@@ -256,8 +256,11 @@ public class ServletResponse implements HttpServletResponse
             String charset = (String)__charSetMap.get(lang);
             if (charset != null)
             {
-                type = ((type.indexOf(';')==-1)?"; charset=":" charset=")+
-                    charset;
+                int semi=type.indexOf(';');
+                if (semi<0)
+                    type += "; charset="+charset;
+                else
+                    type = type.substring(0,semi)+"; charset="+charset;
             }
         }        
         /* lets put updated MIME type back */

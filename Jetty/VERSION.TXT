@@ -1,6 +1,8 @@
 Jetty3 Versions
 --------------
 
+ + Fix ServletResponse.setLocale()
+
 Jetty-3.1.rc9 - 02 Sep 2001
  + Added bin/orgPackage.sh script to change package names.
  + Changed to org.mortbay domain names.

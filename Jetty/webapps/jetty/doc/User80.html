@@ -23,7 +23,7 @@ since it inserts another copy of the rule every time you run it.
 Once this rule is set up, a Linux 2.2 kernel will redirect all data
 addressed to port 80 to a server such as Jetty running on port 8080.
 This includes all RedHat 6.x distros.  Linux 2.4 kernels, e.g. RedHat
-7.x,  have a similar "iptrees" facility.
+7.1+,  have a similar "iptables" facility.
 <BR><BR>
 Be careful to place rules like this one early in your "input" chain.
 Such rules must precede any rule that would accept the packet, otherwise
