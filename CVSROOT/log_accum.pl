@@ -14,6 +14,9 @@
 # Jon Stevens added a few new features and cleaned up some of the 
 # output
 
+# 2002/01/20 Adapted by Brett Sealey for Jetty from the jboss
+# project, head: revision (1.4)
+
 ############################################################
 #
 # Setup instructions
@@ -65,7 +68,7 @@ $CVSROOT       = $ENV{'CVSROOT'};
 $CVSBIN        = '/usr/local/bin';
 $PATH          = "$PATH:/bin:/usr/bin";
 $MAIL_CMD      = "| /usr/lib/sendmail -i -t";
-$MAIL_TO       = 'jboss-development@lists.sourceforge.net';
+$MAIL_TO       = 'jetty-cvslog@lists.sourceforge.net';
 #$MAIL_FROM     = "$ENV{'USER'}\@users.sourceforge.net";
 undef $MAIL_FROM;
 $SUBJECT_PRE   = 'CVS update:';
