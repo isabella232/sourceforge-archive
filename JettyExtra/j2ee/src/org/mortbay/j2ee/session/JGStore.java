@@ -183,7 +183,7 @@ public class
   public void
     receive(Message msg)
     {
-      _log.info("**************** RECEIVE CALLED *********************");
+      //      _log.info("**************** RECEIVE CALLED *********************");
       byte[] buf=msg.getBuffer();
     }
 
