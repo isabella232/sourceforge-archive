@@ -427,6 +427,7 @@ public class ServletHandler extends AbstractHttpHandler
         throws Exception
     {
         MultiException mx = new MultiException();
+        
         // Sort and Initialize servlets
         HashSet holder_set = new HashSet(_servletMap.size()+_nameMap.size());
         holder_set.addAll(_servletMap.values());
@@ -436,9 +437,7 @@ public class ServletHandler extends AbstractHttpHandler
         java.util.Arrays.sort (holders);        
         for (int i=0; i<holders.length; i++)
         {
-            ServletHolder holder = holders [i];
-            
-            try{holder.start();}
+            try{holders[i].start();}
             catch(Exception e)
             {
                 Code.debug(e);
@@ -452,19 +451,32 @@ public class ServletHandler extends AbstractHttpHandler
     public synchronized void stop()
         throws InterruptedException
     {
+        // Sort and Initialize servlets
+        HashSet holder_set = new HashSet(_servletMap.size()+_nameMap.size());
+        holder_set.addAll(_servletMap.values());
+        holder_set.addAll(_nameMap.values());
+        ServletHolder holders [] = (ServletHolder [])
+            holder_set.toArray(new ServletHolder [holder_set.size()]);
+        java.util.Arrays.sort (holders);
+        
+        // Stop servlets
+        for (int i=holders.length; i-->0;)
+        {
+            try
+            {
+                if (holders[i].isStarted())
+                    holders[i].stop();
+            }
+            catch(Exception e){Code.warning(e);}
+        }
+        
         // Stop the session manager
         _sessionManager.stop();
         
-        // Stop servlets
-        Iterator i = _servletMap.values().iterator();
-        while (i.hasNext())
-        {
-            ServletHolder holder = (ServletHolder)i.next();
-            holder.stop();
-        }      
+        super.stop();
+        
         _loader=null;
         _context=null;
-        super.stop();
     }
 
     /* ------------------------------------------------------------ */
