@@ -786,25 +786,39 @@ public class HttpContext extends ResourceCache
     }
 
     /* ------------------------------------------------------------ */
-    /** Sets the class path for the context from the jar and zip files found
+    /** Add the class path element  to the context.
+     * A class path is only required for a context if it uses classes
+     * that are not in the system class path.
+     * @param classPath a comma or ';' separated list of class
+     * resources. These may be jar files, directories or URLs to jars
+     * or directories.
+     */
+    public void addClassPath(String classPath)
+    {
+        if (_classPath==null || _classPath.length()==0)
+            _classPath=classPath;
+        else
+            _classPath+=","+classPath;
+
+        if (isStarted())
+            log.warn("classpath set while started");
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Add elements to the class path for the context from the jar and zip files found
      *  in the specified resource.
      * @param lib the resource that contains the jar and/or zip files.
      * @param append true if the classpath entries are to be appended to any
      * existing classpath, or false if they replace the existing classpath.
      * @see #setClassPath(String)
      */
-    public void setClassPaths(Resource lib, boolean append)
+    public void addClassPaths(Resource lib)
     {
         if (isStarted())
             log.warn("classpaths set while started");
 
         if (lib.exists() && lib.isDirectory())
         {
-            StringBuffer classPath=new StringBuffer();
-
-            if (append && this.getClassPath()!=null)
-                classPath.append(_classPath);
-
             String[] files=lib.list();
             for (int f=0;files!=null && f<files.length;f++)
             {
@@ -813,8 +827,7 @@ public class HttpContext extends ResourceCache
                     String fnlc=fn.getName().toLowerCase();
                     if (fnlc.endsWith(".jar") || fnlc.endsWith(".zip"))
                     {
-                        classPath.append(classPath.length()>0?",":"");
-                        classPath.append(fn.toString());
+                        addClassPath(fn.toString());
                     }
                 }
                 catch (Exception ex)
@@ -822,25 +835,7 @@ public class HttpContext extends ResourceCache
                     log.warn(LogSupport.EXCEPTION,ex);
                 }
             }
-
-            if (classPath.length()>0)
-                _classPath=classPath.toString();
         }
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Sets the class path for the context from the jar and zip files found
-     *  in the specified resource.
-     * @param lib the resource that contains the jar and/or zip files.
-     * @param append true if the classpath entries are to be appended to any
-     * existing classpath, or false if they are to be prepended.
-     * @exception IOException
-     */
-    public void setClassPaths(String lib, boolean append) throws IOException
-    {
-        if (_loader!=null)
-            throw new IllegalStateException("ClassLoader already initialized");
-        this.setClassPaths(Resource.newResource(lib), append);
     }
 
     /* ------------------------------------------------------------ */

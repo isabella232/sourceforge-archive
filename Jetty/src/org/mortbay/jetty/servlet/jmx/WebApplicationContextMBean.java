@@ -32,7 +32,6 @@ public class WebApplicationContextMBean extends ServletHttpContextMBean
 
         defineAttribute("displayName",false);
         defineAttribute("defaultsDescriptor",true);
-        defineAttribute("deploymentDescriptor",false);
         defineAttribute("WAR",true);
         defineAttribute("extractWAR",true);
     }
