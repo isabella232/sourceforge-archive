@@ -11,14 +11,14 @@ import java.rmi.RemoteException;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionEvent;
-import org.apache.log4j.Category;
+import org.jboss.logging.Logger;
 
 //----------------------------------------
 
 public class ActivationInterceptor
   extends StateInterceptor
 {
-  Category _log=Category.getInstance(getClass().getName());
+  protected static final Logger _log=Logger.getLogger(ActivationInterceptor.class);
   protected final HttpSessionEvent _event;
 
   public

@@ -5,6 +5,8 @@
 
 package org.mortbay.j2ee.session;
 
+import javax.servlet.http.HttpServletRequest;
+
 //----------------------------------------
 
 // a store provides 3 APIs :
@@ -34,10 +36,11 @@ public interface
   void setScavengerPeriod(int secs);
   void setScavengerExtraTime(int secs);
   void setActualMaxInactiveInterval(int secs);
+  int getActualMaxInactiveInterval();
   boolean isDistributed();
 
   // ID allocation
-  String allocateId() throws Exception;
+  String allocateId(HttpServletRequest request) throws Exception;
   void   deallocateId(String id) throws Exception;
 
   // State LifeCycle

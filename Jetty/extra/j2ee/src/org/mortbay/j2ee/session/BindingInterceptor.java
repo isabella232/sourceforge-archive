@@ -11,7 +11,7 @@ import java.rmi.RemoteException;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
-import org.apache.log4j.Category;
+import org.jboss.logging.Logger;
 
 //----------------------------------------
 
@@ -36,7 +36,7 @@ import org.apache.log4j.Category;
 public class BindingInterceptor
   extends StateInterceptor
 {
-  protected final Category _log=Category.getInstance(getClass().getName());
+  protected static final Logger _log=Logger.getLogger(BindingInterceptor.class);
   // All Interceptors are expected to provide this constructor...
 
   // HttpSessionBindingListeners are held in the SessionManager -

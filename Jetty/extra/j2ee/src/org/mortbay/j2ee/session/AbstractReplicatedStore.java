@@ -7,16 +7,17 @@ package org.mortbay.j2ee.session;
 
 //----------------------------------------
 
+import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Map;
-import org.apache.log4j.Category;
 import org.javagroups.Message;
 import org.javagroups.blocks.MessageDispatcher;
 import org.javagroups.util.Util;
+import org.jboss.logging.Logger;
 
 //----------------------------------------
 
@@ -40,6 +41,20 @@ abstract public class
   AbstractReplicatedStore
   extends AbstractStore
 {
+  protected final static Logger _log=Logger.getLogger(AbstractReplicatedStore.class);
+
+  protected ClassLoader _loader;
+
+  public
+    AbstractReplicatedStore()
+    {
+      super();
+      _loader=Thread.currentThread().getContextClassLoader();
+    }
+
+  public ClassLoader getLoader() {return _loader;}
+  public void setLoader(ClassLoader loader) {_loader=loader;}
+
   //----------------------------------------
   // tmp hack to prevent infinite loop
   private final static ThreadLocal _replicating=new ThreadLocal();
@@ -50,7 +65,9 @@ abstract public class
   public Object
     clone()
     {
-      return super.clone();
+      AbstractReplicatedStore ars=(AbstractReplicatedStore)super.clone();
+      ars.setLoader(getLoader());
+      return ars;
     }
 
   protected Map     _sessions=new HashMap();
@@ -61,10 +78,12 @@ abstract public class
   public void
     destroy()			// corresponds to ctor
     {
+      _log.trace("destroying...");
       _sessions.clear();
       _sessions=null;
       setManager(null);
       super.destroy();
+      _log.trace("...destroyed");
     }
 
   //----------------------------------------
@@ -78,9 +97,8 @@ abstract public class
 
       if (!AbstractReplicatedStore.getReplicating())
       {
-	Class[]  argClasses   = {String.class, Long.TYPE, Integer.TYPE, Integer.TYPE};
 	Object[] argInstances = {id, new Long(creationTime), new Integer(maxInactiveInterval), new Integer(_actualMaxInactiveInterval)};
-	publish(null, "createSession", argClasses, argInstances);
+	publish(null, CREATE_SESSION, argInstances);
       }
 
       createSession(id, creationTime, maxInactiveInterval, _actualMaxInactiveInterval);
@@ -123,9 +141,8 @@ abstract public class
 
       if (!AbstractReplicatedStore.getReplicating())
       {
-	Class[]  argClasses   = {String.class};
 	Object[] argInstances = {id};
-	publish(null, "destroySession", argClasses, argInstances);
+	publish(null, DESTROY_SESSION, argInstances);
       }
 
       destroySession(id);
@@ -138,16 +155,17 @@ abstract public class
     scavenge()
     throws Exception
     {
-      _log.info("distributed scavenging...");
+      _log.trace("starting distributed session scavenge...");
       synchronized (_sessions)
       {
 	for (Iterator i=_sessions.entrySet().iterator(); i.hasNext();)
  	  if (!((LocalState)((Map.Entry)i.next()).getValue()).isValid(_scavengerExtraTime))
 	  {
-	    _log.info("scavenging state");
+	    //	    _log.trace("scavenging distributed session");
 	    i.remove();
 	  }
       }
+      _log.trace("...distributed session scavenge finished");
     }
 
   //----------------------------------------
@@ -168,10 +186,77 @@ abstract public class
   //----------------------------------------
   // change notification API
 
-  abstract protected void publish(String id, String methodName, Class[] argClasses, Object[] argInstances);
+  protected static Map      _methodToInteger=new HashMap();
+  protected static Method[] _integerToMethod=new Method[8];
+  protected static Method   CREATE_SESSION;
+  protected static Method   DESTROY_SESSION;
+  protected static Method   TOUCH_SESSIONS;
+  protected static Method   SET_LAST_ACCESSED_TIME;
+
+  static
+  {
+    // this is absolutely horrible and will break if anyone changes
+    // the shape of the interface - but it is a quick, easy and
+    // efficient hack - so I am using it while I think of a better
+    // way...
+    try
+    {
+      int index=0;
+      Method m=null;
+
+      // class methods...
+      m=CREATE_SESSION=AbstractReplicatedStore.class.getMethod("createSession", new Class[]{String.class, Long.TYPE, Integer.TYPE, Integer.TYPE});
+      _integerToMethod[index]=m;
+      _methodToInteger.put(m.getName(), new Integer(index));
+      index++;
+
+      m=DESTROY_SESSION=AbstractReplicatedStore.class.getMethod("destroySession", new Class[]{String.class});
+      _integerToMethod[index]=m;
+      _methodToInteger.put(m.getName(), new Integer(index));
+      index++;
+
+      m=TOUCH_SESSIONS=AbstractReplicatedStore.class.getMethod("touchSessions", new Class[]{String[].class, Long.TYPE});
+      _integerToMethod[index]=m;
+      _methodToInteger.put(m.getName(), new Integer(index));
+      index++;
+
+      // instance methods...
+      m=SET_LAST_ACCESSED_TIME=State.class.getMethod("setLastAccessedTime", new Class[]{Long.TYPE});
+      _integerToMethod[index]=m;
+      _methodToInteger.put(m.getName(), new Integer(index));
+      index++;
+
+      m=State.class.getMethod("setMaxInactiveInterval", new Class[]{Integer.TYPE});
+      _integerToMethod[index]=m;
+      _methodToInteger.put(m.getName(), new Integer(index));
+      index++;
+
+      m=State.class.getMethod("setAttribute", new Class[]{String.class, Object.class, Boolean.TYPE});
+      _integerToMethod[index]=m;
+      _methodToInteger.put(m.getName(), new Integer(index));
+      index++;
+
+      m=State.class.getMethod("setAttributes", new Class[]{Map.class});
+      _integerToMethod[index]=m;
+      _methodToInteger.put(m.getName(), new Integer(index));
+      index++;
+
+      m=State.class.getMethod("removeAttribute", new Class[]{String.class, Boolean.TYPE});
+      _integerToMethod[index]=m;
+      _methodToInteger.put(m.getName(), new Integer(index));
+      index++;
+    }
+    catch (Exception e)
+    {
+      System.err.println("AbstractReplicatedStore: something went wrong building dispatch tables");
+      e.printStackTrace(System.err);
+    }
+  }
+
+  abstract protected void publish(String id, Method method, Object[] argInstances);
 
   protected void
-    dispatch(String id, String methodName, Class[] argClasses, Object[] argInstances)
+    dispatch(String id, Integer methodId, Object[] argInstances)
     {
       try
       {
@@ -191,7 +276,8 @@ abstract public class
 
 	try
 	{
-	  target.getClass().getMethod(methodName, argClasses).invoke(target, argInstances);
+	  Method method=_integerToMethod[methodId.intValue()];
+	  method.invoke(target, argInstances);
 	}
 	catch (Exception e)
 	{
@@ -207,7 +293,7 @@ abstract public class
   public void
     createSession(String id, long creationTime, int maxInactiveInterval, int actualMaxInactiveInterval)
     {
-      _log.debug("creating replicated session: "+id);
+      if (_log.isTraceEnabled()) _log.trace("creating replicated session: "+id);
       State state=new LocalState(id, creationTime, maxInactiveInterval, actualMaxInactiveInterval);
       synchronized(_sessions) {_sessions.put(id, state);}
 
@@ -221,8 +307,30 @@ abstract public class
   public void
     destroySession(String id)
     {
-      _log.debug("destroying replicated session: "+id);
+      if (_log.isTraceEnabled()) _log.trace("destroying replicated session: "+id);
       synchronized(_sessions) {_sessions.remove(id);}
+    }
+
+  public void
+    touchSessions(String[] ids, long time)
+    {
+      //      _log.info("touching sessions...: "+ids);
+     for (int i=0;i<ids.length;i++)
+      {
+	String id=ids[i];
+	Object target;
+	// I could synch the whole block. This is slower, but will not
+	// hold up everything else...
+	synchronized (_subscribers){target=_subscribers.get(id);}
+	try
+	{
+	  ((StateInterceptor)target).setLastAccessedTime(time);
+	}
+	catch (Exception e)
+	{
+	  _log.warn("unable to touch session: "+id+" probably already removed");
+	}
+      }
     }
 
   //----------------------------------------

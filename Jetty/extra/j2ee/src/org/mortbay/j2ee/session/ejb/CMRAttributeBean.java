@@ -15,7 +15,7 @@ import javax.ejb.CreateException;
 import javax.ejb.EntityBean;
 import javax.ejb.EntityContext;
 import javax.ejb.RemoveException;
-import org.apache.log4j.Category;
+import org.jboss.logging.Logger;
 import org.mortbay.j2ee.session.interfaces.CMRAttribute;
 import org.mortbay.j2ee.session.interfaces.CMRAttributeHome;
 import org.mortbay.j2ee.session.interfaces.CMRAttributePK;
@@ -47,7 +47,7 @@ import org.mortbay.j2ee.session.interfaces.CMRAttributePK;
 public abstract class CMRAttributeBean
   implements EntityBean
 {
-  Category _log=Category.getInstance(getClass().getName());
+  protected static final Logger _log=Logger.getLogger(CMRAttributeBean.class);
 
   //----------------------------------------
   // Home

@@ -17,7 +17,7 @@ import java.util.HashMap;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionEvent;
-import org.apache.log4j.Category;
+import org.jboss.logging.Logger;
 
 //----------------------------------------
 
@@ -35,6 +35,8 @@ import org.apache.log4j.Category;
 public class MarshallingInterceptor
   extends StateInterceptor
 {
+  protected static final Logger _log=Logger.getLogger(MarshallingInterceptor.class);
+
   static class ObjectInputStream
     extends java.io.ObjectInputStream
   {
@@ -79,8 +81,6 @@ public class MarshallingInterceptor
       }
     }
   }
-
-  Category _log=Category.getInstance(getClass().getName());
 
   static public byte[]
     marshal(Object value)

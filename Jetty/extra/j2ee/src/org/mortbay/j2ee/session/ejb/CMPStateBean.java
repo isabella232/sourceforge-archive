@@ -15,7 +15,7 @@ import javax.ejb.CreateException;
 import javax.ejb.EntityBean;
 import javax.ejb.EntityContext;
 import javax.ejb.RemoveException;
-import org.apache.log4j.Category;
+import org.jboss.logging.Logger;
 import org.mortbay.j2ee.session.interfaces.CMPState;
 import org.mortbay.j2ee.session.interfaces.CMPStateHome;
 import org.mortbay.j2ee.session.interfaces.CMPStatePK;
@@ -43,7 +43,7 @@ import org.mortbay.j2ee.session.interfaces.CMPStatePK;
 public abstract class CMPStateBean
   implements EntityBean
 {
-  Category _log=Category.getInstance(getClass().getName());
+  protected static final Logger _log=Logger.getLogger(CMPStateBean.class);
 
   //----------------------------------------
   // Home
@@ -70,7 +70,7 @@ public abstract class CMPStateBean
       // instance - but it is the only one that I have found so far...
       CMPStateHome home = (CMPStateHome)_entityContext.getEJBObject().getEJBHome();
       Collection c=(Collection)home.findTimedOut(System.currentTimeMillis(), extraTime, actualMaxInactiveInterval);
-      _log.debug("distributed scavenging: "+c);
+      if (_log.isDebugEnabled()) _log.debug("distributed scavenging: "+c);
 
       // this is not working - what is the class of the Objects returned in the Collection ?
       for (Iterator i=c.iterator(); i.hasNext();)
@@ -99,7 +99,7 @@ public abstract class CMPStateBean
   public CMPStatePK ejbCreate(String context, String id, int maxInactiveInterval, int actualMaxInactiveInterval)
     throws CreateException
   {
-    _log.debug("ejbCreate("+context+":"+id+")");
+    if (_log.isDebugEnabled()) _log.debug("ejbCreate("+context+":"+id+")");
 
     setContext(context);
     setId(id);
@@ -139,7 +139,7 @@ public abstract class CMPStateBean
     ejbRemove()
     throws RemoveException
   {
-    _log.debug("ejbRemove("+getContext()+":"+getId()+")");
+    if (_log.isDebugEnabled()) _log.debug("ejbRemove("+getContext()+":"+getId()+")");
   }
 
   //----------------------------------------

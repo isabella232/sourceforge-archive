@@ -15,7 +15,7 @@ import javax.transaction.InvalidTransactionException;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
-import org.apache.log4j.Category;
+import org.jboss.logging.Logger;
 
 //----------------------------------------
 
@@ -27,7 +27,7 @@ import org.apache.log4j.Category;
 public class TransactionInterceptor
   extends AroundInterceptor
 {
-  protected final Category    _log              =Category.getInstance(getClass().getName());
+  protected static final Logger _log=Logger.getLogger(TransactionInterceptor.class);
   protected final ThreadLocal _theirTransaction =new ThreadLocal();
   protected       Context     _ctx;
 

@@ -9,7 +9,7 @@ package org.mortbay.j2ee.session;
 
 import java.rmi.RemoteException;
 import javax.servlet.http.HttpSession;
-import org.apache.log4j.Category;
+import org.jboss.logging.Logger;
 
 //----------------------------------------
 // every time an attribute is added to the underlying HttpSession this
@@ -27,7 +27,7 @@ public
   class TypeCheckingInterceptor
   extends StateInterceptor
 {
-  Category _log=Category.getInstance(getClass().getName());
+  protected static final Logger _log=Logger.getLogger(TypeCheckingInterceptor.class);
 
   public Object
     setAttribute(String name, Object value, boolean returnValue)

@@ -7,7 +7,7 @@ package org.mortbay.j2ee.session;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import org.apache.log4j.Category;
+import org.jboss.logging.Logger;
 
 // utility for unambiguously shipping Contexts from node to node..
 

@@ -14,7 +14,7 @@ import javax.ejb.RemoveException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
-import org.apache.log4j.Category;
+import org.jboss.logging.Logger;
 import org.mortbay.j2ee.session.interfaces.CMPState;
 import org.mortbay.j2ee.session.interfaces.CMPStateHome;
 import org.mortbay.j2ee.session.interfaces.CMPStatePK;
@@ -67,7 +67,7 @@ public class CMPStore
     }
     catch (Throwable e)
     {
-      _log.debug("session "+id+" not found: "+e);
+      if (_log.isDebugEnabled()) _log.debug("session "+id+" not found: "+e);
       return null;
     }
   }

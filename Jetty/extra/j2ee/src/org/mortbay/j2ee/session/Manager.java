@@ -27,7 +27,7 @@ import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionContext;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
-import org.apache.log4j.Category;
+import org.jboss.logging.Logger;
 
 import org.mortbay.jetty.servlet.WebApplicationContext;
 import org.mortbay.j2ee.J2EEWebApplicationContext;
@@ -73,25 +73,25 @@ import org.mortbay.j2ee.J2EEWebApplicationContext;
 public class Manager
   implements org.mortbay.jetty.servlet.SessionManager
 {
-  Category _log=Category.getInstance(getClass().getName());
+  protected static final Logger _log=Logger.getLogger(Manager.class);
 
 
-  //----------------------------------------
-  protected String _workerName;
-  public String getWorkerName() { return _workerName; }
-  public void setWorkerName(String workerName) { _workerName=workerName; }
   //----------------------------------------
   protected WebApplicationContext _context;
   public WebApplicationContext getContext() {return _context;}
   public void setContext(WebApplicationContext context) {_context=context;}
   //----------------------------------------
-  protected int _scavengerPeriod=60*10; // every 10 mins
+  protected int _scavengerPeriod=60; // every 1 min
   public void setScavengerPeriod(int period) {_scavengerPeriod=period;}
   public int getScavengerPeriod() {return _scavengerPeriod;}
   //----------------------------------------
   protected StateInterceptor[] _interceptorStack=null;
   public StateInterceptor[] getInterceptorStack() {return _interceptorStack;}
   public void setInterceptorStack(StateInterceptor[] interceptorStack) {_interceptorStack=interceptorStack;}
+  //----------------------------------------
+  protected IdGenerator _idGenerator=null;
+  public IdGenerator getIdGenerator() {return _idGenerator;}
+  public void setIdGenerator(IdGenerator idGenerator) {_idGenerator=idGenerator;}
   //----------------------------------------
   protected int _maxInactiveInterval;
   public int getMaxInactiveInterval() {return _maxInactiveInterval;}
@@ -119,7 +119,7 @@ public class Manager
   public Object
     clone()
   {
-    _log.info("cloning Manager: "+this);
+    //    _log.info("cloning Manager: "+this);
     Manager m=new Manager();
 
     // deep-copy Store attribute - each Manager gets it's own Store instance
@@ -127,12 +127,16 @@ public class Manager
     if (store!=null)
       m.setStore((Store)store.clone());
 
-    // Stateless Interceptors may be shared between Contexts...
+    // deep-copy IdGenerator attribute - each Manager gets it's own IdGenerator instance
+    IdGenerator ig=getIdGenerator();
+    if (ig!=null)
+      m.setIdGenerator((IdGenerator)ig.clone());
+
+    // Container uses InterceptorStack as a prototype to clone a stack for each new session...
     m.setInterceptorStack(getInterceptorStack());
 
     m.setMaxInactiveInterval(getMaxInactiveInterval());
     m.setScavengerPeriod(getScavengerPeriod());
-    m.setWorkerName(getWorkerName());
 
     return m;
   }
@@ -156,7 +160,7 @@ public class Manager
   public void
     start()
   {
-    _log.debug("starting...");
+    _log.trace("starting...");
     synchronized (_startedLock)
     {
       if (_started)
@@ -171,6 +175,9 @@ public class Manager
 	setStore(new LocalStore());
       }
 
+      if (_idGenerator==null)
+	_idGenerator=new DistributableIdGenerator();
+
       try
       {
 	_store.start();
@@ -182,14 +189,16 @@ public class Manager
 	try{_store.start();}catch(Exception e2){_log.error("could not start Store", e2);}
       }
 
+      if (_log.isTraceEnabled()) _log.trace("starting local scavenger thread...(period: "+getScavengerPeriod()+" secs)");
+      long delay=getScavengerPeriod()*1000;
       boolean isDaemon=true;
       _scavenger=new Timer(isDaemon);
-      long delay=getScavengerPeriod()*1000;
       _scavenger.scheduleAtFixedRate(new Scavenger() ,delay,delay);
+      _log.trace("...local scavenger thread started");
       _started=true;
     }
 
-    _log.debug("started");
+    _log.trace("...started");
   }
 
   public boolean
@@ -201,7 +210,7 @@ public class Manager
   public void
     stop()
   {
-    _log.debug("stopping...");
+    _log.trace("stopping...");
 
     synchronized (_startedLock)
     {
@@ -223,8 +232,10 @@ public class Manager
 	_sessions.clear();
       }
 
+      _log.trace("stopping local scavenger thread...");
       _scavenger.cancel();
       _scavenger=null;
+      _log.trace("...local scavenger thread stopped");
       scavenge();
 
       _store.stop();
@@ -233,7 +244,7 @@ public class Manager
       _started=false;
     }
 
-    _log.debug("stopped");
+    _log.trace("...stopped");
   }
 
   //----------------------------------------
@@ -245,13 +256,13 @@ public class Manager
   public void
     initialize(org.mortbay.jetty.servlet.ServletHandler handler)
   {
-    _log.debug("initialising...");
+    _log.trace("initialising...");
     _handler=handler;
     //    _log = Logger.getLogger(getClass().getName()+"#" + getServletContext().getServletContextName());
     // perhaps we should cache the interceptor classes here as well...
 
     //    _log.info("initialised("+_handler+"): "+Thread.currentThread().getContextClassLoader());
-    _log.debug("initialised");
+    _log.trace("...initialised");
   }
 
   //----------------------------------------
@@ -267,7 +278,7 @@ public class Manager
   public HttpSession
     newHttpSession(HttpServletRequest request) // TODO
   {
-    return newSession();
+    return newSession(request);
   }
 
   //----------------------------------------
@@ -381,13 +392,13 @@ public class Manager
   }
 
   protected HttpSession
-    newSession()
+    newSession(HttpServletRequest request)
   {
     String id=null;
     HttpSession session=null;
     try
     {
-      id=_store.allocateId();
+      id=_store.allocateId(request);
       State state=_store.newState(id, getMaxInactiveInterval());
       session=newContainer(id, state);
     }
@@ -397,7 +408,7 @@ public class Manager
       return null;		// BAD - TODO
     }
 
-    _log.debug("remembering session - "+id);
+    if (_log.isDebugEnabled()) _log.debug("remembering session - "+id);
 
     synchronized (_sessions) {_sessions.put(id, session);}
 
@@ -416,11 +427,11 @@ public class Manager
     destroySession(HttpSession container)
   {
     String id=container.getId();
-    _log.debug("forgetting session - "+id);
+    if (_log.isDebugEnabled()) _log.debug("forgetting session - "+id);
     Object tmp;
     synchronized (_sessions) {tmp=_sessions.remove(id);}
     container=(HttpSession)tmp;
-    _log.debug("forgetting session - "+ container);
+    if (_log.isDebugEnabled()) _log.debug("forgetting session - "+ container);
 
     if (container==null)
     {
@@ -473,10 +484,10 @@ public class Manager
       _log.error("could not raise events on session destruction - problem in distribution layer", e);
     }
 
-    _log.debug("notifying session - "+id);
+    if (_log.isDebugEnabled()) _log.debug("notifying session - "+id);
     notifySessionDestroyed(container);
 
-    _log.debug("destroying container - "+id);
+    if (_log.isDebugEnabled()) _log.debug("destroying container - "+id);
     State state=destroyContainer(container);
 
     try
@@ -485,7 +496,7 @@ public class Manager
 				// it does not want this state
 				// removed...
       {
-	_log.debug("removing state - "+id);
+	if (_log.isDebugEnabled()) _log.debug("removing state - "+id);
 	_store.removeState(state);
       }
     }
@@ -535,7 +546,7 @@ public class Manager
     }
     catch (Exception ignore)
     {
-      _log.debug("did not find distributed session: "+id);
+      if (_log.isDebugEnabled()) _log.debug("did not find distributed session: "+id);
     }
 
     return container;
@@ -649,7 +660,7 @@ public class Manager
   protected void
     scavenge()
   {
-    _log.info("local scavenging...");
+    _log.trace("starting local scavenge...");
     //
     // take a quick copy...
     Collection copy;
@@ -663,17 +674,21 @@ public class Manager
       // because it has a local cache of the necessary details, it
       // will only go to the Stored State if it really thinks that it
       // is invalid...
-      String id=null;;
+      String id=null;
+      long t=System.currentTimeMillis();
       try
       {
 	StateAdaptor sa=(StateAdaptor)i.next();
 	id=sa.getId();
-	sa.getLastAccessedTime();
+	// the ValidationInterceptor should pick this up and throw an IllegalStateException
+	long lat=sa.getLastAccessedTime();
       }
-      catch (Exception ignore)
+      catch (IllegalStateException ignore)
       {
+	if (_log.isTraceEnabled()) _log.trace("session ("+id+") must have been invalid - removing it");
 	synchronized (_sessions) {_sessions.remove(id);}
       }
     }
+    _log.trace("...finished local scavenge");
   }
 }

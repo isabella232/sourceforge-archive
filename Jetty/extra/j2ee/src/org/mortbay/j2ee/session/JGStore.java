@@ -7,14 +7,18 @@ package org.mortbay.j2ee.session;
 
 //----------------------------------------
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
-import org.apache.log4j.Category;
 import org.javagroups.Address;
 import org.javagroups.Channel;
 import org.javagroups.JChannel;
@@ -28,7 +32,8 @@ import org.javagroups.blocks.MessageDispatcher;
 import org.javagroups.blocks.MethodCall;
 import org.javagroups.blocks.RpcDispatcher;
 import org.javagroups.util.Util;
-
+import org.jboss.logging.Logger;
+import org.jboss.logging.Logger;
 //----------------------------------------
 
 // what happens if a member drops away for a while then comes back -
@@ -62,6 +67,9 @@ public class
   extends AbstractReplicatedStore
   implements MessageListener, MembershipListener
 {
+  protected Logger _log=Logger.getLogger(JGStore.class);
+
+  // this should be XML in the dd...
   protected String _protocolStack=""+
     "UDP(mcast_addr=228.8.8.8;mcast_port=45566;ip_ttl=32;" +
     "ucast_recv_buf_size=16000;ucast_send_buf_size=16000;" +
@@ -100,7 +108,6 @@ public class
       {
 	_log.error("could not convert "+distributionMode+" to GroupRequest field", e);
       }
-      _log.debug("GroupRequest:"+distributionMode+"="+_distributionModeInternal);
     }
 
   protected String _distributionMode="GET_ALL"; // synchronous/non-sticky
@@ -119,19 +126,20 @@ public class
   public Object
     clone()
     {
+      _log.trace("cloning...");
       JGStore jgs=(JGStore)super.clone();
       jgs.setProtocolStack(getProtocolStack());
       jgs.setSubClusterName(getSubClusterName());
       jgs.setRetrievalTimeOut(getRetrievalTimeOut());
       jgs.setDistributionMode(getDistributionMode());
       jgs.setDistributionTimeOut(getDistributionTimeOut());
+      _log.trace("...cloned");
 
       return jgs;
     }
 
   //----------------------------------------
 
-  protected ClassLoader   _loader;
   protected Channel       _channel;
   protected RpcDispatcher _dispatcher;
   protected Vector        _members;
@@ -139,17 +147,12 @@ public class
   //----------------------------------------
   // Store API - Store LifeCycle
 
-  public
-    JGStore()
-    {
-      super();
-
-      _loader=Thread.currentThread().getContextClassLoader();
-    }
-
   protected void
     init()
     {
+      _log=Logger.getLogger(JGStore.class.getName()+"#"+getContextPath());
+      _log.trace("initialising...");
+
       try
       {
 	// start up our channel...
@@ -166,7 +169,7 @@ public class
 	      ClassLoader oldLoader=Thread.currentThread().getContextClassLoader();
 	      try
 	      {
-		Thread.currentThread().setContextClassLoader(_loader);
+		Thread.currentThread().setContextClassLoader(getLoader());
 		return MarshallingInterceptor.demarshal(buf);
 	      }
 	      catch (Exception e)
@@ -194,27 +197,25 @@ public class
 	      return null;
 	    }
 	  });
+	_log.debug("JavaGroups RpcDispatcher initialised");
 
 	_channel.setOpt(Channel.GET_STATE_EVENTS, Boolean.TRUE);
+	_log.debug("JavaGroups Channel initialised");
 
 	View view=_channel.getView();
 	if (view!=null)
 	  _members=(Vector)view.getMembers().clone();
 
-	if (_members!=null)
-	{
-	  _members=(Vector)_members.clone(); // we don't own it
-	  _members.remove(_channel.getLocalAddress());
-	}
-	else
-	  _members=new Vector(0);
-
-	_log.info("current view members: "+_members);
+	_members=(_members==null)?new Vector():(Vector)_members.clone(); // we don't own it
+	if (_log.isDebugEnabled()) _log.debug("JavaGroups View: "+_members);
+	_members.remove(_channel.getLocalAddress());
       }
       catch (Exception e)
       {
 	_log.error("could not initialise JavaGroups Channel and Dispatcher", e);
       }
+
+      _log.trace("...initialised");
     }
 
   public String
@@ -227,74 +228,179 @@ public class
     start()
     throws Exception
     {
+      _log.trace("starting...");
       super.start();
 
       init();
 
       String channelName=getChannelName();
-      _log.debug("starting ("+channelName+")....");
+      if (_log.isDebugEnabled()) _log.debug("starting JavaGroups...: ("+channelName+")");
 
       _channel.connect(channelName); // group should be on a per-context basis
+      _log.trace("JavaGroups Channel connected");
       _dispatcher.start();
+      _log.trace("JavaGroups Dispatcher started");
 
       if (!_channel.getState(null, getRetrievalTimeOut()))
-	_log.info("could not retrieve current sessions from JavaGroups - assuming this to be initial node");
+	_log.info("cluster state is null - this must be the first node");
 
-      _log.debug("started ("+channelName+")....");
+      _log.debug("...JavaGroups started");
+      _log.trace("...started");
     }
 
   public void
     stop()
     {
+      _log.trace("stopping...");
+      _timer.cancel();
+      _log.trace("Touch Timer stopped");
+
+      if (_log.isDebugEnabled()) _log.debug("stopping JavaGroups...: ("+getChannelName()+")");
       _dispatcher.stop();
+      _log.trace("JavaGroups RpcDispatcher stopped");
       _channel.disconnect();
+      _log.trace("JavaGroups Channel disconnected");
+      _log.debug("...JavaGroups stopped");
 
       super.stop();
+      _log.trace("...stopped");
     }
 
   public void
     destroy()
     {
+      _log.trace("destroying...");
+      _timer=null;
       _dispatcher=null;
       _channel=null;
 
       super.destroy();
+      _log.trace("...destroyed");
     }
 
   //----------------------------------------
   // AbstractReplicatedStore API
 
-  protected void
-    publish(String id, String methodName, Class[] argClasses, Object[] argInstances)
+  protected Object    _idsLock =new Object();
+  protected Set       _ids     =new HashSet();
+  protected Timer     _timer   =new Timer();
+  protected long      _period  =0;
+  protected TimerTask _task    =new TouchTimerTask();
+
+  protected class TouchTimerTask extends TimerTask
+  {
+    protected Set _oldIds=null;
+    protected Set _newIds=new HashSet();
+
+    public void
+      run()
     {
-      //      _log.info("publishing: "+id+" - "+methodName);
+      synchronized (_idsLock)
+      {
+	_oldIds=_ids;
+	_ids=_newIds;		// empty
+	_newIds=null;
+      }
+
+      //      _log.info("TOUCHING SESSIONS: "+_oldIds);
+      publish(null, TOUCH_SESSIONS, new Object[] {_oldIds.toArray(new String[_oldIds.size()]), new Long(System.currentTimeMillis()+_period)});
+      _oldIds.clear();
+      _newIds=_oldIds;		// recycle Set for next distribution
+      _oldIds=null;
+    }
+  }
+
+
+  public long getBatchPeriod(){return _period;}
+  public void setBatchPeriod(long period){_period=period;}
+
+  protected void
+    publish(String id, Method method, Object[] argInstances)
+    {
+      if (_log.isTraceEnabled())
+      {
+	String args="";
+	for (int i=0; i<argInstances.length; i++)
+	  args+=(i>0?",":"")+argInstances[i];
+	if (_log.isTraceEnabled()) _log.trace("publishing method...: "+id+"."+method.getName()+"("+args+")");
+      }
+
+      if (_period>0)
+      {
+	if (method.equals(SET_LAST_ACCESSED_TIME))
+	{
+	  // push into set to be touched when a timer expires...
+	  synchronized (_idsLock)
+	  {
+	    // kick off timer as soon as something that needs publishing
+	    // appears...
+	    if (_ids.size()==0)
+	    {
+	      _timer.schedule(new TouchTimerTask(), _period); // TODO - reuse old task
+	      _log.debug("Touch Timer scheduled: _period");
+	    }
+
+	    _ids.add(id);
+	  };
+	  return;
+	}
+	else if (method.equals(DESTROY_SESSION))
+	{
+	  String tmp=(String)argInstances[0]; // id in factory methods
+	  //	  System.out.println("LOCAL DESTRUCTION : "+tmp); // arg[0] is the id
+	  // this session has been destroyed locally...
+	  synchronized (_idsLock)
+	  {
+	    _ids.remove(tmp);
+	  }
+	}
+      }
 
       try
       {
-	Class[] tmp={String.class, String.class, Class[].class, Object[].class};
-	MethodCall method = new MethodCall(getClass().getMethod("dispatch",tmp));
-	method.addArg(id);
-	method.addArg(methodName);
-	method.addArg(argClasses);
-	method.addArg(argInstances);
+	Class[] tmp={String.class, Integer.class, Object[].class};
+	MethodCall mc = new MethodCall(getClass().getMethod("dispatch",tmp));
+	mc.addArg(id);
+	mc.addArg(_methodToInteger.get(method.getName()));
+	mc.addArg(argInstances);
 
 	// we need some way of synchronising _member read/write-ing...
 	_dispatcher.callRemoteMethods(_members,
-				      method,
+				      mc,
 				      getDistributionModeInternal(),
 				      getDistributionTimeOut());
+	_log.trace("...method published");
       }
       catch(Exception e)
       {
 	_log.error("problem publishing change in state over JavaGroups", e);
       }
-
     }
 
   // JG doesn't find this method in our superclass ...
   public void
-    dispatch(String id, String methodName, Class[] argClasses, Object[] argInstances)
+    dispatch(String id, Integer method, Object[] argInstances)
     {
+      Method m=_integerToMethod[method.intValue()];
+      if (_log.isTraceEnabled())
+      {
+	String args="";
+	for (int i=0; i<argInstances.length; i++)
+	  args+=(i>0?",":"")+argInstances[i];
+	if (_log.isTraceEnabled()) _log.trace("dispatching method... : "+id+"."+_integerToMethod[method.intValue()].getName()+"("+args+")");
+      }
+
+      if (m.equals(DESTROY_SESSION))
+      {
+	String tmp=(String)argInstances[0]; // id in factory methods
+	//	System.out.println("REMOTE DESTRUCTION : "+tmp); // arg[0] is the id
+	// this session has been destroyed remotely...
+	synchronized (_idsLock)
+	{
+	  _ids.remove(tmp);
+	}
+      }
+
       //      _log.info("dispatching: "+id+" - "+methodName);
 
       // we should check the context name here, or not bother sending it...
@@ -302,13 +408,14 @@ public class
       ClassLoader oldLoader=Thread.currentThread().getContextClassLoader();
       try
       {
-	Thread.currentThread().setContextClassLoader(_loader);
-	super.dispatch(id, methodName, argClasses, argInstances);
+	Thread.currentThread().setContextClassLoader(getLoader());
+	super.dispatch(id, method, argInstances);
       }
       finally
       {
 	Thread.currentThread().setContextClassLoader(oldLoader);
       }
+      _log.trace("...method dispatched");
     }
 
   //----------------------------------------
@@ -340,7 +447,7 @@ public class
       ClassLoader oldLoader=Thread.currentThread().getContextClassLoader();
       try
       {
-	Thread.currentThread().setContextClassLoader(_loader);
+	Thread.currentThread().setContextClassLoader(getLoader());
 	_log.info("initialising another store from our current state");
 
 	// this is a bit problematic - since we really need to freeze
@@ -423,24 +530,30 @@ public class
   public void
     block()
     {
-      _log.info("block()");
+      _log.trace("handling JavaGroups block()...");
+      _log.trace("...JavaGroups block() handled");
     }
 
   // Called when a member is suspected
   public synchronized void
     suspect(Address suspected_mbr)
     {
-      _log.info("suspect("+suspected_mbr+")");
+      if (_log.isTraceEnabled()) _log.trace("handling JavaGroups suspect("+suspected_mbr+")...");
+      _log.warn("cluster suspects member may have been lost: "+suspected_mbr);
+      _log.trace("...JavaGroups suspect() handled");
     }
 
   // Called when channel membership changes
   public synchronized void
     viewAccepted(View newView)
     {
-      _log.info("viewAccepted("+newView+")");
+      if (_log.isTraceEnabled()) _log.trace("handling Javagroups viewAccepted("+newView+")...");
 
-      boolean isMerge=(newView instanceof MergeView);
-      _log.warn("merging... NYI");
+      // this is meant to happen if a network split is healed and two
+      // clusters try to reconcile their separate states into one -
+      // an unlikely event.
+      if(newView instanceof MergeView)
+	_log.warn("NYI - merging: view is " + newView);
 
       Vector newMembers=newView.getMembers();
 
@@ -448,8 +561,10 @@ public class
       {
  	_members.clear();
  	_members.addAll(newMembers);
+	_log.info("JavaGroups View: "+_members);
 	_members.remove(_channel.getLocalAddress());
-	_log.info("current view members: "+_members);
       }
+
+      _log.trace("...Javagroups viewAccepted() handled");
     }
 }

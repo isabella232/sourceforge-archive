@@ -108,6 +108,8 @@
     <copy file="${src}/org/mortbay/jetty/servlet/webdefault.xml" tofile="${etc}/webdefault.xml" />
     <available property="demo.available" type="dir" file="${demo.src}" />
     <echo message="Demo available=${demo.available}" level="info"/>
+    <available property="jboss.available" type="dir" file="${jboss.home}" />
+    <echo message="JBoss available=${jboss.available}" level="info"/>
   </target>
   
 

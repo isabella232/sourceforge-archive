@@ -18,7 +18,7 @@ import javax.naming.InitialContext;
 import javax.transaction.Status;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
-import org.apache.log4j.Category;
+import org.jboss.logging.Logger;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.jetty.servlet.WebApplicationHandler;
@@ -29,7 +29,7 @@ public abstract class
   J2EEWebApplicationHandler
   extends WebApplicationHandler
 {
-  protected Category _log=Category.getInstance(getClass().getName());
+  protected static final Logger _log=Logger.getLogger(J2EEWebApplicationHandler.class);
 
   protected Context            _ctx;
   protected TransactionManager _tm;

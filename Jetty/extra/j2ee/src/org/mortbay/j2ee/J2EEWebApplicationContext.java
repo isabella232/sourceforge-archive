@@ -10,13 +10,13 @@ import java.util.List;
 import org.mortbay.jetty.servlet.SessionManager;
 import org.mortbay.jetty.servlet.WebApplicationContext;
 import org.mortbay.j2ee.session.Manager;
-import org.apache.log4j.Category;
+import org.jboss.logging.Logger;
 
 public class
   J2EEWebApplicationContext
   extends WebApplicationContext
 {
-  protected Category _log=Category.getInstance(getClass().getName());
+  protected static final Logger _log=Logger.getLogger(J2EEWebApplicationContext.class);
 
   public
     J2EEWebApplicationContext(String warUrl)
@@ -40,7 +40,7 @@ public class
   public void
     setDistributable(boolean distributable)
     {
-      _log.info("setDistributable "+distributable);
+      if (_log.isDebugEnabled()) _log.debug("setDistributable "+distributable);
       _distributable=distributable;
     }
 
@@ -49,7 +49,7 @@ public class
   public void
     setDistributableSessionManager(Manager manager)
     {
-      _log.info("setDistributableSessionManager "+manager);
+      //      _log.info("setDistributableSessionManager "+manager);
       _distributableSessionManager=(Manager)manager;
       _distributableSessionManager.setContext(this);
     }
