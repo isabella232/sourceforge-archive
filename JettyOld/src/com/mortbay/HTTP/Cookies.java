@@ -43,10 +43,7 @@ public class Cookies
             .asciiToLowerCase((cookie.getName()+';'+
                                cookie.getPath()+';'+
                                cookie.getDomain()));
-        if (cookie.getMaxAge()==0)
-            cookies.remove(key);
-        else
-            cookies.put(key,cookie);
+	cookies.put(key,cookie);
     }
     
     /* -------------------------------------------------------------- */
@@ -72,7 +69,6 @@ public class Cookies
      * @param maxAge the seconds until the cookie expires. A negative value
      *        implies browser session and zero causes the cookie to be 
      *        deleted.
-     *        If null is passed the cookie expires with the browser session.
      * @param secure if true the cookie is flagged secure.
      */
     public void setCookie(String name,
@@ -97,13 +93,8 @@ public class Cookies
         if (domain!=null)
             cookie.setDomain(domain);
         
-        if (maxAge==0)
-            cookies.remove(key);
-        else
-        {
-            cookie.setMaxAge(maxAge);
-            cookies.put(key,cookie);
-        }
+	cookie.setMaxAge(maxAge);
+	cookies.put(key,cookie);
     }
 
     /* -------------------------------------------------------------- */
@@ -149,7 +140,7 @@ public class Cookies
         }
 
         int maxAge = cookie.getMaxAge();
-        if (maxAge>0)
+        if (maxAge>=0)
         {
             buf.append("; expires=");
             Date date = new Date(System.currentTimeMillis()+1000L*maxAge);
