@@ -69,6 +69,7 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
     private String _war;
     private boolean _extract;
     private boolean _ignorewebjetty;
+    private boolean _distributable;
     private Configuration _configuration;
 
     private transient String _name;
@@ -120,6 +121,7 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
         out.writeObject(_war);
         out.writeBoolean(_extract);
         out.writeBoolean(_ignorewebjetty);
+        out.writeBoolean(_distributable);
         out.writeObject(_configuration);
     }
 
@@ -147,6 +149,7 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
         _war= (String)in.readObject();
         _extract= in.readBoolean();
         _ignorewebjetty= in.readBoolean();
+        _distributable= in.readBoolean();
         _configuration=(Configuration)in.readObject();
     }
 
@@ -338,6 +341,18 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
         _ignorewebjetty= b;
         if (b && getPermissions() != null)
             log.warn("Permissions set with web-jetty.xml enabled");
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isDistributable()
+    {
+        return _distributable;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setDistributable(boolean distributable)
+    {
+        _distributable=distributable;
     }
 
     /* ------------------------------------------------------------ */

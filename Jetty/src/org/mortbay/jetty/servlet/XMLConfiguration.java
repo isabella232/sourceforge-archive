@@ -218,6 +218,8 @@ public class XMLConfiguration extends WebApplicationContext.Configuration
             initFilterMapping(node);
         else if("listener".equals(element))
             initListener(node);
+        else if("distributable".equals(element))
+            initDistributable(node);
         else
         {
             if(log.isDebugEnabled())
@@ -421,6 +423,16 @@ public class XMLConfiguration extends WebApplicationContext.Configuration
         }
         if(!known)
             log.warn("Unknown: "+listener);
+    }
+
+    /* ------------------------------------------------------------ */
+    protected void initDistributable(XmlParser.Node node)
+    {
+        // the element has no content, so its simple presence
+        // indicates that the webapp is distributable...
+        WebApplicationContext wac=getWebApplicationContext();
+        if (!wac.isDistributable())
+	   wac.setDistributable(true);
     }
 
     /* ------------------------------------------------------------ */
