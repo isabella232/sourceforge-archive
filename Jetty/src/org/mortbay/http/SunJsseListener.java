@@ -46,6 +46,7 @@ public class SunJsseListener extends JsseListener
     private transient Password _keypassword;
     private String _keystore_type = DEFAULT_KEYSTORE_TYPE;
     private String _keystore_provider_name = DEFAULT_KEYSTORE_PROVIDER_NAME;
+    private String _keystore_provider_class = DEFAULT_KEYSTORE_PROVIDER_CLASS;
 
     /* ------------------------------------------------------------ */
     static
@@ -103,6 +104,18 @@ public class SunJsseListener extends JsseListener
     }
     
     /* ------------------------------------------------------------ */
+    public String getKeystoreProviderClass()
+    {
+        return _keystore_provider_class;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setKeystoreProviderClass(String classname)
+    {
+        _keystore_provider_class = classname;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Constructor. 
      * @exception IOException 
      */
@@ -151,7 +164,26 @@ public class SunJsseListener extends JsseListener
         KeyStore ks = null;
 
         Log.event(KEYSTORE_TYPE_PROPERTY+"="+_keystore_type);
-        if (_keystore_provider_name != null) {
+        
+        if (_keystore_provider_class != null) {
+            // find provider.
+            // avoid creating another instance if already installed in Security.
+            java.security.Provider[] installed_providers = Security.getProviders();
+            java.security.Provider myprovider = null;
+            for (int i=0; i < installed_providers.length; i++) {
+                if (installed_providers[i].getClass().getName().equals(_keystore_provider_class)) {
+                    myprovider = installed_providers[i];
+                    break;
+                }
+            }
+            if (myprovider == null) {
+                // not installed yet, create instance and add it
+                myprovider = (java.security.Provider) Class.forName(_keystore_provider_class).newInstance();
+                Security.addProvider(myprovider);
+            }
+            Log.event(KEYSTORE_PROVIDER_CLASS_PROPERTY+"="+_keystore_provider_class);
+            ks = KeyStore.getInstance(_keystore_type,myprovider);
+        } else if (_keystore_provider_name != null) {
             Log.event(KEYSTORE_PROVIDER_NAME_PROPERTY+"="+_keystore_provider_name);
             ks = KeyStore.getInstance(_keystore_type,_keystore_provider_name);
         } else {

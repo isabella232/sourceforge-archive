@@ -57,6 +57,12 @@ public abstract class JsseListener extends SocketListener
     /** String name of keystore provider name property */
     public static final String KEYSTORE_PROVIDER_NAME_PROPERTY = "jetty.ssl.keystore.provider.name";
 
+    /** String name of keystore provider class property */
+    public static final String KEYSTORE_PROVIDER_CLASS_PROPERTY = "jetty.ssl.keystore.provider.class";
+
+    /** Default value for keystore provider class. null = use default */
+    public static final String DEFAULT_KEYSTORE_PROVIDER_CLASS = System.getProperty(KEYSTORE_PROVIDER_CLASS_PROPERTY);
+
     /** Default value for the keystore location path. */
     public static final String DEFAULT_KEYSTORE  =
         System.getProperty("user.home" ) + File.separator + ".keystore";
