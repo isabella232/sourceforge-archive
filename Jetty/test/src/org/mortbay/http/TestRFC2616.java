@@ -154,7 +154,8 @@ public class TestRFC2616
         context.addHandler(new NotFoundHandler());
         _server.addListener(this);
         _server.start();
-        
+        _server.stop();
+        _server.start();
     }
 
     /* --------------------------------------------------------------- */
@@ -290,7 +291,7 @@ public class TestRFC2616
 
             fields.putDateField("Date",d1);
             t.checkEquals(fields.get("Date"),
-                          "Sun, 6 Nov 1994 08:49:37 GMT",
+                          "Sun, 06 Nov 1994 08:49:37 GMT",
                           "3.3.1 RFC 822 preferred");
         }
         catch(Exception e)

@@ -336,7 +336,7 @@ public class ResourceHandler extends AbstractHttpHandler
             
             if ((date=request.getDateField(HttpFields.__IfUnmodifiedSince))>0)
             {
-                if (resource.lastModified() > date)
+                if (resource.lastModified()/1000 > date/1000)
                 {
                     response.sendError(response.__412_Precondition_Failed);
                     return false;
@@ -345,7 +345,7 @@ public class ResourceHandler extends AbstractHttpHandler
             
             if ((date=request.getDateField(HttpFields.__IfModifiedSince))>0)
             {
-                if (resource.lastModified() <= date)
+                if (resource.lastModified()/1000 <= date/1000)
                 {
                     response.setStatus(response.__304_Not_Modified);
                     request.setHandled(true);
