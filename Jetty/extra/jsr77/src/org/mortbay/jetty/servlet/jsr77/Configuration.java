@@ -91,7 +91,7 @@ public class Configuration implements WebApplicationContext.Configuration
            {
                String filterName = FILTER_PREFIX+servlets[i].getName();
                FilterHolder holder = _context.getWebApplicationHandler().defineFilter(filterName, Jsr77Filter.class.getName());              
-               _context.getWebApplicationHandler().mapServletToFilter(servlets[i].getName(), filterName);
+               _context.getWebApplicationHandler().addFilterServletMapping(servlets[i].getName(), filterName,FilterHolder.__ALL);
                holder.put ("servlet-name", servlets[i].getName());        
                if (log.isDebugEnabled())
                {
