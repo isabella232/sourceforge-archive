@@ -264,6 +264,7 @@ public class CGI extends HttpServlet
 
             String ContentStatus = "Status";
             String location = fields.get(HttpFields.__ContentLocation);
+            String redirect = fields.get(HttpFields.__Location);
             String status   = fields.get(ContentStatus);
 
             if (status!=null)
@@ -289,6 +290,16 @@ public class CGI extends HttpServlet
                 res.setHeader(key,val);
             }
 
+            if (status==null && redirect != null)
+            {
+                // The CGI has set Location and is counting on us to do the redirect.
+                // See http://CGI-Spec.Golux.Com/draft-coar-cgi-v11-03-clean.html#7.2.1.2
+                if (!redirect.startsWith("http:/")&&!redirect.startsWith("https:/"))
+                    res.sendRedirect(redirect);
+                else
+                    res.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+            }
+                
             // copy remains of input onto output...
             IO.copy(li, res.getOutputStream());
 
