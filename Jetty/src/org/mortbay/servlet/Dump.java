@@ -19,6 +19,8 @@ import org.mortbay.util.Code;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Enumeration;
+import java.util.Locale;
+import java.lang.reflect.Field;
 import javax.servlet.UnavailableException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -73,8 +75,22 @@ public class Dump extends HttpServlet
             }
         }
         
-        
         sres.setContentType("text/html");
+
+        if (info!=null && info.indexOf("Locale/")>=0)
+        {
+            try
+            {
+                String locale_name=info.substring(info.indexOf("Locale/")+7);
+                Field f=java.util.Locale.class.getField(locale_name);
+                sres.setLocale((Locale)f.get(null));
+            }
+            catch(Exception e)
+            {
+                Code.ignore(e);
+                sres.setLocale(Locale.getDefault());
+            }
+        }
 
         String pi=sreq.getPathInfo();
         if (pi!=null)
