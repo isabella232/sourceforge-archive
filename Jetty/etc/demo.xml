@@ -65,6 +65,21 @@ $ID: $
     </Arg>
   </Call>
 
+  <!--
+  <Call name="addListener">
+    <Arg>
+      <New class="com.mortbay.HTTP.SunJsseListener">
+        <Set name="Port">8443</Set>
+        <Set name="MinThreads">5</Set>
+        <Set name="MaxThreads">255</Set>
+        <Set name="MaxIdleTimeMs">50000</Set>
+	<Set name="Password">secretPassword</Set>
+	<Set name="KeyPassword">verySecretPassword</Set>
+      </New>
+    </Arg>
+  </Call>
+  -->
+
   <Call name="addWebApplication">
     <Arg>/</Arg>
     <Arg><SystemProperty name="user.dir"/>/webapps/jetty/</Arg>
@@ -74,8 +89,6 @@ $ID: $
     <Arg>/handler/*</Arg>
     <Set name="ResourceBase">./FileBase/</Set>
     <Set name="ServingResources">TRUE</Set>
-    <Set name="ClassPath">./servlets/</Set>
-    <Set name="ServingDynamicServlets">TRUE</Set>
     <Call name="addServlet">
       <Arg>Dump</Arg>
       <Arg>/dump,/dump/*</Arg>

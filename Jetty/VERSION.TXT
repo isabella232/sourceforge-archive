@@ -1,10 +1,8 @@
 Stable 2.4.6
 Dev    3.0.A99
 
-
 Release 3.0.B0
-CustomizeRequest
-setScheme
+   + SSL implemented with JsseListener
    + Partial implementation of webapp securitycontraints
    + Switched to the aelfred parser from microstar, which is
      only partially validating, but small and lightweight

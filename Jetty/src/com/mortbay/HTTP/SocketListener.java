@@ -89,14 +89,55 @@ public class SocketListener
             Code.debug("ACCEPT:",socket);
 	    socket.setSoLinger(false,0);
             HttpConnection connection =
-                new HttpConnection(this,socket.getInetAddress(),
-				   socket.getInputStream(),
-				   socket.getOutputStream());
+                new SocketConnection(socket);
             connection.handle();
         }
         catch ( Exception e ){
             Code.warning("Connection problem",e);
         }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param request 
+     */
+    public final void customizeRequest(HttpConnection connection,
+				       HttpRequest request)
+    {
+	customizeRequest(((SocketConnection)connection).getSocket(),
+			 request);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param request 
+     */
+    protected void customizeRequest(Socket socket,
+				    HttpRequest request)
+    {
+	// Do nothing
+    }
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class SocketConnection extends HttpConnection
+    {
+	private Socket _socket;
+	public Socket getSocket()
+	{
+	    return _socket;
+	}
+
+	/* -------------------------------------------------------- */
+	SocketConnection(Socket socket)
+	    throws IOException
+	{
+	    super(SocketListener.this,
+		  socket.getInetAddress(),
+		  socket.getInputStream(),
+		  socket.getOutputStream());
+	    _socket=socket;
+	}
     }
 }
 

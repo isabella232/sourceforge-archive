@@ -609,6 +609,14 @@ class ServletRequest
 	return _context.getRequestDispatcher(url);
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return 
+     */
+    public String toString()
+    {
+	return _httpRequest.toString();
+    }
 }
 
 

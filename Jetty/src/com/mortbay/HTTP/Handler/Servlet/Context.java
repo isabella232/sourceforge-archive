@@ -220,7 +220,7 @@ public class Context implements ServletContext, HttpSessionContext
     /* ------------------------------------------------------------ */
     public void log(String msg)
     {
-	Log.event(msg);
+        Log.message(Log.EVENT,msg,new Frame(2));
     }
     
     /* ------------------------------------------------------------ */

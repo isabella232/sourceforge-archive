@@ -267,6 +267,7 @@ public class HttpConnection
             try
             {
                 _request.readHeader(getInputStream());
+		_listener.customizeRequest(this,_request);
             }
             catch(HttpException e)
             {
@@ -281,7 +282,7 @@ public class HttpConnection
 	    
             if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
                 throw new HttpException(_response.__400_Bad_Request);
-
+	    
 	    if (Code.debug())
 	    {
 		_response.setField("Jetty-Request",_request.getRequestLine());
@@ -360,7 +361,7 @@ public class HttpConnection
             
             // service the request
             service(_request,_response);
-
+	    
             // Complete the request
             if (_persistent)
             {
@@ -410,7 +411,10 @@ public class HttpConnection
             _persistent=false;
             if (_response.isCommitted())
             {
-                Code.warning(e.toString());
+		if (Code.debug())
+		    Code.warning(_request.toString(),e);
+		else
+		    Code.warning(e.toString());
             }
             else
             {
@@ -425,7 +429,10 @@ public class HttpConnection
         {
             // Handle Exception by sending 500 error code (if output not
             // committed) and closing connection.
-	    Code.warning(_request.toString()+":\n"+_request.toString(),e);
+	    if (Code.debug())
+		Code.warning(_request.toString(),e);
+	    else
+		Code.warning(e.toString());
 	    
             _persistent=false;
             if (!_response.isCommitted())
@@ -780,6 +787,11 @@ public class HttpConnection
      */
     void commitResponse()
     {
+	// Handler forced close
+	_close=HttpFields.__Close.equals
+	    (_response.getField(HttpFields.__Connection));
+	if (_close)
+	    _persistent=false;
 	
 	// if we have no content or encoding,
 	// and no content length

@@ -991,6 +991,10 @@ public class TestRFC2616
         }
     }
     
+    public void customizeRequest(HttpConnection connection,
+				       HttpRequest request)
+    {
+    }
     
     /* ------------------------------------------------------------ */
     public static void main(String[] args)

@@ -14,7 +14,6 @@ import com.mortbay.HTTP.*;
 import com.mortbay.Util.*;
 
 import org.xml.sax.*;
-import javax.xml.parsers.*;
 
 /* ------------------------------------------------------------ */
 /** Configure Objects from XML.
@@ -324,7 +323,7 @@ public class XmlConfiguration
 	    arg[i]=value(obj,(XmlParser.Node)node.get(i));
 
 	String method=node.getAttribute("name");
-	Code.debug("call ",node);
+	Code.debug("call ",method);
 	
 	// Lets just try all methods for now
 	Method[] methods = oClass.getMethods();
