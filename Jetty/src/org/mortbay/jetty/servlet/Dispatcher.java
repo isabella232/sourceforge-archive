@@ -574,11 +574,18 @@ public class Dispatcher implements RequestDispatcher
                 if (_xSession==null)
                 {
                     log.debug("Ctx dispatch session");
-                    if (_requestedSessionId==null)
-                        _requestedSessionId=super.getSession(true).getId();
-                    _xSession=_servletHandler.getHttpSession(_requestedSessionId);
-                    if (create && _xSession==null)
-                        _xSession=_servletHandler.newHttpSession(this);
+                    
+
+                    if (getAttribute("org.mortbay.jetty.servlet.Dispatcher.shared_session") != null)
+                    	_xSession= super.getSession(create);
+                    else
+                    {
+                        if (_requestedSessionId==null)
+                            _requestedSessionId=super.getSession(true).getId();
+                        _xSession=_servletHandler.getHttpSession(_requestedSessionId);
+                        if (create && _xSession==null)
+                            _xSession=_servletHandler.newHttpSession(this);
+                    }
                 }
                 return _xSession;
             }
