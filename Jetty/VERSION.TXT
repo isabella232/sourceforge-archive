@@ -5,6 +5,7 @@ Jetty Versions
  + PathMap uses own Map.Entry impl for IBM JVMs 
  + Use ${jetty.home}/work or WEB-INF/work for temp directories if present
  + Protect ThreadPool.run() from interrupted exceptions
+ + Added org.mortbay.http.ErrorHandler for error pages.
 
 Jetty-4.2.14 - 4 November 2003
  + Respect content length when decoding form content.
