@@ -176,6 +176,14 @@
     </Call>
     -->  
 
+    <!-- uncomment to add a worker tag to the session manager
+    <Call name="getServletHandler">
+      <Call name="getSessionManager">
+        <Set name="workerName">demo0</Set>
+      </Call>
+    </Call>
+    -->
+
   </Call>
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

@@ -54,7 +54,8 @@ public abstract class AbstractSessionManager implements SessionManager
     // -1 means no timeout
     private int _dftMaxIdleSecs = -1;
     private int _scavengePeriodMs = 30000;
-
+    private String _workerName ;
+    
     private transient ArrayList _sessionListeners=new ArrayList();
     private transient ArrayList _sessionAttributeListeners=new ArrayList();
     private transient Map _sessions;
@@ -90,6 +91,8 @@ public abstract class AbstractSessionManager implements SessionManager
             long r = _random.nextLong();
             if (r<0)r=-r;
             id=Long.toString(r,30+(int)(created%7));
+            if (_workerName!=null)
+                id+="."+_workerName;
         }
         while (_sessions.containsKey(id));
         return id;
@@ -118,6 +121,28 @@ public abstract class AbstractSessionManager implements SessionManager
 
     /* ------------------------------------------------------------ */
     protected abstract Session newSession();
+    
+    /* ------------------------------------------------------------ */
+    /** Get the workname.
+     * If set, the workername is dot appended to the session ID
+     * and can be used to assist session affinity in a load balancer.
+     * @return String or null
+     */
+    public String getWorkerName()
+    {
+        return _workerName;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the workname.
+     * If set, the workername is dot appended to the session ID
+     * and can be used to assist session affinity in a load balancer.
+     * @param workerName 
+     */
+    public void setWorkerName(String workerName)
+    {
+        _workerName = workerName;
+    }
     
     /* ------------------------------------------------------------ */
     /** 
