@@ -28,6 +28,8 @@ import javax.servlet.ServletContextListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.servlet.WebApplicationContext;
+import org.mortbay.util.LifeCycleEvent;
+import org.mortbay.util.LifeCycleListener;
 import org.mortbay.util.LogSupport;
 
 /* ------------------------------------------------------------ */
@@ -62,6 +64,29 @@ public class WebApplicationContextMBean extends ServletHttpContextMBean
         defineAttribute("WAR",true);
         defineAttribute("extractWAR",true);
         _webappContext=(WebApplicationContext)getManagedResource();
+        _webappContext.addEventListener(new LifeCycleListener()
+                {
+
+                    public void lifeCycleStarting (LifeCycleEvent event)
+                    {}
+                    
+                    public void lifeCycleStarted (LifeCycleEvent event)
+                    {
+                        getConfigurations();
+                    }
+
+                    public void lifeCycleFailure (LifeCycleEvent event)
+                    {}
+
+                    public void lifeCycleStopping (LifeCycleEvent event)
+                    {}
+
+                    public void lifeCycleStopped (LifeCycleEvent event)
+                    {
+                        destroyConfigurations();
+                    }
+            
+                });
     }
     
     
@@ -72,11 +97,7 @@ public class WebApplicationContextMBean extends ServletHttpContextMBean
     public void postRegister(Boolean ok)
     {
         super.postRegister(ok);
-        //register as a listener on the WebApplicationContext to
-        //find out when it is started. Once it is started, all necessary
-        //configurations will have been completed, so we can create mbeans
-        //for them.
-        registerListener();
+        getConfigurations();
     }
     
     
@@ -127,34 +148,6 @@ public class WebApplicationContextMBean extends ServletHttpContextMBean
     }
     
     
-    public void registerListener ()
-    {
-        if (null==_webappContext)
-            return;
-        
-        try
-        {
-            _webappContext.addEventListener (
-                    new ServletContextListener()
-                    {
-                        public void contextInitialized (ServletContextEvent e)
-                        {
-                            getConfigurations();
-                            System.out.println ("CONFIGS AFTER="+_configurations);
-                        }
-                        public void contextDestroyed (ServletContextEvent e)
-                        {
-                            destroyComponentMBeans(_configurations);
-                            destroyHandlers();
-                        }
-                    });
-            
-        }
-        catch (Exception e)
-        {
-            log.warn(LogSupport.EXCEPTION,e);
-        }
-        
-    }
+ 
     
 }

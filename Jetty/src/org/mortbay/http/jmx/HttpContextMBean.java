@@ -25,6 +25,8 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpContext;
+import org.mortbay.util.LifeCycleEvent;
+import org.mortbay.util.LifeCycleListener;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.jmx.LifeCycleMBean;
 
@@ -128,6 +130,30 @@ public class HttpContextMBean extends LifeCycleMBean
 
 
         _httpContext=(HttpContext)getManagedResource();
+        
+        _httpContext.addEventListener(new LifeCycleListener()
+                {
+
+                    public void lifeCycleStarting (LifeCycleEvent event)
+                    {}
+
+                    public void lifeCycleStarted (LifeCycleEvent event)
+                    {
+                        getHandlers();                     
+                    }
+
+                    public void lifeCycleFailure (LifeCycleEvent event)
+                    {}
+
+                    public void lifeCycleStopping (LifeCycleEvent event)
+                    {}
+
+                    public void lifeCycleStopped (LifeCycleEvent event)
+                    {
+                        destroyHandlers();
+                    }
+            
+                });
     }
 
 

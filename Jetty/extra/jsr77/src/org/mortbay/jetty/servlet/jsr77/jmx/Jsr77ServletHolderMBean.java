@@ -195,7 +195,6 @@ public class Jsr77ServletHolderMBean extends ModelMBeanImpl
         try
         {
             jsr77Name = new ObjectName(getDefaultDomain()+":J2EEServer=null,J2EEApplication=null,J2EEWebModule="+context+",j2EEType=Servlet,name="+_servletHolder.getName());    
-            //oName=new ObjectName(on+",servlet="+_servletHolder.getName()+",stats=jsr77");
         }
         catch(Exception e)
         {
