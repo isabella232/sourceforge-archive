@@ -142,7 +142,11 @@ public class FormAuthenticator implements Authenticator
             
             String nuri=(String)session.getAttribute(__J_URI);
             if (nuri==null || nuri.length()==0)
-                nuri="/";
+            {
+                nuri=request.getContextPath();
+                if (nuri.length()==0)
+                    nuri="/";
+            }
             
             if (form_cred._userPrincipal!=null)
             {
@@ -261,7 +265,6 @@ public class FormAuthenticator implements Authenticator
                                  "://" + request.getServerName() +
                                  ":" + request.getServerPort() +
                                  URI.addPaths(request.getContextPath(),uri));
-	    System.err.println("set nuri = "+session.getAttribute(__J_URI));
             response.setContentLength(0);
             response.sendRedirect(response.encodeRedirectURL(URI.addPaths(request.getContextPath(),
                                                                           _formLoginPage)));
