@@ -1023,7 +1023,7 @@ public class HttpRequest extends HttpMessage
                                     version=Integer.parseInt
                                         (StringUtil.unquote(v.substring(0,comma)));
                                     v=v.substring(comma+1);
-                                    int e=v.indexOf('=');
+                                    e=v.indexOf('=');
                                     if (e>0)
                                     {
                                         n=v.substring(0,e);
@@ -1055,10 +1055,9 @@ public class HttpRequest extends HttpMessage
                             cookie.setVersion(version);
                         cookies=LazyList.add(cookies,cookie);
                     }
-                    catch(Exception e)
+                    catch(Exception ex)
                     {
-                        LogSupport.ignore(log,e);
-                        log.warn("Bad Cookie received: "+e.toString());
+                        LogSupport.ignore(log,ex);
                     }
                 }
             }
