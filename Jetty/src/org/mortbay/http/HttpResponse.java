@@ -334,12 +334,14 @@ public class HttpResponse extends HttpMessage
             message = (String)__statusMsg.get(code_integer);
             if (message==null)
                 message=""+code;
+            setReason(message);
         }
+        else
+            setReason(UrlEncoded.encodeString(message));
         HttpRequest request=getHttpRequest();
              
         // Generate normal error page.
         setStatus(code);
-        setReason(UrlEncoded.encodeString(message));
         
         // If we are allowed to have a body 
         if (code!=__204_No_Content &&
@@ -347,16 +349,13 @@ public class HttpResponse extends HttpMessage
             code!=__206_Partial_Content &&
             code>=200)
         {
-            setContentType(HttpFields.__TextHtml);
-            _mimeType=HttpFields.__TextHtml;
-            _characterEncoding=null;
-            ByteArrayISO8859Writer writer =
-                new ByteArrayISO8859Writer(((HttpOutputStream)getOutputStream()).getBufferSize());
-            writeErrorPage(writer,code,message);
-            writer.flush();
-            setContentLength(writer.size());
-            writer.writeTo(getOutputStream());
-            writer.destroy();
+            if (getHttpContext()!=null)
+            {   
+                Object o=
+                    getHttpContext().getAttribute(HttpContext.__ErrorHandler);
+                if (o!=null && o instanceof HttpHandler)
+                    ((HttpHandler)o).handle(request.getPath(), null, request, this);
+            }
         }
         else if (code!=__206_Partial_Content) 
         {
@@ -369,35 +368,6 @@ public class HttpResponse extends HttpMessage
         commit();
     }
     
-    /* ------------------------------------------------------------ */
-    public void writeErrorPage(Writer writer, int code,String message)
-        throws IOException
-    {
-        if (message!=null)
-        {
-            message=StringUtil.replace(message,"<","&lt;");
-            message=StringUtil.replace(message,">","&gt;");
-        }
-        String uri=getHttpRequest().getPath();
-        uri=StringUtil.replace(uri,"<","&lt;");
-        uri=StringUtil.replace(uri,">","&gt;");
-        
-        writer.write("<html>\n<head>\n<title>Error ");
-        writer.write(Integer.toString(code));
-        writer.write(' ');
-        writer.write(message);
-        writer.write("</title>\n<BODY>\n<h2>HTTP ERROR: ");
-        writer.write(Integer.toString(code));
-        writer.write(' ');
-        writer.write(message);
-        writer.write("</h2>\n");
-        writer.write("RequestURI=");
-        writer.write(uri);
-        writer.write("<p><i><small><a href=\"http://jetty.mortbay.org\">Powered by Jetty://</a></small></i></p>");
-        for (int i=0;i<20;i++)
-            writer.write("\n                                                ");
-        writer.write("\n</body>\n</html>\n");
-    }
     
     
     /* ------------------------------------------------------------- */

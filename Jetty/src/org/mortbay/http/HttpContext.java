@@ -17,7 +17,6 @@ import java.net.UnknownHostException;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Permissions;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,6 +32,7 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.http.handler.ErrorPageHandler;
 import org.mortbay.util.CachedResource;
 import org.mortbay.util.IO;
 import org.mortbay.util.LazyList;
@@ -83,6 +83,9 @@ public class HttpContext implements LifeCycle,
      */
     public final static String __fileClassPathAttr=
         "org.mortbay.http.HttpContext.FileClassPathAttribute";
+
+    public final static String __ErrorHandler=
+        "org.mortbay.http.ErrorHandler";
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -176,7 +179,9 @@ public class HttpContext implements LifeCycle,
     /** Constructor.
      */
     public HttpContext()
-    {}
+    {
+        setAttribute(__ErrorHandler,  new ErrorPageHandler()); 
+    }
 
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -1673,13 +1678,12 @@ public class HttpContext implements LifeCycle,
             String q=request.getQuery();
             if (q!=null&&q.length()!=0)
                 buf.append("?"+q);
-            response.setField(HttpFields.__Location,
-                              buf.toString());
+                
+            response.sendRedirect(buf.toString());
             if (log.isDebugEnabled())
                 log.debug(this+" consumed all of path "+
                              request.getPath()+
                              ", redirect to "+buf.toString());
-            response.sendError(302);
             return true;
         }
 
