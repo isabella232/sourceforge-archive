@@ -501,7 +501,7 @@ public class HttpResponse extends HttpMessage
             name_value_params=buf.toString();
         }
         
-        _header.put(cookie2?HttpFields.__SetCookie2:HttpFields.__SetCookie,
+        _header.add(cookie2?HttpFields.__SetCookie2:HttpFields.__SetCookie,
                     name_value_params);        
     }
     
