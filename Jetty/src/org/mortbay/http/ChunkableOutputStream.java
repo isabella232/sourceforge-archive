@@ -343,7 +343,14 @@ public class ChunkableOutputStream extends FilterOutputStream
         if (_observers!=null)
             _observers.clear();
     }
-        
+
+    /* ------------------------------------------------------------ */
+    public void destroy()
+    {
+        if (_buffer!=null)
+            _buffer.destroy();
+    }
+    
     /* ------------------------------------------------------------ */
     /** Get chunking mode 
      */
@@ -351,7 +358,6 @@ public class ChunkableOutputStream extends FilterOutputStream
     {
         return _chunking;
     }
-
     
     /* ------------------------------------------------------------ */
     /** Set the trailer to send with a chunked close.

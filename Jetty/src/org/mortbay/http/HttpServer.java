@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.WeakHashMap;
 import org.mortbay.http.handler.DumpHandler;
+import org.mortbay.http.handler.ResourceHandler;
 import org.mortbay.http.handler.NotFoundHandler;
 import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
@@ -1156,7 +1157,7 @@ public class HttpServer implements LifeCycle
             String host=null;
             HttpContext context = server.getContext(host,"/");
             context.setResourceBase("docroot/");
-            context.setServingResources(true);
+            context.addHandler(new ResourceHandler());
             context.addHandler(new DumpHandler());
             
             // Parse arguments

@@ -28,14 +28,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.mortbay.http.HttpException;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.InclusiveByteRange;
 import org.mortbay.http.MultiPartResponse;
 import org.mortbay.http.PathMap;
-import org.mortbay.http.ResourceBase;
-import org.mortbay.http.SecurityBase;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.CachedResource;
 import org.mortbay.util.Code;
@@ -56,31 +55,17 @@ import org.mortbay.util.URI;
  * <p>
  * @since Jetty 4.1
  * @see org.mortbay.jetty.servlet.WebApplicationContext
- * @see org.mortbay.http.SecurityBase
- * @see org.mortbay.http.ResourceBase
  * @version $Id$
  * @author Greg Wilkins
  */
 public class WebApplicationHandler extends ServletHandler
 {
-    private ResourceBase _base=new ResourceBase();
-    private Security _security=new Security();
+    private static String __AllowString="GET, HEAD, POST, OPTION, TRACE";
+    
     private Map _filterMap=new HashMap();
     private List _pathFilters=new ArrayList();
     private MultiMap _servletFilterMap=new MultiMap();
-    private boolean _acceptRanges=true;
-    
-    /* ------------------------------------------------------------ */
-    public ResourceBase getResourceBase()
-    {
-        return _base;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public SecurityBase getSecurityBase()
-    {
-        return _security;
-    }
+    private boolean _acceptRanges=true;    
     
     /* ------------------------------------------------------------ */
     public boolean isAcceptRanges()
@@ -145,9 +130,6 @@ public class WebApplicationHandler extends ServletHandler
     public synchronized void start()
         throws Exception
     {
-        _base.setHttpContext(getHttpContext());
-        _security.setHttpContext(getHttpContext());
-        
         // Start filters
         MultiException mex = new MultiException();
         Iterator iter = _filterMap.values().iterator();
@@ -238,7 +220,7 @@ public class WebApplicationHandler extends ServletHandler
             Map.Entry servlet=getHolderEntry(pathInContext);
             Resource resource=null;
             if (servlet==null)
-                resource=_base.getResource(pathInContext);
+                resource=getHttpContext().getResource(pathInContext);
             
             Code.debug("servlet=",servlet,"  resource=",resource);
             
@@ -267,7 +249,8 @@ public class WebApplicationHandler extends ServletHandler
                 Code.debug("session=",session);
                 
                 // Security Check
-                if (!_security.check(pathInContext,pathParams,httpRequest,httpResponse))
+                if (!getHttpContext().checkSecurityContstraints
+                    (pathInContext,httpRequest,httpResponse))
                 return;
                 
                 // Path filters
@@ -409,7 +392,7 @@ public class WebApplicationHandler extends ServletHandler
     private void setAllowHeader(HttpServletResponse response)
     {
         if (response!=null)
-            response.setHeader(HttpFields.__Allow, _base.getAllowedString());
+            response.setHeader(HttpFields.__Allow, __AllowString);
     }
     
     /* ------------------------------------------------------------ */
@@ -425,7 +408,7 @@ public class WebApplicationHandler extends ServletHandler
         String method=request.getMethod();
         
         // Is the method allowed?        
-        if (!_base.isMethodAllowed(method))
+        if (__AllowString.indexOf(method)<0)
         {
             Code.debug("Method not allowed: ",method);
             if (resource.exists())
@@ -549,7 +532,7 @@ public class WebApplicationHandler extends ServletHandler
                 }
   
                 // See if index file exists
-                String welcome=_base.getWelcomeFile(resource);
+                String welcome=getHttpContext().getWelcomeFile(resource);
                 if (welcome!=null)
                 {     
                     // Forward to the index
@@ -636,7 +619,8 @@ public class WebApplicationHandler extends ServletHandler
         //  216 response which does not require an overall 
         //  content-length header
         //
-        ResourceBase.MetaData metaData = (ResourceBase.MetaData)resource.getAssociate();
+        HttpContext.ResourceMetaData metaData =
+            (HttpContext.ResourceMetaData)resource.getAssociate();
         String encoding = metaData.getEncoding();
         MultiPartResponse multi = new MultiPartResponse(response.getOutputStream());
         response.setStatus(HttpResponse.__206_Partial_Content,"Partial Content");
@@ -701,7 +685,8 @@ public class WebApplicationHandler extends ServletHandler
                       long count)
         throws IOException
     {
-        ResourceBase.MetaData metaData = (ResourceBase.MetaData)resource.getAssociate();
+        HttpContext.ResourceMetaData metaData =
+            (HttpContext.ResourceMetaData)resource.getAssociate();
 
         response.setContentType(metaData.getEncoding());
         if (count != -1)
@@ -727,7 +712,8 @@ public class WebApplicationHandler extends ServletHandler
     {
         Code.debug("sendDirectory: "+resource);
         String base = URI.addPaths(request.getRequestURI(),"/");
-        ByteArrayISO8859Writer dir = _base.getDirectoryListing(resource,base,parent);
+        ByteArrayISO8859Writer dir = getHttpContext()
+            .getDirectoryListing(resource,base,parent);
         if (dir==null)
         {
             response.sendError(HttpResponse.__403_Forbidden,
@@ -779,7 +765,7 @@ public class WebApplicationHandler extends ServletHandler
             {
                 // 9.2
                 response.setIntHeader(HttpFields.__ContentLength,0);
-                response.setHeader(HttpFields.__Allow,_base.getAllowedString());                
+                response.setHeader(HttpFields.__Allow,__AllowString);                
                 response.flushBuffer();
             }
             else
@@ -788,52 +774,12 @@ public class WebApplicationHandler extends ServletHandler
         else
         {
             // Unknown METHOD
-            response.setHeader(HttpFields.__Allow,_base.getAllowedString());
+            response.setHeader(HttpFields.__Allow,__AllowString);
             response.sendError(HttpResponse.__405_Method_Not_Allowed);
         }
     }
     
 
-    /* ------------------------------------------------------------ */
-    public Set getResourcePaths(String uriInContext)
-    {
-        try
-        {
-            uriInContext=URI.canonicalPath(uriInContext);
-            if (uriInContext==null)
-                return Collections.EMPTY_SET;
-            Resource resource=_base.getResource(uriInContext);
-            if (resource==null || !resource.isDirectory())
-                return Collections.EMPTY_SET;
-            String[] contents=resource.list();
-            if (contents==null || contents.length==0)
-                return Collections.EMPTY_SET;
-            HashSet set = new HashSet(contents.length*2);
-            for (int i=0;i<contents.length;i++)
-                set.add(URI.addPaths(uriInContext,contents[i]));
-            return set;
-        }
-        catch(Exception e)
-        {
-            Code.ignore(e);
-        }
-        
-        return Collections.EMPTY_SET;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public InputStream getResourceAsStream(String uriInContext)
-    {
-        try
-        {
-            uriInContext=URI.canonicalPath(uriInContext);
-            Resource resource=_base.getResource(uriInContext);
-            if (resource!=null)
-                return resource.getInputStream();
-        }
-        catch(IOException e) {Code.ignore(e);}
-        return null;
-    }
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -890,32 +836,6 @@ public class WebApplicationHandler extends ServletHandler
             // Not found
             else
                 notFound(request,response);
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private class Security extends SecurityBase
-    {
-        /* ------------------------------------------------------------ */
-        public boolean check(String pathInContext,
-                             String pathParams,
-                             HttpRequest request,
-                             HttpResponse response)
-            throws HttpException, IOException
-        {
-            if (!super.check(pathInContext,request,response))
-                return false;
-
-            if (_authenticator instanceof FormAuthenticator &&
-                pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK) &&
-                _authenticator.authenticated(_httpContext.getRealm(),
-                                             pathInContext,
-                                             request,
-                                             response)==null)
-                return false;
-            return true;
         }
     }
 }

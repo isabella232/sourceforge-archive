@@ -5,15 +5,13 @@
 package org.mortbay.util;
 
 import java.io.File;
-import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.security.Permission;
-import java.lang.reflect.Method;
 
 /* ------------------------------------------------------------ */
 /** Abstract resource class.
@@ -38,13 +36,7 @@ public abstract class Resource
         {
             try
             {
-                URLConnection connection=url.openConnection();
-                Permission perm = connection.getPermission();
-                if (!(perm instanceof java.io.FilePermission) && Code.debug())
-                    Code.warning("Caution: File resource without FilePermission:"+url);
-                
-                File file =new File(perm.getName());
-                FileResource fileResource= new FileResource(url,connection,file);
+                FileResource fileResource= new FileResource(url);
                 if (fileResource.getAlias()!=null)
                     return fileResource.getAlias();
                 return fileResource;

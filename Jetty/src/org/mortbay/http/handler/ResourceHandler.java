@@ -27,13 +27,13 @@ import org.mortbay.http.HttpResponse;
 import org.mortbay.http.InclusiveByteRange;
 import org.mortbay.http.MultiPartResponse;
 import org.mortbay.http.PathMap;
-import org.mortbay.http.ResourceBase;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.CachedResource;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.Log;
 import org.mortbay.util.Resource;
+import org.mortbay.util.StringMap;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 import org.mortbay.util.URI;
@@ -55,14 +55,77 @@ public class ResourceHandler extends NullHandler
     /* ----------------------------------------------------------------- */
     private boolean _acceptRanges=true;
     private int _welcomeRedirectionIndex=0;
-    private ResourceBase _base=new ResourceBase();
-
-    /* ------------------------------------------------------------ */
-    public ResourceBase getResourceBase()
+    private String[] _methods=null;
+    private String _allowed;
+    private StringMap _methodMap = new StringMap();
     {
-        return _base;
+        setAllowedMethods(new String[]
+            {
+                HttpRequest.__GET,
+                HttpRequest.__POST,
+                HttpRequest.__HEAD,
+                HttpRequest.__OPTIONS,
+                HttpRequest.__TRACE
+            });
     }
 
+
+    /* ----------------------------------------------------------------- */
+    /** Construct a ResourceHandler.
+     */
+    public ResourceHandler()
+    {}
+
+ 
+    /* ----------------------------------------------------------------- */
+    public synchronized void start()
+        throws Exception
+    {        
+        Log.event("ResourceHandler started in "+ getHttpContext().getBaseResource());
+        super.start();
+    }
+ 
+    /* ----------------------------------------------------------------- */
+    public void stop()
+        throws InterruptedException
+    {
+        super.stop();
+    }
+
+    /* ------------------------------------------------------------ */
+    public String[] getAllowedMethods()
+    {
+        return _methods;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setAllowedMethods(String[] methods)
+    {
+        StringBuffer b = new StringBuffer();
+        _methods=methods;
+        _methodMap.clear();
+        for (int i=0;i<methods.length;i++)
+        {
+            _methodMap.put(methods[i],methods[i]);
+            if (i>0)
+                b.append(',');
+            b.append(methods[i]);
+        }
+        _allowed=b.toString();
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isMethodAllowed(String method)
+    {
+        return _methodMap.get(method)!=null;
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getAllowedString()
+    {
+        return _allowed;
+    }
+    
     /* ------------------------------------------------------------ */
     public boolean isAcceptRanges()
     {
@@ -90,31 +153,6 @@ public class ResourceHandler extends NullHandler
         _welcomeRedirectionIndex=i;
     }
     
-
-    /* ----------------------------------------------------------------- */
-    /** Construct a ResourceHandler.
-     */
-    public ResourceHandler()
-    {}
-
- 
-    /* ----------------------------------------------------------------- */
-    public synchronized void start()
-        throws Exception
-    {
-        _base.setHttpContext(getHttpContext());
-        
-        Log.event("ResourceHandler started in "+ getHttpContext().getBaseResource());
-        super.start();
-    }
- 
-    /* ----------------------------------------------------------------- */
-    public void stop()
-        throws InterruptedException
-    {
-        super.stop();
-    }
-
  
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,
@@ -129,14 +167,14 @@ public class ResourceHandler extends NullHandler
             throw new HttpException(HttpResponse.__403_Forbidden);
             
         boolean endsWithSlash= pathInContext.endsWith("/");
-        Resource resource = _base.getResource(pathInContext);
+        Resource resource = getHttpContext().getResource(pathInContext);
 
         if (resource==null)
             return;
 
 
         // Is the method allowed?
-        if (!_base.isMethodAllowed(request.getMethod()))
+        if (!isMethodAllowed(request.getMethod()))
         {
             Code.debug("Method not allowed: ",request.getMethod());
             if (resource.exists())
@@ -228,7 +266,7 @@ public class ResourceHandler extends NullHandler
                 }
   
                 // See if index file exists
-                String welcome=_base.getWelcomeFile(resource);
+                String welcome=getHttpContext().getWelcomeFile(resource);
                 if (welcome!=null)
                 {     
                     // Forward to the index
@@ -434,14 +472,15 @@ public class ResourceHandler extends NullHandler
     /* ------------------------------------------------------------ */
     void setAllowHeader(HttpResponse response)
     {
-        response.setField(HttpFields.__Allow, _base.getAllowedString());
+        response.setField(HttpFields.__Allow, getAllowedString());
     }
     
     /* ------------------------------------------------------------ */
     public void writeHeaders(HttpResponse response,Resource resource, long count)
         throws IOException
     {
-        ResourceBase.MetaData metaData = (ResourceBase.MetaData)resource.getAssociate();
+        HttpContext.ResourceMetaData metaData =
+            (HttpContext.ResourceMetaData)resource.getAssociate();
 
         response.setContentType(metaData.getEncoding());
         if (count != -1)
@@ -534,7 +573,8 @@ public class ResourceHandler extends NullHandler
         //  216 response which does not require an overall 
         //  content-length header
         //
-        ResourceBase.MetaData metaData = (ResourceBase.MetaData)resource.getAssociate();
+        HttpContext.ResourceMetaData metaData =
+            (HttpContext.ResourceMetaData)resource.getAssociate();
         String encoding = metaData.getEncoding();
         MultiPartResponse multi = new MultiPartResponse(response);
         response.setStatus(response.__206_Partial_Content);
@@ -608,7 +648,9 @@ public class ResourceHandler extends NullHandler
         request.setHandled(true);
         Code.debug("sendDirectory: "+resource);
         String base = URI.addPaths(request.getPath(),"/");
-        ByteArrayISO8859Writer dir = _base.getDirectoryListing(resource,base,parent);
+        ByteArrayISO8859Writer dir = getHttpContext()
+            .getDirectoryListing(resource,base,parent);
+
         if (dir==null)
         {
             response.sendError(HttpResponse.__403_Forbidden,

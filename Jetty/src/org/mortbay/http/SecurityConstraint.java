@@ -25,6 +25,11 @@ public class SecurityConstraint
     implements Cloneable
 {
     /* ------------------------------------------------------------ */
+    public final static String __BASIC_AUTH="BASIC";
+    public final static String __FORM_AUTH="FORM";
+    public final static String __CERT_AUTH="CLIENT-CERT";    
+    
+    /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     public interface Authenticator

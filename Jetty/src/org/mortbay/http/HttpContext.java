@@ -31,6 +31,14 @@ import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URI;
+import org.mortbay.util.ByteArrayISO8859Writer;
+import java.util.Arrays;
+import org.mortbay.util.CachedResource;
+import org.mortbay.util.TypeUtil;
+import java.text.DateFormat;
+import java.util.Date;
+import org.mortbay.http.SecurityConstraint.Authenticator;
+
 
 /* ------------------------------------------------------------ */
 /** Context for a collection of HttpHandlers.
@@ -60,6 +68,8 @@ import org.mortbay.util.URI;
  */
 public class HttpContext implements LifeCycle
 {
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     private final static Map __dftMimeMap = new HashMap();
     private final static Map __encodings = new HashMap();
     static
@@ -71,7 +81,6 @@ public class HttpContext implements LifeCycle
             String ext = (String)i.nextElement();
             __dftMimeMap.put(ext,mime.getString(ext));
         }
-
         ResourceBundle encoding = ResourceBundle.getBundle("org/mortbay/http/encoding");
         i = encoding.getKeys();
         while(i.hasMoreElements())
@@ -82,13 +91,13 @@ public class HttpContext implements LifeCycle
     }
 
     /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     private HttpServer _httpServer;
     private List _handlers=new ArrayList(3);
     private HttpHandler[] _handlersArray;
     private String _classPath;
     private ClassLoader _parent;
     private ClassLoader _loader;
-    private Resource _resourceBase;
     private boolean _started;
 
     private Map _attributes = new HashMap(11);
@@ -103,12 +112,31 @@ public class HttpContext implements LifeCycle
     
     private File _tmpDir;
     
-    private Map _mimeMap;
     private Map _encodingMap;
-    private Map _resourceAliases;
     private Map _errorPages;
+    
     private UserRealm _userRealm;
     private String _realmName;
+    private PathMap _constraintMap=new PathMap();
+    private Authenticator _authenticator;
+
+    private Resource _resourceBase;
+    private Map _cache=new HashMap();
+    private CachedMetaData _mostRecentlyUsed=null;
+    private CachedMetaData _leastRecentlyUsed=null;
+    private int _cacheSize;
+    private Map _mimeMap;
+    private int _maxCachedFileSize =400*1024;
+    private int _maxCacheSize =4*1024*1024;
+    private boolean _dirAllowed=true;
+    private String[] _welcomes=
+    {
+        "welcome.html",
+        "index.html",
+        "index.htm",
+        "index.jsp"
+    };
+
     private PermissionCollection _permissions;
     
     /* ------------------------------------------------------------ */
@@ -116,6 +144,7 @@ public class HttpContext implements LifeCycle
      */
     public HttpContext()
     {}
+
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -267,17 +296,7 @@ public class HttpContext implements LifeCycle
         return _hostsArray;
     }
 
-    /* ------------------------------------------------------------ */
-    /** Register a host mapping for this context.
-     * @deprecated USe addVirtualHost(String)
-     * @param hostname 
-     */
-    public void registerHost(String hostname)
-    {
-        addVirtualHost(hostname);
-    }
-
-
+    
     /* ------------------------------------------------------------ */
     public void setHandlers(HttpHandler[] handlers)
     {
@@ -468,6 +487,329 @@ public class HttpContext implements LifeCycle
         _attributes.remove(name);
     }
 
+
+
+    /* ------------------------------------------------------------ */
+    /** Set the Resource Base.
+     * The base resource is the Resource to use as a relative base
+     * for all context resources. The ResourceBase attribute is a
+     * string version of the baseResource.
+     * If a relative file is passed, it is converted to a file
+     * URL based on the current working directory.
+     * @return The file or URL to use as the base for all resources
+     * within the context.
+     */
+    public String getResourceBase()
+    {
+        if (_resourceBase==null)
+            return null;
+        return _resourceBase.toString();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the Resource Base.
+     * The base resource is the Resource to use as a relative base
+     * for all context resources. The ResourceBase attribute is a
+     * string version of the baseResource.
+     * If a relative file is passed, it is converted to a file
+     * URL based on the current working directory.
+     * @param resourceBase A URL prefix or directory name.
+     */
+    public void setResourceBase(String resourceBase)
+    {
+        try{
+            _resourceBase=Resource.newResource(resourceBase);
+            Code.debug("resourceBase=",_resourceBase," for ", this);
+        }
+        catch(IOException e)
+        {
+            Code.debug(e);
+            throw new IllegalArgumentException(resourceBase+":"+e.toString());
+        }
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /** Get the base resource.
+     * The base resource is the Resource to use as a relative base
+     * for all context resources. The ResourceBase attribute is a
+     * string version of the baseResource.
+     * @return The resourceBase as a Resource instance 
+     */
+    public Resource getBaseResource()
+    {
+        return _resourceBase;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the base resource.
+     * The base resource is the Resource to use as a relative base
+     * for all context resources. The ResourceBase attribute is a
+     * string version of the baseResource.
+     * @param base The resourceBase as a Resource instance
+     */
+    public void setBaseResource(Resource base)
+    {
+        _resourceBase=base;
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    public int getMaxCachedFileSize()
+    {
+        return _maxCachedFileSize;
+    }
+ 
+    /* ------------------------------------------------------------ */
+    public void setMaxCachedFileSize(int maxCachedFileSize)
+    {
+        _maxCachedFileSize = maxCachedFileSize;
+    }
+
+    /* ------------------------------------------------------------ */
+    public int getMaxCacheSize()
+    {
+        return _maxCacheSize;
+    }
+ 
+    /* ------------------------------------------------------------ */
+    public void setMaxCacheSize(int maxCacheSize)
+    {
+        _maxCacheSize = maxCacheSize;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isDirAllowed()
+    {
+        return _dirAllowed;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setDirAllowed(boolean dirAllowed)
+    {
+        _dirAllowed = dirAllowed;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String[] getWelcomeFiles()
+    {
+        return _welcomes;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setWelcomeFiles(String[] welcomes)
+    {
+        if (welcomes==null)
+            _welcomes=new String[0];
+        else
+            _welcomes=welcomes;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void addWelcomeFile(String welcomeFile)
+    {
+        if (welcomeFile.startsWith("/") ||
+            welcomeFile.startsWith(java.io.File.separator) ||
+            welcomeFile.endsWith("/") ||
+            welcomeFile.endsWith(java.io.File.separator))
+            Code.warning("Invalid welcome file: "+welcomeFile);
+        List list = new ArrayList(Arrays.asList(_welcomes));
+        list.add(welcomeFile);
+        _welcomes=(String[])list.toArray(_welcomes);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void removeWelcomeFile(String welcomeFile)
+    {
+        List list = new ArrayList(Arrays.asList(_welcomes));
+        list.remove(welcomeFile);
+        _welcomes=(String[])list.toArray(_welcomes);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Resource getResource(String pathInContext)
+        throws IOException
+    {    
+        if (_resourceBase==null)
+            return null;
+        
+        Resource resource=null;
+
+        // Cache operations
+        synchronized(_cache)
+        {
+            // Look for it in the cache
+            CachedResource cached = (CachedResource)_cache.get(pathInContext);
+            if (cached!=null)
+            {
+                Code.debug("CACHE HIT: ",cached);
+                CachedMetaData cmd = (CachedMetaData)cached.getAssociate();
+                if (cmd!=null && cmd.isValid())
+                    return cached;
+            }
+
+            // Make the resource
+            resource=_resourceBase.addPath(pathInContext);
+            Code.debug("CACHE MISS: ",resource);
+            if (resource==null)
+                return null;
+
+            // Is it cacheable?
+            long len = resource.length();
+            if (resource.exists() &&
+                !resource.isDirectory() &&
+                len>0 && len<_maxCachedFileSize && len<_maxCacheSize)
+            {
+                int needed=_maxCacheSize-(int)len;
+                while(_cacheSize>needed)
+                    _leastRecentlyUsed.invalidate();
+            
+                cached=resource.cache();
+                new CachedMetaData(cached,pathInContext);
+                return cached;
+            }
+        }
+
+        // Non cached response
+        ResourceMetaData md = new ResourceMetaData(resource);
+        return resource;
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getWelcomeFile(Resource resource)
+        throws IOException
+    {
+        if (!resource.isDirectory())
+            return null;
+        
+        for (int i=0;i<_welcomes.length;i++)
+        {
+            Resource welcome=resource.addPath(_welcomes[i]);
+            if (welcome.exists())
+                return _welcomes[i];
+        }
+
+        return null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public ByteArrayISO8859Writer getDirectoryListing(Resource resource,
+                                                      String base,
+                                                      boolean parent)
+        throws IOException
+    {
+        if (!_dirAllowed || !resource.isDirectory())
+            return null;
+        
+        String[] ls = resource.list();
+        if (ls==null)
+            return null;
+                
+        String title = "Directory: "+base;
+        
+        ByteArrayISO8859Writer out = new ByteArrayISO8859Writer();
+        
+        out.write("<HTML><HEAD><TITLE>");
+        out.write(title);
+        out.write("</TITLE></HEAD><BODY>\n<H1>");
+        out.write(title);
+        out.write("</H1><TABLE BORDER=0>");
+        
+        if (parent)
+        {
+            out.write("<TR><TD><A HREF=");
+            out.write(URI.encodePath(URI.addPaths(base,"../")));
+            out.write(">Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
+        }
+        
+        DateFormat dfmt=DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
+                                                       DateFormat.MEDIUM);
+        for (int i=0 ; i< ls.length ; i++)
+        {
+            String encoded=URI.encodePath(ls[i]);
+            Resource item = resource.addPath(encoded);
+            
+            out.write("<TR><TD><A HREF=\"");
+            String path=URI.addPaths(base,encoded);
+            
+            if (item.isDirectory() && !path.endsWith("/"))
+                path=URI.addPaths(path,"/");
+            out.write(path);
+            out.write("\">");
+            out.write(StringUtil.replace(StringUtil.replace(ls[i],"<","&lt;"),">","&gt;"));
+            out.write("&nbsp;");
+            out.write("</TD><TD ALIGN=right>");
+            out.write(""+item.length());
+            out.write(" bytes&nbsp;</TD><TD>");
+            out.write(dfmt.format(new Date(item.lastModified())));
+            out.write("</TD></TR>\n");
+        }
+        out.write("</TABLE>\n");
+        out.flush();
+        return out;
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    public synchronized Map getMimeMap()
+    {
+        return _mimeMap;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * Also sets the org.mortbay.http.mimeMap context attribute
+     * @param mimeMap 
+     */
+    public void setMimeMap(Map mimeMap)
+    {
+        _mimeMap = mimeMap;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get the MIME type by filename extension.
+     * @param filename A file name
+     * @return MIME type matching the longest dot extension of the
+     * file name.
+     */
+    public String getMimeByExtension(String filename)
+    {
+        String type=null;
+        
+        if (filename!=null)
+        {
+            int i=-1;
+            while(type==null)
+            {
+                i=filename.indexOf(".",i+1);
+                
+                if (i<0 || i>=filename.length())
+                    break;
+                
+                String ext=StringUtil.asciiToLowerCase(filename.substring(i+1));
+                if (_mimeMap!=null)
+                    type = (String)_mimeMap.get(ext);
+                if (type==null)
+                    type=(String)__dftMimeMap.get(ext);
+            }
+        }
+
+        return type;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set a mime mapping
+     * @param extension 
+     * @param type 
+     */
+    public void setMimeMapping(String extension,String type)
+    {
+        if (_mimeMap==null)
+            _mimeMap=new HashMap();
+        _mimeMap.put(extension,type);
+    }
+
+    
     /* ------------------------------------------------------------ */
     /** Get the context classpath.
      * This method only returns the paths that have been set for this
@@ -745,20 +1087,6 @@ public class HttpContext implements LifeCycle
         _loader=loader;
     }
     
-    /* ------------------------------------------------------------ */
-    /** Set Parent ClassLoader.
-     * By default the parent loader is the thread context classloader
-     * of the thread that calls initClassLoader.  If setClassLoader is
-     * called, then the parent is ignored.
-     * @param loader The class loader to use for the parent loader of
-     * the context classloader.
-     */
-    public synchronized void setParentClassLoader(ClassLoader loader)
-    {
-        if (isStarted())
-            throw new IllegalStateException("Started");
-        _parent=loader;
-    }
     
     /* ------------------------------------------------------------ */
     /** Get the classloader.
@@ -778,6 +1106,27 @@ public class HttpContext implements LifeCycle
         return _loader;
     }
 
+    /* ------------------------------------------------------------ */
+    /** Set Parent ClassLoader.
+     * By default the parent loader is the thread context classloader
+     * of the thread that calls initClassLoader.  If setClassLoader is
+     * called, then the parent is ignored.
+     * @param loader The class loader to use for the parent loader of
+     * the context classloader.
+     */
+    public synchronized void setParentClassLoader(ClassLoader loader)
+    {
+        if (isStarted())
+            throw new IllegalStateException("Started");
+        _parent=loader;
+    }
+
+    /* ------------------------------------------------------------ */
+    public ClassLoader getParentClassLoader()
+    {
+        return _parent;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Initialize the context classloader.
      * Initialize the context classloader with the current parameters.
@@ -830,117 +1179,6 @@ public class HttpContext implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the Resource Base.
-     * The base resource is the Resource to use as a relative base
-     * for all context resources. The ResourceBase attribute is a
-     * string version of the baseResource.
-     * If a relative file is passed, it is converted to a file
-     * URL based on the current working directory.
-     * @return The file or URL to use as the base for all resources
-     * within the context.
-     */
-    public String getResourceBase()
-    {
-        if (_resourceBase==null)
-            return null;
-        return _resourceBase.toString();
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Set the Resource Base.
-     * The base resource is the Resource to use as a relative base
-     * for all context resources. The ResourceBase attribute is a
-     * string version of the baseResource.
-     * If a relative file is passed, it is converted to a file
-     * URL based on the current working directory.
-     * @param resourceBase A URL prefix or directory name.
-     */
-    public void setResourceBase(String resourceBase)
-    {
-        try{
-            _resourceBase=Resource.newResource(resourceBase);
-            Code.debug("resourceBase=",_resourceBase," for ", this);
-        }
-        catch(IOException e)
-        {
-            Code.debug(e);
-            throw new IllegalArgumentException(resourceBase+":"+e.toString());
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get a Resource from the context.
-     * The resource base must be set
-     * @param path A path to be applied to the resource base
-     * @return A Resource or null if no resourceBasse is set.
-     */
-    public Resource getResource(String path)
-        throws IOException
-    {
-        if (_resourceBase==null)
-            return null;
-        if (path==null)
-            return _resourceBase;
-        return _resourceBase.addPath(path);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get the base resource.
-     * The base resource is the Resource to use as a relative base
-     * for all context resources. The ResourceBase attribute is a
-     * string version of the baseResource.
-     * @return The resourceBase as a Resource instance 
-     */
-    public Resource getBaseResource()
-    {
-        return _resourceBase;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Set the base resource.
-     * The base resource is the Resource to use as a relative base
-     * for all context resources. The ResourceBase attribute is a
-     * string version of the baseResource.
-     * @param base The resourceBase as a Resource instance
-     */
-    public void setBaseResource(Resource base)
-    {
-        _resourceBase=base;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Set Resource Alias.
-     * Resource aliases map resource uri's within a context.
-     * They may optionally be used by a handler when looking for
-     * a resource.  The only known user is
-     * org.mortbay.jetty.servlet.WebApplicationContext
-     * @param alias 
-     * @param uri 
-     */
-    public void setResourceAlias(String alias,String uri)
-    {
-        if (_resourceAliases==null)
-            _resourceAliases=new HashMap(5);
-        _resourceAliases.put(alias,uri);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public String getResourceAlias(String alias)
-    {
-        if (_resourceAliases==null)
-            return null;
-       return (String) _resourceAliases.get(alias);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public String removeResourceAlias(String alias)
-    {
-        if (_resourceAliases==null)
-            return null;
-       return (String) _resourceAliases.remove(alias);
-    }
-    
-    /* ------------------------------------------------------------ */
     /** set error page URI.
      * @param error A string representing an error code or a
      * exception classname
@@ -974,73 +1212,6 @@ public class HttpContext implements LifeCycle
             return null;
        return (String) _errorPages.remove(error);
     }
-
-    
-    /* ------------------------------------------------------------ */
-    /** Get the context ResourceHandler.
-     * Conveniance method. If no ResourceHandler exists, a new one is added to
-     * the context.
-     * @return ResourceHandler
-     */
-    public ResourceHandler getResourceHandler()
-    {
-        ResourceHandler resourceHandler= (ResourceHandler)
-            getHandler(org.mortbay.http.handler.ResourceHandler.class);
-        if (resourceHandler==null)
-        {
-            resourceHandler=new ResourceHandler();
-            addHandler(resourceHandler);
-        }
-        return resourceHandler;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get the context SecurityHandler.
-     * Conveniance method. If no SecurityHandler exists, a new one is added to
-     * the context at position 0.
-     * @return SecurityHandler
-     */
-    public SecurityHandler getSecurityHandler()
-    {
-        SecurityHandler securityHandler= (SecurityHandler)
-            getHandler(org.mortbay.http.handler.SecurityHandler.class);
-        if (securityHandler==null)
-        {
-            securityHandler=new SecurityHandler();
-            addHandler(0,securityHandler);
-        }
-        return securityHandler;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Setup context for serving Resources as files.
-     * Conveniance method.
-     * @param serve If true and there is no ResourceHandler instance in the
-     * context, a ResourceHandler is added. If false, all ResourceHandler
-     * instances are removed from the context.
-     */
-    public synchronized void setServingResources(boolean serve)
-    {
-        ResourceHandler handler = (ResourceHandler)
-            getHandler(org.mortbay.http.handler.ResourceHandler.class);
-        if (serve)
-        {
-            if (handler==null)
-                getResourceHandler();
-        }
-        else while (handler!=null)
-        {
-            _handlers.remove(handler);
-            handler = (ResourceHandler)
-                getHandler(org.mortbay.http.handler.ResourceHandler.class);
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isServingResources()
-    {
-        return null!=getHandler(org.mortbay.http.handler.ResourceHandler.class);
-    }
     
     /* ------------------------------------------------------------ */
     /** Set the realm name.
@@ -1073,64 +1244,92 @@ public class HttpContext implements LifeCycle
     }    
 
     /* ------------------------------------------------------------ */
-    public synchronized Map getMimeMap()
-    {
-        return _mimeMap;
+    public Authenticator getAuthenticator()
+    {        
+        return _authenticator;
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * Also sets the org.mortbay.http.mimeMap context attribute
-     * @param mimeMap 
-     */
-    public void setMimeMap(Map mimeMap)
+    public void setAuthenticator(Authenticator authenticator)
     {
-        _mimeMap = mimeMap;
+        _authenticator=authenticator;
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the MIME type by filename extension.
-     * @param filename A file name
-     * @return MIME type matching the longest dot extension of the
-     * file name.
-     */
-    public String getMimeByExtension(String filename)
+    public void addSecurityConstraint(String pathSpec, SecurityConstraint sc)
     {
-        String type=null;
-        
-        if (filename!=null)
+        List scs = (List)_constraintMap.get(pathSpec);
+        if (scs==null)
         {
-            int i=-1;
-            while(type==null)
+            scs=new ArrayList(2);
+            _constraintMap.put(pathSpec,scs);
+        }
+        scs.add(sc);
+        
+        Code.debug("added ",sc," at ",pathSpec);
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isAuthConstrained()
+    {
+        Iterator i = _constraintMap.values().iterator();
+        while(i.hasNext())
+        {
+            Iterator j= ((ArrayList)i.next()).iterator();
+            while(j.hasNext())
             {
-                i=filename.indexOf(".",i+1);
-                
-                if (i<0 || i>=filename.length())
-                    break;
-                
-                String ext=StringUtil.asciiToLowerCase(filename.substring(i+1));
-                if (_mimeMap!=null)
-                    type = (String)_mimeMap.get(ext);
-                if (type==null)
-                    type=(String)__dftMimeMap.get(ext);
+                SecurityConstraint sc = (SecurityConstraint)j.next();
+                if (sc.isAuthenticate())
+                {
+                    return true;
+                }
             }
         }
-
-        return type;
+        return false;
     }
+
 
     /* ------------------------------------------------------------ */
-    /** Set a mime mapping
-     * @param extension 
-     * @param type 
-     */
-    public void setMimeMapping(String extension,String type)
+    public boolean checkSecurityContstraints(String pathInContext,
+                                             HttpRequest request,
+                                             HttpResponse response)
+        throws HttpException, IOException
     {
-        if (_mimeMap==null)
-            _mimeMap=new HashMap();
-        _mimeMap.put(extension,type);
+        UserRealm realm = getRealm();
+        
+        // Get all path matches
+        List scss =_constraintMap.getMatches(pathInContext);
+        if (scss!=null)
+        {          
+            Code.debug("Security Constraint on ",pathInContext," against ",scss);
+            
+            // for each path match
+            matches:
+            for (int m=0;m<scss.size();m++)
+            {
+                // Get all constraints
+                Map.Entry entry=(Map.Entry)scss.get(m);
+                if (Code.verbose())
+                    Code.debug("Check ",pathInContext," against ",entry);
+                
+                List scs = (List)entry.getValue();
+                
+                switch (SecurityConstraint.check(scs,
+                                                 _authenticator,
+                                                 realm,
+                                                 pathInContext,
+                                                 request,
+                                                 response))
+                {
+                  case -1: return false; // Auth failed.
+                  case 0: continue; // No constraints matched
+                  case 1: break matches; // Passed a constraint.
+                }
+            }
+        }
+        
+        return true;
     }
-
     
     /* ------------------------------------------------------------ */
     /** Get the map of mime type to char encoding.
@@ -1566,11 +1765,8 @@ public class HttpContext implements LifeCycle
         _hosts=null;
         _tmpDir=null;
         
-        _mimeMap=null;
+        setMimeMap(null);
         _encodingMap=null;
-        if (_resourceAliases!=null)
-            _resourceAliases.clear();
-        _resourceAliases=null;
         if (_errorPages!=null)
             _errorPages.clear();
         _errorPages=null;
@@ -1719,5 +1915,143 @@ public class HttpContext implements LifeCycle
 
         if (_httpServer!=null)
             _httpServer.log(request,response,length);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /** MetaData associated with a context Resource.
+     */
+    public class ResourceMetaData
+    {
+        protected String _name;
+        protected Resource _resource;
+        
+        ResourceMetaData(Resource resource)
+        {
+            _resource=resource;
+            _name=_resource.toString();
+            _resource.setAssociate(this);
+        }
+
+        public String getLength()
+        {
+            return Long.toString(_resource.length());
+        }
+        
+        public String getLastModified()
+        {
+            return HttpFields.__dateSend.format(new Date(_resource.lastModified()));
+        }
+        
+        public String getEncoding()
+        {
+            return getMimeByExtension(_name);
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class CachedMetaData extends ResourceMetaData
+    {
+        String _lastModified;
+        String _encoding;
+        String _length;
+        String _key;
+        
+        CachedResource _cached;
+        CachedMetaData _prev;
+        CachedMetaData _next;
+            
+        CachedMetaData(CachedResource resource, String pathInContext)
+        {
+            super(resource);
+            _cached=resource;
+            _length=super.getLength();
+            _lastModified=super.getLastModified();
+            _encoding=super.getEncoding();
+            _key=pathInContext;
+            
+            _next=_mostRecentlyUsed;
+            _mostRecentlyUsed=this;
+            if (_next!=null)
+                _next._prev=this;
+            _prev=null;
+            if (_leastRecentlyUsed==null)
+                _leastRecentlyUsed=this;
+            
+            _cache.put(_key,resource);
+
+            _cacheSize+=_cached.length();
+            
+        }
+        
+        public String getLength()
+        {
+            return _length;
+        }
+        
+        public String getLastModified()
+        {
+            return _lastModified;
+        }
+        
+        public String getEncoding()
+        {
+            return _encoding;
+        }
+        
+        /* ------------------------------------------------------------ */
+        boolean isValid()
+            throws IOException
+        {
+            if (_cached.isUptoDate())
+            {
+                if (_mostRecentlyUsed!=this)
+                {
+                    CachedMetaData tp = _prev;
+                    CachedMetaData tn = _next;
+                    
+                    _next=_mostRecentlyUsed;
+                    _mostRecentlyUsed=this;
+                    if (_next!=null)
+                        _next._prev=this;
+                    _prev=null;
+                    
+                    if (tp!=null)
+                        tp._next=tn;
+                    if (tn!=null)
+                        tn._prev=tp;
+                    
+                    if (_leastRecentlyUsed==this && tp!=null)
+                        _leastRecentlyUsed=tp;
+                }
+                return true;
+            }
+
+            invalidate();
+            return false;
+        }
+
+        public void invalidate()
+        {
+            // Invalidate it
+            _cache.remove(_key);
+            _cacheSize=_cacheSize-(int)_cached.length();
+            
+            
+            if (_mostRecentlyUsed==this)
+                _mostRecentlyUsed=_next;
+            else
+                _prev._next=_next;
+            
+            if (_leastRecentlyUsed==this)
+                _leastRecentlyUsed=_prev;
+            else
+                _next._prev=_prev;
+            
+            _prev=null;
+            _next=null;
+        }
+        
     }
 }

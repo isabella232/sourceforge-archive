@@ -3,11 +3,13 @@ Jetty Versions
 
 Jetty-4.1.D1 - 
  + Recycle servlet requests and responses
+ + Added simple buffer pool.
  + Reworked output buffering to keep constant sized buffers.
  + Don't chunk 30x empty responses.
  + Fixed "" contextPaths in Dispatcher.
  + Removed race for the starting of session scavaging
  + Fixed /foo/../bar// bug in canonical path.
+ + Merged ResourceBase and SecurityBase into HttpContext
 
 Jetty-4.0.2 - 6 June 2002
  + Fixed web.dtd references.

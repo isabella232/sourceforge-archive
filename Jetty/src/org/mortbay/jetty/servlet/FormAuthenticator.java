@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.http.SecurityBase;
+import org.mortbay.http.SecurityConstraint;
 import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.http.UserPrincipal;
 import org.mortbay.http.UserRealm;
@@ -39,7 +39,7 @@ public class FormAuthenticator implements Authenticator
     /* ------------------------------------------------------------ */
     public String getAuthMethod()
     {
-        return SecurityBase.__FORM_AUTH;
+        return SecurityConstraint.__FORM_AUTH;
     }
 
     /* ------------------------------------------------------------ */

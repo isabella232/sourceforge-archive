@@ -1050,18 +1050,25 @@ public class HttpConnection
      */
     private void destroy()
     {
+        try{close();}
+        catch (IOException e){Code.ignore(e);}
+        catch (Exception e){Code.warning(e);}
+        
         // Destroy request and response
         if (_request!=null)
             _request.destroy();
         if (_response!=null)
             _response.destroy();
+        if (_inputStream!=null)
+            _inputStream.destroy();
+        if (_outputStream!=null)
+            _outputStream.destroy();
+        _inputStream=null;
+        _outputStream=null;
         _request=null;
         _response=null;
         _handlingThread=null;
         
-        try{close();}
-        catch (IOException e){Code.ignore(e);}
-        catch (Exception e){Code.warning(e);}
         if (_statsOn)
         {
             _tmpTime=System.currentTimeMillis();

@@ -749,14 +749,14 @@ public class ServletHandler
     /* ------------------------------------------------------------ */
     public Set getResourcePaths(String uriInContext)
     {
-        Resource baseResource=_httpContext.getBaseResource();
-        uriInContext=URI.canonicalPath(uriInContext);
-        if (baseResource==null || uriInContext==null)
-            return Collections.EMPTY_SET;
-
         try
         {
-            Resource resource = baseResource.addPath(uriInContext);
+            uriInContext=URI.canonicalPath(uriInContext);
+            if (uriInContext==null)
+                return Collections.EMPTY_SET;
+            Resource resource=_httpContext.getResource(uriInContext);
+            if (resource==null || !resource.isDirectory())
+                return Collections.EMPTY_SET;
             String[] contents=resource.list();
             if (contents==null || contents.length==0)
                 return Collections.EMPTY_SET;
@@ -783,20 +783,11 @@ public class ServletHandler
      */
     public URL getResource(String uriInContext)
         throws MalformedURLException
-    {
-        Resource baseResource=_httpContext.getBaseResource();
-        uriInContext=URI.canonicalPath(uriInContext);
-        if (baseResource==null || uriInContext==null)
-            return null;
-        
+    {        
         try{
-            Resource resource = baseResource.addPath(uriInContext);
-            if (resource.exists())
+            Resource resource = _httpContext.getResource(uriInContext);
+            if (resource!=null && resource.exists())
                 return resource.getURL();
-
-            String aliasedUri=_httpContext.getResourceAlias(uriInContext);
-            if (aliasedUri!=null)
-                return getResource(aliasedUri);
         }
         catch(IllegalArgumentException e)
         {
@@ -818,6 +809,7 @@ public class ServletHandler
     {
         try
         {
+            uriInContext=URI.canonicalPath(uriInContext);
             URL url = getResource(uriInContext);
             if (url!=null)
                 return url.openStream();

@@ -37,7 +37,6 @@ import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.HttpServer;
-import org.mortbay.http.SecurityBase;
 import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.http.SecurityConstraint;
 import org.mortbay.http.UserRealm;
@@ -87,7 +86,8 @@ public class WebApplicationContext extends ServletHttpContext
     private ArrayList _contextAttributeListeners;
     private Set _warnings;
     private FormAuthenticator _formAuthenticator;
-    
+    private Map _resourceAliases;
+
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param httpServer The HttpServer for this context
@@ -879,14 +879,14 @@ public class WebApplicationContext extends ServletHttpContext
     /* ------------------------------------------------------------ */
     private void initWelcomeFileList(XmlParser.Node node)
     {
-        _webAppHandler.getResourceBase().setWelcomeFiles(null);
+        setWelcomeFiles(null);
         Iterator iter= node.iterator("welcome-file");
         while(iter.hasNext())
         {
             XmlParser.Node indexNode=(XmlParser.Node)iter.next();
             String index=indexNode.toString(false,true);
             Code.debug("Index: ",index);
-            _webAppHandler.getResourceBase().addWelcomeFile(index);
+            addWelcomeFile(index);
         }
     }
 
@@ -965,7 +965,7 @@ public class WebApplicationContext extends ServletHttpContext
             {
                 String url=
                     ((XmlParser.Node)iter2.next()).toString(false,true);
-                _webAppHandler.getSecurityBase().addSecurityConstraint(url,sc);
+                addSecurityConstraint(url,sc);
             }
         }
     }
@@ -974,22 +974,21 @@ public class WebApplicationContext extends ServletHttpContext
     private void initLoginConfig(XmlParser.Node node)
     {
         XmlParser.Node method=node.get("auth-method");
-        SecurityBase securityBase=_webAppHandler.getSecurityBase();
         if (method!=null)
         {
             Authenticator authenticator=null;
             String m=method.toString(false,true);
             
-            if (SecurityBase.__FORM_AUTH.equals(m))
+            if (SecurityConstraint.__FORM_AUTH.equals(m))
                 authenticator=_formAuthenticator=new FormAuthenticator();
-            else if (SecurityBase.__BASIC_AUTH.equals(m))
+            else if (SecurityConstraint.__BASIC_AUTH.equals(m))
                 authenticator=new BasicAuthenticator();
-            else if (SecurityBase.__CERT_AUTH.equals(m))
+            else if (SecurityConstraint.__CERT_AUTH.equals(m))
                 authenticator=new ClientCertAuthenticator();
             else
                 Code.warning("UNKNOWN AUTH METHOD: "+m);
 
-            securityBase.setAuthenticator(authenticator);
+            setAuthenticator(authenticator);
         }
         
         XmlParser.Node name=node.get("realm-name");
@@ -1066,4 +1065,83 @@ public class WebApplicationContext extends ServletHttpContext
     {
         return _tagLibMap;
     }
+
+
+    /* ------------------------------------------------------------ */
+    public boolean checkSecurityContstraints(String pathInContext,
+                                             HttpRequest request,
+                                             HttpResponse response)
+            throws HttpException, IOException
+    {
+        if (!super.checkSecurityContstraints(pathInContext,request,response))
+            return false;
+        
+        if (getAuthenticator() instanceof FormAuthenticator &&
+            pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK) &&
+            getAuthenticator().authenticated(getRealm(),
+                                             pathInContext,
+                                             request,
+                                             response)==null)
+            return false;
+        return true;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set Resource Alias.
+     * Resource aliases map resource uri's within a context.
+     * They may optionally be used by a handler when looking for
+     * a resource.  
+     * @param alias 
+     * @param uri 
+     */
+    public void setResourceAlias(String alias,String uri)
+    {
+        if (_resourceAliases==null)
+            _resourceAliases=new HashMap(5);
+        _resourceAliases.put(alias,uri);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getResourceAlias(String alias)
+    {
+        if (_resourceAliases==null)
+            return null;
+       return (String) _resourceAliases.get(alias);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String removeResourceAlias(String alias)
+    {
+        if (_resourceAliases==null)
+            return null;
+       return (String) _resourceAliases.remove(alias);
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    public Resource getResource(String uriInContext)
+        throws IOException
+    {
+        IOException ioe=null;
+        try
+        {
+            Resource resource=super.getResource(uriInContext);
+            if (resource.exists())
+                return resource;
+        }
+        catch (IOException e)
+        {
+            ioe=e;
+        }
+
+        String aliasedUri=getResourceAlias(uriInContext);
+        if (aliasedUri!=null)
+            return super.getResource(aliasedUri);
+
+        if (ioe!=null)
+            throw ioe;
+
+        return null;
+    }
+    
 }

@@ -7,11 +7,13 @@ package org.mortbay.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.Permission;
 
 
 /* ------------------------------------------------------------ */
@@ -35,8 +37,9 @@ class FileResource extends URLResource
     static
     {
         __checkAliases=
-            "true".equalsIgnoreCase(System.getProperty("org.mortbay.util.FileResource.checkAliases",
-                                                       File.separatorChar=='/'?"false":"true"));
+            "true".equalsIgnoreCase
+            (System.getProperty("org.mortbay.util.FileResource.checkAliases",
+                                File.separatorChar=='/'?"false":"true"));
         if (__checkAliases)
             Log.event("Checking Resource aliases");
     }
@@ -46,11 +49,30 @@ class FileResource extends URLResource
     private BadResource _alias=null;
     
     /* -------------------------------------------------------- */
+    FileResource(URL url)
+        throws IOException
+    {
+        super(url,url.openConnection());
+
+        Permission perm = _connection.getPermission();
+        if (!(perm instanceof java.io.FilePermission) && Code.debug())
+            Code.warning("Caution: File resource without FilePermission:"+url);
+        _file =new File(perm.getName());
+        
+        checkAliases(url);
+    }
+    
+    /* -------------------------------------------------------- */
     FileResource(URL url, URLConnection connection, File file)
     {
         super(url,connection);
         _file=file;
-
+        checkAliases(url);
+    }
+    
+    /* ------------------------------------------------------------ */
+    private void checkAliases(URL url)
+    {
         if (__checkAliases)
         {
             try{
@@ -73,7 +95,7 @@ class FileResource extends URLResource
         }
     }
     
-
+    
     /* ------------------------------------------------------------ */
     /** Get an Alias BadResource if one was created.
      * @return BadResource for alias or null.

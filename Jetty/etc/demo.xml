@@ -129,7 +129,9 @@
     </Call>   
 
     <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/demo/docroot/</Set>
-    <Set name="ServingResources">TRUE</Set>
+    <Call name="addHandler">
+      <Arg><New class="org.mortbay.http.handler.ResourceHandler"/></Arg>
+    </Call>
 
     <Call name="addHandler">
       <Arg><New class="org.mortbay.http.handler.DumpHandler"/></Arg>
@@ -144,7 +146,9 @@
   <Call name="addContext">
     <Arg>/javadoc/*</Arg>
     <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/javadoc/</Set>
-    <Set name="ServingResources">TRUE</Set>
+    <Call name="addHandler">
+      <Arg><New class="org.mortbay.http.handler.ResourceHandler"/></Arg>
+    </Call>
   </Call>
 
   <Call name="addContext">

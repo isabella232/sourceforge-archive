@@ -104,7 +104,7 @@ public class Dispatcher implements RequestDispatcher
             // Look for a static resource
             try{
                 Resource resource=
-                    _resourceHandler.getResourceBase().getResource(pathInContext);
+                    _resourceHandler.getHttpContext().getResource(pathInContext);
                 if (resource.exists())
                 {
                     _resource=resource;
@@ -118,7 +118,7 @@ public class Dispatcher implements RequestDispatcher
             // Look for a static resource
             try{
                 Resource resource=
-                    _webAppHandler.getResourceBase().getResource(pathInContext);
+                    _webAppHandler.getHttpContext().getResource(pathInContext);
                 if (resource.exists())
                 {
                     _resource=resource;

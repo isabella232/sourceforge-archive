@@ -240,7 +240,6 @@ public class TestRFC2616
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         HttpConnection connection = new HttpConnection(this,null,in,out,null);
         connection.handle();
-        connection.close();
         return out.toByteArray();
     }
     

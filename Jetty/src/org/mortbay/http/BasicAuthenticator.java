@@ -39,7 +39,7 @@ public class BasicAuthenticator implements Authenticator
     
     public String getAuthMethod()
     {
-        return SecurityBase.__BASIC_AUTH;
+        return SecurityConstraint.__BASIC_AUTH;
     }
 }
     

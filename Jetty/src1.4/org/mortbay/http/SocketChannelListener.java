@@ -53,6 +53,7 @@ public class SocketChannelListener
     private String _confidentialScheme=HttpMessage.__SSL_SCHEME;
     private int _integralPort=0;
     private int _confidentialPort=0;
+    private int _bufferSize=4096;
 
     /* ------------------------------------------------------------------- */
     public SocketChannelListener()
@@ -75,6 +76,18 @@ public class SocketChannelListener
         return _server;
     }
 
+    /* ------------------------------------------------------------ */
+    public int getBufferSize()
+    {
+        return _bufferSize;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setBufferSize(int size)
+    {
+        _bufferSize=size;
+    }
+        
     /* --------------------------------------------------------------- */
     public void setDefaultScheme(String scheme)
     {

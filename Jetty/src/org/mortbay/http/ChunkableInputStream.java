@@ -180,6 +180,16 @@ public class ChunkableInputStream extends FilterInputStream
     {
         return _deChunker._trailer;
     }
+
+    /* ------------------------------------------------------------ */
+    public void destroy()
+    {
+        if (_realIn!=null)
+            _realIn.destroy();
+        _realIn=null;
+        _deChunker=null;
+    }
+    
     
     /* ------------------------------------------------------------ */
     /** A closed input stream.

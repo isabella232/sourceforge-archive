@@ -79,7 +79,7 @@ public class LineInput extends FilterInputStream
         _mark=-1;
         if (bufferSize==0)
             bufferSize=2048;
-        _buf=new byte[bufferSize];
+        _buf=ByteArrayPool.getByteArray(bufferSize);
         _byteBuffer=new ByteBuffer(_buf);
         _lineBuffer=new LineBuffer(bufferSize);
         _reader=new InputStreamReader(_byteBuffer);
@@ -99,7 +99,7 @@ public class LineInput extends FilterInputStream
         _mark=-1;
         if (bufferSize==0)
             bufferSize=2048;
-        _buf=new byte[bufferSize];
+        _buf=ByteArrayPool.getByteArray(bufferSize);
         _byteBuffer=new ByteBuffer(_buf);
         _lineBuffer=new LineBuffer(bufferSize);
         _reader=new InputStreamReader(_byteBuffer,encoding);
@@ -649,6 +649,16 @@ public class LineInput extends FilterInputStream
         {buffer=new char[maxLineLength];}
 
         public String toString(){return new String(buffer,0,size);}
+    }
+
+    /* ------------------------------------------------------------ */
+    public void destroy()
+    {
+        ByteArrayPool.returnByteArray(_buf);
+        _byteBuffer=null;
+        _reader=null;
+        _lineBuffer=null;
+        _encoding=null;
     }
 }
 

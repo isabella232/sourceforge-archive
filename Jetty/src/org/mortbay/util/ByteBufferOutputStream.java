@@ -45,7 +45,7 @@ public class ByteBufferOutputStream extends OutputStream
      */
     public ByteBufferOutputStream(int capacity,int reserve)
     {
-        _buf=new byte[capacity];
+        _buf=ByteArrayPool.getByteArray(capacity);
         _reserve=reserve;
         _start=reserve;
         _end=reserve;
@@ -161,6 +161,12 @@ public class ByteBufferOutputStream extends OutputStream
     /* ------------------------------------------------------------ */
     public void close()
     {}
+    
+    /* ------------------------------------------------------------ */
+    public void destroy()
+    {
+        ByteArrayPool.returnByteArray(_buf);
+    }
 
     /* ------------------------------------------------------------ */
     public void ensureReserve(int n)
@@ -186,7 +192,6 @@ public class ByteBufferOutputStream extends OutputStream
             }
         }
     }
-    
     
     /* ------------------------------------------------------------ */
     public void ensureCapacity(int n)

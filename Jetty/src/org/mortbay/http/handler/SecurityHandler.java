@@ -25,7 +25,6 @@ import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.HttpServer;
 import org.mortbay.http.PathMap;
-import org.mortbay.http.SecurityBase;
 import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.http.SecurityConstraint;
 import org.mortbay.http.UserPrincipal;
@@ -44,18 +43,11 @@ public class SecurityHandler extends NullHandler
 {   
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private String _authMethod=SecurityBase.__BASIC_AUTH;
+    private String _authMethod=SecurityConstraint.__BASIC_AUTH;
     private Map _authRealmMap;
     private String _realmName ;
     private boolean _realmForced=false;
-    private SecurityBase _securityBase=new SecurityBase();
 
-    /* ------------------------------------------------------------ */
-    public SecurityBase getSecurityBase()
-    {
-        return _securityBase;
-    }
-    
     /* ------------------------------------------------------------ */
     public String getAuthMethod()
     {
@@ -74,21 +66,20 @@ public class SecurityHandler extends NullHandler
     public void addSecurityConstraint(String pathSpec,
                                       SecurityConstraint sc)
     {
-        _securityBase.addSecurityConstraint(pathSpec,sc);
+        getHttpContext().addSecurityConstraint(pathSpec,sc);
     }
 
     /* ------------------------------------------------------------ */
     public void start()
         throws Exception
     {
-        _securityBase.setHttpContext(getHttpContext());
-        if (_securityBase.getAuthenticator()==null)
+        if (getHttpContext().getAuthenticator()==null)
         {
             // Find out the Authenticator.
-            if (SecurityBase.__BASIC_AUTH.equalsIgnoreCase(_authMethod))
-                _securityBase.setAuthenticator(new BasicAuthenticator());
-            else if (SecurityBase.__CERT_AUTH.equalsIgnoreCase(_authMethod))
-                _securityBase.setAuthenticator(new ClientCertAuthenticator());
+            if (SecurityConstraint.__BASIC_AUTH.equalsIgnoreCase(_authMethod))
+                getHttpContext().setAuthenticator(new BasicAuthenticator());
+            else if (SecurityConstraint.__CERT_AUTH.equalsIgnoreCase(_authMethod))
+                getHttpContext().setAuthenticator(new ClientCertAuthenticator());
             else
                 Code.warning("Unknown Authentication method:"+_authMethod);
         }
@@ -103,7 +94,7 @@ public class SecurityHandler extends NullHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
-        _securityBase.check(pathInContext,request,response);
+        getHttpContext().checkSecurityContstraints(pathInContext,request,response);
     }
 
 }

@@ -62,7 +62,7 @@ public class ClientCertAuthenticator implements Authenticator
     
     public String getAuthMethod()
     {
-        return SecurityBase.__CERT_AUTH;
+        return SecurityConstraint.__CERT_AUTH;
     }
 
 
