@@ -1,0 +1,22 @@
+<!-- -*- html-helper -*- -->
+<h1>Java Server Pages</h1>
+Jetty comes with the <A HREF=http://www.xs4all.nl/~vincentp/>GNUJSP</A> implementation of
+<A HREF=http://java.sun.com/products/jsp/>Java Server Pages</A> installed.
+JSP allows dynamic content to be added to HTML pages with special tags that
+allow java code to be compiled and called.
+<P>
+The links below are some jsp examples. The GNUJSP README is also listed
+below:
+<TABLE><TR><TD>
+<UL>
+  <LI><A HREF=/jsp/date.jsp>Date</A>. View the <A HREF=/JSP/date.jsp>source</A>.
+  <LI><A HREF=/jsp/snoop.jsp>Snoop</A>. View the <A HREF=/JSP/snoop.jsp>source</A>.
+  <LI><A HREF=/jsp/session.jsp>Session</A>. View the <A HREF=/JSP/session.jsp>source</A>.
+</UL>
+</TD></TR></TABLE>
+<P>
+<TABLE BORDER=1 CELLPADDING=4><TR><TD>
+<PRE>
+<!=com.mortbay.HTTP.Filter.HtmlFilter.includePreFile(out,"src/org/gjt/jsp","README.gnujsp")>
+</PRE>
+</TABLE>
