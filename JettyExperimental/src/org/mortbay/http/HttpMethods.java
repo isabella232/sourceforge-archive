@@ -7,9 +7,8 @@
 
 package org.mortbay.http;
 
+import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache;
-
-
 
 /* ------------------------------------------------------------------------------- */
 /** 
@@ -19,8 +18,7 @@ import org.mortbay.io.BufferCache;
  */
 public class HttpMethods extends BufferCache
 {
-    public final static String 
-    	GET= "GET",
+    public final static String GET= "GET",
         POST= "POST",
         HEAD= "HEAD",
         PUT= "PUT",
@@ -29,30 +27,28 @@ public class HttpMethods extends BufferCache
         TRACE= "TRACE",
         CONNECT= "CONNECT",
         MOVE= "MOVE";
-        
-    public final static int
-        __GET= 1,
-        __POST= 2,
-        __HEAD= 3,
-        __PUT= 4,
-        __OPTIONS= 5,
-        __DELETE= 6,
-        __TRACE= 7,
-        __CONNECT= 8,
-        __MOVE= 9;
-    
-    public final static HttpMethods CACHE = new HttpMethods();
-    
-    private HttpMethods()
-    {
-        add(GET,__GET);
-        add(POST,__POST);
-        add(HEAD,__HEAD);
-        add(PUT,__PUT);
-        add(OPTIONS,__OPTIONS);
-        add(DELETE,__DELETE);
-        add(TRACE,__TRACE);
-        add(CONNECT,__CONNECT);
-        add(MOVE,__MOVE);
-    }
+
+    public final static int GET_ORDINAL= 1,
+        POST_ORDINAL= 2,
+        HEAD_ORDINAL= 3,
+        PUT_ORDINAL= 4,
+        OPTIONS_ORDINAL= 5,
+        DELETE_ORDINAL= 6,
+        TRACE_ORDINAL= 7,
+        CONNECT_ORDINAL= 8,
+        MOVE_ORDINAL= 9;
+
+    public final static HttpMethods CACHE= new HttpMethods();
+
+    public final static Buffer 
+        GET_BUFFER= CACHE.add(GET, GET_ORDINAL),
+        POST_BUFFER= CACHE.add(POST, POST_ORDINAL),
+        HEAD_BUFFER= CACHE.add(HEAD, HEAD_ORDINAL),
+        PUT_BUFFER= CACHE.add(PUT, PUT_ORDINAL),
+        OPTIONS_BUFFER= CACHE.add(OPTIONS, OPTIONS_ORDINAL),
+        DELETE_BUFFER= CACHE.add(DELETE, DELETE_ORDINAL),
+        TRACE_BUFFER= CACHE.add(TRACE, TRACE_ORDINAL),
+        CONNECT_BUFFER= CACHE.add(CONNECT, CONNECT_ORDINAL),
+        MOVE_BUFFER= CACHE.add(MOVE, MOVE_ORDINAL);
+
 }

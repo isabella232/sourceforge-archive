@@ -7,6 +7,7 @@
 
 package org.mortbay.http;
 
+import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache;
 
 /**
@@ -23,6 +24,7 @@ public class HttpHeaderValues extends BufferCache
         GZIP="gzip",
         IDENTITY="identity",
         KEEP_ALIVE="keep-alive",
+        MULTIPART_BYTERANGES="multipart/byteranges",
         TEXT_HTML="text/html",
         
         CLIENT0="ISO-8859-1,utf-8;q=0.7, *;q=0.7",
@@ -31,29 +33,32 @@ public class HttpHeaderValues extends BufferCache
 
     private static int index=1;
     public final static int
-        __CLOSE=index++,
-        __CHUNKED=index++,
-        __FORM_ENCODED=index++,
-        __GZIP=index++,
-        __IDENTITY=index++,
-        __KEEP_ALIVE=index++,
-        __TEXT_HTML=index++;
+        CLOSE_ORDINAL=index++,
+        CHUNKED_ORDINAL=index++,
+        FORM_ENCODED_ORDINAL=index++,
+        GZIP_ORDINAL=index++,
+        IDENTITY_ORDINAL=index++,
+        KEEP_ALIVE_ORDINAL=index++,
+        MULTIPART_BYTERANGES_ORDINAL=index++,
+        TEXT_HTML_ORDINAL=index++;
 
     public final static HttpHeaderValues CACHE= new HttpHeaderValues();
 
-    private HttpHeaderValues()
-    {
-        add(CLOSE, __CLOSE);
-        add(CHUNKED, __CHUNKED);
-        add(FORM_ENCODED,__FORM_ENCODED);
-        add(GZIP,__GZIP);
-        add(IDENTITY, __IDENTITY);
-        add(KEEP_ALIVE,__KEEP_ALIVE);
-        add(TEXT_HTML,__TEXT_HTML);
+    public final static Buffer 
+        CLOSE_BUFFER=CACHE.add(CLOSE,CLOSE_ORDINAL),
+        CHUNKED_BUFFER=CACHE.add(CHUNKED,CHUNKED_ORDINAL),
+        FORM_ENCODED_BUFFER=CACHE.add(FORM_ENCODED,FORM_ENCODED_ORDINAL),
+        GZIP_BUFFER=CACHE.add(GZIP,GZIP_ORDINAL),
+        IDENTITY_BUFFER=CACHE.add(IDENTITY,IDENTITY_ORDINAL),
+        KEEP_ALIVE_BUFFER=CACHE.add(KEEP_ALIVE,KEEP_ALIVE_ORDINAL),
+        TEXT_HTML_BUFFER=CACHE.add(TEXT_HTML,TEXT_HTML_ORDINAL),
+        MULTIPART_BYTERANGES_BUFFER=CACHE.add(MULTIPART_BYTERANGES,MULTIPART_BYTERANGES_ORDINAL);
         
+    static
+    {  
         index=100;
-        add(CLIENT0,index++);
-        add(CLIENT1,index++);
-        add(CLIENT2,index++);
+        CACHE.add(CLIENT0,index++);
+        CACHE.add(CLIENT1,index++);
+        CACHE.add(CLIENT2,index++);
     }
 }

@@ -4,6 +4,8 @@
  */
 package org.mortbay.io;
 
+import java.io.IOException;
+
 /**
  * Portability class containing methods not available on all JVMs (specifically SuperWaba).
  * @author gregw
@@ -39,6 +41,11 @@ public class Portable
     public static void throwNumberFormat(String string)
     {
         throw new NumberFormatException(string);
+    }
+
+    public static void throwIO(String string) throws IOException
+    {
+        throw new IOException(string);
     }
 
     public static byte[] getBytes(String s)

@@ -149,11 +149,19 @@ public class HttpHeader
     }
 
     /**
-     * @return
+     * @return HttpVersions cache Buffer
      */
     public Buffer getVersion()
     {
         return _version;
+    }
+    
+    /**
+     * @return HttpVersions cache ordinal
+     */
+    public int getVersionOrdinal()
+    {
+        return HttpVersions.getOrdinal(_version);
     }
 
     /**
@@ -278,6 +286,46 @@ public class HttpHeader
             };
     }
     
+    /* -------------------------------------------------------------- */
+    /** Get enumeration of header _names.
+     * Returns an enumeration of strings representing the header _names
+     * for this request. 
+     */
+    public Enumeration getFieldNameBuffers()
+    {
+        return new Enumeration()
+        {
+            int i= 0;
+            Field field= null;
+
+            public boolean hasMoreElements()
+            {
+                if (field != null)
+                    return true;
+                while (i < _fields.size())
+                {
+                    Field f= (Field)_fields.get(i++);
+                    if (f != null && f._prev == null && f._revision == _revision)
+                    {
+                        field= f;
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            public Object nextElement() throws NoSuchElementException
+            {
+                if (field != null || hasMoreElements())
+                {
+                    Buffer n= field._name;
+                    field= null;
+                    return n;
+                }
+                throw new NoSuchElementException();
+            }
+        };
+    }
     /* ------------------------------------------------------------ */
     protected Field getField(String name)
     {       
@@ -316,11 +364,11 @@ public class HttpHeader
      * multiple fields of the same name, only the first is returned.
      * @param name the case-insensitive field name
      */
-    public String get(Buffer name)
+    public Buffer get(Buffer name)
     {
         Field field=getField(name);
         if (field!=null && field._revision==_revision)
-            return field._value.toString();
+            return field._value;
         return null;
     }
     
@@ -331,43 +379,62 @@ public class HttpHeader
      */
     public Enumeration getValues(String name)
     {
-        return getValues(HttpHeaderValues.CACHE.lookup(name));
+        final Field field= getField(name);
+        if (field == null)
+            return null;
+
+        return new Enumeration()
+        {
+            Field f= field;
+            public boolean hasMoreElements()
+            {
+                while (f != null && f._revision != _revision)
+                    f= f._next;
+                return f != null;
+            }
+            public Object nextElement() throws NoSuchElementException
+            {
+                if (f == null)
+                    throw new NoSuchElementException();
+                Field n= f;
+                do f= f._next;
+                while (f != null && f._revision != _revision);
+                return n._value.toString();
+            }
+        };
     }
     
     /* -------------------------------------------------------------- */
     /** Get multi headers
-     * @return Enumeration of the values, or null if no such header.
+     * @return Enumeration of the value Buffers, or null if no such header.
      * @param name the case-insensitive field name
      */
     public Enumeration getValues(Buffer name)
     {
-        final Field field=getField(name);
+        final Field field= getField(name);
 
-        if (field!=null)
-        {            
-            return new Enumeration()
-                {
-                    Field f=field;
-                    
-                    public boolean hasMoreElements()
-                    {
-                        while (f!=null && f._revision!=_revision)
-                            f=f._next;
-                        return f!=null;
-                    }
-                        
-                    public Object nextElement()
-                        throws NoSuchElementException
-                    {
-                        if (f==null)
-                            throw new NoSuchElementException();
-                        Field n=f;
-                        do f=f._next; while (f!=null && f._revision!=_revision);
-                        return n._value.toString();
-                    }
-                };
-        }
-        return null;
+        if (field == null)
+            return null;
+
+        return new Enumeration()
+        {
+            Field f= field;
+            public boolean hasMoreElements()
+            {
+                while (f != null && f._revision != _revision)
+                    f= f._next;
+                return f != null;
+            }
+            public Object nextElement() throws NoSuchElementException
+            {
+                if (f == null)
+                    throw new NoSuchElementException();
+                Field n= f;
+                do f= f._next;
+                while (f != null && f._revision != _revision);
+                return n._value;
+            }
+        };
     }
     
     /* -------------------------------------------------------------- */
@@ -601,6 +668,22 @@ public class HttpHeader
         
         return -1;
     }
+   
+    /* -------------------------------------------------------------- */
+    /** Get a header as an integer value.
+     * Returns the value of an integer field or -1 if not found.
+     * The case of the field name is ignored.
+     * @param name the case-insensitive field name
+     * @exception NumberFormatException If bad integer found
+     */
+    public int getIntField(Buffer name)
+        throws NumberFormatException
+    {
+        Field field = getField(name);
+        if (field!=null)
+            return BufferUtil.toInt(field._value);
+        return -1;
+    }
     
     /* -------------------------------------------------------------- */
     /** Get a header as a date value.
@@ -707,7 +790,7 @@ public class HttpHeader
                 if (_method!=null)
                     Portable.throwIllegalState("status and method");
                 if (_version==null)
-                    _version=HttpVersions.CACHE.get(HttpVersions.__HTTP_1_1);
+                    _version=HttpVersions.CACHE.get(HttpVersions.HTTP_1_1_ORDINAL);
                 writer.write(_version.toString());
                 writer.write(' ');
                 writer.write(_status);
@@ -716,7 +799,7 @@ public class HttpHeader
                 {
                     _reason=HttpStatus.CACHE.get(_status);
                     if (_reason==null)
-                        _reason=HttpStatus.CACHE.get(HttpStatus.__999_Unknown);
+                        _reason=HttpStatus.CACHE.get(HttpStatus.ORDINAL_999_Unknown);
                 }
                 writer.write(_reason.toString());
             }
@@ -752,7 +835,7 @@ public class HttpHeader
             if (_method!=null)
                 Portable.throwIllegalState("status and method");
             if (_version==null)
-                _version=HttpVersions.CACHE.get(HttpVersions.__HTTP_1_1);
+                _version=HttpVersions.CACHE.get(HttpVersions.HTTP_1_1_ORDINAL);
             buffer.put(_version);
             buffer.put((byte)' ');
             BufferUtil.putDecInt(buffer, _status);
@@ -761,7 +844,7 @@ public class HttpHeader
             {
                 _reason=HttpStatus.CACHE.get(_status);
                 if (_reason==null)
-                    _reason=HttpStatus.CACHE.get(HttpStatus.__999_Unknown);
+                    _reason=HttpStatus.CACHE.get(HttpStatus.ORDINAL_999_Unknown);
             }
             buffer.put(_reason);
         }

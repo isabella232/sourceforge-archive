@@ -149,34 +149,6 @@ public class HttpInputStream extends InputStream
         }
         return -1;
     }
-
-    public static void main(String[] args)
-        throws Exception
-    {   
-        ServerSocket ss = new ServerSocket(8080);
-        while(true)
-        {
-            Socket socket=ss.accept();
-            InputStreamBuffer in = new InputStreamBuffer(socket,2048);
-            HttpInputStream input = new HttpInputStream(in);
-            
-            while (true) 
-            {
-                HttpHeader header = input.readHeader();
-                if (header==null)
-                    break;
-                System.err.println(header);
-                byte data[] = new byte[4096];
-                
-                int len;
-                while((len=input.read(data,0,4096))>0)
-                {
-                    System.err.println(len+" of content");
-                }
-                socket.getOutputStream().write("HTTP/1.1 200 OK\015\012Transfer-Encoding: chunked\015\012Content-Type: text/html\015\012\015\0120b\015\012<h1>Hi</h1>\015\0120\015\012\015\012".getBytes());        
-            } 
-        }
-    }   
     
     private Buffer _buffer;
     private Parser _parser;

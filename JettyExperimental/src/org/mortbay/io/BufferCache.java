@@ -29,14 +29,15 @@ public class BufferCache
      * @param GET
      * @param GET_METHOD
      */
-    public void add(String value, int ordinal)
+    public CachedBuffer add(String value, int ordinal)
     {
-        Buffer buffer= new CachedBuffer(value, ordinal);
+        CachedBuffer buffer= new CachedBuffer(value, ordinal);
         _bufferMap.put(buffer, buffer);
         _stringMap.put(value, buffer);
         while ((ordinal - _index.size()) > 0)
             _index.add(null);
         _index.add(ordinal, buffer);
+        return buffer;
     }
 
     public CachedBuffer get(int ordinal)

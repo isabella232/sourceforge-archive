@@ -76,17 +76,33 @@ public class OutputStreamBuffer extends ByteArrayBuffer implements OutBuffer
     public int flush(Buffer header) throws IOException
     {
         // TODO lots of efficiency stuff here to avoid double write
-        
+
         int total=0;
+        
+        // See if the header buffer will fit in front of buffer content.
         int length=header.length();
-        if (length>0)
+        if (length<=getIndex())
+        {
+            int pi=putIndex();
+            setGetIndex(getIndex()-length);
+            setPutIndex(getIndex());
+            put(header);
+            setPutIndex(pi);
+        }
+        else if (length>0)
+        {
+            System.err.println(header.toDetailString());
             _out.write(header.array(),header.getIndex(),length);
-        total=length;
+            total=length;
+        }
         header.clear();
         
         length=length();
         if (length>0)
+        {
+            System.err.println(this.toDetailString());
             _out.write(array(),getIndex(),length);
+        }
         total+=length;
         clear();
         

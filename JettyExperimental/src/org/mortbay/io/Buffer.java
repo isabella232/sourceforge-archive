@@ -188,6 +188,13 @@ public interface Buffer
     void poke(int index, byte b);
     
     /**
+     * Put a specific byte to a specific getIndex.
+     * @param index an <code>int</code> value
+     * @param b a <code>byte array</code> value
+     */
+    void poke(int index, byte b[], int offset, int length);
+    
+    /**
      * Write the bytes from the source buffer to the current getIndex.
      * @param src a <code>Buffer</code> value
      */
@@ -198,6 +205,12 @@ public interface Buffer
      * @param b a <code>byte</code> value
      */
     void put(byte b);
+    
+    /**
+     * Put a byte to the current getIndex and increment the getIndex.
+     * @param b a <code>byte</code> value
+     */
+    void put(byte[] b,int offset, int length);
 
     /**
      * The index of the first element that should not be read.

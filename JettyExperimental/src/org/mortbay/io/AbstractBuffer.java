@@ -193,8 +193,8 @@ public abstract class AbstractBuffer implements Buffer
                     + ">"
                     + capacity());
         
-        byte src_array[]=src.array();
-        byte dst_array[]=array();
+        byte[] src_array=src.array();
+        byte[] dst_array=array();
         if (src_array!=null && dst_array!=null)
             Portable.arraycopy(src_array, src.getIndex(), dst_array, index, src.length());
         else if (src_array!=null)
@@ -214,6 +214,31 @@ public abstract class AbstractBuffer implements Buffer
         }
     }   
 
+    public void poke(int index, byte[] b, int offset, int length)
+    {
+        if (isReadOnly())
+            Portable.throwIllegalState("read only");
+        if (index < 0)
+            Portable.throwIllegalArgument("index<0: " + index + "<0");
+        if (index + length > capacity())
+            Portable.throwIllegalArgument(
+                "index+length>capacity(): "
+                    + index
+                    + "+"
+                    + length
+                    + ">"
+                    + capacity());
+        
+        byte[] dst_array=array();
+        if (dst_array!=null)
+            Portable.arraycopy(b, offset, dst_array, index, length);
+        else 
+        {
+            for (int i=0;i<length;i++)
+                poke(index++,b[offset+i]);
+        }
+    }   
+    
     public void put(Buffer src)
     {
         poke(_put, src);
@@ -224,6 +249,12 @@ public abstract class AbstractBuffer implements Buffer
     {
         poke(_put, b);
         _put++;
+    }
+    
+    public void put(byte[] b, int offset, int length)
+    {
+        poke(_put, b,offset,length);
+        _put+=length;
     }
 
     public int putIndex()
@@ -345,12 +376,12 @@ public abstract class AbstractBuffer implements Buffer
             else
                 buf.append(c);
             
-            if (count++ == 32)
+            if (count++ == 50)
             {
-                if (_put-i>8)
+                if (_put-i>20)
                 {
                     buf.append(" ... ");
-                    i=_put-8;
+                    i=_put-20;
                 }
             }
         }

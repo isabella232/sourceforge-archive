@@ -75,4 +75,27 @@ public class BufferUtilTest extends TestCase
             assertEquals("t"+i,str[i],buffer.toString());
         }       
     }
+
+    public void testPutHexInt()
+        throws Exception
+    {
+        int val[] =
+        {
+            0,42,43,-44,-45,-2147483648,2147483647
+        };
+        
+        String str[] =
+        {
+            "0","2A","2B","-2C","-2D","-80000000","7FFFFFFF"
+        };
+        
+        Buffer buffer = new ByteArrayBuffer(12);
+
+        for (int i=0;i<val.length;i++)
+        {
+            buffer.clear();
+            BufferUtil.putHexInt(buffer,val[i]);
+            assertEquals("t"+i,str[i],buffer.toString());
+        }       
+    }
 }

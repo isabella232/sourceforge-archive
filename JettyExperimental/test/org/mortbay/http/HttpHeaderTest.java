@@ -367,7 +367,7 @@ public class HttpHeaderTest extends TestCase
         String s;
         
         header.setStatus(411);
-        header.setVersion(HttpVersions.__HTTP_1_1);
+        header.setVersion(HttpVersions.HTTP_1_1_ORDINAL);
         Buffer buffer = new ByteArrayBuffer(1024);
         header.put(buffer);
         s=buffer.toString();
@@ -375,8 +375,8 @@ public class HttpHeaderTest extends TestCase
 
         buffer.clear();
         header.setStatus(0);
-        header.setVersion(HttpVersions.__HTTP_1_0);
-        header.setMethod(HttpMethods.__GET); 
+        header.setVersion(HttpVersions.HTTP_1_0_ORDINAL);
+        header.setMethod(HttpMethods.GET_ORDINAL); 
         header.setURI("/foo");
         header.put(buffer);
         s=buffer.toString();

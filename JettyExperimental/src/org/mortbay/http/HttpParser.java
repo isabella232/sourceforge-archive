@@ -334,21 +334,21 @@ public class HttpParser
 
                             switch (ho)
                             {
-                                case HttpHeaders.__CONTENT_LENGTH :
+                                case HttpHeaders.CONTENT_LENGTH_ORDINAL :
                                     contentLength= BufferUtil.toInt(value);
                                     if (contentLength <= 0)
                                         contentLength= HttpParser.NO_CONTENT;
                                     break;
-                                case HttpHeaders.__CONNECTION :
-                                    close= (HttpHeaderValues.__CLOSE == vo);
+                                case HttpHeaders.CONNECTION_ORDINAL :
+                                    close= (HttpHeaderValues.CLOSE_ORDINAL == vo);
                                     break;
 
-                                case HttpHeaders.__TRANSFER_ENCODING :
-                                    if (HttpHeaderValues.__CHUNKED == vo)
+                                case HttpHeaders.TRANSFER_ENCODING_ORDINAL :
+                                    if (HttpHeaderValues.CHUNKED_ORDINAL == vo)
                                         contentLength= CHUNKED_CONTENT;
                                     break;
 
-                                case HttpHeaders.__CONTENT_TYPE :
+                                case HttpHeaders.CONTENT_TYPE_ORDINAL :
                                     content= true;
                                     break;
 
