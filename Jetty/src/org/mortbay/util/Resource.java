@@ -378,6 +378,7 @@ public abstract class Resource implements Serializable
             buf.append("</TD></TR>\n");
         }
         buf.append("</TABLE>\n");
+	buf.append("</BODY></HTML>\n");
         
         return buf.toString();
     }
