@@ -39,13 +39,13 @@ public class HttpInputStream extends InputStream
         if (_parser.inContentState())
         {
             // Do we need to fill the buffer?
-            if (_parser._content==null || !_parser._content.hasRemaining())
+            if (_parser._content==null || !_parser._content.hasContent())
             {
                 _parser._content=null;
                 _parser.parseNext(_buffer);
             }
             
-            if (_parser._content!=null && _parser._content.remaining()>=1)
+            if (_parser._content!=null && _parser._content.length()>=1)
                 return _parser._content.get();
         } 
         return -1;
@@ -59,7 +59,7 @@ public class HttpInputStream extends InputStream
         if (_parser.inContentState())
         {
             // Do we need to fill the buffer?
-            if (_parser._content==null || !_parser._content.hasRemaining())
+            if (_parser._content==null || !_parser._content.hasContent())
             {
                 _parser._content=null;
                 _parser.parseNext(_buffer);
@@ -79,7 +79,7 @@ public class HttpInputStream extends InputStream
         if (_parser.inContentState())
         {
             // Do we need to fill the buffer?
-            if (_parser._content==null || !_parser._content.hasRemaining())
+            if (_parser._content==null || !_parser._content.hasContent())
             {
                 _parser._content=null;
                 _parser.parseNext(_buffer);
@@ -99,7 +99,7 @@ public class HttpInputStream extends InputStream
         if (_parser.inContentState())
         {
             // Do we need to fill the buffer?
-            if (_parser._content==null || !_parser._content.hasRemaining())
+            if (_parser._content==null || !_parser._content.hasContent())
             {
                 _parser._content=null;
                 _parser.parseNext(_buffer);
@@ -117,7 +117,7 @@ public class HttpInputStream extends InputStream
     public int available() throws IOException
     {
         if (_parser.inContentState() && _parser._content!=null)
-            return _parser._content.remaining();
+            return _parser._content.length();
         return -1;
     }
 

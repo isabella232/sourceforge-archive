@@ -129,10 +129,10 @@ public class HttpParser
         if (state == STATE_END)
             state= STATE_START;
 
-        if (source.remaining() == 0)
+        if (source.length() == 0)
         {
             source.compact();
-            if (source.markValue()==0 && source.limit()==source.capacity())
+            if (source.markIndex()==0 && source.putIndex()==source.capacity())
             	throw new IllegalStateException("Buffer too small");
             int filled= source.fill();
             if (log.isTraceEnabled()) log.trace("filled="+filled);
@@ -149,7 +149,7 @@ public class HttpParser
         byte ch;
 
         // Handler header
-        while (state < STATE_END && source.remaining() > 0)
+        while (state < STATE_END && source.length() > 0)
         {
             ch= source.get();
             if (eol == CARRIAGE_RETURN && ch == LINE_FEED)
@@ -308,7 +308,7 @@ public class HttpParser
                     {
                         if (length == -1)
                             source.mark();
-                        length= source.position() - source.markValue();
+                        length= source.getIndex() - source.markIndex();
                     }
                     break;
 
@@ -354,7 +354,7 @@ public class HttpParser
                     {
                         if (length == -1)
                             source.mark();
-                        length= source.position() - source.markValue();
+                        length= source.getIndex() - source.markIndex();
                     }
                     break;
             }
@@ -362,7 +362,7 @@ public class HttpParser
 
         // Handle content
         Buffer chunk;
-        while (state > STATE_END && source.remaining() > 0)
+        while (state > STATE_END && source.length() > 0)
         {
             if (eol == CARRIAGE_RETURN && source.peek() == LINE_FEED)
             {
@@ -374,14 +374,14 @@ public class HttpParser
             switch (state)
             {
                 case STATE_EOF_CONTENT :
-                    chunk= source.getBuffer(-1);
+                    chunk= source.get(-1);
                     foundContent(contentPosition, chunk);
-                    contentPosition += chunk.remaining();
+                    contentPosition += chunk.length();
                     return;
 
                 case STATE_CONTENT :
                     {
-                        int length= source.remaining();
+                        int length= source.length();
                         int remaining= contentLength - contentPosition;
                         if (remaining == 0)
                         {
@@ -391,9 +391,9 @@ public class HttpParser
                         }
                         else if (length > remaining)
                             length= remaining;
-                        chunk= source.getBuffer(length);
+                        chunk= source.get(length);
                         foundContent(contentPosition, chunk);
-                        contentPosition += chunk.remaining();
+                        contentPosition += chunk.length();
                     }
                     return;
 
@@ -456,7 +456,7 @@ public class HttpParser
 
                 case STATE_CHUNK :
                     {
-                        int length= source.remaining();
+                        int length= source.length();
                         int remaining= chunkLength - chunkPosition;
                         if (remaining == 0)
                         {
@@ -465,10 +465,10 @@ public class HttpParser
                         }
                         else if (length > remaining)
                             length= remaining;
-                        chunk= source.getBuffer(length);
+                        chunk= source.get(length);
                         foundContent(contentPosition, chunk);
-                        contentPosition += chunk.remaining();
-                        chunkPosition += chunk.remaining();
+                        contentPosition += chunk.length();
+                        chunkPosition += chunk.length();
                     }
                     return;
             }

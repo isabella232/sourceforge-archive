@@ -72,7 +72,6 @@ public class BufferUtilTest extends TestCase
         {
             buffer.clear();
             BufferUtil.putInt(buffer,val[i]);
-            buffer.flip();
             assertEquals("t"+i,str[i],buffer.toString());
         }       
     }

@@ -77,7 +77,7 @@ public class BufferCacheTest extends TestCase
 			Buffer b=cache.get(buf);
 			
 			if (i>0)
-				assertEquals(i,b.get(1)-'0');
+				assertEquals(i,b.peek(1)-'0');
 			else
 				assertEquals(null,b);
 		}

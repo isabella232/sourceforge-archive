@@ -373,9 +373,9 @@ public class StringMap extends AbstractMap implements Externalizable
 
         // look for best match
     charLoop:
-        for (int i=buffer.position();i<buffer.limit();i++)
+        for (int i=buffer.getIndex();i<buffer.putIndex();i++)
         {
-            char c=(char)buffer.get(i);
+            char c=(char)buffer.peek(i);
 
             // Advance node
             if (ni==-1)

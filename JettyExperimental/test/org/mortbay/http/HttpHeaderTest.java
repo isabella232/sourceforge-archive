@@ -248,7 +248,6 @@ public class HttpHeaderTest extends TestCase
         vb.put((byte)'u');
         vb.put((byte)'e');
         vb.put((byte)'1');
-        vb.flip();
         
         header.put("name0", "value0");
         header.put(n1,va);
@@ -371,17 +370,15 @@ public class HttpHeaderTest extends TestCase
         header.setVersion(HttpVersions.__HTTP_1_1);
         Buffer buffer = new ByteArrayBuffer(1024);
         header.put(buffer);
-        buffer.flip();
         s=buffer.toString();
         assertEquals("HTTP/1.1 411 Length Required\r\nname0: value0\r\n\r\n",s);
 
-        buffer.empty();
+        buffer.clear();
         header.setStatus(0);
         header.setVersion(HttpVersions.__HTTP_1_0);
         header.setMethod(HttpMethods.__GET); 
         header.setURI("/foo");
         header.put(buffer);
-        buffer.flip();
         s=buffer.toString();
         assertEquals("GET /foo HTTP/1.0\r\nname0: value0\r\n\r\n",s);
           

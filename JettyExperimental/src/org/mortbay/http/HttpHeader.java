@@ -805,11 +805,13 @@ public class HttpHeader
         {
             ByteArrayBuffer buffer = new ByteArrayBuffer(4096);
             put(buffer);
-            buffer.flip();
             return buffer.toString();
         }
         catch(Exception e)
-        {}
+        {
+            e.printStackTrace();
+        }
+        
         return null;
     }
 

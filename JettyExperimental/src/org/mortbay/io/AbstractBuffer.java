@@ -6,12 +6,6 @@ package org.mortbay.io;
  */
 public abstract class AbstractBuffer implements Buffer
 {
-    private int _mark;
-    private int _position;
-    private int _limit;
-    private int _hash;
-    protected boolean _readOnly;
-    protected boolean _caseSensitive;
 
     /**
      * Constructor for BufferView
@@ -22,252 +16,38 @@ public abstract class AbstractBuffer implements Buffer
         _readOnly= readOnly;
     }
 
-    public int position()
+    public void compact()
     {
-        return _position;
-    }
-
-    public void position(int newPosition)
-    {
-        if (_readOnly)
-            Portable.throwIllegalState("read only");
-        if (newPosition < 0)
-            Portable.throwIllegalArgument("newposition<0: " + newPosition + "<0");
-        if (newPosition > limit())
-            Portable.throwIllegalArgument("newposition>limit: " + newPosition + ">" + limit());
-        _position= newPosition;
-    }
-
-    /**
-     * @see org.mortbay.util.Buffer#limit()
-     */
-    public int limit()
-    {
-        return _limit;
-    }
-
-    /**
-     * @see org.mortbay.util.Buffer#limit(int)
-     */
-    public void limit(int newLimit)
-    {
-        if (_readOnly)
-            Portable.throwIllegalState("read only");
-        if (newLimit > capacity())
-            Portable.throwIllegalArgument("newLimit>capacity: " + newLimit + ">" + capacity());
-        if (position() > newLimit)
-            Portable.throwIllegalArgument("position>newLimit: " + position() + ">" + newLimit);
-        _limit= newLimit;
-    }
-
-    public int remaining()
-    {
-        return _limit - _position;
-    }
-
-    public boolean hasRemaining()
-    {
-        return _limit > _position;
-    }
-
-    public byte peek()
-    {
-        return get(_position);
-    }
-
-    public abstract byte get(int position);
-    public abstract Buffer getBuffer(int position, int length);
-
-    public abstract void put(int position, byte b);
-
-    public void put(int position, Buffer src)
-    {
-        for (int i= src.position(); i < src.limit(); i++)
-            put(src.get(i));
-    }
-
-    public byte get()
-    {
-        byte b= get(_position);
-        _position++;
-        return b;
-    }
-
-    public Buffer getBuffer(int length)
-    {
-        Buffer view= getBuffer(_position, length);
-        _position += length;
-        return view;
+        int s= markIndex() >= 0 ? markIndex() : getIndex();
+        if (s > 0)
+        {
+            byte array[]=array();
+            int length=putIndex()-s;
+            
+            if (length>0)
+            {
+                if (array!=null)
+                    Portable.arraycopy(array(), s, array(), 0, putIndex() - s);
+                else
+                {
+                    for (int i=length; i-->0;)
+                        poke(i,peek(s+i));
+                }
+            }
+            
+            if (markIndex() > 0)
+                setMarkIndex(markIndex() - s);
+            setGetIndex(getIndex() - s);
+            setPutIndex(putIndex() - s);
+        }
     }
     
-    public int skip(int n)
-    {
-        if (remaining()<n)
-            n=remaining();
-        _position+=n;
-        return n;
-    }
-
-    public void put(byte b)
-    {
-        put(_position, b);
-        _position++;
-    }
-
-    public void put(Buffer src)
-    {
-        put(_position, src);
-        _position += src.remaining();
-    }
-
-    public int markValue()
-    {
-        return _mark;
-    }
-
-    public void markValue(int newMark)
-    {
-        _mark= newMark;
-    }
-
-    public void mark()
-    {
-        _mark= _position - 1;
-    }
-
-    public void mark(int position)
-    {
-        _mark= _position + position;
-    }
-
     public void clear()
     {
-        position(0);
-        limit(capacity());
-    }
-
-    public void empty()
-    {
-        position(0);
-        limit(0);
+        setGetIndex(0);
+        setPutIndex(0);
     }
     
-    public final void flip()
-    {
-        _limit= _position;
-        _position= 0;
-        _mark= -1;
-    }
-
-    public void rewind()
-    {
-        _position= 0;
-        _mark= -1;
-    }
-
-    public void reset()
-    {
-        if (_mark>=0)
-            _position= _mark;
-    }
-
-    /**
-     * @see org.mortbay.io.Buffer#slice()
-     */
-    public Buffer slice()
-    {
-        return getBuffer(_position, _limit - _position);
-    }
-
-    public Buffer sliceFromMark()
-    {
-        return sliceFromMark(_position - _mark - 1);
-    }
-
-    public Buffer sliceFromMark(int length)
-    {
-        if (_mark < 0)
-            return null;
-        Buffer view= getBuffer(_mark, length);
-        _mark= -1;
-        return view;
-    }
-
-	/**
-	 * 
-	 */
-	public boolean isCaseSensitive()
-	{
-		return _caseSensitive;
-	}
-
-	/**
-	 * 
-	 */
-	public void setCaseSensitive(boolean c)
-	{
-		_caseSensitive=c;
-	}
-	
-    /**
-     * @see org.mortbay.util.Buffer#isReadOnly()
-     */
-    public boolean isReadOnly()
-    {
-        return _readOnly;
-    }
-
-    public String toString()
-    {
-        return new String(asArray(), 0, remaining());
-    }
-
-    public String toDetailString()
-    {
-        StringBuffer buf= new StringBuffer();
-        buf.append("[m=");
-        buf.append(_mark);
-        buf.append(",o=");
-        buf.append(_position);
-        buf.append(",l=");
-        buf.append(_limit);
-        buf.append(",c=");
-        buf.append(capacity());
-        buf.append("]={");
-        if (_mark >= 0)
-        {
-            for (int i= _mark; i < _position; i++)
-            {
-                char c= (char)get(i);
-                if (Character.isISOControl(c))
-                {
-                    buf.append(c < 16 ? "\\0" : "\\");
-                    buf.append(Integer.toString(c, 16));
-                }
-                else
-                    buf.append(c);
-            }
-            buf.append("}{");
-        }
-
-        for (int i= _position; i < _limit; i++)
-        {
-            char c= (char)get(i);
-            if (Character.isISOControl(c))
-            {
-                buf.append(c < 16 ? "\\0" : "\\");
-                buf.append(Integer.toString(c, 16));
-            }
-            else
-                buf.append(c);
-        }
-        buf.append('}');
-        return buf.toString();
-    }
-    /* ------------------------------------------------------------------------------- */
-    /**
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     public boolean equals(Object obj)
     {
         // reject non buffers;
@@ -276,7 +56,7 @@ public abstract class AbstractBuffer implements Buffer
         Buffer b= (Buffer)obj;
         
         // reject different lengths
-        if (b.remaining() != remaining())
+        if (b.length() != length())
             return false;
         
         // reject AbstractBuffer with different hash value
@@ -288,10 +68,10 @@ public abstract class AbstractBuffer implements Buffer
         }
             
         // Nothing for it but to do the hard grind.
-        for (int i= remaining(); i-- > 0;)
+        for (int i= length(); i-- > 0;)
         {
-            byte b1= get(position() + i);
-            byte b2= b.get(b.position() + i);
+            byte b1= peek(getIndex() + i);
+            byte b2= b.peek(b.getIndex() + i);
             if (b1 != b2)
             {
             	if (isCaseSensitive() && b.isCaseSensitive())
@@ -308,10 +88,45 @@ public abstract class AbstractBuffer implements Buffer
         return true;
     }
 
-    /* ------------------------------------------------------------------------------- */
-    /**
-     * @see java.lang.Object#hashCode()
-     */
+    public byte get()
+    {
+        byte b= peek(_get);
+        _get++;
+        return b;
+    }
+
+    public Buffer get(int length)
+    {
+        Buffer view= peek(_get, length);
+        _get += length;
+        return view;
+    }
+
+    public int getIndex()
+    {
+        return _get;
+    }
+    
+    public boolean hasContent()
+    {
+        return _put > _get;
+    }
+    
+    private int hash()
+    {
+        int hash= 0;
+        for (int i= putIndex(); i--> getIndex();)
+        {
+            byte b= peek(i);
+            if (!isCaseSensitive() && 'a' >= b && b <= 'z')
+                b= (byte) (b - 'a' + 'A');
+            hash= 31 * hash + b;
+        }
+        if (hash == 0)
+            hash= -1;
+        return hash;
+    }
+    
     public int hashCode()
     {
         if (!isReadOnly())
@@ -322,19 +137,232 @@ public abstract class AbstractBuffer implements Buffer
             
         return _hash;
     }
-    
-    private int hash()
+
+	public boolean isCaseSensitive()
+	{
+		return _caseSensitive;
+	}
+	
+    public boolean isReadOnly()
     {
-        int hash= 0;
-        for (int i= limit(); i--> position();)
-        {
-            byte b= get(i);
-            if (!isCaseSensitive() && 'a' >= b && b <= 'z')
-                b= (byte) (b - 'a' + 'A');
-            hash= 31 * hash + b;
-        }
-        if (hash == 0)
-            hash= -1;
-        return hash;
+        return _readOnly;
     }
+
+    public int length()
+    {
+        return _put - _get;
+    }
+
+    public void mark()
+    {
+        _mark= _get - 1;
+    }
+
+    public void mark(int offset)
+    {
+        _mark= _get + offset;
+    }
+
+    public int markIndex()
+    {
+        return _mark;
+    }
+
+    public byte peek()
+    {
+        return peek(_get);
+    }
+
+    public void poke(int index, Buffer src)
+    {
+        if (isReadOnly())
+            Portable.throwIllegalState("read only");
+        if (index < 0)
+            Portable.throwIllegalArgument("index<0: " + index + "<0");
+        if (index + src.length() > capacity())
+            Portable.throwIllegalArgument(
+                "index+length>capacity(): "
+                    + index
+                    + "+"
+                    + src.length()
+                    + ">"
+                    + capacity());
+        
+        byte src_array[]=src.array();
+        byte dst_array[]=array();
+        if (src_array!=null && dst_array!=null)
+            Portable.arraycopy(src_array, src.getIndex(), dst_array, index, src.length());
+        else if (src_array!=null)
+        {
+            for (int i= src.getIndex(); i < src.putIndex(); i++)
+                poke(index++,src_array[i]);
+        }
+        else if (dst_array!=null)
+        {
+            for (int i= src.getIndex(); i < src.putIndex(); i++)
+                dst_array[index++]=src.peek(i);
+        }
+        else
+        {
+            for (int i= src.getIndex(); i < src.putIndex(); i++)
+                poke(index++,src.peek(i));
+        }
+    }   
+
+    public void put(Buffer src)
+    {
+        poke(_put, src);
+        _put += src.length();
+    }
+
+    public void put(byte b)
+    {
+        poke(_put, b);
+        _put++;
+    }
+
+    public int putIndex()
+    {
+        return _put;
+    }
+
+    public void reset()
+    {
+        if (_mark>=0)
+            _get= _mark;
+    }
+
+    public void rewind()
+    {
+        _get= 0;
+        _mark= -1;
+    }
+
+	public void setCaseSensitive(boolean c)
+	{
+		_caseSensitive=c;
+	}
+
+    public void setGetIndex(int newPosition)
+    {
+        if (_readOnly)
+            Portable.throwIllegalState("read only");
+        if (newPosition < 0)
+            Portable.throwIllegalArgument("newposition<0: " + newPosition + "<0");
+        if (newPosition > putIndex())
+            Portable.throwIllegalArgument("newposition>limit: " + newPosition + ">" + putIndex());
+        _get= newPosition;
+    }
+
+    public void setMarkIndex(int newMark)
+    {
+        _mark= newMark;
+    }
+
+    /**
+     * @see org.mortbay.util.Buffer#limit(int)
+     */
+    public void setPutIndex(int newLimit)
+    {
+        if (_readOnly)
+            Portable.throwIllegalState("read only");
+        if (newLimit > capacity())
+            Portable.throwIllegalArgument("newLimit>capacity: " + newLimit + ">" + capacity());
+        if (getIndex() > newLimit)
+            Portable.throwIllegalArgument("position>newLimit: " + getIndex() + ">" + newLimit);
+        _put= newLimit;
+    }
+    
+    public int skip(int n)
+    {
+        if (length()<n)
+            n=length();
+        _get+=n;
+        return n;
+    }
+
+    public Buffer slice()
+    {
+        return peek(_get, _put - _get);
+    }
+
+    public Buffer sliceFromMark()
+    {
+        return sliceFromMark(_get - _mark - 1);
+    }
+
+    public Buffer sliceFromMark(int length)
+    {
+        if (_mark < 0)
+            return null;
+        Buffer view= peek(_mark, length);
+        _mark= -1;
+        return view;
+    }
+
+    public String toDetailString()
+    {
+        StringBuffer buf= new StringBuffer();
+        buf.append("[m=");
+        buf.append(_mark);
+        buf.append(",g=");
+        buf.append(_get);
+        buf.append(",p=");
+        buf.append(_put);
+        buf.append(",c=");
+        buf.append(capacity());
+        buf.append("]={");
+        if (_mark >= 0)
+        {
+            for (int i= _mark; i < _get; i++)
+            {
+                char c= (char)peek(i);
+                if (Character.isISOControl(c))
+                {
+                    buf.append(c < 16 ? "\\0" : "\\");
+                    buf.append(Integer.toString(c, 16));
+                }
+                else
+                    buf.append(c);
+            }
+            buf.append("}{");
+        }
+
+        int count=0;
+        for (int i= _get; i < _put; i++)
+        {
+            char c= (char)peek(i);
+            if (Character.isISOControl(c))
+            {
+                buf.append(c < 16 ? "\\0" : "\\");
+                buf.append(Integer.toString(c, 16));
+            }
+            else
+                buf.append(c);
+            
+            if (count++ == 32)
+            {
+                if (_put-i>8)
+                {
+                    buf.append(" ... ");
+                    i=_put-8;
+                }
+            }
+        }
+        buf.append('}');
+        return buf.toString();
+    }
+
+    public String toString()
+    {
+        return new String(asArray(), 0, length());
+    }
+    
+    
+    protected boolean _caseSensitive;
+    private int _get;
+    private int _hash;
+    private int _mark;
+    private int _put;
+    protected boolean _readOnly;
 }

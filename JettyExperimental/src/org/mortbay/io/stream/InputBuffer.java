@@ -32,17 +32,17 @@ public class InputBuffer extends ByteArrayBuffer
      */
     public int fill() 
     {
-    	int space=capacity()-limit();
+    	int space=capacity()-putIndex();
     	if (space<=0)
     		return 0;
     	
     	try
     	{
-	    	byte[] bytes = getByteArray();
-		    int n=_in.read(bytes,limit(),space);
+	    	byte[] bytes = array();
+		    int n=_in.read(bytes,putIndex(),space);
 		    if (n>=0)
 		    {
-		    	limit(limit()+n);
+		    	setPutIndex(putIndex()+n);
 				return n;
 		    }
     	}

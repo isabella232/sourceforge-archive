@@ -30,9 +30,9 @@ public class BufferUtil
         int val= 0;
         boolean started= false;
         boolean minus= false;
-        for (int i= buffer.position(); i < buffer.limit(); i++)
+        for (int i= buffer.getIndex(); i < buffer.putIndex(); i++)
         {
-            byte b= buffer.get(i);
+            byte b= buffer.peek(i);
             if (b <= SPACE)
             {
                 if (started)
