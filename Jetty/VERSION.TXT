@@ -14,6 +14,10 @@ Jetty-4.0.RC2 - 12 March 2002
  + Security FAQ
  + Disabled the Password EXEC mechanism by default
 
+Jetty-3.1.7 - 12 Mar 2002
+ + Fixed security problem with constraints being bypassed with //
+   in URLs
+
 Jetty-4.0.RC1 - 06 March 2002
  + Added ContentEncodingHandler for compression.
  + Fixed filter vs forward bug.

@@ -173,7 +173,6 @@ public class PathMap extends HashMap
      */
     public synchronized Map.Entry getMatch(String path)
     {
-        path=URI.canonicalPath(path);
         Map.Entry entry;
 
         int l=path.indexOf(';');
