@@ -3,6 +3,7 @@ Jetty Versions
 
  + Stop/Start filtesr in declaration order.
  + Some AJP13 optimizations.
+ + Use "standard" names for default,jsp & invoker servlets.
 
 Jetty-4.1.1 - 30 September 2002
  + Fixed client scripting vulnerability with jasper2.
