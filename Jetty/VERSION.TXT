@@ -1,3 +1,7 @@
+   + Fixed constructor to RolloverFileLogSink
+   + Improved synchronization on LogSink
+   + Allow HttpRequest.toString() handles bad requests.
+
 Jetty-3.0.A97 - 13 July 2000
    + Tempory request log implementation
    + Less verbose debug

@@ -28,14 +28,14 @@ package com.mortbay.Util;
  * @author V. Lipovetsky
  * @author Kent Johnson
  */
-
 public class RolloverFileLogSink 
 	extends LogSink implements Runnable
 {
 
-    // ---------------------------------------------------------------------------
-    //		RolloverFileLogSink
-    // ---------------------------------------------------------------------------
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @exception java.io.IOException 
+     */
     public RolloverFileLogSink()
 	throws java.io.IOException
     {
@@ -63,8 +63,20 @@ public class RolloverFileLogSink
     }
 
 
-    public void RolloverFileLogSink(String newLogDir, int newRetainDays , 
-				    String newLogExt, long newThreadStopTimeout, long newTimerInterval)
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param newLogDir 
+     * @param newRetainDays 
+     * @param newLogExt 
+     * @param newThreadStopTimeout 
+     * @param newTimerInterval 
+     * @exception java.io.IOException 
+     */
+    public RolloverFileLogSink(String newLogDir,
+			       int newRetainDays , 
+			       String newLogExt,
+			       long newThreadStopTimeout,
+			       long newTimerInterval)
 	throws java.io.IOException
     {
     	setLogDir(newLogDir);
@@ -76,10 +88,10 @@ public class RolloverFileLogSink
 	start();
     }
 	
-	
-    // ---------------------------------------------------------------------------
-    //		start
-    // ---------------------------------------------------------------------------
+    /* ------------------------------------------------------------ */
+    /* 
+     * @exception java.io.IOException 
+     */
     private void start()
 	throws java.io.IOException
     {
@@ -92,18 +104,18 @@ public class RolloverFileLogSink
     }//start
     
     
-    // ---------------------------------------------------------------------------
-    //		stop
-    // ---------------------------------------------------------------------------
+    /* ------------------------------------------------------------ */
     public void stop()
     {
     	cleanup();
     }
 
 
-    // ---------------------------------------------------------------------------
-    //		setLogNameToDate
-    // ---------------------------------------------------------------------------
+    /* ------------------------------------------------------------ */
+    /* 
+     * @param curDate 
+     * @exception java.io.IOException 
+     */
     private synchronized void setLogNameToDate(java.util.Date curDate)
     	throws java.io.IOException
     {
@@ -142,9 +154,10 @@ public class RolloverFileLogSink
     }//setLogNameToDate
 
 
-    // ---------------------------------------------------------------------------
-    //		clearOldLogFiles
-    // ---------------------------------------------------------------------------
+    /* ------------------------------------------------------------ */
+    /* 
+     * @param curDate 
+     */
     private synchronized void clearOldLogFiles(java.util.Date curDate)
     {
 	String[] logFileList = logDir.list(
@@ -182,10 +195,9 @@ public class RolloverFileLogSink
 	}//for
     }
     
-    
-    // ---------------------------------------------------------------------------
-    //		startClearThread
-    // ---------------------------------------------------------------------------
+    /* ------------------------------------------------------------ */
+    /* 
+     */
     private synchronized void startClearThread()
     {
 	if (clearThread == null) {
@@ -196,9 +208,10 @@ public class RolloverFileLogSink
     }
 
 
-    // ---------------------------------------------------------------------------
-    //		stopClearThread
-    // ---------------------------------------------------------------------------
+    /* ------------------------------------------------------------ */
+    /* 
+     * @param timeout 
+     */
     private synchronized void stopClearThread(long timeout)
     {
 	if (clearThread != null) {
@@ -219,9 +232,7 @@ public class RolloverFileLogSink
     }
 
 
-    // ---------------------------------------------------------------------------
-    //		run
-    // ---------------------------------------------------------------------------
+    /* ------------------------------------------------------------ */
     public void run( )
     {
 	try {
@@ -259,24 +270,9 @@ public class RolloverFileLogSink
     }//run
 
 
-    /*
-    public static void main(String[] args)
-    {
-			try {
-				RolloverFileLogSink errLog = new RolloverFileLogSink();
-				errLog.create(args[0], 2, ".LOG", 20*1000, 20*1000);
-				errLog.logWriter.println("Hello, World !");
-			} catch(Exception e) {
-				//System.out.println(e);
-				e.printStackTrace();
-			}//try
-    }//main
-    */
-
-
-// ---------------------------------------------------------------------------
-//		cleanup
-// ---------------------------------------------------------------------------
+    /* ------------------------------------------------------------ */
+    /** 
+     */
     public synchronized void cleanup()
     {
 	if (isCreated()) {
@@ -287,9 +283,14 @@ public class RolloverFileLogSink
     }
 
 
-    // ---------------------------------------------------------------------------
+    /* ------------------------------------------------------------ */
     private java.io.File logDir = new java.io.File("./");
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param newValue 
+     * @exception java.io.IOException 
+     */
     public void setLogDir(String newValue)
 	throws java.io.IOException
     {
@@ -297,61 +298,102 @@ public class RolloverFileLogSink
         logDir.mkdirs();	// Make sure it exists
     }
 
+    /* ------------------------------------------------------------ */
     private String logExt = ".log";
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return 
+     */
     public String getLogExt() {
         return logExt;
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param newValue 
+     */
     public void setLogExt(String newValue) {
         logExt = newValue;
     }
+    
+    /* ------------------------------------------------------------ */
     private int retainDays = 1;
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return 
+     */
     public int getRetainDays() {
         return retainDays;
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param newValue 
+     */
     public void setRetainDays(int newValue)
     {
         retainDays = newValue;
     }
 
+    /* ------------------------------------------------------------ */
     private long threadStopTimeout = 20*1000;
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return 
+     */
     public long getThreadStopTimeout() {
         return threadStopTimeout;
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param newValue 
+     */
     public void setThreadStopTimeout(long newValue) {
         threadStopTimeout = newValue;
     }
     
+    /* ------------------------------------------------------------ */
     private long timerInterval = 20*1000;
 
+    /* ------------------------------------------------------------ */
     public long getTimerInterval() {
         return timerInterval;
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param newValue 
+     */
     public void setTimerInterval(long newValue)
     {
         timerInterval = newValue;
     }
-    /****************************************
-     * data members
-     ****************************************/
 
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return 
+     */
     public boolean isCreated()
     {
   	return created;
     }
 
+    /* ------------------------------------------------------------ */
+    /* 
+     * @param newValue 
+     */
     private void setCreated(boolean newValue)
     {
   	created = newValue;
     }
 
     private boolean created = false;
+    
     // add your data members here
     private java.io.PrintWriter logWriter;
     private java.io.File logFile;
@@ -361,10 +403,9 @@ public class RolloverFileLogSink
 	new java.text.SimpleDateFormat("yyyy_MM_dd");
 
 
-    // ---------------------------------------------------------------------------
-    //		ThreadEvent
-    // ---------------------------------------------------------------------------
-    /** A helper class that is used to signal the cleanup thread to stop. */
+    /* ------------------------------------------------------------ */
+    /** A helper class that is used to signal the cleanup thread to stop. 
+     */
     static final private class ThreadEvent 
     {
 	private boolean on = false;

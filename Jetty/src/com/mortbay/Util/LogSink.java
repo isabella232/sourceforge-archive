@@ -29,15 +29,14 @@ public class LogSink
     protected boolean _logLabels=true;
     protected boolean _logTags=true;
     protected boolean _logStackSize=true;
-    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    public boolean _logStackTrace=false;
+    protected boolean _logStackTrace=false;
     protected boolean _logOneLine=false;
     
     /*-------------------------------------------------------------------*/
     private PrintWriter _out=null;
     
     /*-------------------------------------------------------------------*/
-    private StringBuffer __stringBuffer = new StringBuffer(512);
+    private StringBuffer _stringBuffer = new StringBuffer(512);
     
     /* ------------------------------------------------------------ */
     private static final String __lineSeparator =
@@ -114,35 +113,35 @@ public class LogSink
 		    long time)
     {
         // Lock static buffer
-        synchronized(__stringBuffer)
+        synchronized(_stringBuffer)
         {
-            __stringBuffer.setLength(0);
+            _stringBuffer.setLength(0);
             
             // Log the time stamp
             if (_logTimeStamps)
             {
                 if (_dateFormat!=null)
-                    __stringBuffer.append(_dateFormat.format(new Date(time)));
+                    _stringBuffer.append(_dateFormat.format(new Date(time)));
                 else
                 {
                     String mSecs = "0000" + time%1000L;
                     mSecs = mSecs.substring(mSecs.length() - 3);
-                    __stringBuffer.append(Long.toString(time / 1000L));
-                    __stringBuffer.append('.');
-                    __stringBuffer.append(mSecs);
+                    _stringBuffer.append(Long.toString(time / 1000L));
+                    _stringBuffer.append('.');
+                    _stringBuffer.append(mSecs);
                 }
             }
         
             // Log the label
             if (_logLabels && frame != null)
             {
-                __stringBuffer.append(frame.toString());
-                __stringBuffer.append(':');
+                _stringBuffer.append(frame.toString());
+                _stringBuffer.append(':');
             }
             
             // Log the tag
             if (_logTags)
-                __stringBuffer.append(tag);
+                _stringBuffer.append(tag);
 
             
             // Determine the indent string for the message and append it
@@ -150,13 +149,13 @@ public class LogSink
             // line is not blank
             String indent = "";
             String indentSeparator = _logOneLine?"\\n ":__lineSeparator;
-            if (__stringBuffer.length() > 0)
-            	__stringBuffer.append(indentSeparator);
-            __stringBuffer.append(__indentBase);
+            if (_stringBuffer.length() > 0)
+            	_stringBuffer.append(indentSeparator);
+            _stringBuffer.append(__indentBase);
             
             if (_logStackSize && frame != null) {
             	indent = __indent.substring(0,frame._depth)+" ";
-	            __stringBuffer.append(indent);
+	            _stringBuffer.append(indent);
             }
             indent = indentSeparator + __indentBase + indent;
             
@@ -169,15 +168,15 @@ public class LogSink
             int last=0; 
             while ((i=msg.indexOf(__lineSeparator,i))>=last)
             {
-                __stringBuffer.append(msg.substring(last,i));
-                __stringBuffer.append(indent);
+                _stringBuffer.append(msg.substring(last,i));
+                _stringBuffer.append(indent);
                 i+=__lineSeparatorLen;
                 last=i;
             }
             if (msg.length()>last)
-                __stringBuffer.append(msg.substring(last));
+                _stringBuffer.append(msg.substring(last));
 
-	    log(__stringBuffer.toString());
+	    log(_stringBuffer.toString());
 	}
     }
     
@@ -187,13 +186,10 @@ public class LogSink
      * implementation writes the message to a PrintWriter.
      * @param formattedLog 
      */
-    public void log(String formattedLog)
+    public synchronized void log(String formattedLog)
     {
-	synchronized(_out)
-	{
-	    _out.println(formattedLog);
-	    _out.flush();
-	}
+	_out.println(formattedLog);
+	_out.flush();
     }
 
     /* ------------------------------------------------------------ */
