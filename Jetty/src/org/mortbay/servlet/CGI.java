@@ -147,7 +147,7 @@ public class CGI extends HttpServlet
         Code.debug("CGI: script is "+exe);
         Code.debug("CGI: pathInfo is "+last);
 
-        exec(exe.toString(), last, req, res);
+        exec(exe, last, req, res);
     }
     
 
@@ -159,12 +159,14 @@ public class CGI extends HttpServlet
      * @param res 
      * @exception IOException 
      */
-    private void exec(String path,
+    private void exec(File command,
                       String pathInfo,
                       HttpServletRequest req,
                       HttpServletResponse res)
         throws IOException
     {
+        String path=command.toString();
+        File dir=command.getParentFile();
         Code.debug("CGI: execing: "+path);
 
 	EnvList env = new EnvList();
@@ -216,7 +218,9 @@ public class CGI extends HttpServlet
         // are we meant to decode args here ? or does the script get them
         // via PATH_INFO ?  if we are, they should be decoded and passed
         // into exec here...
-        Process p=Runtime.getRuntime().exec(path, env.getEnvArray());
+        Process p=dir==null
+            ?Runtime.getRuntime().exec(path, env.getEnvArray())
+            :Runtime.getRuntime().exec(path, env.getEnvArray(),dir);
 
         // hook processes input to browser's output (async)
         final InputStream inFromReq=req.getInputStream();
