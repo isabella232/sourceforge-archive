@@ -255,7 +255,11 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
 	    _listeners=null;
 	}
 	
-        setLogSink(null);
+        if (_logSink!=null)
+        {
+            remove(_logSink);
+            _logSink.destroy();
+        }
     }
 
     /* ------------------------------------------------------------ */
