@@ -413,8 +413,6 @@ public class HttpConnection
             // Handle Exception by sending 500 error code (if output not
             // committed) and closing connection.
 
-	    Code.warning(e);
-	    
             if (Code.debug())
                 Code.warning(e);
             else
