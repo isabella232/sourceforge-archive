@@ -77,13 +77,11 @@ involve clients and a single server, and gradually create multi-tier enterprise 
 throughout your existing network ... because Java Servlets run on the software and hardware you've already installed. 
 </I></BLOCKQUOTE>
 
-
 <A NAME="Open"></A>
 <BR>&nbsp;<H3>Open Source License</H3>
 Jetty is released under an <A HREF="http://www.opensource.org">Open Source</A>
 License, derived from the Artistic License. Full source code is included in
 the release. <B><A HREF=/software/LICENSE.html>The License</A></B> puts few restrictions on usage of Jetty.
-
 
 <A NAME="Servlets"></A>
 <BR>&nbsp;<H3>Serving Servlets</H3>
@@ -96,12 +94,10 @@ servers. They provide a general framework for services built using the
 request-response paradigm. </I> [Javasoft's Java Servlet API White Paper]
 </BLOCKQUOTE>
 
-
 <A NAME="HTTP11"></A>
 <BR>&nbsp;<H3>HTTP/1.1 Protocol</H3>
 Jetty supports the HTTP/1.0 and HTTP/1.1 protocols. The 1.1 protocol offers
 much greater network performance.
-
 
 <A NAME="Modular"></A>
 <BR>&nbsp;<H3>Modular Architecture</H3>
@@ -125,12 +121,10 @@ Key classes within Jetty are dynamicaly loaded so that they may be replaced
 with alternate or extended implementations. For example SSL handling is
 provided by extending the standard HttpListener class.
 
-
 <A NAME="JSP"></A>
 <BR>&nbsp;<H3>GNU Java Server Pages</H3>
 Includes the GNUJSP package, which implements Java Server Pages, a method
 for adding dynamic content to HTML pages.
-
 
 <A NAME="SSL"></A>
 <BR>&nbsp;<H3>SSL Support</H3>
@@ -138,7 +132,6 @@ A HttpListener extension class has been contributed by
 <A HREF=http://www.forge.com.au>FORGE</A> that integrates their
 Protekt SSL product with Jetty. A similar approach may be used to
 integrate other SSL implementations.
-
 
 <A NAME="Efficient"></A>
 <BR>&nbsp;<H3>Small & Efficient</H3>
@@ -149,7 +142,6 @@ a small and efficient server is the result: <UL>
   <LI>Minimal Object and thread creation.
   <LI>Server performance degrades reasonably under stress.
 </UL>
-
 
 <A NAME="Config"></A>
 <BR>&nbsp;<H3>Flexible Configuration</H3>       
@@ -165,7 +157,6 @@ interface of which there are several implementations:<UL>
   <LI>Application specific configuration implementations.
 </UL>
 
-
 <A NAME="File"></A>
 <BR>&nbsp;<H3>Standard HTTP File serving</H3>
 Jetty can serve standard files like most other HTTP servers and supports:
@@ -177,7 +168,6 @@ Jetty can serve standard files like most other HTTP servers and supports:
   <LI>PUT and DEL optionally supported.
 </UL>
 
-
 <A NAME="Session"></A>
 <BR>&nbsp;<H3>Session Tracking</H3>
 Jetty uses it's handler architecture and cookie support to
@@ -185,7 +175,6 @@ provide user session and browser tracking.  Every client session is
 assigned an ID and session data may be queried, set or modified to
 allow communication and maintain state between multiple requests from the
 same same session.
-
 
 <A NAME="Includes"></A>
 <BR>&nbsp;<H3>Server Side Includes</H3>
@@ -195,7 +184,6 @@ allow authored HTML to be combined with dynamic content.  The contents of
 a file or even results from another HTTP request can be included (embedded)
 in a page as it is generated or by filtering a response stream. 
 
-
 <A NAME="Proxy"></A>
 <BR>&nbsp;<H3>Proxy Handling</H3>
 The ProxyHandler implementation of HTTP Handler, allows Jetty to be
@@ -203,7 +191,6 @@ configured as a proxy server for both FTP and HTTP requests. The results
 of proxy requests are handled in the same fashion as any other request, so
 the full features of Jetty may be applied to create intelligent proxy
 services.
-
 
 <A NAME="Forwarding"></A>
 <BR>&nbsp;<H3>Request Forwarding</H3>
@@ -237,7 +224,6 @@ statically authored or generated elsewhere.
 Support is provided to use this mechanism for server side includes and
 URL embedding.
 
-
 <A NAME="Push"></A>
 <BR>&nbsp;<H3>Server Push Support</H3>
 Because Jetty assigns each request it own Thread, it is a simple matter
@@ -252,11 +238,8 @@ to update the entire browser frame whenever it chooses.
 Handling of multipart/form-data streams allows handling of the
 file input item of HTML forms.       
 
-
-
-
 <A NAME="Util"></A>
-<BR>&nbsp;<H3>Utility Classes </B></BR> 
+<BR>&nbsp;<H3>Utility Classes </H3> 
 Bundled with Jetty are several utility packages which form a good basis
 for a Java software infrastructure for WWW development, including:
 <UL>
@@ -269,7 +252,6 @@ for a Java software infrastructure for WWW development, including:
   <LI><A HREF=/javadoc/com/mortbay/Util/package-summary.html>Net and IO utilities</A>.
 </UL>
 
-
 <A NAME="HTML"></A>
 <BR>&nbsp;<H3>HTML Generation</H3>
 While HTML is a simple language to learn and write, it can be also be
@@ -280,7 +262,6 @@ from a database.
 Jetty comes with a rich HTML generation package that can be used on its
 own, with another servlet server or in Jetty servlets. Supported for
 templated look and feel is a key element of this package.
-
 
 <A NAME="Legacy"></A>
 <BR>&nbsp;<H3>Legacy Integration</H3>
@@ -293,7 +274,6 @@ Furthermore, The ability of Jetty to get responses from other HTTP servers and
 modify or embed them in other pages, allows multiple services to be combined
 into a single consistent WWW presence.
 Thus existing systems can be used while migrating to a dynamic WWW approach.
-
 
 <A NAME="Telephony"></A>
 <BR>&nbsp;<H3>Telephony and SmartCard Support</H3>
@@ -308,7 +288,6 @@ request.<P>
 uses tones generated by the smartcard to identify a client over the phone
 or over the WWW.  The system provides fraud prevention and
 detection for accidental, malicious and systematic attacks.
-
 
 <A NAME="Engineering"></A>
 <BR>&nbsp;<H3>Software Engineering</H3>  
@@ -334,5 +313,4 @@ techniques to be applied to:<UL>
 </UL>
 
 </TD></TR></TABLE>
-</BLOCKQUOTE>
 
