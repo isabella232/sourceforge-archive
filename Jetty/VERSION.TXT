@@ -1,10 +1,12 @@
 Jetty Versions
 --------------
 
-Jetty-5.0.alpha1
+Jetty-5.0.alpha1 - 12 August 2003
  + Switched to mx4j
  + Improve combinations of Security Constraints
  + Implemented locale encoding mapping.
+ + Synced with 4.2.12
+ + Updated to Jasper 5.0.7
 
 Jetty-5.0.alpha0 - 16 Jul 2003
  + Compiled against 2.4 servlet spec.
@@ -15,15 +17,17 @@ Jetty-5.0.alpha0 - 16 Jul 2003
  + Implemented filter-mapping <dispatcher> element
  + Implemented Dispatcher forward attributes.
 
-Jetty-4.2.12
- + restore max inactive interval for session manager
+Jetty-4.2.12 - 12 August 2003
+ + Restore max inactive interval for session manager
  + Removed protection of org.mortbay.http attributes
  + Fixed parameter ordering for a forward request.
  + Fixed up HTAccessHandler
  + Improved error messages from ProxyHandler
  + Added missing S to some OPTIONS strings
  + Added open method to threaded server.
- + FormAuthenticator does 403 with empty error page.
+ + FORMAuthenticator does 403 with empty error page.
+ + Fixed MIME types for chemicals
+ + Padding for IE in RootNotFoundHandler
 
 Jetty-4.2.11 - 12 July 2003
  + Fixed race in servlet initialization code.
