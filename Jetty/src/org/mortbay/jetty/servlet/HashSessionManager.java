@@ -57,7 +57,7 @@ public class HashSessionManager implements SessionManager
     
     
     /* ------------------------------------------------------------ */
-    HashSessionManager(ServletHandler handler)
+    protected HashSessionManager(ServletHandler handler)
     {
         _handler=handler;
     }
@@ -288,7 +288,7 @@ public class HashSessionManager implements SessionManager
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    class Session
+    protected class Session
         implements SessionManager.Session
     {
         HashMap _values = new HashMap(11);
@@ -301,7 +301,7 @@ public class HashSessionManager implements SessionManager
         HttpSessionEvent _event;
 
         /* ------------------------------------------------------------- */
-        Session()
+        protected Session()
         {
             synchronized(Session.class)
             {
