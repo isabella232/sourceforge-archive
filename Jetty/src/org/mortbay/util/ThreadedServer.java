@@ -38,6 +38,7 @@ abstract public class ThreadedServer extends ThreadPool
     
     private transient Acceptor _acceptor=null;  
     private transient ServerSocket _listen = null;
+    private transient boolean _running=false;
     
     /* ------------------------------------------------------------------- */
     /* Construct
@@ -401,7 +402,8 @@ abstract public class ThreadedServer extends ThreadPool
             _soTimeOut=getMaxIdleTimeMs();
             if (_soTimeOut>=0)
                 _listen.setSoTimeout(_soTimeOut);
-            
+
+            _running=true;
             _acceptor=new Acceptor();
             _acceptor.setDaemon(isDaemon());
             _acceptor.start();
@@ -420,30 +422,38 @@ abstract public class ThreadedServer extends ThreadPool
     public void stop()
         throws InterruptedException
     {
-        if (_acceptor!=null)
-        {
-            _acceptor._running=false;
-            _acceptor.interrupt();
-            Thread.yield();
-        }
-
         synchronized(this)
         {
+            // Signal that we are stopping
+            _running=false;
+            
+            // Close the listener socket.
+            Code.debug("closing ",_listen);
+            try {if (_listen!=null)_listen.close();}catch(IOException e){Code.warning(e);}
+            
+            // Do we have an acceptor thread (running or not)
+            Thread.yield();
             if (_acceptor!=null)
-                _acceptor.forceStop();
-            _acceptor=null;
+            {
+                // Tell the acceptor to exit and wake it up
+                _acceptor.interrupt();
+                wait(getMaxIdleTimeMs());
+                
+                // Do we still have an acceptor thread? It is playing hard to stop!
+                // Try forcing the stop to be noticed by making a connection to self.
+                if (_acceptor!=null)
+                {
+                    _acceptor.forceStop();     
+                    // Assume that worked and go on as if it did.
+                    _acceptor=null;
+                }
+            }
         }
 
-        Thread.yield();
-        
-        try{
-            super.stop();
-        }
-        catch(Exception e)
-        {
-            Code.warning(e);
-        }
-        
+        // Stop the thread pool
+        try{super.stop();}catch(Exception e){Code.warning(e);}
+
+        // Clean up
         _listen=null;
         _acceptor=null;
     }
@@ -483,8 +493,7 @@ abstract public class ThreadedServer extends ThreadPool
     /* ------------------------------------------------------------ */
     private class Acceptor extends Thread
     {
-        
-        boolean _running=false;
+        /* ------------------------------------------------------------ */
         public void run()
         {
             ThreadedServer threadedServer = ThreadedServer.this;
@@ -493,7 +502,6 @@ abstract public class ThreadedServer extends ThreadPool
             try
             {
                 this.setName("Acceptor "+_listen);
-                _running=true;
                 while(_running)
                 {
                     boolean low_threads=
@@ -535,7 +543,10 @@ abstract public class ThreadedServer extends ThreadPool
                     {}
                     catch(Exception e)
                     {
-                        Code.warning(e);
+                        if (_running)
+                            Code.warning(e);
+                        else
+                            Code.debug(e);
                     }
                     catch(Error e)
                     {
@@ -555,16 +566,15 @@ abstract public class ThreadedServer extends ThreadPool
                     Code.warning("Stopping "+this.getName());
                 else
                     Log.event("Stopping "+this.getName());
-                try{if (_listen!=null)_listen.close();}
-                catch (IOException e) {Code.ignore(e);}
                 synchronized(threadedServer)
                 {
-                    _listen=null;
                     _acceptor=null;
+                    threadedServer.notifyAll();
                 }
             }
         }
 
+        /* ------------------------------------------------------------ */
         void forceStop()
         {
             if(_listen!=null && _address!=null)
@@ -583,8 +593,7 @@ abstract public class ThreadedServer extends ThreadPool
                 }
                 catch(IOException e)
                 {
-                    Code.warning("problem stopping acceptor "+addr+": "+e.toString());
-                    Code.debug(e);
+                    Code.debug("problem stopping acceptor ",addr,": ",e);
                 }
             }
         }

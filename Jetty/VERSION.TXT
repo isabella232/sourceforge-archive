@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Clean up of ThreadedServer.stop()
+
 Jetty-4.2.2 - 20 November 2002
  + Fixed sendRedirect for non http URLS
  + Fixed URI query recycling for persistent connections
