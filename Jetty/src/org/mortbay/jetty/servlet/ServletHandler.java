@@ -490,7 +490,7 @@ public class ServletHandler
                        HttpResponse httpResponse)
          throws IOException
     {
-        if (!isStarted() || _servletMap.size()==0)
+        if (!isStarted())
             return;
         
         try

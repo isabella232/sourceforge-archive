@@ -95,19 +95,26 @@ public class UrlEncoded extends MultiMap
                     {
                         if (i>0)
                             result.append('&');
-                        
                         Object val=list.get(i);
                         result.append(URLEncoder.encode(key));
 
                         if (val!=null)
                         {
-                            result.append('=');
-                            result.append(URLEncoder.encode(val.toString()));
+                            String str=val.toString();
+                            if (str.length()>0)
+                            {
+                                result.append('=');
+                                result.append(URLEncoder.encode(str));
+                            }
+                            else if (equalsForNullValue)
+                                result.append('=');
                         }
                         else if (equalsForNullValue)
                             result.append('=');
                     }
                 }
+                if (iter.hasNext())
+                    result.append('&');
             }
             return result.toString();
         }

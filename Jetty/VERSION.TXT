@@ -1,9 +1,9 @@
 Jetty Versions
 --------------
 
- + Fixed bug with request dispatcher parameters
-
 Jetty-4.0.D1 - 14 Nov 2001
+ + Fixed ServletHandler with no servlets 
+ + Fixed bug with request dispatcher parameters
  + New ContextLoader implementation.
  + New Dispatcher implementation
  + Added Context and Session Event Handling

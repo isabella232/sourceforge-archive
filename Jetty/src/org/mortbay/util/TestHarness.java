@@ -526,7 +526,7 @@ public class TestHarness
             test.checkEquals(code.size(),2,"multi param size");
             test.check(code.encode().equals("Name5=aaa&Name6=bbb") ||
                        code.encode().equals("Name6=bbb&Name5=aaa"),
-                       "multi encode");
+                       "multi encode "+code.encode());
             test.checkEquals(code.getString("Name5"),"aaa","multi get");
             test.checkEquals(code.getString("Name6"),"bbb","multi get");
         
