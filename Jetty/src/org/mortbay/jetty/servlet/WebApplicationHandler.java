@@ -5,7 +5,6 @@
 
 package org.mortbay.jetty.servlet;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -59,7 +58,7 @@ import org.mortbay.util.URI;
  * @version $Id$
  * @author Greg Wilkins
  */
-public class WebApplicationHandler extends ServletHandler implements Externalizable
+public class WebApplicationHandler extends ServletHandler 
 {
     private Map _filterMap=new HashMap();
     private List _pathFilters=new ArrayList();
@@ -67,22 +66,6 @@ public class WebApplicationHandler extends ServletHandler implements Externaliza
     private boolean _acceptRanges=true;
     
     private transient boolean _started=false;
-    
-    /* ------------------------------------------------------------ */
-    public void writeExternal(java.io.ObjectOutput out)
-        throws java.io.IOException
-    {
-        out.writeBoolean(_acceptRanges);
-        if (!(getHttpContext() instanceof WebApplicationContext))
-            Code.notImplemented();
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void readExternal(java.io.ObjectInput in)
-        throws java.io.IOException, ClassNotFoundException
-    {
-        _acceptRanges =in.readBoolean();
-    }
     
     /* ------------------------------------------------------------ */
     public boolean isAcceptRanges()

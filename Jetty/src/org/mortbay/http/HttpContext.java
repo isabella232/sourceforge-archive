@@ -94,22 +94,22 @@ public class HttpContext implements LifeCycle,
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private List _handlers=new ArrayList(3);
-    private String _classPath;
-    private boolean _statsOn=false;
-
-    private Map _attributes = new HashMap(11);
-    private Map _initParams = new HashMap(11);
-    
-    private List _hosts=new ArrayList(2);
     private String _contextPath;
-    private String _name;
+    private List _hosts=new ArrayList(2);
+    private List _handlers=new ArrayList(3);
+    private Map _attributes = new HashMap(3);
     private boolean _redirectNullPath=true;
-    private boolean _httpServerAccess=false;
-    
-    private Map _encodingMap;
+    private int _maxCachedFileSize =400*1024;
+    private int _maxCacheSize =4*1024*1024;
+    private boolean _dirAllowed=true;
+    private boolean _statsOn=false;
+    private PermissionCollection _permissions;
+
+    /* ------------------------------------------------------------ */
+    private String _name;
+    private String _classPath;
+    private Map _initParams = new HashMap(11);
     private Map _errorPages;
-    
     private UserRealm _userRealm;
     private String _realmName;
     private PathMap _constraintMap=new PathMap();
@@ -117,9 +117,8 @@ public class HttpContext implements LifeCycle,
 
     private Resource _resourceBase;
     private Map _mimeMap;
-    private int _maxCachedFileSize =400*1024;
-    private int _maxCacheSize =4*1024*1024;
-    private boolean _dirAllowed=true;
+    private Map _encodingMap;
+
     private String[] _welcomes=
     {
         "welcome.html",
@@ -128,7 +127,6 @@ public class HttpContext implements LifeCycle,
         "index.jsp"
     };
 
-    private PermissionCollection _permissions;
     
     /* ------------------------------------------------------------ */
     private transient boolean _started;
@@ -503,6 +501,22 @@ public class HttpContext implements LifeCycle,
     public Object getAttribute(String name)
     {
         return _attributes.get(name);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     */
+    public Map getAttributes()
+    {
+        return _attributes;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     */
+    public void setAttributes(Map attributes)
+    {
+        _attributes=attributes;
     }
 
     /* ------------------------------------------------------------ */

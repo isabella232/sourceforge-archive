@@ -6,8 +6,11 @@
 package org.mortbay.http;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.lang.reflect.Method;
 import java.util.AbstractCollection;
 import java.util.AbstractMap;
@@ -35,6 +38,7 @@ import org.mortbay.util.Loader;
 import org.mortbay.util.Log;
 import org.mortbay.util.LogSink;
 import org.mortbay.util.MultiException;
+import org.mortbay.util.Resource;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.URI;
 
@@ -1144,81 +1148,6 @@ public class HttpServer implements LifeCycle,
         _connectionsRequestsAve=_connectionsRequestsAve-_connectionsRequestsAve/16+requests;
     }
     
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /** Construct server from command line arguments.
-     * @param args 
-     */
-    public static void main(String[] args)
-    {
-        if (args.length==0)
-        {
-            args= new String[] {"8080"};
-        }
-        else if (args.length==1 && args[0].startsWith("-"))
-        {
-            System.err.println
-                ("\nUsage - java org.mortbay.http.HttpServer [[<addr>:]<port> .. ]");
-            System.err.println
-                ("  Serves files from '.' directory");
-            System.err.println
-                ("  Dump handler for not found requests");
-            System.err.println
-                ("  Default port is 8080");
-            System.exit(1);
-        }
-        
-        try{
-            // Create the server
-            HttpServer server = new HttpServer();
-
-            // Default is no virtual host
-            String host=null;
-            HttpContext context = server.getContext(host,"/");
-            context.setResourceBase(".");
-            context.addHandler(new ResourceHandler());
-            context.addHandler(new DumpHandler());
-            context.addHandler(new NotFoundHandler());
-            
-            // Parse arguments
-            for (int i=0;i<args.length;i++)
-            {
-                InetAddrPort address = new InetAddrPort(args[i]);
-                server.addListener(address);
-            }
-            
-            server.start();
-        }
-        catch (Exception e)
-        {
-            Code.warning(e);
-        }
-    }
-
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    public class ComponentEvent extends EventObject
-    {
-        private Object component;
-        private ComponentEvent(Object component)
-        {
-            super(HttpServer.this);
-            this.component=component;
-        }
-        public Object getComponent()
-        {
-            return component;
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    public interface ComponentEventListener extends EventListener
-    {
-        public void addComponent(ComponentEvent event);
-        public void removeComponent(ComponentEvent event);
-    }
     
     /* ------------------------------------------------------------ */
     private void addComponent(Object o)
@@ -1274,6 +1203,26 @@ public class HttpServer implements LifeCycle,
         _eventListeners.remove(listener);
     }
 
+    /* ------------------------------------------------------------ */
+    /** Save the HttpServer
+     * The server is saved by serialization to the given filename or URL.
+     *
+     * @param saveat A file or URL to save the configuration at. 
+     * @exception MalformedURLException 
+     * @exception IOException 
+     */
+    public void save(String saveat)
+        throws MalformedURLException,
+               IOException
+    {
+        Resource resource = Resource.newResource(saveat);
+        ObjectOutputStream out = new ObjectOutputStream(resource.getOutputStream());
+        out.writeObject(this);
+        out.flush();
+        out.close();
+        Log.event("Saved "+this+" to "+resource);
+    }
+    
     /* ------------------------------------------------------------ */
     /** Destroy a stopped server.
      * Remove all components and send notifications to all event
@@ -1333,4 +1282,86 @@ public class HttpServer implements LifeCycle,
         _eventListeners=null;
     }
     
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /** Construct server from command line arguments.
+     * @param args 
+     */
+    public static void main(String[] args)
+    {
+        if (args.length==0 || args.length>2)
+        {
+            System.err.println
+                ("\nUsage - java org.mortbay.http.HttpServer [<addr>:]<port>");
+            System.err.println
+                ("\nUsage - java org.mortbay.http.HttpServer -r [savefile]");
+            System.err.println
+                ("  Serves files from '.' directory");
+            System.err.println
+                ("  Dump handler for not found requests");
+            System.err.println
+                ("  Default port is 8080");
+            System.exit(1);
+        }
+        
+        try{
+            
+            if (args.length==1)
+            {
+                // Create the server
+                HttpServer server = new HttpServer();
+                
+                // Default is no virtual host
+                String host=null;
+                HttpContext context = server.getContext(host,"/");
+                context.setResourceBase(".");
+                context.addHandler(new ResourceHandler());
+                context.addHandler(new DumpHandler());
+                context.addHandler(new NotFoundHandler());
+
+                InetAddrPort address = new InetAddrPort(args[0]);
+                server.addListener(address);
+
+                server.start();
+            }
+            else
+            {
+                Resource resource = Resource.newResource(args[1]);
+                ObjectInputStream in = new ObjectInputStream(resource.getInputStream());
+                HttpServer server = (HttpServer)in.readObject();
+                in.close();
+                server.start();
+            }
+            
+        }
+        catch (Exception e)
+        {
+            Code.warning(e);
+        }
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public class ComponentEvent extends EventObject
+    {
+        private Object component;
+        private ComponentEvent(Object component)
+        {
+            super(HttpServer.this);
+            this.component=component;
+        }
+        public Object getComponent()
+        {
+            return component;
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public interface ComponentEventListener extends EventListener
+    {
+        public void addComponent(ComponentEvent event);
+        public void removeComponent(ComponentEvent event);
+    }
 }

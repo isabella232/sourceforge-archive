@@ -122,6 +122,7 @@ public class HttpServerMBean extends LifeCycleMBean
         defineAttribute("requestsDurationMax");
         
         defineOperation("stop",new String[]{"java.lang.Boolean.TYPE"},IMPACT_ACTION);
+        defineOperation("save",new String[]{"java.lang.String"},IMPACT_ACTION);
         defineOperation("destroy",IMPACT_ACTION);
     }
     
@@ -223,7 +224,5 @@ public class HttpServerMBean extends LifeCycleMBean
         ObjectName oName;
         Object mbean;
     }
-
-    
 }
 

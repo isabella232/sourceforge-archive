@@ -5,12 +5,14 @@
 
 package org.mortbay.jetty.servlet;
 
+import java.io.Externalizable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.PermissionCollection;
 import java.util.AbstractCollection;
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -71,16 +73,18 @@ import org.mortbay.xml.XmlParser;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class WebApplicationContext extends ServletHttpContext
+public class WebApplicationContext
+    extends ServletHttpContext
+    implements Externalizable
 {
     /* ------------------------------------------------------------ */
-    private String _name;
     private String _deploymentDescriptor;
     private String _defaultsDescriptor="org/mortbay/jetty/servlet/webdefault.xml";
     private String _war;
     private boolean _extract;
     private boolean _ignorewebjetty;
-    
+
+    private transient String _name;
     private transient FormAuthenticator _formAuthenticator;
     private transient Map _resourceAliases;
     private transient Resource _webApp;
@@ -98,8 +102,7 @@ public class WebApplicationContext extends ServletHttpContext
      */
     public WebApplicationContext()
         throws IOException
-    {
-    }
+    {}
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -110,6 +113,62 @@ public class WebApplicationContext extends ServletHttpContext
         throws IOException
     {
         _war=webApp;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void writeExternal(java.io.ObjectOutput out)
+        throws java.io.IOException
+    {
+        out.writeObject(getContextPath());
+        out.writeObject(getVirtualHosts());
+        HttpHandler[] handlers = getHandlers();
+        for (int i=0;i<handlers.length;i++)
+        {
+            if (handlers[i] instanceof WebApplicationHandler)
+                break;
+            out.writeObject(handlers[i]);
+        }
+        out.writeObject(getAttributes());
+        out.writeBoolean(isRedirectNullPath());
+        out.writeInt(getMaxCachedFileSize());
+        out.writeInt(getMaxCacheSize());
+        out.writeBoolean(isDirAllowed());
+        out.writeBoolean(getStatsOn());
+        out.writeObject(getPermissions());
+        
+        out.writeObject(_deploymentDescriptor);
+        out.writeObject(_defaultsDescriptor);
+        out.writeObject(_war);
+        out.writeBoolean(_extract);
+        out.writeBoolean(_ignorewebjetty);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void readExternal(java.io.ObjectInput in)
+        throws java.io.IOException, ClassNotFoundException
+    {
+        setContextPath((String)in.readObject());
+        setVirtualHosts((String[])in.readObject());
+        Object o = in.readObject();
+        
+        while(o instanceof HttpHandler)
+        {
+            addHandler((HttpHandler)o);
+            o = in.readObject();
+        }
+        setAttributes((Map)o);
+        setRedirectNullPath(in.readBoolean());
+        setMaxCachedFileSize(in.readInt());
+        setMaxCacheSize(in.readInt());
+        setDirAllowed(in.readBoolean());
+        setStatsOn(in.readBoolean());
+        setPermissions((PermissionCollection)in.readObject());
+        
+        _deploymentDescriptor=(String)in.readObject();
+        _defaultsDescriptor=(String)in.readObject();
+        _war=(String)in.readObject();
+        _extract=in.readBoolean();
+        _ignorewebjetty=in.readBoolean();
     }
     
     /* ------------------------------------------------------------ */
