@@ -330,11 +330,14 @@ public class HttpResponse extends HttpMessage
             {
                 if (request.getAttribute("javax.servlet.error.status_code")==null)
                 {
+                    // Clear old facades
+                    request.setFacade(null);
+                    setFacade(null);
+                    
                     // Set attributes to describe error
                     request.setAttribute("javax.servlet.error.request_uri",
                                          getHttpRequest().getPath());
-                    request.setAttribute("javax.servlet.error.servlet_name",
-                                         "NOT IMPLEMENTED");
+                    // request.setAttribute("javax.servlet.error.servlet_name","XXX");
                     request.setAttribute("javax.servlet.error.status_code",code_integer);
                     request.setAttribute("javax.servlet.error.message",
                                          message==null?reason:message);
