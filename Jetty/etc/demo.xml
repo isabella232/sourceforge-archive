@@ -46,20 +46,6 @@
   </Call>
   -->
  
-  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- UNCOMMENT TO CONFIGURE Log4jSink (in contrib directory)
-  <Call name="instance" class="org.mortbay.util.Log">
-    <Call name="disableLog"/>
-    <Call name="add">
-      <Arg>
-        <New class="org.mortbay.util.Log4jSink">  
-          <Set name="options">etc/log4j.xml</Set>
-          <Call name="start"/>
-        </New>
-      </Arg>
-    </Call>
-  </Call>
-  -->
 
 
   <!-- =============================================================== -->
