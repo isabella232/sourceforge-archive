@@ -32,9 +32,9 @@ read Y
     unset JETTY_HOME
     [ -d Jetty ] && mv Jetty Jetty.cvs
     cvs $CVS_ARGS rtag $CVS_BRANCH -F Jetty_$TAG Jetty
-    cvs $CVS_ARGS export -P -r Jetty_$TAG Jetty
+    cvs $CVS_ARGS export -r Jetty_$TAG Jetty
     cd $HOME/Jetty
-    rm -fr src/com webappsrc/com
+    rm -fr FileBase servlets doc docroot src/com webappsrc webapps/default webapps/examples webapps/jetty testdocs
     ant all tidy || exit 1
     cd ..
     mv Jetty Jetty-$VERSION
