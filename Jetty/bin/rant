@@ -9,7 +9,7 @@ do
     break;
   else
     pwd
-    [ `pwd` = '/' ] && break;
+    [ "`pwd`" = '/' ] && break;
     cd ..
   fi
 done
