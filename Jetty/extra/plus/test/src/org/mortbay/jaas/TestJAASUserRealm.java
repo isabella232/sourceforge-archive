@@ -148,7 +148,7 @@ public class TestJAASUserRealm extends TestCase
         JAASUserRealm realm = new JAASUserRealm ("testRealm");
 
         realm.setLoginModuleName ("jdbc");
-        realm.setCallbackHandler (new DefaultCallbackHandler());
+        realm.setCallbackHandlerClass ("org.mortbay.jaas.callback.DefaultCallbackHandler");
         realm.setRoleCheckPolicy (new StrictRoleCheckPolicy());
         
 
