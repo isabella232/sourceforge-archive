@@ -41,6 +41,7 @@ public class ThreadPool
     /* ------------------------------------------------------------------- */
     private String _name;
     private Pool _pool;
+    private Object _join=new Object();
 
     private transient int _threadId=0;
     private transient boolean _started;
@@ -275,9 +276,33 @@ public class ThreadPool
     public void stop()
         throws InterruptedException
     {
+        synchronized(this)
+        {
+            if (_reserved!=null)
+            {
+                _pool.put(_reserved);
+                _reserved=null;
+            }
+        }
         _started=false;
         _pool.stop();
-        _reserved=null;
+        synchronized(_join)
+        {
+            _join.notifyAll();
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void join()
+    {
+        while(isStarted() && _pool!=null)
+        {
+            synchronized(_join)
+            {
+                try{if (isStarted() && _pool!=null)_join.wait(30000);}
+                catch (Exception e) {Code.ignore(e);}
+            }
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -402,9 +427,9 @@ public class ThreadPool
             _id=id;
             _name=_pool.getPoolName()==null
                 ?("PoolThread-"+id):(_pool.getPoolName()+"-"+id);
-            setName(_name);
-            setDaemon(pool.getAttribute(__DAEMON)!=null);
-            start();
+            this.setName(_name);
+            this.setDaemon(pool.getAttribute(__DAEMON)!=null);
+            this.start();
         }
 
         /* ------------------------------------------------------------ */
