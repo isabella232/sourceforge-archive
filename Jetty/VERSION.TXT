@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-4.0.1 - 
+Jetty-4.0.1 -
  + Implemented the run-as servlet tag.
  + Added confidential and integral redirections to HttpListener
  + Fixed ServletResponse.reset() to resetBuffer.

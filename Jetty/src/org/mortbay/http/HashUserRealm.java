@@ -319,17 +319,17 @@ public class HashUserRealm extends HashMap implements UserRealm
 
         public String getName()
         {
-            return user.getName();
+            return "role:"+role;
         }
                 
         public boolean isAuthenticated()
         {
-            return user.isAuthenticated();
+            return true;
         }
         
         public boolean isUserInRole(String role)
         {
-            return this.role.equals(role) || user.isUserInRole(role);
+            return this.role.equals(role);
         }
     }
 }
