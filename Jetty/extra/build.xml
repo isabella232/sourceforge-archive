@@ -90,7 +90,7 @@ Other targets:
   <!-- ==================================================================== -->
   <!-- Tidy                                                                -->
   <!-- ==================================================================== -->
-  <target name="tidy" depends="tidy.plus,tidy.loadbalancer,tidy.ftp,tidy.jdk1.2,clean.j2ee">
+  <target name="tidy" depends="tidy.plus,tidy.loadbalancer,tidy.ftp,tidy.jdk1.2,tidy.j2ee">
   </target>
 
   <target name="tidy.plus">
