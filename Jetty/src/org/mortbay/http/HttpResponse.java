@@ -327,7 +327,7 @@ public class HttpResponse extends HttpMessage
                 exClass=exClass.getSuperclass();
             }
             
-            if (error_page==null)
+            if (error_page==null && _handlerContext!=null)
                 error_page = _handlerContext.getErrorPage(""+code);
 
             if (error_page!=null)
