@@ -56,25 +56,6 @@ public class MultiMap extends HashMap
     }
     
     /* ------------------------------------------------------------ */
-    /** Constructor. 
-     * @param map 
-     */
-    public MultiMap(MultiMap map)
-    {
-        super((map.size()*3)/2);
-        
-        Iterator i = map.entrySet().iterator();
-        while(i.hasNext())
-        {
-            Map.Entry entry =
-                (Map.Entry)i.next();
-            Object value=entry.getValue();
-            super.put(entry.getKey(),value==null?null:((LazyList)value).clone());
-        }   
-    }
-    
-    
-    /* ------------------------------------------------------------ */
     /** Get multiple values.
      * Single valued entries are converted to singleton lists.
      * @param name The entry key. 
@@ -258,13 +239,19 @@ public class MultiMap extends HashMap
      */
     public void putAll(Map m)
     {
+        boolean multi = (m instanceof MultiMap);
         Iterator i = m.entrySet().iterator();
         while(i.hasNext())
         {
             Map.Entry entry =
                 (Map.Entry)i.next();
-            put(entry.getKey(),entry.getValue());
-        }        
+
+            Object value=entry.getValue();
+            if (multi)
+                super.put(entry.getKey(),value==null?null:((LazyList)value).clone());
+            else
+                put(entry.getKey(),value);
+        }
     }
 
     /* ------------------------------------------------------------ */

@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Fixed bug with request dispatcher parameters
+
 Jetty-4.0.D1 - 14 Nov 2001
  + New ContextLoader implementation.
  + New Dispatcher implementation

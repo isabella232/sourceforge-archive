@@ -74,55 +74,38 @@ public class UrlEncoded extends MultiMap
         StringBuffer result = new StringBuffer(128);
         synchronized(result)
         {
-            Iterator i = entrySet().iterator();
-            String separator="";
-            while(i.hasNext())
+            Iterator iter = entrySet().iterator();
+            while(iter.hasNext())
             {
-                Map.Entry entry =
-                    (Map.Entry)i.next();
+                Map.Entry entry = (Map.Entry)iter.next();
                 
                 String key = entry.getKey().toString();
-                Object value = entry.getValue();
-
-                // encode single values and extract multi values
-                if (value==null)
+                LazyList list = (LazyList)entry.getValue();
+                int s=LazyList.size(list);
+                
+                if (s==0)
                 {
-                    result.append(separator);
-                    separator="&";
                     result.append(URLEncoder.encode(key));
-                    if (equalsForNullValue)
+                    if(equalsForNullValue)
                         result.append('=');
-                }
-                else if (value instanceof List)
-                {
-                    // encode multi values
-                    List values=(List)value;
-                    for (int v=0; v<values.size();v++)
-                    {
-                        result.append(separator);
-                        separator="&";
-                        result.append(URLEncoder.encode(key));
-                        String val=(String)values.get(v);
-                        if (val!=null && val.length()>0)
-                        {
-                            result.append('=');
-                            result.append(URLEncoder.encode(val));
-                        }
-                        else if (equalsForNullValue)
-                            result.append('=');
-                    }
                 }
                 else
                 {
-                    // Encode single item
-                    String val=value.toString();
-                    result.append(separator);
-                    separator="&";
-                    result.append(URLEncoder.encode(key));
-                    if (equalsForNullValue || val.length()>0)
+                    for (int i=0;i<s;i++)
                     {
-                        result.append('=');
-                        result.append(URLEncoder.encode(val));
+                        if (i>0)
+                            result.append('&');
+                        
+                        Object val=list.get(i);
+                        result.append(URLEncoder.encode(key));
+
+                        if (val!=null)
+                        {
+                            result.append('=');
+                            result.append(URLEncoder.encode(val.toString()));
+                        }
+                        else if (equalsForNullValue)
+                            result.append('=');
                     }
                 }
             }
