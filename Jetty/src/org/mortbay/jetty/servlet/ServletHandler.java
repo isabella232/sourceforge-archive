@@ -414,8 +414,11 @@ public class ServletHandler
     {
         MultiException mx = new MultiException();
         // Sort and Initialize servlets
+        HashSet holder_set = new HashSet(_servletMap.size()+_nameMap.size());
+        holder_set.addAll(_servletMap.values());
+        holder_set.addAll(_nameMap.values());
         ServletHolder holders [] = (ServletHolder [])
-            (new HashSet(_servletMap.values ())).toArray(new ServletHolder [0]);
+            holder_set.toArray(new ServletHolder [holder_set.size()]);
         java.util.Arrays.sort (holders);        
         for (int i=0; i<holders.length; i++)
         {

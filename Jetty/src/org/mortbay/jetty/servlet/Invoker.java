@@ -112,6 +112,7 @@ public class Invoker extends HttpServlet
         RequestDispatcher rd = getServletContext().getNamedDispatcher(servletClass);
         if (rd!=null)
         {
+            System.err.println("Forward to named: "+servletClass);
             rd.forward(request,response);
             return;
         }

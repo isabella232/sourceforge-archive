@@ -312,7 +312,7 @@ public class ServletHolder extends Holder
                IOException
     {
         if (_class==null)
-            throw new UnavailableException("Unknown Servlet class");
+            throw new UnavailableException("Servlet Not Initialized");
         
         Servlet servlet=getServlet();
         
