@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Force security disassociation.
+
 Jetty-4.0.2 - 6 June 2002
  + Fixed web.dtd references.
  + Fixed handler/context start order.
