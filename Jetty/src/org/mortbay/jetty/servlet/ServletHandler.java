@@ -670,6 +670,8 @@ public class ServletHandler
         }
         
         // redirect to login page
+        if (httpRequest.getQuery()!=null)
+            uri+="?"+httpRequest.getQuery();
         session.setAttribute(__J_URI, URI.addPaths(request.getContextPath(),uri));
         response.sendRedirect(URI.addPaths(request.getContextPath(),
                                            shandler.getLoginPage()));
