@@ -271,9 +271,28 @@ if not "%ACTION%"=="restart" goto try_run
         goto END
 
 :try_run
-if not "%ACTION%"=="run" goto try_check
+if not "%ACTION%"=="run" goto try_service
         echo "Running Jetty: "
         echo "STARTED `date`" >>%JETTY_LOG%\jetty.out
+        %RUN_CMD%
+        goto END
+
+:try_service
+if not "%ACTION%"=="service" goto try_check
+        echo "Running Jetty as Service: "
+        echo "Made service `date`" >>%JETTY_LOG%\jetty.out
+        set JAVA_DLL_PATH=%JAVA_HOME%\jre\bin
+        set JVM_PATH=%JAVA_DLL_PATH%\hotspot
+        if exist %JVM_PATH%\jvm.dll goto run_service
+        set JVM_PATH=%JAVA_DLL_PATH%\classic
+        if exist %JVM_PATH%\jvm.dll goto run_service
+        set JVM_PATH=%JAVA_DLL_PATH%
+
+        :run_service
+        set PATH=%JVM_PATH%;%PATH%
+        copy %JETTY_HOME%\win32\service\jettysvc.exe %JVM_PATH%
+        set RUN_CMD=%JVM_PATH%\jettysvc.exe -i -Djava.class.path=%CLASSPATH% -Djetty.home=%JETTY_HOME% -Djetty.log=%JETTY_LOG% %CONFIGS% wrkdir=%JETTY_HOME%
+		  echo %RUN_CMD%
         %RUN_CMD%
         goto END
 
@@ -284,7 +303,7 @@ if not "%ACTION%"=="check" goto no_action
         goto END
 
 :no_action
-echo "Usage: %0 {start|stop|run|restart|check} [ CONFIGS ... ] "
+echo "Usage: %0 {start|stop|run|restart|service|check} [ CONFIGS ... ] "
 goto ERROR
 
 :ERROR
