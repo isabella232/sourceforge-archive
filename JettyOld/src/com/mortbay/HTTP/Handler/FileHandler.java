@@ -89,11 +89,12 @@ public class FileHandler extends NullHandler
 		   " PATHINFO=",pathInfo,
 		   " FILENAME=",filename);
 	
+	
 	// check filename
 	boolean endsWithSlash= filename.endsWith("/");
 	if (endsWithSlash)
 	    filename = filename.substring(0,filename.length()-1);
-	endsWithSlash=endsWithSlash || path.endsWith("/");
+	
 	
 	Code.debug("Looking for ",uri," in ",filename);
 	
@@ -124,6 +125,8 @@ public class FileHandler extends NullHandler
 	    {
 		if (!endsWithSlash)
 		{
+		    Code.debug("Redirect to directory/");
+		    
 		    int port=request.getServerPort();
 		    String q=request.getQueryString();
 		    if (q!=null&&q.length()==0)
@@ -197,7 +200,7 @@ public class FileHandler extends NullHandler
 	if (parent)
 	{
 	    table.newRow();
-	    table.addCell(new Link(base+"..","Parent Directory"));
+	    table.addCell(new Link(base+"../","Parent Directory"));
 	}
 	
 	DateFormat dfmt=DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
@@ -207,8 +210,11 @@ public class FileHandler extends NullHandler
 	{
 	    File item = new File(file.getPath()+File.separator+ls[i]);
 	    table.newRow();
-	    table.addCell(new Link(base+ls[i],ls[i])+"&nbsp;");
-	    table.addCell(item.length()+"bytes&nbsp;").cell().right();
+	    String uri=base+ls[i];
+	    if (item.isDirectory())
+		uri+="/";
+	    table.addCell(new Link(uri,ls[i])+"&nbsp;");
+	    table.addCell(item.length()+" bytes&nbsp;").cell().right();
 	    table.addCell(dfmt.format(new Date(item.lastModified())));
 	}
 	
