@@ -13,7 +13,7 @@
   <Set name="PassivationStrategy">
 
     <New class="org.codehaus.wadi.plugins.FilePassivationStrategy"><!-- File based persistance -->
-      <Arg><SystemProperty name="wadi.home"/>/tmp</Arg><!-- put evicted sessions ${wadi.home}/tmp -->
+      <Arg><SystemProperty name="wadi.home"/>/tmp</Arg>
 
       <!-- evicted sessions will be gzipped -->
       <Set name="StreamingStrategy">
@@ -44,8 +44,5 @@
   <!-- Multicast address:port over which session location protocol runs -->
   <Set name="AutoLocationAddress">228.5.6.7</Set>
   <Set name="AutoLocationPort">6789</Set>
-
-  <!-- not yet used -->
-  <Set name="BucketName"><SystemProperty name="bucket.name"/></Set>
 
 </Configure>
