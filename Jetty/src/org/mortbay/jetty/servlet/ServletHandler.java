@@ -125,6 +125,27 @@ public class ServletHandler extends AbstractHttpHandler
         if (isStarted())
             throw new IllegalStateException("Started");
 
+        int mii=0;
+        boolean setMii=false;
+ 
+        if ( _sessionManager!=null)
+        {
+            mii=_sessionManager.getMaxInactiveInterval();
+            setMii=true;
+            if (getHttpContext()!=null)
+                _sessionManager.initialize(null);
+        }
+
+        _sessionManager=sm;
+
+        if (_sessionManager!=null)
+        {
+            if (getHttpContext()!=null)
+                _sessionManager.initialize(this);
+            if (setMii)
+                _sessionManager.setMaxInactiveInterval(mii);
+        } 
+        
         _sessionManager=sm;
     }
     

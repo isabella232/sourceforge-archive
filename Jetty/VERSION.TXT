@@ -5,6 +5,7 @@ Jetty Versions
  + Fixed HEAD with empty chunk bug.
  + Fixed jetty.home/work handling
  + Fixed setDate thread safety
+ + Fixed SessionManager init
 
 Jetty-5.0.beta1 - 24 December 2003
  + SecurityConstraints not reset by stop() on custom context
