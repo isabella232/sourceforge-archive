@@ -885,7 +885,7 @@ public class HttpRequest extends HttpMessage
                 return _cookies;
             }
             
-            ArrayList cookies=new ArrayList(4);
+            LazyList cookies=null;
             int version=0;
             Cookie cookie=null;
 
@@ -962,7 +962,7 @@ public class HttpRequest extends HttpMessage
                     cookie=new Cookie(n,v);
                     if (version>0)
                         cookie.setVersion(version);
-                    cookies.add(cookie);
+                    cookies=LazyList.add(cookies,cookie);
                 }
                 catch(Exception e)
                 {
@@ -971,9 +971,9 @@ public class HttpRequest extends HttpMessage
                 }
             }
 
-            _cookies=new Cookie[cookies.size()];
-            if (cookies.size()>0)
-                cookies.toArray(_cookies);
+            _cookies=new Cookie[LazyList.size(cookies)];
+            for (int i=0;i<_cookies.length;i++)
+                _cookies[i]=(Cookie)LazyList.get(cookies,i);
         }
         catch(Exception e)
         {
