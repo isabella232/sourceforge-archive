@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.19 - 19 Mar 2004
  + Fixed DOS attack problem
 
 Jetty-4.2.18 - 1 Mar 2004
