@@ -275,7 +275,7 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public boolean isSecure()
     {
-        return "https".equalsIgnoreCase(_httpRequest.getScheme());
+        return _httpRequest.isConfidential();
     }
     
     /* ------------------------------------------------------------ */

@@ -66,9 +66,7 @@ public class URLResource extends Resource
         }
 
         if (_connection!=null)
-        {
             _connection=null;
-        }
     }
 
     /* ------------------------------------------------------------ */

@@ -421,6 +421,24 @@ public class HttpRequest extends HttpMessage
             scheme=_connection.getDefaultScheme();
         return scheme==null?"http":scheme;
     }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if this request came over an integral channel such as SSL
+     */
+    public boolean isIntegral()
+    {
+        return _connection.getListener().isIntegral(_connection);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if this request came over an confidential channel such as SSL.
+     */
+    public boolean isConfidential()
+    {
+        return _connection.getListener().isConfidential(_connection);
+    }
     
     /* ------------------------------------------------------------ */
     /** Get the request host.

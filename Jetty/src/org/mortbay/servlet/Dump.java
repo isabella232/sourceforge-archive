@@ -137,6 +137,9 @@ public class Dump extends HttpServlet
             table.addHeading("getRequestURI:&nbsp;").cell().right();
             table.addCell(""+request.getRequestURI());
             table.newRow();
+            table.addHeading("getRequestURL:&nbsp;").cell().right();
+            table.addCell(""+request.getRequestURL());
+            table.newRow();
             table.addHeading("getContextPath:&nbsp;").cell().right();
             table.addCell(""+request.getContextPath());
             table.newRow();
@@ -178,6 +181,10 @@ public class Dump extends HttpServlet
             table.newRow();
             table.addHeading("getRequestedSessionId:&nbsp;").cell().right();
             table.addCell(""+request.getRequestedSessionId());                                           
+            table.newRow();
+            table.addHeading("isSecure():&nbsp;").cell().right();
+            table.addCell(""+request.isSecure());
+            
             table.newRow();
             table.addHeading("isUserInRole(dumpRole):&nbsp;").cell().right();
             table.addCell(""+request.isUserInRole("dumpRole"));

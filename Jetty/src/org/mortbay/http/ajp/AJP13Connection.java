@@ -129,6 +129,16 @@ public class AJP13Connection extends HttpConnection
     }
 
     /* ------------------------------------------------------------ */
+    /** Get the listeners Default scheme. 
+     * Conveniance method equivalent to getListener().getDefaultProtocol().
+     * @return HttpServer.
+     */
+    public String getDefaultScheme()
+    {
+        return _isSSL?HttpMessage.__SSL_SCHEME:super.getDefaultScheme();
+    }
+    
+    /* ------------------------------------------------------------ */
     public boolean isSSL()
     {
         return _isSSL;
