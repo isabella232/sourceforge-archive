@@ -6,6 +6,7 @@
 package com.mortbay.HTTP;
 
 import com.mortbay.Base.Code;
+import com.mortbay.Util.URI;
 import java.io.*;
 import javax.servlet.*;
 
@@ -23,17 +24,17 @@ public class HttpRequestDispatcher implements javax.servlet.RequestDispatcher
 {
 
     HttpServer _server;
-    String _path;
+    URI _uri;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param server 
      * @param URL 
      */
-    HttpRequestDispatcher(HttpServer server, String path)
+    HttpRequestDispatcher(HttpServer server, String uri)
     {
         _server = server;
-        _path = path;
+	URI _uri = new URI(uri);
     }
 
     
@@ -50,10 +51,8 @@ public class HttpRequestDispatcher implements javax.servlet.RequestDispatcher
     {
         HttpRequest req = (HttpRequest) request;
         HttpResponse res = (HttpResponse) response;
-        req.setRequestPath(_path);
-	req.getHttpResponse().preReDispatch();
+        req.setRequestPath(_uri.getPath(),_uri.getParameters());
         _server.handle(req,res);
-	req.getHttpResponse().postReDispatch();
     }
     
 
@@ -70,13 +69,13 @@ public class HttpRequestDispatcher implements javax.servlet.RequestDispatcher
     {
         HttpRequest req = (HttpRequest) request;
         HttpResponse res = (HttpResponse) response;
-	Code.debug("Include ",_path);
-	req.getHttpResponse().preReDispatch();
-        req.setResourcePath(_path);
+	Code.debug("Include ",_uri.getPath());
+	req.getHttpResponse().preInclude();
+        req.setResourcePath(_uri.getPath(),_uri.getParameters());
         _server.handle(req,res);
-	req.getHttpResponse().postReDispatch();
+	req.getHttpResponse().postInclude();
+        req.setResourcePath(null,null);
     }
-    
 };
 
 

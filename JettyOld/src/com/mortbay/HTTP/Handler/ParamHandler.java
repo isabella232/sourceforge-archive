@@ -67,7 +67,8 @@ public class ParamHandler extends NullHandler
          throws IOException
     {
         Code.debug("ParamHandler");
-        request.decodeFormParameters();
+	if (request.getMethod().equals(HttpRequest.POST))
+	    request.decodeFormParameters();
         if (includeCookiesAsParameters)
             request.cookiesAsParameters();
     }

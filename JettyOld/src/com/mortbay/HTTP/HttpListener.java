@@ -25,6 +25,9 @@ import java.net.*;
 */
 public class HttpListener extends ThreadedServer
 {
+    public static boolean frameDebug = 
+	System.getProperties().get("FRAMEDEBUG")!=null;
+
     /* ------------------------------------------------------------ */
     public static Class[] ConstructArgs =
     {
@@ -100,6 +103,7 @@ public class HttpListener extends ThreadedServer
     {
         try
         {
+	    if(frameDebug) Log.event("CONNECT: "+connection);
             while(true)
             {
                 HttpRequest request = null;
@@ -115,6 +119,8 @@ public class HttpListener extends ThreadedServer
                                    request.getMethod(),
                                    " ",
                                    request.getRequestURI());
+		    if(frameDebug) Log.event("REQUEST: "+request.getMethod()+
+					     " "+request.getRequestURI());
             
                     response=new HttpResponse(connection.getOutputStream(),
                                               request);
@@ -122,6 +128,7 @@ public class HttpListener extends ThreadedServer
                     server.handle(request,response);
 
                     response.complete();
+		    if(frameDebug) Log.event("RESPONSE: "+response.getStatus());
                 
                     String connection_header =response.getHeader(response.Connection);
                     if (connection_header!=null)
@@ -146,7 +153,8 @@ public class HttpListener extends ThreadedServer
                 }
                 catch (Exception e)
                 {
-                    Code.debug(e);
+		    if(frameDebug) Code.warning(e);
+		    else Code.debug(e);
                     
                     // If no respones - must have a request error
                     if (response==null)
@@ -167,6 +175,8 @@ public class HttpListener extends ThreadedServer
                     if (response!=null)
                         response.destroy();
                 }
+
+		if(frameDebug) Log.event("KEEPALIVE: "+connection);
             }
         }
         catch (Exception e)
@@ -176,6 +186,7 @@ public class HttpListener extends ThreadedServer
         finally
         {
             try{
+		if(frameDebug) Log.event("CLOSE: "+connection);
                 connection.close();
             }
             catch (IOException e){

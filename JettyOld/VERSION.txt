@@ -1,3 +1,8 @@
+  + Form parameters only decoded for POSTs UNTESTED! need to check spec
+  + RequestDispathcer handles URI parameters UNTESTED!
+  + Fixed bug with RequestDispatcher.include()
+  + Fixed caste problem in UrlEncoded
+  + Fixed null pointer in ThreadedServer with stopAll
 
 Release 2.3.5 - 25th January 2000 LATEST 
   + Fixed nasty bug with HTTP/1.1 redirects.

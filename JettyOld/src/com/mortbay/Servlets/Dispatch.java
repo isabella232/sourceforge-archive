@@ -61,6 +61,19 @@ public class Dispatch extends HttpServlet
 
 	    pout.write("<HL><H1>Included ");
 	}
+	else if (info.startsWith("/INCLUDE/"))
+	{
+	    info=info.substring(8);
+	    OutputStream out = sres.getOutputStream();
+	    PrintWriter pout = new PrintWriter(out);
+	    pout.write("<H1>Include: "+info+"</H1><HL>");
+	    pout.flush();
+
+	    RequestDispatcher dispatch = getServletContext().getRequestDispatcher(info);
+	    dispatch.include(sreq,sres);
+
+	    pout.write("<HL><H1>Included ");
+	}
 	else if (info.startsWith("/forward/"))
 	{
 	    info=info.substring(8);
@@ -72,6 +85,7 @@ public class Dispatch extends HttpServlet
 	    PrintWriter pout = sres.getWriter();
 	    pout.write("<H1>Dispatch URL must be of the form: "+
 		       "<BR>/Dispatch/include/path"+
+		       "<BR>/Dispatch/INCLUDE/path"+
 		       "<BR>/Dispatch/forward/path</H1>");
 	    pout.flush();
 	}

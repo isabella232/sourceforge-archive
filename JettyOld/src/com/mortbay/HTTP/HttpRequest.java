@@ -95,6 +95,8 @@ public class HttpRequest extends HttpHeader
     private HttpResponse response=null;
     private BufferedReader reader=null;
     private int inputState=0;
+
+    private Dictionary redirectParams = null;
     
     /* -------------------------------------------------------------- */
     /** Construct received request.
@@ -229,11 +231,9 @@ public class HttpRequest extends HttpHeader
         return uri.getPath();
     }
     
+    
     /* -------------------------------------------------------------- */
     /** Set the URI path 
-     * @return For the given example, this would return <PRE>
-     * /Servlet/Path/Foo/Bar
-     * </PRE>
      */
     public void setRequestPath(String path)
     {
@@ -241,6 +241,19 @@ public class HttpRequest extends HttpHeader
             uri.setPath(path);
         servletPath=null;
         pathInfo=path;
+    }
+
+    /* -------------------------------------------------------------- */
+    /** Set the URI path and redirect params
+     */
+    public void setRequestPath(String path, Dictionary params)
+    {
+        if (uri!=null && path!=null)
+            uri.setPath(path);
+        servletPath=null;
+        pathInfo=path;
+
+	redirectParams=params;
     }
     
     /* ------------------------------------------------------------ */
@@ -272,9 +285,10 @@ public class HttpRequest extends HttpHeader
      * the requestPath unmodified when calling a new resource for content.
      * @param path 
      */
-    public void setResourcePath(String path)
+    public void setResourcePath(String path, Dictionary params)
     {
         resourcePath=path;
+	redirectParams=params;
     }
     
     /* -------------------------------------------------------------- */
@@ -382,7 +396,7 @@ public class HttpRequest extends HttpHeader
         
         servletPath=null;
         pathInfo=path;
-        setResourcePath(path);
+        setResourcePath(path,null);
         if (translateURI)
             uri.setPath(getResourcePath());
     }
@@ -748,8 +762,11 @@ public class HttpRequest extends HttpHeader
      */
     public String getParameter(String name)
     {
-        Object value = uri.get(name);
-        
+        Object value=null;
+	if (redirectParams!=null)
+	    value = redirectParams.get(name);
+	if (value==null)
+	    value = uri.get(name);
         if (value==null && formParameters!=null)
             value = formParameters.get(name);
         if (value==null && cookieParameters!=null)

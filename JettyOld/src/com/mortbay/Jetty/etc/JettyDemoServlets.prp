@@ -80,6 +80,9 @@ SERVLET.Laf.PROPERTY.ResourceBase   : /laf
 SERVLET.Index.PATHS		    : /Jetty|;/Jetty/Info|;/Jetty/Demo|;/Jetty/Program|;/Jetty/Config|
 SERVLET.Index.CLASS		    : com.mortbay.Jetty.DemoIndex
 
+SERVLET.Dispatch.CLASS		    : com.mortbay.Servlets.Dispatch
+SERVLET.Dispatch.PATHS		    : /Dispatch%
+
 SERVLET.gnujsp.PATHS		    : /jsp/*.jsp
 SERVLET.gnujsp.CLASS		    : org.gjt.jsp.JSPServlet
 SERVLET.gnujsp.CLASSPATH            : ./lib/gnujsp.jar
