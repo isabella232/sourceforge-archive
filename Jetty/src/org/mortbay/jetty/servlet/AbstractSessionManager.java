@@ -193,11 +193,11 @@ public abstract class AbstractSessionManager implements SessionManager
     {
         if (_random==null)
         {
-            Log.event("New random session seed");
+            Code.debug("New random session seed");
             _random=new Random();
         }
         else
-            Log.event("Initializing random session key: "+_random);
+            Code.debug("Initializing random session key: ",_random);
         _random.nextLong();
         
         if (_sessions==null)
@@ -314,7 +314,7 @@ public abstract class AbstractSessionManager implements SessionManager
                     try {
                         if (period!=_scavengePeriodMs)
                         {
-                            Log.event("Session scavenger period = "+_scavengePeriodMs/1000+"s");
+                            Code.debug("Session scavenger period = "+_scavengePeriodMs/1000+"s");
                             period=_scavengePeriodMs;
                         }
                         sleep(period>1000?period:1000);
@@ -328,7 +328,7 @@ public abstract class AbstractSessionManager implements SessionManager
             finally
             {
                 AbstractSessionManager.this._scavenger=null;
-                Log.event("Session scavanger exited");
+                Code.debug("Session scavanger exited");
             }
         }
 

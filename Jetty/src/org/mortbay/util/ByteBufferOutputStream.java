@@ -81,6 +81,7 @@ public class ByteBufferOutputStream extends OutputStream
     {
         out.write(_buf,_start,_end-_start);
     }
+    
 
     /* ------------------------------------------------------------ */
     public void write(int b)

@@ -1004,7 +1004,7 @@ public class HttpContext implements LifeCycle
                 
                 if (_tmpDir.isDirectory() && _tmpDir.canWrite())
                 {
-                    Log.event("Converted to File "+_tmpDir+" for "+this);
+                    Code.debug("Converted to File ",_tmpDir," for ",this);
                     setAttribute("javax.servlet.context.tempdir",_tmpDir);
                     return _tmpDir;
                 }
@@ -1048,13 +1048,13 @@ public class HttpContext implements LifeCycle
             
             if (_tmpDir.exists())
             {
-                Log.event("Delete existing temp dir "+_tmpDir+" for "+this);
+                Code.debug("Delete existing temp dir ",_tmpDir," for ",this);
                 IO.delete(_tmpDir);
             }
             
             _tmpDir.mkdir();
             _tmpDir.deleteOnExit();
-            Log.event("Created temp dir "+_tmpDir+" for "+this);
+            Code.debug("Created temp dir ",_tmpDir," for ",this);
         }
         catch(Exception e)
         {
@@ -1071,7 +1071,7 @@ public class HttpContext implements LifeCycle
                     _tmpDir.delete();
                 _tmpDir.mkdir();
                 _tmpDir.deleteOnExit();
-                Log.event("Created temp dir "+_tmpDir+" for "+this);
+                Code.debug("Created temp dir ",_tmpDir," for ",this);
             }
             catch(IOException e)
             {

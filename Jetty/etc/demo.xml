@@ -25,7 +25,15 @@
   -->
 
 
-  <!-- Configure the listeners -->
+  <!-- =============================================================== -->
+  <!-- Configure the Request Listeners                                 -->
+  <!-- =============================================================== -->
+
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Add a HTTP listener on port 8080                                -->
+  <!-- The default port can be changed using: java -Djetty.port=80     -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.SocketListener">
@@ -42,7 +50,11 @@
   </Call>
 
 
-<!--  Uncomment this to add an SSL listener.
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Add a HTTPS SSL listener on port 8843                           -->
+  <!-- Uncomment this section to activate this listener                -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!--  
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.SunJsseListener">
@@ -59,8 +71,12 @@
       </New>
     </Arg>
   </Call>
--->
+  -->
 
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Add a AJP13 listener on port 8009                               -->
+  <!-- This protocol can be used with mod_jk in apache, IIS etc.       -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.ajp.AJP13Listener">
@@ -76,14 +92,44 @@
   </Call>
 
 
-  <!-- Configure the content -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Add and configure a NIO HTTP listener to port 8888              -->
+  <!-- The default port can be changed using: java -Djetty.port=80     -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!--
+  <Call name="addListener">
+    <Arg>
+      <New class="org.mortbay.http.SocketChannelListener">
+        <Set name="Port"><SystemProperty name="jetty.port" default="8888"/></Set>
+        <Set name="MinThreads">3</Set>
+        <Set name="MaxThreads">50</Set>
+        <Set name="MaxIdleTimeMs">30000</Set>
+        <Set name="MaxReadTimeMs">10000</Set>
+        <Set name="MaxStopTimeMs">5000</Set>
+      </New>
+    </Arg>
+  </Call>
+  -->
 
+  
+
+  <!-- =============================================================== -->
+  <!-- Configure the Contexts                                          -->
+  <!-- =============================================================== -->
+
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Add root context web applications.                              -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Call name="addWebApplication">
     <Arg>/</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/root</Arg>
   </Call>
 
 
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Add jetty demo web applications.                                -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Call name="addWebApplication">
     <Arg>/jetty/*</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/jetty</Arg>
@@ -98,11 +144,18 @@
     -->
   </Call>
 
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Add tomcat examples web applications.                           -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Call name="addWebApplication">
     <Arg>/examples/*</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/examples</Arg>
   </Call>
 
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Build a demo context manually.                                  -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Call name="addContext">
     <Arg>/demo/*</Arg>
 
@@ -160,6 +213,9 @@
 
 
 
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Build the javadoc context.                                      -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Call name="addContext">
     <Arg>/javadoc/*</Arg>
     <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/javadoc/</Set>
@@ -168,6 +224,9 @@
     </Call>
   </Call>
 
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Build the cgi-bin context.                                      -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Call name="addContext">
     <Arg>/cgi-bin/*</Arg>
     <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/cgi-bin/</Set>
@@ -180,6 +239,9 @@
   </Call>
 
 
+  <!-- =============================================================== -->
+  <!-- Configure the Authentication Realms                             -->
+  <!-- =============================================================== -->
   <Call name="addRealm">
     <Arg>
       <New class="org.mortbay.http.HashUserRealm">
@@ -198,6 +260,9 @@
     </Arg>
   </Call>
 
+  <!-- =============================================================== -->
+  <!-- Configure the Request Log                                       -->
+  <!-- =============================================================== -->
   <Set name="RequestLog">
     <New class="org.mortbay.http.NCSARequestLog">
       <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.request.log</Arg>

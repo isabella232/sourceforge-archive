@@ -792,29 +792,12 @@ public class HttpConnection
      * handled, an error has been returned to the requestor or the
      * connection has been closed.
      * The handleNext() is called in a loop until it returns false.
-     * <P>
-     * The Connection is set as a ThreadLocal of the calling thread and is
-     * available via the getHttpConnection() method.
      */
     public final void handle()
     {
-        __threadConnection.set(this);
-        try
-        {
-            while(_listener.isStarted())
-            {
-                if (!handleNext())
-                    break;
-                if (_request!=null)
-                    _request.recycle(this);
-                if (_response!=null)
-                    _response.recycle(this);
-            }
-        }
-        finally
-        {
-            __threadConnection.set(null);
-        }
+        while(_listener.isStarted())
+            if (!handleNext())
+                break;
     }
     
     /* ------------------------------------------------------------ */
@@ -823,6 +806,9 @@ public class HttpConnection
      * service each request received on the connection.
      * If the thread is a PoolThread, the thread is set as inactive
      * when waiting for a request. 
+     * <P>
+     * The Connection is set as a ThreadLocal of the calling thread and is
+     * available via the getHttpConnection() method.
      * @return true if the connection is still open and may provide
      * more requests.
      */
@@ -832,6 +818,7 @@ public class HttpConnection
         PoolThread poolThread=(_handlingThread instanceof PoolThread)
             ? ((PoolThread)_handlingThread):null;
         
+        __threadConnection.set(this);
         HttpContext context=null;
         try
         {   
@@ -1039,7 +1026,7 @@ public class HttpConnection
                         content_length>=0 && bytes_written>0 && content_length!=bytes_written)
                     {
                     Code.warning("Invalid length: Content-Length="+content_length+
-                                 " bytes written="+bytes_written+
+                                 " written="+bytes_written+
                                  " for "+_request.getRequestURL());
                     _persistent=false;
                     try{_outputStream.close();}
@@ -1049,6 +1036,8 @@ public class HttpConnection
             }
             finally
             {
+                __threadConnection.set(null);
+                
                 // stats & logging
                 statsRequestEnd();
                 
@@ -1056,7 +1045,13 @@ public class HttpConnection
                     context.log(_request,_response,bytes_written);
                 
                 if (_persistent)
+                {
                     _listener.persistConnection(this);
+                    if (_request!=null)
+                        _request.recycle(this);
+                    if (_response!=null)
+                        _response.recycle(this);
+                }
                 else
                     destroy();
             }

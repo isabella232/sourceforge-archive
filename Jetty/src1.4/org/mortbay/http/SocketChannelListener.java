@@ -44,9 +44,8 @@ public class SocketChannelListener
     private boolean _lastOut=false;
     private ServerSocketChannel _acceptChannel;
     private Selector _selector;
-    private ArrayList _jobList=new ArrayList();
-    private ArrayList _pending=new ArrayList();
-    private Iterator _jobs;
+    private SelectorThread _selectorThread;
+    private ArrayList _idling=new ArrayList();
     private int _maxReadTimeMs=0;
     private int _lingerTimeSecs=30;
     private String _integralScheme=HttpMessage.__SSL_SCHEME;
@@ -151,6 +150,23 @@ public class SocketChannelListener
         return _address.getPort();
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return The InetSocketAddress of the listener
+     */
+    public InetSocketAddress getInetSocketAddress()
+    {
+        return _address;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param address The InetSocketAddress of the listener
+     */
+    public void setInetSocketAddress(InetSocketAddress address)
+    {
+        _address=address;
+    }
 
     /* ------------------------------------------------------------ */
     /** Set Max Read Time.
@@ -211,139 +227,42 @@ public class SocketChannelListener
 	// Register accepts on the server socket with the selector.
         _acceptChannel.register(_selector,SelectionKey.OP_ACCEPT);
 
+        // Start selector thread
+        _selectorThread=new SelectorThread();
+        _selectorThread.start();
+            
         // Start the thread Pool
         super.start();
+        Log.event("Started SocketChannelListener on "+getInetSocketAddress());
     }
     
     /* ------------------------------------------------------------ */
     public void stop()
         throws InterruptedException
     {
-        super.stop();
-        try{_selector.close();}catch(Exception e){Code.warning(e);}
-        try{_acceptChannel.close();}catch(Exception e){Code.warning(e);}
-        _jobs=null;
-        _jobList.clear();
-    }
-
-    /* ------------------------------------------------------------ */
-    protected  Object getJob(int idleTimeoutMs)
-        throws InterruptedException, InterruptedIOException
-    {
-        synchronized(_jobList)
+        if (_selectorThread!=null)
         {
-            if (_jobs==null || !_jobs.hasNext())
-            {
-                if (!isStarted() || !_selector.isOpen())
-                    return null;
-                
-                _jobs=null;
-                _jobList.clear();
-                try
-                {
-                    // Add pending Idle connections.
-                    synchronized(_pending)
-                    {
-                        // Make sure all cancelled keys are handled.
-                        if (_pending.size()>0)
-                            _selector.selectNow();
-
-                        // Register pending.
-                        for (int i=0;i<_pending.size();i++)
-                        {
-                            Connection c = (Connection)_pending.get(i);
-                            SocketChannel sc = c.getSocketChannel();
-                            sc.configureBlocking(false);
-                            sc.register(_selector,SelectionKey.OP_READ,c);
-                            Code.debug("register ",c);
-                        }
-                        _pending.clear();
-                    }
-
-                    if (Code.debug())
-                        Code.debug("select("+idleTimeoutMs+") on "+_selector.keys());
-
-                    // Select 
-                    if (_selector.select(idleTimeoutMs)>0)
-                    {                    
-                        // For all ready selection Keys.
-                        Iterator ready=_selector.selectedKeys().iterator();
-                        while (ready!=null && ready.hasNext())
-                        {
-                            SelectionKey key = (SelectionKey)ready.next();
-                            ready.remove();
-                            if ((key.interestOps()&SelectionKey.OP_READ)!=0)
-                            {
-                                // We have new connections
-                                HttpConnection connection=(HttpConnection)key.attachment();
-                                Code.debug("READ ready ",connection);
-                                key.cancel();
-                                key.channel().configureBlocking(true);
-                                _jobList.add(connection);
-                            }
-                            else if ((key.interestOps()&SelectionKey.OP_ACCEPT)!=0)
-                            {
-                                // We have connections to accept.
-                                ServerSocketChannel channel = (ServerSocketChannel)key.channel();
-                                SocketChannel sc;
-                                
-                                // Accept new connections
-                                while ((sc=channel.accept())!=null)
-                                {
-                                    Code.debug("Accept: ",sc);
-                                    sc.configureBlocking(true);
-                                    Socket socket = sc.socket();
-                                    
-                                    try {
-                                        if (_maxReadTimeMs>=0)
-                                            socket.setSoTimeout(_maxReadTimeMs);
-                                        if (_lingerTimeSecs>=0)
-                                            socket.setSoLinger(true,_lingerTimeSecs);
-                                        else
-                                            socket.setSoLinger(false,0);
-                                    }
-                                    catch(Exception e){Code.ignore(e);}
-                                    
-                                    HttpConnection connection =
-                                        new Connection(sc,socket);
-                                    _jobList.add(connection);
-
-                                    // only accept single connection
-                                    // if low on resources
-                                    if (isLowOnResources())
-                                        break;
-                                }
-                            }
-                        }
-                    }
-                }
-                catch(Exception e)
-                {
-                    if (Code.debug())
-                        Code.warning(e);
-                    else
-                        Log.event(e.toString());
-                }
-                _jobs=_jobList.iterator();
-            }    
-            
-            if (_jobs!=null && _jobs.hasNext())
-            {
-                Object job=_jobs.next();
-                return job;
-            }
+            _selectorThread._running=false;
+            _selector.wakeup();
+            Thread.yield();
+        }
+        synchronized(this)
+        {
+            if (_selectorThread!=null)
+                _selectorThread.forceStop();
         }
         
-        return null;
+        super.stop();
+        Log.event("Stopped SocketChannelListener on "+getInetSocketAddress());
     }
-    
+
     /* ------------------------------------------------------------ */
     public void handle(Object job)
         throws InterruptedException
     {
         Code.debug("handle "+job);
         
-        if (job instanceof HttpConnection)
+        if (job instanceof Connection)
         {
             Connection connection =(Connection)job;
             try
@@ -353,12 +272,21 @@ public class SocketChannelListener
                     ChunkableInputStream cin=connection.getInputStream();
                     if (cin.available()<=0)
                     {
-                        selectOn(connection);
-                        break;
+                        Thread.yield();
+                        if (cin.available()<=0)
+                        {
+                            Code.debug("Idling ",connection);
+                            synchronized(_idling)
+                            {
+                                _idling.add(connection);
+                            }
+                            _selector.wakeup();
+                            break;
+                        }
                     }
                 }
             }
-            catch(IOException e)
+            catch(Exception e)
             {
                 Code.warning(e);
             }
@@ -368,17 +296,17 @@ public class SocketChannelListener
         
     }
 
-    
     /* ------------------------------------------------------------ */
-    protected void selectOn(HttpConnection connection)
-        throws IOException
+    protected void stopJob(Thread thread, Object job)
     {
-        Code.debug("Idling ",connection);
-        synchronized(_pending)
+        try
         {
-            _pending.add(connection);
+            ((Connection)job).close();
         }
-        _selector.wakeup();
+        catch(IOException e)
+        {
+            Code.warning(e);
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -534,5 +462,132 @@ public class SocketChannelListener
         }
     }
 
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class SelectorThread extends Thread
+    {
+        boolean _running=false;
+        public void run()
+        {
+            try
+            {
+                this.setName("Selector "+_address);
+                _running=true;
 
+                while(_running)
+                {
+                    // Add idling Idle connections.
+                    synchronized(_idling)
+                    {
+                        // Make sure all cancelled keys are handled.
+                        if (_idling.size()>0)
+                            _selector.selectNow();
+                    
+                        // Register idling.
+                        for (int i=0;i<_idling.size();i++)
+                        {
+                            Connection c = (Connection)_idling.get(i);
+                            SocketChannel sc = c.getSocketChannel();
+                            sc.configureBlocking(false);
+                            sc.register(_selector,SelectionKey.OP_READ,c);
+                            Code.debug("register ",c);
+                        }
+                        _idling.clear();
+                    }
+                
+                    // Select
+                    if (Code.debug())
+                    {
+                        Code.debug("select() on "+_selector.keys());
+                        _selector.select();
+                        Code.debug("Selected "+_selector.selectedKeys());
+                    }
+                    else
+                        _selector.select();
+
+                    // handle results of select
+                    if (_selector.selectedKeys().size()>0)
+                    {    
+                        // For all ready selection Keys.
+                        Iterator ready=_selector.selectedKeys().iterator();
+                        while (ready!=null && ready.hasNext())
+                        {
+                            SelectionKey key = (SelectionKey)ready.next();
+                            ready.remove();
+                            if ((key.interestOps()&SelectionKey.OP_READ)!=0)
+                            {
+                                // Un-Idle a connections
+                                HttpConnection connection=(HttpConnection)key.attachment();
+                                Code.debug("READ ready ",connection);
+                                key.cancel();
+                                key.channel().configureBlocking(true);
+                                SocketChannelListener.this.run(connection);
+                            }
+                            else if ((key.interestOps()&SelectionKey.OP_ACCEPT)!=0)
+                            {
+                                // We have connections to accept.
+                                ServerSocketChannel channel = (ServerSocketChannel)key.channel();
+                                SocketChannel sc;
+                            
+                                // Accept new connections
+                                while ((sc=channel.accept())!=null)
+                                {
+                                    Code.debug("Accept: ",sc);
+                                    sc.configureBlocking(true);
+                                    Socket socket = sc.socket();
+                                
+                                    try {
+                                        if (_maxReadTimeMs>=0)
+                                            socket.setSoTimeout(_maxReadTimeMs);
+                                        if (_lingerTimeSecs>=0)
+                                            socket.setSoLinger(true,_lingerTimeSecs);
+                                        else
+                                            socket.setSoLinger(false,0);
+                                    }
+                                    catch(Exception e){Code.ignore(e);}
+                                
+                                    HttpConnection connection =
+                                        new Connection(sc,socket);
+                                    SocketChannelListener.this.run(connection);
+                                
+                                    // only accept single connection
+                                    // if low on resources
+                                    if (isLowOnResources())
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                if (_running)
+                    Code.warning(e.toString());
+                Code.debug(e);
+            }
+            finally
+            {
+                if (_running)
+                    Code.warning("Stopping "+this.getName());
+                else
+                    Log.event("Stopping "+this.getName());
+
+                try{if (_acceptChannel!=null)_acceptChannel.close();}
+                catch (IOException e) {Code.ignore(e);}
+                try{if (_selector!=null)_selector.close();}
+                catch (IOException e) {Code.ignore(e);}
+                
+                _selector=null;
+                _acceptChannel=null;
+                _selectorThread=null;
+            }
+        }
+
+        void forceStop()
+        {
+            Log.event("Force Stop "+this.getName());
+        }
+    }
 }
