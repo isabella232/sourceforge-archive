@@ -20,7 +20,8 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.List;
+import java.util.ArrayList;
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -40,6 +41,8 @@ import org.mortbay.util.StringUtil;
  *
  * The cgi bin directory can be set with the cgibinResourceBase init
  * parameter or it will default to the resource base of the context.
+ *
+ * Note: Must be run unpacked somewhere in the filesystem.
  *
  * @version $Revision$
  * @author Julian Gosnell
@@ -101,25 +104,28 @@ public class CGI extends HttpServlet
 
         _path=getInitParameter("Path");
         Code.debug("CGI: PATH accepted - "+_path);
+        Code.debug("CGI: System.Properties : " + System.getProperties().toString());
     }
 
     /* ------------------------------------------------------------ */
     public void service(HttpServletRequest req, HttpServletResponse res) 
         throws ServletException, IOException
     {
-        Code.debug("CGI: req.getContextPath() : ",req.getContextPath());
-        Code.debug("CGI: req.getServletPath() : ",req.getServletPath());
-        Code.debug("CGI: req.getPathInfo()    : ",req.getPathInfo());
+	String pathInContext =
+	    StringUtil.nonNull(req.getServletPath()) +
+	    StringUtil.nonNull(req.getPathInfo());
 
-        Code.debug("CGI: System.Properties : " + System.getProperties().toString());
+	Code.debug("CGI: req.getContextPath() : "+req.getContextPath());
+        Code.debug("CGI: req.getServletPath() : "+req.getServletPath());
+        Code.debug("CGI: req.getPathInfo()    : "+req.getPathInfo());
+        Code.debug("CGI: _docRoot             : "+_docRoot);
 
-        // pathInfo() actually comprises scriptName/pathInfo...We will
+	
+        // pathInContext may actually comprises scriptName/pathInfo...We will
         // walk backwards up it until we find the script - the rest must
         // be the pathInfo;
 
-        // what about dos - '\'...should we use pathSeparator ?
-
-        String both=req.getPathInfo();
+        String both=pathInContext;
         String first=both;
         String last="";
         File exe=new File(_docRoot, first);
@@ -129,11 +135,11 @@ public class CGI extends HttpServlet
             int index=first.lastIndexOf('/'); 
       
             first=first.substring(0, index);
-            last =both.substring(index, both.length());
+            last=both.substring(index, both.length());
             exe=new File(_docRoot, first);
         }
-    
-        if (first.length()==0 || !exe.exists())
+
+	if (first.length()==0 || !exe.exists())
             res.sendError(404);
 
         exe = exe.getCanonicalFile();
@@ -144,6 +150,7 @@ public class CGI extends HttpServlet
         exec(exe.toString(), last, req, res);
     }
     
+
     /* ------------------------------------------------------------ */
     /* 
      * @param root 
@@ -158,61 +165,58 @@ public class CGI extends HttpServlet
                       HttpServletResponse res)
         throws IOException
     {
-        Code.debug("CGI: execing : "+path);
-        String env[]=
-        {
-            // these ones are from "The WWW Common Gateway Interface Version 1.1"
-            // look at : http://Web.Golux.Com/coar/cgi/draft-coar-cgi-v11-03-clean.html#6.1.1
-            "AUTH_TYPE="                + StringUtil.nonNull(req.getAuthType()),
-            "CONTENT_LENGTH="           + req.getContentLength(),
-            "CONTENT_TYPE="             + StringUtil.nonNull(req.getContentType()),
-            "GATEWAY_INTERFACE="        + "CGI/1.1",
-            "PATH_INFO="                + StringUtil.nonNull(pathInfo),
-            "PATH_TRANSLATED="          + StringUtil.nonNull(req.getPathTranslated()),
-            "QUERY_STRING="             + StringUtil.nonNull(req.getQueryString()),
-            "REMOTE_ADDR="              + req.getRemoteAddr(),
-            "REMOTE_HOST="              + req.getRemoteHost(),
+        Code.debug("CGI: execing: "+path);
 
-            // The identity information reported about the connection by a
-            // RFC 1413 [11] request to the remote agent, if
-            // available. Servers MAY choose not to support this feature, or
-            // not to request the data for efficiency reasons.
-            // "REMOTE_IDENT="             + "NYI",
+	EnvList env = new EnvList();
+	
+	// these ones are from "The WWW Common Gateway Interface Version 1.1"
+	// look at : http://Web.Golux.Com/coar/cgi/draft-coar-cgi-v11-03-clean.html#6.1.1
+	env.set("AUTH_TYPE", req.getAuthType());
+	env.set("CONTENT_LENGTH", Integer.toString(req.getContentLength()));
+	env.set("CONTENT_TYPE", req.getContentType());
+	env.set("GATEWAY_INTERFACE", "CGI/1.1");
+	env.set("PATH_INFO", pathInfo);
+	env.set("PATH_TRANSLATED", req.getPathTranslated());
+	env.set("QUERY_STRING", req.getQueryString());
+	env.set("REMOTE_ADDR", req.getRemoteAddr());
+	env.set("REMOTE_HOST", req.getRemoteHost());
 
-            "REMOTE_USER="              + StringUtil.nonNull(req.getRemoteUser()),
-            "REQUEST_METHOD="           + req.getMethod(),
-            "SCRIPT_NAME="              + req.getRequestURI().substring(0, req.getRequestURI().length() - pathInfo.length()),
-            "SERVER_NAME="              + req.getServerName(),
-            "SERVER_PORT="              + req.getServerPort(),
-            "SERVER_PROTOCOL="          + req.getProtocol(),
-            "SERVER_SOFTWARE="          + getServletContext().getServerInfo(),
-            "HTTP_ACCEPT="              + StringUtil.nonNull(req.getHeader(HttpFields.__Accept)),
-            "HTTP_ACCEPT_CHARSET="      + StringUtil.nonNull(req.getHeader(HttpFields.__AcceptCharset)),
-            "HTTP_ACCEPT_ENCODING="     + StringUtil.nonNull(req.getHeader(HttpFields.__AcceptEncoding)),
-            "HTTP_ACCEPT_LANGUAGE="     + StringUtil.nonNull(req.getHeader(HttpFields.__AcceptLanguage)),
-            "HTTP_FORWARDED="           + StringUtil.nonNull(req.getHeader(HttpFields.__Forwarded)),
-            "HTTP_HOST="                + StringUtil.nonNull(req.getHeader(HttpFields.__Host)),
-            "HTTP_PROXY_AUTHORIZATION=" + StringUtil.nonNull(req.getHeader(HttpFields.__ProxyAuthorization)),
-            "HTTP_REFERER="            + StringUtil.nonNull(req.getHeader(HttpFields.__Referer)),
-            "HTTP_USER_AGENT="          + StringUtil.nonNull(req.getHeader(HttpFields.__UserAgent)),
-        
-            // found these 2 extra headers in request from Jetty - should
-            // they be included ?
-            "HTTP_PRAGMA="              + StringUtil.nonNull(req.getHeader(HttpFields.__Pragma)),
-            "HTTP_COOKIE="              + StringUtil.nonNull(req.getHeader(HttpFields.__Cookie)),
+	// The identity information reported about the connection by a
+	// RFC 1413 [11] request to the remote agent, if
+	// available. Servers MAY choose not to support this feature, or
+	// not to request the data for efficiency reasons.
+	// "REMOTE_IDENT" => "NYI"
 
-            // these extra ones were from printenv on www.dev.nomura.co.uk
-            "HTTPS="                    + (req.isSecure()?"ON":"OFF"),
-            "PATH="                     + _path,
-            //       "DOCUMENT_ROOT="            + root + "/docs",
-            //       "SERVER_URL="               + "NYI - http://us0245",
-            //       "TZ="                       + System.getProperty("user.timezone"),
-        };
-      
+	env.set("REMOTE_USER", req.getRemoteUser());
+	env.set("REQUEST_METHOD", req.getMethod());
+	env.set("SCRIPT_NAME",
+	       req.getRequestURI()
+	       .substring(0, req.getRequestURI().length() - pathInfo.length()));
+	env.set("SERVER_NAME", req.getServerName());
+	env.set("SERVER_PORT", Integer.toString(req.getServerPort()));
+	env.set("SERVER_PROTOCOL", req.getProtocol());
+	env.set("SERVER_SOFTWARE",
+	       getServletContext().getServerInfo());
+
+	Enumeration enum = req.getHeaderNames();
+	while (enum.hasMoreElements())
+	{
+	    String name = (String) enum.nextElement();
+	    String value = req.getHeader(name);
+	    env.set("HTTP_" + name.toUpperCase().replace( '-', '_' ), value);
+	}
+
+	// these extra ones were from printenv on www.dev.nomura.co.uk
+	env.set("HTTPS", (req.isSecure()?"ON":"OFF"));
+	env.set("PATH", _path);
+	// "DOCUMENT_ROOT" => root + "/docs",
+	// "SERVER_URL" => "NYI - http://us0245",
+	// "TZ" => System.getProperty("user.timezone"),
+
         // are we meant to decode args here ? or does the script get them
         // via PATH_INFO ?  if we are, they should be decoded and passed
         // into exec here...
-        Process p=Runtime.getRuntime().exec(path,env);
+        Process p=Runtime.getRuntime().exec(path, env.getEnvArray());
 
         // hook processes input to browser's output (async)
         final InputStream inFromReq=req.getInputStream();
@@ -271,15 +275,57 @@ public class CGI extends HttpServlet
 
             // copy remains of input onto output...
             IO.copy(li, res.getOutputStream());
+
+	    p.waitFor();
+	    int exitValue = p.exitValue();
+	    Code.debug("CGI: p.exitValue(): " + exitValue);
+	    if (0 != exitValue)
+	    {
+		Code.warning("Non-zero exit status ("+exitValue+
+			     ") from CGI program: "+path);
+		if (!res.isCommitted())
+		    res.sendError(500, "Failed to exec CGI");
+	    }
         }
         catch (IOException e)
         {
-            // browser has closed its input stream - we should
-            // terminate script and clean up...
+            // browser has probably closed its input stream - we
+            // terminate and clean up...
             Code.debug("CGI: Client closed connection!");
-            p.destroy();
         }
+	catch (InterruptedException ie)
+        {
+            Code.debug("CGI: interrupted!");
+        }
+	finally
+	{
+            p.destroy();
+	}
+
+	Code.debug("CGI: Finished exec: " + p);
     }
-};
+
+
+    /* ------------------------------------------------------------ */
+    /** private utility class that manages the Environment passed
+     * to exec.
+     */
+    private static class EnvList
+    {
+	private List envList = new ArrayList();
+
+	/** Set a name/value pair, null values will be treated as
+	 * an empty String */
+	public void set(String name, String value) {
+	    envList.add(name + "=" + StringUtil.nonNull(value));
+	}
+
+	/** Get representation suitable for passing to exec. */
+	public String[] getEnvArray()
+	{
+	    return (String[]) envList.toArray(new String[0]);
+	}
+    }
+}
 
 //-----------------------------------------------------------------------------
