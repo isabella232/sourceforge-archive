@@ -130,7 +130,7 @@ public class JDBCUserRealm extends HashUserRealm
             + _userTablePasswordField + " from "
             + _userTable + " where "
             + _userTableUserField + " = ?";
-        _roleSql = "select u." + _roleTableRoleField
+        _roleSql = "select r." + _roleTableRoleField
             + " from " + _roleTable + " r, "
             + _userRoleTable + " u where u."
             + _userRoleTableUserKey + " = ?"
