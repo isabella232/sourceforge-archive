@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-4.2.0rc2 - 14 November 2002
+Jetty-4.2.0 - 14 November 2002
  + Restrict 304 responses to seconds time resolution.
  + Use IE date formatting for speed.
  + Removed jasper source and just include jars from 4.1.12
