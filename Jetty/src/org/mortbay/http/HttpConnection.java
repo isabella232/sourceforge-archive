@@ -40,6 +40,7 @@ public class HttpConnection
 {
     /* ------------------------------------------------------------ */
     private static ThreadLocal __threadConnection=new ThreadLocal();
+    private static boolean __2068_Continues=Boolean.getBoolean("org.mortbay.http.HttpConnection.2068Continue");
     
     /* ------------------------------------------------------------ */
     protected HttpRequest _request;
@@ -470,7 +471,8 @@ public class HttpConnection
             else
                 throw new HttpException(HttpResponse.__417_Expectation_Failed);
         }
-        else if (_inputStream.available()<=0 &&
+        else if (__2068_Continues &&
+                 _inputStream.available()<=0 &&
                  (HttpRequest.__PUT.equals(_request.getMethod()) ||
                   HttpRequest.__POST.equals(_request.getMethod())))
         {

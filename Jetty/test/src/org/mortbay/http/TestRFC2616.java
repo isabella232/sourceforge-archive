@@ -778,30 +778,6 @@ public class TestRFC2616
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200","8.2.3 expect 100")+1;
             
-            // No Expect PUT
-            offset=0;
-            response=listener.getResponses("PUT /R1 HTTP/1.1\n"+
-                                           "Host: localhost\n"+
-                                           "Content-Type: text/plain\n"+
-                                           "Content-Length: 8\n"+
-                                           "\n");
-            Code.debug("RESPONSE: ",response);
-            offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 100 Continue","8.2.3 RFC2068")+1;
-            offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 404","8.2.3 RFC2068")+1;
-            // No Expect PUT
-            offset=0;
-            response=listener.getResponses("POST /R1 HTTP/1.1\n"+
-                                           "Host: localhost\n"+
-                                           "Content-Type: text/plain\n"+
-                                           "Content-Length: 8\n"+
-                                           "\n");
-            Code.debug("RESPONSE: ",response);
-            offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 100 Continue","8.2.3 RFC2068")+1;
-            offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 200","8.2.3 RFC2068")+1;
         }
         catch(Exception e)
         {
