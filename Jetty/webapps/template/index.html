@@ -31,14 +31,23 @@ To start Jetty with JMX use:  <PRE>
   java -Dstart.class=org.mortbay.util.jmx.Main -jar start.jar etc/jetty.mlet
 </PRE>
 
+<p>
 To start a server using the jars and resource in the extra packages, use:
 <PRE>
 java -DSTART=extra/etc/start.config -jar start.jar
 </PRE>
 or
 <PRE>
-java -Dmain.class=org.mortbay.jetty.plus.Server -DSTART=extra/etc/start.config -jar start.jar
+java -DSTART=extra/etc/start.config -jar start.jar
 </PRE>
+<p>
+To start the <A HREF="http://jetty.mortbay.org/jetty/plus/index.html">JettyPlus server</A>, use:
+<PRE>
+java -DSTART=extra/etc/start-plus.config -jar start.jar
+</PRE>
+
+
+
 
 
 
