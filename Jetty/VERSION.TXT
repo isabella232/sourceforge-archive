@@ -5,6 +5,7 @@ Jetty-5.1.2pre0
  + Fixed case of Cookie parameters
  + Support Secure and HttpOnly in session cookies
  + Modified useRequestedID handling to only use unseen IDs
+ + UnavailableException handling from handle
 
 Jetty-4.2.23
  + LineInput handles readers with small internal buffer

@@ -351,12 +351,22 @@ public class ServletHolder extends Holder
         }    
     }
 
-    private Servlet makeUnavailable(UnavailableException e) throws UnavailableException {
+    /* ------------------------------------------------------------ */
+    private Servlet makeUnavailable(UnavailableException e) 
+      throws UnavailableException 
+    {
         _unavailableEx=e;
         _unavailable=-1;
-        if (_unavailableEx.getUnavailableSeconds()>0)
-            _unavailable=System.currentTimeMillis()+
-                1000*_unavailableEx.getUnavailableSeconds();
+        if (e.isPermanent())   
+            _unavailable=-1;
+        else
+	{
+            if (_unavailableEx.getUnavailableSeconds()>0)
+                _unavailable=System.currentTimeMillis()+1000*_unavailableEx.getUnavailableSeconds();
+            else
+                _unavailable=System.currentTimeMillis()+5000; // TODO configure
+	}
+   
         throw _unavailableEx;
     }
 
