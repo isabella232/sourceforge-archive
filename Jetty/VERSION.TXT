@@ -12,6 +12,7 @@ Jetty-3.1.0 - 21 Sep 2001
  + Fix REFFERER in CGI
  + Fix FORM authentication on exact patterns
  + Fix flush on stop bug in logs. 
+ + Fix param reading on CGI servlet
  + New simplified jetty.bat
  + Improved closing of listeners.
  + Optimized List creation
