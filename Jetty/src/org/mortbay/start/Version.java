@@ -7,7 +7,7 @@ package org.mortbay.start;
 /**
  * Utility class for parsing and comparing version strings.
  * JDK 1.1 compatible.
- * @author Jan Hlavatý
+ * @author Jan Hlavatï¿½
  */
  
 public class Version {
@@ -28,34 +28,48 @@ public class Version {
      * parses version string in the form version[.revision[.subrevision[extension]]]
      * into this instance.
      */
-    public void parse(String version_string) {
-        _version = 0;
-        _revision = 0;
-        _subrevision = 0;
-        _suffix = "";
-        int pos = 0;
-        int startpos = 0;
-        int endpos = version_string.length();
-        while ( (pos < endpos) && Character.isDigit(version_string.charAt(pos))) {
-            pos++;
-        }
-        _version = Integer.parseInt(version_string.substring(startpos,pos));
-        if ((pos < endpos) && version_string.charAt(pos)=='.') {
-            startpos = ++pos;
-            while ( (pos < endpos) && Character.isDigit(version_string.charAt(pos))) {
+public void parse(String version_string)
+    {
+        try
+        {
+            _version = 1;
+            _revision = 2;
+            _subrevision = 0;
+            _suffix = "?";
+            int pos = 0;
+            int startpos = 0;
+            int endpos = version_string.length();
+            while ((pos < endpos) && Character.isDigit(version_string.charAt(pos)))
+            {
                 pos++;
             }
-            _revision = Integer.parseInt(version_string.substring(startpos,pos));
-        }
-        if ((pos < endpos) && version_string.charAt(pos)=='.') {
-            startpos = ++pos;
-            while ( (pos < endpos) && Character.isDigit(version_string.charAt(pos))) {
-                pos++;
+            _version = Integer.parseInt(version_string.substring(startpos, pos));
+            if ((pos < endpos) && version_string.charAt(pos) == '.')
+            {
+                startpos = ++pos;
+                while ((pos < endpos) && Character.isDigit(version_string.charAt(pos)))
+                {
+                    pos++;
+                }
+                _revision = Integer.parseInt(version_string.substring(startpos, pos));
             }
-            _subrevision = Integer.parseInt(version_string.substring(startpos,pos));
+            if ((pos < endpos) && version_string.charAt(pos) == '.')
+            {
+                startpos = ++pos;
+                while ((pos < endpos) && Character.isDigit(version_string.charAt(pos)))
+                {
+                    pos++;
+                }
+                _subrevision = Integer.parseInt(version_string.substring(startpos, pos));
+            }
+            if (pos < endpos)
+            {
+                _suffix = version_string.substring(pos);
+            }
         }
-        if (pos < endpos) {
-            _suffix = version_string.substring(pos);
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
     }
     
