@@ -1150,8 +1150,8 @@ public class HttpRequest extends HttpHeader
             {
                 Code.ignore(e);
                 reader=new BufferedReader(new InputStreamReader(getInputStream()));
-                inputState=2;
             }
+            inputState=2;
         }
         return reader;
     }

@@ -1,3 +1,7 @@
+Release 2.3.2 - 17th October 1999 LATEST STABLE
+  + Fixed getReader bug with HttpRequest.
+  + Updated UrlEncoded with Jetty3 version.
+
 Release 2.3.1 - 14th October 1999
   + Force UTF8 for FTP commands
   + Force UTF8 for HTML 
@@ -13,7 +17,7 @@ Release 2.3.1 - 14th October 1999
   + HTTP/1.0 Keep-Alive (about time!).
   + Fixed GNUJSP 1.0 resource bug.
 
-Release 2.3.0 - 5th October 1999 - LATEST
+Release 2.3.0 - 5th October 1999
   + Added SetUID class with native Unix call to set the 
     effective User ID.
   + FTP closes files after put/get.
@@ -28,7 +32,7 @@ Release 2.3.0A - 22 Sep 1999
   + Added BuildJetty.java file.
   + Expanded tabs to spaces in source.
 
-Release 2.2.8 - 15 Sep 1999  -  STABLE
+Release 2.2.8 - 15 Sep 1999
   + Fixed bug in Element.attribute with empty string values.
   + Made translation of getRequestURI() optional.
   + Removed recursion from TranslationHandler
