@@ -407,7 +407,6 @@ public class Dispatcher implements RequestDispatcher
                 super.setAttribute(name,value);
         }
         
-        
         /* ------------------------------------------------------------ */
         public Object getAttribute(String name)
         {

@@ -48,9 +48,9 @@ import javax.servlet.http.HttpServletRequestWrapper;
 public class Invoker extends HttpServlet
 {
     private ServletHandler _servletHandler;
-    private Map.Entry _thisEntry;
+    private Map.Entry _invokerEntry;
     private Map _parameters;
-    private boolean _systemServlets;
+    private boolean _nonContextServlets;
     private boolean _verbose;
         
     /* ------------------------------------------------------------ */
@@ -67,7 +67,7 @@ public class Invoker extends HttpServlet
             String lvalue=value.toLowerCase();
             if ("nonContextServlets".equals(param))
             {
-                _systemServlets=value.length()>0 && value.startsWith("t");
+                _nonContextServlets=value.length()>0 && value.startsWith("t");
             }
             if ("verbose".equals(param))
             {
@@ -86,106 +86,130 @@ public class Invoker extends HttpServlet
     protected void service(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException
     {
+        // Get the requested path and info
+        boolean included=false;
+        String servlet_path=(String)request.getAttribute(Dispatcher.__SERVLET_PATH);
+        if (servlet_path==null)
+            servlet_path=request.getServletPath();
+        else
+            included=true;
+        String path_info = (String)request.getAttribute(Dispatcher.__PATH_INFO);
+        if (path_info==null)
+            path_info=request.getPathInfo();
+        
         // Get the servlet class
-        String servletClass = request.getPathInfo();
-        if (servletClass==null || servletClass.length()<=1 )
+        String servlet = path_info;
+        if (servlet==null || servlet.length()<=1 )
         {
             response.sendError(404);
             return;
         }
         
-        int i0=servletClass.charAt(0)=='/'?1:0;
-        int i1=servletClass.indexOf('/',i0);
-        String info=i1<0?null:servletClass.substring(i1);
-        servletClass=i1<0?servletClass.substring(i0):servletClass.substring(i0,i1);           
-        if (servletClass.endsWith(".class"))
-            servletClass=servletClass.substring(0,servletClass.length()-6);
-        if (servletClass==null || servletClass.length()==0)
-        {
-            response.sendError(404);
-            return;
-        }
-                    
-        // Determine the path spec
-        String path=URI.addPaths(request.getServletPath(),servletClass);
-        
-        // Try a named dispatcher
-        RequestDispatcher rd = getServletContext().getNamedDispatcher(servletClass);
-        if (rd!=null)
-        {
-            rd.forward(new NamedRequest(request,servletClass),response);
-            return;
-        }
-        
-        synchronized(_servletHandler)
-        {
-            // setup this entry
-            if (_thisEntry==null)
-                _thisEntry=_servletHandler.getHolderEntry(request.getServletPath());
-            
-            // Look for existing mapping
-            Map.Entry entry = _servletHandler.getHolderEntry(path);
+        int i0=servlet.charAt(0)=='/'?1:0;
+        int i1=servlet.indexOf('/',i0);
+        String info=i1<0?null:servlet.substring(i1);
+        servlet=i1<0?servlet.substring(i0):servlet.substring(i0,i1);
 
-            if (entry==null || entry==_thisEntry)
+        // look for a named holder
+        ServletHolder holder=_servletHandler.getServletHolder(servlet);
+        if (holder!=null)
+        {
+            // Add named servlet mapping
+            _servletHandler.addServletHolder(URI.addPaths(servlet_path,servlet)+"/*",holder);
+        }
+        else
+        {
+            // look for a class mapping
+            if (servlet.endsWith(".class"))
+                servlet=servlet.substring(0,servlet.length()-6);
+            if (servlet==null || servlet.length()==0)
             {
-                // Make a holder
-                ServletHolder holder=new ServletHolder(_servletHandler,servletClass,servletClass);
-                if (_parameters!=null)
-                    holder.putAll(_parameters);
-                
-                try {holder.start();}
-                catch (Exception e)
-                {
-                    Code.debug(e);
-                    throw new UnavailableException(e.toString());
-                }
-
-                // Check it is from an allowable classloader
-                if (!_systemServlets)
-                {
-                    Object servlet=holder.getServlet();
-                    
-                    if (_servletHandler.getClassLoader()!=
-                        servlet.getClass().getClassLoader())
-                    {
-                        holder.stop();
-                        String msg=
-                            "Dynamic servlet "+
-                            servletClass+
-                            " not loaded from context "+
-                            request.getContextPath();
-                        Code.warning(msg);
-                        throw new UnavailableException(msg);
-                    }
-                }
-
-                if (_verbose)
-                    log("Dynamic load '"+servletClass+"' at "+path);
-                _servletHandler.addServletHolder(path+"/*",holder);
-                _servletHandler.addServletHolder(path+".class/*",holder);
-            }
-
-            // Dispatch to path
-            rd=request.getRequestDispatcher(URI.encodePath(URI.addPaths(path,info)));
-            if (rd!=null)
-                rd.forward(request,response);
-            else
                 response.sendError(404);
+                return;
+            }   
+        
+            synchronized(_servletHandler)
+            {
+                // find the entry for the invoker
+                if (_invokerEntry==null)
+                    _invokerEntry=_servletHandler.getHolderEntry(servlet_path);
+            
+                // Check for existing mapping (avoid threaded race).
+                String path=URI.addPaths(servlet_path,servlet);
+                Map.Entry entry = _servletHandler.getHolderEntry(path);
+
+                if (entry!=null && entry!=_invokerEntry)
+                {
+                    // Use the holder
+                    holder=(ServletHolder)entry.getValue();       
+                }
+                else
+                {
+                    // Make a holder
+                    holder=new ServletHolder(_servletHandler,servlet,servlet);
+                    
+                    if (_parameters!=null)
+                        holder.putAll(_parameters);
+                    
+                    try {holder.start();}
+                    catch (Exception e)
+                    {
+                        Code.debug(e);
+                        throw new UnavailableException(e.toString());
+                    }
+                    
+                    // Check it is from an allowable classloader
+                    if (!_nonContextServlets)
+                    {
+                        Object s=holder.getServlet();
+                        
+                        if (_servletHandler.getClassLoader()!=
+                            s.getClass().getClassLoader())
+                        {
+                            holder.stop();
+                            Code.warning("Dynamic servlet "+s+
+                                         " not loaded from context "+
+                                         request.getContextPath());
+                            throw new UnavailableException("Not in context");
+                        }
+                    }
+
+                    // Add the holder for all the possible paths
+                    if (_verbose)
+                        log("Dynamic load '"+servlet+"' at "+path);
+                    _servletHandler.addServletHolder(path+"/*",holder);
+                    _servletHandler.addServletHolder(path+".class/*",holder);
+                }
+            }
+            
         }
+        
+        if (holder!=null)
+            holder.handle(new Request(request,included,servlet,servlet_path,path_info),
+                          response);
+        else
+            response.sendError(404);
+        
     }
 
     /* ------------------------------------------------------------ */
-    class NamedRequest extends HttpServletRequestWrapper
+    class Request extends HttpServletRequestWrapper
     {
         String _servletPath;
         String _pathInfo;
+        boolean _included;
         
         /* ------------------------------------------------------------ */
-        NamedRequest(HttpServletRequest request,String name)
+        Request(HttpServletRequest request,
+                boolean included,
+                String name,
+                String servletPath,
+                String pathInfo)
         {
             super(request);
-            _servletPath=URI.addPaths(request.getServletPath(),name);
-            _pathInfo=request.getPathInfo().substring(name.length()+1);
+            _included=included;
+            _servletPath=URI.addPaths(servletPath,name);
+            _pathInfo=pathInfo.substring(name.length()+1);
             if (_pathInfo.length()==0)
                 _pathInfo=null;
         }
@@ -193,13 +217,32 @@ public class Invoker extends HttpServlet
         /* ------------------------------------------------------------ */
         public String getServletPath()
         {
+            if (_included)
+                return super.getServletPath();
             return _servletPath;
         }
         
         /* ------------------------------------------------------------ */
         public String getPathInfo()
         {
+            if (_included)
+                return super.getPathInfo();
             return _pathInfo;
+        }
+        
+        /* ------------------------------------------------------------ */
+        public Object getAttribute(String name)
+        {
+            if (_included)
+            {
+                if (name.equals(Dispatcher.__REQUEST_URI))
+                    return URI.addPaths(URI.addPaths(getContextPath(),_servletPath),_pathInfo);
+                if (name.equals(Dispatcher.__PATH_INFO))
+                    return _pathInfo;
+                if (name.equals(Dispatcher.__SERVLET_PATH))
+                    return _servletPath;
+            }
+            return super.getAttribute(name);
         }
     }
 }

@@ -138,8 +138,10 @@ public class RequestDispatchTest extends HttpServlet
         else if (info.startsWith("/includeN/"))
         {
             info=info.substring(10);
+            if (info.indexOf("/")>=0)
+                info=info.substring(0,info.indexOf("/"));
+            
             PrintWriter pout;
-
             if (info.startsWith("/null"))
                 info=info.substring(5);
             else
@@ -164,6 +166,8 @@ public class RequestDispatchTest extends HttpServlet
         else if (info.startsWith("/forwardN/"))
         {
             info=info.substring(10);
+            if (info.indexOf("/")>=0)
+                info=info.substring(0,info.indexOf("/"));
             RequestDispatcher dispatch = getServletContext()
                 .getNamedDispatcher(info);
             if (dispatch!=null)
