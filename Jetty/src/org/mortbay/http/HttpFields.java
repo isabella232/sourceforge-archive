@@ -1074,12 +1074,20 @@ public class HttpFields
                     }
                 }
                 
-                if (field!=null)    
-                    field.reset(buf,i1,i2-i1+1);
+                if (field!=null)
+                {
+                    if (i1>=0)
+                        field.reset(buf,i1,i2-i1+1);
+                    else
+                        field.reset("");
+                }
                 else
                 {
                     // create the field
-                    field=new Field(info,buf,i1,i2-i1+1);
+                    if (i1>=0)
+                        field=new Field(info,buf,i1,i2-i1+1);
+                    else
+                        field=new Field(info,"");
                     
                     // look for chain to add too
                     if(last!=null)

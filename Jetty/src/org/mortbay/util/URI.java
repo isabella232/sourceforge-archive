@@ -952,10 +952,11 @@ public class URI
                 return true;
             if (!(c>='a'&&c<='z' ||
                   c>='A'&&c<='Z' ||
-                  c>='0'&&c<='9' ||
-                  c=='.' ||
-                  c=='+' ||
-                  c=='-'))
+                  (i>0 &&(c>='0'&&c<='9' ||
+                          c=='.' ||
+                          c=='+' ||
+                          c=='-'))
+                  ))
                 break;
         }
         return false;

@@ -333,26 +333,28 @@ abstract public class ThreadedServer extends ThreadPool
     {
         try
         {
-            Socket s;
+            Socket s=null;
             
             if (_soTimeOut!=timeout)
             {
                 _soTimeOut=timeout;
                 _listen.setSoTimeout(_soTimeOut);
             }
-            
-            s=_listen.accept();
-            
-            try {
-                if (getMaxIdleTimeMs()>=0)
-                    s.setSoTimeout(getMaxIdleTimeMs());
-  		if (_lingerTimeSecs>=0)
-  		    s.setSoLinger(true,_lingerTimeSecs);
-  		else
-  		    s.setSoLinger(false,0);
-  	    }
-            catch(Exception e){Code.ignore(e);}
-            
+
+            if (_listen!=null)
+            {
+                s=_listen.accept();
+                
+                try {
+                    if (getMaxIdleTimeMs()>=0)
+                        s.setSoTimeout(getMaxIdleTimeMs());
+                    if (_lingerTimeSecs>=0)
+                        s.setSoLinger(true,_lingerTimeSecs);
+                    else
+                        s.setSoLinger(false,0);
+                }
+                catch(Exception e){Code.ignore(e);}
+            }
             return s;
         }
         catch(java.net.SocketException e)
