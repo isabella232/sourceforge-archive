@@ -8,6 +8,9 @@ Jetty Versions
  + Lowercase jsessionid for URLs only.
  + Made NCSARequestLog easier to extend.
  + Added definitions for RFC2518 WebDav response codes.
+ + removed remaining non portable getBytes() calls 
+ + fixed remove listener bug.
+ + many more optimizations
 
 Jetty-4.2.0rc1 - 2 November 2002
  + Support default mime mapping defined by *

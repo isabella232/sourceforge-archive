@@ -115,8 +115,14 @@ public class HttpResponse extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    public static final byte[] __Continue=
-        "HTTP/1.1 100 Continue\015\012\015\012".getBytes();
+    static byte[] __Continue;
+    static
+    {
+        try{
+            __Continue="HTTP/1.1 100 Continue\015\012\015\012".getBytes(StringUtil.__ISO_8859_1);
+        }
+        catch (Exception e){Code.fail(e);}
+    }
     
     /* -------------------------------------------------------------- */
     private int _status= __200_OK;

@@ -37,7 +37,7 @@ public class URI
     private String _path;
     private String _encodedPath;
     private String _query;
-    private UrlEncoded _parameters = new UrlEncoded();
+    private UrlEncoded _parameters;
     private boolean _dirty;
     
     /* ------------------------------------------------------------ */
@@ -54,7 +54,8 @@ public class URI
         _path=uri._path;
         _encodedPath=uri._encodedPath;
         _query=uri._query;
-        _parameters=(UrlEncoded)uri._parameters.clone();
+        if (uri._parameters!=null && _parameters.size()>0)
+            _parameters=(UrlEncoded)uri._parameters.clone();
         _dirty=false;
     }
     
@@ -68,6 +69,13 @@ public class URI
     public URI(String uri)
         throws IllegalArgumentException
     {
+        setURI(uri);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setURI(String uri)
+        throws IllegalArgumentException
+    {
         try
         {    
             _uri=uri;
@@ -76,73 +84,90 @@ public class URI
             int maxi=uri.length()-1;
             int mark=0;
             int state=0;
-            for (int i=0;i<=maxi;i++)
+            int i=0;
+
+            if (maxi==0 || uri.charAt(0)=='/' && uri.charAt(1)!='/')
             {
-                char c=uri.charAt(i);
-                switch(state)
+                state=3;
+                _scheme=null;
+                _host=null;
+                _port=0;
+            }
+            else
+            {
+                for (i=0;i<=maxi;i++)
                 {
-                  case 0: // looking for scheme or path
-                      if (c==':' &&
-                          uri.charAt(i+1)=='/' &&
-                          uri.charAt(i+2)=='/')
-                      {
-                          // found end of scheme & start of host
-                          _scheme=uri.substring(mark,i);
-                          i+=2;
-                          mark=i+1;
-                          state=1;
-                      }
-                      else if (i==0 && c=='/')
-                      {
-                          // Found path
-                          state=3;
-                      }
-                      else if (i==0 && c=='*')
-                      {
-                          state=5;
-                          _path="*";
-                          _encodedPath="*";
-                          break;
-                      }
-                      continue;
-
-                  case 1: // Get host & look for port or path
-                      if (c==':')
-                      {
-                          // found port
-                          _host=uri.substring(mark,i);
-                          mark=i+1;
-                          state=2;
-                      }
-                      else if (c=='/')
-                      {
-                          // found path
-                          _host=uri.substring(mark,i);
-                          mark=i;
-                          state=3;
-                      }
-                      continue;
-
-                  case 2: // Get port & look for path
-                      if (c=='/')
-                      {
-                          _port=TypeUtil.parseInt(uri,mark,i-mark,10);
-                          mark=i;
-                          state=3;
-                      }
-                      continue;
-                      
-                  case 3: // Get path & look for query
-                      if (c=='?')
-                      {
-                          // Found query
-                          _encodedPath=uri.substring(mark,i);
-                          _path=decodePath(_encodedPath);
-                          mark=i+1;
-                          state=4;
-                          break;
-                      }
-                      continue;
+                    char c=uri.charAt(i);
+                    switch(state)
+                    {
+                      case 0: // looking for scheme or path
+                          if (c==':' &&
+                              uri.charAt(i+1)=='/' &&
+                              uri.charAt(i+2)=='/')
+                          {
+                              // found end of scheme & start of host
+                              _scheme=uri.substring(mark,i);
+                              i+=2;
+                              mark=i+1;
+                              state=1;
+                          }
+                          else if (i==0 && c=='/')
+                          {
+                              // Found path
+                              state=3;
+                          }
+                          else if (i==0 && c=='*')
+                          {
+                              state=5;
+                              _path="*";
+                              _encodedPath="*";
+                              break;
+                          }
+                          continue;
+                          
+                      case 1: // Get host & look for port or path
+                          if (c==':')
+                          {
+                              // found port
+                              _host=uri.substring(mark,i);
+                              mark=i+1;
+                              state=2;
+                          }
+                          else if (c=='/')
+                          {
+                              // found path
+                              _host=uri.substring(mark,i);
+                              mark=i;
+                              state=3;
+                          }
+                          continue;
+                          
+                      case 2: // Get port & look for path
+                          if (c=='/')
+                          {
+                              _port=TypeUtil.parseInt(uri,mark,i-mark,10);
+                              mark=i;
+                              state=3;
+                          }
+                          continue;
+                    }
+                }
+            }
+            
+            
+            // State 3 - Get path & look for query
+            _query=null;
+            for (i++;i<=maxi;i++)
+            {
+                char c=uri.charAt(i); 
+                if (c=='?')
+                {
+                    // Found query
+                    _encodedPath=uri.substring(mark,i);
+                    _path=decodePath(_encodedPath);
+                    mark=i+1;
+                    state=4;
+                    break;
                 }
             }
 
@@ -185,7 +210,13 @@ public class URI
             }
         
             if (_query!=null && _query.length()>0)
+            {
+                if (_parameters==null)
+                    _parameters= new UrlEncoded();
+                else
+                    _parameters.clear();
                 _parameters.decode(_query,__CHARSET);
+            }
             else
                 _query=null;           
         }
@@ -300,7 +331,7 @@ public class URI
      */
     public String getQuery()
     {
-        if (_dirty)
+        if (_dirty && _parameters!=null)
         {
             _query = _parameters.encode(__CHARSET);
             if (_query!=null && _query.length()==0)
@@ -317,8 +348,14 @@ public class URI
     {
         _dirty=true;
         _query=query;
-        _parameters.clear();
-        _parameters.decode(query);
+        
+        if (_parameters!=null)
+            _parameters.clear();
+        else if (query!=null)
+            _parameters=new UrlEncoded();
+        
+        if (query!=null)
+            _parameters.decode(query);
     }
     
     /* ------------------------------------------------------------ */
@@ -327,6 +364,8 @@ public class URI
      */
     public Set getParameterNames()
     {
+        if (_parameters==null)
+            return Collections.EMPTY_SET;
         return _parameters.keySet();
     }
     
@@ -336,17 +375,10 @@ public class URI
      */
     public MultiMap getParameters()
     {
+        if (_parameters==null)
+            _parameters=new UrlEncoded();
         _dirty=true;
         return _parameters;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get the uri query _parameters.
-     * @return the URI query _parameters
-     */
-    public MultiMap cloneParameters()
-    {
-        return (MultiMap)_parameters.clone();
     }
     
     /* ------------------------------------------------------------ */
@@ -355,7 +387,18 @@ public class URI
      */
     public Map getUnmodifiableParameters()
     {
+        if (_parameters==null)
+            return Collections.EMPTY_MAP;
         return Collections.unmodifiableMap(_parameters);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add the uri query _parameters to a MultiMap
+     */
+    public void putParametersTo(MultiMap map)
+    {
+        if (_parameters!=null && _parameters.size()>0)
+            map.putAll(_parameters);
     }
     
     /* ------------------------------------------------------------ */
@@ -363,8 +406,11 @@ public class URI
      */
     public void clearParameters()
     {
-        _dirty=true;
-        _parameters.clear();
+        if (_parameters!=null)
+        {
+            _dirty=true;
+            _parameters.clear();
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -385,8 +431,7 @@ public class URI
      */
     public Object put(Object name, Object value)
     {
-        _dirty=true;
-        return _parameters.put(name,value);
+        return getParameters().put(name,value);
     }
     
     /* ------------------------------------------------------------ */
@@ -394,8 +439,7 @@ public class URI
      */
     public void put(Map values)
     {
-        _dirty=true;
-        _parameters.putAll(values);
+        getParameters().putAll(values);
     }
 
     /* ------------------------------------------------------------ */
@@ -403,6 +447,8 @@ public class URI
      */
     public String get(String name)
     {
+        if (_parameters==null)
+            return null;
         return (String)_parameters.get(name);
     }
     
@@ -413,6 +459,8 @@ public class URI
      */
     public List getValues(String name)
     {
+        if (_parameters==null)
+            return null;
         return _parameters.getValues(name);
     }
     
@@ -421,8 +469,11 @@ public class URI
      */
     public void remove(String name)
     {
-        _dirty=true;
-        _parameters.remove(name);
+        if (_parameters!=null)
+        {
+            _dirty=
+                _parameters.remove(name)!=null;
+        }
     }
     
     /* ------------------------------------------------------------ */

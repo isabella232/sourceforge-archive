@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.mortbay.http.HttpFields;
 import org.mortbay.util.Code;
 import org.mortbay.util.LineInput;
+import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
 /** Multipart Form Data request.
@@ -70,7 +71,7 @@ public class MultiPartRequest
             value(content_type.substring(content_type.indexOf("boundary=")));
         
         Code.debug("Boundary=",_boundary);
-        _byteBoundary= (_boundary+"--").getBytes();
+        _byteBoundary= (_boundary+"--").getBytes(StringUtil.__ISO_8859_1);
         
         loadAllParts();
     }

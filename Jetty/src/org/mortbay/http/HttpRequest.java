@@ -586,7 +586,7 @@ public class HttpRequest extends HttpMessage
             }
         }
 
-        // Search for first space separated chunk
+        // Search for last space separated chunk
         int e1=-1,e2=-1,e3=-1;
         state=0;
     endloop:
@@ -608,7 +608,7 @@ public class HttpRequest extends HttpMessage
                       e2=i;
                   continue;
                   
-              case 2: // skip whitespace after method
+              case 2: // skip whitespace before version
                   e3=i;
                   if (c!=' ')
                       break endloop;
@@ -650,7 +650,10 @@ public class HttpRequest extends HttpMessage
         // handle URI
         try{
             String raw_uri=new String(buf,s3,e3-s3+1);
-            _uri= new URI(raw_uri);
+            if (_uri==null)
+                _uri= new URI(raw_uri);
+            else
+                _uri.setURI(raw_uri);
         }
         catch(IllegalArgumentException e)
         {
@@ -750,7 +753,11 @@ public class HttpRequest extends HttpMessage
         if (_paramsExtracted)
             return;
         _paramsExtracted=true;
-        _parameters=_uri.cloneParameters();
+
+        if (_parameters==null)
+            _parameters=new MultiMap(5);
+
+        _uri.putParametersTo(_parameters);
         
         if (_state==__MSG_RECEIVED)
         {
@@ -1033,7 +1040,7 @@ public class HttpRequest extends HttpMessage
     void recycle(HttpConnection connection)
     {
         _method=null;
-        _uri=null;
+        //_uri=null;
         _host=null;
         _hostPort=null;
         _port=0;
@@ -1057,6 +1064,7 @@ public class HttpRequest extends HttpMessage
      */
     public void destroy()
     {
+        _parameters=null;
         _method=null;
         _uri=null;
         _host=null;

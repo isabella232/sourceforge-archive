@@ -62,8 +62,7 @@ public class SocketListener
     /* ------------------------------------------------------------ */
     public void setHttpServer(HttpServer server)
     {
-        Code.assertTrue(_server==null || _server==server,
-                        "Cannot share listeners");
+        Code.assertTrue(server==null || _server==null || _server==server,"Cannot share listeners");
         _server=server;
     }
 

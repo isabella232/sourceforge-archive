@@ -21,7 +21,7 @@
     <Arg>
       <New class="org.mortbay.http.SocketListener">
         <Set name="port"><SystemProperty name="jetty.port" default="8080"/></Set>
-        <Set name="minThreads">20</Set>
+        <Set name="minThreads">5</Set>
         <Set name="maxThreads">200</Set>
         <Set name="maxIdleTimeMs">30000</Set>
         <Set name="lowResourcePersistTimeMs">1000</Set>
@@ -34,6 +34,7 @@
   <!-- Add a AJP13 listener on port 8009                               -->
   <!-- This protocol can be used with mod_jk in apache, IIS etc.       -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.ajp.AJP13Listener">
@@ -43,12 +44,14 @@
       </New>
     </Arg>
   </Call>
+-->
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add and configure a NIO HTTP listener to port 8888              -->
   <!-- This listener should be used to replace the standard HTTP       -->
   <!-- listener when deployed on LARGE systems using jdk 1.4           -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.SocketChannelListener">
@@ -57,6 +60,7 @@
       </New>
     </Arg>
   </Call>
+-->
 
   <!-- =============================================================== -->
   <!-- Configure the Authentication Realms                             -->

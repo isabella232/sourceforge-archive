@@ -162,8 +162,44 @@ public class UrlEncoded extends MultiMap
      */
     public static void decodeTo(String content, MultiMap map, String charset)
     {
-        if ((content != null) && (content.length() > 0))
-            decodeTo(content.getBytes(), map, charset);
+        if (charset==null)
+            charset=StringUtil.__ISO_8859_1;
+        synchronized(map)
+        {
+            String token;
+            String name;
+            String value;
+
+            StringTokenizer tokenizer =
+                new StringTokenizer(content, "&", false);
+
+            while ((tokenizer.hasMoreTokens()))
+            {
+                token = tokenizer.nextToken();
+                
+                // breaking it at the "=" sign
+                int i = token.indexOf('=');
+                if (i<0)
+                {
+                    name=decodeString(token,charset);
+                    value="";
+                }
+                else
+                {
+                    name=decodeString(token.substring(0,i++),
+                                      charset);
+                    if (i>=token.length())
+                        value="";
+                    else
+                        value = decodeString(token.substring(i),
+                                             charset);
+                }
+
+                // Add value to the map
+                if (name.length() > 0)
+                    map.add(name,value);
+            }
+        }
     }
 
     /* -------------------------------------------------------------- */

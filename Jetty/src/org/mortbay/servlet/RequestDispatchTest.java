@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponseWrapper;
 import org.mortbay.util.Code;
+import org.mortbay.util.StringUtil;
 
 
 /* ------------------------------------------------------------ */
@@ -101,19 +102,19 @@ public class RequestDispatchTest extends HttpServlet
             {
                 OutputStream out=null;
                 out = sres.getOutputStream();
-                out.write(("<H1>Include: "+info+"</H1><HR>").getBytes());   
+                out.write(("<H1>Include: "+info+"</H1><HR>").getBytes(StringUtil.__ISO_8859_1));   
 
                 RequestDispatcher dispatch = getServletContext()
                     .getRequestDispatcher(info);
                 if (dispatch==null)
                 {
                     out = sres.getOutputStream();
-                    out.write("<H1>Null dispatcher</H1>".getBytes());
+                    out.write("<H1>Null dispatcher</H1>".getBytes(StringUtil.__ISO_8859_1));
                 }
                 else
                     dispatch.include(sreq,sres);
                 
-                out.write("<HR><H1>-- Included (outputstream)</H1>".getBytes());
+                out.write("<HR><H1>-- Included (outputstream)</H1>".getBytes(StringUtil.__ISO_8859_1));
             }
         }
         else if (info.startsWith("/forward/"))

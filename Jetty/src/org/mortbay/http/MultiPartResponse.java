@@ -7,6 +7,8 @@ package org.mortbay.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import org.mortbay.util.Code;
+import org.mortbay.util.StringUtil;
 
 /* ================================================================ */
 /** Handle a multipart MIME response.
@@ -17,15 +19,25 @@ import java.io.OutputStream;
 */
 public class MultiPartResponse
 {
-    private static final byte[] __CRLF="\015\012".getBytes();
-    private static final byte[] __DASHDASH="--".getBytes();
+    /* ------------------------------------------------------------ */
+    private static byte[] __CRLF;
+    private static byte[] __DASHDASH;
+    static
+    {
+        try
+        {
+            __CRLF="\015\012".getBytes(StringUtil.__ISO_8859_1);
+            __DASHDASH="--".getBytes(StringUtil.__ISO_8859_1);
+        }
+        catch (Exception e) {Code.fail(e);}
+    }
     
     /* ------------------------------------------------------------ */
     private String boundary =
         "org.mortbay.http.MultiPartResponse.boundary."+
         Long.toString(System.currentTimeMillis(),36);
     
-    private byte[] boundaryBytes = boundary.getBytes();
+    private byte[] boundaryBytes = boundary.getBytes(StringUtil.__ISO_8859_1);
 
     /* ------------------------------------------------------------ */
     public String getBoundary()
@@ -73,7 +85,7 @@ public class MultiPartResponse
         out.write(__DASHDASH);
         out.write(boundaryBytes);
         out.write(__CRLF);
-        out.write(("Content-type: "+contentType).getBytes());
+        out.write(("Content-type: "+contentType).getBytes(StringUtil.__ISO_8859_1));
         out.write(__CRLF);
         out.write(__CRLF);
     }
@@ -90,11 +102,11 @@ public class MultiPartResponse
         out.write(__DASHDASH);
         out.write(boundaryBytes);
         out.write(__CRLF);
-        out.write(("Content-type: "+contentType).getBytes());
+        out.write(("Content-type: "+contentType).getBytes(StringUtil.__ISO_8859_1));
         out.write(__CRLF);
         for (int i=0;headers!=null && i<headers.length;i++)
         {
-            out.write(headers[i].getBytes());
+            out.write(headers[i].getBytes(StringUtil.__ISO_8859_1));
             out.write(__CRLF);
         }
         out.write(__CRLF);

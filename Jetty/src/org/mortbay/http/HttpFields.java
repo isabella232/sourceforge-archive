@@ -427,6 +427,10 @@ public class HttpFields
         }
         
         /* ------------------------------------------------------------ */
+        /** Reassign a value to this field.
+         * Checks if the value is the same as that in the char array, if so
+         * then just reuse existing value.
+         */
         void reset(char[] buf, int offset, int length)
         {  
             _valid=true;
@@ -996,69 +1000,64 @@ public class HttpFields
                     break;
                 
                 // setup loop state machine
-                int state=0;
                 int i1=-1;
                 int i2=-1;
-                int name_i=-1;
                 int name_l=0;
+                int i=0;
+                char c=buf[0];
                 
-                // loop for all chars in buffer
-                for (int i=0;i<line_buffer.size;i++)
+                // Check for continuity line
+                if (c!=' ' && c!='\t')
                 {
-                    char c=buf[i];
-                    
-                    switch(state)
+                    i2=0;
+                    // reading name upto :
+                    for (i=1;i<size;i++)
                     {
-                      case 0: // leading white
-                          if (c==' ' || c=='\t')
-                          {
-                              // continuation line
-                              state=2;
-                              continue;
-                          }
-                          state=1;
-                          i1=i;
-                          i2=i-1;
-                          // fall through to case 1...
-                          
-                      case 1: // reading name
-                          if (c==':')
-                          {
-                              name_i=i1;
-                              name_l=i2-i1+1;                              
-                              state=2;
-                              i1=i;i2=i-1;
-                              continue;
-                          }
-                          if (c!=' '&&c!='\t')
-                              i2=i;
-                          continue;
-                          
-                      case 2: // skip whitespace after :
-                          if (c==' ' || c=='\t')
-                              continue;
-                          state=3;
-                          i1=i;
-                          i2=i-1;
-                          // fall through to case 3...
-                          
-                      case 3: // looking for last non-white
-                          if (c!=' ' && c!='\t')
-                              i2=i;
+                        c=buf[i];
+                        if (c==':')
+                        {
+                            name_l=i2+1; 
+                            break;
+                        }
+                        
+                        if (c!=' '&&c!='\t')
+                            i2=i;
                     }
-                    continue;
+                }   
+
+                // skip whitespace after : or start of continuity line
+                for (i++;i<size;i++)
+                {
+                    c=buf[i];
+                    if (c!=' ' && c!='\t')
+                    {
+                        i1=i;
+                        i2=i-1;
+                        break;
+                    }
                 }
                 
-                if (name_i<0 || name_l==0)
+                // Reverse Parse the "name : value" to last char of value
+                for (i=size;i-->i1;)
                 {
-                    if (state>=2 && last!=null)
-                        // Continuation line
+                    c=buf[i];
+                    if (c!=' ' && c!='\t')
+                    {
+                        i2=i;
+                        break;
+                    }
+                }
+
+                // If no name, it is a continuation line
+                if (name_l<=0)
+                {
+                    if (i1>0 && last!=null)
                         last._value=last._value+' '+new String(buf,i1,i2-i1+1);
                     continue;
                 }
 
                 // create the field.
-                FieldInfo info = getFieldInfo(buf,name_i,name_l);
+                FieldInfo info = getFieldInfo(buf,0,name_l);
                 Field field=getField(info,false);
                 last=null;
                 if (field!=null)
