@@ -34,7 +34,7 @@ import org.mortbay.util.URI;
  * HTTP/1.1 ranges are supported.
  * 
  * @version $Id$
- * @author Nuno Preguiça 
+ * @author Nuno Preguiça
  * @author Greg Wilkins
  */
 public class ResourceHandler extends AbstractHttpHandler
@@ -215,7 +215,7 @@ public class ResourceHandler extends AbstractHttpHandler
             if (resource.exists())
             {
                 setAllowHeader(response);
-                response.sendError(response.__405_Method_Not_Allowed);
+                response.sendError(HttpResponse.__405_Method_Not_Allowed);
             }
             return;
         }
@@ -248,7 +248,7 @@ public class ResourceHandler extends AbstractHttpHandler
                 // anything else...
                 try{
                     if (resource.exists())
-                        response.sendError(response.__501_Not_Implemented);
+                        response.sendError(HttpResponse.__501_Not_Implemented);
                 }
                 catch(Exception e) {Code.ignore(e);}
             }
@@ -373,7 +373,7 @@ public class ResourceHandler extends AbstractHttpHandler
             {
                 if (resource.lastModified()/1000 > date/1000)
                 {
-                    response.sendError(response.__412_Precondition_Failed);
+                    response.sendError(HttpResponse.__412_Precondition_Failed);
                     return false;
                 }
             }
@@ -383,7 +383,7 @@ public class ResourceHandler extends AbstractHttpHandler
                 
                 if (resource.lastModified()/1000 <= date/1000)
                 {
-                    response.setStatus(response.__304_Not_Modified);
+                    response.setStatus(HttpResponse.__304_Not_Modified);
                     request.setHandled(true);
                     return false;
                 }
@@ -413,7 +413,7 @@ public class ResourceHandler extends AbstractHttpHandler
             if (!exists)
             {
                 if (!resource.getFile().mkdirs())
-                    response.sendError(response.__403_Forbidden, "Directories could not be created");
+                    response.sendError(HttpResponse.__403_Forbidden, "Directories could not be created");
                 else
                 {
                     request.setHandled(true);
@@ -449,7 +449,7 @@ public class ResourceHandler extends AbstractHttpHandler
             catch (Exception ex)
             {
                 Code.warning(ex);
-                response.sendError(response.__403_Forbidden,
+                response.sendError(HttpResponse.__403_Forbidden,
                                    ex.getMessage());
             }
         }
@@ -482,7 +482,7 @@ public class ResourceHandler extends AbstractHttpHandler
         catch (SecurityException sex)
         {
             Code.warning(sex);
-            response.sendError(response.__403_Forbidden, sex.getMessage());
+            response.sendError(HttpResponse.__403_Forbidden, sex.getMessage());
         }
     }
 
@@ -501,7 +501,7 @@ public class ResourceHandler extends AbstractHttpHandler
         String newPath = URI.canonicalPath(request.getField("New-uri"));
         if (newPath==null)
         {
-            response.sendError(response.__405_Method_Not_Allowed,
+            response.sendError(HttpResponse.__405_Method_Not_Allowed,
                                "Bad new uri");
             return;
         }
@@ -509,7 +509,7 @@ public class ResourceHandler extends AbstractHttpHandler
         String contextPath = getHttpContext().getContextPath();
         if (contextPath!=null && !newPath.startsWith(contextPath))
         {
-            response.sendError(response.__405_Method_Not_Allowed,
+            response.sendError(HttpResponse.__405_Method_Not_Allowed,
                                "Not in context");
             return;
         }
@@ -527,14 +527,14 @@ public class ResourceHandler extends AbstractHttpHandler
             Code.debug("Moving "+resource+" to "+newFile);
             resource.renameTo(newFile);
     
-            response.setStatus(response.__204_No_Content);
+            response.setStatus(HttpResponse.__204_No_Content);
             request.setHandled(true);
         }
         catch (Exception ex)
         {
             Code.warning(ex);
             setAllowHeader(response);
-            response.sendError(response.__405_Method_Not_Allowed,
+            response.sendError(HttpResponse.__405_Method_Not_Allowed,
                                "Error:"+ex);
             return;
         }
@@ -632,9 +632,9 @@ public class ResourceHandler extends AbstractHttpHandler
         {
             Code.debug("no satisfiable ranges");
             writeHeaders(response, resource, resLength);
-            response.setStatus(response.__416_Requested_Range_Not_Satisfiable);
-            response.setReason((String)response.__statusMsg
-                               .get(TypeUtil.newInteger(response.__416_Requested_Range_Not_Satisfiable)));
+            response.setStatus(HttpResponse.__416_Requested_Range_Not_Satisfiable);
+            response.setReason((String)HttpResponse.__statusMsg
+                               .get(TypeUtil.newInteger(HttpResponse.__416_Requested_Range_Not_Satisfiable)));
 
             response.setField(HttpFields.__ContentRange, 
                               InclusiveByteRange.to416HeaderRangeString(resLength));
@@ -655,9 +655,9 @@ public class ResourceHandler extends AbstractHttpHandler
             Code.debug("single satisfiable range: " + singleSatisfiableRange);
             long singleLength = singleSatisfiableRange.getSize(resLength);
             writeHeaders(response,resource,singleLength);
-            response.setStatus(response.__206_Partial_Content);
-            response.setReason((String)response.__statusMsg
-                               .get(TypeUtil.newInteger(response.__206_Partial_Content)));
+            response.setStatus(HttpResponse.__206_Partial_Content);
+            response.setReason((String)HttpResponse.__statusMsg
+                               .get(TypeUtil.newInteger(HttpResponse.__206_Partial_Content)));
             response.setField(HttpFields.__ContentRange, 
                               singleSatisfiableRange.toHeaderRangeString(resLength));
             OutputStream out = response.getOutputStream();
@@ -677,9 +677,9 @@ public class ResourceHandler extends AbstractHttpHandler
             (HttpContext.ResourceMetaData)resource.getAssociate();
         String encoding = metaData.getEncoding();
         MultiPartResponse multi = new MultiPartResponse(response);
-        response.setStatus(response.__206_Partial_Content);
-        response.setReason((String)response.__statusMsg
-                           .get(TypeUtil.newInteger(response.__206_Partial_Content)));
+        response.setStatus(HttpResponse.__206_Partial_Content);
+        response.setReason((String)HttpResponse.__statusMsg
+                           .get(TypeUtil.newInteger(HttpResponse.__206_Partial_Content)));
 
 	// If the request has a "Request-Range" header then we need to
 	// send an old style multipart/x-byteranges Content-Type. This
