@@ -32,8 +32,13 @@ import java.util.Random;
 
 
 /* ------------------------------------------------------------ */
-/** An in-memory implementation of SessionManager
- * <p>
+/** An Abstract implementation of SessionManager.
+ * The partial implementation of SessionManager interface provides
+ * the majority of the handling required to implement a
+ * SessionManager.  Concrete implementations of SessionManager based
+ * on AbstractSessionManager need only implement the newSession method
+ * to return a specialized version of the Session inner class that
+ * provides an attribute Map.
  *
  * @version $Id$
  * @author Greg Wilkins (gregw)

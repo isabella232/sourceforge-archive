@@ -9,8 +9,17 @@ import org.mortbay.util.LifeCycle;
 
 
 /* ------------------------------------------------------------ */
-/** HTTP request handler.
- *
+/** HTTP handler.
+ * The HTTP Handler interface is implemented by classes that wish to
+ * receive and handle requests from the HttpServer.  The handle method
+ * is called for each request and the handler may ignore, modify or
+ * handle the request.
+ * Examples of HttpHandler instances include:<UL>
+ * <LI>org.mortbay.http.handler.ResourceHandler</LI>
+ * <LI>org.mortbay.jetty.servlet.ServletHandler</LI>
+ * </UL>
+ * @see org.mortbay.http.HttpServer
+ * @see org.mortbay.http.HttpContext
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -49,6 +58,7 @@ public interface HttpHandler extends LifeCycle
     
     /* ------------------------------------------------------------ */
     /** Handle a request.
+     *
      * @param pathInContext The context path
      * @param pathParams Path parameters such as encoded Session ID
      * @param request The request

@@ -2,11 +2,13 @@ Jetty Versions
 --------------
 
 Jetty-4.0.B0 - 4 Feb 2002
+ + Implemented 2.3 security constraint semantics
+   PLEASE REVIEW YOUR SECURITY CONSTRAINTS (see README).
+ + Stop and remove NotFound context for HttpServer
+ + HttpContext destroy
  + Release process builds JettyExtra
  + Welcome files may be relative
  + Fixed HttpFields remove bug
- + Implemented 2.3 security constraint semantics
-   PLEASE REVIEW YOUR SECURITY CONSTRAINTS (see README).
  + Added Array element to XMLConfiguration
  + Allow listener schemes to be set.
  + Added index links to tutorial

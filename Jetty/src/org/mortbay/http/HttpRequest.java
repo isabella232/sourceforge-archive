@@ -934,8 +934,8 @@ public class HttpRequest extends HttpMessage
 
     /* ------------------------------------------------------------ */
     /** Get a request attribute.
-     * @param name 
-     * @return 
+     * @param name Attribute name
+     * @return Attribute value
      */
     public Object getAttribute(String name)
     {
@@ -946,9 +946,9 @@ public class HttpRequest extends HttpMessage
 
     /* ------------------------------------------------------------ */
     /** Set a request attribute.
-     * @param name 
-     * @param attribute 
-     * @return 
+     * @param name Attribute name
+     * @param attribute Attribute value
+     * @return Previous Attribute value
      */
     public Object setAttribute(String name, Object attribute)
     {
@@ -959,7 +959,7 @@ public class HttpRequest extends HttpMessage
 
     /* ------------------------------------------------------------ */
     /** Get Attribute names.
-     * @return 
+     * @return Collection of Strings
      */
     public Collection getAttributeNames()
     {
@@ -970,9 +970,8 @@ public class HttpRequest extends HttpMessage
 
     /* ------------------------------------------------------------ */
     /** Remove a request attribute.
-     * @param name 
-     * @param attribute 
-     * @return 
+     * @param name Attribute name
+     * @return Previous Attribute value
      */
     public void removeAttribute(String name)
     {

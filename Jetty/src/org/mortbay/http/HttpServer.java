@@ -258,12 +258,19 @@ public class HttpServer implements LifeCycle
                 context.stop();
         }
 
+        if (_notFoundContext!=null)
+        {
+            _notFoundContext.stop();
+            remove(_notFoundContext);
+        }
+        _notFoundContext=null;
+        
         if (_requestLog!=null && _requestLog.isStarted())
         {
             _requestLog.stop();
             Log.event("Stoped "+_requestLog);
         }
-
+        
         Log.event("Stopped "+this);
     }
     
@@ -502,9 +509,10 @@ public class HttpServer implements LifeCycle
     public void removeContext(HttpContext context)
         throws IllegalStateException
     {
+        if (_virtualHostMap==null)
+            return;
         if (context.isStarted())
             throw new IllegalStateException("Context not stopped");
-                    
         Iterator i1 = _virtualHostMap.values().iterator();
         while(i1.hasNext())
         {
@@ -741,6 +749,7 @@ public class HttpServer implements LifeCycle
             {
                 _notFoundContext=new HttpContext(this,"/");
                 _notFoundContext.addHttpHandler(new NotFoundHandler());
+                add(_notFoundContext);
                 try{_notFoundContext.start();}catch(Exception e){Code.warning(e);}
             }
             if (!_notFoundContext.handle(request,response))
@@ -1167,7 +1176,8 @@ public class HttpServer implements LifeCycle
 
     /* ------------------------------------------------------------ */
     /** Destroy a stopped server.
-     * Remove all components and send notifications to all event listeners.
+     * Remove all components and send notifications to all event
+     * listeners. The HttpServer must be stopped before it can be destroyed.
      */
     public void destroy()
     {
@@ -1179,13 +1189,15 @@ public class HttpServer implements LifeCycle
         if (_virtualHostMap!=null)
             _virtualHostMap.clear();
         _virtualHostMap=null;
-
+        _notFoundContext=null;
 
         if (_components!=null && _eventListeners!=null)
         {
             for (int c=0;c<_components.size();c++)
             {
                 Object o=_components.get(c);
+                if (o instanceof HttpContext )
+                    ((HttpContext)o).destroy();
                 
                 if (_eventListeners!=null)
                 {

@@ -32,7 +32,7 @@ import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
 /** Context for a collection of HttpHandlers.
- * Handler Context provides an ordered container for HttpHandlers
+ * HTTP Context provides an ordered container for HttpHandlers
  * that share the same path prefix, filebase, resourcebase and/or
  * classpath.
  * <p>
@@ -1411,7 +1411,49 @@ public class HttpContext implements LifeCycle
             thread.setContextClassLoader(lastContextLoader);
         }
         _loader=null;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Destroy a context.
+     * Destroy a context and remove it from the HttpServer. The
+     * HttpContext must be stopped before it can be destroyed.
+     */
+    public void destroy()
+    {
+        if (isStarted())
+            throw new IllegalStateException("Started");
+
+        if (_httpServer!=null)
+            _httpServer.removeContext(this);
+
+        _httpServer=null;
+        if (_handlers!=null)
+            _handlers.clear();
+        _handlers=null;
+        _parent=null;
+        _loader=null;
+        _resourceBase=null;
+        if (_attributes!=null)
+            _attributes.clear();
+        _attributes=null;
+        if (_initParams!=null)
+            _initParams.clear();
+        _initParams=null;
+        if (_hosts!=null)
+            _hosts.clear();
+        _hosts=null;
+        _tmpDir=null;
         
+        _mimeMap=null;
+        _encodingMap=null;
+        if (_resourceAliases!=null)
+            _resourceAliases.clear();
+        _resourceAliases=null;
+        if (_errorPages!=null)
+            _errorPages.clear();
+        _errorPages=null;
+
+        _permissions=null;
     }
     
 
