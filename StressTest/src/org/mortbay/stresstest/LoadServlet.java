@@ -31,11 +31,9 @@ public class LoadServlet extends HttpServlet
         throws ServletException, IOException
     {
         String info=request.getPathInfo();
-        request.setCharacterEncoding("UTF-8");
-
-        Enumeration e = request.getParameterNames();
-        while (e.hasMoreElements())
-            request.getParameter((String)e.nextElement());
+        String encoding=request.getParameter("encoding");
+        if (encoding!=null)
+            request.setCharacterEncoding(encoding);
 
         // Reader r = request.getReader();
         // while (r.read()!=-1);
@@ -48,7 +46,10 @@ public class LoadServlet extends HttpServlet
         response.setContentType("text/plain");
         PrintWriter out = response.getWriter();
         for (int i=0;i<10;i++)
-            out.write("Now is the time for all good men to come to the aid of the party\n");
+        {
+            out.write("Now ");
+            out.write("is the time for all good men to come to the aid of the party\n");
+        }
         out.flush();
     }
 

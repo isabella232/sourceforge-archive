@@ -26,6 +26,8 @@ public class  StressTester implements Runnable
 
     ArrayList _modes = new ArrayList();
     ArrayList _requests = new ArrayList();
+
+    int _tests;
     
     int _loops=0;
     String _host;
@@ -40,19 +42,32 @@ public class  StressTester implements Runnable
     
     public static void main(String[] args) throws Exception
     {
-        if (args.length != 4) 
+        if (args.length<4) 
             usage();
+
+        int i=0;
+        boolean files=false;
+        boolean servlets=false;
+        while(args[i].startsWith("-"))
+        {
+            String option=args[i++];
+            files|=option.equalsIgnoreCase("-file");
+            servlets|=option.equalsIgnoreCase("-servlet");
+        }
+	if (!files && !servlets)
+	    files=servlets=true;
         
-        new StressTester(args[0],Integer.parseInt(args[1]))
-            .stress(Integer.parseInt(args[2]),
-                    Integer.parseInt(args[3]));
+        StressTester tester = new StressTester(args[i++],Integer.parseInt(args[i++]));
+        tester.setTests((files?1:0) + (servlets?2:0));
+        tester.stress(Integer.parseInt(args[i++]),
+                      Integer.parseInt(args[i++]));
     }
 
     static void usage()
     {
         System.err.println("StressTester -- stress a WWW server");
         System.err.println("usage:");
-        System.err.println("java org.mortbay.jetty.StressTester <host> <port> <n-threads> <n-loops>");
+        System.err.println("java org.mortbay.jetty.StressTester [-file|-servlet] <host> <port> <n-threads> <n-loops>");
         System.err.println();
         System.exit(1);
     }
@@ -136,7 +151,11 @@ public class  StressTester implements Runnable
             }    
         }
     }
-    
+
+    void setTests(int tests)
+    {
+        _tests=tests;
+    }
     
     void stress(int nthreads, int loops)
         throws Exception 
@@ -152,6 +171,9 @@ public class  StressTester implements Runnable
             for(int i=0;i<2;i++)
             {
                 _requests=(ArrayList)_modes.get(m++);
+                
+                if (((i+1)&_tests) == 0 )
+                    continue;
                 
                 System.err.println("MODE: "+mode+
                                  (i==0?"/file":"/servlet")+
@@ -183,6 +205,10 @@ public class  StressTester implements Runnable
             for(int i=0;i<2;i++)
             {
                 _requests=(ArrayList)_modes.get(m++);
+
+                if (((i+1)&_tests) == 0 )
+                    continue;
+                
                 _totalConnects=0;
                 _totalRequests=0;
                 _totalFailures=0;
@@ -265,6 +291,7 @@ public class  StressTester implements Runnable
             {
                 
                 Socket socket = new Socket(_host,_port);
+                socket.setTcpNoDelay(true);
                 socket.setSoTimeout(10000);
                 InputStream in = socket.getInputStream();
                 LineInput lin = new LineInput(in);
@@ -281,6 +308,8 @@ public class  StressTester implements Runnable
                     out.write((byte[])_requests.get(j));
                     out.flush();
                     
+		    Thread.yield();
+
                     resLine = lin.readLine();
                     if (resLine==null)
                     {
