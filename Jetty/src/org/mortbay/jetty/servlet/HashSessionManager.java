@@ -65,7 +65,13 @@ public class HashSessionManager extends AbstractSessionManager
         /* ------------------------------------------------------------- */
         protected Session()
         {
-            super(new HashMap(11));
+            super();
+        }
+        
+        /* ------------------------------------------------------------ */
+        protected Map newAttributeMap()
+        {
+            return new HashMap(3);
         }
     }
     

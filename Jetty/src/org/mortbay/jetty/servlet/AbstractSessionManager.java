@@ -15,6 +15,7 @@ import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContext;
@@ -357,13 +358,15 @@ public abstract class AbstractSessionManager implements SessionManager
         HttpSessionEvent _event;
 
         /* ------------------------------------------------------------- */
-        protected Session(Map values)
+        protected Session()
         {
-            _values=values;
             _id=newSessionId(_created);
             if (_dftMaxIdleSecs>=0)
                 _maxIdleMs=_dftMaxIdleSecs*1000;
         }
+
+        /* ------------------------------------------------------------ */
+        protected abstract Map newAttributeMap();
 
         /* ------------------------------------------------------------ */
         HttpSessionEvent getHttpSessionEvent()
@@ -446,28 +449,32 @@ public abstract class AbstractSessionManager implements SessionManager
             throws IllegalStateException
         {
             if (_invalid) throw new IllegalStateException();
-            
-            Iterator iter = _values.keySet().iterator();
-            while (iter.hasNext())
-            {
-                String key = (String)iter.next();
-                Object value = _values.get(key);
-                iter.remove();
-                unbindValue(key, value);
 
-                if (_sessionAttributeListeners.size()>0)
+            if (_values!=null)
+            {
+                Iterator iter = _values.keySet().iterator();
+                while (iter.hasNext())
                 {
-                    HttpSessionBindingEvent event =
-                        new HttpSessionBindingEvent(this,key,value);
+                    String key = (String)iter.next();
+                    Object value = _values.get(key);
+                    iter.remove();
+                    unbindValue(key, value);
                     
-                    for(int i=0;i<_sessionAttributeListeners.size();i++)
+                    if (_sessionAttributeListeners.size()>0)
                     {
-                        ((HttpSessionAttributeListener)
-                         _sessionAttributeListeners.get(i))
-                            .attributeRemoved(event);
+                        HttpSessionBindingEvent event =
+                            new HttpSessionBindingEvent(this,key,value);
+                        
+                        for(int i=0;i<_sessionAttributeListeners.size();i++)
+                        {
+                            ((HttpSessionAttributeListener)
+                             _sessionAttributeListeners.get(i))
+                                .attributeRemoved(event);
+                        }
                     }
                 }
             }
+            
             synchronized (AbstractSessionManager.this)
             {
                 _invalid=true;
@@ -492,6 +499,8 @@ public abstract class AbstractSessionManager implements SessionManager
         public Object getAttribute(String name)
         {
             if (_invalid) throw new IllegalStateException();
+            if (_values==null)
+                return null;
             return _values.get(name);
         }
 
@@ -499,7 +508,7 @@ public abstract class AbstractSessionManager implements SessionManager
         public Enumeration getAttributeNames()
         {
             if (_invalid) throw new IllegalStateException();
-	    ArrayList names = new ArrayList(_values.keySet());
+            List names = _values==null?Collections.EMPTY_LIST:new ArrayList(_values.keySet());
 	    return Collections.enumeration(names);
         }
 
@@ -507,6 +516,8 @@ public abstract class AbstractSessionManager implements SessionManager
         public synchronized void setAttribute(String name, Object value)
         {
             if (_invalid) throw new IllegalStateException();
+            if (_values==null)
+                _values=newAttributeMap();
             Object oldValue = _values.put(name,value);
 
             if (value==null || !value.equals(oldValue))
@@ -541,6 +552,9 @@ public abstract class AbstractSessionManager implements SessionManager
         public synchronized void removeAttribute(String name)
         {
             if (_invalid) throw new IllegalStateException();
+            if (_values==null)
+                return;
+            
             Object old=_values.remove(name);
             if (old!=null)
             {
@@ -581,6 +595,8 @@ public abstract class AbstractSessionManager implements SessionManager
             throws IllegalStateException
         {
             if (_invalid) throw new IllegalStateException();
+            if (_values==null)
+                return new String[0];
             String[] a = new String[_values.size()];
             return (String[])_values.keySet().toArray(a);
         }
