@@ -1,6 +1,11 @@
 Stable 2.4.7
 Dev    3.0.B05
 
+ + Added Multipart request and response classes from Jetty2
+ + Moved and simplified ServletLoader to ContextLoader.
+ + Initialize JSP with classloader.
+ + All attributes in javax. java. and com.mortbay. name spaces to be set.
+
 Jetty-3.0.B05 - 18 Oct 2000
  + Improved null returns to get almost clean watchdog test.
  + Cleaned up response committing and flushing

@@ -579,7 +579,13 @@ abstract public class HttpMessage
             return;
         
         if (Code.verbose(99))
-            Code.debug("commit from "+__state[_state]);
+        {
+            if (Code.verbose(9999))
+                Code.debug("commit from "+__state[_state]+": ",
+                           new Throwable());
+            else
+                Code.debug("commit from "+__state[_state]);
+        }
         
         ChunkableOutputStream out = getOutputStream();
         

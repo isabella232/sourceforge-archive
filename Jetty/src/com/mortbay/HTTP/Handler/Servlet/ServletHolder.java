@@ -70,11 +70,14 @@ public class ServletHolder
         // XXX - This is horrible - got to find a better way.
         if (className.equals("org.apache.jasper.servlet.JspServlet"))
         {
-            Code.debug("Fiddle classpath for Jasper");
-            put("classpath",_handler.getHandlerContext().getClassPath());
+            Code.debug("Fiddle classloader for Jasper");
+            _context.setAttribute("org.apache.tomcat.classloader",
+                                  _handler.getHandlerContext()
+                                  .getClassLoader());
         }
     }
 
+    
     /* ------------------------------------------------------------ */
     public String getServletName()
     {
@@ -135,7 +138,7 @@ public class ServletHolder
     {
         try
         {
-            ServletLoader loader=_context.getHandler().getServletLoader();
+            ClassLoader loader=_context.getHandler().getClassLoader();
             if (loader==null)
                 _servletClass=Class.forName(getClassName());
             else

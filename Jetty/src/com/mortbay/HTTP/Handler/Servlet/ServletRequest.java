@@ -485,14 +485,12 @@ class ServletRequest
     /* -------------------------------------------------------------- */
     public void setAttribute(String name, Object value)
     {
-        Context.checkAttributeName(name);
         _httpRequest.setAttribute(name,value);
     }
     
     /* -------------------------------------------------------------- */
     public void removeAttribute(String name)
     {
-        Context.checkAttributeName(name);
         _httpRequest.removeAttribute(name);
     }
     

@@ -12,14 +12,21 @@ import com.mortbay.HTTP.HttpRequest;
 import com.mortbay.HTTP.HttpResponse;
 import com.mortbay.HTTP.PathMap;
 import com.mortbay.Util.Code;
+import com.mortbay.Util.IO;
 import com.mortbay.Util.Log;
 import com.mortbay.Util.Resource;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.StringTokenizer;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
@@ -37,13 +44,12 @@ import javax.servlet.UnavailableException;
  * @author Greg Wilkins
  */
 public class ServletHandler extends NullHandler 
-{
+{    
     /* ----------------------------------------------------------------- */
     private PathMap _servletMap=new PathMap();
     private Map _nameMap=new HashMap();
     private Context _context;
-    private boolean _autoReload;
-    private ServletLoader _loader;
+    private ClassLoader _loader;
 
     /* ----------------------------------------------------------------- */
     /** Construct basic auth handler.
@@ -68,45 +74,31 @@ public class ServletHandler extends NullHandler
     /* ------------------------------------------------------------ */
     public boolean isAutoReload()
     {
-        return _autoReload;
+        return false;
     }
+    
     /* ------------------------------------------------------------ */
+    /** Not Supported. 
+     * @param autoReload 
+     */
     public void setAutoReload(boolean autoReload)
     {
-        _autoReload = autoReload;
+        if (autoReload==true)
+            Code.warning("AutoReload is no longer supported!\n"+
+                         "It may be resurrected once the URL libraries fully support lastModified");
     }
     
     /* ------------------------------------------------------------ */
-    public ServletLoader getServletLoader()
+    public ClassLoader getClassLoader()
     {
         return _loader;
-    }
-    
-    /* ------------------------------------------------------------ */
-    private synchronized void initializeLoader()
-    {
-        try
-        {
-            String classPath=getHandlerContext().getClassPath();	    
-            if (classPath!=null && classPath.length()>0)
-            {
-                _loader=new ServletLoader(classPath,false);
-                Code.debug("servlet classpath=",classPath);
-            }
-            else
-                _loader=new ServletLoader(null,false);    
-        }
-        catch(Throwable e)
-        {
-            Code.fail(e);
-        }
     }
     
     /* ----------------------------------------------------------------- */
     public void start()
     {
         // Initialize classloader
-        initializeLoader();
+        _loader=getHandlerContext().getClassLoader();
         
         // Initialize servlets
         Iterator i = _servletMap.values().iterator();
@@ -119,8 +111,7 @@ public class ServletHandler extends NullHandler
         
         Log.event("ServletHandler started: "+this);
         super.start();
-    }
-        
+    }   
     
     
     /* ------------------------------------------------------------ */
@@ -191,26 +182,7 @@ public class ServletHandler extends NullHandler
          throws IOException
     {
         try
-        {
-            // Handle reload 
-            if (isAutoReload())
-            {
-                synchronized(this)
-                {
-                    if (_loader.isModified())
-                    {
-                        Log.event("RELOAD "+this);
-                        // XXX Should wait for requests to goto 0;
-                        
-                        // destroy old servlets
-                        destroy();
-                        // New loader
-                        initializeLoader();
-                    }
-                }
-            }
-            
-            
+        {            
             // Build servlet request and response
             ServletRequest request =
                 new ServletRequest(_context,httpRequest);
@@ -223,7 +195,17 @@ public class ServletHandler extends NullHandler
         {
             Code.warning(e);
             System.err.println(httpRequest);
-            throw new HttpException();
+            if (e instanceof HttpException)
+                throw (HttpException)e;
+            if (e instanceof IOException)
+                throw (IOException)e;
+            throw new HttpException(500);
+        }
+        catch(Error e)
+        {
+            Code.warning(e);
+            System.err.println(httpRequest);
+            throw new HttpException(500);
         }
     }
 
@@ -277,17 +259,12 @@ public class ServletHandler extends NullHandler
                 Context.access(session);
             
             // service request
-            try
-            {
-                holder.handle(request,response);
-            }
-            finally
-            {
-                response.setOutputState(0);
-                Code.debug("Handled by ",entry);
-                if (!httpResponse.isCommitted())
-                    httpResponse.commit();
-            }
+            holder.handle(request,response);
+            response.setOutputState(0);
+            Code.debug("Handled by ",entry);
+            if (!httpResponse.isCommitted())
+                httpResponse.commit();
+            
         }
     }
         

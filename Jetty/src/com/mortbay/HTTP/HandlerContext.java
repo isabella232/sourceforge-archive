@@ -12,15 +12,23 @@ import com.mortbay.HTTP.Handler.Servlet.DynamicHandler;
 import com.mortbay.HTTP.Handler.Servlet.ServletHandler;
 import com.mortbay.HTTP.Handler.Servlet.ServletHolder;
 import com.mortbay.Util.Code;
+import com.mortbay.Util.IO;
 import com.mortbay.Util.Resource;
 import com.mortbay.Util.StringUtil;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.StringTokenizer;
 import java.util.List;
 import java.util.Map;
+
 
 /* ------------------------------------------------------------ */
 /** Context for a collection of HttpHandlers.
@@ -42,10 +50,18 @@ import java.util.Map;
  */
 public class HandlerContext
 {
+    public final static String
+        __ResourceBase="com.mortbay.HTTP.HandlerContext.resourceBase",
+        __ClassPath="com.mortbay.HTTP.HandlerContext.classPath",
+        __ClassLoader="com.mortbay.HTTP.HandlerContext.classLoader",
+        __MimeMap="com.mortbay.HTTP.HandlerContext.mimeMap";
+    
     private HttpServer _httpServer;
     private List _handlers=new ArrayList(3);
     private ServletHandler _servletHandler;
     private String _classPath;
+    private ClassLoader _parent;
+    private ClassLoader _loader;
     private Resource _resourceBase;
 
     private Map _attributes = new HashMap(11);
@@ -134,10 +150,10 @@ public class HandlerContext
     {
         return _classPath;
     }
-    
+     
     /* ------------------------------------------------------------ */
     /** Sets the class path for the context.
-     * Also sets the com.mortbay.HTTP.classPath context attribute.
+     * Also sets the com.mortbay.HTTP.HandlerContext.classPath attribute.
      * A class path is only required for a context if it uses classes
      * that are not in the system class path, or if class reloading is
      * to be performed.
@@ -146,9 +162,99 @@ public class HandlerContext
     public void setClassPath(String classPath)
     {
         _classPath = classPath;
-        _attributes.put("com.mortbay.HTTP.classPath",classPath);
+        _loader=null;
+        _attributes.put(__ClassPath,classPath);
     }
 
+    /* ------------------------------------------------------------ */
+    /** Get the classloader.
+     * If no classloader has been set and the context has been loaded
+     * normally, then null is returned.
+     * If no classloader has been set and the context was loaded from
+     * a classloader, that loader is returned.
+     * If a classloader has been set and no classpath has been set then
+     * the set classloader is returned.
+     * If a classloader and a classpath has been set, then a new
+     * URLClassloader initialized on the classpath with the set loader as a
+     * partent is return.
+     * @return Classloader or null.
+     */
+    public synchronized ClassLoader getClassLoader()
+    {
+        if (_loader==null && (_parent!=null ||
+                              _classPath!=null ||
+                              this.getClass().getClassLoader()!=null))
+        {
+            
+            URL[] path=null;    
+            try{
+                // If no parent, then try this classes loader as parent
+                if (_parent==null)
+                    _parent=this.getClass().getClassLoader();
+                
+                Code.debug("Init classloader from "+_classPath+
+                           ", "+_parent+" for "+this);
+            
+                // look for additional classpath
+                if (_classPath!=null)
+                {
+                    StringTokenizer tokenizer =
+                        new StringTokenizer(_classPath,",;");
+                    path = new URL[tokenizer.countTokens()];
+                    int i=0;
+                    while (tokenizer.hasMoreTokens())
+                    {
+                        Resource resource =
+                            Resource.newResource(tokenizer.nextToken());
+                        if (resource.isDirectory() || resource.getFile()!=null)
+                            path[i++]=resource.getURL();
+                        else
+                        {
+                            // XXX - this is a jar in a jar, so we must
+                            // extract it - probably should be to an in memory
+                            // structure, but this will do for now.
+                            // XXX - Need to do better with the temp dir
+                            InputStream in =resource.getInputStream();
+                            File file=File.createTempFile("Jetty",".zip");
+                            file.deleteOnExit();
+                            Code.debug("Extract ",resource," to ",file);
+                            FileOutputStream out = new FileOutputStream(file);
+                            IO.copy(in,out);
+                            out.close();
+                            path[i++]=file.toURL();
+                        }
+                    }
+                }
+            }
+            catch(Exception e){Code.warning(e);}
+            catch(Error e){Code.warning(e);}
+            
+            if (path==null || path.length==0 || path[0]==null)
+                _loader=_parent;
+            else
+                _loader=new ContextLoader(_classPath,path,_parent);
+            _attributes.put(__ClassLoader,_loader);
+        }
+        
+        return _loader;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the class loader.
+     * If a classpath is also set, this classloader is treated as
+     * a parent loader to a URLClassLoader initialized with the
+     * classpath.
+     * Also sets the com.mortbay.HTTP.HandlerContext.classLoader
+     * attribute.
+     * @param loader 
+     */
+    public void setClassLoader(ClassLoader loader)
+    {
+        _parent=loader;
+        _loader=null;
+        _attributes.put(__ClassLoader,loader);
+    }
+   
     /* ------------------------------------------------------------ */
     public Resource getResourceBase()
     {
@@ -161,8 +267,7 @@ public class HandlerContext
     {
         Code.debug("resourceBase=",resourceBase," for ", this);
         _resourceBase=resourceBase;
-        _attributes.put("com.mortbay.HTTP.resourceBase",
-                        _resourceBase.toString());
+        _attributes.put(__ResourceBase,_resourceBase.toString());
     }
     
     /* ------------------------------------------------------------ */
@@ -176,7 +281,7 @@ public class HandlerContext
     {
         try{
             _resourceBase=Resource.newResource(resourceBase);
-            _attributes.put("com.mortbay.HTTP.resourceBase",
+            _attributes.put(__ResourceBase,
                             _resourceBase.toString());
             Code.debug("resourceBase=",_resourceBase," for ", this);
         }
@@ -201,7 +306,7 @@ public class HandlerContext
     public void setMimeMap(Map mimeMap)
     {
         _mimeMap = mimeMap;
-        _attributes.put("com.mortbay.HTTP.mimeMap",_mimeMap);
+        _attributes.put(__MimeMap,_mimeMap);
     }
     
     /* ------------------------------------------------------------ */
@@ -485,6 +590,8 @@ public class HandlerContext
      */
     public Object getAttribute(String name)
     {
+        if (__ClassLoader.equals(name))
+            return getClassLoader();
         return _attributes.get(name);
     }
 
@@ -504,11 +611,13 @@ public class HandlerContext
      */
     public synchronized void setAttribute(String name, Object value)
     {
-        if ("com.mortbay.HTTP.resourceBase".equals(name))
+        if (__ResourceBase.equals(name))
             setResourceBase(value.toString());
-        else if ("com.mortbay.HTTP.classPath".equals(name))
+        else if (__ClassPath.equals(name))
             setClassPath(value.toString());
-        else if ("com.mortbay.HTTP.mimeMap".equals(name))
+        else if (__ClassLoader.equals(name))
+            setClassLoader((ClassLoader)value);
+        else if (__MimeMap.equals(name))
         {
             _mimeMap=(Map)value;
             _attributes.put(name,value);
@@ -525,11 +634,13 @@ public class HandlerContext
      */
     public synchronized void removeAttribute(String name)
     {
-        if ("com.mortbay.HTTP.resourceBase".equals(name))
+        if (__ResourceBase.equals(name))
             setResourceBase((String)null);
-        else if ("com.mortbay.HTTP.classPath".equals(name))
+        else if (__ClassPath.equals(name))
             setClassPath(null);
-        else if ("com.mortbay.HTTP.mimeMap".equals(name))
+        else if (__ClassLoader.equals(name))
+            setClassLoader(null);
+        else if (__MimeMap.equals(name))
         {
             _mimeMap=null;
             _attributes.remove(name);

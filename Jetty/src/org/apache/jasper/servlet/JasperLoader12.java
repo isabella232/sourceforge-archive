@@ -177,4 +177,7 @@ public class JasperLoader12 extends JasperLoader {
         }
     }
 
+    public String toString() {
+        return "JspLoader1.2( " +  options.getScratchDir()   + " ) / " + parent;
+    }
 }

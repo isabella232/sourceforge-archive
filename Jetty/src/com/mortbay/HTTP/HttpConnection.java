@@ -456,9 +456,9 @@ public class HttpConnection
         catch (Error e)
         {
             Code.warning(e);
-            
+
             _persistent=false;
-            if (!_outputStream.isCommitted())
+            if (!_response.isCommitted())
             {
                 _outputStream.resetBuffer();
                 _response.removeField(HttpFields.__TransferEncoding);
@@ -639,6 +639,9 @@ public class HttpConnection
         if (_response==null)
             return;
 
+        if (Code.verbose(9999))
+            Code.debug("Notify from ",new Throwable());
+        
         switch(action)
         {
           case OutputObserver.__FIRST_WRITE:

@@ -121,7 +121,6 @@ Note that the test harnesses are not in the jar file, so you will need
 to build all the source and run with the source hierarchy in the CLASSPATH.
 
 
-
 Distribution
 ============
 Jetty distributions and information is available from:
@@ -130,6 +129,15 @@ Jetty distributions and information is available from:
    http://sourceforge.net/project/jetty
    ftp://jetty.mortbay.com/pub
    
+
+Documentation
+=============
+Jetty is currently under documented, but this is improving.  The
+documentation is currently being hosted and developed as a Wiki site.
+For details see:
+
+  http://jetty.mortbay.com:8080/wiki/JettyWiki
+
 
 How to Contribute
 =================

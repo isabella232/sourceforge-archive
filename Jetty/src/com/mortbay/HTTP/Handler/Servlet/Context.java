@@ -329,7 +329,6 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public void setAttribute(String name, Object value)
     {
-        checkAttributeName(name);
         _handler.getHandlerContext().setAttribute(name,value);
     }
 
@@ -340,21 +339,7 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public void removeAttribute(String name)
     {
-        checkAttributeName(name);
         _handler.getHandlerContext().removeAttribute(name);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Check attribute name.
-     * Prevent servlet from setting restricted attribute names.
-     */
-    static void checkAttributeName(String name)
-    {   
-        if (name!=null &&
-            ( name.startsWith("com.mortbay.") ||
-              name.startsWith("java.") ||
-              name.startsWith("javax.")))
-            throw new IllegalArgumentException("Cannot change attributes in java.*, javax.* or com.mortbay.*");
     }
 
     /* ------------------------------------------------------------ */

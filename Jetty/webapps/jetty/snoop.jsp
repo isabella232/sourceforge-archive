@@ -5,7 +5,10 @@
 </HEAD>
 <BODY>
 
-<H1>JSP Snoop page</H1>
+<H1>WebApp JSP Snoop page</H1>
+
+<H2>Context information</H2>
+ClassLoader=<%= this.getClass().getClassLoader() %>
 
 <H2>Request information</H2>
 
@@ -169,3 +172,4 @@
 
 </BODY>
 </HTML>
+
