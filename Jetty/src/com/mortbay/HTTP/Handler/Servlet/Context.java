@@ -127,7 +127,7 @@ public class Context implements ServletContext, HttpSessionContext
     /* ------------------------------------------------------------ */
     public int getMinorVersion()
     {
-        return 1;
+        return 2;
     }
 
     /* ------------------------------------------------------------ */
