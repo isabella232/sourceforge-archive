@@ -39,6 +39,10 @@ Other targets:
   <property name="logs"           value="${basedir}/logs"/>
   <property name="webapps"        value="${basedir}/webapps"/>
   <property name="webappsrc"      value="${basedir}/webappsrc"/>
+  <property name="test"           value="${basedir}/test"/>
+  <property name="test.lib"       value="${test}/lib"/>
+  <property name="test.src"       value="${test}/src"/>
+  <property name="test.classes"   value="${test}/classes"/>
   <property name="build.compiler" value="jikes"/>
   <!-- property name="build.compiler" value="classic"/ -->
   <!-- property name="build.compiler" value="modern" / -->
@@ -60,7 +64,7 @@ Other targets:
   <property name="jaxp.jar"       value="${lib}/javax.xml.jaxp.jar"/>
   <property name="xml.jar"        value="${lib}/org.apache.crimson.jar"/>
   <property name="jsse.jar"       value="${lib}/com.sun.net.ssl.jar"/>
-  <property name="junit.jar"      value="${lib}/junit-3.7.jar"/>
+  <property name="junit.jar"      value="${test.lib}/junit-3.7.jar"/>
 
   <path id="classpath">
     <pathelement path="${jetty.jar}" />
@@ -69,7 +73,6 @@ Other targets:
     <pathelement path="${jsse.jar}" />
     <pathelement path="${jaxp.jar}" />
     <pathelement path="${xml.jar}" />
-    <pathelement path="${junit.jar}" />
   </path>
 
   <!-- ==================================================================== -->
@@ -95,6 +98,7 @@ Other targets:
   <!-- ==================================================================== -->
   <target name="tidy">
     <delete dir="${classes}" quiet="true"/>
+    <delete dir="${test.classes}" quiet="true"/>
     <delete file="${mini.http.jar}" quiet="true"/>
   </target>
 
@@ -299,11 +303,25 @@ Other targets:
 
   <!-- ==================================================================== -->
   <target name="testUtil_JUnit" depends="jars">
+    <mkdir dir="${test.classes}" />
+    <javac srcdir="${test.src}"
+           destdir="${test.classes}"
+           debug="true"
+           optimize="fale"
+           deprecation="${javac.deprecation}"
+           >
+       <classpath>
+         <path refid="classpath" />
+         <pathelement path="${junit.jar}" />     
+       </classpath>
+       <include name="**/*.java"/>
+    </javac>
     <junit fork="no" haltonerror="yes" haltonfailure="yes" >
       <formatter type="brief" usefile="false" />                  
       <classpath> 
          <path refid="classpath" />
          <pathelement path="${junit.jar}" />     
+         <pathelement path="${test.classes}" />     
       </classpath>        
       <test name="org.mortbay.util.JUnitTestHarness"  />
     </junit>
