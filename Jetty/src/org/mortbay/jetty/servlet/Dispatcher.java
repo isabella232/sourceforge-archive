@@ -191,6 +191,7 @@ public class Dispatcher implements RequestDispatcher
         }
         
         Object old_scope = null;
+        ServletHandler servletHandler = servletHttpRequest.getServletHandler();
         try
         {
             if (request.crossContext())
@@ -241,6 +242,8 @@ public class Dispatcher implements RequestDispatcher
                     .leaveContextScope(httpConnection.getRequest(),
                                        httpConnection.getResponse(),
                                        old_scope);
+            // restore servlet handler
+            servletHttpRequest.setServletHandler(servletHandler);
         }   
     }
 

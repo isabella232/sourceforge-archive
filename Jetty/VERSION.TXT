@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+
 Jetty-5.0.alpha3
  + Use File.toURI().toURL() when jdk 1.2 alternative is available.
  + Priority added to ThreadPool
@@ -10,7 +11,9 @@ Jetty-5.0.alpha3
  + Set TransactionManager on JettyPlus datasources and pools
  + Fixed null pointer if no sevices configured for JettyPlus
  + Updated jasper and examples to 5.0.12
- + lazy authentication if no auth constraint.
+ + Lazy authentication if no auth constraint.
+ + Restore servlet handler after dispatch
+ + Allow customization of HttpConnections
 
 Jetty-4.2.14RC0 - 7 October 2003
  + Correctly setup context classloader in cross context dispatch.

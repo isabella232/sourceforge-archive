@@ -1205,8 +1205,6 @@ public class WebApplicationContext
                 {
                     String ep=errorPage.toString(false,true);
                     _formAuthenticator.setErrorPage(ep);
-                    if (getErrorPage("403")==null)
-                        setErrorPage("403",ep);
                 }
             }
         }
