@@ -192,7 +192,7 @@ public class HttpRequest extends HttpMessage
         {
             writer.write(_method);
             writer.write(' ');
-            writer.write(_uri!=null?_uri.toString():"null");
+            writer.write(_uri!=null?URI.encodePath(_uri.toString()):"null");
             writer.write(' ');
             writer.write(_version);
             writer.write(HttpFields.__CRLF);
