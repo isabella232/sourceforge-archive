@@ -25,7 +25,6 @@ import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.WebApplicationContext;
-import org.mortbay.jetty.servlet.jsr77.Jsr77Filter;
 
 
 /* ------------------------------------------------------------ */

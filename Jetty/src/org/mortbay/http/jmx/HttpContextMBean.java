@@ -16,6 +16,7 @@
 package org.mortbay.http.jmx;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
 import javax.management.MBeanException;
 import javax.management.MBeanServer;
@@ -40,6 +41,7 @@ public class HttpContextMBean extends LifeCycleMBean
 
     private HttpContext _httpContext;
     private HashMap _rlMap=new HashMap(3);
+    private HashMap _handlerMap = new HashMap();
 
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -153,13 +155,20 @@ public class HttpContextMBean extends LifeCycleMBean
     public void postDeregister()
     {
         _httpContext=null;
+        destroyComponentMBeans(_handlerMap);
         super.postDeregister();
     }
 
     /* ------------------------------------------------------------ */
     public ObjectName[] getHandlers()
     {
-        return getComponentMBeans(_httpContext.getHandlers(),null);
+        return getComponentMBeans(_httpContext.getHandlers(),_handlerMap);
+    }
+    
+  
+    public void destroyHandlers()
+    {
+        destroyComponentMBeans(_handlerMap);
     }
 
     /* ------------------------------------------------------------ */

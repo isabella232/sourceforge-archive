@@ -73,31 +73,14 @@ public class WebApplicationContextMBean extends ServletHttpContextMBean
     {
         super.postRegister(ok);
         //register as a listener on the WebApplicationContext to
-        //find out when it is started so that all of the jsr77
-        //objects will have been created, and therefore we can
-        //register mbeans for them
-        try
-        {
-            _webappContext.addEventListener (
-                    new ServletContextListener()
-                    {
-                        public void contextInitialized (ServletContextEvent e)
-                        {
-                            getConfigurations();
-                        }
-                        public void contextDestroyed (ServletContextEvent e)
-                        {
-                            
-                        }
-                    });
-            
-        }
-        catch (Exception e)
-        {
-            log.warn(LogSupport.EXCEPTION,e);
-        }
+        //find out when it is started. Once it is started, all necessary
+        //configurations will have been completed, so we can create mbeans
+        //for them.
+        registerListener();
     }
     
+    
+   
     
     
     /**postDeregister
@@ -106,24 +89,7 @@ public class WebApplicationContextMBean extends ServletHttpContextMBean
      */
     public void postDeregister ()
     {
-        
-        MBeanServer mbeanServer = getMBeanServer();
-        Iterator itor = _configurations.values().iterator();
-        while (itor.hasNext())
-        {
-            try
-            {
-                ObjectName o = (ObjectName)itor.next();
-                log.info("Unregistering: "+o);
-                
-                if (null!=mbeanServer)
-                    mbeanServer.unregisterMBean((ObjectName)o);
-            }
-            catch (Exception e)
-            {
-                log.warn(LogSupport.EXCEPTION, e);
-            }
-        }
+        destroyConfigurations ();     
         super.postDeregister();
     }
    
@@ -136,6 +102,59 @@ public class WebApplicationContextMBean extends ServletHttpContextMBean
     public ObjectName[] getConfigurations ()
     { 
         return getComponentMBeans(_webappContext.getConfigurations(),_configurations); 
+    }
+    
+    public void destroyConfigurations ()
+    {
+        MBeanServer mbeanServer = getMBeanServer();
+        Iterator itor = _configurations.values().iterator();
+        while (itor.hasNext())
+        {
+            try
+            {
+                ObjectName o = (ObjectName)itor.next();
+                log.debug("Unregistering: "+o);
+                
+                if (null!=mbeanServer)
+                    mbeanServer.unregisterMBean((ObjectName)o);
+            }
+            catch (Exception e)
+            {
+                log.warn(LogSupport.EXCEPTION, e);
+            }
+        }
+        _configurations.clear();
+    }
+    
+    
+    public void registerListener ()
+    {
+        if (null==_webappContext)
+            return;
+        
+        try
+        {
+            _webappContext.addEventListener (
+                    new ServletContextListener()
+                    {
+                        public void contextInitialized (ServletContextEvent e)
+                        {
+                            getConfigurations();
+                            System.out.println ("CONFIGS AFTER="+_configurations);
+                        }
+                        public void contextDestroyed (ServletContextEvent e)
+                        {
+                            destroyComponentMBeans(_configurations);
+                            destroyHandlers();
+                        }
+                    });
+            
+        }
+        catch (Exception e)
+        {
+            log.warn(LogSupport.EXCEPTION,e);
+        }
+        
     }
     
 }

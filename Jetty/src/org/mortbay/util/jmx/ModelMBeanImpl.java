@@ -1245,4 +1245,31 @@ public class ModelMBeanImpl
         
         return beans;
     }
+    
+    /** Unregister mbeans for already registered components
+     * @param map
+     */
+    protected void destroyComponentMBeans (Map map)
+    {
+        //if no map of registered mbean names is passed,
+        //use the default map
+        if (null==map)
+            map = _components;
+        
+        if (map==null)
+            return;
+        
+        Iterator itor = map.values().iterator();
+        while (itor.hasNext())
+        {
+            try
+            {
+                ObjectName o = (ObjectName)itor.next();
+                getMBeanServer().unregisterMBean(o);
+                itor.remove();
+            }
+            catch (Exception e) {log.warn(LogSupport.EXCEPTION,e);}
+        }
+            
+    }
 }

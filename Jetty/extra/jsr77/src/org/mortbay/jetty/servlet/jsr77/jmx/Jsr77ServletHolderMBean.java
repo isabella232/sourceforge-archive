@@ -163,12 +163,22 @@ public class Jsr77ServletHolderMBean extends ModelMBeanImpl
     {
         if (null==_stats)
         {
+            if (null==_servletHolder)
+                return;
+            
             String servletName = _servletHolder.getName();
             WebApplicationHandler handler = (WebApplicationHandler)_servletHolder.getHttpHandler();
+            
+            if (null==handler)
+                return;
+            
             FilterHolder filterHolder = handler.getFilter (Configuration.FILTER_PREFIX+servletName);
             if (null!=filterHolder)
             {
                 Jsr77Filter filter = (Jsr77Filter)filterHolder.getFilter();
+                if (null==filter)
+                    return;
+                
                 _stats = filter.getServletStats();
             }
         }

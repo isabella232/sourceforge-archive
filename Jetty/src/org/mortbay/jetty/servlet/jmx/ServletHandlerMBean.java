@@ -15,12 +15,18 @@
 
 package org.mortbay.jetty.servlet.jmx;
 
+import java.util.HashMap;
+import java.util.Iterator;
+
 import javax.management.MBeanException;
 import javax.management.ObjectName;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.jmx.HttpHandlerMBean;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.SessionManager;
+import org.mortbay.util.LogSupport;
 
 /* ------------------------------------------------------------ */
 /** 
@@ -31,7 +37,9 @@ import org.mortbay.jetty.servlet.SessionManager;
 public class ServletHandlerMBean extends HttpHandlerMBean  
 {
     /* ------------------------------------------------------------ */
+    private static final Log log = LogFactory.getLog(ServletHandlerMBean.class);
     private ServletHandler _servletHandler;
+    private HashMap _servletMap = new HashMap();
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -65,7 +73,7 @@ public class ServletHandlerMBean extends HttpHandlerMBean
     /* ------------------------------------------------------------ */
     public ObjectName[] getServlets()
     {
-        return getComponentMBeans(_servletHandler.getServlets(),null);   
+        return getComponentMBeans(_servletHandler.getServlets(), _servletMap);   
     }
     
     /* ------------------------------------------------------------ */
@@ -74,5 +82,11 @@ public class ServletHandlerMBean extends HttpHandlerMBean
         super.postRegister(ok);
         if (ok.booleanValue())
             getSessionManager();
+    }
+    
+    public void postDeregister ()
+    {
+        destroyComponentMBeans(_servletMap);
+        super.postDeregister();
     }
 }

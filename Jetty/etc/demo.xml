@@ -204,7 +204,11 @@
   <!-- Note that order is significant. This can be changed per webapp  -->
   <!-- by calling setConfigurationClassNames() on the webapp context.  -->
   <!-- The jsr77 configuration is optional - if specified, jsr77       -->
-  <!-- statistics will be enabled.                                     -->
+  <!-- statistics will be enabled. You will also need to build the     -->
+  <!-- extra/jsr77 package, include the jsr77 jars and start Jetty with -->
+  <!-- jmx enabled. To make this easier, a start config file has been  -->
+  <!-- provided that sets up the classpath correctly. Start like so:   -->
+  <!-- java -DSTART=extra/etc/start-jsr77.config -jar start.jar etc/demo.mlet -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!--
   <Set name="WebApplicationConfigurationClassNames">
@@ -214,8 +218,7 @@
       <Item>org.mortbay.jetty.servlet.jsr77.Configuration</Item>
     </Array>
   </Set>
- -->
-
+  -->
 
 
 

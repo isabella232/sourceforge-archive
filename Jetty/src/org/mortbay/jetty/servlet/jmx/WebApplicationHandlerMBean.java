@@ -16,13 +16,17 @@
 package org.mortbay.jetty.servlet.jmx;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.management.MBeanException;
 import javax.management.ObjectName;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.servlet.WebApplicationHandler;
+import org.mortbay.util.LogSupport;
 
 
 /* ------------------------------------------------------------ */
@@ -34,6 +38,7 @@ import org.mortbay.jetty.servlet.WebApplicationHandler;
 public class WebApplicationHandlerMBean extends ServletHandlerMBean
 {
     /* ------------------------------------------------------------ */
+    private static final Log log = LogFactory.getLog (WebApplicationHandlerMBean.class);
     private WebApplicationHandler _webappHandler;
     private Map _filters = new HashMap();
     
@@ -60,5 +65,11 @@ public class WebApplicationHandlerMBean extends ServletHandlerMBean
     {
         List l=_webappHandler.getFilters();
         return getComponentMBeans(l.toArray(),_filters);  
+    }
+    
+    public void postDeregister ()
+    {
+       destroyComponentMBeans(_filters);
+        super.postDeregister();
     }
 }

@@ -58,6 +58,8 @@ all         - everything
     <pathelement location="${servlet.jar}"/>
     <pathelement location="${jetty.jar}"/>
     <pathelement location="${mortbay.jmx.jar}"/>
+    <pathelement location="${ext}/javax77.jar"/>
+    <pathelement location="${lib}/org.mortbay.jsr77.jar"/>
     <path refid="jboss.classpath"/>
   </path>
 
@@ -70,7 +72,14 @@ all         - everything
 
 
 <!--=========================================================================-->
-  <target name="prepare">
+  <target name="jsr77">
+    <ant dir="../jsr77" inheritAll="false"/>
+    <available property="jsr77.available" file="../lib/org.mortbay.jsr77.jar"/>
+    <fail unless="jsr77.available" message="Build extra/jsr77 subproject failed"/>
+  </target>
+
+
+  <target name="prepare" depends="jsr77">
     <mkdir dir="${lib}" />
     <mkdir dir="${classes}" />
     <mkdir dir="${generated.src}" />
@@ -152,6 +161,7 @@ all         - everything
     </jar>
   </target>
 
+
   <target name="jboss.jetty.sar" depends="jboss.jetty.jar,j2ee.jar">
 
     <jar jarfile="${jboss.jetty.sar}">
@@ -161,6 +171,7 @@ all         - everything
       <fileset dir="${lib}">   
         <include name="org.jboss.jetty.jar"/>
         <include name="org.mortbay.j2ee.jar"/>
+	<include name="org.mortbay.jsr77.jar"/>
       </fileset>
       <fileset dir="${jetty.lib}">   
         <include name="org.mortbay.jetty.jar"/>
