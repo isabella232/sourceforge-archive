@@ -546,6 +546,11 @@ abstract public class ThreadedServer extends ThreadPool
                     {
                         Code.warning(e);
                     }
+                    catch(Error e)
+                    {
+                        Code.warning(e);
+                        break;
+                    }
                 }
             }
             finally
