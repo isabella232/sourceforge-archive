@@ -232,6 +232,7 @@
   <!--  *                        All other parameters are copied to the     -->
   <!--                           each dynamic servlet as init parameters    -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
+  <!-- Uncomment for dynamic invocation
   <servlet>
     <servlet-name>invoker</servlet-name>
     <servlet-class>org.mortbay.jetty.servlet.Invoker</servlet-class>
@@ -249,6 +250,7 @@
     </init-param>
     <load-on-startup>0</load-on-startup>
   </servlet>
+  -->
 
   <!-- ==================================================================== -->
   <servlet-mapping>
@@ -369,8 +371,7 @@
   <!--       http://jetty.mortbay.org/jetty/doc/servlet24.html#d0e711       -->
   <!--       to find out why this is stupid.                                -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
-  <!-- COMMENT OUT TO RUN FAST 
-  -->
+  <!-- UNCOMMENT For compliant behaviour
   <filter>
     <filter-name>jsr154</filter-name>
     <filter-class>org.mortbay.jetty.servlet.JSR154Filter</filter-class>
@@ -383,6 +384,7 @@
       <dispatcher>FORWARD</dispatcher>
       <dispatcher>INCLUDE</dispatcher>
   </filter-mapping>
+  -->
   
 </web-app>
 

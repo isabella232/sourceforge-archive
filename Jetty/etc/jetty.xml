@@ -70,7 +70,6 @@
   <!-- Add a HTTPS SSL listener on port 8443                           -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- UNCOMMENT TO ACTIVATE
-  -->
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.SunJsseListener">
@@ -91,6 +90,7 @@
       </New>
     </Arg>
   </Call>
+  -->
 
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -110,6 +110,32 @@
     </Arg>
   </Call>
   -->
+
+
+  <!-- =============================================================== -->
+  <!-- Set the default web application configuration mechanisms:       -->
+  <!--   XMLConfiguration       - handles WEB-INF/web.xml              -->
+  <!--   JettyWebConfiguration  - handles WEB-INF/jetty-web.xml        -->
+  <!--   jsr77.Configuration    - Adds jsr77 statistics to servlets    -->
+  <!--                                                                 -->
+  <!-- Order of these classes is significant. The defaults set here    -->
+  <!-- can be overridden by calling setConfigurationClassNames() on    -->
+  <!-- the webapp context.                                             -->
+  <!-- The jsr77 configuration requires additional jars on the         -->
+  <!-- on the classpath and it needs jmx enabled.  To do this start    -->
+  <!-- with a command like:                                            -->
+  <!--   java -DSTART=extra/etc/start-jsr77.config -jar start.jar etc/demo.mlet 
+                                                                       -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <Set name="WebApplicationConfigurationClassNames">
+    <Array type="java.lang.String">
+      <Item>org.mortbay.jetty.servlet.XMLConfiguration</Item>
+      <Item>org.mortbay.jetty.servlet.JettyWebConfiguration</Item>
+      <!--
+      <Item>org.mortbay.jetty.servlet.jsr77.Configuration</Item>
+      -->
+    </Array>
+  </Set>
 
 
   <!-- =============================================================== -->

@@ -66,10 +66,6 @@ public abstract class AbstractSessionManager implements SessionManager
     public final static int __distantFuture = 60*60*24*7*52*20;
     
     /* ------------------------------------------------------------ */
-    public final static boolean __24SessionDestroyed=
-        Boolean.getBoolean("org.mortbay.jetty.servlet.AbstractSessionManager.24SessionDestroyed");
-    
-    /* ------------------------------------------------------------ */
     // Setting of max inactive interval for new sessions
     // -1 means no timeout
     private int _dftMaxIdleSecs = -1;
@@ -600,7 +596,7 @@ public abstract class AbstractSessionManager implements SessionManager
             if (_invalid) throw new IllegalStateException();
             
             
-            if(__24SessionDestroyed && _sessionListeners != null)
+            if(_sessionListeners != null)
             {        
                 HttpSessionEvent event = new HttpSessionEvent(this);
                 for(int i=0;i<_sessionListeners.size();i++)
@@ -637,14 +633,6 @@ public abstract class AbstractSessionManager implements SessionManager
             {
                 _invalid=true;
                 _sessions.remove(getId());
-                
-                if(!__24SessionDestroyed && _sessionListeners != null)
-                {
-                    HttpSessionEvent event = new HttpSessionEvent(this);
-                    for(int i=0;i<_sessionListeners.size();i++)
-                        ((HttpSessionListener)_sessionListeners.get(i)).
-                        sessionDestroyed(event);       
-                }
             } 
         }
         
