@@ -14,7 +14,6 @@ import java.net.*;
 import com.mortbay.HTTP.Handler.*;
 import com.mortbay.HTTP.Handler.Servlet.*;
 import java.lang.reflect.*;
-import javax.xml.parsers.*;
 import org.xml.sax.*;
 import javax.servlet.*;
 

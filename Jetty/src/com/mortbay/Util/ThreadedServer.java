@@ -204,6 +204,8 @@ abstract public class ThreadedServer extends ThreadPool
         }
         finally
         {
+            try {connection.setSoLinger(true,0);}
+            catch ( Exception e ){Code.ignore(e);}
             try {connection.close();}
             catch ( Exception e ){Code.warning("Connection problem",e);}
             connection=null;

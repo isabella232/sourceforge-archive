@@ -25,6 +25,8 @@ EXCLUDECLASSES := \
 	TestHarness$$2.class \
 	TestHarness$$TestThreadedServer.class \
 	TestHarness$$TestThreadPool.class \
+	TestConfiguration.class \
+
 
 include $(JETTY_HOME)/etc/Global.mk
 

@@ -12,7 +12,6 @@ import java.util.*;
 
 /* ------------------------------------------------------------ */
 /** Socket HTTP Listener.
- *
  * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -88,6 +87,7 @@ public class SocketListener
         try
         {
             Code.debug("ACCEPT:",socket);
+	    socket.setSoLinger(false,0);
             HttpConnection connection =
                 new HttpConnection(this,socket.getInetAddress(),
 				   socket.getInputStream(),
@@ -96,13 +96,6 @@ public class SocketListener
         }
         catch ( Exception e ){
             Code.warning("Connection problem",e);
-        }
-        finally
-        {
-	    Code.debug("CLOSE: "+socket);
-            try {socket.close();}
-            catch ( Exception e ){Code.warning("Connection problem",e);}
-            socket=null;
         }
     }
 }

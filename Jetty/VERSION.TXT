@@ -1,4 +1,4 @@
-Stable 2.4.5
+Stable 2.4.6
 Dev    3.0.A99
 
 
@@ -7,6 +7,13 @@ setScheme
    + Switched to the aelfred parser from microstar, which is
      only partially validating, but small and lightweight
    + Implemented webapp session-config
+
+Release 2.4.6 - 16th Aug 2000 
+  + Turn Linger off before closing sockets, to allow restart.
+  + JsseListener & SunJsseListener added and documented
+  + com.mortbay.Util.KeyPairTool added to handle openSSL SSL keys.
+  + Minor changes to compile with jikes.
+  + Added passive mode methods to FTP
 
 Jetty-3.0.A99 - 10 Aug 2000
    + Implemented jetty.xml configuration

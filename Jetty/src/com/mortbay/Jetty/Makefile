@@ -32,4 +32,3 @@ install: JettyServlet.class JettyPage.class
 	cp $(INSTALLROOT)/VERSION.TXT $(INSTALLROOT)/webapps/$(WEBAPP)/versions.txt
 
 
-
