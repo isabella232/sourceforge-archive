@@ -1,6 +1,10 @@
 Jetty Versions
 --------------
 
+Jetty-4.0.4 - 23 June 2002
+ + Back out change: Don't chunk 30x empty responses.
+ + Conditional header tested against welcome file not directory.
+
 Jetty-4.0.3 - 20 June 2002
  + WebapplicationContext.start sets context loader
  + Fixed close propagation of on-chunked output streams

@@ -347,10 +347,6 @@ public class ResourceHandler extends NullHandler
  
         if (resource!=null && resource.exists())
         {
-            // Check modified dates
-            if (!passConditionalHeaders(request,response,resource))
-                return;
-     
             // check if directory
             if (resource.isDirectory())
             {
@@ -377,25 +373,35 @@ public class ResourceHandler extends NullHandler
                         resource.addPath((String)_indexFiles.get(i));
       
                     if (index.exists())
-                    {
-                                           
+                    {                
                         // Forward to the index
                         String ipath=URI.addPaths(pathInContext,(String)_indexFiles.get(i));
                         URI uri=request.getURI();
                         uri.setPath(URI.addPaths(uri.getPath(),(String)_indexFiles.get(i)));
 
+                        // Check modified dates
+                        if (!passConditionalHeaders(request,response,index))
+                            return;
                         getHttpContext().handle(_welcomeRedirectionIndex,
                                                 ipath,pathParams,request,response);
                         return;
                     }
                 }
 
+                // Check modified dates
+                if (!passConditionalHeaders(request,response,resource))
+                    return;
+                
                 // If we got here, no forward to index took place
                 sendDirectory(request,response,resource,pathInContext.length()>1);
             }
             // check if it is a file
             else if (resource.exists())
             {
+                // Check modified dates
+                if (!passConditionalHeaders(request,response,resource))
+                    return;
+
                 if (!endsWithSlash)
                     sendFile(request,response,resource,true);
             }
