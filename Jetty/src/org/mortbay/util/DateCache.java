@@ -134,7 +134,7 @@ public class DateCache
             i = format.indexOf("ss");
         }
         
-        Code.assert(i>=0,"No seconds in format");
+        Code.assertTrue(i>=0,"No seconds in format");
 
         // Build a formatter that formats a second format string
         // Have to replace @ with ' later due to bug in SimpleDateFormat

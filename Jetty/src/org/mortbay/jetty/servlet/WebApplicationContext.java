@@ -15,8 +15,10 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.ServletContextAttributeEvent;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextEvent;
@@ -84,6 +86,7 @@ public class WebApplicationContext extends ServletHttpContext
     private XmlParser _xmlParser;
     private ArrayList _contextListeners;
     private ArrayList _contextAttributeListeners;
+    private Set _warnings;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -586,66 +589,84 @@ public class WebApplicationContext extends ServletHttpContext
                 
                 node=(XmlParser.Node)o;
                 String name=node.getTag();
-                
-                if ("display-name".equals(name))
-                    initDisplayName(node);
-                else if ("description".equals(name))
-                {}
-                else if ("distributable".equals(name))
-                {
-                    Code.warning("Not implemented: "+name);
-                    System.err.println(node);
-                }
-                else if ("context-param".equals(name))
-                    initContextParam(node);
-                else if ("servlet".equals(name))
-                    initServlet(node);
-                else if ("servlet-mapping".equals(name))
-                    initServletMapping(node);
-                else if ("session-config".equals(name))
-                    initSessionConfig(node);
-                else if ("mime-mapping".equals(name))
-                    initMimeConfig(node);
-                else if ("welcome-file-list".equals(name))
-                    initWelcomeFileList(node);
-                else if ("error-page".equals(name))
-                    initErrorPage(node);
-                else if ("taglib".equals(name))
-                    initTagLib(node);
-                else if ("resource-ref".equals(name))
-                    Code.debug("No implementation: ",node);
-                else if ("security-constraint".equals(name))
-                    initSecurityConstraint(node);
-                else if ("login-config".equals(name))
-                    initLoginConfig(node);
-                else if ("security-role".equals(name))
-                    initSecurityRole(node);
-                else if ("env-entry".equals(name))
-                    Code.warning("Not implemented: "+node);
-                else if ("filter".equals(name))
-                    initFilter(node);
-                else if ("filter-mapping".equals(name))
-                    initFilterMapping(node);
-                else if ("listener".equals(name))
-                    initListener(node);
-                else if ("ejb-ref".equals(name))
-                    Code.debug("No implementation: ",node);
-                else if ("ejb-local-ref".equals(name))
-                    Code.debug("No implementation: ",node);
-                else
-                {
-                    Code.warning("UNKNOWN TAG: "+name);
-                    System.err.println(node);
-                }
+
+                initWebXmlElement(name,node);
+            }
+            catch(ClassNotFoundException e)
+            {
+                throw e;
             }
             catch(Exception e)
             {
                 Code.warning("Configuration problem at "+node,e);
+                throw new UnavailableException("Configuration problem");
             }
         }
         
     }
 
+    /* ------------------------------------------------------------ */
+    /** Handle web.xml element.
+     * This method is called for each top level element within the
+     * web.xml file.  It may be specialized by derived
+     * WebApplicationContexts to provide additional configuration and handling.
+     * @param element The element name
+     * @param node The node containing the element.
+     */
+    protected void initWebXmlElement(String element, XmlParser.Node node)
+        throws Exception
+    {
+        if ("display-name".equals(element))
+            initDisplayName(node);
+        else if ("description".equals(element))
+        {
+        }
+        else if ("context-param".equals(element))
+            initContextParam(node);
+        else if ("servlet".equals(element))
+            initServlet(node);
+        else if ("servlet-mapping".equals(element))
+            initServletMapping(node);
+        else if ("session-config".equals(element))
+            initSessionConfig(node);
+        else if ("mime-mapping".equals(element))
+            initMimeConfig(node);
+        else if ("welcome-file-list".equals(element))
+            initWelcomeFileList(node);
+        else if ("error-page".equals(element))
+            initErrorPage(node);
+        else if ("taglib".equals(element))
+            initTagLib(node);
+        else if ("resource-ref".equals(element))
+            Code.debug("No implementation: ",node);
+        else if ("security-constraint".equals(element))
+            initSecurityConstraint(node);
+        else if ("login-config".equals(element))
+            initLoginConfig(node);
+        else if ("security-role".equals(element))
+            initSecurityRole(node);
+        else if ("filter".equals(element))
+            initFilter(node);
+        else if ("filter-mapping".equals(element))
+            initFilterMapping(node);
+        else if ("listener".equals(element))
+            initListener(node);
+        else
+        {                
+            if (_warnings==null)
+                _warnings=new HashSet(3);
+            
+            if (_warnings.contains(element))
+                Code.debug("Not Implemented: ",node);
+            else
+            {
+                _warnings.add(element);
+                Code.warning("Element "+element+" not handled in "+this);
+                Code.debug(node);
+            }
+        }
+    }
+    
     /* ------------------------------------------------------------ */
     private void initDisplayName(XmlParser.Node node)
     {

@@ -68,8 +68,8 @@ public class Composite extends Element
             {
                 if (o instanceof Element)
                 {
-                    Code.assert(!(o instanceof Page),
-                                "Can't insert Page in Composite");
+                    Code.assertTrue(!(o instanceof Page),
+                                    "Can't insert Page in Composite");
                     elements.add(o);
                 }
                 else if (o instanceof String)

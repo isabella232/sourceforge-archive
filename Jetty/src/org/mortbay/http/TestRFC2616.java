@@ -251,7 +251,7 @@ public class TestRFC2616
         test9_2();
         test9_4();
         test9_8();
-	test10_2_7();	/* 206 Partial Content                         */
+  	test10_2_7();	/* 206 Partial Content                         */
         test10_3();     /* Redirection 3XX                             */
         test14_16();    /* Content-Range                               */
         test14_35();    /* Byte Ranges                                 */
@@ -346,20 +346,34 @@ public class TestRFC2616
                                            "Transfer-Encoding: chunked\n"+
                                            "Content-Type: text/plain\n"+
                                            "\n"+
+                                           "2;\n"+
+                                           "12\n"+
                                            "3;\n"+
-                                           "123\n"+
-                                           "3;\n"+
-                                           "456\n"+
+                                           "345\n"+
+                                           "0;\n\n"+
+
+                                           "GET /R2 HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Transfer-Encoding: chunked\n"+
+                                           "Content-Type: text/plain\n"+
+                                           "\n"+
+                                           "4;\n"+
+                                           "6789\n"+
+                                           "5;\n"+
+                                           "abcde\n"+
                                            "0;\n\n"+
                                            
-                                           "GET /R2 HTTP/1.1\n"+
+                                           "GET /R3 HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "Connection: close\n"+
                                            "\n");
             Code.debug("RESPONSE: ",response);
-            offset = t.checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking")+10;
-            offset = t.checkContains(response,offset,"123456","3.6.1 Chunking");
-            offset = t.checkContains(response,offset,"/R2","3.6.1 Chunking")+10;
+            offset = t.checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking");
+            offset = t.checkContains(response,offset,"12345","3.6.1 Chunking");
+            offset = t.checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking");
+            offset = t.checkContains(response,offset,"6789abcde","3.6.1 Chunking");
+            offset = t.checkContains(response,offset,"/R3","3.6.1 Chunking");
+
             
             // Chunked and keep alive
             offset=0;

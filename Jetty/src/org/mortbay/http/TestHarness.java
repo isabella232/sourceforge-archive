@@ -98,7 +98,29 @@ public class TestHarness
 
             test.checkEquals(cin.getTrailer().get("some-trailer"),
                              "some-value","Trailer fields");
-            
+
+            // Read some more after a reset
+            cin.resetStream();
+            cin.setChunking();
+            test.checkEquals(cin.read(),'a',"2 Read 1st char");
+            test.checkEquals(cin.read(),'b',"2 Read cont char");
+            test.checkEquals(cin.read(),'c',"2 Read next chunk char");
+
+            test.checkEquals(cin.read(buf),17,"2 Read array chunk limited");
+            test.checkEquals(new String(buf,0,17),
+                             "defghijklmnopqrst","2 Read array chunk");
+            test.checkEquals(cin.read(buf,1,10),6,"2 Read Offset limited");
+            test.checkEquals(new String(buf,0,17),"duvwxyzklmnopqrst",
+                             "2 Read offset");
+            test.checkEquals(cin.read(buf),6,"2 Read CRLF");
+            test.checkEquals(new String(buf,0,6),
+                             "12"+CRLF+"34",
+                             "2 Read CRLF");
+            test.checkEquals(cin.read(buf),12,"2 Read to EOF");
+            test.checkEquals(new String(buf,0,12),
+                             "567890abcdef","2 Read to EOF");
+            test.checkEquals(cin.read(buf),-1,"2 Read EOF");
+            test.checkEquals(cin.read(buf),-1,"2 Read EOF again");
         }
         catch(Exception e)
         {
@@ -486,14 +508,14 @@ public class TestHarness
     {
         try
         {
-              chunkInTest();
-              chunkOutTest();
-              filters();
-              httpFields();
-              pathMap();
-
-              TestRequest.test();
-              TestRFC2616.test();
+            chunkInTest();
+            chunkOutTest();
+            filters();
+            httpFields();
+            pathMap();
+            
+            TestRequest.test();
+            TestRFC2616.test();
         }
         catch(Throwable e)
         {

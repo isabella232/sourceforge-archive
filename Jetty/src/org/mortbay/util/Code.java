@@ -22,7 +22,7 @@ import java.util.Vector;
 * <pre>
 * {
 *    ...
-*    Code.assert(booleanExpression(),"Assert that expression evaluates true");
+*    Code.assertTrue(booleanExpression(),"Assert that expression evaluates true");
 *    ...
 *    Code.assertEquals(objectA,objectB,"Assert equality");
 *    Code.assertEquals(1,2,"Assert equality");
@@ -372,7 +372,7 @@ public class Code
      * @param m Message to log if assertion fails
      * @throws CodeException Thrown if assertion fails
      */
-    public static void assert(boolean b,String m)
+    public static void assertTrue(boolean b,String m)
     {
         if (!b)
         {

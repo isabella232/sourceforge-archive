@@ -53,8 +53,8 @@ public class SocketListener
     /* ------------------------------------------------------------ */
     public void setHttpServer(HttpServer server)
     {
-        Code.assert(_server==null || _server==server,
-                    "Cannot share listeners");
+        Code.assertTrue(_server==null || _server==server,
+                        "Cannot share listeners");
         _server=server;
     }
 
@@ -176,12 +176,12 @@ public class SocketListener
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            Code.ignore(e);
         }
     }
 
     /* ------------------------------------------------------------ */
-    /** Persist the connection
+    /** Persist the connection.
      * If the listener is low on resources, the connection read
      * timeout is set to lowResourcePersistTimeMs.  The
      * customizeRequest method is used to reset this to the normal
@@ -206,7 +206,7 @@ public class SocketListener
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            Code.ignore(e);
         }
     }
 

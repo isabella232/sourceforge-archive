@@ -103,8 +103,8 @@ public class JettyPage extends Page
             Code.warning(th);
         }
 
-        Code.assert(major.size()>0 && ((ArrayList)(major.get(0))).size()>0,
-                    "No index");
+        Code.assertTrue(major.size()>0 && ((ArrayList)(major.get(0))).size()>0,
+                        "No index");
         
         __section=new Section[major.size()][];
         for (i=0;i<major.size();i++)
@@ -265,9 +265,9 @@ public class JettyPage extends Page
         Section(String context, String value)
         {
             StringTokenizer tok = new StringTokenizer(value,"\t ");
-            Code.assert(tok.hasMoreTokens(),"No name");
+            Code.assertTrue(tok.hasMoreTokens(),"No name");
             _key=tok.nextToken();
-            Code.assert(tok.hasMoreTokens(),"No URI");
+            Code.assertTrue(tok.hasMoreTokens(),"No URI");
             _uri=tok.nextToken();
             if (tok.hasMoreTokens())
                 _pathSpec=tok.nextToken();

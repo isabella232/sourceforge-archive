@@ -266,7 +266,7 @@ public class TestHarness
         
         try
         {
-            Code.assert(true,"assert");
+            Code.assertTrue(true,"assert");
             Code.assertEquals("String","String","equals");
             Code.assertEquals(1,1,"equals");
             Code.assertContains("String","rin","contains");         

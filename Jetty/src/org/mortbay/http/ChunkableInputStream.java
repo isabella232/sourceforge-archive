@@ -28,7 +28,7 @@ import org.mortbay.util.StringUtil;
  * This class is not synchronized and should be synchronized
  * explicitly if an instance is used by multiple threads.
  *
- * @see org.mortbay.util.LineInput.
+ * @see org.mortbay.util.LineInput
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -119,7 +119,7 @@ public class ChunkableInputStream extends FilterInputStream
         in=_realIn;
         _filters=0;
         if (_deChunker!=null)
-            _deChunker._trailer=null;
+            _deChunker.resetStream();
         _chunking=false;
         _realIn.setByteLimit(-1);
     }
@@ -205,12 +205,20 @@ public class ChunkableInputStream extends FilterInputStream
         /* ------------------------------------------------------------ */
         int _chunkSize=0;
         HttpFields _trailer=null;
-        
+
         /* ------------------------------------------------------------ */
         /** Constructor.
          */
         public DeChunker()
         {}
+
+
+        /* ------------------------------------------------------------ */
+        public void resetStream()
+        {
+            _chunkSize=0;
+            _deChunker._trailer=null;
+        }
 
         /* ------------------------------------------------------------ */
         public int read()
