@@ -1,9 +1,11 @@
 Jetty Versions
 --------------
  
+Jetty-4.2.15 - 20 Dec 2003
  + SecurityConstraints not reset by stop() on custom context
  + Fixed UnixCrypt handling in HTAccessHandler
  + Added patch for JBoss realm single sign on
+ + Environment variables for CGI
 
 Jetty-4.2.15rc0 - 22 Nov 2003
  + PathMap uses own Map.Entry impl for IBM JVMs 
