@@ -44,7 +44,7 @@ import java.util.TimeZone;
 public class HttpFields
 {
     /* ------------------------------------------------------------ */
-    /** General Fields
+    /** General Fields.
      */
     public final static String
         __CacheControl = "Cache-Control",
@@ -58,7 +58,7 @@ public class HttpFields
         __Warning = "Warning";
         
     /* ------------------------------------------------------------ */
-    /** Entity Fields
+    /** Entity Fields.
      */
     public final static String
         __Allow = "Allow",
@@ -73,7 +73,7 @@ public class HttpFields
         __LastModified = "Last-Modified";
     
     /* ------------------------------------------------------------ */
-    /** Request Fields
+    /** Request Fields.
      */
     public final static String
         __Accept = "Accept",
@@ -97,7 +97,7 @@ public class HttpFields
         __UserAgent = "User-Agent";
 
     /* ------------------------------------------------------------ */
-    /** Response Fields
+    /** Response Fields.
      */
     public final static String
         __AcceptRanges = "Accept-Ranges",
@@ -107,19 +107,21 @@ public class HttpFields
         __ProxyAuthenticate = "Proxy-Authenticate",
         __RetryAfter = "Retry-After",
         __Server = "Server",
+        __ServletEngine = "Servlet-Engine",
         __Vary = "Vary",
         __WwwAuthenticate = "WWW-Authenticate";
      
     /* ------------------------------------------------------------ */
-    /** Other Fields
+    /** Other Fields.
      */
     public final static String __Cookie = "Cookie";
     public final static String __SetCookie = "Set-Cookie";
+    public final static String __SetCookie2 = "Set-Cookie2";
     public final static String __MimeVersion ="MIME-Version";
     public final static String __Identity ="identity";
     
     /* ------------------------------------------------------------ */
-    /** Fields Values
+    /** Fields Values.
      */    
     public final static String __Chunked = "chunked";
     public final static String __Close = "close";
@@ -132,7 +134,7 @@ public class HttpFields
     
     
     /* ------------------------------------------------------------ */
-    /** Single valued Fields
+    /** Single valued Fields.
      */  
     public final static String[] __SingleValued=
     {
@@ -151,7 +153,7 @@ public class HttpFields
     }
     
     /* ------------------------------------------------------------ */
-    /** Inline Fields
+    /** Inline Fields.
      */  
     public final static String[] __inlineValues=
     {
@@ -746,7 +748,7 @@ public class HttpFields
 
     
     /* ------------------------------------------------------------ */
-    /** Convert list of strings to coma separated quoted string
+    /** Convert list of strings to coma separated quoted string.
      * @param list List of strings
      * @return 
      */

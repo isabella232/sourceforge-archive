@@ -433,8 +433,13 @@ public class ServletRequest
             _session = _context.newSession();
             Cookie cookie =
                 new Cookie(_context.__SessionId,_session.getId());
-            cookie.setPath("/");
-            getServletResponse().addCookie(cookie); 
+            String path=getContextPath();
+            if (path==null || path.length()==0)
+                path="/";
+            cookie.setPath(path);
+            _servletResponse.getHttpResponse().addSetCookie(cookie,false);
+            cookie.setVersion(1);
+            _servletResponse.getHttpResponse().addSetCookie(cookie,true); 
         }
 
         return _session;

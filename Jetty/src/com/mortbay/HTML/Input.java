@@ -6,7 +6,7 @@
 package com.mortbay.HTML;
 
 /* -------------------------------------------------------------------- */
-/** HTML Form Input Tag
+/** HTML Form Input Tag.
  * <p>
  * @see Tag
  * @see Form

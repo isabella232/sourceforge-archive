@@ -53,7 +53,7 @@ public class Test
     private boolean passed = true;
     
     /*-------------------------------------------------------------------*/
-    /** Test constructor
+    /** Test constructor.
      *  @param testCase   the name of the test case
      */
     public Test(String testCase)
@@ -64,7 +64,7 @@ public class Test
     }
     
     /*-------------------------------------------------------------------*/
-    /** Check a boolean test case
+    /** Check a boolean test case.
      *  @param b        Boolean to check
      *  @param check    Description of this check
      */
@@ -91,7 +91,7 @@ public class Test
     
     
     /*-------------------------------------------------------------------*/
-    /** Check that string contains a substring
+    /** Check that string contains a substring.
      *  @return Index of substring
      */
     public int checkContains(String string, String subString, String check)
@@ -100,7 +100,7 @@ public class Test
     }
     
     /*-------------------------------------------------------------------*/
-    /** Check that string contains a substring
+    /** Check that string contains a substring.
      *  @return Index of substring
      */
     public int checkContains(String string,
@@ -133,7 +133,7 @@ public class Test
     
  
     /*-------------------------------------------------------------------*/
-    /** Check that string does not contain a substring
+    /** Check that string does not contain a substring.
      *  @return Index of substring
      */
     public int checkNotContained(String string, String subString, String check)
@@ -142,7 +142,7 @@ public class Test
     }
     
     /*-------------------------------------------------------------------*/
-    /** Check that string does not contain a substring
+    /** Check that string does not contain a substring.
      *  @return Index of substring
      */
     public int checkNotContained(String string,
@@ -176,7 +176,7 @@ public class Test
  
     
     /*-------------------------------------------------------------------*/
-    /** Check a pair of objects for equality test case
+    /** Check a pair of objects for equality test case.
      *  @param o1       First object to compare
      *  @param o2       Second object to compare
      *  @param check    Description of this check
@@ -187,7 +187,7 @@ public class Test
     }
     
     /*-------------------------------------------------------------------*/
-    /** Check a a pair of longs for equality
+    /** Check a a pair of longs for equality.
      *  @param l1       First Long to compare
      *  @param l2       Second Long to compare
      *  @param check    Description of this check
@@ -198,7 +198,7 @@ public class Test
     }
     
     /*-------------------------------------------------------------------*/
-    /** Check a a pair of doubles for equality
+    /** Check a a pair of doubles for equality.
      *  @param d1       First double to compare
      *  @param d2       Second double to compare
      *  @param check    Description of this check
@@ -209,7 +209,7 @@ public class Test
     }
     
     /*-------------------------------------------------------------------*/
-    /** Check a a pair of chars for equality
+    /** Check a a pair of chars for equality.
      *  @param c1       First char to compare
      *  @param c2       Second char to compare
      *  @param check    Description of this check
@@ -220,7 +220,7 @@ public class Test
     }
 
     /*-------------------------------------------------------------------*/
-    /** Check contents of a pair of InputStreams for equality
+    /** Check contents of a pair of InputStreams for equality.
      * @param in1 First InputStream
      * @param in2 Second InputStream
      * @param check Description
@@ -247,7 +247,7 @@ public class Test
     }
     
    /*-------------------------------------------------------------------*/
-    /** Internal check a pair of objects for equality test case
+    /** Internal check a pair of objects for equality test case.
      *  @param o1       First object to compare
      *  @param o2       Second object to compare
      *  @param check    Description of this check
@@ -275,7 +275,7 @@ public class Test
     }
 
     /*-------------------------------------------------------------------*/
-    /** Produce test report
+    /** Produce test report.
      *  
      */
     public static void report()

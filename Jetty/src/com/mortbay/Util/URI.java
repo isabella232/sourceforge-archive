@@ -194,7 +194,7 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the uri scheme
+    /** Get the uri scheme.
      * @return the URI scheme
      */
     public String getScheme()
@@ -213,7 +213,7 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the uri host
+    /** Get the uri host.
      * @return the URI host
      */
     public String getHost()
@@ -232,7 +232,7 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the uri port
+    /** Get the uri port.
      * @return the URI port
      */
     public int getPort()
@@ -252,7 +252,7 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the uri path
+    /** Get the uri path.
      * @return the URI path
      */
     public String getPath()
@@ -261,7 +261,7 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the uri path
+    /** Set the uri path.
      * @param path the URI path
      */
     public void setPath(String path)
@@ -272,7 +272,7 @@ public class URI
     
     
     /* ------------------------------------------------------------ */
-    /** Get the uri query String
+    /** Get the uri query String.
      * @return the URI query string
      */
     public String getQuery()
@@ -287,7 +287,7 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the uri query String
+    /** Set the uri query String.
      * @param query the URI query string
      */
     public void setQuery(String query)
@@ -299,7 +299,7 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
-    /** Set if this URI should encode nulls as an empty = clause
+    /** Set if this URI should encode nulls as an empty = clause.
      * @param b If true then encode nulls
      */
     public void setEncodeNulls(boolean b)
@@ -309,7 +309,7 @@ public class URI
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the uri query _parameters names
+    /** Get the uri query _parameters names.
      * @return  Unmodifiable set of URI query _parameters names
      */
     public Set getParameterNames()
@@ -337,7 +337,7 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
-    /** Clear the URI _parameters
+    /** Clear the URI _parameters.
      */
     public void clearParameters()
     {
@@ -346,7 +346,7 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
-    /** Add encoded _parameters
+    /** Add encoded _parameters.
      * @param encoded A HTTP encoded string of _parameters: e.g.. "a=1&b=2"
      */
     public void put(String encoded)
@@ -368,7 +368,7 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
-    /** Add dictionary to the uri query _parameters
+    /** Add dictionary to the uri query _parameters.
      */
     public void put(Map values)
     {
@@ -385,7 +385,7 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
-    /** Get named multiple values
+    /** Get named multiple values.
      * @param name The parameter name
      * @return Umodifiable list of values or null
      */
@@ -493,7 +493,7 @@ public class URI
     }
 
     /* ------------------------------------------------------------ */
-    /** Clone URI
+    /** Clone URI.
      * @return cloned URI
      */
     public Object clone()

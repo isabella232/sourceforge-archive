@@ -9,7 +9,7 @@ import java.io.Writer;
 import java.util.Enumeration;
 
 // =======================================================================
-/** A form laid out in a Table
+/** A form laid out in a Table.
  * <p> This class creates a form and lays out all the elements within a
  * table. Each element added has a label part and a element part. The label
  * is displayed in the form beside the element. All buttons are shown at the
@@ -29,7 +29,7 @@ public class TableForm extends Form
     private boolean extendRow = false;
     
     /* ----------------------------------------------------------- */
-    /** Create a new TableForm
+    /** Create a new TableForm.
      * @param target The target url to send the form contents to
      */
     public TableForm(String target)
@@ -40,7 +40,7 @@ public class TableForm extends Form
     }
 
     /* ----------------------------------------------------------- */
-    /** Add an informational section
+    /** Add an informational section.
      */
     public void addText(String label,
                         String value)
@@ -83,7 +83,7 @@ public class TableForm extends Form
     }
 
     /* ----------------------------------------------------------- */
-    /** Add an informational field which also passes the data as hidden
+    /** Add an informational field which also passes the data as hidden.
      * @param tag The form name of the element
      * @param label The label for the element in the table.
      */
@@ -107,7 +107,7 @@ public class TableForm extends Form
     }
 
     /* ----------------------------------------------------------- */
-    /** Add a password field
+    /** Add a password field.
      * @param tag The form name of the element
      * @param label The label for the element in the table.
      */
@@ -136,7 +136,7 @@ public class TableForm extends Form
     }
 
     /* ----------------------------------------------------------- */
-    /** Add a Select field
+    /** Add a Select field.
      * @param tag The form name of the element
      * @param label The label for the element in the table.
      */
@@ -152,7 +152,7 @@ public class TableForm extends Form
     }
 
     /* ----------------------------------------------------------- */
-    /** Add a Select field initialised with fields
+    /** Add a Select field initialised with fields.
      * @param tag The form name of the element
      * @param label The label for the element in the table.
      */
@@ -232,7 +232,7 @@ public class TableForm extends Form
     }
 
     /* ----------------------------------------------------------- */
-    /** Add a Submit Button
+    /** Add a Submit Button.
      * @param tag The form name of the element
      * @param label The label for the Button
      */
@@ -251,7 +251,7 @@ public class TableForm extends Form
     }
 
     /* ----------------------------------------------------------- */
-    /** Add a reset button
+    /** Add a reset button.
      * @param tag The form name of the element
      * @param label The label for the element in the table.
      */
@@ -298,7 +298,7 @@ public class TableForm extends Form
     }
 
     /* ----------------------------------------------------------- */
-    /** Add an arbitrary element to the table
+    /** Add an arbitrary element to the table.
      * @param label The label for the element in the table.
      */
     public void addField(String label,Element field)

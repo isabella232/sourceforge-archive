@@ -9,7 +9,7 @@ import java.io.Writer;
 
 
 /* ------------------------------------------------------------ */
-/** HTML Comment
+/** HTML Comment.
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

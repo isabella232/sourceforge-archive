@@ -405,7 +405,7 @@ public class HttpResponse extends HttpMessage
     public void addSetCookie(String name,
                              String value)
     {
-        addSetCookie(new Cookie(name,value));
+        addSetCookie(new Cookie(name,value),false);
     }
     
     /* -------------------------------------------------------------- */
@@ -413,8 +413,19 @@ public class HttpResponse extends HttpMessage
      */
     public void addSetCookie(Cookie cookie)
     {
+        addSetCookie(cookie,false);
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Add a Set-Cookie field.
+     * @param cookie The cookie.
+     * @param cookie2 If true, use the alternate cookie 2 header
+     */
+    public void addSetCookie(Cookie cookie, boolean cookie2)
+    {
         String name=cookie.getName();
         String value=cookie.getValue();
+        int version=cookie.getVersion();
         
         // Check arguments
         if (name==null || name.length()==0)
@@ -432,7 +443,6 @@ public class HttpResponse extends HttpMessage
                 buf.append(UrlEncoded.encodeString(value));
             }
             
-            int version=cookie.getVersion();
             if (version>0)
             {
                 buf.append(";Version=");
@@ -482,7 +492,8 @@ public class HttpResponse extends HttpMessage
             name_value_params=buf.toString();
         }
         
-        _header.put(HttpFields.__SetCookie,name_value_params);
+        _header.put(cookie2?HttpFields.__SetCookie2:HttpFields.__SetCookie,
+                    name_value_params);        
     }
     
     /* ------------------------------------------------------------ */

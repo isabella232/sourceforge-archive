@@ -167,7 +167,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     }
         
     /* ------------------------------------------------------------ */
-    /** Get the output buffer capacity
+    /** Get the output buffer capacity.
      * @return Buffer capacity in bytes.
      */
     public int getBufferCapacity()
@@ -208,7 +208,7 @@ public class ChunkableOutputStream extends FilterOutputStream
      * @exception Problem with observer notification.
      */
     public void resetBuffer()
-        throws IllegalStateException, IOException
+        throws IllegalStateException
     {
         if (_committed)
             throw new IllegalStateException("Output committed");
@@ -239,7 +239,14 @@ public class ChunkableOutputStream extends FilterOutputStream
         _filters=0;
         _written=false;
         _committed=false;
-        notify(OutputObserver.__RESET_BUFFER);
+        try
+        {
+            notify(OutputObserver.__RESET_BUFFER);
+        }
+        catch(IOException e)
+        {
+            Code.ignore(e);
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -400,7 +407,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     }
 
     /* ------------------------------------------------------------ */
-    /** Set the trailer to send with a chunked close
+    /** Set the trailer to send with a chunked close.
      * @param trailer 
      */
     public void setTrailer(HttpFields trailer)

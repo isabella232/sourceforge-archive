@@ -108,7 +108,7 @@ public class StringUtil
     }
     
     /* ------------------------------------------------------------ */
-    /** Test main
+    /** Test main.
      * @param args args
      */
     public static void main(String[] args)

@@ -9,7 +9,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /* ======================================================================== */
-/** InetAddress and Port
+/** InetAddress and Port.
  */
 public class InetAddrPort
     implements Cloneable
@@ -89,7 +89,7 @@ public class InetAddrPort
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the Host
+    /** Get the Host.
      * @return The IP address
      */
     public String getHost()
@@ -98,7 +98,7 @@ public class InetAddrPort
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the Host
+    /** Set the Host.
      * @param host 
      * @exception java.net.UnknownHostException 
      */
@@ -110,7 +110,7 @@ public class InetAddrPort
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the IP address
+    /** Get the IP address.
      * @return The IP address
      */
     public InetAddress getInetAddress()
@@ -119,7 +119,7 @@ public class InetAddrPort
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the IP address
+    /** Set the IP address.
      * @param addr The IP address
      */
     public void setInetAddress(InetAddress addr)
@@ -128,7 +128,7 @@ public class InetAddrPort
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the port
+    /** Get the port.
      * @return The port number
      */
     public int getPort()
@@ -137,7 +137,7 @@ public class InetAddrPort
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the port
+    /** Set the port.
      * @param port The port number
      */
     public void setPort(int port)
@@ -155,7 +155,7 @@ public class InetAddrPort
     }
 
     /* ------------------------------------------------------------ */
-    /** Clone the InetAddrPort
+    /** Clone the InetAddrPort.
      * @return A new instance.
      */
     public Object clone()
@@ -173,7 +173,7 @@ public class InetAddrPort
     }
     
     /* ------------------------------------------------------------ */
-    /** Equals
+    /** Equals.
      * @param o 
      * @return True if is the same address and port.
      */

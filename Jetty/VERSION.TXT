@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
  
+ + RequestDispatcher.forward() only resets buffer, not headers.
+ + Added ServletWriter that can be disabled.
  + Resource gets systemresources from it's own classloader.
  + don't include classes in release.
  + Allow load-on-startup with no content.
@@ -12,6 +14,15 @@ Jetty Versions
  + Reduced risk of double null check sync problem.
  + Don't set connection:close for normal HTTP/1.0 responses.
  + RequestDispatcher new queries params replace old.
+ + Servlet init order may be negative.
+ + Corrected a few of the many spelling mistakes.
+ + Javadoc improvements.
+ + Webapps serve dynamics servlets by default.
+ + Warn for missing WEB-INF or web.xml
+ + Sessions try version 1 cookies in set-cookie2 header. 
+ + Put extra server and servlet info in header.
+ + Version details in header can be suppressed with System property
+   java.com.mortbay.HTTP.Version.paranoid
 
 Jetty-3.0.0.rc5 - 12 Nov 2000
  + Default writer encoding set by mime type if not explicitly set.

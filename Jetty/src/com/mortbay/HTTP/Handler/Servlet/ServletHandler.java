@@ -156,8 +156,7 @@ public class ServletHandler extends NullHandler
         {
             ServletHolder holder = (ServletHolder)i.next();
 
-
-            if (holder.getInitOrder()>=0)
+            if (holder.isInitOnStartup())
                 holder.initialize();
         }
         

@@ -11,7 +11,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 /* ---------------------------------------------------------------- */
-/** FrameSet
+/** FrameSet.
  * <p>
  * Usage
  * <PRE>
@@ -37,7 +37,7 @@ public class FrameSet extends Page
     Hashtable frameMap=null;
     
     /* ------------------------------------------------------------ */
-    /** FrameSet constructor
+    /** FrameSet constructor.
      * @param colSpec Comma separated list of column widths specified
      *                as pixels, percentage or '*' for variable
      */

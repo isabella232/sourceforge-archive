@@ -109,7 +109,7 @@ public class HashUserRealm extends HashMap
     }
 
     /* ------------------------------------------------------------ */
-    /** Put user into realm
+    /** Put user into realm.
      * @param name User name
      * @param credentials String password, Password or UserPrinciple
      *                    instance. 

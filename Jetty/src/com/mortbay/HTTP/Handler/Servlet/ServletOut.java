@@ -5,17 +5,18 @@
 
 package com.mortbay.HTTP.Handler.Servlet;
 
-import com.mortbay.HTTP.ChunkableOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import com.mortbay.Util.IO;
 import javax.servlet.ServletOutputStream;
 
 
 class ServletOut extends ServletOutputStream
 {
-    ChunkableOutputStream _out;
+    OutputStream _out;
 
     /* ------------------------------------------------------------ */
-    ServletOut(ChunkableOutputStream out)
+    ServletOut(OutputStream out)
     {
         _out=out;
     }
@@ -26,11 +27,39 @@ class ServletOut extends ServletOutputStream
     {
         _out.write(ch);
     }
+    
+    /* ------------------------------------------------------------ */
+    public void write(byte[]b)
+        throws IOException
+    {
+        _out.write(b);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void write(byte[]b,int o,int l)
+        throws IOException
+    {
+        _out.write(b,o,l);
+    }
 
     /* ------------------------------------------------------------ */
     public void flush()
         throws IOException
     {
         _out.flush();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void close()
+        throws IOException
+    {
+        _out.close();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void disable()
+        throws IOException
+    {
+        _out=IO.getNullStream();
     }
 }

@@ -7,7 +7,7 @@ package com.mortbay.HTML;
 
 
 /* ------------------------------------------------------------ */
-/** CSS Style LINK
+/** CSS Style LINK.
  *
  * @version $Id$
  * @author Greg Wilkins (gregw)

@@ -49,7 +49,7 @@ public class PathMap extends HashMap
     HashMap _prefixMap=new HashMap();
     
     /* --------------------------------------------------------------- */
-    /** Construct empty PathMap
+    /** Construct empty PathMap.
      */
     public PathMap()
     {
@@ -57,7 +57,7 @@ public class PathMap extends HashMap
     }
     
     /* --------------------------------------------------------------- */
-    /** Construct empty PathMap
+    /** Construct empty PathMap.
      */
     public PathMap(int capacity)
     {
@@ -65,7 +65,7 @@ public class PathMap extends HashMap
     }
     
     /* --------------------------------------------------------------- */
-    /** Construct from dictionary PathMap
+    /** Construct from dictionary PathMap.
      */
     public PathMap(Map m)
     {
@@ -73,7 +73,7 @@ public class PathMap extends HashMap
     }
     
     /* --------------------------------------------------------------- */
-    /** Add a single path match to the PathMap
+    /** Add a single path match to the PathMap.
      * @param pathSpec The path specification, or coma separated list of
      * path specifications.
      * @param object The object the path maps to

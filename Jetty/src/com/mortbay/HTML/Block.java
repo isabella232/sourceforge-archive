@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 /* -------------------------------------------------------------------- */
-/** HTML Block Composite
+/** HTML Block Composite.
  * Block of predefined or arbitrary type.
  * Block types are predefined for PRE, BLOCKQUOTE, CENTER, LISTING,
  * PLAINTEXT, XMP, DIV (Left and Right) and SPAN.
@@ -46,7 +46,7 @@ public class Block extends Composite
     private String tag;
 
     /* ----------------------------------------------------------------- */
-    /** Construct a block using the passed string as the tag
+    /** Construct a block using the passed string as the tag.
      * @param tag The tag to use to open and close the block.
      */
     public Block(String tag)
@@ -65,7 +65,7 @@ public class Block extends Composite
     }
 
     /* ----------------------------------------------------------------- */
-    /** Construct a block using the passed string as the tag
+    /** Construct a block using the passed string as the tag.
      * @param tag The tag to use to open and close the block.
      * @param attributes String of attributes for opening tag.
      */

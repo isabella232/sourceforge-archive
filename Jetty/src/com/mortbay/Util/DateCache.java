@@ -138,7 +138,7 @@ public class DateCache
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the format
+    /** Get the format.
      */
     public SimpleDateFormat getFormat()
     {
@@ -146,7 +146,7 @@ public class DateCache
     }
 
     /* ------------------------------------------------------------ */
-    /** Set the timezone
+    /** Set the timezone.
      * @param tz TimeZone
      */
     public void setTimeZone(TimeZone tz)

@@ -16,7 +16,7 @@ import java.util.Hashtable;
 import java.util.StringTokenizer;
 
 /* ------------------------------------------------------------ */
-/** Multipart Form Data request
+/** Multipart Form Data request.
  * <p>
  * This class decodes the multipart/form-data stream sent by
  * a HTML form that uses a file input item.
@@ -73,7 +73,7 @@ public class MultiPartRequest
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the part names
+    /** Get the part names.
      * @return an array of part names
      */
     public String[] getPartNames()
@@ -93,7 +93,7 @@ public class MultiPartRequest
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the data of a part as a string
+    /** Get the data of a part as a string.
      * @param name The part name 
      * @return The part data
      */
@@ -107,7 +107,7 @@ public class MultiPartRequest
     
 
     /* ------------------------------------------------------------ */
-    /** Get the data of a part as a stream
+    /** Get the data of a part as a stream.
      * @param name The part name 
      * @return Stream providing the part data
      */

@@ -102,7 +102,7 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the request
+    /** Get the request.
      * @return the request
      */
     public HttpRequest getRequest()
@@ -111,7 +111,7 @@ public class HttpConnection
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the response
+    /** Get the response.
      * @return the response
      */
     public HttpResponse getResponse()
@@ -268,7 +268,8 @@ public class HttpConnection
                 }
                 
                 _response.setVersion(_version);
-                _response.setField(HttpFields.__Server,Version.__Version);
+                _response.setField(HttpFields.__Server,Version.__VersionDetail);
+                _response.setField(HttpFields.__ServletEngine,Version.__ServletEngine);
                 _response.setField(HttpFields.__MimeVersion,"1.0");
                 _response.setCurrentTime(HttpFields.__Date);
             

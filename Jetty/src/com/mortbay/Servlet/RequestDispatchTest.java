@@ -68,34 +68,38 @@ public class RequestDispatchTest extends HttpServlet
         {
             info=info.substring(8);
             if (info.indexOf('?')<0)
-                info+="?Dispatch=includeWriter";
+                info+="?Dispatch=include";
             else
-                info+="&Dispatch=includeWriter";
+                info+="&Dispatch=include";
 
             if (System.currentTimeMillis()%2==0)
             {
                 PrintWriter pout = sres.getWriter();
-                pout.write("<H1>Include: "+info+"</H1><HL>");
+                pout.write("<H1>Include: "+info+"</H1><HR>");
                 pout.flush();
                 
                 RequestDispatcher dispatch = getServletContext()
                     .getRequestDispatcher(info);
-                dispatch.include(sreq,sres);
-                
-                pout.write("<HL><H1>-- Included (writer)</H1>");
+                if (dispatch==null)    
+                    pout.write("<H1>Null dispatcher</H1>");
+                else
+                    dispatch.include(sreq,sres);
+                pout.write("<HR><H1>-- Included (writer)</H1>");
             }
             else 
             {
                 OutputStream out = sres.getOutputStream();
                 PrintWriter pout = new PrintWriter(out);
-                pout.write("<H1>Include: "+info+"</H1><HL>");
+                pout.write("<H1>Include: "+info+"</H1><HR>");
                 pout.flush();
                 
                 RequestDispatcher dispatch = getServletContext()
                     .getRequestDispatcher(info);
-                dispatch.include(sreq,sres);
-                
-                pout.write("<HL><H1>-- Included (outputstream)</H1>");
+                if (dispatch==null)    
+                    pout.write("<H1>Null dispatcher</H1>");
+                else
+                    dispatch.include(sreq,sres);
+                pout.write("<HR><H1>-- Included (outputstream)</H1>");
                 pout.flush();
             }
         }
@@ -111,7 +115,11 @@ public class RequestDispatchTest extends HttpServlet
             if (dispatch!=null)
                 dispatch.forward(sreq,sres);
             else
-                sres.sendError(404);
+            {
+                PrintWriter pout = sres.getWriter();
+                pout.write("<H1>No dispatcher for: "+info+"</H1><HR>");
+                pout.flush();
+            }
         }
         else if (info.startsWith("/includeN/"))
         {

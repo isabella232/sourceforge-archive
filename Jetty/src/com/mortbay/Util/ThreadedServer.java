@@ -45,7 +45,7 @@ abstract public class ThreadedServer extends ThreadPool
     {}
 
     /* ------------------------------------------------------------------- */
-    /** Construct for specific port
+    /** Construct for specific port.
      */
     public ThreadedServer(int port)
     {
@@ -53,7 +53,7 @@ abstract public class ThreadedServer extends ThreadPool
     }
     
     /* ------------------------------------------------------------------- */
-    /** Construct for specific address and port
+    /** Construct for specific address and port.
      */
     public ThreadedServer(InetAddress address, int port) 
     {
@@ -61,7 +61,7 @@ abstract public class ThreadedServer extends ThreadPool
     }
     
     /* ------------------------------------------------------------------- */
-    /** Construct for specific address and port
+    /** Construct for specific address and port.
      */
     public ThreadedServer(String host, int port) 
         throws UnknownHostException
@@ -70,7 +70,7 @@ abstract public class ThreadedServer extends ThreadPool
     }
     
     /* ------------------------------------------------------------------- */
-    /** Construct for specific address and port
+    /** Construct for specific address and port.
      */
     public ThreadedServer(InetAddrPort address) 
     {
@@ -202,7 +202,7 @@ abstract public class ThreadedServer extends ThreadPool
     }
     
     /* ------------------------------------------------------------------- */
-    /** Handle new connection
+    /** Handle new connection.
      * This method should be overridden by the derived class to implement
      * the required handling.  It is called by a thread created for it and
      * does not need to return until it has finished it's task
@@ -213,7 +213,7 @@ abstract public class ThreadedServer extends ThreadPool
     }
 
     /* ------------------------------------------------------------------- */
-    /** Handle new connection
+    /** Handle new connection.
      * If access is required to the actual socket, override this method
      * instead of handleConnection(InputStream in,OutputStream out).
      * The default implementation of this just calls

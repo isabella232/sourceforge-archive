@@ -55,7 +55,7 @@ public class UrlEncoded extends MultiMap
     }
     
     /* -------------------------------------------------------------- */
-    /** Encode Hashtable with % encoding
+    /** Encode Hashtable with % encoding.
      */
     public String encode()
     {
@@ -63,7 +63,7 @@ public class UrlEncoded extends MultiMap
     }
     
     /* -------------------------------------------------------------- */
-    /** Encode Hashtable with % encoding
+    /** Encode Hashtable with % encoding.
      * @param equalsForNullValue if True, then an '=' is always used, even
      * for parameters without a value. e.g. "blah?a=&b=&c=".
      */
@@ -173,7 +173,7 @@ public class UrlEncoded extends MultiMap
     }
     
     /* -------------------------------------------------------------- */
-    /** Decode String with % encoding
+    /** Decode String with % encoding.
      */
     public static String decodeString(String encoded)
     {

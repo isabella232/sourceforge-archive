@@ -63,7 +63,7 @@ public class IO extends ThreadPool
     }
     
     /* ------------------------------------------------------------------- */
-    /** Copy Stream in to Stream out until EOF or exception
+    /** Copy Stream in to Stream out until EOF or exception.
      * in own thread
      */
     public static void copyThread(InputStream in, OutputStream out)
@@ -78,7 +78,7 @@ public class IO extends ThreadPool
     }
     
     /* ------------------------------------------------------------------- */
-    /** Copy Stream in to Stream out until EOF or exception
+    /** Copy Stream in to Stream out until EOF or exception.
      */
     public static void copy(InputStream in, OutputStream out)
          throws IOException
@@ -103,7 +103,7 @@ public class IO extends ThreadPool
     }
     
     /* ------------------------------------------------------------------- */
-    /** Copy Reader to Writer out until EOF or exception
+    /** Copy Reader to Writer out until EOF or exception.
      */
     public static void copy(Reader in, Writer out)
          throws IOException
@@ -112,7 +112,7 @@ public class IO extends ThreadPool
     }
     
     /* ------------------------------------------------------------------- */
-    /** Copy Stream in to Stream for byteCount bytes or until EOF or exception
+    /** Copy Stream in to Stream for byteCount bytes or until EOF or exception.
      */
     public static void copy(InputStream in,
                             OutputStream out,
@@ -157,7 +157,7 @@ public class IO extends ThreadPool
     }  
     
     /* ------------------------------------------------------------------- */
-    /** Copy Reader to Writer for byteCount bytes or until EOF or exception
+    /** Copy Reader to Writer for byteCount bytes or until EOF or exception.
      */
     public static void copy(Reader in,
                             Writer out,
@@ -242,6 +242,50 @@ public class IO extends ThreadPool
             }
         }
     }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return An outputstream to nowhere
+     */
+    public static OutputStream getNullStream()
+    {
+        return __nullStream;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private static class NullOS extends OutputStream                                    
+    {
+        public void close(){}
+        public void flush(){}
+        public void write(byte[]b){}
+        public void write(byte[]b,int i,int l){}
+        public void write(int b){}
+    }
+    private static NullOS __nullStream = new NullOS();
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return An writer to nowhere
+     */
+    public static Writer getNullWriter()
+    {
+        return __nullWriter;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private static class NullWrite extends Writer                                    
+    {
+        public void close(){}
+        public void flush(){}
+        public void write(char[]b){}
+        public void write(char[]b,int o,int l){}
+        public void write(int b){}
+        public void write(String s){}
+        public void write(String s,int o,int l){}
+    }
+    private static NullWrite __nullWriter = new NullWrite();
 }
 
 

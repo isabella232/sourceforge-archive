@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
 
 
 /* ------------------------------------------------------------ */
-/** HTTP Listener
+/** HTTP Listener.
  *
  * @see HttpConnection
  * @version $Id$

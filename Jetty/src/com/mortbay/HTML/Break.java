@@ -6,7 +6,7 @@
 package com.mortbay.HTML;
 
 /* -------------------------------------------------------------------- */
-/** Break Tag
+/** Break Tag.
  */
 public class Break extends Tag
 {
@@ -19,7 +19,7 @@ public class Break extends Tag
     public final static String Para="P";
 
     /* ---------------------------------------------------------------- */
-    /** Default constructor (Line Break)
+    /** Default constructor (Line Break).
      */
     public Break()
     {
@@ -27,7 +27,7 @@ public class Break extends Tag
     }
     
     /* ---------------------------------------------------------------- */
-    /** Constructor
+    /** Constructor.
      * @param type The Break type
      */
     public Break(String type)

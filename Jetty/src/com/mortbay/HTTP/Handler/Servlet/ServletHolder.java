@@ -51,13 +51,14 @@ public class ServletHolder
     private String _name=null;
     private String _className ;
     private Map _initParams ;
-    private int _initOrder=-1;
+    private int _initOrder;
+    private boolean _initOnStartup=false;
     private Config _config;
     private Map _roleMap;
     private int _checks;
 
     /* ---------------------------------------------------------------- */
-    /** Construct a Servlet property mostly from the servers config
+    /** Construct a Servlet property mostly from the servers config.
      * file.
      * @param handler ServletHandler
      * @param className Servlet class name (fully qualified)
@@ -107,7 +108,7 @@ public class ServletHolder
      */
     public boolean isInitOnStartup()
     {
-        return _initOrder>=0;
+        return _initOrder!=0 || _initOnStartup;
     }
 
     /* ------------------------------------------------------------ */
@@ -133,6 +134,7 @@ public class ServletHolder
      */
     public void setInitOrder(int order)
     {
+        _initOnStartup=true;
         _initOrder = order;
     }
 
@@ -341,7 +343,7 @@ public class ServletHolder
     }
     
     /* ------------------------------------------------------------ */
-    /** get a user role link
+    /** get a user role link.
      * @param name The name of the role
      * @return The name as translated by the link. If no link exists,
      * the name is returned.
@@ -496,7 +498,7 @@ public class ServletHolder
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the name of the Servlet
+    /** Get the name of the Servlet.
      * @return Servlet name
      */
     public String toString()

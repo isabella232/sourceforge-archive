@@ -81,6 +81,7 @@ public class WebApplicationContext extends HandlerContext
             
         // Add servlet Handler
         _servletHandler = getServletHandler();
+        _servletHandler.setDynamicServletPathSpec("/servlet/*");
         _context=_servletHandler.getContext();
             
         // ResourcePath
@@ -115,11 +116,12 @@ public class WebApplicationContext extends HandlerContext
             throw new IOException("Parse error on "+_webAppName+
                                   ": "+e.toString());
         }
-
         
         // Do we have a WEB-INF
         Resource _webInf = _webApp.addPath("WEB-INF/");
-        if (_webInf.exists() && _webInf.isDirectory())
+        if (!_webInf.exists() || !_webInf.isDirectory())
+            Code.warning("No WEB-INF in "+_webAppName+". Serving files only.");
+        else
         {
             // Look for classes directory
             Resource classes = _webApp.addPath("WEB-INF/classes/");
@@ -150,7 +152,9 @@ public class WebApplicationContext extends HandlerContext
 
             // do web.xml file
             Resource web = _webApp.addPath("WEB-INF/web.xml");
-            if (web.exists())
+            if (!web.exists())
+                Code.warning("No WEB-INF/web.xml in "+_webAppName+". Serving files and default/dynamic servlets only");
+            else
             {
                 try
                 {

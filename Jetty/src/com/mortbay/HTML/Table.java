@@ -7,7 +7,7 @@ package com.mortbay.HTML;
 import java.util.Hashtable;
 
 /* --------------------------------------------------------------------- */
-/** A HTML Table element
+/** A HTML Table element.
  * <p> The Table Element works by calling newRow and then adding cells or
  * headings.
  * <p>Notes<br>
@@ -30,7 +30,7 @@ public class Table extends Block
     private Block _defaultRow=null;
 
     /* ----------------------------------------------------------------- */
-    /** Construct Table
+    /** Construct Table.
      */
     public Table()
     {
@@ -41,7 +41,7 @@ public class Table extends Block
     }
     
     /* ----------------------------------------------------------------- */
-    /** Construct Table
+    /** Construct Table.
      */
     public Table(int border)
     {
@@ -53,7 +53,7 @@ public class Table extends Block
     }
 
     /* ----------------------------------------------------------------- */
-    /** Construct Table with attributes
+    /** Construct Table with attributes.
      */
     public Table(int border, String attributes)
     {
@@ -81,7 +81,7 @@ public class Table extends Block
     }
 
     /* ----------------------------------------------------------------- */
-    /** Create new table row with attributes
+    /** Create new table row with attributes.
      * Attributes set after this call and before a call to newCell or
      * newHeader are considered row attributes.
      */
@@ -209,7 +209,7 @@ public class Table extends Block
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the table cell spacing
+    /** Set the table cell spacing.
      * @param s spacing in pixels
      * @return This table for call chaining
      */
@@ -221,7 +221,7 @@ public class Table extends Block
     
 
     /* ------------------------------------------------------------ */
-    /** Set the table cell padding
+    /** Set the table cell padding.
      * @param padding the cell padding in pixels
      * @return This table for call chaining
      */
@@ -232,7 +232,7 @@ public class Table extends Block
     }
     
     /* ------------------------------------------------------------ */
-    /** Set horizontal and vertical spacing
+    /** Set horizontal and vertical spacing.
      * @param h horizontal spacing
      * @param v vertical spacing
      * @return This table for call chaining
@@ -269,7 +269,7 @@ public class Table extends Block
     }
     
     /* ----------------------------------------------------------------- */
-    /** Add cell nesting factory
+    /** Add cell nesting factory.
      * Set the CompositeFactory for this thread. Each new cell in the
      * table added by this thread will have a new Composite from this
      * factory nested in the Cell.
@@ -289,7 +289,7 @@ public class Table extends Block
     }
     
     /* ----------------------------------------------------------------- */
-    /** Add cell nesting factory for thread
+    /** Add cell nesting factory for thread.
      * Set the CompositeFactory for this thread. Each new cell in the
      * table added by this thread will have a new Composite from this
      * factory nested in the Cell.
@@ -308,7 +308,7 @@ public class Table extends Block
     }
     
     /* ----------------------------------------------------------------- */
-    /** Add cell nesting factory for table
+    /** Add cell nesting factory for table.
      * Set the CompositeFactory for this thread. Each new cell in the
      * table added by this thread will have a new Composite from this
      * factory nested in the Cell.

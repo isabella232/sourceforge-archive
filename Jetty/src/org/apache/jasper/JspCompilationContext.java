@@ -106,7 +106,7 @@ public interface JspCompilationContext {
      */
     public ClassLoader getClassLoader();
 
-    /** Add a jar to the classpath used by the loader
+    /** Add a jar to the classpath used by the loader.
      */
     public void addJar( String jar ) throws IOException ;
 

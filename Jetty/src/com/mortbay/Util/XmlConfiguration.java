@@ -30,13 +30,13 @@ import org.xml.sax.SAXException;
  */
 public class XmlConfiguration
 {
-    private static Class[] __primatives =
+    private static Class[] __primitives =
     {
         Boolean.TYPE, Character.TYPE, Byte.TYPE, Short.TYPE, Integer.TYPE,
         Long.TYPE, Float.TYPE, Double.TYPE, Void.TYPE
     };
     
-    private static Class[] __primativeHolders =
+    private static Class[] __primitiveHolders =
     {
         Boolean.class, Character.class, Byte.class, Short.class, Integer.class,
         Long.class, Float.class, Double.class, Void.class
@@ -198,11 +198,11 @@ public class XmlConfiguration
             return;
         }
         catch(IllegalArgumentException e)
-        {if(Code.verbose(999))Code.ignore(e);}
+        {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
         catch(IllegalAccessException e)
-        {if(Code.verbose(999))Code.ignore(e);}
+        {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
         catch(NoSuchMethodException e)
-        {if(Code.verbose(999))Code.ignore(e);}
+        {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
         
         // Try for native match
         try{
@@ -213,13 +213,13 @@ public class XmlConfiguration
             return;
         }
         catch(NoSuchFieldException e)
-        {if(Code.verbose(999))Code.ignore(e);}
+        {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
         catch(IllegalArgumentException e)
-        {if(Code.verbose(999))Code.ignore(e);}
+        {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
         catch(IllegalAccessException e)
-        {if(Code.verbose(999))Code.ignore(e);}
+        {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
         catch(NoSuchMethodException e)
-        {if(Code.verbose(999))Code.ignore(e);}
+        {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
 
 
         // Search for a match by trying all the set methods
@@ -237,8 +237,8 @@ public class XmlConfiguration
                     sets[s].invoke(obj,arg);
                     return;
                 }
-                catch(IllegalArgumentException e){if(Code.verbose(999))Code.ignore(e);}
-                catch(IllegalAccessException e){if(Code.verbose(999))Code.ignore(e);}
+                catch(IllegalArgumentException e){if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+                catch(IllegalAccessException e){if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
             }
         }
 
@@ -250,11 +250,11 @@ public class XmlConfiguration
                 Class sClass=set.getParameterTypes()[0];
                 if (sClass.isPrimitive())
                 {
-                    for (int t=0;t<__primatives.length;t++)
+                    for (int t=0;t<__primitives.length;t++)
                     {
-                        if (sClass.equals(__primatives[t]))
+                        if (sClass.equals(__primitives[t]))
                         {
-                            sClass=__primativeHolders[t];
+                            sClass=__primitiveHolders[t];
                             break;
                         }
                     }
@@ -265,11 +265,11 @@ public class XmlConfiguration
                 return;
             }
             catch(NoSuchMethodException e)
-            {if(Code.verbose(999))Code.ignore(e);}
+            {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
             catch(IllegalAccessException e)
-            {if(Code.verbose(999))Code.ignore(e);}
+            {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
             catch(InstantiationException e)
-            {if(Code.verbose(999))Code.ignore(e);}
+            {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
         }
 
         // No Joy
@@ -359,9 +359,9 @@ public class XmlConfiguration
             boolean called=false;
             try{n=methods[c].invoke(obj,arg);called=true;}
             catch(IllegalAccessException e)
-            {if(Code.verbose(999))Code.ignore(e);}
+            {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
             catch(IllegalArgumentException e)
-            {if(Code.verbose(999))Code.ignore(e);}
+            {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
             if (called)
             {
                 configure(n,node,argi);
@@ -428,11 +428,11 @@ public class XmlConfiguration
                 called=true;
             }
             catch(IllegalAccessException e)
-            {if(Code.verbose(999))Code.ignore(e);}
+            {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
             catch(InstantiationException e)
-            {if(Code.verbose(999))Code.ignore(e);}
+            {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
             catch(IllegalArgumentException e)
-            {if(Code.verbose(999))Code.ignore(e);}
+            {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
             if(called)
             {
                 configure(n,node,argi);

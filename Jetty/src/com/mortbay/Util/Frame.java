@@ -10,7 +10,7 @@ import java.io.StringWriter;
 
 
 /*-----------------------------------------------------------------------*/
-/** Access the current execution frame
+/** Access the current execution frame.
  */
 public class Frame
 {
@@ -40,7 +40,7 @@ public class Frame
     private int _lineStart=0;
     private int _lineEnd;
     /*-------------------------------------------------------------------*/
-    /** Construct a frame
+    /** Construct a frame.
      */
     public Frame()
     {
@@ -57,7 +57,7 @@ public class Frame
     }
     
     /*-------------------------------------------------------------------*/
-    /** Construct a frame
+    /** Construct a frame.
      * @param ignoreFrames number of levels of stack to ignore
      */
     public Frame(int ignoreFrames)
@@ -128,7 +128,7 @@ public class Frame
     }
     
     /* ------------------------------------------------------------ */
-    /** Complete partial constructor
+    /** Complete partial constructor.
      */
     void complete()
     {
@@ -187,7 +187,7 @@ public class Frame
     }
     
     /* ------------------------------------------------------------ */
-    /** Get a Frame representing the function one level up in this frame
+    /** Get a Frame representing the function one level up in this frame.
      * @return parent frame or null if none
      */
     public Frame getParent(){

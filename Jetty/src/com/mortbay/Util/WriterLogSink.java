@@ -72,7 +72,7 @@ public class WriterLogSink
     }
     
     /*-------------------------------------------------------------------*/
-    /** Set the log options
+    /** Set the log options.
      *
      * @param logOptions A string of characters as defined for the
      * LOG_OPTIONS system parameter.

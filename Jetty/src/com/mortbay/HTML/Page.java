@@ -107,7 +107,7 @@ public class Page extends Composite
     }
 
     /* ----------------------------------------------------------------- */
-    /** Set page title
+    /** Set page title.
      * @return This Page (for chained commands)
      */
     public Page title(String title)
@@ -120,7 +120,7 @@ public class Page extends Composite
     }
 
     /* ----------------------------------------------------------------- */
-    /** Add element or object to the page header
+    /** Add element or object to the page header.
      * @param o The Object to add. If it is a String or Element, it is
      * added directly, otherwise toString() is called.
      * @return This Page (for chained commands)
@@ -133,7 +133,7 @@ public class Page extends Composite
     }
   
     /* ----------------------------------------------------------------- */
-    /** Set page background image
+    /** Set page background image.
      * @return This Page (for chained commands)
      */
     public final Page setBackGroundImage(String bg)
@@ -143,7 +143,7 @@ public class Page extends Composite
     }
   
     /* ----------------------------------------------------------------- */
-    /** Set page background color
+    /** Set page background color.
      * @return This Page (for chained commands)
      */
     public final Page setBackGroundColor(String color)
@@ -154,7 +154,7 @@ public class Page extends Composite
     }
   
     /* ----------------------------------------------------------------- */
-    /** Set the URL Base for the Page
+    /** Set the URL Base for the Page.
      * @param target Default link target, null if none.
      * @param href Default absolute href, null if none.
      * @return This Page (for chained commands)
@@ -186,7 +186,7 @@ public class Page extends Composite
     }
     
     /* ------------------------------------------------------------ */
-    /** Write HTML page head tags
+    /** Write HTML page head tags.
      * Write tags &ltHTML&gt&ltHEAD&gt .... &lt/HEAD&gt
      */
     public void writeHtmlHead(Writer out)
@@ -207,7 +207,7 @@ public class Page extends Composite
     }
     
     /* ------------------------------------------------------------ */
-    /** Write HTML page body tag
+    /** Write HTML page body tag.
      * Write tags &ltBODY page attributes&gt.
      */
     public void writeBodyTag(Writer out)
@@ -221,7 +221,7 @@ public class Page extends Composite
     }
 
     /* ------------------------------------------------------------ */
-    /** Write end BODY and end HTML tags
+    /** Write end BODY and end HTML tags.
      */
     public void writeHtmlEnd(Writer out)
          throws IOException
@@ -231,7 +231,7 @@ public class Page extends Composite
     }
     
     /* ------------------------------------------------------------ */
-    /** Write any body elements of the page
+    /** Write any body elements of the page.
      */
     public void writeElements(Writer out)
          throws IOException
@@ -240,7 +240,7 @@ public class Page extends Composite
     }
     
     /* ------------------------------------------------------------ */
-    /** Write page section
+    /** Write page section.
      * The page is written containing only the named section.
      * If a head and bodyTag have not been written, then they
      * are written before the section. If endHtml is true, the
@@ -301,7 +301,7 @@ public class Page extends Composite
     }
 
     /* ------------------------------------------------------------ */
-    /** Return the preferred FrameSet to be used with a specialized Page
+    /** Return the preferred FrameSet to be used with a specialized Page.
      * The Frames will be named after the sections they are to
      * contain.
      * The default implementation returns null
@@ -312,7 +312,7 @@ public class Page extends Composite
     }
 
     /* ------------------------------------------------------------ */
-    /** Set a composite as a named section.  Other Page users may
+    /** Set a composite as a named section.  Other Page users may.
      * add to the section by calling addTo().  It is up to the section
      * creator to add the section to the page in it appropriate position.
      */
@@ -322,7 +322,7 @@ public class Page extends Composite
     }
     
     /* ------------------------------------------------------------ */
-    /** Set a composite as a named section and add it to the
+    /** Set a composite as a named section and add it to the.
      * contents of the page
      */
     public void addSection(String section, Composite composite)
@@ -340,7 +340,7 @@ public class Page extends Composite
     }
 
     /* ------------------------------------------------------------ */
-    /** Add content to a named sections.  If the named section cannot
+    /** Add content to a named sections.  If the named section cannot.
      * be found, the content is added to the page.
      */
     public void addTo(String section, Object element)

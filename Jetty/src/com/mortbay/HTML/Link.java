@@ -7,7 +7,7 @@ package com.mortbay.HTML;
 
 
 /* -------------------------------------------------------------------- */
-/** HTML Link Block
+/** HTML Link Block.
  * This is a HTML reference (not a CSS Link).
  * @see StyleLink
  */
@@ -15,7 +15,7 @@ public class Link extends Block
 {
 
     /* ----------------------------------------------------------------- */
-    /** Construct Link
+    /** Construct Link.
      * @param href The target URL of the link
      */
     public Link(String href)
@@ -25,7 +25,7 @@ public class Link extends Block
     }
 
     /* ----------------------------------------------------------------- */
-    /** Construct Link
+    /** Construct Link.
      * @param href The target URL of the link
      * @param link Link Element
      */
@@ -36,7 +36,7 @@ public class Link extends Block
     }
     
     /* ----------------------------------------------------------------- */
-    /** Set the link target frame
+    /** Set the link target frame.
      */
     public Link target(String t)
     {

@@ -12,7 +12,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 
 /* -------------------------------------------------------------------- */
-/** HTML Composite Element
+/** HTML Composite Element.
  * <p>This class is can be used a either an abstract or concrete
  * holder of other HTML elements.
  * Used directly, it allow multiple HTML Elements to be added which
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 public class Composite extends Element
 {
     /* ----------------------------------------------------------------- */
-    /** The vector of elements in this Composite
+    /** The vector of elements in this Composite.
      */
     protected ArrayList elements= new ArrayList(8);
 
@@ -38,13 +38,13 @@ public class Composite extends Element
     protected Composite nest=null;
 
     /* ----------------------------------------------------------------- */
-    /** Default constructor
+    /** Default constructor.
      */
     public Composite()
     {}
     
     /* ----------------------------------------------------------------- */
-    /** Default constructor
+    /** Default constructor.
      */
     public Composite(String attributes)
     {
@@ -52,7 +52,7 @@ public class Composite extends Element
     }
 
     /* ----------------------------------------------------------------- */
-    /** Add an Object to the Composite by converting it to a Element or
+    /** Add an Object to the Composite by converting it to a Element or.
      * String
      * @param o The Object to add. If it is a String or Element, it is
      * added directly, otherwise toString() is called.
@@ -82,7 +82,7 @@ public class Composite extends Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** Nest a Composite within a Composite
+    /** Nest a Composite within a Composite.
      * The passed Composite is added to this Composite. Adds to
      * this composite are actually added to the nested Composite.
      * Calls to nest are passed the nested Composite
@@ -102,7 +102,7 @@ public class Composite extends Element
     }
 
     /* ----------------------------------------------------------------- */
-    /** Explicit set of the Nested component
+    /** Explicit set of the Nested component.
      * No add is performed. setNest() obeys any current nesting and
      * sets the nesting of the nested component.
      */
@@ -116,7 +116,7 @@ public class Composite extends Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** Recursively unnest the composites
+    /** Recursively unnest the composites.
      */
     public Composite unnest()
     {
@@ -128,7 +128,7 @@ public class Composite extends Element
 
 
     /* ----------------------------------------------------------------- */
-    /** The number of Elements in this Composite
+    /** The number of Elements in this Composite.
      * @return The number of elements in this Composite
      */
     public int size()
@@ -179,7 +179,7 @@ public class Composite extends Element
     }
 
     /* ------------------------------------------------------------ */
-    /** Empty the contents of this Composite 
+    /** Empty the contents of this Composite .
      */
     public Composite reset()
     {
@@ -224,7 +224,7 @@ public class Composite extends Element
     }
 
     /* ------------------------------------------------------------ */
-    /** Replace an object within the composite
+    /** Replace an object within the composite.
      * @param oldObj 
      * @param newObj 
      * @return 

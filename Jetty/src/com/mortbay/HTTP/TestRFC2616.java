@@ -23,7 +23,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /* ------------------------------------------------------------ */
-/** Test against RFC 2616
+/** Test against RFC 2616.
  *
  * @version $Id$
  * @author Greg Wilkins (gregw)

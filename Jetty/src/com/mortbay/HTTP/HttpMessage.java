@@ -30,7 +30,7 @@ import java.util.List;
 abstract public class HttpMessage
 {
     /* ------------------------------------------------------------ */
-    /** Message States
+    /** Message States.
      */
     public final static int
         __MSG_EDITABLE=0,  // Created locally, all set methods enabled
@@ -132,7 +132,7 @@ abstract public class HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the protocol version
+    /** Get the protocol version.
      * @return return the version.
      */
     public String getVersion()
@@ -140,7 +140,7 @@ abstract public class HttpMessage
         return _version;
     }
     /* ------------------------------------------------------------ */
-    /** Get the protocol version
+    /** Get the protocol version.
      * @return return the version dot (0.9=-1 1.0=0 1.1=1)
      */
     public int getDotVersion()
@@ -597,7 +597,7 @@ abstract public class HttpMessage
 
 
     /* ------------------------------------------------------------ */
-    /** Write the message header
+    /** Write the message header.
      * @param writer
      */
     abstract void writeHeader(Writer writer)

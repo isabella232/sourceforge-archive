@@ -7,14 +7,14 @@ package com.mortbay.HTML;
 
 
 /* -------------------------------------------------------------------- */
-/** HTML Script Block
+/** HTML Script Block.
  */
 public class Script extends Block
 {
     public static final String javascript = "JavaScript";
 
     /* ------------------------------------------------------------ */
-    /** Construct a script element
+    /** Construct a script element.
      * @param lang Language of Script */
     public Script(String script, String lang)
     {

@@ -6,7 +6,7 @@
 package com.mortbay.HTML;
 
 /* -------------------------------------------------------------------- */
-/** HTML Heading
+/** HTML Heading.
  */
 public class Heading extends Block
 {

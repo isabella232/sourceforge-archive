@@ -172,7 +172,7 @@ public class Resource
     }
 
     /* ------------------------------------------------------------ */
-    /** Release any resources held by the resource
+    /** Release any resources held by the resource.
      */
     public void release()
     {

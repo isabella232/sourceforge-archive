@@ -1571,7 +1571,7 @@ public class TestHarness
     
     
     /* ------------------------------------------------------------ */
-    /** main
+    /** main.
      */
     public static void main(String[] args)
     {

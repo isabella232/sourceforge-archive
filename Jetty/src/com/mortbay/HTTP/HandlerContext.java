@@ -469,7 +469,7 @@ public class HandlerContext implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    /** Get all handlers
+    /** Get all handlers.
      * @return 
      */
     public List getHandlers()

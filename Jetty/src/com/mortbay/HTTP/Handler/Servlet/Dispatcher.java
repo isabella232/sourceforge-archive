@@ -157,8 +157,9 @@ public class Dispatcher implements RequestDispatcher
             
         if (servletRequest.getHttpRequest().isCommitted())
             throw new IllegalStateException("Request is committed");
-        servletResponse.reset();
-
+        servletResponse.resetBuffer();
+        servletResponse.setOutputState(-1);
+        
         // Remove any evidence of previous include
         httpRequest.removeAttribute( "javax.servlet.include.request_uri");
         httpRequest.removeAttribute( "javax.servlet.include.servlet_path");

@@ -126,7 +126,7 @@ public class LineInput extends FilterInputStream
     
     
     /* ------------------------------------------------------------ */
-    /** Get the byte limit
+    /** Get the byte limit.
      * @return Number of bytes until EOF is returned or -1 for no limit.
      */
     public int getByteLimit()

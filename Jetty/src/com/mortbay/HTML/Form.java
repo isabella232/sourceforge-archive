@@ -20,7 +20,7 @@ public class Form extends Block
     private String method="POST";
     
     /* ----------------------------------------------------------------- */
-    /** Constructor
+    /** Constructor.
      */
     public Form()
     {
@@ -28,7 +28,7 @@ public class Form extends Block
     }
 
     /* ----------------------------------------------------------------- */
-    /** Constructor
+    /** Constructor.
      * @param submitURL The URL to submit the form to
      */
     public Form(String submitURL)
@@ -38,7 +38,7 @@ public class Form extends Block
     }
 
     /* ----------------------------------------------------------------- */
-    /** Constructor
+    /** Constructor.
      * @param submitURL The URL to submit the form to
      */
     public Form action(String submitURL)
@@ -48,7 +48,7 @@ public class Form extends Block
     }
     
     /* ----------------------------------------------------------------- */
-    /** Set the form target
+    /** Set the form target.
      */
     public Form target(String t)
     {
@@ -57,7 +57,7 @@ public class Form extends Block
     }
     
     /* ----------------------------------------------------------------- */
-    /** Set the form method
+    /** Set the form method.
      */
     public Form method(String m)
     {
@@ -66,7 +66,7 @@ public class Form extends Block
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the form encoding type
+    /** Set the form encoding type.
      */
     public Form encoding(String encoding){
         attribute("ENCTYPE", encoding);

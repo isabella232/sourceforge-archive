@@ -650,7 +650,7 @@ public class JspWriterImpl extends JspWriter {
         }
     }
 
-    /** Package-level access
+    /** Package-level access.
      */
     void recycle() {
         flushed = false;

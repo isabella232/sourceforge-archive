@@ -233,7 +233,7 @@ public class XmlParser
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    /** XML Attribute
+    /** XML Attribute.
      */
     public static class Attribute
     {
@@ -343,7 +343,7 @@ public class XmlParser
         }
         
         /* ------------------------------------------------------------ */
-        /** Get the first child node with the tag
+        /** Get the first child node with the tag.
          * @param tag 
          * @return Node or null.
          */

@@ -93,7 +93,7 @@ public class Code
     }
     
     /*-------------------------------------------------------------------*/
-    /** Initialize default behaviour from applet parameters
+    /** Initialize default behaviour from applet parameters.
      *
      * Look for applet parameters of the same name as the
      * system properties used to config Code.
@@ -178,7 +178,7 @@ public class Code
     }
 
     /* ------------------------------------------------------------ */
-    /** Set if debugging is on or off
+    /** Set if debugging is on or off.
      * @param debug 
      */
     public static synchronized void setDebug(boolean debug)
@@ -193,7 +193,7 @@ public class Code
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the debug status
+    /** Get the debug status.
      * @return the debug status
      */
     public static boolean getDebug()
@@ -203,7 +203,7 @@ public class Code
     
     
     /* ------------------------------------------------------------ */
-    /** Suppress stack trace
+    /** Suppress stack trace.
      * @param stack if true stacks are not produced
      */
     public static void setSuppressStack(boolean stack)
@@ -212,7 +212,7 @@ public class Code
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the stack suppression status
+    /** Get the stack suppression status.
      * @return the stack suppression status
      */
     public static boolean getSuppressStack()
@@ -222,7 +222,7 @@ public class Code
     
 
     /* ------------------------------------------------------------ */
-    /** Set warning suppression
+    /** Set warning suppression.
      * @param warnings Warnings suppress if this is true and debug is false
      */
     public static void setSuppressWarnings(boolean warnings)
@@ -231,7 +231,7 @@ public class Code
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the warnings suppression status
+    /** Get the warnings suppression status.
      * @return the warnings suppression status
      */
     public static boolean getSuppressWarnings()
@@ -241,7 +241,7 @@ public class Code
 
     
     /* ------------------------------------------------------------ */
-    /** Set verbosity level
+    /** Set verbosity level.
      * @param verbose 
      */
     public static void setVerbose(int verbose)
@@ -250,7 +250,7 @@ public class Code
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the verbosity level
+    /** Get the verbosity level.
      * @return the verbosity level
      */
     public static int getVerbose()
@@ -259,7 +259,7 @@ public class Code
     }
     
     /* ------------------------------------------------------------ */
-    /** Set debug patterns
+    /** Set debug patterns.
      * @param patterns coma separated string of patterns 
      */
     public static void setDebugPatterns(String patterns)
@@ -282,7 +282,7 @@ public class Code
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the debug patterns
+    /** Get the debug patterns.
      * @return Coma separated list of debug patterns
      */
     public static String getDebugPatterns()
@@ -291,7 +291,7 @@ public class Code
     }
 
     /* ------------------------------------------------------------ */
-    /** Set debug triggers
+    /** Set debug triggers.
      * @param triggers coma separated string of triggers 
      */
     public static void setDebugTriggers(String triggers)
@@ -315,7 +315,7 @@ public class Code
 
 
     /* ------------------------------------------------------------ */
-    /** Get the debug triggers
+    /** Get the debug triggers.
      * @return Coma separated list of debug triggers
      */
     public static String getDebugTriggers()
@@ -554,7 +554,7 @@ public class Code
     }
 
     /*-------------------------------------------------------------------*/
-    /** Standard fatal error for a method not yet implemented
+    /** Standard fatal error for a method not yet implemented.
      */
     public static void notImplemented() 
     {
@@ -563,7 +563,7 @@ public class Code
     }
 
     /* ------------------------------------------------------------ */
-    /** Get verbosity level
+    /** Get verbosity level.
      * @return true if any level of verbosity is set.
      */
     public static boolean verbose()
@@ -572,7 +572,7 @@ public class Code
     }
     
     /* ------------------------------------------------------------ */
-    /** Get verbosity level
+    /** Get verbosity level.
      * @param v verbosity level to check against
      * @return true if current level of verbosity greater than or equal to v
      */
@@ -582,7 +582,7 @@ public class Code
     }
     
     /*-------------------------------------------------------------------*/
-    /** Get debug status for the current stack frame
+    /** Get debug status for the current stack frame.
      * @returns true if debug is on for this stack frame
      */
     public static boolean debug()
@@ -670,7 +670,7 @@ public class Code
     }
     
     /*-------------------------------------------------------------------*/
-    /** Debug with frame depth
+    /** Debug with frame depth.
      * @param depth Depth of debug frame, 1=caller, 2=callers caller...
      * @param o Object
      */
@@ -968,7 +968,7 @@ public class Code
     
     
     /*-------------------------------------------------------------------*/
-    /** Ignore an exception
+    /** Ignore an exception.
      * @param ex The Throwable to print the full stack trace of
      */
     public static void ignore(Throwable ex)

@@ -15,7 +15,7 @@ public class Target extends Block
 {
 
     /* ----------------------------------------------------------------- */
-    /** Construct Link
+    /** Construct Link.
      * @param target The target name 
      */
     public Target(String target)
@@ -25,7 +25,7 @@ public class Target extends Block
     }
 
     /* ----------------------------------------------------------------- */
-    /** Construct Link
+    /** Construct Link.
      * @param target The target name 
      * @param link Link Element
      */

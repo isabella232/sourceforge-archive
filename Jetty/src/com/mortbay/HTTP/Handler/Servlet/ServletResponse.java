@@ -10,6 +10,7 @@ import com.mortbay.HTTP.HttpFields;
 import com.mortbay.HTTP.HttpRequest;
 import com.mortbay.HTTP.HttpResponse;
 import com.mortbay.Util.Code;
+import com.mortbay.Util.IO;
 import com.mortbay.Util.StringUtil;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -41,7 +42,7 @@ public class ServletResponse implements HttpServletResponse
     private ServletRequest _servletRequest;
     private int _outputState=0;
     private ServletOut _out =null;
-    private PrintWriter _writer=null;
+    private ServletWriter _writer=null;
     private HttpSession _session=null;
     private boolean _noSession=false;
     private boolean _locked=false;
@@ -124,11 +125,24 @@ public class ServletResponse implements HttpServletResponse
     void setOutputState(int s)
         throws IOException
     {
-        _outputState=s;
-        if (_out!=null)
-            _out.flush();
-        if (_writer!=null)
-            _writer.flush();
+        if (s<0)
+        {
+            _outputState=0;
+            if (_out!=null)
+                _out.disable();
+            _out=null;
+            if (_writer!=null)
+                _writer.disable();
+            _writer=null;
+        }
+        else
+        {
+            _outputState=s;
+            if (_out!=null)
+                _out.flush();
+            if (_writer!=null)
+                _writer.flush();
+        }
     }
     
     
@@ -185,6 +199,12 @@ public class ServletResponse implements HttpServletResponse
         else
             _httpResponse.getOutputStream().flush();
         _httpResponse.commit();
+    }
+    
+    /* ------------------------------------------------------------ */
+    void resetBuffer()
+    {
+        _httpResponse.getOutputStream().resetBuffer();
     }
     
     /* ------------------------------------------------------------ */
@@ -458,7 +478,8 @@ public class ServletResponse implements HttpServletResponse
     }
 
     /* ------------------------------------------------------------ */
-    public PrintWriter getWriter() throws java.io.IOException 
+    public PrintWriter getWriter()
+        throws java.io.IOException 
     {
         if (_outputState!=0 && _outputState!=2)
             throw new IllegalStateException();
@@ -479,15 +500,7 @@ public class ServletResponse implements HttpServletResponse
                 encoding = StringUtil.__ISO_8859_1; 
             
             /* construct Writer using correct encoding */
-            try
-            {
-                _writer = new PrintWriter(new OutputStreamWriter(_httpResponse.getOutputStream(), encoding ));
-            }
-            catch (java.io.UnsupportedEncodingException e)
-            {
-                throw new java.io.IOException("Unsupported character encoding in Content-Type");
-            }
-            
+            _writer = new ServletWriter(_httpResponse.getOutputStream(), encoding);
         }                    
         _outputState=2;
         return _writer;
@@ -510,6 +523,7 @@ public class ServletResponse implements HttpServletResponse
         if (_locale!=null)
             setLocale(_locale);
     }
+
 }
 
 

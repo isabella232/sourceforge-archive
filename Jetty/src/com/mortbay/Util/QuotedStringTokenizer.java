@@ -234,7 +234,7 @@ public class QuotedStringTokenizer
     }
 
     /* ------------------------------------------------------------ */
-    /** Not implemented
+    /** Not implemented.
      */
     public int countTokens()
     {

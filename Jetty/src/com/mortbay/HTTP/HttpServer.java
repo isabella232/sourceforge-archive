@@ -256,7 +256,7 @@ public class HttpServer implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    /** Remove a HTTP Listener
+    /** Remove a HTTP Listener.
      * @param listener 
      */
     public void removeListener(HttpListener listener)
@@ -361,7 +361,7 @@ public class HttpServer implements LifeCycle
     }
 
     /* ------------------------------------------------------------ */
-    /** Remove a context or Web application
+    /** Remove a context or Web application.
      * @param host The virtual host or null for all hosts.
      * @param contextPathSpec
      * @param i Index among contexts of same host and pathSpec.

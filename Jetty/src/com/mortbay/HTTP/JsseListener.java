@@ -132,7 +132,7 @@ public abstract class JsseListener extends SocketListener
     }
 
     /* ------------------------------------------------------------ */
-    /** Allow the Listener a chance to customise the request
+    /** Allow the Listener a chance to customise the request.
      * before the server does its stuff.
      * <br> This allows extra attributes to be set for SSL connections.
      */

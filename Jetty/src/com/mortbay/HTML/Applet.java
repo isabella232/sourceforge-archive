@@ -12,7 +12,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 /* ---------------------------------------------------------------- */
-/** An Applet Block
+/** An Applet Block.
  * <p> Lets you set the class name from the program, and optionally, the
  * size and the codebase.
  *
@@ -39,7 +39,7 @@ public class Applet extends Block
     private Composite paramHolder = new Composite();
     
     /* ------------------------------------------------------------ */
-    /** Create an Applet Element
+    /** Create an Applet Element.
      * @param className The name of the class to give for the applet
      */
     public Applet(String className)
@@ -50,7 +50,8 @@ public class Applet extends Block
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the dimensions of the Applet */
+    /** Set the dimensions of the Applet.
+     */
     public Applet setDimensions(int height, int width)
     {
         width(width);
@@ -59,7 +60,7 @@ public class Applet extends Block
     }
     
     /* ------------------------------------------------------------ */
-    /** Set whether debugging is on in the Applet
+    /** Set whether debugging is on in the Applet.
      * <p> This controls whether the com.mortbay.Util.Code debug messages
      * will be printed to the java console.
      * @see com.mortbay.Util.Code#initParamsFromApplet
@@ -82,7 +83,7 @@ public class Applet extends Block
     }
     
     /* ------------------------------------------------------------ */
-    /** Set an alternate display for non-java browsers
+    /** Set an alternate display for non-java browsers.
      * @param alt The alternate element to display 
      * @deprecated use add
      */

@@ -7,7 +7,7 @@ package com.mortbay.HTML;
 import java.io.IOException;
 import java.io.Writer;
 
-/** FrameSet
+/** FrameSet.
  * @version $Id$
  * @author Greg Wilkins
 */
@@ -21,7 +21,7 @@ public class Frame
     String border="";
     
     /* ------------------------------------------------------------ */
-    /** Frame constructor
+    /** Frame constructor.
      */
     Frame(){}
     

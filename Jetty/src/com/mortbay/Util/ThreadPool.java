@@ -236,7 +236,7 @@ public class ThreadPool
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the maximum thread idle time
+    /** Get the maximum thread idle time.
      * @return Max idle time in ms.
      */
     public int getMaxIdleTimeMs()

@@ -6,7 +6,7 @@
 package com.mortbay.HTML;
 
 /* --------------------------------------------------------------------- */
-/** Composite Factory
+/** Composite Factory.
  * Abstract interface for production of composites
  */
 public interface CompositeFactory

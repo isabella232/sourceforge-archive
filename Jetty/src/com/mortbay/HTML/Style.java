@@ -7,7 +7,7 @@ package com.mortbay.HTML;
 
 
 /* -------------------------------------------------------------------- */
-/** HTML Style Block
+/** HTML Style Block.
  */
 public class Style extends Block
 {
@@ -24,7 +24,7 @@ public class Style extends Block
 
     
     /* ------------------------------------------------------------ */
-    /** Construct a Style element
+    /** Construct a Style element.
      * @param type Format of Style */
     public Style(String style, String type)
     {
@@ -69,7 +69,7 @@ public class Style extends Block
 
 
     /* ------------------------------------------------------------ */
-    /** Import another style sheet
+    /** Import another style sheet.
      * @param url The URL to import
      * @return This style
      */

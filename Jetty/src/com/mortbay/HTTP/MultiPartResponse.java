@@ -18,7 +18,7 @@ import java.io.Writer;
 
 
 /* ================================================================ */
-/** Handle a multipart MIME response
+/** Handle a multipart MIME response.
  * <p><h4>Usage</h4>
  * <pre>
  * public class MultiPartCount extends Servlet
@@ -61,12 +61,12 @@ public class MultiPartResponse
     OutputStream outputStream = null;
 
     /* ------------------------------------------------------------ */    
-    /** PrintWriter to write content too
+    /** PrintWriter to write content too.
      */
     public Writer out = null; 
 
     /* ------------------------------------------------------------ */
-    /** MultiPartResponse constructor
+    /** MultiPartResponse constructor.
      * @param response The ServletResponse to which this multipart
      *                 response will be sent.
      */
@@ -78,7 +78,7 @@ public class MultiPartResponse
     }
 
     /* ------------------------------------------------------------ */
-    /** MultiPartResponse constructor
+    /** MultiPartResponse constructor.
      * @param response The ServletResponse to which this multipart
      *                 response will be sent.
      */
@@ -110,7 +110,7 @@ public class MultiPartResponse
     
 
     /* ------------------------------------------------------------ */
-    /** Start creation of the next Content
+    /** Start creation of the next Content.
      */
     public void startNextPart(String contentType)
          throws IOException
@@ -120,7 +120,7 @@ public class MultiPartResponse
     }
     
     /* ------------------------------------------------------------ */
-    /** End the current part
+    /** End the current part.
      * @exception IOException IOException
      */
     public void endPart()
@@ -140,7 +140,7 @@ public class MultiPartResponse
     }
     
     /* ------------------------------------------------------------ */
-    /** End the current part
+    /** End the current part.
      * @param lastPart True if this is the last part
      * @exception IOException IOException
      */

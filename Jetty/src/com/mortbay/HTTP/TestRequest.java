@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 
 /* ------------------------------------------------------------ */
-/** Test HTTP Request
+/** Test HTTP Request.
  *
  * @version $Id$
  * @author Greg Wilkins (gregw)

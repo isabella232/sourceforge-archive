@@ -48,7 +48,7 @@ public class ChunkableInputStream extends FilterInputStream
     private int _filters;
     
     /* ------------------------------------------------------------ */
-    /** Constructor
+    /** Constructor.
      */
     public ChunkableInputStream( InputStream in)
     {
@@ -169,7 +169,7 @@ public class ChunkableInputStream extends FilterInputStream
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the content length
+    /** Get the content length.
      * @return Number of bytes until EOF is returned or -1 for no limit.
      */
     public int getContentLength()
@@ -184,7 +184,7 @@ public class ChunkableInputStream extends FilterInputStream
     }
     
     /* ------------------------------------------------------------ */
-    /** A closed input stream
+    /** A closed input stream.
      */
     private static class ClosedStream extends InputStream
     {
@@ -207,7 +207,7 @@ public class ChunkableInputStream extends FilterInputStream
         HttpFields _trailer=null;
         
         /* ------------------------------------------------------------ */
-        /** Constructor
+        /** Constructor.
          */
         public DeChunker()
         {}
@@ -280,7 +280,7 @@ public class ChunkableInputStream extends FilterInputStream
         }
  
         /* ------------------------------------------------------------ */
-        /** Mark is not supported
+        /** Mark is not supported.
          * @return false
          */
         public boolean markSupported()
@@ -289,7 +289,7 @@ public class ChunkableInputStream extends FilterInputStream
         }
     
         /* ------------------------------------------------------------ */
-        /** Not Implemented
+        /** Not Implemented.
          */
         public void reset()
         {
@@ -297,7 +297,7 @@ public class ChunkableInputStream extends FilterInputStream
         }
 
         /* ------------------------------------------------------------ */
-        /** Not Implemented
+        /** Not Implemented.
          * @param readlimit 
          */
         public void mark(int readlimit)

@@ -10,7 +10,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 /* ---------------------------------------------------------------- */
-/** HTML Image Tag
+/** HTML Image Tag.
  * @see com.mortbay.HTML.Block
  * @version $Id$
  * @author Greg Wilkins
@@ -68,7 +68,7 @@ public class Image extends Tag
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the image size from the header of a GIF file
+    /** Set the image size from the header of a GIF file.
      * @param dirname The directory name, expected to be in OS format
      * @param pathname The image path name relative to the directory.
      *                 Expected to be in WWW format (i.e. with slashes)
@@ -82,7 +82,7 @@ public class Image extends Tag
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the image size from the header of a GIF file
+    /** Set the image size from the header of a GIF file.
      */
     public Image setSizeFromGif(String filename)
     {
@@ -90,7 +90,7 @@ public class Image extends Tag
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the image size from the header of a GIF file
+    /** Set the image size from the header of a GIF file.
      */
     public Image setSizeFromGif(File gif)
     {

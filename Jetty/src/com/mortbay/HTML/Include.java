@@ -21,7 +21,7 @@ import java.io.Writer;
 import java.net.URL;
 
 /* -------------------------------------------------------------------- */
-/** Include File, InputStream or Reader Element
+/** Include File, InputStream or Reader Element.
  * <p>This Element includes another file.
  * This class expects that the HTTP directory separator '/' will be used.
  * This will be converted to the local directory separator.

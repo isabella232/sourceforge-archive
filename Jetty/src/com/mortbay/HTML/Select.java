@@ -8,7 +8,7 @@ import com.mortbay.Util.Code;
 import java.util.Enumeration;
 
 /* -------------------------------------------------------------------- */
-/** HTML select Block
+/** HTML select Block.
  * @see  com.mortbay.HTML.Block
  */
 public class Select extends Block
@@ -57,7 +57,7 @@ public class Select extends Block
     }
 
     /* ----------------------------------------------------------------- */
-    /** Add option and specify if selected
+    /** Add option and specify if selected.
      */
     public Composite add(Object o)
     {
@@ -72,7 +72,7 @@ public class Select extends Block
     }
 
     /* ----------------------------------------------------------------- */
-    /** Add option and specify if selected
+    /** Add option and specify if selected.
      */
     public Select add(Object o, boolean selected)
     {
@@ -85,7 +85,7 @@ public class Select extends Block
     }
 
     /* ----------------------------------------------------------------- */
-    /** Add an option
+    /** Add an option.
      * @param o The name of the option (displayed in the form)
      * @param selected Whether the option is selected
      * @param value The value of this option (returned in the form content)
@@ -133,7 +133,7 @@ public class Select extends Block
     }
 
     /* ----------------------------------------------------------------- */
-    /** Utility function for multi-selectors
+    /** Utility function for multi-selectors.
      * <p> This function takes the result returned by a multi-select input
      * and produces an integer bit-set result of the selections made. It
      * assumes the values of the multi-select are all different powers of 2.

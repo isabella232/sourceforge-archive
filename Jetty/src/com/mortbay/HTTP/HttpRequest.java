@@ -46,7 +46,7 @@ import javax.servlet.http.Cookie;
 public class HttpRequest extends HttpMessage
 {
     /* ------------------------------------------------------------ */
-    /** Request METHODS
+    /** Request METHODS.
      */
     public static final String
         __OPTIONS="OPTIONS",
@@ -121,7 +121,7 @@ public class HttpRequest extends HttpMessage
     }
 
     /* ------------------------------------------------------------ */
-    /** Set the handled status
+    /** Set the handled status.
      * @param handled true or false
      */
     public void setHandled(boolean handled)
@@ -209,7 +209,7 @@ public class HttpRequest extends HttpMessage
     }
 
     /* -------------------------------------------------------------- */
-    /** Return the HTTP request line as it was received
+    /** Return the HTTP request line as it was received.
      */
     public String getRequestLine()
     {
@@ -293,7 +293,7 @@ public class HttpRequest extends HttpMessage
     }
     
     /* -------------------------------------------------------------- */
-    /** Set the HTTP URI
+    /** Set the HTTP URI.
      * @param uri the uri
      * @exception IllegalStateException Request is not EDITABLE
      */
@@ -460,7 +460,7 @@ public class HttpRequest extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the request path
+    /** Get the request path.
      * @return 
      */
     public String getPath()
@@ -469,7 +469,7 @@ public class HttpRequest extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the request path
+    /** Set the request path.
      * @param path The path
      * @exception IllegalStateException Request is not EDITABLE
      */
@@ -482,7 +482,7 @@ public class HttpRequest extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the request query
+    /** Get the request query.
      * @return 
      */
     public String getQuery()
@@ -491,7 +491,7 @@ public class HttpRequest extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the request query
+    /** Set the request query.
      * @param query The query
      * @exception IllegalStateException Request is not EDITABLE
      */
@@ -517,7 +517,7 @@ public class HttpRequest extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    /** Decode HTTP request line
+    /** Decode HTTP request line.
      * @param buf Character buffer
      * @param len Length of line in buffer.
      * @exception IOException 
@@ -770,7 +770,7 @@ public class HttpRequest extends HttpMessage
     
     
     /* ------------------------------------------------------------ */
-    /** Get the set of parameter names
+    /** Get the set of parameter names.
      * @return Set of parameter names.
      */
     public Set getParameterNames()
@@ -793,7 +793,7 @@ public class HttpRequest extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    /** Get multi valued paramater
+    /** Get multi valued paramater.
      * @param name Parameter name
      * @return Parameter values
      */
@@ -806,7 +806,7 @@ public class HttpRequest extends HttpMessage
     
 
     /* -------------------------------------------------------------- */
-    /** Extract received cookies from a header
+    /** Extract received cookies from a header.
      * @param buffer Contains encoded cookies
      * @return Array of Cookies.
      */

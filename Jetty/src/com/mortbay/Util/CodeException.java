@@ -6,7 +6,7 @@
 package com.mortbay.Util;
 
 /* ------------------------------------------------------------ */
-/** Code Exception
+/** Code Exception.
  * 
  * Thrown by Code.assert or Code.fail
  * @see Code

@@ -14,7 +14,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 /* -------------------------------------------------------------------- */
-/** HTML Element
+/** HTML Element.
  * <p>This abstract class is the base for all HTML Elements.
  * The feature of an abstract HTML Element is that it can be added to
  * HTML Pages, HTML Composites and several other HTML Elements derivations.
@@ -56,18 +56,18 @@ public abstract class Element
     private int size=-1;
 
     /* ----------------------------------------------------------------- */
-    /** The space separated string of HTML element attributes
+    /** The space separated string of HTML element attributes.
      */
     private String attributes=null;
     protected Hashtable attributeMap=null;
 
     /* ----------------------------------------------------------------- */
-    /** Default constructor
+    /** Default constructor.
      */
     public Element(){}
 
     /* ----------------------------------------------------------------- */
-    /** Construct with attributes
+    /** Construct with attributes.
      * @param attributes The initial attributes of the element
      */
     public Element(String attributes)
@@ -76,7 +76,7 @@ public abstract class Element
     }
 
     /* ----------------------------------------------------------------- */
-    /** Write element to a Writer
+    /** Write element to a Writer.
      * This abstract method is called by the Page or other containing
      * Element to write the HTML for this element. This must be implemented
      * by the derived Element classes.
@@ -86,7 +86,7 @@ public abstract class Element
          throws IOException;
 
     /* ----------------------------------------------------------------- */
-    /** Write Element to an OutputStream
+    /** Write Element to an OutputStream.
      * Calls print(Writer) and checks errors
      * Elements that override this method should also override
      * write(Writer) to avoid infinite recursion.
@@ -101,7 +101,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** Write Element to an OutputStream
+    /** Write Element to an OutputStream.
      * Calls print(Writer) and checks errors
      * Elements that override this method should also override
      * write(Writer) to avoid infinite recursion.
@@ -149,7 +149,7 @@ public abstract class Element
     }
 
     /* ----------------------------------------------------------------- */
-    /** Add element Attributes
+    /** Add element Attributes.
      * The attributes are added to the Element attributes (separated with
      * a space). The attributes are available to the derived class in the
      * protected member String <I>attributes</I>
@@ -180,7 +180,7 @@ public abstract class Element
     }
 
     /* ------------------------------------------------------------ */
-    /** Set attributes from another Element
+    /** Set attributes from another Element.
      * @param e Element
      * @return This Element
      */
@@ -282,7 +282,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** left justify
+    /** left justify.
      * Convenience method equivalent to attribute("ALIGN","LEFT"). Not
      * applicable to all Elements.
      */
@@ -292,7 +292,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** right justify
+    /** right justify.
      * Convenience method equivalent to attribute("ALIGN","RIGHT"). Not
      * applicable to all Elements.
      */
@@ -302,7 +302,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** Center
+    /** Center.
      * Convenience method equivalent to attribute("ALIGN","CENTER"). Not
      * applicable to all Elements.
      */
@@ -312,7 +312,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** Top align
+    /** Top align.
      * Convenience method equivalent to attribute("VALIGN","TOP"). Not
      * applicable to all Elements.
      */
@@ -322,7 +322,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** Bottom align
+    /** Bottom align.
      * Convenience method equivalent to attribute("VALIGN","BOTTOM"). Not
      * applicable to all Elements.
      */
@@ -332,7 +332,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** Middle align
+    /** Middle align.
      * Convenience method equivalent to attribute("VALIGN","MIDDLE"). Not
      * applicable to all Elements.
      */
@@ -342,7 +342,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** set width
+    /** set width.
      * Convenience method equivalent to attribute("WIDTH",w). Not
      * applicable to all Elements.
      */
@@ -353,7 +353,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** set width
+    /** set width.
      * Convenience method equivalent to attribute("WIDTH",w). Not
      * applicable to all Elements.
      */
@@ -370,7 +370,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** set height
+    /** set height.
      * Convenience method equivalent to attribute("HEIGHT",h). Not
      * applicable to all Elements.
      */
@@ -381,7 +381,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** set height
+    /** set height.
      * Convenience method equivalent to attribute("HEIGHT",h). Not
      * applicable to all Elements.
      */
@@ -398,7 +398,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** set size
+    /** set size.
      * Convenience method equivalent to attribute("SIZE",s). Not
      * applicable to all Elements.
      */
@@ -409,7 +409,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** set size
+    /** set size.
      * Convenience method equivalent to attribute("SIZE",s). Not
      * applicable to all Elements.
      */
@@ -426,7 +426,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** set color
+    /** set color.
      * Convenience method equivalent to attribute("COLOR",color). Not
      * applicable to all Elements.
      */
@@ -436,7 +436,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** set BGCOLOR
+    /** set BGCOLOR.
      * Convenience method equivalent to attribute("BGCOLOR",color). Not
      * applicable to all Elements.
      */
@@ -446,7 +446,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** set CSS CLASS
+    /** set CSS CLASS.
      */
     public Element cssClass(String c)
     {
@@ -454,7 +454,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** set CSS ID
+    /** set CSS ID.
      */
     public Element cssID(String id)
     {
@@ -462,7 +462,7 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** set Style
+    /** set Style.
      */
     public Element style(String s)
     {

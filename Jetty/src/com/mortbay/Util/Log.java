@@ -155,7 +155,7 @@ public class Log
     
 
     /* ------------------------------------------------------------ */
-    /** Initialize default behaviour from applet parameters
+    /** Initialize default behaviour from applet parameters.
      *
      * Initializes the default instance from  applet parameters of the
      * same name as the system properties used to config Log
@@ -274,7 +274,7 @@ public class Log
     }
     
     /* ------------------------------------------------------------ */
-    /** Log a message
+    /** Log a message.
      * @param tag Tag for type of log
      * @param msg The message
      * @param frame The frame that generated the message.
@@ -300,7 +300,7 @@ public class Log
     }
 
     /* ------------------------------------------------------------ */
-    /** Log an event
+    /** Log an event.
      */
     public static void event(String message, int stackDepth)
     {
@@ -308,7 +308,7 @@ public class Log
     }
     
     /* ------------------------------------------------------------ */
-    /** Log an event
+    /** Log an event.
      */
     public static void event(String message)
     {
@@ -316,7 +316,7 @@ public class Log
     }
     
     /* ------------------------------------------------------------ */
-    /** Log an warning
+    /** Log an warning.
      */
     public static void warning(String message, int stackDepth)
     {
@@ -324,7 +324,7 @@ public class Log
     }
     
     /* ------------------------------------------------------------ */
-    /** Log an warning
+    /** Log an warning.
      */
     public static void warning(String message)
     {
