@@ -12,3 +12,5 @@
  + Check head method against Head exception
 
  + Implement encrypted password realm storage.
+
+ + Add demo of multipart upload
