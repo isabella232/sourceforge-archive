@@ -44,9 +44,9 @@ public class Applet extends Block
      */
     public Applet(String className)
     {
-        super("APPLET");
+        super("applet");
         add(paramHolder);
-        attribute("CODE",className);
+        attribute("code",className);
     }
     
     /* ------------------------------------------------------------ */
@@ -116,15 +116,15 @@ public class Applet extends Block
          throws IOException
     {
         if (codeBase != null)
-            attribute("CODEBASE",codeBase);
+            attribute("codebase",codeBase);
         
         if (debug)
-            paramHolder.add("<PARAM NAME=DEBUG VALUE=yes>");
+            paramHolder.add("<param name=\"debug\" value=\"yes\">");
         if (params != null)
             for (Enumeration enum = params.keys(); enum.hasMoreElements();)
             {
                 String key = enum.nextElement().toString();
-                paramHolder.add("<PARAM NAME=\"" + key + "\" VALUE=\"" +
+                paramHolder.add("<param name=\"" + key + "\" value=\"" +
                                 params.get(key).toString() + "\">");
             }
         super.write(out);

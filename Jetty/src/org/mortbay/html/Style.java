@@ -12,13 +12,13 @@ package org.mortbay.html;
 public class Style extends Block
 {
     public static final String
-        STYLE = "STYLE",
-        TYPE  = "TYPE",
-        MEDIA = "MEDIA";
+        STYLE = "style",
+        TYPE  = "type",
+        MEDIA = "media";
     
     public final static String
-        StyleSheet="StyleSheet",
-        AlternateStyleSheet="Alternate StyleSheet",
+        StyleSheet="stylesheet",
+        AlternateStyleSheet="alternate stylesheet",
         text_css="text/css",
         screen = "screen";
 
@@ -50,7 +50,7 @@ public class Style extends Block
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the media 
+    /** Set the media
      */
     public Style media(String m)
     {

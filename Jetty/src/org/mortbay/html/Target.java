@@ -20,8 +20,8 @@ public class Target extends Block
      */
     public Target(String target)
     {
-        super("A");
-        attribute("NAME",target);
+        super("a");
+        attribute("name",target);
     }
 
     /* ----------------------------------------------------------------- */

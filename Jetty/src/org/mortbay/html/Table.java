@@ -34,7 +34,7 @@ public class Table extends Block
      */
     public Table()
     {
-        super("TABLE");
+        super("table");
         if (threadNestingMap!=null)
             cellNestFactory = (CompositeFactory)
                 threadNestingMap.get(Thread.currentThread());
@@ -45,8 +45,8 @@ public class Table extends Block
      */
     public Table(int border)
     {
-        super("TABLE");
-        attribute("BORDER",border);
+        super("table");
+        attribute("border",border);
         if (threadNestingMap!=null)
             cellNestFactory = (CompositeFactory)
                 threadNestingMap.get(Thread.currentThread());
@@ -69,7 +69,7 @@ public class Table extends Block
     public Table newRow()
     {
         unnest();
-        nest(row = new Block("TR"));
+        nest(row = new Block("tr"));
         if (_defaultRow!=null)
         {
             row.setAttributesFrom(_defaultRow);
@@ -116,7 +116,7 @@ public class Table extends Block
      */
     public Table newCell()
     {
-        newBlock("TD");
+        newBlock("td");
         if (_defaultCell!=null)
         {
             cell.setAttributesFrom(_defaultCell);
@@ -172,7 +172,7 @@ public class Table extends Block
      */
     public Table newHeading()
     {
-        newBlock("TH");
+        newBlock("th");
         if (_defaultHead!=null)
         {
             cell.setAttributesFrom(_defaultHead);
@@ -215,7 +215,7 @@ public class Table extends Block
      */
     public Table cellSpacing(int s)
     {
-        attribute("CELLSPACING",s);
+        attribute("cellspacing",s);
         return this;
     }
     
@@ -227,7 +227,7 @@ public class Table extends Block
      */
     public Table cellPadding(int padding)
     {
-        attribute("CELLPADDING",padding);
+        attribute("cellpadding",padding);
         return this;
     }
     
@@ -240,9 +240,9 @@ public class Table extends Block
     public Table spacing(int h, int v)
     {
         if (h>=0)
-            attribute("HSPACE",h);
+            attribute("hspace",h);
         if (v>=0)
-            attribute("VSPACE",v);
+            attribute("vspace",v);
         return this;
     }
 
@@ -331,7 +331,7 @@ public class Table extends Block
     public Block defaultRow()
     {
         if (_defaultRow==null)
-            _defaultRow=new Block("TR");
+            _defaultRow=new Block("tr");
         return _defaultRow;
     }
     
@@ -345,7 +345,7 @@ public class Table extends Block
     public Block defaultHead()
     {
         if (_defaultHead==null)
-            _defaultHead=new Block("TH");
+            _defaultHead=new Block("th");
         return _defaultHead;
     }
     
@@ -359,7 +359,7 @@ public class Table extends Block
     public Block defaultCell()
     {
         if (_defaultCell==null)
-            _defaultCell=new Block("TD");
+            _defaultCell=new Block("td");
         return _defaultCell;
     }
 }

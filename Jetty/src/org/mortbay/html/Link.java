@@ -20,8 +20,8 @@ public class Link extends Block
      */
     public Link(String href)
     {
-        super("A");
-        attribute("HREF",href);
+        super("a");
+        attribute("href",href);
     }
 
     /* ----------------------------------------------------------------- */
@@ -41,7 +41,7 @@ public class Link extends Block
     public Link target(String t)
     {
         if (t!=null && t.length()>0)
-            attribute("TARGET",t);
+            attribute("target",t);
         return this;
     }    
 }

@@ -11,7 +11,7 @@ package org.mortbay.html;
 public class Heading extends Block
 {
     private static final String[] headerTags = {
-        "H1", "H2", "H3", "H4", "H5", "H6"
+        "h1", "h2", "h3", "h4", "h5", "h6"
     };
 
     /* ----------------------------------------------------------------- */
@@ -21,7 +21,7 @@ public class Heading extends Block
      */
     public Heading(int level,Object o)
     {
-        super((level <= headerTags.length) ? headerTags[level-1] : "H"+level);
+        super((level <= headerTags.length) ? headerTags[level-1] : "h"+level);
         add(o);
     }
 }

@@ -208,7 +208,7 @@ public class TableForm extends Form
         {
             column.newRow();
             column.addCell(buttons).left().middle();
-            column.cell().attribute("COLSPAN","2");
+            column.cell().attribute("colspan","2");
         }
         extendRow=false;
     }
@@ -288,8 +288,8 @@ public class TableForm extends Form
     /** Extend the usage of the current row in the form.  The next
      * element added will be added to the same row as the form and
      * not have a label of it's own.
-     * @return TableForm, the this pointer so that users can write:<PRE>
-     *                    tableForm.extendRow().addField(...)</PRE>
+     * @return TableForm, the this pointer so that users can write:<pre>
+     *                    tableForm.extendRow().addField(...)</pre>
      */
     public TableForm extendRow()
     {
@@ -306,7 +306,7 @@ public class TableForm extends Form
         if (label==null)
             label="&nbsp;";
         else
-            label="<B>"+label+":</B>";
+            label="<b>"+label+":</b>";
 
         if (extendRow)
         {
@@ -344,7 +344,7 @@ public class TableForm extends Form
      */
     public void addColumn(int spacing)
     {
-        table.addCell("&nbsp","WIDTH="+spacing);
+        table.addCell("&nbsp","width="+spacing);
         column = new Table(0);
         table.addCell(column);
         table.cell().top();
@@ -372,7 +372,7 @@ public class TableForm extends Form
      */
     public void setColumnSpan(int span)
     {
-        table.cell().attribute("COLSPAN",""+span);
+        table.cell().attribute("colspan",""+span);
     }
     
     /* ----------------------------------------------------------- */
@@ -397,7 +397,7 @@ public class TableForm extends Form
         if (bottomButtons!=null)
         {
             table.newRow();
-            table.addCell(bottomButtons).attribute("COLSPAN",columns);
+            table.addCell(bottomButtons).attribute("colspan",columns);
         }
         super.write(out);
     } 

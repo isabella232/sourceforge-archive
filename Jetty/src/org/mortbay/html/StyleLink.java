@@ -15,8 +15,8 @@ package org.mortbay.html;
 public class StyleLink extends Tag
 {
     public final static String
-        REL="REL",
-        HREF="HREF",
+        REL="rel",
+        HREF="href",
         TYPE=Style.TYPE,
         MEDIA=Style.MEDIA;
     
@@ -26,7 +26,7 @@ public class StyleLink extends Tag
      */
     public StyleLink(String href)
     {
-        super("LINK");
+        super("link");
         attribute(REL,Style.StyleSheet);
         attribute(HREF,href);
         attribute(TYPE,Style.text_css);
@@ -41,7 +41,7 @@ public class StyleLink extends Tag
      */
     public StyleLink(String rel, String href, String type, String media)
     {
-        super("LINK");
+        super("link");
         attribute(REL,rel==null?Style.StyleSheet:rel);
         attribute(HREF,href);
         attribute(TYPE,type==null?Style.text_css:type);

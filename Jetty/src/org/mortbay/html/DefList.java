@@ -30,20 +30,21 @@ public class DefList extends Element
     public void write(Writer out)
          throws IOException
     {
-        out.write("<DL"+attributes()+">");
+        out.write("<dl"+attributes()+">");
 
         if (terms.size() != defs.size())
             throw new Error("mismatched Vector sizes");
 
         for (int i=0; i <terms.size() ; i++)
         {
-            out.write("<DT>");
+            out.write("<dt>");
             ((Element)terms.elementAt(i)).write(out);
-            out.write("<DD>");
+            out.write("</dt><dd>");
             ((Element)defs.elementAt(i)).write(out);
+            out.write("</dd>");
         }
 
-        out.write("</DL>");
+        out.write("</dl>");
     }
 
     // ------------------------------------------------------------

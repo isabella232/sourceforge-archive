@@ -28,12 +28,12 @@ public class Frame
     /* ------------------------------------------------------------ */
     public Frame border(boolean threeD, int width, String color)
     {
-        border=" FRAMEBORDER="+(threeD?"yes":"no");
+        border=" frameborder=\""+(threeD?"yes":"no")+"\"";
         if (width>=0)
-            border+=" BORDER="+width;
+            border+=" border=\""+width+"\"";
 
         if (color!=null)
-            border+=" BORDERCOLOR="+color;
+            border+=" BORDERCOLOR=\""+color+"\"";
         return this;
     }
     /* ------------------------------------------------------------ */
@@ -68,7 +68,7 @@ public class Frame
     /* ------------------------------------------------------------ */
     public Frame resize(boolean r)
     {
-        resize=r?"":" NORESIZE";
+        resize=r?"":" noresize";
         return this;
     }
     
@@ -76,12 +76,12 @@ public class Frame
     void write(Writer out)
          throws IOException
     {
-        out.write("<FRAME SCROLLING="+scrolling+resize+border);
+        out.write("<frame scrolling=\""+scrolling+"\""+resize+border);
         
         if(src!=null)
-            out.write(" SRC="+src);
+            out.write(" src=\""+src+"\"");
         if(name!=null)
-            out.write(" NAME="+name);
+            out.write(" name=\""+name+"\"");
         out.write(">");
     }
 };

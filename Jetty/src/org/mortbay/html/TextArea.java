@@ -7,7 +7,7 @@ package org.mortbay.html;
 
 /* -------------------------------------------------------------------- */
 /** A Text Area within a form.
- * <p> The text in the TEXTAREA is handled by the super class, Text
+ * <p> The text in the textarea is handled by the super class, Text
  * @see org.mortbay.html.Text
  */
 public class TextArea extends Block
@@ -16,8 +16,8 @@ public class TextArea extends Block
     /** @param name The name of the TextArea within the form */
     public TextArea(String name)
     {
-        super("TEXTAREA");
-        attribute("NAME",name);
+        super("textarea");
+        attribute("name",name);
     }
 
     /* ----------------------------------------------------------------- */
@@ -30,10 +30,10 @@ public class TextArea extends Block
     }
 
     /* ----------------------------------------------------------------- */
-    public TextArea setSize(int chars,int lines)
+    public TextArea setSize(int cols,int lines)
     {
-        attribute("ROWS",lines);
-        attribute("COLS",chars);
+        attribute("rows",lines);
+        attribute("cols",cols);
         return this;
     }
 }

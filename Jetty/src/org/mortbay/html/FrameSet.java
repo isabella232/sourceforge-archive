@@ -14,14 +14,14 @@ import java.util.Vector;
 /** FrameSet.
  * <p>
  * Usage
- * <PRE>
+ * <pre>
  *      FrameSet set = new FrameSet("FrameTest","*,*","*,*");
  *      set.frame(0,0).name("Frame1",req.getRequestPath()+"?Frame=1");
  *      set.frame(0,1).name("Frame2",req.getRequestPath()+"?Frame=2");
  *      set.frame(1,0).name("Frame3",req.getRequestPath()+"?Frame=3");
  *      set.frame(1,1).name("Frame4",req.getRequestPath()+"?Frame=4");
  *      set.write(new Writer(res.getOutputStream()));
- * </PRE>
+ * </pre>
  * @version $Id$
  * @author Greg Wilkins
 */
@@ -74,12 +74,12 @@ public class FrameSet extends Page
     /* ------------------------------------------------------------ */
     public FrameSet border(boolean threeD, int width, String color)
     {
-        border=" FRAMEBORDER="+(threeD?"yes":"no");
+        border=" frameborder=\""+(threeD?"yes":"no")+"\"";
         if (width>=0)
-            border+=" BORDER="+width;
+            border+=" border=\""+width+"\"";
 
         if (color!=null)
-            border+=" BORDERCOLOR="+color;
+            border+=" bordercolor=\""+color+"\"";
         return this;
     }
     
@@ -130,24 +130,24 @@ public class FrameSet extends Page
     {
         writeHtmlHead(out);
         
-        out.write("<FRAMESET "+border);
+        out.write("<frameset "+border);
         
         if(colSpec!=null)
-            out.write(" COLS="+colSpec);
+            out.write(" cols=\""+colSpec+"\"");
         if(rowSpec!=null)
-            out.write(" ROWS="+rowSpec);
+            out.write(" rows=\""+rowSpec+"\"");
         out.write(">");
 
         for(int r=0;r<rows;r++)
             for(int c=0;c<cols;c++)
                 frames[c][r].write(out);
 
-        out.write("<NOFRAMES>");
+        out.write("<noframes>");
         writeElements(out);
-        out.write("</NOFRAMES>");
+        out.write("</noframes>");
 
-        out.write("</FRAMESET>");
-        out.write("</HTML>");
+        out.write("</frameset>");
+        out.write("</html>");
     }
 };
 

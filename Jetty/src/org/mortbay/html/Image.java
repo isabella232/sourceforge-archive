@@ -20,27 +20,27 @@ public class Image extends Tag
     /* ------------------------------------------------------------ */
     public Image(String src)
     {
-        super("IMG");
-        attribute("SRC",src);
+        super("img");
+        attribute("src",src);
     }
     
     /* ------------------------------------------------------------ */
-    /** Construct from Gif file.
+    /** Construct from GIF file.
      */
     public Image(String dirname, String src)
     {
-        super("IMG");
-        attribute("SRC",src);
+        super("img");
+        attribute("src",src);
         setSizeFromGif(dirname,src);
     }
     
     /* ------------------------------------------------------------ */
-    /** Construct from Gif file.
+    /** Construct from GIF file.
      */
     public Image(File gif)
     {
-        super("IMG");
-        attribute("SRC",gif.getName());
+        super("img");
+        attribute("src",gif.getName());
         setSizeFromGif(gif);
     }
 
@@ -56,14 +56,14 @@ public class Image extends Tag
     /* ------------------------------------------------------------ */
     public Image border(int b)
     {
-        attribute("BORDER",b);
+        attribute("border",b);
         return this;
     }
     
     /* ------------------------------------------------------------ */
     public Image alt(String alt)
     {
-        attribute("ALT",alt);
+        attribute("alt",alt);
         return this;
     }
     

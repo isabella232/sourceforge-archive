@@ -17,55 +17,55 @@ public class Input extends Tag
 {
     /* ----------------------------------------------------------------- */
     /** Input types */
-    public final static String Text="TEXT";
-    public final static String Password="PASSWORD";
-    public final static String Checkbox="CHECKBOX";
-    public final static String Radio="RADIO";
-    public final static String Submit="SUBMIT";
-    public final static String Reset="RESET";
-    public final static String Hidden="HIDDEN";
-    public final static String File="FILE";
-    public final static String Image="IMAGE";
+    public final static String Text="text";
+    public final static String Password="password";
+    public final static String Checkbox="checkbox";
+    public final static String Radio="radio";
+    public final static String Submit="submit";
+    public final static String Reset="reset";
+    public final static String Hidden="hidden";
+    public final static String File="file";
+    public final static String Image="image";
 
     /* ----------------------------------------------------------------- */
     public Input(String type,String name)
     {
-        super("INPUT");
-        attribute("TYPE",type);
-        attribute("NAME",name);
+        super("input");
+        attribute("type",type);
+        attribute("name",name);
     }
 
     /* ----------------------------------------------------------------- */
     public Input(String type,String name, String value)
     {
         this(type,name);
-        attribute("VALUE",value);
+        attribute("value",value);
     }
 
     /* ----------------------------------------------------------------- */
     public Input(Image image,String name, String value)
     {
-        super("INPUT");
-        attribute("TYPE","IMAGE");
-        attribute("NAME",name);
+        super("input");
+        attribute("type","image");
+        attribute("name",name);
         if (value!=null)
-            attribute("VALUE",value);
+            attribute("value",value);
         attribute(image.attributes());
     }
     
     /* ----------------------------------------------------------------- */
     public Input(Image image,String name)
     {
-        super("INPUT");
-        attribute("TYPE","IMAGE");
-        attribute("NAME",name);
+        super("input");
+        attribute("type","image");
+        attribute("name",name);
         attribute(image.attributes());
     }
 
     /* ----------------------------------------------------------------- */
     public Input check()
     {
-        attribute("CHECKED");
+        attribute("checked");
         return this;
     }
 
@@ -79,7 +79,7 @@ public class Input extends Tag
     /* ----------------------------------------------------------------- */
     public Input setMaxSize(int size)
     {
-        attribute("MAXLENGTH",size);
+        attribute("maxlength",size);
         return this;
     }
 

@@ -20,11 +20,11 @@ public class Select extends Block
      */
     public Select(String name,boolean multiple)
     {
-        super("SELECT");
-        attribute("NAME",name);
+        super("select");
+        attribute("name",name);
         
         if (multiple)
-            attribute("MULTIPLE");
+            attribute("multiple");
     }
 
     /* ----------------------------------------------------------------- */
@@ -65,7 +65,7 @@ public class Select extends Block
             this.add((Enumeration)o);
         else
         {
-            super.add("<OPTION>");
+            super.add("<option>");
             super.add(o);
         }
         return this;
@@ -77,9 +77,9 @@ public class Select extends Block
     public Select add(Object o, boolean selected)
     {
         if (selected)
-            super.add("<OPTION SELECTED>");
+            super.add("<option selected>");
         else
-            super.add("<OPTION>");
+            super.add("<option>");
         super.add(o);
         return this;
     }
@@ -93,9 +93,9 @@ public class Select extends Block
     public Select add(Object o, boolean selected, String value)
     {
         if (selected)
-            super.add("<OPTION SELECTED VALUE=\""+value+"\">");
+            super.add("<option selected value=\""+value+"\">");
         else
-            super.add("<OPTION VALUE=\""+value+"\">");
+            super.add("<option value=\""+value+"\">");
         
         super.add(o);
         

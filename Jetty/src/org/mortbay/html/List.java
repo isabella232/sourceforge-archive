@@ -15,10 +15,10 @@ package org.mortbay.html;
 public class List extends Block
 {
     /* ----------------------------------------------------------------- */
-    public static final String Unordered="UL";
-    public static final String Ordered="OL";
-    public static final String Menu="MENU";
-    public static final String Directory="DIR";
+    public static final String Unordered="ul";
+    public static final String Ordered="ol";
+    public static final String Menu="menu";
+    public static final String Directory="dir";
     
     /* ----------------------------------------------------------------- */
     public List(String type)
@@ -33,8 +33,9 @@ public class List extends Block
      */
     public Composite add(Object o)
     {
-        super.add("<LI>");
+        super.add("<li>");
         super.add(o);
+        super.add("</li>");
         return this;
     }
     
@@ -44,9 +45,10 @@ public class List extends Block
      */
     public Composite newItem()
     {
-        super.add("<LI>");
+        super.add("<li>");
         Composite composite=new Composite();
         super.add(composite);
+	super.add("</li>");
         return composite;
     }
 

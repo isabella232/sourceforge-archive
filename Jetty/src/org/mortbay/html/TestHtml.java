@@ -98,7 +98,7 @@ class TestHtml
                 table.defaultRow().cssID("I1");
                 table.defaultHead().cssID("I2");
                 table.defaultCell().cssID("I3");
-                table.defaultCell().add("<B>");
+                table.defaultCell().add("<b>");
                 table.newRow();
                 table.addHeading("Heading1");
                 table.addHeading(new Text("Heading2"));
@@ -174,7 +174,7 @@ class TestHtml
       
                 page.add(Break.rule);
 
-                page.add(new Style().comment().add("DT { background: yellow; color: black }"));
+                page.add(new Style().comment().add("dt { background: yellow; color: black }"));
 
                 page.write(System.out);
             }

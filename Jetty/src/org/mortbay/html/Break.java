@@ -12,11 +12,11 @@ public class Break extends Tag
 {
     /* ---------------------------------------------------------------- */
     /** Line Break tag type */
-    public final static String Line="BR";
+    public final static String Line="br";
     /** Rule Break tag type */
-    public final static String Rule="HR";
+    public final static String Rule="hr";
     /** Paragraph Break tag type */
-    public final static String Para="P";
+    public final static String Para="p";
 
     /* ---------------------------------------------------------------- */
     /** Default constructor (Line Break).

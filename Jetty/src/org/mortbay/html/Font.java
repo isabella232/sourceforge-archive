@@ -17,7 +17,7 @@ public class Font extends Block
     /* ----------------------------------------------------------------- */
     public Font()
     {
-        super("FONT");
+        super("font");
     }
     
     /* ----------------------------------------------------------------- */
@@ -45,13 +45,13 @@ public class Font extends Block
     /* ----------------------------------------------------------------- */
     public Font(String attributes)
     {
-        super("FONT",attributes);
+        super("font",attributes);
     }
     
     /* ----------------------------------------------------------------- */
     public Font face(String face)
     {
-        attribute("FACE",face);
+        attribute("face",face);
         return this;
     }
     

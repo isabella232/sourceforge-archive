@@ -133,7 +133,7 @@ public class Page extends Composite
      */
     public final Page setBackGroundImage(String bg)
     {
-        attribute("BACKGROUND",bg);
+        attribute("background",bg);
         return this;
     }
   
@@ -144,7 +144,7 @@ public class Page extends Composite
     public final Page setBackGroundColor(String color)
     {
         properties.put(BgColour,color);
-        attribute("BGCOLOR",color);
+        attribute("bgcolor",color);
         return this;
     }
   
@@ -156,18 +156,18 @@ public class Page extends Composite
      */
     public final Page setBase(String target, String href)
     {
-        base="<BASE " +
-            ((target!=null)?("TARGET="+target):"") +
-            ((href!=null)?("HREF="+href):"") +
+        base="<base " +
+            ((target!=null)?("TARGET=\""+target+"\""):"") +
+            ((href!=null)?("HREF=\""+href+"\""):"") +
             ">";
         return this;
     }
 
     /* ----------------------------------------------------------------- */
-    /** Write the entire page by calling:<BR>
-     * writeHtmlHead(out)<BR>
-     * writeBodyTag(out)<BR>
-     * writeElements(out)<BR>
+    /** Write the entire page by calling:<br>
+     * writeHtmlHead(out)<br>
+     * writeBodyTag(out)<br>
+     * writeElements(out)<br>
      * writeHtmlEnd(out)
      */
     public void write(Writer out)
@@ -182,7 +182,7 @@ public class Page extends Composite
     
     /* ------------------------------------------------------------ */
     /** Write HTML page head tags.
-     * Write tags &ltHTML&gt&ltHEAD&gt .... &lt/HEAD&gt
+     * Write tags &ltHTML&gt&lthead&gt .... &lt/head&gt
      */
     public void writeHtmlHead(Writer out)
          throws IOException
@@ -191,13 +191,13 @@ public class Page extends Composite
         {
             writtenHtmlHead=true;
             completeSections();
-            out.write("<HTML><HEAD>");
+            out.write("<html><head>");
             String title=(String)properties.get(Title);
             if (title!=null && title.length()>0 && !title.equals(NoTitle))
-                out.write("<TITLE>"+title+"</TITLE>");
+                out.write("<title>"+title+"</title>");
             head.write(out);
             out.write(base);
-            out.write("\n</HEAD>\n");
+            out.write("\n</head>\n");
         }
     }
     
@@ -211,7 +211,7 @@ public class Page extends Composite
         if (!writtenBodyTag)
         {
             writtenBodyTag = true;          
-            out.write("<BODY "+attributes()+">\n");
+            out.write("<body "+attributes()+">\n");
         }
     }
 
@@ -221,8 +221,8 @@ public class Page extends Composite
     public void writeHtmlEnd(Writer out)
          throws IOException
     {
-        out.write("</BODY>");
-        out.write("</HTML>");
+        out.write("</body>");
+        out.write("</html>");
     }
     
     /* ------------------------------------------------------------ */
@@ -357,9 +357,3 @@ public class Page extends Composite
     {
     }
 }
-
-
-
-
-
-

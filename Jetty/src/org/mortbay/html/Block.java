@@ -18,29 +18,29 @@ public class Block extends Composite
 {
     /* ----------------------------------------------------------------- */
     /** Preformatted text */
-    public static final String Pre="PRE";
+    public static final String Pre="pre";
     /** Quoted Text */
-    public static final String Quote="BLOCKQUOTE";
+    public static final String Quote="blockquote";
     /** Center the block */
-    public static final String Center="CENTER";
+    public static final String Center="center";
     /** Code listing style */
-    public static final String Listing="LISTING";
+    public static final String Listing="listing";
     /** Plain text */
-    public static final String Plain="PLAINTEXT";
+    public static final String Plain="plaintext";
     /** Old pre format - preserve line breaks */
-    public static final String Xmp="XMP";
+    public static final String Xmp="xmp";
     /** Basic Division */
-    public static final String Div="DIV";
+    public static final String Div="div";
     /** Left align */
-    public static final String Left="DIVL";
+    public static final String Left="divl";
     /** Right align */
-    public static final String Right="DIVR";
+    public static final String Right="divr";
     /** Bold */
-    public static final String Bold="B";
+    public static final String Bold="b";
     /** Italic */
-    public static final String Italic="I";
+    public static final String Italic="i";
     /** Span */
-    public static final String Span="SPAN";
+    public static final String Span="span";
 
     /* ----------------------------------------------------------------- */
     private String tag;

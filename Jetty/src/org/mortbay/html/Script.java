@@ -18,8 +18,8 @@ public class Script extends Block
      * @param lang Language of Script */
     public Script(String script, String lang)
     {
-        super("SCRIPT");
-        attribute("LANGUAGE",lang);
+        super("script");
+        attribute("language",lang);
         add(script);
     }
 
