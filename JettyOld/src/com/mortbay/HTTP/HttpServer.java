@@ -127,7 +127,7 @@ public class HttpServer implements ServletContext
         while (e.hasMoreElements())
         {
             String handlersPath = (String) e.nextElement();
-            Code.debug("Check configured handlers for path "+handlersPath);
+            Code.debug("Check configured handlers for path ",handlersPath);
             HttpHandler[] httpHandlers = null;
             try
             {
@@ -363,13 +363,13 @@ public class HttpServer implements ServletContext
                     if (Code.verbose())
                     {
                         if (handled)
-                            Code.debug("Request was handled by "+handler);
+                            Code.debug("Request was handled by ",handler);
                         else
-                            Code.debug("Request NOT handled by "+handler);
+                            Code.debug("Request NOT handled by ",handler);
                     }
                 }
                 if (handled)
-                    Code.debug("Handled by "+httpHandlers[h-1]);
+                    Code.debug("Handled by ",httpHandlers[h-1]);
             }
             catch (HeadException e)
             {
@@ -379,7 +379,9 @@ public class HttpServer implements ServletContext
             catch (Exception e1)
             {
                 exception=e1;
-                Code.debug("Exception in HttpHandler "+h,exception);
+                Code.debug("Exception in HttpHandler ",
+			   new Integer(h),
+			   exception);
 
                 // Select exception handler stack by path
                 ExceptionHandler[] exceptionHandlers = (ExceptionHandler[])

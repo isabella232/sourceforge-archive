@@ -175,7 +175,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     {
         if (observable==null)
             observable=new Observed();
-        Code.debug("Added Observer "+o);
+        Code.debug("Added Observer ",o);
         observable.addObserver(o);
     }
     
@@ -369,7 +369,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
                                  boolean streamIncludesHeaders)
         throws IOException
     {
-        Code.debug("writeInputStream:"+length);
+        Code.debug("writeInputStream:",new Long(length));
         if (streamIncludesHeaders)
         {
             Code.assert(!headersWritten(),"Headers already written");

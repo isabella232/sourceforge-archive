@@ -206,7 +206,7 @@ public class HtmlFilter extends HttpFilter
                   if (tag==null ||tag.length()==0)
                       break;
                   
-                  Code.debug("Found tag "+tag);
+                  Code.debug("Found tag ",tag);
                   Hashtable named = new Hashtable(10);
                   named.put("this",info);
                   named.put("data",info);
@@ -293,7 +293,7 @@ public class HtmlFilter extends HttpFilter
         if (directory==null)
             directory=".";
 
-        Code.debug("writeFile("+directory+","+fileName+")");
+        Code.debug("writeFile(",directory,",",fileName,")");
 
         File file = new File(directory,fileName);
         BufferedInputStream in =
@@ -312,7 +312,7 @@ public class HtmlFilter extends HttpFilter
         if (directory==null)
             directory=".";
 
-        Code.debug("writePreFile("+directory+","+fileName+")");
+        Code.debug("writePreFile(",directory,",",fileName,")");
 
         File file = new File(directory,fileName);
         BufferedInputStream in =

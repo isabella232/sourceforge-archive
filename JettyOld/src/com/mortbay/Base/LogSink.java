@@ -12,9 +12,9 @@ import java.text.*;
 
 /* ------------------------------------------------------------ */
 /** A Log sink.
- * This class represents both a concrete or abstract sink of
- * Log data.  The default implementation logs to a PrintWriter, but
- * derived implementations may log to files, syslog, or other
+* This class represents both a concrete or abstract sink of
+* Log data.  The default implementation logs to a PrintWriter, but
+* derived implementations may log to files, syslog, or other
  * logging APIs.
  *
  * @see
@@ -41,6 +41,10 @@ public class LogSink
     /* ------------------------------------------------------------ */
     private static final String __lineSeparator =
 	System.getProperty("line.separator");
+    private static final String __indentBase = 
+    "  ";
+    private static final String __indentSeparator =
+	__lineSeparator+__indentBase;
     private static final int __lineSeparatorLen =
 	__lineSeparator.length();
     private static String __indent =
@@ -129,7 +133,7 @@ public class LogSink
             }
         
             // Log the label
-            if (_logLabels)
+            if (_logLabels && frame != null)
             {
                 __stringBuffer.append(frame.toString());
                 __stringBuffer.append(':');
@@ -140,15 +144,24 @@ public class LogSink
                 __stringBuffer.append(tag);
 
             
-            // Determine the indent string for the message
-            String indent = _logOneLine?"\\n ":"\n  ";
-            if (_logStackSize)
-                indent += __indent.substring(0,frame._depth)+" ";
-            __stringBuffer.append(indent);
+            // Determine the indent string for the message and append it
+            // to the buffer. Only put a newline in the buffer if the first
+            // line is not blank
+            String indent = "";
+            String indentSeparator = _logOneLine?"\\n ":__lineSeparator;
+            if (__stringBuffer.length() > 0)
+            	__stringBuffer.append(indentSeparator);
+            __stringBuffer.append(__indentBase);
+            
+            if (_logStackSize && frame != null) {
+            	indent = __indent.substring(0,frame._depth)+" ";
+	            __stringBuffer.append(indent);
+            }
+            indent = indentSeparator + __indentBase + indent;
             
             // Add stack frame to message
-            if (_logStackTrace)
-                msg = msg + "\n" + frame._stack;
+            if (_logStackTrace && frame != null)
+                msg = msg + __lineSeparator + frame._stack;
 
             // Log indented message
             int i=0;
@@ -177,7 +190,7 @@ public class LogSink
     {
 	synchronized(_out)
 	{
-	    _out.println(__stringBuffer.toString());
+	    _out.println(formattedLog);
 	    _out.flush();
 	}
     }
@@ -186,6 +199,15 @@ public class LogSink
     protected void setWriter(PrintWriter out)
     {
 	_out=out;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Stop a log sink.
+     * An opportunity for subclasses to clean up. The default
+     * implementation does nothing 
+     */
+    public void stop()
+    {
     }
 };
 

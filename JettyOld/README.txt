@@ -203,41 +203,6 @@ To run to serve files in another directory:
 
 
 
-
-COMMON PROBLEMS
-===============
-
-Cannot read property file
--------------------------
-Some JVMs appear to have problems reading property files that
-mix their line termination characters.  The files in this release
-have been created under Unix, so are terminated with LF. If you edit
-these files under another OS, make sure you have a consistent line
-termination character (CRLF for DOS & Windows, LF for Unix, CR for Mac).
-
-GNUJSP locks or fails during compile
-------------------------------------
-The default GNUJSP configuration uses a command line compiler. Try
-changing the compiler property for the gnujsp servlet to some of the
-options suggested in the GNUJSP INSTALL file.  Also check the
-arguments defined for the JSP compiler, specifically the path to the
-gnujsp.jar.  If all else fails, put gnujsp into the system CLASSPATH.
-
-CLASSPATH does not work
------------------------
-Check that you use ':' or ';' as appropriate for your platform
-when separating directories and jar files in CLASSPATHS.
-
-PATHS does not work in config file
-----------------------------------
-For URL path lists, ';' or ',' should be used as a separator.
-
-Method not found exception
---------------------------
-An earlier version of the javax.servlet package may be in your
-CLASSPATH.
-
-
 FREQUENTLY ASKED QUESTIONS
 ==========================
 
@@ -327,6 +292,13 @@ To build the library for your platform, run the following commands:
 
 Note that this will only work for Unix systems, but the approach 
 should be able to be adapted to other operating systems.
+
+
+Does Jetty support CGI?
+-----------------------
+There is a CGI servlet in the contrib/uk/org/gosnell/Servlet
+directory.  It is configured into the demo as part of the 
+dump demonstration.
 
 
 MISCELLANEOUS
@@ -424,6 +396,44 @@ commands:
 
   cd $JETTY_HOME/src
   javac BuildJetty.java
+
+
+The build-win32.mak file is a GNU makefile for windows platforms that
+uses the cygnus utilities to build Jetty from BuildJetty.java.
+
+
+COMMON PROBLEMS
+===============
+
+Cannot read property file
+-------------------------
+Some JVMs appear to have problems reading property files that
+mix their line termination characters.  The files in this release
+have been created under Unix, so are terminated with LF. If you edit
+these files under another OS, make sure you have a consistent line
+termination character (CRLF for DOS & Windows, LF for Unix, CR for Mac).
+
+GNUJSP locks or fails during compile
+------------------------------------
+The default GNUJSP configuration uses a command line compiler. Try
+changing the compiler property for the gnujsp servlet to some of the
+options suggested in the GNUJSP INSTALL file.  Also check the
+arguments defined for the JSP compiler, specifically the path to the
+gnujsp.jar.  If all else fails, put gnujsp into the system CLASSPATH.
+
+CLASSPATH does not work
+-----------------------
+Check that you use ':' or ';' as appropriate for your platform
+when separating directories and jar files in CLASSPATHS.
+
+PATHS does not work in config file
+----------------------------------
+For URL path lists, ';' or ',' should be used as a separator.
+
+Method not found exception
+--------------------------
+An earlier version of the javax.servlet package may be in your
+CLASSPATH.
 
 
 

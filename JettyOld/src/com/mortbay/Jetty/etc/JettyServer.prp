@@ -50,7 +50,7 @@ main.PROPERTY.MinListenerThreads	  : 1
 main.PROPERTY.MaxListenerThreads	  : 20
 main.PROPERTY.MaxListenerThreadIdleMs	  : 60000
 main.PROPERTY.HTTP1_0_KeepAlive           : True
-main.PROPERTY.MimeMap			  : ./etc/Mime.prp
+main.PROPERTY.MimeMap			  : %user.dir%/etc/Mime.prp
 main.LISTENER.all.CLASS                   : com.mortbay.HTTP.HttpListener
 main.LISTENER.all.ADDRS                   : 0.0.0.0:8080
 
@@ -69,7 +69,7 @@ main.root.PATHS                           : /
 main.root.HANDLERS			  : Log;Auth;Alias;Filter;File;Param;Session;Dynamic;Servlet;NotFound
 
 main.root.Log.CLASS			  : com.mortbay.HTTP.Handler.LogHandler
-main.root.Log.PROPERTY.File               : ./log/demo.log
+main.root.Log.PROPERTY.File               : %user.dir%/log/demo.log
 main.root.Log.PROPERTY.Append		  : False
 main.root.Log.PROPERTY.LongForm           : True
 main.root.Log.PROPERTY.CountContentLength : True
@@ -91,7 +91,7 @@ main.root.File.PROPERTY.AllowPut		     : False
 main.root.File.PROPERTY.AllowDelete		     : False
 main.root.File.PROPERTY.Indexes			     : index.html;index.htm
 main.root.File.PROPERTY.FILES.FileBase.PATHS	     : /File%
-main.root.File.PROPERTY.FILES.FileBase.DIRECTORY     : ./FileBase
+main.root.File.PROPERTY.FILES.FileBase.DIRECTORY     : %user.dir%/FileBase
 
 main.root.Param.CLASS				     : com.mortbay.HTTP.Handler.ParamHandler
 main.root.Param.PROPERTY.CookiesAsParameters	     : False
@@ -100,7 +100,7 @@ main.root.Session.CLASS				     : com.mortbay.HTTP.Handler.SessionHandler
 
 main.root.Dynamic.CLASS			             : com.mortbay.HTTP.Handler.ServletHandler
 main.root.Dynamic.PROPERTY.PATHS		     : /servlet/
-main.root.Dynamic.PROPERTY.CLASSPATH		     : ./servlets
+main.root.Dynamic.PROPERTY.CLASSPATH		     : %user.dir%/servlets
 main.root.Dynamic.PROPERTY.AutoReloadDynamicServlets : True
 
 main.root.Servlet.CLASS			             : com.mortbay.HTTP.Handler.ServletHandler
@@ -112,9 +112,9 @@ main.root.Servlet.PROPERTY.SERVLET.Dump.CHUNK	     : True
 # JSP servlet configuration
 main.root.Servlet.PROPERTY.SERVLET.gnujsp.PATHS		     : *.jsp
 main.root.Servlet.PROPERTY.SERVLET.gnujsp.CLASS		     : org.gjt.jsp.JspServlet
-main.root.Servlet.PROPERTY.SERVLET.gnujsp.CLASSPATH          : ./lib/gnujsp.jar
+main.root.Servlet.PROPERTY.SERVLET.gnujsp.CLASSPATH          : %user.dir%/lib/gnujsp.jar
 main.root.Servlet.PROPERTY.SERVLET.gnujsp.ResourceBase       : file:./FileBase/
-main.root.Servlet.PROPERTY.SERVLET.gnujsp.PROPERTY.scratchdir: ./etc/jsp     
+main.root.Servlet.PROPERTY.SERVLET.gnujsp.PROPERTY.scratchdir: %user.dir%/etc/jsp     
 main.root.Servlet.PROPERTY.SERVLET.gnujsp.PROPERTY.debug     : true
 main.root.Servlet.PROPERTY.SERVLET.gnujsp.PROPERTY.checkclass: true
 main.root.Servlet.PROPERTY.SERVLET.gnujsp.PROPERTY.compiler  : builtin-javac -classpath %classpath%:%scratchdir%:lib/gnujsp.jar -d %scratchdir% -deprecation %source% 

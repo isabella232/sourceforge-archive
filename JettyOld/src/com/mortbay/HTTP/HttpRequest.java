@@ -369,8 +369,8 @@ public class HttpRequest extends HttpHeader
                   servletPath=servletPath.substring(0,s);
         }
         
-        Code.debug("SetServletPath '"+servletPath+
-                   "' in " + uri );
+        Code.debug("SetServletPath '",servletPath,
+                   "' in " , uri );
                                         
         this.servletPath=servletPath;
 
@@ -1139,7 +1139,7 @@ public class HttpRequest extends HttpHeader
     /* -------------------------------------------------------------- */
     public HttpSession getSession(boolean create)
     {
-        Code.debug("getSession("+create+")");
+        Code.debug("getSession(",new Boolean(create),")");
         
         if (session != null && SessionContext.isValid(session))
             return session;

@@ -1,5 +1,7 @@
-
-
+  + Many debug call optimizations
+  + Added RolloverFileLogSink
+  + Support System.property expansions in PropertyTrees.
+  + Added uk.org.gosnell.Servlets.CgiServlet to contrib
   + HttpRequest.setRequestPath does not null pathInfo.
   + BasicAuthHandler uses getResourcePath so it can be used 
     behind request dispatching

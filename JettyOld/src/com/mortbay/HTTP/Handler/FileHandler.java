@@ -226,7 +226,7 @@ public class FileHandler extends NullHandler
         while (names.hasMoreElements())
         {
             String filesName = names.nextElement().toString();
-            Code.debug("Configuring files "+filesName);
+            Code.debug("Configuring files ",filesName);
             PropertyTree filesTree = tree.getTree("FILES."+filesName);
             String filesDir = filesTree.getProperty("DIRECTORY");
             
@@ -308,7 +308,6 @@ public class FileHandler extends NullHandler
             Code.warning("Path with .. not handled");
             return;
         }
-
         
         // Find path
         String path=dirMap.longestMatch(uri);
@@ -344,7 +343,7 @@ public class FileHandler extends NullHandler
         else if (request.getMethod().equals(HttpRequest.MOVE))
             handleMove(request, response, uri, filename, path);
         else {
-            Code.debug("Unknown action:"+request.getMethod());
+            Code.debug("Unknown action:",request.getMethod());
             // anything else...
             if (new File(filename).exists())
                 response.sendError(response.SC_NOT_IMPLEMENTED);
@@ -420,7 +419,7 @@ public class FileHandler extends NullHandler
                 {
                     File index = new File(filename+
                                           File.separator +
-                                          indexFiles.elementAt(i));		    
+                                          indexFiles.elementAt(i));
                     if (index.isFile())
                     {
 			if (!checkGetHeader(request,response,index))
@@ -503,14 +502,14 @@ public class FileHandler extends NullHandler
             final int bufSize = 1024;
             byte bytes[] = new byte[bufSize];
             int read;
-            Code.debug(HttpHeader.ContentLength+"="+toRead);
+            Code.debug(HttpHeader.ContentLength,"=", toRead);
             while (toRead > 0 &&
                    (read = in.read(bytes, 0,
                                    (toRead>bufSize?bufSize:toRead))) > 0)
             {
                 toRead -= read;
                 fos.write(bytes, 0, read);
-                Code.debug("Read " + read + "bytes: " + bytes);
+                Code.debug("Read ", read);
             }
             in.close();
             fos.close();
@@ -610,7 +609,7 @@ public class FileHandler extends NullHandler
                 (newPathInfo.startsWith("/")?"":File.separator)+
                 newPathInfo;
             File newFile = new File(newFilename);
-            Code.debug("Moving "+filename+" to "+newFilename);
+            Code.debug("Moving ",filename," to ",newFilename);
             file.renameTo(newFile);
             response.setStatus(response.SC_NO_CONTENT);
             response.writeHeaders();
@@ -727,7 +726,7 @@ public class FileHandler extends NullHandler
     {
         if (dirAllowed)
         {
-            Code.debug("sendDirectory: "+file);
+            Code.debug("sendDirectory: ",file);
             String base = request.getRequestURI();
             if (!base.endsWith("/"))
                 base+="/";

@@ -69,7 +69,7 @@ public class HttpFilter extends FilterOutputStream
     {
         if (canHandle(response.getHeader(HttpHeader.ContentType)))
         {
-            Code.debug("Activate HttpFilter "+this); 
+            Code.debug("Activate HttpFilter ",this); 
             this.request=response.getRequest();
             this.response=response;
             HttpOutputStream httpOut = response.getHttpOutputStream();
@@ -77,7 +77,7 @@ public class HttpFilter extends FilterOutputStream
             activate();
         }
         else
-            Code.debug("Can't activate HttpFilter "+this); 
+            Code.debug("Can't activate HttpFilter ",this); 
     }
 
     /* ------------------------------------------------------------ */

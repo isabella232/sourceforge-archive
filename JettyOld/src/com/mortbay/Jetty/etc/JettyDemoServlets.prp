@@ -32,7 +32,7 @@
 # ------------------------------------------------------------------------
 
 PATHS				    : /servlet/;/SERVLET/;/Servlet/
-CLASSPATH			    : ./servlets
+CLASSPATH			    : %user.dir%/servlets
 AutoReloadDynamicServlets	    : True
 Loader                              : com.mortbay.HTTP.Handler.FileJarServletLoader
 
@@ -42,7 +42,7 @@ SERVLET.Dump.CHUNK		    : True
 SERVLET.Dump.PROPERTY.AttrX	    : ValueX
 SERVLET.Dump.PROPERTY.AttrY	    : ValueY
 SERVLET.Dump.PROPERTY.AttrZ	    : ValueZ
-SERVLET.Dump.PROPERTIES		    : ./etc/JettyDemoDump.prp
+SERVLET.Dump.PROPERTIES		    : %user.dir%/etc/JettyDemoDump.prp
 SERVLET.Dump.Initialize		    : True
 SERVLET.Dump.AutoReload             : False
 SERVLET.Dump.Loader                 : com.mortbay.HTTP.Handler.FileJarServletLoader
@@ -86,10 +86,15 @@ SERVLET.Dispatch.PATHS		    : /Dispatch%
 
 SERVLET.gnujsp.PATHS		    : *.jsp
 SERVLET.gnujsp.CLASS		    : org.gjt.jsp.JspServlet
-SERVLET.gnujsp.CLASSPATH            : ./lib/gnujsp.jar
+SERVLET.gnujsp.CLASSPATH            : %user.dir%/lib/gnujsp.jar
 SERVLET.gnujsp.ResourceBase         : file:./FileBase/
-SERVLET.gnujsp.PROPERTY.scratchdir  : ./etc/jsp     
+SERVLET.gnujsp.PROPERTY.scratchdir  : %user.dir%/etc/jsp     
 SERVLET.gnujsp.PROPERTY.debug       : true
 SERVLET.gnujsp.PROPERTY.checkclass  : true
 SERVLET.gnujsp.PROPERTY.compiler    : builtin-javac -classpath %classpath%:%scratchdir%:lib/gnujsp.jar -d %scratchdir% -deprecation %source% 
 
+SERVLET.CgiServlet.AutoReload       : False
+SERVLET.CgiServlet.CLASS            : uk.org.gosnell.Servlets.CgiServlet
+SERVLET.CgiServlet.PATHS            : /cgi-bin
+SERVLET.CgiServlet.CLASSPATH        : %user.dir%/contrib
+SERVLET.CgiServlet.PROPERTY.Roots   : %user.dir%/cgi-bin

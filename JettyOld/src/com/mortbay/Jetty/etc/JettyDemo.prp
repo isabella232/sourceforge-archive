@@ -57,7 +57,7 @@ main.PROPERTY.MinListenerThreads	  : 3
 main.PROPERTY.MaxListenerThreads	  : 20
 main.PROPERTY.MaxListenerThreadIdleMs	  : 60000
 main.PROPERTY.HTTP1_0_KeepAlive           : True
-main.PROPERTY.MimeMap			  : ./etc/Mime.prp
+main.PROPERTY.MimeMap			  : %user.dir%/etc/Mime.prp
 
 
 
@@ -73,14 +73,14 @@ main.root.PATHS                           : /
 main.root.HANDLERS			  : Log;Auth;Filter;Alias;Param;Session;Servlet;File;Forward;NotFound
 
 main.root.Log.CLASS			  : com.mortbay.HTTP.Handler.LogHandler
-main.root.Log.PROPERTY.File               : ./log/demo.log
+main.root.Log.PROPERTY.File               : %user.dir%/log/demo.log
 main.root.Log.PROPERTY.Append             : False
 main.root.Log.PROPERTY.LongForm           : True
 main.root.Log.PROPERTY.CountContentLength : False
 main.root.Log.PROPERTY.DateFormat         : dd/MMM/yyyy:HH:mm:ss
 
 main.root.Auth.CLASS			  : com.mortbay.HTTP.Handler.BasicAuthHandler
-main.root.Auth.PROPERTIES		  : ./etc/JettyDemoRealms.prp
+main.root.Auth.PROPERTIES		  : %user.dir%/etc/JettyDemoRealms.prp
 
 main.root.Filter.CLASS			  : com.mortbay.HTTP.Handler.FilterHandler
 main.root.Filter.PROPERTY.Html.CLASS      : com.mortbay.HTTP.Filter.HtmlFilter
@@ -89,7 +89,7 @@ main.root.Filter.PROPERTY.Gzip.CLASS      : com.mortbay.HTTP.Filter.GzipFilter
 main.root.Filter.PROPERTY.Gzip.PATHS      : /GZ%
 
 main.root.Alias.CLASS			  : com.mortbay.HTTP.Handler.TranslateHandler
-main.root.Alias.PROPERTIES		  : ./etc/JettyDemoAlias.prp
+main.root.Alias.PROPERTIES		  : %user.dir%/etc/JettyDemoAlias.prp
 
 main.root.Param.CLASS			  : com.mortbay.HTTP.Handler.ParamHandler
 main.root.Param.PROPERTY.CookiesAsParameters : False
@@ -97,10 +97,10 @@ main.root.Param.PROPERTY.CookiesAsParameters : False
 main.root.Session.CLASS			  : com.mortbay.HTTP.Handler.SessionHandler
 
 main.root.Servlet.CLASS			  : com.mortbay.HTTP.Handler.ServletHandler
-main.root.Servlet.PROPERTIES		  : ./etc/JettyDemoServlets.prp
+main.root.Servlet.PROPERTIES		  : %user.dir%/etc/JettyDemoServlets.prp
 
 main.root.File.CLASS			  : com.mortbay.HTTP.Handler.FileHandler
-main.root.File.PROPERTIES		  : ./etc/JettyDemoFiles.prp
+main.root.File.PROPERTIES		  : %user.dir%/etc/JettyDemoFiles.prp
 
 main.root.Forward.CLASS			       : com.mortbay.HTTP.Handler.ForwardHandler
 main.root.Forward.PROPERTY.ProxyAddrPort       :
@@ -138,13 +138,13 @@ main.files.File.PROPERTY.AllowPut		 : False
 main.files.File.PROPERTY.AllowDelete		 : False
 main.files.File.PROPERTY.Indexes		 : index.html
 main.files.File.PROPERTY.FILES.Laf.PATHS         : /laf
-main.files.File.PROPERTY.FILES.Laf.DIRECTORY     : ./FileBase
+main.files.File.PROPERTY.FILES.Laf.DIRECTORY     : %user.dir%/FileBase
 main.files.File.PROPERTY.FILES.Javadoc.PATHS     : /javadoc
-main.files.File.PROPERTY.FILES.Javadoc.DIRECTORY : ./javadoc
+main.files.File.PROPERTY.FILES.Javadoc.DIRECTORY : %user.dir%/javadoc
 main.files.File.PROPERTY.FILES.Software.PATHS    : /software
-main.files.File.PROPERTY.FILES.Software.DIRECTORY: .
+main.files.File.PROPERTY.FILES.Software.DIRECTORY: %user.dir%
 main.files.File.PROPERTY.FILES.Servlet.PATHS     : /javadoc/javax/servlet
-main.files.File.PROPERTY.FILES.Servlet.DIRECTORY : ./src/javax/servlet/javadoc
+main.files.File.PROPERTY.FILES.Servlet.DIRECTORY : %user.dir%/src/javax/servlet/javadoc
 main.files.NotFound.CLASS		         : com.mortbay.HTTP.Handler.NotFoundHandler
 
 # ======================================================================== 
@@ -162,14 +162,13 @@ proxy.LISTENER.all.ADDRS                  : 0.0.0.0:8081
 proxy.root.HANDLERS			  : Log;Proxy;NotFound
 proxy.root.PATHS			  : /
 proxy.root.Log.CLASS			  : com.mortbay.HTTP.Handler.LogHandler
-proxy.root.Log.PROPERTY.File              : ./log/demo.log
+proxy.root.Log.PROPERTY.File              : %user.dir%/log/demo.log
 proxy.root.Log.PROPERTY.Append            : True
 
 proxy.root.Proxy.CLASS			  : com.mortbay.HTTP.Handler.ProxyHandler
 proxy.root.Proxy.PROPERTY.PATHS           : /;http;ftp
 
 proxy.root.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
-
 
 
 

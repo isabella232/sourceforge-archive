@@ -5,6 +5,7 @@
 
 package com.mortbay.Base;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.io.*;
 import java.text.*;
@@ -27,13 +28,28 @@ import java.text.*;
  * O Place each log one One line of output
  * </PRE>
  *
- * <p> If the property LOG_FILE is set, this class uses it as the alternate
- * destination for Log output rather than standard error.
+ * <p> If the property LOG_CLASSES is set, it is interpreted as a 
+ * semi-colon-separated list of fully-qualified LogSink class names.
+ * An instance of each class, created with a default constructor,
+ * is added to the list of log sinks.
+ * 
+ * Some possibilities for LOG_CLASSES are
+ *  com.mortbay.Base.LogSink - log to System.err
+ *  com.mortbay.Base.FileLogSink - log to file whose name is in LOG_FILE
+ *  com.mortbay.Base.RolloverFileLogSink - log to daily rollover logs
+ *
+ * <p> If the property LOG_CLASSES is missing, a single LogSink is
+ * used to output to System.err.
+ *
  * <p> If the property LOG_DATE_FORMAT is set, then it is interpreted
  * as a format string for java.text.SimpleDateFormat and used to
  * format the log timestamps. Note: The character '+' is replaced with
  * space in the date format string.  If LOG_TIMEZONE is set, it is used
  * to set the timezone of the log date format, otherwise GMT is used.
+ *
+ * <p> As an alternative to the above behavior, you can create LogSinks
+ * in code and add() them to the Log. If you do this before the first
+ * use of the log, the default initialization will be skipped.
  */
 public class Log 
 {
@@ -62,9 +78,10 @@ public class Log
     /*-------------------------------------------------------------------*/
     public LogSink[] _sinks = null;
     public String _logOptions=null;
+    private boolean _needInit = true;
 
     /*-------------------------------------------------------------------*/
-    private static Log __instance=null;
+    private static Log __instance = new Log();
 
     /*-------------------------------------------------------------------*/
     /** Shared static instances, reduces object creation at expense
@@ -74,56 +91,67 @@ public class Log
     /*-------------------------------------------------------------------*/
     public static Log instance()
     {   
-        if (__instance==null)
-        {
-            synchronized(com.mortbay.Base.Log.class)
-            {
-                if (__instance==null)
-		{
-                    __instance = new Log();
-		    
-		    String logOptions = "tLTs";
-		    String logFile = null;
-		    String dateFormat = "yyyyMMdd HHmmss.SSS zzz ";
-		    String timezone = "GMT";
-		    try {
-			logOptions = System.getProperty("LOG_OPTIONS","tLTs");
-			logFile = System.getProperty("LOG_FILE");
-			dateFormat = System.getProperty("LOG_DATE_FORMAT",
-							"yyyyMMdd HHmmss.SSS zzz ");
-			timezone = System.getProperty("LOG_TIMEZONE","GMT");
-		    }
-		    catch (Exception ex){
-			System.err.println("Exception from getProperty - probably running in applet\nUse Log.initParamsFromApplet or Log.setOptions to control debug output.");
-		    }
-		    
-		    LogSink sink= null;
-		    try
-		    {
-			if(logFile==null)
-			    sink=new LogSink();
-			else
-			    sink=new FileLogSink(logFile);
-		    }
-		    catch(IOException e)
-		    {
-			e.printStackTrace();
-			sink=new LogSink();
-		    }
-		    
-		    sink.setOptions(dateFormat,timezone,
-				    (logOptions.indexOf(TIMESTAMP) >= 0),
-				    (logOptions.indexOf(LABEL) >= 0),
-				    (logOptions.indexOf(TAG) >= 0),
-				    (logOptions.indexOf(STACKSIZE) >= 0),
-				    (logOptions.indexOf(STACKTRACE) >= 0),
-				    (logOptions.indexOf(ONELINE) >= 0));
-		    
-		    __instance.add(sink);
-		}
-            }
-        }
         return __instance;
+    }
+    
+    
+    /*-------------------------------------------------------------------*/
+    /** Default initialization is used the first time we have to log
+     *	unless a sink has been added with add(). _needInit allows us to
+     *	distinguish between initial state and disabled state.
+     */
+    private synchronized void defaultInit() 
+    {
+        if (_needInit)
+	{
+            _needInit = false;
+		    
+	    String logOptions = "tLTs";
+	    String logFile = null;
+	    String dateFormat = "yyyyMMdd HHmmss.SSS zzz ";
+	    String timezone = "GMT";
+	    try {
+		logOptions = System.getProperty("LOG_OPTIONS","tLTs");
+		dateFormat = System.getProperty("LOG_DATE_FORMAT",
+						"yyyyMMdd HHmmss.SSS zzz ");
+		timezone = System.getProperty("LOG_TIMEZONE","GMT");
+	    }
+	    catch (Exception ex){
+		System.err.println("Exception from getProperty - probably running in applet\nUse Log.initParamsFromApplet or Log.setOptions to control debug output.");
+	    }
+		    
+	    String sinkClasses = System.getProperty("LOG_CLASSES", "com.mortbay.Base.LogSink");
+	    StringTokenizer sinkTokens = new StringTokenizer(sinkClasses, ";");
+		    
+	    LogSink sink= null;
+	    while (sinkTokens.hasMoreTokens()) {
+		String sinkClassName = sinkTokens.nextToken();
+		    	
+		try{
+		    Class sinkClass = Class.forName(sinkClassName);
+		    if (com.mortbay.Base.LogSink.class.isAssignableFrom(sinkClass)) {
+			sink = (LogSink)sinkClass.newInstance();
+					    
+			sink.setOptions(dateFormat,timezone,
+					(logOptions.indexOf(TIMESTAMP) >= 0),
+					(logOptions.indexOf(LABEL) >= 0),
+					(logOptions.indexOf(TAG) >= 0),
+					(logOptions.indexOf(STACKSIZE) >= 0),
+					(logOptions.indexOf(STACKTRACE) >= 0),
+					(logOptions.indexOf(ONELINE) >= 0));
+					    
+			__instance.add(sink);
+		    }
+		    else {
+			// Can't use Code.fail here, that's what we're setting up
+			System.err.println(sinkClass+" is not a com.mortbay.Base.LogSink");
+		    }
+		}
+		catch (Exception e) {
+		    e.printStackTrace();
+		}
+	    }
+	}
     }    
     
 
@@ -138,9 +166,6 @@ public class Log
     {
 	synchronized(com.mortbay.Base.Log.class)
 	{
-	    if (__instance==null)
-		__instance = new Log();
-		
 	    String logOptions = appl.getParameter("LOG_OPTIONS");
 	    String logFile = appl.getParameter("LOG_FILE");
 	    String dateFormat = appl.getParameter("LOG_DATE_FORMAT");
@@ -205,16 +230,21 @@ public class Log
 	    ns[_sinks.length]=logSink;
 	    _sinks=ns;
 	}
+	_needInit = false;
     }
     
     
     /* ------------------------------------------------------------ */
     /** No logging.
-     * All log sinks are removed.
+     * All log sinks are stopped and removed.
      */
     public void disableLog()
     {
-        _sinks=null;
+	if (_sinks!=null) {
+	    for (int s=_sinks.length;s-->0;)
+		_sinks[s].stop();
+	    _sinks=null;
+	}
     }
     
     
@@ -239,6 +269,8 @@ public class Log
                         Frame frame,
                         long time)
     {
+	if (_needInit)
+	    defaultInit();
 	if (_sinks==null)
 	    return;
 	for (int s=_sinks.length;s-->0;)

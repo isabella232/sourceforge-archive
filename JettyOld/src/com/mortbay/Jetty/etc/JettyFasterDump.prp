@@ -14,7 +14,7 @@ main.PROPERTY.SessionMaxInactiveInterval  : 3600
 main.PROPERTY.MinListenerThreads	  : 10
 main.PROPERTY.MaxListenerThreads	  : 20
 main.PROPERTY.MaxListenerThreadIdleMs	  : 60000
-main.PROPERTY.MimeMap			  : ./etc/Mime.prp
+main.PROPERTY.MimeMap			  : %user.dir%/etc/Mime.prp
 main.LISTENER.all.CLASS                   : com.mortbay.HTTP.HttpListener
 main.LISTENER.all.ADDRS                   : 0.0.0.0:8080
 
@@ -24,7 +24,7 @@ main.root.PATHS                           : /
 main.root.HANDLERS			  : Log;Auth;File;Param;Session;Dynamic;Servlet;NotFound
 
 main.root.Log.CLASS			  : com.mortbay.HTTP.Handler.LogHandler
-main.root.Log.PROPERTY.File               : ./etc/demo.log
+main.root.Log.PROPERTY.File               : %user.dir%/etc/demo.log
 main.root.Log.PROPERTY.Append		  : False
 main.root.Log.PROPERTY.LongForm           : False
 main.root.Log.PROPERTY.CountContentLength : False
@@ -39,7 +39,7 @@ main.root.File.PROPERTY.AllowPut		     : False
 main.root.File.PROPERTY.AllowDelete		     : False
 main.root.File.PROPERTY.Indexes			     : index.html;index.htm
 main.root.File.PROPERTY.FILES.FileBase.PATHS	     : /File%
-main.root.File.PROPERTY.FILES.FileBase.DIRECTORY     : ./FileBase
+main.root.File.PROPERTY.FILES.FileBase.DIRECTORY     : %user.dir%/FileBase
 
 main.root.Param.CLASS				     : com.mortbay.HTTP.Handler.ParamHandler
 main.root.Param.PROPERTY.CookiesAsParameters	     : False
@@ -48,7 +48,7 @@ main.root.Session.CLASS				     : com.mortbay.HTTP.Handler.SessionHandler
 
 main.root.Dynamic.CLASS			             : com.mortbay.HTTP.Handler.ServletHandler
 main.root.Dynamic.PROPERTY.PATHS		     : /servlet/
-main.root.Dynamic.PROPERTY.CLASSPATH		     : ./servlets
+main.root.Dynamic.PROPERTY.CLASSPATH		     : %user.dir%/servlets
 main.root.Dynamic.PROPERTY.AutoReloadDynamicServlets : False
 
 main.root.Servlet.CLASS			             : com.mortbay.HTTP.Handler.ServletHandler

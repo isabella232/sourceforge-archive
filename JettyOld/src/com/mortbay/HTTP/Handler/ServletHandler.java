@@ -121,7 +121,7 @@ public class ServletHandler extends NullHandler
                 if ("*".equals(servletName))
                     continue;
                 
-                Code.debug("Configuring servlet "+servletName);
+                Code.debug("Configuring servlet ",servletName);
                 PropertyTree servletTree = servlets.getTree(servletName);
                 
                 String servletClass = servletTree.getProperty("CLASS");
@@ -169,7 +169,7 @@ public class ServletHandler extends NullHandler
             ServletHolder holder =
                 (ServletHolder)servletMap.get(pathSpec);
             
-            Code.debug("Pass request to servlet " + holder);
+            Code.debug("Pass request to servlet ", holder);
 
             request.setServletPath(pathSpec);
             if (pathTranslated!=null && request.getPathInfo()!=null)
@@ -189,7 +189,7 @@ public class ServletHandler extends NullHandler
             return;
         
         if (Code.verbose())
-            Code.debug("Looking for "+address +" in "+dynamicMap);
+            Code.debug("Looking for ",address ," in ",dynamicMap);
         
         // try a dynamic servlet
         pathSpec=dynamicMap.matchSpec(address);

@@ -35,6 +35,10 @@ import java.util.StringTokenizer;
  * Wildcard nodes can be defined with "*" so that keys such as
  * "aa.*.cc", will match gets such as "aa.bb.cc", "aa.X.cc", etc. 
  *
+ * Values can contain tokens such as %name%, which are expanded
+ * as with the results of a call to System.getProperty("name");
+ * The % character may be included in a value with %%.
+ *
  * To aid in constructing and saving Properties files,
  * <code>getConverter</code> will convert Dictionaries into PropertyTrees
  * recursively.
@@ -100,6 +104,7 @@ public class PropertyTree extends Properties
         {
             Object k=e.nextElement();
             String v=(String)properties.get(k);
+	    v=expandMacros(v);
             put(k,trim?v.trim():v);    
         }
     }
@@ -542,4 +547,34 @@ public class PropertyTree extends Properties
             expandNode(keyMap,n,keyLength);
         }
     }
+
+    /* ------------------------------------------------------------ */
+    static private String expandMacros(String v)
+    {
+        // do limited substitution on values
+        for (int i=0; i<v.length();)
+	{
+            int i1 = v.indexOf('%',i);
+            if (i1 < 0) break;
+            int i2 = v.indexOf('%',i1+1);
+            if (i2 < 0) break;
+            i = i2 + 1;
+	    
+            String sk = v.substring(i1+1,i2);
+            String sv = sk.length()==0?"%":System.getProperty(sk);
+            if (null == sv) continue;
+            i = i1 + sv.length();
+            StringBuffer b = new StringBuffer();
+            if (0 < i1)
+                b.append(v.substring(0,i1));
+            b.append(sv);
+            if ((i2+1) < v.length()) 
+                b.append(v.substring(i2+1));
+	    
+            Code.debug("EXPANDED \"" , v , "\" TO \"" ,b);
+            v = b.toString();
+        }
+        return v;
+    }
+
 };

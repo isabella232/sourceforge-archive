@@ -101,9 +101,9 @@ public class MethodTag
             tagMethodName = tagClassName.substring(i+1).trim();
             tagClassName  = tagClassName.substring(0,i).trim();
 
-            Code.debug("class = "+tagClassName);
-            Code.debug("method = "+tagMethodName);
-            Code.debug("args = "+tagArgsString);
+            Code.debug("class = ",tagClassName);
+            Code.debug("method = ",tagMethodName);
+            Code.debug("args = ",tagArgsString);
 
             StreamTokenizer tok =
                 new StreamTokenizer(new StringReader(tagArgsString));
