@@ -20,49 +20,19 @@ import java.util.Set;
  * It also has the benefit that it can look up entries by substring or
  * sections of char and byte arrays.  This can prevent many String
  * objects from being created just to look up in the map.
- * 
+ *
+ * This map is NOT synchronized.
+ *
  * @version 1.0 Thu Aug 16 2001
  * @author Greg Wilkins (gregw)
  */
 public class StringMap extends AbstractMap
 {
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private class Node implements Map.Entry
-    {
-        char _char;
-        char _uchar;
-        char _lchar;
-        Node _next;
-        Node _children;
-        String _key;
-        Object _value;
-        
-        Node(char c)
-        {
-            _char=c;
-            _uchar=Character.toUpperCase(c);
-            _lchar=Character.toLowerCase(c);
-        }
-        public Object getKey(){return _key;}
-        public Object getValue(){return _value;}
-        public Object setValue(Object o){Object old=_value;_value=(String)o;return old;}
-        public String toString(){return "["+_char+":"+_key+"="+_value+"]";}
-    }
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private class NullEntry implements Map.Entry
-    {
-        public Object getKey(){return null;}
-        public Object getValue(){return _nullValue;}
-        public Object setValue(Object o)
-            {Object old=_nullValue;_nullValue=(String)o;return old;}
-        public String toString(){return "[:null="+_nullValue+"]";}
-    }
+    private static final int __HASH_WIDTH=9;
     
     /* ------------------------------------------------------------ */
-    private Node _root;
+    private int _width=__HASH_WIDTH;
+    private Node _root=new Node();
     private boolean _ignoreCase=false;
     private NullEntry _nullEntry=null;
     private Object _nullValue=null;
@@ -80,13 +50,54 @@ public class StringMap extends AbstractMap
      * @param ignoreCase 
      */
     public StringMap(boolean ignoreCase)
-    {_ignoreCase=ignoreCase;}
+    {
+        _ignoreCase=ignoreCase;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param ignoreCase 
+     * @param width Width of hash tables, larger values are faster but
+     * use more memory.
+     */
+    public StringMap(boolean ignoreCase,int width)
+    {
+        _ignoreCase=ignoreCase;
+        _width=width;
+    }
     
     /* ------------------------------------------------------------ */
     /** Set the ignoreCase attribute.
      * @param ic If true, the map is case insensitive for keys.
      */
-    public void setIgnoreCase(boolean ic){_ignoreCase=ic;}
+    public void setIgnoreCase(boolean ic)
+    {
+        if (_root._children!=null)
+            throw new IllegalStateException("Must be set before first put");
+        _ignoreCase=ic;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isIgnoreCase()
+    {
+        return _ignoreCase;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the hash width.
+     * @param width Width of hash tables, larger values are faster but
+     * use more memory.
+     */
+    public void setWidth(int width)
+    {
+        _width=width;
+    }
+
+    /* ------------------------------------------------------------ */
+    public int getWidth()
+    {
+        return _width;
+    }
     
     /* ------------------------------------------------------------ */
     public Object put(Object key, Object value)
@@ -112,8 +123,9 @@ public class StringMap extends AbstractMap
         }
         
         Node node = _root;
-        Node last = null;
-        Node up = null;
+        int ni=-1;
+        Node prev = null;
+        Node parent = null;
 
         // look for best match
     charLoop:
@@ -121,39 +133,86 @@ public class StringMap extends AbstractMap
         {
             char c=key.charAt(i);
             
-            // While we have a node to try
+            // Advance node
+            if (ni==-1)
+            {
+                parent=node;
+                prev=null;
+                ni=0;
+                node=(node._children==null)?null:node._children[c%_width];
+            }
+            
+            // Loop through a node chain at the same level
             while (node!=null) 
             {
                 // If it is a matching node, goto next char
-                if (node._char==c || _ignoreCase&&(node._lchar==c||node._uchar==c))
+                if (node._char[ni]==c || _ignoreCase&&node._ochar[ni]==c)
                 {
-                    last=null;
-                    up=node;
-                    node=node._children;
+                    prev=null;
+                    ni++;
+                    if (ni==node._char.length)
+                        ni=-1;
                     continue charLoop;
                 }
-                last=node;
-                node=node._next;                
+
+                // no char match
+                // if the first char,
+                if (ni==0)
+                {
+                    // look along the chain for a char match
+                    prev=node;
+                    node=node._next;
+                }
+                else
+                {
+                    // Split the current node!
+                    Node split=node.split(this,ni);
+                    i--;
+                    ni=-1;
+                    continue charLoop;
+                }
             }
 
             // We have run out of nodes, so as this is a put, make one
-            node = new Node(c);
-            if (last!=null)
-                last._next=node;
-            else if (up!=null)
-                up._children=node;
-            else
+            node = new Node(_ignoreCase,key,i);
+
+            if (prev!=null) // add to end of chain
+                prev._next=node;
+            else if (parent!=null) // add new child
+            {
+                if (parent._children==null)
+                    parent._children=new Node[_width];
+                parent._children[c%_width]=node;
+                int oi=node._ochar[0]%_width;
+                if (node._ochar!=null && node._char[0]%_width!=oi)
+                {
+                    if (parent._children[oi]==null)
+                        parent._children[oi]=node;
+                    else
+                    {
+                        Node n=parent._children[oi];
+                        while(n._next!=null)
+                            n=n._next;
+                        n._next=node;
+                    }
+                }
+            }
+            else // this is the root.
                 _root=node;
-            up=node;
-            last=null;
-            node=null;
+            break;
         }
-        if (up!=null)
+        
+        // Do we have a node
+        if (node!=null)
         {
-            Object old = up._value;
-            up._key=key;
-            up._value=value;
-            _entrySet.add(up);
+            // Split it if we are in the middle
+            if(ni>0)
+                node.split(this,ni);
+        
+            Object old = node._value;
+            node._key=key;
+            node._value=value;
+            _entrySet.add(node);
             return old;
         }
         return null;
@@ -195,7 +254,8 @@ public class StringMap extends AbstractMap
             return _nullEntry;
         
         Node node = _root;
-        Node up = null;
+        int ni=-1;
+        Node parent = null;
 
         // look for best match
     charLoop:
@@ -203,24 +263,39 @@ public class StringMap extends AbstractMap
         {
             char c=key.charAt(offset+i);
 
-            // While we have a node to try
+            // Advance node
+            if (ni==-1)
+            {
+                parent=node;
+                ni=0;
+                node=(node._children==null)?null:node._children[c%_width];
+            }
+            
+            // Look through the node chain
             while (node!=null) 
             {
                 // If it is a matching node, goto next char
-                if (node._char==c || _ignoreCase&&(node._lchar==c||node._uchar==c))
+                if (node._char[ni]==c || _ignoreCase&&node._ochar[ni]==c)
                 {
-                    up=node;
-                    node=node._children;
+                    ni++;
+                    if (ni==node._char.length)
+                        ni=-1;
                     continue charLoop;
                 }
+
+                // No char match, so if mid node then no match at all.
+                if (ni>0) return null;
+
+                // try next in chain
                 node=node._next;                
             }
             return null;
         }
-
-        if (up!=null && up._key==null)
+        
+        if (ni>0) return null;
+        if (node!=null && node._key==null)
             return null;
-        return up;
+        return node;
     }
     
     /* ------------------------------------------------------------ */
@@ -237,7 +312,8 @@ public class StringMap extends AbstractMap
             return _nullEntry;
         
         Node node = _root;
-        Node up = null;
+        int ni=-1;
+        Node parent = null;
 
         // look for best match
     charLoop:
@@ -245,24 +321,39 @@ public class StringMap extends AbstractMap
         {
             char c=key[offset+i];
 
+            // Advance node
+            if (ni==-1)
+            {
+                parent=node;
+                ni=0;
+                node=(node._children==null)?null:node._children[c%_width];
+            }
+            
             // While we have a node to try
             while (node!=null) 
             {
                 // If it is a matching node, goto next char
-                if (node._char==c || _ignoreCase&&(node._lchar==c||node._uchar==c))
+                if (node._char[ni]==c || _ignoreCase&&node._ochar[ni]==c)
                 {
-                    up=node;
-                    node=node._children;
+                    ni++;
+                    if (ni==node._char.length)
+                        ni=-1;
                     continue charLoop;
                 }
+
+                // No char match, so if mid node then no match at all.
+                if (ni>0) return null;
+
+                // try next in chain
                 node=node._next;                
             }
             return null;
         }
         
-        if (up!=null && up._key==null)
+        if (ni>0) return null;
+        if (node!=null && node._key==null)
             return null;
-        return up;
+        return node;
     }
     
     /* ------------------------------------------------------------ */
@@ -280,7 +371,8 @@ public class StringMap extends AbstractMap
             return _nullEntry;
         
         Node node = _root;
-        Node up = null;
+        int ni=-1;
+        Node parent = null;
 
         // look for best match
     charLoop:
@@ -288,24 +380,39 @@ public class StringMap extends AbstractMap
         {
             char c=(char)(key[offset+i]);
 
+            // Advance node
+            if (ni==-1)
+            {
+                parent=node;
+                ni=0;
+                node=(node._children==null)?null:node._children[c%_width];
+            }
+            
             // While we have a node to try
             while (node!=null) 
-            {
+            {  
                 // If it is a matching node, goto next char
-                if (node._char==c || _ignoreCase&&(node._lchar==c||node._uchar==c))
+                if (node._char[ni]==c || _ignoreCase&&node._ochar[ni]==c)
                 {
-                    up=node;
-                    node=node._children;
+                    ni++;
+                    if (ni==node._char.length)
+                        ni=-1;
                     continue charLoop;
                 }
-                node=node._next;                
+
+                // No char match, so if mid node then no match at all.
+                if (ni>0) return null;
+
+                // try next in chain
+                node=node._next;                      
             }
             return null;
         }
         
-        if (up!=null && up._key==null)
+        if (ni>0) return null;
+        if (node!=null && node._key==null)
             return null;
-        return up;
+        return node;
     }
     
     /* ------------------------------------------------------------ */
@@ -332,7 +439,8 @@ public class StringMap extends AbstractMap
         }
         
         Node node = _root;
-        Node up = null;
+        int ni=-1;
+        Node parent = null;
 
         // look for best match
     charLoop:
@@ -340,30 +448,45 @@ public class StringMap extends AbstractMap
         {
             char c=key.charAt(i);
 
+            // Advance node
+            if (ni==-1)
+            {
+                parent=node;
+                ni=0;
+                node=(node._children==null)?null:node._children[c%_width];
+            }
+            
             // While we have a node to try
             while (node!=null) 
             {
                 // If it is a matching node, goto next char
-                if (node._char==c || _ignoreCase&&(node._lchar==c||node._uchar==c))
+                if (node._char[ni]==c || _ignoreCase&&node._ochar[ni]==c)
                 {
-                    up=node;
-                    node=node._children;
+                    ni++;
+                    if (ni==node._char.length)
+                        ni=-1;
                     continue charLoop;
                 }
-                node=node._next;                
+
+                // No char match, so if mid node then no match at all.
+                if (ni>0) return null;
+
+                // try next in chain
+                node=node._next;         
             }
             return null;
         }
 
-        if (up!=null && up._key==null)
+        if (ni>0) return null;
+        if (node!=null && node._key==null)
             return null;
         
-        Object old = up._value;
-        _entrySet.remove(up);
-        up._value=null;
-        up._key=null;
+        Object old = node._value;
+        _entrySet.remove(node);
+        node._value=null;
+        node._key=null;
         
-        return old;
+        return old; 
     }
 
     /* ------------------------------------------------------------ */
@@ -396,10 +519,143 @@ public class StringMap extends AbstractMap
     /* ------------------------------------------------------------ */
     public void clear()
     {
-        _root=null;
+        _root=new Node();
         _nullEntry=null;
         _nullValue=null;
         _entrySet.clear();
     }
 
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private static class Node implements Map.Entry
+    {
+        char[] _char;
+        char[] _ochar;
+        Node _next;
+        Node[] _children;
+        String _key;
+        Object _value;
+        
+        Node(){}
+        
+        Node(boolean ignoreCase,String s, int offset)
+        {
+            int l=s.length()-offset;
+            Code.assertTrue(l>0,"Node._char.length>0");
+            _char=new char[l];
+            _ochar=new char[l];
+            for (int i=0;i<l;i++)
+            {
+                char c=s.charAt(offset+i);
+                _char[i]=c;
+                if (ignoreCase)
+                {
+                    char o=c;
+                    if (Character.isUpperCase(c))
+                        o=Character.toLowerCase(c);
+                    else if (Character.isLowerCase(c))
+                        o=Character.toUpperCase(c);
+                    _ochar[i]=o;
+                }
+            }
+        }
+
+        Node split(StringMap map,int offset)
+        {
+            Node split = new Node();
+            int sl=_char.length-offset;
+            
+            Code.assertTrue(offset>0,"split offset>0");
+            Code.assertTrue(sl>0,"split remainder>0");
+            
+            char[] tmp=this._char;
+            this._char=new char[offset];
+            split._char = new char[sl];
+            System.arraycopy(tmp,0,this._char,0,offset);
+            System.arraycopy(tmp,offset,split._char,0,sl);
+
+            if (this._ochar!=null)
+            {
+                tmp=this._ochar;
+                this._ochar=new char[offset];
+                split._ochar = new char[sl];
+                System.arraycopy(tmp,0,this._ochar,0,offset);
+                System.arraycopy(tmp,offset,split._ochar,0,sl);
+            }
+            
+            split._key=this._key;
+            split._value=this._value;
+            this._key=null;
+            this._value=null;
+            if (map._entrySet.remove(this))
+                map._entrySet.add(split);
+
+            split._children=this._children;            
+            this._children=new Node[map._width];
+            this._children[split._char[0]%map._width]=split;
+            if (split._ochar!=null && this._children[split._ochar[0]%map._width]!=split)
+                this._children[split._ochar[0]%map._width]=split;
+
+            return split;
+        }
+        
+        public Object getKey(){return _key;}
+        public Object getValue(){return _value;}
+        public Object setValue(Object o){Object old=_value;_value=(String)o;return old;}
+        public String toString()
+        {
+            StringBuffer buf=new StringBuffer();
+            synchronized(buf)
+            {
+                toString(buf);
+            }
+            return buf.toString();
+        }
+
+        private void toString(StringBuffer buf)
+        {
+            buf.append("{[");
+            if (_char==null)
+                buf.append('-');
+            else
+                for (int i=0;i<_char.length;i++)
+                    buf.append(_char[i]);
+            buf.append(':');
+            buf.append(_key);
+            buf.append('=');
+            buf.append(_value);
+            buf.append(']');
+            if (_children!=null)
+            {
+                for (int i=0;i<_children.length;i++)
+                {
+                    buf.append('|');
+                    if (_children[i]!=null)
+                        _children[i].toString(buf);
+                    else
+                        buf.append("-");
+                }
+            }
+            buf.append('}');
+            if (_next!=null)
+            {
+                buf.append(",\n");
+                _next.toString(buf);
+            }
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class NullEntry implements Map.Entry
+    {
+        public Object getKey(){return null;}
+        public Object getValue(){return _nullValue;}
+        public Object setValue(Object o)
+            {Object old=_nullValue;_nullValue=(String)o;return old;}
+        public String toString(){return "[:null="+_nullValue+"]";}
+    }
+    
 }

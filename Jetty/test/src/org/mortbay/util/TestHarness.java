@@ -75,180 +75,6 @@ public class TestHarness
     }    
 
     
-    /* ------------------------------------------------------------ 
-     * MOved to JUnit testing
-     */
-    //static void testDateCache()
-    
-    /* ------------------------------------------------------------ */
-    /**  No longer needed with JUnit
-     */
-    //static void testTest()
-    
-    /*-------------------------------------------------------------------
-    // XXX - this was not even a test harness - poor show!
-    static void testLog()
-    {
-        Log.instance();
-        System.err.println("\n\nEXPECT TESTTAG: TEST Message");
-        Log.message("TESTTAG","TEST Message",new Frame());
-        System.err.println("\n\nEXPECT: Test event");
-        Log.event("Test event");
-        System.err.println("\n\nEXPECT: Test warning");
-        Log.warning("Test warning");
-    }
-    */
-
-    /* ------------------------------------------------------------ 
-     * Moved to JUnit testing
-    private static void testFrameChecker(TestCase t, Frame f, String desc,
-                                         String method, int depth,
-                                         String thread, String file)
-    {
-        t.checkContains(f._method, method, desc+": method");
-        t.checkEquals(f._depth, depth, desc+": depth");
-        t.checkEquals(f._thread, thread, desc+": thread");
-        t.checkContains(f._file, file, desc+": file");
-    }
-    
-    static void testFrame()
-    {
-        TestCase t = new TestCase("org.mortbay.util.Frame");
-        Frame f = new Frame();
-        testFrameChecker(t, f, "default constructor",
-                         "org.mortbay.util.TestHarness.testFrame",
-                         2, "main", "TestHarness.java");
-        f = f.getParent();
-        testFrameChecker(t, f, "getParent",
-                         "org.mortbay.util.TestHarness.main",
-                         1, "main", "TestHarness.java");
-        f = f.getParent();
-        t.checkEquals(f, null, "getParent() off top of stack");
-        f = new Frame(1);
-        testFrameChecker(t, f, "new Frame(1)",
-                         "org.mortbay.util.TestHarness.main",
-                         1, "main", "TestHarness.java");
-        f = new Frame(1, true);
-        testFrameChecker(t, f, "partial",
-                         "unknownMethod", 0, "unknownThread", "UnknownFile");
-        f.complete();
-        testFrameChecker(t, f, "new Frame(1)",
-                         "org.mortbay.util.TestHarness.main",
-                         1, "main", "TestHarness.java");
-    }
-    */
-    
-    /*-------------------------------------------------------------------*/
-    /*
-     * These are not automated tests. It's debug output that must be
-     * checked by a human. To automate, provide a Log descendant or
-     * other kind of o.m.u.Code listener, that can expect output values.
-     * --Juanco
-     */
-    /*
-    static void testCode()
-    {
-        // Also not a test harness
-        TestCase t = new TestCase("org.mortbay.util.Code");
-        Code code = Code.instance();
-
-        System.err.println("RUNNING CODE TESTS. Failures expected and must be visually checked");
-        
-        code._debugOn=false;
-        Code.debug("YOU SHOULD NOT SEE THIS");
-        
-        code._debugOn=true;
-        System.err.println("\n\nEXPECT DEBUG: Test debug message");
-        Code.debug("Test debug message");
-        System.err.println("\n\nEXPECT DEBUG: Test debug with stack");
-        Code.debug("Test debug with stack",new Throwable());
-        System.err.println("\n\nEXPECT DEBUG: Test debug with various");
-        Code.debug("Test debug with various",new Throwable(),"\n",code);
-        
-        code._debugPatterns = new java.util.Vector();
-        code._debugPatterns.addElement("ZZZZZ");
-        Code.debug("YOU SHOULD NOT SEE THIS");
-        Code.debug("YOU SHOULD"," NOT SEE ","THIS");
-        
-        code._debugPatterns.addElement("TestHarness");
-        System.err.println("\n\nEXPECT DEBUG: Test debug pattern");
-        Code.debug("Test debug pattern");
-        code._debugPatterns = null;
-
-        System.err.println("\n\nEXPECT WARNING: Test warning");
-        Code.warning("Test warning");
-        
-        Code.setDebug(false);
-        Code.setDebugTriggers("FOO,BAR");
-        Code.debug("YOU SHOULD NOT SEE THIS");
-        Code.triggerOn("BLAH");
-        Code.debug("YOU SHOULD NOT SEE THIS");
-        System.err.println("\n\nEXPECT TRIGGER: ON FOO");
-        Code.triggerOn("FOO");
-        System.err.println("\n\nEXPECT DEBUG: triggered");
-        Code.debug("triggered");
-        System.err.println("\n\nEXPECT TRIGGER: ON BAR");
-        Code.triggerOn("BAR");
-        System.err.println("\n\nEXPECT DEBUG: triggered");
-        Code.debug("triggered");
-        Code.triggerOn("FOO");
-        System.err.println("\n\nEXPECT TRIGGER: OFF FOO");
-        Code.triggerOff("FOO");
-        System.err.println("\n\nEXPECT DEBUG: triggered");
-        Code.debug("triggered");
-        System.err.println("\n\nEXPECT TRIGGER: OFF BAR");
-        Code.triggerOff("BAR");
-        Code.debug("YOU SHOULD NOT SEE THIS");
-        Code.triggerOff("BLAH");
-        Code.debug("YOU SHOULD NOT SEE THIS");
-        
-        Code.setDebug(false);
-        
-        try
-        {
-            System.err.println("\n\nEXPECT FAIL: Fail test");
-            Code.fail("Fail test");
-            t.check(false,"fail");
-        }
-        catch(CodeException e)
-        {
-            Code.debug(e);
-            t.check(true,"fail");
-        }
-        
-        try
-        {
-            Code.assertTrue(true,"assert");
-            Code.assertEquals("String","String","equals");
-            Code.assertEquals(1,1,"equals");
-            Code.assertContains("String","rin","contains");         
-            
-            System.err.println("\n\nEXPECT ASSERT: Assert fail");
-            Code.assertEquals("foo","bar","assert fail");
-            t.check(false,"Assert");
-        }
-        catch(CodeException e)
-        {
-            t.check(true,"Assert");
-            System.err.println("\n\nEXPECT Warning: Assert with stack");
-            Code.warning(e);
-        }
-    }
-   */
-    
-    /* ------------------------------------------------------------ */
-    /* Moved to JUnit testing
-    public static void testIO()
-    
-    /* ------------------------------------------------------------ */
-    /* Moved to JUnit testing
-    public static void testB64()
-    */
-
-    /* ------------------------------------------------------------ */
-    // Moved to JUnit tsting
-    // public static void testPassword()
-    
 
     /* ------------------------------------------------------------ */
     public static void testBlockingQueue()
@@ -1237,6 +1063,30 @@ public class TestHarness
             t.checkEquals(map.get("K03"),"V3","4V3");
             t.checkEquals(map.get("???"),null,"4null");
             
+            map.put("ABCD","V4");
+            map.put("ABCDEFGH","V5");
+            map.put("ABXX","V6");
+            t.checkEquals(map.get("AB"),null,"nullAB");
+            map.put("AB","V7");
+            map.put("ABCDEF","V8");
+            map.put("ABCDXXXX","V9");
+            
+            t.checkEquals(map.get("ABCD"),"V4","V4");
+            t.checkEquals(map.get("ABCDEFGH"),"V5","V5");
+            t.checkEquals(map.get("ABXX"),"V6","V6");
+            t.checkEquals(map.get("AB"),"V7","V7");
+            t.checkEquals(map.get("ABCDEF"),"V8","V8");
+            t.checkEquals(map.get("ABCDXXXX"),"V9","V9");
+            t.checkEquals(map.get("ABC"),null,"null1");
+            t.checkEquals(map.get("AB?"),null,"null2");
+            t.checkEquals(map.get("ABCDE"),null,"null3");
+            t.checkEquals(map.get("ABCD?"),null,"null4");
+            t.checkEquals(map.get("ABCDEFG"),null,"null5");
+            t.checkEquals(map.get("ABCDEF?"),null,"null6");
+            t.checkEquals(map.get("ABCDEFGHI"),null,"null7");
+            t.checkEquals(map.get("ABCDEFGH?"),null,"null8");
+            
+            
             t.checkEquals(map.getEntry("x0x",1,1).getValue(),"V0","5V0");
             t.checkEquals(map.getEntry("xK1x",1,2).getValue(),"V1","5V1");
             t.checkEquals(map.getEntry("xK2x",1,2).getValue(),"V2","5V2");
@@ -1257,15 +1107,27 @@ public class TestHarness
             t.checkEquals(map.getEntry("xK03x".getBytes(),1,3).getValue(),"V3","7V3");
             t.checkEquals(map.getEntry("???".getBytes(),1,1),null,"7null");
             
-            map.setIgnoreCase(false);
-            t.checkEquals(map.size(),4,"8size");
+            t.checkEquals(map.size(),10,"8size");
             t.checkEquals(map.get("0"),"V0","8V0");
             t.checkEquals(map.get("k1"),null,"8V1");
             t.checkEquals(map.get("k2"),null,"8V2");
             t.checkEquals(map.get("k03"),null,"8V3");
             t.checkEquals(map.get("???"),null,"8null");
+
+            map.clear();
             map.setIgnoreCase(true);
-            t.checkEquals(map.size(),4,"9size");
+            map.put("K1","V1");
+            map.put("K2","V2");
+            map.put("0","V0");
+            map.put("K03","V3");
+            map.put("ABCD","V4");
+            map.put("ABCDEFGH","V5");
+            map.put("ABXX","V6");
+            map.put("AB","V7");
+            map.put("ABCDEF","V8");
+            map.put("ABCDXXXX","V9");
+            
+            t.checkEquals(map.size(),10,"9size");
             t.checkEquals(map.get("0"),"V0","9V0");
             t.checkEquals(map.get("k1"),"V1","9V1");
             t.checkEquals(map.get("k2"),"V2","9V2");
@@ -1273,7 +1135,7 @@ public class TestHarness
             t.checkEquals(map.get("???"),null,"9null");
 
             map.put(null,"Vn");
-            t.checkEquals(map.size(),5,"10size");
+            t.checkEquals(map.size(),11,"10size");
             t.checkEquals(map.get("0"),"V0","10V0");
             t.checkEquals(map.get("k1"),"V1","10V1");
             t.checkEquals(map.get("k2"),"V2","10V2");
@@ -1282,11 +1144,17 @@ public class TestHarness
             t.checkEquals(map.get(null),"Vn","10Vn");
 
             map.remove("XXX");
-            t.checkEquals(map.size(),5,"11size5");
+            t.checkEquals(map.size(),11,"11size5");
             map.remove("k2");
-            t.checkEquals(map.size(),4,"11size4");
+            t.checkEquals(map.size(),10,"11size4");
             map.remove(null);
-            t.checkEquals(map.size(),3,"11size3");
+            t.checkEquals(map.size(),9,"11size3");
+            
+            map.remove("AB");
+            map.remove("ABCDXXXX");
+            map.remove("ABCDEF");
+            map.remove("ABCDEFGH");
+            t.checkEquals(map.size(),5,"12size");
             
             
         }
@@ -1518,28 +1386,17 @@ public class TestHarness
     {
         try
         {
-       	   //testTest();
-            //testLog();
-            // testFrame();
-            //testCode();
-            //testPassword();
             testStringMap();
             testSingletonList();
             testLazyList();
             testMultiMap();
             testQuotedStringTokenizer();            
-            //testDateCache();
             testBlockingQueue();
-            //testIO();
-            //testUrlEncoded();
-            //testURI();
             testLineInput();
             testThreadPool();
             testThreadedServer();
-            //testB64();
             testResource();
 
-            //testJarURL();
         }
         catch(Throwable th)
         {

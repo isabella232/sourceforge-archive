@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Reduce object count and add hash width to StringMap
  + Factor out RolloverFileOutputStream from OutputStreamLogSink
  + Remove request logSink and replace with RequestLog using
    RolloverFileOutputStream
