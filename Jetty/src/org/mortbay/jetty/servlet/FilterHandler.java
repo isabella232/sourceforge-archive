@@ -351,15 +351,15 @@ public class FilterHandler
             // Goto the original resource
             ServletHttpRequest servletHttpRequest=  ServletHttpRequest.unwrap(request);
             ServletHttpResponse servletHttpResponse=servletHttpRequest.getServletHttpResponse();
-            ServletRequest requestWrapper=      servletHttpRequest.getWrapper();
-            ServletResponse responseWrapper=    servletHttpResponse.getWrapper();
+//             ServletRequest requestWrapper=      servletHttpRequest.getWrapper();
+//             ServletResponse responseWrapper=    servletHttpResponse.getWrapper();
             HttpRequest httpRequest =               servletHttpRequest.getHttpRequest();
             HttpResponse httpResponse =             httpRequest.getHttpResponse();
             
             try
             {
-                servletHttpRequest.setWrapper((ServletRequest)request);
-                servletHttpResponse.setWrapper((ServletResponse)response);
+//                 servletHttpRequest.setWrapper((ServletRequest)request);
+//                 servletHttpResponse.setWrapper((ServletResponse)response);
                 
                 _httpContext.handle(_nextHandler,
                                     _pathInContext,
@@ -370,8 +370,8 @@ public class FilterHandler
             }
             finally
             {
-                servletHttpRequest.setWrapper(requestWrapper);
-                servletHttpResponse.setWrapper(responseWrapper);
+//                 servletHttpRequest.setWrapper(requestWrapper);
+//                 servletHttpResponse.setWrapper(responseWrapper);
             }
         }   
     }
@@ -419,15 +419,15 @@ public class FilterHandler
                 // Goto the original resource
                 ServletHttpRequest servletHttpRequest=  ServletHttpRequest.unwrap(request);
                 ServletHttpResponse servletHttpResponse=servletHttpRequest.getServletHttpResponse();
-                ServletRequest requestWrapper=      servletHttpRequest.getWrapper();
-                ServletResponse responseWrapper=    servletHttpResponse.getWrapper();
+//                 ServletRequest requestWrapper=      servletHttpRequest.getWrapper();
+//                 ServletResponse responseWrapper=    servletHttpResponse.getWrapper();
                 HttpRequest httpRequest =               servletHttpRequest.getHttpRequest();
                 HttpResponse httpResponse =             httpRequest.getHttpResponse();
             
                 try
                 {
-                    servletHttpRequest.setWrapper((ServletRequest)request);
-                    servletHttpResponse.setWrapper((ServletResponse)response);
+//                     servletHttpRequest.setWrapper((ServletRequest)request);
+//                     servletHttpResponse.setWrapper((ServletResponse)response);
                     _httpContext.handle(_nextHandler,
                                         _pathInContext,
                                         null, // Assume path params have
@@ -437,8 +437,8 @@ public class FilterHandler
                 }
                 finally
                 {
-                    servletHttpRequest.setWrapper(requestWrapper);
-                    servletHttpResponse.setWrapper(responseWrapper);
+//                     servletHttpRequest.setWrapper(requestWrapper);
+//                     servletHttpResponse.setWrapper(responseWrapper);
                 }
             }
         }

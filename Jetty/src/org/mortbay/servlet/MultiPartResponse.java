@@ -27,8 +27,7 @@ public class MultiPartResponse extends org.mortbay.http.MultiPartResponse
      * @param response The ServletResponse to which this multipart
      *                 response will be sent.
      */
-    public MultiPartResponse(HttpServletRequest request,
-                             HttpServletResponse response)
+    public MultiPartResponse(HttpServletResponse response)
          throws IOException
     {
         super(response.getOutputStream());

@@ -6,12 +6,13 @@
 package org.mortbay.http;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import javax.servlet.http.Cookie;
+import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.Code;
 import org.mortbay.util.StringUtil;
 
@@ -29,9 +30,7 @@ import org.mortbay.util.StringUtil;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HttpResponse
-    extends HttpMessage.Implementation
-    implements HttpMessage.Response
+public class HttpResponse extends HttpMessage
 { 
       public final static int
           __100_Continue = 100,
@@ -309,14 +308,15 @@ public class HttpResponse
     /* ------------------------------------------------------------- */
     /** Send Error Response.
      */
-    private void sendError(int code,Class exClass,String message) 
+    public void sendError(int code,String message) 
         throws IOException
     {        
         Integer code_integer=new Integer(code);
         if (message == null)
             message = (String)__statusMsg.get(code_integer);
         HttpRequest request=getRequest();
-
+        Class exClass=(Class)request.getAttribute("javax.servlet.error.exception_type");
+             
         // Generate normal error page.
         setStatus(code);
         setReason(message);
@@ -343,9 +343,9 @@ public class HttpResponse
             {
                 if (request.getAttribute("javax.servlet.error.status_code")==null)
                 {
-                    // Clear old facades
-                    request.setFacade(null);
-                    setFacade(null);
+                    // Clear old wrappers
+                    request.setWrapper(null);
+                    setWrapper(null);
                     
                     // Set attributes to describe error
                     request.setAttribute("javax.servlet.error.request_uri",
@@ -354,6 +354,7 @@ public class HttpResponse
                     request.setAttribute("javax.servlet.error.message",message);
                     
                     // Do a forward to the error page resource.
+                    setContentType(HttpFields.__TextHtml);
                     getHttpContext().handle(0,error_page,null,request,this);
                 }
                 else
@@ -361,43 +362,15 @@ public class HttpResponse
                                  request.getAttribute("javax.servlet.error.status_code"));
             }
             else
-            {
-                HttpMessage facade=getFacade();
-                if (facade==null)
-                    facade=this;
-                
-                facade.setContentType(HttpFields.__TextHtml);
+            {   
+                setContentType(HttpFields.__TextHtml);
                 _mimeType=HttpFields.__TextHtml;
                 _characterEncoding=null;
-                OutputStream out=facade.getOutputStream();
-                
-                if (message!=null)
-                {
-                    message=StringUtil.replace(message,"<","&lt;");
-                    message=StringUtil.replace(message,">","&gt;");
-                }
-                String uri=getRequest().getPath();
-                uri=StringUtil.replace(uri,"<","&lt;");
-                uri=StringUtil.replace(uri,">","&gt;");
-                
-                StringBuffer body= new StringBuffer(1500);
-                body.append("<HTML>\n<HEAD>\n<TITLE>Error ");
-                body.append(code);
-                body.append(' ');
-                body.append(message);
-                body.append("</TITLE>\n<BODY>\n<H2>HTTP ERROR: ");
-                body.append(code);
-                body.append(' ');
-                body.append(message);
-                body.append("</H2>\n");
-                body.append("RequestURI=");
-                body.append(uri);
-                for (int i=0;i<20;i++)
-                    body.append("\n                                                ");
-                body.append("\n</BODY>\n</HTML>\n");
-                byte[] buf=body.toString().getBytes(StringUtil.__ISO_8859_1);
-                facade.setContentLength(buf.length);
-                out.write(buf);
+                ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(1500);
+                writeErrorPage(writer,code,message);
+                writer.flush();
+                setContentLength(writer.length());
+                writer.writeTo(getOutputStream());
             }
         }
         else if (code!=__206_Partial_Content) 
@@ -411,19 +384,35 @@ public class HttpResponse
             commitHeader();
     }
     
-    /* ------------------------------------------------------------- */
-    /**
-     * Sends an error response to the client using the specified status
-     * code and no default message.
-     * @param code the status code
-     * @param message the detail message
-     * @exception IOException If an I/O error has occurred.
-     */
-    public void sendError(int code,String message) 
+    /* ------------------------------------------------------------ */
+    public void writeErrorPage(Writer writer, int code,String message)
         throws IOException
     {
-        sendError(code,null,message);
+        if (message!=null)
+        {
+            message=StringUtil.replace(message,"<","&lt;");
+            message=StringUtil.replace(message,">","&gt;");
+        }
+        String uri=getRequest().getPath();
+        uri=StringUtil.replace(uri,"<","&lt;");
+        uri=StringUtil.replace(uri,">","&gt;");
+        
+        writer.write("<HTML>\n<HEAD>\n<TITLE>Error ");
+        writer.write(code);
+        writer.write(' ');
+        writer.write(message);
+        writer.write("</TITLE>\n<BODY>\n<H2>HTTP ERROR: ");
+        writer.write(code);
+        writer.write(' ');
+        writer.write(message);
+        writer.write("</H2>\n");
+        writer.write("RequestURI=");
+        writer.write(uri);
+        for (int i=0;i<20;i++)
+            writer.write("\n                                                ");
+        writer.write("\n</BODY>\n</HTML>\n");
     }
+    
     
     /* ------------------------------------------------------------- */
     /**
@@ -435,32 +424,7 @@ public class HttpResponse
     public void sendError(int code) 
         throws IOException
     {
-        sendError(code,null,null);
-    }
-    
-    /* ------------------------------------------------------------- */
-    /** Send Error Response.
-     * Sends an error response to the client using the specified status
-     * code and detail message.
-     * @param exception 
-     * @exception IOException If an I/O error has occurred.
-     */
-    public void sendError(int code,Throwable exception) 
-        throws IOException
-    {
-        if (exception instanceof HttpException)
-        {
-            HttpException he = (HttpException)exception;
-            code=he.getCode();
-            sendError(code,null,he.getMessage());
-        }
-        else
-        {
-            Class exClass = exception.getClass();
-            getRequest().setAttribute("javax.servlet.error.exception_type",exClass);
-            getRequest().setAttribute("javax.servlet.error.exception",exception);
-            sendError(code,exClass,exception.getMessage());
-        }
+        sendError(code,null);
     }
     
     /* ------------------------------------------------------------- */

@@ -67,8 +67,6 @@ public class ServletHttpResponse implements HttpServletResponse
     private HttpSession _session=null;
     private boolean _noSession=false;
     private Locale _locale=null;
-    private ServletResponse _wrapper;  
-    private HttpMessage _facade = new Facade();  
 
     private static Map __charSetMap = new HashMap();
     static
@@ -124,38 +122,6 @@ public class ServletHttpResponse implements HttpServletResponse
         _httpResponse=response;
     }
 
-    /* ------------------------------------------------------------ */
-    HttpMessage getFacade()
-    {
-        return _facade;
-    }
-
-    /* ------------------------------------------------------------ */
-    boolean isWrapped()
-    {
-        return _wrapper!=null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    void setWrapper(ServletResponse wrapper)
-    {
-        if (wrapper == this)
-            _wrapper=null;
-        else
-            _wrapper=wrapper;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return The top most wrapper of the response or this response if
-     * there are no wrappers. 
-     */
-    ServletResponse getWrapper()
-    {
-        if (_wrapper==null)
-            return this;
-        return _wrapper;
-    }
     
     /* ------------------------------------------------------------ */
     int getOutputState()
@@ -589,80 +555,6 @@ public class ServletHttpResponse implements HttpServletResponse
     public String toString()
     {
         return _httpResponse.toString();
-    }
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /** HttpMessage Facade.
-     * This facade allows the ServletHttpResponse to be treated as a
-     * HttpMessage by HttpHandlers.
-     */
-    public class Facade implements HttpMessage.Response
-    {
-        public ServletHttpResponse getServletHttpResponse()
-        {return ServletHttpResponse.this;}
-        
-        public InputStream getInputStream() throws IOException
-        {throw new UnsupportedOperationException();}
-        public OutputStream getOutputStream() throws IOException
-        {
-            try{return getWrapper().getOutputStream();}
-            catch(IllegalStateException e)
-            {
-                Code.ignore(e);
-                return new WriterOutputStream(getWrapper().getWriter(),
-                                              getCharacterEncoding());
-            }
-        }
-        public boolean containsField(String name)
-        {throw new UnsupportedOperationException();}
-        public Enumeration getFieldNames()
-        {throw new UnsupportedOperationException();}
-        public Enumeration getFieldValues(String name)
-        {throw new UnsupportedOperationException();}
-        public Enumeration getFieldValues(String name, String separators)
-        {throw new UnsupportedOperationException();}
-        
-        public String getField(String name)
-        {throw new UnsupportedOperationException();}
-        public int getIntField(String name)
-        {throw new UnsupportedOperationException();}
-        public long getDateField(String name)
-        {throw new UnsupportedOperationException();}
-
-        
-        public String setField(String name, String value)
-        {((HttpServletResponse)getWrapper()).setHeader(name,value);return null;}
-        public void setField(String name, List values){throw new UnsupportedOperationException();}
-        public void setIntField(String name, int value)
-        {((HttpServletResponse)getWrapper()).setIntHeader(name,value);}
-        public void setDateField(String name, long date)
-        {((HttpServletResponse)getWrapper()).setDateHeader(name,date);}
-        
-        public void addField(String name, String value)
-        {((HttpServletResponse)getWrapper()).addHeader(name,value);}
-        public void addIntField(String name, int value)
-        {((HttpServletResponse)getWrapper()).addIntHeader(name,value);}
-        public void addDateField(String name, long date)
-        {((HttpServletResponse)getWrapper()).addDateHeader(name,date);}
-        
-        public String removeField(String name){throw new UnsupportedOperationException();}
-        
-        public String getContentType(){throw new UnsupportedOperationException();}
-        public void setContentType(String type){getWrapper().setContentType(type);}
-        public int getContentLength(){throw new UnsupportedOperationException();}
-        public void setContentLength(int len){getWrapper().setContentLength(len);}
-        public String getCharacterEncoding(){return getWrapper().getCharacterEncoding();}
-        public void setCharacterEncoding(String encoding){throw new UnsupportedOperationException();}
-        
-        public Object getAttribute(String name){throw new UnsupportedOperationException();}
-        public Object setAttribute(String name, Object attribute){throw new UnsupportedOperationException();}
-        public Enumeration getAttributeNames(){throw new UnsupportedOperationException();}
-        public void removeAttribute(String name){throw new UnsupportedOperationException();}
-        public void sendError(int code) throws IOException
-        {((HttpServletResponse)getWrapper()).sendError(code);}
-        public void sendError(int code,String msg) throws IOException
-        {((HttpServletResponse)getWrapper()).sendError(code,msg);}
     }
 
     

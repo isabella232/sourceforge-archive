@@ -35,15 +35,12 @@ public class NotFoundHandler extends NullHandler
         throws HttpException, IOException
     {
         Code.debug("Not Found");
-
-        HttpMessage.Response facade = (HttpMessage.Response)
-            response.getHttpMessage();
         
         // Not found GET request
         String method=request.getMethod();
         if (method.equals(HttpRequest.__GET))
         {
-            facade.sendError(response.__404_Not_Found,
+            response.sendError(response.__404_Not_Found,
                                "Could not find resource for "+
                                request.getPath());
         }
@@ -55,7 +52,7 @@ public class NotFoundHandler extends NullHandler
                  method.equals(HttpRequest.__DELETE) ||
                  method.equals(HttpRequest.__MOVE)   )
         {
-            facade.sendError(response.__404_Not_Found);
+            response.sendError(response.__404_Not_Found);
         }
         
         else if (method.equals(HttpRequest.__OPTIONS))
@@ -64,15 +61,15 @@ public class NotFoundHandler extends NullHandler
             if ("*".equals(request.getPath()))
             {
                 // 9.2
-                facade.setIntField(HttpFields.__ContentLength,0);
-                facade.setField(HttpFields.__Allow,
-                                "GET, HEAD, POST, PUT, DELETE, MOVE, OPTIONS, TRACE");
+                response.setIntField(HttpFields.__ContentLength,0);
+                response.setField(HttpFields.__Allow,
+                                  "GET, HEAD, POST, PUT, DELETE, MOVE, OPTIONS, TRACE");
                 response.commit();
             }
             else
-                facade.sendError(response.__404_Not_Found);
+                response.sendError(response.__404_Not_Found);
         }
-
+        
         
         else if (method.equals(HttpRequest.__TRACE))
         {
@@ -81,9 +78,9 @@ public class NotFoundHandler extends NullHandler
         else
         {
             // Unknown METHOD
-            facade.setField(HttpFields.__Allow,
+            response.setField(HttpFields.__Allow,
                               "GET, HEAD, POST, PUT, DELETE, MOVE, OPTIONS, TRACE");
-            facade.sendError(response.__405_Method_Not_Allowed);
+            response.sendError(response.__405_Method_Not_Allowed);
         }
     }
 }

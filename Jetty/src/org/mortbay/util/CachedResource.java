@@ -245,6 +245,8 @@ public class CachedResource extends Resource
     public void writeTo(OutputStream os, long startByte, long count) 
         throws IOException
     {
+        if (count<0)
+            count=_buf.length-startByte;
         if (_buf!=null)
             os.write(_buf, (int) startByte, (int) count);
     }

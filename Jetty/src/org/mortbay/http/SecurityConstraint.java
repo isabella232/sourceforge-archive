@@ -36,7 +36,6 @@ public class SecurityConstraint
          */
         public UserPrincipal authenticated(UserRealm realm,
                                            String pathInContext,
-                                           String pathParams,
                                            HttpRequest request,
                                            HttpResponse response)
         throws IOException;
@@ -263,7 +262,6 @@ public class SecurityConstraint
                             Authenticator authenticator,
                             UserRealm realm,
                             String pathInContext,
-                            String pathParams,
                             HttpRequest request,
                             HttpResponse response)
         throws HttpException, IOException
@@ -296,7 +294,6 @@ public class SecurityConstraint
                 else
                     user=authenticator.authenticated(realm,
                                                      pathInContext,
-                                                     pathParams,
                                                      request,
                                                      response);
                 if (user==null)

@@ -1,5 +1,5 @@
 // ========================================================================
-// Copyright (c) 1999 Mort Bay Consulting (Australia) Pty. Ltd.
+// Copyright (c) 1999-2002 Mort Bay Consulting (Australia) Pty. Ltd.
 // $Id$
 // ========================================================================
 
@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.mortbay.http.BasicAuthenticator;
+import org.mortbay.http.ClientCertAuthenticator;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
@@ -23,6 +25,7 @@ import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.HttpServer;
 import org.mortbay.http.PathMap;
+import org.mortbay.http.SecurityBase;
 import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.http.SecurityConstraint;
 import org.mortbay.http.UserPrincipal;
@@ -38,73 +41,25 @@ import org.mortbay.util.StringUtil;
  * @author Greg Wilkins (gregw)
  */
 public class SecurityHandler extends NullHandler
-{
-    
-    public final static String __BASIC_AUTH="BASIC";
-    public final static String __FORM_AUTH="FORM";
-    public final static String __CERT_AUTH="CLIENT-CERT";
-    public final static String __ATTR="org.mortbay.J.H.SecurityHandler";
-
-    
-    
+{   
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    public interface FormAuthenticator extends Authenticator
-    {
-        public final static String __J_SECURITY_CHECK="j_security_check";
-        public final static String __J_USERNAME="j_username";
-        public final static String __J_PASSWORD="j_password";
-        public void formAuthInit(String formLoginPage, String formErrorPage);
-    }
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private static class BasicAuthenticator implements Authenticator
-    {
-        /* ------------------------------------------------------------ */
-        /** 
-         * @return UserPrinciple if authenticated or null if not. If
-         * Authentication fails, then the authenticator may have committed
-         * the response as an auth challenge or redirect.
-         * @exception IOException 
-         */
-        public UserPrincipal authenticated(UserRealm realm,
-                                           String pathInContext,
-                                           String pathParams,
-                                           HttpRequest request,
-                                           HttpResponse response)
-            throws IOException
-        {
-            UserPrincipal user=request.basicAuthenticated(realm);
-            if (user==null)
-                response.sendBasicAuthenticationChallenge(realm);
-            return user;
-        }
-        
-        public String getAuthMethod()
-        {
-            return "BASIC";
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private PathMap _constraintMap=new PathMap();
-    private String _authMethod=__BASIC_AUTH;
+    private String _authMethod=SecurityBase.__BASIC_AUTH;
     private Map _authRealmMap;
     private String _realmName ;
-    private UserRealm _realm ;
     private boolean _realmForced=false;
-    private String _formLoginPage;
-    private String _formErrorPage;
-    private Authenticator _authenticator;
+    private SecurityBase _securityBase=new SecurityBase();
+
+    /* ------------------------------------------------------------ */
+    public SecurityBase getSecurityBase()
+    {
+        return _securityBase;
+    }
     
     /* ------------------------------------------------------------ */
     public UserRealm getUserRealm()
     {        
-        return _realm;
+        return _securityBase.getUserRealm();
     }
     
     /* ------------------------------------------------------------ */
@@ -130,8 +85,8 @@ public class SecurityHandler extends NullHandler
         if (isStarted())
             throw new IllegalStateException("Handler started");
         _realmName=realmName;
-        _realm=realm;
         _realmForced=realm!=null;
+        _securityBase.setUserRealm(realm);
     }
     
     /* ------------------------------------------------------------ */
@@ -143,56 +98,16 @@ public class SecurityHandler extends NullHandler
     /* ------------------------------------------------------------ */
     public void setAuthMethod(String method)
     {
-        if (isStarted())
+        if (isStarted() && _authMethod!=null && !_authMethod.equals(method))
             throw new IllegalStateException("Handler started");
-        if (!__BASIC_AUTH.equals(method) &&
-            !__FORM_AUTH.equals(method) &&
-            !__CERT_AUTH.equals(method))
-            throw new IllegalArgumentException("Not supported: "+method);
         _authMethod = method;
-    }
-
-    /* ------------------------------------------------------------ */
-    public String getLoginPage()
-    {
-      return _formLoginPage;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setLoginPage(String page)
-    {
-        if ( ! page.startsWith("/") )
-            page = "/" + page;
-        _formLoginPage = page;
-    }
-
-    /* ------------------------------------------------------------ */
-    public String getErrorPage()
-    {
-        return _formErrorPage;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void setErrorPage(String page)
-    {
-        if ( ! page.startsWith("/") )
-            page = "/" + page;
-        _formErrorPage = page;
     }
     
     /* ------------------------------------------------------------ */
     public void addSecurityConstraint(String pathSpec,
                                       SecurityConstraint sc)
     {
-        List scs = (List)_constraintMap.get(pathSpec);
-        if (scs==null)
-        {
-            scs=new ArrayList(2);
-            _constraintMap.put(pathSpec,scs);
-        }
-        scs.add(sc);
-        
-        Code.debug("added ",sc," at ",pathSpec);
+        _securityBase.addSecurityConstraint(pathSpec,sc);
     }
 
     /* ------------------------------------------------------------ */
@@ -204,82 +119,30 @@ public class SecurityHandler extends NullHandler
         {
             
             if (!_realmForced)
-                _realm = getHttpContext().getHttpServer()
-                    .getRealm(_realmName);
+                _securityBase.setUserRealm(getHttpContext().getHttpServer().getRealm(_realmName));
             super.start();
-            if (_realm==null)
+            if (_securityBase.getUserRealm()==null)
                 Code.warning("Unknown realm: "+_realmName+" for "+this);
         }
         // Or that we have some contraints.
-        else if (_constraintMap.size()>0)
+        else if (_securityBase.isAuthConstrained())
         {
-            Iterator i = _constraintMap.values().iterator();
-            while(i.hasNext())
-            {
-                Iterator j= ((ArrayList)i.next()).iterator();
-                while(j.hasNext())
-                {
-                    SecurityConstraint sc = (SecurityConstraint)j.next();
-                    if (sc.isAuthenticate())
-                    {
-                        Code.warning("No Realm set for "+this);
-                        super.start();
-                        return;
-                    }
-                }
-            }
+            Code.warning("No Realm set for "+this);
+            super.start();
+            return;
         }
 
-        // Find out the Authenticator.
-        if (__BASIC_AUTH.equalsIgnoreCase(_authMethod))
+        if (_securityBase.getAuthenticator()==null)
         {
-            _authenticator=new BasicAuthenticator();
-            Code.debug("BasicAuthenticator=",_authenticator);
-        }
-        else if (__CERT_AUTH.equalsIgnoreCase(_authMethod))
-        {
-            _authenticator=new ClientCertAuthenticator();
-            Code.debug("CertAuthenticator=",_authenticator);
-        }
-        else if (__FORM_AUTH.equalsIgnoreCase(_authMethod))
-        {
-            // Make sure that we have both login and error page set
-            // before handling any form login requests
-            if ( _formLoginPage == null || _formLoginPage.equals("") ||
-                 _formErrorPage == null || _formErrorPage.equals("") ||
-                 _realm==null)
-            {
-                Code.warning("Form realm, login and/or error page not set correctly");
-            }
+            // Find out the Authenticator.
+            if (SecurityBase.__BASIC_AUTH.equalsIgnoreCase(_authMethod))
+                _securityBase.setAuthenticator(new BasicAuthenticator());
+            else if (SecurityBase.__CERT_AUTH.equalsIgnoreCase(_authMethod))
+                _securityBase.setAuthenticator(new ClientCertAuthenticator());
             else
-            {
-                // look for FormAuthenticator
-                try
-                {
-                    HttpHandler[] handlers = getHttpContext().getHandlers();
-                    for (int i=0;i<handlers.length;i++)
-                    {
-                        HttpHandler handler=handlers[i];
-                        if (handler instanceof FormAuthenticator)
-                        {
-                            _authenticator=(FormAuthenticator)handler;
-                            ((FormAuthenticator)_authenticator)
-                                .formAuthInit(_formLoginPage,_formErrorPage);
-                            Code.debug("FormAuthenticator=",_authenticator);
-                            break;
-                        }
-                    }
-                }
-                catch(Exception e)
-                {
-                    Code.warning("Failed to initialize FORM auth",e);
-                }
-                if (_authenticator==null)
-                    Code.warning("FormAuthenticator HttpHandler is required for FORM authentication");
-                    
-            }
+                Code.warning("Unknown Authentication method:"+_authMethod);
         }
-
+        
         super.start();
     }
     
@@ -290,48 +153,8 @@ public class SecurityHandler extends NullHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
-        // Get all path matches
-        List scss =_constraintMap.getMatches(pathInContext);
-        if (scss!=null)
-        {          
-            Code.debug("Security Constraint on ",pathInContext," against ",scss);
-            
-            // for each path match
-        matches:
-            for (int m=0;m<scss.size();m++)
-            {
-                // Get all constraints
-                Map.Entry entry=(Map.Entry)scss.get(m);
-                if (Code.verbose())
-                    Code.debug("Check ",pathInContext," against ",entry);
-
-                List scs = (List)entry.getValue();
-                
-                switch (SecurityConstraint.check(scs,
-                                                 _authenticator,
-                                                 _realm,
-                                                 pathInContext,
-                                                 pathParams,
-                                                 request,
-                                                 response))
-                {
-                  case -1: return; // Auth failed.
-                  case 0: continue; // No constraints matched
-                  case 1: break matches; // Passed a constraint.
-                }
-            }
-        }
-        
-        // Handle form security check
-        if (_authenticator!=null && pathInContext!=null && pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
-        {
-            Code.debug("FORM j_security_check");
-            _authenticator.authenticated(_realm,
-                                         pathInContext,
-                                         pathParams,
-                                         request,
-                                         response);
-        }
+        _securityBase.check(pathInContext,request,response);
     }
+
 }
 

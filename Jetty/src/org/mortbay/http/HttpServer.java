@@ -65,6 +65,7 @@ public class HttpServer implements LifeCycle
     private static WeakHashMap __servers = new WeakHashMap();
     private static Collection __roServers =
         Collections.unmodifiableCollection(__servers.keySet());
+    private static String[] __noVirtualHost=new String[1];
     
     /* ------------------------------------------------------------ */
     /** Get HttpServer Collection.
@@ -485,7 +486,7 @@ public class HttpServer implements LifeCycle
     {
         String[] hosts=context.getVirtualHosts();
         if (hosts==null || hosts.length==0)
-            hosts = new String[]{null};
+            hosts = __noVirtualHost;
 
         // For each host name
         for (int h=0;h<hosts.length;h++)
@@ -817,17 +818,27 @@ public class HttpServer implements LifeCycle
      * context by URI.  A list of hosts may be passed to qualify the
      * search.
      * @param uri URI that must be satisfied by the servlet handler 
-     * @param hosts null or a list of virtual hosts names to search
+     * @param vhosts null or a list of virtual hosts names to search
      * @return HttpHandler
      */
     public HttpHandler findHandler(Class handlerClass,
                                    String uri,
-                                   String[] hosts)
+                                   String[] vhosts)
     {
+        System.err.println("handlerClass="+handlerClass);
+        System.err.println("uri="+uri);
         uri = URI.stripPath(uri);
-        for (int h=0; h<hosts.length ; h++)
+        System.err.println("stripped="+uri);
+        System.err.println("vhosts.length="+vhosts.length);
+
+        if (vhosts==null || vhosts.length==0)
+            vhosts=__noVirtualHost;
+        
+        for (int h=0; h<vhosts.length ; h++)
         {
-            String host = hosts[h];
+            String host = vhosts[h];
+            
+            System.err.println("host="+host);
             
             PathMap contextMap=(PathMap)_virtualHostMap.get(host);
             if (contextMap!=null)
@@ -835,11 +846,14 @@ public class HttpServer implements LifeCycle
                 List contextLists =contextMap.getMatches(uri);
                 if(contextLists!=null)
                 {
+                    
                     for (int i=0;i<contextLists.size();i++)
                     {
                         Map.Entry entry=
                             (Map.Entry)
                             contextLists.get(i);
+                        System.err.println("entry="+entry);
+                        
                         String contextPath=(String)entry.getKey();
                         List contextList = (List)entry.getValue();
                 
@@ -847,9 +861,12 @@ public class HttpServer implements LifeCycle
                         {
                             HttpContext context=
                                 (HttpContext)contextList.get(j);
+                            System.err.println("context="+context);
                             
                             HttpHandler handler = context.getHandler(handlerClass);
 
+                            System.err.println("handler="+handler);
+                            
                             if (handler!=null)
                                 return handler;
                         }

@@ -29,17 +29,19 @@ import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
+import org.mortbay.http.BasicAuthenticator;
+import org.mortbay.http.ClientCertAuthenticator;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.HttpServer;
+import org.mortbay.http.SecurityBase;
+import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.http.SecurityConstraint;
-import org.mortbay.http.handler.NotFoundHandler;
+import org.mortbay.http.UserRealm;
 import org.mortbay.http.handler.NullHandler;
-import org.mortbay.http.handler.ResourceHandler;
-import org.mortbay.http.handler.SecurityHandler;
 import org.mortbay.util.Code;
 import org.mortbay.util.JarResource;
 import org.mortbay.util.Log;
@@ -57,18 +59,6 @@ import org.mortbay.xml.XmlParser;
  * This specialization of HttpContext uses the standardized web.xml
  * to describe a web application and configure the handlers for the
  * HttpContext.
- * <P>
- * It creates and/or configures the following Handlers:<UL>
- * <LI>SecurityHandler - Implements CLIENT_CERT, BASIC and FORM
- * authentication. This handler is forced to be the first handler in
- * the context.
- * <LI>ServletHandler - Servlet handler for dynamic and configured
- * servlets
- * <LI>WebInfProtect - A handler to ensure the WEB-INF is protected
- * from all requests. This is always installed before the ResourceHandler
- * <LI>ResourceHandler - Serves static content and if forced to be
- * after the servlet handler within the context.
- * </UL>
  *
  * If a file named web-jetty.xml or jetty-web.xml is found in the
  * WEB-INF directory it is applied to the context using the
@@ -83,12 +73,7 @@ public class WebApplicationContext extends ServletHttpContext
     private String _name;
     private Resource _webApp;
     private Resource _webInf;
-    private NotFoundHandler _notFoundHandler;
-    private HttpHandler _webInfHandler;
-    private FilterHandler _filterHandler;
-    private ServletHandler _servletHandler;
-    private SecurityHandler _securityHandler;
-    private ResourceHandler _resourceHandler;
+    private WebApplicationHandler _webAppHandler;
     private Map _tagLibMap=new HashMap(3);
     private String _deploymentDescriptor;
     private String _defaultsDescriptor="org/mortbay/jetty/servlet/webdefault.xml";
@@ -97,6 +82,7 @@ public class WebApplicationContext extends ServletHttpContext
     private ArrayList _contextListeners;
     private ArrayList _contextAttributeListeners;
     private Set _warnings;
+    private FormAuthenticator _formAuthenticator;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -214,74 +200,11 @@ public class WebApplicationContext extends ServletHttpContext
         // Find the webapp
         resolveWebApp();
 
-        // add security handler first
-        _securityHandler=(SecurityHandler)getHandler(SecurityHandler.class);
-        if (_securityHandler==null)
-            _securityHandler=new SecurityHandler();
-        if (getHandlerIndex(_securityHandler)!=0)
-        {
-            removeHandler(_securityHandler);
-            addHandler(0,_securityHandler);
-        }        
-        
-        // Protect WEB-INF
-        _webInfHandler=new WebInfProtect();
-        addHandler(1,_webInfHandler);
-        
-        // Add filter Handler
-        _filterHandler = (FilterHandler)getHandler(FilterHandler.class);
-        if (_filterHandler==null)
-        {
-            _filterHandler=new FilterHandler();
-            addHandler(_filterHandler);
-        }
-        
-        // Add servlet Handler
-        _servletHandler = (ServletHandler)getHandler(ServletHandler.class);
-        if (_servletHandler==null)
-        {
-            _servletHandler=new ServletHandler();
-            addHandler(_servletHandler);
-        }
-        _servletHandler.setDynamicServletPathSpec("/servlet/*");
-        
-        // Check order
-        if (getHandlerIndex(_servletHandler)<getHandlerIndex(_filterHandler))
-        {
-            removeHandler(_servletHandler);
-            addHandler(_servletHandler);
-        }
-        
-        // Resource Handler
-        _resourceHandler = (ResourceHandler)getHandler(ResourceHandler.class);
-        if (_resourceHandler==null)
-        {
-            _resourceHandler=new ResourceHandler();
-            //_resourceHandler.setPutAllowed(false);
-            //_resourceHandler.setDelAllowed(false);
-            addHandler(_resourceHandler);
-        }
+        // Add the handler
+        _webAppHandler = new WebApplicationHandler();
+        _webAppHandler.setDynamicServletPathSpec("/servlet/*");
+        addHandler(_webAppHandler);
 
-        // Check order
-        if (_servletHandler!=null &&
-            getHandlerIndex(_resourceHandler)<getHandlerIndex(_servletHandler))
-        {
-            removeHandler(_resourceHandler);
-            addHandler(_resourceHandler);
-        }
-        
-        // NotFoundHandler
-        _notFoundHandler=(NotFoundHandler)getHandler(NotFoundHandler.class);
-        if (_notFoundHandler==null)
-            _notFoundHandler=new NotFoundHandler();
-        else
-            removeHandler(_notFoundHandler);
-        addHandler(_notFoundHandler);
-
-        // Handle welcome redirection index
-        if (_filterHandler!=null && _resourceHandler!=null)
-            _resourceHandler.setWelcomeRedirectionIndex
-                (getHandlerIndex(_filterHandler)+1);
         
         // Do the default configuration
         try
@@ -321,8 +244,8 @@ public class WebApplicationContext extends ServletHttpContext
             
             // Look for jars
             Resource lib = _webInf.addPath("lib/");
-            super.setClassPaths(lib,true);            
-
+            super.setClassPaths(lib,true);
+            
             // do web.xml file
             Resource web = _webInf.addPath("web.xml");
             if (!web.exists())
@@ -381,24 +304,20 @@ public class WebApplicationContext extends ServletHttpContext
         initClassLoader(true);
         
         // Set classpath for Jasper.
-        if (_servletHandler!=null)
+        Map.Entry entry = _webAppHandler.getHolderEntry("test.jsp");
+        if (entry!=null)
         {
-            Map.Entry entry = _servletHandler.getHolderEntry("test.jsp");
-            if (entry!=null)
+            ServletHolder jspHolder = (ServletHolder)entry.getValue();
+            if (jspHolder!=null && jspHolder.getInitParameter("classpath")==null)
             {
-                ServletHolder jspHolder = (ServletHolder)entry.getValue();
-                if (jspHolder!=null && jspHolder.getInitParameter("classpath")==null)
-                {
-                    String fileClassPath=getFileClassPath();
-                    jspHolder.setInitParameter("classpath",fileClassPath);
-                    Code.debug("Set classpath=",fileClassPath," for ",jspHolder);
-                }
+                String fileClassPath=getFileClassPath();
+                jspHolder.setInitParameter("classpath",fileClassPath);
+                Code.debug("Set classpath=",fileClassPath," for ",jspHolder);
             }
         }
 
         // If we have servlets, don't init them yet
-        if (_servletHandler!=null)
-            _servletHandler.setAutoInitializeServlets(false);
+        _webAppHandler.setAutoInitializeServlets(false);
 
         MultiException mex = new MultiException();
         
@@ -408,14 +327,9 @@ public class WebApplicationContext extends ServletHttpContext
         
         // If it actually started
         if (super.isStarted())
-        {    
-//             if (_resourceHandler.isPutAllowed())
-//                 Log.event("PUT allowed in "+this);
-//             if (_resourceHandler.isDelAllowed())
-//                 Log.event("DEL allowed in "+this);
-            
+        {            
             // Context listeners
-            if (_contextListeners!=null && _servletHandler!=null)
+            if (_contextListeners!=null && _webAppHandler!=null)
             {
                 //Ensure classloader for context is used
                 Thread thread = Thread.currentThread();
@@ -433,7 +347,7 @@ public class WebApplicationContext extends ServletHttpContext
         }
         
         // OK to Initialize servlets now
-        if (_servletHandler!=null && _servletHandler.isStarted())
+        if (_webAppHandler!=null && _webAppHandler.isStarted())
         {
             Thread thread = Thread.currentThread();
             ClassLoader lastContextLoader=thread.getContextClassLoader();
@@ -441,7 +355,7 @@ public class WebApplicationContext extends ServletHttpContext
             try{
                 if (getClassLoader()!=null)
                     thread.setContextClassLoader(getClassLoader());
-                _servletHandler.initializeServlets();
+                _webAppHandler.initializeServlets();
             }
             catch(Exception ex) { mex.add(ex); }
             finally{thread.setContextClassLoader(lastContextLoader);}
@@ -460,7 +374,7 @@ public class WebApplicationContext extends ServletHttpContext
         throws  InterruptedException
     {
         // Context listeners
-        if (_contextListeners!=null && _servletHandler!=null)
+        if (_contextListeners!=null && _webAppHandler!=null)
         {
             ServletContextEvent event = new ServletContextEvent(getServletContext());
             for (int i=0;i<_contextListeners.size();i++)
@@ -472,29 +386,9 @@ public class WebApplicationContext extends ServletHttpContext
         super.stop();
 
         // clean up
-        if (_resourceHandler!=null)
-            removeHandler(_resourceHandler);
-        _resourceHandler=null;
-        
-        if (_servletHandler!=null)
-            removeHandler(_servletHandler);
-        _servletHandler=null;
-        
-        if (_filterHandler!=null)
-            removeHandler(_filterHandler);
-        _filterHandler=null;
-        
-        if (_webInfHandler!=null)
-            removeHandler(_webInfHandler);
-        _webInfHandler=null;
-        
-        if (_securityHandler!=null)
-            removeHandler(_securityHandler);
-        _securityHandler=null;
-        
-        if (_notFoundHandler!=null)
-            removeHandler(_notFoundHandler);
-        _notFoundHandler=null;
+        if (_webAppHandler!=null)
+            removeHandler(_webAppHandler);
+        _webAppHandler=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -540,7 +434,7 @@ public class WebApplicationContext extends ServletHttpContext
         Object old = super.getAttribute(name);
         super.setAttribute(name,value);
 
-        if (_contextAttributeListeners!=null && _servletHandler!=null)
+        if (_contextAttributeListeners!=null && _webAppHandler!=null)
         {
             ServletContextAttributeEvent event =
                 new ServletContextAttributeEvent(getServletContext(),
@@ -568,7 +462,9 @@ public class WebApplicationContext extends ServletHttpContext
         Object old = super.getAttribute(name);
         super.removeAttribute(name);
         
-        if (old !=null && _contextAttributeListeners!=null && _servletHandler!=null)
+        if (old !=null &&
+            _contextAttributeListeners!=null &&
+            _webAppHandler!=null)
         {
             ServletContextAttributeEvent event =
                 new ServletContextAttributeEvent(getServletContext(),
@@ -776,7 +672,7 @@ public class WebApplicationContext extends ServletHttpContext
         if (name==null)
             name=className;
         
-        FilterHolder holder = _filterHandler.newFilterHolder(name,className);
+        FilterHolder holder = _webAppHandler.defineFilter(name,className);
         Iterator iter= node.iterator("init-param");
         while(iter.hasNext())
         {
@@ -795,9 +691,9 @@ public class WebApplicationContext extends ServletHttpContext
         String servletName=node.getString("servlet-name",false,true);
         
         if (servletName!=null)
-            _filterHandler.mapServletToFilter(servletName,filterName);
+            _webAppHandler.mapServletToFilter(servletName,filterName);
         else
-            _filterHandler.mapPathToFilter(pathSpec,filterName);
+            _webAppHandler.mapPathToFilter(pathSpec,filterName);
     }
     
     /* ------------------------------------------------------------ */
@@ -826,7 +722,7 @@ public class WebApplicationContext extends ServletHttpContext
         if (name==null)
             name=className;
         
-        ServletHolder holder = _servletHandler.newServletHolder(name,className,jspFile);
+        ServletHolder holder = _webAppHandler.newServletHolder(name,className,jspFile);
 
         // handle JSP classpath
         if (jspFile!=null)
@@ -882,13 +778,13 @@ public class WebApplicationContext extends ServletHttpContext
         // add default mappings
         String defaultPath="/servlet/"+name+"/*";
         Code.debug("ServletMapping: ",holder.getName(),"=",defaultPath);
-        _servletHandler.addServletHolder(defaultPath,holder);
+        _webAppHandler.addServletHolder(defaultPath,holder);
         if (!className.equals(name))
         {
             defaultPath="/servlet/"+className+"/*";
             Code.debug("ServletMapping: ",holder.getName(),
                        "=",defaultPath);
-            _servletHandler.addServletHolder(defaultPath,holder);
+            _webAppHandler.addServletHolder(defaultPath,holder);
         }
 
         XmlParser.Node run_as = node.get("run-as");
@@ -908,7 +804,7 @@ public class WebApplicationContext extends ServletHttpContext
         String name=node.getString("servlet-name",false,true);
         String pathSpec=node.getString("url-pattern",false,true);
 
-        _servletHandler.mapPathToServlet(pathSpec,name);
+        _webAppHandler.mapPathToServlet(pathSpec,name);
     }
 
     /* ------------------------------------------------------------ */
@@ -947,7 +843,7 @@ public class WebApplicationContext extends ServletHttpContext
            (listener instanceof HttpSessionListener))
         {
             known=true;
-            _servletHandler.addEventListener((EventListener)listener);
+            _webAppHandler.addEventListener((EventListener)listener);
         }
         if (!known)
             Code.warning("Unknown: "+listener);
@@ -961,7 +857,7 @@ public class WebApplicationContext extends ServletHttpContext
         if(tNode!=null)
         {
             int timeout = Integer.parseInt(tNode.toString(false,true));
-            _servletHandler.setSessionInactiveInterval(timeout*60);
+            _webAppHandler.setSessionInactiveInterval(timeout*60);
         }
     }
     
@@ -979,14 +875,14 @@ public class WebApplicationContext extends ServletHttpContext
     /* ------------------------------------------------------------ */
     private void initWelcomeFileList(XmlParser.Node node)
     {
-        _resourceHandler.getResourceBase().setWelcomeFiles(null);
+        _webAppHandler.getResourceBase().setWelcomeFiles(null);
         Iterator iter= node.iterator("welcome-file");
         while(iter.hasNext())
         {
             XmlParser.Node indexNode=(XmlParser.Node)iter.next();
             String index=indexNode.toString(false,true);
             Code.debug("Index: ",index);
-            _resourceHandler.getResourceBase().addWelcomeFile(index);
+            _webAppHandler.getResourceBase().addWelcomeFile(index);
         }
     }
 
@@ -1027,7 +923,6 @@ public class WebApplicationContext extends ServletHttpContext
                 scBase.addRole(role);
             }
         }
-        
         
         XmlParser.Node data=node.get("user-data-constraint");
         if (data!=null)
@@ -1070,30 +965,61 @@ public class WebApplicationContext extends ServletHttpContext
             }
         }
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public void addSecurityConstraint(String pathSpec,SecurityConstraint sc)
+    {
+        _webAppHandler.getSecurityBase()
+            .addSecurityConstraint(pathSpec,sc);
+    }
+
+    /* ------------------------------------------------------------ */
+    public void addAuthConstraint(String pathSpec,String role)
+    {
+        _webAppHandler.getSecurityBase()
+            .addSecurityConstraint(pathSpec,new SecurityConstraint(role,role));
+    }
+                                      
     /* ------------------------------------------------------------ */
     private void initLoginConfig(XmlParser.Node node)
     {
-        SecurityHandler sh = getSecurityHandler();
-        if (sh==null)
-            return;
-
         XmlParser.Node method=node.get("auth-method");
+        SecurityBase securityBase=_webAppHandler.getSecurityBase();
         if (method!=null)
-            sh.setAuthMethod(method.toString(false,true));
+        {
+            Authenticator authenticator=null;
+            String m=method.toString(false,true);
+            
+            if (SecurityBase.__FORM_AUTH.equals(m))
+                authenticator=_formAuthenticator=new FormAuthenticator();
+            else if (SecurityBase.__BASIC_AUTH.equals(m))
+                authenticator=new BasicAuthenticator();
+            else if (SecurityBase.__CERT_AUTH.equals(m))
+                authenticator=new ClientCertAuthenticator();
+            else
+                Code.warning("UNKNOWN AUTH METHOD: "+m);
+
+            securityBase.setAuthenticator(authenticator);
+        }
+        
         XmlParser.Node name=node.get("realm-name");
         if (name!=null)
-            sh.setRealmName(name.toString(false,true));
+            securityBase.setUserRealm(getUserRealm(name.toString(false,true)));
 
         XmlParser.Node formConfig = node.get("form-login-config");
         if(formConfig != null)
         {
-          XmlParser.Node loginPage = formConfig.get("form-login-page");
-          if (loginPage != null)
-            sh.setLoginPage(loginPage.toString(false,true));
-          XmlParser.Node errorPage = formConfig.get("form-error-page");
-          if (errorPage != null)
-            sh.setErrorPage(errorPage.toString(false,true));
+            if (_formAuthenticator==null)
+                Code.warning("FORM Authentication miss-configured");
+            else
+            {
+                XmlParser.Node loginPage = formConfig.get("form-login-page");
+                if (loginPage != null)
+                    _formAuthenticator.setLoginPage(loginPage.toString(false,true));
+                XmlParser.Node errorPage = formConfig.get("form-error-page");
+                if (errorPage != null)
+                    _formAuthenticator.setErrorPage(errorPage.toString(false,true));
+            }
         }
     }
     
@@ -1108,6 +1034,12 @@ public class WebApplicationContext extends ServletHttpContext
                   " defined");
     }
 
+    /* ------------------------------------------------------------ */
+    protected UserRealm getUserRealm(String name)
+    {
+        return getHttpServer().getRealm(name);
+    }
+    
     /* ------------------------------------------------------------ */
     public String toString()
     {
@@ -1143,30 +1075,5 @@ public class WebApplicationContext extends ServletHttpContext
     public Map getTagLibMap()
     {
         return _tagLibMap;
-    }
-    
-    
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private class WebInfProtect extends NullHandler
-    {
-        public void handle(String pathInContext,
-                           String pathParams,
-                           HttpRequest request,
-                           HttpResponse response)
-            throws HttpException, IOException
-        {
-            String path=URI.canonicalPath(StringUtil.asciiToLowerCase(pathInContext));
-            if(path.startsWith("/web-inf") || path.startsWith("/meta-inf" ))
-            {
-                response.sendError(HttpResponse.__403_Forbidden);
-            }
-        }
-
-        public String toString()
-        {
-            return "WebInfProtect";
-        }
     }
 }

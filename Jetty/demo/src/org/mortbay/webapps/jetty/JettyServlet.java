@@ -35,7 +35,10 @@ public class JettyServlet extends HttpServlet
                       HttpServletResponse response) 
         throws ServletException, IOException
     {	
-        String path=request.getServletPath();
+        String path=(String)request.getAttribute("javax.servlet.include.servlet_path");
+        if (path==null)
+            path=request.getServletPath();
+        
         Resource resource=
                 Resource.newResource(getServletContext().getResource(path));
         

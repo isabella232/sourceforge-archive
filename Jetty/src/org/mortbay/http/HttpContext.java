@@ -823,8 +823,8 @@ public class HttpContext implements LifeCycle
         }
         
         if (className==null)
-            return null;
-        
+            return null;        
+                       
         return _loader.loadClass(className);
     }
     

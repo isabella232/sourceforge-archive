@@ -702,7 +702,9 @@ public class HttpConnection
 		_response.setField(HttpFields.__Connection,
 				   HttpFields.__Close);
 		
-		_response.sendError(HttpResponse.__500_Internal_Server_Error,e);
+                _request.setAttribute("javax.servlet.error.exception_type",e.getClass());
+                _request.setAttribute("javax.servlet.error.exception",e);
+		_response.sendError(HttpResponse.__500_Internal_Server_Error);
 
                 // probabluy not browser so be more verbose
 		if (gotIOException)

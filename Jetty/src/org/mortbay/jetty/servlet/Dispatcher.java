@@ -7,6 +7,7 @@ package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Enumeration;
@@ -66,18 +67,29 @@ public class Dispatcher implements RequestDispatcher
     String _query;
     Resource _resource;
     ResourceHandler _resourceHandler;
+    WebApplicationHandler _webAppHandler;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param server 
      * @param URL 
      */
-    Dispatcher(ServletHandler servletHandler, String pathInContext, String query)
+    Dispatcher(ServletHandler servletHandler,
+               ResourceHandler resourceHandler,
+               String pathInContext,
+               String query)
         throws IllegalStateException
     {
         Code.debug("Dispatcher for ",servletHandler,",",pathInContext,",",query);
         
         _servletHandler=servletHandler;
+        _resourceHandler=resourceHandler;
+        if (_servletHandler instanceof WebApplicationHandler)
+        {
+            _webAppHandler=(WebApplicationHandler)_servletHandler;
+            _resourceHandler=null;
+        }
+        
         _path=URI.canonicalPath(pathInContext);
         _query=query;
 
@@ -87,41 +99,46 @@ public class Dispatcher implements RequestDispatcher
             _pathSpec=(String)entry.getKey();
             _holder = (ServletHolder)entry.getValue();
         }
-        else
-        {
-            _resourceHandler=(ResourceHandler)
-                _servletHandler.getHttpContext().getHandler(ResourceHandler.class);
-            
-            // If no servlet found
-            if (_resourceHandler!=null)
-            {
-                // Look for a static resource
-                try{
-                    Resource resource= _resourceHandler.getHttpContext().getBaseResource();
-                    if (resource!=null)
-                        resource = resource.addPath(_path);
-                    if (resource.exists() && !resource.isDirectory())
-                    {
-                        _resource=resource;
-                        Code.debug("Dispatcher for resource ",_resource);
-                    }
+        else if (_resourceHandler!=null)
+        {            
+            // Look for a static resource
+            try{
+                Resource resource=
+                    _resourceHandler.getResourceBase().getResource(pathInContext);
+                if (resource.exists())
+                {
+                    _resource=resource;
+                    Code.debug("Dispatcher for resource ",_resource);
                 }
-                catch(IOException e){Code.ignore(e);}
             }
+            catch(IOException e){Code.ignore(e);}
+        }
+        else if (_webAppHandler!=null)
+        {            
+            // Look for a static resource
+            try{
+                Resource resource=
+                    _webAppHandler.getResourceBase().getResource(pathInContext);
+                if (resource.exists())
+                {
+                    _resource=resource;
+                    Code.debug("Dispatcher for resource ",_resource);
+                }
+            }
+            catch(IOException e){Code.ignore(e);}
         }
 
         // if no servlet and no resource
         if (_holder==null && _resource==null)
             throw new IllegalStateException("No servlet handlers in context");
     }
-
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param server 
      * @param URL 
      */
-    Dispatcher(ServletHandler servletHandler, String name)
+    Dispatcher(ServletHandler servletHandler,String name)
         throws IllegalStateException
     {
         _servletHandler=servletHandler;
@@ -181,18 +198,12 @@ public class Dispatcher implements RequestDispatcher
         HttpServletResponse httpServletResponse=(HttpServletResponse)servletResponse;
         ServletHttpRequest servletHttpRequest=ServletHttpRequest.unwrap(servletRequest);
         ServletHttpResponse servletHttpResponse=servletHttpRequest.getServletHttpResponse();
-        HttpRequest httpRequest=servletHttpRequest.getHttpRequest();
-        HttpResponse httpResponse=httpRequest.getHttpResponse();
-        ServletRequest oldRequestWrapper=servletHttpRequest.getWrapper();
-        ServletResponse oldResponseWrapper=servletHttpResponse.getWrapper();
-        
+
         try
         {
             // wrap the request and response
             DispatcherRequest request = new DispatcherRequest(httpServletRequest);
             DispatcherResponse response = new DispatcherResponse(httpServletResponse);
-            servletHttpRequest.setWrapper(request);
-            servletHttpResponse.setWrapper(response);
 
             if (forward)
             {
@@ -225,9 +236,21 @@ public class Dispatcher implements RequestDispatcher
             else if (isResource())
             {
                 if (forward)
-                    _resourceHandler.handle(_path,null,httpRequest,httpResponse);
+                {
+                    if (_webAppHandler!=null)
+                        _webAppHandler.handleGet(_path,_resource,request,response,true);
+                    else
+                    {
+                        HttpRequest httpRequest=servletHttpRequest.getHttpRequest();
+                        HttpResponse httpResponse=httpRequest.getHttpResponse();
+                        _resourceHandler.handle(_path,null,httpRequest,httpResponse);
+                    }
+                }
                 else
-                    _resourceHandler.sendFile(httpRequest,httpResponse,_resource,false);
+                {
+                    OutputStream out=response.getOutputStream();
+                    _resource.writeTo(out,0,-1);
+                }
             }
             else
             {
@@ -253,7 +276,6 @@ public class Dispatcher implements RequestDispatcher
                 request.setPathInfo(PathMap.pathInfo(_pathSpec,_path));
                 request.setQueryString(query);
                 _holder.handle(request,response);
-
                 
                 if (forward)
                 {
@@ -267,8 +289,6 @@ public class Dispatcher implements RequestDispatcher
         }
         finally
         {
-            servletHttpRequest.setWrapper(oldRequestWrapper);
-            servletHttpResponse.setWrapper(oldResponseWrapper);
         }
     }
         

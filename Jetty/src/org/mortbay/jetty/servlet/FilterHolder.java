@@ -118,7 +118,7 @@ public class FilterHolder
         /* ------------------------------------------------------------ */
         public ServletContext getServletContext()
         {
-            return ((FilterHandler)_httpHandler).getServletHandler().getServletContext();
+            return ((WebApplicationHandler)_httpHandler).getServletContext();
         }
         
         /* -------------------------------------------------------- */

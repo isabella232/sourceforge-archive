@@ -301,5 +301,29 @@ public abstract class Resource
     {
         return new CachedResource(this);
     }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param out 
+     * @param start First byte to write
+     * @param count Bytes to write or -1 for all of them.
+     */
+    public void writeTo(OutputStream out,long start,long count)
+        throws IOException
+    {
+        InputStream in = getInputStream();
+        try
+        {
+            in.skip(start);
+            if (count<0)
+                IO.copy(in,out);
+            else
+                IO.copy(in,out,(int)count);
+        }
+        finally
+        {
+            in.close();
+        }
+    }
     
 }

@@ -1,9 +1,10 @@
 // ===========================================================================
-// Copyright (c) 1996 Mort Bay Consulting Pty. Ltd. All rights reserved.
+// Copyright (c) 1996-2002 Mort Bay Consulting Pty. Ltd. All rights reserved.
 // $Id$
 // ---------------------------------------------------------------------------
 
 package org.mortbay.jetty.servlet;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -36,8 +37,8 @@ import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
-import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpConnection;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpListener;
 import org.mortbay.http.HttpMessage;
@@ -45,11 +46,13 @@ import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.HttpServer;
 import org.mortbay.http.PathMap;
+import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.http.UserPrincipal;
 import org.mortbay.http.UserRealm;
 import org.mortbay.http.Version;
 import org.mortbay.http.handler.NullHandler;
 import org.mortbay.http.handler.SecurityHandler;
+import org.mortbay.http.handler.ResourceHandler;
 import org.mortbay.util.Code;
 import org.mortbay.util.Frame;
 import org.mortbay.util.InetAddrPort;
@@ -59,7 +62,6 @@ import org.mortbay.util.LogSink;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
 import org.mortbay.util.URI;
-
 
 
 /* --------------------------------------------------------------------- */
@@ -76,15 +78,10 @@ import org.mortbay.util.URI;
  */
 public class ServletHandler
     extends NullHandler
-    implements SecurityHandler.FormAuthenticator
 {
     /* ------------------------------------------------------------ */
     private static final boolean __Slosh2Slash=File.separatorChar=='\\';
 
-    /* ------------------------------------------------------------ */
-    public final static String __J_URI="org.mortbay.jetty.URI";
-    public final static String __J_AUTHENTICATED="org.mortbay.jetty.Auth";
-    
     /* ------------------------------------------------------------ */
     private PathMap _servletMap=new PathMap();
     private Map _nameMap=new HashMap();
@@ -100,6 +97,7 @@ public class ServletHandler
     private boolean _autoInitializeServlets=true;
     private String _formLoginPage;
     private String _formErrorPage;
+    private ResourceHandler _resourceHandler;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -381,7 +379,7 @@ public class ServletHandler
             return;
         
         _httpContext=getHttpContext();
-        
+        _resourceHandler=(ResourceHandler)_httpContext.getHandler(ResourceHandler.class);
         _sessionManager.start();
         
         // Initialize classloader
@@ -454,17 +452,15 @@ public class ServletHandler
                                                     HttpResponse httpResponse)
     {
         // Look for a previously built servlet request.
-        ServletHttpRequest servletHttpRequest = null;
-        HttpMessage facade = httpRequest.getFacade();
-        if (facade!=null)
-            servletHttpRequest =((ServletHttpRequest.Facade)facade).getServletHttpRequest();
+        ServletHttpRequest servletHttpRequest =
+            (ServletHttpRequest)httpRequest.getWrapper();
         
         if (servletHttpRequest==null)
-            servletHttpRequest=newFacades(pathInContext,
-                                          pathParams,
-                                          httpRequest,
-                                          httpResponse,
-                                          getHolderEntry(pathInContext));
+            servletHttpRequest=newWrappers(pathInContext,
+                                           pathParams,
+                                           httpRequest,
+                                           httpResponse,
+                                           getHolderEntry(pathInContext));
         
         return servletHttpRequest; 
     }
@@ -477,26 +473,23 @@ public class ServletHandler
      */
     public HttpServletResponse getHttpServletResponse(HttpResponse httpResponse)
     {
-        // Look for a previously built servlet request.
-        HttpMessage facade = httpResponse.getFacade();
-        if (facade==null)
-            return null;
-        return ((ServletHttpResponse.Facade)facade).getServletHttpResponse();
+        return (HttpServletResponse) httpResponse.getWrapper();
     }
     
     /* ------------------------------------------------------------ */
-    private ServletHttpRequest newFacades(String pathInContext,
-                                          String pathParams,
-                                          HttpRequest httpRequest,
-                                          HttpResponse httpResponse,
-                                          Map.Entry entry)
+    private ServletHttpRequest newWrappers(String pathInContext,
+                                           String pathParams,
+                                           HttpRequest httpRequest,
+                                           HttpResponse httpResponse,
+                                           Map.Entry entry)
     {
         // Build the request and response.
-        ServletHttpRequest servletHttpRequest  = new ServletHttpRequest(this,pathInContext,httpRequest);
-        httpRequest.setFacade(servletHttpRequest.getFacade());
+        ServletHttpRequest servletHttpRequest =
+            new ServletHttpRequest(this,pathInContext,httpRequest);
+        httpRequest.setWrapper(servletHttpRequest);
         ServletHttpResponse servletHttpResponse =
             new ServletHttpResponse(servletHttpRequest,httpResponse);
-        httpResponse.setFacade(servletHttpResponse.getFacade());
+        httpResponse.setWrapper(servletHttpResponse);
         
         // Handle the session ID
         servletHttpRequest.setSessionId(pathParams);
@@ -562,49 +555,23 @@ public class ServletHandler
             // handling
             Code.debug("ServletHandler: ",pathInContext);
 
-            // Do we already have servlet facades?
-            HttpMessage facade = httpRequest.getFacade();
-            if (facade!=null)
-                request =((ServletHttpRequest.Facade)facade).getServletHttpRequest();
-            if (request==null)
-            {
-                Map.Entry entry=getHolderEntry(pathInContext);
-                if (entry==null)
-                    return;
+            Map.Entry entry=getHolderEntry(pathInContext);
+            if (entry==null)
+                return;
                 
-                request=newFacades(pathInContext,
-                                   pathParams,
-                                   httpRequest,
-                                   httpResponse,
-                                   entry);
-                holder = request.getServletHolder();
-            }
-            else if (!pathInContext.equals(request.getPathInContext()))
-            {
-                // pathInContext has changed, so get a new holder!
-                Map.Entry entry=getHolderEntry(pathInContext);
-                if (entry==null)
-                    return;
-                String servletPathSpec=(String)entry.getKey(); 
-                holder=(ServletHolder)entry.getValue();
-                request.setServletPaths(PathMap.pathMatch(servletPathSpec,
-                                                          pathInContext),
-                                        PathMap.pathInfo(servletPathSpec,
-                                                         pathInContext),
-                                        holder);
-            }
-            else
-                holder = request.getServletHolder();
-            
-            // Get the response
+            request=newWrappers(pathInContext,
+                                pathParams,
+                                httpRequest,
+                                httpResponse,
+                                entry);
+            holder = request.getServletHolder();
             response = request.getServletHttpResponse();
 
             // service request
             if (holder!=null)
             {
-                // service request
-                ServletResponse wrapper=response.getWrapper();
-                holder.handle(request.getWrapper(),response.getWrapper());
+                //service request
+                holder.handle(request,response);
                 response.flushBuffer();
                 
                 // reset output
@@ -638,10 +605,13 @@ public class ServletHandler
             
             httpResponse.getHttpConnection().forceClose();
             if (!httpResponse.isCommitted())
+            {
+                httpRequest.setAttribute("javax.servlet.error.exception_type",th.getClass());
+                httpRequest.setAttribute("javax.servlet.error.exception",th);
                 httpResponse.sendError(th instanceof UnavailableException
                                        ?HttpResponse.__503_Service_Unavailable
-                                       :HttpResponse.__500_Internal_Server_Error,
-                                       th);
+                                       :HttpResponse.__500_Internal_Server_Error);
+            }
             else
                 Code.debug("Response already committed for handling ",th);
         }
@@ -651,7 +621,11 @@ public class ServletHandler
             Code.debug(httpRequest);
             httpResponse.getHttpConnection().forceClose();
             if (!httpResponse.isCommitted())
-                httpResponse.sendError(HttpResponse.__500_Internal_Server_Error,e);
+            {
+                httpRequest.setAttribute("javax.servlet.error.exception_type",e.getClass());
+                httpRequest.setAttribute("javax.servlet.error.exception",e);
+                httpResponse.sendError(HttpResponse.__500_Internal_Server_Error);
+            }
             else
                 Code.debug("Response already committed for handling ",e);
         }
@@ -763,97 +737,155 @@ public class ServletHandler
     
 
     /* ------------------------------------------------------------ */
-    public String getAuthMethod()
+    public Set getResourcePaths(String uriInContext)
     {
-        return _formErrorPage!=null?"FORM":"BASIC";
+        Resource baseResource=_httpContext.getBaseResource();
+        uriInContext=URI.canonicalPath(uriInContext);
+        if (baseResource==null || uriInContext==null)
+            return Collections.EMPTY_SET;
+
+        try
+        {
+            Resource resource = baseResource.addPath(uriInContext);
+            String[] contents=resource.list();
+            if (contents==null || contents.length==0)
+                return Collections.EMPTY_SET;
+            HashSet set = new HashSet(contents.length*2);
+            for (int i=0;i<contents.length;i++)
+                set.add(URI.addPaths(uriInContext,contents[i]));
+            return set;
+        }
+        catch(Exception e)
+        {
+            Code.ignore(e);
+        }
+        
+        return Collections.EMPTY_SET;
     }
     
+
     /* ------------------------------------------------------------ */
-    /** Perform form authentication.
-     * Called from SecurityHandler.
-     * @return UserPrincipal if authenticated else null.
+    /** Get a Resource.
+     * If no resource is found, resource aliases are tried.
+     * @param uriInContext 
+     * @return 
+     * @exception MalformedURLException 
      */
-    public UserPrincipal authenticated(UserRealm realm,
-                                       String pathInContext,
-                                       String pathParams,
-                                       HttpRequest httpRequest,
-                                       HttpResponse httpResponse)
-        throws IOException
+    public URL getResource(String uriInContext)
+        throws MalformedURLException
     {
-        HttpServletRequest request = getHttpServletRequest(pathInContext,
-                                                           pathParams,
-                                                           httpRequest,
-                                                           httpResponse);
-        HttpServletResponse response = getHttpServletResponse(httpResponse);
-
-        // Handle paths
-        String uri = pathInContext;
-
-        // Setup session 
-        HttpSession session=request.getSession(true);             
-        
-        // Handle a request for authentication.
-        if ( uri.substring(uri.lastIndexOf("/")+1).startsWith(__J_SECURITY_CHECK) )
-        {
-            // Check the session object for login info. 
-            String username = request.getParameter(__J_USERNAME);
-            String password = request.getParameter(__J_PASSWORD);
-            
-            UserPrincipal user = realm.authenticate(username,password,httpRequest);
-            if (user!=null)
-            {
-                Code.debug("Form authentication OK for ",username);
-                httpRequest.setAttribute(HttpRequest.__AuthType,"FORM");
-                httpRequest.setAttribute(HttpRequest.__AuthUser,username);
-                httpRequest.setUserPrincipal(user);
-                session.setAttribute(__J_AUTHENTICATED,user);
-                String nuri=(String)session.getAttribute(__J_URI);
-                if (nuri==null)
-                    response.sendRedirect(URI.addPaths(request.getContextPath(),
-                                                       _formErrorPage));
-                else
-                    response.sendRedirect(nuri);
-            }
-            else
-            {
-                Code.debug("Form authentication FAILED for ",username);
-                response.sendRedirect(URI.addPaths(request.getContextPath(),
-                                                   _formErrorPage));
-            }
-            
-            // Security check is always false, only true after final redirection.
-            return null;
-        }
-
-        // Check if the session is already authenticated.
-        UserPrincipal user = (UserPrincipal) session.getAttribute(__J_AUTHENTICATED);
-        if (user != null)
-        {
-            if (user.isAuthenticated())
-            {
-                Code.debug("FORM Authenticated for ",user.getName());
-                httpRequest.setAttribute(HttpRequest.__AuthType,"FORM");
-                httpRequest.setAttribute(HttpRequest.__AuthUser,user.getName());
-                httpRequest.setUserPrincipal(user);
-                return user;
-            }
-        }
-        
-        // Don't authenticate authform or errorpage
-        if (pathInContext!=null &&
-            pathInContext.equals(_formErrorPage) || pathInContext.equals(_formLoginPage))
+        Resource baseResource=_httpContext.getBaseResource();
+        uriInContext=URI.canonicalPath(uriInContext);
+        if (baseResource==null || uriInContext==null)
             return null;
         
-        // redirect to login page
-        if (httpRequest.getQuery()!=null)
-            uri+="?"+httpRequest.getQuery();
-        session.setAttribute(__J_URI, URI.addPaths(request.getContextPath(),uri));
-        response.sendRedirect(URI.addPaths(request.getContextPath(),
-                                           _formLoginPage));
+        try{
+            Resource resource = baseResource.addPath(uriInContext);
+            if (resource.exists())
+                return resource.getURL();
+
+            String aliasedUri=_httpContext.getResourceAlias(uriInContext);
+            if (aliasedUri!=null)
+                return getResource(aliasedUri);
+        }
+        catch(IllegalArgumentException e)
+        {
+            Code.ignore(e);
+        }
+        catch(MalformedURLException e)
+        {
+            throw e;
+        }
+        catch(IOException e)
+        {
+            Code.warning(e);
+        }
         return null;
     }
 
+    /* ------------------------------------------------------------ */
+    public InputStream getResourceAsStream(String uriInContext)
+    {
+        try
+        {
+            URL url = getResource(uriInContext);
+            if (url!=null)
+                return url.openStream();
+        }
+        catch(MalformedURLException e) {Code.ignore(e);}
+        catch(IOException e) {Code.ignore(e);}
+        return null;
+    }
 
+    /* ------------------------------------------------------------ */
+    public String getRealPath(String path)
+    {
+        if(Code.debug())
+            Code.debug("getRealPath of ",path," in ",this);
+
+        if (__Slosh2Slash)
+            path=path.replace('\\','/');
+        
+        Resource baseResource=_httpContext.getBaseResource();
+        if (baseResource==null )
+            return null;
+
+        try{
+            Resource resource = baseResource.addPath(path);
+            File file = resource.getFile();
+
+            return (file==null)?null:(file.getAbsolutePath());
+        }
+        catch(IOException e)
+        {
+            Code.warning(e);
+            return null;
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    public RequestDispatcher getRequestDispatcher(String uriInContext)
+    {
+        if (uriInContext == null)
+            return null;
+
+        if (!uriInContext.startsWith("/"))
+            uriInContext="/"+uriInContext;
+        
+        try
+        {
+            String pathInContext=uriInContext;
+            String query=null;
+            int q=0;
+            if ((q=pathInContext.indexOf('?'))>0)
+            {
+                pathInContext=uriInContext.substring(0,q);
+                query=uriInContext.substring(q+1);
+            }
+
+            return new Dispatcher(ServletHandler.this,
+                                  _resourceHandler,
+                                  pathInContext,query);
+        }
+        catch(Exception e)
+        {
+            Code.ignore(e);
+            return null;
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    public RequestDispatcher getNamedDispatcher(String name)
+    {
+        if (name == null || name.length()==0)
+            return null;
+
+        try { return new Dispatcher(ServletHandler.this,name); }
+        catch(Exception e) {Code.ignore(e);}
+        
+        return null;
+    }
+    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -893,122 +925,38 @@ public class ServletHandler
         /* ------------------------------------------------------------ */
         public Set getResourcePaths(String uriInContext)
         {
-            Resource baseResource=_httpContext.getBaseResource();
-            uriInContext=URI.canonicalPath(uriInContext);
-            if (baseResource==null || uriInContext==null)
-                return Collections.EMPTY_SET;
-
-            try
-            {
-                Resource resource = baseResource.addPath(uriInContext);
-                String[] contents=resource.list();
-                if (contents==null || contents.length==0)
-                    return Collections.EMPTY_SET;
-                HashSet set = new HashSet(contents.length*2);
-                for (int i=0;i<contents.length;i++)
-                    set.add(URI.addPaths(uriInContext,contents[i]));
-                return set;
-            }
-            catch(Exception e)
-            {
-                Code.ignore(e);
-            }
-        
-            return Collections.EMPTY_SET;
+            return ServletHandler.this.getResourcePaths(uriInContext);
         }
-    
 
         /* ------------------------------------------------------------ */
-        /** Get a Resource.
-         * If no resource is found, resource aliases are tried.
-         * @param uriInContext 
-         * @return 
-         * @exception MalformedURLException 
-         */
         public URL getResource(String uriInContext)
             throws MalformedURLException
         {
-            Resource baseResource=_httpContext.getBaseResource();
-            uriInContext=URI.canonicalPath(uriInContext);
-            if (baseResource==null || uriInContext==null)
-                return null;
-        
-            try{
-                Resource resource = baseResource.addPath(uriInContext);
-                if (resource.exists())
-                    return resource.getURL();
-
-                String aliasedUri=_httpContext.getResourceAlias(uriInContext);
-                if (aliasedUri!=null)
-                    return getResource(aliasedUri);
-            }
-            catch(IllegalArgumentException e)
-            {
-                Code.ignore(e);
-            }
-            catch(MalformedURLException e)
-            {
-                throw e;
-            }
-            catch(IOException e)
-            {
-                Code.warning(e);
-            }
-            return null;
+            return ServletHandler.this.getResource(uriInContext);
         }
 
         /* ------------------------------------------------------------ */
         public InputStream getResourceAsStream(String uriInContext)
         {
-            try
-            {
-                URL url = getResource(uriInContext);
-                if (url!=null)
-                    return url.openStream();
-            }
-            catch(MalformedURLException e) {Code.ignore(e);}
-            catch(IOException e) {Code.ignore(e);}
-            return null;
+            return ServletHandler.this.getResourceAsStream(uriInContext);
         }
 
+        /* ------------------------------------------------------------ */
+        public String getRealPath(String path)
+        {
+            return ServletHandler.this.getRealPath(path);
+        }
 
         /* ------------------------------------------------------------ */
         public RequestDispatcher getRequestDispatcher(String uriInContext)
         {
-        
-            if (uriInContext == null || !uriInContext.startsWith("/"))
-                return null;
-
-            try
-            {
-                String pathInContext=uriInContext;
-                String query=null;
-                int q=0;
-                if ((q=pathInContext.indexOf('?'))>0)
-                {
-                    pathInContext=uriInContext.substring(0,q);
-                    query=uriInContext.substring(q+1);
-                }
-
-                return new Dispatcher(ServletHandler.this,pathInContext,query);
-            }
-            catch(Exception e)
-            {
-                Code.ignore(e);
-                return null;
-            }
+            return ServletHandler.this.getRequestDispatcher(uriInContext);
         }
 
         /* ------------------------------------------------------------ */
         public RequestDispatcher getNamedDispatcher(String name)
         {
-            if (name == null || name.length()==0)
-                return null;
-
-            try { return new Dispatcher(ServletHandler.this,name); }
-            catch(Exception e) {Code.ignore(e);}
-        
-            return null;
+            return ServletHandler.this.getNamedDispatcher(name);
         }
     
         /* ------------------------------------------------------------ */
@@ -1051,7 +999,7 @@ public class ServletHandler
         {
             if (_logSink!=null)
                 _logSink.log(Log.EVENT,msg,new
-                    Frame(2),System.currentTimeMillis());
+                             Frame(2),System.currentTimeMillis());
             else
                 Log.message(Log.EVENT,msg,new Frame(2));
         }
@@ -1068,32 +1016,6 @@ public class ServletHandler
         {
             Code.warning(msg,th);
             log(msg+": "+th.toString());
-        }
-
-        /* ------------------------------------------------------------ */
-        public String getRealPath(String path)
-        {
-            if(Code.debug())
-                Code.debug("getRealPath of ",path," in ",this);
-
-            if (__Slosh2Slash)
-                path=path.replace('\\','/');
-        
-            Resource baseResource=_httpContext.getBaseResource();
-            if (baseResource==null )
-                return null;
-
-            try{
-                Resource resource = baseResource.addPath(path);
-                File file = resource.getFile();
-
-                return (file==null)?null:(file.getAbsolutePath());
-            }
-            catch(IOException e)
-            {
-                Code.warning(e);
-                return null;
-            }
         }
 
         /* ------------------------------------------------------------ */
@@ -1195,7 +1117,5 @@ public class ServletHandler
             return null;
         }
     }
-
-
     
 }

@@ -43,7 +43,7 @@ public class MultiPartResponse
     private boolean inPart=false;
     
     /* ------------------------------------------------------------ */
-    protected MultiPartResponse(OutputStream out)
+    public MultiPartResponse(OutputStream out)
          throws IOException
     {
         this.out=out;
@@ -53,8 +53,7 @@ public class MultiPartResponse
     /* ------------------------------------------------------------ */
     /** MultiPartResponse constructor.
      */
-    public MultiPartResponse(HttpRequest request,
-                             HttpResponse response)
+    public MultiPartResponse(HttpResponse response)
          throws IOException
     {
         response.setField(HttpFields.__ContentType,"multipart/mixed;boundary="+boundary);

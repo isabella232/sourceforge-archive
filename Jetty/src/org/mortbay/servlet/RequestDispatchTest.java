@@ -155,7 +155,7 @@ public class RequestDispatchTest extends HttpServlet
             else
             {
                 pout = sres.getWriter();
-                pout.write("<H1>Include named: "+info+"</H1><HL>");
+                pout.write("<H1>Include named: "+info+"</H1><HR>");
             }
             
             RequestDispatcher dispatch = getServletContext()
@@ -169,7 +169,7 @@ public class RequestDispatchTest extends HttpServlet
             }
             
             pout = sres.getWriter();
-            pout.write("<HL><H1>Included ");
+            pout.write("<HR><H1>Included ");
         }
         else if (info.startsWith("/forwardN/"))
         {
