@@ -504,27 +504,8 @@ abstract public class ThreadedServer extends ThreadPool
                 this.setName("Acceptor "+_listen);
                 while(_running)
                 {
-                    boolean low_threads=
-                        (threadedServer.getMaxThreads()+
-                         threadedServer.getIdleThreads()-
-                         threadedServer.getThreads())<threadedServer.getMinThreads();
-                
                     try
                     {
-                        // Reduce acceptor priority if we are low on Threads
-                        if (low_threads)
-                        {
-                            acceptor.setPriority(priority-1);
-                            Thread.yield();
-                        }
-
-                        // Reserve a thread
-//                         while (!threadedServer.reserveThread())
-//                         {
-//                             System.err.println("SLEEP");
-//                             Thread.sleep(250);
-//                         }
-                        
                         // Accept a socket
                         Socket socket=acceptSocket(_listen,_soTimeOut);
 
@@ -552,12 +533,7 @@ abstract public class ThreadedServer extends ThreadPool
                     {
                         Code.warning(e);
                         break;
-                    }
-                    finally
-                    {
-                        if (low_threads)
-                            acceptor.setPriority(priority);
-                    }
+                    }  
                 }
             }
             finally

@@ -45,7 +45,6 @@ public class ThreadPool
 
     private transient int _threadId=0;
     private transient boolean _started;
-    private transient PoolThread _reserved;
     
     /* ------------------------------------------------------------------- */
     /* Construct
@@ -276,14 +275,6 @@ public class ThreadPool
     public void stop()
         throws InterruptedException
     {
-        synchronized(_pool)
-        {
-            if (_reserved!=null)
-            {
-                _pool.put(_reserved);
-                _reserved=null;
-            }
-        }
         _started=false;
         _pool.stop();
         synchronized(_join)
@@ -313,16 +304,7 @@ public class ThreadPool
     public void shrink()
         throws InterruptedException
     {
-        synchronized(_pool)
-        {
-            if (_reserved!=null)
-            {
-                _pool.put(_reserved);
-                _reserved=null;
-            }
-        
-            _pool.shrink();
-        }
+        _pool.shrink();
     }
     
 
@@ -341,18 +323,7 @@ public class ThreadPool
         
         try
         {
-            PoolThread thread = null;
-
-            synchronized(_pool)
-            {
-                if (_reserved==null)
-                    thread=(PoolThread)_pool.get(getMaxIdleTimeMs());
-                else
-                {
-                    thread=_reserved;
-                    _reserved=null;
-                }
-            }
+            PoolThread thread=(PoolThread)_pool.get(getMaxIdleTimeMs());
             
             if (thread!=null)
                 thread.run(this,job);
@@ -364,24 +335,6 @@ public class ThreadPool
         }
         catch (InterruptedException e) {throw e;}
         catch (Exception e){Code.warning(e);}
-    }
-
-    /* ------------------------------------------------------------ */
-    protected boolean reserveThread()
-        throws InterruptedException
-    {
-        synchronized(_pool)
-        {
-            try
-            {
-                if (_reserved!=null)
-                    return false;
-                _reserved=(PoolThread)_pool.get(getMaxIdleTimeMs());
-            }
-            catch (InterruptedException e) {throw e;}
-            catch (Exception e){Code.warning(e);}
-        }
-        return _reserved!=null;
     }
     
 
