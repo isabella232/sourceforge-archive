@@ -50,7 +50,7 @@ public class JettyPage extends Page
 	    return;
 
         // This only works for 1 context.
-        Log.event("Loading JettyPage Index");
+        Code.debug("Loading JettyPage Index");
         int i=0;
         int j=0;
         ArrayList major=new ArrayList(10);
@@ -70,7 +70,7 @@ public class JettyPage extends Page
                     do
                     {
                         Section section=new Section(context,value);
-                        Log.event(key+" = "+section);
+                        Code.debug(key," = ",section);
                         minor.add(section);
                         if (section._pathSpec!=null)
                         {
@@ -269,7 +269,7 @@ public class JettyPage extends Page
 
                      if (__section[i][0]._link != null)
                      {
-                         Log.event ("Section "+__section[i][0]._section+" has link "+__section[i][0]._link);
+                         Code.debug ("Section "+__section[i][0]._section+" has link "+__section[i][0]._link);
                          
                          if (_selectedSection._section.equals(__section[i][0]._section))
                              menu.add ("<a class=selhdr href="+__section[i][0]._link+">"+__section[i][0]._section+"</a>");
@@ -278,7 +278,7 @@ public class JettyPage extends Page
                      }
                      else
                      {
-                         Log.event ("Section has no link: "+__section[i][0]._section);
+                         Code.debug ("Section has no link: "+__section[i][0]._section);
                          menu.add ("<font color=#ffffff><b>"+__section[i][0]._section+"</b></font>");
                      }
                  }
