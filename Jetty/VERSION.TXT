@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+Jetty-4.0.D1 - 12 Nov 2001
+ + New Dispatcher implementation
  + Added Context and Session Event Handling
  + Added FilterHolder
  + Added FilterHandler
