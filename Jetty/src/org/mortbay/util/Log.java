@@ -154,11 +154,25 @@ public class Log
         }
         else
         {
-            LogSink[] ns = new LogSink[_sinks.length+1];
-            for (int i=_sinks.length;i-->0;)
-                ns[i]=_sinks[i];
-            ns[_sinks.length]=logSink;
-            _sinks=ns;
+            boolean slotFree = false;
+            for( int i=_sinks.length; i-->0; )
+            {
+                if( _sinks[i] == null )
+                {
+                    slotFree = true;
+                    _sinks[i] = logSink;
+                    break;
+                }
+            }
+
+            if( !slotFree )
+            {
+                LogSink[] ns = new LogSink[_sinks.length+1];
+                for (int i=_sinks.length;i-->0;)
+                    ns[i]=_sinks[i];
+                ns[_sinks.length]=logSink;
+                _sinks=ns;
+            }
         }
         _initialized = true;
     }

@@ -116,6 +116,7 @@ public class ProxyHandler extends AbstractHttpHandler
             {
                 http = (HttpURLConnection)connection;
                 http.setRequestMethod(request.getMethod());
+                http.setInstanceFollowRedirects(false);
             }
 
             // check connection header
@@ -216,7 +217,10 @@ public class ProxyHandler extends AbstractHttpHandler
         }
         catch (Exception e)
         {
-            Code.warning("??? ",e);
+            Code.warning(e.toString());
+            Code.ignore(e);
+            if (!response.isCommitted())
+                response.sendError(500);
         }
         
     }
