@@ -114,6 +114,9 @@ public class JAASUserPrincipal implements Principal
     //holds the JAAS Credential and roles associated with
     //this UserPrincipal 
     private Subject subject = null;
+
+    private static RoleStack runAsRoles = new RoleStack();
+    
     private RoleCheckPolicy roleCheckPolicy = null;
     private String name = null;
     
@@ -136,13 +139,13 @@ public class JAASUserPrincipal implements Principal
      * @param roleName role to check
      * @return true or false accordint to the RoleCheckPolicy.
      */
-    boolean isUserInRole (String roleName)
+    public boolean isUserInRole (String roleName)
     {
         if (roleCheckPolicy == null)
             roleCheckPolicy = new StrictRoleCheckPolicy();
 
         return roleCheckPolicy.checkRole (new JAASRole(roleName),
-                                          RoleStack.peek(),
+                                          runAsRoles.peek(),
                                           getRoles());
     }
 
@@ -219,7 +222,7 @@ public class JAASUserPrincipal implements Principal
      */
     public void pushRole (String roleName)
     {
-        RoleStack.push (new JAASRole(roleName));
+        runAsRoles.push (new JAASRole(roleName));
     }
 
     
@@ -228,7 +231,7 @@ public class JAASUserPrincipal implements Principal
      */
     public void popRole ()
     {
-        RoleStack.pop ();
+        runAsRoles.pop ();
     }
 
 
@@ -237,7 +240,7 @@ public class JAASUserPrincipal implements Principal
      */
     public void disassociate ()
     {
-        RoleStack.clear();
+        runAsRoles.clear();
     }
 
 
