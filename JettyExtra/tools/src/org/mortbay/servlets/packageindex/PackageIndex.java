@@ -167,6 +167,11 @@ public class PackageIndex extends DispatchServlet
 	    PackageSpecArgs args = (PackageSpecArgs)
 		cs.convert(packageArgs, PackageSpecArgs.class, cs);
 	    if (args.paths != null && (args.paths.length > 0)){
+                Code.debug("Package:", packName, "=\"" +
+                           (args.description == null ? packName :
+                            args.description), "dirs:" +
+                           packageArgs.get("paths"),
+                           "; versioning:" + args.versioning);
 		PackageSpec spec =
 		    new PackageSpec(packName,
 				    args.description == null ? packName :
@@ -198,6 +203,10 @@ public class PackageIndex extends DispatchServlet
                         packconfig.getTree(list[j].getName());
                     PackageSpecArgs args = (PackageSpecArgs)
                         cs.convert(packageArgs, PackageSpecArgs.class, cs);
+                    Code.debug("Scan Package:", list[j].getName(), "=\"" +
+                               (args.description == null ? list[j].getName() :
+                                args.description), "dirs:" + dir,
+                               "; versioning:" + args.versioning);
                     PackageSpec spec =
                         new PackageSpec(list[j].getName(),
                                         args.description == null ?
@@ -320,7 +329,7 @@ public class PackageIndex extends DispatchServlet
 	}
 	table.addCell(new Input(Input.Submit, "submit", "Make Index"),
 		      "COLSPAN=2").cell().center();
-	page.add(new Link(req.getServletPath(), "Full List"));
+	page.add(new Link(req.getServletPath() + "./", "Full List"));
 	page.add(" : ");
 	page.add(new Link(req.getServletPath() + "checkPaths",
                           "Re-Read Directories"));
@@ -406,7 +415,7 @@ public class PackageIndex extends DispatchServlet
                             "Edit Index").target("_parent");
             page.add(link);
             page.add(" : ");
-            page.add(new Link(req.getServletPath(), "Full List"));
+            page.add(new Link(req.getServletPath() + "./", "Full List"));
             page.add(" : ");
             page.add(new Link(req.getServletPath() + "checkPaths",
                               "Re-Read Directories"));
