@@ -1578,4 +1578,35 @@ public class TestRFC2616
             }
         }
     }
+
+    public boolean isIntegral(HttpConnection c)
+    {
+        return false;
+    }
+
+    public String getIntegralScheme()
+    {
+        return null;
+    }
+
+    public int getIntegralPort()
+    {
+        return 0;    
+    }
+
+    public boolean isConfidential(HttpConnection c)
+    {
+        return false;
+    }
+
+    public String getConfidentialScheme()
+    {
+        return null;
+    }
+
+    public int getConfidentialPort()
+    {
+        return 0;    
+    }
+    
 }

@@ -21,4 +21,10 @@ public interface UserRealm
     public String getName();
 
     public UserPrincipal getUser(String username);
+    
+    public UserPrincipal getAnonymous();
+
+    public void pushRole(UserPrincipal user, String role);
+
+    public void popRole(UserPrincipal user, String role);
 }

@@ -887,6 +887,16 @@ public class WebApplicationContext extends ServletHttpContext
                        "=",defaultPath);
             _servletHandler.addServletHolder(defaultPath,holder);
         }
+
+        XmlParser.Node run_as = node.get("run-as");
+        if (run_as!=null)
+        {
+            String roleName=run_as.getString("role-name",false,true);
+            if (roleName!=null)
+                holder.setRunAs(roleName);
+        }
+        
+        
     }
     
     /* ------------------------------------------------------------ */

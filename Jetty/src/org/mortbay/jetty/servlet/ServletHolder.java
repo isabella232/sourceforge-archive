@@ -18,9 +18,13 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.UnavailableException;
+import org.mortbay.http.HttpRequest;
+import org.mortbay.http.UserPrincipal;
+import org.mortbay.http.UserRealm;
+import org.mortbay.http.handler.SecurityHandler;
 import org.mortbay.util.Code;
 import org.mortbay.util.URI;
 
@@ -50,6 +54,8 @@ public class ServletHolder extends Holder
     private String _path;
     private long _unavailable;
     private UnavailableException _unavailableEx;
+    private String _run_as;
+    private UserRealm _realm;
     
     /* ---------------------------------------------------------------- */
     /** Constructor.
@@ -171,6 +177,22 @@ public class ServletHolder extends Holder
         String link=(String)_roleMap.get(name);
         return (link==null)?name:link;
     }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param role Role name that is added to UserPrincipal when this servlet
+     * is called. 
+     */
+    public void setRunAs(String role)
+    {
+        _run_as=role;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getRunAs()
+    {
+        return _run_as;
+    }
     
     /* ------------------------------------------------------------ */
     public void start()
@@ -213,7 +235,17 @@ public class ServletHolder extends Holder
                 else
                     throw new ServletException(e);
             }            
-        }    
+        }
+
+        if (_run_as!=null)
+        {
+            SecurityHandler security_handler = (SecurityHandler)
+                _servletHandler.getHttpContext().
+                getHttpHandler(SecurityHandler.class);
+
+            if (security_handler!=null)
+                _realm=security_handler.getUserRealm();
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -313,6 +345,7 @@ public class ServletHolder extends Holder
 
         // Service the request
         boolean servlet_error=true;
+        UserPrincipal user=null;
         try
         {
             // Handle aliased path
@@ -321,6 +354,18 @@ public class ServletHolder extends Holder
                 request.setAttribute("javax.servlet.include.request_uri",
                                      URI.addPaths(_servletHandler.getHttpContext().getContextPath(),_path));
                 request.setAttribute("javax.servlet.include.servlet_path",_path);
+            }
+
+            // Handle run as
+            if (_run_as!=null && _realm!=null)
+            {
+                ServletHttpRequest servletHttpRequest=
+                    ServletHttpRequest.unwrap(request);
+                HttpRequest http_request=servletHttpRequest.getHttpRequest();
+                http_request.getUserPrincipal();
+                if (user==null)
+                    http_request.setUserPrincipal(user=_realm.getAnonymous());
+                _realm.pushRole(user,_run_as);
             }
 
             servlet.service(request,response);
@@ -336,6 +381,9 @@ public class ServletHolder extends Holder
         }
         finally
         {
+            if (_run_as!=null && _realm!=null && user!=null)
+                _realm.popRole(user,_run_as);
+            
             if (servlet_error)
                 request.setAttribute("javax.servlet.error.servlet_name",getName());
 

@@ -103,7 +103,8 @@ public class HttpRequest
     private boolean _handled;
     private Cookie[] _cookies;
     private long _timeStamp;
-
+    private UserPrincipal _userPrincipal;
+    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
@@ -936,9 +937,15 @@ public class HttpRequest
     }
     
     /* ------------------------------------------------------------ */
-    public Principal getUserPrincipal()
+    public UserPrincipal getUserPrincipal()
     {
-        return (Principal)getAttribute(UserPrincipal.__ATTR);
+        return _userPrincipal;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setUserPrincipal(UserPrincipal principal)
+    {
+        _userPrincipal=principal;
     }
     
     /* ------------------------------------------------------------ */
@@ -1013,7 +1020,7 @@ public class HttpRequest
             {
                 setAttribute(__AuthType,"BASIC");
                 setAttribute(__AuthUser,username);
-                setAttribute(UserPrincipal.__ATTR,user);
+                setUserPrincipal(user);                
                 return user;
             }
             

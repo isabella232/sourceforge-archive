@@ -307,11 +307,13 @@ public class SecurityConstraint
                     List roles=sc.getRoles();
                     boolean inRole=false;
                     for (int r=roles.size();r-->0;)
+                    {
                         if (user.isUserInRole(roles.get(r).toString()))
                         {
                             inRole=true;
                             break;
                         }
+                    }
                     if (!inRole)
                     {
                         Code.warning("AUTH FAILURE: role for "+user.getName());

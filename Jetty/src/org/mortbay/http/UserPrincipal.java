@@ -17,15 +17,7 @@ import java.security.Principal;
  * @author Greg Wilkins (gregw)
  */
 public interface UserPrincipal extends Principal
-{
-    static public String __ATTR="org.mortbay.http.UserPrincipal";
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return The Realm for this user. 
-     */
-    public UserRealm getUserRealm();
-    
+{    
     /* ------------------------------------------------------------ */
     /** Authenticate the users credentials 
      * @param credentials The user credentials, normally a password. 
