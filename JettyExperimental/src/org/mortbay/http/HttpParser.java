@@ -31,16 +31,8 @@ import org.mortbay.io.View;
  * @version $Revision$
  * @author gregw
  */
-public class HttpParser 
+public class HttpParser implements HTTP
 {
-    // Terminal symbols.
-    static final byte COLON= (byte)':';
-    static final byte SEMI_COLON= (byte)';';
-    static final byte SPACE= 0x20;
-    static final byte CARRIAGE_RETURN= 0x0D;
-    static final byte LINE_FEED= 0x0A;
-    static final byte TAB= 0x09;
-
     // States
     public static final int STATE_START= -11;
     public static final int STATE_FIELD0= -10;
@@ -61,11 +53,6 @@ public class HttpParser
     public static final int STATE_CHUNK_PARAMS= 5;
     public static final int STATE_CHUNK= 6;
 
-	public static final int UNKNOWN_CONTENT= -3;
-    public static final int CHUNKED_CONTENT= -2;
-    public static final int EOF_CONTENT= -1;
-    public static final int NO_CONTENT= 0;
-
     /* ------------------------------------------------------------------------------- */
     protected int state= STATE_START;
     protected byte eol;
@@ -83,6 +70,7 @@ public class HttpParser
     private EventHandler handler;
     private View startTok0;
     private View startTok1;
+    private boolean response=false;
     
     /* ------------------------------------------------------------------------------- */
     /** Constructor. 
@@ -270,6 +258,7 @@ public class HttpParser
                 {
                     buffer.mark();
                     state = STATE_FIELD1;
+                    response=ch>='1' && ch<='5';
                 }
                 else if (ch < SPACE) 
                 throw new RuntimeException(toString(buffer));
@@ -325,7 +314,7 @@ public class HttpParser
                 {
                     if (contentLength == UNKNOWN_CONTENT)
                     {
-                        if (content)
+                        if (content || response)
                             contentLength = EOF_CONTENT;
                         else
                             contentLength = NO_CONTENT;
@@ -401,8 +390,8 @@ public class HttpParser
                     Buffer value = HttpHeaderValues.CACHE.lookup(buffer.sliceFromMark(length));
                     if (length > 0)
                     {
-                        int ho = BufferCache.getOrdinal(header);
-                        int vo = BufferCache.getOrdinal(value);
+                        int ho = HttpHeaders.CACHE.getOrdinal(header);
+                        int vo = HttpHeaderValues.CACHE.getOrdinal(value);
                         switch (ho)
                         {
                           case HttpHeaders.CONTENT_LENGTH_ORDINAL:
@@ -465,7 +454,7 @@ public class HttpParser
             switch (state)
             {
               case STATE_EOF_CONTENT:
-                chunk = buffer.get(-1);
+                chunk = buffer.get(buffer.length());
                 handler.foundContent(contentPosition, chunk);
                 contentPosition += chunk.length();
                 return;
@@ -576,7 +565,7 @@ public class HttpParser
         content=false;
         startTok0.setPutIndex(startTok0.getIndex());
         startTok1.setPutIndex(startTok1.getIndex());
-        
+        response=false;
     }
 
     public static abstract class EventHandler

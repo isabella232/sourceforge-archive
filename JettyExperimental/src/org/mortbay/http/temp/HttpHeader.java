@@ -275,7 +275,7 @@ public class HttpHeader
      */
     public int getVersionOrdinal()
     {
-        return HttpVersions.getOrdinal(_version);
+        return HttpVersions.CACHE.getOrdinal(_version);
     }
 
     /**

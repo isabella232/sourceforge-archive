@@ -282,56 +282,76 @@ public abstract class AbstractBuffer implements Buffer
         return _view;
     }
 
-    public void poke(int index, Buffer src)
+    public int poke(int index, Buffer src)
     {
         if (isReadOnly()) Portable.throwIllegalState(__READONLY);
         if (index < 0) Portable.throwIllegalArgument("index<0: " + index + "<0");
-        if (index + src.length() > capacity())
-                Portable.throwIllegalArgument("index+length>capacity(): " + index + "+"
-                        + src.length() + ">" + capacity());
+        
+        int length=src.length();
+        if (index + length > capacity())
+        {
+            length=capacity()-index;
+            if (length<0)
+                Portable.throwIllegalArgument("index>capacity(): " + index + ">" + capacity());
+        }
+        
         byte[] src_array = src.array();
         byte[] dst_array = array();
         if (src_array != null && dst_array != null)
-            Portable.arraycopy(src_array, src.getIndex(), dst_array, index, src.length());
+            Portable.arraycopy(src_array, src.getIndex(), dst_array, index, length);
         else if (src_array != null)
         {
-            for (int i = src.getIndex(); i < src.putIndex(); i++)
-                poke(index++, src_array[i]);
+            int s=src.getIndex();
+            for (int i=0;i<length;i++)
+                poke(index++,src_array[s++]);
         }
         else if (dst_array != null)
         {
-            for (int i = src.getIndex(); i < src.putIndex(); i++)
-                dst_array[index++] = src.peek(i);
+            int s=src.getIndex();
+            for (int i=0;i<length;i++)
+                dst_array[index++]=src.peek(s++);
         }
         else
         {
-            for (int i = src.getIndex(); i < src.putIndex(); i++)
-                poke(index++, src.peek(i));
+            int s=src.getIndex();
+            for (int i=0;i<length;i++)
+                poke(index++,src.peek(s++));
         }
+        
+        return length;
     }
+    
 
-    public void poke(int index, byte[] b, int offset, int length)
+    public int poke(int index, byte[] b, int offset, int length)
     {
         if (isReadOnly()) Portable.throwIllegalState(__READONLY);
         if (index < 0) Portable.throwIllegalArgument("index<0: " + index + "<0");
+
         if (index + length > capacity())
-                Portable.throwIllegalArgument("index+length>capacity(): " + index + "+" + length
-                        + ">" + capacity());
+        {
+            length=capacity()-index;
+            if (length<0)
+                Portable.throwIllegalArgument("index>capacity(): " + index + ">" + capacity());
+        }
+        
         byte[] dst_array = array();
         if (dst_array != null)
             Portable.arraycopy(b, offset, dst_array, index, length);
         else
         {
-            for (int i = 0; i < length; i++)
-                poke(index++, b[offset + i]);
+            int s=offset;
+            for (int i=0;i<length;i++)
+                poke(index++,b[s++]);
         }
+        return length;
     }
 
-    public void put(Buffer src)
+    public int put(Buffer src)
     {
         int pi = putIndex();
-        poke(pi, src);
-        setPutIndex(pi + src.length());
+        int l=poke(pi, src);
+        setPutIndex(pi + l);
+        return l;
     }
 
     public void put(byte b)
@@ -341,11 +361,20 @@ public abstract class AbstractBuffer implements Buffer
         setPutIndex(pi + 1);
     }
 
-    public void put(byte[] b, int offset, int length)
+    public int put(byte[] b, int offset, int length)
     {
         int pi = putIndex();
-        poke(pi, b, offset, length);
-        setPutIndex(pi + length);
+        int l = poke(pi, b, offset, length);
+        setPutIndex(pi + l);
+        return l;
+    }
+    
+    public int put(byte[] b)
+    {
+        int pi = putIndex();
+        int l = poke(pi, b, 0, b.length);
+        setPutIndex(pi + l);
+        return l;
     }
 
     public int putIndex()

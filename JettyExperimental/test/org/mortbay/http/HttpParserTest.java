@@ -267,6 +267,7 @@ public class HttpParserTest extends TestCase
         for (int t= 0; t < tests.length; t++)
         {
             String tst="t"+tests[t];
+            System.err.println(tst);
             try
             {
                 ByteArrayBuffer buffer= new ByteArrayBuffer(tests[t]);

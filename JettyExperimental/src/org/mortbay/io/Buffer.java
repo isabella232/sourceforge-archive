@@ -226,15 +226,18 @@ public interface Buffer extends Cloneable
     
     /**
      * Put the contents of the buffer at the specific index.
+     * The source buffer is not modified.
      * @param index an <code>int</code> value
      * @param src a <code>Buffer</code> value
+     * @return The number of bytes actually poked
      */
-    void poke(int index, Buffer src);
+    int poke(int index, Buffer src);
     
     /**
      * Put a specific byte to a specific getIndex.
      * @param index an <code>int</code> value
      * @param b a <code>byte</code> value
+     * @return The number of bytes actually poked
      */
     void poke(int index, byte b);
     
@@ -242,26 +245,38 @@ public interface Buffer extends Cloneable
      * Put a specific byte to a specific getIndex.
      * @param index an <code>int</code> value
      * @param b a <code>byte array</code> value
+     * @return The number of bytes actually poked
      */
-    void poke(int index, byte b[], int offset, int length);
+    int poke(int index, byte b[], int offset, int length);
     
     /**
      * Write the bytes from the source buffer to the current getIndex.
+     * The source buffer is not modified.
      * @param src a <code>Buffer</code> value
+     * @return The number of bytes actually poked
      */
-    void put(Buffer src);
+    int put(Buffer src);
 
     /**
      * Put a byte to the current getIndex and increment the getIndex.
      * @param b a <code>byte</code> value
+     * @return The number of bytes actually poked
      */
     void put(byte b);
     
     /**
      * Put a byte to the current getIndex and increment the getIndex.
      * @param b a <code>byte</code> value
+     * @return The number of bytes actually poked
      */
-    void put(byte[] b,int offset, int length);
+    int put(byte[] b,int offset, int length);
+
+    /**
+     * Put a byte to the current getIndex and increment the getIndex.
+     * @param b a <code>byte</code> value
+     * @return The number of bytes actually poked
+     */
+    int put(byte[] b);
 
     /**
      * The index of the first element that should not be read.

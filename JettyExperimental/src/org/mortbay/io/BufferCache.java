@@ -86,9 +86,12 @@ public class BufferCache
         return lookup(buffer).toString();
     }
 
-    public static int getOrdinal(Buffer buffer)
+    public int getOrdinal(Buffer buffer)
     {
         if (buffer instanceof CachedBuffer)
+            return ((CachedBuffer)buffer).getOrdinal();
+        buffer=lookup(buffer);
+        if (buffer!=null && buffer instanceof CachedBuffer)
             return ((CachedBuffer)buffer).getOrdinal();
         return -1;
     }

@@ -90,14 +90,14 @@ public class NIOBuffer extends AbstractBuffer
         _buf.put(position,b);
     }
 
-    public void poke(int index, Buffer src)
+    public int poke(int index, Buffer src)
     {
         if (isReadOnly()) Portable.throwIllegalState(__READONLY);
         
         byte[] array=src.array();
         if (array!=null)
         {
-            poke(index,array,src.getIndex(),src.length());
+            return poke(index,array,src.getIndex(),src.length());
         }
         else
         {
@@ -110,9 +110,11 @@ public class NIOBuffer extends AbstractBuffer
                 try
                 {
                     _buf.position(index);
+                    // TODO limit this
                     b.limit(src.putIndex());
                     b.position(src.getIndex());
                     _buf.put(b);
+                    return src.length();
                 }
                 finally
                 {
@@ -122,18 +124,21 @@ public class NIOBuffer extends AbstractBuffer
                 }
             }
             else
-                super.poke(index,src);
+                return super.poke(index,src);
         }
     }
     
 
-    public void poke(int index, byte[] b, int offset, int length)
+    public int poke(int index, byte[] b, int offset, int length)
     {
         if (isReadOnly()) Portable.throwIllegalState(__READONLY);
         try
         {
+            if (index+length>capacity())
+                length=capacity()-index;
             _buf.position(index);
             _buf.put(b,offset,length);
+            return length;
         }
         finally
         {

@@ -242,6 +242,17 @@ public class BufferUtil
         buffer.put((byte)13);
         buffer.put((byte)10);
     }
+    
+    public static boolean isPrefix(Buffer prefix,Buffer buffer)
+    {
+        if (prefix.length()>buffer.length())
+            return false;
+        int bi=buffer.getIndex();
+        for (int i=prefix.getIndex(); i<prefix.putIndex();i++)
+            if (prefix.peek(i)!=buffer.peek(bi++))
+                return false;
+        return true;
+    }
 
 
 }

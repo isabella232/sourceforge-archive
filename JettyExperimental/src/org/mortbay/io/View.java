@@ -175,9 +175,9 @@ public class View extends AbstractBuffer
      * @param index
      * @param src
      */
-    public void poke(int index, Buffer src)
+    public int poke(int index, Buffer src)
     {
-        _buffer.poke(index,src); 
+        return _buffer.poke(index,src); 
     }
 
     /**
@@ -195,8 +195,8 @@ public class View extends AbstractBuffer
      * @param offset
      * @param length
      */
-    public void poke(int index, byte[] b, int offset, int length)
+    public int poke(int index, byte[] b, int offset, int length)
     {
-        _buffer.poke(index,b,offset,length);
+        return _buffer.poke(index,b,offset,length);
     }
 }
