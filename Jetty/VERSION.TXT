@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Merged LimitedNCSARequestLog into NCSARequestLog
+
 Jetty-4.1.0 - 22 September 2002
  + Fixed CGI+windows security hole.
  + Fixed AJP13 handling of mod_jk loadbalancing.
