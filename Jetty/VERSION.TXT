@@ -13,6 +13,7 @@ Jetty-5.1.RC0 - 11 October 2004
  + Added LifeCycle events and generic container.
  + Upgraded to ant-1.6 for jasper
  + Fixed HTAccessHandler
+ + JBoss 4.0.0 support
 
 Jetty-4
  + LineInput handles readers with small internal buffer
