@@ -178,7 +178,7 @@ public class ProxyHandler extends AbstractHttpHandler
             if (http!=null)
             {
                 proxy_in = http.getErrorStream();
-                int code=500;
+                int code=HttpResponse.__500_Internal_Server_Error;
                 
                 code=http.getResponseCode();
                 response.setStatus(code);
@@ -220,9 +220,8 @@ public class ProxyHandler extends AbstractHttpHandler
             Code.warning(e.toString());
             Code.ignore(e);
             if (!response.isCommitted())
-                response.sendError(500);
+                response.sendError(HttpResponse.__400_Bad_Request);
         }
-        
     }
     
     /* ------------------------------------------------------------ */

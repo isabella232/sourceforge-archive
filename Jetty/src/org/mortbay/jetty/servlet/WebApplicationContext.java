@@ -511,12 +511,16 @@ public class WebApplicationContext
         throws  InterruptedException
     {
         // Context listeners
-        if (_contextListeners!=null && _webAppHandler!=null)
+        if (_contextListeners!=null)
         {
-            ServletContextEvent event = new ServletContextEvent(getServletContext());
-            for (int i=_contextListeners.size();i-->0;)
-                ((ServletContextListener)_contextListeners.get(i))
-                    .contextDestroyed(event);
+            if (_webAppHandler!=null)
+            {
+                ServletContextEvent event = new ServletContextEvent(getServletContext());
+                for (int i=_contextListeners.size();i-->0;)
+                    ((ServletContextListener)_contextListeners.get(i))
+                        .contextDestroyed(event);
+            }
+            _contextListeners.clear();
         }
 
         // Stop the context

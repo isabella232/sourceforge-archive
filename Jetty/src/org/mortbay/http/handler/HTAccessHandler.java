@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.StringTokenizer;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpRequest;
@@ -35,6 +36,7 @@ import org.mortbay.util.UnixCrypt;
  * @author Deville Daniel
  * @author Dubois Roger
  * @author  Greg Wilkins
+ * @author  Konstantin Metlov
  *
  */
 public class HTAccessHandler extends AbstractHttpHandler
@@ -158,7 +160,7 @@ public class HTAccessHandler extends AbstractHttpHandler
             }
  
             // set required page
-            if (!ht.checkAuth(user,password))
+            if (!ht.checkAuth(user,password,getHttpContext(),request))
             {
                 Code.debug("Auth Failed");
                 _requireUser=true;
@@ -398,18 +400,24 @@ public class HTAccessHandler extends AbstractHttpHandler
         }
 
         /* ------------------------------------------------------------ */
-        public boolean checkAuth(String user, String pass)
+        public boolean checkAuth(String user,
+                                 String pass,
+                                 HttpContext context,
+                                 HttpRequest request)
         {
             if(_requireName == null)
                 return true;
-
-            // Have to authenticate the user
-            String code=getUserCode(user);
-            if (code==null ||
-                (code.equals("") && !pass.equals("")) ||
-                (!code.equals(UnixCrypt.crypt(pass, code))))
-                return false;
-                    
+            
+ 	    // Authenticate with realm  
+ 	    if (context.getRealm().authenticate(user, pass, request)==null)
+            {  
+                // Have to authenticate the user with the password file  
+ 	        String code=getUserCode(user);  
+     	        if (code==null ||  
+         	    (code.equals("") && !pass.equals("")) ||  
+             	    (!code.equals(UnixCrypt.crypt(pass, code))))  
+                    return false;  
+            };                    
             
             if (_requireName.equals(USER)) 
             {
