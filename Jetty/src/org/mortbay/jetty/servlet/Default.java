@@ -13,6 +13,7 @@ import java.util.List;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -71,9 +72,11 @@ public class Default extends HttpServlet
     private boolean _delAllowed;
     private boolean _redirectWelcomeFiles;
     private int _minGzipLength=-1;
+    private Resource _resourceBase;
     
     /* ------------------------------------------------------------ */
     public void init()
+        throws UnavailableException
     {
         ServletContext config=getServletContext();
         _servletHandler=((ServletHandler.Context)config).getServletHandler();
@@ -85,6 +88,17 @@ public class Default extends HttpServlet
         _delAllowed=getInitBoolean("delAllowed");
         _redirectWelcomeFiles=getInitBoolean("redirectWelcome");
         _minGzipLength=getInitInt("minGzipLength");
+        
+        String rb=getInitParameter("resourceBase");
+        if (rb!=null)
+        {
+            try{_resourceBase=Resource.newResource(rb);}
+            catch (Exception e) {
+                Code.warning(e);
+                throw new UnavailableException(e.toString()); 
+            }
+        }
+        
         
         if (_putAllowed)
             _AllowString+=", PUT";
@@ -126,23 +140,24 @@ public class Default extends HttpServlet
     protected Resource getResource(String pathInContext)
         throws IOException
     {
-        return _httpContext.getResource(pathInContext);
+        if (_resourceBase==null)
+            return _httpContext.getResource(pathInContext);
+        return _resourceBase.addPath(pathInContext);
     }
-    
     
     /* ------------------------------------------------------------ */
     protected void service(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException
     {
-        String pathInContext=(String)request.getAttribute(Dispatcher.__SERVLET_PATH);
+        String pathInContext=(String)request.getAttribute(Dispatcher.__PATH_INFO);
         if (pathInContext==null)
         {
-            pathInContext=(String)request.getAttribute(Dispatcher.__PATH_INFO);
+            pathInContext=(String)request.getAttribute(Dispatcher.__SERVLET_PATH);
             if (pathInContext==null)
             {
-                pathInContext=request.getServletPath();
+                pathInContext=request.getPathInfo();
                 if (pathInContext==null)
-                    pathInContext=request.getPathInfo();
+                    pathInContext=request.getServletPath();
             }
         }
         
@@ -438,7 +453,7 @@ public class Default extends HttpServlet
             // Try a direct match for most common requests. Avoids
             // parsing the date.
             HttpContext.ResourceMetaData metaData =
-                (HttpContext.ResourceMetaData)resource.getAssociate();
+                _httpContext.getResourceMetaData(resource);
             if (metaData!=null)
             {
                 String ifms=request.getHeader(HttpFields.__IfModifiedSince);
@@ -608,7 +623,7 @@ public class Default extends HttpServlet
         //  content-length header
         //
         HttpContext.ResourceMetaData metaData =
-            (HttpContext.ResourceMetaData)resource.getAssociate();
+            _httpContext.getResourceMetaData(resource);
         String encoding = metaData.getEncoding();
         MultiPartResponse multi = new MultiPartResponse(response.getOutputStream());
         response.setStatus(HttpResponse.__206_Partial_Content,"Partial Content");
@@ -674,8 +689,8 @@ public class Default extends HttpServlet
         throws IOException
     {
         HttpContext.ResourceMetaData metaData =
-            (HttpContext.ResourceMetaData)resource.getAssociate();
-
+            _httpContext.getResourceMetaData(resource);
+        
         response.setContentType(metaData.getEncoding());
         if (count != -1)
         {

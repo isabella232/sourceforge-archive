@@ -273,6 +273,16 @@
       <Arg>*.jsp</Arg>
       <Arg>org.apache.jasper.servlet.JspServlet</Arg>
     </Call>   
+    <Call name="addServlet">
+      <Arg>SrcDefault</Arg>
+      <Arg>/src/*</Arg>
+      <Arg>org.mortbay.jetty.servlet.Default</Arg>
+      <Call name="setInitParameter"><Arg>dirAllowed</Arg><Arg>true</Arg></Call>
+      <Call name="setInitParameter">
+        <Arg>resourceBase</Arg>
+        <Arg><SystemProperty name="jetty.home" default="."/>/src/</Arg>
+      </Call>
+    </Call>   
 
     <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/demo/docroot/</Set>
     <Call name="addHandler">

@@ -80,6 +80,8 @@
   <!--                    encoded if a matching resource is found ending    -->
   <!--                    with ".gz"                                        -->
   <!--                                                                      -->
+  <!--   resoureBase      Can be set to replace the context resource base   -->
+  <!--                                                                      -->
   <!-- The MOVE method is allowed if PUT and DELETE are allowed             -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <servlet>
