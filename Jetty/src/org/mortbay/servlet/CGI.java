@@ -42,6 +42,12 @@ import org.mortbay.util.StringUtil;
  * The cgi bin directory can be set with the cgibinResourceBase init
  * parameter or it will default to the resource base of the context.
  *
+ * The "commandPrefix" init parameter may be used to set a prefix to all
+ * commands passed to exec. This can be used on systems that need assistance
+ * to execute a particular file type. For example on windows this can be set
+ * to "perl" so that perl scripts are executed.
+ *
+ * The "Path" init param is passed to the exec environment as PATH.
  * Note: Must be run unpacked somewhere in the filesystem.
  *
  * @version $Revision$
@@ -51,13 +57,14 @@ public class CGI extends HttpServlet
 {
     protected File _docRoot;
     protected String _path;
+    protected String _cmdPrefix;
 
     /* ------------------------------------------------------------ */
     public void
         init()
         throws ServletException
     {
-
+        _cmdPrefix=getInitParameter("commandPrefix");
 
         String tmp = getInitParameter("cgibinResourceBase");
         if (tmp==null)
@@ -218,9 +225,11 @@ public class CGI extends HttpServlet
         // are we meant to decode args here ? or does the script get them
         // via PATH_INFO ?  if we are, they should be decoded and passed
         // into exec here...
+
+        String execCmd=(_cmdPrefix!=null)?_cmdPrefix+" "+path:path;
         Process p=dir==null
-            ?Runtime.getRuntime().exec(path, env.getEnvArray())
-            :Runtime.getRuntime().exec(path, env.getEnvArray(),dir);
+            ?Runtime.getRuntime().exec(execCmd, env.getEnvArray())
+            :Runtime.getRuntime().exec(execCmd, env.getEnvArray(),dir);
 
         // hook processes input to browser's output (async)
         final InputStream inFromReq=req.getInputStream();
