@@ -4,28 +4,35 @@
 // ========================================================================
 
 package org.mortbay.http;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.nio.channels.Channels;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.Iterator;
-import org.mortbay.util.ChannelStream;
+import org.mortbay.http.SocketListener;
+import org.mortbay.http.HttpRequest;
+import org.mortbay.http.HttpConnection;
+import org.mortbay.http.HttpInputStream;
 import org.mortbay.util.Code;
+import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.Log;
 import org.mortbay.util.ThreadPool;
+import org.mortbay.util.ChannelStream;
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.ServerSocket;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.nio.channels.Channels;
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SelectionKey;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /* ------------------------------------------------------------ */
 /** Non blocking Listener.
  * @version $Id$
  * @author Greg Wilkins (gregw)
- * @author Oleksandr Protasenko
  */
 public class SocketChannelListener
     extends ThreadPool
@@ -57,8 +64,7 @@ public class SocketChannelListener
     /* ------------------------------------------------------------ */
     public void setHttpServer(HttpServer server)
     {
-        Code.assertTrue(_server==null || _server==server,
-                        "Cannot share listeners");
+        Code.assertTrue(server==null || _server==null || _server==server,"Cannot share listeners");
         _server=server;
     }
 
@@ -222,6 +228,11 @@ public class SocketChannelListener
         
 	// Bind the server socket to the local host and port
 	_acceptChannel.socket().bind(_address);
+        
+        // Read the address back from the server socket to fix issues
+        // with listeners on anonymous ports
+        _address = (InetSocketAddress)
+            _acceptChannel.socket().getLocalSocketAddress();
 
         // create a selector;
         _selector=Selector.open();
@@ -463,9 +474,6 @@ public class SocketChannelListener
                   sc);
         }
 
-	boolean active = false;
-	boolean isActive() { return active; }
-
         protected void readRequest()
             throws IOException
         {
@@ -473,44 +481,13 @@ public class SocketChannelListener
             {
                 // XXXXXXXXXXXXX - mark Idle
                 super.readRequest();
-
-		// listen for client dropping connection, while processing request
-		active = true;
-                synchronized(_idling)
-                {
-                    _idling.add(this);
-                }
-                _selector.wakeup();
             }
             finally
             {
                 // XXXXXXXXXXXXX - mark active
             }
         }
-
-	public void outputNotify(OutputStream out, int action, Object ignoredData)            
-	    throws IOException {
-
-	    SocketChannel sc = getSocketChannel();
-	    SelectionKey key = sc.keyFor(_selector);
-
-	    // done processing, restore channel blocking mode
-    	    synchronized(_idling)
-            {
-		if (key != null && key.isValid()) {
-
-        	    key.cancel();
-        	    key.channel().configureBlocking(true);
-            	    _selector.wakeup();
-                }
-		else
-		    _idling.remove(this);
-	    }
-	    active = false;
-
-	    super.outputNotify(out, action, ignoredData);
-	}
-
+    
         public SocketChannel getSocketChannel()
         {
             return (SocketChannel)getConnection();
@@ -523,7 +500,7 @@ public class SocketChannelListener
             Socket socket=sc.socket();
             super.close();            
             sc.close();
-            if (!socket.isOutputShutdown())
+            if (socket.isOutputShutdown())
                 socket.shutdownOutput();
         }
     }
@@ -543,8 +520,6 @@ public class SocketChannelListener
 
                 while(_running)
                 {
-            try
-            {
                     // Add idling Idle connections.
                     synchronized(_idling)
                     {
@@ -583,33 +558,16 @@ public class SocketChannelListener
                         {
                             SelectionKey key = (SelectionKey)ready.next();
                             ready.remove();
-                            if (key.isReadable())
+                            if ((key.interestOps()&SelectionKey.OP_READ)!=0)
                             {
                                 // Un-Idle a connections
-                                Connection connection=(Connection)key.attachment();
+                                HttpConnection connection=(HttpConnection)key.attachment();
                                 Code.debug("READ ready ",connection);
                                 key.cancel();
                                 key.channel().configureBlocking(true);
-
-				// interrupt the processing if client drops connection
-				if (connection.isActive()) {
-
-				    if (((SocketChannel)key.channel()).socket().
-					getInputStream().available() <= 0)
-					try {
-
-                            		    Code.debug("interrupting ", connection);
-					    connection.close();
-					}
-					catch (Exception e) {
-
-					    Code.ignore(e);
-					}
-				}
-				else
-                            	    SocketChannelListener.this.run(connection);
+                                SocketChannelListener.this.run(connection);
                             }
-                            else if (key.isAcceptable())
+                            else if ((key.interestOps()&SelectionKey.OP_ACCEPT)!=0)
                             {
                                 // We have connections to accept.
                                 ServerSocketChannel channel = (ServerSocketChannel)key.channel();
@@ -645,6 +603,7 @@ public class SocketChannelListener
                         }
                     }
                 }
+            }
             catch(InterruptedException e)
             {
                 Code.ignore(e);
@@ -657,8 +616,6 @@ public class SocketChannelListener
             {
                 Code.debug(e);
             }
-            }
-	    }
             finally
             {
                 Log.event("Stopping "+this.getName());

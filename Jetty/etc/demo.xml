@@ -79,6 +79,7 @@
         <Set name="MaxThreads">100</Set>
         <Set name="MaxIdleTimeMs">30000</Set>
         <Set name="LowResourcePersistTimeMs">5000</Set>
+        <Set name="PoolName">Listener</Set>
       </New>
     </Arg>
   </Call>
@@ -111,6 +112,7 @@
         <Set name="Keystore"><SystemProperty name="jetty.home" default="."/>/etc/demokeystore</Set>
         <Set name="Password">OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4</Set>
     	<Set name="KeyPassword">OBF:1u2u1wml1z7s1z7a1wnl1u2g</Set>
+        <Set name="PoolName">Listener</Set>
       </New>
     </Arg>
   </Call>
@@ -129,33 +131,10 @@
         <Set name="MaxThreads">20</Set>
         <Set name="MaxIdleTimeMs">0</Set>
         <Set name="confidentialPort">443</Set>
+        <Set name="PoolName">Listener</Set>
       </New>
     </Arg>
   </Call>
-
-
-  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- Add and configure a NIO HTTP listener to port 8888              -->
-  <!-- This listener can be used to replace the standard HTTP          -->
-  <!-- listener when deployed on LARGE systems using jdk 1.4           -->
-  <!-- which have a need to reduce the threads allocated.              -->
-  <!-- While it does not improve straight line performance, it does    -->
-  <!-- reduce the thread burden for systems that do not cope well with -->
-  <!-- thousands of threads.  It is still experimental, so please      -->
-  <!-- feedback any experiences you have with it.                      -->
-  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- UNCOMMENT TO ACTIVATE
-  <Call name="addListener">
-    <Arg>
-      <New class="org.mortbay.http.SocketChannelListener">
-        <Set name="Port"><SystemProperty name="jetty.port" default="8888"/></Set>
-        <Set name="MinThreads">5</Set>
-        <Set name="MaxThreads">500</Set>
-        <Set name="MaxIdleTimeMs">30000</Set>
-      </New>
-    </Arg>
-  </Call>
-  -->
 
 
 
