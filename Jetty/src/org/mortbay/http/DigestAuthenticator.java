@@ -21,6 +21,7 @@ import java.security.Principal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.B64Code;
 import org.mortbay.util.Credential;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.QuotedStringTokenizer;
@@ -37,6 +38,10 @@ public class DigestAuthenticator implements Authenticator
 {
     static Log log = LogFactory.getLog(DigestAuthenticator.class);
 
+    private long maxNonceAge=0;
+    private long nonceSecret=this.hashCode();
+    
+    
     /* ------------------------------------------------------------ */
     /** 
      * @return UserPrinciple if authenticated or null if not. If
@@ -107,7 +112,8 @@ public class DigestAuthenticator implements Authenticator
                 }
             }            
 
-            user = realm.authenticate(digest.username,digest,request);
+            if (checkNonce(digest.nonce,request))
+                user = realm.authenticate(digest.username,digest,request);
             
             if (user==null)
                 log.warn("AUTH FAILURE: user "+digest.username);
@@ -142,13 +148,100 @@ public class DigestAuthenticator implements Authenticator
 			    "digest realm=\""+realm.getName()+
 			    "\", domain=\""+
 			    "/"+ // request.getContextPath()+
-			    "\", nonce=\""+
-			    Long.toString(request.getTimeStamp(),27)+
+			    "\", nonce=\""+newNonce(request)+
 			    "\""
                           );
         response.sendError(HttpResponse.__401_Unauthorized);
     }
 
+    /* ------------------------------------------------------------ */
+    public String newNonce(HttpRequest request)
+    {
+        long ts=request.getTimeStamp();
+        long sk=nonceSecret;
+        
+        byte[] nounce = new byte[24];
+        for (int i=0;i<8;i++)
+        {
+            nounce[i]=(byte)(ts&0xff);
+            ts=ts>>8;
+            nounce[8+i]=(byte)(sk&0xff);
+            sk=sk>>8;
+        }
+        
+        byte[] hash=null;
+        try
+        {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.reset();
+            md.update(nounce,0,16);
+            hash = md.digest();
+        }
+        catch(Exception e)
+        {
+            log.fatal(this,e);
+        }
+        
+        for (int i=0;i<hash.length;i++)
+        {
+            nounce[8+i]=hash[i];
+            if (i==23)
+                break;
+        }
+        
+        return new String(B64Code.encode(nounce));
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean checkNonce(String nonce, HttpRequest request)
+    {
+        try
+        {
+            byte[] n = B64Code.decode(nonce.toCharArray());
+            if (n.length!=24)
+                return false;
+            
+            long ts=0;
+            long sk=nonceSecret;
+            byte[] n2 = new byte[16];
+            for (int i=0;i<8;i++)
+            {
+                n2[i]=n[i];
+                n2[8+i]=(byte)(sk&0xff);
+                sk=sk>>8;
+                ts=(ts<<8)+(0xff&(long)n[7-i]);
+            }
+            
+            long age=request.getTimeStamp()-ts;
+            
+            if(maxNonceAge>0 && (age<0 || age>maxNonceAge))
+                return false;
+            
+            byte[] hash=null;
+            try
+            {
+                MessageDigest md = MessageDigest.getInstance("MD5");
+                md.reset();
+                md.update(n2,0,16);
+                hash = md.digest();
+            }
+            catch(Exception e)
+            {
+                log.fatal(this,e);
+            }
+            
+            for (int i=0;i<16;i++)
+                if (n[i+8]!=hash[i])
+                    return false;
+                
+            return true;
+        }
+        catch(Exception e)
+        {
+            log.debug("",e);
+        }
+        return false;
+    }
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -219,6 +312,34 @@ public class DigestAuthenticator implements Authenticator
             return username+","+response;
         }
         
+    }
+    /**
+     * @return Returns the maxNonceAge.
+     */
+    public long getMaxNonceAge()
+    {
+        return maxNonceAge;
+    }
+    /**
+     * @param maxNonceAge The maxNonceAge to set.
+     */
+    public void setMaxNonceAge(long maxNonceAge)
+    {
+        this.maxNonceAge = maxNonceAge;
+    }
+    /**
+     * @return Returns the nonceSecret.
+     */
+    public long getNonceSecret()
+    {
+        return nonceSecret;
+    }
+    /**
+     * @param nonceSecret The nonceSecret to set.
+     */
+    public void setNonceSecret(long nonceSecret)
+    {
+        this.nonceSecret = nonceSecret;
     }
 }
     
