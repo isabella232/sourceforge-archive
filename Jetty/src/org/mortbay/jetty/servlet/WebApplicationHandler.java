@@ -195,15 +195,11 @@ public class WebApplicationHandler extends ServletHandler
 
         SessionManager old= getSessionManager();
 
-        int mii= 0;
-        boolean setMii= false;
-
         if (getHttpContext() != null)
         {
             // recover config and remove listeners from old session manager
             if (old != null && old != sm)
             {
-                old.initialize(null);
                 if (_sessionListeners != null)
                 {
                     for (Iterator i= LazyList.iterator(_sessionListeners); i.hasNext();)
@@ -212,8 +208,6 @@ public class WebApplicationHandler extends ServletHandler
                         _sessionManager.removeEventListener(listener);
                     }
                 }
-                mii= _sessionManager.getMaxInactiveInterval();
-                setMii= true;
             }
 
             // Set listeners and config on new listener.
@@ -227,9 +221,6 @@ public class WebApplicationHandler extends ServletHandler
                         sm.addEventListener(listener);
                     }
                 }
-                sm.initialize(this);
-                if (setMii)
-                    sm.setMaxInactiveInterval(mii);
             }
         }
 

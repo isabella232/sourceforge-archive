@@ -328,7 +328,8 @@ public class LogImpl implements org.apache.commons.logging.Log
      */
     public void info(Object arg0)
     {
-        message(INFO,arg0,new Frame(1));
+        if (isInfoEnabled())
+            message(INFO,arg0,new Frame(1));
         
     }
 
@@ -337,7 +338,8 @@ public class LogImpl implements org.apache.commons.logging.Log
      */
     public void info(Object arg0, Throwable arg1)
     {
-        message(INFO,new Object[]{arg0,arg1},new Frame(1));
+        if (isInfoEnabled())
+            message(INFO,new Object[]{arg0,arg1},new Frame(1));
     }
 
     /* (non-Javadoc)
@@ -515,7 +517,8 @@ public class LogImpl implements org.apache.commons.logging.Log
      */
     public void trace(Object arg0)
     {
-        message(TRACE,arg0,new Frame(1));
+        if (isTraceEnabled())
+            message(TRACE,arg0,new Frame(1));
     }
 
     /* (non-Javadoc)
@@ -523,8 +526,8 @@ public class LogImpl implements org.apache.commons.logging.Log
      */
     public void trace(Object arg0, Throwable arg1)
     {
-        message(TRACE,new Object[]{arg0,arg1},new Frame(1));
-        
+        if (isTraceEnabled())
+            message(TRACE,new Object[]{arg0,arg1},new Frame(1));
     }
 
     /* (non-Javadoc)

@@ -22,6 +22,8 @@
   
   
     <!-- Create a logger for the demo web app classes -->
+    <!-- and map Context logger by display name to demo logger -->  
+    <!--
     <Call name="setAttribute">
       <Arg>org.mortbay.webapps.*</Arg>
       <Arg>
@@ -44,14 +46,14 @@
        </New>
       </Arg>
     </Call>  
-      
-    <!-- Map Context by display name to demo logger -->  
     <Call name="setAttribute">
       <Arg>Jetty Demo</Arg>
       <Arg>org.mortbay.webapps.*</Arg>
     </Call>
+    -->
     
     <!-- reconfigure the default logger -->
+    <!--
     <Call name="getInstance">
       <Arg/>
       <Call name="reset"/>
@@ -71,6 +73,7 @@
         </Arg>
       </Call>
     </Call>
+    -->
   </Call>
   
   
