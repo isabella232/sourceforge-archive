@@ -104,7 +104,7 @@ A Demo server can be run on port 8080 with the commands:
 
 
 You can access this demo with at http://localhost:8080
-The demo also runs a simple admin servlet at http://localhost:8888,
+The demo also runs a simple admin servlet at http://localhost:8081,
 with user username=admin, password=admin.
 
 There is also a Unix start/stop script bin/jetty.sh which can run
@@ -414,54 +414,92 @@ trimmed significantly if you want to reduce size.
 JMX Management
 --------------
 Jetty is instrumented with an optional JMX managment layer.
-This is contained in the Jetty3Extra release
+This is contained in the JettyExtra package
 
 
 SASL Authentication
 -------------------
-A SASL listener is included in the Jetty3Extra release
-
-
-PDF and Adobe Acrobat support
------------------------------
-Adobe Acrobat pluggin for IE has a problem handling chunked content and the
-partial implementation of ranges supported by Jetty.  If you are serving
-PDF files from Jetty, then you will need to configure the HttpServer to
-not force chunking and the ResourceHandler to not accept ranges:
-
-<Configure  class="org.mortbay.http.HttpServer">
-  ...
-  <Set name="ChunkingForced" type="boolean">false</Set>
-  ...
-
-  <Call name="addWebApplication">
-      ...
-      <Call name="getResourceHandler">
-         <Set name="AcceptRanges" type="boolean">false</Set>
-      </Call>
-  </Call>
-  ...
-</Configure>
-
-
-Minimal HTTP Jar
------------------
-The ant target mini.http.jar builds an all-in-one minimal(ish) jar that
-contains Util and HTTP packages.   This gives a full HTTP/1.1 server with
-the HttpHandler extension mechanism (but no servlets) in about 220K.
-
-OK so there has been a bit of code bloat from the old Jetty2 100K days,
-but then there has been specification bloat as well.  This jar could be
-trimmed significantly if all HTTP/1.1 features are not used (eg Ranges or
-security).
-
-The minimal server can be run from the command line with
-
- java -cp org.mortbay.http.jar org.mortbay.http.HttpServer
+A SASL listener is included in the JettyExtra release
 
 
 Non-Blocking IO.
 ----------------
-The Jetty3Extra package provides support for non-blocking IO to
+The JettyExtra package provides support for non-blocking IO to
 reduct the thread usage of the Jetty server.
+
+
+DEBUGGING
+=========
+
+The debug and logging output of jetty can be controlled with java System properties:
+
+    DEBUG - If set, debug output is enabled
+    DEBUG_PATTERNS - If set to a comma separated list of strings, Then debug output is only produced from those classes whose fully qualified class name contains one of the strings as a substring.
+    DEBUG_VERBOSE - Set to an integer verbosity level for use in controlling debug verbosity (see verbose(int))
+
+Using this with the java program:
+
+   java [-DDEBUG [-DDEBUG_PATTERNS="MyClass,my.package"] [-DDEBUG_VERBOSE=n] ]  my.package.main
+
+example:
+
+   java -DDEBUG -DDEBUG_PATTERNS=com.acme.MyServlet,HttpHandler  org.mortbay.jetty.Server
+
+
+There is also a debug servlet that can change the debug setting of a running
+server.   It is configured by the admin.xml file and is run on port 8081 as 
+part of the standard Jetty demo.
+
+Finally the JMX MBeans provided by the JettyExtra package also provide a 
+mechanism to configure debugging and logging at runtime.
+
+
+Support FAQ
+===========
+ + This list if for jetty related support questions.  General questions about
+   servlets and/or java should not be posted here.
+
+ + Before posting, please check the archives that the question has not been
+   asked before by checking the archives at 
+   http://groups.yahoo.com/group/jetty-support
+
+ + Please also read the improving documentation at
+      http://jetty.mortbay.org/jetty/doc/index.html
+   Please read the tutorial, then read it again.
+
+ + Jetty3 uses the 2.2 servlet API, which introduced contexts.  
+   It is important to understand contexts when configuring Jetty and it 
+   may be worth while reading the Jetty documentation and the servlet spec 
+   about the 2.2 servlet API.
+
+ + Before posting, try increasing the debug output of Jetty.  Debugging 
+   control is described in the README file.  Even if you cannot spot the
+   problem in the output, it may be valuable to make the trace available
+   to whoever helps you with your problem.
+
+ + When posting a support question, please provide as much information as
+   possible, which should include:
+      - The version of Jetty.
+      - The version of java.
+      - Your Operating system.
+      - Overview of your configuration.
+      - What URL was tried.
+      - What browser and what it rendered.
+      - Details of the problem, including stack traces and/or log files.
+      - Details of what you have tried to make it work.
+      
+ + For JSP problems, consider checking JSP forums first. Jetty uses the
+   Jasper engine from jakarta.apache.org - bugs and all.
+   If you can write a small JSP that demonstrates your problem, you 
+   will get much faster results.
+
+ + For general class loading problems, the solution is often best to start
+   with your classes on the system classpath until you are more familiar
+   with the configuration of Contexts. 
+
+ + If in doubt about if you should post or not - please post, we are pretty
+   friendly and will tell you nicely if it is not appropriate.
+
+
+
 

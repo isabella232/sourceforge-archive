@@ -22,7 +22,7 @@ $Id$
     <Arg>
       <New class="org.mortbay.http.SocketListener">
         <Set name="Host">localhost</Set>
-        <Set name="Port">8888</Set>
+        <Set name="Port">8081</Set>
         <Set name="MinThreads">1</Set>
         <Set name="MaxThreads">5</Set>
         <Set name="MaxIdleTimeMs">10000</Set>      
