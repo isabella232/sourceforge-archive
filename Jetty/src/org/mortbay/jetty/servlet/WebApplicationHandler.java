@@ -339,16 +339,13 @@ public class WebApplicationHandler extends ServletHandler
             if (th.getClass().equals(IOException.class))
                 throw (IOException)th;
 
-            if (Code.debug())
+            if (!Code.debug() && th instanceof java.io.IOException)
+                Code.warning("Exception for "+httpRequest.getURI()+": "+th);
+            else
             {
                 Code.warning("Exception for "+httpRequest.getURI(),th);
                 Code.debug(httpRequest);
             }
-            else
-            {
-                Code.warning("Exception for "+httpRequest.getURI()+": "+th);
-            }
-            
             
             httpResponse.getHttpConnection().forceClose();
             if (!httpResponse.isCommitted())
@@ -364,17 +361,9 @@ public class WebApplicationHandler extends ServletHandler
                 Code.debug("Response already committed for handling ",th);
         }
         catch(Error e)
-        {
-            
-            if (Code.debug())
-            {
-                Code.warning("Error for "+httpRequest.getURI(),e);
-                Code.debug(httpRequest);
-            }
-            else
-            {
-                Code.warning("Error for "+httpRequest.getURI()+": "+e);
-            }
+        {   
+            Code.warning("Error for "+httpRequest.getURI(),e);
+            Code.debug(httpRequest);
             
             httpResponse.getHttpConnection().forceClose();
             if (!httpResponse.isCommitted())
