@@ -569,17 +569,21 @@ public class ServletHttpResponse implements HttpServletResponse
         if (_writer==null)
         {
             /* get encoding from Content-Type header */
-            String encoding = getCharacterEncoding();
-            if (encoding==null && _servletHttpRequest!=null)
-            {
-                /* implementation of educated defaults */
-                String mimeType = _httpResponse.getMimeType();                
-                encoding = _servletHttpRequest.getServletHandler()
-                    .getHttpContext().getEncodingByMimeType(mimeType);
-            }
+            String encoding = _httpResponse.getCharacterEncoding();
+            
             if (encoding==null)
-                // get last resort hardcoded default
-                encoding = StringUtil.__ISO_8859_1; 
+            {
+                if (_servletHttpRequest!=null)
+                {
+                    /* implementation of educated defaults */
+                    String mimeType = _httpResponse.getMimeType();                
+                    encoding = _servletHttpRequest.getServletHandler()
+                    	.getHttpContext().getEncodingByMimeType(mimeType);
+                }
+                if (encoding==null)
+                    encoding = StringUtil.__ISO_8859_1; 
+                _httpResponse.setCharacterEncoding(encoding,true);
+            }
             
             /* construct Writer using correct encoding */
             _writer = new ServletWriter(_httpResponse.getOutputStream(), encoding);
