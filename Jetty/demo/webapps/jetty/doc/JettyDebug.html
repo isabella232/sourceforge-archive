@@ -9,7 +9,7 @@ debug problems. For information on how to set up general debugging options go to
 
 <h1>JSSE</h1>
 <p> As described in the JSSE FAQ, there is a debug facility built into JSSE controlled by the javax.net.debug property.
-<p> Assuming that you've got JSSE configured properly you will be able to use it as follows, you will need to edit the etc/demo.xml as described in <a href="JsseSSL.html">The JSSE SSL doco</a>.
+<p> Assuming that you've got JSSE configured properly you will be able to use it as follows, you will need to edit the etc/demo.xml as described in <a href="../JsseSSL.html">The JSSE SSL doco</a>.
 <p> To get help use:
 <pre>
 JAVA_OPTIONS='-Djavax.net.debug=help' ./bin/jetty.sh run
@@ -53,6 +53,7 @@ openssl s_client -help
 
 <h4>example</h4>
 <p> When run against a server using the expired test certificate the following is generated.
+<font size="-1">
 <pre>
 bretts@london[7538]: openssl s_client -showcerts -connect localhost:8443
 CONNECTED(00000003)
@@ -100,17 +101,18 @@ Server public key is 1024 bit
 SSL-Session:
     Protocol  : TLSv1
     Cipher    : EXP-RC4-MD5
-    Session-ID: 3B079FD18A655C2228F3B9267CDC768F2BD0251E0B2EE8E2E980BDB02F341369
+    Session-ID: 3B079FD18A6267CDC768F2BD0251E0B2EE8E2E9...
     Session-ID-ctx: 
-    Master-Key: 9AD848E83549CF9835747EC287876579D95F3D69A64B9DB8E90E78B42D355F9CDD130D5AD1FE406743784B75B7CA58BE
+    Master-Key: 9AD848E83549CF9835747EC287876579D95F3D69A64B9DB8E9...
     Key-Arg   : None
     Start Time: 990355411
     Timeout   : 300 (sec)
     Verify return code: 0 (ok)
 ---
 </pre>
+</font>
 <BR><BR>
-<font size=-1>Author: Brett Sealey.<br>
+<font size="-1">Author: Brett Sealey.<br>
 Last updated: 2002 January 22nd
 </font>
 <BR><BR>
