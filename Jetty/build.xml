@@ -184,6 +184,9 @@ release     - Cleanup for release
        <exclude name="com/mortbay/HTTP/Http10TestClient.class" />
        <exclude name="com/mortbay/HTTP/Handler/TestTEHandler.class" />
        <exclude name="com/mortbay/HTML/TestHtml.class" />
+       <!-- make sure demo classes don't wind up in the jar -->
+       <exclude name="com/mortbay/Jetty/JettyPage.java" />
+       <exclude name="com/mortbay/Jetty/JettyServlet.java" />
     </jar>
   </target>
   
