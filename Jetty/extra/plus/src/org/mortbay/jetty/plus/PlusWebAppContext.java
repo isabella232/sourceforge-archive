@@ -17,6 +17,9 @@ package org.mortbay.jetty.plus;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -40,6 +43,7 @@ public class PlusWebAppContext extends WebApplicationContext
 {
     private static Log log = LogFactory.getLog(PlusWebAppContext.class);
     private InitialContext _initialCtx = null;
+    private HashMap _envMap = null;
     private ClassLoader _removeClassLoader=null;
 
     /* ------------------------------------------------------------ */
@@ -63,6 +67,24 @@ public class PlusWebAppContext extends WebApplicationContext
     {
         super(webApp);
         setConfiguration(new Configuration(this));
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /** Add a java:comp/env entry.
+     *  Values must be serializable to be stored!
+     */
+    public void addEnvEntry (String name, Object value)
+    {
+        if (_envMap == null)
+             _envMap = new HashMap();
+
+        if (name == null)
+            log.warn ("Name for java:comp/env is null. Ignoring.");
+        if (value == null)
+            log.warn ("Value for java:comp/env is null. Ignoring.");
+
+        _envMap.put (name, value);
     }
 
     /* ------------------------------------------------------------ */
@@ -95,52 +117,23 @@ public class PlusWebAppContext extends WebApplicationContext
         //bind UserTransaction
         compCtx.rebind ("UserTransaction", new LinkRef ("javax.transaction.UserTransaction"));
         if(log.isDebugEnabled())log.debug("Bound ref to javax.transaction.UserTransaction to java:comp/UserTransaction");   
-    }
 
-
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Bind an object to a context ensuring all subcontexts 
-     * are created if necessary
-     *
-     * @param ctx the context into which to bind
-     * @param name the name relative to context to bind
-     * @param obj the object to be bound
-     * @exception NamingException if an error occurs
-     */
-    /*
-      public void bind (Context ctx, String nameStr, Object obj)
-        throws NamingException
-    {
-        Name name = ctx.getNameParser("").parse(nameStr);
-
-        //no name, nothing to do 
-        if (name.size() == 0)
-            return;
-
-        Context subCtx = ctx;
-        
-        //last component of the name will be the name to bind
-
-        for (int i=0; i < name.size() - 1; i++)
+	//set up any env entries defined in config file
+        if (_envMap != null)
         {
-            try
+            Iterator it = _envMap.entrySet().iterator();
+            while (it.hasNext())
             {
-                subCtx = (Context)subCtx.lookup (name.get(i));
-                if(log.isDebugEnabled())log.debug("Subcontext "+name.get(i)+" already exists");
-            }
-            catch (NameNotFoundException e)
-            {
-                subCtx = subCtx.createSubcontext(name.get(i));
-                if(log.isDebugEnabled())log.debug("Subcontext "+name.get(i)+" created");
+                Map.Entry entry = (Map.Entry)it.next();
+                Util.bind (envCtx, (String)entry.getKey(), entry.getValue());
+                if (log.isDebugEnabled())log.debug("Bound java:comp/env/"+entry.getKey()+" to "+entry.getValue());	
             }
         }
-
-        subCtx.rebind (name.get(name.size() - 1), obj);
-        if(log.isDebugEnabled())log.debug("Bound object to "+name.get(name.size() - 1));
     }
-    */
+
+
+
+   
 
 
     /* ------------------------------------------------------------ */
