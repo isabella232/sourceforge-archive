@@ -152,10 +152,14 @@
 
       <Set name="DistributableSessionManagerPrototype">
        <New class="org.mortbay.j2ee.session.Manager">
-        <Set name="scavengerPeriod">600</Set>
-        <!-- NYI
-        <Set name="workerName">node1</Set>
-        -->
+        <Set name="scavengerPeriod">600</Set>        
+        <Set name="idGenerator">
+          <New class="org.mortbay.j2ee.session.DistributableAjpIdGenerator">
+            <!-- not needed if mod_jk supports JVMROUTE 
+            <Set name="workerName">node1</Set>
+            -->
+          </New>
+        </Set>
         <Set name="interceptorStack">
          <Array type="org.mortbay.j2ee.session.StateInterceptor">
 <!--

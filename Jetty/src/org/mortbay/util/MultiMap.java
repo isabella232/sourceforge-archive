@@ -226,8 +226,6 @@ public class MultiMap extends HashMap
         int s=LazyList.size(lo);
         if (s>0)
             ln=LazyList.remove(lo,value);
-        if (lo!=ln)
-            super.put(name,value);
         return LazyList.size(ln)!=s;
     }
     
