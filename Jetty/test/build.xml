@@ -22,6 +22,18 @@ the Ant optional tasks from:
 -->
 
 <project name="Jetty HTTP Server Tests" default="test" basedir="..">
+
+
+  <!-- ==================================================================== -->
+  <property name="build.compiler"            value="modern" />
+  <property name="build.compiler.emacs"      value="true" />
+  <property name="build.compiler.fulldepend" value="false" />
+  <property name="build.compiler.pedantic"   value="false" />
+  <property name="javac.debug"               value="on" />
+  <property name="javac.optimize"            value="off" />
+  <property name="javac.deprecation"         value="off" />
+
+  <!-- ==================================================================== -->
   <property environment="env"/>
   <property name="src"            value="${basedir}/src" />
   <property name="src1.4"         value="${basedir}/src1.4" />
@@ -39,13 +51,6 @@ the Ant optional tasks from:
   <property name="test.src"       value="${test}/src"/>
   <property name="test.classes"   value="${test}/classes"/>
   <property name="test.results"   value="${test}/results"/>
-  <!-- property name="build.compiler" value="jikes"/ -->
-  <!-- property name="build.compiler" value="classic"/ -->
-  <!-- property name="build.compiler" value="modern" / -->
-
-  <property name="javac.debug"             value="on" />
-  <property name="javac.optimize"          value="off" />
-  <property name="javac.deprecation"       value="off" />
 
   <property name="jetty.home"             value="${basedir}" />
   <property name="jetty.webapp"           value="${webapps}/jetty"/>
@@ -60,22 +65,30 @@ the Ant optional tasks from:
   <property name="jasper.jar"     value="${lib}/org.apache.jasper.jar"/>
 
   <!-- ==================================================================== -->
-  <path id="extpath">
-    <fileset dir="${ext}">
-      <include name="*.jar"/>
-      <include name="*.JAR"/>
-      <include name="*.zip"/>
-      <include name="*.ZIP"/>
-     </fileset>
-  </path>
+  <target name="classpath" depends="is.jdk1.4.available,classpath1.2,classpath1.4"/>
+  <target name="is.jdk1.4.available">
+    <available property="jdk1.4.available" classname="java.util.logging.Handler" />
+  </target>
 
   <!-- ==================================================================== -->
-  <target name="classpath">
-    <available property="jdk1.4.available" classname="java.util.logging.Handler" />
+  <target name="classpath1.2" unless="jdk1.4.available">
+    <path id="extpath">
+      <fileset dir="${ext}">
+        <include name="*.jar"/>
+        <include name="*.JAR"/>
+        <include name="*.zip"/>
+        <include name="*.ZIP"/>
+       </fileset>
+    </path>
+
     <path id="classpath">
       <pathelement path="${classes}" />
       <path refid="extpath" />
     </path>
+
+    <property name="expanded.classpath" refid="classpath"/>
+    <echo message="classpath=${expanded.classpath}" level="info"/>
+
   </target>
 
   <!-- ==================================================================== -->
@@ -97,11 +110,15 @@ the Ant optional tasks from:
       <pathelement path="${classes}" />
       <path refid="extpath" />
     </path>
+
+    <property name="expanded.classpath" refid="classpath"/>
+    <echo message="classpath=${expanded.classpath}" level="info"/>
+
   </target>
   
 
   <!-- ==================================================================== -->
-  <target name="prepare" depends="classpath,classpath1.4">
+  <target name="prepare" depends="classpath">
     <mkdir dir="${test.classes}" />
     <mkdir dir="${test.results}" />
     <available property="junit.task.available" 

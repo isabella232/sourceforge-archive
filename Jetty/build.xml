@@ -31,9 +31,21 @@ Other targets:
 -->
 <project name="Jetty HTTP Server" default="webapps" basedir=".">
 
+  <!-- ==================================================================== -->
   <property name="RELEASE.MAJOR"  value="4.1" />
   <property name="RELEASE.MAJOR.MINOR"  value="4.1.0RC2" />
 
+
+  <!-- ==================================================================== -->
+  <property name="build.compiler"            value="modern" />
+  <property name="build.compiler.emacs"      value="true" />
+  <property name="build.compiler.fulldepend" value="false" />
+  <property name="build.compiler.pedantic"   value="false" />
+  <property name="javac.debug"               value="on" />
+  <property name="javac.optimize"            value="off" />
+  <property name="javac.deprecation"         value="off" />
+
+  <!-- ==================================================================== -->
   <property environment="env"/>
   <property name="src"            value="${basedir}/src" />
   <property name="src1.4"         value="${basedir}/src1.4" />
@@ -50,13 +62,6 @@ Other targets:
   <property name="test"           value="${basedir}/test"/>
   <property name="test.src"       value="${test}/src"/>
   <property name="test.classes"   value="${test}/classes" />
-  <!-- property name="build.compiler" value="jikes" / -->
-  <!-- property name="build.compiler" value="classic"/ -->
-  <!-- property name="build.compiler" value="modern" / -->
-
-  <property name="javac.debug"             value="on" />
-  <property name="javac.optimize"          value="off" />
-  <property name="javac.deprecation"       value="off" />
 
   <property name="jetty.home"             value="${basedir}" />
   <property name="jetty.webapp"           value="${demo.webapps}/jetty"/>
@@ -71,32 +76,42 @@ Other targets:
   <property name="servlet.jar"     value="${lib}/javax.servlet.jar"/>
   <property name="jasper.jar"      value="${lib}/org.apache.jasper.jar"/>
 
+  <property name="jetty.run"       value="${etc}/admin.xml ${etc}/jetty.xml"/>
+
   <property name="jvmarg"  value="-Djetty.home=${jetty.home} -Djetty.log=${jetty.home}/logs" />
 
-  <!-- ==================================================================== -->
-  <path id="extpath">
-    <fileset dir="${ext}">
-      <include name="*.jar"/>
-      <include name="*.JAR"/>
-      <include name="*.zip"/>
-      <include name="*.ZIP"/>
-     </fileset>
-  </path>
+
+
 
   <!-- ==================================================================== -->
-  <target name="classpath">
+  <target name="classpath" depends="is.jdk1.4.available,classpath1.2,classpath1.4"/>
+  <target name="is.jdk1.4.available">
     <available property="jdk1.4.available" classname="java.util.logging.Handler" />
+    <echo message="JDK1.4 available=${jdk1.4.available}" level="info"/>
+  </target>
+
+  <!-- ==================================================================== -->
+  <target name="classpath1.2" unless="jdk1.4.available">
+    <path id="extpath">
+      <fileset dir="${ext}">
+        <include name="*.jar"/>
+        <include name="*.JAR"/>
+        <include name="*.zip"/>
+        <include name="*.ZIP"/>
+       </fileset>
+    </path>
     <path id="classpath">
       <pathelement location="${jetty1.2.jar}" />
       <pathelement location="${jasper.jar}" />
       <pathelement location="${servlet.jar}" />
       <path refid="extpath" />
     </path>
+    <property name="expanded.classpath" refid="classpath"/>
+    <echo message="classpath=${expanded.classpath}" level="info"/>
   </target>
 
   <!-- ==================================================================== -->
   <target name="classpath1.4" if="jdk1.4.available">
-
     <path id="extpath">
       <fileset dir="${ext}">
         <include name="*.jar"/>
@@ -114,10 +129,12 @@ Other targets:
       <pathelement location="${servlet.jar}" />
       <path refid="extpath" />
     </path>
+    <property name="expanded.classpath" refid="classpath"/>
+    <echo message="classpath=${expanded.classpath}" level="info"/>
   </target>
   
   <!-- ==================================================================== -->
-  <target name="prepare" depends="classpath,classpath1.4">
+  <target name="prepare" depends="classpath">
     <mkdir dir="${jetty.webapp.classes}"/>
     <mkdir dir="${javadoc}" />
     <mkdir dir="${classes}" />
@@ -453,8 +470,8 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="run" depends="jars"
-   description="Run the default configuration">
+  <target name="run" depends="classpath"
+   description="Run Jetty with configuration set by the jetty.run property">
     <java classname="org.mortbay.jetty.Server"
           dir="${jetty.home}"
           fork="yes"
@@ -465,7 +482,7 @@ Other targets:
          <path refid="classpath" />
        </classpath>
        <jvmarg line="${jvmarg}" />
-       <arg line="${etc}/admin.xml ${etc}/jetty.xml" />
+       <arg line="${jetty.run}" />
     </java>
   </target>
 

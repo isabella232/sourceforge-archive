@@ -77,6 +77,12 @@ The default jetty.xml configuration can be started with:
   Win32: ant.bat run
 
 
+An alternative configuration file can be run with
+
+  Unix:  ant -Djetty.run=acme.xml run
+  Win32: ant.bat -Djetty.run=acme.xml run
+
+
 
 Unix Quick start
 ================
