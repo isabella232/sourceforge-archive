@@ -43,6 +43,7 @@ class ServletWriter extends PrintWriter
     String encoding=null;
     OutputStream os=null;
     boolean written=false;
+    HttpOutputStream httpOut;
     
     /* ------------------------------------------------------------ */
     ServletWriter(OutputStream os)
@@ -51,6 +52,8 @@ class ServletWriter extends PrintWriter
         super((os instanceof HttpOutputStream) 
               ?((HttpOutputStream)os).getWriter(null)
               :new OutputStreamWriter(os));
+        if (os instanceof HttpOutputStream)
+            httpOut=(HttpOutputStream)os;
         this.os=os;
     }
     
@@ -61,6 +64,8 @@ class ServletWriter extends PrintWriter
         super((os instanceof HttpOutputStream)
               ?((HttpOutputStream)os).getWriter(encoding)
               :new OutputStreamWriter(os,encoding));
+        if (os instanceof HttpOutputStream)
+            httpOut=(HttpOutputStream)os;
         this.os=os;
         this.encoding=encoding;
     }

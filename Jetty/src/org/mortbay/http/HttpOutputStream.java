@@ -70,10 +70,12 @@ public class HttpOutputStream extends OutputStream
     private int _headerReserve;
     private HttpWriter _iso8859writer;
     private HttpWriter _utf8writer;
+    private HttpWriter _asciiwriter;
     private boolean _nulled;
     private boolean _closing=false;
     private int _contentLength=-1;
 	private int _bytes;
+	private boolean _disableFlush;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -356,6 +358,8 @@ public class HttpOutputStream extends OutputStream
             _iso8859writer.flush();
         if (_utf8writer!=null)
             _utf8writer.flush();
+        if (_asciiwriter!=null)
+            _asciiwriter.flush();
 
         _bytes=0;
         _written=false;
@@ -380,6 +384,9 @@ public class HttpOutputStream extends OutputStream
         if (_utf8writer!=null)
             _utf8writer.destroy();
         _utf8writer=null;
+        if (_asciiwriter!=null)
+            _asciiwriter.destroy();
+        _asciiwriter=null;
     }
     
     
@@ -467,7 +474,7 @@ public class HttpOutputStream extends OutputStream
     public void flush()
         throws IOException
     {
-       if (_out!=null && !_closing)
+       if (!_disableFlush && _out!=null && !_closing)
           _out.flush();
     }
     
@@ -532,11 +539,13 @@ public class HttpOutputStream extends OutputStream
         throws IOException
     {
         if (_observers!=null)
+        {
             for (int i=_observers.size();i-->0;)
             {
                 Object data=_observers.get(i--);
                 ((OutputObserver)_observers.get(i)).outputNotify(this,action,data);
             }
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -566,6 +575,15 @@ public class HttpOutputStream extends OutputStream
     }
     
     /* ------------------------------------------------------------ */
+    private Writer getASCIIWriter()
+        throws IOException
+    {
+        if (_asciiwriter==null)
+            _asciiwriter=new HttpWriter("US-ASCII",getBufferSize());
+        return _asciiwriter;
+    }
+    
+    /* ------------------------------------------------------------ */
     public Writer getWriter(String encoding)
         throws IOException
     {
@@ -577,6 +595,9 @@ public class HttpOutputStream extends OutputStream
         if ("UTF-8".equalsIgnoreCase(encoding) ||
             "UTF8".equalsIgnoreCase(encoding))
             return getUTF8Writer();
+        
+        if ("US-ASCII".equalsIgnoreCase(encoding))
+            return getASCIIWriter();
 
         return new OutputStreamWriter(this,encoding);
     }
@@ -589,7 +610,6 @@ public class HttpOutputStream extends OutputStream
             "\nrealOut="+_realOut+
             "\nbufferedOut="+_bufferedOut;
     }
-    
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -629,9 +649,10 @@ public class HttpOutputStream extends OutputStream
                     char[] ca ={c};
                     writeEncoded(ca,0,1);
                 }
+                
+                if (_bytes==_contentLength)
+                    flush();
             }
-            if (_bytes==_contentLength)
-                flush();
         }
     
         /* ------------------------------------------------------------ */
@@ -687,7 +708,7 @@ public class HttpOutputStream extends OutputStream
                 }
             }
 
-            if (_bytes==_contentLength)
+            if (!_nulled && _bytes==_contentLength)
                 flush();
         }
     
@@ -752,10 +773,20 @@ public class HttpOutputStream extends OutputStream
         private void writeEncoded(char[] ca,int offset, int length)
             throws IOException
         {
+        	_writting=true;
             if (_writer==null)
                 _writer = new OutputStreamWriter(HttpOutputStream.this,_encoding);
-            _writting=true;
-            _writer.write(ca,offset,length);
+      
+            try
+            {
+                HttpOutputStream.this._disableFlush=true;
+                _writer.write(ca,offset,length);
+                _writer.flush();
+            }
+            finally
+            {
+                HttpOutputStream.this._disableFlush=false;
+            }
         }
         
         /* ------------------------------------------------------------ */
@@ -789,4 +820,7 @@ public class HttpOutputStream extends OutputStream
             _encoding=null;
         }
     }
+    /**
+     * @return Returns the disableFlush.
+     */
 }

@@ -1,10 +1,12 @@
 Jetty Versions
 --------------
 
+Jetty-5.1.RC1 
  + Allow JSSE listener to be just confidential or just integral.
  + Fixed NPE for null contenttype
  + improved clean targets
  + when committed setHeader is a noop rather than IllegalStateException 
+ + Partially flush writers on every write so content length can be detected.
 
 Jetty-5.1.RC0 - 11 October 2004
  + Fixed many minor issues from J2EE 1.4 TCK testing
