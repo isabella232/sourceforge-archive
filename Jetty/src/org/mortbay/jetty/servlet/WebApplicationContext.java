@@ -229,10 +229,11 @@ public class WebApplicationContext extends ServletHandlerContext
         _securityHandler=(SecurityHandler)getHandler(SecurityHandler.class);
         if (_securityHandler==null)
             _securityHandler=new SecurityHandler();
-        else
+        if (getHandlerIndex(_securityHandler)!=0)
+        {
             removeHandler(_securityHandler);
-        addHandler(0,_securityHandler);
-
+            addHandler(0,_securityHandler);
+        }
         
         // Add servlet Handler
         _servletHandler = (ServletHandler)getHandler(ServletHandler.class);
