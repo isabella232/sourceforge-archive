@@ -358,56 +358,53 @@ public class ServletHandler extends NullHandler
         // else if we have not looked at this path before
         else if (!_dynamicPaths.contains(pathInContext))
         {
-            String path=pathInContext;
-        
-            _dynamicPaths.add(path);
+            _dynamicPaths.add(pathInContext);
             
-            // OK lets look for a dynamic servlet.
-            Code.debug("looking for ", path," in ",
-                       getHandlerContext().getClassPath());
-
-            // remove prefix
-            String servletClass=PathMap.pathInfo(_dynamicServletPathSpec,path);
-            if (servletClass==null || servletClass.length()<2)
-                return null;
-            servletClass=servletClass.substring(1);
-            
-            // remove suffix
-            int slash=servletClass.indexOf("/");
-            if (slash>=0)
-                servletClass=servletClass.substring(0,slash);            
-            if (servletClass.endsWith(".class"))
-                servletClass=servletClass.substring(0,servletClass.length()-6);
-
-            // work out the actual servlet path
-            if ("/".equals(_dynamicServletPathSpec))
-                path="/"+servletClass;
-            else
-                path=PathMap.pathMatch(_dynamicServletPathSpec,path)+"/"+servletClass;
-            
-            Code.debug("Dynamic path=",path);
-
-            // make a holder
-            ServletHolder holder=null;
-            try{
-                holder=newServletHolder(servletClass);
+            try
+            {
+                // OK lets look for a dynamic servlet.
+                String path=pathInContext;
+                Code.debug("looking for ", path," in ",
+                           getHandlerContext().getClassPath());
+                
+                // remove prefix
+                String servletClass=PathMap.pathInfo(_dynamicServletPathSpec,path);
+                if (servletClass==null || servletClass.length()<2)
+                    return null;
+                servletClass=servletClass.substring(1);
+                
+                // remove suffix
+                int slash=servletClass.indexOf("/");
+                if (slash>=0)
+                    servletClass=servletClass.substring(0,slash);            
+                if (servletClass.endsWith(".class"))
+                    servletClass=servletClass.substring(0,servletClass.length()-6);
+                
+                // work out the actual servlet path
+                if ("/".equals(_dynamicServletPathSpec))
+                    path="/"+servletClass;
+                else
+                    path=PathMap.pathMatch(_dynamicServletPathSpec,path)+"/"+servletClass;
+                
+                Code.debug("Dynamic path=",path);
+                
+                // make a holder
+                ServletHolder holder=newServletHolder(servletClass);
                 Map params=getDynamicInitParams();
                 if (params!=null)
                     holder.putAll(params);
                 holder.getServlet();
+                
+                Log.event("Dynamic load '"+servletClass+"' at "+path);
+                addHolder(path,holder);
+                addHolder(path+".class",holder);
+                addHolder(path+"/*",holder);
+                addHolder(path+".class/*",holder);
             }
             catch(Exception e)
             {
                 Code.ignore(e);
-                return null;
             }
-            
-            Log.event("Dynamic load '"+servletClass+"' at "+path);
-            addHolder(path,holder);
-            addHolder(path+".class",holder);
-            addHolder(path+"/*",holder);
-            addHolder(path+".class/*",holder);
-            
         }
         
         return _servletMap.getMatch(pathInContext);
