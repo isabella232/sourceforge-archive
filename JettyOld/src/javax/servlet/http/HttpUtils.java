@@ -40,7 +40,7 @@ public class HttpUtils {
     private static ResourceBundle lStrings =
 	ResourceBundle.getBundle(LSTRING_FILE);
     
-    static Hashtable nullHashtable = new Hashtable();
+    static Hashtable nullHashtable = new Hashtable(1);
     
     /**
      * Creates an empty HttpUtils object.
@@ -81,7 +81,7 @@ public class HttpUtils {
 	if (s == null) {
 	    throw new IllegalArgumentException();
 	}
-	Hashtable ht = new Hashtable();
+	Hashtable ht = new Hashtable(10);
 	StringBuffer sb = new StringBuffer();
 	StringTokenizer st = new StringTokenizer(s, "&");
 	while (st.hasMoreTokens()) {

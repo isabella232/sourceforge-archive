@@ -122,8 +122,8 @@ import java.net.MalformedURLException;
 public class PathMap extends Dictionary
 {
     /* --------------------------------------------------------------- */
-    Hashtable pathMap=new Hashtable();
-    Hashtable absoluteMap=new Hashtable();
+    Hashtable pathMap=new Hashtable(27);
+    Hashtable absoluteMap=new Hashtable(27);
     WildMap wildMap=new WildMap();
     
     /* --------------------------------------------------------------- */

@@ -77,12 +77,4 @@ public interface HttpConfiguration
      */
     public void log(String message);
     
-
 }
-
-
-
-
-
-
-

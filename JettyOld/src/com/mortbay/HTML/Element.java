@@ -147,7 +147,7 @@ public abstract class Element
     public Element attribute(String attribute, Object value)
     {
 	if (attributeMap==null)
-	    attributeMap=new Hashtable();
+	    attributeMap=new Hashtable(10);
 	
 	if (value!=null)
 	    attributeMap.put(attribute,"\""+value+'"');
@@ -163,7 +163,7 @@ public abstract class Element
     public Element attribute(String attribute, long value)
     {
 	if (attributeMap==null)
-	    attributeMap=new Hashtable();
+	    attributeMap=new Hashtable(10);
 	
 	attributeMap.put(attribute,Long.toString(value));
 	return this;

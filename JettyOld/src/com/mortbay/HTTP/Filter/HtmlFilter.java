@@ -100,7 +100,7 @@ public class HtmlFilter extends HttpFilter
 		  tag=tag.substring(3);
 
 		  Code.debug("Found tag "+tag);
-		  Hashtable named = new Hashtable();
+		  Hashtable named = new Hashtable(10);
 		  named.put("this",info);
 		  named.put("data",info);
 		  named.put("info",info);

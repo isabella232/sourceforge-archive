@@ -39,7 +39,7 @@ public class MultiPartRequest
     HttpInputStream _in;
     String _boundary;
     byte[] _byteBoundary;
-    Hashtable _partMap = new Hashtable();
+    Hashtable _partMap = new Hashtable(10);
     int _char=-2;
     boolean _lastPart=false;
     
@@ -319,7 +319,7 @@ public class MultiPartRequest
     {
 	String _name=null;
 	String _filename=null;
-	Hashtable _headers= new Hashtable();;
+	Hashtable _headers= new Hashtable(10);
 	byte[] _data=null;
     }
     

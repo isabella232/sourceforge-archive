@@ -22,7 +22,7 @@ import javax.servlet.http.Cookie;
 public class Cookies
 {
     /* -------------------------------------------------------------- */
-    private Hashtable cookies = new Hashtable();
+    private Hashtable cookies = new Hashtable(10);
     
     /* -------------------------------------------------------------- */
     public final static SimpleDateFormat __dateSend = 

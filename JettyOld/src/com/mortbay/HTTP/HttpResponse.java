@@ -94,6 +94,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     private Observable observable=null;
     private boolean chunkByDefault=chunkByDefaultDefault;
     private boolean doNotClose=false;
+    private int outputState=0;
     
     /* -------------------------------------------------------------- */
     /** Construct a response
@@ -377,8 +378,11 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      * The first write to this stream will trigger writing of the
      * HTTP filters and potential activation of any HttpFilters.
      */
-    public ServletOutputStream getOutputStream()
+    public synchronized ServletOutputStream getOutputStream()
     {
+	if (outputState!=0 && outputState!=1)
+	    throw new IllegalStateException();
+	outputState=1;
 	return httpOut;
     }
     
@@ -602,6 +606,10 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     /* -------------------------------------------------------------- */
     public java.io.PrintWriter getWriter()
     {
+	if (outputState!=0 && outputState!=2)
+	    throw new IllegalStateException();
+	outputState=2;
+	
 	if (writer==null)
 	    writer=new PrintWriter(new OutputStreamWriter(getOutputStream()));
 	return writer;

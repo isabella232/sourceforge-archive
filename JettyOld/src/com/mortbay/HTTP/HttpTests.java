@@ -40,6 +40,8 @@ public class HttpTests
 	    "D1: Fri, 31 Dec 1999 23:59:59 GMT" + CRLF +
 	    "D2: Friday, 31-Dec-99 23:59:59 GMT" + CRLF +
 	    "D3: Fri Dec 31 23:59:59 1999" + CRLF +
+	    "D4: Mon Jan 1 2000 00:00:01" + CRLF +
+	    "D5: Tue Feb 29 2000 12:00:00" + CRLF +
 	    CRLF +
 	    "Other Stuff"+ CRLF;
 	
@@ -49,6 +51,8 @@ public class HttpTests
 	    "D1: Fri, 31 Dec 1999 23:59:59 GMT" + CRLF +
 	    "D2: Fri, 31 Dec 1999 23:59:59 GMT" + CRLF +
 	    "D3: Fri Dec 31 23:59:59 1999" + CRLF +
+	    "D4: Mon Jan 1 2000 00:00:01" + CRLF +
+	    "D5: Tue Feb 29 2000 12:00:00" + CRLF +
 	    CRLF;
 	
 
@@ -72,15 +76,21 @@ public class HttpTests
 	h.setIntHeader("I1",-33);
 	t.checkEquals(h.getIntHeader("I1"),-33,"setIntHeader");
 	
+	
 	long d1 = h.getDateHeader("D1");
 	long d2 = h.getDateHeader("D2");
 	long d3 = h.getDateHeader("D3");
-	t.checkEquals(d1,d2,"getDateHeader");
-	t.checkEquals(d2,d3,"getDateHeader");
+	long d4 = h.getDateHeader("D4");
+	long d5 = h.getDateHeader("D5");
+	t.check(d1>0,"getDateHeader1");
+	t.check(d2>0,"getDateHeader2");
+	t.checkEquals(d1,d2,"getDateHeader12");
+	t.checkEquals(d2,d3,"getDateHeader23");
+	t.checkEquals(d3+2000,d4,"getDateHeader34");
 
 	h.setDateHeader("D2",d1);
 	t.checkEquals(h.getHeader("D1"),h.getHeader("D2"),
-		      "setDateHeader");
+		      "setDateHeader12");
 
 	String h3 = h.toString();
 	t.checkEquals(h2,h3,"toString");
@@ -287,15 +297,22 @@ public class HttpTests
     {
 	Test test = new Test("com.mortbay.HTTP.HttpInputStream");
 
+	byte[] buf = new byte[18];
+	
 	try{
 	    FileInputStream fin= new FileInputStream("test.chunkIn");
 	    HttpInputStream cin = new HttpInputStream(fin);
+	    cin.setContentLength(10);
+	    test.checkEquals(cin.read(buf),10,"content length limited");
+	    test.checkEquals(cin.read(buf),-1,"content length EOF");
+	    
+	    fin= new FileInputStream("test.chunkIn");
+	    cin = new HttpInputStream(fin);
 	    cin.chunking(true);
 	    test.checkEquals(cin.read(),'a',"Read 1st char");
 	    test.checkEquals(cin.read(),'b',"Read cont char");
 	    test.checkEquals(cin.read(),'c',"Read next chunk char");
 
-	    byte[] buf = new byte[18];
 	    test.checkEquals(cin.read(buf),17,"Read array chunk limited");
 	    test.checkEquals(new String(buf,0,17),
 			     "defghijklmnopqrst","Read array chunk");

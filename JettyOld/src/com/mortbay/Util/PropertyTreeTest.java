@@ -8,6 +8,7 @@ package com.mortbay.Util;
 import com.mortbay.Base.Code;
 import com.mortbay.Base.Test;
 import java.io.FileInputStream;
+import java.util.*;
 
 public class PropertyTreeTest
 {
@@ -19,7 +20,6 @@ public class PropertyTreeTest
 	PropertyTree props = new PropertyTree();
 	props.load(new FileInputStream("PropertyTreeTest.prp"));
 	Code.debug(props);
-	System.out.println(props);
 	
 	test.checkEquals(props.get("a.f.g.c"), "4", "a.f.g.c");
 	test.checkEquals(props.get("a.b.g.c"), "4", "a.b.g.c");
@@ -46,11 +46,67 @@ public class PropertyTreeTest
 	test.checkEquals(props.get("a.b.c.d"), "ambig1", "a.b.c.d");
 	test.checkEquals(props.get("a.b.d.d"), "ambig1", "a.b.d.d");
 	test.checkEquals(props.get("a.b.x.d.x.d"), "ambig3", "a.b.x.d.x.d");
+	test.checkEquals(props.getProperty("a.b.d"), "wow", "getProperty(a.b.d)");
 	test.checkEquals(props.getProperty("a.b.c"), "2", "getProperty(a.b.c)");
 	test.checkEquals(props.getProperty("a.c", "def"), "def", "getProperty(a.c, def)");
 	test.checkEquals(props.get("h.f.g"), "hfstar", "h.f.g");
 	test.checkEquals(props.get("h.f.g.g"), "hfstar", "h.f.g.g");
+
+	PropertyTree sub = props.getTree("a");
+	test.checkEquals(sub.get("f.g.c"), "4", "[a.]f.g.c");
+	test.checkEquals(sub.get("b.g.c"), "4", "[a.]b.g.c");
+	test.checkEquals(sub.get("b.c"), "2", "[a.]b.c");
+	test.checkEquals(sub.get("c"), null, "[a.]c");
+	test.checkEquals(sub.get("c.d"), "wow", "[a.]c.d");
+	test.checkEquals(sub.get("b.d"), "wow", "[a.]b.d");
+	test.checkEquals(sub.get("d"), "wow", "[a.]d");
+	test.checkEquals(sub.get("e.a.c.d"), "ambig2", "[a.]e.a.c.d");
+	test.checkEquals(sub.get("c.d.j.k.l"), "complex1", "[a.]c.d.j.k.l");
+	test.checkEquals(sub.get("b.c.d"), "ambig1", "[a.]b.c.d");
+	test.checkEquals(sub.get("b.d.d"), "ambig1", "[a.]b.d.d");
+	test.checkEquals(sub.get("b.x.d.x.d"), "ambig3", "[a.]b.x.d.x.d");
+	test.checkEquals(sub.getProperty("b.d"), "wow", "getProperty([a.]b.d)");
+	test.checkEquals(sub.getProperty("b.c"), "2", "getProperty([a.]b.c)");
+	test.checkEquals(sub.getProperty("c", "def"), "def", "getProperty([a.]c, def)");
+	props=new PropertyTree();
+	String[] init =
+	{
+	    "*","*.b.c","a.*.c","a.b.*","*.b.*","a.*",
+	    "*.b","*.B","a.b.c","a.*.b","a.*.B"
+	};
+	for (int i=0;i<init.length;i++)
+	    props.put(init[i],new Integer(i));
+	sub=props.getTree("a");
+	test.checkEquals(sub.get("*.b"),new Integer(9),"subtree get");
+	
+	sub=sub.getTree("b");	
+	test.checkEquals(sub.toString(),
+			 "{c=8, *.b.c=1, *.B=10, *=3, *.b.*=4, *.c=2, *.b=9}",
+			 "SubTree");
+	Properties clone = (Properties)sub.clone();
+	test.checkEquals(clone.toString(),
+			 "{c=8, *.b.c=1, *.B=10, *=3, *.b.*=4, *.c=2, *.b=9}",
+			 "SubTree");
+	sub.put("C","C");
+	test.checkContains(props.toString(),"a.b.C=C","Subtree changed");
+	clone.put("C","X");
+	test.checkContains(props.toString(),"a.b.C=C","clone changed");
+	sub.put("*.B","B");
+	test.checkContains(props.toString(),"a.b.*.B=B","Subtree changed");
+	test.checkContains(props.toString(),"a.*.B=10","Subtree changed");
+
+	Enumeration e=sub.elements();
+	String v=sub.toString();
+	while(e.hasMoreElements())
+	{
+	    String ev="="+e.nextElement();
+	    test.checkContains(v,ev,"Elements");
+	    v=v.substring(0,v.indexOf(ev))+v.substring(v.indexOf(ev)+ev.length());
+	}
+	
+	
 	test.report();
     }
     /* ------------------------------------------------------------ */
 };
+

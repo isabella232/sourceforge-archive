@@ -59,7 +59,7 @@ public class ServletHolder implements ServletConfig
 			 Hashtable initParams)
     {
 	this.name	= name;
-	this.initParams=initParams==null?new Hashtable():initParams;
+	this.initParams=initParams==null?new Hashtable(10):initParams;
 
 	try
 	{
@@ -109,7 +109,7 @@ public class ServletHolder implements ServletConfig
     public ServletHolder(String name, GenericServlet sl)
     {
       this.name = name;
-      this.initParams=new Hashtable();
+      this.initParams=new Hashtable(10);
       this.servletClass = sl.getClass();
       this.servlet = sl;
       singleThreadModel =

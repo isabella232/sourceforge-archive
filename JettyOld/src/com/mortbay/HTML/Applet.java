@@ -102,7 +102,7 @@ public class Applet extends Block
     public Applet setParam(String name, String value)
     {
 	if (params == null)
-	    params = new Hashtable();
+	    params = new Hashtable(10);
 	params.put(name, value);
 	return this;
     }

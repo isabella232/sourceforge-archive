@@ -28,6 +28,7 @@ public class HttpInputStream extends ServletInputStream
     private int chunksize=0;
     com.mortbay.HTTP.HttpHeader footers=null;
     private boolean chunking=false;
+    private int contentLength=-1;
 
     /* ------------------------------------------------------------ */
     /** Buffer for readLine, gets reused across calls */
@@ -59,6 +60,15 @@ public class HttpInputStream extends ServletInputStream
 	this.chunking=chunking;
     }
 
+    /* ------------------------------------------------------------ */
+    /** Set the content length.
+     * Only this number of bytes can be read before EOF is returned.
+     * @param len length.
+     */
+    public void setContentLength(int len)
+    {
+	contentLength=len;
+    }
 	
     /* ------------------------------------------------------------ */
     /** Read a line ended by CR or CRLF or LF.
@@ -146,8 +156,13 @@ public class HttpInputStream extends ServletInputStream
 	    chunksize=(b<0)?-1:(chunksize-1);
 	    return b;
 	}
-    
-	return in.read();
+
+	if (contentLength==0)
+	    return -1;
+	int b=in.read();
+	if (contentLength>0)
+	    contentLength--;
+	return b;
     }
  
     /* ------------------------------------------------------------ */
@@ -165,7 +180,7 @@ public class HttpInputStream extends ServletInputStream
 	    chunksize=(len<0)?-1:(chunksize-len);
 	}
 	else
-	    len=in.read(b,0,len);
+	    len=read(b,0,len);
 
 	return len;
     }
@@ -183,7 +198,16 @@ public class HttpInputStream extends ServletInputStream
 	    chunksize=(len<0)?-1:(chunksize-len);
 	}
 	else
+	{
+	    if (contentLength==0)
+		return -1;
+	    if (len>contentLength)
+		len=contentLength;
 	    len=in.read(b,off,len);
+	    if (contentLength>0 && len>0)
+		contentLength-=len;
+	}
+
 	return len;
     }
     
@@ -200,7 +224,11 @@ public class HttpInputStream extends ServletInputStream
 	    chunksize=(len<0)?-1:(chunksize-(int)len);
 	}
 	else
+	{
 	    len=in.skip(len);
+	    if (contentLength>0 && len>0)
+		contentLength-=len;
+	}
 	return len;
     }
 

@@ -91,6 +91,8 @@ public class HttpRequest extends HttpHeader
     private String serverName = null;
     private int serverPort = 0;
     private HttpResponse response=null;
+    private BufferedReader reader=null;
+    private int inputState=0;
     
     /* -------------------------------------------------------------- */
     /** Construct received request
@@ -134,6 +136,12 @@ public class HttpRequest extends HttpHeader
 	{
 	    setHeader(ContentLength,null);
 	    this.in.chunking(true);
+	}
+	else 
+	{
+	    int content_length=getContentLength();
+	    if (content_length>=0)
+		in.setContentLength(content_length);
 	}
 	
 	decodeCookieParameters();
@@ -386,7 +394,7 @@ public class HttpRequest extends HttpHeader
     {
 	if (cookieParameters==null)
 	{
-	    cookieParameters=new Hashtable();
+	    cookieParameters=new Hashtable(11);
 	    String c = getHeader(HttpHeader.Cookie);
 	    if (c!=null)
 		cookies=Cookies.decode(c,cookieParameters);
@@ -581,8 +589,11 @@ public class HttpRequest extends HttpHeader
     /** Get request input stream
      * @return an input stream for reading the request body.
      */
-    public ServletInputStream getInputStream()
+    public synchronized ServletInputStream getInputStream()
     {
+	if (inputState!=0 && inputState!=1)
+	    throw new IllegalStateException();
+	inputState=1;
 	return in;
     }
 
@@ -723,11 +734,10 @@ public class HttpRequest extends HttpHeader
     
     /* -------------------------------------------------------------- */
     public void setAttribute(String name, Object o)
-    {
-	
+    {	
 	if (attributes == null)
-	    attributes = new Hashtable();
-	attributes.put( name, o );
+	    attributes = new Hashtable(11);
+	attributes.put(name, o);
     }
 
     
@@ -991,9 +1001,14 @@ public class HttpRequest extends HttpHeader
     }
     
     /* -------------------------------------------------------------- */
-    public BufferedReader getReader()
+    public synchronized BufferedReader getReader()
     {
-	return new BufferedReader(new InputStreamReader(getInputStream()));
+	if (inputState!=0 && inputState!=2)
+	    throw new IllegalStateException();
+	inputState=2;
+	if (reader==null)
+	    reader=new BufferedReader(new InputStreamReader(getInputStream()));
+	return reader;
     }
 
     /* -------------------------------------------------------------- */

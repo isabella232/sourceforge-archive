@@ -26,12 +26,15 @@ public class UrlEncoded extends Hashtable
     
     /* ----------------------------------------------------------------- */
     public UrlEncoded()
-    {}
+    {
+	super(10);
+    }
     
     /* ----------------------------------------------------------------- */
     public UrlEncoded(String s)
 	throws IOException
     {
+	super(10);
 	read(s);
     }
     

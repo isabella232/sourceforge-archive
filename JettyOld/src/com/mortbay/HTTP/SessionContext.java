@@ -62,6 +62,7 @@ public class SessionContext extends Hashtable
 	/* ------------------------------------------------------------- */
 	Session(String sid)
 	{
+	    super(10);
 	    id=sid;
 	    put(SessionId,id);
 	    put(SessionStatus,OldSession);

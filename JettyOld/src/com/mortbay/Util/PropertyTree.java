@@ -40,62 +40,56 @@ import java.util.StringTokenizer;
  * * = blob         # Match anything
  * </pre>
  * All the standard Properties methods work as usual, but keys such as
- * "a.b.c" can be used to retrieve nested values. The Properties methods,
- * <code>propertyNames</code> only returns proper key names, not default
- * keys, but <code>list</code> and <code>save</code> will write out the
- * default keys and their values.
- *
- * <p> This class adds methods to navigate over different elements of the
- * tree: <ul>
- *   <li> <code>keys</code>: Return an Enumeration of the names of the
- * direct children of this tree.
- *   <li> <code>getNode</code>: Retrieve a direct child node of this
- * PropertyTree by name (if it exists).
- * </ul>
+ * "a.b.c" can be used to retrieve nested values. 
  *
  * <p> To aid in constructing and saving Properties files,
  * <code>getConverter</code> will convert Dictionaries into PropertyTrees
  * recursively.
- *
- * <strong>Note:</strong> If keys for "a.b.c=xxx" and "a.b=xxx" exist, then
- * doing a get("a.b") will return the value for "a.b" rather than returning
- * the PropertyTree representing "a.b". Because of this it is recommended
- * that Properties files not be written to contain such keys where nested
- * PropertyTrees need to be retrieved.
  */
+
 public class PropertyTree extends Properties
 {
-    /* ------------------------------------------------------------ */
-    private Hashtable children = new Hashtable();
-    private Object value = null;
-    // The default values
-    private PropertyTree defaultValues = null;
     
+    /* ------------------------------------------------------------ */
+    class Node extends Hashtable
+    {
+	Node() {super(13);}
+	public String key=null;
+	public String toString()
+	{
+	    return  "["+key+":"+super.toString()+"]";
+	}
+    }
+    
+    /* ------------------------------------------------------------ */
+    private Node rootNode=new Node();
+
     /* ------------------------------------------------------------ */
     public PropertyTree()
     {}
     
     /* ------------------------------------------------------------ */
-    /** Private constructor for building sub-nodes
-     * @param defaults Whether this represents a set of default values
-     */
-    private PropertyTree(boolean defaults)
-    {
-	// This way, if we can't find a value on lookup, we skip it and pass
-	// over to our defaultVals, i.e. we recurse over ourself down the
-	// path...
-	if (defaults) defaultValues = this;
-    }
-    
-    /* ------------------------------------------------------------ */
     /** Override Hashtable.get() */
-    public Object get(Object key)
+    public synchronized Object get(Object key)
     {
-	Code.debug("Get ",key,"=",value);
-	Vector v = getTokens(key.toString());
-	if (v != null)
-	    return getValue(0, v);
-	return null;
+	Object realKey=key;
+	Object value=super.get(realKey);
+	if (value==null)
+	{
+	    realKey=getTokenKey(key.toString());
+	    if (realKey!=null)
+		value=super.get(realKey);
+	}
+	
+	Code.debug("Get ",realKey,"(",key,")=",value);
+	return value;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Override Properties.getProperty() */
+    public String getProperty(String key)
+    {
+	return (String)get(key);
     }
     
     /* ------------------------------------------------------------ */
@@ -103,63 +97,48 @@ public class PropertyTree extends Properties
     public synchronized Object put(Object key, Object value)
     {
 	Code.debug("Put ",key,"=",value);
-	Vector v = getTokens(key.toString());
-	if (v != null)
-	    return putValue(0, v, value);
-	return null;
+	String keyStr=key.toString();
+	putTokenKey(keyStr,keyStr);
+	return super.put(key,value);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Override Properties.getProperty() */
+    public String setProperty(String key,String value)
+    {
+	return (String)put(key,value);
     }
     
     /* ------------------------------------------------------------ */
     /** Override Hashtable.remove() */
-    public Object remove(Object key)
+    public synchronized Object remove(Object key)
     {
-	return put(key, null);
-    }
+	Object value=super.get(key);
+	if (value!=null)
+	{
+	    Code.debug("Remove ",key);
+	    putTokenKey(key.toString(),null);
+	    return super.remove(key);
+	}
+
+	String realKey=getTokenKey(key.toString());
+	if (realKey!=null)
+	{
+	    Code.debug("Remove ",realKey,"(",key,")");
+	    putTokenKey(realKey,null);
+	    return super.remove(realKey);
+	}
+	return null;
+    }   
     
     /* ------------------------------------------------------------ */
     /** From Properties */
-    public String getProperty(String key)
-    {
-	return (String)get(key);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** From Properties */
-    public String getProperty(String key,
-  			      String defaultValue)
-    {
-	String retv = (String)get(key);
-	if (retv == null)
-	    retv = defaultValue;
-	return retv;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** From Properties */
-    public synchronized void save(OutputStream out,
-				  String header)
+    public synchronized void save(OutputStream out,String header)
     {
 	PrintWriter writer = new PrintWriter(new OutputStreamWriter(out));
 	writer.print("# ");
 	writer.println(header);
 	list(writer);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Return a list of the fully-qualified names of the properties in this
-     * tree
-     */
-    public Enumeration propertyNames()
-    {
-	 Vector v = new Vector();
-	 listNames("", v);
-	 return v.elements();
-    }
-    
-    /* ------------------------------------------------------------ */
-    public Enumeration keys()
-    {
-	return children.keys();
     }
     
     /* ------------------------------------------------------------ */
@@ -169,45 +148,94 @@ public class PropertyTree extends Properties
      */
     public PropertyTree getTree(String key)
     {
-	Vector v = getTokens(key.toString());
-	if (v != null)
-	    return getSubTree(0, v);
-	return null;
+	if (key.indexOf('*')>=0)
+	    throw new Error("Can't wildcard subtree");
+	return new SubPropertyTree(this,key);
     }
     
     /* ------------------------------------------------------------ */
-    /** To remove nested PropertyTrees */
-    public Object removeTree(Object key)
+    public Enumeration propertyNames()
     {
-	Vector v = getTokens(key.toString());
-	if (v != null)
-	    return removeSubTree(0, v);
-	return null;
+	return keys();
+    }
+
+    /* ------------------------------------------------------------ */
+    public Enumeration elements()
+    {
+	final Enumeration keys=keys();
+	return new Enumeration(){
+	    public boolean hasMoreElements(){
+		return keys.hasMoreElements();
+	    }
+	    public Object nextElement(){
+		return get(keys.nextElement());
+	    }
+	};	
     }
     
     /* ------------------------------------------------------------ */
-    public void list(PrintStream out)
+    public Object clone()
     {
-	PrintWriter writer = new PrintWriter(new OutputStreamWriter(out));
-	list(writer);
+	PropertyTree pt = new PropertyTree();
+	Enumeration e = keys();
+	while(e.hasMoreElements())
+	{
+	    String k = (String)e.nextElement();
+	    pt.put(k,get(k));
+	}
+	return pt;
     }
     
     /* ------------------------------------------------------------ */
-    public void list(PrintWriter out)
+    private void putTokenKey(String key,String tokenKey)
     {
-	listValues("", out, "\n");
-	out.flush();
+	Vector tokens=getTokens(key);
+	Node node=rootNode;
+	int index=0;
+	while(index<tokens.size())
+	{
+	    Node subNode = (Node)node.get(tokens.elementAt(index));
+	    if (subNode==null)
+	    {
+		subNode=new Node();
+		node.put(tokens.elementAt(index),subNode);
+	    }
+	    node=subNode;
+	    index++;
+	}
+	node.key=tokenKey;
+    }    
+
+    /* ------------------------------------------------------------ */
+    private String getTokenKey(String key)
+    {
+	Vector tokens=getTokens(key);
+	String tokenKey=getTokenKey(rootNode,tokens,0);
+	if (Code.verbose(9)) Code.debug(key,"-->",tokenKey);
+	return tokenKey;
     }
     
     /* ------------------------------------------------------------ */
-    public String toString()
+    private String getTokenKey(Node node, Vector tokens, int index)
     {
-	StringWriter sw = new StringWriter();
-	PrintWriter writer = new PrintWriter(sw);
-	listValues("", writer, "\n");
-	writer.flush();
-	return sw.toString();
+	String key=null;
+	if (tokens.size()==index)
+	    key=node.key;
+	else
+	{
+	    // expand named nodes
+	    Node subNode=(Node)node.get(tokens.elementAt(index));
+	    if (subNode!=null)
+		key=getTokenKey(subNode,tokens,index+1);
+
+	    // if no key, try wild expansions
+	    subNode=(Node)node.get("*");
+	    while (subNode!=null && key==null && index<tokens.size())
+		key=getTokenKey(subNode,tokens,++index);
+	}
+	return key;
     }
+    
     
     /* ------------------------------------------------------------ */
     /** Turn the key into a list of tokens */
@@ -215,216 +243,13 @@ public class PropertyTree extends Properties
     {
 	if (key != null)
 	{
-	    Vector v = new Vector();
+	    Vector v = new Vector(10);
 	    StringTokenizer tokens = new StringTokenizer(key.toString(), ".");
 	    while (tokens.hasMoreTokens())
 		v.addElement(tokens.nextToken());
 	    return v;
 	}
 	return null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /* Lookup a value in the tree recursively
-     * @param index The index into key
-     * @param key A list of the key elements
-     * @return the value
-     */
-    private Object getValue(int index, Vector key)
-    {
-	if (index == key.size())
-	    // Must be us! Return our value...
-	    return value;
-	String elem = key.elementAt(index).toString();
-	Object val = children.get(elem);
-	PropertyTree subNode = null;
-	if (val != null)
-	{
-	    if (val instanceof PropertyTree)
-	    {
-		subNode = (PropertyTree)val;
-		val = subNode.getValue(index + 1, key);
-		if (val != null) return val;
-	    }
-	    else if (index + 1 == key.size())
-	    {
-		// val must be what they want...
-		return val;
-	    }
-	}
-	
-	if (defaultValues == null)
-	    return null;
-	return defaultValues.getValue(index + 1, key);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /* Put a value in the tree recursively
-     * @param index The index into key
-     * @param key A list of the key elements
-     * @return the old value
-     */
-    private Object putValue(int index, Vector key, Object value)
-    {
-	Object retv = this.value;
-	if (index == key.size())
-	{
-	    // Must be us!
-	    this.value = value;
-	    return retv;
-	}
-	
-	String elem = key.elementAt(index).toString();
-	// Special case handling if they are trying to put a PropertyTree.
-	if (value instanceof PropertyTree && index + 1 == key.size())
-	{
-	    if (elem.equals("*"))
-	    {
-		retv = defaultValues;
-		defaultValues = (PropertyTree)value;
-		return retv;
-	    }
-	    return children.put(elem, value);
-	}
-	
-	Object val = children.get(elem);
-	// Check if there is a node there already...
-	if (val != null && val instanceof PropertyTree)
-	    return ((PropertyTree)val).putValue(index + 1, key, value);
-	// Optimisation
-	if (index + 1 == key.size() && !elem.equals("*"))
-	{
-	    // one of our children!
-	    if (value == null)
-		return children.remove(elem);
-	    else
-		return children.put(elem, value);
-	}
-	// go to a sub-node
-	PropertyTree subnode = getSubNode(elem);
-	return subnode.putValue(index + 1, key, value);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /* retrieve a PropertyTree */
-    private PropertyTree getSubTree(int index, Vector key)
-    {
-	if (index == key.size())
-	    return this;
-	String elem = key.elementAt(index).toString();
-	PropertyTree subnode = getSubNode(elem, false);
-	if (subnode == null) return null;
-	return subnode.getSubTree(index+1, key);
-    }
-    
-    /* ------------------------------------------------------------ */
-    private PropertyTree removeSubTree(int index, Vector key)
-    {
-	if (index == key.size())
-	{
-	    children.clear();
-	    if (defaultValues != this) defaultValues = null;
-	    return this;
-	}
-	String elem = key.elementAt(index).toString();
-	PropertyTree subnode = getSubNode(elem, false);
-	if (subnode == null) return null;
-	if (index + 1 == key.size() && subnode.value == null){
-	    children.remove(elem);
-	    return subnode;
-	} else {
-	    return subnode.removeSubTree(index + 1, key);
-	}
-    }
-    
-    /* ------------------------------------------------------------ */
-    private PropertyTree getSubNode(String name)
-    {
-	return getSubNode(name, true);
-    }
-    
-    /* ------------------------------------------------------------ */
-    private PropertyTree getSubNode(String name, boolean create)
-    {
-	boolean defaults = "*".equals(name);
-	Object val = null;
-	if (defaults)
-	{
-	    if (defaultValues != null)
-		return defaultValues;
-	}
-	else
-	{
-	    val = children.get(name);
-	    if (val != null && val instanceof PropertyTree)
-		return (PropertyTree)val;
-	}
-	if (create)
-	{
-	    PropertyTree tree = new PropertyTree(defaults);
-	    tree.value = val;
-	    if (defaults)
-		defaultValues = tree;
-	    else
-		children.put(name, tree);
-	    return tree;
-	}
-	else
-	    return null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    private void listValues(String prefix, PrintWriter writer,
-			    String postfix)
-    {
-	String dot = (prefix == null || prefix.equals("")) ? "" : ".";
-	if (value != null)
-	    writeKeyValue(prefix, writer, postfix, "", value.toString());
-	
-	for (Enumeration enum = children.keys(); enum.hasMoreElements();)
-	{
-	    String key = enum.nextElement().toString();
-	    Object val = children.get(key);
-	    if (val instanceof PropertyTree)
-	    {
-		PropertyTree tree = (PropertyTree)val;
-		tree.listValues(prefix+dot+key, writer, postfix);
-	    }
-	    else
-		writeKeyValue(prefix, writer, postfix, dot + key,
-			      val.toString());
-	}
-	if (defaultValues != null && defaultValues != this)
-	    defaultValues.listValues(prefix+dot+"*", writer, postfix);
-    }
-    
-    /* ------------------------------------------------------------ */
-    protected static void writeKeyValue(String prefix, PrintWriter writer,
-					String postfix, String key,
-					String value)
-    {
-	writer.print(prefix);
-	writer.print(key);
-	writer.print(": ");
-	writer.print(value);
-	writer.print(postfix);
-    }
-    
-    /* ------------------------------------------------------------ */
-    private void listNames(String prefix, Vector into)
-    {
-	String dot = (prefix == null || prefix.equals("")) ? "" : ".";
-	if (value != null)
-	    into.addElement(prefix);
-	for (Enumeration enum = children.keys(); enum.hasMoreElements();){
-	    String key = enum.nextElement().toString();
-	    Object val = children.get(key);
-	    if (val instanceof PropertyTree){
-		PropertyTree tree = (PropertyTree)val;
-		tree.listNames(prefix+dot+key, into);
-	    } else
-		into.addElement(prefix+dot+key);
-	}
     }
     
     /* ------------------------------------------------------------ */
@@ -464,7 +289,131 @@ public class PropertyTree extends Properties
 	    }
 	};
     }
+
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    static class SubPropertyTree extends PropertyTree
+    {
+	public final String prefix;
+	public final PropertyTree tree;
+	public final Vector tokens;
+	public final String[] prefixes;
+	public final String[] wilds;
+	public Hashtable keyMap=null;
+	
+	
+	/* ------------------------------------------------------------ */
+	SubPropertyTree(PropertyTree tree,String node)
+	{
+	    prefix=node+".";
+	    this.tree=tree;
+	    tokens=tree.getTokens(node);
+	    prefixes=new String[tokens.size()];
+	    for (int i=0;i<tokens.size();i++)
+		prefixes[i]=((i>0)?prefixes[i-1]:"")+tokens.elementAt(i)+".";
+	    wilds=new String[tokens.size()];
+	    for (int i=0;i<wilds.length;i++)
+		wilds[i]=((i>0)?prefixes[i-1]:"")+"*.";
+	}
+	
+	/* ------------------------------------------------------------ */
+	/** Override Hashtable.get() */
+	public Object get(Object key)
+	{
+	    if (keyMap==null)
+		this.keys();
+	    String k=(String)keyMap.get(key);
+	    if (k==null)
+		k = prefix+key;
+	    return tree.get(k);
+	}
+    
+	/* ------------------------------------------------------------ */
+	/** Override Hashtable.put() */
+	public Object put(Object key, Object value)
+	{
+	    keyMap=null;
+	    key = prefix+key;
+	    return tree.put(key,value);
+	}
+    
+	/* ------------------------------------------------------------ */
+	/** Override Hashtable.remove() */
+	public Object remove(Object key)
+	{
+	    key = prefix+key;
+	    return tree.remove(key);
+	}
+    
+	/* ------------------------------------------------------------ */
+	/** Return a sub node of this PropertyTree
+	 * @param name The name of the sub node
+	 * @return null if none.
+	 */
+	public PropertyTree getTree(String key)
+	{
+	    key = prefix+key;
+	    return new SubPropertyTree(tree,key);
+	}
+
+	/* ------------------------------------------------------------ */
+	public Enumeration keys()
+	{
+	    keyMap=new Hashtable();
+	    Enumeration e = tree.keys();
+	    while (e.hasMoreElements())
+	    {
+		String k=(String)e.nextElement();
+		if (k.startsWith(prefix))
+		{
+		    keyMap.put(k.substring(prefix.length()),k);
+		    continue;
+		}
+
+		for (int i=wilds.length;i-->0;)
+		{
+		    if (k.startsWith(wilds[i]))
+		    {
+			String wk="*."+k.substring(wilds[i].length());
+			String ok=(String)keyMap.get(wk);
+			if (ok==null || k.length()>ok.length())
+			    keyMap.put(wk,k);
+			continue;
+		    }
+		}
+	    }
+	    return keyMap.keys();
+	}
+	
+	/* ------------------------------------------------------------ */
+	public String toString()
+	{
+	    StringBuffer buf=new StringBuffer();
+	    synchronized(buf)
+	    {
+		buf.append("{");
+		boolean first=true;
+		Enumeration e = this.keys();
+		while(e.hasMoreElements())
+		{
+		    if (!first)
+			buf.append(", ");
+		    String k = (String)e.nextElement();
+		    buf.append(k);
+		    buf.append("=");
+		    buf.append(get(k));
+		    first=false;
+		}
+		buf.append("}");
+	    }
+	    return buf.toString();
+	}
+    }
 };
+
+
+
 
 
 

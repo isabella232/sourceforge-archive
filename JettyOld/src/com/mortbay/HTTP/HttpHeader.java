@@ -47,13 +47,27 @@ public class HttpHeader
     public final static SimpleDateFormat __dateReceive[] =
     {
 	new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz"),
-	new SimpleDateFormat("EEE, dd-MMM-yy HH:mm:ss zzz"),
-	new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy"),
+	new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss"),
+	new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss zzz"),
+	new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss"),
+	new SimpleDateFormat("EEE MMM dd yyyy HH:mm:ss zzz"),
+	new SimpleDateFormat("EEE MMM dd yyyy HH:mm:ss"),
+	new SimpleDateFormat("EEE MMM-dd-yyyy HH:mm:ss zzz"),
+	new SimpleDateFormat("EEE MMM-dd-yyyy HH:mm:ss"),
 	new SimpleDateFormat("dd MMM yyyy HH:mm:ss zzz"),
-	new SimpleDateFormat("dd-MMM-yy HH:mm:ss zzz"),
 	new SimpleDateFormat("dd MMM yyyy HH:mm:ss"),
+	new SimpleDateFormat("dd-MMM-yy HH:mm:ss zzz"),
 	new SimpleDateFormat("dd-MMM-yy HH:mm:ss"),
-	new SimpleDateFormat("MMM dd HH:mm:ss yyyy")
+	new SimpleDateFormat("MMM dd HH:mm:ss yyyy zzz"),
+	new SimpleDateFormat("MMM dd HH:mm:ss yyyy"),
+	new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy zzz"),
+	new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy"),
+	new SimpleDateFormat("EEE, MMM dd HH:mm:ss yyyy zzz"),
+	new SimpleDateFormat("EEE, MMM dd HH:mm:ss yyyy"),
+	new SimpleDateFormat("EEE, dd-MMM-yy HH:mm:ss zzz"),
+	new SimpleDateFormat("EEE, dd-MMM-yy HH:mm:ss"),
+	new SimpleDateFormat("EEE dd-MMM-yy HH:mm:ss zzz"),
+	new SimpleDateFormat("EEE dd-MMM-yy HH:mm:ss"),
     };
     static
     {
@@ -65,8 +79,8 @@ public class HttpHeader
     }
     
     /* -------------------------------------------------------------- */
-    private Hashtable keyMap= new Hashtable();
-    private Vector keys= new Vector();
+    private Hashtable keyMap= new Hashtable(15);
+    private Vector keys= new Vector(15);
 
     /* -------------------------------------------------------------- */
     /** Get enumeration of header names.
@@ -312,6 +326,23 @@ public class HttpHeader
 		}
 		catch(java.lang.Exception e)
 		{}
+	    }
+	}
+	if (val.endsWith(" GMT"))
+	{
+	    val=val.substring(0,val.length()-4);
+	    for (int i=0;i<__dateReceive.length;i++)
+	    {
+		try{
+		    Code.debug("TRY ",val," against ",__dateReceive[i].toPattern());
+		    Date date=(Date)__dateReceive[i].parseObject(val);
+		    Code.debug("GOT ",date);
+		    return date.getTime();
+		}
+		catch(java.lang.Exception e)
+		{
+		    Code.ignore(e);
+		}
 	    }
 	}
 	return -1;

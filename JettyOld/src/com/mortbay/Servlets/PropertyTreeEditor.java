@@ -113,20 +113,6 @@ public class PropertyTreeEditor
 	    fillPage(context, req);
 	}
 	
-	/* -------------------------------------------------------- */
-	public void prune(Context context,
-			  PruneArgs args,
-			  HttpServletRequest req)
-	{
-	    addHeader(context, req, true);
-	    
-	    if (args.keys != null)
-	    {
-		for (int i=args.keys.length; i-->0 ;)
-		    context.subtree.removeTree(args.keys[i]);
-	    }
-	    fillPage(context, req);
-	}
 	
 	/* ------------------------------------------------------------ */
 	public void save(Context context,
@@ -148,7 +134,7 @@ public class PropertyTreeEditor
 	    
 	    OutputStream out = res.getOutputStream();
 	    PrintWriter pout = new PrintWriter(out);
-	    pout.print(context.subtree);
+	    context.subtree.list(pout);
 	    pout.flush();
 	    context.page=null;
 	}
@@ -192,53 +178,60 @@ public class PropertyTreeEditor
 	    String myUrl = context.path.getUrlPath(req);
 	    String name = context.path.getBaseName();
 	    
-	    try{
-		Table table = new Table(1);
-		page.add(table);
-		table.cellPadding(2);
-		table.newRow();
-		table.addHeading("KEY");
-		table.addHeading("VALUE");
-		
-		LineNumberReader in =
-		    new LineNumberReader(new StringReader(context.subtree.toString()));
-		String line=null;
-		while((line=in.readLine())!=null)
-		{
-		    table.newRow();
-		    table.newCell();
-		    
-		    int i=line.indexOf(':');
-		    if (i<0)
-			i=line.indexOf('=');
-		    Code.assert(i>=1,"Bad format of Tree");
+	    Table table = new Table(1);
+	    page.add(table);
+	    table.cellPadding(2);
+	    table.newRow();
+	    table.addHeading("KEY");
+	    table.addHeading("VALUE");
 
-		    String key=line.substring(0,i);
-		    String value=line.substring(i+1);
-
-		    StringTokenizer tok = new StringTokenizer(key,".");
-		    String path="";
-		    while (tok.hasMoreTokens())
-		    {
-			String t = tok.nextToken();
-			path += "/"+t;
-			if (tok.hasMoreTokens())
-			{
-			    table.add(new Link(myUrl+path,t));
-			    table.add(" . ");
-			}
-			else
-			    table.add(new Link(myUrl+"/edit?action=Get&key="+
-					       path.replace('/','.')
-					       .substring(1),t));
-		    }
-		    table.addCell(value);
-		}
-	    }
-	    catch(IOException e)
+	    // crude sort of the keys
+	    Vector keys=new Vector(context.subtree.size());
+	    Enumeration e = context.subtree.keys();
+	    while (e.hasMoreElements())
 	    {
-		Code.warning(e);
+		String key=(String)e.nextElement();
+		for (int i=0;i<keys.size();i++)
+		{
+		    if (key.compareTo((String)keys.elementAt(i))<0)
+		    {
+			keys.insertElementAt(key,i);
+			key=null;
+			break;
+		    }
+		}
+		if (key!=null)
+		    keys.addElement(key);
 	    }
+	    
+	    e = keys.elements();
+	    while (e.hasMoreElements())
+	    {
+		table.newRow();
+		table.newCell();
+
+		String key=(String)e.nextElement();
+		String value=context.subtree.get(key).toString();
+		    
+		StringTokenizer tok = new StringTokenizer(key,".");
+		String path="";
+		while (tok.hasMoreTokens())
+		{
+		    String t = tok.nextToken();
+		    path += "/"+t;
+		    if (tok.hasMoreTokens())
+		    {
+			table.add(new Link(myUrl+path,t));
+			table.add(" . ");
+		    }
+		    else
+			table.add(new Link(myUrl+"/edit?action=Get&key="+
+					   path.replace('/','.')
+					   .substring(1),t));
+		}
+		table.addCell(value);
+	    }
+		
 	    page.add("</TD><TD WIDTH=25>&nbsp;</TD><TD>");
 	    
 	    TableForm form;
@@ -252,18 +245,6 @@ public class PropertyTreeEditor
 	    form.addButton("action", "Set");
 	    form.addButton("action", "Get");
 	    form.addButton("action", "Remove");
-	    page.add(form);
-	    
-	    // Remove
-	    page.add("<HR>");
-	    form = new TableForm(myUrl+"/prune");
-	    Select select = form.addSelect("keys","Prune",true,3);
-	    Enumeration enum = context.subtree.keys();
-	    while (enum.hasMoreElements())
-		select.add(enum.nextElement());
-	    
-	    form.addButtonArea("Action");
-	    form.addButton("go", "Prune");
 	    page.add(form);
 	    
 	    // Load & Save ...
@@ -370,7 +351,7 @@ public class PropertyTreeEditor
 	context.page.unnest();
 	
 	context.page.title("Property Tree Editor");
-	context.page.add("<TABLE><TR><TD COLSPAN=3><H1>Property Tree&nbsp;@&nbsp;");
+	context.page.add("<TABLE WIDTH=95%><TR><TD COLSPAN=3><H1>Property Tree&nbsp;@&nbsp;");
 	
 	try
 	{

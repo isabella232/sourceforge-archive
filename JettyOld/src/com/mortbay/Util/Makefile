@@ -7,7 +7,7 @@
 
 #JAVAOPTIONS := 
 #JAVACOPTIONS :=
-TESTS := TestHarness.java PropertyTreeTest.java DictionaryConverterTest.java
+TESTS := PropertyTreeTest.java TestHarness.java DictionaryConverterTest.java
 ROOTNAME := com
 SUBDIRS := STF
 INSTALLPATH := etc

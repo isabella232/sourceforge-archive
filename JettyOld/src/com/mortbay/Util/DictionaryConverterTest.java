@@ -40,25 +40,33 @@ public class DictionaryConverterTest
     };
     /* ------------------------------------------------------------ */
     public static void main(String argv[])
-	throws Exception
     {
     	Test test = new Test("DictionaryConverter");
-	PropertyTree props = new PropertyTree();
-	props.load(new FileInputStream("DictionaryConverterTest.prp"));
-	ConverterSet cs = new ConverterSet();
-	cs.registerPrimitiveConverters();
-	cs.register(new DictionaryConverter());
-	Class testClass2 = (new TestClass2()).getClass();
-	Object converted = cs.convert(props, testClass2, cs);
-	test.check(converted instanceof TestClass2, "Converted to TestClass2");
-	TestClass2 inst = (TestClass2)converted;
-	test.check(inst.intTest1 == 99, "intTest1 not changed");
-	test.check(inst.intTest2 == 999, "intTest2");
-	test.check(inst.floatTest == 9.99F, "floatTest");
-	test.checkEquals(inst.stringTest, "This is a field", "stringTest");
-	test.checkEquals(inst.propTest, "This is a property", "propTest");
-	test.check(inst.complexTest != null, "complexTest set");
-	test.check(inst.complexTest.OK, "complexTest.OK");
+	try
+	{
+	    PropertyTree props = new PropertyTree();
+	    props.load(new FileInputStream("DictionaryConverterTest.prp"));
+	    ConverterSet cs = new ConverterSet();
+	    cs.registerPrimitiveConverters();
+	    cs.register(new DictionaryConverter());
+	    Class testClass2 = (new TestClass2()).getClass();
+	    Object converted = cs.convert(props, testClass2, cs);
+	    test.check(converted instanceof TestClass2, "Converted to TestClass2");
+	    TestClass2 inst = (TestClass2)converted;
+	    test.check(inst.intTest1 == 99, "intTest1 not changed");
+	    test.check(inst.intTest2 == 999, "intTest2");
+	    test.check(inst.floatTest == 9.99F, "floatTest");
+	    test.checkEquals(inst.stringTest, "This is a field", "stringTest");
+	    test.checkEquals(inst.propTest, "This is a property", "propTest");
+	    test.check(inst.complexTest != null, "complexTest set");
+	    test.check(inst.complexTest.OK, "complexTest.OK");
+	}
+	catch(Exception e)
+	{
+	    Code.warning(e);
+	    test.check(false,e.toString());
+	}
+	
 	test.report();
     }
     /* ------------------------------------------------------------ */

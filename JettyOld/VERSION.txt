@@ -1,5 +1,15 @@
 
-Release 2.1.5 - 15 March 1999
+Release 2.1.6 - 21 April 1999
+  + Reduced initial size of most hashtables to reduce
+    default memory overheads.
+  + Throw IllegalStateException as required from gets of 
+    input/output/reader/witer in requests/responses.
+  + New simpler version of PropertyTree
+  + Updated PropertyTreeEditor
+  + Return EOF from HttpInputStream that has a content length.
+  + Added additional date formats for HttpHeader.getDateHeader
+
+Release 2.1.5 - 15 April 1999
   + Session URL encoding fixed for relative URLs.
   + Reduced session memory overhead of sessions
   + Form parameters protected against multiple decodes when redirected.

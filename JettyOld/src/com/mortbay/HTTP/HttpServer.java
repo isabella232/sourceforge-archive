@@ -83,7 +83,7 @@ public class HttpServer implements ServletContext
     private HttpListener[] listeners;
     private PathMap httpHandlersMap;
     private PathMap exceptionHandlersMap;
-    private Hashtable servletHandlerMap = new Hashtable();
+    private Hashtable servletHandlerMap = new Hashtable(10);
     
     /* -------------------------------------------------------------------- */
     /** Construct, must be configured later
@@ -114,7 +114,7 @@ public class HttpServer implements ServletContext
 	httpHandlersMap=config.httpHandlersMap();
 	exceptionHandlersMap=config.exceptionHandlersMap();
 
-	Hashtable handlerSet = new Hashtable();
+	Hashtable handlerSet = new Hashtable(20);
 	Enumeration e = httpHandlersMap.keys();
 	// for all handler stacks
 	while (e.hasMoreElements())

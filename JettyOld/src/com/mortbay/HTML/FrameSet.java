@@ -104,8 +104,8 @@ public class FrameSet extends Page
     {
 	if (frameMap==null)
 	{
-	    frameMap=new Hashtable();
-	    frameNames=new Vector();
+	    frameMap=new Hashtable(10);
+	    frameNames=new Vector(10);
 	}
 	
 	Frame frame = frames[col][row];
