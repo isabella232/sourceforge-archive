@@ -19,7 +19,7 @@ import org.mortbay.util.Code;
  * and an instance registered with HttpServer.
  *
  * @see HttpServer
- * @version 1.0 Wed Mar  6 2002
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class HttpEncoding implements Serializable

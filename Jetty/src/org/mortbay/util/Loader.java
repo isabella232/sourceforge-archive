@@ -19,7 +19,7 @@ package org.mortbay.util;
  *          ...
  *     }
  * </PRE>          
- * @version 1.0 Wed Mar  6 2002
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class Loader

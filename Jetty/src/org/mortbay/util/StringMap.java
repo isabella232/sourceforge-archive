@@ -25,7 +25,7 @@ import java.util.Set;
  *
  * This map is NOT synchronized.
  *
- * @version 1.0 Thu Aug 16 2001
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class StringMap extends AbstractMap implements Externalizable

@@ -18,7 +18,7 @@ import javax.net.ssl.HandshakeCompletedListener;
  * Each client certificate supplied is tried against the realm using the
  * Principal name as the username and a string representation of the
  * certificate as the credential.
- * @version $id:$
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class ClientCertAuthenticator implements Authenticator

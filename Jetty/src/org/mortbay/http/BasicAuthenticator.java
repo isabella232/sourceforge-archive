@@ -15,7 +15,7 @@ import org.mortbay.util.B64Code;
 /* ------------------------------------------------------------ */
 /** BASIC authentication.
  *
- * @version $id:$
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class BasicAuthenticator implements Authenticator

@@ -21,7 +21,7 @@ import org.mortbay.util.ByteArrayPool;
 /* ------------------------------------------------------------ */
 /**
  *
- * @version 1.0 Thu Jun 13 2002
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class AJP13Packet

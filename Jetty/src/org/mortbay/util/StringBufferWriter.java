@@ -11,7 +11,7 @@ import java.io.IOException;
 /* ------------------------------------------------------------ */
 /** A Writer to a StringBuffer.
  *
- * @version 1.0 Mon Mar  4 2002
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class StringBufferWriter extends Writer

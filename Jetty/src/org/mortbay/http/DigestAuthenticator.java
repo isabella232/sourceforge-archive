@@ -18,7 +18,7 @@ import java.security.MessageDigest;
 /* ------------------------------------------------------------ */
 /** DIGEST authentication.
  *
- * @version $id:$
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class DigestAuthenticator implements Authenticator
