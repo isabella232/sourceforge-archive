@@ -19,7 +19,9 @@ import java.net.Socket;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.Vector;
 import java.util.zip.ZipEntry;
 
@@ -63,8 +65,10 @@ public class TestHarness
     static void testDateCache()
     {
         Test t = new Test("com.mortbay.Util.DateCache");
-        
-        DateCache dc = new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
+        //                            012345678901234567890123456789
+        DateCache dc = new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'",
+                                     Locale.US);
+        dc.setTimeZone(TimeZone.getTimeZone("GMT"));
         try
         {
             String last=dc.format(System.currentTimeMillis());
