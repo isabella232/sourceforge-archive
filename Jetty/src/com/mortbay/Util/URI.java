@@ -589,26 +589,34 @@ public class URI
             split=p1.indexOf('?');
         if (split==0)
             return p2+p1;
-        else if (split>=0)
-        {
-            p3=p1.substring(split);
-            p1=p1.substring(0,split);
-        }
+        if (split<0)
+            split=p1.length();
 
-        if (p1.endsWith("/"))
+        StringBuffer buf = new StringBuffer(p1.length()+p2.length()+2);
+        buf.append(p1);
+        
+        if (buf.charAt(split-1)=='/')
         {
             if (p2.startsWith("/"))
-                return p3==null?(p1+p2.substring(1)):(p1+p2.substring(1)+p3);
+            {
+                buf.deleteCharAt(split-1);
+                buf.insert(split-1,p2);
+            }
             else
-                return p3==null?(p1+p2):(p1+p2+p3);
+                buf.insert(split,p2);
         }
         else
         {
             if (p2.startsWith("/"))
-                return p3==null?(p1+p2):(p1+p2+p3);
+                buf.insert(split,p2);
             else
-                return p3==null?(p1+'/'+p2):(p1+'/'+p2+p3);
+            {
+                buf.insert(split,'/');
+                buf.insert(split+1,p2);
+            }
         }
+
+        return buf.toString();
     }
     
     /* ------------------------------------------------------------ */

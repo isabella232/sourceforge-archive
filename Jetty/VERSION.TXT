@@ -3,7 +3,10 @@ Jetty3 Versions
 
  + Added HttpServer statistics
  + Don't add notfound context.
- + Many major and minor optimizations
+ + Many major and minor optimizations:
+   * ISO8859 conversion
+   * Buffer allocation
+   * URI pathAdd
  + Separation of URL params in HttpHandler API.
  + Fixed handling of default mime types
  + Allow contextpaths without leading /
