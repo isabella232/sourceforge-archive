@@ -585,15 +585,15 @@ abstract public class ThreadedServer extends ThreadPool
                     {
                         // Accept a socket
                         Socket socket = acceptSocket(_listen, _soTimeOut);
+                        
                         // Handle the socket
-                        if (_running)
+                        if (socket != null)
                         {
-                            if (socket == null)
-                                threadedServer.shrink();
-                            else
+                            if (_running)
                                 threadedServer.run(socket);
+                            else
+                                socket.close();
                         }
-                        else if (socket != null) socket.close();
                     }
                     catch (Throwable e)
                     {

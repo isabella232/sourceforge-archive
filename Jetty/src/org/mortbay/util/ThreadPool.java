@@ -518,6 +518,8 @@ public class ThreadPool implements LifeCycle,Serializable
                     // handle outside of sync
                     if(run!=null && runPool!=null)
                         runPool.handle(run);
+                    else if (run==null && _pool!=null)
+                        _pool.shrink();
                 }
                 catch(InterruptedException e)
                 {
