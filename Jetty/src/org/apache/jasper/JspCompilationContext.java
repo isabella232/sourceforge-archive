@@ -267,7 +267,7 @@ public class JspCompilationContext {
 	}
         for (int i = iSep; i < iEnd; i++) {
             char ch = jspUri.charAt(i);
-            if (Character.isLetterOrDigit(ch)) {
+            if (Character.isJavaIdentifierPart(ch)) {
                 modifiedClassName.append(ch);
             } else if (ch == '.') {
                 modifiedClassName.append('_');
@@ -330,10 +330,10 @@ public class JspCompilationContext {
         String outputDir = getOutputDir();
         servletJavaFileName = getServletClassName() + ".java";
  	if (outputDir != null && !outputDir.equals("")) {
-            if( outputDir.endsWith( java.io.File.separator ) ) {
+            if( outputDir.endsWith("/" ) ) {
                 servletJavaFileName = outputDir + servletJavaFileName;
             } else {
-                servletJavaFileName = outputDir + java.io.File.separator + servletJavaFileName;
+                servletJavaFileName = outputDir + "/" + servletJavaFileName;
             }
         }
 	return servletJavaFileName;

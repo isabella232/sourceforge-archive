@@ -174,6 +174,9 @@ jar containing the JDK compiler (if you wish to use another compiler
 you will have to configure jasper) and the ant.jar from jakarta-ant 1.5 
 or later.
 
+If your JVM supports the -server flag, then it can be a useful
+option to include when starting Jetty.  It can reduce memory size and
+avoid some JVM crashes.
 
 
 Running the Demo Server

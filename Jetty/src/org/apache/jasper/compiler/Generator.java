@@ -235,70 +235,57 @@ public class Generator {
 
 	page.visit(new TagHandlerPoolVisitor(tagHandlerPoolNames));
     }
- 
-    /*
-     * For every custom tag, declares its scripting variables with AT_BEGIN
-     * and AT_END scopes.
-     */
-    private void declareAtBeginAtEndScriptingVariables(Node.Nodes page)
+
+    private void declareTemporaryScriptingVars(Node.Nodes page)
 	    throws JasperException {
 
-	class ScriptingVariableDeclarationVisitor extends Node.Visitor {
+	class ScriptingVarVisitor extends Node.Visitor {
 
-	    /*
-	     * Vector keeping track of which scripting variables have already
-	     * been declared
-	     */
-	    private Vector scriptVars;
+	    private Vector vars;
 
-	    /*
-	     * Constructor.
-	     */
-	    public ScriptingVariableDeclarationVisitor() {
-		scriptVars = new Vector();
+	    ScriptingVarVisitor() {
+		vars = new Vector();
 	    }
 
 	    public void visit(Node.CustomTag n) throws JasperException {
 
-		TagVariableInfo[] tagVarInfos = n.getTagVariableInfos();
-		VariableInfo[] varInfos = n.getVariableInfos();
+		if (n.getCustomNestingLevel() > 0) {
+		    TagVariableInfo[] tagVarInfos = n.getTagVariableInfos();
+		    VariableInfo[] varInfos = n.getVariableInfos();
 
-		if ((varInfos == null) && (tagVarInfos == null)) {
-		    visitBody(n);
-		}
-
-		if (varInfos != null) {
-		    for (int i=0; i<varInfos.length; i++) {
-			int scope = varInfos[i].getScope();
-			String varName = varInfos[i].getVarName();
-			if (((scope == VariableInfo.AT_BEGIN)
-			                     || (scope == VariableInfo.AT_END))
-			        && varInfos[i].getDeclare()
-			        && !scriptVars.contains(varName)) {
-			    out.printin(varInfos[i].getClassName());
-			    out.print(" ");
-			    out.print(varName);
-			    out.println(" = null;");
-			    scriptVars.add(varName);
+		    if (varInfos != null) {
+			for (int i=0; i<varInfos.length; i++) {
+			    String varName = varInfos[i].getVarName();
+			    String tmpVarName = "_jspx_" + varName + "_"
+				+ n.getCustomNestingLevel();
+			    if (!vars.contains(tmpVarName)) {
+				vars.add(tmpVarName);
+				out.printin(varInfos[i].getClassName());
+				out.print(" ");
+				out.print(tmpVarName);
+				out.print(" = ");
+				out.print(null);
+				out.println(";");
+			    }
 			}
-		    }
-		} else {
-		    for (int i=0; i<tagVarInfos.length; i++) {
-			int scope = tagVarInfos[i].getScope();
-			String varName = tagVarInfos[i].getNameGiven();
-			if (varName == null) {
-			    varName = n.getTagData().getAttributeString(
-                                        tagVarInfos[i].getNameFromAttribute());
-			}
-			if (((scope == VariableInfo.AT_BEGIN)
-			                     || (scope == VariableInfo.AT_END))
-			        && tagVarInfos[i].getDeclare()
-			        && !scriptVars.contains(varName)) {
-			    out.printin(tagVarInfos[i].getClassName());
-			    out.print(" ");
-			    out.print(varName);
-			    out.println(" = null;");
-			    scriptVars.add(varName);
+		    } else if (tagVarInfos != null) {
+			for (int i=0; i<tagVarInfos.length; i++) {
+			    String varName = tagVarInfos[i].getNameGiven();
+			    if (varName == null) {
+				varName = n.getTagData().getAttributeString(
+			                tagVarInfos[i].getNameFromAttribute());
+			    }
+			    String tmpVarName = "_jspx_" + varName + "_"
+				+ n.getCustomNestingLevel();
+			    if (!vars.contains(tmpVarName)) {
+				vars.add(tmpVarName);
+				out.printin(tagVarInfos[i].getClassName());
+				out.print(" ");
+				out.print(tmpVarName);
+				out.print(" = ");
+				out.print(null);
+				out.println(";");
+			    }
 			}
 		    }
 		}
@@ -307,7 +294,7 @@ public class Generator {
 	    }
 	}
 
-	page.visit(new ScriptingVariableDeclarationVisitor());
+	page.visit(new ScriptingVarVisitor());
     }
 
     /**
@@ -462,7 +449,7 @@ public class Generator {
         out.printil("JspWriter _jspx_out = null;");
 	out.println();
 
-	declareAtBeginAtEndScriptingVariables(page);
+	declareTemporaryScriptingVars(page);
 	out.println();
 
 	out.printil("try {");
@@ -1083,11 +1070,9 @@ public class Generator {
 	    TagHandlerInfo handlerInfo = (TagHandlerInfo)
 		handlerInfosByShortName.get(n.getShortName());
 	    if (handlerInfo == null) {
-		handlerInfo = new TagHandlerInfo(
-		                            n,
-					    n.getTagInfo().getTagClassName(),
-					    ctxt.getClassLoader(),
-					    err);
+		handlerInfo = new TagHandlerInfo(n,
+						 n.getTagHandlerClass(),
+						 err);
 		handlerInfosByShortName.put(n.getShortName(), handlerInfo);
 	    }
 
@@ -1319,15 +1304,15 @@ public class Generator {
 	    out.printil("{");
 	    out.pushIndent();
 
-	    // Declare scripting variables with NESTED scope
-	    declareNestedScriptingVariables(n);
+	    // Declare AT_BEGIN scripting variables
+	    declareScriptingVars(n, VariableInfo.AT_BEGIN);
 
 	    /*
 	     * Save current values of scripting variables, so that the 
 	     * scripting variables may be synchronized without affecting their
 	     * original values
 	     */
-	    saveScriptingVariables(n);
+	    saveScriptingVars(n);
 
 	    out.printin(tagHandlerClass.getName());
 	    out.print(" ");
@@ -1359,10 +1344,12 @@ public class Generator {
 	    out.print(tagHandlerVar);
 	    out.println(".doStartTag();");
 
-	    // Synchronize AT_BEGIN and NESTED scripting variables
 	    if (!implementsBodyTag) {
-		syncScriptingVariables(n, VariableInfo.AT_BEGIN);
-		syncScriptingVariables(n, VariableInfo.NESTED);
+		// Synchronize AT_BEGIN scripting variables
+		syncScriptingVars(n, VariableInfo.AT_BEGIN);
+		// Declare and synchronize NESTED scripting variables
+		declareScriptingVars(n, VariableInfo.NESTED);
+		syncScriptingVars(n, VariableInfo.NESTED);
 	    }
 
 	    if (n.getBody() != null) {
@@ -1372,6 +1359,9 @@ public class Generator {
 		out.pushIndent();
 		
 		if (implementsBodyTag) {
+		    // Declare NESTED scripting variables
+		    declareScriptingVars(n, VariableInfo.NESTED);
+
 		    out.printin("if (");
 		    out.print(tagEvalVar);
 		    out.println(" != javax.servlet.jsp.tagext.Tag.EVAL_BODY_INCLUDE) {");
@@ -1387,8 +1377,8 @@ public class Generator {
 		    out.println(".doInitBody();");
 
 		    // Synchronize AT_BEGIN and NESTED scripting variables
-		    syncScriptingVariables(n, VariableInfo.AT_BEGIN);
-		    syncScriptingVariables(n, VariableInfo.NESTED);
+		    syncScriptingVars(n, VariableInfo.AT_BEGIN);
+		    syncScriptingVars(n, VariableInfo.NESTED);
 		    
 		    out.popIndent();
 		    out.printil("}");
@@ -1418,8 +1408,8 @@ public class Generator {
 
 		// Synchronize AT_BEGIN and NESTED scripting variables
 		if (implementsBodyTag) {
-		    syncScriptingVariables(n, VariableInfo.AT_BEGIN);
-		    syncScriptingVariables(n, VariableInfo.NESTED);
+		    syncScriptingVars(n, VariableInfo.AT_BEGIN);
+		    syncScriptingVars(n, VariableInfo.NESTED);
 		}
 
 		out.printil("if (evalDoAfterBody != javax.servlet.jsp.tagext.BodyTag.EVAL_BODY_AGAIN)");
@@ -1452,9 +1442,12 @@ public class Generator {
 	    out.printil((methodNesting > 0)? "return true;": "return;");
 	    out.popIndent();
 
-	    // Synchronize AT_BEGIN and AT_END scripting variables
-	    syncScriptingVariables(n, VariableInfo.AT_BEGIN);
-	    syncScriptingVariables(n, VariableInfo.AT_END);
+	    // Synchronize AT_BEGIN scripting variables
+	    syncScriptingVars(n, VariableInfo.AT_BEGIN);
+
+	    // Declare and synchronize AT_END scripting variables
+	    declareScriptingVars(n, VariableInfo.AT_END);
+	    syncScriptingVars(n, VariableInfo.AT_END);
 
 	    // TryCatchFinally
 	    if (implementsTryCatchFinally) {
@@ -1482,44 +1475,35 @@ public class Generator {
                 out.println("}");
 	    }
 
-	    restoreScriptingVariables(n);
+	    restoreScriptingVars(n);
 	    out.popIndent();
 	    out.printil("}");
 
 	    n.setEndJavaLine(out.getJavaLine());
 	}
 
-	/*
-	 * Declares any NESTED scripting variables of the given custom tag.
-	 */
-	private void declareNestedScriptingVariables(Node.CustomTag n) {
-
-	    TagVariableInfo[] tagVarInfos = n.getTagVariableInfos();
-	    VariableInfo[] nestedVarInfos = n.getNestedVariableInfos();
-	    if ((nestedVarInfos == null) && (tagVarInfos == null)) {
-		return;
-	    }
-
-	    if (nestedVarInfos != null) {
-		for (int i=0; i<nestedVarInfos.length; i++) {
-		    String name = nestedVarInfos[i].getVarName();
-		    out.printin(nestedVarInfos[i].getClassName());
-		    out.print(" ");
-		    out.print(name);
-		    out.println(" = null;");
-		}
-	    } else {
-		for (int i=0; i<tagVarInfos.length; i++) {
-		    if ((tagVarInfos[i].getScope() == VariableInfo.NESTED)
-			    && tagVarInfos[i].getDeclare()) {
-			String name = tagVarInfos[i].getNameGiven();
-			if (name == null) {
-			    name = n.getTagData().getAttributeString(
-                                    tagVarInfos[i].getNameFromAttribute());
-			}
-			out.printin(tagVarInfos[i].getClassName());
+	private void declareScriptingVars(Node.CustomTag n, int scope) {
+	    
+	    Vector vec = n.getScriptingVars(scope);
+	    if (vec != null) {
+		for (int i=0; i<vec.size(); i++) {
+		    Object elem = vec.elementAt(i);
+		    if (elem instanceof VariableInfo) {
+			VariableInfo varInfo = (VariableInfo) elem;
+			out.printin(varInfo.getClassName());
 			out.print(" ");
-			out.print(name);
+			out.print(varInfo.getVarName());
+			out.println(" = null;");
+		    } else {
+			TagVariableInfo tagVarInfo = (TagVariableInfo) elem;
+			String varName = tagVarInfo.getNameGiven();
+			if (varName == null) {
+			    varName = n.getTagData().getAttributeString(
+                                        tagVarInfo.getNameFromAttribute());
+			}
+			out.printin(tagVarInfo.getClassName());
+			out.print(" ");
+			out.print(varName);
 			out.println(" = null;");
 		    }
 		}
@@ -1535,7 +1519,7 @@ public class Generator {
 	 * end element. This way, the scripting variables may be synchronized
 	 * by the given tag without affecting their original values.
 	 */
-	private void saveScriptingVariables(Node.CustomTag n) {
+	private void saveScriptingVars(Node.CustomTag n) {
 	    if (n.getCustomNestingLevel() == 0) {
 		return;
 	    }
@@ -1584,7 +1568,7 @@ public class Generator {
 	 * restore its scripting variables to their original values that were
 	 * saved in the tag's start element.
 	 */
-	private void restoreScriptingVariables(Node.CustomTag n) {
+	private void restoreScriptingVars(Node.CustomTag n) {
 	    if (n.getCustomNestingLevel() == 0) {
 		return;
 	    }
@@ -1626,7 +1610,7 @@ public class Generator {
 	 * Synchronizes the scripting variables of the given custom tag for
 	 * the given scope.
 	 */
-	private void syncScriptingVariables(Node.CustomTag n, int scope) {
+	private void syncScriptingVars(Node.CustomTag n, int scope) {
 	    TagVariableInfo[] tagVarInfos = n.getTagVariableInfos();
 	    VariableInfo[] varInfos = n.getVariableInfos();
 
@@ -1897,23 +1881,15 @@ public class Generator {
 	/**
 	 * Constructor.
 	 *
-	 * @param n The custom tag whose tag handler is to be loaded and
+	 * @param n The custom tag whose tag handler class is to be
 	 * introspected
-	 * @param tagClassName Name of tag handler class to load
-	 * @param loader Class loader to use
+	 * @param tagHandlerClass Tag handler class
 	 * @param err Error dispatcher
 	 */
-	TagHandlerInfo(Node n, String tagClassName, ClassLoader loader,
-		       ErrorDispatcher err) throws JasperException {
-
-	    // Load the tag handler class with the given name
-	    tagHandlerClass = null;
-	    try {
-		tagHandlerClass = loader.loadClass(tagClassName);
-	    } catch (Exception e) {
-		err.jspError(n, "jsp.error.unable.loadclass", tagClassName, e);
-	    }
-
+	TagHandlerInfo(Node n, Class tagHandlerClass, ErrorDispatcher err)
+	    throws JasperException
+	{
+	    this.tagHandlerClass = tagHandlerClass;
 	    this.methodMaps = new Hashtable();
 	    this.propertyEditorMaps = new Hashtable();
 
@@ -1937,7 +1913,7 @@ public class Generator {
 		}
 	    } catch (IntrospectionException ie) {
 		err.jspError(n, "jsp.error.introspect.taghandler",
-			     tagClassName, ie);
+			     tagHandlerClass.getName(), ie);
 	    }
 	}
 

@@ -709,6 +709,14 @@ public class Parser {
 	if (tagInfo == null) {
 	    err.jspError(start, "jsp.error.bad_tag", shortTagName, prefix);
 	}
+	Class tagHandlerClass = null;
+	try {
+	    tagHandlerClass
+		= ctxt.getClassLoader().loadClass(tagInfo.getTagClassName());
+	} catch (Exception e) {
+	    err.jspError(start, "jsp.error.unable.loadclass", shortTagName,
+			 prefix);
+	}
 
 	// EmptyElemTag ::= '<' Name ( #S Attribute )* S? '/>'
 	// or Stag ::= '<' Name ( #S Attribute)* S? '>'
@@ -718,7 +726,7 @@ public class Parser {
 	if (reader.matches("/>")) {
 	    // EmptyElemTag ::= '<' Name ( S Attribute )* S? '/>'#
 	    new Node.CustomTag(attrs, start, tagName, prefix, shortTagName,
-			       tagInfo, parent);
+			       tagInfo, tagHandlerClass, parent);
 	    return true;
 	}
 	
@@ -734,7 +742,8 @@ public class Parser {
 	String bc = tagInfo.getBodyContent();
 
 	Node tagNode = new Node.CustomTag(attrs, start, tagName, prefix,
-					  shortTagName, tagInfo, parent);
+					  shortTagName, tagInfo,
+					  tagHandlerClass, parent);
 	// There are 3 body content types: empty, jsp, or tag-dependent.
 	if (bc.equalsIgnoreCase(TagInfo.BODY_CONTENT_EMPTY)) {
 	    if (!reader.matchesETag(tagName)) {

@@ -19,7 +19,7 @@
     <Call name="addWebApplication">
       <Arg>/mycontext</Arg>
       <Arg><SystemProperty name="jetty.home" default=".">/webapps/mywebapp</Arg>
-      <Set name="defaultsDescriptor"><SystemProperty name="jetty.home" default=".">/etc/webdefault.xml</Set>
+      <Set name="defaultsDescriptor"><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Set>
     </Call>
                                                                            -->
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

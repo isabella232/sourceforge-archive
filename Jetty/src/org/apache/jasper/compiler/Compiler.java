@@ -237,6 +237,9 @@ public class Compiler {
 	// Collect page info
 	Collector.collect(this, pageNodes);
 
+	// Determine which custom tag needs to declare which scripting vars
+	ScriptingVariabler.set(pageNodes);
+
 	// generate servlet .java file
 	Generator.generate(writer, this, pageNodes);
         writer.close();

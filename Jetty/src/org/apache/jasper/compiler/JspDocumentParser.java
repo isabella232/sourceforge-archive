@@ -406,9 +406,18 @@ public class JspDocumentParser extends DefaultHandler
 	    throw new SAXException(err.getString("jsp.error.bad_tag",
 						 shortName, prefix));
 	}
+	Class tagHandlerClass = null;
+	try {
+	    tagHandlerClass
+		= ctxt.getClassLoader().loadClass(tagInfo.getTagClassName());
+	} catch (Exception e) {
+	    throw new SAXException(err.getString(
+						 "jsp.error.unable.loadclass",
+						 shortName, prefix));
+	}
        
 	return new Node.CustomTag(attrs, start, qName, prefix, shortName,
-				  tagInfo, parent);
+				  tagInfo, tagHandlerClass, parent);
     }
 
     /*
