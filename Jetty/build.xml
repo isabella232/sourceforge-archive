@@ -160,6 +160,7 @@ release     - Cleanup for release
     <mkdir dir="${javadoc}"/>
     <javadoc packagenames="com.mortbay.*,javax.servlet.*,org.apache.jasper.*"
              sourcepath="${src}"
+	     classpath="${classpath}"
              destdir="${javadoc}"
              author="true"
              version="true"
