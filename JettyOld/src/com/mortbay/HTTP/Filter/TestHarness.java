@@ -179,7 +179,7 @@ public class TestHarness
             methodTag();
             htmlFilter();
         }
-        catch(Exception e)
+        catch(Throwable e)
         {
             Code.warning(e);
             new Test("com.mortbay.HTTP.Filter.TestHarness")

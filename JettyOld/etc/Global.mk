@@ -37,7 +37,9 @@ $(RECURSIVETARGETS) :
 	@$(MAKE) -f $(MKFILEPATH)/Recurse.mk recurse TARGET=$(patsubst %.recurse,%,$@)
 endif
 
-JAVAC := ${JDK_HOME}/bin/javac
+ifndef JAVAC
+    JAVAC := ${JDK_HOME}/bin/javac
+endif
 JAVA := ${JDK_HOME}/bin/java
 JAVAH := ${JDK_HOME}/bin/javah
 NATIVEOPTS := -I${JDK_HOME}/include \

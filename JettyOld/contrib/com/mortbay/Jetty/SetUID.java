@@ -37,7 +37,7 @@ public class SetUID
             Log.event("Set User ID = "+uid);
             doSetUID(uid);
         }
-        catch(Exception e)
+        catch(Throwable e)
         {
             Code.fail(e);
         }        

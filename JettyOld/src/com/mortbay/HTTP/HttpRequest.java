@@ -1044,7 +1044,7 @@ public class HttpRequest extends HttpHeader
 
 
     /* -------------------------------------------------------------- */
-    public javax.servlet.http.Cookie getCookies()[]
+    public Cookie[] getCookies()
     {
         if (cookies==null)
         {

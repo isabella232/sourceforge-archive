@@ -171,7 +171,7 @@ public class HttpHeader
     public void read(HttpInputStream in)
     throws IOException
     {
-        com.mortbay.HTTP.HttpInputStream$CharBuffer cbuf;
+        com.mortbay.HTTP.HttpInputStream.CharBuffer cbuf;
         char[] lbuf=null;
         String last=null;
         while ((cbuf=in.readCharBufferLine())!=null)

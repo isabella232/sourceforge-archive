@@ -63,8 +63,20 @@ public class RolloverFileLogSink
     }
 
 
-    public void RolloverFileLogSink(String newLogDir, int newRetainDays , 
-				    String newLogExt, long newThreadStopTimeout, long newTimerInterval)
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param newLogDir 
+     * @param newRetainDays 
+     * @param newLogExt 
+     * @param newThreadStopTimeout 
+     * @param newTimerInterval 
+     * @exception java.io.IOException 
+     */
+    public RolloverFileLogSink(String newLogDir,
+			       int newRetainDays , 
+			       String newLogExt,
+			       long newThreadStopTimeout,
+			       long newTimerInterval)
 	throws java.io.IOException
     {
     	setLogDir(newLogDir);

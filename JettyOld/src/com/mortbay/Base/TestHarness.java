@@ -208,7 +208,7 @@ public class TestHarness
             frameTest();
             codeTest();
         }
-        catch(Exception e)
+        catch(Throwable e)
         {
             Code.warning(e);
             Test t=new Test(e.toString());
