@@ -19,24 +19,24 @@ import java.util.Properties;
 /** HashMapped User Realm with JDBC as data source.
  * JDBCUserRealm extends HashUserRealm and adds a method to fetch user
  * information from database.
- * The getUser() method checks the inherited HashMap and if the user
- * is found, then it is returned.
- * Otherwise fetch information from database and populate inherited
- * hash.
- * Periodically (controled by configuration parameter), internal
+ * The authenticate() method checks the inherited HashMap for the user.
+ * If the user is not found, it will fetch details from the database
+ * and populate the inherited HashMap. It then calls the HashUserRealm
+ * authenticate() method to perform the actual authentication.
+ * Periodically (controlled by configuration parameter), internal
  * hashes are cleared. Caching can be disabled by setting cache
  * refresh interval to zero.
  * Uses one database connection that is initialized at startup. Reconnect
- * on failures. getUser() is 'synchronized'.
+ * on failures. authenticate() is 'synchronized'.
  *
  * An example properties file for configuration is in
  * $JETTY_HOME/etc/jdbcRealm.properties
  *
- * @see Password
  * @version $Id$
  * @author Arkadi Shishlov (arkadi)
  * @author Fredrik Borgh
  * @author Greg Wilkins (gregw)
+ * @author Ben Alex
  */
 
 public class JDBCUserRealm extends HashUserRealm
@@ -162,7 +162,9 @@ public class JDBCUserRealm extends HashUserRealm
     }
     
     /* ------------------------------------------------------------ */
-    public synchronized UserPrincipal getUser(String username)
+    public synchronized UserPrincipal authenticate(String username,
+                                                   String credentials,
+                                                   HttpRequest request)
     {
         long now = System.currentTimeMillis();
         if (now - _lastHashPurge > _cacheTime || _cacheTime == 0)
@@ -177,7 +179,7 @@ public class JDBCUserRealm extends HashUserRealm
             loadUser(username);
             user = (UserPrincipal)super.get(username);
         }
-        return user;
+        return super.authenticate(username, credentials, request);
     }
     
     /* ------------------------------------------------------------ */

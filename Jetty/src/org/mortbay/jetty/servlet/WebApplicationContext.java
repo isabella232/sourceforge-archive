@@ -87,7 +87,8 @@ public class WebApplicationContext extends ServletHttpContext
     private Set _warnings;
     private FormAuthenticator _formAuthenticator;
     private Map _resourceAliases;
-
+    private boolean _ignorewebjetty;
+    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param httpServer The HttpServer for this context
@@ -179,6 +180,21 @@ public class WebApplicationContext extends ServletHttpContext
         }
     }
 
+    /* ------------------------------------------------------------ */
+    public boolean isIgnoreWebJetty()
+    {
+        return _ignorewebjetty;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param b If TRUE, web-jetty.xml and jetty-web.xml configuration
+     * files are ignored. 
+     */
+    public void setIgnoreWebJetty(boolean b)
+    {
+        _ignorewebjetty=b;
+    }
     
     /* ------------------------------------------------------------ */
     /** Start the Web Application.
@@ -189,7 +205,14 @@ public class WebApplicationContext extends ServletHttpContext
     {
         if (isStarted())
             return;
-        
+
+        // save context classloader
+        Thread thread = Thread.currentThread();
+        ClassLoader lastContextLoader=thread.getContextClassLoader();
+
+        try
+        {
+            
         // Get parser
         XmlParser xmlParser=new XmlParser();
         
@@ -250,6 +273,10 @@ public class WebApplicationContext extends ServletHttpContext
             Resource lib = _webInf.addPath("lib/");
             super.setClassPaths(lib,true);
             
+            // setup classloader
+            initClassLoader(true);
+            thread.setContextClassLoader(getClassLoader());
+        
             // do web.xml file
             Resource web = _webInf.addPath("web.xml");
             if (!web.exists())
@@ -281,7 +308,7 @@ public class WebApplicationContext extends ServletHttpContext
             Resource jetty = _webInf.addPath("web-jetty.xml");
             if (!jetty.exists())
                 jetty = _webInf.addPath("jetty-web.xml");
-            if (jetty.exists())
+            if (!_ignorewebjetty && jetty.exists())
             {
                 try
                 {
@@ -306,6 +333,7 @@ public class WebApplicationContext extends ServletHttpContext
 
         // initialize the classloader (if it has not been so already)
         initClassLoader(true);
+        thread.setContextClassLoader(getClassLoader());
         
         // Set classpath for Jasper.
         Map.Entry entry = _webAppHandler.getHolderEntry("test.jsp");
@@ -335,37 +363,31 @@ public class WebApplicationContext extends ServletHttpContext
             // Context listeners
             if (_contextListeners!=null && _webAppHandler!=null)
             {
-                //Ensure classloader for context is used
-                Thread thread = Thread.currentThread();
-                ClassLoader lastContextLoader=thread.getContextClassLoader();
-                if (getClassLoader() != null)
-                    thread.setContextClassLoader(getClassLoader());
-                
                 ServletContextEvent event = new ServletContextEvent(getServletContext());
                 for (int i=0;i<_contextListeners.size();i++)
                     try{((ServletContextListener)_contextListeners.get(i))
                             .contextInitialized(event);}
                     catch(Exception ex) { mex.add(ex); }
-                thread.setContextClassLoader(lastContextLoader);
             }
         }
         
         // OK to Initialize servlets now
         if (_webAppHandler!=null && _webAppHandler.isStarted())
         {
-            Thread thread = Thread.currentThread();
-            ClassLoader lastContextLoader=thread.getContextClassLoader();
-            
             try{
-                if (getClassLoader()!=null)
-                    thread.setContextClassLoader(getClassLoader());
                 _webAppHandler.initializeServlets();
             }
             catch(Exception ex) { mex.add(ex); }
-            finally{thread.setContextClassLoader(lastContextLoader);}
         }
         
         mex.ifExceptionThrow();
+        
+        }
+        finally
+        {
+            thread.setContextClassLoader(lastContextLoader);
+        }
+        
     }
 
     /* ------------------------------------------------------------ */

@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Set contextloader during webapplicationcontext.start
  + Added AJP13 listener for apache integration.
  + Fixed ChunkableOutputStream close propagation
  + Better recycling of HttpRequests.
