@@ -118,13 +118,13 @@ public class FormAuthenticator implements Authenticator
                                                            httpRequest);
             
             String nuri=(String)session.getAttribute(__J_URI);
-            session.removeAttribute(__J_URI); // Remove popped return URI.
             if (nuri==null || nuri.length()==0)
                 nuri="/";
             
             if (credential._userPrincipal!=null)
             {
                 Code.debug("Form authentication OK for ",credential._jUserName);
+                session.removeAttribute(__J_URI); // Remove popped return URI.
                 httpRequest.setAuthType(SecurityConstraint.__FORM_AUTH);
                 httpRequest.setAuthUser(credential._jUserName);
                 httpRequest.setUserPrincipal(credential._userPrincipal);
@@ -135,11 +135,16 @@ public class FormAuthenticator implements Authenticator
             {
                 Code.debug("Form authentication FAILED for ",credential._jUserName);
                 if (_formErrorPage!=null)
+                {
                     response.sendRedirect(response.encodeRedirectURL
                                           (URI.addPaths(request.getContextPath(),
                                                         _formErrorPage)));
+                }
                 else
+                {
+                    session.removeAttribute(__J_URI); // Remove popped return URI.
                     response.sendError(HttpResponse.__403_Forbidden);
+                }
             }
             
             // Security check is always false, only true after final redirection.
