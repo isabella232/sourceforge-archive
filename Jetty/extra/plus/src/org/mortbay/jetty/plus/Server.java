@@ -111,23 +111,25 @@ public class Server extends org.mortbay.jetty.Server
     public synchronized void start()
         throws MultiException
     {
-       MultiException mex = new MultiException();
 
        //iterate over all the services and start them in order
-       Iterator itor = _serviceList.iterator();
-       while (itor.hasNext())
+       if (_serviceList != null)
        {
-           try
-           {
-               ((Service)itor.next()).start();
-           }
-           catch (Exception e)
-           {
-               mex.add(e);
-           }
+         MultiException mex = new MultiException();
+         Iterator itor = _serviceList.iterator();
+         while (itor.hasNext())
+         {
+             try
+             {
+                 ((Service)itor.next()).start();
+             }
+             catch (Exception e)
+             {
+                 mex.add(e);
+             }
+         }
+         mex.ifExceptionThrowMulti();
        }
-
-       mex.ifExceptionThrowMulti();
 
 
 

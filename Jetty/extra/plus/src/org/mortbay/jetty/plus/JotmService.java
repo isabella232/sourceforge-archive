@@ -170,6 +170,12 @@ public class JotmService extends TMService
                     StandardXAPoolDataSource xapdsPoolDataSource = (StandardXAPoolDataSource)meDataSource.getValue();
                     xadsDataSource = xapdsPoolDataSource.getDataSource();
                 
+		    if (m_tm != null)
+		    {
+                        xapdsPoolDataSource.setTransactionManager(m_tm.getTransactionManager());
+			((StandardXADataSource)xadsDataSource).setTransactionManager(m_tm.getTransactionManager());
+		    }
+
                     //bind both the Pool and the DataSource
                     try 
                     {
@@ -189,6 +195,12 @@ public class JotmService extends TMService
                 {
                     //bind only the DataSource
                     xadsDataSource = (StandardXADataSource)o;
+		    if (m_tm != null)
+		    {
+                        ((StandardXADataSource)xadsDataSource).setTransactionManager(m_tm.getTransactionManager());
+		    }
+
+
                     try
                     {
                         Util.bind(ictx, strDataSourceName, xadsDataSource);
