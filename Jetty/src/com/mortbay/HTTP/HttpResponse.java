@@ -315,16 +315,18 @@ public class HttpResponse extends HttpMessage
             _mimeType=HttpFields.__TextHtml;
             _characterEncoding=null;
             ChunkableOutputStream out=getOutputStream();
-
             
             Resource errorPage=null;
             if (_handlerContext!=null && error!=null)
                 errorPage=_handlerContext.getErrorPageResource(error);
+
+            // XXX temp
+            _header.put("Connection","close");
+
             if (errorPage!=null)
             {
                 _header.putIntField(HttpFields.__ContentLength,
                                     (int)errorPage.length());
-                _header.put("Connection","close");
                 IO.copy(errorPage.getInputStream(),out);
             }
             else

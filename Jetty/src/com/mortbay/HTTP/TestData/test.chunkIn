@@ -6,7 +6,7 @@ cdefghijklmnopqrst
   6 ; forgiving whitespace 
 uvwxyz
 
-6;CRLF in data
+6
 12
 34
 c;CRLF not in data

@@ -955,7 +955,7 @@ public class TestRFC2616
 
             String expectedData = listener.testFiles[0].data.substring(1, 3+1);
             offset=t.checkContains(response,offset, 
-                                  "3;\r\n" + expectedData + "\r\n0;", 
+                                  "3\r\n" + expectedData + "\r\n0", 
                                   "6. subrange data: \"" + expectedData + "\"");
 	}
         catch(Exception e)
@@ -1147,7 +1147,7 @@ public class TestRFC2616
 
             if (expectedStatus == 200 || expectedStatus == 206) {
                   offset=t.checkContains(response,offset, 
-                                  ";\r\n" + expectedData + "\r\n0;", 
+                                  "\r\n" + expectedData + "\r\n0", 
                                   tname + ".3. subrange data: \"" + expectedData + "\"");
             }
         }

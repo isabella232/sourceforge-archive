@@ -46,7 +46,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     final static byte[]
         __CRLF_B    = {(byte)'\015',(byte)'\012'};
     final static byte[]
-        __CHUNK_EOF_B ={(byte)'0',(byte)';',(byte)'\015',(byte)'\012'};
+        __CHUNK_EOF_B ={(byte)'0',(byte)'\015',(byte)'\012'};
     
     public final static Class[] __filterArg = {java.io.OutputStream.class};
         
@@ -432,7 +432,6 @@ public class ChunkableOutputStream extends FilterOutputStream
                     if (size>0)
                     {
                         writer.write(Integer.toString(size,16));
-                        writer.write(';');
                         writer.write(__CRLF);
                         writer.flush();
                         _buffer.write(__CRLF_B);
