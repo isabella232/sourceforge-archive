@@ -1324,25 +1324,25 @@ public class HttpFields
 
             if (version>0)
             {
-                buf.append(";Version=");
+                buf.append(";version=");
                 buf.append(version);
                 String comment=cookie.getComment();
                 if (comment!=null && comment.length()>0)
                 {
-                    buf.append(";Comment=");
+                    buf.append(";comment=");
                     QuotedStringTokenizer.quote(buf,comment);
                 }
             }
             String path=cookie.getPath();
             if (path!=null && path.length()>0)
             {
-                buf.append(";Path=");
+                buf.append(";path=");
                 buf.append(path);
             }
             String domain=cookie.getDomain();
             if (domain!=null && domain.length()>0)
             {
-                buf.append(";Domain=");
+                buf.append(";domain=");
                 buf.append(domain.toLowerCase());// lowercase for IE
             }
             long maxAge = cookie.getMaxAge();
@@ -1350,7 +1350,7 @@ public class HttpFields
             {
                 if (version==0)
                 {
-                    buf.append(";Expires=");
+                    buf.append(";expires=");
                     if (maxAge==0)
                         buf.append(__01Jan1970);
                     else
@@ -1358,13 +1358,13 @@ public class HttpFields
                 }
                 else
                 {
-                    buf.append (";Max-Age=");
+                    buf.append (";max-age=");
                     buf.append (cookie.getMaxAge());
                 }
             }
             else if (version>0)
             {
-                buf.append (";Discard");
+                buf.append (";discard");
             }
             if (cookie.getSecure())
             {
