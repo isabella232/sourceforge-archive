@@ -33,7 +33,7 @@ public class LogSink
     protected boolean _logOneLine=false;
     
     /*-------------------------------------------------------------------*/
-    private PrintWriter _out=null;
+    protected PrintWriter _out=null;
     
     /*-------------------------------------------------------------------*/
     private StringBuffer __stringBuffer = new StringBuffer(512);

@@ -7,6 +7,7 @@
 ** www.fuib.com 
 ** E-mail: vit@fuib.com, lipov99@yahoo.com
 ** Modified for use with Jetty by Kent Johnson <KJohnson@transparent.com>
+** Multiple log file modification by Jonathon Parker, jparker@transparent.com
 */
 
 package com.mortbay.Base;
@@ -18,11 +19,14 @@ package com.mortbay.Base;
  * are rolled over every day and old files are deleted.
  *
  * The default constructor looks for these System properties:
- * ROLLOVER_LOG_DIR			The path to the directory containing the logs
- * ROLLOVER_LOG_RETAIN_DAYS	The number of days to retain logs
- * ROLLOVER_LOG_EXTENSION	The file extension for log files
+ * ROLLOVER_LOG_DIR	    The path to the directory containing the logs
+ * ROLLOVER_LOG_RETAIN_DAYS The number of days to retain logs
+ * ROLLOVER_LOG_EXTENSION   The file extension for log files
  * ROLLOVER_LOG_STOP_TIMEOUT How long to wait to kill the cleanup thread
  * ROLLOVER_LOG_TIMER_INTERVAL How long the cleanup thread sleeps
+ * ROLLOVER_LOG_MULT_DAY If true, Jetty will keep multiple log files for same day,
+ *                       if server is halted and restored.  Useful for debugging 
+ *                       server crashes.
  *
  * @version 1.0 Tue May 23 2000
  * @author V. Lipovetsky
@@ -30,7 +34,7 @@ package com.mortbay.Base;
  */
 
 public class RolloverFileLogSink 
-	extends LogSink implements Runnable
+    extends LogSink implements Runnable
 {
 
     // ---------------------------------------------------------------------------
@@ -124,11 +128,20 @@ public class RolloverFileLogSink
 
 	//** If new name eq old do nothing
 	if (newLogFile.equals(logFile)) return;
-			
-	// Make sure we start fresh
-	if (newLogFile.exists())
+            
+	// Make sure we start fresh if multDay option not set
+	if (!multDay && newLogFile.exists()){
 	    newLogFile.delete();
-
+	}
+	// Make additional files appended with _num2, _num3, etc.
+	else{
+	    int num = 1;
+	    while (newLogFile.exists()){
+		num++;
+		newLogFile = new java.io.File(logDir, 
+					      fileDateFormat.format(curDate) + "_num" + num + logExt);
+	    }
+	}
 	logFile = newLogFile;
 
 	//** Open new log file
@@ -272,23 +285,23 @@ public class RolloverFileLogSink
 
 
     /*
-    public static void main(String[] args)
-    {
-			try {
-				RolloverFileLogSink errLog = new RolloverFileLogSink();
-				errLog.create(args[0], 2, ".LOG", 20*1000, 20*1000);
-				errLog.logWriter.println("Hello, World !");
-			} catch(Exception e) {
+      public static void main(String[] args)
+      {
+      try {
+      RolloverFileLogSink errLog = new RolloverFileLogSink();
+      errLog.create(args[0], 2, ".LOG", 20*1000, 20*1000);
+      errLog.logWriter.println("Hello, World !");
+      } catch(Exception e) {
 				//System.out.println(e);
 				e.printStackTrace();
-			}//try
-    }//main
+				}//try
+				}//main
     */
 
 
-// ---------------------------------------------------------------------------
-//		cleanup
-// ---------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------
+    //		cleanup
+    // ---------------------------------------------------------------------------
     public synchronized void cleanup()
     {
 	if (isCreated()) {
@@ -360,7 +373,7 @@ public class RolloverFileLogSink
 
     private void setCreated(boolean newValue)
     {
-  	created = newValue;
+	created = newValue;
     }
 
     private boolean created = false;
@@ -371,6 +384,7 @@ public class RolloverFileLogSink
     private ThreadEvent threadEvent = new ThreadEvent();
     private java.text.SimpleDateFormat fileDateFormat = 
 	new java.text.SimpleDateFormat("yyyy_MM_dd");
+    private boolean multDay;
 
 
     // ---------------------------------------------------------------------------
