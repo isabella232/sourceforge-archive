@@ -1,0 +1,6 @@
+The JettyServer.prp file contains an example property file for running the
+PackageIndex servlet using Jetty. You will need to change the MimeMap path
+and the FileHandler paths to represent the paths on your server.
+The PackageIndex.prp file is referenced from the JettyServer.prp file and
+requires site-specific modifications to work correctly. Read the comments
+contained within.
