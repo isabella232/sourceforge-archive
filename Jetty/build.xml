@@ -575,6 +575,10 @@
       </zipfileset>
     </zip>
 
+    <copy todir="${dist}">
+      <fileset dir="${extra}/j2ee" includes="*.sar"/>
+    </copy>  
+
   </target>
 
 </project>
