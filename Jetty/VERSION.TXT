@@ -1,12 +1,12 @@
 Jetty Versions
 --------------
 
-Jetty-5.1.RC0
- + LineInput handles readers with small internal buffer
- + Added LogStream to capture stderr and stdout to logging
+Jetty-5.1.RC0 - 11 October 2004
  + Fixed many minor issues from J2EE 1.4 TCK testing
    See sf.net bugs 1031520 - 1032205
  + Refactored, simplified and optimized HttpOutputStream
+ + LineInput handles readers with small internal buffer
+ + Added LogStream to capture stderr and stdout to logging
  + Added filter chain cache
  + Added JSR77 servlet statistic support
  + Refactored webapp context configurations
