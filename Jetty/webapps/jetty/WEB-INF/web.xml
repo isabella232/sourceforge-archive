@@ -31,10 +31,23 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>Auth Area</web-resource-name>
-      <url-pattern>/Auth/*</url-pattern>
+      <url-pattern>/auth/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
-      <role-name>com.mortbay.HTTP.UserPrinciple</role-name>
+      <role-name>com.mortbay.HTTP.User</role-name>
+    </auth-constraint>
+    <user-data-constraint>
+      <transport-guarantee>NONE</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>No Auth Area</web-resource-name>
+      <url-pattern>/noauth/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>NONE</role-name>
     </auth-constraint>
     <user-data-constraint>
       <transport-guarantee>NONE</transport-guarantee>
@@ -43,7 +56,7 @@
 
   <login-config>
     <auth-method>BASIC</auth-method>
-    <realm-name>Test Basic Authentication</realm-name>
+    <realm-name>Jetty Demo Realm</realm-name>
   </login-config>
 
   <!--

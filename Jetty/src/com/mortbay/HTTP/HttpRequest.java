@@ -948,7 +948,7 @@ public class HttpRequest extends HttpMessage
     /* ------------------------------------------------------------ */
     public Principal getUserPrincipal()
     {
-        return (Principal)getAttribute(UserPrincipal.__ATTRIBUTE_NAME);
+        return (Principal)getAttribute(UserPrincipal.__ATTR);
     }
     
     /* ------------------------------------------------------------ */

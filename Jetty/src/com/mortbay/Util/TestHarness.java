@@ -26,6 +26,11 @@ import java.util.Vector;
 import java.util.zip.ZipEntry;
 
 
+/* ------------------------------------------------------------ */
+/** 
+ * @version $Id$
+ * @author Greg Wilkins (gregw)
+ */
 public class TestHarness
 {
     public final static String __CRLF = "\015\012";
@@ -350,6 +355,57 @@ public class TestHarness
             t.check(false,"Exception: "+e);
         }
     }
+    
+    /* ------------------------------------------------------------ */
+    public static void testPassword()
+    {
+        Test t = new Test("com.mortbay.Util.Password");
+        try{
+            Password f1 = new Password("password","Foo");
+            Password f2 = new Password("password",
+                                       Password.obfiscate("Foo"));
+            Password f3 = new Password("password",
+                                       Password.checksum("Foo"));
+            
+            Password b1 = new Password("password","Bar");
+            Password b2 = new Password("password",
+                                       Password.obfiscate("Bar"));
+            Password b3 = new Password("password",
+                                       Password.checksum("Bar"));
+
+            t.check(f1.equals(f1),"PW to PW");
+            t.check(f1.equals(f2),"PW to Obf");
+            t.check(f1.equals(f3),"PW to CS");
+            t.check(f1.equals("Foo"),"PW to Str");
+            t.check(f2.equals(f1),"Obf to PW");
+            t.check(f2.equals(f2),"Obf to Obf");
+            t.check(f2.equals(f3),"Obf to CS");
+            t.check(f2.equals("Foo"),"Obf to Str");
+            t.check(f3.equals(f1),"CS to PW");
+            t.check(f3.equals(f2),"CS to Obf");
+            t.check(f3.equals(f3),"CS to CS");
+            t.check(f3.equals("Foo"),"CS to Str");
+            
+            t.check(!f1.equals(b1),"PW to PW");
+            t.check(!f1.equals(b2),"PW to Obf");
+            t.check(!f1.equals(b3),"PW to CS");
+            t.check(!f1.equals("Bar"),"PW to Str");
+            t.check(!f2.equals(b1),"Obf to PW");
+            t.check(!f2.equals(b2),"Obf to Obf");
+            t.check(!f2.equals(b3),"Obf to CS");
+            t.check(!f2.equals("Bar"),"Obf to Str");
+            t.check(!f3.equals(b1),"CS to PW");
+            t.check(!f3.equals(b2),"CS to Obf");
+            t.check(!f3.equals(b3),"CS to CS");
+            t.check(!f3.equals("Bar"),"CS to Str");
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,"Exception: "+e);
+        }
+    }
+    
 
     /* ------------------------------------------------------------ */
     public static void testBlockingQueue()
@@ -1556,13 +1612,14 @@ public class TestHarness
     {
         try
         {
-            testMultiMap();
-       	    testQuotedStringTokenizer();            
-       	    testDateCache();
        	    testTest();
        	    testLog();
        	    testFrame();
        	    testCode();
+      	    testPassword();
+            testMultiMap();
+       	    testQuotedStringTokenizer();            
+       	    testDateCache();
        	    testDataHelper();
        	    testBlockingQueue();
        	    testIO();

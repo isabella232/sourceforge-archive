@@ -434,7 +434,7 @@ public class WebApplicationContext extends HandlerContext
             sh.setAuthMethod(method.toString(false,true));
         XmlParser.Node name=node.get("realm-name");
         if (name!=null)
-            sh.setAuthRealm(name.toString(false,true));
+            sh.setRealm(name.toString(false,true));
     }
     
     /* ------------------------------------------------------------ */

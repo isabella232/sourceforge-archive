@@ -583,7 +583,8 @@ public class ResourceHandler extends NullHandler
         Code.debug("sendFile: ",resource);
 
         // Can the file be cached?
-        if (_cache!=null && resource.length()<_maxCachedFileSize)
+        if (_cache!=null && resource.length()>0 &&
+            resource.length()<_maxCachedFileSize)
         {
             byte[] bytes=null;
             synchronized (_cacheMap)
@@ -645,7 +646,15 @@ public class ResourceHandler extends NullHandler
             {
                 // Just send it as a file and hope that the URL
                 // formats the directory
-                sendFile(request,response,file);
+                try{
+                    sendFile(request,response,file);
+                }
+                catch(IOException e)
+                {
+                    Code.ignore(e);
+                    response.sendError(HttpResponse.__403_Forbidden,
+                                       "Invalid directory");
+                }
                 return;
             }
 

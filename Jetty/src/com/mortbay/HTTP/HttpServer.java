@@ -38,19 +38,19 @@ import java.util.Set;
  * @author Greg Wilkins (gregw)
  */
 public class HttpServer implements LifeCycle
-{
-    
+{    
     /* ------------------------------------------------------------ */
-    HashMap _listeners = new HashMap(7);
-    
-    // HttpServer[host->PathMap[contextPath->List[HanderContext]]]
-    // HandlerContext[List[HttpHandler]]
-    HashMap _hostMap = new HashMap(7);
+    private HashMap _listeners = new HashMap(3);
     private HttpEncoding _httpEncoding ;
     private LogSink _logSink;
     private DateCache _dateCache=
         new DateCache("dd/MMM/yyyy:HH:mm:ss");
-
+    private HashMap _realmMap = new HashMap(3);
+    
+    // HttpServer[host->PathMap[contextPath->List[HanderContext]]]
+    // HandlerContext[List[HttpHandler]]
+    private HashMap _hostMap = new HashMap(3);
+    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
@@ -689,6 +689,25 @@ public class HttpServer implements LifeCycle
             _logSink.log(log);
         }
     }
+
+    /* ------------------------------------------------------------ */
+    public UserRealm addRealm(UserRealm realm)
+    {
+        return (UserRealm)_realmMap.put(realm.getName(),realm);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public UserRealm getRealm(String realmName)
+    {
+        return (UserRealm)_realmMap.get(realmName);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public UserRealm removeRealm(String realmName)
+    {
+        return (UserRealm)_realmMap.remove(realmName);
+    }
+    
     
     /* ------------------------------------------------------------ */
     /** Construct server from command line arguments.

@@ -19,6 +19,9 @@ import java.security.Principal;
  */
 public interface UserPrincipal extends Principal
 {
-    static public String __ATTRIBUTE_NAME="com.mortbay.HTTP.UserPrincipal";
+    static public String __ATTR="com.mortbay.HTTP.UserPrincipal";
+    
+    public UserRealm getUserRealm();
+    public boolean authenticate(String password);
     public boolean isUserInRole(String role);
 }

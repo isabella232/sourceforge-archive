@@ -13,6 +13,8 @@ package com.mortbay.HTTP;
  */
 public interface UserRealm
 {
+    static public String __UserRole="com.mortbay.HTTP.User";
+    
     public String getName();
 
     public UserPrincipal getUser(String username, HttpRequest request);

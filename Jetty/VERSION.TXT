@@ -1,6 +1,7 @@
 Stable 2.4.7
 Dev    3.0.B05
 
+ + Added HashUserRealm and cleaned up security constraints
  + Added Multipart request and response classes from Jetty2
  + Moved and simplified ServletLoader to ContextLoader.
  + Initialize JSP with classloader.

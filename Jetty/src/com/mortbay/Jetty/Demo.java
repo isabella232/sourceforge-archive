@@ -8,6 +8,7 @@ package com.mortbay.Jetty;
 import com.mortbay.HTTP.Handler.DumpHandler;
 import com.mortbay.HTTP.Handler.NotFoundHandler;
 import com.mortbay.HTTP.HandlerContext;
+import com.mortbay.HTTP.HashUserRealm;
 import com.mortbay.HTTP.HttpServer;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.InetAddrPort;
@@ -73,6 +74,12 @@ public class Demo
                 .put("/","/jetty/index.html");
             context.addHandler(new NotFoundHandler());
 
+            // Realm
+            HashUserRealm realm=
+                new HashUserRealm("Jetty Demo Realm",
+                                  "./etc/demoRealm.properties");
+            server.addRealm(realm);
+            
             // Logger
             RolloverFileLogSink log = new RolloverFileLogSink();
             log.setLogDir("./logs");

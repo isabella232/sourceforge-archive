@@ -6,6 +6,7 @@
 package com.mortbay.Jetty;
 import com.mortbay.HTML.Include;
 import com.mortbay.Util.Code;
+import com.mortbay.Util.IO;
 import com.mortbay.Util.Resource;
 import com.mortbay.Util.StringUtil;
 import java.io.File;
@@ -45,18 +46,26 @@ public class JettyServlet extends HttpServlet
         }
         
         Code.debug("Resource=",resource);
-        
+        String encoding=getServletContext().getMimeType(resource.getName());
+        if (encoding!=null)
+            response.setContentType(encoding);
+
         JettyPage page = new JettyPage(request.getContextPath(),path);
-        if (page.getSection()==null)
-            return;
-        
-        page.add(new Include(resource.getInputStream()));
-        
-        PrintWriter pout = response.getWriter();
-        page.write(pout);
-        pout.flush();
+        if (page.getSection()!=null)
+        {
+            page.add(new Include(resource.getInputStream()));
+            PrintWriter pout = response.getWriter();
+            page.write(pout);
+            pout.flush();
+        }
+        else
+        {
+            if(resource.length()>0)
+                response.setContentLength((int)resource.length());
+            IO.copy(resource.getInputStream(),
+                    response.getOutputStream());
+        }
     }
-    
 
     /* ------------------------------------------------------------ */
     public long getLastModified(HttpServletRequest request)

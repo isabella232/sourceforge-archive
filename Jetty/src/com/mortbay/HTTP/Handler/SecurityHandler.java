@@ -11,6 +11,9 @@ import com.mortbay.HTTP.HttpRequest;
 import com.mortbay.HTTP.HttpResponse;
 import com.mortbay.HTTP.PathMap;
 import com.mortbay.HTTP.SecurityConstraint;
+import com.mortbay.HTTP.HashUserRealm;
+import com.mortbay.HTTP.UserRealm;
+import com.mortbay.HTTP.UserPrincipal;
 import com.mortbay.Util.B64Code;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.Password;
@@ -35,25 +38,26 @@ public class SecurityHandler extends NullHandler
     PathMap _constraintMap=new PathMap();
     String _authMethod=__BASIC_AUTH;
     Map _authRealmMap;
-    String _authRealm ;
+    String _realmName ;
+    UserRealm _realm ;
+
     
     /* ------------------------------------------------------------ */
     /** 
      * @return 
      */
-    public String getAuthRealm()
-    {
-        
-        return _authRealm;
+    public UserRealm getRealm()
+    {        
+        return _realm;
     }
     
     /* ------------------------------------------------------------ */
     /** 
      * @param authRealm 
      */
-    public void setAuthRealm(String authRealm)
+    public void setRealm(String realmName)
     {
-        _authRealm = authRealm;
+        _realmName=realmName;
     }
     
     /* ------------------------------------------------------------ */
@@ -90,6 +94,16 @@ public class SecurityHandler extends NullHandler
         
         Code.debug("added ",sc," at ",pathSpec);
     }
+
+    /* ------------------------------------------------------------ */
+    public void start()
+    {
+        _realm = getHandlerContext().getHttpServer()
+            .getRealm(_realmName);
+        if (_realm==null)
+            throw new IllegalStateException("Unknown realm: "+_realmName);
+        super.start();
+    }
     
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,
@@ -97,15 +111,20 @@ public class SecurityHandler extends NullHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
+        Code.debug("Authenticate "+pathInContext);
+
         // Get all path matches
         List scss =_constraintMap.getMatches(pathInContext);
         if (scss!=null)
         {
+            
             // for each path match 
             for (int m=0;m<scss.size();m++)
             {
                 // Get all constraints
                 Map.Entry entry=(Map.Entry)scss.get(m);
+                Code.debug("Auth ",pathInContext," against ",entry);
+                
                 List scs = (List)entry.getValue();
                 // for each constraint
                 for (int c=0;c<scs.size();c++)
@@ -153,7 +172,8 @@ public class SecurityHandler extends NullHandler
 
         if (!userAuth)
             return false;
-        
+
+        // Check if user is in a role that is suitable
         boolean inRole=false;
         while(roles.hasNext())
         {
@@ -165,8 +185,27 @@ public class SecurityHandler extends NullHandler
             }
         }
 
+        // If no role reject authentication.
         if (!inRole)
-            response.sendError(HttpResponse.__403_Forbidden);
+        {
+            Code.warning("AUTH FAILURE: role for "+
+                         request.getUserPrincipal().getName());
+            if (__BASIC_AUTH.equals(_authMethod))
+            {
+                Code.debug("Not in role "+_realmName);
+                response.setField(HttpFields.__ContentType,"text/html");
+                response.setStatus(HttpResponse.__401_Unauthorized);
+                response.setField(HttpFields.__WwwAuthenticate,
+                                  "basic realm=\""+_realmName+'"');
+                OutputStream out = response.getOutputStream();
+                out.write("<HTML><BODY><H1>Authentication Failed</H1></BODY></HTML>\nUser not in an Authorized role".getBytes());
+                out.flush();
+                response.commit();
+                request.setHandled(true);
+            }
+            else
+                response.sendError(HttpResponse.__403_Forbidden);
+        }
         
         return userAuth && inRole;
     }
@@ -190,32 +229,30 @@ public class SecurityHandler extends NullHandler
                 credentials.substring(credentials.indexOf(' ')+1);
             credentials = B64Code.decode(credentials,"ISO-8859-1");
             int i = credentials.indexOf(':');
-            String user = credentials.substring(0,i);
+            String username = credentials.substring(0,i);
             String password = credentials.substring(i+1);
             
-            request.setAttribute(HttpRequest.__AuthUser,user);
-            request.setAttribute(HttpRequest.__AuthType,"BASIC");
 
-            if (_authRealmMap!=null)
+            if (_realm!=null)
             {
-                String pw=(String)_authRealmMap.get(user);
-                if (pw!=null)
+                UserPrincipal user = _realm.getUser(username,request);
+                if (user!=null && user.authenticate(password))
                 {
-                    Password dpw=new Password(user,pw);
-                    if (password.equals(dpw.toString()))
-                        return true;
+                    request.setAttribute(HttpRequest.__AuthType,"BASIC");
+                    request.setAttribute(HttpRequest.__AuthUser,username);
+                    request.setAttribute(UserPrincipal.__ATTR,user);
+                    return true;
                 }
-                    
-                if (Code.debug())
-                    Code.warning("'"+pw+"'!='"+password+"'");
+                
+                Code.warning("AUTH FAILURE: user "+username);
             }
         }
         
-        Code.debug("Unauthorized in "+_authRealm);
+        Code.debug("Unauthorized in "+_realmName);
         response.setField(HttpFields.__ContentType,"text/html");
         response.setStatus(HttpResponse.__401_Unauthorized);
         response.setField(HttpFields.__WwwAuthenticate,
-                          "basic realm=\""+_authRealm+'"');
+                          "basic realm=\""+_realmName+'"');
         OutputStream out = response.getOutputStream();
         out.write("<HTML><BODY><H1>Authentication Failed</H1></BODY></HTML>"
                   .getBytes());
@@ -227,14 +264,11 @@ public class SecurityHandler extends NullHandler
 
     /* ------------------------------------------------------------ */
     /** 
-     * @param username 
-     * @param password 
+     * @deprecated use HttpServer.addRealm()
      */
     public synchronized void addUser(String username, String password)
     {
-        if (_authRealmMap==null)
-            _authRealmMap=new HashMap();
-        _authRealmMap.put(username,password);
+        Code.warning("addUser deprecated, use HttpServer.addRealm()");
     }    
 }
 
