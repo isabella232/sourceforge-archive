@@ -10,6 +10,7 @@ import com.mortbay.Util.StringUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.BufferedOutputStream;
 import java.io.InterruptedIOException;
 import java.net.InetAddress;
 import java.util.HashMap;
@@ -358,13 +359,9 @@ public class HttpConnection
                         
                     // Commit the response
                     try{
-                        if (!_response.isCommitted())
-                            _response.commit();
+                        _outputStream.flush(_outputStream.isChunking());
+                        _outputStream.resetStream();
                         _inputStream.resetStream();
-                        if (_outputStream.isChunking())
-                            _outputStream.endChunking(); 
-                        else
-                            _outputStream.resetStream();
                     }
                     catch(IOException e) {exception(e);}
                 }

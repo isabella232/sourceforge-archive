@@ -32,7 +32,7 @@ environment.
 Quick start on Windows
 ======================
 run:
-  %JETTY_HOME%/bin/jetty.sh run demo
+  %JETTY_HOME%\bin\jetty.sh run demo.xml
 
 Browse to:
   http://localhost:8080

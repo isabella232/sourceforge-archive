@@ -1,8 +1,10 @@
 Jetty Versions
 --------------
 
-Jetty-3.0.2 - 7 Jan 2001
- + Improved jetty.sh finding of JVMs
+Jetty-3.0.2 - 
+ + Greatly improved efficiency of ChunkableOutputStream
+ + Improved jetty.bat
+ + Improved jetty.sh 
  + Handle unknown status reasons in HttpResponse
  + Ignore included response updates rather than IllegalStateException
 

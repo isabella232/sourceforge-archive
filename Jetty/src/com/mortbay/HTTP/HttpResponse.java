@@ -324,6 +324,7 @@ public class HttpResponse extends HttpMessage
             {
                 _header.putIntField(HttpFields.__ContentLength,
                                     (int)errorPage.length());
+                _header.put("Connection","close");
                 IO.copy(errorPage.getInputStream(),out);
             }
             else

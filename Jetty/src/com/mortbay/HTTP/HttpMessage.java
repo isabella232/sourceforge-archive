@@ -629,7 +629,7 @@ abstract public class HttpMessage
         Writer writer = out.getRawWriter();
         writeHeader(writer);
         _state=__MSG_SENDING;
-        out.writeRawWriter();
+        out.flush();
     }
     
     /* ------------------------------------------------------------ */

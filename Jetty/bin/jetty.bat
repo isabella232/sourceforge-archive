@@ -55,7 +55,7 @@
 :: $Id$
 ::
 
-setlocal
+rem setlocal
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Get the action & configs
 :::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -85,33 +85,33 @@ if not exist %HOME%\.jettyrc  goto no_jettyrc
 set JETTY_JAR=lib\com.mortbay.jetty.jar
 
 
-goto check_jetty_home
+goto check_home_jetty
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 :: if no JETTY_HOME, search likely locations.
 :::::::::::::::::::::::::::::::::::::::::::::::::::
-if not x==x%JETTY_HOME% goto check_jetty_home
+if not x==x%JETTY_HOME% goto check_home_jetty
    ::@TODO Find a way to search for the jetty directory
    if not exist .\%JETTY_JAR% goto check_parent_dir
    set JETTY_HOME=.
    :check_parent_dir
-   if not exist ..\%JETTY_JAR% goto check_jetty_home
+   if not exist ..\%JETTY_JAR% goto check_home_jetty
    set JETTY_HOME=..
    :: add other likely locations here
 
-:check_jetty_home
+:check_home_jetty
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 :: No JETTY_HOME yet? We're out of luck!
 :::::::::::::::::::::::::::::::::::::::::::::::::::
-if not x==x%JETTY_HOME% goto check_jetty_jar
+if not x==x%JETTY_HOME% goto check_jar_jetty
     echo "** ERROR: JETTY_HOME not set, you need to set it or install in a standard location" 
     goto ERROR
 
-:check_jetty_jar
-if exist %JETTY_HOME%\%JETTY_JAR% goto have_jetty_home
+:check_jar_jetty
+if exist %JETTY_HOME%\%JETTY_JAR% goto have_home_jetty
    echo "** ERROR: Oops! %JETTY_HOME%\%JETTY_JAR% is not readable!" 
    goto ERROR
    
-:have_jetty_home
+:have_home_jetty
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Get the list of config.xml files from the command line.
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -120,7 +120,7 @@ if x==x%ARGS% goto no_args
 :no_args
 
 ::@TODO Find a way to parse jetty.conf
-goto no_jetty_conf
+goto no_conf_jetty
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Try to find this script's configuration file,
 :: but only if no configurations were given on the
@@ -133,7 +133,7 @@ if x==x%JETTY_CONF% set JETTY_CONF=%JETTY_HOME%\etc\jetty.conf
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 set CONFIG_LINES=
 if not x==x%CONFIGS% goto have_configs
-  if not exist "%JETTY_CONF%" goto no_jetty_conf
+  if not exist "%JETTY_CONF%" goto no_conf_jetty
      for /f %%L in (%JETTY_CONF%) do set CONFIG_LINES=%CONFIG_LINES% %%L
 
 
@@ -163,7 +163,7 @@ if not x==x%CONFIG_LINES (
   )
 )
 
-:no_jetty_conf
+:no_conf_jetty
 
 echo CONFIGS=%CONFIGS%
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -299,5 +299,11 @@ goto ERROR
 :ERROR
 
 :END
-endlocal
+rem endlocal
+
+
+
+
+
+
 
