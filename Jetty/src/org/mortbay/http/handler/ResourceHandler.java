@@ -249,10 +249,11 @@ public class ResourceHandler extends NullHandler
             return;
         
         boolean endsWithSlash= pathInContext.endsWith("/");
-        Resource resource = baseResource.addPath(pathInContext);
+        Resource resource = null;
         
         try
         {
+            resource = baseResource.addPath(pathInContext);
             Code.debug("\nPATH=",pathInContext,
                        "\nRESOURCE=",resource);
             
@@ -280,6 +281,10 @@ public class ResourceHandler extends NullHandler
                 }
                 catch(Exception e) {Code.ignore(e);}
             }
+        }
+        catch(IllegalArgumentException e)
+        {
+            Code.ignore(e);
         }
         finally
         {

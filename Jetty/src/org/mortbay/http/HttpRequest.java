@@ -651,8 +651,13 @@ public class HttpRequest extends HttpMessage
         }
 
         // handle URI
-        _uri= new URI(new String(buf,s3,e3-s3+1));
-        
+        try{_uri= new URI(new String(buf,s3,e3-s3+1));}
+        catch(IllegalArgumentException e)
+        {
+            Code.ignore(e);
+            throw new HttpException(HttpResponse.__400_Bad_Request,new String(buf,s3,e3-s3+1));
+        }
+            
     }
     
     /* ------------------------------------------------------------ */

@@ -666,24 +666,26 @@ public class HttpConnection
     private void exception(Throwable e)
     {
 	try{
-	    boolean pendingIOException = false;
-	    if (e instanceof IOException)
-	    {
-                // Assume it was the browser closing early
-		if (Code.debug())
-                {
-                    String reqString
-                        = (_request == null) ? null : _request.toString();
-		    Code.debug(reqString,e);
-		}
-                else
-		    pendingIOException = true;
-	    }
-	    else
+            Code.debug(e);
+	    boolean gotIOException = false;
+            if (e instanceof HttpException)
             {
-                String reqString
-                    = (_request == null) ? null : _request.toString();  
-                Code.warning(reqString,e);
+                if (_request==null)
+                    Code.warning(e.toString());
+                else
+                    Code.warning(_request.getRequestLine()+" "+e.toString());
+            }
+            else if (e instanceof IOException)
+	    {
+                // Assume browser closed connection
+                gotIOException = true;
+	    }
+	    else 
+            {
+                if (_request==null)
+                    Code.warning(e.toString());
+                else
+                    Code.warning(_request.getRequestLine(),e);
             }
             
 	    _persistent=false;
@@ -695,13 +697,14 @@ public class HttpConnection
 				   HttpFields.__Close);
 		
 		_response.sendError(HttpResponse.__500_Internal_Server_Error,e);
-		
-		if (pendingIOException)
+
+                // probabluy not browser so be more verbose
+		if (gotIOException)
                 {
-		    // Not a browser disconnect if we reach here.
-                    String reqString
-                        = (_request == null) ? null : _request.toString();
-		    Code.warning(reqString,e);
+                    if (_request==null)
+                        Code.warning(e);
+                    else
+                        Code.warning(_request.getRequestLine(),e);
                 }
 	    }
 	}
@@ -710,6 +713,7 @@ public class HttpConnection
             Code.ignore(ex);
         }
     }
+
     
     /* ------------------------------------------------------------ */
     /** Service a Request.
