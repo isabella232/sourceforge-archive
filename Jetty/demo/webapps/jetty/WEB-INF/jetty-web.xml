@@ -97,4 +97,13 @@ org.mortbay.jetty.servlet.WebApplicationContext objet
       <Call name="start"/>
     </Call>
 
+
+  <!-- override classloader settings to allow this webapp to see Jetty implementation classes -->
+  <!-- Server classes are hidden from a HttpContext or webapp -->
+  <Set name="serverClasses">
+    <Array type="java.lang.String">
+    </Array>
+  </Set>
+
+
 </Configure>

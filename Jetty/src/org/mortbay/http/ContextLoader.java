@@ -70,10 +70,10 @@ public class ContextLoader extends URLClassLoader
         _permissions= permisions;
         _parent= parent;
         _systemClasses=context.getSystemClasses();
-        if (_systemClasses==null)
+        if (_systemClasses==null && context.getHttpServer()!=null)
             _systemClasses=context.getHttpServer().getSystemClasses();
         _serverClasses=context.getServerClasses();
-        if (_serverClasses==null)
+        if (_serverClasses==null && context.getHttpServer()!=null)
             _serverClasses=context.getHttpServer().getServerClasses();
         
         if (_parent == null)
@@ -299,7 +299,7 @@ public class ContextLoader extends URLClassLoader
         name=name.replace('/','.');
         while(name.startsWith("."))
             name=name.substring(1);
-        
+
         if (_serverClasses!=null)
         {
             for (int i=0;i<_serverClasses.length;i++)
@@ -371,5 +371,41 @@ public class ContextLoader extends URLClassLoader
         this._parent=null;
         this._permissions=null;
         this._urlClassPath=null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the serverClasses.
+     */
+    String[] getServerClasses()
+    {
+        return _serverClasses;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param serverClasses The serverClasses to set.
+     */
+    void setServerClasses(String[] serverClasses)
+    {
+        _serverClasses = serverClasses;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the systemClasses.
+     */
+    String[] getSystemClasses()
+    {
+        return _systemClasses;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param systemClasses The systemClasses to set.
+     */
+    void setSystemClasses(String[] systemClasses)
+    {
+        _systemClasses = systemClasses;
     }
 }

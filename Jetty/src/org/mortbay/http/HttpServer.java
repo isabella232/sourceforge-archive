@@ -669,7 +669,7 @@ public class HttpServer extends Container
      */
     public void setSystemClasses(String[] classes)
     {
-        if (classes==null || classes.length==0)
+        if (classes==null)
             _systemClasses=null;
         else
             _systemClasses=Arrays.asList(classes);
@@ -684,7 +684,7 @@ public class HttpServer extends Container
      */
     public String[] getSystemClasses()
     {
-        if (_systemClasses==null || _systemClasses.size()==0)
+        if (_systemClasses==null)
             return null;
         return (String[])_systemClasses.toArray(new String[_systemClasses.size()]);
     }
@@ -699,7 +699,7 @@ public class HttpServer extends Container
      */
     public void setServerClasses(String[] classes)
     {
-        if (classes==null || classes.length==0)
+        if (classes==null)
             _serverClasses=null;
         else
             _serverClasses=Arrays.asList(classes);
@@ -714,7 +714,7 @@ public class HttpServer extends Container
      */
     public String[] getServerClasses()
     {
-        if (_serverClasses==null || _serverClasses.size()==0)
+        if (_serverClasses==null )
             return null;
         return (String[])_serverClasses.toArray(new String[_serverClasses.size()]);
     }

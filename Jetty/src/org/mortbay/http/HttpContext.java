@@ -436,10 +436,23 @@ public class HttpContext extends Container
      */
     public void setSystemClasses(String[] classes)
     {
-        if (classes==null || classes.length==0)
+        if (classes==null)
             _systemClasses=null;
         else
             _systemClasses=Arrays.asList(classes);
+        
+        if (_loader!=null && (_loader instanceof ContextLoader))
+        {
+            if (_systemClasses==null)
+            {
+                if (_httpServer!=null)
+                    ((ContextLoader)_loader).setSystemClasses(_httpServer.getSystemClasses());
+                else
+                    ((ContextLoader)_loader).setSystemClasses(null);
+            }
+            else
+                ((ContextLoader)_loader).setSystemClasses(getSystemClasses());
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -450,7 +463,7 @@ public class HttpContext extends Container
      */
     public String[] getSystemClasses()
     {
-        if (_systemClasses==null || _systemClasses.size()==0)
+        if (_systemClasses==null)
             return null;
         return (String[])_systemClasses.toArray(new String[_systemClasses.size()]);
     }
@@ -464,10 +477,23 @@ public class HttpContext extends Container
      */
     public void setServerClasses(String[] classes)
     {
-        if (classes==null || classes.length==0)
+        if (classes==null)
             _serverClasses=null;
         else
             _serverClasses=Arrays.asList(classes);
+        
+        if (_loader!=null && (_loader instanceof ContextLoader))
+        {
+            if (_serverClasses==null)
+            {
+                if (_httpServer!=null)
+                    ((ContextLoader)_loader).setServerClasses(_httpServer.getServerClasses());
+                else
+                    ((ContextLoader)_loader).setServerClasses(null);
+            }
+            else
+                ((ContextLoader)_loader).setServerClasses(getServerClasses());
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -478,7 +504,7 @@ public class HttpContext extends Container
      */
     public String[] getServerClasses()
     {
-        if (_serverClasses==null || _serverClasses.size()==0)
+        if (_serverClasses==null)
             return null;
         return (String[])_serverClasses.toArray(new String[_serverClasses.size()]);
     }
