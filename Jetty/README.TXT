@@ -13,18 +13,37 @@ dynamic HTTP requests from any Java application.
 
 Downloading
 ============
-Jetty is can be downloaded in one of three distribution files:
+Jetty is can be downloaded in one of the following distribution files:
 
-  Jetty-X.X.X.tar.gz : This is the complete release containing source,
+  Jetty-X.X.X.tar.gz  -  This is the complete release containing source,
   compiled jars, external jars and demos.  Installation is simply
   untaring the tar.gz file in the directory required.
 
-  Jetty-X.X.X-no-ext.tar.gz : This is the complete release with the
+  Jetty-X.X.X-no-ext.tar.gz  -  This is the complete release with the
   external jars removed.  This release is good if you already have
   the required external jars (see below).
 
-  Jetty-X.X.X-src.tar.gz : A source only distribution which needs
+  Jetty-X.X.X-src.tar.gz  -  A source only distribution which needs
   to be build using ant. This distribution also excludes the demo.
+
+
+
+Package contents
+================
+
+  src     - The source for the HTTP server and servlet container.
+  lib     - The jars of the compile jetty code.
+  ext     - The external jars needed for the main jetty server.
+  etc     - The config files and resources.
+  demo    - Demos of the HTTP server and servlet container.
+  test    - Test harnesses.
+  webapps - The default location for war files or webapps.
+  extra   - Directory of optional extras
+            /plus          - Extended jetty with JNDI, transaction, JAAS & log4j
+            /ftp           - FTP client
+            /j2ee          - J2EE distributions and integration 
+            /jdk1.2        - Classes for JDK < 1.4
+            /loadbalancer  - A simple load balancer
 
 
 Quick Start
@@ -40,7 +59,6 @@ Quick Start
 
   Then point your browser at http://localhost:8080 to see the demo 
   web site.
-
 
 
 

@@ -112,6 +112,7 @@
 
   <!-- ==================================================================== -->
   <target name="tidy" description="Remove generated files not needed for running">
+    <delete dir="${dist}" quiet="false"/>
     <delete dir="${classes}" quiet="true"/>
     <delete dir="${test.classes}" quiet="true"/>
     <delete file="${mini.http.jar}" quiet="true"/>
@@ -126,7 +127,6 @@
     <delete dir="${jetty.webapp.classes}" quiet="false"/>
     <delete dir="${javadoc}" quiet="false"/>
     <delete dir="${etc}/dtd" quiet="false"/>
-    <delete dir="${dist}" quiet="false"/>
     <delete file="${jetty.jar}" quiet="false"/>
     <delete file="${mortbay.jmx.jar}" quiet="false"/>
     <delete file="${servlet.jar}" quiet="false"/> 
@@ -486,6 +486,7 @@
           description="Build the distribution archives">
     <mkdir dir="${dist}"/>
     
+    
     <tar tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}.tar.gz" 
          compression="gzip"
          longfile="gnu">
@@ -497,6 +498,7 @@
         <exclude name="**/logs/*.log"/>
       </tarfileset>
     </tar>
+
 
     <tar 
      tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-no-ext.tar.gz" 
