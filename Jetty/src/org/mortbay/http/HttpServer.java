@@ -66,7 +66,7 @@ public class HttpServer implements LifeCycle
     private HashMap _listeners = new HashMap(3);
     private HttpEncoding _httpEncoding ;
     private HashMap _realmMap = new HashMap(3);    
-    private StringMap _hostMap = new StringMap();
+    private StringMap _virtualHostMap = new StringMap();
     
     private HttpContext _notFoundContext=null;
     private boolean _chunkingForced=false;
@@ -81,7 +81,7 @@ public class HttpServer implements LifeCycle
     public HttpServer()
     {
         __servers.add(this);
-        _hostMap.setIgnoreCase(true);
+        _virtualHostMap.setIgnoreCase(true);
     }
     
     /* ------------------------------------------------------------ */
@@ -121,7 +121,7 @@ public class HttpServer implements LifeCycle
         if (Code.verbose(99))
         {
             Code.debug("LISTENERS: ",_listeners);
-            Code.debug("HANDLER: ",_hostMap);
+            Code.debug("HANDLER: ",_virtualHostMap);
         }   
 
         if (_requestLog!=null && !_requestLog.isStarted())
@@ -314,29 +314,27 @@ public class HttpServer implements LifeCycle
             return Collections.EMPTY_LIST;
         return _listeners.values();
     }
-
     
     /* ------------------------------------------------------------ */
     /** Define a virtual host alias.
      * All requests to the alias are handled the same as request for
-     * the host.
-     * @param host Host name or IP
+     * the virtualHost.
+     * @param virtualHost Host name or IP
      * @param alias Alias hostname or IP
      */
-    public void addHostAlias(String host, String alias)
+    public void addHostAlias(String virtualHost, String alias)
     {
-        Object contextMap=_hostMap.get(host);
+        Object contextMap=_virtualHostMap.get(virtualHost);
         if (contextMap==null)
-            throw new IllegalArgumentException("No Such Host: "+host);
-        _hostMap.put(alias,contextMap);
+            throw new IllegalArgumentException("No Such Host: "+virtualHost);
+        _virtualHostMap.put(alias,contextMap);
     }
-
 
     /* ------------------------------------------------------------ */
     /** Create a new HttpContext.
      * Specialized HttpServer classes may specialize this method to
      * return subclasses of HttpContext.
-     * @param contextPathSpec 
+     * @param contextPathSpec Path specification relative to the context path. 
      * @return A new instance of HttpContext or a subclass of HttpContext
      */
     protected HttpContext newHttpContext(String contextPathSpec)
@@ -347,7 +345,7 @@ public class HttpServer implements LifeCycle
     /* ------------------------------------------------------------ */
     /** Create and add a new context.
      * Note that multiple contexts can be created for the same
-     * host and contextPath. Requests are offered to multiple
+     * virtualHost and contextPath. Requests are offered to multiple
      * contexts in the order they where added to the HttpServer.
      * @param contextPath
      * @return A HttpContext instance created by a call to newHttpContext.
@@ -361,18 +359,18 @@ public class HttpServer implements LifeCycle
     /* ------------------------------------------------------------ */
     /** Create and add a new context.
      * Note that multiple contexts can be created for the same
-     * host and contextPath. Requests are offered to multiple
+     * virtualHost and contextPath. Requests are offered to multiple
      * contexts in the order they where added to the HttpServer.
-     * @param host Virtual hostname or null for all hosts.
-     * @param contextPathSpec
+     * @param virtualHost Virtual hostname or null for all hosts.
+     * @param contextPathSpec Path specification relative to the context path.
      * @return A HttpContext instance created by a call to newHttpContext.
      */
-    public HttpContext addContext(String host, String contextPathSpec)
+    public HttpContext addContext(String virtualHost, String contextPathSpec)
     {
-        if (host!=null && host.length()==0)
-            host=null;
+        if (virtualHost!=null && virtualHost.length()==0)
+            virtualHost=null;
         HttpContext hc = newHttpContext(contextPathSpec);
-        addContext(host,hc);
+        addContext(virtualHost,hc);
         return hc;
     }
 
@@ -380,17 +378,17 @@ public class HttpServer implements LifeCycle
     /** Add a context.
      * As contexts cannot be publicly created, this may be used to
      * alias an existing context.
-     * @param host The virtual host or null for all hosts.
+     * @param virtualHost The virtual host or null for all hosts.
      * @param context 
      */
-    public void addContext(String host,
+    public void addContext(String virtualHost,
                            HttpContext context)
     {
-        PathMap contextMap=(PathMap)_hostMap.get(host);
+        PathMap contextMap=(PathMap)_virtualHostMap.get(virtualHost);
         if (contextMap==null)
         {
             contextMap=new PathMap(7);
-            _hostMap.put(host,contextMap);
+            _virtualHostMap.put(virtualHost,contextMap);
         }
 
         String contextPathSpec=context.getContextPath();
@@ -405,23 +403,23 @@ public class HttpServer implements LifeCycle
         }
 
         contextList.add(context);
-        context.addHost(host);
+        context.addHost(virtualHost);
         add(context);
 
-        Code.debug("Added ",context," for host ",host);
+        Code.debug("Added ",context," for host ",virtualHost);
     }
 
     /* ------------------------------------------------------------ */
     /** Remove a context or Web application.
-     * @param host The virtual host or null for all hosts.
-     * @param contextPathSpec
-     * @param i Index among contexts of same host and pathSpec.
+     * @param virtualHost The virtual host or null for all hosts.
+     * @param contextPathSpec Path specification relative to the context path.
+     * @param i Index among contexts of same virtualHost and pathSpec.
      * @exception IllegalStateException if context not stopped
      */
-    public void removeContext(String host, String contextPathSpec, int i)
+    public void removeContext(String virtualHost, String contextPathSpec, int i)
         throws IllegalStateException
     {
-        PathMap contextMap=(PathMap)_hostMap.get(host);
+        PathMap contextMap=(PathMap)_virtualHostMap.get(virtualHost);
         if (contextMap!=null)
         {
             List contextList = (List)contextMap.get(contextPathSpec);
@@ -451,7 +449,7 @@ public class HttpServer implements LifeCycle
         if (context.isStarted())
             throw new IllegalStateException("Context not stopped");
                     
-        Iterator i1 = _hostMap.values().iterator();
+        Iterator i1 = _virtualHostMap.values().iterator();
         while(i1.hasNext())
         {
             PathMap contextMap=(PathMap)i1.next();
@@ -470,17 +468,17 @@ public class HttpServer implements LifeCycle
     
         
     /* ------------------------------------------------------------ */
-    /** 
-     * @param host The virtual host or null for all hosts.
-     * @param contextPathSpec
-     * @param i Index among contexts of same host and pathSpec.
+    /** Get or create context. 
+     * @param virtualHost The virtual host or null for all hosts.
+     * @param contextPathSpec Path specification relative to the context path.
+     * @param i Index among contexts of same virtualHost and pathSpec.
      * @return The HttpContext or null.
      */
-    public HttpContext getContext(String host, String contextPathSpec, int i)
+    public HttpContext getContext(String virtualHost, String contextPathSpec, int i)
     {
         HttpContext hc=null;
 
-        PathMap contextMap=(PathMap)_hostMap.get(host);
+        PathMap contextMap=(PathMap)_virtualHostMap.get(virtualHost);
         if (contextMap!=null)
         {
             List contextList = (List)contextMap.get(contextPathSpec);
@@ -498,17 +496,17 @@ public class HttpServer implements LifeCycle
     
     /* ------------------------------------------------------------ */
     /** Get or create context. 
-     * @param host The virtual host or null for all hosts.
+     * @param virtualHost The virtual host or null for all hosts.
      * @param contextPath 
      * @return HttpContext. If multiple contexts exist for the same
-     * host and pathSpec, the most recently added context is returned.
+     * virtualHost and pathSpec, the most recently added context is returned.
      * If no context exists, a new context is created by a call to newHttpContext.
      */
-    public HttpContext getContext(String host, String contextPath)
+    public HttpContext getContext(String virtualHost, String contextPath)
     { 
         HttpContext hc=null;
 
-        PathMap contextMap=(PathMap)_hostMap.get(host);
+        PathMap contextMap=(PathMap)_virtualHostMap.get(virtualHost);
         if (contextMap!=null)
         {
             List contextList = (List)contextMap.get(contextPath);
@@ -517,12 +515,20 @@ public class HttpServer implements LifeCycle
             
         }
         if (hc==null)
-            hc=addContext(host,contextPath);
+            hc=addContext(virtualHost,contextPath);
 
         return hc;
     }
     
-    
+    /* ------------------------------------------------------------ */
+    /** Get or create context. 
+     * @param contextPathSpec Path specification relative to the context path.
+     * @return The HttpContext or null.
+     */
+    public HttpContext getContext(String contextPathSpec)
+    {
+	return getContext(null,contextPathSpec,0);
+    }    
  
     /* ------------------------------------------------------------ */
     /** 
@@ -531,7 +537,7 @@ public class HttpServer implements LifeCycle
     public synchronized Set getHandlers()
     {
         HashSet set = new HashSet(33);
-        Iterator maps=_hostMap.values().iterator();
+        Iterator maps=_virtualHostMap.values().iterator();
         while (maps.hasNext())
         {
             PathMap pm=(PathMap)maps.next();
@@ -556,11 +562,11 @@ public class HttpServer implements LifeCycle
      */
     public synchronized Set getHttpContexts()
     {
-        if (_hostMap==null)
+        if (_virtualHostMap==null)
             return Collections.EMPTY_SET;
         
         HashSet set = new HashSet(33);
-        Iterator maps=_hostMap.values().iterator();
+        Iterator maps=_virtualHostMap.values().iterator();
         while (maps.hasNext())
         {
             PathMap pm=(PathMap)maps.next();
@@ -635,7 +641,7 @@ public class HttpServer implements LifeCycle
 
         while (true)
         {
-            PathMap contextMap=(PathMap)_hostMap.get(host);
+            PathMap contextMap=(PathMap)_virtualHostMap.get(host);
             if (contextMap!=null)
             {
                 List contextLists =contextMap.getMatches(request.getPath());
@@ -706,7 +712,7 @@ public class HttpServer implements LifeCycle
         {
             String host = (String)hosts.get(h);
             
-            PathMap contextMap=(PathMap)_hostMap.get(host);
+            PathMap contextMap=(PathMap)_virtualHostMap.get(host);
             if (contextMap!=null)
             {
                 List contextLists =contextMap.getMatches(uri);
@@ -782,7 +788,7 @@ public class HttpServer implements LifeCycle
     /* ------------------------------------------------------------ */
     public Map getHostMap()
     {
-        return _hostMap;
+        return _virtualHostMap;
     }
 
 
@@ -1121,9 +1127,9 @@ public class HttpServer implements LifeCycle
         if (_listeners!=null)
             _listeners.clear();
         _listeners=null;
-        if (_hostMap!=null)
-            _hostMap.clear();
-        _hostMap=null;
+        if (_virtualHostMap!=null)
+            _virtualHostMap.clear();
+        _virtualHostMap=null;
 
 
         if (_components!=null && _eventListeners!=null)
