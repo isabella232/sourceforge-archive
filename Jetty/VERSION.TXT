@@ -1,5 +1,6 @@
 Jetty Versions
 --------------
+ + Allow multiple security-role-ref elements per servlet.
 
 Jetty-4.2.10pre1 - 2 June 2003
  + Fixed JSP code visibility problem introduced in Jetty-4.2.10pre0

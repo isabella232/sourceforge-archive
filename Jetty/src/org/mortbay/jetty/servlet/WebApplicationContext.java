@@ -841,10 +841,10 @@ public class WebApplicationContext
             holder.setInitParameter("classpath",getFileClassPath());
         }
         
-        Iterator iter= node.iterator("init-param");
-        while(iter.hasNext())
+        Iterator iParamsIter= node.iterator("init-param");
+        while(iParamsIter.hasNext())
         {
-            XmlParser.Node paramNode=(XmlParser.Node)iter.next();
+            XmlParser.Node paramNode=(XmlParser.Node)iParamsIter.next();
             String pname=paramNode.getString("param-name",false,true);
             String pvalue=paramNode.getString("param-value",false,true);
             holder.put(pname,pvalue);
@@ -876,15 +876,22 @@ public class WebApplicationContext
             }
         }
     
-        XmlParser.Node securityRef = node.get("security-role-ref");
-        if (securityRef!=null)
+        Iterator sRefsIter= node.iterator("security-role-ref");
+        while(sRefsIter.hasNext())
         {
+            XmlParser.Node securityRef=(XmlParser.Node)sRefsIter.next();
             String roleName=securityRef.getString("role-name",false,true);
             String roleLink=securityRef.getString("role-link",false,true);
-            if (roleLink!=null && roleLink.length()>0)
+            if (roleName!=null && roleName.length()>0
+                    && roleLink!=null && roleLink.length()>0)
             {
                 Code.debug("link role ",roleName," to ",roleLink," for ",this);
                 holder.setUserRoleLink(roleName,roleLink);
+            }
+            else
+            {
+                Code.warning("Ignored invalid security-role-ref element: "
+                        +"servlet-name="+name+", "+securityRef);
             }
         }
 
