@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
  + Merged LimitedNCSARequestLog into NCSARequestLog
+ + Fixed space in resource name handling for jdk1.4
 
 Jetty-4.1.0 - 22 September 2002
  + Fixed CGI+windows security hole.
