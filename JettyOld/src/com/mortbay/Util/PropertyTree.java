@@ -125,6 +125,15 @@ public class PropertyTree extends Properties
 	list(writer);
     }
     /* ------------------------------------------------------------ */
+    /** Return a list of the fully-qualified names of the properties in this
+     * tree
+     */
+     public Enumeration propertyNames(){
+	 Vector v = new Vector();
+	 listNames("", v);
+	 return v.elements();
+     }
+    /* ------------------------------------------------------------ */
     public Enumeration keys(){
 	return children.keys();
     }
