@@ -13,8 +13,7 @@
 
   <!-- ==================================================================== -->
   <property name="RELEASE.MAJOR"  value="4.1" />
-  <property name="RELEASE.MAJOR.MINOR"  value="4.1.3" />
-
+  <property name="RELEASE.MAJOR.MINOR"  value="4.1.4" />
 
   <!-- ==================================================================== -->
   <property name="build.compiler"            value="modern" />
