@@ -135,7 +135,7 @@ public class JDBCUserRealm extends HashUserRealm
             + " from " + _roleTable + " r, "
             + _userRoleTable + " u where u."
             + _userRoleTableUserKey + " = ?"
-            + " and r." + _roleTableKey + " = "
+            + " and r." + _roleTableKey + " = u."
             + _userRoleTableRoleKey;
     }
     

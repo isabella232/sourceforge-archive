@@ -1,8 +1,10 @@
 Jetty Versions
 --------------
 
+ + Fixed column name in JDBCUserRealm
  + Remove last of the Class.forName calls.
  + Removed redundant sessionID check.
+ + Security FAQ
  + Disabled the Password EXEC mechanism by default
 
 Jetty-4.0.RC1 - 06 March 2002
