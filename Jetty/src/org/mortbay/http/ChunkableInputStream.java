@@ -119,7 +119,7 @@ public class ChunkableInputStream extends FilterInputStream
         in=_realIn;
         _filters=0;
         if (_deChunker!=null)
-            _deChunker._trailer=null;
+            _deChunker.resetStream();
         _chunking=false;
         _realIn.setByteLimit(-1);
     }
@@ -205,12 +205,20 @@ public class ChunkableInputStream extends FilterInputStream
         /* ------------------------------------------------------------ */
         int _chunkSize=0;
         HttpFields _trailer=null;
-        
+
         /* ------------------------------------------------------------ */
         /** Constructor.
          */
         public DeChunker()
         {}
+
+
+        /* ------------------------------------------------------------ */
+        public void resetStream()
+        {
+            _chunkSize=0;
+            _deChunker._trailer=null;
+        }
 
         /* ------------------------------------------------------------ */
         public int read()

@@ -388,8 +388,8 @@ public class ThreadPool
         while (_threadSet!=null && !_threadSet.isEmpty() && now-stopped_at<=wait_time)
         {
             // wait for jobs to end, with backing off timer
-            if (sleep_time>5000)
-                Log.event("Stop waiting "+(sleep_time+999)/1000+"s "+(now-stopped_at));
+            if (sleep_time>2000)
+                Log.event("Stop waiting "+(sleep_time+999)/1000+"s ");
             Thread.sleep(sleep_time);
             now=System.currentTimeMillis();
             sleep_time*=2;

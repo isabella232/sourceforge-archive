@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Allow POSTs to static resources.
  + stopJob/killStop in ThreadPool to improve stopping
    ThreadedServer on some platforms.
  + Branched at Jetty_3_1
