@@ -80,16 +80,25 @@ public class FormAuthenticator implements Authenticator
     /* ------------------------------------------------------------ */
     public void setErrorPage(String path)
     {
-        if (!path.startsWith("/"))
+        if (path==null || path.trim().length()==0)
         {
-            Code.warning("form-error-page must start with /");
-            path="/"+path;
+            _formErrorPath=null;
+            _formErrorPage=null;
         }
-        _formErrorPage=path;
-        _formErrorPath=path;
-        if (_formErrorPath.indexOf('?')>0)
-            _formErrorPath=_formErrorPath.substring(0,_formErrorPath.indexOf('?'));
-    }
+        else
+        {
+            if (!path.startsWith("/"))
+            {
+                Code.warning("form-error-page must start with /");
+                path="/"+path;
+            }
+            _formErrorPage=path;
+            _formErrorPath=path;
+
+            if (_formErrorPath!=null && _formErrorPath.indexOf('?')>0)
+                _formErrorPath=_formErrorPath.substring(0,_formErrorPath.indexOf('?'));
+        }
+    }    
 
     /* ------------------------------------------------------------ */
     public String getErrorPage()

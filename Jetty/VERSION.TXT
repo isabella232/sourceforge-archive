@@ -23,6 +23,7 @@ Jetty-4.2.12
  + Improved error messages from ProxyHandler
  + Added missing S to some OPTIONS strings
  + Added open method to threaded server.
+ + FormAuthenticator does 403 with empty error page.
 
 Jetty-4.2.11 - 12 July 2003
  + Fixed race in servlet initialization code.
