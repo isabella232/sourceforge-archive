@@ -52,7 +52,6 @@ public class ServletHttpContextMBean extends HttpContextMBean
     {
         super.defineManagedResource();
 
-        defineAttribute("dynamicServletPathSpec");
         defineOperation("addServlet",
                         new String[] {STRING,STRING,STRING},
                         IMPACT_ACTION);
