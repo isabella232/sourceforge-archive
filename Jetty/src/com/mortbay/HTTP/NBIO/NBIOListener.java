@@ -117,6 +117,18 @@ public class NBIOListener extends SocketListener
                 HttpConnection connection=(HttpConnection)job;
                 handleHttpConnection(connection);
             }
+            else if (job instanceof SelectSet)
+            {
+                try
+                {
+                    _out.write(1);
+                    _out.flush();
+                }
+                catch(Exception e)
+                {
+                    Code.warning(e);
+                }
+            }
             else
             {
                 Socket socket = (Socket)job;
@@ -179,16 +191,12 @@ public class NBIOListener extends SocketListener
 
         synchronized(_newSelectSet)
         {
+            if (_newSelectSet.size()==0)
+            {
+                try{run(_newSelectSet);}
+                catch(Exception e){Code.warning(e);}
+            }
             _newSelectSet.add(item);
-            try
-            {
-                _out.write(1);
-                _out.flush();
-            }
-            catch(Exception e)
-            {
-                Code.warning(e);
-            }
         }
     }
 
