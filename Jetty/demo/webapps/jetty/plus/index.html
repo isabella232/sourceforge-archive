@@ -1,7 +1,14 @@
 <P>
 <H1>JettyPlus://</H1>
 
+<h2><font color=red>What's new </font></h2>
+  <ol>
+    <li>[07-Apr-2004] JettyPlus now updated to <a href="http://jotm.objectweb.org">JOTM 1.4.3 </a></li>
+    <li>[07-Apr-2004] new <A href="#start.config">start configuration</a> for JettyPlus start.jar</li>
+  </ol>
+<A name="start.config">
 <h2> What it is and how to run it</h2>
+</a>
 
 The purpose of this project is to enrich Jetty by
 selectively incorporating useful J2EE and non-J2EE features. The result is
@@ -14,11 +21,11 @@ The feature set currently contains:
 
 <ul>
   <li> <A HREF="http://java.sun.com/j2ee/transactions.html">Java
-  Transaction API (JTA)</A> and Resource references, eg <A HREF="http://java.sun.com/j2se/1.4.1/docs/api/javax/sql/package-summary.html">DataSources</A> <font color=red><i>Updated</i></font>
+  Transaction API (JTA)</A> and Resource references, eg <A HREF="http://java.sun.com/j2se/1.4.1/docs/api/javax/sql/package-summary.html">DataSources</A> 
   <li> <A HREF="http://java.sun.com/products/jndi/">Java Naming and Directory Interface API (JNDI)</A>
   <li> <A HREF="http://jakarta.apache.org/log4j/docs/">Log4J</A>  
   <li> <A HREF="http://java.sun.com/products/jaas/">Java Authentication and Authorization Service (JAAS)</A>
-  <li> <A HREF="http://java.sun.com/products/javamail/">Java Mail</A>&nbsp; <font color=red><i>New</i></font>
+  <li> <A HREF="http://java.sun.com/products/javamail/">Java Mail</A>&nbsp; 
 </ul> 
 
 To use JettyPlus, you must:
@@ -48,18 +55,15 @@ you can edit the <code>start.config</code> file inside
   </li>
 </ul>
 <P>
-JettyPlus consists of
-<code><b>org.mortbay.jetty.plus.jar</b></code>, ancillary file
-<code><b>org.mortbay.jetty.plus.resource.jar</b></code>, and
-optionally <code><b>org.mortbay.jaas.jar</b></code> as well
-as a number of libraries found in <code><b>extra/ext</b></code>. If you use the convenient
-start.jar method of running Jetty (highly recommended), all necessary jar files will
+JettyPlus consists of <code><b>org.mortbay.jetty.plus.jar</b></code>,  <code><b>org.mortbay.jaas.jar</b></code> as well
+as a number of libraries found in <code><b>extra/ext</b></code> and property files found in <code><b>extra/resources</b></code>. If you use the convenient
+start.jar method of running Jetty (highly recommended), all necessary jar and property files will
 automatically be placed on the JVM classpath for you. Otherwise,
 you will need to place the following on the Java classpath in
 addition to the usual Jetty jars:
 <ul>
+  <li>all property files in extra/resources</li>
   <li>org.mortbay.jetty.plus.jar
-  <li>org.mortbay.jetty.plus.resource.jar
   <li>org.mortbay.jetty.jaas.jar (if you want to use JAAS)
   <li>activation.jar
   <li>mail.jar
@@ -75,9 +79,6 @@ addition to the usual Jetty jars:
   <li>jts1_0.jar
   <li>log4j.jar
   <li>objectweb-datasource.jar
-  <li>ow_util_log_file.jar
-  <li>ow_util_log_wrp_log4j.jar
-  <li>p6spy.jar
   <li>xapool.jar
 </ul>
 <P>
@@ -87,7 +88,7 @@ instructions on how to run the JettyPlus demonstration webapps.
 <P>
 <h2>Features</H2>
 <H3>Transactions and DataSources</H3>
-Thanks to the integration of the <A HREF="http://www.objectweb.org/jotm/index.html">JOTM</A> and <A
+Thanks to the integration of the <A HREF="http://jotm.objectweb.org">JOTM</A> and <A
 HREF="http://xapool.experlog.com/">XAPool</A> packages
 from <A HREF="http://www.objectweb.org">ObjectWeb</A>,
 it is now possible to easily incorporate distributed transactional semantics in your
@@ -148,7 +149,7 @@ To use DataSources in your webapp, you need to:
       &lt;New class="org.mortbay.jetty.plus.JotmService"&gt;
         &lt;Set name="Name"&gt;TransactionMgr&lt;/Set&gt;
         <font color="blue"> &lt;!-- set up a pooled DataSource --&gt;</font>
-         &lt;Call name="addPooledDataSource"&gt;
+         &lt;Call name="addDataSource"&gt;
              &lt;Arg&gt;jdbc/myDB&lt;/Arg&gt;   <font color="blue"&lt;!-- client lookup jndi name of datasource  --&gt;</font>
              <font color="blue">&lt;!-- set up the datasource --&gt;</font>
              &lt;Arg&gt;
