@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.servlet;
+package org.mortbay.webapps.jetty;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;

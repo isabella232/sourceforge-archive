@@ -307,11 +307,6 @@
       <Arg>org.mortbay.servlet.SessionDump</Arg>
     </Call>
     <Call name="addServlet">
-      <Arg>Dispatch</Arg>
-      <Arg>/dispatch/*</Arg>
-      <Arg>org.mortbay.servlet.RequestDispatchTest</Arg>
-    </Call>
-    <Call name="addServlet">
       <Arg>JSP</Arg>
       <Arg>*.jsp</Arg>
       <Arg>org.apache.jasper.servlet.JspServlet</Arg>

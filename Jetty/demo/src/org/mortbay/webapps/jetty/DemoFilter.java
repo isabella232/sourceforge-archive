@@ -54,7 +54,7 @@ public  class DemoFilter implements Filter
         
         if (wrap)
             chain.doFilter(new HttpServletRequestWrapper((HttpServletRequest)request),
-                                       new HttpServletResponseWrapper((HttpServletResponse)response));
+                           new HttpServletResponseWrapper((HttpServletResponse)response));
         else                               
             chain.doFilter(request, response);
     }

@@ -31,7 +31,7 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
     <filter-name>Demo REQUEST Filter</filter-name>
     <filter-class>org.mortbay.webapps.jetty.DemoFilter</filter-class>
     <init-param><param-name>type</param-name><param-value>REQUEST</param-value></init-param>
-    <init-param><param-name>wrap</param-name><param-value>TRUE</param-value></init-param>
+    <init-param><param-name>wrap</param-name><param-value>FALSE</param-value></init-param>
   </filter>
   
   <filter>
@@ -144,7 +144,7 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
 
   <servlet>
     <servlet-name>Dispatch</servlet-name>
-    <servlet-class>org.mortbay.servlet.RequestDispatchTest</servlet-class>
+    <servlet-class>org.mortbay.webapps.jetty.RequestDispatchTest</servlet-class>
     <run-as><role-name>dispatch</role-name></run-as>
   </servlet>
 

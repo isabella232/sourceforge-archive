@@ -62,11 +62,6 @@
       <Arg>/session/*</Arg>
       <Arg>org.mortbay.servlet.SessionDump</Arg>
     </Call>
-    <Call name="addServlet">
-      <Arg>Dispatch</Arg>
-      <Arg>/Dispatch/*</Arg>
-      <Arg>org.mortbay.servlet.RequestDispatchTest</Arg>
-    </Call>
 
     <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/demo/docroot/</Set>
     <Set name="ServingResources">TRUE</Set>
