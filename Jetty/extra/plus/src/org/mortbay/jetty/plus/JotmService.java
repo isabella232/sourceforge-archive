@@ -146,8 +146,10 @@ public class JotmService extends TMService
             }
             
             
-            // Now take any existing data sources and register them with this
-            // transaction manager and JNDI
+            // Now take any existing data sources and register them with JNDI
+            // NB: it won't be necessary to call setTransactionManager() on the DataSource
+            // or Pool because they both do a JNDI lookup to find a TransactionManager with
+            // which to enrol their transactions when necessary 
             XADataSource xadsDataSource;
             Iterator             itrDataSources;
             TransactionManager   tmManager;
@@ -160,29 +162,46 @@ public class JotmService extends TMService
             {
                 meDataSource = (Map.Entry)itrDataSources.next();
                 strDataSourceName = (String)meDataSource.getKey();
-                StandardXAPoolDataSource xapdsPoolDataSource = (StandardXAPoolDataSource)meDataSource.getValue();
-                xadsDataSource = xapdsPoolDataSource.getDataSource();
-                
-                try 
-                {
-                    Util.bind(ictx, "XA"+ strDataSourceName, xadsDataSource);
-                    Code.debug("XA Data source bound in JNDI with name XA" + strDataSourceName);
-                    Util.bind(ictx, strDataSourceName, xapdsPoolDataSource);
-                    Code.debug("Data Source Pool bound in JNDI with name " + strDataSourceName);
-                } 
-                catch (NamingException e) 
-                {
-                    Code.debug("Data source rebind failed :" + e.getExplanation());
-                    Code.warning(e);
-                    throw e;
-                }
+                Object o = meDataSource.getValue();
 
-                //set up a transaction manager for the DataSource and Pool
-                //NB: this step is not strictly necessary for Jotm, as the XADataSource
-                //and XAPoolDataSource both use JNDI to lookup a Transaction manager
-                //whenever they themselves are looked up by a client
-                xapdsPoolDataSource.setTransactionManager(tmManager);
-                ((StandardXADataSource)xadsDataSource).setTransactionManager(tmManager);
+                if (o instanceof StandardXAPoolDataSource)
+                {
+                    StandardXAPoolDataSource xapdsPoolDataSource = (StandardXAPoolDataSource)meDataSource.getValue();
+                    xadsDataSource = xapdsPoolDataSource.getDataSource();
+                
+                    //bind both the Pool and the DataSource
+                    try 
+                    {
+                        Util.bind(ictx, "XA"+ strDataSourceName, xadsDataSource);
+                        Code.debug("XA Data source bound in JNDI with name XA" + strDataSourceName);
+                        Util.bind(ictx, strDataSourceName, xapdsPoolDataSource);
+                        Code.debug("Data Source Pool bound in JNDI with name " + strDataSourceName);
+                    } 
+                    catch (NamingException e) 
+                    {
+                        Code.debug("Data source rebind failed :" + e.getExplanation());
+                        Code.warning(e);
+                        throw e;
+                    }
+                }
+                else if (o instanceof StandardXADataSource)
+                {
+                    //bind only the DataSource
+                    xadsDataSource = (StandardXADataSource)o;
+                    try
+                    {
+                        Util.bind(ictx, strDataSourceName, xadsDataSource);
+                        Code.debug("Data Source bound in JNDI with name "+ strDataSourceName);
+                    }
+                    catch (NamingException e)
+                    {
+                        Code.debug("Data source rebind failed : "+e.getExplanation());
+                        Code.warning(e);
+                        throw e;
+                    }
+                }
+                else
+                    throw new IllegalStateException (o + " is not a StandardDataSource");
             }
 
             super.start();
@@ -235,9 +254,9 @@ public class JotmService extends TMService
      * @exception SQLException if an error occurs
      * @exception NamingException if an error occurs
      */
-    public void addPooledDataSource (String dsJNDIName, 
-                                     StandardXADataSource xaDataSource, 
-                                     StandardXAPoolDataSource xaPool)
+    public void addDataSource (String dsJNDIName, 
+                               StandardXADataSource xaDataSource, 
+                               StandardXAPoolDataSource xaPool)
         throws SQLException, NamingException
     {
         // set up username and password for pool
@@ -255,5 +274,26 @@ public class JotmService extends TMService
 
         Log.event("Pooled data source: " +dsJNDIName+" configured");
     }
+
+
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Add a DataSource that does not have an associated pool.
+     * You should only use this if the driver for the datasource does it's
+     * own pooling.
+     *
+     * @param dsJNDIName a <code>String</code> value
+     * @param xaDataSource a <code>StandardXADataSource</code> value
+     */
+    public  void addDataSource (String dsJNDIName,
+                                StandardXADataSource xaDataSource)
+    {  
+        // add to map of datasources
+        m_mpDataSources.put(dsJNDIName, xaDataSource);
+        Log.event("Data source: " +dsJNDIName+" configured");
+
+    }
+
 
 }
