@@ -100,6 +100,12 @@ public class WebApplicationContext extends ServletHttpContext
     {
         _war=webApp;
     }
+
+    /* ------------------------------------------------------------ */
+    public WebApplicationHandler getWebApplicationHandler()
+    {
+        return _webAppHandler;
+    }
     
     /* ------------------------------------------------------------ */
     private void resolveWebApp()

@@ -39,7 +39,7 @@ import java.util.zip.CRC32;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class Password extends Credentials
+public class Password extends Credential
 {
     private String _pw;
     
@@ -81,8 +81,8 @@ public class Password extends Credentials
         if (credentials instanceof String)
             return credentials.equals(_pw);
         
-        if (credentials instanceof Credentials)
-            return ((Credentials)credentials).check(_pw);
+        if (credentials instanceof Credential)
+            return ((Credential)credentials).check(_pw);
             
         return false;
     }
@@ -153,10 +153,15 @@ public class Password extends Credentials
     }
 
     /* ------------------------------------------------------------ */
-    /** XXXX
-     * @param realm 
-     * @param dft 
-     * @param promptDft 
+    /** Get a password.
+     * A password is obtained by trying <UL>
+     * <LI>Calling <Code>System.getProperty(realm,dft)</Code>
+     * <LI>Prompting for a password
+     * <LI>Using promptDft if nothing was entered.
+     * </UL>
+     * @param realm The realm name for the password, used as a SystemProperty name.
+     * @param dft The default password.
+     * @param promptDft The default to use if prompting for the password.
      * @return 
      */
     public static Password getPassword(String realm,String dft, String promptDft)
@@ -185,11 +190,6 @@ public class Password extends Credentials
         return new Password(passwd);
     }
     
-    /* ------------------------------------------------------------ */
-    public static String crypt(String user, String pw)
-    {
-        return "CRYPT:"+UnixCrypt.crypt(pw,user);
-    }
     
     /* ------------------------------------------------------------ */
     /** 
@@ -207,9 +207,9 @@ public class Password extends Credentials
         Password pw = "?".equals(p)?new Password(p):new Password(p);
         System.err.println(pw.toString());
         System.err.println(obfuscate(pw.toString()));
-        System.err.println(Credentials.MD5.digest(p));
+        System.err.println(Credential.MD5.digest(p));
         if (arg.length==2)
-            System.err.println(crypt(arg[0],pw.toString()));
+            System.err.println(Credential.Crypt.crypt(arg[0],pw.toString()));
     }    
 }
 

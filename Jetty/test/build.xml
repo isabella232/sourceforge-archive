@@ -27,6 +27,7 @@ the Ant optional tasks from:
   <property name="src1.4"         value="${basedir}/src1.4" />
   <property name="etc"            value="${basedir}/etc" />
   <property name="lib"            value="${basedir}/lib"/>
+  <property name="ext"            value="${basedir}/ext"/>
   <property name="classes"        value="${basedir}/classes"/>
   <property name="classes1.4"     value="${basedir}/classes1.4"/>
   <property name="javadoc"        value="${basedir}/javadoc"/>

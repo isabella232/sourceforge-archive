@@ -49,7 +49,7 @@ public class ServletHttpContext extends HttpContext
      * Called by the ServletHandler to 
      * @param servletContext 
      */
-    void setServletContext(ServletContext servletContext)
+    protected void setServletContext(ServletContext servletContext)
     {
         if (_servletContext!=null)
             throw new IllegalStateException("ServletContext already set");

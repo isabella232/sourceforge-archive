@@ -306,45 +306,61 @@ public class Tests extends junit.framework.TestCase
     /* ------------------------------------------------------------ */
     public void testPassword()
     {
-        Password f1 = new Password("password","Foo");
-        Password f2 = new Password("password",
-                                   Password.obfuscate("Foo"));
-        Password f3 = new Password("password",
-                                   Password.checksum("Foo"));
+        Password f1 = new Password("Foo");
+        Password f2 = new Password(Password.obfuscate("Foo"));
         
-        Password b1 = new Password("password","Bar");
-        Password b2 = new Password("password",
-                                   Password.obfuscate("Bar"));
-        Password b3 = new Password("password",
-                                   Password.checksum("Bar"));
+        Password b1 = new Password("Bar");
+        Password b2 = new Password(Password.obfuscate("Bar"));
 
         assertTrue("PW to PW",   f1.equals(f1));
         assertTrue("PW to Obf",  f1.equals(f2));
-        assertTrue("PW to CS",   !f1.equals(f3));
         assertTrue("Obf to PW",  f2.equals(f1));
         assertTrue("Obf to Obf", f2.equals(f2));
-        assertTrue("Obf to CS",  !f2.equals(f3));
-        assertTrue("CS to PW",   !f3.equals(f1));
-        assertTrue("CS to Obf",  !f3.equals(f2));
-        assertTrue("CS to CS",   f3.equals(f3));
         
         assertTrue("PW to Str",  f1.check("Foo"));
         assertTrue("Obf to Str", f2.check("Foo"));
-        assertTrue("CS to Str",  f3.check("Foo"));
         
         assertTrue("PW to PW",   !f1.equals(b1));
         assertTrue("PW to Obf",  !f1.equals(b2));
-        assertTrue("PW to CS",   !f1.equals(b3));
         assertTrue("Obf to PW",  !f2.equals(b1));
         assertTrue("Obf to Obf", !f2.equals(b2));
-        assertTrue("Obf to CS",  !f2.equals(b3));
-        assertTrue("CS to PW",   !f3.equals(b1));
-        assertTrue("CS to Obf",  !f3.equals(b2));
-        assertTrue("CS to CS",   !f3.equals(b3));
         
         assertTrue("PW to Str",  !f1.check("Bar"));
         assertTrue("Obf to Str", !f2.check("Bar"));
-        assertTrue("CS to Str",  !f3.check("Bar"));
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    public void testCredential()
+    {
+        Credential[] creds =
+            {
+                    new Password("Foo"),
+                    Credential.getCredential("Foo"),
+                    Credential.getCredential(Credential.Crypt.crypt("user","Foo")),
+                    Credential.getCredential(Credential.MD5.digest("Foo"))
+            };
+
+        assertTrue("c[0].check(c[0])", creds[0].check(creds[0]));
+        assertTrue("c[0].check(c[1])", creds[0].check(creds[1]));
+        assertTrue("c[0].check(c[2])", creds[0].check(creds[2]));
+        assertTrue("c[0].check(c[3])", creds[0].check(creds[3]));
+
+        assertTrue("c[1].check(c[0])", creds[1].check(creds[0]));
+        assertTrue("c[1].check(c[1])", creds[1].check(creds[1]));
+        assertTrue("c[1].check(c[2])", creds[1].check(creds[2]));
+        assertTrue("c[1].check(c[3])", creds[1].check(creds[3]));
+
+        assertTrue("c[2].check(c[0])", creds[2].check(creds[0]));
+        assertTrue("c[2].check(c[1])", creds[2].check(creds[1]));
+        assertTrue("c[2].check(c[2])",!creds[2].check(creds[2]));
+        assertTrue("c[2].check(c[3])",!creds[2].check(creds[3]));
+
+        assertTrue("c[3].check(c[0])", creds[3].check(creds[0]));
+        assertTrue("c[3].check(c[1])", creds[3].check(creds[1]));
+        assertTrue("c[3].check(c[2])",!creds[3].check(creds[2]));
+        assertTrue("c[3].check(c[3])",!creds[3].check(creds[3]));
+       
     }
 
     /* ------------------------------------------------------------ */

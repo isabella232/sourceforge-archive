@@ -743,7 +743,10 @@ public class ServletHandler
 
         if (__Slosh2Slash)
             path=path.replace('\\','/');
-        
+        path=URI.canonicalPath(path);
+        if (path==null)
+            return null;
+
         Resource baseResource=getHttpContext().getBaseResource();
         if (baseResource==null )
             return null;

@@ -8,7 +8,7 @@ package org.mortbay.http;
 import java.io.IOException;
 import org.mortbay.http.SecurityConstraint.Authenticator;
 import java.security.Principal;
-import org.mortbay.util.Credentials;
+import org.mortbay.util.Credential;
 import org.mortbay.util.Code;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
@@ -145,7 +145,7 @@ public class DigestAuthenticator implements Authenticator
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private static class Digest extends Credentials
+    private static class Digest extends Credential
     {
         private static MessageDigest __md;
 

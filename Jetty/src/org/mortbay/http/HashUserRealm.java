@@ -21,7 +21,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import org.mortbay.util.Code;
-import org.mortbay.util.Credentials;
+import org.mortbay.util.Credential;
 import org.mortbay.util.Password;
 import org.mortbay.util.Resource;
 
@@ -170,10 +170,7 @@ public class HashUserRealm extends HashMap implements UserRealm
             return super
                 .put(name,
                      new KnownUser(name.toString(),
-                                   Credentials.getCredentials
-                                   (_realmName,
-                                    name.toString(),
-                                    credentials.toString())));
+                                   Credential.getCredential(credentials.toString())));
         return null;
     }
 
@@ -272,13 +269,13 @@ public class HashUserRealm extends HashMap implements UserRealm
     private class KnownUser extends User
     {
         private String _userName;
-        private Credentials _cred;
+        private Credential _cred;
         
         /* -------------------------------------------------------- */
-        KnownUser(String name,Credentials credentials)
+        KnownUser(String name,Credential credential)
         {
             _userName=name;
-            _cred=credentials;
+            _cred=credential;
         }
         
         /* -------------------------------------------------------- */

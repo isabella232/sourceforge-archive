@@ -10,7 +10,7 @@ import java.security.MessageDigest;
 
 /* ------------------------------------------------------------ */
 /** Credentials.
- * The Credentials class represents an abstract mechanism for checking
+ * The Credential class represents an abstract mechanism for checking
  * authentication credentials.  A credential instance either represents a
  * secret, or some data that could only be derived from knowing the secret.
  * <p>
@@ -23,7 +23,7 @@ import java.security.MessageDigest;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public abstract class Credentials
+public abstract class Credential
 {
     /* ------------------------------------------------------------ */
     /** Check a credential
@@ -39,30 +39,25 @@ public abstract class Credentials
     /** Get a credential from a String.
      * If the credential String starts with a known Credential type (eg
      * "CRYPT:" or "MD5:" ) then a Credential of that type is returned. Else the
-     * credential is assumed to be a Password and is obtained with the
-     * Password.getPassword method.
-     * @param realm 
-     * @param user 
-     * @param credentials 
-     * @return 
+     * credential is assumed to be a Password.
+     * @param credential String representation of the credential
+     * @return A Credential or Password instance.
      */
-    public static Credentials getCredentials(String realm,
-                                             String user,
-                                             String credentials)
+    public static Credential getCredential(String credential)
     {
-        if (credentials.startsWith(Crypt.__TYPE))
-            return new Crypt(credentials);
-        if (credentials.startsWith(MD5.__TYPE))
-            return new MD5(credentials);
+        if (credential.startsWith(Crypt.__TYPE))
+            return new Crypt(credential);
+        if (credential.startsWith(MD5.__TYPE))
+            return new MD5(credential);
         
-        return Password.getPassword(realm,credentials,null);
+        return new Password(credential);
     }
 
 
     /* ------------------------------------------------------------ */
     /** Unix Crypt Credentials
      */
-    public static class Crypt extends Credentials
+    public static class Crypt extends Credential
     {
         public static final String __TYPE="CRYPT:";
         
@@ -83,12 +78,17 @@ public abstract class Credentials
             String passwd = credentials.toString();
             return _cooked.equals(UnixCrypt.crypt(passwd,_cooked));
         }
+
+        public static String crypt(String user,String pw)
+        {
+            return "CRYPT:"+UnixCrypt.crypt(pw,user);
+        }
     }
     
     /* ------------------------------------------------------------ */
     /** Unix Crypt Credentials
      */
-    public static class MD5 extends Credentials
+    public static class MD5 extends Credential
     {
         public static final String __TYPE="MD5:";
         private static MessageDigest __md;
@@ -111,10 +111,8 @@ public abstract class Credentials
             {
                 byte[] digest=null;
                 
-                if (credentials instanceof Credentials.MD5)
-                    digest=((Credentials.MD5)credentials)._digest;
-                else if (credentials instanceof Password ||
-                         credentials instanceof String)
+                if (credentials instanceof Password ||
+                    credentials instanceof String)
                 {
                     synchronized(__TYPE)
                     {

@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Fixed getRealPath for packed war files.
  + Changed URI default charset back to ISO_8859_1
  + Restructured Password into Password and Credentials
  + Added DigestAuthenticator
