@@ -563,7 +563,8 @@ public class HttpOutputStream
         throws IOException
     {
         if (_iso8859writer==null)
-            _iso8859writer=new HttpWriter(StringUtil.__ISO_8859_1);
+            _iso8859writer=new HttpWriter(StringUtil.__ISO_8859_1,
+                                          getBufferSize());
         return _iso8859writer;
     }
     
@@ -572,7 +573,7 @@ public class HttpOutputStream
         throws IOException
     {
         if (_utf8writer==null)
-            _utf8writer=new HttpWriter("UTF-8");
+            _utf8writer=new HttpWriter("UTF-8",getBufferSize());
         return _utf8writer;
     }
     
@@ -611,12 +612,13 @@ public class HttpOutputStream
     {
         private OutputStreamWriter _writer=null;
         private boolean _writting=false;
-        private byte[] _buf = ByteArrayPool.getByteArray(4096);
+        private byte[] _buf;
         private String _encoding;
         
         /* -------------------------------------------------------- */
-        HttpWriter(String encoding)
+        HttpWriter(String encoding,int bufferSize)
         {
+            _buf = ByteArrayPool.getByteArray(bufferSize);
             _encoding=encoding;
         }
         

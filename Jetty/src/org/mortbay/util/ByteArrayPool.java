@@ -29,6 +29,7 @@ public class ByteArrayPool
     public static byte[] getByteArray(int size)
     {
         byte[][] pool = (byte[][])__pools.get();
+        boolean full=true;
         for (int i=pool.length;i-->0;)
         {
             if (pool[i]!=null && pool[i].length==size)
@@ -37,9 +38,34 @@ public class ByteArrayPool
                 pool[i]=null;
                 return b;
             }
+            else
+                full=false;
         }
+
+        if (full)
+            for (int i=pool.length;i-->0;)
+                pool[i]=null;
+        
         return new byte[size];
     }
+
+    /* ------------------------------------------------------------ */
+    public static byte[] getByteArrayAtLeast(int minSize)
+    {
+        byte[][] pool = (byte[][])__pools.get();
+        for (int i=pool.length;i-->0;)
+        {
+            if (pool[i]!=null && pool[i].length>=minSize)
+            {
+                byte[]b = pool[i];
+                pool[i]=null;
+                return b;
+            }
+        }
+        
+        return new byte[minSize];
+    }
+
 
     /* ------------------------------------------------------------ */
     public static void returnByteArray(final byte[] b)

@@ -111,11 +111,6 @@ public class NullableOutputStream
         {
             if (_closed)
                 throw new IOException("closed");
-//             byte[] b2 = new byte[8192];
-//             System.arraycopy(b,off,b2,0,len);
-//             org.mortbay.http.ajp.AJP13Packet p =
-//                 new org.mortbay.http.ajp.AJP13Packet(b2,len);
-//             System.err.println(Thread.currentThread()+" Nullable  "+p.toString());
             out.write(b,off,len);
         }
     }

@@ -397,11 +397,14 @@ public class HttpResponse extends HttpMessage
                 setContentType(HttpFields.__TextHtml);
                 _mimeType=HttpFields.__TextHtml;
                 _characterEncoding=null;
-                ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(1500);
+                ByteArrayISO8859Writer writer =
+                    new ByteArrayISO8859Writer(((HttpOutputStream)getOutputStream()).getBufferSize());
+                
                 writeErrorPage(writer,code,message);
                 writer.flush();
                 setContentLength(writer.size());
                 writer.writeTo(getOutputStream());
+                writer.destroy();
             }
         }
         else if (code!=__206_Partial_Content) 
