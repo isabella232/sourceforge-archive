@@ -46,7 +46,7 @@ public class LineInput extends FilterInputStream
     private LineBuffer _lineBuffer;
     private String _encoding;
     private boolean _eof=false;
-    private int _lfWait;
+    private boolean _lastCr=false;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -127,28 +127,6 @@ public class LineInput extends FilterInputStream
             return _byteLimit;
         
         return _byteLimit+_avail-_pos;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the time to wait for a LF after a CR.
-     * Default is 500ms.
-     * @param lfWait delay in MS
-     * @return Old wait time.
-     */
-    public int setLFWait(int lfWaitMs)
-    {
-        int old=_lfWait;
-        _lfWait=lfWaitMs;
-        return old;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get the time to wait for a LF after a CR.
-     * @return delay in MS
-     */
-    public int getLFWait()
-    {
-        return _lfWait;
     }
     
     /* ------------------------------------------------------------ */
@@ -457,7 +435,9 @@ public class LineInput extends FilterInputStream
         byte b;  
         boolean cr = false;
         boolean lf = false;
-
+        boolean last_cr=_lastCr;
+        _lastCr=false;
+        
         int len=0;
         
     LineLoop:
@@ -480,14 +460,10 @@ public class LineInput extends FilterInputStream
                 // return a line.
                 if (cr && in.available()==0)
                 {
-                    try{Thread.sleep(_lfWait);}
-                    catch(InterruptedException e){Code.ignore(e);}
-                    if (in.available()==0)
-                    {
-                        cr=true;
-                        lf=true;
-                        break;
-                    }
+                    _lastCr=true;
+                    cr=true;
+                    lf=true;
+                    break;
                 }
 
                 _pos=_mark;
@@ -503,6 +479,11 @@ public class LineInput extends FilterInputStream
             switch(b)
             {
               case 10:
+                  if (last_cr && !cr && len==0)
+                  {
+                      _lastCr=false;
+                      continue;
+                  }
                   lf = true;
                   break LineLoop;
                 
@@ -577,7 +558,7 @@ public class LineInput extends FilterInputStream
             else
                 Code.debug("EOF");
         }
-
+        
         return len;
     }
 

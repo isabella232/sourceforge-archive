@@ -1158,9 +1158,7 @@ public class TestHarness
             test.checkEquals(server._jobs,2,"Steady State");
             test.checkEquals(server.getSize(),3,"Steady State");
 
-            // If you change this to just a CR, you will have to
-            // extend the timings as LineInput may wait 500ms.
-            p1.print("Exit\015\012");
+            p1.print("Exit\015");
             p1.flush();
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
@@ -1180,7 +1178,7 @@ public class TestHarness
             test.checkEquals(server._jobs,2,"1 idle");
             test.checkEquals(server.getSize(),3,"1 idle");
 
-            p1.print("Exit\015\012");
+            p1.print("Exit\015");
             p1.flush();
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
