@@ -4,6 +4,7 @@
  * Distributable under GPL license.
  * See terms of license at gnu.org.
  */
+
 // $Id$
 
 // A Jetty HttpServer with the interface expected by JBoss'
@@ -19,7 +20,6 @@ import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Hashtable;
-import java.util.Iterator;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -315,12 +315,8 @@ public class Jetty
 	app.setDefaultsDescriptor (getWebDefaultResource());
 
 
-      Iterator hosts = wa.getMetaData().getVirtualHosts();
-      while(hosts.hasNext())
-          app.addVirtualHost((String)hosts.next());
-
-      // Add the webapp
-      addContext(app);
+      String virtualHost=wa.getMetaData().getVirtualHost();
+      addContext(virtualHost, app);
 
       // keep track of deployed contexts for undeployment
       _deployed.put(warUrl, app);
