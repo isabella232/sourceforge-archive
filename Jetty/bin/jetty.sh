@@ -383,7 +383,7 @@ fi
 
 if [ "$JAVA" = "" ]
 then
-    echo "Cannot find a JRE or JDK. Please set $JAVA_HOME to a >1.2 JRE" 2>&2
+    echo "Cannot find a JRE or JDK. Please set JAVA_HOME to a >=1.2 JRE" 2>&2
     exit 1
 fi
 

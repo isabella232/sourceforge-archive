@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-3.1.2 - 12 Oct 2001
+Jetty-3.1.2 - 13 Oct 2001
  + Fixed double entry on PathMap.getMatches
  + Fixed servlet handling of non session url params.
  + Fixed attr handling in XmlParser.toString
