@@ -832,7 +832,7 @@ public class HttpRequest extends HttpMessage
                             int max=content_length;
                             if (max<0)
                                 max=__maxFormContentSize;
-                            else if (max>__maxFormContentSize)
+                            else if (__maxFormContentSize>0 && max>__maxFormContentSize)
                             {
                                 log.warn("Form content truncated");
                                 max=__maxFormContentSize;
