@@ -3,7 +3,7 @@ Sealed: true
 Package-Version: 1.0.0
 Package-Title: org.mortbay.jetty
 Specification-Version: 3.1
-Implementation-Version: 3.1.7
+Implementation-Version: 3.1.8
 Specification-Vendor: Mort Bay Consulting, Pty. Ltd.
 Implementation-Vendor: Mort Bay Consulting, Pty. Ltd.
 Implementation-URL: http://jetty.mortbay.org

@@ -1,9 +1,11 @@
 Jetty Versions
 --------------
 
+Jetty-3.1.8 - 6 June 2002
  + Made SecurityConstraint.addRole() require authentication.
  + Fixed singled threaded dynamic servlets
  + Fixed no slash context redirection.
+ + Fixed /foo/../bar// bug in canonical path.
 
 Jetty-3.1.7 - 12 Mar 2002
  + Fixed security problem with constraints being bypassed with //

@@ -799,6 +799,7 @@ public class TestHarness
                 {"a/.","a/"},
                 {"a/..",""},
                 {"a/../..",null},
+                {"/foo/../bar//","/bar/"}
             };
 
             for (int t=0;t<canonical.length;t++)
