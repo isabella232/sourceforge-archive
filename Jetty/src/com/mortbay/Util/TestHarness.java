@@ -10,6 +10,8 @@ import com.mortbay.Util.DataClassTest.T2;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.File;
+import java.io.FilePermission;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
@@ -27,6 +29,32 @@ import java.util.zip.ZipEntry;
 public class TestHarness
 {
     public final static String __CRLF = "\015\012";
+    public static String __userDir =
+        System.getProperty("user.dir",".");
+    public static URL __userURL=null;
+    private static String __relDir="";
+    static
+    {
+        try{
+            File file = new File(__userDir);
+            __userURL=file.toURL();
+            if (!__userURL.toString().endsWith("/Util/"))
+            {
+                __userURL=new URL(__userURL.toString()+
+                                  "src/com/mortbay/Util/");
+                FilePermission perm = (FilePermission)
+                    __userURL.openConnection().getPermission();
+                __userDir=new File(perm.getName()).getCanonicalPath();
+                __relDir="src/com/mortbay/Util/".replace('/',
+                                                         File.separatorChar);
+            }                
+        }
+        catch(Exception e)
+        {
+            Code.fail(e);
+        }
+    }    
+
     
     /* ------------------------------------------------------------ */
     static void testDateCache()
@@ -1286,36 +1314,35 @@ public class TestHarness
         try
         {
             Resource r;
-            r = Resource.newResource("file:"+
-                                     System.getProperty("user.dir")+
-                                     "/TestHarness.java");
-            t.check(r.exists(),"File URL exists");
-            t.checkEquals(r.getName(),System.getProperty("user.dir")+
-                          "/TestHarness.java","File name");
+            r = Resource.newResource(__userURL+"TestHarness.java");
             
+            t.check(r.exists(),"File URL exists");            
             t.check(!r.isDirectory(),"File URL not directory");
-            r = Resource.newResource(System.getProperty("user.dir")+
-                                     "/TestHarness.java");
+            
+            r = Resource.newResource(__userDir+File.separator+
+                                     "TestHarness.java");
             t.check(r.exists(),"Abs File exists");
             t.check(!r.isDirectory(),"Abs URL not directory");
-            r = Resource.newResource("TestHarness.java");
+            
+            r = Resource.newResource(__relDir+"TestHarness.java");
             t.check(r.exists(),"Rel File exists");
             t.check(!r.isDirectory(),"Rel URL not directory");
 
 
-            Resource rt = Resource.newResource("file:"+
-                                               System.getProperty("user.dir"));
-            Resource rt1=rt.addPath("Test");
+            String us=__userURL.toString();
+            us=us.substring(0,us.length()-1);
+            
+            Resource rt = Resource.newResource(us);
+            Resource rt1=rt.addPath("TestData");
+            
             t.check(rt1.exists(),"Test File exists");
             t.check(rt1.isDirectory(),"Test URL is directory");
-            Resource rt2=rt.addPath("Test/");
+            Resource rt2=rt.addPath("TestData/");
             t.check(rt2.exists(),"Test File exists");
             t.check(rt2.isDirectory(),"Test URL is directory");
             
             
-            Resource b = Resource.newResource("file:"+
-                                              System.getProperty("user.dir")+
-                                              "/");
+            Resource b = Resource.newResource(__userURL.toString());
             
             r = b.addPath("Resource.java");
             t.check(r.exists(),"AddPath resource exists");
@@ -1325,9 +1352,9 @@ public class TestHarness
             t.check(r.exists(),"AddPath resource exists");
             r = b.addPath("/UnknownFile");
             t.check(!r.exists(),"AddPath resource ! exists");
+
             
-            b = Resource.newResource("file:"+
-                                     System.getProperty("user.dir"));
+            b = Resource.newResource(us);
             r = b.addPath("Resource.java");
             t.check(r.exists(),"AddPath resource exists");
             r = b.addPath("UnknownFile");
@@ -1338,7 +1365,7 @@ public class TestHarness
             t.check(!r.exists(),"AddPath resource ! exists");
             
 
-            r = Resource.newResource("file:"+System.getProperty("user.dir"));
+            r = Resource.newResource(us);
             t.check(r.exists(),"Dir URL exists");
             t.check(r.isDirectory(),"Dir URL directory");
             r = r.addPath("Resource.java");
@@ -1353,14 +1380,12 @@ public class TestHarness
             j = Resource.newResource("jar:file:/somejar.jar!/");
             t.check(!j.exists(),"no jar file");
             
-            j = Resource.newResource("jar:file:"+
-                                     System.getProperty("user.dir")+
-                                     "/TestData/test.zip!/");
+            j = Resource.newResource("jar:"+__userURL+
+                                     "TestData/test.zip!/");
             t.check(j instanceof JarFileResource,"Jar Resource");
             t.checkEquals(j.getFile(),null,"no file for jar:");
-            t.checkEquals(j.getName(),"jar:file:"+
-                          System.getProperty("user.dir")+
-                          "/TestData/test.zip!/","jar name");
+            t.checkContains(j.getName(),"jar:file:","jar name");
+            t.checkContains(j.getName(),"/TestData/test.zip!/","jar name");
             t.check(j.exists(),"jar exists");
             t.check(j.isDirectory(),"root directory");
             t.check(j.lastModified()!=-1,"Last Modified");
@@ -1426,8 +1451,7 @@ public class TestHarness
                  Resource.newSystemResource
                  ("com/mortbay/Util/configure.dtd"));
             
-            String url = "file:"+System.getProperty("user.dir")+
-                "/TestData/configure.xml";
+            String url = __userURL+"TestData/configure.xml";
             XmlParser.Node testDoc = parser.parse(url);
             String testDocStr = testDoc.toString().trim();
             Code.debug(testDocStr);
@@ -1448,8 +1472,7 @@ public class TestHarness
         Test t = new Test("com.mortbay.Util.XmlConfiguration");
         try
         {
-            String url = "file:"+System.getProperty("user.dir")+
-                "/TestData/configure.xml";
+            String url = __userURL+"TestData/configure.xml";
             XmlConfiguration configuration =
                 new XmlConfiguration(new URL(url));
             TestConfiguration tc = new TestConfiguration();

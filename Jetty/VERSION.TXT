@@ -1,6 +1,8 @@
 Stable 2.4.7
 Dev    3.0.B04
 
+ + Made test harnesses work with ant.
+ + improved ant documentation.
  + Removed most deprecation warnings
  + Fixed JarFileResource to handle jar files without directories.
  + Implemented war file support

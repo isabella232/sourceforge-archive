@@ -5,6 +5,7 @@
 
 package com.mortbay.Util;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -25,7 +26,9 @@ public class PropertyTreeTest
         try
         {
             PropertyTree props = new PropertyTree();
-            props.load(new FileInputStream("PropertyTreeTest.prp"));
+            props.load(new FileInputStream(TestHarness.__userDir+
+                                           File.separator+
+                                           "PropertyTreeTest.prp"));
             Code.debug("tree=",props);
             
             test.checkEquals(props.get("a"), "1", "a");

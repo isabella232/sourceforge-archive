@@ -92,15 +92,23 @@ be used:
    $JETTY_HOME/src:
 
 The code can be build with gnu make just by typing 'make'.  Other
-make options can be viewed with the command 'make help'.  An Ant
-build file is included in etc/build.xml.  Ant is available from
+make options can be viewed with the command 'make help'.  
+
+An Ant build file is included in build.xml.  This file is configured to
+use the jikes compiler from IBM. To use the normal JDK compiler comment
+out the jikes line in build.xml.  Ant is available from
 
     http://jakarta.apache.org/ant/index.html  
 
-And it can be run with:
+You can run ant for the following targets:
 
-    ant -buildfile etc\build.xml 
-
+    ant         - Build source
+    ant all     - Build everything
+    ant test    - Build and run tests
+    ant demo    - Build and run the demo
+    ant clean   - Remove generated files
+    ant release - Build everything and cleanup a bit
+  
 
 Test Harnesses
 ==============

@@ -38,7 +38,7 @@ release     - Cleanup for release
   <property name="lib"            value="${basedir}/lib"/>
   <property name="classes"        value="${basedir}/classes"/>
   <property name="javadoc"        value="${basedir}/javadoc"/>
-  <!-- <property name="build.compiler" value="jikes"/> -->
+  <property name="build.compiler" value="jikes"/> 
   
   <property name="jetty.webapp"           value="${webapps}/jetty"/>
   <property name="jetty.war"              value="${webapps}/jetty.war"/>
@@ -48,9 +48,9 @@ release     - Cleanup for release
   <property name="jetty.jar"      value="${lib}/com.mortbay.jetty.jar"/>
   <property name="servlet.jar"    value="${lib}/javax.servlet.jar"/>
   <property name="jasper.jar"     value="${lib}/org.apache.jasper.jar"/>
-  <property name="aelfred.jar"    value="${lib}/com.microstar.xml.jar"/>
+  <property name="xml.jar"        value="${lib}/com.microstar.xml.jar"/>
   <property name="jsse.jar"       value="${lib}/com.sun.net.ssl.jar"/>
-  <property name="libs"           value="${aelfred.jar};${jsse.jar};${jasper.jar};${servlet.jar};${jetty.jar}"/>
+  <property name="libs"           value="${xml.jar};${jsse.jar};${jasper.jar};${servlet.jar};${jetty.jar}"/>
   
   
   <!-- property name="build.compiler" value="classic"/ -->
@@ -194,12 +194,12 @@ release     - Cleanup for release
   <target name="test" depends="jetty">
     <property name="classpath" value="${jetty.jar};${servlet.jar}" />
     <java classname="com.mortbay.Util.TestHarness"
-          classpath="${classpath}"
+          classpath="${classes};${xml.jar}"
           fork="yes"
           failonerror="yes" 
           />
     <java classname="com.mortbay.HTTP.TestHarness"
-          classpath="${classpath}"
+          classpath="${classes};${xml.jar}"
           fork="yes"
           failonerror="yes" 
           />

@@ -9,9 +9,12 @@ import com.mortbay.Util.Code;
 import com.mortbay.Util.LineInput;
 import com.mortbay.Util.Test;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilePermission;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 
@@ -25,7 +28,31 @@ import java.util.List;
 public class TestHarness
 {
     public static String CRLF = HttpFields.__CRLF;
-            
+       
+    public final static String __CRLF = "\015\012";
+    public static String __userDir =
+        System.getProperty("user.dir",".");
+    public static URL __userURL=null;
+    static
+    {
+        try{
+            File file = new File(__userDir);
+            __userURL=file.toURL();
+            if (!__userURL.toString().endsWith("/HTTP/"))
+            {
+                __userURL=new URL(__userURL.toString()+
+                                  "src/com/mortbay/HTTP/");
+                FilePermission perm = (FilePermission)
+                    __userURL.openConnection().getPermission();
+                __userDir=new File(perm.getName()).getCanonicalPath();
+            }                
+        }
+        catch(Exception e)
+        {
+            Code.fail(e);
+        }
+    }
+    
     /* -------------------------------------------------------------- */
     public static void chunkInTest()
         throws Exception
@@ -35,13 +62,18 @@ public class TestHarness
         byte[] buf = new byte[18];
         
         try{
-            FileInputStream fin= new FileInputStream("TestData/test.chunkIn");
+            FileInputStream fin=
+                new FileInputStream(__userDir+File.separator+
+                                    "TestData"+File.separator+
+                                    "test.chunkIn");
             ChunkableInputStream cin = new ChunkableInputStream(fin);
             cin.setContentLength(10);
             test.checkEquals(cin.read(buf),10,"content length limited");
             test.checkEquals(cin.read(buf),-1,"content length EOF");
             
-            fin= new FileInputStream("TestData/test.chunkIn");
+            fin= new FileInputStream(__userDir+File.separator+
+                                    "TestData"+File.separator+
+                                    "test.chunkIn");
             cin = new ChunkableInputStream(fin);
             cin.setChunking();
             test.checkEquals(cin.read(),'a',"Read 1st char");
@@ -81,8 +113,10 @@ public class TestHarness
         Test test = new Test("com.mortbay.HTTP.ChunkableOutputStream");
 
         try{
+            File tmpFile=File.createTempFile("HTTP.TestHarness",".chunked");
+            tmpFile.deleteOnExit();
             
-            FileOutputStream fout = new FileOutputStream("TestData/tmp.chunkOut");
+            FileOutputStream fout = new FileOutputStream(tmpFile);
             ChunkableOutputStream cout = new ChunkableOutputStream(fout);
             cout.setChunking();
             
@@ -108,7 +142,7 @@ public class TestHarness
             cout.setTrailer(trailer);
             cout.close();
             
-            FileInputStream ftmp= new FileInputStream("TestData/tmp.chunkOut");
+            FileInputStream ftmp= new FileInputStream(tmpFile);
             ChunkableInputStream cin = new ChunkableInputStream(ftmp);
             cin.setChunking();
 
@@ -129,8 +163,11 @@ public class TestHarness
                 chars++;
             test.checkEquals(chars,400*11,"Auto flush");
             
-            ftmp= new FileInputStream("TestData/tmp.chunkOut");
-            FileInputStream ftest= new FileInputStream("TestData/test.chunkOut");
+            ftmp= new FileInputStream(tmpFile);
+            FileInputStream ftest=
+                new FileInputStream(__userDir+File.separator+
+                                    "TestData"+File.separator+
+                                    "test.chunkOut");
             test.checkEquals(ftmp,ftest,"chunked out");
         }
         catch(Exception e)
@@ -146,8 +183,10 @@ public class TestHarness
         Test t = new Test("com.mortbay.HTTP.ChunkableXxxputStream");
         try
         {
+            File tmpFile=File.createTempFile("HTTP.TestHarness",".gzip");
+            tmpFile.deleteOnExit();
             FileOutputStream fout =
-                new FileOutputStream("TestData/tmp.gzip");
+                new FileOutputStream(tmpFile);
             ChunkableOutputStream cout = new ChunkableOutputStream(fout);
             cout.setChunking();
             
@@ -161,7 +200,8 @@ public class TestHarness
             
             cout.close();
             
-            FileInputStream fin= new FileInputStream("TestData/tmp.gzip");
+            FileInputStream fin=
+                new FileInputStream(tmpFile);
             ChunkableInputStream cin = new ChunkableInputStream(fin);
             cin.setChunking();
             cin.insertFilter(java.util.zip.GZIPInputStream.class
