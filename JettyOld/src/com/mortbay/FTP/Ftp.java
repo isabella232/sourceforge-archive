@@ -109,6 +109,12 @@ public class Ftp
         open(hostAddr,port);
         authenticate(username,password);
     }
+
+    
+    /* -------------------------------------------------------------------- */
+    public InetAddress getLocalAddress() {
+        return command.getLocalAddress();
+    }
     
     /* -------------------------------------------------------------------- */
     void cmd(String cmd)

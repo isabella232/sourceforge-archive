@@ -1,8 +1,10 @@
-Release 2.3.0A1 -
+Release 2.3.0 - 5th October 1999 - LATEST
   + Added SetUID class with native Unix call to set the 
     effective User ID.
+  + FTP closes files after put/get.
+  + FTP uses InetAddress of command socket for data socket.
 
-Release 2.3.0A - 22 Sep 1999  -  LATEST
+Release 2.3.0A - 22 Sep 1999  
   + Added GNUJSP 1.0 for the JSP 1.0 API.
   + Use javax.servlet classes from JWSDK1.0
   + Added "Powered by Jetty" button.

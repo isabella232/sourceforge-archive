@@ -127,6 +127,18 @@ public class DataPort extends Thread
             catch (IOException ioe) { Code.ignore(ioe);}
             listen = null;
         }
+        if (in != null)
+        {
+            try {in.close();}
+            catch (IOException ioe) { Code.ignore(ioe);}
+            in = null;
+        }
+        if (out != null)
+        {
+            try {out.close();}
+            catch (IOException ioe) { Code.ignore(ioe);}
+            out = null;
+        }
         ftp=null;
     }
     
@@ -143,7 +155,7 @@ public class DataPort extends Thread
                 port = listen.getLocalPort();
                 addr = listen.getInetAddress();
                 if (addr==null || addr.getAddress()[0]==0)
-                    addr = InetAddress.getLocalHost();
+                    addr = ftp.getLocalAddress();
             }
             finally{
                 notify();
