@@ -73,6 +73,8 @@ Other targets:
   <property name="jmxri.jar"       value="${lib}/jmxri.jar"/>
   <property name="jmxtools.jar"    value="${lib}/jmxtools.jar"/>
   <property name="junit.jar"       value="${test.lib}/junit-3.7.jar"/>
+  
+  <property name="tools.jar"       value="${env.JAVA_HOME}/lib/tools.jar"/>
 
   <path id="libpath">
     <pathelement location="${jsse.jar}" />
@@ -81,6 +83,7 @@ Other targets:
     <pathelement location="${jdom.jar}" />
     <pathelement location="${jmxri.jar}" />
     <pathelement location="${jmxtools.jar}" />
+    <pathelement location="${tools.jar}" />
   </path>
 
   <!-- ==================================================================== -->
