@@ -38,8 +38,10 @@ import org.apache.commons.logging.LogFactory;
 public class ThreadPool implements LifeCycle,Serializable
 {
     static Log log=LogFactory.getLog(ThreadPool.class);
+    static private int __pool=0;
     public static final String __DAEMON="org.mortbay.util.ThreadPool.daemon";
     public static final String __PRIORITY="org.mortbay.util.ThreadPool.priority";
+    
     /* ------------------------------------------------------------------- */
     private String _name;
     private Pool _pool;
@@ -52,9 +54,10 @@ public class ThreadPool implements LifeCycle,Serializable
      */
     public ThreadPool()
     {
+        _name=this.getClass().getName().substring(this.getClass().getPackage().getName().length()+1)+__pool++;
         _pool=new Pool();
+        _pool.setPoolName(_name);
         _pool.setPoolClass(ThreadPool.PoolThread.class);
-        _name=this.getClass().getName();
         int dot=_name.lastIndexOf('.');
         if(dot>=0)
             _name=_name.substring(dot+1);
@@ -71,17 +74,21 @@ public class ThreadPool implements LifeCycle,Serializable
 
     /* ------------------------------------------------------------ */
     /**
-     * @param name Name of the ThreadPool to use when naming Threads.
+     * @param name Name of the ThreadPool to use when naming Threads 
+     * from an anonlymous threadpool.
      */
     public void setName(String name)
     {
         _name=name;
+        // If this is our private pool
+        if (_pool.getPoolName()==_name)
+            _pool.setPoolName(name);
     }
 
     /* ------------------------------------------------------------ */
     /**
-     * @return Name of the Pool instance this ThreadPool uses or null for an anonymous private
-     *                 pool.
+     * @return Name of the Pool instance this ThreadPool uses or null 
+     * for an anonymous private pool.
      */
     public String getPoolName()
     {
@@ -111,7 +118,10 @@ public class ThreadPool implements LifeCycle,Serializable
             if(name==null)
             {
                 if(_pool.getPoolName()!=null)
+                {               
                     _pool=new Pool();
+                    _pool.setPoolName(getName());
+                }
             }
             else
             {
@@ -425,7 +435,7 @@ public class ThreadPool implements LifeCycle,Serializable
         {
             _pool=pool;
             _id=id;
-            _name=_pool.getPoolName()==null?("PoolThread-"+id):(_pool.getPoolName()+"-"+id);
+            _name=_pool.getPoolName()+"-"+id;
             this.setName(_name);
             this.setDaemon(pool.getAttribute(__DAEMON)!=null);
             Object o=pool.getAttribute(__PRIORITY);
