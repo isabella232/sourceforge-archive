@@ -174,7 +174,7 @@ test        - Runs the Jetty test harness.
     </javadoc>
   </target>
 
-  <target name="test" > <!-- depends="jetty" -->
+  <target name="test" depends="jetty">
     <property name="classpath" value="${jetty.jar};${servlet.jar}" />
     <java classname="com.mortbay.Util.TestHarness"
           classpath="${classpath}"
