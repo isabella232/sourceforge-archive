@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Allow AJP13 buffers to be resized.
+
 Jetty-4.2.5 - 14 January 2003
  + Fixed pathParam bug for ;jsessionid
  + Don't process conditional headers and ranges for includes
