@@ -18,6 +18,8 @@ import java.util.ArrayList;
  * It differs from the java.net.URL class as it does not provide
  * communications ability, but it does assist with query string
  * formatting.
+ * <P>UTF8 encoding is used by default for % encoded characters. This
+ * may be overridden with the org.mortbay.util.URI.encoding system property.
  * @see UrlEncoded
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -25,12 +27,16 @@ import java.util.ArrayList;
 public class URI
     implements Cloneable
 {
+    public static final String __CHARSET=
+        System.getProperty("org.mortbay.util.URI.charset","UTF8");
+    
     /* ------------------------------------------------------------ */
     private String _uri;
     private String _scheme;
     private String _host;
     private int _port;
     private String _path;
+    private String _encodedPath;
     private String _query;
     private UrlEncoded _parameters = new UrlEncoded();
     private boolean _dirty;
@@ -48,6 +54,7 @@ public class URI
         _host=uri._host;
         _port=uri._port;
         _path=uri._path;
+        _encodedPath=uri._encodedPath;
         _query=uri._query;
         _parameters=(UrlEncoded)uri._parameters.clone();
         _dirty=false;
@@ -97,6 +104,7 @@ public class URI
                       {
                           state=5;
                           _path="*";
+                          _encodedPath="*";
                           break;
                       }
                       continue;
@@ -131,7 +139,8 @@ public class URI
                       if (c=='?')
                       {
                           // Found query
-                          _path=decodePath(uri.substring(mark,i));
+                          _encodedPath=uri.substring(mark,i);
+                          _path=decodePath(_encodedPath);
                           mark=i+1;
                           state=4;
                           break;
@@ -145,23 +154,27 @@ public class URI
             {
               case 0:
                   _dirty=false;
-                  _path=_uri;
+                  _encodedPath=_uri;
+                  _path=decodePath(_encodedPath);
                   break;
                   
               case 1:
                   _dirty=true;
-                  _path="/";
+                  _encodedPath="/";
+                  _path=_encodedPath;
                   _host=uri.substring(mark);
                   break;
                   
               case 2:
                   _dirty=true;
-                  _path="/";
+                  _encodedPath="/";
+                  _path=_encodedPath;
                   _port=Integer.parseInt(uri.substring(mark));
                   break;
               case 3:
                   _dirty=(mark==maxi);
-                  _path=decodePath(uri.substring(mark));
+                  _encodedPath=uri.substring(mark);
+                  _path=decodePath(_encodedPath);
                   break;
                   
               case 4:
@@ -175,7 +188,7 @@ public class URI
             }
         
             if (_query!=null && _query.length()>0)
-                _parameters.decode(_query);
+                _parameters.decode(_query,__CHARSET);
             else
                 _query=null;           
         }
@@ -264,12 +277,22 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
+    /** Get the encoded uri path.
+     * @return the URI path
+     */
+    public String getEncodedPath()
+    {
+        return _encodedPath;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Set the uri path.
      * @param path the URI path
      */
     public void setPath(String path)
     {
         _path=path;
+        _encodedPath=encodePath(_path);
         _dirty=true;
     }
     
@@ -282,7 +305,7 @@ public class URI
     {
         if (_dirty)
         {
-            _query = _parameters.encode(_encodeNulls);
+            _query = _parameters.encode(__CHARSET,_encodeNulls);
             if (_query!=null && _query.length()==0)
                 _query=null;
         }
@@ -328,6 +351,15 @@ public class URI
     {
         _dirty=true;
         return _parameters;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the uri query _parameters.
+     * @return the URI query _parameters
+     */
+    public MultiMap cloneParameters()
+    {
+        return (MultiMap)_parameters.clone();
     }
     
     /* ------------------------------------------------------------ */
@@ -428,7 +460,7 @@ public class URI
                         buf.append(_port);
                     }
                 }
-                encodePath(buf,_path);
+                buf.append(_encodedPath);
 
                 if (_query!=null && _query.length()>0)
                 {
@@ -454,23 +486,44 @@ public class URI
         if (path==null || path.length()==0)
             return path;
         
-        StringBuffer buf = new StringBuffer(path.length()<<1);
-        encodePath(buf,path);
-        return buf.toString();
+        StringBuffer buf = encodePath(null,path);
+        return buf==null?path:buf.toString();
     }
         
     /* ------------------------------------------------------------ */
     /* Encode a URI path.
      * @param path The path the encode
-     * @param buf StringBuffer to encode path into
+     * @param buf StringBuffer to encode path into (or null)
+     * @return The StringBuffer or null if no substitutions required.
      */
-    public static void encodePath(StringBuffer buf, String path)
+    public static StringBuffer encodePath(StringBuffer buf, String path)
     {
+        if (buf==null)
+        {
+        loop:
+            for (int i=0;i<path.length();i++)
+            {
+                char c=path.charAt(i);
+                switch(c)
+                {
+                  case '%':
+                  case '?':
+                  case ';':
+                  case '#':
+                  case ' ':
+                      buf=new StringBuffer(path.length()<<1);
+                      break loop;
+                }
+            }
+            if (buf==null)
+                return null;
+        }
+        
         synchronized(buf)
         {
             for (int i=0;i<path.length();i++)
             {
-                char c=path.charAt(i);
+                char c=path.charAt(i);       
                 switch(c)
                 {
                   case '%':
@@ -494,6 +547,8 @@ public class URI
                 }
             }
         }
+
+        return buf;
     }
     
     /* ------------------------------------------------------------ */
@@ -544,7 +599,7 @@ public class URI
 
         try
         {    
-            return new String(bytes,0,n,StringUtil.__ISO_8859_1);
+            return new String(bytes,0,n,__CHARSET);
         }
         catch(UnsupportedEncodingException e)
         {
@@ -622,8 +677,6 @@ public class URI
     /* ------------------------------------------------------------ */
     /** Return the parent Path.
      * Treat a URI like a directory path and return the parent directory.
-     * @param p 
-     * @return 
      */
     public static String parentPath(String p)
     {
@@ -638,8 +691,6 @@ public class URI
     /* ------------------------------------------------------------ */
     /** Strip parameters from a path.
      * Return path upto any semicolon parameters.
-     * @param path 
-     * @return 
      */
     public static String stripPath(String path)
     {
@@ -649,104 +700,6 @@ public class URI
         if (semi<0)
             return path;
         return path.substring(0,semi);
-    }
-    
-
-    /* ------------------------------------------------------------ */
-    /** Convert a path to a cananonical form.
-     * All instances of "//", "." and ".." are factored out.  Null is returned
-     * if the path tries to .. above it's root.
-     * @param path 
-     * @return path or null.
-     */
-    public static String oldCanonicalPath(String path)
-    {
-        if (path==null || path.length()==0)
-            return path;
-
-        int last=-1;
-        int slash=path.indexOf('/');
-        if (slash<0)
-            slash=path.length();
-
-    search:
-        while (last<slash)
-        {
-            switch(slash-last)
-            {
-              case 1: // double slash
-                  if (last<0 || slash==path.length())
-                      break;
-                  break search;
-              case 2: // possible single dot
-                  if (path.charAt(last+1)!='.')
-                      break;
-                  break search;
-              case 3: // possible double dot
-                  if (path.charAt(last+1)!='.' || path.charAt(last+2)!='.')
-                      break;
-                  break search;
-            }
-            
-            last=slash;
-            slash=path.indexOf('/',last+1);
-            if (slash<0)
-                slash=path.length();
-        }
-
-        // If we have checked the entire string
-        if (last>=slash)
-            return path;
-        
-        StringBuffer buf = new StringBuffer(path);
-
-        while (last<slash)
-        {
-            switch(slash-last)
-            {
-              case 1: // double slash
-                  if (last<0 || slash==buf.length())
-                      break;
-                  buf.deleteCharAt(last);
-                  slash=last;
-                  
-                  break;
-              case 2: // possible single dot
-                  if (buf.charAt(last+1)!='.')
-                      break;
-                  while(slash<buf.length() && buf.charAt(slash)=='/')
-                      slash++;
-                  if (last<0)
-                      buf.delete(0,slash);
-                  else
-                      buf.delete(last+1,slash);
-                  slash=last;
-                  break;
-              case 3: // possible double dot
-                  if (buf.charAt(last+1)!='.' || buf.charAt(last+2)!='.')
-                      break;
-                  if (last<=0)
-                      return null;
-                  int i=last-1;
-                  while(i>0 && buf.charAt(i)!='/')
-                      i--;
-                  buf.delete(buf.charAt(i)=='/'?(i+1):i,
-                             (slash==buf.length()||buf.charAt(i)=='/')?slash:(slash+1));
-                  if (i<0 || buf.length()==0)
-                      slash=last=i;
-                  else 
-                      slash=last=buf.charAt(i)=='/'?i:(i-1);
-                  break;
-            }            
-            
-            last=slash;
-            if (slash<buf.length())
-                slash++;
-            while(slash<buf.length() && buf.charAt(slash)!='/')
-                slash++;
-        }
-
-        return buf.toString();
     }
     
     /* ------------------------------------------------------------ */

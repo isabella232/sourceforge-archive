@@ -2,12 +2,14 @@
 // $Id$
 package org.mortbay.util;
 
+import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -44,14 +46,27 @@ public class UrlEncoded extends MultiMap
     /* ----------------------------------------------------------------- */
     public UrlEncoded(String s)
     {
-        super(10);
-        decode(s);
+        super(6);
+        decode(s,StringUtil.__ISO_8859_1);
+    }
+    
+    /* ----------------------------------------------------------------- */
+    public UrlEncoded(String s, String charset)
+    {
+        super(6);
+        decode(s,charset);
     }
     
     /* ----------------------------------------------------------------- */
     public void decode(String query)
     {
-        decodeTo(query,this);
+        decodeTo(query,this,StringUtil.__ISO_8859_1);
+    }
+    
+    /* ----------------------------------------------------------------- */
+    public void decode(String query,String charset)
+    {
+        decodeTo(query,this,charset);
     }
     
     /* -------------------------------------------------------------- */
@@ -59,7 +74,23 @@ public class UrlEncoded extends MultiMap
      */
     public String encode()
     {
-        return encode(false);
+        return encode(StringUtil.__ISO_8859_1,false);
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Encode Hashtable with % encoding.
+     */
+    public String encode(String charset)
+    {
+        return encode(charset,false);
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Encode Hashtable with % encoding.
+     */
+    public String encode(boolean equalsForNullValue)
+    {
+        return encode(StringUtil.__ISO_8859_1,equalsForNullValue);
     }
     
     /* -------------------------------------------------------------- */
@@ -67,28 +98,26 @@ public class UrlEncoded extends MultiMap
      * @param equalsForNullValue if True, then an '=' is always used, even
      * for parameters without a value. e.g. "blah?a=&b=&c=".
      */
-    public synchronized String encode(boolean equalsForNullValue)
-    {        
+    public synchronized String encode(String charset, boolean equalsForNullValue)
+    {
+        if (charset==null)
+            charset=StringUtil.__ISO_8859_1;
+        
         StringBuffer result = new StringBuffer(128);
         synchronized(result)
         {
-            Iterator i = entrySet().iterator();
-            String separator="";
-            while(i.hasNext())
+            Iterator iter = entrySet().iterator();
+            while(iter.hasNext())
             {
-                Map.Entry entry =
-                    (Map.Entry)i.next();
+                Map.Entry entry = (Map.Entry)iter.next();
                 
                 String key = entry.getKey().toString();
                 Object value = entry.getValue();
-
-                // encode single values and extract multi values
+                
                 if (value==null)
                 {
-                    result.append(separator);
-                    separator="&";
                     result.append(URLEncoder.encode(key));
-                    if (equalsForNullValue)
+                    if(equalsForNullValue)
                         result.append('=');
                 }
                 else if (value instanceof List)
@@ -97,14 +126,21 @@ public class UrlEncoded extends MultiMap
                     List values=(List)value;
                     for (int v=0; v<values.size();v++)
                     {
-                        result.append(separator);
-                        separator="&";
-                        result.append(URLEncoder.encode(key));
-                        String val=(String)values.get(v);
-                        if (val!=null && val.length()>0)
+                        if (v>0)
+                            result.append('&');
+                        Object val=values.get(v);
+                        result.append(encodeString(key,charset));
+
+                        if (val!=null)
                         {
-                            result.append('=');
-                            result.append(URLEncoder.encode(val));
+                            String str=val.toString();
+                            if (str.length()>0)
+                            {
+                                result.append('=');
+                                result.append(encodeString(str,charset));
+                            }
+                            else if (equalsForNullValue)
+                                result.append('=');
                         }
                         else if (equalsForNullValue)
                             result.append('=');
@@ -112,23 +148,30 @@ public class UrlEncoded extends MultiMap
                 }
                 else
                 {
-                    // Encode single item
-                    String val=value.toString();
-                    result.append(separator);
-                    separator="&";
-                    result.append(URLEncoder.encode(key));
-                    if (equalsForNullValue || val.length()>0)
+                    result.append(encodeString(key,charset));
+                    
+                    if (value!=null)
                     {
-                        result.append('=');
-                        result.append(URLEncoder.encode(val));
+                        String str=value.toString();
+                        if (str.length()>0)
+                        {
+                            result.append('=');
+                            result.append(encodeString(str,charset));
+                        }
+                        else if (equalsForNullValue)
+                            result.append('=');
                     }
+                    else if (equalsForNullValue)
+                        result.append('=');
                 }
+                
+                if (iter.hasNext())
+                    result.append('&');
             }
             return result.toString();
         }
     }
 
-    
     /* -------------------------------------------------------------- */
     /* Decoded parameters to Map.
      * @param content the string containing the encoded parameters
@@ -136,6 +179,19 @@ public class UrlEncoded extends MultiMap
      */
     public static void decodeTo(String content,MultiMap map)
     {
+        decodeTo(content,map,StringUtil.__ISO_8859_1);
+    }
+    
+    
+    /* -------------------------------------------------------------- */
+    /* Decoded parameters to Map.
+     * @param content the string containing the encoded parameters
+     * @param url The dictionary to add the parameters to
+     */
+    public static void decodeTo(String content,MultiMap map,String charset)
+    {
+        if (charset==null)
+            charset=StringUtil.__ISO_8859_1;
         synchronized(map)
         {
             String token;
@@ -148,21 +204,23 @@ public class UrlEncoded extends MultiMap
             while ((tokenizer.hasMoreTokens()))
             {
                 token = tokenizer.nextToken();
-            
+                
                 // breaking it at the "=" sign
                 int i = token.indexOf('=');
                 if (i<0)
                 {
-                    name=decodeString(token);
+                    name=decodeString(token,charset);
                     value="";
                 }
                 else
                 {
-                    name=decodeString(token.substring(0,i++));
+                    name=decodeString(token.substring(0,i++),
+                                      charset);
                     if (i>=token.length())
                         value="";
                     else
-                        value = decodeString(token.substring(i));
+                        value = decodeString(token.substring(i),
+                                             charset);
                 }
 
                 // Add value to the map
@@ -175,14 +233,26 @@ public class UrlEncoded extends MultiMap
     /* -------------------------------------------------------------- */
     /** Decode String with % encoding.
      * This method makes the assumption that the majority of calls
-     * will need no decoding.
+     * will need no decoding and uses the 8859 encoding.
      */
     public static String decodeString(String encoded)
     {
+        return decodeString(encoded,StringUtil.__ISO_8859_1);
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Decode String with % encoding.
+     * This method makes the assumption that the majority of calls
+     * will need no decoding.
+     */
+    public static String decodeString(String encoded,String charset)
+    {
+        if (charset==null)
+            charset=StringUtil.__ISO_8859_1;
         int len=encoded.length();
         byte[] bytes=null;
         int n=0;
-        boolean noDecode=true;
+        StringBuffer buf=null;
         
         for (int i=0;i<len;i++)
         {
@@ -190,46 +260,87 @@ public class UrlEncoded extends MultiMap
             if (c<0||c>0xff)
                 throw new IllegalArgumentException("Not decoded");
             
-            byte b = (byte)(0xff & c);
-            
             if (c=='+')
             {
-                b=(byte)' ';
+                if (buf==null)
+                {
+                    buf=new StringBuffer(len);
+                    for (int j=0;j<i;j++)
+                        buf.append(encoded.charAt(j));
+                }
+                if (n>0)
+                {
+                    try {buf.append(new String(bytes,0,n,charset));}
+                    catch(UnsupportedEncodingException e)
+                    {buf.append(new String(bytes,0,n));}
+                    n=0;
+                }        
+                buf.append(' ');
             }
             else if (c=='%' && (i+2)<len)
             {
-                b=(byte)(0xff&Integer.parseInt(encoded.substring(i+1,i+3),16));
-                i+=2;
-            }
-            else if (bytes==null)
-            {
-                n++;
-                continue;
-            }
-
-            if (bytes==null)
-            {
-                noDecode=false;
-                bytes=new byte[len];
-                for (int j=0;j<n;j++)
-                    bytes[j]=(byte)(0xff & encoded.charAt(j));                
-            }
+                byte b;
+                char cn = encoded.charAt(i+1);
+                if (cn>='a' && cn<='z')
+                    b=(byte)(10+cn-'a');
+                else if (cn>='A' && cn<='Z')
+                    b=(byte)(10+cn-'A');
+                else
+                    b=(byte)(cn-'0');
+                cn = encoded.charAt(i+2);
+                if (cn>='a' && cn<='z')
+                    b=(byte)(b*16+10+cn-'a');
+                else if (cn>='A' && cn<='Z')
+                    b=(byte)(b*16+10+cn-'A');
+                else
+                    b=(byte)(b*16+cn-'0');
                 
-            bytes[n++]=b;
+                if (buf==null)
+                {
+                    buf=new StringBuffer(len);
+                    for (int j=0;j<i;j++)
+                        buf.append(encoded.charAt(j));
+                }
+                i+=2;
+                if (bytes==null)
+                    bytes=new byte[len];
+                bytes[n++]=b;
+            }
+            else if (buf!=null)
+            {
+                if (n>0)
+                {
+                    try {buf.append(new String(bytes,0,n,charset));}
+                    catch(UnsupportedEncodingException e)
+                    {buf.append(new String(bytes,0,n));}
+                    n=0;
+                }                
+                buf.append(c);
+            }
         }
 
-        if (noDecode)
+        if (buf==null)
             return encoded;
 
-        try
+        if (n>0)
         {
-            return new String(bytes,0,n,StringUtil.__ISO_8859_1);
+            try {buf.append(new String(bytes,0,n,charset));}
+            catch(UnsupportedEncodingException e)
+            {buf.append(new String(bytes,0,n));}
         }
-        catch(UnsupportedEncodingException e)
-        {
-            Code.warning(e);
-            return new String(bytes,0,n);
-        }
+
+        return buf.toString();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Perform URL encoding.
+     * Assumes 8859 charset
+     * @param string 
+     * @return encoded string.
+     */
+    public static String encodeString(String string)
+    {
+        return encodeString(string,StringUtil.__ISO_8859_1);
     }
     
     /* ------------------------------------------------------------ */
@@ -237,12 +348,14 @@ public class UrlEncoded extends MultiMap
      * @param string 
      * @return encoded string.
      */
-    public static String encodeString(String string)
+    public static String encodeString(String string,String charset)
     {
+        if (charset==null)
+            charset=StringUtil.__ISO_8859_1;
         byte[] bytes=null;
         try
         {
-            bytes=string.getBytes(StringUtil.__ISO_8859_1);
+            bytes=string.getBytes(charset);
         }
         catch(UnsupportedEncodingException e)
         {
@@ -292,7 +405,7 @@ public class UrlEncoded extends MultiMap
         
         try
         {    
-            return new String(encoded,0,n,StringUtil.__ISO_8859_1);
+            return new String(encoded,0,n,charset);
         }
         catch(UnsupportedEncodingException e)
         {
@@ -308,12 +421,5 @@ public class UrlEncoded extends MultiMap
     public Object clone()
     {
         return new UrlEncoded(this);
-    }
-
-    public static void main(String[] a)
-    {
-	System.err.println(encodeString(a[0]));
-	System.err.println(decodeString(a[0]));
-
     }
 }

@@ -1,3 +1,8 @@
+// ===========================================================================
+// Copyright (c) 1996 Mort Bay Consulting Pty. Ltd. All rights reserved.
+// $Id$
+// ---------------------------------------------------------------------------
+
 package org.mortbay.http.handler;
 
 import org.mortbay.http.ChunkableOutputStream;
@@ -10,6 +15,7 @@ import org.mortbay.http.HttpResponse;
 import org.mortbay.http.MultiPartResponse;
 import org.mortbay.http.PathMap;
 import org.mortbay.http.InclusiveByteRange;
+import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.Log;
@@ -59,10 +65,11 @@ public class ResourceHandler extends NullHandler
     private boolean _acceptRanges=true;
     
     /* ------------------------------------------------------------ */
-    List _indexFiles =new ArrayList(2);
+    List _indexFiles =new ArrayList(4);
     {
         _indexFiles.add("index.html");
         _indexFiles.add("index.htm");
+        _indexFiles.add("index.jsp");
     }
  
     /* ------------------------------------------------------------ */
@@ -132,6 +139,11 @@ public class ResourceHandler extends NullHandler
     /* ------------------------------------------------------------ */
     public void addIndexFile(String indexFile)
     {
+        if (indexFile.startsWith("/") ||
+            indexFile.startsWith(java.io.File.separator) ||
+            indexFile.endsWith("/") ||
+            indexFile.endsWith(java.io.File.separator))
+            Code.warning("Invalid index file: "+indexFile);
         _indexFiles.add(indexFile);
     }
  
@@ -253,12 +265,11 @@ public class ResourceHandler extends NullHandler
         
         try
         {
-            resource = baseResource.addPath(pathInContext);
-            Code.debug("\nPATH=",pathInContext,
-                       "\nRESOURCE=",resource);
+            resource = baseResource.addPath(URI.encodePath(pathInContext));
+            Code.debug("PATH=",pathInContext,
+                       " RESOURCE=",resource);
             
             // check filename
-            
             String method=request.getMethod();
             if (method.equals(HttpRequest.__GET) ||
                 method.equals(HttpRequest.__POST) ||
@@ -808,42 +819,46 @@ public class ResourceHandler extends NullHandler
      
             String title = "Directory: "+base;
      
-            ChunkableOutputStream out=response.getOutputStream();
-     
-            out.print("<HTML><HEAD><TITLE>");
-            out.print(title);
-            out.print("</TITLE></HEAD><BODY>\n<H1>");
-            out.print(title);
-            out.print("</H1><TABLE BORDER=0>");
+            ByteArrayISO8859Writer out = new ByteArrayISO8859Writer();
+            
+            out.write("<HTML><HEAD><TITLE>");
+            out.write(title);
+            out.write("</TITLE></HEAD><BODY>\n<H1>");
+            out.write(title);
+            out.write("</H1><TABLE BORDER=0>");
      
             if (parent)
             {
-                out.print("<TR><TD><A HREF=");
-                out.print(padSpaces(URI.addPaths(base,"../")));
-                out.print(">Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
+                out.write("<TR><TD><A HREF=");
+                out.write(URI.encodePath(URI.addPaths(base,"../")));
+                out.write(">Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
             }
      
             DateFormat dfmt=DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
                                                            DateFormat.MEDIUM);
             for (int i=0 ; i< ls.length ; i++)
             {
-                Resource item = file.addPath(ls[i]);
+                String encoded=URI.encodePath(ls[i]);
+                Resource item = file.addPath(encoded);
   
-                out.print("<TR><TD><A HREF=\"");
-                String path=URI.addPaths(base,ls[i]);
+                out.write("<TR><TD><A HREF=\"");
+                String path=URI.addPaths(base,encoded);
+                
                 if (item.isDirectory() && !path.endsWith("/"))
                     path=URI.addPaths(path,"/");
-                out.print(padSpaces(path));
-                out.print("\">");
-                out.print(ls[i]);
-                out.print("&nbsp;");
-                out.print("</TD><TD ALIGN=right>");
-                out.print(""+item.length());
-                out.print(" bytes&nbsp;</TD><TD>");
-                out.print(dfmt.format(new Date(item.lastModified())));
-                out.print("</TD></TR>\n");
+                out.write(path);
+                out.write("\">");
+                out.write(StringUtil.replace(StringUtil.replace(ls[i],"<","&lt;"),">","&gt;"));
+                out.write("&nbsp;");
+                out.write("</TD><TD ALIGN=right>");
+                out.write(""+item.length());
+                out.write(" bytes&nbsp;</TD><TD>");
+                out.write(dfmt.format(new Date(item.lastModified())));
+                out.write("</TD></TR>\n");
             }
-            out.println("</TABLE>");
+            out.write("</TABLE>\n");
+            response.setIntField(HttpFields.__ContentLength, out.length());
+            out.writeTo(response.getOutputStream());
             request.setHandled(true);
         }
         else
@@ -853,18 +868,6 @@ public class ResourceHandler extends NullHandler
                                "Directory access not allowed");
         }
     }
-
-
- 
-    /* ------------------------------------------------------------ */
-    /**
-     * Replaces spaces by %20
-     */
-    private String padSpaces(String str)
-    {
-        return StringUtil.replace(str," ","%20");
-    }
- 
 
  
     /* ------------------------------------------------------------ */

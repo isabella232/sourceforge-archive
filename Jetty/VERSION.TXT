@@ -4,6 +4,7 @@ Jetty Versions
 Jetty-3.1.6 - 28 Feb 2002
  + Implemented 2.3 clarifications to security constraint semantics
    PLEASE REVIEW YOUR SECURITY CONSTRAINTS (see README).
+ + Improved handling of non alpha characters in file resources.
  + Empty suffix for temp directory.
  + Fixed HttpFields remove bug
  + Set Listeners default scheme 
