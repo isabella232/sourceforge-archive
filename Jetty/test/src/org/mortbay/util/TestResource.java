@@ -114,7 +114,7 @@ public class TestResource extends junit.framework.TestCase
                               "src/org/mortbay/util/");
             FilePermission perm = (FilePermission)
                 __userURL.openConnection().getPermission();
-            __userDir=new File(perm.getName()).getCanonicalPath()+"/";
+            __userDir=new File(perm.getName()).getCanonicalPath()+File.separatorChar;
             __relDir="src/org/mortbay/util/"
                 .replace('/',File.separatorChar);
         }
@@ -124,7 +124,7 @@ public class TestResource extends junit.framework.TestCase
                               "test/src/org/mortbay/util/");
             FilePermission perm = (FilePermission)
                 __userURL.openConnection().getPermission();
-            __userDir=new File(perm.getName()).getCanonicalPath()+"/";
+            __userDir=new File(perm.getName()).getCanonicalPath()+File.separatorChar;
             __relDir="test/src/org/mortbay/util/"
                 .replace('/',File.separatorChar);
         }
