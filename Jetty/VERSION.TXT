@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+Jetty-3.0.0.rc3 - 5 Nov 2000
+ + Changed ThreadPool.stop for IBM 1.3 JVM
+ + Added bin/jetty.sh run script.
  + upgraded build.xml to ant v1.2
  + Set MaxReadTimeMs in all examples
  + Further clean up of the connection close actions

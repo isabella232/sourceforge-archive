@@ -17,6 +17,19 @@ base. The aims of the Jetty 3 developement include:
   + Improved coding standards and increasing test coverage.
 
 
+Quick start on Unix
+===================
+
+run:
+  <install-directory>/bin/jetty.sh start admin demo
+
+Browse to:
+  http://localhost:8080
+
+If this doesn't work - you will need to read some more and setup the environment.
+
+
+
 Environment
 ===========
 Development has been done in JDK1.2 and the following CLASSPATH is required 
@@ -57,6 +70,16 @@ example of coded configuration. The same demo is configured by the
 xml files etc/admin.xml etc/demo.xml and can be run with the command:
 
   java com.mortbay.Jetty.Server etc/admin.xml etc/demo.xml
+
+
+There is also a Unix start/stop script bin/jetty.sh which can run
+the demo with:
+
+  bin/jetty.sh start admin demo
+
+This script find the JVM and sets the CLASSPATH, so it can be used as 
+an /etc/init.d script and will look for xml config files in 
+/etc/jetty (among other places).
 
 
 Configuring the Server

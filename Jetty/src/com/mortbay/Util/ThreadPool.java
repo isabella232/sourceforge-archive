@@ -296,18 +296,20 @@ public class ThreadPool
     {
         Code.debug("Stop Pool ",_name);
         _running=false;
-        
-        synchronized(this)
+
+        while (!_threadSet.isEmpty())
         {
-            Iterator iter=_threadSet.iterator();
-            while(iter.hasNext())
+            synchronized(this)
             {
-                Thread thread=(Thread)iter.next();
-                thread.interrupt();
+                Object[] threads=_threadSet.toArray();
+                for(int t=0;t<threads.length;t++)
+                {
+                    Thread thread=(Thread)threads[t];
+                    thread.interrupt();
+                }
             }
+            Thread.yield();
         }
-        
-        join();
     }
     
     
@@ -326,12 +328,13 @@ public class ThreadPool
         _running=false;
         
         // interrupt the threads
-        Iterator iter=_threadSet.iterator();
-        while(iter.hasNext())
+        Object[] threads=_threadSet.toArray();
+        for(int t=0;t<threads.length;t++)
         {
-            Thread thread=(Thread)iter.next();
+            Thread thread=(Thread)threads[t];
             thread.interrupt();
         }
+        
         // wait a while for all threads to die
         Thread.yield();
         try{
@@ -343,10 +346,10 @@ public class ThreadPool
             // Warn about any still running
             if (_threadSet.size()>0)
             {
-                iter=_threadSet.iterator();
-                while(iter.hasNext())
+                threads=_threadSet.toArray();
+                for(int t=0;t<threads.length;t++)
                 {
-                    Thread thread=(Thread)iter.next();
+                    Thread thread=(Thread)threads[t];
                     if (thread.isAlive())
                     {
                         thread.interrupt();

@@ -393,7 +393,7 @@ abstract public class ThreadedServer extends ThreadPool
     }
     
     /* --------------------------------------------------------------- */
-    public void destroy()
+    synchronized public void destroy()
     {
         if (_listen!=null)
         {
