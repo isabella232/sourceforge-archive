@@ -191,7 +191,7 @@ public class Log
     /** No logging.
      * All log sinks are stopped and removed.
      */
-    public void disableLog()
+    public synchronized void disableLog()
     {
         if (_sinks!=null) {
             for (int s=_sinks.length;s-->0;)
@@ -267,15 +267,26 @@ public class Log
             defaultInit();
         
         if (_sinks==null)
+        {
+            System.err.println(time+": "+tag+","+msg+","+frame);
             return;
+        }
+        
+        boolean logged=false;
         for (int s=_sinks.length;s-->0;)
         {
             if (_sinks[s]==null)
                 continue;
             
             if (_sinks[s].isStarted())
+            {
+                logged=true;
                 _sinks[s].log(tag,msg,frame,time);
+            }
         }
+
+        if (!logged)
+            System.err.println(time+": "+tag+","+msg+","+frame);
     }
     
     /* ------------------------------------------------------------ */

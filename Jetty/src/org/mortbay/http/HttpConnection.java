@@ -95,8 +95,9 @@ public class HttpConnection
         _listener=listener;
         _remoteInetAddress=remoteAddr;
         int bufferSize=listener==null?4096:listener.getBufferSize();
+        int reserveSize=listener==null?512:listener.getBufferReserve();
         _inputStream=new ChunkableInputStream(in,bufferSize);
-        _outputStream=new ChunkableOutputStream(out,bufferSize);
+        _outputStream=new ChunkableOutputStream(out,bufferSize,reserveSize);
         _outputStream.addObserver(this);
         _outputSetup=false;
         if (_listener!=null)

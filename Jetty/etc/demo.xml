@@ -9,8 +9,38 @@
 <!-- $Id$ -->
 <Configure class="org.mortbay.jetty.Server">
 
+  <!-- =============================================================== -->
+  <!-- Configure the Debugger                                          -->
+  <!-- =============================================================== -->
+  <Set name="Debug" class="org.mortbay.util.Code" type="boolean">false</Set>
+  <Set name="Verbose" class="org.mortbay.util.Code" type="int">0</Set>
+  <Set name="DebugPatterns" class="org.mortbay.util.Code" type="String"></Set>
 
-  
+  <!-- =============================================================== -->
+  <!-- Configure the Logger                                            -->
+  <!-- =============================================================== -->
+  <!-- UNCOMMENT TO ACTIVATE
+  <Set name="Debug" class="org.mortbay.util.Code" type="boolean">false</Set>
+  <Call name="instance" class="org.mortbay.util.Log">
+    <Call name="disableLog"/>
+    <Call name="add">
+      <Arg>
+        <New class="org.mortbay.util.OutputStreamLogSink">  
+          <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.jetty.log</Arg>
+          <Set name="retainDays">90</Set>
+          <Set name="append">true</Set>
+          <Set name="logLabels">false</Set>
+          <Set name="logStackSize">false</Set>
+          <Set name="logStackTrace">false</Set>
+          <Set name="logOneLine">true</Set>
+          <Set name="logTimeZone">GMT</Set>
+          <Call name="start"/>
+        </New>
+      </Arg>
+    </Call>
+  </Call>
+  -->
+
   <!-- =============================================================== -->
   <!-- Configure the Request Listeners                                 -->
   <!-- =============================================================== -->

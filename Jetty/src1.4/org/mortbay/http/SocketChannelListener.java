@@ -47,6 +47,7 @@ public class SocketChannelListener
     private int _integralPort=0;
     private int _confidentialPort=0;
     private int _bufferSize=4096;
+    private int _bufferReserve=512;
     
     private transient HttpServer _server;
     private transient boolean _lastLow=false;
@@ -88,7 +89,19 @@ public class SocketChannelListener
     {
         _bufferSize=size;
     }
-        
+       
+    /* ------------------------------------------------------------ */
+    public int getBufferReserve()
+    {
+        return _bufferReserve;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setBufferReserve(int size)
+    {
+        _bufferReserve=size;
+    }
+         
     /* --------------------------------------------------------------- */
     public void setDefaultScheme(String scheme)
     {

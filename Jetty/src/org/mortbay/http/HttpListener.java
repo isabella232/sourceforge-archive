@@ -80,6 +80,17 @@ public interface HttpListener extends LifeCycle, Serializable
     public int getBufferSize();
     
     /* ------------------------------------------------------------ */
+    /** Get the size of the header reserve area.
+     * Get the size of the header reserve area within the buffers used
+     * by connections from this listener.  The header reserve is space
+     * reserved in the first buffer of a response to allow a HTTP header to
+     * be written in the same packet.  The reserve should be large enough to
+     * avoid moving data to fit the header, but not too large as to waste memory.
+     * @return The default buffer reserve size in bytes.
+     */
+    public int getBufferReserve();
+    
+    /* ------------------------------------------------------------ */
     /** Get the default scheme for requests.
      * If a request is received from a HttpConnection created by this
      * listener, that does not include a scheme in it's request URL, then

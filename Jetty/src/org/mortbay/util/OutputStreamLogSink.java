@@ -175,19 +175,42 @@ public class OutputStreamLogSink
         if (_logTimezone!=null)
             _dateFormat.getFormat().setTimeZone(TimeZone.getTimeZone(_logTimezone));
     }
+
     
     /* ------------------------------------------------------------ */
+    /** 
+     * @deprecated Use getLogTimeZone() 
+     */
     public String getLogTimezone()
     {
         return _logTimezone;
     }
+    
     /* ------------------------------------------------------------ */
+    /** 
+     * @deprecated Use setLogTimeZone(String) 
+     */
     public void setLogTimezone(String logTimezone)
     {
         _logTimezone=logTimezone;
         if (_dateFormat!=null && _logTimezone!=null)
             _dateFormat.getFormat().setTimeZone(TimeZone.getTimeZone(_logTimezone));
     }
+    
+    /* ------------------------------------------------------------ */
+    public String getLogTimeZone()
+    {
+        return _logTimezone;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setLogTimeZone(String logTimezone)
+    {
+        _logTimezone=logTimezone;
+        if (_dateFormat!=null && _logTimezone!=null)
+            _dateFormat.getFormat().setTimeZone(TimeZone.getTimeZone(_logTimezone));
+    }
+    
     /* ------------------------------------------------------------ */
     public boolean isLogTimeStamps()
     {

@@ -462,7 +462,7 @@ JAVA_OPTIONS="$JAVA_OPTIONS -Djetty.home=$JETTY_HOME -Djetty.log=$JETTY_LOG"
 #####################################################
 # This is how the Jetty server will be started
 #####################################################
-RUN_CMD="$JAVA $JAVA_OPTIONS -DLOG_FILE=$JETTY_LOG/yyyy_mm_dd.jetty.log -cp $CLASSPATH org.mortbay.jetty.Server $CONFIGS"
+RUN_CMD="$JAVA $JAVA_OPTIONS -cp $CLASSPATH org.mortbay.jetty.Server $CONFIGS"
 
 #####################################################
 # Comment these out after you're happy with what 

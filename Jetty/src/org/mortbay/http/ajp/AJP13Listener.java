@@ -44,6 +44,7 @@ public class AJP13Listener
     private int _confidentialPort=0;
     private boolean _identifyListener=false;
     private int _bufferSize=8192;
+    private int _bufferReserve=512;
     private String[] _remoteServers;
     
     /* ------------------------------------------------------------------- */
@@ -81,6 +82,18 @@ public class AJP13Listener
     public void setBufferSize(int size)
     {
         _bufferSize=size;
+    }
+        
+    /* ------------------------------------------------------------ */
+    public int getBufferReserve()
+    {
+        return _bufferReserve;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setBufferReserve(int size)
+    {
+        _bufferReserve=size;
     }
         
     /* ------------------------------------------------------------ */

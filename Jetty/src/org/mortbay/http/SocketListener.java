@@ -41,6 +41,7 @@ public class SocketListener
     private int _confidentialPort=0;
     private boolean _identifyListener=false;
     private int _bufferSize=4096;
+    private int _bufferReserve=512;
 
     private transient HttpServer _server;
     private transient int _throttled=0;
@@ -82,6 +83,18 @@ public class SocketListener
     public void setBufferSize(int size)
     {
         _bufferSize=size;
+    }
+
+    /* ------------------------------------------------------------ */
+    public int getBufferReserve()
+    {
+        return _bufferReserve;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setBufferReserve(int size)
+    {
+        _bufferReserve=size;
     }
         
     /* ------------------------------------------------------------ */
