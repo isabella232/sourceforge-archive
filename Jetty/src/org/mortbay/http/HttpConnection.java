@@ -941,9 +941,7 @@ public class HttpConnection
                 {
                     try{
                         // Read remaining input
-                        while(_inputStream.available()>0 &&
-			      (_inputStream.skip(4096)>0 ||
-			       _inputStream.read()>=0));
+                        while(_inputStream.skip(4096)>0 || _inputStream.read()>=0);
                     }
                     catch(IOException e)
                     {
@@ -974,20 +972,19 @@ public class HttpConnection
                     }
                     catch(IOException e) {exception(e);}
                 }
-                else
+                else if (_response!=null) // There was a request
                 {
                     // half hearted attempt to eat any remaining input
                     try{
                         while(_inputStream.available()>0 &&
-			      (_inputStream.skip(4096)>0 ||_inputStream.read()>=0));
+ 			      (_inputStream.skip(4096)>0 ||_inputStream.read()>=0));
                         _inputStream.resetStream();
                     }
                     catch(IOException e){Code.ignore(e);}
                 
                     // commit non persistent
                     try{
-                        if (_response!=null)
-                            _response.commit();
+                        _response.commit();
                         _outputStream.flush();
                         bytes_written=_outputStream.getBytesWritten();
                         _outputStream.close();

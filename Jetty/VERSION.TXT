@@ -1,7 +1,8 @@
 Jetty Versions
 --------------
 
- + HttpConnection was too greedy. Fixed delayed response bug.
+ + Fixed delayed response bug:
+   Stopped HttpConnection consuming input from timedout connection.
  + DTD allows static "Get" and "Set" methods to be invoked.
 
 Jetty-4.0.0 - 22 March 2002
