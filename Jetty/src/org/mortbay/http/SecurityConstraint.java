@@ -345,44 +345,19 @@ public class SecurityConstraint
             {
                 if (sc.getAuthenticate())
                 {
-
-                    // TODO - this is as per spec - but it sucks!
-//                     if (roles!=ANY_ROLE)
-//                     {
-//                         if (sc.isAnyRole())
-//                             roles=ANY_ROLE;
-//                         else
-//                         {
-//                             List scr = sc.getRoles();
-//                             if (scr==null || scr.size()==0)
-//                                 forbidden=true;
-//                             else
-//                                 roles=LazyList.addCollection(roles,scr);
-//                         }
-//                     }
-                    
-                    if (sc.isAnyRole())
-                    {
-                        if (roles==null)
-                            roles=ANY_ROLE;
-                    }
-                    else
-                    {                        
-                        List scr = sc.getRoles();
-                        if (scr==null || scr.size()==0)
-                            forbidden=true;
-                        else if (roles==null || roles==ANY_ROLE)
-                            roles=LazyList.addCollection(null,scr);
-                        else
-                        {
-                            for (int i=LazyList.size(roles);i-->0;)
-                            {
-                                Object r=LazyList.get(roles,i);
-                                if (!scr.contains(r))
-                                    roles=LazyList.remove(roles,i);
-                            }
-                        }
-                    }
+                     if (roles!=ANY_ROLE)
+                     {
+                         if (sc.isAnyRole())
+                             roles=ANY_ROLE;
+                         else
+                         {
+                             List scr = sc.getRoles();
+                             if (scr==null || scr.size()==0)
+                                 forbidden=true;
+                             else
+                                 roles=LazyList.addCollection(roles,scr);
+                         }
+                     }
                 }
                 else
                     unauthenticated=true;

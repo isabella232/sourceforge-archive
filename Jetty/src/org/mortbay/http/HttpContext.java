@@ -5,7 +5,6 @@
 
 package org.mortbay.http;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -952,22 +951,10 @@ public class HttpContext implements LifeCycle,
     /* ------------------------------------------------------------ */
     /** Get the file classpath of the context.
      * This method makes a best effort to return a complete file
-     * classpath for the context.  The default implementation returns
-     * <PRE>
-     *  ((ContextLoader)getClassLoader()).getFileClassPath()+
-     *       System.getProperty("path.separator")+
-     *       System.getProperty("java.class.path");
-     * </PRE>
-     * The default implementation requires the classloader to be
-     * initialized before it is called. It will not include any
-     * classpaths used by a non-system parent classloader.
-     * <P>
-     * The main user of this method is the start() method.  If a JSP
-     * servlet is detected, the string returned from this method is
-     * used as the default value for the "classpath" init parameter.
-     * <P>
-     * Derivations may replace this method with a more accurate or
-     * specialized version.
+     * classpath for the context.
+     * It is obtained by walking the classloader hierarchy and looking for
+     * URLClassLoaders.  The system property java.class.path is also checked for
+     * file elements not already found in the loader hierarchy.
      * @return Path of files and directories for loading classes.
      * @exception IllegalStateException HttpContext.initClassLoader
      * has not been called.
@@ -986,72 +973,72 @@ public class HttpContext implements LifeCycle,
         // Walk the loader hierarchy
        	while (loader !=null)
        	{
-       		loaders.add(0,loader);
-			loader = loader.getParent();
+            loaders.add(0,loader);
+            loader = loader.getParent();
        	}
        	
        	// Try to handle java2compliant modes
        	loader=getClassLoader();
        	if (loader instanceof ContextLoader && !((ContextLoader)loader).isJava2Compliant())
        	{
-       		loaders.remove(loader);
-       		loaders.add(0,loader);
+            loaders.remove(loader);
+            loaders.add(0,loader);
        	}
-			
-		for (int i=0;i<loaders.size();i++)
-		{
-			loader=(ClassLoader)loaders.get(i);
-		
-			if (log.isDebugEnabled()) log.debug("extract paths from "+loader);
-       		if (loader instanceof URLClassLoader)
-       		{
-       			URL[] urls = ((URLClassLoader)loader).getURLs();
-       			for (int j=0;j<urls.length;j++)
-       			{
-       				try
-       				{
-       					Resource path = Resource.newResource(urls[j]);
-						if (log.isTraceEnabled()) log.trace("path "+path);
-       					File file = path.getFile();
-       					if (file!=null)
-       						paths.add(file.getAbsolutePath());
-       				}
-       				catch(Exception e)
-       				{
-       					log.trace(LogSupport.IGNORED,e);
-       				}
-       			}	
-       		}	
+        
+        for (int i=0;i<loaders.size();i++)
+        {
+            loader=(ClassLoader)loaders.get(i);
+            
+            if (log.isDebugEnabled()) log.debug("extract paths from "+loader);
+            if (loader instanceof URLClassLoader)
+            {
+                URL[] urls = ((URLClassLoader)loader).getURLs();
+                for (int j=0;j<urls.length;j++)
+                {
+                    try
+                    {
+                        Resource path = Resource.newResource(urls[j]);
+                        if (log.isTraceEnabled()) log.trace("path "+path);
+                        File file = path.getFile();
+                        if (file!=null)
+                            paths.add(file.getAbsolutePath());
+                    }
+                    catch(Exception e)
+                    {
+                        log.trace(LogSupport.IGNORED,e);
+                    }
+                }	
+            }	
        	}
        	
-		// Add the system classpath elements from property.
-		String jcp=System.getProperty("java.class.path");
-		if (jcp!=null)
-		{
-			StringTokenizer tok=new StringTokenizer(jcp,File.pathSeparator);
-			while (tok.hasMoreTokens())
-			{
-				String path=tok.nextToken();
-				if (!paths.contains(path))
-				{
-					log.trace("PATH="+path);
-					paths.add(path);
-				}
-				else
-					log.trace("done="+path);			
-			}
-		}
-            
+        // Add the system classpath elements from property.
+        String jcp=System.getProperty("java.class.path");
+        if (jcp!=null)
+        {
+            StringTokenizer tok=new StringTokenizer(jcp,File.pathSeparator);
+            while (tok.hasMoreTokens())
+            {
+                String path=tok.nextToken();
+                if (!paths.contains(path))
+                {
+                    log.trace("PATH="+path);
+                    paths.add(path);
+                }
+                else
+                    log.trace("done="+path);			
+            }
+        }
+        
         StringBuffer buf = new StringBuffer();
         Iterator iter = paths.iterator();
         while(iter.hasNext())
         {
-        	if (buf.length()>0)
-        		buf.append(File.pathSeparator);
-        	buf.append(iter.next().toString());
+            if (buf.length()>0)
+                buf.append(File.pathSeparator);
+            buf.append(iter.next().toString());
         }
-
-		if (log.isDebugEnabled()) log.debug("fileClassPath="+buf);
+        
+        if (log.isDebugEnabled()) log.debug("fileClassPath="+buf);
         return buf.toString();
     }
 
@@ -1452,48 +1439,58 @@ public class HttpContext implements LifeCycle,
     /* ------------------------------------------------------------ */
     public void addSecurityConstraint(String pathSpec, SecurityConstraint sc)
     {
-        List scs = (List)_constraintMap.get(pathSpec);
-        if (scs==null)
-        {
-            scs=new ArrayList(2);
-            _constraintMap.put(pathSpec,scs);
-        }
-        scs.add(sc);
+        Object scs = _constraintMap.get(pathSpec);
+        scs = LazyList.add(scs,sc);
+        _constraintMap.put(pathSpec,scs);
         
         if(log.isDebugEnabled())log.debug("added "+sc+" at "+pathSpec);
     }
 
     /* ------------------------------------------------------------ */
-    public boolean checkSecurityConstraints(String pathInContext,
-                                            HttpRequest request,
-                                            HttpResponse response)
+    public boolean checkSecurityConstraints(
+        String pathInContext,
+        HttpRequest request,
+        HttpResponse response)
         throws HttpException, IOException
-    {   
-        UserRealm realm = getRealm();
+    {
+        UserRealm realm= getRealm();
 
-        // Get all path matches
-        // TODO. May not need to build list - or at least break
-        // list at first non-matching pattern - ugh!
-        
-        List scss =_constraintMap.getMatches(pathInContext);
-        if (scss!=null && scss.size()>0)
+        List scss= _constraintMap.getMatches(pathInContext);
+        String pattern=null;
+        if (scss != null && scss.size() > 0)
         {
-            Object constraints=null;
-            
-            // for each path match
-            for (int m=0;m<scss.size();m++)
-            {
-                Map.Entry entry=(Map.Entry)scss.get(m);
-                List scs = (List)entry.getValue();
-                constraints=LazyList.addCollection(constraints,scs);
-            }
+            Object constraints= null;
 
-            return SecurityConstraint.check(LazyList.getList(constraints),
-                                            _authenticator,
-                                            realm,
-                                            pathInContext,
-                                            request,
-                                            response); 
+            // for each path match
+            // Add only constraints that have the correct method
+            // break if the matching pattern changes.  This allows only
+            // constraints with matching pattern and method to be combined.
+            loop:
+            for (int m= 0; m < scss.size(); m++)
+            {
+                Map.Entry entry= (Map.Entry)scss.get(m);
+                Object scs= entry.getValue();
+                String p=(String)entry.getKey();
+                for (int c=0;c<LazyList.size(scs);c++)
+                {
+                	SecurityConstraint sc=(SecurityConstraint)LazyList.get(scs,c);
+					if (!sc.forMethod(request.getMethod()))
+						continue;
+						
+					if (pattern!=null && !pattern.equals(p))
+						break loop;
+					pattern=p;	
+	                constraints= LazyList.add(constraints, sc);
+                }
+            }
+            
+            return SecurityConstraint.check(
+                LazyList.getList(constraints),
+                _authenticator,
+                realm,
+                pathInContext,
+                request,
+                response);
         }
         return true;
     }

@@ -74,7 +74,7 @@ public class ServerMBean extends HttpServerMBean
     /* ------------------------------------------------------------ */
     protected ObjectName newObjectName(MBeanServer server)
     {
-        return uniqueObjectName(server, getDefaultDomain()+":Jetty=");
+        return uniqueObjectName(server, getDefaultDomain()+":Server=");
     }
 
     /* ------------------------------------------------------------ */

@@ -980,7 +980,7 @@ public class HttpConnection
             {
                 if (log.isDebugEnabled())
                 {
-                    if (log.isTraceEnabled()) log.debug(LogSupport.EXCEPTION,e);
+                    if (log.isTraceEnabled()) log.trace(LogSupport.EXCEPTION,e);
                     else if(log.isDebugEnabled())log.debug(e.toString());
                 }
                 _response.destroy();

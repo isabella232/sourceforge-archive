@@ -6,8 +6,10 @@ Jetty-5.0.alpha3
  + Priority added to ThreadPool
  + replaced win32 service with http://wrapper.tanukisoftware.org
  + FileClassPath derived from walk of classloader hierarchy.
+ + Implemented security constraint combinations
  + Set TransactionManager on JettyPlus datasources and pools
  + Fixed null pointer if no sevices configured for JettyPlus
+ + Updated jasper and examples to 5.0.12
 
 Jetty-5.0.alpha2 - 19 September 2003
  + Use commons logging.
