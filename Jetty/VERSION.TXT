@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Fixed up HTAccessHandler
  + Improved error messages from ProxyHandler
  + Added missing S to some OPTIONS strings
  + Added open method to threaded server.

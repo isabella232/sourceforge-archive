@@ -259,8 +259,7 @@ public class HTAccessHandler extends AbstractHttpHandler
             BufferedReader htin=null;
             try
             {
-                htin=new BufferedReader(new InputStreamReader(
-                        _userResource.getInputStream()));
+                htin=new BufferedReader(new InputStreamReader(resource.getInputStream()));
                 parse(htin);
                 _lastModified=resource.lastModified();
 
@@ -434,32 +433,35 @@ public class HTAccessHandler extends AbstractHttpHandler
                 return true;
 
             // Authenticate with realm
-            if (context.getRealm().authenticate(user,pass,request)==null)
+            org.mortbay.http.UserRealm realm=context.getRealm();
+            org.mortbay.http.UserPrincipal principal=realm==null?null:realm.authenticate(user,pass,request);
+            if (principal==null)
             {
                 // Have to authenticate the user with the password file
                 String code=getUserCode(user);
-                if (code==null ||
-                        (code.equals("") && !pass.equals("")) ||
-                        (!code.equals(UnixCrypt.crypt(pass,code))))
+                String cred=(user!=null&&pass!=null)?UnixCrypt.crypt(user,pass):null;
+                if (code==null || (code.equals("") && !pass.equals("")) || !code.equals(cred))
                     return false;
             }
 
-            if (_requireName.equals(USER))
+            if (_requireName.equalsIgnoreCase(USER))
             {
                 if (_requireEntities.contains(user))
                     return true;
             }
-            else if (_requireName.equals(GROUP))
+            else if (_requireName.equalsIgnoreCase(GROUP))
             {
                 ArrayList gps=getUserGroups(user);
-                for (int g=gps.size();g-->0;)
-                    if (_requireEntities.contains(gps.get(g)))
-                        return true;
+                if (gps!=null)
+                    for (int g=gps.size();g-->0;)
+                        if (_requireEntities.contains(gps.get(g)))
+                            return true;
             }
-            else if (_requireName.equals(VALID_USER))
+            else if (_requireName.equalsIgnoreCase(VALID_USER))
             {
                 return true;
             }
+            
             return false;
         }
 
@@ -543,8 +545,7 @@ public class HTAccessHandler extends AbstractHttpHandler
                 BufferedReader ufin=null;
                 try
                 {
-                    ufin=new BufferedReader(new InputStreamReader(
-                            _userResource.getInputStream()));
+                    ufin=new BufferedReader(new InputStreamReader(_groupResource.getInputStream()));
                     _groupModified=_groupResource.lastModified();
                     String line;
                     while ((line=ufin.readLine())!=null)
@@ -588,7 +589,7 @@ public class HTAccessHandler extends AbstractHttpHandler
                     }
                 }
             }
-
+            
             return (ArrayList)_groups.get(group);
         }
 
