@@ -169,7 +169,17 @@ public class Resource
         if (url==null)
         {
             loader=Resource.class.getClassLoader();
-            url=loader.getResource(resource);
+            if (loader!=null)
+            {
+                url=loader.getResource(resource);
+                if (url==null && resource.startsWith("/"))
+                    url=loader.getResource(resource.substring(1));
+            }
+        }
+        
+        if (url==null)
+        {
+            url=ClassLoader.getSystemResource(resource);
             if (url==null && resource.startsWith("/"))
                 url=loader.getResource(resource.substring(1));
         }
