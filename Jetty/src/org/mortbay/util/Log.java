@@ -5,6 +5,7 @@
 
 package org.mortbay.util;
 
+import java.io.PrintStream;
 import java.util.StringTokenizer;
 
 /*-----------------------------------------------------------------------*/
@@ -55,6 +56,7 @@ public class Log
     public final static String ASSERT="ASSERT ";
     public final static String FAIL=  "FAIL!! ";
 
+    
     /*-------------------------------------------------------------------*/
     public LogSink[] _sinks = null;
     public String _logOptions=null;

@@ -31,7 +31,7 @@ abstract public class ThreadedServer extends ThreadPool
     /* ------------------------------------------------------------------- */
     private InetAddrPort _address=null;
     private int _soTimeOut=-1;
-    private int _lingerTimeSecs=30;
+    private int _lingerTimeSecs=-1;
     private boolean _tcpNoDelay=true;
     private int _acceptQueueSize=-1;
     
@@ -364,6 +364,8 @@ abstract public class ThreadedServer extends ThreadPool
                         s.setSoLinger(true,_lingerTimeSecs);
                     else
                         s.setSoLinger(false,0);
+                    
+                   
                 }
                 catch(Exception e)
                 {

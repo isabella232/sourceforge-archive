@@ -25,7 +25,8 @@
         <Set name="LowResourcePersistTimeMs">1000</Set>
         <Set name="ConfidentialPort">8443</Set>
         <Set name="IntegralPort">8443</Set>
-        <Set name="PoolName">main</Set>
+        <Set name="PoolName">http</Set>
+        <Set name="LingerTimeSecs">-1</Set>
       </New>
     </Arg>
   </Call>
@@ -40,7 +41,7 @@
     <Arg>
       <New class="org.mortbay.http.SunJsseListener">
         <Set name="Port">8443</Set>
-        <Set name="PoolName">main</Set>
+        <Set name="PoolName">http</Set>
         <Set name="Keystore"><SystemProperty name="jetty.home" default="."/>/etc/demokeystore</Set>
 	<Set name="Password">OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4</Set>
 	<Set name="KeyPassword">OBF:1u2u1wml1z7s1z7a1wnl1u2g</Set>
@@ -54,6 +55,7 @@
   <!-- Add a AJP13 listener on port 8009                               -->
   <!-- This protocol can be used with mod_jk in apache, IIS etc.       -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!--
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.ajp.AJP13Listener">
@@ -66,6 +68,7 @@
       </New>
     </Arg>
   </Call>
+  -->
 
 
   <!-- =============================================================== -->

@@ -428,6 +428,9 @@ public class UnixCrypt extends Object
         long constdatablock = 0L;		/* encryption constant */
         byte[] cryptresult = new byte[13];	/* encrypted result */
         long keyword = 0L;
+        /* invalid parameters! */
+        if(key==null||setting==null) 
+            return '*'; // will NOT match under ANY circumstances!
         int keylen = key.length();
 
         for (int i=0; i<8 ; i++) {

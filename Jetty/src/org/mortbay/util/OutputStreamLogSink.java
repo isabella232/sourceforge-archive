@@ -92,7 +92,7 @@ public class OutputStreamLogSink
     {
         _filename=System.getProperty("LOG_FILE");
         if (_filename==null)
-            _out=System.err;
+            _out=LogStream.STDERR_STREAM;
     }
         
     /* ------------------------------------------------------------ */
@@ -488,7 +488,7 @@ public class OutputStreamLogSink
         }
 
         if (_out==null)
-            _out=System.err;
+            _out=LogStream.STDERR_STREAM;
         
         _started=true;
     }
@@ -518,7 +518,7 @@ public class OutputStreamLogSink
             Thread.yield();
         }
         
-        if (_out!=null && _out!=System.err)
+        if (_out!=null && _out!=LogStream.STDERR_STREAM)
         {
             try{_out.close();}
             catch(Exception e){if (Code.debug())e.printStackTrace();}

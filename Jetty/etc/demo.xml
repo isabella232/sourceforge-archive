@@ -46,6 +46,10 @@
   </Call>
   -->
  
+  <!-- UNCOMMENT to capture Stderr and Stdout to jetty log
+  <Set class="org.mortbay.util.LogStream" name="logStdErr">true</Set>
+  <Set class="org.mortbay.util.LogStream" name="logStdOut">true</Set>
+  -->
 
 
   <!-- =============================================================== -->
