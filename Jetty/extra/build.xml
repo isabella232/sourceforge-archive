@@ -1,0 +1,69 @@
+<!--
+========================================================================
+ Copyright (c) 2003 Mort Bay Consulting (Australia) Pty. Ltd.
+ $Id$
+========================================================================
+========================================================================
+
+The default target is "all", which will build everything in extra.
+
+Other targets:
+
+  clean         - Remove all generated files.
+-->
+
+<project name="Jetty Extra" default="all" basedir=".">
+
+  <!-- ==================================================================== -->
+  <property environment="env"/>
+  <property name="plus"           value="${basedir}/plus"/>
+  <property name="jboss"          value="${basedir}/jboss"/>
+
+
+
+  <!-- ==================================================================== -->
+  <!-- Clean                                                                -->
+  <!-- ==================================================================== -->
+  <target name="clean" depends="check.available, clean.available">
+  </target>
+
+  <target name="clean.available" depends="clean.plus, clean.jboss">
+  </target>
+
+  <target name="clean.plus" if="plus.available"
+     description="Remove generated files">
+    <ant antfile="${plus.available}" inheritAll="false" target="clean"/>
+  </target>
+
+  <target name="clean.jboss" if="jboss.available">
+    <ant antfile="${jboss.available}" inheritAll="false" target="clean"/>
+  </target>
+
+
+
+  <!-- ==================================================================== -->
+  <!-- all                                                                  -->
+  <!-- ==================================================================== -->
+  <target name="all" 
+	  depends="check.available, build.available"
+	  description="Build all extras">
+  </target>
+
+  <target name="check.available">
+    <available property="plus.available" value="${plus}/build.xml" file="${plus}/build.xml"/>
+    <available property="jboss.available" value="${jboss}/build.xml" file="${jboss}/build.xml"/>
+    <!-- add other subdir checks here                       -->
+  </target>
+
+  <target name="build.available" depends="do.plus, do.jboss">
+  </target>
+
+  <target name="do.plus" if="plus.available">
+    <ant antfile="${plus.available}" inheritAll="false"/>
+  </target>
+
+  <target name="do.jboss" if="jboss.available">
+    <ant antfile="${jboss.available}" inheritAll="false"/>
+  </target>
+
+ </project>

@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Incorporate jetty extra and plus into build
+ + Integrate with JAAS
  + Apply the append flag of RolloverFileOutputStream constructor.
  + RolloverFileOutputStream manages Rollover thread.
  + New look and feel for www site.

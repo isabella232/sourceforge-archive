@@ -1,0 +1,71 @@
+<?xml version="1.0"  encoding="ISO-8859-1"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.2//EN" "http://jetty.mortbay.org/configure_1_2.dtd">
+
+
+
+<!-- =============================================================== -->
+<!-- Configure the Jetty Server                                      -->
+<!-- =============================================================== -->
+<!-- $Id$ -->
+<Configure class="org.mortbay.jetty.Server">
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+    <Set name="Debug" class="org.mortbay.util.Code" type="boolean">true</Set>
+    <Set name="Verbose" class="org.mortbay.util.Code" type="int">0</Set>
+    <Set name="DebugPatterns" class="org.mortbay.util.Code" type="String"></Set>
+
+
+
+
+  <!-- =============================================================== -->
+  <!-- Configure the Request Listeners                                 -->
+  <!-- =============================================================== -->
+
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Add and configure a HTTP listener to port 8080                       -->
+  <!-- The default port can be changed using: java -Djetty.port=80     -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <Call name="addListener">
+    <Arg>
+      <New class="org.mortbay.http.SocketListener">
+        <Set name="Port"><SystemProperty name="jetty.port" default="8080"/></Set>
+        <Set name="MinThreads">5</Set>
+        <Set name="MaxThreads">100</Set>
+        <Set name="MaxIdleTimeMs">30000</Set>
+        <Set name="LowResourcePersistTimeMs">5000</Set>
+        <Set name="PoolName">Listener</Set>
+      </New>
+    </Arg>
+  </Call>
+
+
+
+
+  <!-- =============================================================== -->
+  <!-- Configure the Contexts                                          -->
+  <!-- =============================================================== -->
+
+
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Add jaas demo web applications.                                 -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <Call name="addWebApplication">
+    <Arg>/jaas/*</Arg>
+    <Arg><SystemProperty name="jetty.home"/>/extra/plus/demo/webapps/jaas</Arg>
+
+    <Set name="Realm">
+        <New class="org.mortbay.jaas.JAASUserRealm">
+	  <Set name="Name">Test JAAS Realm</Set>
+	  <Set name="LoginModuleName">jdbc</Set>
+	  <Set name="RoleCheckPolicy">
+	    <New class="org.mortbay.jaas.StrictRoleCheckPolicy"/>
+	  </Set>
+	  <Set name="CallbackHandler">
+	    <New class="org.mortbay.jaas.callback.DefaultCallbackHandler"/>
+	  </Set>
+        </New>
+    </Set>
+  </Call>
+</Configure>

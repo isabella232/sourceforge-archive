@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.security.Policy;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
@@ -396,7 +397,11 @@ public class Main
                 .getResourceAsStream("org/mortbay/start/start.config");
             configure(cpcfg,args);
             cpcfg.close();
-        }
+
+	     File file = new File (System.getProperty("jetty.home"));
+	     String canonical = file.getCanonicalPath();
+	     System.setProperty("jetty.home", canonical);
+	}
         catch (Exception e)
         {
             e.printStackTrace();
@@ -416,6 +421,18 @@ public class Main
         // Invoke main(args) using new classloader.
         Thread.currentThread().setContextClassLoader(cl);
             
+	// re-eval the policy now that env is set
+	try
+	{
+	     Policy policy = Policy.getPolicy();
+	     if (policy != null)
+		 policy.refresh();
+	}
+	catch (Exception e)
+	{
+	    e.printStackTrace();
+	}
+
         try
         {
             if (_xml.size()>0)

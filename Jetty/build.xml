@@ -32,6 +32,7 @@
   <property name="lib"            value="${basedir}/lib"/>
   <property name="ext"            value="${basedir}/ext"/>
   <property name="contrib"        value="${basedir}/contrib"/>
+  <property name="extra"          value="${basedir}/extra"/>
   <property name="classes"        value="${basedir}/classes"/>
   <property name="classes1.4"     value="${basedir}/classes1.4"/>
   <property name="javadoc"        value="${basedir}/javadoc"/>
@@ -273,6 +274,13 @@
        <exclude name="**/Naming*.java" unless="tyrex.available"/>
     </javac>
   </target>
+
+
+  <!-- ==================================================================== -->
+  <target name="extra" depends="jars">
+    <ant antfile="${extra}/build.xml" inheritAll="false"/>
+  </target>
+
 
   <!-- ==================================================================== -->
   <target name="manifest" depends="classes">
