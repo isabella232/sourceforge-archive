@@ -468,7 +468,7 @@ public class ModelMBeanImpl
      */
     public synchronized void defineOperation(String name,int impact)
     {
-        defineOperation(name,null,impact);
+        defineOperation(name,null,impact,false);
     }
     
     /* ------------------------------------------------------------ */
@@ -489,8 +489,31 @@ public class ModelMBeanImpl
                                              String[] signature,
                                              int impact)
     {
+        defineOperation(name,signature,impact,false);
+    }
+        
+    /* ------------------------------------------------------------ */
+    /** Define an operation on the managed object.
+     * Defines an operation with parameters. Refection is used to
+     * determine find the method and it's return type. The description
+     * of the method is found with a call to findDescription on
+     * "name(signature)". The name and description of each parameter
+     * is found with a call to findDescription with
+     * "name(partialSignature", the returned description is for the
+     * last parameter of the partial signature and is assumed to start
+     * with the parameter name, followed by a colon.
+     * @param name The name of the method call.
+     * @param signature The types of the operation parameters.
+     * @param impact Impact as defined in MBeanOperationInfo
+     * @param onMBean true if the operation is defined on the mbean
+     */
+    public synchronized void defineOperation(String name,
+            String[] signature,
+            int impact,
+            boolean onMBean)
+    {
         _dirty=true;        
-        Class oClass=_object.getClass();
+        Class oClass=onMBean?this.getClass():_object.getClass();
         if (signature==null) signature=new String[0];
 
         try
@@ -736,7 +759,10 @@ public class ModelMBeanImpl
             if (method==null)
                 throw new NoSuchMethodException(methodKey);
 
-            return method.invoke(_object,params);
+            Object o=_object;
+            if (method.getDeclaringClass().isInstance(this))
+                o=this;
+            return method.invoke(o,params);
         }
         catch(NoSuchMethodException e)
         {

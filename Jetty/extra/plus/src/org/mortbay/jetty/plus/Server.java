@@ -92,6 +92,7 @@ public class Server extends org.mortbay.jetty.Server
             _serviceList = new ArrayList(5);
 
         _serviceList.add (service);
+	addComponent(service);
         Code.debug ("Service List contains: "+_serviceList.size()+" services");
     }
 

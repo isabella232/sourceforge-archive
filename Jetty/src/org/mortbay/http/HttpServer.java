@@ -1241,7 +1241,7 @@ public class HttpServer implements LifeCycle,
     
     
     /* ------------------------------------------------------------ */
-    private void addComponent(Object o)
+    protected void addComponent(Object o)
     {
         Code.debug("add component: ",o);
         if (_components==null)
@@ -1262,7 +1262,7 @@ public class HttpServer implements LifeCycle,
     }
     
     /* ------------------------------------------------------------ */
-    private void removeComponent(Object o)
+    protected void removeComponent(Object o)
     {
         Code.debug("remove component: ",o);
         if (_components.remove(o) && _eventListeners!=null)

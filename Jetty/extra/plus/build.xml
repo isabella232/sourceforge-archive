@@ -115,6 +115,12 @@ Other targets:
   <!-- Classes                                                              -->
   <!-- ==================================================================== -->
   <target name="classes" depends="prepare" description="Compile classes">
+    <copy todir="${classes}">
+      <fileset dir="${src}">
+        <include name="**/*.properties" />
+      </fileset>
+    </copy>
+
     <javac srcdir="${src}"
            destdir="${classes}"
            debug="true"

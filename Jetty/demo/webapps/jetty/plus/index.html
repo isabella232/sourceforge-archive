@@ -19,8 +19,10 @@ The feature set currently contains:
   <li> <A HREF="http://jakarta.apache.org/log4j/docs/">Log4J</A>  
   <li> <A HREF="http://java.sun.com/products/jaas/">Java Authentication and Authorization Service (JAAS)</A>
   <li> <A HREF="http://java.sun.com/products/javamail/">Java Mail</A>&nbsp; <font color=red><i>New</i></font>
+  <li><A HREF="http://java.sun.com/products/JavaManagement/">JMX</a><font color=red><i>New</i></font>
 </ul> 
 
+<h3>How to run it</h3>
 To use JettyPlus, you must:
 <ul>
   <li> Configure the <code>org.mortbay.jetty.plus.Server</code>
@@ -47,6 +49,16 @@ you can edit the <code>start.config</code> file inside
   </pre></code>
   </li>
 </ul>
+
+<h3>How to run it with JMX</h3>
+As with standard Jetty, you must use an mlet boot file to configure your JettyPlus servers and usually also a JMX http adaptor. An example can be found in <code><b>extra/etc/jettyplus.mlet</b></code>.  
+<P>
+To run with JMX do:
+<BR>
+java -Dstart.class=org.mortbay.util.jmx.Main -Dserver.class=org.mortbay.jetty.plus.Server -Dlog4j.configuration=log4j.xml -jar start.jar extra/etc/jettyplus.mlet
+<BR>
+
+<h3>More details</h3>
 <P>
 JettyPlus consists of
 <code><b>org.mortbay.jetty.plus.jar</b></code>, ancillary file

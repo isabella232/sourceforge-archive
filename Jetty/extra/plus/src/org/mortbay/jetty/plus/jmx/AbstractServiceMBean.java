@@ -10,10 +10,8 @@ import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.plus.Service;
-import org.mortbay.util.LogSupport;
+import org.mortbay.util.Code;
 import org.mortbay.util.jmx.LifeCycleMBean;
 
 /**
@@ -24,7 +22,6 @@ import org.mortbay.util.jmx.LifeCycleMBean;
  */
 public class AbstractServiceMBean extends LifeCycleMBean
 {
-    private static final Log log = LogFactory.getLog(AbstractServiceMBean.class);
     private Service _service = null;
     
     public AbstractServiceMBean ()
@@ -50,7 +47,13 @@ public class AbstractServiceMBean extends LifeCycleMBean
         
         
         try{oName=new ObjectName(oName+",service="+sName);}
-        catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
+        catch(Exception e)
+	{
+            if (Code.debug())
+               Code.warning(e);
+            else
+               Code.warning(e.toString());
+        }
         return oName;
     }
 
