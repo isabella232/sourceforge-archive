@@ -544,6 +544,8 @@
         <exclude name="**/CVS/**"/>
         <exclude name="**/logs/*.log"/>
         <exclude name="testdocs/**"/>
+	<exclude name=".classpath"/>
+	<exclude name=".project"/>
       </zipfileset>
     </zip>
 
