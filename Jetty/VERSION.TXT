@@ -1,3 +1,5 @@
+   + added removeValue method to MultiMap
+
 Jetty-3.0.A6 - 9 Apr 2000
    + Integrated skeleton 2.1 Servlet container
    + Improved portability of Frame and Debug.

@@ -46,7 +46,6 @@ public class MultiMap extends HashMap
         super((map.size()*3)/2);
         putAll(map);
     }
-    
 
     /* ------------------------------------------------------------ */
     /** Get multiple values.
@@ -240,6 +239,31 @@ public class MultiMap extends HashMap
         for (int i=0;i<values.size();i++)
             l.add(values.elementAt(i));
         addValues(name,l);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Remove value.
+     * Single valued entries are converted to singleton lists.
+     * @param name The entry key. 
+     * @param value The entry value. 
+     * @return true if it was removed.
+     */
+    public boolean removeValue(Object name,Object value)
+    {
+        Object o=get(name);
+        if (o==null)
+            return false;
+        if (o instanceof List)
+	{
+	    List l=(List)o;
+	    return l.remove(value);
+	}
+	if (o.equals(value))
+	{
+	    remove(name);
+	    return true;
+	}
+	return false;
     }
     
     /* ------------------------------------------------------------ */
