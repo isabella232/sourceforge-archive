@@ -46,7 +46,8 @@ class FileResource extends URLResource
     
     /* ------------------------------------------------------------ */
     private File _file;
-    private BadResource _alias=null;
+    private transient URL _alias=null;
+    private transient boolean _aliasChecked=false;
     
     /* -------------------------------------------------------- */
     FileResource(URL url)
@@ -56,8 +57,6 @@ class FileResource extends URLResource
 
         Permission perm = _connection.getPermission();
         _file =new File(perm.getName());
-        
-        checkAliases(url);
     }
     
     /* -------------------------------------------------------- */
@@ -65,7 +64,6 @@ class FileResource extends URLResource
     {
         super(url,connection);
         _file=file;
-        checkAliases(url);
     }
 
     /* -------------------------------------------------------- */
@@ -87,23 +85,26 @@ class FileResource extends URLResource
             path+="/";
 
         FileResource r=new FileResource(new URL(_url,path),null,newFile);
-        if (r!=null && r.getAlias()!=null)
-            return r.getAlias();
         return r;
     }
     
     
+    
+    
     /* ------------------------------------------------------------ */
-    private void checkAliases(URL url)
+    /** Get an Alias BadResource if one was created.
+     * @return BadResource for alias or null.
+     */
+    public URL getAlias()
     {
-        if (__checkAliases)
+        if (__checkAliases && !_aliasChecked)
         {
             try{
                 String abs=_file.getAbsolutePath();
                 String can=_file.getCanonicalPath();
 
                 if (!abs.equals(can))
-                    _alias=new BadResource(url,abs+" is alias of "+can);
+                    _alias=Resource.newResource(can).getURL();
                 
                 if (_alias!=null && Code.debug())
                 {
@@ -116,15 +117,6 @@ class FileResource extends URLResource
                 Code.ignore(e);
             }
         }
-    }
-    
-    
-    /* ------------------------------------------------------------ */
-    /** Get an Alias BadResource if one was created.
-     * @return BadResource for alias or null.
-     */
-    BadResource getAlias()
-    {
         return _alias;
     }
     

@@ -122,7 +122,7 @@ class FileResource extends URLResource
     /* ------------------------------------------------------------ */
     public URL getAlias()
     {
-        if (!_aliasChecked)
+        if (__checkAliases && !_aliasChecked)
         {
             try
             {    

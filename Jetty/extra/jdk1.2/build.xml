@@ -88,6 +88,7 @@
     <mkdir dir="${tmp.src}" />
     <copy todir="${tmp.src}">
       <fileset dir="${jetty.src}">
+        <include name="javax/**" />
         <include name="org/**/*.java" />
         <include name="org/**/*.properties" />
         <include name="org/**/*.config" />
@@ -96,6 +97,7 @@
         <exclude name="org/mortbay/util/Frame.java" />
         <exclude name="org/mortbay/util/FileResource.java" />
         <exclude name="org/mortbay/util/LoggerLogSink.java" />
+        <exclude name="org/mortbay/http/handler/ProxyHandler.java" />
       </fileset>
     </copy>
 
