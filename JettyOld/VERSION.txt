@@ -1,5 +1,7 @@
+Release 2.4.4 - 3rd June 2000 LATEST
   + Many debug call optimizations
   + Added RolloverFileLogSink
+  + Improved LogSink configuration
   + Support System.property expansions in PropertyTrees.
   + Added uk.org.gosnell.Servlets.CgiServlet to contrib
   + HttpRequest.setRequestPath does not null pathInfo.
@@ -7,8 +9,9 @@
     behind request dispatching
   + Added HTML.Composite.replace
   + FileHandler implements IfModifiedSince on index files.
+  + Added build-win32.mak
 
-Release 2.4.3 - 4th May 2000 LATEST STABLE
+Release 2.4.3 - 4th May 2000 STABLE
   + Pass Cookies with 0 max age to browser.
   + Allow CRLF in UrlEncoded
 

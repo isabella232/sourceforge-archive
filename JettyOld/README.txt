@@ -398,6 +398,9 @@ commands:
   javac BuildJetty.java
 
 
+There is a similar BuildContrib.java file for the contributed source
+in the contrib directory.
+
 The build-win32.mak file is a GNU makefile for windows platforms that
 uses the cygnus utilities to build Jetty from BuildJetty.java.
 
