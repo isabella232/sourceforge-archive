@@ -25,9 +25,10 @@ import java.util.TimeZone;
  *
  * @version $Id$
  * @author Kent Johnson <KJohnson@transparent.com>
+ * @author Greg Wilkins (gregw)
  */
 
-public final class DateCache  
+public class DateCache  
 {
     SimpleDateFormat minuteFormat;
     SimpleDateFormat format;

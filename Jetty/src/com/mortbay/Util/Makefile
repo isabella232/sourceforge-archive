@@ -30,3 +30,8 @@ EXCLUDECLASSES := \
 
 include $(JETTY_HOME)/etc/Global.mk
 
+install: $(INSTALLROOT)/classes/com/mortbay/Util/configure.dtd
+
+$(INSTALLROOT)/classes/com/mortbay/Util/configure.dtd: configure.dtd
+	[ -d $(INSTALLROOT)/classes/com/mortbay/Util ] || mkdir -p $(INSTALLROOT)/classes/com/mortbay/Util
+	cp configure.dtd $(INSTALLROOT)/classes/com/mortbay/Util/configure.dtd
