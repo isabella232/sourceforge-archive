@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+ + Added link to a Jetty page in Korean.
+ + Added ExpiryHandler which can set a default Expires header.
+
 Jetty-4.1.B1 - 19 July 2002
  + Updated mini.http.jar target
  + CGI Servlet, pass all HTTP headers through.
