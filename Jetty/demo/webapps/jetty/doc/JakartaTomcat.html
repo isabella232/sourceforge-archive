@@ -3,25 +3,28 @@
 <A HREF=http://jakarta.apache.org>Jakarta Tomcat</A> is the apache/Sun effort
 to produce a reference implementation of the Servlet API.  The Tomcat project
 is the merge of the apache JSERV container and Sun's original reference
-implementation.
+implementation.  However, the Jakarta project has now grown as is now providing 
+a wide range of framework components related to java webapplications.
 <BR><BR>
-Tomcat is primarily a <A HREF="ServletContainer.html">ServletContainer</A> that can be used by 
+Tomcat is primarily a Servlet Container that can be used by 
 various HTTP servers, normally as a separate process.  It does contain
 a Java HTTP server, but it is only a simple implementation.
 Tomcat is part of the Jakarta project and forms an element within
 a larger framework. 
 <BR><BR>
-Jetty is both a HTTP server and a <A HREF="ServletContainer.html">ServletContainer</A>, in a single JVM.
+Jetty is both a HTTP server and a Servlet Container, in a single JVM.
 The focus of Jetty is to provide a full featured implementation of
-the HTTP/1.1 protocol and a standards compliant <A HREF="ServletContainer.html">ServletContainer</A>.
+the HTTP/1.1 protocol and a standards compliant Servlet Container</A>.
 <BR><BR>
 Jetty is intended to be deployable as a complete HTTP/Servlet 
-component within a Java application.
+component within a Java application.  The different focus of Jetty allows it 
+be smaller, faster, simpler and more flexible than Tomcat. 
 <BR><BR>
-The different focus of Jetty allows it be smaller, faster, simpler
-and more flexible than Tomcat. 
+Note that Tomcat 4 is also a HTTP/1.1 server and is much improved on previous
+versions of Tomcat.  However, it remains to be seen how independant Tomcat4 
+remains or if it will become part of the extended Jakarta platform.
 <BR><BR>
-Jetty uses the jasper JSP engine from the jakarta project.
+Jetty uses the jasper JSP engine from the jakarta project for JSP serving. The Jakarta-watchdog test suite is also used to test Jetty's compliance with the specification.
 <BR><BR><HR>
 Return to <A HREF="index.html">JettyFaq</A><HR>
 </BODY>

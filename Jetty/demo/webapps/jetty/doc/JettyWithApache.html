@@ -1,6 +1,8 @@
-<BR><B><FONT SIZE="+2">Using Jetty With Apache</FONT></B>
+<HR><B><FONT SIZE="+2">Using Jetty With Apache</FONT></B><HR>
 <BR><BR>
-It is possible to use Jetty with Apache, somewhat like JServe, with a couple of small limitations.  
+Firstly remember that Jetty is a HTTP/1.1 server and there is no need to use another webserver
+just to serve static content.  However, if existing applications or special features require Apache 
+to be used, it is possible to use Jetty behind Apache.
 <BR><BR>
 The setup uses the Apache transparent proxy feature.  If you have an Apache server with DSO support or mod_proxy is already configured in, you may not have to rebuild Apache.  You may also wish to use Apache's mod_rewrite.  Some Apache installations in RedHat&nbsp;<!-- widget ref --> RPM format have everything you will need, right out of the box.  These instructions presume that you have an Apache with the appropriate modules compiled in or available as DSO's for dynamic loading.
 <BR><BR>
@@ -52,7 +54,6 @@ The Servlet API calls ServletRequest.getRemoteHost() and ServletRequest.getRemot
 <BR><BR>
 You may also wish to turn off Jetty's HTTP request logging.  The limitation on access to remote addresses applies to Jetty logging also.
 <BR><BR>
+<HR>
 Return to <A HREF="index.html">Jetty FAQ</A>.
-<BR><BR>
-</BODY>
-</HTML>
+<HR>
