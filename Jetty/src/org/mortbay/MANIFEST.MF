@@ -1,12 +1,25 @@
 Manifest-Version: 1.0
-
-Name: org/mortbay/jetty
 Sealed: true
-Specification-Title:  Jetty HTTP Server
-Specification-Version: 3.1
-Specification-Vendor: Mort Bay Consulting, Pty. Ltd.
-Implementation-Title: Jetty HTTP Server
-Implementation-Version: 3.1.1
-Implementation-Vendor: Mort Bay Consulting, Pty. Ltd.
 Package-Version: 1.0.0
 Package-Title: org.mortbay.jetty
+Specification-Version: 3.1
+Implementation-Version: 3.1.1
+Specification-Vendor: Mort Bay Consulting, Pty. Ltd.
+Implementation-Vendor: Mort Bay Consulting, Pty. Ltd.
+Implementation-URL: http://jetty.mortbay.org
+
+Name: org/mortbay/jetty/
+Specification-Title:  Jetty HTTP Servlet Server
+Implementation-Title: Jetty HTTP Servlet Server
+
+Name: org/mortbay/http/
+Specification-Title:  Mort Bay HTTP Server
+Implementation-Title: Mort Bay HTTP Server
+
+Name: org/mortbay/html/
+Specification-Title:  Mort Bay HTML Utilities
+Implementation-Title: Mort Bay HTML Utilities
+
+Name: org/mortbay/util/
+Specification-Title:  Mort Bay Misc. Utilities
+Implementation-Title: Mort Bay Misc. Utilities
