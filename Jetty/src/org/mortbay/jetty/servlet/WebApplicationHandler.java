@@ -411,11 +411,11 @@ public class WebApplicationHandler extends ServletHandler
     }
 
     /* ------------------------------------------------------------ */
-    protected void dispatch(
-        String pathInContext,
-        HttpServletRequest request,
-        HttpServletResponse response,
-        ServletHolder servletHolder, int type)
+    protected void dispatch(String pathInContext,
+                            HttpServletRequest request,
+                            HttpServletResponse response,
+                            ServletHolder servletHolder, 
+                            int type)
         throws ServletException, UnavailableException, IOException
     {
         if (type == Dispatcher.__REQUEST)
@@ -425,8 +425,7 @@ public class WebApplicationHandler extends ServletHandler
             ServletHttpResponse servletHttpResponse= (ServletHttpResponse)response;  
             
             // protect web-inf and meta-inf
-            if (StringUtil.startsWithIgnoreCase(pathInContext, "/web-inf")
-                    || StringUtil.startsWithIgnoreCase(pathInContext, "/meta-inf"))
+            if (StringUtil.startsWithIgnoreCase(pathInContext, "/web-inf") || StringUtil.startsWithIgnoreCase(pathInContext, "/meta-inf"))
             {
                 response.sendError(HttpResponse.__404_Not_Found);
                 return;
@@ -455,11 +454,7 @@ public class WebApplicationHandler extends ServletHandler
                 ServletHttpResponse servletHttpResponse= servletHttpRequest.getServletHttpResponse();
                 ServletHttpContext servletContext= (ServletHttpContext)context;
                 
-                if (!servletContext
-                        .jSecurityCheck(
-                                pathInContext,
-                                servletHttpRequest.getHttpRequest(),
-                                servletHttpResponse.getHttpResponse()))
+                if (!servletContext.jSecurityCheck(pathInContext,servletHttpRequest.getHttpRequest(),servletHttpResponse.getHttpResponse()))
                     return;
             }
         }

@@ -162,6 +162,8 @@ public class JSR154Filter implements Filter
             dispatch=true;
             requestWrapper.pushWrapper(state.dispatchRequest);
             responseWrapper.pushWrapper(state.dispatchResponse);
+            state.dispatchRequest=null;
+            state.dispatchResponse=null;
         }
         
         try

@@ -29,10 +29,10 @@ public class ExServlet extends HttpServlet
      */
     public void init() throws ServletException
     {
-        if (System.currentTimeMillis()-started<30000)
+        if (System.currentTimeMillis()-started<15000)
         {
             unavailable++;
-            throw new UnavailableException("Test unavail "+unavailable,10);
+            throw new UnavailableException("Test unavail "+unavailable,5);
         }
     }
     
