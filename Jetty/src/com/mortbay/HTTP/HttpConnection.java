@@ -350,7 +350,7 @@ public class HttpConnection
                 verifyHTTP_1_0();
             else
                 throw new HttpException(_response.__505_HTTP_Version_Not_Supported);
-            if (Code.debug())
+            if (Code.verbose(99))
                 Code.debug("IN is "+
                            (_inputStream.isChunking()?"chunked":"not chunked")+
                            " Content-Length="+

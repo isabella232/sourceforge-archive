@@ -78,16 +78,14 @@ public class WebApplicationContext extends HandlerContext
 		setClassPath(classes.getCanonicalPath());
 	    // XXX need to add jar files to classpath
 
+	    // Add servlet Handler
+	    addHandler(new ServletHandler());
+	    _servletHandler = getServletHandler();
 
 	    // FileBase and ResourcePath
 	    setFileBase(_directoryName);
 	    setResourceBase("file:"+_directoryName);
 	    setServingFiles(true);
-	    
-	    // Add servlet Handler
-	    addHandler(new ServletHandler());
-	    _servletHandler = getServletHandler();
-
 	    
 	    // parse the web.xml file
 	    DocumentBuilder docBuilder =

@@ -37,9 +37,9 @@ public class Demo
 	    // Configure handlers
 	    HandlerContext context;
 	    server.addWebApplication(null,
-				     "/webapp/*,/webapp",
-				     "./webapps/default");
-	    context=server.getContext(null,"/");
+				     "/",
+				     "./webapps/jetty");
+	    context=server.getContext(null,"/handler/*");
 	    context.setFileBase(".");
 	    context.addServlet("/dump,/dump/*","com.mortbay.Servlet.Dump");
 	    context.addServlet("/session","com.mortbay.Servlet.SessionDump");

@@ -426,7 +426,7 @@ public class HttpServer implements LifeCycle
 			    HandlerContext context=
 				(HandlerContext)contextList.get(j);
 			    
-			    if (Code.verbose(9))
+			    if (Code.debug())
 				Code.debug("Try context [",contextPathSpec,
 					   ",",new Integer(j),
 					   "]=",context);
@@ -437,7 +437,7 @@ public class HttpServer implements LifeCycle
 				HttpHandler handler =
 				    (HttpHandler)handlers.get(k);
 	    
-				if (Code.verbose(9))
+				if (Code.debug())
 				    Code.debug("Try handler ",handler);
 				
 				handler.handle(contextPathSpec,
@@ -446,7 +446,7 @@ public class HttpServer implements LifeCycle
 
 				if (request.isHandled())
 				{
-				    if (Code.verbose(9))
+				    if (Code.debug())
 					Code.debug("Handled by ",handler);
 				    response.complete();
 				    return;
@@ -529,6 +529,11 @@ public class HttpServer implements LifeCycle
             String[] newArgs=
 	    {
 		"-appContext","/=./webapps/default",
+		"-content","/",
+		"-classPath","./servlets",
+		"-dynamic",
+		"-fileBase","./FileBase/",
+		"-files",
 		"8080",
 	    };
             args=newArgs;
@@ -569,6 +574,11 @@ public class HttpServer implements LifeCycle
                 ("\nDefault options:");
             System.err.println
                 ("  -appContext /=./webapps/default\n"+
+		 "  -content /\n"+
+		 "  -classPath ./servlets\n"+
+		 "  -dynamic\n"+
+		 "  -fileBase ./FileBase/\n"+
+		 "  -files\n"+
 		 "  8080");
             System.exit(1);
         }

@@ -63,7 +63,7 @@ public class ServletLoader extends ClassLoader
 	    c=loadServletClass(name);
 	    if (c!=null)
 	    {
-		Code.debug("loaded  ",name);
+		if (Code.verbose())Code.debug("loaded  ",name);
 		_cache.put(name,c);
 		return c;
 	    }

@@ -538,7 +538,8 @@ public class HttpRequest extends HttpMessage
      */
     public synchronized Object forceRemoveField(String name)
     {
-        Code.debug("force remove ",name);
+        if (Code.verbose(99))
+	    Code.debug("force remove ",name);
         int saved_state=_state;
         try{
             _state=__MSG_EDITABLE;
