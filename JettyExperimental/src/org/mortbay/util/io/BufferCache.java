@@ -5,10 +5,11 @@
  * $Id$
  * ============================================== */
  
-package org.mortbay.util;
+package org.mortbay.util.io;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
 
 /* ------------------------------------------------------------------------------- */
 /** 

@@ -1,7 +1,7 @@
 package org.mortbay.http;
 
-import org.mortbay.util.ByteArrayBuffer;
-import org.mortbay.util.Buffer;
+import org.mortbay.util.io.Buffer;
+import org.mortbay.util.io.ByteArrayBuffer;
 
 import junit.framework.TestCase;
 

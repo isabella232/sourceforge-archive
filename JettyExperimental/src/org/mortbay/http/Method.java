@@ -7,7 +7,7 @@
 
 package org.mortbay.http;
 
-import org.mortbay.util.BufferCache;
+import org.mortbay.util.io.BufferCache;
 
 
 

@@ -1,4 +1,4 @@
-package org.mortbay.util;
+package org.mortbay.util.io;
 /**
  * @author gregw
  *

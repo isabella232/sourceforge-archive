@@ -1,4 +1,6 @@
-package org.mortbay.util;
+package org.mortbay.util.io;
+
+import org.mortbay.util.Portable;
 
 /**
  * @author gregw

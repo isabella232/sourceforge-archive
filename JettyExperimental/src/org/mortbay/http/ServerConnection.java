@@ -7,8 +7,8 @@
  
 package org.mortbay.http;
 
-import org.mortbay.util.Buffer;
-import org.mortbay.util.BufferUtil;
+import org.mortbay.util.io.Buffer;
+import org.mortbay.util.io.BufferUtil;
 
 /* ------------------------------------------------------------------------------- */
 /** 
