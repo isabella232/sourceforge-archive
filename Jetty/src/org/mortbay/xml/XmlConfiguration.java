@@ -5,6 +5,7 @@
 
 package org.mortbay.xml;
 
+import java.io.StringReader;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -22,6 +23,7 @@ import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.Primitive;
 import org.mortbay.util.Resource;
 import org.xml.sax.SAXException;
+import org.xml.sax.InputSource;
 
 
 /* ------------------------------------------------------------ */
@@ -47,10 +49,59 @@ public class XmlConfiguration
         Long.class, Float.class, Double.class, Void.class
     };
     
-    
     /* ------------------------------------------------------------ */
     private static XmlParser __parser;
-    XmlParser.Node _config;
+    private XmlParser.Node _config;
+
+    /* ------------------------------------------------------------ */
+    private synchronized static void initParser()
+        throws IOException
+    {
+        if (__parser!=null)
+            return;
+        
+        __parser = new XmlParser();
+        Resource config12Resource=Resource.newSystemResource("org/mortbay/xml/configure_1_2.dtd");
+        Code.assertTrue(config12Resource.exists(),
+                        "org/mortbay/xml/configure_1_2.dtd");
+        __parser.redirectEntity
+            ("configure.dtd",config12Resource);
+        __parser.redirectEntity
+            ("configure_1_2.dtd",
+                     config12Resource);
+        __parser.redirectEntity
+            ("http://jetty.mortbay.org/configure_1_2.dtd",
+             config12Resource);
+        __parser.redirectEntity
+            ("-//Mort Bay Consulting//DTD Configure 1.2//EN",
+             config12Resource);
+        
+        Resource config11Resource=Resource.newSystemResource("org/mortbay/xml/configure_1_1.dtd");
+        Code.assertTrue(config11Resource.exists(),
+                        "org/mortbay/xml/configure_1_1.dtd");
+        __parser.redirectEntity
+            ("configure_1_1.dtd",
+             config11Resource);
+        __parser.redirectEntity
+            ("http://jetty.mortbay.org/configure_1_1.dtd",
+             config11Resource);
+        __parser.redirectEntity
+            ("-//Mort Bay Consulting//DTD Configure 1.1//EN",
+             config11Resource);
+        
+        Resource config10Resource=Resource.newSystemResource("org/mortbay/xml/configure_1_0.dtd");  
+        Code.assertTrue(config10Resource.exists(),
+                        "org/mortbay/xml/configure_1_0.dtd");  
+        __parser.redirectEntity
+            ("configure_1_0.dtd",
+             config10Resource);
+        __parser.redirectEntity
+            ("http://jetty.mortbay.org/configure_1_0.dtd",
+             config10Resource);
+        __parser.redirectEntity
+            ("-//Mort Bay Consulting//DTD Configure 1.0//EN",
+             config10Resource);
+    }
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -60,59 +111,34 @@ public class XmlConfiguration
     public XmlConfiguration(URL configuration)
         throws SAXException, IOException
     {
-        synchronized(this.getClass())
+        initParser();
+        synchronized(__parser)
         {
-            if (__parser==null)
-            {
-                __parser = new XmlParser();
-                Resource config12Resource=Resource.newSystemResource
-                    ("org/mortbay/xml/configure_1_2.dtd");
-                Code.assertTrue(config12Resource.exists(),
-                                "org/mortbay/xml/configure_1_2.dtd");
-                __parser.redirectEntity
-                    ("configure.dtd",config12Resource);
-                __parser.redirectEntity
-                    ("configure_1_2.dtd",
-                     config12Resource);
-                __parser.redirectEntity
-                    ("http://jetty.mortbay.org/configure_1_2.dtd",
-                     config12Resource);
-                __parser.redirectEntity
-                    ("-//Mort Bay Consulting//DTD Configure 1.2//EN",
-                     config12Resource);
-                
-                Resource config11Resource=Resource.newSystemResource
-                    ("org/mortbay/xml/configure_1_1.dtd");
-                Code.assertTrue(config11Resource.exists(),
-                                "org/mortbay/xml/configure_1_1.dtd");
-                __parser.redirectEntity
-                    ("configure_1_1.dtd",
-                     config11Resource);
-                __parser.redirectEntity
-                    ("http://jetty.mortbay.org/configure_1_1.dtd",
-                     config11Resource);
-                __parser.redirectEntity
-                    ("-//Mort Bay Consulting//DTD Configure 1.1//EN",
-                     config11Resource);
-
-                Resource config10Resource=Resource.newSystemResource
-                    ("org/mortbay/xml/configure_1_0.dtd");  
-                Code.assertTrue(config10Resource.exists(),
-                                "org/mortbay/xml/configure_1_0.dtd");  
-                __parser.redirectEntity
-                    ("configure_1_0.dtd",
-                     config10Resource);
-                __parser.redirectEntity
-                    ("http://jetty.mortbay.org/configure_1_0.dtd",
-                     config10Resource);
-                __parser.redirectEntity
-                    ("-//Mort Bay Consulting//DTD Configure 1.0//EN",
-                     config10Resource);
-            }
+            _config = __parser.parse(configuration.toString());	
         }
-        _config = __parser.parse(configuration.toString());	
     }
+    
 
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param configuration String of XML configuration commands
+     * excluding the normal XML preamble. The String should start with
+     * a "<Configure ...." element.
+     * @exception SAXException 
+     * @exception IOException 
+     */
+    public XmlConfiguration(String configuration)
+        throws SAXException, IOException
+    {
+        initParser();
+        configuration="<?xml version=\"1.0\"  encoding=\"ISO-8859-1\"?>\n<!DOCTYPE Configure PUBLIC \"-//Mort Bay Consulting//DTD Configure 1.0//EN\" \"http://jetty.mortbay.org/configure_1_2.dtd\">"+
+            configuration;
+        InputSource source = new InputSource(new StringReader(configuration));
+        synchronized(__parser)
+        {
+            _config = __parser.parse(source);	
+        }
+    }
 
     /* ------------------------------------------------------------ */
     /** Configure an object.

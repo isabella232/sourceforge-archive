@@ -178,6 +178,13 @@ public class TestHarness
             t.checkEquals(tc2.url.toString(),
                           "http://www.mortbay.com/",
                           "nested call");
+
+            configuration =
+                new XmlConfiguration("<Configure class=\"org.mortbay.xml.TestConfiguration\"><Set name=\"Test\">SetValue</Set><Set name=\"Test\" type=\"int\">2</Set></Configure>");
+            TestConfiguration tc3 = new TestConfiguration();
+            configuration.configure(tc3);
+            t.checkEquals(tc3.testObject,"SetValue","Set String 3");
+            t.checkEquals(tc3.testInt,2,"Set Type 3");
         }
         catch(Exception e)
         {

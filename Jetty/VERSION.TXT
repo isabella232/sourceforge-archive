@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Added String constructor to XmlConfiguration.
  + Added org.mortbay.http.JDBCUserRealm
  + Init classloader for JspServlet
  + Slightly more agressive eating unused input from non persistent connection.

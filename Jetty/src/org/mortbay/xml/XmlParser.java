@@ -92,9 +92,7 @@ public class XmlParser
     }
 
     /* ------------------------------------------------------------ */
-    /** Parse URL.
-     */
-    public synchronized Node parse(String url)
+    public synchronized Node parse(InputSource source)
         throws IOException,SAXException
     {
         Handler handler= new Handler();
@@ -102,12 +100,22 @@ public class XmlParser
         reader.setContentHandler(handler);
   	reader.setErrorHandler(handler);
   	reader.setEntityResolver(handler);
-        _parser.parse(url, handler);
+        _parser.parse(source, handler);
         if (handler._error!=null)
             throw handler._error;
         Node doc=(Node)handler._top.get(0);
         handler.clear();
         return doc;
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /** Parse URL.
+     */
+    public synchronized Node parse(String url)
+        throws IOException,SAXException
+    {
+        return parse(new InputSource(url));
     }
     
     /* ------------------------------------------------------------ */
@@ -116,7 +124,7 @@ public class XmlParser
     public synchronized Node parse(File file)
         throws IOException,SAXException
     {
-        return parse(file.toURL().toString());
+        return parse(new InputSource(file.toURL().toString()));
     }
 
     /* ------------------------------------------------------------ */
