@@ -96,4 +96,5 @@ SERVLET.gnujsp.PROPERTY.compiler    : builtin-javac -classpath %classpath%:%scra
 SERVLET.CgiServlet.AutoReload       : False
 SERVLET.CgiServlet.CLASS            : uk.org.gosnell.Servlets.CgiServlet
 SERVLET.CgiServlet.PATHS            : /cgi-bin
+SERVLET.CgiServlet.CLASSPATH        : %user.dir%/contrib
 SERVLET.CgiServlet.PROPERTY.Roots   : %user.dir%/cgi-bin
