@@ -1,7 +1,7 @@
 Jetty3 Versions
 --------------
 
-Jetty-3.1.0 - ?????
+Jetty-3.1.0 - 21 Sep 2001
  + Added long overdue Tutorial documentation.
  + Improved some other documentation.
  + Fix ResourceHandler cache invalidate.
