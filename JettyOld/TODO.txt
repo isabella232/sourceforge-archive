@@ -1,4 +1,11 @@
 
+ + Update this todo list 
+
+ + Write an EJB container container with Jetty in it, so
+   that it can report on all the other EJBs
+
+ + Improve com.mortbay.Jetty.Server configuration options
+
  + Standard format server-side includes
  
  + HTTP Meta tags in HTML
@@ -9,6 +16,8 @@
 
  + Convert Servlets to use get & post methods
 
- + Check head method against Head exception
-
  + Implement encrypted password realm storage
+
+ + Work out what this HTTP-DAV bullshit is from Microsoft
+   and give rude messages if anybody even attempt to use
+   it (see Halloween papers at http://www.opensource.org)

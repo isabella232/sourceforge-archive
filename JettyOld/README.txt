@@ -49,7 +49,7 @@ The Jetty server may be run in the other modes as follows:
     the file JettyServer.prp and then run:
 
         cd $JETTY_HOME
-	java com.mortbay.HTTP.Server [configFile]
+	java com.mortbay.Jetty.Server [configFile]
 
   + To run a HTTP file server, in the current directory:
 

@@ -15,15 +15,29 @@ import java.lang.InterruptedException;
 /** Threaded socket server.
  * This class listens at a socket and spawns a new thread for each
  * request that connects.
- *
+ * <P>
  * The class is abstract and derived classes must provide the handling
  * for the connections.
+ * <P>
+ * If the property THREADED_SERVER_LOW_PRIO is set, then the accept thread
+ * runs at a lower priority, so that new connections are only accepted if
+ * spare CPU is available.
+ * <P>
+ * The property THREADED_SERVER_MAX_THREADS can be set to limit the
+ * number of threads created.
+ * <P>
+ * Currently these settings effect all threaded servers in the same JVM
+ * and cannot be individually altered.
  *
  * @version $Id$
  * @author Greg Wilkins
  */
 abstract public class ThreadedServer implements Runnable 
-{
+{    
+    /* ------------------------------------------------------------------- */
+    private static boolean __lowPrio =
+	(System.getProperty("THREADED_SERVER_LOW_PRIO")!=null);
+
     /* ------------------------------------------------------------------- */
     private Thread serverThread = null;
     private InetAddress address = null;
@@ -174,7 +188,14 @@ abstract public class ThreadedServer implements Runnable
     final public void run( ) 
     {
 	Code.debug( "Listener running on " + listen );
-
+	if (__lowPrio)
+	{
+	    Code.debug( "Listening at lower priority");
+	    serverThread.setPriority(serverThread.getPriority()-1);
+	}
+	if (ConnectionThread.__maxThreads>0)    
+	    Code.debug( "Max Threads = " + ConnectionThread.__maxThreads );
+	
 	// While the thread is running . . .
 	while( serverThread != null ) 
 	{
@@ -198,23 +219,48 @@ abstract public class ThreadedServer implements Runnable
 class ConnectionThread extends Thread
 {
     /* ------------------------------------------------------------ */
-    static final Stack __threads = new Stack();
+    static int __maxThreads =
+	Integer.getInteger("THREADED_SERVER_MAX_THREADS",0).intValue();
 
-	/* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    static final Stack __threads = new Stack();
+    static int __nthreads=0;
+    
+    /* ------------------------------------------------------------ */
     static void handle(ThreadedServer server,Socket connection)
     {
 	ConnectionThread c=null;
-	try{
-	    c=(ConnectionThread)__threads.pop();
-	}
-	catch(EmptyStackException e)
+	synchronized(__threads)
 	{
-	    Code.ignore(e);
-	    c=new ConnectionThread(server);
+	    try
+	    {
+		while (c==null)
+		{
+		    try {
+			if (!__threads.empty())
+			{
+			    // use free thread
+			    c=(ConnectionThread)__threads.pop();
+			}
+			else if(__maxThreads<=0 || __nthreads<__maxThreads)
+			{
+			    // new thread
+			    c=new ConnectionThread(server);
+			}
+			else
+			{
+			    // wait for thread
+			    __threads.wait();
+			}
+		    }
+		    catch (EmptyStackException e1) {Code.ignore(e1);}
+		}
+	    }
+	    catch (InterruptedException e2) {Code.ignore(e2);}
 	}
 	c.handle(connection);
     }
-	
+    
     /* ------------------------------------------------------------ */
     final ThreadedServer server;
     Socket connection = null;
@@ -244,9 +290,13 @@ class ConnectionThread extends Thread
     {
 	try
 	{
-	    while (true)
+	    synchronized(__threads)
 	    {
-		synchronized(this)
+		__nthreads++;
+	    }
+	    synchronized(this)
+	    {
+		while (true)
 		{
 		    while (connection==null)
 		    {
@@ -256,13 +306,29 @@ class ConnectionThread extends Thread
 		    Code.debug("Thread: ",this," Handling ",connection);
 		    server.handleConnection(connection);
 		    connection=null;
-		    __threads.push(this);
+		    synchronized(__threads)
+		    {
+			__threads.push(this);
+			__threads.notify();
+		    }
 		}
 	    }
 	}
 	catch(InterruptedException e)
 	{
-	    Code.debug(e);
+	    Code.warning(e);
+	}
+	catch(Throwable e)
+	{
+	    Code.warning(e);
+	}
+	finally
+	{
+	    synchronized(__threads)
+	    {
+		__nthreads--;
+		__threads.notify();
+	    } 
 	}
     }
 }

@@ -1,3 +1,12 @@
+Release 2.0.3 - 13 November 1998
+  + Limit threads in ThreadedServer and low priority listener option 
+    greatly improve performance under worse case loads.
+  + Fix bug with index files for Jetty.Server. Previously servers
+    configured with com.mortbay.Jetty.Server would not handle
+    index.html files.  Need to make this configurable in the prp file.
+  + Fixed errors in REAME file: com.mortbay.Jetty.Server was called
+    com.mortbay.HTTP.Server
+
 Release 2.0.2 - 1 November 1998
   + Use JETTY_HOME rather than MORTBAY_HOME for build environment
   + Add thread pool to threaded server for significant

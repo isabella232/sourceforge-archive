@@ -45,7 +45,7 @@ import java.util.*;
  * @version $Id$
  * @author Greg Wilkins
 */
-public class MultiPartResponse implements Runnable
+public class MultiPartResponse
 {
     /* ------------------------------------------------------------ */
     private static String boundary =
@@ -53,7 +53,6 @@ public class MultiPartResponse implements Runnable
     
     /* ------------------------------------------------------------ */
     ServletResponse response=null;
-    Thread servlet=null;
     InputStream in=null;
     OutputStream outputStream = null;
 
@@ -101,32 +100,11 @@ public class MultiPartResponse implements Runnable
 	out.write("--"+boundary+HttpHeader.CRLF);
 	out.flush();
 
-	servlet = Thread.currentThread();
-
 	if (HttpHeader.HTTP_1_1.equals(request.getProtocol()))
 	    response.setHeader(HttpHeader.Connection,HttpHeader.Close);
 
-	new Thread(this).start();
     }
     
-    /* ------------------------------------------------------------ */
-    public void run()
-    {
-	try{
-	    while (in.read()!=-1);
-	}
-	catch(Exception e){
-	    Code.debug("MultiPartResponse monitor input got ",e);
-	}
-	finally{
-	    if (servlet!=null && servlet.isAlive())
-	    {
-		Code.debug("Stop the servlet");
-		servlet.stop();
-	    }
-	}
-    }	
-	
 
     /* ------------------------------------------------------------ */
     /** Start creation of the next Content
@@ -139,6 +117,9 @@ public class MultiPartResponse implements Runnable
     }
     
     /* ------------------------------------------------------------ */
+    /** End the current part
+     * @exception IOException IOException
+     */
     public void endPart()
 	 throws IOException
     {
@@ -146,6 +127,9 @@ public class MultiPartResponse implements Runnable
     }
     
     /* ------------------------------------------------------------ */
+    /** End the current part and the whole response.
+     * @exception IOException IOException
+     */
     public void endLastPart()
 	 throws IOException
     {
@@ -153,6 +137,10 @@ public class MultiPartResponse implements Runnable
     }
     
     /* ------------------------------------------------------------ */
+    /** End the current part
+     * @param lastPart True if this is the last part
+     * @exception IOException IOException
+     */
     public void endPart(boolean lastPart)
 	 throws IOException
     {
