@@ -264,7 +264,10 @@ public class HttpResponse extends HttpMessage
     {
         if (_reason!=null)
             return _reason;
-        return (String)__statusMsg.get(new Integer(_status));
+        _reason=(String)__statusMsg.get(new Integer(_status));
+        if (_reason==null)
+            _reason="unknown";
+        return _reason;
     }
     
     /* -------------------------------------------------------------- */

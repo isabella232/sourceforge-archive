@@ -53,7 +53,6 @@ public class Dump extends HttpServlet
     public void doGet(HttpServletRequest sreq, HttpServletResponse sres) 
         throws ServletException, IOException
     {
-
         String info=sreq.getPathInfo();
         if (info!=null && info.endsWith("Exception"))
         {
