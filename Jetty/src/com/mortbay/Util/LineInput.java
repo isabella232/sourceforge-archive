@@ -443,6 +443,9 @@ public class LineInput extends FilterInputStream
 		    if (_avail<_contents)
 			_avail++;
 		}
+		// If we ate all that ws filled, fill some more
+		if (_pos==_avail)
+		    fill();
 	    }
 	    
 //  	    String buffer=new String(_buf,_pos,_avail-_pos);

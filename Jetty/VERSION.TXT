@@ -7,6 +7,7 @@ Jetty-3.0.B02 - 24st Aug 2000
  + Fixed bug in TestRFC2616
  + Improved ThreadedServer stop and destroy
  + Use resources in WebApplication
+ + Added CGI servlet
 
 Jetty-3.0.B01 - 21st Aug 2000
  + SSL implemented with JsseListener

@@ -692,8 +692,6 @@ public class HttpRequest extends HttpMessage
 							   0,
 							   content_length,
 							   "ISO-8859-1");
-			    System.err.println("CONTENT="+content_length+
-					       ": '"+contentStr+"'");
                             UrlEncoded.decodeTo(contentStr,_parameters);
                         }
                         catch (IOException e)
