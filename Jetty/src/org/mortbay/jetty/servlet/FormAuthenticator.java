@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
-import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.SecurityConstraint;
@@ -136,7 +135,10 @@ public class FormAuthenticator implements Authenticator
             
             String nuri=(String)session.getAttribute(__J_URI);
             if (nuri==null || nuri.length()==0)
-                nuri="/";
+            {
+                nuri=request.getContextPath();
+                if (nuri.length()==0) nuri="/";
+            }
             
             if (form_cred._userPrincipal!=null)
             {
