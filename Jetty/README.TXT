@@ -111,8 +111,8 @@ An alternative configuration file can be run with
 
 
 
-Unix Quick start
-================
+Unix Start Scripts
+==================
 
 On unix, you can use the supplied shell script to set the classpaths
 and run Jetty:
@@ -124,13 +124,46 @@ and run Jetty:
 This will start a demo Jetty server on port 8080. Point your browser at
   http://localhost:8080
 
-By default, output will be logged in the $JETTY_HOME/logs directory.
+This script is controlled by the following environment variables:
+
+ JAVA       - executable JVM
+ JAVA_HOME  - Home of java, specifically $JAVA_HOME/lib/tools.jar
+ JETTY_HOME - Home of jetty
+ JETTY_CONF - Location of the script's configuration file, set to
+              /etc/jetty.conf, or $JETTY_HOME/etc/jetty.conf by
+              default.
+ JETTY_RUN  - Directory for jetty pid file
+ JETTY_LOG  - Directory for jetty output log
+
+If any of these variables are not set, then frantic searches are made
+of likely locations to try and find them.
+
+The /etc/jetty.conf file may contain:
+ - Coment lines starting with #
+ - References to files, which are considered .xml server configurations, and
+   passed to jetty for serving.
+ - References to directories (i.e. /etc/jetty.d). Each directory is scanned
+   for .xml files, and those found are passed to jetty for serving.
+
+Note: If .xml configuration files are given in the command line, jetty will
+not use /etc/jetty.conf. This is useful for running single servers while
+testing.
+
+Note: if you don't setup the /etc/jetty.conf file, then running
+"jetty.sh start" without a config specified may start multiple
+servers (demo, jetty, watchdog) on the same port - causing errors.
+
+Other jetty.sh actions are:
+   start -- To start the server.
+   stop  -- Stops a server started with "start".
+   run   -- Runs Jetty in foreground mode.
+   check -- Does nothing. Useful checking the configuration.
 
 
 
 
-Win2000 Quick Start
-===================
+Win2000 Start Scripts
+=====================
 Due to problems with the servlet security model (see below).  It is vital
 that windows users use the exact case for drive letters, URLs and filenames.
 
@@ -154,8 +187,8 @@ will need to read some more and setup the environment.
 
 
 
-Environment
-===========
+Manual Start
+============
 
 If you are using jdk1.4, you should use the path (or non-unix equivalent):
 
@@ -306,6 +339,15 @@ The mailing lists are the best place to start:
 NOTES
 =====
 
+HTTP Server vs Servlet Server
+-----------------------------
+Jetty can be considered both as a HTTP server with it own powerful
+extension architecture and as a Servlet Container implementing the
+standards for web applications.  The style of configuration of these
+two view is significantly different.  The Jetty tutorial provided
+by the demo server should be read in detail to understand the 
+difference between these two approaches.
+
 
 JDK 1.4 Support
 ---------------
@@ -322,6 +364,7 @@ classes.
 
 The SocketChannelListener class uses non blocking IO for idle connections to
 greatly reduce the threads needed by Jetty.
+
 
 Minimal HTTP jar
 ----------------
@@ -344,18 +387,16 @@ JettyExtra
 Extra jetty functionality is available via the JettyExtra
 package.  This include gtp, tools and SASL support.
 
+JSP Engine
+----------
+Jetty uses the Jasper JSP engine from jakarta to provide java
+server pages. Jetty switched to use Jasper2 for the 4.1.x releases,
+as it promises greater performance and standards compliance.
+However, jasper2 requires the ant.jar in the classpath and still
+has some backwards compatibility issues with older JSPs.
 
-Classpaths Handling.
---------------------
-If a context has it's own classpath set, then a ContextLoader
-is created with tha classpath set.  A ContextLoader is a specialized
-URLClassLoader so any Resource/URL/File combination may be used to
-specify a path.   This classloader has the ServletHandlers classloader
-set as its parent, so normal Java2 loader hierarchy semantics are
-followed.
-
-Note that if the context is a packed WAR file, then the elements
-of the classpath are likely to be jar:file URLs.
+The jasper2 engine can simply be replace with the jasper1 engine
+by replacing the org.apache.jasper.jar from a Jetty 4.0 release.
 
 
 JSP Classpaths
@@ -370,58 +411,18 @@ If this proves to be a problem for you, then unpack your WAR files
 (which is what most other containers do by default anyway).
 
 
-
 Unimplemented WebApplication features
 -------------------------------------
-The following WebApplication tags are not implemented:
+The following WebApplication tags are not implemented in standalone
+jetty.
 
   <distributable>
   <resource-ref>
   <env-entry>
   <ejb-ref>
 
-
-Run script
-----------
-The unix start/stop script bin/jetty.sh which can run with:
-
-   bin/jetty.sh start [ jetty.xml ... ]
-
-This script is controlled by the following environment variables:
-
- JAVA       - executable JVM
- JAVA_HOME  - Home of java, specifically $JAVA_HOME/lib/tools.jar
- JETTY_HOME - Home of jetty
- JETTY_CONF - Location of the script's configuration file, set to
-              /etc/jetty.conf, or $JETTY_HOME/etc/jetty.conf by
-              default.
- JETTY_RUN  - Directory for jetty pid file
- JETTY_LOG  - Directory for jetty output log
-
-If any of these variables are not set, then frantic searches are made
-of likely locations to try and find them.
-
-The /etc/jetty.conf file may contain:
- - Coment lines starting with #
- - References to files, which are considered .xml server configurations, and
-   passed to jetty for serving.
- - References to directories (i.e. /etc/jetty.d). Each directory is scanned
-   for .xml files, and those found are passed to jetty for serving.
-
-Note: If .xml configuration files are given in the command line, jetty will
-not use /etc/jetty.conf. This is useful for running single servers while
-testing.
-
-Note: if you don't setup the /etc/jetty.conf file, then running
-"jetty.sh start" without a config specified may start multiple
-servers (demo, jetty, watchdog) on the same port - causing errors.
-
-Other jetty.sh actions are:
-   start -- To start the server.
-   stop  -- Stops a server started with "start".
-   run   -- Runs Jetty in foreground mode.
-   check -- Does nothing. Useful checking the configuration.
-
+When Jetty is used in a J2EE container such JBoss or JOnAS then 
+these may be implemented by those containers.
 
 
 Unix SystemV Init
@@ -565,7 +566,6 @@ Specific access should then be granted with constraints like:
 
 Session Security
 ----------------
-
 Jetty uses the standard java.util.Random class to generate session IDs.  This
 may be insufficient for high security sites.  The SessionManager instance can
 be initialized with a more secure random number generator, such as
@@ -613,23 +613,6 @@ The DTDs used by jetty are resolved as resources from the system
 classpath, thus they are stored in org.mortbay.http/web.dtd and
 org.mortbay.util.configure.dtd within the source tree and jar file.
 Copies are also placed in etc for reference.
-
-
-JMX Management
---------------
-Jetty is instrumented with an optional JMX managment layer.
-This is contained in the JettyExtra package
-
-
-SASL Authentication
--------------------
-A SASL listener is included in the JettyExtra release
-
-
-Non-Blocking IO.
-----------------
-The JettyExtra package provides support for non-blocking IO to
-reduct the thread usage of the Jetty server.
 
 
 DEBUGGING
