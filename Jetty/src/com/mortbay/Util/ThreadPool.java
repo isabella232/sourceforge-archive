@@ -296,8 +296,8 @@ public class ThreadPool
     {
         Code.debug("Stop Pool ",_name);
         _running=false;
-
-        while (!_threadSet.isEmpty())
+        
+        while (_threadSet!=null && !_threadSet.isEmpty())
         {
             synchronized(this)
             {
@@ -309,6 +309,8 @@ public class ThreadPool
                 }
             }
             Thread.yield();
+            if (_threadSet.size()>0)
+                Thread.sleep(200);
         }
     }
     

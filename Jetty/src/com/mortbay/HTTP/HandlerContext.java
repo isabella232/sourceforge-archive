@@ -747,22 +747,25 @@ public class HandlerContext implements LifeCycle
      */
     public String getMimeByExtension(String filename)
     {
-        if (filename==null)
-            return null;
+        String type=null;
         
-        getMimeMap();
-        int i=-1;
-        while(true)
+        if (filename!=null)
         {
-            i=filename.indexOf(".",i+1);
-
-            if (i<0 || i>=filename.length())
-                return null;
-        
-            String ext=StringUtil.asciiToLowerCase(filename.substring(i+1));
-            String type = (String)_mimeMap.get(ext);
-            return type;
+            getMimeMap();
+            int i=-1;
+            while(type==null)
+            {
+                i=filename.indexOf(".",i+1);
+                
+                if (i<0 || i>=filename.length())
+                    break;
+                
+                String ext=StringUtil.asciiToLowerCase(filename.substring(i+1));
+                type = (String)_mimeMap.get(ext);
+            }
         }
+
+        return type;
     }
 
     /* ------------------------------------------------------------ */

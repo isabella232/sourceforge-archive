@@ -408,7 +408,7 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
-    /* 
+    /* Exception reporting policy method.
      * @param th 
      */
     private void exception(Throwable e)
@@ -416,6 +416,9 @@ public class HttpConnection
         try{
             if (Code.debug())
                 Code.warning(_request.toString(),e);
+            else if ( e instanceof IOException )
+                // Assume it was the browser closing early
+                Code.ignore(e);
             else
                 Code.warning(e.toString());
 
