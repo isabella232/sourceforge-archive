@@ -395,9 +395,9 @@ public class WebApplicationContext extends ServletHttpContext
             }
         }
 
-        // Don't init servlets
-        if (_servletHandler!=null)
-            _servletHandler.setAutoInitializeServlets(false);
+//         // Don't init servlets
+//         if (_servletHandler!=null)
+//             _servletHandler.setAutoInitializeServlets(false);
 
         MultiException mex = new MultiException();
         
@@ -424,10 +424,10 @@ public class WebApplicationContext extends ServletHttpContext
                     catch(Exception ex) { mex.add(ex); }
             }
 
-            // Initialize servlets
-            if (_servletHandler!=null)
-                try{_servletHandler.initializeServlets();}
-                catch(Exception ex) { mex.add(ex); }
+//             // Initialize servlets
+//             if (_servletHandler!=null)
+//                 try{_servletHandler.initializeServlets();}
+//                 catch(Exception ex) { mex.add(ex); }
         }
 
         mex.ifExceptionThrow();
