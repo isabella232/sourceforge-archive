@@ -25,6 +25,8 @@ Instructions for running Watchdog on Windows
        > cd %WATCHDOG_HOME%
        > ant servlet
 
+     Due to problems with standard localhost setups, you may need to specify the local host with
+       > ant -Dhost=127.0.0.1 servlet
 
 Instructions for running Watchdog on Linux
 ==========================================
