@@ -1,5 +1,6 @@
 Jetty Versions
 --------------
+
  + Apply the append flag of RolloverFileOutputStream constructor.
  + RolloverFileOutputStream manages Rollover thread.
  + New look and feel for www site.
@@ -7,7 +8,8 @@ Jetty Versions
  + Allow params in form auth URLs
  + Updated to jasper jars from tomcat 4.1.24
  + Allow query params in error page URL.
- + ProxyHandler checks black and white lists for Connect
+ + ProxyHandler checks black and white lists for Connect.
+ + Merge multivalued parameters in dispatcher.
 
 Jetty-4.2.9 - 19 March 2003
  + Conditional headers check after /dir to /dir/ redirection.
