@@ -286,7 +286,7 @@ public class ResourceHandler extends NullHandler
 
                 if (cachedFile!=null &&cachedFile.isValid())
                 {
-                    if (!checkGetHeader(request,response,cachedFile.resource))
+                    if (!passConditionalHeaders(request,response,cachedFile.resource))
                         return;
                 }
             }
@@ -302,7 +302,7 @@ public class ResourceHandler extends NullHandler
         if (resource!=null && resource.exists())
         {
             // Check modified dates
-            if (!checkGetHeader(request,response,resource))
+            if (!passConditionalHeaders(request,response,resource))
                 return;
      
             // check if directory
@@ -360,32 +360,34 @@ public class ResourceHandler extends NullHandler
     /* ------------------------------------------------------------ */
     /* Check modification date headers.
      */
-    private boolean checkGetHeader(HttpRequest request,
-                                   HttpResponse response,
-                                   Resource file)
+    private boolean passConditionalHeaders(HttpRequest request,
+                                           HttpResponse response,
+                                           Resource resource)
         throws IOException
     {
         if (!request.getMethod().equals(HttpRequest.__HEAD))
         {
             // check any modified headers.
             long date=0;
+            
+            if ((date=request.getDateField(HttpFields.__IfUnmodifiedSince))>0)
+            {
+                if (resource.lastModified() > date)
+                {
+                    response.sendError(response.__412_Precondition_Failed);
+                    return false;
+                }
+            }
+            
             if ((date=request.getDateField(HttpFields.__IfModifiedSince))>0)
             {
-                if (file.lastModified() <= date)
+                if (resource.lastModified() <= date)
                 {
                     response.sendError(response.__304_Not_Modified);
                     return false;
                 }
             }
    
-            if ((date=request.getDateField(HttpFields.__IfUnmodifiedSince))>0)
-            {
-                if (file.lastModified() > date)
-                {
-                    response.sendError(response.__412_Precondition_Failed);
-                    return false;
-                }
-            }
         }
         return true;
     }
@@ -402,7 +404,11 @@ public class ResourceHandler extends NullHandler
 
         if (!_putAllowed)
             return;
-  
+
+        if (resource.exists() &&
+            !passConditionalHeaders(request,response,resource))
+            return;
+        
         try
         {
             int toRead = request.getIntField(HttpFields.__ContentLength);
@@ -447,9 +453,9 @@ public class ResourceHandler extends NullHandler
         throws IOException
     {
         Code.debug("DELETE ",path," from ",resource);  
-  
  
-        if (!resource.exists())
+        if (!resource.exists() ||
+            !passConditionalHeaders(request,response,resource))
             return;
  
         if (!_delAllowed)
@@ -491,15 +497,8 @@ public class ResourceHandler extends NullHandler
                     Resource resource)
         throws IOException
     {
-        if (!_delAllowed || !_putAllowed)
-            return;  
- 
-        if (!resource.exists())
-        {
-            if (_delAllowed && _putAllowed)
-                response.sendError(response.__404_Not_Found);
+        if (!resource.exists() || !passConditionalHeaders(request,response,resource))
             return;
-        }
 
         if (!_delAllowed || !_putAllowed)
         {
