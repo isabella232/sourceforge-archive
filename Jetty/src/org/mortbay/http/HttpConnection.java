@@ -867,6 +867,7 @@ public class HttpConnection
 
         // Normal handling.
         HttpContext context=null;
+        boolean stats=false;
         try
         {   
             // Assume the connection is not persistent,
@@ -879,12 +880,23 @@ public class HttpConnection
 
             // Read requests
             readRequest();
+            
+            if (_listener==null || !_listener.isStarted())
+            {
+                Code.debug("Dead connection:"+this);
+                _persistent=false;
+                _response.destroy();
+                _response=null;
+                return false;
+            }
+            
             _listener.customizeRequest(this,_request);
             if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
                 throw new HttpException(HttpResponse.__400_Bad_Request);
             
             // We have a valid request!
             statsRequestStart();
+            stats=true;
             if (Code.debug())
             {
                 _response.setField("Jetty-Request",
@@ -894,17 +906,13 @@ public class HttpConnection
             
             // Pick response version, we assume that _request.getVersion() == 1
             _dotVersion=_request.getDotVersion();
-            
             if (_dotVersion>1)
-            {
                 _dotVersion=1;
-            }
             
             // Common fields on the response
             _response.setVersion(HttpMessage.__HTTP_1_1);
             _response.setField(HttpFields.__Date,_request.getTimeStampStr());
             _response.setField(HttpFields.__Server,Version.__VersionDetail);
-            // _response.setField(HttpFields.__ServletEngine,Version.__ServletEngine);
             
             // Handle Connection header field
             Enumeration connectionValues =
@@ -1049,7 +1057,8 @@ public class HttpConnection
             }
             
             // stats & logging
-            statsRequestEnd();       
+            if (stats)
+                statsRequestEnd();       
             if (context!=null)
                 context.log(_request,_response,bytes_written);
         }

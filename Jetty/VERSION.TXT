@@ -1,7 +1,9 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.20pre0
  + Worked around bad jboss URL handler in XMLParser
+ + Forced close of connections over stop/start
 
 Jetty-4.2.19 - 19 Mar 2004
  + Fixed DOS attack problem
