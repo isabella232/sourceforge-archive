@@ -429,7 +429,7 @@ public class HttpRequest extends HttpHeader
                  }
  
                  // Convert it to a hash table
-                 String content = new String(postBytes,"ISO8859_1");
+                 String content = new String(postBytes,"ISO-8859-1");
                  formParameters = new UrlEncoded(content);
              }
          }
@@ -1130,7 +1130,7 @@ public class HttpRequest extends HttpHeader
         {
             try
             {
-                reader=new BufferedReader(new InputStreamReader(getInputStream(),"ISO8859_1"));
+                reader=new BufferedReader(new InputStreamReader(getInputStream(),"ISO-8859-1"));
             }
             catch(UnsupportedEncodingException e)
             {

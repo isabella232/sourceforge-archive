@@ -199,6 +199,118 @@ public class UrlEncoded extends Hashtable
     }
     
     /* -------------------------------------------------------------- */
+    /** Encode Hashtable with % encoding
+     */
+    public String encode()
+    {
+        return encode(false);
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Encode Hashtable with % encoding
+     * @param equalsForNullValue if True, then an '=' is always used, even
+     * for parameters without a value. e.g. "blah?a=&b=&c=".
+     */
+    public String encode(boolean equalsForNullValue)
+    {
+        Enumeration keys=keys();
+        String separator="";
+        StringBuffer result = new StringBuffer(128);
+        while(keys.hasMoreElements())
+        {
+            String key = keys.nextElement().toString();
+            String[] values = getValues(key);
+
+            for (int v=0; v<values.length;v++)
+            {
+                result.append(separator);
+                result.append(encode(key));
+            
+                if (values[v].length()>0)
+                {
+                    result.append('=');
+                    result.append(encode(values[v]));
+                }
+                else if (equalsForNullValue)
+                    result.append('=');
+            
+                separator="&";
+            }
+        }
+        return result.toString();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Perform URL encoding.
+     * Simply calls URLEncoder.encode
+     * @param string 
+     * @return encoded string.
+     */
+    public static String encode(String string)
+    {
+        byte[] bytes=null;
+        try
+        {
+            bytes=string.getBytes("ISO-8859-1");
+        }
+        catch(UnsupportedEncodingException e)
+        {
+            Code.warning(e);
+            bytes=string.getBytes();
+        }
+        
+        int len=bytes.length;
+        byte[] encoded= new byte[bytes.length*3];
+        int n=0;
+        boolean noEncode=true;
+        
+        for (int i=0;i<len;i++)
+        {
+            byte b = bytes[i];
+            
+            if (b==' ')
+            {
+                noEncode=false;
+                encoded[n++]='+';
+            }
+            else if (b>='a' && b<='z' ||
+                     b>='A' && b<='Z' ||
+                     b>='0' && b<='9')
+            {
+                encoded[n++]=b;
+            }
+            else
+            {
+                noEncode=false;
+                encoded[n++]=(byte)'%';
+                byte nibble= (byte) ((b&0xf0)>>4);
+                if (nibble>=10)
+                    encoded[n++]=(byte)('A'+nibble-10);
+                else
+                    encoded[n++]=(byte)('0'+nibble);
+                nibble= (byte) (b&0xf);
+                if (nibble>=10)
+                    encoded[n++]=(byte)('A'+nibble-10);
+                else
+                    encoded[n++]=(byte)('0'+nibble);
+            }
+        }
+
+        if (noEncode)
+            return string;
+        
+        try
+        {    
+            return new String(encoded,0,n,"ISO-8859-1");
+        }
+        catch(UnsupportedEncodingException e)
+        {
+            Code.warning(e);
+            return new String(encoded,0,n);
+        }
+    }
+    
+    /* -------------------------------------------------------------- */
     /** Decode String with % encoding
      */
     public static String decode(String encoded)
@@ -236,56 +348,15 @@ public class UrlEncoded extends Hashtable
             return encoded;
 
         try
-        {    
-            return new String(bytes,0,n,"ISO8859_1");
+        {
+            return new String(bytes,0,n,"ISO-8859-1");
         }
-        catch(Exception e)
+        catch(UnsupportedEncodingException e)
         {
             Code.warning(e);
             return new String(bytes,0,n);
         }
-    }
-    
-    /* -------------------------------------------------------------- */
-    /** Encode Hashtable with % encoding
-     */
-    public String encode()
-    {
-        return encode(false);
-    }
-    
-    /* -------------------------------------------------------------- */
-    /** Encode Hashtable with % encoding
-     * @param equalsForNullValue if True, then an '=' is always used, even
-     * for parameters without a value. e.g. "blah?a=&b=&c=".
-     */
-    public String encode(boolean equalsForNullValue)
-    {
-        Enumeration keys=keys();
-        String separator="";
-        StringBuffer result = new StringBuffer(128);
-        while(keys.hasMoreElements())
-        {
-            String key = keys.nextElement().toString();
-            String[] values = getValues(key);
-
-            for (int v=0; v<values.length;v++)
-            {
-                result.append(separator);
-                result.append(URLEncoder.encode(key));
-            
-                if (values[v].length()>0)
-                {
-                    result.append('=');
-                    result.append(URLEncoder.encode(values[v]));
-                }
-                else if (equalsForNullValue)
-                    result.append('=');
-            
-                separator="&";
-            }
-        }
-        return result.toString();
+        
     }
     
 }

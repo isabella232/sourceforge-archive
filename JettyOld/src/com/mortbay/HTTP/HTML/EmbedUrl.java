@@ -42,8 +42,12 @@ public class EmbedUrl extends  Element
         this.proxy=proxy;
     }
 
-    /* ----------------------------------------------------------------- */
-    private void skipHeader()
+    /* ------------------------------------------------------------ */
+    /* 
+     * @return content encoding.
+     * @exception IOException 
+     */
+    private String skipHeader()
          throws IOException
     {
         Code.debug("Embed "+url);
@@ -73,6 +77,17 @@ public class EmbedUrl extends  Element
         String replyLine=replyStream.readLine();
         Code.debug("got "+replyLine);
         replyHeader.read(replyStream);
+        
+        String s = replyHeader.getHeader(HttpHeader.ContentType);
+        try {
+            int i1 = s.indexOf("charset=",s.indexOf(';')) + 8;
+            int i2 = s.indexOf(' ',i1);
+            return (0 < i2) ? s.substring(i1,i2) : s.substring(i1);
+        }
+        catch (Exception e)
+        {
+            return "ISO-8859-1";
+        }
     }
 
     /* ----------------------------------------------------------------- */
@@ -109,9 +124,14 @@ public class EmbedUrl extends  Element
     {
         try
         {
-            skipHeader();
-            // XXX should extract content encoding....
-            IO.copy(new InputStreamReader(replyStream,"ISO8859_1"),out);
+            String encoding=skipHeader();
+            try{
+                IO.copy(new InputStreamReader(replyStream,encoding),out);
+            }
+            catch(UnsupportedEncodingException e)
+            {
+                IO.copy(new InputStreamReader(replyStream,"ISO-8859-1"),out);
+            }
             out.flush();
         }
         finally

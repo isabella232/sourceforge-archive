@@ -1,6 +1,8 @@
 Release 2.3.3 - 19th October 1999 LATEST STABLE
-  + Replaced UTF8 encoding with ISO8859_1 for headers.
+  + Replaced UTF8 encoding with ISO-8859-1 for headers.
   + Use UrlEncoded for form parameters.
+  + Do our own URL encoding with ISO-8859-1
+  + HTTP.HTML.EmbedUrl uses contents encoding.
 
 Release 2.3.2 - 17th October 1999 
   + Fixed getReader bug with HttpRequest.

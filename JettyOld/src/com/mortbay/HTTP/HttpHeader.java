@@ -313,7 +313,7 @@ public class HttpHeader
     protected void write(OutputStream out)
     throws IOException
     {
-        Writer writer=new OutputStreamWriter(out,"ISO8859_1");
+        Writer writer=new OutputStreamWriter(out,"ISO-8859-1");
         write(writer,null);
         writer.flush();
     }
