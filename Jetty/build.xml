@@ -464,7 +464,7 @@
   <!-- ==================================================================== -->
   <target name="tests" depends="test"/>
   <target name="test" 
-          depends="jars"
+          depends="webapps"
           description="Build and run the test harnesses">
     <ant antfile="${test}/build.xml" inheritAll="true" target="test"/>
   </target>
