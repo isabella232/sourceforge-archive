@@ -30,6 +30,7 @@ import org.mortbay.http.HttpResponse;
 import org.mortbay.http.handler.NullHandler;
 import org.mortbay.util.Code;
 import org.mortbay.util.MultiMap;
+import org.mortbay.util.MultiException;
 
 
 /* ------------------------------------------------------------ */
@@ -76,6 +77,14 @@ public class FilterHandler
     public void setCacheFilterChains(boolean cache)
     {
         _cacheFilterChains=cache;
+
+        if (isStarted())
+        {
+            if (_cacheFilterChains)
+                _chainMap=new HashMap();
+            else
+                _chainMap=null;
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -140,22 +149,32 @@ public class FilterHandler
         _handlerIndex = _httpContext.getHttpHandlerIndex(this);
         _servletHandler = (ServletHandler)
             _httpContext.getHttpHandler(ServletHandler.class);
-        if (!_servletHandler.isStarted())
-            _servletHandler.start();
 
         if (_cacheFilterChains)
             _chainMap=new HashMap();
+
+        MultiException mex = new MultiException();
+        try
+        {
+            if (!_servletHandler.isStarted())
+                _servletHandler.start();
+        }
+        catch(MultiException e) {mex=e;}
+        catch(Exception e) {mex.add(e);}
         
         // Start filters
         Iterator iter = _filterMap.values().iterator();
         while (iter.hasNext())
         {
             FilterHolder holder = (FilterHolder)iter.next();
-            holder.start();
+            try{holder.start();}
+            catch(Exception e) {mex.add(e);}
         }
 
         Code.debug("Path Filters: "+_pathFilters);
         Code.debug("Servlet Filters: "+_servletFilterMap);
+
+        mex.ifExceptionThrow();
     }
     
     /* ------------------------------------------------------------ */

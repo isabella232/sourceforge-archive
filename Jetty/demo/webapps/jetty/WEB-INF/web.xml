@@ -32,6 +32,12 @@
     <jsp-file>/snoop.jsp</jsp-file>
   </servlet>
 
+  <servlet>
+    <servlet-name>Dump</servlet-name>
+    <servlet-class>org.mortbay.servlet.Dump</servlet-class>
+    <load-on-startup>0</load-on-startup>
+  </servlet>
+
   <servlet-mapping>
     <servlet-name>Jetty Demo Page</servlet-name>
     <url-pattern>*.html</url-pattern>
@@ -45,6 +51,11 @@
   <servlet-mapping>
     <servlet-name>JSP Snoop</servlet-name>
     <url-pattern>/jspsnoop/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>Dump</servlet-name>
+    <url-pattern>/dump/*</url-pattern>
   </servlet-mapping>
 
   <welcome-file-list>

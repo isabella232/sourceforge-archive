@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + User / mapping rather than /* for servlet requests to static content
  + Accept jetty-web.xml or web-jetty.xml in WEB-INF
  + Added optional JDK 1.4 src tree
  + o.m.u.Frame uses JDK1.4 stack frame handling 

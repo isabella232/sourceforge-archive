@@ -362,7 +362,7 @@ public class ServletHttpRequest
     public String getPathInfo()
     {
         if (_servletPath==null)
-            return _pathInContext;
+            return null; 
         return _pathInfo;
     }
     
@@ -493,7 +493,6 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public StringBuffer getRequestURL()
     {
-        
         StringBuffer buf = _httpRequest.getRootURL();
         buf.append(getRequestURI());
         return buf;
@@ -503,7 +502,7 @@ public class ServletHttpRequest
     public String getServletPath()
     {
         if (_servletPath==null)
-            return "";
+            return _pathInContext;
         return _servletPath;
     }
     

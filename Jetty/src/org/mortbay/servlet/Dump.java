@@ -235,6 +235,25 @@ public class Dump extends HttpServlet
             table.newRow();
             table.newHeading()
                 .cell().nest(new Font(2,true))
+                .add("<BR>Context Parameters")
+                .attribute("COLSPAN","2")
+                .left();
+            a = getServletContext().getInitParameterNames();
+            while (a.hasMoreElements())
+            {
+                name=(String)a.nextElement();
+                table.newRow();
+                table.addHeading(name+":&nbsp;")
+		    .cell().attribute("VALIGN","TOP").right();
+                table.addCell("<pre>" +
+			      toString(getServletContext()
+				       .getInitParameter(name))
+			      + "</pre>");
+            }
+
+            table.newRow();
+            table.newHeading()
+                .cell().nest(new Font(2,true))
                 .add("<BR>Other HTTP Headers")
                 .attribute("COLSPAN","2")
                 .left();
