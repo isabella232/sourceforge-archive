@@ -1,0 +1,49 @@
+<?xml version="1.0"  encoding="ISO8859_1"?> 
+<!DOCTYPE Server SYSTEM "jetty.dtd"> 
+
+<Server>
+  <Listener port="8080"/>
+
+  <Listener class="com.mortbay.HTTP.JsseListener" port="8181">
+    <Parameter><Name>Password</Name><Value>Secret</Value></Parameter>
+  </Listener>
+
+  <Context type="application">
+    <Path>/</Path>
+    <ResourceBase>./webapps/jetty/</ResourceBase>
+  </Context>
+
+  <Context>
+    <Path>/handler/*</Path>
+    <ResourceBase>./FileBase/</ResourceBase>
+    <Handler class="com.mortbay.HTTP.Handler.Servlet.ServletHandler">
+      <Init method="addServlet">
+        <Arg>/dump,/dump/*</Arg>
+        <Arg>com.mortbay.Servlet.Dump</Arg>
+      </Init>
+      <Init method="addServlet">
+        <Arg>/session</Arg>
+        <Arg>com.mortbay.Servlet.SessionDump</Arg>
+      </Init>
+    </Handler>
+    <Handler class="com.mortbay.HTTP.Handler.FileHandler"/>
+    <Handler class="com.mortbay.HTTP.Handler.NotFoundHandler"/>
+  </Context>
+
+  <Context>
+    <Path>/servlet/*</Path>
+    <Classes>./servlets/</Classes>
+    <Handler class="com.mortbay.HTTP.Handler.Servlet.DynamicHandler"/>
+    <Handler class="com.mortbay.HTTP.Handler.NotFoundHandler"/>
+  </Context>
+
+  <Context>
+    <Path>/javadoc/*</Path>
+    <ResourceBase>./javadoc/</ResourceBase>
+    <Handler class="com.mortbay.HTTP.Handler.FileHandler"/>
+    <Handler class="com.mortbay.HTTP.Handler.NotFoundHandler"/>
+  </Context>
+
+</Server>
+
+

@@ -30,11 +30,7 @@ import javax.servlet.*;
  */
 public class WebApplicationContext extends HandlerContext
 {
-    /* ------------------------------------------------------------ */
-    /** XXX - needs to be configured
-     */
-    public static final File __dtd = new File("./etc/web.dtd");
-    
+    static private XmlParser __xmlParser=null;    
 	
     /* ------------------------------------------------------------ */
     private String _name;
@@ -52,6 +48,15 @@ public class WebApplicationContext extends HandlerContext
 	throws IOException
     {
 	super(httpServer);
+
+	if (__xmlParser==null)
+	{
+	    __xmlParser=new XmlParser();
+	    // XXX - need to configure this better
+	    __xmlParser.addLocalDTD("web-app_2_2.dtd",
+				    new File(System.getProperty("user.dir")+
+					     "/etc/web.dtd"));
+	}
 
 	File _directory = new File(directory);
 	if (!_directory.exists() || !_directory.isDirectory())
@@ -77,8 +82,9 @@ public class WebApplicationContext extends HandlerContext
 				    "classes");
 	    if (classes.exists())
 		setClassPath(classes.getCanonicalPath());
-	    // XXX need to add jar files to classpath
+	    // XXX - need to add jar files to classpath
 
+	    
 	    // Add servlet Handler
 	    addHandler(new ServletHandler());
 	    _servletHandler = getServletHandler();
@@ -88,21 +94,7 @@ public class WebApplicationContext extends HandlerContext
 	    setResourceBase("file:"+_directoryName);
 	    setServingFiles(true);
 	    
-	    // parse the web.xml file
-	    DocumentBuilder docBuilder =
-		DocumentBuilderFactory.newInstance().newDocumentBuilder();
-	    docBuilder.setEntityResolver(new EntityResolver()
-		{
-		    public InputSource resolveEntity (String pid, String sid)
-			throws IOException
-		    {
-			if (__dtd!=null && __dtd.exists() &&
-			    sid.equals("http://java.sun.com/j2ee/dtds/web-app_2_2.dtd"))
-			    return new InputSource(new FileReader(__dtd));
-			return null;
-		    }
-		});
-	    _web = docBuilder.parse (web);
+	    _web = __xmlParser.parse(web);
 	    _web.getDocumentElement ().normalize();
 	    
 	    initialize();

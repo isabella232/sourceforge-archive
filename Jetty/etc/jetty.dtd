@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="ISO8859_1"?>
+
+<!ELEMENT Server (Listener+,Context+)>
+
+<!ELEMENT Listener 
+(Parameter*,Init*)>
+<!ATTLIST Listener
+    class  NMTOKEN "com.mortbay.HTTP.HttpListener"
+    interface NMTOKEN "0.0.0.0"
+    port NMTOKEN "80"
+>
+
+<!ELEMENT Context (VirtualHost*,Path+,ResourceBase?,Classes*,Handler*)>
+<!ATTLIST Context
+    type (handler|application|other) "handler" 
+    class  NMTOKEN ""
+>
+
+<!ELEMENT Path (#PCDATA) >
+<!ELEMENT VirtualHost (#PCDATA) >
+<!ELEMENT Classes (#PCDATA) >
+<!ELEMENT ResourceBase (#PCDATA) >
+
+<!ELEMENT Application  (Parameter*,Init*)>
+
+<!ELEMENT Handler (Parameter*,Init*)>
+<!ATTLIST Handler
+    class  NMTOKEN
+"com.mortbay.HTTP.Handler.Servlet.ServletHandler"
+>
+
+<!ELEMENT Parameter (Name,Value)>
+<!ELEMENT Name (#PCDATA) >
+<!ELEMENT Value (#PCDATA) >
+
+<!ELEMENT Init (Arg*)>
+<!ATTLIST Init
+   method NMTOKEN "init">
+
+<!ELEMENT Arg (#PCDATA) >
+<!ATTLIST Arg
+    type (String|int|boolean) "String">
+
