@@ -98,12 +98,14 @@ public class PropertyTree extends Properties
     {
 	if (Code.verbose()) Code.debug("Subtree at ",node);
 	this.prefix=node+".";
-	
+
+	// make list of prefixes
 	Vector tokens=parent.getTokens(node);
 	String[] prefixes=new String[tokens.size()];
 	for (int i=0;i<tokens.size();i++)
 	    prefixes[i]=((i>0)?prefixes[i-1]:"")+tokens.elementAt(i)+".";
 
+	// make list of wild prefixes
 	String[] wilds=new String[tokens.size()];
 	for (int i=1;i<wilds.length;i++)
 	    wilds[i]=prefixes[i-1]+"*";
@@ -187,16 +189,9 @@ public class PropertyTree extends Properties
     public void load(InputStream in)
 	throws IOException
     {
-	super.load(in);
-
-	Enumeration e=keys();
-	while (e.hasMoreElements())
-	{
-	    Object k=e.nextElement();
-	    String v=(String)get(k);
-
-	    put(k,trim?v.trim():v);    
-	}
+	Properties parser = new Properties();
+	parser.load(in);
+	load(parser);
     }
 
     /* ------------------------------------------------------------ */
@@ -355,6 +350,54 @@ public class PropertyTree extends Properties
 	return node.keys();
     }
     
+    
+    /* ------------------------------------------------------------ */
+    /** Enumerate non wild tree node names below given node.
+     * @param wild If false, only non-wild nodes are returned.
+     * @return Enumeration of tree node names.
+     */
+    public Enumeration getRealNodes()
+    {
+	return getRealNodes("");
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Enumerate non wild tree node names below given node.
+     * @param key Key of the node.
+     * @param wild If false, only non-wild nodes are returned.
+     * @return Enumeration of tree node names.
+     */
+    public Enumeration getRealNodes(String key)
+    {
+	if (!key.endsWith(".") && key.length()>0)
+	    key+=".";
+	    
+	// find the root tree.
+	PropertyTree tree=this;
+	while (tree.parent!=null)
+	{
+	    key=tree.prefix+key;
+	    tree=tree.parent;
+	}
+	
+	// find not wild keys
+	Hashtable keySet=new Hashtable(tree.size()*2);
+	Enumeration e= tree.keys();
+	while (e.hasMoreElements())
+	{
+	    String k=(String)e.nextElement();
+	    if (!k.startsWith(key))
+		continue;
+	    String s=k.substring(key.length());
+	    int d=s.indexOf(".");
+	    if (d>=0)
+		s=s.substring(0,d);
+	    keySet.put(s,s);
+	}
+	
+	return keySet.keys();
+    }
+    
     /* ------------------------------------------------------------ */
     public Vector getVector(String key, String separators)
     {
@@ -379,6 +422,16 @@ public class PropertyTree extends Properties
 	return "1tTyYoO".indexOf(value.charAt(0))>=0;
     }
     
+    /* ------------------------------------------------------------ */
+    public boolean getBoolean(String key, boolean inDefault)
+    {
+        String value=getProperty(key);
+        if (value==null || value.length()==0)
+            return inDefault;
+        return "1tTyYoO".indexOf(value.charAt(0))>=0;
+    }
+
+
     /* ------------------------------------------------------------ */
     public Object clone()
     {
