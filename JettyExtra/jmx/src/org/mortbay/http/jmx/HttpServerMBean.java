@@ -136,10 +136,18 @@ public class HttpServerMBean extends LifeCycleMBean
                 Code.warning("No MBean for "+o);
             else
             {
+                ObjectName oName=null;
                 if (mbean instanceof ModelMBeanImpl)
+                {
                     ((ModelMBeanImpl)mbean).setBaseObjectName(getObjectName().toString());
-                ObjectName oName=
-                    getMBeanServer().registerMBean(mbean,null).getObjectName();
+                    oName= getMBeanServer().registerMBean(mbean,null).getObjectName();
+                }
+                else
+                {
+                    oName=uniqueObjectName(getMBeanServer(),o,
+                                           getObjectName().toString());
+                    oName=getMBeanServer().registerMBean(mbean,oName).getObjectName();
+                }
                 Holder holder = new Holder(oName,mbean);
                 _mbeanMap.put(o,holder);
             }
