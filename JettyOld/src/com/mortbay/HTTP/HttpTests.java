@@ -36,12 +36,14 @@ public class HttpTests
     {
 	String h1 =
 	    "Content-Type: xyz" + CRLF +
-	    "  I1  : 42   " + CRLF +
+	    "I1  : 42   " + CRLF +
 	    "D1: Fri, 31 Dec 1999 23:59:59 GMT" + CRLF +
 	    "D2: Friday, 31-Dec-99 23:59:59 GMT" + CRLF +
 	    "D3: Fri Dec 31 23:59:59 1999" + CRLF +
 	    "D4: Mon Jan 1 2000 00:00:01" + CRLF +
 	    "D5: Tue Feb 29 2000 12:00:00" + CRLF +
+	    "C1: Continuation  " + CRLF +
+	    "	 Value  " + CRLF +
 	    CRLF +
 	    "Other Stuff"+ CRLF;
 	
@@ -53,6 +55,7 @@ public class HttpTests
 	    "D3: Fri Dec 31 23:59:59 1999" + CRLF +
 	    "D4: Mon Jan 1 2000 00:00:01" + CRLF +
 	    "D5: Tue Feb 29 2000 12:00:00" + CRLF +
+	    "C1: Continuation Value" + CRLF +
 	    CRLF;
 	
 
@@ -332,6 +335,12 @@ public class HttpTests
 	    test.checkEquals(cin.getFooters().getHeader("some-footer"),
 			     "some-value","Footer fields");
   
+	    fin= new FileInputStream("test.chunkIn");
+	    cin = new HttpInputStream(fin);
+	    cin.__maxLineLength=8;
+	    test.checkEquals(cin.readLine().length(),8,"line length limited");
+	    test.checkEquals(cin.readLine().length(),8,"line length limited");
+	    test.checkEquals(cin.readLine().length(),4,"line length limited");
 	}
 	catch(Exception e)
 	{

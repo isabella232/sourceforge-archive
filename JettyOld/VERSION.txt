@@ -1,3 +1,16 @@
+Release 2.2.1 - 16 July 1999
+  + Comma separate header fields.
+  + Protect against duplicate single valued headers.
+  + Less verbose debug in PropertyTree
+  + Ignore IOException in ThreadedServer.run() when closing.
+  + Limit maximum line length in HttpInputStream.
+  + Response with SC_BAD_REQUEST rather than close in more 
+    circumstances
+  + Handle continuation lines in HttpHeader.
+  + Implemented com.mortbay.Util.IO as a ThreadPool
+  + Fixed ExceptionHandler configuration
+  + Added TerseExceptionHandler 
+
 Release 2.2.0 - 1 July 1999
   + Improved feature description page.
   + Added Protekt SSL HttpListener

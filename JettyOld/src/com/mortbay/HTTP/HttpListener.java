@@ -137,6 +137,18 @@ public class HttpListener extends ThreadedServer
 		{
 		    Code.ignore(e);
 		}
+		catch (Exception e)
+		{
+		    Code.debug(e);
+		    // If no respones - must have a request error
+		    if (response==null)
+		    {
+			// try to write BAD_REQUEST
+			response=
+			    new HttpResponse(connection.getOutputStream(),null);
+			response.sendError(HttpResponse.SC_BAD_REQUEST);
+		    }
+		}
 		finally
 		{
 		    if (request!=null)

@@ -483,8 +483,8 @@ public class PropertyTree extends Properties
 			  int index,
 			  String key)
     {
-	if (Code.debug())
-	    System.err.println(key+" "+tokens+" "+index+" "+node);
+	if (Code.verbose(19))
+	    Code.debug(key," ",tokens," "+index," ",node);
 
 	// Is this a match?
 	if (tokens.size()==index)

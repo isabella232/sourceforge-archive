@@ -10,17 +10,15 @@ import javax.servlet.*;
 import java.io.*;
 
 /** HTTP input stream
- * <p> Implements JavaSofts weird input stream
- *
- * <p><h4>Notes</h4>
- * <p> Not really required as it only adds a few unneeded methods and
- * delegates everything else to the stream it was constructed with.
- *
  * @version $Id$
  * @author Greg Wilkins
 */
 public class HttpInputStream extends ServletInputStream
-{    
+{
+    /* ------------------------------------------------------------ */
+    /** Limit max line length */
+    public static int __maxLineLength=8192;
+    
     /* ------------------------------------------------------------ */
     /** The actual input stream.
      */
@@ -31,8 +29,9 @@ public class HttpInputStream extends ServletInputStream
     private int contentLength=-1;
 
     /* ------------------------------------------------------------ */
-    /** Buffer for readLine, gets reused across calls */
-    /* Note that the readCharBufferLine method break encapsulation
+    /** Buffer for readLine.
+     * The buffer gets reused across calls.
+     * Note that the readCharBufferLine method breaks encapsulation
      * by returning this buffer, so BE CAREFUL!!!
      */
     static class CharBuffer
@@ -96,12 +95,13 @@ public class HttpInputStream extends ServletInputStream
 	
 	int room = charBuffer.chars.length;
 	charBuffer.size=0;
-	int c;  
+	int c=0;  
 	boolean cr = false;
 	boolean lf = false;
 
     LineLoop:
-	while ((c=chunking?read():in.read())!=-1)
+	while (charBuffer.size<__maxLineLength &&
+	       (c=chunking?read():in.read())!=-1)
 	{
 	    switch(c)
 	    {
@@ -127,8 +127,12 @@ public class HttpInputStream extends ServletInputStream
 		  {
 		      if (--room < 0)
 		      {
+			  // Double the size of the buffer but don't
+			  // wastefully overshoot any contentLength limit.
+			  int newLength = charBuffer.chars.length << 1;
+			  newLength = Math.min(__maxLineLength,newLength);
 			  char[] old = charBuffer.chars;
-			  charBuffer.chars =new char[charBuffer.chars.length+128];
+			  charBuffer.chars =new char[newLength];
 			  room = charBuffer.chars.length-charBuffer.size-1;
 			  System.arraycopy(old,0,charBuffer.chars,0,charBuffer.size);
 		      }
@@ -258,10 +262,13 @@ public class HttpInputStream extends ServletInputStream
     }
  
     /* ------------------------------------------------------------ */
+    /** Close stream.
+     * The close is not passed to the wrapped stream, as this is
+     * needed for the response
+     */
     public void close() throws IOException
     {
 	Code.debug("Close");
-        in.close();
 	chunksize=-1;
     }
  

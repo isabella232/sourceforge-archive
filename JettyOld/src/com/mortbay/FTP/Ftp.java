@@ -580,17 +580,28 @@ public class Ftp
 	transferDataPort = new DataPort(this,bout);
 	try{
 	    cmd(transferDataPort.getFtpPortCommand());
-	    cmd("NLST");
-
 	    in.waitForCompleteOK();
+	    cmd("NLST");
+            in.waitForPreliminaryOK();
 	    waitUntilTransferComplete();
 	}
-	catch(FtpException e){
+	catch(FtpReplyException e)
+	{
+	    transferDataPort.close();
+	    transferDataPort=null;
+	    // Return null if there was no directory.
+	    if ("550".equals(e.reply.code))
+		return null;
+	    throw e;
+	}
+	catch(FtpException e)
+	{
 	    transferDataPort.close();
 	    transferDataPort=null;
 	    throw e;
 	}	
-	catch(IOException e){
+	catch(IOException e)
+	{
 	    transferDataPort.close();
 	    transferDataPort=null;
 	    throw e;
@@ -643,7 +654,7 @@ public class Ftp
 		in=null;
 		out=null;
 		if (transferDataPort!=null)
-		    transferDataPort.stop();
+		    transferDataPort.close();
 	    }	
 	}
     }

@@ -103,7 +103,8 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	this.out=out;
 	this.httpOut=new HttpOutputStream(out,this);
 	this.request=request;
-	request.setHttpResponse(this);
+	if (request!=null)
+	    request.setHttpResponse(this);
 	version = HttpHeader.HTTP_1_0;
 	status = Integer.toString(SC_OK);
 	reason = "OK";
@@ -114,7 +115,8 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	setHeader(Server,Version.__jetty);
 	setDateHeader(Date,System.currentTimeMillis());
 
-	if (HttpHeader.Close.equals(request.getHeader(HttpHeader.Connection)))
+	if (request!=null &&
+	    HttpHeader.Close.equals(request.getHeader(HttpHeader.Connection)))
 	    setHeader(HttpHeader.Connection,HttpHeader.Close);
     }
     
@@ -297,7 +299,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 		super.write(out);
 
 	    // Handle HEAD
-	    if (request.getMethod().equals("HEAD"))
+	    if (request!=null && request.getMethod().equals("HEAD"))
 		// Fake a break in the HttpOutputStream
 		throw HeadException.instance;
 	    
@@ -561,7 +563,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     public java.lang.String encodeURL(java.lang.String url)
     {
 	// should not encode if cookies in evidence
-	if (request.isRequestedSessionIdFromCookie())
+	if (request==null || request.isRequestedSessionIdFromCookie())
 	    return url;
 	
 	// get session;

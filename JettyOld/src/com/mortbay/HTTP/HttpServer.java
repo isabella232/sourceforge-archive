@@ -261,8 +261,7 @@ public class HttpServer implements ServletContext
 		// insist on Host header
 		if (request.getHeader(HttpHeader.Host)==null)
 		{
-		    response.sendError(HttpResponse.SC_BAD_REQUEST,
-				       "Bad Request");
+		    response.sendError(HttpResponse.SC_BAD_REQUEST);
 		    return;
 		}
 	    }

@@ -31,8 +31,21 @@ public class HttpHeader
     public final static String UserAgent="User-Agent";
     public final static String IfModifiedSince="If-Modified-Since";
     public final static String IfUnmodifiedSince="If-Unmodified-Since";
+    public final static String[] SingleValued=
+    {
+	"age", "authorization", "content-length", "content-location", "content-md5",
+	"content-range", "content-type", "date", "etag", "expires", "from", "host",
+        "if-modified-since", "if-range", "if-unmodified-since", "last-modified",
+	"location", "max-forwards", "proxy-authorization", "range", "referer",
+	"retry-after", "server", "user-agent"
+    };
+    public final static Hashtable __singleValuedMap=new Hashtable(37);
+    static
+    {
+	for (int i=0;i<SingleValued.length;i++)
+	    __singleValuedMap.put(SingleValued[i],SingleValued[i]);
+    }
     
-    /* -------------------------------------------------------------- */
     public final static String CRLF = "\015\012";
     public final static byte[] __CRLF = {(byte)'\015',(byte)'\012'};
     public final static byte[] __COLON = {(byte)':',(byte)' '};
@@ -150,6 +163,7 @@ public class HttpHeader
     {
 	com.mortbay.HTTP.HttpInputStream$CharBuffer cbuf;
 	char[] lbuf=null;
+	String last=null;
 	while ((cbuf=in.readCharBufferLine())!=(com.mortbay.HTTP.HttpInputStream$CharBuffer)null)
 	{
 	    // check for empty line to end headers
@@ -176,8 +190,12 @@ public class HttpHeader
 		switch(state)
 		{
 		  case 0: // leading white
-		      if (c==' ')
+		      if (c==' ' || c=='	')
+		      {
+			  // continuation line
+			  state=2;
 			  continue;
+		      }
 		      state=1;
 		      i1=i;
 		      i2=i-1;
@@ -198,33 +216,49 @@ public class HttpHeader
 		      else
 		      {
 			  lbuf[i]=c;
-			  if (c!=' ')
+			  if (c!=' ' && c!='	')
 			      i2=i;
 		      }
 		      continue;
 
 		  case 2: // skip whitespace after :
-		      if (c==' ')
+		      if (c==' ' || c=='	')
 			  continue;
 		      state=3;
 		      i1=i;
 		      i2=i-1;
 
 		  case 3: // looking for last non-white
-		      if (c!=' ')
+		      if (c!=' ' && c!='	')
 			  i2=i;
 		}
 		continue;
 	    }
 	    
 	    if (lkey==null || lkey.length()==0)
+	    {
+		if (state>=2 && last!=null)
+		{
+		    // Continuation line
+		    String existing=(String)keyMap.get(last);
+		    StringBuffer sb = new StringBuffer(existing);
+		    sb.append(' ');
+		    sb.append(buf,i1,i2-i1+1);
+		    keyMap.put(last,sb.toString());
+		}
 		continue;
-
+	    }
+	    
+	    // Handle repeated headers
 	    String existing=(String)keyMap.get(lkey);
 	    if (existing!=null)
 	    {
+		Code.warning("Duplicate single value headers");
+		if (__singleValuedMap.containsKey(lkey))
+		    throw new IOException("Duplicate single value headers");
+		
 		StringBuffer sb = new StringBuffer(existing);
-		sb.append(';');
+		sb.append(',');
 		sb.append(buf,i1,i2-i1+1);
 		keyMap.put(lkey,sb.toString());
 	    }
@@ -232,6 +266,7 @@ public class HttpHeader
 	    {
 		keyMap.put(lkey,new String(buf,i1,i2-i1+1));
 		keys.addElement(key);
+		last=lkey;
 	    }
 	}
     }

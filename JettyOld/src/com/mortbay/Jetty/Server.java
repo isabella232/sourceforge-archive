@@ -442,6 +442,52 @@ public class Server extends BaseConfiguration
 	    }
 	    stack[h]=handlerInstance;
 	}
+ 	// Put in the exception handling stacks if needed
+ 	Vector exceptionHandlers = stackTree.getVector("EXCEPTIONS",";,");
+ 	if (exceptionHandlers.size() > 0)
+ 	{
+ 	    ExceptionHandler[] exceptionStack
+ 	      = new ExceptionHandler[exceptionHandlers.size()];
+ 
+ 	    exceptionHandlersMap = new PathMap();
+ 
+ 	    // Add the handler array to all the paths
+ 	    for (int d=paths.size();d-->0;)
+ 		exceptionHandlersMap.put(paths.elementAt(d),exceptionStack);
+ 	
+ 	    for (int ehi=0; ehi<exceptionHandlers.size();ehi++)
+ 	    {
+ 		String handlerName=(String)exceptionHandlers.elementAt(ehi);
+ 		PropertyTree handlerTree = stackTree.getTree(handlerName);
+ 		PropertyTree handlerProperties=properties(handlerTree);
+ 	    
+ 		Code.debug("Configure ExceptionHandler ",serverName,
+ 			   ".",stackName,
+ 			   ".",handlerName,
+ 			   " ",handlerProperties);
+ 
+ 		Class handlerClass=Class.forName(handlerTree.getProperty("CLASS"));
+ 		if (!com.mortbay.HTTP.ExceptionHandler.class.isAssignableFrom(handlerClass))
+ 		    Code.fail(handlerClass+" is not a com.mortbay.HTTP.ExceptionHandler");
+ 	    
+ 		ExceptionHandler handlerInstance=null;
+ 		try
+ 		  {
+ 		      Class[] typeArgs = {};
+ 		      Constructor handlerConstructor =
+ 			handlerClass.getConstructor(typeArgs);
+ 		      Object[] arg = {};
+ 		      handlerInstance = (com.mortbay.HTTP.ExceptionHandler)
+ 			handlerConstructor.newInstance(arg);
+ 		  }
+ 		catch(NoSuchMethodException nsme)
+ 		  {
+ 		      handlerInstance
+ 			= (ExceptionHandler) handlerClass.newInstance();
+ 		  }
+ 		exceptionStack[ehi]=handlerInstance;
+ 	    }
+ 	}
     }
 
     

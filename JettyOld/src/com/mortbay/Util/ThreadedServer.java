@@ -440,7 +440,7 @@ abstract public class ThreadedServer
 		}
 		catch ( IOException e )
 		{
-		    Code.warning(e);
+		    Code.ignore(e);
 		}
 		finally
 		{

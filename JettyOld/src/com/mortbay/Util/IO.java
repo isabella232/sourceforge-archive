@@ -9,36 +9,51 @@ import java.io.*;
 
 /* ======================================================================== */
 /** IO Utilities
+ * Provides stream handling utilities in
+ * singleton Threadpool implementation accessed by static members.
  */
-public class IO extends Thread
+public class IO extends ThreadPool
 {
     /* ------------------------------------------------------------------- */
-    public static int bufferSize = 4096;
+    public static int bufferSize = 8192;
     /* ------------------------------------------------------------------- */
-    private InputStream in=null;
-    private OutputStream out=null;
-    private Reader read=null;
-    private Writer write=null;
-
-    /* ------------------------------------------------------------------- */
-    private IO(InputStream in, OutputStream out)
+    private static IO __instance=null;
+    public static IO instance()
     {
-	super("IO InputStream->OutputStream");
-	this.in=in;
-	this.out=out;
-	start();
+	if (__instance==null)
+	{
+	    synchronized(com.mortbay.Util.IO.class)
+	    {
+		if (__instance==null)
+		    __instance=new IO();
+	    }
+	}
+	return __instance;
     }
     
     /* ------------------------------------------------------------------- */
-    private IO(Reader in, Writer out)
+    static class Job
     {
-	super("IO Reader->Writer");
-	this.read=in;
-	this.write=out;
-	start();
-    }
-    
+	InputStream in;
+	OutputStream out;
+	Reader read;
+	Writer write;
 
+	Job(InputStream in,OutputStream out)
+	{
+	    this.in=in;
+	    this.out=out;
+	    this.read=null;
+	    this.write=null;
+	}
+	Job(Reader read,Writer write)
+	{
+	    this.in=null;
+	    this.out=null;
+	    this.read=read;
+	    this.write=write;
+	}
+    }
     
     /* ------------------------------------------------------------------- */
     /** Copy Stream in to Stream out until EOF or exception
@@ -46,7 +61,13 @@ public class IO extends Thread
      */
     public static void copyThread(InputStream in, OutputStream out)
     {
-	new IO(in,out);
+	try{
+	    instance().run(new Job(in,out));
+	}
+	catch(InterruptedException e)
+	{
+	    Code.warning(e);
+	}
     }
     
     /* ------------------------------------------------------------------- */
@@ -58,14 +79,20 @@ public class IO extends Thread
 	copy(in,out,-1);
     }
     
-    
     /* ------------------------------------------------------------------- */
     /** Copy Stream in to Stream out until EOF or exception
      * in own thread
      */
     public static void copyThread(Reader in, Writer out)
     {
-	new IO(in,out);
+	try
+	{
+	    instance().run(new Job(in,out));
+	}
+	catch(InterruptedException e)
+	{
+	    Code.warning(e);
+	}
     }
     
     /* ------------------------------------------------------------------- */
@@ -170,19 +197,23 @@ public class IO extends Thread
     /* ------------------------------------------------------------ */
     /** Run copy for copyThread()
      */
-    public void run()
+    public void Handle(Object o)
     {
+	Job job=(Job)o;
 	try {
-	    if (in!=null)
-		copy(in,out,-1);
+	    if (job.in!=null)
+		copy(job.in,job.out,-1);
 	    else
-		copy(read,write,-1);
+		copy(job.read,job.write,-1);
 	}
 	catch(IOException e)
 	{
 	    Code.ignore(e);
 	    try{
-		out.close();
+		if (job.out!=null)
+		    job.out.close();
+		if (job.write!=null)
+		    job.write.close();
 	    }
 	    catch(IOException e2)
 	    {
@@ -190,9 +221,6 @@ public class IO extends Thread
 	    }
 	}
     }
-
-    
-
 }
 
 

@@ -24,20 +24,22 @@ public class DataPort extends Thread
     }
 
     /* ------------------------------------------------------------------- */
-    private static final int timeout = 20000;
-    
+    private static final int SOCKET_LISTEN_TIMEOUT = 120000;
+
     /* ------------------------------------------------------------------- */
     private int port=0;
     private InetAddress addr=null;
+    ServerSocket listen = null;
     private Socket connection=null;
     private InputStream in = null;
     private OutputStream out =null;
     private Ftp ftp=null;
+    protected boolean terminated = false;
     
     /* ------------------------------------------------------------------- */
     DataPort(Ftp ftp,InputStream in)
     {
-	super("FTP data port in");
+	super("FtpDataIn");
 	synchronized(this){
 	    this.in = in;
 	    this.ftp= ftp;
@@ -55,7 +57,7 @@ public class DataPort extends Thread
     /* ------------------------------------------------------------------- */
     DataPort(Ftp ftp, OutputStream out)
     {
-	super("FTP data port out");
+	super("FtpDataOut");
 	synchronized(this){
 	    this.out = out;
 	    this.ftp= ftp;
@@ -73,8 +75,15 @@ public class DataPort extends Thread
     /* ------------------------------------------------------------------- */
     final public void run() 
     {
-	try{
-	    listen();
+        terminated = false;
+	try
+	{
+            while (connection == null)
+	    {
+                listen();
+                if (terminated) 
+                    return;
+            }        
 	    handle();
 	}
 	catch(Exception e){
@@ -86,13 +95,12 @@ public class DataPort extends Thread
 	    }
 	}
 	finally{
-	    Code.debug("DataPort Complete");
 	    if (connection!=null)
 	    {
 		try{connection.close();
 		}catch(Exception e){Code.debug("Close Exception",e);}
 			
-		Code.debug("DataPort Closed");
+                connection = null;
 	    }
 	    if (ftp!=null)
 		ftp.transferCompleteNotification(null);
@@ -106,15 +114,27 @@ public class DataPort extends Thread
     final public void close() 
     {
 	Code.debug("Close DataPort");
+        terminated = true;
+        if (connection != null)
+	{
+            try {connection.close();}
+	    catch (IOException ioe) { Code.ignore(ioe);}
+            connection = null;
+        }
+        if (listen != null)
+	{
+            try {listen.close();}
+	    catch (IOException ioe) { Code.ignore(ioe);}
+            listen = null;
+        }
 	ftp=null;
-	stop();
     }
     
     /* ------------------------------------------------------------------- */
     public void listen()
 	 throws IOException
     {
-	ServerSocket listen=null;
+	listen=null;
 
 	// open the listen port
 	synchronized(this){
@@ -130,10 +150,14 @@ public class DataPort extends Thread
 	    }
 	}
 
-	// wait for connection
-	Code.debug("Waiting for connection...");
-	connection = listen.accept();
-	Code.debug("Accepted "+connection);
+        if (!terminated)
+	{
+            // wait for connection
+            Code.debug("Waiting for connection... "+listen);
+            listen.setSoTimeout( SOCKET_LISTEN_TIMEOUT );
+            connection = listen.accept();
+            Code.debug("Accepted "+connection);
+        }
     }
     
 
@@ -141,8 +165,6 @@ public class DataPort extends Thread
     public void handle()
 	 throws IOException
     {
-	Code.debug("Handling ");
-
 	// Setup streams
 	boolean closeOut=false;
 	if (out!=null)
@@ -161,7 +183,6 @@ public class DataPort extends Thread
 	    if (closeOut && out!=null)
 	    {
 		try{
-		    Code.debug("Closing out");
 		    out.flush();
 		    out.close();
 		}
@@ -170,10 +191,7 @@ public class DataPort extends Thread
 		}	
 	    }
 	    if (connection!=null)
-	    {
-		Code.debug("Closing connection");
 		connection.close();
-	    }
 	}
     }
     
