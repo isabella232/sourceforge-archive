@@ -166,12 +166,22 @@ public class Frame
         {
             int lb = _where.indexOf('(');
             int rb = _where.indexOf(')');
-            if (lb>=0 && rb >=0 && lb<rb)
+
+            if (lb>=0 && rb >=0 && lb<rb) 
+            {
                 _file = _where.substring(lb+1,rb).trim();
-            
-            int at = _where.indexOf("at");
+                if (_file.indexOf(':') < 0)
+                    _file = null;
+            }
+              
+            int at = _where.indexOf("at ");
             if (at >=0 && (at+3)<_where.length())
                 _method = _where.substring(at+3);
+            if (at < 0 && rb > 0) 
+            {
+                _method = _where.trim();
+                _method = _method.substring(_method.indexOf(' ') + 1);
+            }
         }
         
         // Get Thread name

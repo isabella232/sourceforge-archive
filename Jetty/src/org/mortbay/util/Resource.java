@@ -117,9 +117,9 @@ public class Resource
     }
 
     /* ------------------------------------------------------------ */
-    /** Construct a resource from a string.
-     * If the string is not a URL, it is treated as an absolute or
-     * relative file path.
+    /** Construct a system resource from a string.
+     * The resource is tried as classloader resource before being
+     * treated as a normal resource.
      * @param resource.
      * @return
      */
@@ -294,14 +294,20 @@ public class Resource
         if (!checkConnection())
             throw new IOException( "Invalid resource");
 
-        if( _in != null)
-        {
-            InputStream in = _in;
-            _in=null;
-            return in;
+        try
+        {    
+            if( _in != null)
+            {
+                InputStream in = _in;
+                _in=null;
+                return in;
+            }
+            return _connection.getInputStream();
         }
-
-        return _connection.getInputStream();
+        finally
+        {
+            _connection=null;
+        }
     }
 
 
