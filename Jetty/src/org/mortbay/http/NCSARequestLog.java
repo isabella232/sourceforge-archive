@@ -38,6 +38,7 @@ public class NCSARequestLog implements RequestLog
     private Locale _logLocale=Locale.US;
     private String _logTimeZone=TimeZone.getDefault().getID();
     private String[] _ignorePaths;
+    private boolean _logCookies=false;
     
     private transient OutputStream _out;
     private transient OutputStream _fileOut;
@@ -240,6 +241,24 @@ public class NCSARequestLog implements RequestLog
     {
         return _ignorePaths;
     }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the logCookies.
+     */
+    boolean getLogCookies()
+    {
+        return _logCookies;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param logCookies If true, cookies are logged instead of the HTTP version
+     */
+    void setLogCookies(boolean logCookies)
+    {
+        _logCookies = logCookies;
+    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -344,13 +363,16 @@ public class NCSARequestLog implements RequestLog
             buf.append((user==null)?"-":user);
             buf.append(" [");
             buf.append(_logDateCache.format(request.getTimeStamp()));
-            buf.append("] \"");
+            buf.append(_logCookies?"] ":"] \"");
             buf.append(request.getMethod());
             buf.append(' ');
             buf.append(request.getURI());
             buf.append(' ');
-            buf.append(request.getVersion());
-            buf.append("\" ");
+            if (_logCookies)
+                appendCookies(buf,request);
+            else
+                buf.append(request.getVersion());
+            buf.append(_logCookies?" ":"\" ");
             int status=response.getStatus();    
             buf.append((char)('0'+((status/100)%10)));
             buf.append((char)('0'+((status/10)%10)));
@@ -394,6 +416,29 @@ public class NCSARequestLog implements RequestLog
         }
     }
     
+    /* ------------------------------------------------------------ */
+    /**
+     * @param buf
+     * @param request
+     */
+    private void appendCookies(StringBuffer buf, HttpRequest request)
+    {
+        Cookie[] cookies = request.getCookies();
+        if (cookies==null || cookies.length==0)
+            buf.append('-');
+        else
+        {
+            for (int i=0;i<cookies.length;i++)
+            {
+                if (i!=0)
+                    buf.append('&');
+                buf.append(cookies[i].getName());
+                buf.append('=');
+                buf.append(UrlEncoded.encodeString(cookies[i].getValue()));
+            }
+        }
+    }
+
     /* ------------------------------------------------------------ */
     /** Log Extended fields.
      * This method can be extended by a derived class to add extened fields to
