@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Fixed RolloverFileOutputStream without date.
+
 Jetty-4.2.0beta0 - 13 October 2002
  + New ThreadPool implementation.
  + New Buffering implementation.
