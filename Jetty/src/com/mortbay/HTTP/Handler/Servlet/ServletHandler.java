@@ -70,7 +70,7 @@ public class ServletHandler extends NullHandler
     {
 	try
 	{
-	    String classPath=getContext().getClassPath();	    
+	    String classPath=getHandlerContext().getClassPath();	    
 	    if (classPath!=null && classPath.length()>0)
 		_loader=new FileJarServletLoader(classPath,false);
 	    else

@@ -30,7 +30,7 @@ public class NullHandler implements HttpHandler
     /** 
      * @return 
      */
-    public HandlerContext getContext()
+    public HandlerContext getHandlerContext()
     {
 	return _context;
     }

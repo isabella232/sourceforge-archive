@@ -17,12 +17,8 @@ import java.net.*;
 
 
 /* --------------------------------------------------------------------- */
-/** ServletHandler<p>
- * This handler maps requests to servlets that implement the
- * javax.servlet.http.HttpServlet API.
- * It is configured with a PathMap of paths to ServletHolder instances.
+/** 
  *
- * @see Interface.HttpHandler
  * @version $Id$
  * @author Greg Wilkins
  */
@@ -41,56 +37,32 @@ public class Context implements ServletContext, HttpSessionContext
 	_handler=handler;
     }
 
-
     /* ------------------------------------------------------------ */
     /**
-     * Returns a <code>String</code> containing the value of the named
-     * context-wide initialization parameter, or <code>null</code> if the 
-     * parameter does not exist.
-     *
-     * <p>This method can make available configuration information useful
-     * to an entire "web application".  For example, it can provide a 
-     * webmaster's email address or the name of a system that holds 
-     * critical data.
-     *
-     * @param	name	a <code>String</code> containing the name of the
-     *                  parameter whose value is requested
-     * 
-     * @return 		a <code>String</code> containing at least the 
-     *			servlet container name and version number
-     *
-     * @see ServletConfig#getInitParameter
+     * Implemented by delegation to getAttributeNames.
      */
     public String getInitParameter(String param)
     {
-	Code.notImplemented();
+	Object p = getAttribute(param);
+	if (p!=null)
+	    return p.toString();
 	return null;
     }
     
     /* ------------------------------------------------------------ */
     /**
-     * Returns the names of the context's initialization parameters as an
-     * <code>Enumeration</code> of <code>String</code> objects, or an
-     * empty <code>Enumeration</code> if the context has no initialization
-     * parameters.
-     *
-     * @return 		an <code>Enumeration</code> of <code>String</code> 
-     *                  objects containing the names of the context's
-     *                  initialization parameters
-     *
-     * @see ServletConfig#getInitParameter
+     * Implemented by delegation to getAttributeNames.
      */
     public Enumeration getInitParameterNames()
     {
-	Code.notImplemented();
-	return null;
+	return getAttributeNames();
     }
     
     
     /* ------------------------------------------------------------ */
     String getRealPathInfo(String pathInfo)
     {
-	String fileBase=_handler.getContext().getFileBase();
+	String fileBase=_handler.getHandlerContext().getFileBase();
 	if (fileBase==null)
 	    return null;
 	
@@ -123,7 +95,7 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public ServletContext getContext(String uri)
     {
-	Code.notImplemented();
+	Code.warning("Not Implemented");
 	return null;
     }
     
@@ -140,31 +112,16 @@ public class Context implements ServletContext, HttpSessionContext
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     * Returns the MIME type of the specified file, or <code>null</code> if 
-     * the MIME type is not known. The MIME type is determined
-     * by the configuration of the servlet container, and may be specified
-     * in a web application deployment descriptor. Common MIME
-     * types are <code>"text/html"</code> and <code>"image/gif"</code>.
-     *
-     *
-     * @param   file    a <code>String</code> specifying the name
-     *			of a file
-     *
-     * @return 		a <code>String</code> specifying the file's MIME type
-     *
-     */
     public String getMimeType(String file)
     {
-	Code.notImplemented();
-	return null;
+	return _handler.getHandlerContext().getMimeByExtension(file);
     }
     
     /* ------------------------------------------------------------ */
     public URL getResource(String uri)
 	throws MalformedURLException
     {
-	String resourceBase=_handler.getContext().getResourceBase();
+	String resourceBase=_handler.getHandlerContext().getResourceBase();
 	if (resourceBase==null)
 	    return null;
 	
@@ -336,7 +293,7 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public Object getAttribute(String name)
     {
-	return _handler.getContext().getAttribute(name);
+	return _handler.getHandlerContext().getAttribute(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -345,7 +302,7 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public Enumeration getAttributeNames()
     {
-	return _handler.getContext().getAttributeNames();
+	return _handler.getHandlerContext().getAttributeNames();
     }
     
     /* ------------------------------------------------------------ */
@@ -354,10 +311,14 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public void setAttribute(String name, Object value)
     {
-	if (name!=null && name.startsWith("com.mortbay."))
-	    Code.warning("Servlet setting com.mortbay.* attribute: "+
+	if (name!=null &&
+	    ( name.startsWith("com.mortbay.") ||
+	      name.startsWith("java.") ||
+	      name.startsWith("javax.")))
+	    Code.warning("Servlet attempted to set com.mortbay.* attribute: "+
 			 name);
-	_handler.getContext().setAttribute(name,value);
+	else
+	    _handler.getHandlerContext().setAttribute(name,value);
     }
     
     /* ------------------------------------------------------------ */
@@ -366,10 +327,14 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public void removeAttribute(String name)
     {
-	if (name!=null && name.startsWith("com.mortbay."))
+	if (name!=null &&
+	    ( name.startsWith("com.mortbay.") ||
+	      name.startsWith("java.") ||
+	      name.startsWith("javax.")))
 	    Code.warning("Servlet removing com.mortbay.* attribute: "+
 			 name);
-	_handler.getContext().removeAttribute(name);
+	else
+	    _handler.getHandlerContext().removeAttribute(name);
     }
 
 

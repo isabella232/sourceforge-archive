@@ -20,7 +20,7 @@ public interface HttpHandler extends LifeCycle
     /** 
      * @return 
      */
-    public HandlerContext getContext();
+    public HandlerContext getHandlerContext();
     
     /* ------------------------------------------------------------ */
     /** Start the handler.

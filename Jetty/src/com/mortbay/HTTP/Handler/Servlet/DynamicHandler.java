@@ -47,7 +47,7 @@ public class DynamicHandler extends ServletHandler
     public void start()
     {
         Log.event("DynamicHandler started for "+
-		  getContext().getClassPath());
+		  getHandlerContext().getClassPath());
 	super.start();
     }
     
@@ -72,7 +72,7 @@ public class DynamicHandler extends ServletHandler
 	    {
 		_paths.add(path);
 		Code.debug(path," from ",
-			   getContext().getClassPath());
+			   getHandlerContext().getClassPath());
 		
 		String servletClass=
 		    PathMap.pathInfo(contextPathSpec,path).substring(1);

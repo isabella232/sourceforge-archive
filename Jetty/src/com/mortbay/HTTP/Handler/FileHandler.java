@@ -106,16 +106,6 @@ public class FileHandler extends NullHandler
 	_maxCachedFileSize = maxCachedFileSize;
     }
 
-    /* ------------------------------------------------------------ */
-    Map _mimeMap ;
-    public Map getMimeMap()
-    {
-	return _mimeMap;
-    }
-    public void setMimeMap(Map mimeMap)
-    {
-	_mimeMap = mimeMap;
-    }
 
     /* ----------------------------------------------------------------- */
     /** Construct a FileHandler.
@@ -126,7 +116,7 @@ public class FileHandler extends NullHandler
     /* ----------------------------------------------------------------- */
     public void start()
     {
-        Log.event("FileHandler started in "+getContext().getFileBase());
+        Log.event("FileHandler started in "+getHandlerContext().getFileBase());
         if (_maxCachedFiles>0 && _maxCachedFileSize>0 && _cache==null)
         {
             _cache=new CachedFile[_maxCachedFiles];
@@ -158,7 +148,7 @@ public class FileHandler extends NullHandler
     public String realPath(String pathSpec, String path)
         throws IllegalArgumentException
     {
-        String realpath=getContext().getFileBase();;
+        String realpath=getHandlerContext().getFileBase();;
         if (pathSpec.startsWith("*."))
         {
             realpath+=path;
@@ -561,7 +551,7 @@ public class FileHandler extends NullHandler
         {
             InputStream in=null;
             int len=0;
-            String encoding=getMimeByExtension(file.getName());
+            String encoding=getHandlerContext().getMimeByExtension(file.getName());
             response.setField(HttpFields.__ContentType,encoding);
             len = (int)file.length();
             response.setIntField(HttpFields.__ContentLength,len);
@@ -658,50 +648,6 @@ public class FileHandler extends NullHandler
     }
 
 
-    /* ------------------------------------------------------------ */
-    /** 
-     * @param filename 
-     * @return 
-     */
-    String getMimeByExtension(String filename)
-    {
-        int i=filename.indexOf(".");
-        String ext;
-
-        if (i<0 || i>=filename.length())
-            ext="default";
-        else
-            ext=StringUtil.asciiToLowerCase(filename.substring(i+1));
-        
-        if (_mimeMap==null)
-        {
-            _mimeMap = new HashMap();
-            _mimeMap.put("default","application/octet-stream");
-            _mimeMap.put("class","application/octet-stream");
-            _mimeMap.put("html","text/html");
-            _mimeMap.put("htm","text/html");
-            _mimeMap.put("txt","text/plain");
-            _mimeMap.put("java","text/plain");
-            _mimeMap.put("gif","image/gif");
-            _mimeMap.put("jpg","image/jpeg");
-            _mimeMap.put("jpeg","image/jpeg");
-            _mimeMap.put("au","audio/basic");
-            _mimeMap.put("snd","audio/basic");
-            _mimeMap.put("ra","audio/x-pn-realaudio");
-            _mimeMap.put("ram","audio/x-pn-realaudio");
-            _mimeMap.put("rm","audio/x-pn-realaudio");
-            _mimeMap.put("rpm","audio/x-pn-realaudio");
-            _mimeMap.put("mov","video/quicktime");
-            _mimeMap.put("jsp","text/plain");
-        }
-        
-        String type = (String)_mimeMap.get(ext);
-        if (type==null)
-            type = (String)_mimeMap.get("default");
-
-        return type;
-    }
-
     
     /* ------------------------------------------------------------ */
     /** Holds a cached file.
@@ -776,7 +722,7 @@ public class FileHandler extends NullHandler
                 read+=len;
             }
             in.close();
-            encoding=getMimeByExtension(file.getName());
+            encoding=getHandlerContext().getMimeByExtension(file.getName());
         }
         
         /* ------------------------------------------------------------ */
