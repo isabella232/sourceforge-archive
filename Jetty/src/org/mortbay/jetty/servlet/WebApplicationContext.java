@@ -165,8 +165,6 @@ public class WebApplicationContext
      */
     public void setWAR(String war)
     {
-        if (isStarted())
-            throw new IllegalStateException();
         _war=war;
     }
     
@@ -672,8 +670,6 @@ public class WebApplicationContext
      */
     public void setDefaultsDescriptor(String defaults)
     {
-        if (isStarted())
-            throw new IllegalStateException();
         _defaultsDescriptor=defaults;
     }
     
@@ -690,8 +686,6 @@ public class WebApplicationContext
      */
     public void setExtractWAR(boolean extract)
     {
-        if (isStarted())
-            throw new IllegalStateException();
         _extract=extract;
     }
     
