@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
  + Handle unknown status reasons in HttpResponse
+ + Ignore included response updates rather than IllegalStateException
 
 Jetty-3.0.1 - 20 Dec 2000
  + Fixed value unbind notification for session invalidation. 

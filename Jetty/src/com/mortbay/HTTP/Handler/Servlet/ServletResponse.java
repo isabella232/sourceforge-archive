@@ -47,7 +47,6 @@ public class ServletResponse implements HttpServletResponse
     private boolean _noSession=false;
     private boolean _locked=false;
     private Locale _locale=null;
-    private static String __lockedMsg = "Response locked by inclusion";
 
     private static Map __charSetMap = new HashMap();
     static
@@ -380,12 +379,7 @@ public class ServletResponse implements HttpServletResponse
     public void setDateHeader(String name, long value) 
     {
         if (_locked)
-        {
-            if (_httpResponse.getDateField(name)==value)
-                return;
-            throw new IllegalStateException(__lockedMsg);
-        }
-        
+            return;
         _httpResponse.setDateField(name,value);
     }
 
@@ -393,16 +387,7 @@ public class ServletResponse implements HttpServletResponse
     public void setHeader(String name, String value) 
     {
         if (_locked)
-        {
-            if (value==null)
-            {
-                if (_httpResponse.getField(name)==null)
-                    return;
-            }
-            else if (value.equals(_httpResponse.getField(name)))
-                return;
-            throw new IllegalStateException(__lockedMsg);
-        }
+            return;
         _httpResponse.setField(name,value);
     }
 
@@ -410,11 +395,7 @@ public class ServletResponse implements HttpServletResponse
     public void setIntHeader(String name, int value) 
     {
         if (_locked)
-        {
-            if (_httpResponse.getIntField(name)==value)
-                return;
-            throw new IllegalStateException(__lockedMsg);
-        }
+            return;
         _httpResponse.setIntField(name,value);
     }
     
@@ -422,7 +403,7 @@ public class ServletResponse implements HttpServletResponse
     public void addDateHeader(String name, long value) 
     {
         if (_locked)
-            throw new IllegalStateException(__lockedMsg);
+            return;
         
         _httpResponse.addDateField(name,new Date(value));
     }
@@ -431,7 +412,7 @@ public class ServletResponse implements HttpServletResponse
     public void addHeader(String name, String value) 
     {
         if (_locked)
-            throw new IllegalStateException(__lockedMsg);
+            return;
         
         _httpResponse.addField(name,value);
     }
@@ -440,7 +421,7 @@ public class ServletResponse implements HttpServletResponse
     public void addIntHeader(String name, int value) 
     {
         if (_locked)
-            throw new IllegalStateException(__lockedMsg);
+            return;
         
         _httpResponse.addIntField(name,value);
     }
