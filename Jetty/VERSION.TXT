@@ -11,6 +11,7 @@ Jetty-4.1.2 ...
  + Some AJP13 optimizations.
  + Use "standard" names for default,jsp & invoker servlets.
  + Fixed caching of directories to avoid shared buffers.
+ + Fixed bad log dir detection
 
 Jetty-4.1.1 - 30 September 2002
  + Fixed client scripting vulnerability with jasper2.
