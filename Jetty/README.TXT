@@ -54,8 +54,6 @@ thus they are stored in com.mortbay.HTTP/web.dtd and
 com.mortbay.Util.configure.dtd within the source tree and jar file.  Copies
 are also placed in etc for reference.
 
-A document in the doc directory describes the configuration for SSL in Jetty.
-
 
 Running the Demo Server
 =======================
@@ -97,3 +95,26 @@ Jetty distributions and information is available from:
 How to Contribute
 =================
 Comments, contributions, feedback, bugs, testing, etc. please....
+
+
+NOTES
+=====
+
+SSL:
+----
+A document in the doc directory describes the configuration for SSL in Jetty.
+
+
+CGI:
+----
+A CGI servlet is included in src/com/mortbay/Servlet/CGI.java  ,  but
+it is not yet configured into the release demo, nor is it documented.
+
+
+What's Missing:
+---------------
+ResourceDispatching
+WebApplication as a war file support (almost there...)
+JSP
+
+
