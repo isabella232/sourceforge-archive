@@ -51,7 +51,7 @@ public abstract class AbstractSessionManager implements SessionManager
     private int _dftMaxIdleSecs = -1;
     private int _scavengePeriodMs = 30000;
     private String _workerName ;
-    
+    private boolean _useRequestedId =false;
     protected transient ArrayList _sessionListeners=new ArrayList();
     protected transient ArrayList _sessionAttributeListeners=new ArrayList();
     protected transient Map _sessions;
@@ -72,6 +72,26 @@ public abstract class AbstractSessionManager implements SessionManager
         _random=random;
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if requested session ID are first considered for new
+     * session IDs
+     */
+    public boolean getUseRequestedId()
+    {
+        return _useRequestedId;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param useRequestedId True if requested session ID are first considered for new
+     * session IDs
+     */
+    public void setUseRequestedId(boolean useRequestedId)
+    {
+        _useRequestedId = useRequestedId;
+    }
+    
     /* ------------------------------------------------------------ */
     public void initialize(ServletHandler handler)
     {
@@ -95,36 +115,45 @@ public abstract class AbstractSessionManager implements SessionManager
      * @param created 
      * @return Session ID.
      */
-    private synchronized String newSessionId(HttpServletRequest request,long created)
+    private String newSessionId(HttpServletRequest request,long created)
     {
-        String id=request.getRequestedSessionId();
-        while (id==null || id.length()==0 || _sessions.containsKey(id))
+        synchronized(_sessions)
         {
-            long r = _random.nextLong();
-            if (r<0)r=-r;
-            id=Long.toString(r,30+(int)(created%7));
-            String worker = (String)request.getAttribute("org.mortbay.http.ajp.JVMRoute");
-            if (worker!=null)
-                id+="."+worker;
-            else if (_workerName!=null)
-                id+="."+_workerName;
+            String id=_useRequestedId?request.getRequestedSessionId():null;
+            while (id==null || id.length()==0 || _sessions.containsKey(id))
+            {
+                long r = _random.nextLong();
+                if (r<0)r=-r;
+                id=Long.toString(r,30+(int)(created%7));
+                String worker = (String)request.getAttribute("org.mortbay.http.ajp.JVMRoute");
+                if (worker!=null)
+                    id+="."+worker;
+                else if (_workerName!=null)
+                    id+="."+_workerName;
+            }
+            return id;
         }
-        return id;
     }
     
     /* ------------------------------------------------------------ */
     public HttpSession getHttpSession(String id)
     {
-        HttpSession s = (HttpSession)_sessions.get(id);
-        return s;
+        synchronized(_sessions)
+        {
+            return (HttpSession)_sessions.get(id);
+        }
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized HttpSession newHttpSession(HttpServletRequest request)
+    public HttpSession newHttpSession(HttpServletRequest request)
     {
         Session session = newSession(request);
         session.setMaxInactiveInterval(_dftMaxIdleSecs);
-        _sessions.put(session.getId(),session);
+        synchronized(_sessions)
+        {
+            _sessions.put(session.getId(),session);
+        }
+        
         HttpSessionEvent event=new HttpSessionEvent(session);
         
         for(int i=0;i<_sessionListeners.size();i++)
@@ -132,6 +161,7 @@ public abstract class AbstractSessionManager implements SessionManager
                 .sessionCreated(event);
         return session;
     }
+    
 
     /* ------------------------------------------------------------ */
     protected abstract Session newSession(HttpServletRequest request);
@@ -162,7 +192,7 @@ public abstract class AbstractSessionManager implements SessionManager
     /** 
      * @param seconds 
      */
-    public synchronized void setMaxInactiveInterval(int seconds)
+    public void setMaxInactiveInterval(int seconds)
     {
         _dftMaxIdleSecs = seconds;
         if (_dftMaxIdleSecs>0 && _scavengePeriodMs>_dftMaxIdleSecs*100)
@@ -173,7 +203,7 @@ public abstract class AbstractSessionManager implements SessionManager
     /** 
      * @param seconds 
      */
-    public synchronized void setScavangePeriod(int seconds)
+    public void setScavangePeriod(int seconds)
     {
         if (seconds==0)
             seconds=60;
@@ -187,9 +217,12 @@ public abstract class AbstractSessionManager implements SessionManager
         
         if (period!=old_period)
         {
-            _scavengePeriodMs=period;
-            if (_scavenger!=null)
-                _scavenger.interrupt();
+            synchronized(this)
+            {
+                _scavengePeriodMs=period;
+                if (_scavenger!=null)
+                    _scavenger.interrupt();
+            }
         }
     }
     
