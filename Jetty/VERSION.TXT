@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + prevent AJP13 from reordering query.
+
 Jetty-4.2.10 - 7 July 2003
  + Updates to JettyPlus documentation
  + Updates to Jetty tutorial for start.jar, jmx etc
