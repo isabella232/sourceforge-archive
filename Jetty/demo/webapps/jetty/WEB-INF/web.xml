@@ -183,7 +183,7 @@
 -->
 
   <security-role>
-      <role-name>roleName</role-name>
+      <role-name>adminRef</role-name>
   </security-role>
 
 </web-app>
