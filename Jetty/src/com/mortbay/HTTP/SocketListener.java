@@ -135,11 +135,27 @@ public class SocketListener
      * the customizeRequest(Socket,HttpRequest) method.
      * @param request
      */
-    public final void customizeRequest(HttpConnection connection,
-                                       HttpRequest request)
+    public void customizeRequest(HttpConnection connection,
+                                 HttpRequest request)
     {
         Socket socket=(Socket)(connection.getConnection());
+        customizeRequest(socket,request);
+    }
 
+    /* ------------------------------------------------------------ */
+    /** Customize request from socket.
+     * Derived versions of SocketListener may specialize this method
+     * to customize the request with attributes of the socket used (eg
+     * SSL session ids).
+     * This version resets the SoTimeout if it has been reduced due to
+     * low resources.  Derived implementations should call
+     * super.customizeRequest(socket,request) unless persistConnection
+     * has also been overridden and not called.
+     * @param request
+     */
+    protected void customizeRequest(Socket socket,
+                                    HttpRequest request)
+    {
         try
         {
             if (_throttled>0 && socket.getSoTimeout()!=getMaxReadTimeMs())
@@ -152,20 +168,6 @@ public class SocketListener
         {
             Code.warning(e);
         }
-        customizeRequest(socket,request);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Customize request from socket.
-     * Derived versions of SocketListener may specialize this method
-     * to customize the request with attributes of the socket used (eg
-     * SSL session ids).
-     * @param request
-     */
-    protected void customizeRequest(Socket socket,
-                                    HttpRequest request)
-    {
-        // Do nothing
     }
 
     /* ------------------------------------------------------------ */
@@ -176,7 +178,7 @@ public class SocketListener
      * value after a request has been read.
      * @param connection.
      */
-    public final void persistConnection(HttpConnection connection)
+    public void persistConnection(HttpConnection connection)
     {
         if (isLowOnResources())
         {
@@ -203,8 +205,6 @@ public class SocketListener
             getThreads()==getMaxThreads() &&
             getIdleThreads()<getMinThreads();
     }
-    
-
 }
 
 

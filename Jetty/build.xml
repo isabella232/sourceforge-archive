@@ -46,7 +46,7 @@ mini.jetty.jar - Build a minimal HTTP server jar.
   <property name="jetty.webapp.classes"   value="${jetty.webapp.webinf}/classes"/>
 
   <property name="jetty.jar"      value="${lib}/com.mortbay.jetty.jar"/>
-  <property name="mini.jetty.jar" value="${basedir}/com.mortbay.http.jar"/>
+  <property name="mini.http.jar"  value="${basedir}/com.mortbay.http.jar"/>
   <property name="servlet.jar"    value="${lib}/javax.servlet.jar"/>
   <property name="jasper.jar"     value="${lib}/org.apache.jasper.jar"/>
   <property name="jaxp.jar"       value="${lib}/javax.xml.jaxp.jar"/>
@@ -71,7 +71,7 @@ mini.jetty.jar - Build a minimal HTTP server jar.
 
   <target name="tidy">
     <delete dir="${classes}" quiet="true"/>
-    <delete file="${mini.jetty.jar}" quiet="true"/>
+    <delete file="${mini.http.jar}" quiet="true"/>
   </target>
 
 
@@ -101,9 +101,21 @@ mini.jetty.jar - Build a minimal HTTP server jar.
            deprecation="off"
            >
        <include name="**/*.java"/>
+       <exclude name="**/NBIO/*.java"/>
     </javac>
   </target>
 
+  <target name="nbio" depends="classes">
+    <javac srcdir="${src}"
+           destdir="${classes}"
+           classpath="${classpath}"
+           debug="on"
+           optimize="off"
+           deprecation="off"
+           >
+       <include name="**/NBIO/*.java"/>
+    </javac>
+  </target>
 
   <target name="servlet.jar" depends="classes">
     <jar jarfile="${servlet.jar}" basedir="${classes}" >
@@ -112,7 +124,7 @@ mini.jetty.jar - Build a minimal HTTP server jar.
   </target>
 
   <target name="jetty.jar" depends="classes,servlet.jar">
-    <delete file="${mini.jetty.jar}" quiet="true"/>
+    <delete file="${mini.http.jar}" quiet="true"/>
     <jar jarfile="${jetty.jar}" basedir="${classes}" manifest="${src}/com/mortbay/MANIFEST.MF" >
        <include name="com/mortbay/**"  />
        <exclude name="com/mortbay/**/TestHarness*.class" />
@@ -127,11 +139,11 @@ mini.jetty.jar - Build a minimal HTTP server jar.
     </jar>
   </target>
 
-  <target name="mini.jetty.jar" depends="classes,servlet.jar">
+  <target name="mini.http.jar" depends="classes,servlet.jar">
     <delete file="${jetty.jar}" quiet="true"/>
     <delete file="${servlet.jar}" quiet="true"/>
     <delete file="${jasper.jar}" quiet="true"/>
-    <jar jarfile="${mini.jetty.jar}" basedir="${classes}" manifest="${src}/com/mortbay/MANIFEST.MF" compress="true">
+    <jar jarfile="${mini.http.jar}" basedir="${classes}" manifest="${src}/com/mortbay/MANIFEST.MF" compress="true">
        <include name="com/mortbay/Util/**" />
        <include name="com/mortbay/HTTP/**" />
        <include name="javax/servlet/http/Cookie.class" />

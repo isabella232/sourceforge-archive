@@ -241,7 +241,7 @@ public class Server extends HttpServer
         Thread hook =
             new Thread() {
                     public void run() {
-                        Code.warning("Shutdown hook executing");
+                        Log.event("Shutdown hook executing");
                         for (int i=0;i<servers.length;i++)
                         {
                             try{servers[i].stop();}

@@ -213,6 +213,8 @@ public abstract class JsseListener extends SocketListener
     protected void customizeRequest(Socket socket,
                                     HttpRequest request)
     {
+        super.customizeRequest(socket,request);
+        
         if (!(socket instanceof javax.net.ssl.SSLSocket))
             return; // I'm tempted to let it throw an exception...
 

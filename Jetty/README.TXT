@@ -412,9 +412,9 @@ not force chunking and the ResourceHandler to not accept ranges:
 </Configure>
 
 
-Minimal Jetty Jar
+Minimal HTTP Jar
 -----------------
-The ant target mini.jetty.jar builds an all-in-one minimal(ish) jar that
+The ant target mini.http.jar builds an all-in-one minimal(ish) jar that
 contains Util and HTTP packages.   This gives a full HTTP/1.1 server with
 the HttpHandler extension mechanism (but no servlets) in about 220K.
 
@@ -427,4 +427,25 @@ The minimal server can be run from the command line with
 
  java -cp com.mortbay.http.jar com.mortbay.HTTP.HttpServer
 
+
+Non-Blocking IO.
+----------------
+The com.mortbay.HTTP.NBIO package provides a SocketListener that
+uses the non-blocking IO library from 
+  http://www.cs.berkeley.edu/~mdw/proj/java-nbio/
+To avoid having threads assigned to Idle connections.   It is 
+HIGHLY EXPERIMENTAL, but appears to work OK at the moment. Feedback
+would be highly appreciated.
+
+To use the NBIO listener, the nbio package must be install on your 
+classpath and ld_library_path as per their instructions. 
+Build the nbio classes into the jetty jars with:
+  ant nbio jars
+
+The etc/nbio.xml file shows how Jetty can be setup to use this listener.
+
+Testing and benchmarking should be done systems with large numbers of 
+connections (idle or otherwise).  It is intended that the number of
+connections may greatly exceed the maximum threads allocated to the 
+listener.
 

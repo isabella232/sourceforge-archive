@@ -65,6 +65,7 @@ public class HttpConnection
     private long _openTime;
     private long _reqTime;
     private int _requests;
+    private Object _object;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -253,7 +254,27 @@ public class HttpConnection
         return _listener.getPort();
     }
 
+    /* ------------------------------------------------------------ */
+    /** Get associated object.
+     * Used by a particular HttpListener implementation to associate
+     * private datastructures with the connection.
+     * @return An object associated with the connecton by setObject.
+     */
+    public Object getObject()
+    {
+        return _object;
+    }
     
+    /* ------------------------------------------------------------ */
+    /** Set associated object.
+     * Used by a particular HttpListener implementation to associate
+     * private datastructures with the connection.
+     * @param o An object associated with the connecton.
+     */
+    public void setObject(Object o)
+    {
+        _object=o;
+    }
 
     /* ------------------------------------------------------------ */
     /* Verify HTTP/1.0 request

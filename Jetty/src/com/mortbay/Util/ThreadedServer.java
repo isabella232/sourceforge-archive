@@ -33,10 +33,11 @@ abstract public class ThreadedServer extends ThreadPool
 {    
     /* ------------------------------------------------------------------- */
     private InetAddrPort _address = null;    
-    ServerSocket _listen = null;
-    int _soTimeOut=-1;
-    int _maxReadTimeMs=-1;
-    int _lingerTimeSecs=30;
+    private ServerSocket _listen = null;
+    private int _soTimeOut=-1;
+    private int _maxReadTimeMs=-1;
+    private int _lingerTimeSecs=30;
+    private Acceptor _acceptor=null;
     
     /* ------------------------------------------------------------------- */
     /* Construct
@@ -278,21 +279,12 @@ abstract public class ThreadedServer extends ThreadPool
      * Implementation of ThreadPool.handle(), calls handleConnection.
      * @param job A Connection.
      */
-    public final void handle(Object job)
+    public void handle(Object job)
     {
         Socket socket =(Socket)job;
         try
         {
-            try {
-  		if (_lingerTimeSecs>=0)
-  		    socket.setSoLinger(true,_lingerTimeSecs);
-  		else
-  		    socket.setSoLinger(false,0);
-  	    }
-            catch(Exception e){Code.ignore(e);}
-            
-            handleConnection(socket); 
-
+            handleConnection(socket);
         }
         catch(Exception e){Code.warning("Connection problem",e);}
         finally
@@ -349,8 +341,16 @@ abstract public class ThreadedServer extends ThreadPool
             
             s=_listen.accept();
             
-            if (_maxReadTimeMs>0)
-                s.setSoTimeout(_maxReadTimeMs);
+            try {
+                if (_maxReadTimeMs>0)
+                    s.setSoTimeout(_maxReadTimeMs);
+  		if (_lingerTimeSecs>=0)
+  		    s.setSoLinger(true,_lingerTimeSecs);
+  		else
+  		    s.setSoLinger(false,0);
+  	    }
+            catch(Exception e){Code.ignore(e);}
+            
             return s;
         }
         catch(java.net.SocketException e)
@@ -369,20 +369,6 @@ abstract public class ThreadedServer extends ThreadPool
             Code.warning(e);
         }
         return null;
-    }
-    
-        
-    /* ------------------------------------------------------------ */
-    /** Get a job.
-     * Implementation of ThreadPool.getJob that calls acceptSocket
-     * @param timeoutMs Time to wait for a Job.  This is ignored as the
-     *                  accept timeout has already been set on the server
-     *                  socket.
-     * @return An accepted connection.
-     */
-    protected final Object getJob(int timeoutMs)
-    {
-        return acceptSocket(_listen,timeoutMs);
     }
     
     /* ------------------------------------------------------------------- */
@@ -412,6 +398,9 @@ abstract public class ThreadedServer extends ThreadPool
         _soTimeOut=getMaxIdleTimeMs();
         if (_soTimeOut>0)
             _listen.setSoTimeout(_soTimeOut);
+
+        _acceptor=new Acceptor();
+        _acceptor.start();
         
         super.start();
     }
@@ -420,7 +409,16 @@ abstract public class ThreadedServer extends ThreadPool
     public void stop()
         throws InterruptedException
     {
-        try{if (_listen!=null) _listen.setSoTimeout(100);}
+        
+        try{
+            if (_acceptor!=null)
+            {
+                _acceptor._running=false;
+                _acceptor.interrupt();
+            }
+            if (_listen!=null)
+                _listen.setSoTimeout(100);
+        }
         catch(SocketException e){Code.warning(e);}
         try {super.stop();}
         finally
@@ -428,12 +426,13 @@ abstract public class ThreadedServer extends ThreadPool
             try{if (_listen!=null) _listen.close();}
             catch(IOException e){Code.warning(e);}
             _listen=null;
+            _acceptor=null;
         }
     }
     
     /* ------------------------------------------------------------ */
     /** Force a stop.
-     * Close the socket, then make a connection to.
+     * Close the socket, then make a connection to it.
      * called from stop if interrupt is not enough
      */
     protected void forceStop()
@@ -469,16 +468,6 @@ abstract public class ThreadedServer extends ThreadPool
         super.destroy();
     }
 
-    /* ------------------------------------------------------------ */
-    /** Disabled.
-     * This ThreadPool method is not applicable to the ThreadedServer.
-     * @param job 
-     */
-    public final void run(Object job)
-    {
-        throw new IllegalStateException("Can't run jobs on ThreadedServer");
-    }
-
 
     /* ------------------------------------------------------------ */
     public String toString()
@@ -486,10 +475,30 @@ abstract public class ThreadedServer extends ThreadPool
         if (_address==null)    
             return getName()+"@0.0.0.0:0";
         return getName()+"@"+getInetAddrPort();
-    }   
+    }
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class Acceptor extends Thread
+    {
+        boolean _running=false;
+        public void run()
+        {
+            _running=true;
+            while(_running)
+            {
+                try
+                {
+                    Socket socket=acceptSocket(_listen,_soTimeOut);
+                    if (socket!=null)
+                        ThreadedServer.this.run(socket);
+                }
+                catch(Exception e)
+                {
+                    Code.warning(e);
+                }
+            }
+        }
+    }
+    
 }
-
-
-
-
-

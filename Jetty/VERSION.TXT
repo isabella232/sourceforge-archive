@@ -1,6 +1,9 @@
 Jetty3 Versions
 --------------
 
+ + Added lowResourcePersistTimeMs for more graceful degradation when
+   we run out of threads.
+
 Jetty-3.1.rc8 - 22 Aug 2001
  + Support WEB-INF/web-jetty.xml configuration extension for webapps
  + Allow per context log files.
