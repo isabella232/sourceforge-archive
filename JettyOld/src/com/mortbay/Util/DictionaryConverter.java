@@ -66,7 +66,7 @@ public class DictionaryConverter implements Converter
                                               converter);
                 }
             } else {
-                if (value == null) continue;
+                if (value == null || value.toString().length()==0) continue;
                 value = converter.convert(value, enum.getType(), converter);
             }
             if (value == null) continue;

@@ -70,7 +70,7 @@ public class MethodTag
     }
 
     /* ----------------------------------------------------------------- */
-    Object invoke()
+    public Object invoke()
          throws InvocationTargetException,IllegalAccessException
     {
         if (tagMethod==null)

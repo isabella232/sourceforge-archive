@@ -40,7 +40,9 @@ public class Cookies
     public void setCookie(Cookie cookie)
     {
         String key = StringUtil
-            .asciiToLowerCase((cookie.getName()+';'+cookie.getPath()));
+            .asciiToLowerCase((cookie.getName()+';'+
+                               cookie.getPath()+';'+
+                               cookie.getDomain()));
         cookies.put(key,cookie);
     }
     
@@ -83,7 +85,7 @@ public class Cookies
         if (path==null)
             path="/";
         
-        String key = StringUtil.asciiToLowerCase(name+';'+path);
+        String key = StringUtil.asciiToLowerCase(name+';'+path+';'+domain);
 
         Cookie cookie = new Cookie(name,value);
         cookie.setPath(path);

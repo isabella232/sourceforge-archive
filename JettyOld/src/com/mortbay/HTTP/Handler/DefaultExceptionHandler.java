@@ -38,15 +38,16 @@ public class DefaultExceptionHandler implements ExceptionHandler
                 Code.warning(exception);
             if (!response.headersWritten())
                 response.setStatus(HttpResponse.SC_INTERNAL_SERVER_ERROR);
-            
+
             PrintWriter pout=null;
-            try{
+            try {
                 pout=new PrintWriter(response.getWriter());
             }
-            catch(IllegalStateException ise)
-            {
+            catch(IllegalStateException ise) {
                 Code.ignore(ise);
-                pout=new PrintWriter(response.getWriter());
+                pout=new PrintWriter
+                    (new OutputStreamWriter
+                        (response.getOutputStream(),"ISO-8859-1"));
             }
 
             pout.println("<HTML><HEAD><TITLE>Exception</TITLE>");

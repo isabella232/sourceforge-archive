@@ -1,4 +1,14 @@
-Release 2.3.3 - 19th October 1999 LATEST STABLE
+Release 2.3.4 - 18th January 2000 LATEST
+  + include from linux rather than genunix for native builds
+  + Fixed IllegalStateException handling in DefaultExceptionHandler
+  + MethodTag.invoke() is now public.
+  + Improved HtmlFilter.activate header modifications.
+  + Cookie map keyed on domain as well as name and path.
+  + DictionaryConverter handles null values.
+  + URI decodes applies URL decoding to the path.
+  + Servlet properties allow objects to be stored.
+
+Release 2.3.3 - 19th October 1999 STABLE
   + Replaced UTF8 encoding with ISO-8859-1 for headers.
   + Use UrlEncoded for form parameters.
   + Do our own URL encoding with ISO-8859-1

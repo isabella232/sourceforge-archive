@@ -640,7 +640,7 @@ public class HttpServer implements ServletContext
      */
     public Object getAttribute(String name)
     {
-        return config.getProperty(name);
+        return config.getProperties().get(name);
     }
     
     /* ---------------------------------------------------------------- */

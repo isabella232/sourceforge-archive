@@ -52,6 +52,7 @@ public class URI
             else
                 path=uri.substring(0,q);
         }
+        path = UrlEncoded.decode(path);
     }
     
     /* ------------------------------------------------------------ */

@@ -128,12 +128,15 @@ public class BaseConfiguration implements HttpConfiguration
      */
     public Object getAttribute(String name)
     {
-        Object attr=null;
         if (attributes!=null)
-            attr=attributes.get(name);
-        if (attr==null)
-            attr=getProperty(name);
-        return attr;
+        {
+            Object a = attributes.get(name);
+            if (null != a)
+                return a;
+        }
+        if (properties==null)
+            return null;
+        return properties.get(name);
     }
     
     /* ------------------------------------------------------------ */
