@@ -20,7 +20,7 @@ import org.mortbay.io.stream.OutputStreamBuffer;
  * Temporary connection class to get things running.
  * 
  */
-public class HttpConnection
+public class HttpConnection implements Runnable
 {
     protected HttpInputStream _in;
     protected HttpOutputStream _out;
@@ -54,12 +54,19 @@ public class HttpConnection
         return _handler;
     }
     
-    public void run() throws IOException
+    public void run()
     {
-        while (_out.isPersistent())
+        try
         {
-            if (!runNext())
-                break;
+            while (_out.isPersistent())
+            {
+                if (!runNext())
+                    break;
+            }
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
         }
     }
 
@@ -115,6 +122,8 @@ public class HttpConnection
             _out.setHeadResponse(HttpMethods.HEAD_BUFFER.equals(request.getMethod()));
 
             _handler.handle(request,_outHeader,_in,_out);
+            _in.close();
+            _out.close();
             return true;
         }
         finally
@@ -172,7 +181,6 @@ public class HttpConnection
             out.write(content.toString().getBytes());
             out.write("</pre></html>\n".getBytes());
             
-            out.close();
         }
     }
 }

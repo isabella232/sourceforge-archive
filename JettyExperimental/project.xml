@@ -53,15 +53,7 @@
   <!-- Versions -->
   <!-- ======== -->
 
-  <currentVersion>EXP</currentVersion>
-
-  <versions>
-    <version>
-      <id>0.0.alpha0</id>
-      <name>0.0.alpha0</name>
-      <tag>HEAD</tag>
-    </version>
-  </versions>
+  <currentVersion>EXP0</currentVersion>
 
 
   <!-- ========== -->

@@ -14,7 +14,7 @@ import java.net.Socket;
 /**
  * Temporary Servler class to get things running.
  */
-public class HttpServer
+public class HttpServer implements Runnable
 {
     int port= 8080;
 
@@ -38,12 +38,13 @@ public class HttpServer
         port= p;
     }
 
-    public void run() throws IOException
+    public void run() 
     {
-        ServerSocket ss= new ServerSocket(8080);
+        ServerSocket ss=null;
 
         try
         {
+            ss= new ServerSocket(port);
 
             System.out.println("listening on " + ss);
             while (true)
@@ -88,9 +89,15 @@ public class HttpServer
                 }
             }
         }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
         finally
         {
-            ss.close();
+            System.out.println("Close Connection: "+ss);
+            try{ss.close();}
+            catch(IOException e){e.printStackTrace();}
         }
     }
 

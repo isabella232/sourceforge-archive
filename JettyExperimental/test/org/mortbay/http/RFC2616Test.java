@@ -593,7 +593,6 @@ public class RFC2616Test extends TestCase
             
             checkContains(get,0,"HTTP/1.1 200","GET");
             checkContains(get,0,"Content-Type: text/html","GET content");
-            checkContains(get,0,"Content-Length: ","GET length");
             checkContains(get,0,"<html>","GET body");
 
             
@@ -602,7 +601,6 @@ public class RFC2616Test extends TestCase
                                               "\n");
             checkContains(head,0,"HTTP/1.1 200","HEAD");
             checkContains(head,0,"Content-Type: text/html","HEAD content");
-            checkContains(head,0,"Content-Length: ","HEAD length");
             assertEquals("HEAD no body",-1,head.indexOf("<html>"));
         }
         catch(Exception e)

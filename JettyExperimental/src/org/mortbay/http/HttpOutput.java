@@ -90,12 +90,14 @@ public class HttpOutput
         // get common values
         int status= _header.getStatus();
         Buffer connection = _header.get(HttpHeaders.CONNECTION_BUFFER);
-        _close=HttpHeaderValues.CLOSE_BUFFER.equals(connection);
+        _close=connection!=null
+            ?HttpHeaderValues.CLOSE_BUFFER.equals(connection)
+            :(_version<HttpVersions.HTTP_1_1_ORDINAL);
+        
         Buffer transferEncoding = _header.get(HttpHeaders.TRANSFER_ENCODING_BUFFER);
         boolean identity=HttpHeaderValues.IDENTITY_BUFFER.equals(transferEncoding);
         _chunking=HttpHeaderValues.CHUNKED_BUFFER.equals(transferEncoding);
         _contentLength=_header.getIntField(HttpHeaders.CONTENT_LENGTH_BUFFER);
-              
               
         // 1. check status
         if (status>=100 && status<=199 || status==204 || status==304)

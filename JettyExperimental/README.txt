@@ -23,7 +23,7 @@ Very little doco at the moment, but the things you need to know are:
 
  + You can run it with
 
-    java -classpath target/jetty-EXP.jar org.mortbay.http.HttpServer
+    java -classpath target/jetty-EXP0.jar org.mortbay.http.HttpServer
 
 
  + The HttpServer is nailed to port 8080 and just does a simple
