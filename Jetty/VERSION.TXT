@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Support default mime mapping defined by *
  + Recycling of HttpFields class.
  + Renamed Filter application methods.
  + Fixed firstWrite after commit.
