@@ -15,6 +15,9 @@
 
 package org.mortbay.http;
 
+import org.mortbay.io.Buffer;
+import org.mortbay.io.ByteArrayBuffer;
+import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.thread.ThreadPool;
 
 
@@ -22,10 +25,26 @@ public class HttpServer
 {
     private ThreadPool _threadPool = new ThreadPool();
     
+    public HttpServer()
+    	throws Exception
+    {
+        _threadPool.start();
+    }
+    
     public void dispatch(Runnable job)
     	throws InterruptedException
     {
-        new Thread(job).start();
+        _threadPool.run(job);
     }
     
+    public Buffer getBuffer()
+    {
+        //return new NIOBuffer(8192, true);
+        return new ByteArrayBuffer(8192);
+    }
+    
+    public void returnBuffer(Buffer buffer)
+    {
+    
+    }
 }

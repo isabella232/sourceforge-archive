@@ -58,6 +58,7 @@ public class View extends AbstractBuffer
     {
         _access=READWRITE;
         _buffer=buffer.buffer();
+        setGetIndex(0);
         setPutIndex(buffer.putIndex());
         setGetIndex(buffer.getIndex());
         setMarkIndex(buffer.markIndex());
@@ -105,8 +106,9 @@ public class View extends AbstractBuffer
     public void clear()
     {
         setMarkIndex(-1);
-        setGetIndex(_buffer.getIndex());
+        setGetIndex(0);
         setPutIndex(_buffer.getIndex());
+        setGetIndex(_buffer.getIndex());
     }
 
     /**

@@ -145,13 +145,14 @@ public class SocketChannelListener implements LifeCycle
         _acceptKey=_acceptChannel.register(_selector, SelectionKey.OP_ACCEPT);
 
         // Start selector thread
-        _selectorThread= new SelectorThread();
+        _selectorThread = new SelectorThread();
         _selectorThread.start();
 
         log.info("Started SocketChannelListener on " + getHost()+":"+getPort());
     }
     
 
+    /* ------------------------------------------------------------ */
     /*
      */
     public boolean isStarted()
@@ -202,13 +203,12 @@ public class SocketChannelListener implements LifeCycle
 
         /* ------------------------------------------------------------ */
         public void run()
-        {
+        {   
             try
             {
                 _running= true;
                 while (_running)
-                {
-                    
+                {   
                     // Give other threads a chance to process last loop.
                     Thread.yield();
                     
@@ -236,7 +236,6 @@ public class SocketChannelListener implements LifeCycle
                     
                     
                     // SELECT for things to do!
-                    System.err.println("Selecting "+_selector);
                     _selector.select(_maxIdleTime);
                     
                     // Look for things to do
@@ -248,10 +247,8 @@ public class SocketChannelListener implements LifeCycle
                         
                         try
                         {
-                            System.err.println("key="+key+" "+key.isValid());
                             if (!key.isValid())
                             {
-                                System.err.println("Cancel");
                                 key.cancel();
                                 continue;
                             }
@@ -260,7 +257,6 @@ public class SocketChannelListener implements LifeCycle
                             {
                                 if (key.isAcceptable())
                                 {
-                                    System.err.println("Accept");
                                     SocketChannel channel = accept();
                                     SelectionKey newKey = channel.register(_selector, SelectionKey.OP_READ);
                                     Connection connection=new Connection(channel,newKey);
@@ -280,7 +276,6 @@ public class SocketChannelListener implements LifeCycle
                         catch (CancelledKeyException e)
                         {
                             LogSupport.ignore(log,e);
-                            System.err.println("Cancel");
                             key.cancel();
                             continue;   
                         }
@@ -351,7 +346,7 @@ public class SocketChannelListener implements LifeCycle
         Connection(SocketChannel channel,SelectionKey key)
         {
             super(channel);
-            _connection = new HttpConnection(this);
+            _connection = new HttpConnection(_server,this);
             key.attach(this);
             _key=key;
         }
@@ -364,7 +359,6 @@ public class SocketChannelListener implements LifeCycle
                 {
                     // Still dispatched, so not interested in further selecting.
                     _key.interestOps(0);
-                    System.err.println("NOT INTERESTED!! "+_key);
                     return;
                 }
                 
@@ -394,9 +388,6 @@ public class SocketChannelListener implements LifeCycle
                 
                 if (getChannel().isOpen() && _key.isValid())
                 {
-                    
-                    // TODO - queue the changes
-                    
                     int ops = _key.interestOps();
                     _interestOps=SelectionKey.OP_READ | (_writable?0:SelectionKey.OP_WRITE);
                     
@@ -461,6 +452,17 @@ public class SocketChannelListener implements LifeCycle
             catch(ClosedChannelException e)
             {
                 log.debug("handle",e);
+            }
+            catch(IOException e)
+            {
+                // TODO - better than this
+                if ("BAD".equals(e.getMessage()))
+                    log.warn("BAD Request");
+                else
+                    log.warn("IO",e);
+                _key.cancel();
+                try{close();}
+                catch(IOException e2){LogSupport.ignore(log, e2);}
             }
             catch(Throwable e)
             {

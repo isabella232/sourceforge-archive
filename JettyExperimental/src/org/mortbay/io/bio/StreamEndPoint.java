@@ -44,6 +44,11 @@ public class StreamEndPoint implements EndPoint
         _in=in;
         _out=out;
     }
+    
+    public boolean isBlocking()
+    {
+        return true;
+    }
 
     /* (non-Javadoc)
      * @see org.mortbay.io.BufferIO#isClosed()
@@ -134,6 +139,7 @@ public class StreamEndPoint implements EndPoint
             _out.write(header.array(),header.getIndex(),length);
             total=length;
         }
+        // TODO
         header.clear();
 
         // See if the trailer buffer will fit in front of buffer content.
@@ -149,7 +155,8 @@ public class StreamEndPoint implements EndPoint
             _out.write(buffer.array(),buffer.getIndex(),length);
        
         total+=length;
-        buffer.clear();
+        if (!buffer.isImmutable())
+            buffer.clear();
         
         // write trailer if it was not stuffed in the buffer.
         length=trailer==null?0:trailer.length();

@@ -26,8 +26,9 @@ import java.io.IOException;
  */
 public interface EndPoint
 {
-
     boolean isClosed();
+    
+    boolean isBlocking();
     
     /**
      * Close any backing stream associated with the buffer

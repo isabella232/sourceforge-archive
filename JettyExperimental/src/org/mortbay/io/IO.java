@@ -95,7 +95,7 @@ public class IO extends ThreadPool
         try{
             instance().run(new Job(in,out));
         }
-        catch(InterruptedException e)
+        catch(Exception e)
         {
             log.warn(LogSupport.EXCEPTION,e);
         }
@@ -120,7 +120,7 @@ public class IO extends ThreadPool
         {
             instance().run(new Job(in,out));
         }
-        catch(InterruptedException e)
+        catch(Exception e)
         {
             log.warn(LogSupport.EXCEPTION,e);
         }

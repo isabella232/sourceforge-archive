@@ -104,6 +104,38 @@ public class HttpBuilder implements HttpTokens
         _transferEncodingSet=false;
         _head=false;
     }
+    
+    public int getState()
+    {
+        return _state;
+    }
+    
+    public boolean isState(int state)
+    {
+        return _state==state;
+    }
+    
+    /** Set the buffer.
+     * The builder must be in START or END. A reset is done when a new buffer is passed.
+     * @param buffer The buffer or null to remove the buffer.
+     */
+    public void setBuffer(Buffer buffer)
+    {
+        if (_state!=STATE_START && _state!=STATE_END)
+            Portable.throwIllegalState("!START&&!END");
+        _buffer=buffer;
+        if (_buffer!=null)
+        {
+            _buffer.clear();
+            if (_state==STATE_END)
+                reset();
+        }
+    }
+    
+    public Buffer getBuffer()
+    {
+        return _buffer;
+    }
 
     /**
      * @return Returns the head.
@@ -331,7 +363,6 @@ public class HttpBuilder implements HttpTokens
         switch(_contentLength)
         {
             case CHUNKED_CONTENT:
-                // TODO check space or bypass etc.
                 int space=_buffer.space();
                 if (content.length()+24<space)
                 {
@@ -346,8 +377,11 @@ public class HttpBuilder implements HttpTokens
                     len = space-24;
                     BufferUtil.putHexInt(_buffer, len);
                     _buffer.put(CRLF);
-                    _buffer.poke(_buffer.putIndex(),content);
-                    _buffer.setPutIndex(_buffer.putIndex()+len);
+                    
+                    int pi=content.putIndex();
+                    content.setPutIndex(content.getIndex()+len);
+                    _buffer.put(content);
+                    content.setPutIndex(pi);
                     _buffer.put(last?CRLF_LAST_CHUNK:CRLF);
                 }
                 break;

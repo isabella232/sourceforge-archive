@@ -16,6 +16,10 @@
 package org.mortbay.thread;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 /* ------------------------------------------------------------ */
 /** A pool of threads.
@@ -38,27 +42,80 @@ import java.io.Serializable;
  */
 public class ThreadPool implements LifeCycle, Serializable
 {
-    public static final String __DAEMON= "org.mortbay.util.ThreadPool.daemon";
-    public static final String __PRIORITY= "org.mortbay.util.ThreadPool.priority";
+    private static int __id;
 
-    /* ------------------------------------------------------------------- */
+    private final String _jobLock = "JOB";
+    private final String _joinLock = "JOIN";
+    
+    private boolean _daemon;
+    private int _maxIdleTimeMs=10000;
+    private int _maxThreads=255;
+    private int _minThreads=1;
     private String _name;
-    private Pool _pool;
-    private Object _join= "";
+    int _priority= Thread.NORM_PRIORITY;
+    private boolean _queue;
+    private int _blockMs=10000;
 
+    private transient int _id;
+    private transient int _idle;
+    private transient List _blocked;
+    private transient List _jobs;
     private transient boolean _started;
+    private transient Set _threads;
 
     /* ------------------------------------------------------------------- */
     /* Construct
      */
     public ThreadPool()
     {
-        _pool= new Pool();
-        _pool.setPoolClass(ThreadPool.PoolThread.class);
         _name= this.getClass().getName();
         int dot= _name.lastIndexOf('.');
         if (dot >= 0)
             _name= _name.substring(dot + 1);
+        _name=_name+__id++;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get the number of idle threads in the pool.
+     * @see #getThreads
+     * @return Number of threads
+     */
+    public int getIdleThreads()
+    {
+        return _idle;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get the maximum thread idle time.
+     * Delegated to the named or anonymous Pool.
+     * @see #setMaxIdleTimeMs
+     * @return Max idle time in ms.
+     */
+    public int getMaxIdleTimeMs()
+    {
+        return _maxIdleTimeMs;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the maximum number of threads.
+     * Delegated to the named or anonymous Pool.
+     * @see #setMaxThreads
+     * @return maximum number of threads.
+     */
+    public int getMaxThreads()
+    {
+        return _maxThreads;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get the minimum number of threads.
+     * Delegated to the named or anonymous Pool.
+     * @see #setMinThreads
+     * @return minimum number of threads.
+     */
+    public int getMinThreads()
+    {
+        return _minThreads;
     }
 
     /* ------------------------------------------------------------ */
@@ -71,178 +128,13 @@ public class ThreadPool implements LifeCycle, Serializable
     }
 
     /* ------------------------------------------------------------ */
-    /** 
-     * @param name Name of the ThreadPool to use when naming Threads.
-     */
-    public void setName(String name)
-    {
-        _name= name;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return Name of the Pool instance this ThreadPool uses or null for
-     * an anonymous private pool.
-     */
-    public String getPoolName()
-    {
-        return _pool.getPoolName();
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the Pool name.
-     * All ThreadPool instances with the same Pool name will share the
-     * same Pool instance. Thus they will share the same max, min and
-     * available Threads.  The field values of the first ThreadPool to call
-     * setPoolName with a specific name are used for the named
-     * Pool. Subsequent ThreadPools that join the name pool will loose their
-     * private values.
-     * @param name Name of the Pool instance this ThreadPool uses or null for
-     * an anonymous private pool.
-     */
-    public void setPoolName(String name)
-    {
-        synchronized (Pool.class)
-        {
-            if (isStarted())
-            {
-                if ((name == null && _pool.getPoolName() != null)
-                    || (name != null && !name.equals(_pool.getPoolName())))
-                    throw new IllegalStateException("started");
-                return;
-            }
-
-            if (name == null)
-            {
-                if (_pool.getPoolName() != null)
-                    _pool= new Pool();
-            }
-            else
-            {
-                Pool pool= Pool.getPool(name);
-                if (pool == null)
-                    _pool.setPoolName(name);
-                else
-                    _pool= pool;
-            }
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    /** 
-     * Delegated to the named or anonymous Pool.
-     */
-    public boolean isDaemon()
-    {
-        return _pool.getAttribute(__DAEMON) != null;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** 
-     * Delegated to the named or anonymous Pool.
-     */
-    public void setDaemon(boolean daemon)
-    {
-        _pool.setAttribute(__DAEMON, daemon ? "true" : null);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Is the pool running jobs.
-     * @return True if start() has been called.
-     */
-    public boolean isStarted()
-    {
-        return _started;
-    }
-
-    /* ------------------------------------------------------------ */
     /** Get the number of threads in the pool.
-     * Delegated to the named or anonymous Pool.
      * @see #getIdleThreads
      * @return Number of threads
      */
     public int getThreads()
     {
-        return _pool.size();
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get the number of idle threads in the pool.
-     * Delegated to the named or anonymous Pool.
-     * @see #getThreads
-     * @return Number of threads
-     */
-    public int getIdleThreads()
-    {
-        return _pool.available();
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get the minimum number of threads.
-     * Delegated to the named or anonymous Pool.
-     * @see #setMinThreads
-     * @return minimum number of threads.
-     */
-    public int getMinThreads()
-    {
-        return _pool.getMinSize();
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the minimum number of threads.
-     * Delegated to the named or anonymous Pool.
-     * @see #getMinThreads
-     * @param minThreads minimum number of threads
-     */
-    public void setMinThreads(int minThreads)
-    {
-        _pool.setMinSize(minThreads);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the maximum number of threads.
-     * Delegated to the named or anonymous Pool.
-     * @see #setMaxThreads
-     * @return maximum number of threads.
-     */
-    public int getMaxThreads()
-    {
-        return _pool.getMaxSize();
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the maximum number of threads.
-     * Delegated to the named or anonymous Pool.
-     * @see #getMaxThreads
-     * @param maxThreads maximum number of threads.
-     */
-    public void setMaxThreads(int maxThreads)
-    {
-        _pool.setMaxSize(maxThreads);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get the maximum thread idle time.
-     * Delegated to the named or anonymous Pool.
-     * @see #setMaxIdleTimeMs
-     * @return Max idle time in ms.
-     */
-    public int getMaxIdleTimeMs()
-    {
-        return _pool.getMaxIdleTimeMs();
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the maximum thread idle time.
-     * Threads that are idle for longer than this period may be
-     * stopped.
-     * Delegated to the named or anonymous Pool.
-     * @see #getMaxIdleTimeMs
-     * @param maxIdleTimeMs Max idle time in ms.
-     */
-    public void setMaxIdleTimeMs(int maxIdleTimeMs)
-    {
-        _pool.setMaxIdleTimeMs(maxIdleTimeMs);
+        return _threads.size();
     }
 
     /* ------------------------------------------------------------ */
@@ -251,104 +143,7 @@ public class ThreadPool implements LifeCycle, Serializable
      */
     public int getThreadsPriority()
     {
-        int priority= Thread.NORM_PRIORITY;
-
-        Object o= _pool.getAttribute(__PRIORITY);
-        if (o != null)
-        {
-            priority= ((Integer)o).intValue();
-        }
-
-        return priority;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the priority of the pool threads.
-     *  @param priority the new thread priority.
-     */
-    public void setThreadsPriority(int priority)
-    {
-        _pool.setAttribute(__PRIORITY, new Integer(priority));
-    }
-
-    /* ------------------------------------------------------------ */
-    /* Start the ThreadPool.
-     * Construct the minimum number of threads.
-     */
-    public void start() throws Exception
-    {
-        _started= true;
-        _pool.start();
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Stop the ThreadPool.
-     * New jobs are no longer accepted,idle threads are interrupted
-     * and stopJob is called on active threads.
-     * The method then waits 
-     * min(getMaxStopTimeMs(),getMaxIdleTimeMs()), for all jobs to
-     * stop, at which time killJob is called.
-     */
-    public void stop() throws InterruptedException
-    {
-        _started= false;
-        _pool.stop();
-        synchronized (_join)
-        {
-            _join.notifyAll();
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public void join() throws InterruptedException
-    {
-        while (isStarted() && _pool != null)
-        {
-            synchronized (_join)
-            {
-                if (isStarted() && _pool != null)
-                    _join.wait(getMaxIdleTimeMs() * 2);
-            }
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public void shrink() throws InterruptedException
-    {
-        _pool.shrink();
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Run job.
-     * Give a job to the pool. 
-     * @param job  If the job is derived from Runnable, the run method
-     * is called, otherwise it is passed as the argument to the handle
-     * method.
-     */
-    public void run(Object job) throws InterruptedException
-    {
-        if (job == null)
-            return;
-
-        try
-        {
-            PoolThread thread= (PoolThread)_pool.get(getMaxIdleTimeMs());
-
-            if (thread != null)
-                thread.run(this, job);
-            else
-            {
-                stopJob(null, job);
-            }
-        }
-        catch (InterruptedException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        return _priority;
     }
 
     /* ------------------------------------------------------------ */
@@ -366,6 +161,205 @@ public class ThreadPool implements LifeCycle, Serializable
     }
 
     /* ------------------------------------------------------------ */
+    /** 
+     * Delegated to the named or anonymous Pool.
+     */
+    public boolean isDaemon()
+    {
+        return _daemon;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Is the pool running jobs.
+     * @return True if start() has been called.
+     */
+    public boolean isStarted()
+    {
+        return _started;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void join() throws InterruptedException
+    {
+        synchronized (_joinLock)
+        {
+            while (isStarted())
+                _joinLock.wait(getMaxIdleTimeMs());
+        }
+    }
+
+    protected void newThread()
+    {
+        synchronized(_jobLock)
+        {
+            Thread thread =new PoolThread();
+            _threads.add(thread);
+            _idle++;
+            thread.setName(_name+"-"+_id++);
+            thread.start();   
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Run job.
+     * Give a job to the pool. 
+     * @param job  If the job is derived from Runnable, the run method
+     * is called, otherwise it is passed as the argument to the handle
+     * method.
+     * @param waitMs
+     * @return true if the job was given to a thread, false if no thread was
+     * available.
+     */
+    public boolean run(Object job) 
+    {
+        boolean queued=false;
+        synchronized(_jobLock)
+        {	
+            if (!_started)
+                return false;
+            
+            int blockMs = _blockMs;
+            
+            // Wait for an idle thread!
+            while (_idle-_jobs.size()<=0)
+            {
+                // Are we at max size?
+                if (_threads.size()<_maxThreads)
+                {    
+                    newThread();
+                    break;
+                }
+                 
+                // Can we queue?
+                if (_queue)
+                    break;
+                
+                // pool is full
+                if (blockMs<0)
+                    return false;
+                    
+                // Block waiting
+                try
+                {
+                    _blocked.add(Thread.currentThread());
+                    _jobLock.wait(blockMs);
+                    blockMs=-1;
+                }
+                catch (InterruptedException ie)
+                {}
+            }
+
+            _jobs.add(job);
+            queued=true;
+            _jobLock.notify();
+            Thread.yield(); 
+        }
+        
+        return queued;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * Delegated to the named or anonymous Pool.
+     */
+    public void setDaemon(boolean daemon)
+    {
+        _daemon=daemon;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the maximum thread idle time.
+     * Threads that are idle for longer than this period may be
+     * stopped.
+     * Delegated to the named or anonymous Pool.
+     * @see #getMaxIdleTimeMs
+     * @param maxIdleTimeMs Max idle time in ms.
+     */
+    public void setMaxIdleTimeMs(int maxIdleTimeMs)
+    {
+        _maxIdleTimeMs=maxIdleTimeMs;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the maximum number of threads.
+     * Delegated to the named or anonymous Pool.
+     * @see #getMaxThreads
+     * @param maxThreads maximum number of threads.
+     */
+    public void setMaxThreads(int maxThreads)
+    {
+        _maxThreads=maxThreads;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the minimum number of threads.
+     * Delegated to the named or anonymous Pool.
+     * @see #getMinThreads
+     * @param minThreads minimum number of threads
+     */
+    public void setMinThreads(int minThreads)
+    {
+        _minThreads=minThreads;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param name Name of the ThreadPool to use when naming Threads.
+     */
+    public void setName(String name)
+    {
+        _name= name;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the priority of the pool threads.
+     *  @param priority the new thread priority.
+     */
+    public void setThreadsPriority(int priority)
+    {
+        _priority=priority;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* Start the ThreadPool.
+     * Construct the minimum number of threads.
+     */
+    public void start() throws Exception
+    {
+        _started= true;
+        _threads=new HashSet();
+        _jobs=new LinkedList();
+        _blocked=new LinkedList();
+        _idle=0;
+        
+        for (int i=0;i<_minThreads;i++)
+        {
+            newThread();
+        }
+        
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Stop the ThreadPool.
+     * New jobs are no longer accepted,idle threads are interrupted
+     * and stopJob is called on active threads.
+     * The method then waits 
+     * min(getMaxStopTimeMs(),getMaxIdleTimeMs()), for all jobs to
+     * stop, at which time killJob is called.
+     */
+    public void stop() throws InterruptedException
+    {
+        _started= false;
+        
+        // TODO STOP!
+        
+        synchronized (_joinLock)
+        {
+            _joinLock.notifyAll();
+        }
+    }
+
+    /* ------------------------------------------------------------ */
     /** Stop a Job.
      * This method is called by the Pool if a job needs to be stopped.
      * The default implementation does nothing and should be extended by a
@@ -375,154 +369,74 @@ public class ThreadPool implements LifeCycle, Serializable
      */
     protected void stopJob(Thread thread, Object job)
     {
+        thread.interrupt();
     }
+    
+    
 
     /* ------------------------------------------------------------ */
     /** Pool Thread class.
      * The PoolThread allows the threads job to be
      * retrieved and active status to be indicated.
      */
-    public static class PoolThread extends Thread implements Pool.PondLife
+    public class PoolThread extends Thread 
     {
-        Pool _pool;
-        ThreadPool _jobPool;
-        Object _job;
-        ThreadPool _runPool;
-        Object _run;
-        int _id;
-        String _name;
-
-        /* ------------------------------------------------------------ */
-        public void enterPool(Pool pool, int id)
+        Object _job=null;
+        
+        PoolThread()
         {
-            _pool= pool;
-            _id= id;
-            _name= _pool.getPoolName() == null ? ("PoolThread-" + id) : (_pool.getPoolName() + "-" + id);
-            this.setName(_name);
-            this.setDaemon(pool.getAttribute(__DAEMON) != null);
-
-            Object o= pool.getAttribute(__PRIORITY);
-            if (o != null)
-            {
-                this.setPriority(((Integer)o).intValue());
-            }
-
-            this.start();
-        }
-
-        /* ------------------------------------------------------------ */
-        public int getID()
-        {
-            return _id;
-        }
-
-        /* ------------------------------------------------------------ */
-        public void poolClosing()
-        {
-            synchronized (this)
-            {
-                _pool= null;
-                if (_run == null)
-                    notify();
-                else
-                    interrupt();
-            }
+            setDaemon(_daemon);
+            setPriority(_priority);
         }
         
-        /* ------------------------------------------------------------ */
-        public void leavePool()
-        {
-            synchronized (this)
-            {
-                _pool= null;
-                if (_runPool == null || _jobPool == null)
-                    notify();
-                
-                if (_job!=null && _jobPool!=null)
-                {
-                    _jobPool.stopJob(this, _job);
-                    _job= null;
-                    _jobPool=null;
-                }
-                
-                if (_run!=null && _runPool!=null)
-                {
-                    _runPool.stopJob(this, _run);
-                    _run= null;
-                    _runPool=null;
-                }
-            }
-        }
-
-        /* ------------------------------------------------------------ */
-        public void run(ThreadPool pool, Object job)
-        {
-            synchronized (this)
-            {
-                _jobPool= pool;
-                _job= job;
-                notify();
-            }
-        }
-
         /* ------------------------------------------------------------ */
         /** ThreadPool run.
          * Loop getting jobs and handling them until idle or stopped.
          */
         public void run()
         {
-            _run= null;
-            _runPool= null;
-            
-            while (_pool != null && _pool.isStarted())
+            try
             {
-                try
+                while (_started)
                 {
-                    synchronized (this)
+                    _job=null;
+                    
+                    try
                     {
-                        // Wait for a job.
-                        if (_run == null && _pool != null && _pool.isStarted() && _job == null)
-                            wait(_pool.getMaxIdleTimeMs());
-
-                        if (_job != null)
+                        synchronized (_jobLock)
                         {
-                            // copy job to run fields
-                            _run= _job;
-                            _job= null;
-                            _runPool= _jobPool;
-                            _jobPool= null;
+                            while(_jobs.size()==0 && _started)
+                                _jobLock.wait();
+                            if (_jobs.size()>0 && _started)
+                                _job=_jobs.remove(0);
+                            if (_job!=null)
+                                _idle--;
                         }
-
+                        
+                        if (_started && _job!=null)
+                            handle(_job);
                     }
-
-                    // handle run outside of sync
-                    if (_run != null && _runPool!=null)
-                        _runPool.handle(_run);
-                }
-                catch (InterruptedException e)
-                {}
-                finally
-                {
-                    synchronized (this)
+                    catch (InterruptedException e) {}
+                    finally
                     {
-                        boolean got= _run != null;
-                        _run= null;
-                        _runPool=null;
-                        try
+                        synchronized (_jobLock)
                         {
-                            if (got && _pool != null)
-                                _pool.put(this);
+                            if (_job!=null)
+                                _idle++;
+                            _job=null;
+                            if (_blocked.size()>0)
+                                ((Thread)_blocked.remove(0)).interrupt();
                         }
-                        catch (InterruptedException e)
-                        {}
                     }
                 }
             }
-        }
-
-        public String toString()
-        {
-            return _name;
+            finally
+            {
+                synchronized (_jobLock)
+                {
+                    _threads.remove(this);
+                }
+            }
         }
     }
 }

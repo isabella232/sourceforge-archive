@@ -166,7 +166,7 @@ public class HttpBuilderTest extends TestCase
     
     class Handler extends HttpParser.Handler
     {   
-        public void foundContent(int index, Buffer ref)
+        public void content(int index, Buffer ref)
         {
             if (index == 0)
                 content= "";

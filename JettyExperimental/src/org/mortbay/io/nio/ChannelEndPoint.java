@@ -46,6 +46,11 @@ public class ChannelEndPoint implements EndPoint
         super();
         this._channel = chanel;
     }
+    
+    public boolean isBlocking()
+    {
+        return false;
+    }
 
     /* (non-Javadoc)
      * @see org.mortbay.io.EndPoint#isClosed()
@@ -185,7 +190,6 @@ public class ChannelEndPoint implements EndPoint
                                 _gather2[0]=bbuf0;
                                 _gather2[1]=bbuf1;
 
-                                System.err.println("BYPASS!!");
                                 length=(int)((GatheringByteChannel)_channel).write(_gather2);
                             }
                         }
@@ -205,7 +209,6 @@ public class ChannelEndPoint implements EndPoint
                                         _gather3[0]=bbuf0;
                                         _gather3[1]=bbuf1;
                                         _gather3[2]=bbuf2;
-                                        System.err.println("BYPASS!!");
                                         length=(int)((GatheringByteChannel)_channel).write(_gather3);
                                     }
                                 }
