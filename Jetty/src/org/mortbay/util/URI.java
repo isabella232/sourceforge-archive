@@ -25,6 +25,7 @@ import java.util.Set;
 public class URI
     implements Cloneable
 {
+
     public static final String __CHARSET=
         System.getProperty("org.mortbay.util.URI.charset",StringUtil.__ISO_8859_1);
     
@@ -600,7 +601,7 @@ public class URI
     /** Encode a URI path.
      * @param path The path the encode
      * @param buf StringBuffer to encode path into (or null)
-     * @param encode String of characters to encode.
+     * @param encode String of characters to encode. % is always encoded.
      * @return The StringBuffer or null if no substitutions required.
      */
     public static StringBuffer encodeString(StringBuffer buf,
@@ -613,7 +614,7 @@ public class URI
             for (int i=0;i<path.length();i++)
             {
                 char c=path.charAt(i);
-                if (encode.indexOf(c)>=0)
+                if (c=='%' || encode.indexOf(c)>=0)
                 {    
                     buf=new StringBuffer(path.length()<<1);
                     break loop;
@@ -628,7 +629,7 @@ public class URI
             for (int i=0;i<path.length();i++)
             {
                 char c=path.charAt(i);
-                if (encode.indexOf(c)>=0)
+                if (c=='%' || encode.indexOf(c)>=0)
                 {
                     buf.append('%');
                     StringUtil.append(buf,(byte)(0xff&c),16);

@@ -304,6 +304,12 @@ public class Tests extends junit.framework.TestCase
     {
         URI uri;
 
+        // test basic encode/decode
+        StringBuffer buf = new StringBuffer();
+        URI.encodeString(buf,"foo%23;,:=bar",";,=");
+        assertEquals("foo%23;,:=bar",URI.decodePath(buf.toString()));
+
+
         // No host
         uri = new URI("/");
         assertEquals("root /","/", uri.getPath());
