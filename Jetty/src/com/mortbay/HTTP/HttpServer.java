@@ -11,6 +11,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import com.mortbay.HTTP.Handler.*;
+import java.lang.reflect.*;
 
 /* ------------------------------------------------------------ */
 /** HTTP Server.
@@ -23,10 +24,17 @@ import com.mortbay.HTTP.Handler.*;
 public class HttpServer
 {
     /* ------------------------------------------------------------ */
+    public final String __defaultServletHandler =
+	"com.mortbay.Servlet2_1.ServletHandler";
+    public final String __defaultDynamicServletHandler =
+	"com.mortbay.Servlet2_1.DynamicHandler";
+    
+    /* ------------------------------------------------------------ */
     HashMap _listeners = new HashMap(7);
     HashMap _hostMap = new HashMap(7);
     PathMap _handlerMap = new PathMap();
     HashMap _fileMap = new HashMap(7);
+    ServletHandler _servletHandler=null;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -225,15 +233,15 @@ public class HttpServer
      * mapped filename and can be mapped to multiple path specifications.
      * @param host Virtual host name or null.
      * @param pathSpec 
-     * @param filename
+     * @param directory
      * @return The handler.
      */
-    public HttpHandler mapFiles(String host, String pathSpec, String filename)
+    public HttpHandler mapFiles(String host, String pathSpec, String directory)
     {
-        FileHandler fileHandler = (FileHandler)_fileMap.get(filename);
+        FileHandler fileHandler = (FileHandler)_fileMap.get(directory);
         if (fileHandler==null)
         {
-            fileHandler = new FileHandler(filename,
+            fileHandler = new FileHandler(directory,
                                           "index.html",
                                           true, // dir OK
                                           false,// put !OK
@@ -241,13 +249,64 @@ public class HttpServer
                                           64,   // cached files
                                           40960 // cached file size
                                           );
-            _fileMap.put(filename,fileHandler);
+            _fileMap.put(directory,fileHandler);
             fileHandler.start();
         }
         mapHandler(host,pathSpec,fileHandler);
         return fileHandler;
     }
 
+    
+    /* ------------------------------------------------------------ */
+    public HttpHandler mapServlet(String host,
+				  String pathSpec,
+				  String servletClass)
+	throws ClassNotFoundException,InstantiationException,IllegalAccessException
+    {
+	if (_servletHandler==null)
+	{
+	    Class servletHandlerClass =
+		Class.forName(__defaultServletHandler);
+	    
+	    _servletHandler=(ServletHandler)servletHandlerClass.newInstance();
+	    mapHandler(host,"/",_servletHandler);
+	    _servletHandler.start();
+	}
+	
+	_servletHandler.addServlet(pathSpec,servletClass);
+	return _servletHandler;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public HttpHandler mapDynamicServlet(String host,
+					 String pathSpec,
+					 String classPath)
+    {
+	try
+	{
+	    Class servletHandlerClass =
+		Class.forName(__defaultDynamicServletHandler);
+	    Class[] types = 
+	    {
+		java.lang.String.class,
+		com.sun.java.util.collections.Map.class
+	    };
+	    Constructor constructor =
+		servletHandlerClass.getConstructor(types);
+	    Object[] args ={classPath,null};
+	    ServletHandler handler=(ServletHandler)constructor.newInstance(args);
+	    mapHandler(host,pathSpec,handler);
+	    handler.start();
+	    
+	    return handler;
+	}
+	catch(Exception e)
+	{
+	    Code.warning(e);
+	    throw new IllegalArgumentException(e.toString());
+	}
+    }
+    
     
     /* ------------------------------------------------------------ */
     /** Start all handlers then listeners.
@@ -391,9 +450,9 @@ public class HttpServer
      * @param parameters Coding parameters or null
      * @exception HttpException 
      */
-    public void enableEncoding(ChunkableInputStream in,
-                               String coding,
-                               Map parameters)
+    public static void enableEncoding(ChunkableInputStream in,
+				      String coding,
+				      Map parameters)
         throws HttpException
     {
         try
@@ -438,9 +497,9 @@ public class HttpServer
      * @param parameters Coding parameters or null
      * @exception HttpException 
      */
-    public void enableEncoding(ChunkableOutputStream out,
-                               String coding,
-                               Map parameters)
+    public static void enableEncoding(ChunkableOutputStream out,
+				      String coding,
+				      Map parameters)
         throws HttpException
     {
         try
@@ -488,8 +547,10 @@ public class HttpServer
         {
             String[] newArgs=
 	    {
-		"-a","8080","-f","/=.","-d","/",
-		"-s21","/servlet/*=./servlets",
+		"-a","8080",
+		"-f","/=.",
+		"-ds","/servlet/*=./servlets",
+		"-d","/",
 		"-h","com.mortbay.HTTP.Handler.NotFoundHandler"
 	    };
             args=newArgs;
@@ -506,7 +567,10 @@ public class HttpServer
                 (" -d <path>           - Dump handler at path Spec");
             
             System.err.println
-                (" -s21 <path>=<path>  - Dynamic servlet2.1 handler at path & path");
+                (" -ds <path>=<dir>    - Dynamic servlets at path & dir");
+            
+            System.err.println
+                (" -s <path>=<class>   - Servlet at path");
             
             System.err.println
                 (" -h <path>=<class>   - Map a hander");
@@ -517,7 +581,7 @@ public class HttpServer
             System.err.println
                 ("Default options:");
             System.err.println
-                (" -a 8080 -f /=. -d / -s21 /servlet/*=./servlets -h /=com.mortbay.HTTP.Handler.NotFoundHandler");
+                (" -a 8080 -f /=. -ds /servlet/*=./servlets -d / -h /=com.mortbay.HTTP.Handler.NotFoundHandler");
             System.exit(1);
         }
         
@@ -566,7 +630,7 @@ public class HttpServer
                     }
 		    
                     // Look for servlet handler
-                    if ("-s21".equals(args[i]))
+                    if ("-ds".equals(args[i]))
                     {
                         i++;
                         String spec=args[i];
@@ -575,12 +639,21 @@ public class HttpServer
                         {
                             String pathSpec=spec.substring(0,e);
                             String file=spec.substring(e+1);
-			    com.mortbay.HTTP.Handler.Servlet2_1.ServletHandler
-				handler = new
-				    com.mortbay.HTTP.Handler.Servlet2_1.ServletHandler();
-			    handler.addDynamic(pathSpec,file,true,null);
-                            server.mapHandler(host,pathSpec,handler);
-                            handler.start();
+			    server.mapDynamicServlet(host,pathSpec,file);
+                        }
+                    }
+		    
+                    // Look for servlet handler
+                    if ("-s".equals(args[i]))
+                    {
+                        i++;
+                        String spec=args[i];
+                        int e=spec.indexOf("=");
+                        if (e>0)
+                        {
+                            String pathSpec=spec.substring(0,e);
+                            String className=spec.substring(e+1);
+			    server.mapServlet(host,pathSpec,className);
                         }
                     }
                     
@@ -627,3 +700,16 @@ public class HttpServer
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -22,9 +22,6 @@ BINFILES :=
 CFGFILES := 
 SUBDIRS = 
 
-# Temporary measure!
-CLASSPATH := $(CLASSPATH):../../../../servlet2.1
-
 
 include $(JETTY_HOME)/etc/Global.mk
 

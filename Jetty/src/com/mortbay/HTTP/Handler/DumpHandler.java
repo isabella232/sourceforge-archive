@@ -94,9 +94,7 @@ public class DumpHandler extends NullHandler
             try{
                 set_cookie=set_cookie.trim();
                 String cv=request.getParameter("CookieVal");
-                Date expires=new Date();
-                expires=new Date(expires.getTime()+(60*60*1000));
-                response.addSetCookie(set_cookie,cv,null,"/",expires,false);
+                response.addSetCookie(set_cookie,cv,null,"/",60*60*1000,false);
             }
             catch(IllegalArgumentException e)
             {

@@ -343,7 +343,7 @@ public class HttpResponse extends HttpMessage
     public void addSetCookie(String name,
                              String value)
     {
-        addSetCookie(name,value,null,"/",null,false);
+        addSetCookie(name,value,null,"/",-1,false);
     }
     
     /* -------------------------------------------------------------- */
@@ -354,15 +354,16 @@ public class HttpResponse extends HttpMessage
      *        If null is passed the default of this domain is used.
      * @param path The path the cookie applies to.
      *        If null is passed the default of "/" is used.
-     * @param expires the Date the cookie expires on.
-     *        If null is passed the cookie expires with the browser session.
+     * @param maxAge the seconds until the cokkie expires.
+     *        A negative value implies browser session and zero causes 
+     *        the cookie to be deleted.
      * @param secure if true the cookie is flagged secure.
      */
     public void addSetCookie(String name,
                              String value,
                              String domain,
                              String path,
-                             Date expires,
+                             int maxAge,
                              boolean secure)
     {
         // Check arguments
@@ -407,10 +408,11 @@ public class HttpResponse extends HttpMessage
                 buf.append(";domain=");
                 buf.append(domain);
             }
-            if (expires!=null)
+            if (maxAge>=0)
             {
                 buf.append(";expires=");
-                buf.append(HttpFields.__dateSend.format(expires));
+		Date expires = new Date(System.currentTimeMillis()+1000L*maxAge);
+		buf.append(HttpFields.__dateSend.format(expires));
             }
         
             name_value_params=buf.toString();
