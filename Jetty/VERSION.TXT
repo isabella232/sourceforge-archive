@@ -1,3 +1,5 @@
+   + implemented removeAttribute on requests
+ 
 Jetty-3.0.A96 - 27 June 2000
    + Fixed bug with HTTP/1.1 Head reqests to servlets.
    + Supressed un-needed chunking EOF indicators.
