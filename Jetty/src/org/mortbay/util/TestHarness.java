@@ -523,6 +523,12 @@ public class TestHarness
             test.checkEquals(code.getString("Name4"),"Value 4!","encoded get");
             
             code.clear();
+            code.decode("Name4=Value+4%21%20%214");
+            test.checkEquals(code.size(),1,"encoded param size");
+            test.checkEquals(code.encode(),"Name4=Value+4%21+%214","encoded encode");
+            test.checkEquals(code.getString("Name4"),"Value 4! !4","encoded get");
+            
+            code.clear();
             code.decode("Name5=aaa&Name6=bbb");
             test.checkEquals(code.size(),2,"multi param size");
             test.check(code.encode().equals("Name5=aaa&Name6=bbb") ||
@@ -648,19 +654,18 @@ public class TestHarness
             test.checkEquals(uri.toString(),"/Test/URI?a=","null param");
             uri.getParameters();
             test.checkEquals(uri.toString(),"/Test/URI?a","null param");
-            uri.setEncodeNulls(true);
-            test.checkEquals(uri.toString(),"/Test/URI?a=","null= param");
             
             uri = new URI("/Test/Nasty%26%3F%20URI?c=%26&d=+%3F");
             test.checkEquals(uri.getPath(),"/Test/Nasty&? URI","nasty");
             uri.setPath("/test/nasty&? URI");
             uri.getParameters();
-            test.checkEquals(uri.toString(),
-                             "/test/nasty&%3F%20URI?c=%26&d=+%3F","nasty");
+            test.check(uri.toString().equals("/test/nasty&%3F%20URI?c=%26&d=+%3F")||
+                       uri.toString().equals("/test/nasty&%3F%20URI?d=+%3F&c=%26"),
+                       "nasty");
             uri=(URI)uri.clone();
-            test.checkEquals(uri.toString(),
-                             "/test/nasty&%3F%20URI?c=%26&d=+%3F","clone");
-
+            test.check(uri.toString().equals("/test/nasty&%3F%20URI?c=%26&d=+%3F")||
+                       uri.toString().equals("/test/nasty&%3F%20URI?d=+%3F&c=%26"),
+                       "clone");
 
             test.checkEquals(URI.addPaths(null,null),null,"null+null");
             test.checkEquals(URI.addPaths(null,""),null,"null+");

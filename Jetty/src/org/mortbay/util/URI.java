@@ -33,7 +33,6 @@ public class URI
     private String _query;
     private UrlEncoded _parameters = new UrlEncoded();
     private boolean _dirty;
-    private boolean _encodeNulls=false;
     
     /* ------------------------------------------------------------ */
     /** Copy Constructor .
@@ -50,7 +49,6 @@ public class URI
         _query=uri._query;
         _parameters=(UrlEncoded)uri._parameters.clone();
         _dirty=false;
-        _encodeNulls=uri._encodeNulls;
     }
     
     /* ------------------------------------------------------------ */
@@ -281,7 +279,7 @@ public class URI
     {
         if (_dirty)
         {
-            _query = _parameters.encode(_encodeNulls);
+            _query = _parameters.encode();
             if (_query!=null && _query.length()==0)
                 _query=null;
         }
@@ -300,16 +298,6 @@ public class URI
         _parameters.decode(query);
     }
     
-    /* ------------------------------------------------------------ */
-    /** Set if this URI should encode nulls as an empty = clause.
-     * @param b If true then encode nulls
-     */
-    public void setEncodeNulls(boolean b)
-    {
-        _dirty=(_encodeNulls!=b);
-        _encodeNulls=b;
-    }
-
     /* ------------------------------------------------------------ */
     /** Get the uri query _parameters names.
      * @return  Unmodifiable set of URI query _parameters names

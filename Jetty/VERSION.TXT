@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Better handling of charset in form encoding.
  + Allow POSTs to static resources.
  + Fixed ChunableInputStream.resetStream bug.
  + Ignore IO errors when trying to persist connections.

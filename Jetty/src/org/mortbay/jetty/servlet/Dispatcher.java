@@ -259,7 +259,7 @@ public class Dispatcher implements RequestDispatcher
                         Map.Entry entry = (Map.Entry)iter.next();
                         encoded.put(entry.getKey(),entry.getValue());
                     }
-                    query=encoded.encode(false);
+                    query=encoded.encode();
                 }
                 
                 
