@@ -1,0 +1,42 @@
+FEATURE LIST
+============
+
+HttpServer:
+-----------
+HTTP/1.0
+HTTP/1.0 keep-alive
+HTTP/1.1 RFC2616
+HTTP/1.1 persistent connections.
+HTTP/1.1 Chunking.
+HTTP/1.1 Chunked trailers.
+HTTP/1.1 Pipelined requests.
+HTTP/1.1 100-Continue expectation.
+HTTP/1.1 Transfer encodings (identity, gzip, deflate, etc.)
+Virtual hosts.
+Quality field parameters
+Request query parameters
+Request form parameters
+Request cookies
+Response set-cookies.
+Redirections
+
+
+FileHandler:
+------------
+GET
+HEAD
+PUT
+DELETE
+OPTIONS
+MOVE
+IfModifiedSince
+IfUnmodifiedSince
+Memory cache
+MIME Type by extension
+
+
+NotFoundHandler:
+----------------
+TRACE
+OPTIONS
+

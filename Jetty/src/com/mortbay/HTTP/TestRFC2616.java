@@ -33,10 +33,14 @@ public class TestRFC2616
         _server=new HttpServer();
         HttpHandler teHandler=new TestTEHandler();
         HttpHandler dumpHandler=new DumpHandler();
-        _server.mapHandler("/",teHandler);
-        _server.mapHandler("/",dumpHandler);
+        HttpHandler notFoundHandler=new NotFoundHandler();
+        _server.mapHandler(null,"/",teHandler);
+        _server.mapHandler(null,"/",dumpHandler);
+        _server.mapHandler(null,"/",notFoundHandler);
+        _server.mapHandler("VirtualHost","/path/*",dumpHandler);
         teHandler.start();
         dumpHandler.start();
+        notFoundHandler.start();
     }
 
     /* ------------------------------------------------------------ */
@@ -89,8 +93,12 @@ public class TestRFC2616
         test3_6();
         test3_9();
         test4_4();
+        test5_2();
         test8_1();
         test8_2();
+        test9_2();
+        test9_4();
+        test9_8();
         test14_39();
         test19_6();
     }
@@ -387,6 +395,70 @@ public class TestRFC2616
     }
     
     /* --------------------------------------------------------------- */
+    public static void test5_2()
+    {        
+        Test t = new Test("RFC2616 5.2 Virtual Hosts");
+        try
+        {
+            TestRFC2616 listener = new TestRFC2616();
+            String response;
+            int offset=0;
+
+            // Default Host
+            offset=0;
+            response=listener.getResponses("GET /path/R1 HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "\n");
+            Code.debug("RESPONSE: ",response);
+            offset=t.checkContains(response,offset,
+                                   "HTTP/1.1 200","Default host")+1;
+            offset=t.checkContains(response,offset,
+                                   "match=null","Default host")+1;
+            offset=t.checkContains(response,offset,
+                                   "info=/path/R1","Default host")+1;
+            
+            // Virtual Host
+            offset=0;
+            response=listener.getResponses("GET http://VirtualHost/path/R1 HTTP/1.1\n"+
+                                           "Host: ignored\n"+
+                                           "\n");
+            Code.debug("RESPONSE: ",response);
+            offset=t.checkContains(response,offset,
+                                   "HTTP/1.1 200","1. virtual host uri")+1;
+            offset=t.checkContains(response,offset,
+                                   "match=/path","1. virtual host uri")+1;
+            offset=t.checkContains(response,offset,
+                                   "info=/R1","1. virtual host uri")+1;
+
+            // Virtual Host
+            offset=0;
+            response=listener.getResponses("GET /path/R1 HTTP/1.1\n"+
+                                           "Host: VirtualHost\n"+
+                                           "\n");
+            Code.debug("RESPONSE: ",response);
+            offset=t.checkContains(response,offset,
+                                   "HTTP/1.1 200","2. virtual host field")+1;
+            offset=t.checkContains(response,offset,
+                                   "match=/path","2. virtual host field")+1;
+            offset=t.checkContains(response,offset,
+                                   "info=/R1","2. virtual host field")+1;
+
+            // Virtual Host
+            offset=0;
+            response=listener.getResponses("GET /path/R1 HTTP/1.1\n"+
+                                           "\n");
+            Code.debug("RESPONSE: ",response);
+            offset=t.checkContains(response,offset,
+                                   "HTTP/1.1 400","3. no host")+1;            
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
+        }
+    }
+    
+    /* --------------------------------------------------------------- */
     public static void test8_1()
     {        
         Test t = new Test("RFC2616 8.1 Persistent");
@@ -524,7 +596,7 @@ public class TestRFC2616
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 100 Continue","8.2.3 RFC2068")+1;
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 400","8.2.3 RFC2068")+1;
+                                   "HTTP/1.1 404","8.2.3 RFC2068")+1;
             // No Expect PUT
             offset=0;
             response=listener.getResponses("POST /R1 HTTP/1.1\n"+
@@ -545,6 +617,106 @@ public class TestRFC2616
         }
         finally{
             Code.setSuppressWarnings(Code.debug());
+        }
+    }
+    
+    /* --------------------------------------------------------------- */
+    public static void test9_2()
+    {        
+        Test t = new Test("RFC2616 9.2 OPTIONS");
+        try
+        {
+            TestRFC2616 listener = new TestRFC2616();
+            String response;
+            int offset=0;
+
+            // Default Host
+            offset=0;
+            response=listener.getResponses("OPTIONS * HTTP/1.1\n"+
+                                           "Connection: close\n"+
+                                           "Host: localhost\n"+
+                                           "\n");
+            Code.debug("RESPONSE: ",response);
+            offset=t.checkContains(response,offset,
+                                   "HTTP/1.1 200","200")+1;
+            offset=t.checkContains(response,offset,
+                                   "Allow: GET, HEAD, POST, PUT, DELETE, MOVE, OPTIONS, TRACE","Allow")+1;
+            
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
+        }
+    }
+    
+    /* --------------------------------------------------------------- */
+    public static void test9_4()
+    {        
+        Test t = new Test("RFC2616 9.4 HEAD");
+        try
+        {
+            TestRFC2616 listener = new TestRFC2616();
+            String get;
+            String head;
+
+            // Default Host
+            get=listener.getResponses("GET /R1 HTTP/1.0\n"+
+                                      "Host: localhost\n"+
+                                      "\n");
+            head=listener.getResponses("HEAD /R1 HTTP/1.0\n"+
+                                       "Host: localhost\n"+
+                                       "\n");
+            
+            Code.debug("GET: ",get);
+            Code.debug("HEAD: ",head);
+            t.checkContains(get,0,"HTTP/1.0 200","GET");
+            t.checkContains(get,0,"Content-Type: text/html","GET content");
+            t.checkContains(get,0,"Content-Length: ","GET length");
+            t.checkContains(head,0,"HTTP/1.0 200","HEAD");
+            t.checkContains(head,0,"Content-Type: text/html","HEAD content");
+            t.checkContains(head,0,"Content-Length: ","HEAD length");
+            t.checkContains(get,0,"<HTML>","GET body");
+            t.checkEquals(head.indexOf("<HTML>"),-1,"HEAD no body");
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
+        }
+    }
+    
+    /* --------------------------------------------------------------- */
+    public static void test9_8()
+    {        
+        Test t = new Test("RFC2616 9.8 TRACE");
+        try
+        {
+            TestRFC2616 listener = new TestRFC2616();
+            String response;
+            int offset=0;
+
+            // Default Host
+            offset=0;
+            response=listener.getResponses("TRACE /path HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Connection: close\n"+
+                                           "\n");
+            Code.debug("RESPONSE: ",response);
+            offset=t.checkContains(response,offset,
+                                   "HTTP/1.1 200","200")+1;
+            offset=t.checkContains(response,offset,
+                                   "Content-Type: message/http",
+                                   "message/http")+1;
+            offset=t.checkContains(response,offset,
+                                   "TRACE /path HTTP/1.1\r\n"+
+                                   "Host: localhost\r\n",
+                                   "Request");
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
         }
     }
     

@@ -24,6 +24,7 @@ public class HttpServer
 {
     /* ------------------------------------------------------------ */
     HashMap _listeners = new HashMap(7);
+    HashMap _hostMap = new HashMap(7);
     PathMap _handlerMap = new PathMap();
     HashMap _fileMap = new HashMap(7);
     
@@ -73,6 +74,39 @@ public class HttpServer
         return _listeners.values();
     }
     
+    /* ------------------------------------------------------------ */
+    private PathMap getHandlerMap(String host, boolean create)
+    {
+        PathMap virtual;
+        if (host!=null && host.length()>0)
+        {
+            virtual=(PathMap)_hostMap.get(host);
+            if (virtual==null && create)
+            {
+                virtual=new PathMap();
+                _hostMap.put(host,virtual);
+            }
+            
+            if (virtual==null)
+                 virtual=_handlerMap;
+        }
+        else
+            virtual=_handlerMap;        
+        return virtual;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Define a virtual host alias.
+     * All requests to the alias are handled the same as request for
+     * the host.
+     * @param host 
+     * @param alias 
+     */
+    public void hostAlias(String host, String alias)
+    {
+        PathMap handlerMap=getHandlerMap(host,true);
+        _hostMap.put(alias,handlerMap);
+    }
     
     /* ------------------------------------------------------------ */
     /** Map a handler to a path specification.
@@ -84,16 +118,17 @@ public class HttpServer
      * Multiple handlers can be mapped to the same pathSpec and
      * requests are passed to the handlers in the order they
      * were registered.
+     * @param host Virtual host name or null.
      * @param pathSpec 
      * @param handler 
      */
-    public void mapHandler(String pathSpec, HttpHandler handler)
+    public void mapHandler(String host,String pathSpec, HttpHandler handler)
     {
-        List list=(List)_handlerMap.get(pathSpec);
+        List list=(List)getHandlerMap(host,true).get(pathSpec);
         if (list==null)
         {
             list=new ArrayList(8);
-            _handlerMap.put(pathSpec,list);
+            getHandlerMap(host,false).put(pathSpec,list);
         }
         if (!list.contains(handler))
             list.add(handler);
@@ -101,25 +136,27 @@ public class HttpServer
     
     /* ------------------------------------------------------------ */
     /** Unmap a handler from a path specification.
+     * @param host Virtual host name or null.
      * @param pathSpec 
      * @param handler 
      */
-    public void unmapHandler(String pathSpec, HttpHandler handler)
+    public void unmapHandler(String host, String pathSpec, HttpHandler handler)
     {
-        List list=(List)_handlerMap.get(pathSpec);
+        List list=(List)getHandlerMap(host,false).get(pathSpec);
         if (list!=null)
             list.remove(handler);
     }
-
 
     /* ------------------------------------------------------------ */
     /** Converniance method for adding FileHandlers.
      * A single FileHandler instance is maintained for each
      * mapped filename and can be mapped to multiple path specifications.
+     * @param host Virtual host name or null.
      * @param pathSpec 
-     * @param filename 
+     * @param filename
+     * @return The handler.
      */
-    public void mapFiles(String pathSpec, String filename)
+    public HttpHandler mapFiles(String host, String pathSpec, String filename)
     {
         FileHandler fileHandler = (FileHandler)_fileMap.get(filename);
         if (fileHandler==null)
@@ -135,10 +172,17 @@ public class HttpServer
             _fileMap.put(filename,fileHandler);
             fileHandler.start();
         }
-        mapHandler(pathSpec,fileHandler);
+        mapHandler(host,pathSpec,fileHandler);
+        return fileHandler;
     }
-    
-    
+
+    /* ------------------------------------------------------------ */
+    /** XXX
+     */
+    public void startAllHandler()
+    {
+        Code.notImplemented();
+    }
     
     /* ------------------------------------------------------------ */
     /** Service a request.
@@ -163,7 +207,8 @@ public class HttpServer
         throws IOException, HttpException
     {
         // find all matching handlers.
-        List matches = (List)_handlerMap.getMatches(request.getPath());
+        List matches = (List)getHandlerMap(request.getHost(),false)
+            .getMatches(request.getPath());
 
         // Try handlers, starting from best match.
         if (matches==null)
@@ -296,29 +341,38 @@ public class HttpServer
 
 
     /* ------------------------------------------------------------ */
-    /** 
+    /** Construct server from command line arguments.
      * @param args 
      */
     public static void main(String[] args)
     {
         if (args.length==0)
         {
-            String[] newArgs= {"-a","8080","-f","/=.","-d","/"};
+            String[] newArgs= {"-a","8080","-f","/=.","-d","/",
+                               "-h","com.mortbay.HTTP.Handler.NotFoundHandler"};
             args=newArgs;
         }
         else if (args.length%2==1)
         {
             System.err.println
-                ("Usage - java com.mortbay.HTTP.HttpServer [ -a <value> ... ]");
+                ("Usage - java com.mortbay.HTTP.HttpServer [ -a|f|d|h <value> ... ]");
             System.err.println
                 (" -a [<addr>:]<port>  - Listen on [ address & ] port");
             System.err.println
                 (" -f <path>=<dir>     - File handler at path Spec to file/directory");
             System.err.println
                 (" -d <path>           - Dump handler at path Spec");
-            System.err.println
-                ("Default options: -a 8080 -f /=. -d /");
             
+            System.err.println
+                (" -h <path>=<class>   - Map a hander");
+            
+            System.err.println
+                (" -v <host>[=<alias>] - Remaining options for virtual host");
+
+            System.err.println
+                ("Default options:");
+            System.err.println
+                (" -a 8080   -f /=.   -d /   -h /=com.mortbay.HTTP.Handler.NotFoundHandler");
             System.exit(1);
         }
         
@@ -326,6 +380,9 @@ public class HttpServer
             // Create the server
             HttpServer server = new HttpServer();
 
+            // Default is no virtual host
+            String host=null;
+            
             // Parse arguments
             for (int i=0;i<args.length;i++)
             {
@@ -345,7 +402,7 @@ public class HttpServer
                     {
                         i++;
                         HttpHandler handler=new DumpHandler();
-                        server.mapHandler(args[i],handler);
+                        server.mapHandler(host,args[i],handler);
                         handler.start();
                     }
                     
@@ -359,7 +416,38 @@ public class HttpServer
                         {
                             String pathSpec=spec.substring(0,e);
                             String file=spec.substring(e+1);
-                            server.mapFiles(pathSpec,file);
+                            server.mapFiles(host,pathSpec,file);
+                        }
+                    }
+                    
+                    // Look for Virtual host
+                    if ("-v".equals(args[i]))
+                    {
+                        i++;
+                        host=args[i];
+                        int e=host.indexOf("=");
+                        if (e>0)
+                        {
+                            String alias=host.substring(e+1);
+                            host=host.substring(0,e);
+                            server.hostAlias(host,alias);
+                        }
+                    }
+                    
+                    // Look for handler
+                    if ("-h".equals(args[i]))
+                    {
+                        i++;
+                        String spec=args[i];
+                        int e=spec.indexOf("=");
+                        if (e>0)
+                        {
+                            String pathSpec=spec.substring(0,e);
+                            String className=spec.substring(e+1);
+                            HttpHandler handler = (HttpHandler)
+                                Class.forName(className).newInstance();
+                            handler.start();
+                            server.mapHandler(host,pathSpec,handler);
                         }
                     }
                 }

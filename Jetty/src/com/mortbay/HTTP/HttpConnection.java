@@ -626,6 +626,10 @@ public class HttpConnection
                       }
                   }
               }
+
+              // Nobble the OutputStream for HEAD requests
+              if (_request.__HEAD.equals(_request.getMethod()))
+                  _outputStream.nullOutput();
               break;
               
           case OutputObserver.__RESET_BUFFER:

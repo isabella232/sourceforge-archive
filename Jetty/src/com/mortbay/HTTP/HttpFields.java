@@ -104,6 +104,7 @@ public class HttpFields extends HashMap
     public final static String __Chunked = "chunked";
     public final static String __Close = "close";
     public final static String __TextHtml = "text/html";
+    public final static String __MessageHttp = "message/http";
     public final static String __KeepAlive = "keep-alive";
     public final static String __WwwFormUrlEncode =
         "application/x-www-form-urlencoded";

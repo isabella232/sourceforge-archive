@@ -14,8 +14,8 @@ import java.io.*;
 
 /* ------------------------------------------------------------ */
 /** Dump request handler.
- *
- * Usefule for testing and debugging.
+ * Dumps GET and POST requests.
+ * Useful for testing and debugging.
  * @see
  * @version 1.0 Mon Oct 11 1999
  * @author Greg Wilkins (gregw)
@@ -35,8 +35,14 @@ public class DumpHandler extends NullHandler
         throws HttpException, IOException
     {
         if (!isStarted())
-            return;        
+            return;
 
+        // Only handle GET, HEAD and POST
+        if (!request.__GET.equals(request.getMethod()) &&
+            !request.__HEAD.equals(request.getMethod()) &&
+            !request.__POST.equals(request.getMethod()))
+            return;
+        
         response.setField(HttpFields.__ContentType,
                           HttpFields.__TextHtml);
         ChunkableOutputStream out = response.getOutputStream();
