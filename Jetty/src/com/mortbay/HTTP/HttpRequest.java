@@ -36,6 +36,9 @@ import javax.servlet.http.Cookie;
  * of a HTTP request. It can be used for receiving or generating
  * requests.
  *
+ * This class is not synchronized. It should be explicitly
+ * synchronized if it is used by multiple threads.
+ *
  * @see HttpResponse
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -131,7 +134,7 @@ public class HttpRequest extends HttpMessage
      * @param in 
      * @exception IOException 
      */
-    public synchronized void readHeader(ChunkableInputStream in)
+    public void readHeader(ChunkableInputStream in)
         throws IOException
     {
         _state=__MSG_BAD;
@@ -185,7 +188,7 @@ public class HttpRequest extends HttpMessage
      * @param out Chunkable output stream
      * @exception IOException IO problem
      */
-    public synchronized void writeHeader(Writer writer)
+    public void writeHeader(Writer writer)
         throws IOException
     {
         if (_state!=__MSG_EDITABLE)
@@ -619,7 +622,7 @@ public class HttpRequest extends HttpMessage
      * @param name The field name
      * @return The old value or null.
      */
-    public synchronized Object forceRemoveField(String name)
+    public Object forceRemoveField(String name)
     {
         if (Code.verbose(99))
             Code.debug("force remove ",name);
@@ -691,7 +694,7 @@ public class HttpRequest extends HttpMessage
     /* ------------------------------------------------------------ */
     /* Extract Paramters from query string and/or form content.
      */
-    private synchronized void extractParameters()
+    private void extractParameters()
     {
         if (_paramsExtracted)
             return;

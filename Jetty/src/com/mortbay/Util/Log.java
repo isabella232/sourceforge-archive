@@ -75,16 +75,18 @@ public class Log
 
     /*-------------------------------------------------------------------*/
     private static Log __instance = null;
+    private static int __instanceChecks=0;
     
     /*-------------------------------------------------------------------*/
     public static Log instance()
     {   
-        if (__instance==null)
+        if (__instance==null || __instanceChecks<2)
         {
             synchronized(WARN)
             {
                 if (__instance==null)
                     __instance=new Log();
+                __instanceChecks++;
             }
         }
         return __instance;

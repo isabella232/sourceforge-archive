@@ -31,7 +31,7 @@ read Y
     cvs $CVS_ARGS rtag -F Jetty_$TAG Jetty3
     cvs $CVS_ARGS export -r Jetty_$TAG Jetty3
     cd $HOME/Jetty3
-    ant all || exit 1
+    ant all tidy || exit 1
     cd ..
     mv Jetty3 Jetty-$VERSION
     tar cfz /usr/local/archive/Jetty-${VERSION}.tgz --exclude Jetty-$VERSION/classes Jetty-$VERSION

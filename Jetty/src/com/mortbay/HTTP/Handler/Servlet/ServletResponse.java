@@ -28,6 +28,10 @@ import javax.servlet.http.HttpSession;
  * This class wraps a Jetty HTTP response as a 2.2 Servlet
  * response.
  *
+ * Note that this wrapper is not synchronized and if a response is to
+ * be operated on by multiple threads, then higher level
+ * synchronizations may be required.
+ *
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -442,7 +446,7 @@ public class ServletResponse implements HttpServletResponse
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized ServletOutputStream getOutputStream() 
+    public ServletOutputStream getOutputStream() 
     {
         if (_outputState!=0 && _outputState!=1)
             throw new IllegalStateException();
@@ -454,7 +458,7 @@ public class ServletResponse implements HttpServletResponse
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized PrintWriter getWriter() throws java.io.IOException 
+    public PrintWriter getWriter() throws java.io.IOException 
     {
         if (_outputState!=0 && _outputState!=2)
             throw new IllegalStateException();

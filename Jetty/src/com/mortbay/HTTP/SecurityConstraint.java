@@ -63,7 +63,7 @@ public class SecurityConstraint
     /** 
      * @param method 
      */
-    public void addMethod(String method)
+    public synchronized void addMethod(String method)
     {
         if (_methods==null)
             _methods=new ArrayList(3);
@@ -87,7 +87,7 @@ public class SecurityConstraint
     /** 
      * @param role 
      */
-    public void addRole(String role)
+    public synchronized void addRole(String role)
     {
         if (_roles==null)
             _roles=new ArrayList(3);

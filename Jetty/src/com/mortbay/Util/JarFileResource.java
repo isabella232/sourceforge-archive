@@ -158,7 +158,7 @@ class JarFileResource extends Resource
     }
 
     /* ------------------------------------------------------------ */
-    public String[] list()
+    public synchronized String[] list()
     {
         if(isDirectory() && _list==null && checkConnection())
         {
@@ -182,7 +182,7 @@ class JarFileResource extends Resource
                 
                 list.add(listName);
             }
-
+            
             _list=new String[list.size()];
             list.toArray(_list);
         }

@@ -25,6 +25,9 @@ import java.util.List;
  * in order to run the protocol handling before and after passing
  * a request to the HttpServer of the HttpListener.
  *
+ * This class is not synchronized as it should only ever be known
+ * to a single thread.
+ *
  * @see HttpListener
  * @see HttpServer
  * @version $Id$
@@ -67,6 +70,8 @@ public class HttpConnection
         _outputStream=new ChunkableOutputStream(out);
         _outputStream.addObserver(this);
         _outputSetup=false;
+        if (_listener!=null)
+            _httpServer=_listener.getHttpServer();
     }
 
     /* ------------------------------------------------------------ */
@@ -151,8 +156,6 @@ public class HttpConnection
      */
     public HttpServer getHttpServer()
     {
-        if (_httpServer==null)
-            _httpServer=_listener.getHttpServer();
         return _httpServer;
     }
 
@@ -196,7 +199,7 @@ public class HttpConnection
      * The service(request,response) method is called by handle to
      * service each request received on the connection.
      */
-    public synchronized void handle()
+    public void handle()
     {
         _handlingThread=Thread.currentThread();
         boolean logRequest=false;
@@ -459,8 +462,6 @@ public class HttpConnection
         throws HttpException, IOException
     {
         if (_httpServer==null)
-            getHttpServer();
-        if (_httpServer==null)
                 throw new HttpException(response.__503_Service_Unavailable);
         _httpServer.service(request,response);
     }
@@ -664,7 +665,7 @@ public class HttpConnection
      * Use the current state of the request and response, to set tranfer
      * parameters such as chunking and content length.
      */
-    public synchronized void setupOutputStream()
+    public void setupOutputStream()
         throws IOException
     {
         if (_outputSetup)
@@ -694,8 +695,10 @@ public class HttpConnection
                           _response.getIntField(HttpFields.__ContentLength)<0)
                       {
                           _persistent=false;
-                          _response.setField(HttpFields.__Connection,
-                                             HttpFields.__Close);
+                          if (_keepAlive)
+                              _response.setField(HttpFields.__Connection,
+                                                 HttpFields.__Close);
+                          _keepAlive=false;
                       }
                       else if (_keepAlive)
                           _response.setField(HttpFields.__Connection,
@@ -764,9 +767,7 @@ public class HttpConnection
 
     
     /* ------------------------------------------------------------ */
-    /** 
-     */
-    synchronized void commitResponse()
+    void commitResponse()
         throws IOException
     {            
         _outputSetup=true;

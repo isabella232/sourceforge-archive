@@ -34,7 +34,10 @@ import java.util.TimeZone;
  * A collection of HTTP header and or Trailer fields.
  * This class is not synchronized and needs to be protected from
  * concurrent access.
- * 
+ *
+ * This class is not synchronized as it is expected that modifications
+ * will only be performed by a single thread.
+ *
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -545,107 +548,109 @@ public class HttpFields
         int size=0;
         char[] lbuf=null;
         com.mortbay.Util.LineInput.LineBuffer line_buffer;
-        
-        while ((line_buffer=in.readLineBuffer())!=null)
+        synchronized(in)
         {
-            // check space in the lowercase buffer
-            buf=line_buffer.buffer;
-            size=line_buffer.size;
-            if (size==0)
-                break;
-            if (lbuf==null || lbuf.length<line_buffer.size)
-                lbuf= new char[buf.length];
-
-            // setup loop state machine
-            int state=0;
-            int i1=-1;
-            int i2=-1;
-            String name=null;
-            String lname=null;
-
-            // loop for all chars in buffer
-            for (int i=0;i<line_buffer.size;i++)
+            while ((line_buffer=in.readLineBuffer())!=null)
             {
-                char c=buf[i];
-
-                switch(state)
+                // check space in the lowercase buffer
+                buf=line_buffer.buffer;
+                size=line_buffer.size;
+                if (size==0)
+                    break;
+                if (lbuf==null || lbuf.length<line_buffer.size)
+                    lbuf= new char[buf.length];
+                
+                // setup loop state machine
+                int state=0;
+                int i1=-1;
+                int i2=-1;
+                String name=null;
+                String lname=null;
+                
+                // loop for all chars in buffer
+                for (int i=0;i<line_buffer.size;i++)
                 {
-                  case 0: // leading white
-                      if (c==' ' || c=='\t')
-                      {
-                          // continuation line
-                          state=2;
+                    char c=buf[i];
+                    
+                    switch(state)
+                    {
+                      case 0: // leading white
+                          if (c==' ' || c=='\t')
+                          {
+                              // continuation line
+                              state=2;
+                              continue;
+                          }
+                          state=1;
+                          i1=i;
+                          i2=i-1;
+                      case 1: // reading name
+                          if (c==':')
+                          {
+                              name=new String(buf,i1,i2-i1+1);
+                              lname=new String(lbuf,i1,i2-i1+1);  
+                              state=2;
+                              i1=i;i2=i-1;
+                              continue;
+                          }
+                          if (c>='A'&&c<='Z')
+                          {
+                              lbuf[i]=(char)(('a'-'A')+c);
+                              i2=i;
+                          }
+                          else
+                          {
+                              lbuf[i]=c;
+                              if (c!=' ' && c!='\t')
+                                  i2=i;
+                          }
                           continue;
-                      }
-                      state=1;
-                      i1=i;
-                      i2=i-1;
-                  case 1: // reading name
-                      if (c==':')
-                      {
-                          name=new String(buf,i1,i2-i1+1);
-                          lname=new String(lbuf,i1,i2-i1+1);  
-                          state=2;
-                          i1=i;i2=i-1;
-                          continue;
-                      }
-                      if (c>='A'&&c<='Z')
-                      {
-                          lbuf[i]=(char)(('a'-'A')+c);
-                          i2=i;
-                      }
-                      else
-                      {
-                          lbuf[i]=c;
+                          
+                      case 2: // skip whitespace after :
+                          if (c==' ' || c=='\t')
+                              continue;
+                          state=3;
+                          i1=i;
+                          i2=i-1;
+                          
+                      case 3: // looking for last non-white
                           if (c!=' ' && c!='\t')
                               i2=i;
-                      }
-                      continue;
-
-                  case 2: // skip whitespace after :
-                      if (c==' ' || c=='\t')
-                          continue;
-                      state=3;
-                      i1=i;
-                      i2=i-1;
-
-                  case 3: // looking for last non-white
-                      if (c!=' ' && c!='\t')
-                          i2=i;
+                    }
+                    continue;
                 }
-                continue;
-            }
-
-            if (lname==null || lname.length()==0)
-            {
-                if (state>=2 && last!=null)
+                
+                if (lname==null || lname.length()==0)
                 {
-                    // Continuation line
-                    String existing=(String)get(last);
-                    StringBuffer sb = new StringBuffer(existing);
-                    sb.append(' ');
-                    sb.append(new String(buf,i1,i2-i1+1));
-                    put(last,sb.toString());
+                    if (state>=2 && last!=null)
+                    {
+                        // Continuation line
+                        String existing=(String)get(last);
+                        StringBuffer sb = new StringBuffer(existing);
+                        sb.append(' ');
+                        sb.append(new String(buf,i1,i2-i1+1));
+                        put(last,sb.toString());
+                    }
+                    continue;
                 }
-                continue;
-            }
-            
-            // Handle repeated headers
-            if (_map.containsKey(lname))
-            {
-                if (__singleValuedSet.contains(lname))
+                
+                // Handle repeated headers
+                if (_map.containsKey(lname))
                 {
-                    Code.warning("Ignored duplicate single value header: "+
-                                 name);
+                    if (__singleValuedSet.contains(lname))
+                    {
+                        Code.warning("Ignored duplicate single value header: "+
+                                     name);
+                    }
+                    else
+                        add(lname,new String(buf,i1,i2-i1+1));
                 }
                 else
-                    add(lname,new String(buf,i1,i2-i1+1));
-            }
-            else
-            {
-                _map.put(lname,new String(buf,i1,i2-i1+1));
-                _names.add(name);
-                last=lname;
+                {
+                    _map.put(lname,new String(buf,i1,i2-i1+1));
+                    _names.add(name);
+                    last=lname;
+                }
             }
         }
     }

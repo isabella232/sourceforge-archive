@@ -6,6 +6,7 @@
 package com.mortbay.HTTP.Handler.Servlet;
 
 import com.mortbay.Util.Code;
+import com.mortbay.Util.ThreadPool;
 import com.mortbay.HTTP.ContextLoader;
 import java.io.IOException;
 import java.util.AbstractMap;
@@ -53,6 +54,7 @@ public class ServletHolder
     private int _initOrder=-1;
     private Config _config;
     private Map _roleMap;
+    private int _checks;
 
     /* ---------------------------------------------------------------- */
     /** Construct a Servlet property mostly from the servers config
@@ -169,7 +171,7 @@ public class ServletHolder
     }
 
     /* ------------------------------------------------------------ */
-    private void initializeClass()
+    private synchronized void initializeClass()
         throws UnavailableException
     {
         try
@@ -238,7 +240,8 @@ public class ServletHolder
         if (_servlet!=null)
             _servlet.destroy();
         _servlet=null;
-
+        _checks=0;
+        
         // Destroy stack of servlets
         while (_servlets!=null && _servlets.size()>0)
         {
@@ -256,7 +259,7 @@ public class ServletHolder
      * SingleThreadModel
      * @return The servlet
      */
-    public Servlet getServlet()
+    public synchronized Servlet getServlet()
         throws UnavailableException
     {
         try{
@@ -268,15 +271,12 @@ public class ServletHolder
                 Servlet newServlet =
                     newServlet = (Servlet)_servletClass.newInstance();
                 newServlet.init(_config);
-                synchronized (this)
-                {
-                    _singleThreadModel =
-                        newServlet instanceof
-                        javax.servlet.SingleThreadModel;
-
-                    if (_servlet==null && !_singleThreadModel)
+                _singleThreadModel =
+                    newServlet instanceof
+                    javax.servlet.SingleThreadModel;
+                
+                if (_servlet==null && !_singleThreadModel)
                         _servlet=newServlet;
-                }
             }
             return _servlet;
         }
@@ -394,7 +394,9 @@ public class ServletHolder
         else
         {
             // Is the singleton instance ready?
-            if (_servlet == null)
+            // Double null check sync problem is reduced by hit
+            // counter. First 10 hits always  
+            if (_servlet == null || _checks<2)
             {
                 // no so get a lock on the class
                 synchronized(this)
@@ -431,6 +433,7 @@ public class ServletHolder
                     else
                         // yes so use it.
                         useServlet = _servlet;
+                    _checks++;
                 }
             }
             else
@@ -472,7 +475,7 @@ public class ServletHolder
      * servlet properties.
      * @return The entrySet of the initParameter map
      */
-    public Set entrySet()
+    public synchronized Set entrySet()
     {
         if (_initParams==null)
             _initParams=new HashMap(3);
@@ -485,7 +488,7 @@ public class ServletHolder
      * configuration conveniance. The methods are mapped to the
      * servlet properties.
      */
-    public Object put(Object name,Object value)
+    public synchronized Object put(Object name,Object value)
     {
         if (_initParams==null)
             _initParams=new HashMap(3);

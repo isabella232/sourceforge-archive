@@ -20,12 +20,14 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.HashSet;
 import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
@@ -39,6 +41,10 @@ import javax.servlet.http.HttpSession;
  * This class wraps a Jetty HTTP request as a 2.2 Servlet
  * request.
  *
+ * Note that this wrapper is not synchronized and if a request is to
+ * be operated on by multiple threads, then higher level
+ * synchronizations may be required.
+ * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -68,7 +74,7 @@ public class ServletRequest
     private BufferedReader _reader=null;
     private int _inputState=0;
     private Context _context;
-    private MultiMap _parameters;
+    private ArrayList _mergedParameters;
 
     
     /* ------------------------------------------------------------ */
@@ -521,7 +527,7 @@ public class ServletRequest
     }
     
     /* -------------------------------------------------------------- */
-    public synchronized ServletInputStream getInputStream()
+    public ServletInputStream getInputStream()
     {
         if (_inputState!=0 && _inputState!=1)
             throw new IllegalStateException();
@@ -532,43 +538,73 @@ public class ServletRequest
     }
     
     /* -------------------------------------------------------------- */
-    MultiMap getParameters()
+    void popParameters()
     {
-        if (_parameters!=null)
-            return _parameters;
-        return _httpRequest.getParameters();
+        _mergedParameters.remove(_mergedParameters.size()-1);
     }
     
     /* -------------------------------------------------------------- */
-    void setParameters(MultiMap parameters)
+    void pushParameters(MultiMap parameters)
     {
-        _parameters=parameters;
+        if (_mergedParameters==null)
+            _mergedParameters=new ArrayList(2);
+        _mergedParameters.add(parameters);
     }
     
     /* -------------------------------------------------------------- */
     public String getParameter(String name)
     {
-        if (_parameters!=null)
-            return _parameters.getString(name);
+        if (_mergedParameters!=null)
+        {
+            for (int p=_mergedParameters.size();p-->0;)
+            {
+                MultiMap params=(MultiMap)_mergedParameters.get(p);
+                String param=params.getString(name);
+                if (param!=null)
+                    return param;
+            }
+        }
         return _httpRequest.getParameter(name);
     }
     
     /* -------------------------------------------------------------- */
     public Enumeration getParameterNames()
     {
-        if (_parameters!=null)
-            return Collections.enumeration(_parameters.keySet());
+        if (_mergedParameters!=null)
+        {
+            HashSet set = new HashSet(_httpRequest.getParameterNames());
+            
+            for (int p=_mergedParameters.size();p-->0;)
+            {
+                MultiMap params=(MultiMap)_mergedParameters.get(p);
+                set.addAll(params.keySet());
+            }
+            return Collections.enumeration(set);
+        }
+        
         return Collections.enumeration(_httpRequest.getParameterNames());
     }
     
     /* -------------------------------------------------------------- */
     public String[] getParameterValues(String name)
     {
-        List v = (_parameters!=null)
-            ? _parameters.getValues(name)
-            : _httpRequest.getParameterValues(name);
+        List v=null;
+        
+        if (_mergedParameters!=null)
+        {
+            for (int p=_mergedParameters.size();v==null && p-->0;)
+            {
+                MultiMap params=(MultiMap)_mergedParameters.get(p);
+                v=params.getValues(name);
+            }
+        }
+        
+        if (v==null)
+            v=_httpRequest.getParameterValues(name);
+        
         if (v==null)
             return null;
+        
         String[]a=new String[v.size()];
         return (String[])v.toArray(a);
     }
@@ -599,7 +635,7 @@ public class ServletRequest
     }
     
     /* -------------------------------------------------------------- */
-    public synchronized BufferedReader getReader()
+    public BufferedReader getReader()
     {
         if (_inputState!=0 && _inputState!=2)
             throw new IllegalStateException();

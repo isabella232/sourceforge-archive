@@ -68,6 +68,7 @@ public class Code
     /*-------------------------------------------------------------------*/
     private static final String __lock="LOCK";
     private static Code __instance=null;
+    private static int __instanceChecks=0;
 
     /*-------------------------------------------------------------------*/
     /** Shared static instances, reduces object creation at expense
@@ -79,12 +80,13 @@ public class Code
     /*-------------------------------------------------------------------*/
     static Code instance()
     {   
-        if (__instance==null)
+        if (__instance==null || __instanceChecks<2)
         {
             synchronized(__lock)
             {
                 if (__instance==null)
                     new Code();
+                __instanceChecks++;
             }
         }
         return __instance;

@@ -268,9 +268,9 @@ public class TestHarness
         }
         catch(CodeException e)
         {
-            System.err.println("\n\nEXPECT Warning: <stack>");
-            Code.warning(e);
             t.check(true,"Assert");
+            System.err.println("\n\nEXPECT Warning: Assert with stack");
+            Code.warning(e);
         }
     }
     

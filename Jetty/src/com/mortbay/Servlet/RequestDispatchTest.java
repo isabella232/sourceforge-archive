@@ -96,6 +96,7 @@ public class RequestDispatchTest extends HttpServlet
                 dispatch.include(sreq,sres);
                 
                 pout.write("<HL><H1>-- Included (outputstream)</H1>");
+                pout.flush();
             }
         }
         else if (info.startsWith("/forward/"))
@@ -139,8 +140,8 @@ public class RequestDispatchTest extends HttpServlet
             {
                 PrintWriter pout = sres.getWriter();
                 pout.write("<H1>No servlet named: "+info+"</H1>");
+                pout.flush();
             }
-            
         }
         else
         {

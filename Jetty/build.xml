@@ -64,9 +64,12 @@ release     - Cleanup for release
     <copy file="${src.dir}/com/mortbay/HTTP/web.dtd" tofile="${basedir}/etc/web.dtd" />
   </target>
   
-  <target name="clean">
-    <delete dir="${jetty.webapp.classes}"/>
+  <target name="tidy">
     <delete dir="${classes}"/>
+  </target>
+
+  <target name="clean" depends="tidy">
+    <delete dir="${jetty.webapp.classes}"/>
     <delete dir="${javadoc}"/>
     <delete file="${jetty.jar}"/>
     <delete file="${servlet.jar}"/>

@@ -774,7 +774,6 @@ public class HandlerContext implements LifeCycle
         
         if (filename!=null)
         {
-            getMimeMap();
             int i=-1;
             while(type==null)
             {
@@ -837,10 +836,7 @@ public class HandlerContext implements LifeCycle
         String encoding =null;
         
         if (type!=null)
-        {
-            getEncodingMap();
             encoding=(String)_encodingMap.get(type);
-        }
 
         return encoding;
     }
@@ -982,6 +978,9 @@ public class HandlerContext implements LifeCycle
         
         _started=true;
 
+        getMimeMap();
+        getEncodingMap();
+        
         setAttribute("com.mortbay.HTTP.HttpServer",
                      _httpServerAccess?_httpServer:null);
         

@@ -25,6 +25,9 @@ import java.lang.reflect.InvocationTargetException;
  * The "8859-1" encoding is used on underlying LineInput instance for
  * line based reads from the raw stream.
  *
+ * This class is not synchronized and should be synchronized
+ * explicitly if an instance is used by multiple threads.
+ *
  * @see com.mortbay.Util.LineInput.
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -85,7 +88,7 @@ public class ChunkableInputStream extends FilterInputStream
      * @exception IllegalStateException Checking cannot be set if
      * a content length has been set.
      */
-    public synchronized void setChunking()
+    public void setChunking()
         throws IllegalStateException
     {
         if (_realIn.getByteLimit()>=0)
@@ -105,7 +108,7 @@ public class ChunkableInputStream extends FilterInputStream
      * there is some unread chunked input or a content length greater
      * than zero remaining.
      */
-    public synchronized void resetStream()
+    public void resetStream()
         throws IllegalStateException
     {
         if ((_deChunker!=null && _deChunker._chunkSize>0) ||
@@ -138,8 +141,8 @@ public class ChunkableInputStream extends FilterInputStream
      *             The first element of the array is replaced with the
      *             current input stream.
      */
-    public synchronized void insertFilter(Constructor filter,
-                                          Object[] args)
+    public void insertFilter(Constructor filter,
+                             Object[] args)
         throws InstantiationException,
                InvocationTargetException,
                IllegalAccessException
@@ -179,7 +182,6 @@ public class ChunkableInputStream extends FilterInputStream
     {
         return _deChunker._trailer;
     }
-
     
     /* ------------------------------------------------------------ */
     /** A closed input stream
@@ -193,7 +195,6 @@ public class ChunkableInputStream extends FilterInputStream
             return -1;
         }
     }
-    
     
     /* ------------------------------------------------------------ */
     /** Dechunk input.

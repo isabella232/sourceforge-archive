@@ -22,14 +22,17 @@ public class IO extends ThreadPool
     public static int bufferSize = 8192;
     /* ------------------------------------------------------------------- */
     private static IO __instance=null;
+    private static int __instanceChecks=0;
+    
     public static IO instance()
     {
-        if (__instance==null)
+        if (__instance==null || __instanceChecks<2)
         {
             synchronized(com.mortbay.Util.IO.class)
             {
                 if (__instance==null)
                     __instance=new IO();
+                __instanceChecks++;
             }
         }
         return __instance;

@@ -511,13 +511,15 @@ public class TestRFC2616
             int offset=0;
 
             offset=0;
-            response=listener.getResponses("GET /R1 HTTP/1.0\n"+
+            response=listener.getResponses("GET /R1 HTTP/1.1\n"+
+                                           "Host: localhost\n"+
                                            "\n");
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.0 200 OK\015\012","8.1.2 default")+10;
-            offset=t.checkContains(response,offset,
-                                   "Connection: close","8.1.2 default")+3;
+                                   "HTTP/1.1 200 OK\015\012","8.1.2 default")+10;
+            
+            t.checkContains(response,offset,
+                            "Transfer-Encoding: chunked","8.1.2 default");
 
             offset=0;
             response=listener.getResponses("GET /R1 HTTP/1.1\n"+
@@ -958,8 +960,8 @@ public class TestRFC2616
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.0 200 OK\015\012","19.6.2 default close")+10;
-            offset=t.checkContains(response,offset,
-                                   "Connection: close","19.6.2 default close")+3;
+            t.checkNotContained(response,offset,
+                                "Connection: close","19.6.2 not assumed");
             
             offset=0;
             response=listener.getResponses("GET /R1 HTTP/1.0\n"+

@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.RequestDispatcher;
@@ -186,13 +187,22 @@ public class Dispatcher implements RequestDispatcher
         // merge query string
         if (_query!=null && _query.length()>0)
         {
-            MultiMap parameters=new MultiMap(servletRequest.getParameters());
+            MultiMap parameters=new MultiMap();
             UrlEncoded.decodeTo(_query,parameters);
-            servletRequest.setParameters(parameters);
+            servletRequest.pushParameters(parameters);
 
             String oldQ=servletRequest.getQueryString();
             if (oldQ!=null && oldQ.length()>0)
-                _query=oldQ+'&'+_query;
+            {
+                UrlEncoded encoded = new UrlEncoded(oldQ);
+                Iterator iter = parameters.entrySet().iterator();
+                while(iter.hasNext())
+                {
+                    Map.Entry entry = (Map.Entry)iter.next();
+                    encoded.put(entry.getKey(),entry.getValue());
+                }
+                _query=encoded.encode(false);
+            }
         }
         
         // The path of the new request is the forward path
@@ -270,13 +280,11 @@ public class Dispatcher implements RequestDispatcher
         }
         
         // merge query string
-        MultiMap old_parameters=null;
         if (_query!=null && _query.length()>0)
         {
-            old_parameters = servletRequest.getParameters();
-            MultiMap parameters=new MultiMap(old_parameters);
+            MultiMap parameters=new MultiMap();
             UrlEncoded.decodeTo(_query,parameters);
-            servletRequest.setParameters(parameters);
+            servletRequest.pushParameters(parameters);
         }
         
         // Request has all original path and info etc.
@@ -330,7 +338,7 @@ public class Dispatcher implements RequestDispatcher
             servletResponse.setLocked(old_locked);
             servletResponse.setOutputState(old_output_state);
             if (_query!=null && _query.length()>0)
-                servletRequest.setParameters(old_parameters);
+                servletRequest.popParameters();
             httpRequest.setAttribute("javax.servlet.include.request_uri",
                                  old_request_uri);
             httpRequest.setAttribute("javax.servlet.include.context_path",

@@ -1,12 +1,17 @@
 Jetty Versions
 --------------
  
+ 
+ + don't include classes in release.
  + Allow load-on-startup with no content.
  + Fixed RollOverFileLogSink bug with extra log files.  
  + Improved Log defaults
  + Don't start HttpServer log sink on add.
  + Admin servlet uses unique links for IE.
  + Added Win32 service support
+ + Reduced risk of double null check sync problem.
+ + Don't set connection:close for normal HTTP/1.0 responses.
+ + RequestDispatcher new queries params replace old.
 
 Jetty-3.0.0.rc5 - 12 Nov 2000
  + Default writer encoding set by mime type if not explicitly set.

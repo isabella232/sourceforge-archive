@@ -292,7 +292,7 @@ public class WriterLogSink
     /** Stop a log sink.
      * The default implementation does nothing 
      */
-    public void start()
+    public synchronized void start()
     {
         if (_dateFormat==null)
         {

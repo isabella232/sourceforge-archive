@@ -35,7 +35,7 @@ public class ThreadPool
 {
     /* ------------------------------------------------------------ */
     static int __maxThreads =
-        Integer.getInteger("THREADPOOL_MAX_THREADS",255).intValue();
+        Integer.getInteger("THREADPOOL_MAX_THREADS",256).intValue();
     
     /* ------------------------------------------------------------ */
     static int __minThreads =
@@ -62,8 +62,8 @@ public class ThreadPool
     private Class _threadClass;
     private Constructor _constructThread;
     
-    /* ------------------------------------------------------------------- */
     private BlockingQueue _queue;
+    private int _queueChecks;
     
     /* ------------------------------------------------------------------- */
     /* Construct
@@ -100,11 +100,6 @@ public class ThreadPool
      */
     public String getName()
     {
-        if (_name==null)
-        {
-            _name=getClass().getName();
-            _name=_name.substring(_name.lastIndexOf(".")+1);
-        }
         return _name;
     }
 
@@ -125,7 +120,7 @@ public class ThreadPool
      * @exception IllegalStateException If the pool has already
      *            been started.
      */
-    public void setThreadClass(Class threadClass)
+    public synchronized void setThreadClass(Class threadClass)
         throws IllegalStateException
     {
         if (_running)
@@ -152,6 +147,11 @@ public class ThreadPool
             setThreadClass(java.lang.Thread.class);
         }
 
+        if (_name==null)
+        {
+            _name=getClass().getName();
+            _name=_name.substring(_name.lastIndexOf(".")+1);
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -453,12 +453,13 @@ public class ThreadPool
     protected Object getJob(int idleTimeoutMs)
         throws InterruptedException, InterruptedIOException
     {
-        if (_queue==null)
+        if (_queue==null || _queueChecks<2)
         {
             synchronized(this)
             {
                 if (_queue==null)
                     _queue=new BlockingQueue(_maxThreads);
+                _queueChecks++;
             }
         }
         
@@ -486,15 +487,15 @@ public class ThreadPool
             return;
         }
         
-        if (_queue==null)
+        if (_queue==null || _queueChecks<2)
         {
             synchronized(this)
             {
                 if (_queue==null)
                     _queue=new BlockingQueue(_maxThreads);
+                _queueChecks++;
             }
         }
-
         _queue.put(job);
     }
 

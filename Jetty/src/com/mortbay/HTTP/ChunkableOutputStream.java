@@ -30,7 +30,10 @@ import java.util.ArrayList;
  * <LI>Notification of significant output events for filter triggering,
  *     header flushing, etc.
  * </UL>
- * 
+ *
+ * This class is not synchronized and should be synchronized
+ * explicitly if an instance is used by multiple threads.
+ *
  * @version $Id$
  * @author Greg Wilkins
 */
@@ -104,7 +107,7 @@ public class ChunkableOutputStream extends FilterOutputStream
      * raw data on the same stream without excessive buffering or flushes.
      * @return Raw Writer
      */
-    public synchronized Writer getRawWriter()
+    public Writer getRawWriter()
     {
         if (_rawWriter==null)
         {
@@ -131,7 +134,7 @@ public class ChunkableOutputStream extends FilterOutputStream
      * raw data on the same stream without excessive buffering or flushes.
      * @exception IOException 
      */
-    public synchronized void writeRawWriter()
+    public void writeRawWriter()
         throws IOException
     {
         if (_rawWriter==null)
@@ -149,7 +152,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     /** Has any data been written to the stream.
      * @return True if write has been called.
      */
-    public synchronized boolean isWritten()
+    public boolean isWritten()
     {
         return _written;
     }
@@ -158,7 +161,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     /** Has any data been sent from this stream.
      * @return True if buffer has been flushed to destination.
      */
-    public synchronized boolean isCommitted()
+    public boolean isCommitted()
     {
         return _committed;
     }
@@ -204,7 +207,7 @@ public class ChunkableOutputStream extends FilterOutputStream
      * @exception IllegalStateException
      * @exception Problem with observer notification.
      */
-    public synchronized void resetBuffer()
+    public void resetBuffer()
         throws IllegalStateException, IOException
     {
         if (_committed)
@@ -245,7 +248,7 @@ public class ChunkableOutputStream extends FilterOutputStream
      * output stream. They are removed when the stream is closed.
      * @param observer The observer. 
      */
-    public synchronized void addObserver(OutputObserver observer)
+    public void addObserver(OutputObserver observer)
     {
         if (_observers==null)
             _observers=new ArrayList(4);
@@ -276,7 +279,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     /* ------------------------------------------------------------ */
     /** Set chunking mode.
      */
-    public synchronized void setChunking()
+    public void setChunking()
         throws IOException
     {
         flush();
@@ -289,7 +292,7 @@ public class ChunkableOutputStream extends FilterOutputStream
      * @exception IOException 
      * @exception IllegalStateException chunking not set
      */
-    public synchronized void endChunking()
+    public void endChunking()
         throws IOException,IllegalStateException
     {
         if (!isChunking())
@@ -331,7 +334,7 @@ public class ChunkableOutputStream extends FilterOutputStream
      * @exception IllegalStateException The stream cannot be
      * reset if chunking is enabled.
      */
-    public synchronized void resetStream()
+    public void resetStream()
         throws IllegalStateException
     {
         if (isChunking())
@@ -382,7 +385,7 @@ public class ChunkableOutputStream extends FilterOutputStream
      *             The first element of the array is replaced with the
      *             current output stream.
      */
-    public synchronized void insertFilter(Constructor filter,
+    public void insertFilter(Constructor filter,
                                           Object[] args)
         throws InstantiationException,
                InvocationTargetException,
@@ -448,7 +451,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized void flush() throws IOException
+    public void flush() throws IOException
     {
         if (out!=null)
             out.flush();
@@ -501,7 +504,7 @@ public class ChunkableOutputStream extends FilterOutputStream
      * All filters are closed and discarded.
      * @exception IOException 
      */
-    public synchronized void close()
+    public void close()
         throws IOException
     {
         // Are we already closed?

@@ -141,7 +141,7 @@ public class ResourceHandler extends NullHandler
 
  
     /* ----------------------------------------------------------------- */
-    public void start()
+    public synchronized void start()
     {
         try
         {

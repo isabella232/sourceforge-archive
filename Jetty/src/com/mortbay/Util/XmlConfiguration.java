@@ -55,24 +55,20 @@ public class XmlConfiguration
     public XmlConfiguration(URL configuration)
         throws SAXException, IOException
     {
-        xxx
-        if (__parser==null)
+        synchronized(this.getClass())
         {
-            synchronized(this.getClass())
+            if (__parser==null)
             {
-                if (__parser==null)
-                {
-                    __parser = new XmlParser();
-                    Resource configResource=Resource.newSystemResource
-                        ("com/mortbay/Util/configure.dtd");    
-                    __parser.redirectEntity
-                        ("configure.dtd",configResource);   
-                    __parser.redirectEntity
-                        ("configure_1_0.dtd",configResource);
-                    __parser.redirectEntity
-                        ("http://jetty.mortbay.com/configure_1_0.dtd",
-                         configResource);
-                }
+                __parser = new XmlParser();
+                Resource configResource=Resource.newSystemResource
+                    ("com/mortbay/Util/configure.dtd");    
+                __parser.redirectEntity
+                    ("configure.dtd",configResource);   
+                __parser.redirectEntity
+                    ("configure_1_0.dtd",configResource);
+                __parser.redirectEntity
+                    ("http://jetty.mortbay.com/configure_1_0.dtd",
+                     configResource);
             }
         }
         _config = __parser.parse(configuration.toString());	

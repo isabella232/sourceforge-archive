@@ -24,6 +24,9 @@ import javax.servlet.http.Cookie;
  * of a HTTP response. It can be used for receiving or generating
  * requests.
  *
+ * This class is not synchronized. It should be explicitly
+ * synchronized if it is used by multiple threads.
+ *
  * @see HttpRequest
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -184,11 +187,11 @@ public class HttpResponse extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    /** XXX Not Implemented
+    /** Not Implemented.
      * @param in 
      * @exception IOException 
      */
-    public synchronized void readHeader(ChunkableInputStream in)
+    public void readHeader(ChunkableInputStream in)
         throws IOException
     {
         _state=__MSG_BAD;
@@ -197,7 +200,7 @@ public class HttpResponse extends HttpMessage
     
     
     /* -------------------------------------------------------------- */
-    public synchronized  void writeHeader(Writer writer) 
+    public void writeHeader(Writer writer) 
         throws IOException
     {
         if (_state!=__MSG_EDITABLE)
@@ -516,7 +519,7 @@ public class HttpResponse extends HttpMessage
     /** 
      * @exception IOException 
      */
-    public synchronized void commit()
+    public void commit()
         throws IOException
     {
         if (isCommitted())

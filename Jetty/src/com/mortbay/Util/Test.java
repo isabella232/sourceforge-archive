@@ -132,6 +132,48 @@ public class Test
     }
     
  
+    /*-------------------------------------------------------------------*/
+    /** Check that string does not contain a substring
+     *  @return Index of substring
+     */
+    public int checkNotContained(String string, String subString, String check)
+    {
+        return checkNotContained(string,0,subString,check);
+    }
+    
+    /*-------------------------------------------------------------------*/
+    /** Check that string does not contain a substring
+     *  @return Index of substring
+     */
+    public int checkNotContained(String string,
+                                 int offset,
+                                 String subString, String check)
+    {
+        int index=-1;
+        reportBuf.append(testCase+" : "+check+" - ");
+        if ((string==null && subString==null)
+            || (string!=null && (subString==null ||
+                                 (index=string.indexOf(subString,offset))>=0)))
+        {
+            Frame frame = new Frame(1);
+            passed=false;
+            reportBuf.append(fail + " at " + frame);
+            reportBuf.append('\n');
+            reportBuf.append(spaces,0,testCase.length()+3);
+            reportBuf.append('"' + subString + "\" IS contained in \"" +
+                             string.substring(offset) + '"');
+            Code.debug(check," FAILED");
+        }
+        else
+        {
+            reportBuf.append(pass);
+            Code.debug(check," OK");
+        }
+        reportBuf.append('\n');
+        return index;
+    }
+    
+ 
     
     /*-------------------------------------------------------------------*/
     /** Check a pair of objects for equality test case

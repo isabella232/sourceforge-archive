@@ -146,12 +146,20 @@ public class Resource
     {
         if (_connection==null)
         {
-            try{
-                _connection=_url.openConnection();
-            }
-            catch(IOException e)
+            synchronized(this)
             {
-                Code.ignore(e);
+                // XXX - vulnerable to double null check sync problem.
+                // but should not be a problem for this class.
+                if (_connection==null)
+                {
+                    try{
+                        _connection=_url.openConnection();
+                    }
+                    catch(IOException e)
+                    {
+                        Code.ignore(e);
+                    }
+                }
             }
         }
         return _connection!=null;
@@ -182,14 +190,20 @@ public class Resource
 
     /* ------------------------------------------------------------ */
     /**
-     * Returns true if the respresenetd resource exists.
+     * Returns true if the respresened resource exists.
      */
     public boolean exists()
     {
         try
         {
             if (checkConnection() && _in==null )
-                _in = _connection.getInputStream();
+            {
+                synchronized(this)
+                {
+                    if ( _in==null )
+                        _in = _connection.getInputStream();
+                }
+            }
         }
         catch (IOException e)
         {
@@ -265,7 +279,7 @@ public class Resource
     /**
      * Returns an input stream to the resource
      */
-    public synchronized InputStream getInputStream()
+    public InputStream getInputStream()
         throws java.io.IOException
     {
         if (!checkConnection())
