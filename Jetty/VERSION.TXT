@@ -2,12 +2,14 @@ Jetty Versions
 --------------
 
 Jetty-3.1.2 - 12 Oct 2001
- + Fixed authentication role handling in FORM auth.
  + Fixed double entry on PathMap.getMatches
- + Fixed FORM Authentication username.
  + Fixed servlet handling of non session url params.
  + Fixed attr handling in XmlParser.toString
- + Fixed request log date formatting
+ + Fixed request log date formatting  
+ + Fixed NotFoundHandler handling of unknown methods
+ + Fixed FORM Authentication username.
+ + Fixed authentication role handling in FORM auth.
+ + FORM authentication passes query params.
  + Added short delay to shutdown hook for JVM bug.
  + Added ServletHandler.sessionCount()
  + Added run target to ant
@@ -16,7 +18,6 @@ Jetty-3.1.2 - 12 Oct 2001
  + Log OK state after thread low warnings.
  + Changed unsatisfiable range warnings to debug.
  + Further improvements in handling of shutdown.
- + FORM authentication passes query params.
 
 Jetty-3.1.1 - 27 Sep 2001
  + Fixed jar manifest format - patched 28 Sep 2001

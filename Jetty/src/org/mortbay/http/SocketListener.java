@@ -232,7 +232,10 @@ public class SocketListener
         if (low && !_lastLow)
             Log.event("LOW ON THREADS: "+this);
         else if (!low && _lastLow)
-            Log.event("OK on threads OK: "+this);
+        {
+            Log.event("OK on threads: "+this);
+            _lastOut=false;
+        }
         _lastLow=low;
         return low;
     }
@@ -248,8 +251,6 @@ public class SocketListener
             getIdleThreads()==0;
         if (out && !_lastOut)
             Code.warning("OUT OF THREADS: "+this);
-        else if (!out && _lastOut)
-            Log.event("Low on threads: "+this);
             
         _lastOut=out;
         return out;

@@ -94,7 +94,6 @@ public class NotFoundHandler extends NullHandler
             // Unknown METHOD
             response.setField(HttpFields.__Allow,
                               "GET, HEAD, POST, PUT, DELETE, MOVE, OPTIONS, TRACE");
-            response.sendError(response.__200_OK);
             response.sendError(response.__405_Method_Not_Allowed);
         }
     }

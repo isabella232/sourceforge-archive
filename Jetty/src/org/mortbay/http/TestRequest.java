@@ -67,7 +67,7 @@ public class TestRequest
             "GET /",                      "GET", "/",       "HTTP/0.9",
             "GET http://h:1/ HTTP/1.0",   "GET", "/",       "HTTP/1.0",
             "GET http://h:1/xx HTTP/1.0", "GET", "/xx",     "HTTP/1.0",
-            "GET http HTTP/1.0",          "GET", "/http",   "HTTP/1.0",
+            "GET http HTTP/1.0",          "GET", "http",    "HTTP/1.0",
             "GET http://h:1/",            "GET", "/",       "HTTP/0.9",
             "GET http://h:1/xxx",         "GET", "/xxx",    "HTTP/0.9",
             "  GET     ",                 null,  null,      null,

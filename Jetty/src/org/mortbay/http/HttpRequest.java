@@ -656,8 +656,7 @@ public class HttpRequest extends HttpMessage
         {
             Code.ignore(e);
             throw new HttpException(HttpResponse.__400_Bad_Request,new String(buf,s3,e3-s3+1));
-        }
-            
+        }            
     }
     
     /* ------------------------------------------------------------ */

@@ -340,19 +340,23 @@ public class HttpResponse extends HttpMessage
 		uri=StringUtil.replace(uri,"<","&lt;");
 		uri=StringUtil.replace(uri,">","&gt;");
 
-                String body=
-                    "<HTML>\n<HEAD>\n<TITLE>Error "+code+
-                    " "+reason+
-                    "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
-                    " "+reason+
-                    "</H2>\n"+(message==null?"":message)+
-                    ("<P>RequestURI="+uri);
-                
-                for (int i=0;i<10;i++)
-                    body+="<!-- Padding for IE                                                 -->";
-                body+="\n</BODY>\n</HTML>\n";
-                
-                byte[] buf=body.getBytes(StringUtil.__ISO_8859_1);
+                StringBuffer body= new StringBuffer(1500);
+                body.append("<HTML>\n<HEAD>\n<TITLE>Error ");
+                body.append(code);
+                body.append(' ');
+                body.append(reason);
+                body.append("</TITLE>\n<BODY>\n<H2>HTTP ERROR: ");
+                body.append(code);
+                body.append(' ');
+                body.append(reason);
+                body.append("</H2>\n");
+                if (message!=null) body.append(message);
+                body.append("<P>RequestURI=");
+                body.append(uri);
+                for (int i=0;i<20;i++)
+                    body.append("\n                                                ");
+                body.append("\n</BODY>\n</HTML>\n");
+                byte[] buf=body.toString().getBytes(StringUtil.__ISO_8859_1);
                 _header.putIntField(HttpFields.__ContentLength,buf.length);
                 out.write(buf);
             }

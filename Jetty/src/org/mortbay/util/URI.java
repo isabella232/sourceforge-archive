@@ -144,8 +144,8 @@ public class URI
             switch(state)
             {
               case 0:
-                  _dirty=true;
-                  _path="/"+_uri;
+                  _dirty=false;
+                  _path=_uri;
                   break;
                   
               case 1:
