@@ -451,7 +451,7 @@ public class FileHandler extends NullHandler
                                    HttpResponse response,
                                    File file)
         throws IOException
-    {	
+    {
         if (!request.getMethod().equals(HttpRequest.HEAD))
         {
             // check any modified headers.

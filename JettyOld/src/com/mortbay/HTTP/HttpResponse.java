@@ -293,7 +293,9 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
                 setHeader(Connection,HttpHeader.Close);
 
                 String length = getHeader(HttpHeader.ContentLength);
-                if (length!=null && length.length()>0 && request!=null)
+                if (request!=null &&
+                    "304".equals(status) || 
+                    (length!=null && length.length()>0 ))
                 {
                     if (request.getHttpServer().http1_0_KeepAlive)
                     {
@@ -498,26 +500,33 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     public void sendError(int code,String msg)
         throws IOException
     {
-        setContentType("text/html");
         setStatus(code,msg);
 
-	byte[] buf =
-	    ("<HTML><HEAD><TITLE>Error "+code+
-	     "</TITLE><BODY><H2>HTTP ERROR: "+code+
-	     " " + msg +
-	     "</H2></BODY>\n</HTML>\n").getBytes("ISO8859_1");
+        if (code!=204 && code!=304 && code>=200)
+        {
+            setContentType("text/html");
+            byte[] buf =
+                ("<HTML><HEAD><TITLE>Error "+code+
+                 "</TITLE><BODY><H2>HTTP ERROR: "+code+
+                 " " + msg +
+                 "</H2></BODY>\n</HTML>\n").getBytes("ISO8859_1");
+            
+            if (writer!=null)
+                writer.flush();
+            else
+                setContentLength(buf.length);
+            outputState=0;
+            OutputStream out = getOutputStream();
+            out.write(buf);
+            out.flush();
+        }
+        else
+        {
+            setHeader(ContentType,null);
+            setHeader(ContentLength,null);
 
-        if (writer!=null)
-            writer.flush();
-	else
-	    setContentLength(buf.length);
-        writeHeaders();
-
-        outputState=0;
-        OutputStream out = getOutputStream();
-
-        out.write(buf);
-        out.flush();
+            writeHeaders();
+        }
     }
 
     /* ------------------------------------------------------------- */

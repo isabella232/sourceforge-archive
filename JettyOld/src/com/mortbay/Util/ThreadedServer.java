@@ -424,20 +424,6 @@ abstract public class ThreadedServer
         
         _running=false;
         
-        // Close the port
-        if (listen!=null)
-        {
-            try
-            {
-		try {listen.setSoTimeout(1);}
-		catch ( Exception e ){Code.ignore(e);}
-                listen.close();
-            }
-            catch(IOException e)
-            {
-                Code.ignore(e);
-            }
-        }
         
         // interrupt the threads
         Enumeration enum=_threadSet.keys();
@@ -480,7 +466,22 @@ abstract public class ThreadedServer
         
         _threadSet.clear();
         _threadSet=null;
-        listen=null;
+        
+        // Close the port
+        if (listen!=null)
+        {
+            try
+            {
+		try {listen.setSoTimeout(1);}
+		catch ( Exception e ){Code.ignore(e);}
+                listen.close();
+            }
+            catch(IOException e)
+            {
+                Code.ignore(e);
+            }
+            listen=null;
+        }
     }
     
   
