@@ -134,7 +134,7 @@ public class Log
     /**  Set the log options
      * @param logOptions A string of characters as defined for the
      * LOG_OPTIONS system parameter.
-     * @param logFile log file name
+     * @param logFile log file name. Null for stderr.
      * @param dateFormat Simple date format string for timestamps
      * @param timezone Time zone for timestamps
      */
@@ -175,7 +175,15 @@ public class Log
 	}
     }
 
-    
+
+    /* ------------------------------------------------------------ */
+    /** No logging.
+     * Logging is disabled with this call.
+     */
+    public void disableLog()
+    {
+	_out=null;
+    }
     
     /*-------------------------------------------------------------------*/
     /** Set the log options
@@ -236,6 +244,9 @@ public class Log
 			Frame frame,
 			long time)
     {
+	if (_out==null)
+	    return;
+	
 	// Lock static buffer
 	synchronized(__stringBuffer)
 	{
