@@ -122,8 +122,8 @@
         <exclude name=".keepme"/>
       </fileset>
     </delete>
-    <ant antfile="${test}/build.xml" inheritAll="false" target="tidy"/>
-    <ant antfile="${extra}/build.xml" inheritAll="false" target="tidy"/>
+    <ant dir="${test}" antfile="${test}/build.xml" inheritAll="false" target="tidy"/>
+    <ant dir="${extra}" antfile="${extra}/build.xml" inheritAll="false" target="tidy"/>
   </target>
   
 
@@ -149,7 +149,7 @@
       </fileset>
     </delete>
     <ant antfile="${test}/build.xml" inheritAll="false" target="clean"/>
-    <ant antfile="${extra}/build.xml" inheritAll="false" target="clean"/>
+    <ant dir="${extra}" antfile="${extra}/build.xml" inheritAll="false" target="clean"/>
     <ant antfile="${webapps}/template/build.xml" inheritAll="false" target="clean"/>
   </target>
 
@@ -403,7 +403,7 @@
   <target name="test" 
           depends="webapps,javadoc"
           description="Build and run the test harnesses">
-    <ant antfile="${test}/build.xml" inheritAll="true" target="test"/>
+    <ant  dir="." antfile="${test}/build.xml" inheritAll="false" target="test"/>
   </target>
 
   <!-- ==================================================================== -->
