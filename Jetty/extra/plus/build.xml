@@ -63,6 +63,7 @@ Other targets:
 
     <path id="classpath">
       <pathelement location="${jetty.jar}" />
+      <pathelement location="${mortbay.jmx.jar}" />
       <pathelement location="${servlet.jar}" />
       <path refid="extpath" />
     </path>
