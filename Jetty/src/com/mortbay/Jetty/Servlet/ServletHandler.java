@@ -410,7 +410,6 @@ public class ServletHandler extends NullHandler
                     // This context has a specific class loader.
                     if (servlet.getClass().getClassLoader()!=_loader)
                     {
-                        new Throwable().printStackTrace();
                         holder.destroy();
                         String msg = "Dynamic servlet "+
                             servletClass+
