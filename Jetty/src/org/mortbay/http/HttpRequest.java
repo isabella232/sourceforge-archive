@@ -953,10 +953,10 @@ public class HttpRequest
      */
     void recycle(HttpConnection connection)
     {
-        super.recycle(connection);
         _method=null;
         _uri=null;
         _host=null;
+        _hostPort=null;
         _port=0;
         _te=null;
         if (_parameters!=null)
@@ -964,8 +964,9 @@ public class HttpRequest
         _paramsExtracted=false;
         _handled=false;
         _cookies=null;
-        if (_attributes!=null)
-            _attributes.clear();
+        _timeStamp=0;
+        _userPrincipal=null;
+        super.recycle(connection);
     }
     
     /* ------------------------------------------------------------ */

@@ -512,9 +512,8 @@ public class HttpResponse
     {
         super.recycle(connection);
         _status=__200_OK;
-        _version=__HTTP_1_0;
-        _state=__MSG_EDITABLE;
         _reason=null;
+        _httpContext=null;
     }
     
     /* ------------------------------------------------------------ */

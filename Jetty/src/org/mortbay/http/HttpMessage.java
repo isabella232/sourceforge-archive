@@ -769,6 +769,8 @@ public interface HttpMessage
             _characterEncoding=null;
             _mimeType=null;
             _facade=null;  // XXX could do better here????
+            if (_attributes!=null)
+                _attributes.clear();
         }
     
         /* ------------------------------------------------------------ */
