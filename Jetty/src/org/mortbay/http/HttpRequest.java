@@ -68,7 +68,22 @@ public class HttpRequest extends HttpMessage
         __CONNECT="CONNECT",
         __MOVE="MOVE";
     
+    /* ------------------------------------------------------------ */
+    /** Max size of the form content.
+     * Limits the size of the data a client can push at the server.
+     * Set via the org.mortbay.http.HttpRequest.maxContentSize
+     * system property.
+     */
+    public static int __maxFormContentSize=
+        Integer.getInteger("org.mortbay.http.HttpRequest.maxFormContentSize",
+                           100000).intValue();
+    
+    /* ------------------------------------------------------------ */
+    /** Maximum header line length.
+     */
     public static int __maxLineLength=2048;
+
+    
     public static final StringMap __methodCache = new StringMap(true);
     public static final StringMap __versionCache = new StringMap(true);
     static
@@ -754,13 +769,13 @@ public class HttpRequest extends HttpMessage
     /* Extract Paramters from query string and/or form content.
      */
     private void extractParameters()
-    {
+    {        
         if (_paramsExtracted)
             return;
         _paramsExtracted=true;
 
         if (_parameters==null)
-            _parameters=new MultiMap(5);
+            _parameters=new MultiMap(8);
 
         _uri.putParametersTo(_parameters);
         
@@ -786,7 +801,9 @@ public class HttpRequest extends HttpMessage
                             ByteArrayOutputStream2 bout =
                                 new ByteArrayOutputStream2(content_length>0?content_length:4096);
                             InputStream in = getInputStream();
-                            IO.copy(in,bout);
+                            int max=(content_length<0||content_length>__maxFormContentSize)
+                                ?__maxFormContentSize:content_length;
+                            IO.copy(in,bout,max);
                             
                             byte[] content=bout.getBuf();
 
