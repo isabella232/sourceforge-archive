@@ -468,10 +468,12 @@ public class HttpResponse extends HttpMessage
      */
     public synchronized void commit()
 	throws IOException
-    {
+    {	
+	_connection.commitResponse();
 	super.commit();
 	HttpRequest request=getRequest();
 	if (request!=null)
 	    request.setHandled(true);
     }
 }
+

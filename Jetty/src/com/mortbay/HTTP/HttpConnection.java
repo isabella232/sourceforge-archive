@@ -379,7 +379,8 @@ public class HttpConnection
                 }
 
                 // Commit the response
-                _response.commit();
+		if (!_response.isCommitted())
+		    _response.commit();
                 _inputStream.resetStream();
                 if (_outputStream.isChunking())
                     _outputStream.endChunking(); 
@@ -716,5 +717,29 @@ public class HttpConnection
               Code.debug("notify CLOSED");
               break;
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     */
+    void commitResponse()
+    {
+	
+	// if we have no content or encoding,
+	// and no content length
+	// need to set content length (XXX or may just close connection?)
+	if (!_outputStream.isWritten() &&
+	    !_response.containsField(HttpFields.__TransferEncoding) &&
+	    !_response.containsField(HttpFields.__ContentLength))
+	{
+	    if(_persistent)
+		_response.setIntField(HttpFields.__ContentLength,0);
+	    else
+	    {
+		_close=true;
+		_response.setField(HttpFields.__Connection,
+				   HttpFields.__Close);
+	    }
+	}
     }
 }

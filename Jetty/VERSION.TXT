@@ -1,4 +1,6 @@
-Jetty-3.0.A97 - 8 July 2000
+Jetty-3.0.A97 -
+   + Fixed persistent commits with no content (eg redirect+keep-alive). 
+   + Implemented servlet isSecure().
    + Implemented servlet getLocale(s).
    + Formatted version in server info string.
    + Protect setContentLength from a late set in default servlet

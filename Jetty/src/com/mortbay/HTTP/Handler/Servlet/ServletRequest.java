@@ -145,20 +145,10 @@ class ServletRequest
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     *
-     * Returns a boolean indicating whether this request was made using a
-     * secure channel, such as HTTPS.
-     *
-     *
-     * @return		a boolean indicating if the request was made using a
-     *                  secure channel
-     *
-     */
     public boolean isSecure()
     {
-	Code.notImplemented();
-	return false;
+	return "HTTPS".equals(_httpRequest.getScheme()) ||
+	    "https".equals(_httpRequest.getScheme());
     }
     
     /* ------------------------------------------------------------ */

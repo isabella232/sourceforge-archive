@@ -146,7 +146,7 @@ abstract public class HttpMessage
     }
 
     /* ------------------------------------------------------------ */
-    /** XXX
+    /** Get field names.
      * @return 
      */
     public Collection getFieldNames()
@@ -160,7 +160,7 @@ abstract public class HttpMessage
 
     /* ------------------------------------------------------------ */
     /** Does the header or trailer contain a field?
-     * @param name NAme of the field
+     * @param name Name of the field
      * @return True if contained in header or trailer.
      */
     public boolean containsField(String name)
