@@ -400,7 +400,7 @@ public class HttpResponse extends HttpMessage
         writer.write(' ');
         writer.write(message);
         writer.write("</TITLE>\n<BODY>\n<H2>HTTP ERROR: ");
-        writer.write(code);
+        writer.write(Integer.toString(code));
         writer.write(' ');
         writer.write(message);
         writer.write("</H2>\n");
