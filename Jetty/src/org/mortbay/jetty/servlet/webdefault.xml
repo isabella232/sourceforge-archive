@@ -75,6 +75,11 @@
   <!--   redirectWelcome  If true, redirect welcome file requests           -->
   <!--                    else use request dispatcher forwards              -->
   <!--                                                                      -->
+  <!--   minGzipLength    If set to a positive integer, then static content -->
+  <!--                    larger than this will be served as gzip content   -->
+  <!--                    encoded if a matching resource is found ending    -->
+  <!--                    with ".gz"                                        -->
+  <!--                                                                      -->
   <!-- The MOVE method is allowed if PUT and DELETE are allowed             -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <servlet>
@@ -99,6 +104,10 @@
     <init-param>
       <param-name>redirectWelcome</param-name>
       <param-value>false</param-value>
+    </init-param>
+    <init-param>
+      <param-name>minGzipLength</param-name>
+      <param-value>8192</param-value>
     </init-param>
     <load-on-startup>0</load-on-startup>
   </servlet>

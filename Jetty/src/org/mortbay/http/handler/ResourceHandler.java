@@ -58,6 +58,7 @@ public class ResourceHandler extends AbstractHttpHandler
     private String[] _methods=null;
     private String _allowed;
     private boolean _dirAllowed=true;
+    private int _minGzipLength =-1;
     private StringMap _methodMap = new StringMap();
     {
         setAllowedMethods(new String[]
@@ -172,6 +173,25 @@ public class ResourceHandler extends AbstractHttpHandler
         _acceptRanges=ar;
     }
     
+    /* ------------------------------------------------------------ */
+    /** Get minimum content length for GZIP encoding.
+     * @return Minimum length of content for gzip encoding or -1 if disabled.
+     */
+    public int getMinGzipLength()
+    {
+        return _minGzipLength;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set minimum content length for GZIP encoding.
+     * @param minGzipLength If set to a positive integer, then static content
+     * larger than this will be served as gzip content encoded
+     * if a matching resource is found ending with ".gz"
+     */
+    public void setMinGzipLength(int minGzipLength)
+    {
+        _minGzipLength = minGzipLength;
+    }
  
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,
@@ -307,7 +327,7 @@ public class ResourceHandler extends AbstractHttpHandler
                 // Check modified dates
                 if (!passConditionalHeaders(request,response,resource))
                     return;
-                sendData(request,response,resource,true);
+                sendData(request,response,pathInContext,resource,true);
             }
             else
                 // don't know what it is
@@ -559,14 +579,13 @@ public class ResourceHandler extends AbstractHttpHandler
     /* ------------------------------------------------------------ */
     public void sendData(HttpRequest request,
                          HttpResponse response,
+                         String pathInContext,
                          Resource resource,
                          boolean writeHeaders)
         throws IOException
     {
         long resLength=resource.length();
         
-
-
         //  see if there are any range headers
         Enumeration reqRanges =
             request.getDotVersion()>0
@@ -575,12 +594,29 @@ public class ResourceHandler extends AbstractHttpHandler
         
         if (!writeHeaders || reqRanges == null || !reqRanges.hasMoreElements())
         {
-            //  if there were no ranges, send entire entity
-            if (writeHeaders)
-                writeHeaders(response,resource,resLength);
-            OutputStream out = response.getOutputStream();
-            resource.writeTo(out,0,resLength);            
+            // look for a gziped content.
+            Resource data=resource;
+            if (_minGzipLength>0)
+            {
+                String accept=request.getField(HttpFields.__AcceptEncoding);
+                if (accept!=null && resLength>_minGzipLength &&
+                    !pathInContext.endsWith(".gz"))
+                {
+                    Resource gz = getHttpContext().getResource(pathInContext+".gz");
+                    if (gz.exists() && accept.indexOf("gzip")>=0)
+                    {
+                        Code.debug("gzip=",gz);
+                        response.setField(HttpFields.__ContentEncoding,"gzip");
+                        data=gz;
+                        resLength=data.length();
+                    }
+                }
+            }
+            writeHeaders(response,resource,resLength);
+            
             request.setHandled(true);
+            OutputStream out = response.getOutputStream();
+            data.writeTo(out,0,resLength);
             return;
         }
             

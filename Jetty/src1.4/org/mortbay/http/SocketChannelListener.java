@@ -228,6 +228,11 @@ public class SocketChannelListener
         
 	// Bind the server socket to the local host and port
 	_acceptChannel.socket().bind(_address);
+        
+        // Read the address back from the server socket to fix issues
+        // with listeners on anonymous ports
+        _address = (InetSocketAddress)
+            _acceptChannel.socket().getLocalSocketAddress();
 
         // create a selector;
         _selector=Selector.open();

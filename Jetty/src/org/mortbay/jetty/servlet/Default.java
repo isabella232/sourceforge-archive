@@ -55,6 +55,11 @@ import org.mortbay.util.ByteArrayISO8859Writer;
  *
  *   redirectWelcome  If true, welcome files are redirected rather than
  *                    forwarded to.
+ *
+ *   minGzipLength    If set to a positive integer, then static content
+ *                    larger than this will be served as gzip content encoded
+ *                    if a matching resource is found ending with ".gz"
+ *
  * </PRE>
  *                                                               
  * The MOVE method is allowed if PUT and DELETE are allowed             
@@ -73,6 +78,7 @@ public class Default extends HttpServlet
     private boolean _putAllowed;
     private boolean _delAllowed;
     private boolean _redirectWelcomeFiles;
+    private int _minGzipLength=-1;
     
     /* ------------------------------------------------------------ */
     public void init()
@@ -86,7 +92,8 @@ public class Default extends HttpServlet
         _putAllowed=getInitBoolean("putAllowed");
         _delAllowed=getInitBoolean("delAllowed");
         _redirectWelcomeFiles=getInitBoolean("redirectWelcome");
-
+        _minGzipLength=getInitInt("minGzipLength");
+        
         if (_putAllowed)
             _AllowString+=", PUT";
         if (_delAllowed)
@@ -105,6 +112,15 @@ public class Default extends HttpServlet
              value.startsWith("y")||
              value.startsWith("Y")||
              value.startsWith("1"));
+    }
+    
+    /* ------------------------------------------------------------ */
+    private int getInitInt(String name)
+    {
+        String value=getInitParameter(name);
+        if (value!=null && value.length()>0)
+            return Integer.parseInt(value);
+        return -1;
     }
     
     /* ------------------------------------------------------------ */
@@ -237,7 +253,7 @@ public class Default extends HttpServlet
                 sendDirectory(request,response,resource,pathInContext.length()>1);
             }
             else // just send it
-                sendData(request,response,resource,true);
+                sendData(request,response,pathInContext,resource,true);
         }
     }
     
@@ -490,6 +506,7 @@ public class Default extends HttpServlet
     /* ------------------------------------------------------------ */
     protected void sendData(HttpServletRequest request,
                             HttpServletResponse response,
+                            String pathInContext,
                             Resource resource,
                             boolean writeHeaders)
         throws IOException
@@ -502,10 +519,31 @@ public class Default extends HttpServlet
         if (!writeHeaders || reqRanges == null || !reqRanges.hasMoreElements())
         {
             //  if there were no ranges, send entire entity
+            Resource data=resource;
             if (writeHeaders)
+            {
+                // look for a gziped content.
+                if (_minGzipLength>0)
+                {
+                    String accept=request.getHeader(HttpFields.__AcceptEncoding);
+                    if (accept!=null && resLength>_minGzipLength &&
+                        !pathInContext.endsWith(".gz"))
+                    {
+                        Resource gz = _httpContext.getResource(pathInContext+".gz");
+                        if (gz.exists() && accept.indexOf("gzip")>=0)
+                        {
+                            Code.debug("gzip=",gz);
+                            response.setHeader(HttpFields.__ContentEncoding,"gzip");
+                            data=gz;
+                            resLength=data.length();
+                        }
+                    }
+                }
                 writeHeaders(response,resource,resLength);
+            }
+            
             OutputStream out = response.getOutputStream();
-            resource.writeTo(out,0,resLength);            
+            data.writeTo(out,0,resLength);
             return;
         }
             

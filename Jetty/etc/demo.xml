@@ -194,10 +194,6 @@
     <Arg>/demo/*</Arg>
 
     <Call name="addHandler">
-      <Arg><New class="org.mortbay.http.handler.ProxyHandler"></New></Arg>
-    </Call>
-
-    <Call name="addHandler">
       <Arg><New class="org.mortbay.http.handler.ForwardHandler">
         <Call name="addForward"><Arg>/forward/*</Arg><Arg>/dump</Arg></Call>
         <!-- <Set name="rootForward">/dump/rootForward</Set> -->
@@ -248,7 +244,11 @@
 
     <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/demo/docroot/</Set>
     <Call name="addHandler">
-      <Arg><New class="org.mortbay.http.handler.ResourceHandler"/></Arg>
+      <Arg>
+        <New class="org.mortbay.http.handler.ResourceHandler">
+            <Set name="minGzipLength">8192</Set>
+        </New>
+      </Arg>
     </Call>
 
     <Call name="addHandler">
