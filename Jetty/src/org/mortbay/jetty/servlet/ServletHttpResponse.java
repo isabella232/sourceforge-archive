@@ -275,7 +275,7 @@ public class ServletHttpResponse implements HttpServletResponse
             /* pick up encoding from map based on languge code */
             String lang = locale.getLanguage();
             String charset = (String)__charSetMap.get(lang);
-            if (charset != null)
+            if (charset != null && charset.length()>0)
             {
                 int semi=type.indexOf(';');
                 if (semi<0)
