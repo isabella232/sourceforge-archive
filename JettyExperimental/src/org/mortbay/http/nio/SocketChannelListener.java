@@ -18,19 +18,23 @@ package org.mortbay.http.nio;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
+import java.nio.channels.CancelledKeyException;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpServer;
+import org.mortbay.io.Buffer;
+import org.mortbay.io.nio.ChannelEndPoint;
+import org.mortbay.thread.LifeCycle;
 import org.mortbay.util.LogSupport;
-import org.mortbay.thread.ThreadPool;
+import org.mortbay.http.HttpConnection;
 
 /* ------------------------------------------------------------------------------- */
 /**  EXPERIMENTAL NIO listener!
@@ -38,21 +42,23 @@ import org.mortbay.thread.ThreadPool;
  * @version $Revision$
  * @author gregw
  */
-public class SocketChannelListener extends ThreadPool 
+public class SocketChannelListener implements LifeCycle 
 {
     private static Log log= LogFactory.getLog(SocketChannelListener.class);
+
+    private String _host;
+    private int _port=8080;
     
-    private InetSocketAddress _address;
-    private int _bufferSize= 4096;
-    private int _lingerTimeSecs=5;
+    private long _maxIdleTime=30000;  // TODO Configure
+    private long _soLingerTime=1000;  // TODO Configure
     
+    private transient InetSocketAddress _address;
     private transient HttpServer _server;
     private transient ServerSocketChannel _acceptChannel;
+    private transient SelectionKey _acceptKey;
     private transient Selector _selector;
     private transient SelectorThread _selectorThread;
-    private transient boolean _isLow=false;
-    private transient boolean _isOut=false;
-    private transient long _warned=0;
+    private transient ArrayList _keyChanges=new ArrayList();
     
     
     /* ------------------------------------------------------------------------------- */
@@ -65,40 +71,32 @@ public class SocketChannelListener extends ThreadPool
 
     /* ------------------------------------------------------------------------------- */
     /*
-     * @see org.mortbay.http.HttpListener#setHttpServer(org.mortbay.http.HttpServer)
-     */
-    public void setHttpServer(HttpServer server)
-    {
-        _server=server;
-    }
-
-    /* ------------------------------------------------------------------------------- */
-    /*
      * @see org.mortbay.http.HttpListener#getHttpServer()
      */
     public HttpServer getHttpServer()
     {
         return _server;
     }
-
+    
+    public void setHttpServer(HttpServer server)
+    {
+        _server=server;
+    }
+    
     /* ------------------------------------------------------------------------------- */
     /**
-     * @see org.mortbay.http.HttpListener#setHost(java.lang.String)
      */
-    public void setHost(String host) throws UnknownHostException
+    public void setHost(String host) 
     {
-        _address = new InetSocketAddress(host, _address == null ? 0 : _address.getPort());
+        _host=host;
     }
 
     /* ------------------------------------------------------------------------------- */
     /*
-     * @see org.mortbay.http.HttpListener#getHost()
      */
     public String getHost()
     {
-        if (_address == null || _address.getAddress() == null)
-            return null;
-        return _address.getHostName();
+        return _host;
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -107,10 +105,7 @@ public class SocketChannelListener extends ThreadPool
      */
     public void setPort(int port)
     {
-        if (_address == null || _address.getHostName() == null)
-            _address= new InetSocketAddress(port);
-        else
-            _address= new InetSocketAddress(_address.getHostName(), port);
+        _port=port;
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -119,45 +114,8 @@ public class SocketChannelListener extends ThreadPool
      */
     public int getPort()
     {
-        if (_address == null)
-            return 0;
-        return _address.getPort();
+        return _port;
     }
-
-    /* ------------------------------------------------------------ */
-    public void setBufferSize(int size)
-    {
-        _bufferSize= size;
-    }
-    
-    /* ------------------------------------------------------------------------------- */
-    /*
-     * @see org.mortbay.http.HttpListener#getBufferSize()
-     */
-    public int getBufferSize()
-    {
-        return _bufferSize;
-    }
-
-
-    /* ------------------------------------------------------------ */
-    /** 
-     * @param sec seconds to linger or -1 to disable linger.
-     */
-    public void setLingerTimeSecs(int ls)
-    {
-        _lingerTimeSecs= ls;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return seconds.
-     */
-    public int getLingerTimeSecs()
-    {
-        return _lingerTimeSecs;
-    }
-    
 
 
     /* ------------------------------------------------------------ */
@@ -166,6 +124,9 @@ public class SocketChannelListener extends ThreadPool
         if (isStarted())
             throw new IllegalStateException("Started");
 
+        // resolve address
+        _address=(_host==null)?new InetSocketAddress(_port):new InetSocketAddress(_host,_port);
+        
         // Create a new server socket and set to non blocking mode
         _acceptChannel= ServerSocketChannel.open();
         _acceptChannel.configureBlocking(false);
@@ -181,28 +142,56 @@ public class SocketChannelListener extends ThreadPool
         _selector= Selector.open();
 
         // Register accepts on the server socket with the selector.
-        _acceptChannel.register(_selector, SelectionKey.OP_ACCEPT);
+        _acceptKey=_acceptChannel.register(_selector, SelectionKey.OP_ACCEPT);
 
         // Start selector thread
         _selectorThread= new SelectorThread();
         _selectorThread.start();
 
-        // Start the thread Pool
-        super.start();
         log.info("Started SocketChannelListener on " + getHost()+":"+getPort());
     }
     
 
+    /*
+     */
+    public boolean isStarted()
+    {
+        return _selector!=null && _selector.isOpen();
+    }
+    
     /* ------------------------------------------------------------ */
     public void stop() throws InterruptedException
     {
         if (_selectorThread != null)
-            _selectorThread.doStop();
+            _selectorThread.stopSelection();
             
-        super.stop();
         log.info("Stopped SocketChannelListener on " + getHost()+":"+getPort());
     }
 
+    /* ------------------------------------------------------------ */
+    public SocketChannel accept()
+    	throws IOException
+    {   
+        SocketChannel channel = _acceptChannel.accept();
+        channel.configureBlocking(false);
+
+        Socket socket=channel.socket();
+        try
+        {
+            if (_maxIdleTime >= 0)
+                socket.setSoTimeout((int)_maxIdleTime);
+            if (_soLingerTime >= 0)
+                socket.setSoLinger(true, (int)_soLingerTime/1000);
+            else
+                socket.setSoLinger(false, 0);
+        }
+        catch (Exception e)
+        {
+            LogSupport.ignore(log, e);
+        }
+        
+        return channel;
+    }
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -219,32 +208,95 @@ public class SocketChannelListener extends ThreadPool
                 _running= true;
                 while (_running)
                 {
+                    
+                    // Give other threads a chance to process last loop.
+                    Thread.yield();
+                    
+                    // Make any key changes required
 
-                    SelectionKey key= null;
-                    try
+                    synchronized(_keyChanges)
                     {
-                        _selector.select();
-                        Iterator iter= _selector.selectedKeys().iterator();
-
-                        while (iter.hasNext())
+                        for (int i=0;i<_keyChanges.size();i++)
                         {
-                            key= (SelectionKey)iter.next();
-                            if (key.isAcceptable())
-                                doAccept(key);
-                            if (key.isReadable())
-                                doRead(key);
+                            try
+                            {
+                                Connection c = (Connection)_keyChanges.get(i);
+                                if (c._interestOps>=0)
+                                    c._key.interestOps(c._interestOps);
+                                else
+                                    c._key.cancel();
+                            }
+                            catch(CancelledKeyException e)
+                            {
+                                log.warn("???",e);
+                            }
+                        }
+                        _keyChanges.clear();
+                    }
+                    
+                    
+                    // SELECT for things to do!
+                    System.err.println("Selecting "+_selector);
+                    _selector.select(_maxIdleTime);
+                    
+                    // Look for things to do
+                    Iterator iter= _selector.selectedKeys().iterator();
+                    while (iter.hasNext())
+                    {
+                        SelectionKey key= (SelectionKey)iter.next();
+                        iter.remove();
+                        
+                        try
+                        {
+                            System.err.println("key="+key+" "+key.isValid());
+                            if (!key.isValid())
+                            {
+                                System.err.println("Cancel");
+                                key.cancel();
+                                continue;
+                            }
+                            
+                            if (key.equals(_acceptKey))
+                            {
+                                if (key.isAcceptable())
+                                {
+                                    System.err.println("Accept");
+                                    SocketChannel channel = accept();
+                                    SelectionKey newKey = channel.register(_selector, SelectionKey.OP_READ);
+                                    Connection connection=new Connection(channel,newKey);
+                                }
+                            }
+                            else
+                            {
+                                Connection connection = (Connection)key.attachment();
+                                if (connection!=null)
+                                    connection.dispatch();
+                                
+                            }
+                            
                             key= null;
-                            iter.remove();
+                       
+                        }
+                        catch (CancelledKeyException e)
+                        {
+                            LogSupport.ignore(log,e);
+                            System.err.println("Cancel");
+                            key.cancel();
+                            continue;   
+                        }
+                        catch (Exception e)
+                        {
+                            if (_running)
+                                log.warn("selector", e);
+                            if (key != null && key!=_acceptKey)
+                                key.interestOps(0);
                         }
                     }
-                    catch (Exception e)
-                    {
-                        if (_running)
-                            log.warn("selector", e);
-                        if (key != null)
-                            key.cancel();
-                    }
                 }
+            }
+            catch(Exception e)
+            {
+                log.error("select ",e);
             }
             finally
             {
@@ -275,43 +327,7 @@ public class SocketChannelListener extends ThreadPool
             }
         }
 
-        /* ------------------------------------------------------------ */
-        void doAccept(SelectionKey key)
-            throws IOException, InterruptedException
-        {          
-            ServerSocketChannel server = (ServerSocketChannel) key.channel();
-            SocketChannel channel = server.accept();
-            channel.configureBlocking(false);
-            SelectionKey readKey = channel.register(_selector, SelectionKey.OP_READ);
-            
-            Socket socket=channel.socket();
-            try
-            {
-                if (getMaxIdleTimeMs() >= 0)
-                    socket.setSoTimeout(getMaxIdleTimeMs());
-                if (_lingerTimeSecs >= 0)
-                    socket.setSoLinger(true, _lingerTimeSecs);
-                else
-                    socket.setSoLinger(false, 0);
-            }
-            catch (Exception e)
-            {
-                LogSupport.ignore(log, e);
-            }
-
-            Connection connection=new Connection(channel,readKey, SocketChannelListener.this);
-            readKey.attach(connection);
-        }
-
-        /* ------------------------------------------------------------ */
-        void doRead(SelectionKey key) 
-            throws IOException
-        {
-            Connection connection = (Connection)key.attachment();
-            
-        }   
-
-        void doStop()
+        void stopSelection()
         {
             _running=false;
             _selector.wakeup();
@@ -323,21 +339,159 @@ public class SocketChannelListener extends ThreadPool
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */
-    private static class Connection
+    private class Connection extends ChannelEndPoint implements Runnable
     {
-        boolean _idle=true;
-        SocketChannel _channel;
+        boolean _dispatched=false;
+        boolean _writable=true;
         SelectionKey _key;
-        SocketChannelListener _listener;
+        HttpConnection _connection;
+        int _interestOps;
         
-        Connection(SocketChannel channel,SelectionKey key, SocketChannelListener listener)
+        
+        Connection(SocketChannel channel,SelectionKey key)
         {
-            _channel=channel;
+            super(channel);
+            _connection = new HttpConnection(this);
+            key.attach(this);
             _key=key;
-            _listener=listener;
         }
         
+        void dispatch() throws InterruptedException
+        {
+            synchronized(this)
+            {
+                if (_dispatched)
+                {
+                    // Still dispatched, so not interested in further selecting.
+                    _key.interestOps(0);
+                    System.err.println("NOT INTERESTED!! "+_key);
+                    return;
+                }
+                
+                _dispatched=true;
+            }
+            
+            try
+            {
+                _server.dispatch(this);
+            }
+            catch(InterruptedException e)
+            {
+                synchronized(this)
+                {
+                    undispatch();
+                }
+            }
+        }
+        
+        /**
+         */
+        private void undispatch()
+        {
+            try
+            {
+                _dispatched=false;
+                
+                if (getChannel().isOpen() && _key.isValid())
+                {
+                    
+                    // TODO - queue the changes
+                    
+                    int ops = _key.interestOps();
+                    _interestOps=SelectionKey.OP_READ | (_writable?0:SelectionKey.OP_WRITE);
+                    
+                    if (_interestOps!=ops)
+                    {
+                        synchronized(_keyChanges)
+                        {
+                            _keyChanges.add(this);
+                        }
+                        _selector.wakeup();
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                log.error("???",e);
+                _interestOps=-1;
+                synchronized(_keyChanges)
+                {
+                    _keyChanges.add(this);
+                }
+            }
+        }
+
+        /* 
+         */
+        public int fill(Buffer buffer) throws IOException
+        {
+            int l = super.fill(buffer);
+            if (l<0)
+                getChannel().close();
+            return l;
+        }
+        
+        /*
+         */
+        public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
+        {
+            int l = super.flush(header, buffer, trailer);
+            _writable=
+                (header==null || header.length()==0) &&
+                 buffer.length()==0 &&
+                (trailer==null || trailer.length()==0);
+            return l;
+        }
+        
+        /*
+         */
+        public int flush(Buffer buffer) throws IOException
+        {
+            int l = super.flush(buffer);
+            _writable=buffer.length()==0;
+            return l;
+        }
+        
+        public void run()
+        {
+            try
+            {
+                _connection.handle();
+            }
+            catch(ClosedChannelException e)
+            {
+                log.debug("handle",e);
+            }
+            catch(Throwable e)
+            {
+                log.warn("handle failed",e);
+                _key.cancel();
+                try{close();}
+                catch(IOException e2){LogSupport.ignore(log, e2);}
+            }
+            finally
+            {
+                synchronized(this)
+                {
+                    undispatch();
+                }
+            }
+        }
+    }
+    
+    
+    public static void main(String[] arg)
+    	throws Exception
+    {
+        HttpServer server = new HttpServer();
+        SocketChannelListener scl = new SocketChannelListener();
+        scl.setHttpServer(server);
+        scl.start();
+        scl._selectorThread.join();
         
     }
+    
+    
+
     
 }

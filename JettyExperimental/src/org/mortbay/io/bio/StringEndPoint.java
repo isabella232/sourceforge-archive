@@ -18,7 +18,6 @@ package org.mortbay.io.bio;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 import org.mortbay.io.Portable;
 

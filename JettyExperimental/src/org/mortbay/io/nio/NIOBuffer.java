@@ -15,10 +15,11 @@
 
 package org.mortbay.io.nio;
 
+import java.nio.ByteBuffer;
+
 import org.mortbay.io.AbstractBuffer;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Portable;
-import java.nio.ByteBuffer;
 
 /* ------------------------------------------------------------------------------- */
 /** 
@@ -97,30 +98,39 @@ public class NIOBuffer extends AbstractBuffer
         byte[] array=src.array();
         if (array!=null)
         {
-            return poke(index,array,src.getIndex(),src.length());
+            int length = poke(index,array,src.getIndex(),src.length());
+            if (!src.isImmutable())
+                src.setGetIndex(src.getIndex()+length);
+            return length;
         }
         else
         {
-            Buffer buf=src.buffer();
-            if (buf instanceof NIOBuffer)
+            Buffer src_buf=src.buffer();
+            if (src_buf instanceof NIOBuffer)
             {
-                ByteBuffer b = ((NIOBuffer)buf)._buf;
-                if (b==_buf)
-                    b=_buf.duplicate();
+                ByteBuffer src_bytebuf = ((NIOBuffer)src_buf)._buf;
+                if (src_bytebuf==_buf)
+                    src_bytebuf=_buf.duplicate();
                 try
                 {
+                    int length=src.length();
+                    if (length>space())    
+                        length=space();
+                    
+                    src_bytebuf.position(src.getIndex());
+                    src_bytebuf.limit(src.getIndex()+length);
+                    
                     _buf.position(index);
-                    // TODO limit this
-                    b.limit(src.putIndex());
-                    b.position(src.getIndex());
-                    _buf.put(b);
-                    return src.length();
+                    _buf.put(src_bytebuf);
+                    if (!src.isImmutable())
+                        src.setGetIndex(src.getIndex()+length);
+                    return length;
                 }
                 finally
                 {
                     _buf.position(0);
-                    b.limit(b.capacity());
-                    b.position(0);
+                    src_bytebuf.limit(src_bytebuf.capacity());
+                    src_bytebuf.position(0);
                 }
             }
             else
@@ -144,5 +154,10 @@ public class NIOBuffer extends AbstractBuffer
         {
             _buf.position(0);
         }
+    }
+    
+    ByteBuffer getByteBuffer()
+    {
+        return _buf;
     }
 }

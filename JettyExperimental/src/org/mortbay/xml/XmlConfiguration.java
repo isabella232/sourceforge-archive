@@ -31,9 +31,9 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.resource.Resource;
 import org.mortbay.util.Loader;
 import org.mortbay.util.LogSupport;
-import org.mortbay.resource.Resource;
 import org.mortbay.util.TypeUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;

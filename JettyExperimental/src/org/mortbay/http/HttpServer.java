@@ -15,11 +15,17 @@
 
 package org.mortbay.http;
 
+import org.mortbay.thread.ThreadPool;
 
 
-/**
- * Temporary Servler class to get things running.
- */
-public class HttpServer  extends org.mortbay.http.bio.HttpServer
+public class HttpServer 
 {
+    private ThreadPool _threadPool = new ThreadPool();
+    
+    public void dispatch(Runnable job)
+    	throws InterruptedException
+    {
+        new Thread(job).start();
+    }
+    
 }

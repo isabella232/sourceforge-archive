@@ -15,13 +15,12 @@
 
 package org.mortbay.http;
 
-import java.io.IOException;
+
+import junit.framework.TestCase;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.View;
-
-import junit.framework.TestCase;
 
 /**
  * @author gregw
@@ -32,7 +31,7 @@ import junit.framework.TestCase;
 public class HttpBuilderTest extends TestCase
 {
     public final static String CONTENT="The quick brown fox jumped\nover the lazy dog\n";
-public final static String[] connect={null,"keep-alive","close"};
+    public final static String[] connect={null,"keep-alive","close"};
 
     public HttpBuilderTest(String arg0)
     {
@@ -46,7 +45,7 @@ public final static String[] connect={null,"keep-alive","close"};
 
     
     public void testHTTP()
-    	throws IOException
+    	throws Exception
     {
         Buffer b=new ByteArrayBuffer(4096);
         HttpBuilder hb = new HttpBuilder(b,null);
@@ -108,10 +107,11 @@ public final static String[] connect={null,"keep-alive","close"};
         }
         
         void build(int version,HttpBuilder hb,String reason, String connection, String te, int chunks)
+        	throws Exception
         {
             values[2]=connection;
             values[3]=te;
-            hb.startResponse(version,code,reason);
+            hb.buildResponse(version,code,reason);
             
             for (int i=0;i<headers.length;i++)
             {
@@ -164,7 +164,7 @@ public final static String[] connect={null,"keep-alive","close"};
     String[] val;
     int h;
     
-    class Handler extends HttpParser.EventHandler
+    class Handler extends HttpParser.Handler
     {   
         public void foundContent(int index, Buffer ref)
         {
@@ -174,7 +174,7 @@ public final static String[] connect={null,"keep-alive","close"};
         }
 
 
-        public void parsedStartLine(Buffer tok0, Buffer tok1, Buffer tok2)
+        public void startRequest(Buffer tok0, Buffer tok1, Buffer tok2)
         {
             h= -1;
             hdr= new String[9];
@@ -189,17 +189,27 @@ public final static String[] connect={null,"keep-alive","close"};
             // System.out.println(f0+" "+f1+" "+f2);
         }
 
-        public void parsedHeaderName(Buffer ref)
+
+        /* (non-Javadoc)
+         * @see org.mortbay.http.HttpHandler#startResponse(org.mortbay.io.Buffer, int, org.mortbay.io.Buffer)
+         */
+        public void startResponse(Buffer version, int status, Buffer reason)
         {
-            hdr[++h]= ref.toString();
+            h= -1;
+            hdr= new String[9];
+            val= new String[9];
+            f0= version.toString();
+            f1= ""+status;
+            if (reason!=null)
+                f2= reason.toString();
+            else
+                f2=null;
         }
 
-        public void parsedHeaderValue(Buffer ref)
+        public void parsedHeader(Buffer name,Buffer value)
         {
-            if (val[h] == null)
-                val[h]= ref.toString();
-            else
-                val[h] += ref.toString();
+            hdr[++h]= name.toString();
+            val[h]= value.toString();
         }
 
         public void headerComplete()
@@ -210,6 +220,8 @@ public final static String[] connect={null,"keep-alive","close"};
         public void messageComplete(int contentLength)
         {
         }
+
+
     }
 
 }

@@ -15,6 +15,8 @@
 
 package org.mortbay.http;
 
+import java.io.IOException;
+
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.EndPoint;
@@ -26,7 +28,7 @@ import org.mortbay.io.Portable;
  * To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
-public class HttpBuilder implements HTTP
+public class HttpBuilder implements HttpTokens
 {
     // states
     public final static int STATE_START=0;
@@ -64,20 +66,20 @@ public class HttpBuilder implements HTTP
             __start[i][__versionLength+6+buf.length()]=HttpParser.LINE_FEED;
         }
     }
-    static
-    
-    
+
+    private Buffer _buffer;
+    private EndPoint _endp;
+    private int _bypass;
     private int _state=STATE_START;
     private int _version=0;
     private int _status=0;
-    private EndPoint _endp;
-    private Buffer _buffer;
     private int _contentLength=UNKNOWN_CONTENT;
     private int _contentWritten=0;
     private boolean _close=false;
     private boolean _keepAlive=false;
     private boolean _contentLengthSet =false;
     private boolean _transferEncodingSet=false;
+    private boolean _head=false;
     
     /* ------------------------------------------------------------------------------- */
     /** Constructor. 
@@ -86,6 +88,7 @@ public class HttpBuilder implements HTTP
     {
         this._buffer=buffer;
         this._endp=io;
+        _bypass=2; // TODO configure  
     }
     
     public void reset()
@@ -99,6 +102,36 @@ public class HttpBuilder implements HTTP
         _keepAlive=false;
         _contentLengthSet =false;
         _transferEncodingSet=false;
+        _head=false;
+    }
+
+    /**
+     * @return Returns the head.
+     */
+    public boolean isHead()
+    {
+        return _head;
+    }
+    /**
+     * @param head The head to set.
+     */
+    public void setHead(boolean head)
+    {
+        _head = head;
+    }
+    
+    public String toString()
+    {   
+        return "_state="+_state+
+        " _version="+_version+
+        " _status="+_status+
+        " _contentLength="+_contentLength+
+        " _contentWritten="+_contentWritten+
+        " _close="+_close+
+        " _keepAlive="+_keepAlive+
+        " _contentLengthSet="+_contentLengthSet+
+        " _transferEncodingSet="+_transferEncodingSet+
+        "\n"+_buffer;
     }
     
     public boolean isPersistent()
@@ -106,48 +139,57 @@ public class HttpBuilder implements HTTP
         return !_close && _contentLength!=EOF_CONTENT;
     }
     
-    public void startResponse(int version,int status,String reason)
+    public void buildResponse(int version,int status,String reason)
     {   
+        // TODO - make it clear that the version is not what is sent.
+        
         if (_state!=STATE_START)
             Portable.throwIllegalState("STATE!=START");
         
         _version=version;
         
-        if (version==HttpVersions.HTTP_0_9_ORDINAL)
+        switch(version)
         {
-            _close=true;
-            _contentLength=EOF_CONTENT;
-        }
-        else
-        {
-            _status=status;
-            
-            byte[] start=__start[status];
+            case HttpVersions.HTTP_0_9_ORDINAL:
         
-            if (start==null)
+                _close=true;
+            	_contentLength=EOF_CONTENT;
+            	break;
+        
+            case HttpVersions.HTTP_1_0_ORDINAL:
+                _close=true;
+            
+            default:
             {
-                if (reason==null)
-                    reason="Unknown";
-                _buffer.put(HttpVersions.HTTP_1_1_BUFFER);
-                _buffer.put((byte)' ');
-                _buffer.put((byte)('0'+status/100));
-                _buffer.put((byte)('0'+(status%100)/10));
-                _buffer.put((byte)('0'+(status%10)));
-                _buffer.put((byte)' ');
-                byte[] r=Portable.getBytes(reason);
-                _buffer.put(r,0,r.length);
-                _buffer.put(CRLF);
-            }
-            else if (reason!=null)
-            {
-                _buffer.put(start,0,__versionLength+5);
-                byte[] r=Portable.getBytes(reason);
-                _buffer.put(r,0,r.length);
-                _buffer.put(CRLF);
-            }
-            else
-            {
-                _buffer.put(start,0,start.length);
+                _status=status;
+                
+                byte[] start=__start[status];
+                
+                if (start==null)
+                {
+                    if (reason==null)
+                        reason="Unknown";
+                    _buffer.put(HttpVersions.HTTP_1_1_BUFFER);
+                    _buffer.put((byte)' ');
+                    _buffer.put((byte)('0'+status/100));
+                    _buffer.put((byte)('0'+(status%100)/10));
+                    _buffer.put((byte)('0'+(status%10)));
+                    _buffer.put((byte)' ');
+                    byte[] r=Portable.getBytes(reason);
+                    _buffer.put(r,0,r.length);
+                    _buffer.put(CRLF);
+                }
+                else if (reason!=null)
+                {
+                    _buffer.put(start,0,__versionLength+5);
+                    byte[] r=Portable.getBytes(reason);
+                    _buffer.put(r,0,r.length);
+                    _buffer.put(CRLF);
+                }
+                else
+                {
+                    _buffer.put(start,0,start.length);
+                }
             }
         }
         
@@ -164,7 +206,7 @@ public class HttpBuilder implements HTTP
         if (_version<HttpVersions.HTTP_1_0_ORDINAL)
             return;
         
-        boolean ok=true;
+        boolean add=true;
         
         int header = HttpHeaders.CACHE.getOrdinal(name);
         
@@ -211,11 +253,14 @@ public class HttpBuilder implements HTTP
                 break;
             
             case HttpHeaders.CONNECTION_ORDINAL:
-                ok=false;
+                add=false;
             	value_ordinal = HttpHeaderValues.CACHE.getOrdinal(value);
+            	
             	// TODO handle multivalue Connection
                 _close=HttpHeaderValues.CLOSE_ORDINAL==value_ordinal;
                 _keepAlive=HttpHeaderValues.KEEP_ALIVE_ORDINAL==value_ordinal;
+                if (_keepAlive && _version == HttpVersions.HTTP_1_0_ORDINAL)
+                    _close=false;
                 
                 if (_close && _contentLength==UNKNOWN_CONTENT)
                     _contentLength=EOF_CONTENT;
@@ -224,7 +269,7 @@ public class HttpBuilder implements HTTP
         }
         
 
-        if (ok)
+        if (add)
         {
             _buffer.put(name);
             _buffer.put(COLON);
@@ -260,11 +305,11 @@ public class HttpBuilder implements HTTP
         }
     }
     
-    public int content(Buffer content,boolean last)
+    public int content(Buffer content,boolean last) throws IOException
     {
         if (_state==STATE_HEADER)
         {
-            if (last && (_contentLength==UNKNOWN_CONTENT || _contentLength==EOF_CONTENT))
+            if (last && (_contentLength==UNKNOWN_CONTENT || _contentLength==EOF_CONTENT || _contentLength==CHUNKED_CONTENT))
                 _contentLength=content.length();
             else if (_contentLength==UNKNOWN_CONTENT )
                 _contentLength=(_close || _version<=HttpVersions.HTTP_1_0_ORDINAL)?EOF_CONTENT:CHUNKED_CONTENT;
@@ -274,10 +319,19 @@ public class HttpBuilder implements HTTP
         if (_state!=STATE_CONTENT)
             Portable.throwIllegalState("STATE=="+_state);
         
+        if (_head)
+        {
+            if (_endp!=null && _buffer.length()>0)	
+                _endp.flush(_buffer);
+            _contentWritten+=content.length();
+            return content.length();
+        }
+        
         int len=0;
         switch(_contentLength)
         {
             case CHUNKED_CONTENT:
+                // TODO check space or bypass etc.
                 int space=_buffer.space();
                 if (content.length()+24<space)
                 {
@@ -299,9 +353,19 @@ public class HttpBuilder implements HTTP
                 break;
                 
             case EOF_CONTENT:	
-            default:
-                // TODO check space or bypass etc.
-                len=_buffer.put(content);
+            default: // CONTENT LENGTH CONTENT
+                
+                // Can we bypass the buffer?
+                if (_endp!=null && _bypass>0 && content.length()>_bypass)
+                {
+                    System.err.println("bypassing");
+                    if (_buffer.length()>0)
+                        len=_endp.flush(_buffer,content,null);
+                    else
+                        len=_endp.flush(content);
+                }
+                else
+                    len=_buffer.put(content);
             	break;
         }
 
@@ -318,12 +382,28 @@ public class HttpBuilder implements HTTP
                 }
             }
             _state=STATE_END;
+
+            if (_endp!=null)
+            {
+                if (_buffer.length()>0)	
+                    _endp.flush(_buffer);
+                
+                if (!isPersistent())
+                    _endp.close();
+            }
+        }
+        else
+        {
+            // TODO - need to handle when buffer is too small etc. not flush every time etc.
+            if (_buffer.length()>0 && _endp!=null && content.length()>=_buffer.space())	
+                _endp.flush(_buffer);
         }
         
         return len;
     }
     
     public void complete()
+    	throws IOException
     {
         if(_state==STATE_END)
             return;
@@ -364,6 +444,15 @@ public class HttpBuilder implements HTTP
         }
         
         _state=STATE_END;
+        
+        if (_endp!=null)
+        {
+            if (_buffer.length()>0)	
+                _endp.flush(_buffer);
+            
+            if (!isPersistent())
+                _endp.close();
+        }
     }
 
     private void completeHeader()

@@ -13,10 +13,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.io.bio;
-
-import java.io.IOException;
-import java.net.Socket;
+package org.mortbay.http;
 
 /**
  * @author gregw
@@ -24,35 +21,22 @@ import java.net.Socket;
  * To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
-public class SocketEndPoint extends StreamEndPoint
+public interface HttpTokens
 {
-    Socket _socket;
+    // Terminal symbols.
+    static final byte COLON= (byte)':';
+    static final byte SPACE= 0x20;
+    static final byte CARRIAGE_RETURN= 0x0D;
+    static final byte LINE_FEED= 0x0A;
+    static final byte[] CRLF = {CARRIAGE_RETURN,LINE_FEED};
+    static final byte SEMI_COLON= (byte)';';
+    static final byte TAB= 0x09;
 
-    /**
-     * 
-     */
-    public SocketEndPoint(Socket socket)
-    	throws IOException	
-    {
-        super(socket.getInputStream(),socket.getOutputStream());
-        _socket=socket;
-    }
+	public static final int SELF_DEFINING_CONTENT= -4;
+	public static final int UNKNOWN_CONTENT= -3;
+    public static final int CHUNKED_CONTENT= -2;
+    public static final int EOF_CONTENT= -1;
+    public static final int NO_CONTENT= 0;
 
-    /* (non-Javadoc)
-     * @see org.mortbay.io.BufferIO#isClosed()
-     */
-    public boolean isClosed()
-    {
-        return _socket==null || _socket.isClosed() || _socket.isInputShutdown() || _socket.isOutputShutdown();
-    }
-
-    /* (non-Javadoc)
-     * @see org.mortbay.io.BufferIO#close()
-     */
-    public void close() throws IOException
-    {
-        _socket.close();
-        _in=null;
-        _out=null;
-    }
+    
 }

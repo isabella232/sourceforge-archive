@@ -318,6 +318,9 @@ public abstract class AbstractBuffer implements Buffer
                 poke(index++,src.peek(s++));
         }
         
+        if (!src.isImmutable())
+            src.setGetIndex(src.getIndex()+length);
+        
         return length;
     }
     

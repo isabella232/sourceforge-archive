@@ -68,6 +68,7 @@ public class View extends AbstractBuffer
     {
         int a=_access;
         _access=READWRITE;
+        setGetIndex(0);
         setPutIndex(put);
         setGetIndex(get);
         setMarkIndex(-1);

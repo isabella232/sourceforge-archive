@@ -135,9 +135,9 @@ public class HttpParserTest extends TestCase
         assertEquals("Header1", hdr[0]);
         assertEquals("value1", val[0]);
         assertEquals("Header2", hdr[1]);
-        assertEquals("value 2avalue 2b", val[1]);
+        assertEquals("value 2a value 2b", val[1]);
         assertEquals("Header3", hdr[2]);
-        assertEquals(null, val[2]);
+        assertEquals("", val[2]);
         assertEquals("Header4", hdr[3]);
         assertEquals("value4", val[3]);
         assertEquals(3, h);
@@ -267,7 +267,6 @@ public class HttpParserTest extends TestCase
         for (int t= 0; t < tests.length; t++)
         {
             String tst="t"+tests[t];
-            System.err.println(tst);
             try
             {
                 ByteArrayBuffer buffer= new ByteArrayBuffer(tests[t]);
@@ -319,7 +318,7 @@ public class HttpParserTest extends TestCase
     String[] val;
     int h;
     
-    class Handler extends HttpParser.EventHandler
+    class Handler extends HttpParser.Handler
     {   
         public void foundContent(int index, Buffer ref)
         {
@@ -329,7 +328,7 @@ public class HttpParserTest extends TestCase
         }
 
 
-        public void parsedStartLine(Buffer tok0, Buffer tok1, Buffer tok2)
+        public void startRequest(Buffer tok0, Buffer tok1, Buffer tok2)
         {
             h= -1;
             hdr= new String[9];
@@ -344,17 +343,10 @@ public class HttpParserTest extends TestCase
             // System.out.println(f0+" "+f1+" "+f2);
         }
 
-        public void parsedHeaderName(Buffer ref)
+        public void parsedHeader(Buffer name, Buffer value)
         {
-            hdr[++h]= ref.toString();
-        }
-
-        public void parsedHeaderValue(Buffer ref)
-        {
-            if (val[h] == null)
-                val[h]= ref.toString();
-            else
-                val[h] += ref.toString();
+            hdr[++h]= name.toString();
+            val[h]= value.toString();
         }
 
         public void headerComplete()
@@ -364,6 +356,16 @@ public class HttpParserTest extends TestCase
 
         public void messageComplete(int contentLength)
         {
+        }
+
+
+        /* (non-Javadoc)
+         * @see org.mortbay.http.HttpHandler#startResponse(org.mortbay.io.Buffer, int, org.mortbay.io.Buffer)
+         */
+        public void startResponse(Buffer version, int status, Buffer reason)
+        {
+            // TODO Auto-generated method stub
+            
         }
     }
 }

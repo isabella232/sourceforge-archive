@@ -15,9 +15,9 @@
 
 package org.mortbay.io;
 
-import org.mortbay.io.nio.NIOBuffer;
-
 import junit.framework.TestCase;
+
+import org.mortbay.io.nio.NIOBuffer;
 
 /**
  * @author gregw
