@@ -629,7 +629,6 @@ abstract public class HttpMessage
         Writer writer = out.getRawWriter();
         writeHeader(writer);
         _state=__MSG_SENDING;
-        out.flush();
     }
     
     /* ------------------------------------------------------------ */
@@ -712,7 +711,6 @@ abstract public class HttpMessage
                 if (out!=null && out.isChunking())
                     out.setTrailer(_trailer);
             }
-            out.flush();
         }
         _state=__MSG_SENT;
     }

@@ -339,7 +339,6 @@ public class HttpResponse extends HttpMessage
                 _header.putIntField(HttpFields.__ContentLength,buf.length);
                 out.write(buf);
             }
-            out.flush();
         }
         else if (code!=206) 
         {
@@ -348,7 +347,7 @@ public class HttpResponse extends HttpMessage
             _characterEncoding=null;
             _mimeType=null;
         }
-        commit();
+        commitHeader();
     }
     
     /* ------------------------------------------------------------- */
@@ -409,7 +408,7 @@ public class HttpResponse extends HttpMessage
     {
         _header.put(HttpFields.__Location,location);
         setStatus(__302_Moved_Temporarily);
-        commit();
+        commitHeader();
     }
 
     /* -------------------------------------------------------------- */

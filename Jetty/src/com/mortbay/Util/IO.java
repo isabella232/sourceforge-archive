@@ -108,41 +108,35 @@ public class IO extends ThreadPool
                             OutputStream out,
                             long byteCount)
          throws IOException
-    {
-        try{
+    {     
+        byte buffer[] = new byte[bufferSize];
+        int len=bufferSize;
+        
+        if (byteCount>=0)
+        {
+            while (byteCount>0)
+            {
+                if (byteCount<bufferSize)
+                    len=in.read(buffer,0,(int)byteCount);
+                else
+                    len=in.read(buffer,0,bufferSize);                   
                 
-            byte buffer[] = new byte[bufferSize];
-            int len=bufferSize;
-
-            if (byteCount>=0)
-            {
-                while (byteCount>0)
-                {
-                    if (byteCount<bufferSize)
-                        len=in.read(buffer,0,(int)byteCount);
-                    else
-                        len=in.read(buffer,0,bufferSize);                   
-
-                    if (len==-1)
-                        break;
-                    
-                    byteCount -= len;
-                    out.write(buffer,0,len);
-                }
-            }
-            else
-            {
-                while (true)
-                {
-                    len=in.read(buffer,0,bufferSize);
-                    if (len<0 )
-                        break;
-                    out.write(buffer,0,len);
-                }
+                if (len==-1)
+                    break;
+                
+                byteCount -= len;
+                out.write(buffer,0,len);
             }
         }
-        finally{
-            out.flush();
+        else
+        {
+            while (true)
+            {
+                len=in.read(buffer,0,bufferSize);
+                if (len<0 )
+                    break;
+                out.write(buffer,0,len);
+            }
         }
     }  
     
@@ -153,41 +147,35 @@ public class IO extends ThreadPool
                             Writer out,
                             long byteCount)
          throws IOException
-    {
-        try{
+    {  
+        char buffer[] = new char[bufferSize];
+        int len=bufferSize;
+        
+        if (byteCount>=0)
+        {
+            while (byteCount>0)
+            {
+                if (byteCount<bufferSize)
+                    len=in.read(buffer,0,(int)byteCount);
+                else
+                    len=in.read(buffer,0,bufferSize);                   
                 
-            char buffer[] = new char[bufferSize];
-            int len=bufferSize;
-
-            if (byteCount>=0)
-            {
-                while (byteCount>0)
-                {
-                    if (byteCount<bufferSize)
-                        len=in.read(buffer,0,(int)byteCount);
-                    else
-                        len=in.read(buffer,0,bufferSize);                   
-
-                    if (len==-1)
-                        break;
-                    
-                    byteCount -= len;
-                    out.write(buffer,0,len);
-                }
-            }
-            else
-            {
-                while (true)
-                {
-                    len=in.read(buffer,0,bufferSize);
-                    if (len==-1)
-                        break;
-                    out.write(buffer,0,len);
-                }
+                if (len==-1)
+                    break;
+                
+                byteCount -= len;
+                out.write(buffer,0,len);
             }
         }
-        finally{
-            out.flush();
+        else
+        {
+            while (true)
+            {
+                len=in.read(buffer,0,bufferSize);
+                if (len==-1)
+                    break;
+                out.write(buffer,0,len);
+            }
         }
     }
 

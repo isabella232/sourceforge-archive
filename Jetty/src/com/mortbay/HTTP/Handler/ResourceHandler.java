@@ -889,7 +889,6 @@ public class ResourceHandler extends NullHandler
                 out.print("</TD></TR>\n");
             }
             out.println("</TABLE>");
-            out.flush();
             request.setHandled(true);
         }
         else

@@ -57,7 +57,6 @@ public class JettyServlet extends HttpServlet
             page.add(new Include(resource.getInputStream()));
             PrintWriter pout = response.getWriter();
             page.write(pout);
-            pout.flush();
         }
         else
         {
