@@ -15,6 +15,13 @@ demo        - Runs the demo web application.
 all         - everything
 
 -->
+
+<!--
+
+ Currently only builds against JBoss - you will need to set
+ -Djboss.home on the command line...
+
+-->
 <project name="J2EE Integration" default="all" basedir=".">
 
   <property environment="env"/>
@@ -27,9 +34,7 @@ all         - everything
   <property name="logs"           value="${basedir}/logs"/>
 
 <!--
-  <property name="build.compiler" value="modern"/>
-  <property name="build.compiler" value="jikes"/>
-  <property name="build.compiler" value="classic"/>
+ requirements: log4j, j2ee, javagroups,
 -->
 
   <property name="build.compiler.emacs"	value="true"/>
@@ -45,6 +50,14 @@ all         - everything
 
   <property name="mortbay.j2ee.jar" value="${lib}/org.mortbay.j2ee.jar"/>
 
+
+<!--
+  <property name="build.compiler" value="modern"/>
+  <property name="build.compiler" value="jikes"/>
+  <property name="build.compiler" value="classic"/>
+-->
+
+
 <!--
   <available file="${jboss.home}" type="dir" property="j2ee.available"/>
   <available file="${jboss.home}" type="dir" property="j2ee.available"/>
@@ -53,6 +66,7 @@ all         - everything
   <path id="jboss.classpath">
     <pathelement location="${jboss.home}/client/jboss-j2ee.jar"/>
     <pathelement location="${jboss.home}/client/log4j.jar"/>
+    <pathelement location="${jboss.home}/thirdparty/javagroups/javagroups/lib/javagroups-2.0.jar"/>
   </path>
 
   <path id="jonas.classpath">
@@ -123,6 +137,7 @@ all         - everything
        <include name="**/*.java"/>
        <exclude name="org/mortbay/j2ee/**/test/**"/>
        <exclude name="org/mortbay/j2ee/session/**/CMP*.java"/>
+       <exclude name="org/mortbay/j2ee/session/**/CMR*.java"/>
     </javac>
   </target>
 
