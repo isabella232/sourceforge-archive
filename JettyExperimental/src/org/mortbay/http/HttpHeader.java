@@ -755,7 +755,7 @@ public class HttpHeader
                 _version=HttpVersions.CACHE.get(HttpVersions.__HTTP_1_1);
             buffer.put(_version);
             buffer.put((byte)' ');
-            BufferUtil.putInt(buffer, _status);
+            BufferUtil.putDecInt(buffer, _status);
             buffer.put((byte)' ');
             if (_reason==null)
             {

@@ -71,7 +71,7 @@ public class BufferUtilTest extends TestCase
         for (int i=0;i<val.length;i++)
         {
             buffer.clear();
-            BufferUtil.putInt(buffer,val[i]);
+            BufferUtil.putDecInt(buffer,val[i]);
             assertEquals("t"+i,str[i],buffer.toString());
         }       
     }

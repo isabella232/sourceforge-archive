@@ -9,7 +9,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.InBuffer;
 import org.mortbay.io.Portable;
-import org.mortbay.io.stream.InputBuffer;
+import org.mortbay.io.stream.InputStreamBuffer;
 
 /**
  * An input stream that can process a HTTP stream, extracting
@@ -157,7 +157,7 @@ public class HttpInputStream extends InputStream
         while(true)
         {
             Socket socket=ss.accept();
-            InputBuffer in = new InputBuffer(socket.getInputStream(),2048);
+            InputStreamBuffer in = new InputStreamBuffer(socket,2048);
             HttpInputStream input = new HttpInputStream(in);
             
             while (true) 

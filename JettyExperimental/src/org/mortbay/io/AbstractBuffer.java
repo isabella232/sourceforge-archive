@@ -152,6 +152,11 @@ public abstract class AbstractBuffer implements Buffer
     {
         return _put - _get;
     }
+    
+    public int space()
+    {
+        return capacity()-_put;
+    }
 
     public void mark()
     {

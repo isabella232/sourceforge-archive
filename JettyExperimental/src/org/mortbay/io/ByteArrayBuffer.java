@@ -1,6 +1,5 @@
 package org.mortbay.io;
 
-import java.io.IOException;
 
 /* ------------------------------------------------------------------------------- */
 /** 
@@ -10,7 +9,6 @@ import java.io.IOException;
  */
 public class ByteArrayBuffer extends AbstractBuffer
 {
-
     public ByteArrayBuffer(byte[] bytes)
     {
         this(bytes, 0, bytes.length, READWRITE);
@@ -92,10 +90,6 @@ public class ByteArrayBuffer extends AbstractBuffer
     {
         return _bytes.length;
     }
-
-    public void close()
-        throws IOException
-    {}
     
     public Buffer duplicate()
     {
@@ -116,24 +110,6 @@ public class ByteArrayBuffer extends AbstractBuffer
         return view;
     }
     
-    public int fill()
-        throws IOException
-    {
-        return -1;
-    }
-
-    public int flush()
-        throws IOException
-    {
-        return -1;
-    }
-
-    public int flush(Buffer header)
-        throws IOException
-    {
-        return -1;
-    }
-
     public int get(byte[] b, int offset, int length)
     {
         int l = length;

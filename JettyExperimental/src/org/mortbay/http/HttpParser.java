@@ -9,7 +9,7 @@ import org.mortbay.io.BufferCache;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.InBuffer;
 import org.mortbay.io.Portable;
-import org.mortbay.io.stream.InputBuffer;
+import org.mortbay.io.stream.InputStreamBuffer;
 
 /* ------------------------------------------------------------------------------- */
 /** 
@@ -142,7 +142,6 @@ public class HttpParser
 
         if (source.length() == 0)
         {
-            source.compact();
             if (source.markIndex()==0 && source.putIndex()==source.capacity())
             	throw new IllegalStateException("Buffer too small");
             int filled=-1;

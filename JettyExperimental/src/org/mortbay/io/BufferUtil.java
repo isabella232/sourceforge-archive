@@ -57,7 +57,13 @@ public class BufferUtil
         return -1;
     }
 
-    public static void putInt(Buffer buffer, int n)
+    public static void putHexInt(Buffer _buffer, int n)
+    {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    public static void putDecInt(Buffer buffer, int n)
     {
         if (n < 0)
         {
@@ -137,5 +143,6 @@ public class BufferUtil
         buffer.put((byte)13);
         buffer.put((byte)10);
     }
+
 
 }

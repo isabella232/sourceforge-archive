@@ -53,6 +53,12 @@ public interface Buffer
     int capacity();
     
     /**
+     * the space remaining in the buffer.
+     * @return capacity - putIndex
+     */
+    int space();
+    
+    /**
      * Clear the buffer. getIndex=0, putIndex=0.
      */
     void clear();

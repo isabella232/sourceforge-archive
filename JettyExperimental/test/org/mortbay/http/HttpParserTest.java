@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.stream.InputBuffer;
+import org.mortbay.io.stream.InputStreamBuffer;
 
 /**
  * @author gregw
@@ -250,7 +250,7 @@ public class HttpParserTest extends TestCase
         for (int t= 0; t < tests.length; t++)
         {
             String tst="t"+tests[t];
-            InputBuffer buffer= new InputBuffer(new FileInputStream(file), tests[t]);
+            InputStreamBuffer buffer= new InputStreamBuffer(new FileInputStream(file), tests[t]);
 
             HttpParser parser= new Parser(buffer);
             parser.parse();
