@@ -1,14 +1,20 @@
 // ========================================================================
-// A very basic CGI Servlet, for use, originally, with Jetty
-// (www.mortbay.com). It's heading towards CGI/1.1 compliance, but
+// A very basic CGI Servlet, for use, with Jetty
+// (jetty.mortbay.com). It's heading towards CGI/1.1 compliance, but
 // still lacks a few features - the basic stuff is here though...
-// Copyright 2000 Julian Gosnell <jules_gosnell@yahoo.com>
-// Released under the terms of the Jetty Licence.
+// Copyright 2000 Julian Gosnell <jules_gosnell@yahoo.com> Released
+// under the terms of the Jetty Licence.
 //
 // For all problems with this servlet please email jules_gosnell@yahoo.com,
 // NOT the Jetty support lists
 //
 // ========================================================================
+
+// TODO
+// - logging
+// - child's stderr
+// - exceptions should report to client via sendError()
+// - tidy up
 
 package com.mortbay.Servlet;
 
@@ -22,80 +28,72 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.Vector;
-import javax.servlet.GenericServlet;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
-
-
 //-----------------------------------------------------------------------------
 public class CGI extends HttpServlet
 {
-  protected Vector _roots = new Vector();
+  protected File _docRoot;
+  protected String _path;
 
   public void
     init()
+    throws ServletException
   {
-    Code.debug("CGI: starting initialisation");
-
-    // check and cache root directories...
-    String tmp = getInitParameter("Roots");
+    String tmp = getServletContext().getRealPath("/");
+    Code.debug("CGI: DocRoot suggested - "+tmp);
 
     if (tmp==null)
-      Code.fail("CGI: Roots init parameter not set");
-
-    StringTokenizer roots = new StringTokenizer(tmp, ",");
-    while (roots.hasMoreTokens())
     {
-      File dir = new File(roots.nextToken());
-
-      if (!dir.exists())
-      {
-        Code.warning("CGI: "+dir+" does not exist");
-        continue;
-      }
-
-      if (!dir.canRead())
-      {
-        Code.warning("CGI: "+dir+" is not readable");
-        continue;
-      }
-
-      if (!dir.isDirectory())
-      {
-        Code.warning("CGI: "+dir+" is not a directory");
-        continue;
-      }
-
-      try
-      {
-        File canonical=dir.getCanonicalFile();
-        _roots.add(0,canonical);
-        Code.debug("CGI: accepting root : "+canonical);
-      }
-      catch (IOException e)
-      {
-        Code.warning("CGI: failed to add root : "+dir+" - "+e);
-      }
-        
+      Code.warning("CGI: no DocRoot !");
+      throw new ServletException();
     }
 
-    if (_roots.size()==0)
-      Code.fail("CGI: no valid roots found from : "+tmp);
+    File dir = new File(tmp);
+    if (!dir.exists())
+    {
+      Code.warning("CGI: DocRoot does not exist - "+dir);
+      throw new ServletException();
+    }
 
-    Code.debug("CGI: ending initialisation");
+    if (!dir.canRead())
+    {
+      Code.warning("CGI: DocRoot is not readable - "+dir);
+      throw new ServletException();
+    }
+
+    if (!dir.isDirectory())
+    {
+      Code.warning("CGI: DocRoot is not a directory - "+dir);
+      throw new ServletException();
+    }
+    
+    try
+    {
+      _docRoot=dir.getCanonicalFile();
+      Code.debug("CGI: DocRoot accepted - "+_docRoot);
+    }
+    catch (IOException e)
+    {
+      Code.warning("CGI: DocRoot failed - "+dir);
+      e.printStackTrace();
+      throw new ServletException();
+    }
+
+    _path=getInitParameter("Path");
+    Code.debug("CGI: PATH accepted - "+_path);
   }
 
   public void service(HttpServletRequest req, HttpServletResponse res) 
     throws ServletException, IOException
   {
+    Code.debug("CGI: req.getContextPath() : " + req.getContextPath());
+    Code.debug("CGI: req.getServletPath() : " + req.getServletPath());
+    Code.debug("CGI: req.getPathInfo()    : " + req.getPathInfo());
+
     Code.debug("CGI: System.Properties : " + System.getProperties().toString());
 
     Enumeration p=req.getParameterNames();
@@ -118,33 +116,11 @@ public class CGI extends HttpServlet
       Code.fail("CGI: no executable specified");
     }
 
-    boolean done=false;
-    for (int i=0,length=_roots.size(); !done && i<length;i++)
-    {
-      File root = (File)_roots.elementAt(i);
-      File file = new File(root, exe).getCanonicalFile();
-      
-      // ensure that this file is below our 'root'...
-      String parent = root.toString();
-      String child  = file.toString();
-      
-      if (!file.exists())
-        continue;
-      
-      if (!parent.equals(child.substring(0, parent.length())))
-      {
-        Code.debug("CGI: "+child+" is not below "+parent);
-        continue;
-      }
-      
-      done=true;
-      exec(root.toString(), file.toString(), req, res);
-    }
+    File script = new File(_docRoot, exe).getCanonicalFile();
+    Code.debug("CGI: script is "+script);
 
-    if (!done)
-      Code.fail("CGI: could not find cgi "+exe+" in roots "+_roots);
+    exec(script.toString(), req, res);
   }
-
     
   /* ------------------------------------------------------------ */
   /* 
@@ -154,8 +130,7 @@ public class CGI extends HttpServlet
    * @param res 
    * @exception IOException 
    */
-  private void exec(String root,
-                    String path,
+  private void exec(String path,
                     HttpServletRequest req,
                     HttpServletResponse res)
     throws IOException
@@ -168,19 +143,13 @@ public class CGI extends HttpServlet
         "AUTH_TYPE="                + req.getAuthType(),
         "CONTENT_LENGTH="           + req.getContentLength(),
         "CONTENT_TYPE="             + req.getContentType(),
-
-        // GATEWAY_INTERFACE
-        // This metavariable is set to the dialect of CGI being used by
-        // the server to communicate with the script.
         "GATEWAY_INTERFACE="        + "CGI/1.1",
-
         "PATH_INFO="                + req.getPathInfo(),
         "PATH_TRANSLATED="          + req.getPathTranslated(),
         "QUERY_STRING="             + req.getQueryString(),
         "REMOTE_ADDR="              + req.getRemoteAddr(),
         "REMOTE_HOST="              + req.getRemoteHost(),
 
-        // REMOTE_IDENT
         // The identity information reported about the connection by a
         // RFC 1413 [11] request to the remote agent, if
         // available. Servers MAY choose not to support this feature, or
@@ -194,23 +163,6 @@ public class CGI extends HttpServlet
         "SERVER_PORT="              + req.getServerPort(),
         "SERVER_PROTOCOL="          + req.getProtocol(),
         "SERVER_SOFTWARE="          + getServletContext().getServerInfo(),
-
-        // these extra ones were from printenv on www.dev.nomura.co.uk
-        //       "DOCUMENT_ROOT="            + root + "/docs",
-        //       "HTTPS="                    + "NYI - OFF",
-        //       "PATH="                     + "NYI - /apps/java/jdk/sun4/SunOS5/1.1.7_05/java1.1/bin:/usr/sbin:/usr/bin",
-        //       "SERVER_URL="               + "NYI - http://us0245",
-        //       "TZ="                       + System.getProperty("user.timezone"),
-
-        // for the moment I am just going to assume the 'scheme' will
-        // always be http... - am I right ?
-
-        //     };
-
-        //     if (req.getScheme().compareTo("http")==0)
-        //     {
-        //       String httpEnv[]=
-        //       {
         "HTTP_ACCEPT="              + req.getHeader("Accept"),
         "HTTP_ACCEPT_CHARSET="      + req.getHeader("Accept-Charset"),
         "HTTP_ACCEPT_ENCODING="     + req.getHeader("Accept-Encoding"),
@@ -224,12 +176,15 @@ public class CGI extends HttpServlet
         // they be included ?
         "HTTP_PRAGMA="              + req.getHeader("Pragma"),
         "HTTP_COOKIE="              + req.getHeader("Cookie"),
+
+        // these extra ones were from printenv on www.dev.nomura.co.uk
+	"HTTPS="                    + (req.isSecure()?"ON":"OFF"),
+	"PATH="                     + _path,
+        //       "DOCUMENT_ROOT="            + root + "/docs",
+        //       "SERVER_URL="               + "NYI - http://us0245",
+        //       "TZ="                       + System.getProperty("user.timezone"),
       };
       
-    // find a better way...
-    //      env = env + httpEnv;
-    //    }
-
     // are we meant to decode args here ? or does the script get them
     // via PATH_INFO ?  if we are, they should be decoded and passed
     // into exec here...
