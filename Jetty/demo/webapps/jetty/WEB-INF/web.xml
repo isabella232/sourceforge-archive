@@ -283,6 +283,14 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
 
   <security-constraint>
     <web-resource-collection>
+      <web-resource-name>ForbiddenXXXX</web-resource-name>
+      <url-pattern>/auth/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint/>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
       <web-resource-name>Forbidden</web-resource-name>
       <url-pattern>/auth/noaccess/*</url-pattern>
     </web-resource-collection>
@@ -299,10 +307,12 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
     </user-data-constraint>
   </security-constraint>
 
+<!--
   <login-config>
     <auth-method>BASIC</auth-method>
     <realm-name>Jetty Demo Realm</realm-name>
   </login-config>
+-->
 
 <!--
   <login-config>
@@ -311,7 +321,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
   </login-config>
 -->
 
-<!--
   <login-config>
     <auth-method>FORM</auth-method>
     <realm-name>Jetty Demo Realm</realm-name>
@@ -320,7 +329,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
        <form-error-page>/auth/logonError.html?param=test</form-error-page>
     </form-login-config>
   </login-config>
--->
 
   <security-role>
       <role-name>adminRef</role-name>

@@ -261,8 +261,7 @@ public class FormAuthenticator implements Authenticator
         }
         
         // Don't authenticate authform or errorpage
-        if (pathInContext!=null &&
-            pathInContext.equals(_formErrorPath) || pathInContext.equals(_formLoginPath))
+        if (isLoginOrErrorPage(pathInContext))
             return SecurityConstraint.__NOBODY;
         
         // redirect to login page
@@ -283,6 +282,12 @@ public class FormAuthenticator implements Authenticator
         return null;
     }
 
+    public boolean isLoginOrErrorPage(String pathInContext)
+    {
+        return pathInContext!=null &&
+         (pathInContext.equals(_formErrorPath) || pathInContext.equals(_formLoginPath));
+    }
+    
     /* ------------------------------------------------------------ */
     /** FORM Authentication credential holder.
      */

@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.jetty.servlet.FormAuthenticator;
 import org.mortbay.util.LazyList;
 
 /* ------------------------------------------------------------ */
@@ -351,7 +352,9 @@ public class SecurityConstraint implements Cloneable, Serializable
         }
 
         // Does this forbid everything?
-        if (forbidden)
+        if (forbidden && 
+            (!(authenticator instanceof FormAuthenticator) || 
+            !((FormAuthenticator)authenticator).isLoginOrErrorPage(pathInContext)))
         {
             HttpContext.sendContextError(response,HttpResponse.__403_Forbidden,null);
             return false;
