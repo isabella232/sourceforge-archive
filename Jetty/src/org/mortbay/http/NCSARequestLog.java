@@ -42,6 +42,7 @@ public class NCSARequestLog implements RequestLog
     private String _logTimeZone=TimeZone.getDefault().getID();
     private String[] _ignorePaths;
     private boolean _logLatency=false;
+    private boolean _logCookies=false;
     
     private transient OutputStream _out;
     private transient OutputStream _fileOut;
@@ -233,6 +234,24 @@ public class NCSARequestLog implements RequestLog
 
     /* ------------------------------------------------------------ */
     /**
+     * @return Returns true if logging cookies
+     */
+    public boolean getLogCookies()
+    {
+        return _logCookies;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param logCookies If true, Cookies is logged at the end of the log line
+     */
+    public void setLogCookies(boolean logCookies)
+    {
+        _logCookies = logCookies;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
      * @return Returns true if logging latency
      */
     public boolean getLogLatency()
@@ -387,8 +406,32 @@ public class NCSARequestLog implements RequestLog
             {
                 _writer.write(log);
                 if (_extended)
-                    logExtended(request,response,_writer);
+		{
+		    logExtended(request,response,_writer);
+		    if (!_logCookies)
+			_writer.write(" -");
+		}
                 
+		if (_logCookies)
+		{
+		    Cookie[] cookies = request.getCookies();
+		    if (cookies==null || cookies.length==0)
+			_writer.write(" -");
+		    else
+		    {
+			_writer.write(" \"");
+			for (int i=0;i<cookies.length;i++)
+			{
+			    if (i!=0)
+				_writer.write(';');
+			    _writer.write(cookies[i].getName());
+			    _writer.write('=');
+			    _writer.write(cookies[i].getValue());
+			}
+			_writer.write("\"");
+		    }
+		}
+
                 if (_logLatency)
                     _writer.write(" "+(System.currentTimeMillis()-request.getTimeStamp()));
                 
@@ -442,22 +485,6 @@ public class NCSARequestLog implements RequestLog
             log.write('"');
         }
         
-        Cookie[] cookies = request.getCookies();
-        if (cookies==null || cookies.length==0)
-            log.write('-');
-        else
-        {
-            log.write(" \"");
-            for (int i=0;i<cookies.length;i++)
-            {
-                if (i!=0)
-                    log.write(';');
-                log.write(cookies[i].getName());
-                log.write('=');
-                log.write(cookies[i].getValue());
-            }
-            log.write("\"");
-        }
 
     }
 }
