@@ -179,27 +179,16 @@
            2) Activate HTTP session clustering in your Web
                Application: add a <distributable/> tag
                at the beginning of your WEB-INF/web.xml file
-           3) Choose one of the HTTP session replication 
-               method below:
-                a) JGStore is an autonomous implementation
-                   that is part of Jetty and makes use of
-                   NO JBoss service. It has been implemented
-                   by Jules Gosnell.
-                b) ClusterStore relies on the same JBoss 
-                   service as the Tomcat session clustering
-                   engine i.e. it requires JBoss clustering
-                   and jbossha-httpsession.sar in /deploy
-                   (ok in the "all" JBoss configuration)
-                   
-            In case of problem:
-             - read the clustering documentation and/or
-             - ask in the clustering forum:
-                http://www.jboss.org/forum.jsp?forum=64                   
+           3) Activate the HTTP session replication 
+               method below: JGStore is an autonomous implementation
+               that is part of Jetty and makes use of
+               NO JBoss service. 
+               The ClusterStore implementation is no longer
+	       supported. 
           ************************************************
           ************************************************
           ************************************************ -->
         <!-- 
-            a)
             JGStore HTTP session replication scheme
             (i.e <distributable/> support)
             See above for more information. Only run with 
@@ -217,20 +206,6 @@
          </New>
         </Set>
         -->
-        <!-- 
-            b)
-            ClusterStore HTTP session replication scheme
-            (i.e <distributable/> support)
-            See above for more information. Only run with 
-            JBoss "all" configuration!        
-        <Set name="store">
-         <New class="org.jboss.jetty.session.ClusterStore">
-          <Set name="actualMaxInactiveInterval">604800</Set>
-          <Set name="scavengerPeriod">3600</Set>
-          <Set name="scavengerExtraTime">900</Set>
-         </New>
-        </Set>
-        -->
         
        </New>
       </Set>
@@ -242,10 +217,5 @@
 
       </Configure>
      </attribute>
-
   </mbean>
-
-  <!-- ==================================================================== -->
-  <!-- ==================================================================== -->
-
 </server>

@@ -13,26 +13,10 @@ necessary functionality at deploy time. This is slower, but simpler
 and more flexible than doing it at compile time. It also allows the
 user to insert custom interceptors - a very powerful feature.
 
-Several different interceptor stacks are demonstrated. Each is
-tailored to a Store Class.
-
-ClusterStore - This expects jbossha-httpsession.sar to be deployed and
-uses this service (currently implemented via JavaGroups) to distribute
-session changes around a cluster partition. Your JBoss cluster MUST be
-set up using the JBoss clustering infrastructure. The whole session
-will be distributed upon any change to it.
-
-CMPStore - No longer supported
-
-LocalStore - No distribution occurs. This is useful for testing
-interceptors etc...
-
-Further stores are under consideration - probably using CMR, JMS
-etc...
 
 IMPORTANT:
 
-I'm currently assuming three modes for HttpSession containers :
+This currently assumes three modes for HttpSession containers :
 
 LOCAL - no distributions occurs.
 
@@ -51,19 +35,6 @@ reference into a session, then alter the reference contents your
 changes will NOT be distributed, because you placed a COPY of your
 object into the session. To update it you MUST place a fresh copy over
 it. This new value will then be distributed.
-
-N.B.
-
-This implementation replaces the previous one and is already more
-robust and fully-featured, however there is still much room for
-optimisation. This will be done by a number of interceptors currently
-being considered - so please do not be disappointed if it not
-blazingly fast - it will be soon.
-
-Enjoy,
-
-
-Jules
 
 -->
 
