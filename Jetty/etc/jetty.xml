@@ -100,7 +100,7 @@
   <!-- + Use the webdefault.xml resource for the defaults descriptor   -->
   <!-- + Upack the war file                                            -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <Set name="rootWebApp">rXoot</Set>
+  <Set name="rootWebApp">rxoot</Set>
   <Call name="addWebApplications">
     <Arg></Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/</Arg>
