@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Added log4j context repository to jettyplus
+
 Jetty-4.2.17 - 1 Feb 2004
  + Fixed busy loop in threadpool run  
  + Reorganized ServletHolder init
