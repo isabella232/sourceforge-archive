@@ -86,7 +86,55 @@ public class Tests extends junit.framework.TestCase
         {
             Code.fail(e);
         }
-    } 
+    }
+
+    /*-------------------------------------------------------------------*/
+    /** Check that string contains a substring.
+     *  @return Index of substring
+     */
+    private int checkContains(String check, String string, String subString)
+    {
+        return realCheckContains(check, string,0,subString);
+    }
+    
+    /*-------------------------------------------------------------------*/
+    /** Check that string contains a substring.
+     *  @return Index of substring
+     */
+    private int checkContains(String check,
+                              String string,
+                              int offset,
+                              String subString)
+    {
+        return realCheckContains(check, string,offset,subString);
+    }
+    
+    /*-------------------------------------------------------------------*/
+    /** Check that string contains a substring.
+     *  @return Index of substring
+     */
+    private int realCheckContains(String check, 
+                                  String string,
+                                  int offset,
+                                  String subString)
+    {
+        int index=-1;
+        if ((string==null && subString==null)
+            || (string!=null && (subString==null ||
+                                 (index=string.indexOf(subString,offset))>=0)))
+        {
+          // do nothing
+        }
+        else
+        {
+            fail('"' + subString + "\" not contained in \"" +
+                             string.substring(offset) + '"');
+        }
+        return index;
+    }
+
+
+    
 
     /* ------------------------------------------------------------ */
     public void testDateCache() throws Exception
@@ -127,4 +175,101 @@ public class Tests extends junit.framework.TestCase
             }
             assertTrue("time changed", change);
     }
+
+    /* ------------------------------------------------------------ */
+    private void testFrameChecker(Frame f, String desc,
+                                  String method, int depth,
+                                  String thread, String file)
+    {
+        checkContains(desc+": depth", f._method, method);
+        assertEquals( desc+": depth", f._depth, depth);
+        assertEquals( desc+": depth", f._thread, thread);
+        checkContains(desc+": depth", f._file, file);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void testFrame()
+    {
+        Frame f = new Frame();
+        testFrameChecker(f, "default constructor",
+                         "org.mortbay.util.TestHarness.testFrame",
+                         2, "main", "TestHarness.java");
+        f = f.getParent();
+        testFrameChecker(f, "getParent",
+                         "org.mortbay.util.TestHarness.main",
+                         1, "main", "TestHarness.java");
+        f = f.getParent();
+        assertEquals("getParent() off top of stack", f, null);
+        f = new Frame(1);
+        testFrameChecker(f, "new Frame(1)",
+                         "org.mortbay.util.TestHarness.main",
+                         1, "main", "TestHarness.java");
+        f = new Frame(1, true);
+        testFrameChecker(f, "partial",
+                         "unknownMethod", 0, "unknownThread", "UnknownFile");
+        f.complete();
+        testFrameChecker(f, "new Frame(1)",
+                         "org.mortbay.util.TestHarness.main",
+                         1, "main", "TestHarness.java");
+    }
+
+
+
+    /* ------------------------------------------------------------ */
+    public void testIO() throws InterruptedException
+    {
+        // Only a little test
+        ByteArrayInputStream in = new ByteArrayInputStream
+            ("The quick brown fox jumped over the lazy dog".getBytes());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        IO.copyThread(in,out);
+        Thread.sleep(500);
+
+        assertEquals( "copyThread",
+                      out.toString(),
+                      "The quick brown fox jumped over the lazy dog");
+    }
+
+    /* ------------------------------------------------------------ */
+    public static void testB64()
+    {
+	    // Perform basic reversibility tests
+       assertEquals("decode(encode())",       B64Code.decode(B64Code.encode("")),"");
+       assertEquals("decode(encode(a))",      B64Code.decode(B64Code.encode("a")),"a");
+       assertEquals("decode(encode(ab))",     B64Code.decode(B64Code.encode("ab")),"ab");
+       assertEquals("decode(encode(abc))",    B64Code.decode(B64Code.encode("abc")),"abc");
+       assertEquals("decode(encode(abcd))",   B64Code.decode(B64Code.encode("abcd")),"abcd");
+       assertEquals("decode(encode(^@))",     B64Code.decode(B64Code.encode("\000")),"\000");
+       assertEquals("decode(encode(a^@))",    B64Code.decode(B64Code.encode("a\000")),"a\000");
+       assertEquals("decode(encode(ab^@))",   B64Code.decode(B64Code.encode("ab\000")),"ab\000");
+       assertEquals("decode(encode(abc^@))",  B64Code.decode(B64Code.encode("abc\000")),"abc\000");
+       assertEquals("decode(encode(abcd^@))", B64Code.decode(B64Code.encode("abcd\000")),"abcd\000");
+
+	    // Test the reversibility of the full range of 8 bit values
+	    byte[] allValues= new byte[256];
+	    for (int i=0; i<256; i++)
+         allValues[i] = (byte) i;
+	    String input = new String(allValues);
+            String output=B64Code.decode(B64Code.encode(input));
+
+            for (int i=0;i<256;i++)
+                if (input.charAt(i)!=output.charAt(i))
+                    System.err.println("DIFF at "+i+" "+
+                                       ((int)input.charAt(i))+
+                                       "!="+
+                                       ((int)output.charAt(i)));
+	    assertEquals( "decode(encode(ALL_128_ASCII_VALUES))", output,input);
+
+	    // Encoder compatibility tests
+	    assertEquals("YWJj","encode(abc)",         B64Code.encode("abc"));
+	    assertEquals("YWJjZA==","encode(abc)",     B64Code.encode("abcd"));
+	    assertEquals("YWJjZGU=","encode(abc)",     B64Code.encode("abcde"));
+	    assertEquals("YWJjZGVm","encode(abc)",     B64Code.encode("abcdef"));
+	    assertEquals("YWJjZGVmZw==","encode(abc)", B64Code.encode("abcdefg"));
+    }
+    
+    
+    
+    
 }

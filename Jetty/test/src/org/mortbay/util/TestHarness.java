@@ -75,81 +75,20 @@ public class TestHarness
     }    
 
     
-    /* ------------------------------------------------------------ */
-    static void testDateCache()
-    {
-        TestCase t = new TestCase("org.mortbay.util.DateCache");
-        //                            012345678901234567890123456789
-        DateCache dc = new DateCache("EEE, dd MMM yyyy HH:mm:ss zzz ZZZ",
-                                     Locale.US);
-        dc.setTimeZone(TimeZone.getTimeZone("GMT"));
-        try
-        {
-            String last=dc.format(System.currentTimeMillis());
-            boolean change=false;
-            for (int i=0;i<15;i++)
-            {
-                Thread.sleep(100);
-                String date=dc.format(System.currentTimeMillis());
-                System.err.println(date);
-                t.checkEquals(last.substring(0,17),
-                              date.substring(0,17),"Same Date");
-
-                if (last.substring(17).equals(date.substring(17)))
-                    change=true;
-                else
-                {
-                    int lh=Integer.parseInt(last.substring(17,19));
-                    int dh=Integer.parseInt(date.substring(17,19));
-                    int lm=Integer.parseInt(last.substring(20,22));
-                    int dm=Integer.parseInt(date.substring(20,22));
-                    int ls=Integer.parseInt(last.substring(23,25));
-                    int ds=Integer.parseInt(date.substring(23,25));
-
-                    // This won't work at midnight!
-                    t.check(ds==ls+1 ||
-                            ds==0 && dm==lm+1 ||
-                            ds==0 && dm==0 && dh==lh+1,
-                            "Time changed");
-                }
-                last=date;
-            }
-            t.check(change,"time changed");
-        }
-        catch(Exception e)
-        {
-            Code.warning(e);
-            t.check(false,e.toString());
-            
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** 
+    /* ------------------------------------------------------------ 
+     * MOved to JUnit testing
      */
-    static void testTest()
-    {
-        TestCase t1 = new TestCase("Test all pass");
-        TestCase t2 = new TestCase(TestCase.SelfFailTest);
-        t2.check(false,"THESE TESTS ARE EXPECTED TO FAIL");
-        t1.check(true,"Boolean check that passes");
-        t2.check(false,"Boolean check that fails");
-        t1.checkEquals("Foo","Foo","Object comparison that passes");
-        t2.checkEquals("Foo","Bar","Object comparison that fails");
-        t1.checkEquals(1,1,"Long comparison that passes");
-        t2.checkEquals(1,2,"Long comparison that fails");
-        t1.checkEquals(1.1,1.1,"Double comparison that passes");
-        t2.checkEquals(1.1,2.2,"Double comparison that fails");
-        t1.checkEquals('a','a',"Char comparison that passes");
-        t2.checkEquals('a','b',"Char comparison that fails");
-        t1.checkContains("ABCD","BC","Contains check that passes");
-        t2.checkContains("ABCD","CB","Contains check that fails");
-    }
+    //static void testDateCache()
     
-    /*-------------------------------------------------------------------*/
+    /* ------------------------------------------------------------ */
+    /**  No longer needed with JUnit
+     */
+    //static void testTest()
+    
+    /*-------------------------------------------------------------------
+    // XXX - this was not even a test harness - poor show!
     static void testLog()
     {
-        // XXX - this is not even a test harness - poor show!
         Log.instance();
         System.err.println("\n\nEXPECT TESTTAG: TEST Message");
         Log.message("TESTTAG","TEST Message",new Frame());
@@ -158,8 +97,10 @@ public class TestHarness
         System.err.println("\n\nEXPECT: Test warning");
         Log.warning("Test warning");
     }
+    */
 
-    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ 
+     * Moved to JUnit testing
     private static void testFrameChecker(TestCase t, Frame f, String desc,
                                          String method, int depth,
                                          String thread, String file)
@@ -170,7 +111,6 @@ public class TestHarness
         t.checkContains(f._file, file, desc+": file");
     }
     
-    /* ------------------------------------------------------------ */
     static void testFrame()
     {
         TestCase t = new TestCase("org.mortbay.util.Frame");
@@ -196,10 +136,16 @@ public class TestHarness
                          "org.mortbay.util.TestHarness.main",
                          1, "main", "TestHarness.java");
     }
+    */
     
     /*-------------------------------------------------------------------*/
-    /** 
+    /*
+     * These are not automated tests. It's debug output that must be
+     * checked by a human. To automate, provide a Log descendant or
+     * other kind of o.m.u.Code listener, that can expect output values.
+     * --Juanco
      */
+    /*
     static void testCode()
     {
         // Also not a test harness
@@ -288,8 +234,10 @@ public class TestHarness
             Code.warning(e);
         }
     }
+   */
     
     /* ------------------------------------------------------------ */
+    /* Moved to JUnit testing
     public static void testIO()
     {
         TestCase t = new TestCase("org.mortbay.util.IO");
@@ -312,8 +260,10 @@ public class TestHarness
             t.check(false,"Exception: "+e);
         }
     }
+    */
     
     /* ------------------------------------------------------------ */
+    /* Moved to JUnit testing
     public static void testB64()
     {
         TestCase t = new TestCase("org.mortbay.util.B64Code");
@@ -359,6 +309,7 @@ public class TestHarness
             t.check(false,"Exception: "+e);
         }
     }
+    */
     
     /* ------------------------------------------------------------ */
     public static void testPassword()
@@ -2006,25 +1957,25 @@ public class TestHarness
     {
         try
         {
-       	    testTest();
-            testLog();
-            testFrame();
-            testCode();
+       	   //testTest();
+            //testLog();
+            // testFrame();
+            //testCode();
             testPassword();
             testStringMap();
             testSingletonList();
             testLazyList();
             testMultiMap();
             testQuotedStringTokenizer();            
-            testDateCache();
+            //testDateCache();
             testBlockingQueue();
-            testIO();
+            //testIO();
             testUrlEncoded();
             testURI();
             testLineInput();
             testThreadPool();
             testThreadedServer();
-            testB64();
+            //testB64();
             testResource();
 
             //testJarURL();
