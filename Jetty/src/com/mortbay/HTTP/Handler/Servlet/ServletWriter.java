@@ -50,7 +50,7 @@ class ServletWriter extends PrintWriter
         }
         void disable()
         {
-            out=IO.getNullStream();
+            this.out=IO.getNullStream();
         }
     }
 }
