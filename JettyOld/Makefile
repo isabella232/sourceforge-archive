@@ -25,6 +25,7 @@ include $(JETTY_HOME)/etc/Global.mk
 
 #help target  jetty-release    Make a release of Jetty
 jetty-release: jetty-jar javax-jar javadoc cleansrc
+	mkdir -p lib
 
 javax-jar:
 	cd $(INSTALLROOT)/classes \
