@@ -63,11 +63,18 @@
 #   above default attribute superfluous.
 #
 # JETTY_PORT
-#   Default port for Jetty servers. The default value is 8080. The java 
-#   system property "jetty.port" will be set to this value for use in 
-#   configure.xml files, f.e.:
+#   Override the default port for Jetty servers. If not set then the
+#   default value in the xml configuration file will be used. The java
+#   system property "jetty.port" will be set to this value for use in
+#   configure.xml files. For example, the following idiom is widely
+#   used in the demo config files to respect this property in Listener
+#   configuration elements:
 #
-#    <Arg><SystemProperty name="jetty.port" default="80"/></Arg>
+#    <Set name="Port"><SystemProperty name="jetty.port" default="8080"/></Set>
+#
+#   Note: that the config file could ignore this property simply by saying:
+#
+#    <Set name="Port">8080</Set>
 #
 # JETTY_RUN
 #   Where the jetty.pid file should be stored. It defaults to the
@@ -407,9 +414,9 @@ fi
 #####################################################
 # See if JETTY_PORT is defined
 #####################################################
-if [ -z "$JETTY_PORT" ] 
+if [ "$JETTY_PORT" != "" ] 
 then
-  JETTY_PORT="8080" 
+  JAVA_OPTIONS="-Djetty.port=$JETTY_PORT $JAVA_OPTIONS"
 fi
 
 
@@ -433,7 +440,7 @@ CLASSPATH="$CP"
 #####################################################
 # Add jetty properties to Java VM options.
 #####################################################
-JAVA_OPTIONS="-Djetty.home=$JETTY_HOME -Djetty.log=$JETTY_LOG -Djetty.port=$JETTY_PORT $JAVA_OPTIONS"
+JAVA_OPTIONS="-Djetty.home=$JETTY_HOME -Djetty.log=$JETTY_LOG $JAVA_OPTIONS"
 
 #####################################################
 # This is how the Jetty server will be started
