@@ -1,6 +1,10 @@
 Jetty Versions
 --------------
 
+Jetty-3.1.7 - 12 Mar 2002
+ + Fixed security problem with constraints being bypassed with //
+   in URLs
+
 Jetty-3.1.6 - 28 Feb 2002
  + Implemented 2.3 clarifications to security constraint semantics
    PLEASE REVIEW YOUR SECURITY CONSTRAINTS (see README).

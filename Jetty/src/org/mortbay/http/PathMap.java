@@ -8,6 +8,7 @@ package org.mortbay.http;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.SingletonList;
+import org.mortbay.util.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

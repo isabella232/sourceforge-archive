@@ -17,6 +17,7 @@ import org.mortbay.util.Resource;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.LifeCycle;
 import org.mortbay.util.MultiException;
+import org.mortbay.util.URI;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -1019,6 +1020,8 @@ public class HandlerContext implements LifeCycle
                           HttpResponse response)
         throws HttpException, IOException
     {
+        pathInContext=URI.canonicalPath(pathInContext);
+        
         // Save the thread context loader
         Thread thread = Thread.currentThread();
         ClassLoader lastContextLoader=thread.getContextClassLoader();
