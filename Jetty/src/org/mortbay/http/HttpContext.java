@@ -404,8 +404,8 @@ public class HttpContext implements LifeCycle
 
         if (dir!=null && !dir.exists())
         {
-            _tmpDir.mkdir();
-            _tmpDir.deleteOnExit();
+            dir.mkdir();
+            dir.deleteOnExit();
         }
         
         if (dir!=null && ( !dir.exists() || !dir.isDirectory() || !dir.canWrite()))
