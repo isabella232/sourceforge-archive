@@ -173,6 +173,7 @@ public class Dispatcher implements RequestDispatcher
             servletHttpRequest.getServletHandler()!=_servletHandler;
 
         ClassLoader loader = null;
+        ServletHandler servletHandler = servletHttpRequest.getServletHandler();
         try
         {
             if (_xContext)
@@ -219,6 +220,8 @@ public class Dispatcher implements RequestDispatcher
             // restore loader
             if (loader!=null)
                 Thread.currentThread().setContextClassLoader(loader);
+            // restore servlet handler
+            servletHttpRequest.setServletHandler(servletHandler);
         }
     }
 

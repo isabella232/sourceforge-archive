@@ -172,12 +172,7 @@ public class SocketListener
     {
         socket.setTcpNoDelay(true);
         
-        HttpConnection connection =
-            new HttpConnection(this,
-                               socket.getInetAddress(),
-                               socket.getInputStream(),
-                               socket.getOutputStream(),
-                               socket);
+        HttpConnection connection = createConnection(socket);
         
         try
         {
@@ -200,7 +195,23 @@ public class SocketListener
 
         connection.handle();
     }
-
+    
+    /* ------------------------------------------------------------ */
+    /** Create an HttpConnection instance. This method can be used to
+     * override the connection instance.
+     * @param socket The underlying socket.
+     */
+    protected HttpConnection createConnection(Socket socket)
+        throws IOException
+    {
+        return new HttpConnection(this,
+                                  socket.getInetAddress(),
+                                  socket.getInputStream(),
+                                  socket.getOutputStream(),
+                                  socket);
+    }
+    
+    
     /* ------------------------------------------------------------ */
     /** Customize the request from connection.
      * This method extracts the socket from the connection and calls

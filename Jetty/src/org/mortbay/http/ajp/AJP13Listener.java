@@ -195,16 +195,27 @@ public class AJP13Listener
         // Handle the connection
         socket.setTcpNoDelay(true);
         socket.setSoTimeout(getMaxIdleTimeMs());
-        AJP13Connection connection=
-            new AJP13Connection(this,
-                                socket.getInputStream(),
-                                socket.getOutputStream(),
-                                socket,
-                                getBufferSize());
+        AJP13Connection connection= createConnection(socket);
         try{connection.handle();}
         finally{connection.destroy();}
     }
 
+    /* ------------------------------------------------------------ */
+    /** Create an AJP13Connection instance. This method can be used to
+     * override the connection instance.
+     * @param socket The underlying socket.
+     */
+    protected AJP13Connection createConnection(Socket socket)
+        throws IOException
+    {
+        return new AJP13Connection(this,
+                                   socket.getInputStream(),
+                                   socket.getOutputStream(),
+                                   socket,
+                                   getBufferSize());
+    }
+    
+           
     /* ------------------------------------------------------------ */
     /** Customize the request from connection.
      * This method extracts the socket from the connection and calls

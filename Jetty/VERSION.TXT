@@ -2,6 +2,8 @@ Jetty Versions
 --------------
 
  + Added UserRealm.logout and arrange for form auth & session invalidation to call it
+ + Restore servlet handler after dispatch
+ + Allow customization of HttpConnections
 
 Jetty-4.2.14RC0 - 7 October 2003
  + Correctly setup context classloader in cross context dispatch.
