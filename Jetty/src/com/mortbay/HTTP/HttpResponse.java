@@ -125,6 +125,16 @@ public class HttpResponse extends HttpMessage
         _state=__MSG_EDITABLE;
     }
 
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return true if the message has been modified. 
+     */
+    public boolean isDirty()
+    {
+	return _state!=__200_OK || super.isDirty();
+    }
+    
 
     /* ------------------------------------------------------------ */
     /** Reset the response.
