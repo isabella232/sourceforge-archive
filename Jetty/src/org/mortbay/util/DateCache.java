@@ -199,7 +199,6 @@ public class DateCache
         String ss1=_tzFormatString.substring(0,i);
         String ss2=_tzFormatString.substring(i+l);
         _minFormatString =ss1+(_millis?"'ss.SSS'":"'ss'")+ss2;
-        System.err.println("minFormatString="+_minFormatString);
     }
 
     /* ------------------------------------------------------------ */
@@ -264,9 +263,6 @@ public class DateCache
             }
             _secFormatString0=_secFormatString.substring(0,i);
             _secFormatString1=_secFormatString.substring(i+l);
-            System.err.println("secFormatString="+_secFormatString);
-            System.err.println("secFormatString0="+_secFormatString0);
-            System.err.println("secFormatString1="+_secFormatString1);
         }
 
         // Always format if we get here

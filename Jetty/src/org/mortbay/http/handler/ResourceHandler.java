@@ -136,6 +136,9 @@ public class ResourceHandler extends NullHandler
     /* ------------------------------------------------------------ */
     public void addIndexFile(String indexFile)
     {
+        if (indexFile.indexOf("/")>=0 ||
+            indexFile.indexOf(java.io.File.separator)>=0)
+            Code.warning("Invalid index file: "+indexFile);
         _indexFiles.add(indexFile);
     }
  

@@ -150,10 +150,6 @@ public class Tests extends junit.framework.TestCase
             {
                 Thread.sleep(100);
                 String date=dc.format(System.currentTimeMillis());
-
-                System.err.println("\nlast="+last);
-                System.err.println("date="+date);
-                
                 
                 assertEquals( "Same Date",
                               last.substring(0,17),

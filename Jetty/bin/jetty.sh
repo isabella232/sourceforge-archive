@@ -28,8 +28,7 @@
 # Configuration variables
 #
 # JAVA_HOME  
-#   Home of Java installation. This needs to be set as this script 
-#   will not look for it.
+#   Home of Java installation. 
 #
 # JAVA
 #   Command to invoke Java. If not set, $JAVA_HOME/bin/java will be

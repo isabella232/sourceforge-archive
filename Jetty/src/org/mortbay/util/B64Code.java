@@ -50,9 +50,19 @@ public class B64Code
      */
     static public String encode(String s)
     {
-        char[] encoded = encode(s.getBytes());
-	return new String(encoded);
+        try
+        {
+            char[] encoded = encode(s.getBytes(StringUtil.__ISO_8859_1));
+            return new String(encoded);
+        }
+        catch(UnsupportedEncodingException e)
+        {
+            Code.fail(e);
+        }
+        return null;
     }
+    
+        
 
 
     // ------------------------------------------------------------------
@@ -69,7 +79,7 @@ public class B64Code
     {
         byte[] bytes;
         if (charEncoding==null)
-            bytes = s.getBytes();
+            bytes = s.getBytes(StringUtil.__ISO_8859_1);
         else
             bytes = s.getBytes(charEncoding);
 
@@ -146,7 +156,15 @@ public class B64Code
      */
     static public String decode(String s)
     {
-	return new String(decode(s.toCharArray()));
+        try
+        {
+            return decode(s,StringUtil.__ISO_8859_1);
+        }
+        catch(UnsupportedEncodingException e)
+        {
+            Code.fail(e);
+        }
+        return null;
     }
     
     // ------------------------------------------------------------------
@@ -169,6 +187,7 @@ public class B64Code
         return new String(decoded,charEncoding);
     }
 
+    /* ------------------------------------------------------------ */
     /**
      * Fast Base 64 decode as described in RFC 1421.
      * <p>Does not attempt to cope with extra whitespace
