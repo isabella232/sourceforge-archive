@@ -228,7 +228,8 @@ public class HttpRequest extends HttpMessage
         
         if (line_buffer.size==__maxLineLength)
             throw new HttpException(HttpResponse.__414_Request_URI_Too_Large);
-        decodeRequestLine(line_buffer.buffer,line_buffer.size);        
+        decodeRequestLine(line_buffer.buffer,line_buffer.size);
+        _timeStamp=System.currentTimeMillis();
         
         // Handle version - replace with fast compare
         if (__HTTP_1_1.equals(_version))
@@ -253,7 +254,6 @@ public class HttpRequest extends HttpMessage
 
         _handled=false;
         _state=__MSG_RECEIVED;
-        _timeStamp=System.currentTimeMillis();
     }
     
     /* -------------------------------------------------------------- */

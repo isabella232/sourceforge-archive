@@ -1377,5 +1377,31 @@ public class HttpFields
             ?HttpFields.__SetCookie2:HttpFields.__SetCookie,
             name_value_params); 
     }
+
+    /* ------------------------------------------------------------ */
+    /** Add fields from another HttpFields instance.
+     * Single valued fields are replaced, while all others are added.
+     * @param fields 
+     */
+    public void add(HttpFields fields)
+    {
+        if (fields==null)
+            return;
+
+        Enumeration enum = fields.getFieldNames();
+        while( enum.hasMoreElements() )
+        {
+            String name = (String)enum.nextElement();
+            FieldInfo info=getFieldInfo(name);
+            if( info._singleValued ) 
+                put(name,fields.get(name));
+            else
+            {
+                Enumeration values = fields.getValues(name);
+                while(values.hasMoreElements())
+                    add(name,(String)values.nextElement());
+            }
+        }
+    }
 }
 

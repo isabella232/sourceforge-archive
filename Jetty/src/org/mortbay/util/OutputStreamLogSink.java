@@ -82,7 +82,7 @@ public class OutputStreamLogSink
     private String _filename;
     private boolean _append=true;
     protected boolean _flushOn=true;
-    protected int _bufferSize=4096;
+    protected int _bufferSize=2048;
     protected boolean _reopen=false;
 
     protected transient boolean _started;
@@ -375,89 +375,71 @@ public class OutputStreamLogSink
                                   Frame frame,
                                   long time)
     {
-        if (_reopen)
+        StringBuffer buf = new StringBuffer(160);
+        
+        // Log the time stamp
+        if (_logTimeStamps)
         {
-            stop();
-            start();
+            buf.append(_dateFormat.format(time));
+            buf.append(' ');
+        }
+            
+            
+        // Log the tag
+        if (_logTags)
+            buf.append(tag);
+        
+        // Log the label
+        if (_logLabels && frame != null)
+        {
+            buf.append(frame.toString());
         }
         
-        if (_out==null)
-            return;
-
-        try
+        // Log the stack depth.
+        if (_logStackSize && frame != null)
         {
-            // Log the time stamp
-            if (_logTimeStamps)
-            {
-                _buffer.write(_dateFormat.format(time));
-                _buffer.write(' ');
-            }
-            
-            
-            // Log the tag
-            if (_logTags)
-                _buffer.write(tag);
-            
-            // Log the label
-            if (_logLabels && frame != null)
-            {
-                _buffer.write(frame.toString());
-            }
-            
-            // Log the stack depth.
-            if (_logStackSize && frame != null)
-            {
-                if (frame.getDepth()<10)    
-                    _buffer.write('0');
-                _buffer.write(Integer.toString(frame.getDepth()));  
-                _buffer.write("> ");
-            }
-            
-            // Determine the indent string for the message and append it
-            // to the buffer. Only put a newline in the buffer if the first
-            // line is not blank
-            String nl=__lineSeparator;
-            
-            if (_logLabels && !_logOneLine && _buffer.size() > 0)
-                _buffer.write(nl);
-            
-            // Log indented message
-            String smsg=(msg==null)
-                ?"???"
-                :((msg instanceof String)?((String)msg):msg.toString());
-            
-            if (_logOneLine)
-            {
-                smsg=StringUtil.replace(smsg,"\015\012","<|");
-                smsg=StringUtil.replace(smsg,"\015","<");
-                smsg=StringUtil.replace(smsg,"\012","|");
-            }
-            else
-            {
-                smsg=StringUtil.replace(smsg,"\015\012","<|");
-                smsg=StringUtil.replace(smsg,"\015","<|");
-                smsg=StringUtil.replace(smsg,"\012","<|");
-                smsg=StringUtil.replace(smsg,"<|",nl);
-            }
-            _buffer.write(smsg);
-            _buffer.write(StringUtil.__LINE_SEPARATOR);
-            
-            // Add stack frame to message
-            if (_logStackTrace && frame != null)
-            {
-                _buffer.write(nl);
-                _buffer.write(frame.getStack());
-            }
-            
-            if (_flushOn || _buffer.size()>_bufferSize)
-            {
-                _buffer.writeTo(_out);
-                _buffer.resetWriter();
-                if (_flushOn)
-                    _out.flush();
-            }
+            if (frame.getDepth()<10)    
+                buf.append('0');
+            buf.append(Integer.toString(frame.getDepth()));  
+            buf.append("> ");
         }
-        catch(IOException e){e.printStackTrace();}
+        
+        // Determine the indent string for the message and append it
+        // to the buffer. Only put a newline in the buffer if the first
+        // line is not blank
+        String nl=__lineSeparator;
+        
+        if (_logLabels && !_logOneLine && _buffer.size() > 0)
+            buf.append(nl);
+        
+        // Log indented message
+        String smsg=(msg==null)
+            ?"???"
+            :((msg instanceof String)?((String)msg):msg.toString());
+        
+        if (_logOneLine)
+        {
+            smsg=StringUtil.replace(smsg,"\015\012","<|");
+            smsg=StringUtil.replace(smsg,"\015","<");
+            smsg=StringUtil.replace(smsg,"\012","|");
+        }
+        else
+        {
+            smsg=StringUtil.replace(smsg,"\015\012","<|");
+            smsg=StringUtil.replace(smsg,"\015","<|");
+            smsg=StringUtil.replace(smsg,"\012","<|");
+            smsg=StringUtil.replace(smsg,"<|",nl);
+        }
+        buf.append(smsg);
+        
+        // Add stack frame to message
+        if (_logStackTrace && frame != null)
+        {
+            buf.append(nl);
+            buf.append(frame.getStack());
+        }
+        
+        log(buf.toString());
     }
     
     /* ------------------------------------------------------------ */
@@ -481,8 +463,7 @@ public class OutputStreamLogSink
             {
                 _buffer.writeTo(_out);
                 _buffer.resetWriter();
-                if (_flushOn)
-                    _out.flush();
+                _out.flush();
             }
         }
         catch(IOException e){e.printStackTrace();}

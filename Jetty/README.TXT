@@ -585,6 +585,12 @@ Jetty does not use any of the DOM classes, so these jars can be
 trimmed significantly if you want to reduce size.
 
 Use the org.xml.sax.parser property to specify an alternative SAX parser.
+For example, the jakarta watchdog tests need xerces and can be run with
+
+java -Djetty.class.path=$CLASSPATH \
+     -Dorg.xml.sax.parser=org.apache.xerces.parsers.SAXParser \
+     -jar start.jar \
+     etc/watchdog.xml 
 
 The DTDs used by jetty are resolved as resources from the system
 classpath, thus they are stored in org.mortbay.http/web.dtd and

@@ -19,18 +19,21 @@ public class TypeUtil
         Integer.getInteger("org.mortbay.util.TypeUtil.IntegerCacheSize",600).intValue();
     private static Integer[] integerCache = new Integer[intCacheSize];
     private static String[] integerStrCache = new String[intCacheSize];
-
+    private static Integer minusOne = new Integer(-1);
+    
     /* ------------------------------------------------------------ */
     /** Convert int to Integer using cache. 
      */
     public static Integer newInteger(int i)
     {
-        if (i<intCacheSize)
+        if (i>=0 && i<intCacheSize)
         {
             if (integerCache[i]==null)
                 integerCache[i]=new Integer(i);
             return integerCache[i];
         }
+        else if (i==-1)
+            return minusOne;
         return new Integer(i);
     }
 
@@ -40,12 +43,14 @@ public class TypeUtil
      */
     public static String toString(int i)
     {
-        if (i<intCacheSize)
+        if (i>=0 && i<intCacheSize)
         {
             if (integerStrCache[i]==null)
                 integerStrCache[i]=Integer.toString(i);
             return integerStrCache[i];
         }
+        else if (i==-1)
+            return "-1";
         return Integer.toString(i);
     }
 
@@ -126,4 +131,37 @@ public class TypeUtil
         return 0;
     }
 
+    /* ------------------------------------------------------------ */
+    public static String toHexString(byte[] b)
+    {   
+        StringBuffer buf = new StringBuffer();
+        for (int i=0;i<b.length;i++)
+        {
+            int bi=0xff&b[i];
+            int c='0'+(bi/16)%16;
+            if (c>'9')
+                c= 'A'+(c-'0'-10);
+            buf.append((char)c);
+            c='0'+bi%16;
+            if (c>'9')
+                c= 'a'+(c-'0'-10);
+            buf.append((char)c);
+        }
+        return buf.toString();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public static byte[] fromHexString(String s)
+    {   
+        if (s.length()%2!=0)
+            throw new IllegalArgumentException(s);
+        byte[] array = new byte[s.length()/2];
+        for (int i=0;i<array.length;i++)
+        {
+            int b = Integer.parseInt(s.substring(i*2,i*2+2),16);
+            array[i]=(byte)(0xff&b);
+        }    
+        return array;
+    }
+    
 }
