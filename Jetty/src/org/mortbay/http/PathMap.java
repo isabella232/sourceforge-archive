@@ -66,10 +66,6 @@ public class PathMap extends HashMap implements Externalizable
     /* ------------------------------------------------------------ */
     private static String __pathSpecSeparators =
         System.getProperty("org.mortbay.http.PathMap.separators",":,");
-
-    /* ------------------------------------------------------------ */
-    public static boolean __oldDefaultPath = 
-        Boolean.getBoolean("org.mortbay.http.PathMap.oldDefaultPath");
     
     /* ------------------------------------------------------------ */
     /** Set the path spec separator.
@@ -93,6 +89,7 @@ public class PathMap extends HashMap implements Externalizable
     Map.Entry _prefixDefault=null;
     Map.Entry _default=null;
     Set _entrySet;
+    boolean _nodefault=false;
     
     /* --------------------------------------------------------------- */
     /** Construct empty PathMap.
@@ -101,6 +98,16 @@ public class PathMap extends HashMap implements Externalizable
     {
         super(11);
         _entrySet=entrySet();
+    }
+
+    /* --------------------------------------------------------------- */
+    /** Construct empty PathMap.
+     */
+    public PathMap(boolean nodefault)
+    {
+        super(11);
+        _entrySet=entrySet();
+        _nodefault=nodefault;
     }
     
     /* --------------------------------------------------------------- */
@@ -177,9 +184,14 @@ public class PathMap extends HashMap implements Externalizable
                     _suffixMap.put(spec.substring(2),entry);
                 else if (spec.equals("/"))
                 {    
-                    _default=entry;
-                    _defaultSingletonList=
-                        SingletonList.newSingletonList(_default);
+                    if (_nodefault)
+                        _exactMap.put(spec,entry);
+                    else
+                    {
+                        _default=entry;
+                        _defaultSingletonList=
+                            SingletonList.newSingletonList(_default);
+                    }
                 }
                 else
                     _exactMap.put(spec,entry);
@@ -392,7 +404,7 @@ public class PathMap extends HashMap implements Externalizable
         if (c=='/')
         {
             if (pathSpec.length()==1)
-                return __oldDefaultPath?"":path;
+                return path;
         
             if (pathSpec.equals(path))
                 return path;
@@ -424,7 +436,7 @@ public class PathMap extends HashMap implements Externalizable
         if (c=='/')
         {
             if (pathSpec.length()==1)
-                return __oldDefaultPath?path:null;
+                return null;
             
             if (pathSpec.equals(path))
                 return null;

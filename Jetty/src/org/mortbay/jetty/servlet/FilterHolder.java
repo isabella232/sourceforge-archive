@@ -121,7 +121,7 @@ public class FilterHolder
     public void addPathSpec(String pathSpec)
     {
         if (_pathSpecs==null)
-            _pathSpecs=new PathMap();
+            _pathSpecs=new PathMap(true);
         _pathSpecs.put(pathSpec,TypeUtil.newInteger(0));
     }
     
