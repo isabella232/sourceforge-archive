@@ -84,6 +84,8 @@
             <Set name="MaxThreads">100</Set>
             <Set name="MaxIdleTimeMs">30000</Set>
             <Set name="LowResourcePersistTimeMs">5000</Set>
+            <Set name="ConfidentialPort">8443</Set>
+            <Set name="IntegralPort">8443</Set>
           </New>
          </Arg>
        </Call>
@@ -104,6 +106,11 @@
             <Set name="Keystore"><SystemProperty name="jboss.server.home.dir"/>/conf/demokeystore</Set>
             <Set name="Password">OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4</Set>
             <Set name="KeyPassword">OBF:1u2u1wml1z7s1z7a1wnl1u2g</Set>
+            <Set name="HttpHandler">
+              <New class="org.mortbay.http.handler.MsieSslHandler">
+	        <Set name="UserAgentSubString">MSIE 5</Set>
+	      </New>
+           </Set>
            </New>
          </Arg>
        </Call>
@@ -135,7 +142,6 @@
            <Set name="retainDays">90</Set>
            <Set name="append">true</Set>
            <Set name="extended">true</Set>
-           <Set name="buffered">false</Set>
            <Set name="LogTimeZone">GMT</Set>
          </New>
        </Set>
