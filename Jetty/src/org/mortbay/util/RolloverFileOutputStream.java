@@ -207,7 +207,21 @@ public class RolloverFileOutputStream extends FilterOutputStream
             }
         }
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public void write (byte[] buf)
+            throws IOException
+     {
+            out.write (buf);
+     }
+
+    /* ------------------------------------------------------------ */
+    public void write (byte[] buf, int off, int len)
+            throws IOException
+     {
+            out.write (buf, off, len);
+     }
+     
     /* ------------------------------------------------------------ */
     /** 
      */
