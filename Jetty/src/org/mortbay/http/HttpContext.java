@@ -708,8 +708,7 @@ public class HttpContext implements LifeCycle
      */
     public synchronized void addHandler(int i,HttpHandler handler)
     {
-        _handlers.add(i,handler);
-        handler.initialize(this);
+        addHttpHandler(i,handler);
     }
     
     /* ------------------------------------------------------------ */
@@ -718,7 +717,7 @@ public class HttpContext implements LifeCycle
      */
     public synchronized void addHandler(HttpHandler handler)
     {
-        addHandler(_handlers.size(),handler);
+        addHttpHandler(_handlers.size(),handler);
     }
 
 
@@ -730,7 +729,12 @@ public class HttpContext implements LifeCycle
     public synchronized void addHttpHandler(int i,HttpHandler handler)
     {
         _handlers.add(i,handler);
-        handler.initialize(this);
+
+        HttpContext context = handler.getHttpContext();
+        if (context==null)
+            handler.initialize(this);
+        else if (context!=this)
+            throw new IllegalArgumentException("Handler already initialized in another HttpContext");
     }
     
     /* ------------------------------------------------------------ */
@@ -739,7 +743,7 @@ public class HttpContext implements LifeCycle
      */
     public synchronized void addHttpHandler(HttpHandler handler)
     {
-        addHandler(_handlers.size(),handler);
+        addHttpHandler(_handlers.size(),handler);
     }
     
     /* ------------------------------------------------------------ */

@@ -102,13 +102,15 @@ public class WebApplicationContext extends ServletHttpContext
      * for specific tag types (eg ejb-ref).
      * @param httpServer The HttpServer for this context
      * @param contextPathSpec The context path spec. Which must be of
-     * the form / or /path/*
+     * the form / or /path/* 
+     * @deprecated                      
      */
-    public WebApplicationContext(HttpServer httpServer,
+    protected WebApplicationContext(HttpServer httpServer,
                                  String contextPathSpec)
     {
         super(httpServer,contextPathSpec);
         _xmlParser= new XmlParser();
+        Code.warning("DEPRECATED CONSTRUCTOR");
     }
 
     /* ------------------------------------------------------------ */
