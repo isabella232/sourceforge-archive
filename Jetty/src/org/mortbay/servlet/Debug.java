@@ -22,6 +22,7 @@ import org.mortbay.html.Table;
 import org.mortbay.html.TableForm;
 import org.mortbay.util.Code;
 import org.mortbay.util.LifeCycle;
+import org.mortbay.util.Loader;
 import org.mortbay.util.Log;
 import org.mortbay.util.LogSink;
 import org.mortbay.util.OutputStreamLogSink;
@@ -31,8 +32,7 @@ import org.mortbay.util.StringUtil;
 /* ------------------------------------------------------------ */
 // Don't  write servlets like this one :-)
 public class Debug extends HttpServlet
-{
-    
+{    
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) 
@@ -179,7 +179,7 @@ public class Debug extends HttpServlet
             try
             {
                 Class logSinkClass =
-                    Class.forName(request.getParameter("LSC"));
+                    Loader.loadClass(this.getClass(),request.getParameter("LSC"));
                 LogSink logSink = (LogSink)logSinkClass.newInstance();
                 log.add(logSink);
             }

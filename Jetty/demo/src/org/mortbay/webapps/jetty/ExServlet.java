@@ -6,6 +6,7 @@
 package org.mortbay.webapps.jetty;
 import org.mortbay.http.HttpException;
 import org.mortbay.util.Code;
+import org.mortbay.util.Loader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Enumeration;
@@ -29,7 +30,8 @@ public class ExServlet extends HttpServlet
         String info=sreq.getPathInfo();
         try
         {
-            throw (Throwable)(Class.forName(info.substring(1)).newInstance());
+            throw (Throwable)(Loader.loadClass(this.getClass(),
+                                               info.substring(1)).newInstance());
         }
         catch(Throwable th)
         {

@@ -1,6 +1,7 @@
 package org.mortbay.http;
 
 import org.mortbay.util.Code;
+import org.mortbay.util.Loader;
 import org.mortbay.util.Resource;
 import org.mortbay.http.HashUserRealm;
 
@@ -82,7 +83,7 @@ public class JDBCUserRealm extends HashUserRealm
     {
         super(name);
         loadConfig(config);
-        Class.forName(_jdbcDriver);
+        Loader.loadClass(this.getClass(),_jdbcDriver);
         connectDatabase();
     }
     

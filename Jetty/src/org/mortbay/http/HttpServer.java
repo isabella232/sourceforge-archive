@@ -28,6 +28,7 @@ import org.mortbay.http.handler.NotFoundHandler;
 import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LifeCycle;
+import org.mortbay.util.Loader;
 import org.mortbay.util.Log;
 import org.mortbay.util.LogSink;
 import org.mortbay.util.MultiException;
@@ -323,7 +324,7 @@ public class HttpServer implements LifeCycle
         {
             if (listenerClass==null || listenerClass.length()==0)
                 listenerClass="org.mortbay.http.SocketListener";
-            Class lc = Class.forName(listenerClass);
+            Class lc = Loader.loadClass(this.getClass(),listenerClass);
             HttpListener listener = (HttpListener) lc.newInstance();
             listener.setHttpServer(this);        
             _listeners.put(listener,listener);

@@ -238,7 +238,7 @@ public class KeyPairTool
 	
         // Dynamically register the Bouncy Castle provider for RSA
 	// support.
-	Class providerClass = Class.forName(providerClassName);
+	Class providerClass = Loader.loadClass(this.getClass(),providerClassName);
 	Provider provider = (Provider)providerClass.newInstance();
 	Security.insertProviderAt(provider, 1);
 	try {

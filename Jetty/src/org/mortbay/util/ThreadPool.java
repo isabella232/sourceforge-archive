@@ -71,7 +71,7 @@ public class ThreadPool
         try
         {
             if (__threadClass!=null)
-                _threadClass = Class.forName( __threadClass );
+                _threadClass = Loader.loadClass(this.getClass(), __threadClass );
             else
                 _threadClass = PoolThread.class;
             Code.debug("Using thread class '", _threadClass.getName(),"'");

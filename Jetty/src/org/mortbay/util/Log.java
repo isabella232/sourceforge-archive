@@ -93,7 +93,7 @@ public class Log
                     	
                 try
                 {
-                    Class sinkClass = Class.forName(sinkClassName);
+                    Class sinkClass = Loader.loadClass(this.getClass(),sinkClassName);
                     if (org.mortbay.util.LogSink.class.isAssignableFrom(sinkClass)) {
                         sink = (LogSink)sinkClass.newInstance();
                         sink.setOptions(_logOptions);
@@ -130,7 +130,7 @@ public class Log
         {
             if (logSinkClass==null || logSinkClass.length()==0)
                 logSinkClass="org.mortbay.util.OutputStreamLogSink";
-            Class sinkClass =  Class.forName(logSinkClass);
+            Class sinkClass =  Loader.loadClass(this.getClass(),logSinkClass);
             LogSink sink=(LogSink)sinkClass.newInstance();
             add(sink);
         }

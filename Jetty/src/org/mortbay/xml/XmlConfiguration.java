@@ -22,6 +22,7 @@ import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.Primitive;
 import org.mortbay.util.Resource;
+import org.mortbay.util.Loader;
 import org.xml.sax.SAXException;
 import org.xml.sax.InputSource;
 
@@ -193,7 +194,8 @@ public class XmlConfiguration
         String className=node.getAttribute("class");
         if (className==null)
             return null;
-        return Class.forName(className);
+        
+        return Loader.loadClass(XmlConfiguration.class,className);
     }
     
     /* ------------------------------------------------------------ */
@@ -600,7 +602,7 @@ public class XmlConfiguration
                 else if ("InetAddrPort".equals(type))
                     aClass=org.mortbay.util.InetAddrPort.class;
                 else
-                    aClass=Class.forName(type);
+                    aClass=Loader.loadClass(XmlConfiguration.class,type);
             }
         }
 

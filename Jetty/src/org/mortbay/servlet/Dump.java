@@ -31,6 +31,7 @@ import org.mortbay.html.Table;
 import org.mortbay.html.TableForm;
 import org.mortbay.http.HttpException;
 import org.mortbay.util.Code;
+import org.mortbay.util.Loader;
 
 /* ------------------------------------------------------------ */
 /** Dump Servlet Request.
@@ -71,7 +72,8 @@ public class Dump extends HttpServlet
         {
             try
             {
-                throw (Throwable)(Class.forName(info.substring(1)).newInstance());
+                throw (Throwable)(Loader.loadClass(this.getClass(),
+                                                   info.substring(1)).newInstance());
             }
             catch(Throwable th)
             {
