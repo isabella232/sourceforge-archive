@@ -29,7 +29,14 @@ public class MultiException extends Exception
     /* ------------------------------------------------------------ */
     public void add(Exception e)
     {
-        nested=LazyList.add(nested,e);
+        if (e instanceof MultiException)
+        {
+            MultiException me = (MultiException)e;
+            for (int i=0;i<LazyList.size(me.nested);i++)
+                nested=LazyList.add(nested,LazyList.get(me.nested,i));
+        }
+        else
+            nested=LazyList.add(nested,e);
     }
 
     /* ------------------------------------------------------------ */

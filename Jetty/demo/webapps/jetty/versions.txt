@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Fixed getLocale again
  + Patch jasper to 20011229101000
  + Removed limits on mark in LineInput.
  + Corrected name to HTTP_REFERER in CGI Servlet.

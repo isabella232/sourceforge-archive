@@ -190,9 +190,8 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public Locale getLocale()
     {
-        Enumeration enum =
-            _httpRequest.getHeader().getValues(HttpFields.__AcceptLanguage,
-                                               HttpFields.__separators);
+        Enumeration enum = _httpRequest.getFieldValues(HttpFields.__AcceptLanguage,
+                                                       HttpFields.__separators);
 
         // handle no locale
         if (enum == null || !enum.hasMoreElements())
@@ -227,9 +226,8 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public Enumeration getLocales()
     {
-        Enumeration enum =
-            _httpRequest.getHeader().getValues(HttpFields.__AcceptLanguage,
-                                               HttpFields.__separators);
+        Enumeration enum = _httpRequest.getFieldValues(HttpFields.__AcceptLanguage,
+                                                       HttpFields.__separators);
 
         // handle no locale
         if (enum == null || !enum.hasMoreElements())
@@ -285,7 +283,10 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public Cookie[] getCookies()
     {
-        return _httpRequest.getCookies();
+        Cookie[] cookies = _httpRequest.getCookies();
+        if (cookies.length==0)
+            return null;
+        return cookies;
     }
     
     /* ------------------------------------------------------------ */
@@ -583,8 +584,12 @@ public class ServletHttpRequest
     
     /* -------------------------------------------------------------- */
     public void setCharacterEncoding(String encoding)
+        throws UnsupportedEncodingException
     {
         _httpRequest.setCharacterEncoding(encoding);
+        if (_inputState!=0)
+            throw new IllegalStateException("getReader() or getInputStream() called");
+        _reader=new BufferedReader(new InputStreamReader(getInputStream(),encoding));
     }
     
     /* -------------------------------------------------------------- */
@@ -613,6 +618,7 @@ public class ServletHttpRequest
         if (_in==null)
             _in = new ServletIn(_httpRequest.getInputStream());  
         _inputState=1;
+        _reader=null;
         return _in;
     }
     
@@ -699,8 +705,8 @@ public class ServletHttpRequest
                 Code.warning(e);
                 _reader=new BufferedReader(new InputStreamReader(getInputStream()));
             }
-            _inputState=2;
         }
+        _inputState=2;
         return _reader;
     }
     

@@ -154,8 +154,13 @@ public class ContextLoader extends URLClassLoader
         if (_fileClassPathWarning)
         {
             _fileClassPathWarning=false;
-            Code.warning("File Classpath incomplete "+ _fileClassPath);
-            Code.warning("URL Classpath "+ _urlClassPath);            
+            if (_fileClassPath==null)
+                Code.warning("No File Classpath from URL path \""+
+                             _urlClassPath+"\"");
+            else
+                Code.warning("File Classpath \""+ _fileClassPath+
+                             "\" incomplete from URL path \""+
+                             _urlClassPath+"\"");
         }
         
         return _fileClassPath;

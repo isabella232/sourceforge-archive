@@ -25,6 +25,7 @@ import org.mortbay.http.HttpResponse;
 import org.mortbay.http.handler.NullHandler;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URI;
+import org.mortbay.util.Code;
 
 /* ------------------------------------------------------------ */
 /** Servlet Response Wrapper.
@@ -187,7 +188,6 @@ public class ServletHttpResponse implements HttpServletResponse
         ChunkableOutputStream out = _httpResponse.getOutputStream();
         if (out.isWritten())
             throw new IllegalStateException("Output written");
-        
         out.setBufferCapacity(size);
     }
     
@@ -241,8 +241,7 @@ public class ServletHttpResponse implements HttpServletResponse
             return; 
 
         _locale = locale;
-        String lang = locale.getLanguage();
-        setHeader(HttpFields.__ContentLanguage, lang);
+        setHeader(HttpFields.__ContentLanguage,locale.toString().replace('_','-'));
                           
         /* get current MIME type from Content-Type header */                  
         String type=_httpResponse.getField(HttpFields.__ContentType);
@@ -265,6 +264,7 @@ public class ServletHttpResponse implements HttpServletResponse
             */
         {
             /* pick up encoding from map based on languge code */
+            String lang = locale.getLanguage();
             String charset = (String)__charSetMap.get(lang);
             if (charset != null)
             {

@@ -1003,7 +1003,7 @@ public class Code
     }
 
     /* ------------------------------------------------------------ */
-    private static void expandThrowable(Throwable ex)
+    private synchronized static void expandThrowable(Throwable ex)
     {
         ex.printStackTrace(__out);
 
@@ -1014,8 +1014,8 @@ public class Code
             for (int i=0;i<mx.size();i++)
             {
                 __out.println("getException("+i+"):");
-                ex=mx.getException(i);
-                expandThrowable(ex);
+                Throwable ex2=mx.getException(i);
+                expandThrowable(ex2);
             }
         }
         else
@@ -1026,10 +1026,12 @@ public class Code
                 {
                     Method getTargetException =
                         ex.getClass().getMethod(__nestedEx[i],__noArgs);
-                    ex=(Throwable)
-                        getTargetException.invoke(ex,null);
-                    __out.println(__nestedEx[i]+"():");
-                    expandThrowable(ex);
+                    Throwable ex2=(Throwable)getTargetException.invoke(ex,null);
+                    if (ex2!=null)
+                    {
+                        __out.println(__nestedEx[i]+"():");
+                        expandThrowable(ex2);
+                    }
                 }
                 catch(Exception ignore){}
             }

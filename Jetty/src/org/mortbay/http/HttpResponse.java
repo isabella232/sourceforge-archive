@@ -444,7 +444,7 @@ public class HttpResponse extends HttpMessage
                                       exception.getClass());
             getRequest().setAttribute("javax.servlet.error.exception",
                                       exception);
-            sendError(code,exception.getClass().getName(),exception.toString());
+            sendError(code,exception.getClass().getName(),exception.getMessage());
         }
     }
     

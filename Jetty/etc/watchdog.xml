@@ -68,11 +68,13 @@ Instructions for running Watchdog on Linux
     <Arg>etc/webdefault.xml/</Arg>
   </Call>
 
+  <!--
   <Call name="addWebApplication">
     <Arg>/jsp-tests/*</Arg>
     <Arg>webapps/jsp-tests.war</Arg>
     <Arg>etc/webdefault.xml/</Arg>
   </Call>
+  -->
 
   <Set name="RequestLogSink">
     <New class="org.mortbay.util.OutputStreamLogSink">
