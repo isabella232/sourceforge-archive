@@ -99,9 +99,13 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     
     /* ------------------------------------------------------------ */
     /** Start all handlers then listeners.
+     * If a subcomponent fails to start, it's exception is added to a
+     * org.mortbay.util.MultiException and the start method continues.
+     * @exception MultiException A collection of exceptions thrown by
+     * start() method of subcomponents of the HttpServer. 
      */
     public synchronized void start()
-        throws Exception
+        throws MultiException
     {
         Log.event("start HttpServer version "+Version.__VersionImpl);
 
@@ -134,7 +138,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
                 try{listener.start();}catch(Exception e){mex.add(e);}
         }
 
-        mex.ifExceptionThrow();
+        mex.ifExceptionThrowMulti();
     }
     
     /* ------------------------------------------------------------ */

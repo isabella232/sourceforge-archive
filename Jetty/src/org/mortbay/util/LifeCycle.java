@@ -31,6 +31,7 @@ public interface LifeCycle
 {
     /* ------------------------------------------------------------ */
     /** Start the LifeCycle.
+     * @exception Exception An arbitrary exception may be thrown.
      */
     public void start()
         throws Exception;

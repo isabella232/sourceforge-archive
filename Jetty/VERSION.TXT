@@ -1,6 +1,7 @@
 Jetty3 Versions
 --------------
 
+ + Improved some documentation.
  + Fix ServletResponse.setLocale()
  + Fix reuse of Resource
  + Fix Jetty.bat for spaces.

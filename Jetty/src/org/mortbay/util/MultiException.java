@@ -13,6 +13,8 @@ import java.util.List;
 /* ------------------------------------------------------------ */
 /** Wraps multiple exceptions.
  *
+ * Allows multiple exceptions to be thrown as a single exception.
+ *
  * @version 1.0 Thu Mar 29 2001
  * @author Greg Wilkins (gregw)
  */
@@ -74,6 +76,19 @@ public class MultiException extends Exception
                 throw (Exception)nested.get(0);
             throw this;
         }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Throw a multiexception.
+     * If this multi exception is empty then no action is taken. If it
+     * contains a any exceptions then this
+     * multi exception is thrown. 
+     */
+    public void ifExceptionThrowMulti()
+        throws MultiException
+    {
+        if (nested!=null)
+            throw this;
     }
     
 }
