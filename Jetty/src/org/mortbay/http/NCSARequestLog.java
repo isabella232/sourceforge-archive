@@ -14,7 +14,7 @@ import org.mortbay.util.StringUtil;
 import java.io.IOException;
 import java.io.BufferedOutputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Locale;
 
 
@@ -288,27 +288,8 @@ public class NCSARequestLog implements RequestLog
                     _buf.write(" - ");
                 
                 if (_extended)
-                {
-                    String referer = request.getField(HttpFields.__Referer);
-                    if(referer==null)
-                        _buf.write("\"-\" ");
-                    else
-                    {
-                        _buf.write('"');
-                        _buf.write(referer);
-                        _buf.write("\" ");
-                    }
-                    
-                    String agent = request.getField(HttpFields.__UserAgent);
-                    if(agent==null)
-                    _buf.write("\"-\"");
-                    else
-                    {
-                        _buf.write('"');
-                        _buf.write(agent);
-                        _buf.write('"');
-                    }
-                }
+                    logExtended(request,response,_buf);
+               
                 _buf.write(StringUtil.__LINE_SEPARATOR);
                 _buf.flush();
                 _buf.writeTo(_out);
@@ -318,6 +299,45 @@ public class NCSARequestLog implements RequestLog
         catch(IOException e)
         {
             Code.warning(e);
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Log Extended fields.
+     * This method can be extended by a derived class to add extened fields to
+     * each log entry.  It is called by the log method after all standard
+     * fields have been added, but before the line terminator.
+     * Derived implementations should write extra fields to the Writer
+     * provided.
+     * The default implementation writes the referer and user agent.
+     * @param request The request to log.
+     * @param response The response to log.
+     * @param log The writer to write the extra fields to.
+     * @exception IOException Problem writing log
+     */
+    protected void logExtended(HttpRequest request,
+                               HttpResponse response,
+                               Writer log)
+        throws IOException
+    {
+        String referer = request.getField(HttpFields.__Referer);
+        if(referer==null)
+            log.write("\"-\" ");
+        else
+        {
+            log.write('"');
+            log.write(referer);
+            log.write("\" ");
+        }
+        
+        String agent = request.getField(HttpFields.__UserAgent);
+        if(agent==null)
+            log.write("\"-\"");
+        else
+        {
+            log.write('"');
+            log.write(agent);
+            log.write('"');
         }
     }
 }
