@@ -1,15 +1,12 @@
 package org.mortbay.http;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.InBuffer;
 import org.mortbay.io.Portable;
-import org.mortbay.io.stream.InputStreamBuffer;
 
 /* ------------------------------------------------------------------------------- */
 /** 
@@ -114,6 +111,7 @@ public class HttpParser
         return "state=" + state + " length=" + length + " buf=" + buf.hashCode();
     }
 
+
     /* ------------------------------------------------------------------------------- */
     /** Parse until END state.
      * @param handler
@@ -135,11 +133,18 @@ public class HttpParser
      * 
      */
     public void parseNext() 
-    throws IOException
+        throws IOException
     {
         if (state == STATE_END)
-            state= STATE_START;
+            Portable.throwIllegalState("STATE_END");
 
+        if (state == STATE_CONTENT && contentPosition==contentLength)
+        {
+            state= STATE_END;
+            messageComplete(contentPosition);
+            return;
+        }
+        
         if (source.length() == 0)
         {
             if (source.markIndex()==0 && source.putIndex()==source.capacity())
@@ -147,7 +152,7 @@ public class HttpParser
             int filled=-1;
             if (inSource!=null)
                 filled= ((InBuffer)source).fill();
-            if (filled < 0 && state == STATE_EOF_CONTENT)
+            if (filled<0 && state == STATE_EOF_CONTENT)
             {
                 state= STATE_END;
                 messageComplete(contentPosition);
@@ -484,6 +489,15 @@ public class HttpParser
                     return;
             }
         }
+    }
+    
+    /* ------------------------------------------------------------------------------- */
+    public void reset()
+    {
+        state=STATE_START;
+        contentLength=0;
+        contentPosition=0;
+        length=0;
     }
 
     /**

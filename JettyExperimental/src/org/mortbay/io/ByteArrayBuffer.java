@@ -79,7 +79,7 @@ public class ByteArrayBuffer extends AbstractBuffer
             byte[] bytes= new byte[putIndex() - getIndex()];
             Portable.arraycopy(array(), getIndex(), bytes, 0, bytes.length);
             ByteArrayBuffer view=
-                new ByteArrayBuffer(array(), getIndex(), length(), READONLY);
+                new ByteArrayBuffer(bytes, 0, length(), READONLY);
             return view;
         }
         else
@@ -105,8 +105,9 @@ public class ByteArrayBuffer extends AbstractBuffer
                 putIndex() - markIndex());
 
         ByteArrayBuffer view=
-            new ByteArrayBuffer(array(), getIndex(), length(), !READONLY);
+            new ByteArrayBuffer(bytes, getIndex(), length(), !READONLY);
         view.setMarkIndex(markIndex());
+        
         return view;
     }
     

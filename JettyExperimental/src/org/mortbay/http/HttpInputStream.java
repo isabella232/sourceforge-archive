@@ -2,14 +2,9 @@ package org.mortbay.http;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.io.BufferUtil;
-import org.mortbay.io.InBuffer;
 import org.mortbay.io.Portable;
-import org.mortbay.io.stream.InputStreamBuffer;
 
 /**
  * An input stream that can process a HTTP stream, extracting
@@ -20,17 +15,21 @@ public class HttpInputStream extends InputStream
 
     public HttpInputStream(Buffer buffer)
     {
-        _buffer= buffer;
-        _parser= new Parser(_buffer);
+        _in = new HttpInput(buffer);
     }
 
+    public Buffer getBuffer()
+    {
+        return _in.getBuffer();
+    }
+    
     /* 
      * @see java.io.InputStream#available()
      */
     public int available() throws IOException
     {
-        if (_parser.inContentState() && _parser._content!=null)
-            return _parser._content.length();
+        if (_content!=null)
+            return _content.length();
         return -1;
     }
 
@@ -39,16 +38,8 @@ public class HttpInputStream extends InputStream
      */
     public void close() throws IOException
     {
-        // Either close real stream or consume all the content.
-        if (_parser.getContentLength()==HttpParser.EOF_CONTENT &&
-            _buffer instanceof InBuffer)
-            ((InBuffer)_buffer).close();
-        else
-            while (_parser.inContentState())
-                _parser.parseNext();
-
-        _parser._content=null;
-        _parser.setState(HttpParser.STATE_END);
+        _content=null;
+        _in.close();
     }
 
     /*
@@ -56,19 +47,10 @@ public class HttpInputStream extends InputStream
      */
     public int read() throws IOException
     {
-        if (_parser.inContentState())
-        {
-            // Do we need to fill the buffer?
-            if (_parser._content==null || !_parser._content.hasContent())
-            {
-                _parser._content=null;
-                _parser.parseNext();
-            }
-            
-            if (_parser._content!=null && _parser._content.length()>=1)
-                return _parser._content.get();
-        } 
-        return -1;
+        if (!getContent())
+            return -1;
+           
+        return _content.get();
     }
 
     /* 
@@ -76,19 +58,10 @@ public class HttpInputStream extends InputStream
      */
     public int read(byte[] b) throws IOException
     {
-        if (_parser.inContentState())
-        {
-            // Do we need to fill the buffer?
-            if (_parser._content==null || !_parser._content.hasContent())
-            {
-                _parser._content=null;
-                _parser.parseNext();
-            }
-            
-            if (_parser._content!=null)
-                return _parser._content.get(b, 0, b.length);
-        }
-        return -1;
+        if (!getContent())
+            return -1;
+           
+        return _content.get(b,0,b.length);
     }
 
     /* 
@@ -96,38 +69,11 @@ public class HttpInputStream extends InputStream
      */
     public int read(byte[] b, int off, int len) throws IOException
     {
-        if (_parser.inContentState())
-        {
-            // Do we need to fill the buffer?
-            if (_parser._content==null || !_parser._content.hasContent())
-            {
-                _parser._content=null;
-                _parser.parseNext();
-            }
-            
-            if (_parser._content!=null)
-                return _parser._content.get(b, off, len);
-        }
-        return -1;
-    }
-    
-    public HttpHeader readHeader()
-        throws IOException
-    {
-        if (_parser.inContentState())
-            Portable.throwIllegalState("in context");
-            
-        _parser._header.clear();
-        if (_parser.getState()==HttpParser.STATE_END)
-            _parser.parseNext();
-            
-        if (_parser.inHeaderState())
-        {
-            while(_parser.inHeaderState())
-                _parser.parseNext();
-            return _parser._header;
-        }
-        return null;
+        if (!getContent())
+            return -1;
+           
+        return _content.get(b,off,len);
+        
     }
 
     /* 
@@ -135,98 +81,68 @@ public class HttpInputStream extends InputStream
      */
     public long skip(long n) throws IOException
     {
-        if (_parser.inContentState())
-        {
-            // Do we need to fill the buffer?
-            if (_parser._content==null || !_parser._content.hasContent())
-            {
-                _parser._content=null;
-                _parser.parseNext();
-            }
-            
-            if (_parser._content!=null)
-                return _parser._content.skip((int)n);
-        }
-        return -1;
+        if (!getContent())
+            return -1;
+           
+        return _content.skip((int)n);
     }
     
-    private Buffer _buffer;
-    private Parser _parser;
-
-    private static class Parser extends HttpParser
-    {
-        private Parser(Buffer source)
+    public HttpHeader readHeader()
+        throws IOException
+    {   
+        while (_in.getHeader()==null)
         {
-            super(source);
-            _header=new HttpHeader();
-        }
-        
-        public void foundContent(int index, Buffer content)
-        {
-            _content=content;
-        }
-
-        public void foundField0(Buffer field)
-        {
-            _header.clear();
-            // assume this is a request
-            _request=true;
-            Buffer method=HttpMethods.CACHE.get(field);
-            if (method==null)
+            switch(_in.parseNext())
             {
-                // maybe this is a response?
-                Buffer version = HttpVersions.CACHE.lookup(field);
-                if (version!=null)
-                {
-                    _request=false;
-                    _header.setVersion(version);
-                }
-                else
-                    method= HttpMethods.CACHE.lookup(field);
+                case HttpInput.NOP: 
+                    continue;
+                case HttpInput.HEADER:
+                    break;
+                case HttpInput.EOF:
+                    return null;
+                case HttpInput.CONTENT:
+                    Portable.throwIllegalState("In Content");
             }
+            break;
+        }
             
-            if (method!=null)
-                _header.setMethod(method);
-            _headerName=null;
-        }
-
-        public void foundField1(Buffer field)
-        {
-            if (_request)
-                _header.setURI(field);
-            else
-                _header.setStatus(BufferUtil.toInt(field));
-        }
-
-        public void foundField2(Buffer field)
-        {
-            if (_request)
-                _header.setVersion(HttpVersions.CACHE.lookup(field));
-            else
-                _header.setReason(field);
-        }
-
-        public void foundHttpHeader(Buffer header)
-        {
-            _headerName=header;
-        }
-
-        public void foundHttpValue(Buffer value)
-        {
-            _header.add(_headerName,value);
-        }
-
-        public void headerComplete()
-        {
-        }
-
-        public void messageComplete(int contextLength)
-        {
-        }
-        
-        Buffer _content;
-        HttpHeader _header;
-        Buffer _headerName;
-        boolean _request;
+        return _in.getHeader();
     }
+    
+    public void resetStream()
+    {
+        _in.reset();
+        _content=null;
+    }
+    
+    private boolean getContent()
+        throws IOException
+    {
+        if (_content!=null && _content.length()>0)
+            return true;
+            
+        while(true)
+        {
+            switch(_in.parseNext())
+            {
+                case HttpInput.NOP: 
+                    continue;
+                case HttpInput.HEADER:
+                case HttpInput.EOF:
+                    return false;
+                case HttpInput.CONTENT:
+                    _content=_in.getContent();
+                    if (_content!=null && _content.length()==0)
+                        continue;
+            }
+            break;
+        }
+        return _content!=null;
+    }
+    
+    
+    Buffer _content;
+    private HttpInput _in;
+    
+
 }
