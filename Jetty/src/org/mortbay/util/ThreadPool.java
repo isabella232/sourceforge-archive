@@ -471,6 +471,7 @@ public class ThreadPool
          */
         public void run() 
         {
+	    Object job=null;
             while (_pool!=null && _pool.isStarted())
             {
                 try
@@ -478,13 +479,19 @@ public class ThreadPool
                     synchronized(this)
                     {
                         // Wait for a job.
-                        if (_pool!=null && _pool.isStarted() && _job==null)
+                        if (job==null && _pool!=null && _pool.isStarted() && _job==null)
                             wait(_pool.getMaxIdleTimeMs());
+
+			if (_job!=null)
+			{
+			    job=_job;
+			    _job=null;
+			}
                     }
                     
                     // handle
-                    if (_job!=null)
-                        _threadPool.handle(_job);
+                    if (job!=null)
+                        _threadPool.handle(job);
                 }
                 catch (InterruptedException e)
                 {
@@ -494,8 +501,8 @@ public class ThreadPool
                 {
                     synchronized(this)
                     {
-                        boolean got=_job!=null;
-                        _job=null;
+                        boolean got=job!=null;
+                        job=null;
                         _threadPool=null;
                         try
                         {
