@@ -370,7 +370,7 @@ public class PropertyTreeEditor
 	context.page.unnest();
 	
 	context.page.title("Property Tree Editor");
-	context.page.add("<TABLE><TR><TD><H1>Property Tree&nbsp;@&nbsp;");
+	context.page.add("<TABLE><TR><TD COLSPAN=3><H1>Property Tree&nbsp;@&nbsp;");
 	
 	try
 	{
@@ -379,7 +379,7 @@ public class PropertyTreeEditor
 	}
 	catch (Exception e)
 	{
-	    Code.warning("Matt will fix this",e);
+	    Code.warning(e);
 	    throw new ServletException(e.toString());
 	}
 	if (context.page != null)
