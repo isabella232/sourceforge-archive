@@ -1620,11 +1620,16 @@ public class HttpContext implements LifeCycle,
         }
         
         String pathParams=null;
-        int semi = pathInContext.indexOf(';');
+        int semi = pathInContext.lastIndexOf(';');
         if (semi>=0)
         {
-            pathParams=pathInContext.substring(semi+1);
-            pathInContext=pathInContext.substring(0,semi);
+            int pl = pathInContext.length()-semi;
+            String ep=request.getEncodedPath();
+            if(';'==ep.charAt(ep.length()-pl))
+            {
+                pathParams=pathInContext.substring(semi+1);
+                pathInContext=pathInContext.substring(0,semi);
+            }
         }
 
         try
