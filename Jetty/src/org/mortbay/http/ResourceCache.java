@@ -53,7 +53,7 @@ public class ResourceCache implements LifeCycle,
         while(i.hasMoreElements())
         {
             String ext = (String)i.nextElement();
-            __dftMimeMap.put(ext,mime.getString(ext));
+            __dftMimeMap.put(StringUtil.asciiToLowerCase(ext),mime.getString(ext));
         }
         ResourceBundle encoding = ResourceBundle.getBundle("org/mortbay/http/encoding");
         i = encoding.getKeys();
@@ -356,7 +356,7 @@ public class ResourceCache implements LifeCycle,
     {
         if (_mimeMap==null)
             _mimeMap=new HashMap();
-        _mimeMap.put(extension,type);
+        _mimeMap.put(StringUtil.asciiToLowerCase(extension),type);
     }
 
 
