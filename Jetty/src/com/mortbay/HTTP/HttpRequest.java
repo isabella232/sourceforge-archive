@@ -27,10 +27,6 @@ public class HttpRequest extends HttpMessage
         CONNECT="CONNECT",
         MOVE="MOVE";
 
-    /* ------------------------------------------------------------ */
-    public static final byte[] __Continue=
-        "HTTP/1.1 100 Continue\015\012\015\012".getBytes();
-    public static final String __ExpectContinue="100-continue";
 
     /* ------------------------------------------------------------ */
     private String _method=null;
@@ -38,12 +34,27 @@ public class HttpRequest extends HttpMessage
     private String _host;
     private int _port;
     
-    /* -------------------------------------------------------------- */
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     */
     public HttpRequest()
     {}
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param connection 
+     */
+    public HttpRequest(Connection connection)
+    {
+        super(connection);
+    }
 
-    /* -------------------------------------------------------------- */
-    public synchronized void read(ChunkableInputStream in)
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param in 
+     * @exception IOException 
+     */
+    public synchronized void readHeader(ChunkableInputStream in)
         throws IOException
     {
         _state=__MSG_BAD;
@@ -62,60 +73,11 @@ public class HttpRequest extends HttpMessage
 
         // Handle version
         if (__HTTP_1_1.equals(_version))
-        {
-            // HTTP 1.1 Handling
             _version=__HTTP_1_1;
-
-            // Handle Expectations
-            String expect=_header.get(HttpFields.__Expect);
-            if (expect!=null && expect.length()>0)
-            {
-                if (StringUtil.asciiToLowerCase(expect)
-                    .equals(__ExpectContinue))
-                {
-                    // XXX
-                    // send continue
-                    // out.write(Continue);
-                    // out.flush();
-                    Code.notImplemented();
-                }
-                else
-                    throw new HttpException(417);
-            }
-
-            // Handle host
-            String host=_header.get(HttpFields.__Host);
-            if (host==null || host.length()==0)
-                throw new HttpException(HttpResponse.__400_Bad_Request);
-        
-            // XXX handle difference to _uri.getHost()
-
-            // Handle input encodings
-            // XXX need to be better than this.... gzip content encoding etc.
-            // XXX case insensitive?
-            if (HttpFields.__Chunked.equals(_header.get(HttpFields.__TransferEncoding)))
-            {
-                _header.remove(HttpFields.__ContentLength);
-                in.setChunking(true);
-            }
-            else 
-            {
-                int content_length=
-                    _header.getIntField(HttpFields.__ContentLength);
-                if (content_length>=0)
-                    in.setContentLength(content_length);
-            }
-        }
-        else
-        {
-            // HTTP 1.0 Handling
+        else if (__HTTP_1_0.equals(_version))
             _version=__HTTP_1_0;
-            
-            // Handle content length
-            int content_length=_header.getIntField(HttpFields.__ContentLength);
-            if (content_length>=0)
-                in.setContentLength(content_length);
-        }
+        else if (__HTTP_0_9.equals(_version))
+            _version=__HTTP_0_9;
         
         _state=__MSG_RECEIVED;
     }
@@ -124,7 +86,7 @@ public class HttpRequest extends HttpMessage
     /* -------------------------------------------------------------- */
     /** Return the HTTP request line as it was received
      */
-    public  String getRequestLine()
+    public String getRequestLine()
     {
         return _method+" "+_uri+" "+_version;
     }

@@ -9,17 +9,20 @@ import java.io.IOException;
 
 public class HttpException extends IOException
 {
-    int _code;
+    private int _code;
 
+    public int getCode()
+    {
+        return _code;
+    }
+    
     public HttpException()
     {
-        super("Unknown");
-        _code=400;
+        _code=HttpResponse.__400_Bad_Request ;
     }
     
     public HttpException(int code)
     {
-        super("Unknown");
         _code=code;
     }
     

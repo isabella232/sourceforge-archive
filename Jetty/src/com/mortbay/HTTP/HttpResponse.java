@@ -12,6 +12,13 @@ import java.util.*;
 import java.lang.reflect.*;
 
 
+/* ------------------------------------------------------------ */
+/** 
+ *
+ * @see
+ * @version 1.0 Tue Oct  5 1999
+ * @author Greg Wilkins (gregw)
+ */
 public class HttpResponse extends HttpMessage 
 { 
       public final static int
@@ -88,24 +95,27 @@ public class HttpResponse extends HttpMessage
         }
     }
     
-    /* -------------------------------------------------------------- */
-    private int _status;
-    private String _reason;
+    /* ------------------------------------------------------------ */
+    public static final byte[] __Continue=
+        "HTTP/1.1 100 Continue\015\012\015\012".getBytes();
     
     /* -------------------------------------------------------------- */
-    /** Construct a response
-     * @param out The output stream that the response will be written to.
-     * @param request The HttpRequest that this response is to.
+    private int _status= __200_OK;
+    private String _reason;
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
      */
     public HttpResponse()
+    {}
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param connection 
+     */
+    public HttpResponse(Connection connection)
     {
-        _version = HttpMessage.__HTTP_1_0;
-        _status = __200_OK;
-        _header.put(HttpFields.__ContentType,"text/html");
-        _header.put(HttpFields.__MimeVersion,"1.0");
-        _header.put(HttpFields.__Server,"Jetty3_XXX");
-        _header.putCurrentTime(HttpFields.__Date);
-        _header.put(HttpFields.__Connection,HttpFields.__Close);
+        super(connection);
     }
     
     /* -------------------------------------------------------------- */

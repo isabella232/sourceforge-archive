@@ -105,6 +105,8 @@ public class HttpFields extends HashMap
     public final static String __TextHtml = "test/html";
     public final static String __WwwFormUrlEncode =
         "application/x-www-form-urlencoded";
+    public static final String __ExpectContinue="100-continue";
+    
     
     /* ------------------------------------------------------------ */
     /** Single valued Fields
@@ -175,6 +177,23 @@ public class HttpFields extends HashMap
     private ArrayList _names= new ArrayList(15);
     private List _readOnlyNames=null;
 
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     */
+    public HttpFields()
+    {
+        super(23);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     */
+    public HttpFields(HttpFields fields)
+    {
+        super(fields);
+        _names=(ArrayList)fields._names.clone();
+    }
+    
     /* -------------------------------------------------------------- */
     /** Get enumeration of header _names.
      * Returns an enumeration of strings representing the header _names
@@ -273,6 +292,8 @@ public class HttpFields extends HashMap
     /** Set a field.
      * @param name the name of the field
      * @param value the value of the field. If null the field is cleared.
+     *              The value may have multiple values, such as a List or Array
+     *              of Strings.
      */
     public Object put(Object name,Object value)
     {
