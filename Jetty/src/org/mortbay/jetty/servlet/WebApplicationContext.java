@@ -523,6 +523,9 @@ public class WebApplicationContext
             _contextListeners.clear();
         }
 
+        if (_contextAttributeListeners!=null)
+            _contextAttributeListeners.clear();
+
         // Stop the context
         super.stop();
 
