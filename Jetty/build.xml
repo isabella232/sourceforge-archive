@@ -345,6 +345,7 @@
 
     <copy file="LICENSE.html" tofile="${jetty.webapp}/LICENSE.html" />
     <copy file="VERSION.TXT" tofile="${jetty.webapp}/versions.txt" />
+    <copy file="README.TXT" tofile="${jetty.webapp}/readme.txt" />
   </target>
 
 
