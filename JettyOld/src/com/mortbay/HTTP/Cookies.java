@@ -43,7 +43,10 @@ public class Cookies
             .asciiToLowerCase((cookie.getName()+';'+
                                cookie.getPath()+';'+
                                cookie.getDomain()));
-        cookies.put(key,cookie);
+        if (cookie.getMaxAge()==0)
+            cookies.remove(key);
+        else
+            cookies.put(key,cookie);
     }
     
     /* -------------------------------------------------------------- */
@@ -54,7 +57,7 @@ public class Cookies
     public void setCookie(String name,
                           String value)
     {
-        setCookie(name,value,null,"/",null,false);
+        setCookie(name,value,null,"/",-1,false);
     }
     
     /* -------------------------------------------------------------- */
@@ -66,7 +69,9 @@ public class Cookies
      *        If null is passed the default of this domain is used.
      * @param path The path the cookie applies to.
      *        If null is passed the default of "/" is used.
-     * @param expires the Date the cookie expires on.
+     * @param maxAge the seconds until the cookie expires. A negative value
+     *        implies browser session and zero causes the cookie to be 
+     *        deleted.
      *        If null is passed the cookie expires with the browser session.
      * @param secure if true the cookie is flagged secure.
      */
@@ -74,7 +79,7 @@ public class Cookies
                           String value,
                           String domain,
                           String path,
-                          Date expires,
+                          int maxAge,
                           boolean secure)
     {
         Code.assert(name!=null && name.length()>0,
@@ -92,14 +97,13 @@ public class Cookies
         if (domain!=null)
             cookie.setDomain(domain);
         
-        if (expires!=null)
+        if (maxAge==0)
+            cookies.remove(key);
+        else
         {
-            int maxAge = (int)
-                ((expires.getTime()-System.currentTimeMillis())/1000);
             cookie.setMaxAge(maxAge);
+            cookies.put(key,cookie);
         }
-
-        cookies.put(key,cookie);
     }
 
     /* -------------------------------------------------------------- */
