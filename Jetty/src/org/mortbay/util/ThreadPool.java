@@ -44,7 +44,7 @@ public class ThreadPool
     static int __maxThreads = 
         Integer.getInteger("THREADPOOL_MAX_THREADS",256).intValue();
     static int __minThreads =
-        Integer.getInteger("THREADPOOL_MIN_THREADS",1).intValue();
+        Integer.getInteger("THREADPOOL_MIN_THREADS",2).intValue();
     static String __threadClass =
         System.getProperty("THREADPOOL_THREAD_CLASS");
     
@@ -713,23 +713,6 @@ public class ThreadPool
                         // wait for a job
                         _job=ThreadPool.this.getJob(_maxIdleTimeMs);
 
-                        // If no job
-                        if (_job==null && _running)
-                        {
-                            if (Code.verbose(99))
-                                Code.debug("Threads="+_threadSet.size()+
-                                           " idle="+_idleSet.size());
-                        
-                            if (_threadSet.size()>_minThreads &&
-                                _idleSet.size()>1)
-                            {
-                                // interrupt was due to accept timeout
-                                // Kill thread if it is in excess of the minimum.
-                                if (Code.verbose(99))
-                                    Code.debug("Idle death: "+_thread);
-                                break;
-                            }
-                        }
                     }
                     catch(InterruptedException e)
                     {
@@ -748,13 +731,28 @@ public class ThreadPool
                         synchronized(ThreadPool.this)
                         {
                             _idleSet.remove(_thread);
-                            // If not more threads accepting - start one
-                            if (_idleSet.size()==0 &&
-                                _running &&
-                                _job!=null &&
-                                _threadSet.size()<_maxThreads)
-                                try{newThread();}
-                                catch(Exception e){Code.warning(e);}
+
+                            // If we are still running
+                            if (_running)
+                            {
+                                // If not more threads accepting - start one
+                                if (_idleSet.size()==0 &&
+                                    _job!=null &&
+                                    _threadSet.size()<_maxThreads)   
+                                {
+                                    try{newThread();}
+                                    catch(Exception e){Code.warning(e);}
+                                }
+                                // else if no job
+                                else if (_job==null &&
+                                         _threadSet.size()>_minThreads &&
+                                         _idleSet.size()>0)
+                                {
+                                    if (Code.verbose(99))
+                                        Code.debug("Idle death: "+_thread);
+                                    break; // Break from the running loop
+                                }
+                            }
                         }
                     }
 

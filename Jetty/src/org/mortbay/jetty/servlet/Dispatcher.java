@@ -161,7 +161,7 @@ public class Dispatcher implements RequestDispatcher
     {
         ServletRequest servletRequest=(ServletRequest)request;
         HttpRequest httpRequest=servletRequest.getHttpRequest();
-        ServletResponse servletResponse=(ServletResponse)response;
+        ServletResponse servletResponse=servletRequest.getServletResponse();
         HttpResponse httpResponse=servletResponse.getHttpResponse();
             
         if (servletRequest.getHttpRequest().isCommitted())
