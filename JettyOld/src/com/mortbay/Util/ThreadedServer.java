@@ -201,12 +201,10 @@ abstract public class ThreadedServer
 	    OutputStream out = connection.getOutputStream();
 
 	    handleConnection(in,out);
-
 	    out.flush();
-	    connection.close();
+	    
 	    in=null;
 	    out=null;
-	    connection=null;
 	}
 	catch ( Exception e ){
 	    Code.warning("Connection problem",e);
@@ -346,9 +344,15 @@ abstract public class ThreadedServer
     /* ------------------------------------------------------------------- */
     /* Start the ThreadedServer listening
      */
-    final synchronized public void start()
+    synchronized public void start()
 	 throws java.io.IOException
     {
+	if (listen!=null)
+	{
+	    Code.debug("Already started on ",address);
+	    return;
+	}
+	
 	Code.debug( "Start Listener for ", address );
 
 	listen=newServerSocket(address,_maxThreads>0?(_maxThreads+1):__maxThreads);
@@ -393,7 +397,7 @@ abstract public class ThreadedServer
     }
     
     /* ------------------------------------------------------------------- */
-    final synchronized public void stop() 
+    synchronized public void stop() 
     {
 	Code.debug("Stop listening on ",listen);
 

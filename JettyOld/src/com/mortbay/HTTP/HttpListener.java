@@ -140,13 +140,17 @@ public class HttpListener extends ThreadedServer
 		catch (Exception e)
 		{
 		    Code.debug(e);
+		    
 		    // If no respones - must have a request error
 		    if (response==null)
 		    {
 			// try to write BAD_REQUEST
-			response=
-			    new HttpResponse(connection.getOutputStream(),null);
+			response=new HttpResponse(connection.getOutputStream(),
+						  null);
+			response.setHeader(HttpHeader.Connection,
+					   HttpHeader.Close);
 			response.sendError(HttpResponse.SC_BAD_REQUEST);
+			break;
 		    }
 		}
 		finally

@@ -48,7 +48,7 @@ import java.util.*;
 public class MultiPartResponse
 {
     /* ------------------------------------------------------------ */
-    private static String boundary =
+    private String boundary =
     "com.mortbay.HTTP.MultiPartResponse.boundary.";
     
     /* ------------------------------------------------------------ */

@@ -147,9 +147,6 @@ public class HttpRequest extends HttpHeader
 	    if (content_length>=0)
 		in.setContentLength(content_length);
 	}
-	
-	decodeCookieParameters();
-
     }
 
     /* -------------------------------------------------------------- */

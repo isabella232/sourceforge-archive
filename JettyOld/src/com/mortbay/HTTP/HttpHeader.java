@@ -28,6 +28,7 @@ public class HttpHeader
     public final static String Connection = "Connection";
     public final static String Close = "close";
     public final static String Referer="Referer";
+    public final static String Expires="Expires";
     public final static String UserAgent="User-Agent";
     public final static String IfModifiedSince="If-Modified-Since";
     public final static String IfUnmodifiedSince="If-Unmodified-Since";

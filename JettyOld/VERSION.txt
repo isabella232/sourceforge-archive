@@ -1,3 +1,15 @@
+Release 2.2.5 - 19 Aug 1999
+  + Fixed bug with closing connections in ThreadedServer
+  + Made start and stop non final in ThreadedServer
+  + Better default handling of ServletExceptions
+  + Always close connection after a bad request.
+  + Set Expires header in HtmlFilter.
+  + Don't override the cookie as parameter option.
+  + Limited growth in MultiPartResponse boundary.
+  + Improved error messages from Jetty.Server.
+  + Close loaded class files so Win32 can overwrite
+    them before GC (what a silly file system!).
+
 Release 2.2.4 - 2 Aug 1999
   + ThreadedServer can use subclasses of Thread.
   + Better help on Jetty.Server

@@ -75,14 +75,16 @@ public class HtmlFilter extends HttpFilter
     /** Modify response on activation.
      * Remove content length and reset the last modified headers, as they
      * are possibly incorrect after filtering.
+     * Add "Expired" header to disable external caching.
      */
     protected void activate()
     {
 	info = new Hashtable();
 	if(response!=null)
 	{
-	    response.setDateHeader(HttpHeader.LastModified,
-				   System.currentTimeMillis());
+            long now = System.currentTimeMillis();
+            response.setDateHeader(HttpHeader.LastModified, now);
+            response.setDateHeader(HttpHeader.Expires, now);
 	    response.setHeader(HttpHeader.ContentLength, null);
 	}
     }

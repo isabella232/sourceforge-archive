@@ -48,13 +48,34 @@ public class DefaultExceptionHandler implements ExceptionHandler
 		Code.ignore(ise);
 		pout=new PrintWriter(response.getWriter());
 	    }
-	    
+
 	    pout.println("<HTML><HEAD><TITLE>Exception</TITLE>");
-	    pout.println("<BODY><H2>");
-	    pout.println(exception.toString());
-	    pout.println("</H2><br><PRE>");
-	    exception.printStackTrace(pout);
-	    pout.println("</PRE></BODY></HTML>");
+	    
+	    if ( exception instanceof javax.servlet.ServletException )
+	    {
+		pout.println("<BODY><H2>");
+		pout.println(exception.toString());
+		pout.println("</H2><br><PRE>");
+		exception.printStackTrace(pout);
+		exception.printStackTrace(pout);
+		pout.println("</PRE>");
+	    
+		javax.servlet.ServletException se =
+		    (javax.servlet.ServletException)exception;
+		if ( se.getRootCause() != null )
+		    exception = (Exception)se.getRootCause();
+	    }
+
+	    if (exception!=null)
+	    {
+		pout.println("<BODY><H2>");
+		pout.println(exception.toString());
+		pout.println("</H2><br><PRE>");
+		exception.printStackTrace(pout);
+		pout.println("</PRE>");
+	    }
+	    
+	    pout.println("</BODY></HTML>");
 	    pout.flush();
 	}
 	catch (Exception e2)

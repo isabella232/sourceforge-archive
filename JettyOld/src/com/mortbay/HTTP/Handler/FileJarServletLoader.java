@@ -196,6 +196,11 @@ public class FileJarServletLoader extends ServletLoader
 		if (Code.verbose(9))
 		    Code.ignore(e);
 	    }
+	    finally
+	    {
+		try{in.close();}
+		catch(Exception e){Code.ignore(e);}
+	    }
 	}
 	
 	return null;

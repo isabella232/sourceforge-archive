@@ -119,6 +119,8 @@ public class Server extends BaseConfiguration
 	    
 		Vector servers =
 		    serversTree.getVector("SERVERS",";,");
+		Code.assert(servers != null,
+			    "Missing mandatory configuration entry: 'SERVERS'");
 		for (int s=0;s<servers.size();s++)
 		{
 		    serverName=(String)servers.elementAt(s);
@@ -188,6 +190,9 @@ public class Server extends BaseConfiguration
 			   " ",serverProperties);
 		
 		Vector stacks = serverTree.getVector("STACKS",";,");
+		Code.assert(stacks != null,
+			    "Missing mandatory configuration entry: '"+
+			    serverName+".STACKS'");
 		for (int k=0; k<stacks.size();k++)
 		{
 		    stackName=(String)stacks.elementAt(k);
@@ -196,6 +201,9 @@ public class Server extends BaseConfiguration
 		}
 
 		stacks = serverTree.getVector("EXCEPTIONS",";,");
+		if (stacks==null)
+		    Code.debug("Missing optional configuration entry: '"+
+			       serverName+".EXCEPTIONS'");
 		for (int k=0; stacks!=null && k<stacks.size();k++)
 		{
 		    stackName=(String)stacks.elementAt(k);
@@ -343,8 +351,15 @@ public class Server extends BaseConfiguration
 		PropertyTree listenerTree = listeners.getTree(listenerName);
 	    
 		String className = listenerTree.getProperty("CLASS");
+		Code.assert(className != null,
+			    "Missing mandatory configuration entry: '"+
+			    serverName+".LISTENER."+listenerName+".CLASS'");
 		Class listenerClass = Class.forName(className);
+
 		Vector addrs = listenerTree.getVector("ADDRS",",; ");
+		Code.assert(addrs != null,
+			    "Missing mandatory configuration entry: '"+
+			    serverName+".LISTENER."+listenerName+".ADDRS'");
 		for (int a=addrs.size();a-->0;)
 		{
 		    InetAddrPort addr_port =
@@ -408,10 +423,9 @@ public class Server extends BaseConfiguration
 					     PropertyTree stackTree)
 	throws Exception
     {
-	PropertyTree stackProperties=properties(stackTree);
 	Code.debug("Configure Stack ",serverName,
 		   ".",stackName,
-		   " ",stackProperties);
+		   " ",stackTree);
 	
 	if (stackTree.get("EXCEPTIONS")!=null)
 	    Code.warning("2.2.0 Style exception configuration in '"+
@@ -419,9 +433,17 @@ public class Server extends BaseConfiguration
 			 "' is not supported");
 	
 	Vector handlers = stackTree.getVector("HANDLERS",";,");
+	Code.assert(handlers != null,
+		    "Missing mandatory configuration entry: '"+
+		    serverName+"."+stackName+".HANDLERS'");
+	
 	HttpHandler[] stack= new HttpHandler[handlers.size()];
 	
 	Vector paths = stackTree.getVector("PATHS",",;");
+	Code.assert(paths != null,
+		    "Missing mandatory configuration entry: '"+
+		    serverName+"."+stackName+".PATHS'");
+
 	for (int d=paths.size();d-->0;)
 	    httpHandlersMap.put(paths.elementAt(d),stack);
 	
@@ -436,7 +458,12 @@ public class Server extends BaseConfiguration
 		       ".",handlerName,
 		       " ",handlerProperties);
 
-	    Class handlerClass=Class.forName(handlerTree.getProperty("CLASS"));
+	    
+	    String className = handlerTree.getProperty("CLASS");
+	    Code.assert(className != null,
+			"Missing mandatory configuration entry: '"+
+			serverName+"."+stackName+"."+handlerName+".CLASS'");
+	    Class handlerClass = Class.forName(className);
 	    if (!com.mortbay.HTTP.HttpHandler.class.isAssignableFrom(handlerClass))
 		Code.fail(handlerClass+" is not a com.mortbay.HTTP.HttpHandler");
 	    
@@ -485,16 +512,22 @@ public class Server extends BaseConfiguration
 					       PropertyTree stackTree)
 	throws Exception
     {
-	PropertyTree stackProperties=properties(stackTree);
 	Code.debug("Configure Ex Stack ",serverName,
 		   ".",stackName,
-		   " ",stackProperties);
+		   " ",stackTree);
 	
 	Vector handlers = stackTree.getVector("HANDLERS",";,");
+	Code.assert(handlers != null,
+		    "Missing mandatory configuration entry: '"+
+		    serverName+"."+stackName+".HANDLERS'");
 	ExceptionHandler[] stack
 	    = new ExceptionHandler[handlers.size()];
 	
 	Vector paths = stackTree.getVector("PATHS",",;");
+	Code.assert(paths != null,
+		    "Missing mandatory configuration entry: '"+
+		    serverName+"."+stackName+".PATHS'");
+
 	for (int d=paths.size();d-->0;)
 	{
 	    if (exceptionHandlersMap==null)
@@ -511,7 +544,11 @@ public class Server extends BaseConfiguration
 		       ".",stackName,
 		       ".",handlerName);
 
-	    Class handlerClass=Class.forName(handlerTree.getProperty("CLASS"));
+	    String className = handlerTree.getProperty("CLASS");
+	    Code.assert(className != null,
+			"Missing mandatory configuration entry: '"+
+			serverName+"."+stackName+"."+handlerName+".CLASS'");
+	    Class handlerClass = Class.forName(className);
 	    if (!com.mortbay.HTTP.ExceptionHandler.class.isAssignableFrom(handlerClass))
 		Code.fail(handlerClass+" is not a com.mortbay.HTTP.ExceptionHandler");
 	    
