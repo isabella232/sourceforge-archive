@@ -818,7 +818,7 @@ public class HttpRequest extends HttpMessage
                 try
                 {
                     byte[]qbytes=query.getBytes(StringUtil.__ISO_8859_1);
-                    UrlEncoded.decodeTo(qbytes,_parameters,encoding);
+                    UrlEncoded.decodeTo(qbytes,0,qbytes.length,_parameters,encoding);
                 }
                 catch(Exception e)
                 {
@@ -863,11 +863,9 @@ public class HttpRequest extends HttpMessage
                             // TODO - this is very inefficient and we could
                             // save lots of memory by streaming this!!!!
                             IO.copy(in,bout,max);
-                            
-                            byte[] content=bout.getBuf();
 
                             // Add form params to query params
-                            UrlEncoded.decodeTo(content,_parameters,encoding);
+                            UrlEncoded.decodeTo(bout.getBuf(),0,bout.getCount(),_parameters,encoding);
                         }
                         catch (EOFException e)
                         {

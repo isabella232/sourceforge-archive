@@ -593,7 +593,7 @@ public class Tests extends junit.framework.TestCase
                 (byte)0x80
             };
         MultiMap m = new MultiMap();
-        UrlEncoded.decodeTo(b,m,"SJIS");
+        UrlEncoded.decodeTo(b,0,b.length,m,"SJIS");
         String sjis=(String)m.get("s");
         assertEquals("SJIS len",3, sjis.length());
         assertEquals("SJIS param","\u30b2\u30fc\u30e0",sjis );
