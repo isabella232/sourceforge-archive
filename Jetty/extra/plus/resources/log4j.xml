@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<!-- ===================================================================== -->
+<!--                                                                       -->
+<!--  Log4j Configuration                                                  -->
+<!--                                                                       -->
+<!-- ===================================================================== -->
+
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
+
+
+
+  <!-- ============================== -->
+  <!-- Append messages to the console -->
+  <!-- ============================== -->
+  <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+    <param name="Threshold" value="TRACE"/>
+    <param name="Target" value="System.err"/>
+
+    <layout class="org.apache.log4j.PatternLayout">
+      <!-- The default pattern: Date Priority [Category] Message\n -->
+      <param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%c{1}] %m%n"/>
+    </layout>
+  </appender>
+
+  <appender name="FILE" class="org.apache.log4j.FileAppender">
+    <param name="Threshold" value="TRACE"/>
+    <param name="File" value="${jetty.home}/logs/log4jetty.log"/>
+
+    <layout class="org.apache.log4j.PatternLayout">
+      <!-- The default pattern: Date Priority [Category] Message\n -->
+      <param name="ConversionPattern" value="%d{ABSOLUTE} %-5p [%c{1}] %m%n"/>
+    </layout>
+ </appender>
+
+
+
+  <!-- Syslog events
+  <appender name="SYSLOG" class="org.apache.log4j.net.SyslogAppender">
+    <param name="Facility" value="LOCAL7"/>
+    <param name="FacilityPrinting" value="true"/>
+    <param name="SyslogHost" value="localhost"/>
+  </appender>
+  -->
+
+  <!-- Log events to JMS (requires a topic to be created)
+  <appender name="JMS" class="org.apache.log4j.net.JMSAppender">
+    <param name="Threshold" value="ERROR"/>
+    <param name="TopicConnectionFactoryBindingName" value="java:/ConnectionFactory"/>
+    <param name="TopicBindingName" value="topic/MyErrorsTopic"/>
+  </appender>
+  -->
+
+  <!-- ================ -->
+  <!-- Limit categories -->
+  <!-- ================ -->
+
+  <!-- Set Jetty categories to INFO -->
+  <category name="org.mortbay">
+    <priority value="TRACE"/>
+  </category>
+
+  <!-- Jotm -->
+  <category name="org.objectweb.jotm">
+    <priority value="INFO"/>
+  </category>
+
+
+  <!-- jta  -->
+  <category name="org.objectweb.jotm.jta">
+    <priority value="INFO"/>
+  </category>
+
+
+  <!-- jotm recovery  -->
+  <category name="org.objectweb.jotm.recovery">
+    <priority value="INFO"/>
+  </category>
+
+  <!-- jotm tests  -->
+  <category name="org.objectweb.carol">
+    <priority value="INFO"/>
+  </category>
+
+  <!-- carol rmi   -->
+  <category name="org.objectweb.carol.rmi">
+    <priority value="INFO"/>
+  </category>
+
+  <!-- carol jndi   -->
+  <category name="org.objectweb.carol.jndi">
+    <priority value="INFO"/>
+  </category>
+
+  <!-- carol lmi   -->
+  <category name="org.objectweb.carol.lmi">
+    <priority value="INFO"/>
+  </category>
+
+  <!-- connect pool   -->
+  <category name="org.enhydra.jdbc">
+    <priority value="INFO"/>
+  </category>
+
+  <!-- ======================= -->
+  <!-- Setup the Root category -->
+  <!-- ======================= -->
+
+  <root>
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="FILE"/>
+  </root>
+
+</log4j:configuration>
