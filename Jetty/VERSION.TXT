@@ -12,6 +12,7 @@ Jetty-4.2.0pre0 - 13 October 2002
  + Fixed caching of directories to avoid shared buffers.
  + Fixed bad log dir detection
  + Fix Session invalidation bug
+ + Build without jmx
 
 Jetty-4.1.2 - 13 OCtober 2002
  + getNamedDispatcher(null) returns containers default servlet.
@@ -21,6 +22,7 @@ Jetty-4.1.2 - 13 OCtober 2002
  + Fixed caching of directories to avoid shared buffers.
  + Fixed bad log dir detection
  + Fix Session invalidation bug
+ + Build without jmx
  + Some AJP13 optimizations.
 
 Jetty-4.1.1 - 30 September 2002

@@ -66,10 +66,16 @@
 
 
   <!-- ==================================================================== -->
-  <target name="classpath" depends="is.jdk1.4.available,classpath1.2,classpath1.4"/>
+  <target name="classpath" depends="is.jdk1.4.available,is.jmx.available,classpath1.2,classpath1.4"/>
+
   <target name="is.jdk1.4.available">
     <available property="jdk1.4.available" classname="java.util.logging.Handler" />
     <echo message="JDK1.4 available=${jdk1.4.available}" level="info"/>
+  </target>
+
+  <target name="is.jmx.available">
+    <available property="jmx.available" classname="javax.management.MBeanException" />
+    <echo message="JMX available=${jmx.available}" level="info"/>
   </target>
 
   <!-- ==================================================================== -->
@@ -202,6 +208,7 @@
            >
        <classpath refid="extpath" />
        <include name="**/*.java"/>
+       <exclude name="**/jmx/**" unless="jmx.available"/>
     </javac>
   </target>
 
@@ -229,6 +236,7 @@
          <pathelement path="${classes}"/>
        </classpath>
        <include name="**/*.java"/>
+       <exclude name="**/jmx/**" unless="jmx.available"/>
     </javac>
   </target>
 
