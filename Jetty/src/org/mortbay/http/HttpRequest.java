@@ -470,7 +470,7 @@ public class HttpRequest extends HttpMessage
         _port=0;
         if (_host!=null && _host.length()>0)
         {
-            int colon=_host.indexOf(':');
+            int colon=_host.lastIndexOf(':');
             if (colon>=0)
             {
                 if (colon<_host.length())
