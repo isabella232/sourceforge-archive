@@ -205,17 +205,17 @@ public class IO extends ThreadPool
      * This delete will recursively delete directories - BE CAREFULL
      * @param file The file to be deleted.
      */
-    public static void delete(File file)
+    public static boolean delete(File file)
     {
         if (!file.exists())
-            return;
+            return false;
         if (file.isDirectory())
         {
             File[] files = file.listFiles();
             for (int i=0;files!=null && i<files.length;i++)
                 delete(files[i]);
         }
-        file.delete();
+        return file.delete();
     }
     
     

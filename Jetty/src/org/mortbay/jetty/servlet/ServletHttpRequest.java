@@ -34,7 +34,6 @@ import javax.servlet.ServletRequestWrapper;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpUtils;
 import javax.servlet.http.HttpServletRequestWrapper;
 import org.mortbay.http.ChunkableInputStream;
 import org.mortbay.http.HttpContext;
@@ -587,10 +586,9 @@ public class ServletHttpRequest
     public void setCharacterEncoding(String encoding)
         throws UnsupportedEncodingException
     {
-        _httpRequest.setCharacterEncoding(encoding);
         if (_inputState!=0)
             throw new IllegalStateException("getReader() or getInputStream() called");
-        _reader=new BufferedReader(new InputStreamReader(getInputStream(),encoding));
+        _httpRequest.setCharacterEncoding(encoding);
     }
     
     /* -------------------------------------------------------------- */

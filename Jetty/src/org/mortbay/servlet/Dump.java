@@ -6,6 +6,7 @@
 package org.mortbay.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.lang.reflect.Field;
 import java.util.Enumeration;
 import java.util.Locale;
@@ -50,17 +51,17 @@ public class Dump extends HttpServlet
     }
 
     /* ------------------------------------------------------------ */
-    public void doPost(HttpServletRequest sreq, HttpServletResponse sres) 
+    public void doPost(HttpServletRequest request, HttpServletResponse response) 
         throws ServletException, IOException
     {
-        doGet(sreq,sres);
+        doGet(request,response);
     }
     
     /* ------------------------------------------------------------ */
-    public void doGet(HttpServletRequest sreq, HttpServletResponse sres) 
+    public void doGet(HttpServletRequest request, HttpServletResponse response) 
         throws ServletException, IOException
     {
-        String info=sreq.getPathInfo();
+        String info=request.getPathInfo();
         if (info!=null && info.endsWith("Exception"))
         {
             try
@@ -74,15 +75,16 @@ public class Dump extends HttpServlet
             }
         }
 
-        String redirect=sreq.getParameter("redirect");
+        String redirect=request.getParameter("redirect");
         if (redirect!=null && redirect.length()>0)
         {
-            sres.sendRedirect(redirect);
+            response.sendRedirect(redirect);
             return;
         }
         
-        
-        sres.setContentType("text/html");
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html");
+        Reader r = request.getReader();
 
         if (info!=null && info.indexOf("Locale/")>=0)
         {
@@ -90,16 +92,16 @@ public class Dump extends HttpServlet
             {
                 String locale_name=info.substring(info.indexOf("Locale/")+7);
                 Field f=java.util.Locale.class.getField(locale_name);
-                sres.setLocale((Locale)f.get(null));
+                response.setLocale((Locale)f.get(null));
             }
             catch(Exception e)
             {
                 Code.ignore(e);
-                sres.setLocale(Locale.getDefault());
+                response.setLocale(Locale.getDefault());
             }
         }
 
-        String pi=sreq.getPathInfo();
+        String pi=request.getPathInfo();
         if (pi!=null)
         {
             if ("/ex0".equals(pi))
@@ -113,7 +115,7 @@ public class Dump extends HttpServlet
         }
         
         
-        PrintWriter pout = sres.getWriter();
+        PrintWriter pout = response.getWriter();
         Page page=null;
 
         try{
@@ -125,63 +127,63 @@ public class Dump extends HttpServlet
             page.add(table);
             table.newRow();
             table.addHeading("getMethod:&nbsp;").cell().right();
-            table.addCell(""+sreq.getMethod());
+            table.addCell(""+request.getMethod());
             table.newRow();
             table.addHeading("getContentLength:&nbsp;").cell().right();
-            table.addCell(Integer.toString(sreq.getContentLength()));
+            table.addCell(Integer.toString(request.getContentLength()));
             table.newRow();
             table.addHeading("getContentType:&nbsp;").cell().right();
-            table.addCell(""+sreq.getContentType());
+            table.addCell(""+request.getContentType());
             table.newRow();
             table.addHeading("getRequestURI:&nbsp;").cell().right();
-            table.addCell(""+sreq.getRequestURI());
+            table.addCell(""+request.getRequestURI());
             table.newRow();
             table.addHeading("getContextPath:&nbsp;").cell().right();
-            table.addCell(""+sreq.getContextPath());
+            table.addCell(""+request.getContextPath());
             table.newRow();
             table.addHeading("getServletPath:&nbsp;").cell().right();
-            table.addCell(""+sreq.getServletPath());
+            table.addCell(""+request.getServletPath());
             table.newRow();
             table.addHeading("getPathInfo:&nbsp;").cell().right();
-            table.addCell(""+sreq.getPathInfo());
+            table.addCell(""+request.getPathInfo());
             table.newRow();
             table.addHeading("getPathTranslated:&nbsp;").cell().right();
-            table.addCell(""+sreq.getPathTranslated());
+            table.addCell(""+request.getPathTranslated());
             table.newRow();
             table.addHeading("getQueryString:&nbsp;").cell().right();
-            table.addCell(""+sreq.getQueryString());
+            table.addCell(""+request.getQueryString());
 
             
             
             table.newRow();
             table.addHeading("getProtocol:&nbsp;").cell().right();
-            table.addCell(""+sreq.getProtocol());
+            table.addCell(""+request.getProtocol());
             table.newRow();
             table.addHeading("getScheme:&nbsp;").cell().right();
-            table.addCell(""+sreq.getScheme());
+            table.addCell(""+request.getScheme());
             table.newRow();
             table.addHeading("getServerName:&nbsp;").cell().right();
-            table.addCell(""+sreq.getServerName());
+            table.addCell(""+request.getServerName());
             table.newRow();
             table.addHeading("getServerPort:&nbsp;").cell().right();
-            table.addCell(""+Integer.toString(sreq.getServerPort()));
+            table.addCell(""+Integer.toString(request.getServerPort()));
             table.newRow();
             table.addHeading("getRemoteUser:&nbsp;").cell().right();
-            table.addCell(""+sreq.getRemoteUser());
+            table.addCell(""+request.getRemoteUser());
             table.newRow();
             table.addHeading("getRemoteAddr:&nbsp;").cell().right();
-            table.addCell(""+sreq.getRemoteAddr());
+            table.addCell(""+request.getRemoteAddr());
             table.newRow();
             table.addHeading("getRemoteHost:&nbsp;").cell().right();
-            table.addCell(""+sreq.getRemoteHost());            
+            table.addCell(""+request.getRemoteHost());            
             table.newRow();
             table.addHeading("getRequestedSessionId:&nbsp;").cell().right();
-            table.addCell(""+sreq.getRequestedSessionId());                                  
+            table.addCell(""+request.getRequestedSessionId());                                  
             table.newRow();
             table.addHeading("getLocale:&nbsp;").cell().right();
-            table.addCell(""+sreq.getLocale());
+            table.addCell(""+request.getLocale());
             
-            Enumeration locales = sreq.getLocales();
+            Enumeration locales = request.getLocales();
             table.newCell();
             while(locales.hasMoreElements())
             {
@@ -196,14 +198,14 @@ public class Dump extends HttpServlet
                 .add("<BR>Other HTTP Headers")
                 .attribute("COLSPAN","2")
                 .left();
-            Enumeration h = sreq.getHeaderNames();
+            Enumeration h = request.getHeaderNames();
             String name;
             while (h.hasMoreElements())
             {
                 name=(String)h.nextElement();
                 table.newRow();
                 table.addHeading(name+":&nbsp;").cell().right();
-                table.addCell(sreq.getHeader(name));
+                table.addCell(request.getHeader(name));
             }
             
             table.newRow();
@@ -212,14 +214,14 @@ public class Dump extends HttpServlet
                 .add("<BR>Request Parameters")
                 .attribute("COLSPAN","2")
                 .left();
-            h = sreq.getParameterNames();
+            h = request.getParameterNames();
             while (h.hasMoreElements())
             {
                 name=(String)h.nextElement();
                 table.newRow();
                 table.addHeading(name+":&nbsp;").cell().right();
-                table.addCell(sreq.getParameter(name));
-                String[] values = sreq.getParameterValues(name);
+                table.addCell(request.getParameter(name));
+                String[] values = request.getParameterValues(name);
                 if (values==null)
                 {
                     table.newRow();
@@ -247,7 +249,7 @@ public class Dump extends HttpServlet
                 .add("<BR>Request Attributes")
                 .attribute("COLSPAN","2")
                 .left();
-            Enumeration a = sreq.getAttributeNames();
+            Enumeration a = request.getAttributeNames();
             while (a.hasMoreElements())
             {
                 name=(String)a.nextElement();
@@ -255,7 +257,7 @@ public class Dump extends HttpServlet
                 table.addHeading(name+":&nbsp;")
 		    .cell().attribute("VALIGN","TOP").right();
 		table.addCell("<pre>" +
-			      toString(sreq.getAttribute(name))
+			      toString(request.getAttribute(name))
 			      + "</pre>");
             }
 
@@ -319,7 +321,7 @@ public class Dump extends HttpServlet
             page.add(Break.para);
             
             page.add(new Heading(1,"Form to generate Dump content"));
-            TableForm tf = new TableForm(sres.encodeURL(sreq.getRequestURI()));
+            TableForm tf = new TableForm(response.encodeURL(request.getRequestURI()));
             tf.method("POST");
             page.add(tf);
             tf.addTextField("TextField","TextField",20,"value");
@@ -336,7 +338,7 @@ public class Dump extends HttpServlet
     
         page.write(pout);
         pout.close();
-        sreq.getInputStream().close();
+        r.close();
         
         if (pi!=null)
         {

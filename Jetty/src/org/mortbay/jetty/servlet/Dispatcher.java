@@ -78,7 +78,7 @@ public class Dispatcher implements RequestDispatcher
     String _pathInContext;
     String _query;
     boolean _include;
-    HttpServletRequest _request;
+    DispatcherRequest _request;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -237,6 +237,15 @@ public class Dispatcher implements RequestDispatcher
         }
 
         /* ------------------------------------------------------------ */
+        void setPaths(String cp,String sp, String pi, String qs)
+        {
+            _contextPath = (cp.length()==1 && cp.charAt(0)=='/')?"":cp;
+            _servletPath=sp;
+            _pathInfo=pi;
+            _query=qs;
+        }
+        
+        /* ------------------------------------------------------------ */
         int getFilterType()
         {
             return _include?FilterHolder.__INCLUDE:FilterHolder.__FORWARD;
@@ -264,24 +273,27 @@ public class Dispatcher implements RequestDispatcher
         {
             if (_include || isNamed())
                 return super.getRequestURL();
-            // XXX - YUCK!
-            StringBuffer buf = super.getRequestURL();
-            String url=buf.toString();
-            int i=url.indexOf("//");
-            i=url.indexOf("/",i+2);
-            buf.setLength(i);
-            buf.append(URI.addPaths(_contextPath,_uriInContext));
+            StringBuffer buf = getRootURL();
+            if (_contextPath.length()>0)
+                buf.append(_contextPath);
+            buf.append(_uriInContext);
             return buf;
         }
 
-        
         /* ------------------------------------------------------------ */
-        void setPaths(String cp,String sp, String pi, String qs)
+        StringBuffer getRootURL()
         {
-            _contextPath = (cp.length()==1 && cp.charAt(0)=='/')?"":cp;
-            _servletPath=sp;
-            _pathInfo=pi;
-            _query=qs;
+            StringBuffer buf = super.getRequestURL();
+            int d=3;
+            for (int i=0;i<buf.length();i++)
+            {
+                if (buf.charAt(i)=='/' && --d==0)
+                {
+                    buf.setLength(i);
+                    break;
+                }
+            }
+            return buf;
         }
         
         /* ------------------------------------------------------------ */
@@ -560,15 +572,9 @@ public class Dispatcher implements RequestDispatcher
         {
             if (!_include)
             {
-                // XXX need to share this code!
                 if (!url.startsWith("http:/")&&!url.startsWith("https:/"))
                 {
-                    StringBuffer buf = _request.getRequestURL();
-                    String u=buf.toString();
-
-                    int i=u.indexOf("//");
-                    i=u.indexOf("/",i+2);
-                    buf.setLength(i);
+                    StringBuffer buf = _request.getRootURL();
                     
                     if (url.startsWith("/"))
                         buf.append(URI.canonicalPath(url));

@@ -1,12 +1,14 @@
 Jetty Versions
 --------------
 
+ + Fixed setCharacterEncoding to work with getReader
  + Fixed getContext to use canonical contextPathSpec
  + Improved the return codes for PUT
  + Made HttpServer serializable
  + Updated international URI doco
  + Updated jasper to CVS snapshot 200208011920
  + Fixed forward to jsp-file servlet
+ + Fixed handling of relative sendRedirect after forward.
 
 Jetty-4.1.0RC0 - 31 July 2002
  + Fixed getRealPath for packed war files.

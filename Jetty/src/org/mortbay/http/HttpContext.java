@@ -270,7 +270,11 @@ public class HttpContext implements LifeCycle,
             _name=null;
 
             if (_httpServer!=null)
+            {
+                if (_hosts.size()==1)
+                    _httpServer.removeMapping(null,this);
                 _httpServer.addMapping(hostname,this);
+            }
             _hostsArray=null;
         }
     }
@@ -287,7 +291,11 @@ public class HttpContext implements LifeCycle,
         {
             _name=null;
             if (_httpServer!=null)
+            {
                 _httpServer.removeMapping(hostname,this);
+                if (_hosts.size()==0)
+                    _httpServer.addMapping(null,this);
+            }
             _hostsArray=null;
         }
     }
@@ -1072,33 +1080,24 @@ public class HttpContext implements LifeCycle,
             String vhost = null;
             for (int h=0;vhost==null && _hosts!=null && h<_hosts.size();h++)
                 vhost=(String)_hosts.get(h);
-            if (InetAddrPort.__0_0_0_0.equals(vhost))
-                vhost=null;
-            
             String host=httpListener.getHost();
-            if (InetAddrPort.__0_0_0_0.equals(host))
-                host=null;
-            
             String temp="Jetty_"+
                 (host==null?"":host)+
                 "_"+
                 httpListener.getPort()+
                 "_"+
                 (vhost==null?"":vhost)+
-                "_"+
                 getContextPath();
             
             temp=temp.replace('/','_');
             temp=temp.replace('.','_');
             temp=temp.replace('\\','_');
             
-            _tmpDir=new File(System.getProperty("java.io.tmpdir"),
-                             temp);
-            
+            _tmpDir=new File(System.getProperty("java.io.tmpdir"),temp);
             if (_tmpDir.exists())
             {
                 Code.debug("Delete existing temp dir ",_tmpDir," for ",this);
-                IO.delete(_tmpDir);
+                IO.delete(_tmpDir); 
             }
             
             _tmpDir.mkdir();

@@ -112,36 +112,36 @@
   <Call name="addWebApplications">
     <Arg></Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/</Arg>
-    <Arg type="boolean">true</Arg>
+    <Arg type="boolean">true</Arg> <!-- Unpack WAR files -->
   </Call>
 
 
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- Add a single web application                                    -->
+  <!-- Add and configure a specific web application                    -->
+  <!-- + Set Unpack WAR files                                          -->
+  <!-- + Set Default Descriptor.  Resource, file or URL                -->
+  <!-- + Set Virtual Hosts. A Null host or empty array means all hosts -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- UNCOMMENT TO ACTIVATE
   <Call name="addWebApplication">
     <Arg>/</Arg>
     <Arg>./webapps/root</Arg>
-    <Set name="extractWAR">false</Set>
+
+    <Set name="extractWAR">false</Set> 
+
+    <Set name="defaultsDescriptor">org/mortbay/jetty/servlet/webdefault.xml</Set>
+
+    <Set name="virtualHosts">
+      <Array class="java.lang.String">
+        <Item></Item>
+        <Item>127.0.0.1</Item>
+        <Item>localhost</Item>
+        <Item>www.acme.com</Item>
+      </Array>
+    </Set>
   </Call>
   -->
-
-
-  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- Add a single web application using java properties and defaults -->
-  <!-- The webapplication deployed can use defaults or be configured   -->
-  <!-- with:  java -Djetty.context=/context -Djetty.webapp=mywebapp    -->
-  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- UNCOMMENT TO ACTIVATE
-  <Call name="addWebApplication">
-    <Arg><SystemProperty name="jetty.context" default="/"/></Arg>
-    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/<SystemProperty name="jetty.webapp" default="root"/></Arg>
-    <Set name="extractWAR">false</Set>
-  </Call>
-  -->
-
 
 
   <!-- =============================================================== -->

@@ -122,6 +122,7 @@
   <Call name="addWebApplication">
     <Arg>/jetty/*</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/jetty</Arg>
+
     <!-- uncomment this section to add a session manager with a SecureRandom generator
     <Call name="getServletHandler">
       <Set name="sessionManager">
