@@ -26,6 +26,7 @@ import org.mortbay.http.handler.NullHandler;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URI;
 import org.mortbay.util.Code;
+import org.mortbay.util.IO;
 
 /* ------------------------------------------------------------ */
 /** Servlet Response Wrapper.
@@ -42,10 +43,17 @@ import org.mortbay.util.Code;
 public class ServletHttpResponse implements HttpServletResponse
 {
     public static final int
+        DISABLED=-1,
         NO_OUT=0,
         OUTPUTSTREAM_OUT=1,
         WRITER_OUT=2;
 
+    private static ServletWriter __nullServletWriter =
+            new ServletWriter(IO.getNullStream());
+    
+    private static ServletOut __nullServletOut =
+            new ServletOut(IO.getNullStream());
+    
     private HttpResponse _httpResponse;
     private ServletHttpRequest _servletHttpRequest;
     private int _outputState=NO_OUT;
@@ -143,7 +151,7 @@ public class ServletHttpResponse implements HttpServletResponse
     {
         if (s<0)
         {
-            _outputState=NO_OUT;
+            _outputState=DISABLED;
             if (_writer!=null)
                 _writer.disable();
             _writer=null;
@@ -489,6 +497,9 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public ServletOutputStream getOutputStream() 
     {
+        if (_outputState==DISABLED)
+            return __nullServletOut;
+        
         if (_outputState!=NO_OUT && _outputState!=OUTPUTSTREAM_OUT)
             throw new IllegalStateException();
         
@@ -510,6 +521,9 @@ public class ServletHttpResponse implements HttpServletResponse
     public PrintWriter getWriter()
         throws java.io.IOException 
     {
+        if (_outputState==DISABLED)
+            return __nullServletWriter;
+                                   
         if (_outputState!=NO_OUT && _outputState!=WRITER_OUT)
             throw new IllegalStateException();
         /* if there is no writer yet */

@@ -31,6 +31,13 @@ class ServletWriter extends PrintWriter
     boolean written=false;
     
     /* ------------------------------------------------------------ */
+    ServletWriter(OutputStream os)
+    {
+        super(new OutputStreamWriter(os));
+        this.os=os;
+    }
+    
+    /* ------------------------------------------------------------ */
     ServletWriter(OutputStream os, String encoding)
         throws IOException
     {
@@ -67,6 +74,7 @@ class ServletWriter extends PrintWriter
         return written;
     }
 
+    
     /* ------------------------------------------------------------ */
     public void print(boolean p)  {written=true;super.print(p);}
     public void print(char p)     {written=true;super.print(p);}

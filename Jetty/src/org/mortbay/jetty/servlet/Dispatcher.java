@@ -196,13 +196,15 @@ public class Dispatcher implements RequestDispatcher
             {
                 // Reset any output done so far.
                 servletResponse.resetBuffer();
-                servletHttpResponse.setOutputState(-1);
+                servletHttpResponse.resetBuffer();
+                servletHttpResponse.setOutputState(ServletHttpResponse.DISABLED);
+                servletHttpResponse.setOutputState(ServletHttpResponse.NO_OUT);
             }
             else
             {
                 response.setLocked(true);
                 old_output_state=servletHttpResponse.getOutputState();
-                servletHttpResponse.setOutputState(0); // XXX ????
+                servletHttpResponse.setOutputState(ServletHttpResponse.NO_OUT);
             }
             
 
@@ -257,6 +259,8 @@ public class Dispatcher implements RequestDispatcher
                 request.setPathInfo(PathMap.pathInfo(_pathSpec,_path));
                 request.setQueryString(query);
                 _holder.handle(request,response);
+                if (forward)
+                    servletHttpResponse.setOutputState(ServletHttpResponse.DISABLED);
             }
         }
         finally
@@ -267,7 +271,6 @@ public class Dispatcher implements RequestDispatcher
                 servletHttpResponse.setOutputState(old_output_state);
         }
     }
-    
         
         
 

@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Prevent output after forward
  + Handle ServletRequestWrappers for Generic Servlets
  + Improved handling of UnavailableException
  + Extract WAR files to standard temp directory
