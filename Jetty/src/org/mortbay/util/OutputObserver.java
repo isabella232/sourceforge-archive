@@ -11,7 +11,7 @@ import java.io.OutputStream;
 /* ------------------------------------------------------------ */
 /** Observer output events.
  *
- * @see HttpOutputStream
+ * @see org.mortbay.http.HttpOutputStream
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

@@ -182,7 +182,7 @@ public class HttpRequest extends HttpMessage
         if (_handled)
             return true;
 
-        HttpResponse response= getResponse();
+        HttpResponse response= getHttpResponse();
         return (response!=null && response.getState()!=response.__MSG_EDITABLE);
     }
 

@@ -147,7 +147,6 @@ public class Server extends HttpServer
      * calls to addContext or getContext that result in a new Context
      * being created will return an
      * org.mortbay.jetty.servlet.ServletHttpContext instance.
-     * @param contextPathSpec 
      * @return ServletHttpContext
      */
     protected HttpContext newHttpContext()

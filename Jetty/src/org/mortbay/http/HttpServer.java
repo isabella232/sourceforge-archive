@@ -8,12 +8,8 @@ package org.mortbay.http;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintStream;
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
-import java.util.AbstractCollection;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,12 +17,9 @@ import java.util.Collections;
 import java.util.EventListener;
 import java.util.EventObject;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
 import java.util.WeakHashMap;
 import org.mortbay.http.handler.DumpHandler;
 import org.mortbay.http.handler.NotFoundHandler;
@@ -34,9 +27,7 @@ import org.mortbay.http.handler.ResourceHandler;
 import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LifeCycle;
-import org.mortbay.util.Loader;
 import org.mortbay.util.Log;
-import org.mortbay.util.LogSink;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
 import org.mortbay.util.StringMap;
@@ -491,9 +482,8 @@ public class HttpServer implements LifeCycle,
  
     /* ------------------------------------------------------------ */
     /** Create a new HttpContext.
-     * Specialized HttpServer classes may specialize this method to
+     * Specialized HttpServer classes may override this method to
      * return subclasses of HttpContext.
-     * @param contextPathSpec Path specification relative to the context path. 
      * @return A new instance of HttpContext or a subclass of HttpContext
      */
     protected HttpContext newHttpContext()
@@ -800,7 +790,7 @@ public class HttpServer implements LifeCycle,
 
     /* ------------------------------------------------------------ */
     /** Set the request log.
-     * @param logSink 
+     * @param log RequestLog to use.
      */
     public synchronized void setRequestLog(RequestLog log)
     {
@@ -957,7 +947,6 @@ public class HttpServer implements LifeCycle,
                             (Map.Entry)
                             contextLists.get(i);
                         
-                        String contextPath=(String)entry.getKey();
                         List contextList = (List)entry.getValue();
                 
                         for (int j=0;j<contextList.size();j++)

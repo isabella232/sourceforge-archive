@@ -34,7 +34,7 @@ import org.mortbay.util.OutputObserver;
  *
  * If an incoming request has a known content-encoding, then a input
  * filter stream is inserted to decode the content and the
- * content-ecoding header is removed so that subsequent filters or
+ * content-encoding header is removed so that subsequent filters or
  * servlets will not attempt to decode again.
  *
  * If a request indicates that it will accept a known encoding, then

@@ -5,8 +5,6 @@
 
 package org.mortbay.http;
 import org.mortbay.util.Code;
-import org.mortbay.util.Log;
-
 
 /* ------------------------------------------------------------ */
 /** Jetty version.
