@@ -1742,7 +1742,7 @@ public class HttpContext implements LifeCycle,
         getEncodingMap();
 
         // Setup realm
-        if (_userRealm==null && _realmName!=null)
+        if (_userRealm==null && _authenticator!=null)
         {
             _userRealm=_httpServer.getRealm(_realmName);
             if (_userRealm==null)

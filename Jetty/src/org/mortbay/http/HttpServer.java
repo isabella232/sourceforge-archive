@@ -965,8 +965,19 @@ public class HttpServer implements LifeCycle,
     }
     
     /* ------------------------------------------------------------ */
+    /** Get a named UserRealm.
+     * @param realmName The name of the realm or null.
+     * @return The named realm. If the name is null and only a single realm
+     * is known, that is returned.
+     */
     public UserRealm getRealm(String realmName)
     {
+        if (realmName==null)
+        {
+            if (_realmMap.size()==1)
+                return (UserRealm)_realmMap.values().iterator().next();
+            Code.warning("Null realmName with multiple known realms");
+        }
         return (UserRealm)_realmMap.get(realmName);
     }
     
