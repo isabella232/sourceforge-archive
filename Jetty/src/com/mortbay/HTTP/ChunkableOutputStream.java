@@ -7,6 +7,7 @@ package com.mortbay.HTTP;
 
 import com.mortbay.Util.Code;
 import com.mortbay.Util.IO;
+import com.mortbay.Util.StringUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -110,7 +111,7 @@ public class ChunkableOutputStream extends FilterOutputStream
             try
             {
                 _rawWriterBuffer=new ByteArrayOutputStream(1024);
-                _rawWriter=new OutputStreamWriter(_rawWriterBuffer,"ISO-8859-1");
+                _rawWriter=new OutputStreamWriter(_rawWriterBuffer,StringUtil.__ISO_8859_1);
             }
             catch(IOException e)
             {

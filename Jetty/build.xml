@@ -104,6 +104,7 @@ release     - Cleanup for release
       <include name="com/mortbay/**/*.properties" />
       <exclude name="com/mortbay/Jetty/JettyIndex*.properties" />
     </copydir>
+    <copyfile src="{src.dir}/com/mortbay/Util/configure.dtd" dest="${basedir}/etc/configure.dtd" />
     <javac srcdir="${src.dir}" 
            destdir="${classes}"
            classpath="${libs}"

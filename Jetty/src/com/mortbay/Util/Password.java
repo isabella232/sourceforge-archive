@@ -276,7 +276,7 @@ public class Password
     public static String checksum(String s)
     {
         byte[] b=null;
-        try{b=s.getBytes("ISO-8859-1");}
+        try{b=s.getBytes(StringUtil.__ISO_8859_1);}
         catch(UnsupportedEncodingException e){Code.fail(e);}
         
         CRC32 crc32 = new CRC32();

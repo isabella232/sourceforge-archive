@@ -10,6 +10,7 @@ import com.mortbay.HTTP.HttpFields;
 import com.mortbay.HTTP.HttpRequest;
 import com.mortbay.HTTP.HttpResponse;
 import com.mortbay.Util.Code;
+import com.mortbay.Util.StringUtil;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -419,7 +420,7 @@ public class ServletResponse implements HttpServletResponse
     public String getCharacterEncoding() 
     {
         String encoding=_httpResponse.getCharacterEncoding();
-        return (encoding==null)?"ISO-8859-1":encoding;
+        return (encoding==null)?StringUtil.__ISO_8859_1:encoding;
     }
 
     /* ------------------------------------------------------------ */

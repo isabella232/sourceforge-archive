@@ -518,7 +518,7 @@ public class TestRFC2616
                                    "HTTP/1.0 200 OK\015\012","8.1.2 default")+10;
             offset=t.checkContains(response,offset,
                                    "Connection: close","8.1.2 default")+3;
-            
+
             offset=0;
             response=listener.getResponses("GET /R1 HTTP/1.1\n"+
                                            "Host: localhost\n"+

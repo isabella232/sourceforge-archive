@@ -153,25 +153,21 @@ public class HttpRequest extends HttpMessage
         decodeRequestLine(line_buffer.buffer,line_buffer.size);
         
         // Handle version - replace with fast compare
-        if (__HTTP_0_9.equals(_version))
+        if (__HTTP_1_1.equals(_version))
+        {
+            _dotVersion=1;
+            _version=__HTTP_1_1;
+            _header.read(line_input);
+        }
+        else if (__HTTP_0_9.equals(_version))
         {
             _dotVersion=-1;
             _version=__HTTP_0_9;
         }
         else
         {
-            if (__HTTP_1_1.equals(_version))
-            {
-                _dotVersion=1;
-                _version=__HTTP_1_1;
-            }
-            else if (__HTTP_1_0.equals(_version))
-            {
-                _dotVersion=0;
-                _version=__HTTP_1_0;
-            }
-            
-            // Read headers
+            _dotVersion=0;
+            _version=__HTTP_1_0;
             _header.read(line_input);
         }
 
@@ -732,7 +728,7 @@ public class HttpRequest extends HttpMessage
                             String contentStr = new String(content,
                                                            0,
                                                            content_length,
-                                                           "ISO-8859-1");
+                                                           StringUtil.__ISO_8859_1);
                             UrlEncoded.decodeTo(contentStr,_parameters);
                         }
                         catch (IOException e)

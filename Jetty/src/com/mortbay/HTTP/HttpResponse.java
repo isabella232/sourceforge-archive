@@ -7,6 +7,7 @@ package com.mortbay.HTTP;
 
 import com.mortbay.Util.Code;
 import com.mortbay.Util.UrlEncoded;
+import com.mortbay.Util.StringUtil;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Field;
@@ -306,7 +307,7 @@ public class HttpResponse extends HttpMessage
                  "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
                  " "+reason+
                  "</H2>\n"+(message==null?"":message)+
-                 "\n</BODY>\n</HTML>\n").getBytes("ISO-8859-1");
+                 "\n</BODY>\n</HTML>\n").getBytes(StringUtil.__ISO_8859_1);
             
             _header.putIntField(HttpFields.__ContentLength,buf.length);
             ChunkableOutputStream out=getOutputStream();
@@ -346,7 +347,7 @@ public class HttpResponse extends HttpMessage
                  "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
                  " "+reason+
                  "</H2>\n"+(message==null?"":message)+
-                 "\n</BODY>\n</HTML>\n").getBytes("ISO-8859-1");
+                 "\n</BODY>\n</HTML>\n").getBytes(StringUtil.__ISO_8859_1);
             
             _header.putIntField(HttpFields.__ContentLength,buf.length);
             ChunkableOutputStream out=getOutputStream();

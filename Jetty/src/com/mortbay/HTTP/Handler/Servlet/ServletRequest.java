@@ -13,6 +13,7 @@ import com.mortbay.HTTP.HttpRequest;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.MultiMap;
 import com.mortbay.Util.Resource;
+import com.mortbay.Util.StringUtil;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -599,7 +600,7 @@ class ServletRequest
         {
             try
             {
-                _reader=new BufferedReader(new InputStreamReader(getInputStream(),"ISO-8859-1"));
+                _reader=new BufferedReader(new InputStreamReader(getInputStream(),StringUtil.__ISO_8859_1));
             }
             catch(UnsupportedEncodingException e)
             {

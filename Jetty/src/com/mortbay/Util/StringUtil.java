@@ -8,6 +8,9 @@ package com.mortbay.Util;
 // ====================================================================
 public class StringUtil
 {
+    public static String __ISO_8859_1 =
+        System.getProperty("ISO_8859_1","ISO-8859-1");
+    
     private static char[] lowercases = {
           '\000','\001','\002','\003','\004','\005','\006','\007',
           '\010','\011','\012','\013','\014','\015','\016','\017',

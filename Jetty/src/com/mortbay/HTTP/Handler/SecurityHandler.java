@@ -17,6 +17,7 @@ import com.mortbay.HTTP.UserPrincipal;
 import com.mortbay.Util.B64Code;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.Password;
+import com.mortbay.Util.StringUtil;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -235,7 +236,7 @@ public class SecurityHandler extends NullHandler
             Code.debug("Credentials: "+credentials);
             credentials =
                 credentials.substring(credentials.indexOf(' ')+1);
-            credentials = B64Code.decode(credentials,"ISO-8859-1");
+            credentials = B64Code.decode(credentials,StringUtil.__ISO_8859_1);
             int i = credentials.indexOf(':');
             String username = credentials.substring(0,i);
             String password = credentials.substring(i+1);

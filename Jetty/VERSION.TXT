@@ -1,11 +1,15 @@
 Jetty Versions
 --------------
 
+Jetty-3.0.0.rc2 - 29 Oct 2000
+ + Replaced ISO-8859-1 literals with StringUtil static
  + Pass file based classpath to JspServlet (see README).
  + Prevented multiple init of ServletHolder
  + ErlEncoding treats params without values as empty rather than null.
  + Accept public DTD for XmlConfiguration (old style still supported).
  + Cleaned up non persistent connection close.
+ + Accept HTTP/1. as HTTP/1.0 (for netscape bug).
+ + Fixed thread name problem in ThreadPool
 
 Jetty-3.0.0.rc1 - 22 Oct 2000
  + Added simple admin servlet.

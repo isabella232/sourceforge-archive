@@ -11,6 +11,7 @@ import com.mortbay.HTTP.HttpFields;
 import com.mortbay.HTTP.HttpRequest;
 import com.mortbay.HTTP.HttpResponse;
 import com.mortbay.Util.Code;
+import com.mortbay.Util.StringUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,7 +61,7 @@ public class DumpHandler extends NullHandler
                           HttpFields.__TextHtml);
         ChunkableOutputStream out = response.getOutputStream();
         ByteArrayOutputStream buf = new ByteArrayOutputStream(2048);
-        Writer writer = new OutputStreamWriter(buf,"ISO-8859-1");
+        Writer writer = new OutputStreamWriter(buf,StringUtil.__ISO_8859_1);
         writer.write("<HTML><H1>Dump HttpHandler</H1>");
         writer.write("<PRE>\npath="+request.getPath()+
                     "\ncontextPath="+getHandlerContext().getContextPath()+

@@ -269,6 +269,7 @@ public class ThreadPool
      */
     synchronized public void start()
     {
+        getName();
         if (_running)
         {
             Code.debug("Already started");

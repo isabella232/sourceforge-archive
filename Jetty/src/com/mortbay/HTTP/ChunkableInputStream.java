@@ -7,6 +7,7 @@ package com.mortbay.HTTP;
 
 import com.mortbay.Util.Code;
 import com.mortbay.Util.LineInput;
+import com.mortbay.Util.StringUtil;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,7 +51,7 @@ public class ChunkableInputStream extends FilterInputStream
     {
         super(null);
         try {
-            _realIn= new LineInput(in,0,"ISO-8859-1");
+            _realIn= new LineInput(in,0,StringUtil.__ISO_8859_1);
         }
         catch(UnsupportedEncodingException e)
         {

@@ -300,49 +300,6 @@ public class HttpConnection
                 // service the request
                 service(_request,_response);
             
-                // Complete the request
-                if (_persistent)
-                {
-                    try{
-                        // Read remaining input
-                        while(_inputStream.skip(4096)>0 ||
-                              _inputStream.read()>=0);
-                    }
-                    catch(IOException e)
-                    {
-                        if (_inputStream.getContentLength()>0)
-                            _inputStream.setContentLength(0);
-                        _persistent=false;
-                        throw new HttpException(_response.__400_Bad_Request,
-                                                "Missing Content");
-                    }
-                        
-                    // Check for no more content
-                    if (_inputStream.getContentLength()>0)
-                    {
-                        _inputStream.setContentLength(0);
-                        _persistent=false;
-                        throw new HttpException(_response.__400_Bad_Request,
-                                                "Missing Content");
-                    }
-                        
-                    // Commit the response
-                    if (!_response.isCommitted())
-                        _response.commit();
-                    _inputStream.resetStream();
-                    if (_outputStream.isChunking())
-                        _outputStream.endChunking(); 
-                    else
-                        _outputStream.resetStream();
-                }
-                else
-                {
-                    _response.commit();
-                    _outputStream.flush();
-                }
-                    
-                if (Code.debug())
-                    Code.debug("RESPONSE:\n",_response); 
             } 
             catch (InterruptedIOException e)
             {
@@ -359,6 +316,57 @@ public class HttpConnection
             catch (Error e)         {exception(e);}
             finally
             {
+                // Complete the request
+                if (_persistent)
+                {
+                    try{
+                        // Read remaining input
+                        while(_inputStream.skip(4096)>0 ||
+                              _inputStream.read()>=0);
+                    }
+                    catch(IOException e)
+                    {
+                        if (_inputStream.getContentLength()>0)
+                            _inputStream.setContentLength(0);
+                        _persistent=false;
+                        exception(new HttpException(_response.__400_Bad_Request,
+                                                    "Missing Content"));
+                    }
+                        
+                    // Check for no more content
+                    if (_inputStream.getContentLength()>0)
+                    {
+                        _inputStream.setContentLength(0);
+                        _persistent=false;
+                        exception (new HttpException(_response.__400_Bad_Request,
+                                                     "Missing Content"));
+                    }
+                        
+                    // Commit the response
+                    try{
+                        if (!_response.isCommitted())
+                            _response.commit();
+                        _inputStream.resetStream();
+                        if (_outputStream.isChunking())
+                            _outputStream.endChunking(); 
+                        else
+                            _outputStream.resetStream();
+                    }
+                    catch(IOException e) {exception(e);}
+                }
+                else
+                {
+                    try{
+                        _response.commit();
+                        _outputStream.flush();
+                        _outputStream.close();
+                    }
+                    catch(IOException e) {exception(e);}
+                }
+                    
+                if (Code.debug())
+                    Code.debug("RESPONSE:\n",_response);
+                
                 if (logRequest && _httpServer!=null)
                     _httpServer.log(_request,_response);
             
@@ -370,7 +378,7 @@ public class HttpConnection
                 _request=null;;
                 _response=null;
             }    
-        }while(_persistent && !_handlingThread.interrupted());
+        }while(_persistent);
         
         _handlingThread=null; 
         try{

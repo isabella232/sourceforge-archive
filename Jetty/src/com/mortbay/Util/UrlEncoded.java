@@ -211,7 +211,7 @@ public class UrlEncoded extends MultiMap
 
         try
         {    
-            return new String(bytes,0,n,"ISO-8859-1");
+            return new String(bytes,0,n,StringUtil.__ISO_8859_1);
         }
         catch(UnsupportedEncodingException e)
         {
@@ -231,7 +231,7 @@ public class UrlEncoded extends MultiMap
         byte[] bytes=null;
         try
         {
-            bytes=string.getBytes("ISO-8859-1");
+            bytes=string.getBytes(StringUtil.__ISO_8859_1);
         }
         catch(UnsupportedEncodingException e)
         {
@@ -281,7 +281,7 @@ public class UrlEncoded extends MultiMap
         
         try
         {    
-            return new String(encoded,0,n,"ISO-8859-1");
+            return new String(encoded,0,n,StringUtil.__ISO_8859_1);
         }
         catch(UnsupportedEncodingException e)
         {
