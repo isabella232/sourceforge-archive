@@ -9,6 +9,6 @@
 #JAVACOPTIONS :=
 TESTS :=
 ROOTNAME := javax
-SUBDIRS := tagext
+SUBDIRS := 
 
 include $(JETTY_HOME)/etc/Global.mk
