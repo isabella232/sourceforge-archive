@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Added AbstractSessionManager
+ + Support Random Session IDs in HashSessionManager.
  + Common handling of TRACE 
  + Updated tutorial and FAQ
  + Reduce object count and add hash width to StringMap

@@ -71,6 +71,16 @@
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/jetty</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
     <Arg type="boolean">false</Arg> <!-- dont expand war -->
+
+    <!-- uncomment this section to add a session manager with a SecureRandom generator
+    <Call name="getServletHandler">
+      <Set name="sessionManager">
+        <New class="org.mortbay.jetty.servlet.HashSessionManager">
+          <Arg><New class="java.security.SecureRandom"/></Arg>
+        </New>
+      </Set>
+    </Call>
+    -->
   </Call>
 
   <Call name="addWebApplication">

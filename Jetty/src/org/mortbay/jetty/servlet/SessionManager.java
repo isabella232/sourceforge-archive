@@ -21,6 +21,9 @@ public interface SessionManager extends LifeCycle
     /* ------------------------------------------------------------ */
     public final static String __SessionId  = "jsessionid";
     public final static String __SessionUrlPrefix = ";"+__SessionId+"=";
+
+    /* ------------------------------------------------------------ */
+    public void initialize(ServletHandler handler);
     
     /* ------------------------------------------------------------ */
     public HttpSession getHttpSession(String id);

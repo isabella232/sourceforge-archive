@@ -205,6 +205,7 @@ public class NCSARequestLog implements RequestLog
                         _out.print('"');
                     }
                 }
+                _out.println();
                 _out.flush();
                 _buf.writeTo(_fileOut);
                 _buf.reset();

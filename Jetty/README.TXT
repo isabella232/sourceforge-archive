@@ -398,6 +398,28 @@ Specific access should be granted with constraints like:
   </security-constraint>
 
 
+Session Security
+----------------
+Jetty uses the standard java.util.Random class to generate session IDs.  This
+may be insufficient for high security sites.  The SessionManager instance can
+be initialized with a more secure random number generator, such as java.security.SecureRandom
+The XML to do this to a webapplication is:
+
+  <Call name="addWebApplication">
+    <Arg>/myapp/*</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/myapp</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
+    <Arg type="boolean">false</Arg> 
+    <Call name="getServletHandler">
+      <Set name="sessionManager">
+        <New class="org.mortbay.jetty.servlet.HashSessionManager">
+          <Arg><New class="java.security.SecureRandom"/></Arg>
+        </New>
+      </Set>
+    </Call>
+  </Call>
+
+
 XML Parsing
 -----------
 Jetty comes with the JAXP 1.1 reference XML parser, which is crimson from

@@ -66,6 +66,10 @@ import org.mortbay.util.URI;
  * This handler maps requests to servlets that implement the
  * javax.servlet.http.HttpServlet API.
  *
+ * If a SessionManager is not added to the handler before it is
+ * initialized, then a HashSessionManager with a standard
+ * java.util.Random generator is created.
+ * 
  * @version $Id$
  * @author Greg Wilkins
  */
@@ -104,9 +108,7 @@ public class ServletHandler
     /* ------------------------------------------------------------ */
     public void initialize(HttpContext context)
     {
-        if (_sessionManager==null)
-            _sessionManager = new HashSessionManager(this);
-        
+        SessionManager sessionManager=getSessionManager();
         super.initialize(context);
         if (context instanceof ServletHttpContext)
         {
@@ -114,6 +116,7 @@ public class ServletHandler
             servletHttpContext.setServletHandler(this);
             servletHttpContext.setServletContext(_context);
         }
+        sessionManager.initialize(this);
     }
 
     /* ------------------------------------------------------------ */
@@ -126,7 +129,7 @@ public class ServletHandler
     public SessionManager getSessionManager()
     {
         if (_sessionManager==null)
-            _sessionManager = new HashSessionManager(this);
+            _sessionManager = new HashSessionManager();
         return _sessionManager;
     }
     

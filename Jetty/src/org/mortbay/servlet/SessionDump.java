@@ -58,8 +58,6 @@ public class SessionDump extends HttpServlet
         if (action.equals("New Session"))
         {   
             session = request.getSession(true);
-            if ("on".equals(request.getParameter("Dump")))
-                nextUrl="/demo/dump";
         }
         else 
         if (session!=null)
@@ -106,7 +104,6 @@ public class SessionDump extends HttpServlet
         if (session==null)
         {
             page.add("<H1>No Session</H1>");
-            tf.addCheckbox("Dump","Dump new session request",false);
             tf.addButton("Action","New Session");
         }
         else
