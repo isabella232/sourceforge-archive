@@ -1,7 +1,12 @@
 Jetty Versions
 --------------
 
- + Stop/Start filtesr in declaration order.
+Jetty-4.2.0pre0 ...
+ + New ThreadPool implementation.
+ + New Buffering implementation.
+
+Jetty-4.1.2 ...
+ + Stop/Start filters in declaration order.
  + Some AJP13 optimizations.
  + Use "standard" names for default,jsp & invoker servlets.
 
