@@ -80,6 +80,27 @@ public class LogMBean extends ModelMBeanImpl
         super.postRegister(ok);    
         if (ok.booleanValue())
             rescanSinks();
+    }    
+
+    /* ------------------------------------------------------------ */
+    public void preDeregister()
+    {
+        super.preDeregister();
+        
+        Iterator iter=_sinks.keySet().iterator();
+        while(iter.hasNext())
+        {
+            try
+            {
+                LogSink sink=(LogSink)iter.next();
+                LogSinkMBean bean=(LogSinkMBean)_sinks.remove(sink);
+                getMBeanServer().unregisterMBean(bean.getObjectName());
+            }
+            catch(Exception e)
+            {
+                Code.warning(e);
+            }
+        }
     }
     
     /* ------------------------------------------------------------ */
