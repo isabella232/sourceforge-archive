@@ -190,8 +190,8 @@ Loading and reloading of servlets can be controlled by accessing
 
 
 
-Running a simple File Servler
------------------------------
+Running a simple File Server
+----------------------------
 The com.mortbay.HTTP.Configure.FileServer class runs a file
 server.  Help for this class can be obtained by running
 
