@@ -120,6 +120,12 @@ public abstract class Credential
         }
         
         /* ------------------------------------------------------------ */
+        public byte[] getDigest()
+        {
+            return _digest;
+        }
+        
+        /* ------------------------------------------------------------ */
         public boolean check(Object credentials)
         {
             try
@@ -137,16 +143,24 @@ public abstract class Credential
                         __md.update(credentials.toString().getBytes(StringUtil.__ISO_8859_1));
                         digest=__md.digest();
                     }
+                    if (digest==null || digest.length!=_digest.length)
+                        return false;
+                    for (int i=0;i<digest.length;i++)
+                        if (digest[i]!=_digest[i])
+                            return false;
+                    return true;
+                }
+                else if(credentials instanceof Credential)
+                {
+                    // Allow credential to attempt check - i.e. this'll work
+                    // for DigestAuthenticator$Digest credentials
+                    return ((Credential)credentials).check(this);
                 }
                 else
+                {
                     log.warn("Can't check "+credentials.getClass()+" against MD5");
-                
-                if (digest==null || digest.length!=_digest.length)
                     return false;
-                for (int i=0;i<digest.length;i++)
-                    if (digest[i]!=_digest[i])
-                        return false;
-                return true;
+                }
             }
             catch (Exception e)
             {

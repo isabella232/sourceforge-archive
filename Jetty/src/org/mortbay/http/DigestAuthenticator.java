@@ -286,16 +286,24 @@ public class DigestAuthenticator implements Authenticator
             
             try{
                 MessageDigest md = MessageDigest.getInstance("MD5");
-                
-                // calc A1 digest
-                md.reset();
-                md.update(username.getBytes(StringUtil.__ISO_8859_1));
-                md.update((byte)':');
-                md.update(realm.getBytes(StringUtil.__ISO_8859_1));
-                md.update((byte)':');
-                md.update(password.getBytes(StringUtil.__ISO_8859_1));
-                byte[] ha1=md.digest();
-
+                byte[] ha1;
+                if(credentials instanceof Credential.MD5)
+                {
+                    // Credentials are already a MD5 digest - assume it's in
+                    // form user:realm:password (we have no way to know since 
+                    // it's a digest, alright?)
+                    ha1 = ((Credential.MD5)credentials).getDigest();
+                }
+                else
+                {
+                    // calc A1 digest
+                    md.update(username.getBytes(StringUtil.__ISO_8859_1));
+                    md.update((byte)':');
+                    md.update(realm.getBytes(StringUtil.__ISO_8859_1));
+                    md.update((byte)':');
+                    md.update(password.getBytes(StringUtil.__ISO_8859_1));
+                    ha1=md.digest();
+                }
                 // calc A2 digest
                 md.reset();
                 md.update(method.getBytes(StringUtil.__ISO_8859_1));
