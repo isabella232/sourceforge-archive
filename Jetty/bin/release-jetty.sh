@@ -6,7 +6,7 @@ then
     exit 1
 fi
 
-CVS_RSH=ssh1
+CVS_RSH=ssh
 export CVS_RSH
 
 CVS_ARGS=-d$1@cvs.jetty.sourceforge.net:/cvsroot/jetty
@@ -35,7 +35,7 @@ read Y
     cd ..
     mv Jetty3 Jetty-$VERSION
     tar cfz /usr/local/archive/Jetty-${VERSION}.tgz --exclude Jetty-$VERSION/classes Jetty-$VERSION
-    cd /usr/local/java/jetty
+    cd /usr/local/share/java/jetty
     tar xfz /usr/local/archive/Jetty-${VERSION}.tgz
 
 } 2>&1 | tee /tmp/release-jetty.log
