@@ -201,7 +201,7 @@ abstract public class ThreadedServer extends ThreadPool
         if (isRunning())
         {
             Code.debug( "Restart for ", address );
-            stop();
+            destroy();
             start();
         }
     }
@@ -299,7 +299,7 @@ abstract public class ThreadedServer extends ThreadPool
         catch(IOException e)
         {
             Code.warning(e);
-            stop();
+            destroy();
             throw new Error(e.toString());
         }        
     }
