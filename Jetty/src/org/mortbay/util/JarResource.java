@@ -81,11 +81,11 @@ public class JarResource extends Resource
     }
     
     /* ------------------------------------------------------------ */
-    public void extract(File directory, boolean deleteOnExit)
+    public static void extract(Resource resource, File directory, boolean deleteOnExit)
         throws IOException
     {
-        Code.debug("Extract ",this," to ",directory);
-        JarInputStream jin = new JarInputStream(getInputStream());
+        Code.debug("Extract ",resource," to ",directory);
+        JarInputStream jin = new JarInputStream(resource.getInputStream());
         JarEntry entry=null;
         while((entry=jin.getNextJarEntry())!=null)
         {
@@ -111,5 +111,12 @@ public class JarResource extends Resource
             if (deleteOnExit)
                 file.deleteOnExit();
         }
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void extract(File directory, boolean deleteOnExit)
+        throws IOException
+    {
+        extract(this,directory,deleteOnExit);
     }   
 }

@@ -117,7 +117,11 @@ public class WebApplicationContext extends ServletHttpContext
         _war=webApp;
     }
     
-
+    /* ------------------------------------------------------------ */
+    private void extractWAR()
+    {
+    }
+    
     /* ------------------------------------------------------------ */
     private void resolveWebApp()
         throws IOException
@@ -126,32 +130,60 @@ public class WebApplicationContext extends ServletHttpContext
         {
             // Set dir or WAR
             _webApp = Resource.newResource(_war);
+
+            if (Code.debug())
+                Code.debug("Try webapp=",_webApp+
+                           ", exists="+_webApp.exists()+
+                           ", directory="+_webApp.isDirectory());
+            
+            // Is the WAR usable directly?
             if (_webApp.exists() &&
                 !_webApp.isDirectory() &&
                 !_webApp.toString().startsWith("jar:"))
             {
-                _webApp = Resource.newResource("jar:"+_webApp+"!/");
-                if (_webApp.exists())
+                // No - then lets see if it can be turned into a jar URL.
+                Resource jarWebApp = Resource.newResource("jar:"+_webApp+"!/");
+                if (jarWebApp.exists() && jarWebApp.isDirectory())
+                {
+                    _webApp=jarWebApp;
                     _war=_webApp.toString();
+                    if (Code.debug())
+                        Code.debug("Try webapp=",_webApp+
+                                   ", exists="+_webApp.exists()+
+                                   ", directory="+_webApp.isDirectory());
+                }
             }
-            if (!_webApp.exists()) {
-                Code.warning("Web application not found "+_war);
-                throw new java.io.FileNotFoundException(_war);
-            }
+
             
-            // Expand
-            if (_extract && _webApp instanceof JarResource)
-            {                
+            // If we should extract or the URL is still not usable
+            if (_webApp.exists() && (_extract  || !_webApp.isDirectory()))
+            {
+                // Then extract it.
                 File tempDir=new File(getTempDirectory(),"webapp");
                 if (tempDir.exists())
                     tempDir.delete();
                 tempDir.mkdir();
                 tempDir.deleteOnExit();
                 Log.event("Extract "+_war+" to "+tempDir);
-                ((JarResource)_webApp).extract(tempDir,true);
+                JarResource.extract(_webApp,tempDir,true);
                 _webApp=Resource.newResource(tempDir.getCanonicalPath());
+                
+                if (Code.debug())
+                    Code.debug("Try webapp=",_webApp+
+                               ", exists="+_webApp.exists()+
+                               ", directory="+_webApp.isDirectory());
+            }
+            
+            // Now do we have something usable?
+            if (!_webApp.exists() || !_webApp.isDirectory())
+            {
+                Code.warning("Web application not found "+_war);
+                throw new java.io.FileNotFoundException(_war);
             }
 
+            Code.debug("webapp=",_webApp);
+
+            // Iw there a WEB-INF directory?
             _webInf = _webApp.addPath("WEB-INF/");
             if (!_webInf.exists() || !_webInf.isDirectory())
                 _webInf=null;

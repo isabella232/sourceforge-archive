@@ -13,7 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.Permission;
-
+import java.lang.reflect.Method;
 
 /* ------------------------------------------------------------ */
 /** Abstract resource class.
@@ -28,7 +28,7 @@ public class Resource
     protected String _urlString;
     protected URLConnection _connection;
     protected InputStream _in=null;
-
+    
     /* ------------------------------------------------------------ */
     public static Resource newResource(URL url)
         throws IOException
@@ -198,6 +198,7 @@ public class Resource
             }
             catch(IOException e)
             {
+                e.printStackTrace();
                 Code.ignore(e);
             }
         }

@@ -211,6 +211,7 @@ Other targets:
     <delete file="${mini.http.jar}" quiet="true"/>
     <jar jarfile="${jetty.jar}" basedir="${classes}" manifest="${src}/org/mortbay/MANIFEST.MF" >
        <include name="org/mortbay/**"  />
+       <include name="org/jboss/**"  />
     </jar>
   </target>
 

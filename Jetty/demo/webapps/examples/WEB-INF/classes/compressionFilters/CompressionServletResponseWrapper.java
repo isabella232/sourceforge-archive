@@ -166,7 +166,6 @@ public class CompressionServletResponseWrapper extends HttpServletResponseWrappe
      * Finish a response.
      */
     public void finishResponse() {
-        System.err.println("Finished COMPRESSED response");
         try {
             if (writer != null) {
                 writer.close();
@@ -237,7 +236,18 @@ public class CompressionServletResponseWrapper extends HttpServletResponseWrappe
 
     }
 
-
+    public void setHeader(String name, String value)
+    {
+        if (!"Content-Length".equalsIgnoreCase(name))
+            super.setHeader(name,value);
+    }
+    
+    public void setIntHeader(String name, int value)
+    {
+        if (!"Content-Length".equalsIgnoreCase(name))
+            super.setIntHeader(name,value);
+    }
+    
     public void setContentLength(int length) {
     }
 
