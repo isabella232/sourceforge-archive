@@ -1088,19 +1088,17 @@ public class TestHarness
                 LineInput lin= new LineInput(in);
                 while((line=lin.readLine())!=null)
                 {
-                    Code.debug("Line ",line);
+                    Code.debug("Line ",line);		    
                     if ("Exit".equals(line))
                         return;
                 }
             }
             catch(Error e)
             {
-		System.err.println(e);
                 Code.ignore(e);
             }
             catch(Exception e)
             {
-		System.err.println(e);
                 Code.ignore(e);
             }
             finally
@@ -1336,7 +1334,6 @@ public class TestHarness
 	    r = b.addPath("UnknownFile");
 	    t.check(!r.exists(),"AddPath resource ! exists");
 	    r = b.addPath("/Resource.java");
-	    System.err.println(r);
 	    t.check(r.exists(),"AddPath resource exists");
 	    r = b.addPath("/UnknownFile");
 	    t.check(!r.exists(),"AddPath resource ! exists");
@@ -1493,27 +1490,27 @@ public class TestHarness
     {
         try
         {
-        	    testMultiMap();
-       	    testQuotedStringTokenizer();            
-       	    testDateCache();
-       	    testTest();
-       	    testLog();
-       	    testFrame();
-       	    testCode();
-       	    testDataHelper();
-       	    testBlockingQueue();
-       	    testIO();
-       	    testUrlEncoded();
-       	    testURI();
+//  	    testMultiMap();
+//         	    testQuotedStringTokenizer();            
+//         	    testDateCache();
+//         	    testTest();
+//         	    testLog();
+//         	    testFrame();
+//         	    testCode();
+//         	    testDataHelper();
+//         	    testBlockingQueue();
+//         	    testIO();
+//         	    testUrlEncoded();
+//         	    testURI();
        	    testLineInput();
-     	    testThreadPool();
-     	    testThreadedServer();
-       	    testB64();
-       	    testZipResource();
-       	    PropertyTreeTest.test();
-      	    resourceTest();
-     	    testXmlParser();
- 	    testXmlConfiguration();
+//       	    testThreadPool();
+       	    testThreadedServer();
+//         	    testB64();
+//         	    testZipResource();
+//         	    PropertyTreeTest.test();
+//        	    resourceTest();
+//       	    testXmlParser();
+//   	    testXmlConfiguration();
         }
         catch(Throwable th)
         {

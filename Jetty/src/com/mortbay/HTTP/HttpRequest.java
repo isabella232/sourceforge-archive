@@ -670,7 +670,7 @@ public class HttpRequest extends HttpMessage
                         Code.warning("No contentLength for "+
                                      HttpFields.__WwwFormUrlEncode);
                     else
-                    {          
+                    {
                         try
                         {
                             // Read the content
@@ -688,11 +688,13 @@ public class HttpRequest extends HttpMessage
                             while ((content_length - offset) > 0);
 
                             // Add form params to query params
-                            UrlEncoded.decodeTo(new String(content,
-                                                           0,
-                                                           content_length,
-                                                           "ISO-8859-1"),
-                                                _parameters);
+                            String contentStr = new String(content,
+							   0,
+							   content_length,
+							   "ISO-8859-1");
+			    System.err.println("CONTENT="+content_length+
+					       ": '"+contentStr+"'");
+                            UrlEncoded.decodeTo(contentStr,_parameters);
                         }
                         catch (IOException e)
                         {
@@ -839,7 +841,9 @@ public class HttpRequest extends HttpMessage
     /* ------------------------------------------------------------ */
     public boolean isUserInRole(String role)
     {
-	Code.warning("Temp implementation");
+	Code.debug("XXX - WARNING Temp implementation");
+
+	// This role is true for any authenticated user
 	if ("com.mortbay.HTTP.HttpRequest.ANY_ROLE".equals(role))
 	{
 	    return getAttribute(HttpRequest.__AuthUser)!=null;

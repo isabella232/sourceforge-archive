@@ -87,6 +87,7 @@ public class SocketListener
         try
         {
             Code.debug("ACCEPT:",socket);
+	    socket.setSoLinger(true,30000);
             HttpConnection connection =
                 new SocketConnection(socket);
             connection.handle();

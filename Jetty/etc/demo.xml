@@ -65,7 +65,7 @@ $ID: $
     </Arg>
   </Call>
 
-  <!--
+<!--
   <Call name="addListener">
     <Arg>
       <New class="com.mortbay.HTTP.SunJsseListener">
@@ -74,19 +74,15 @@ $ID: $
         <Set name="MaxThreads">255</Set>
         <Set name="MaxIdleTimeMs">50000</Set>
 	<Set name="Password">password</Set>
-	<Set name="KeyPassword">password</Set>
+	<Set name="KeyPassword">keypassword</Set>
       </New>
     </Arg>
   </Call>
-  -->
+-->
 
   <Call name="addWebApplication">
     <Arg>/</Arg>
     <Arg>file:<SystemProperty name="user.dir"/>/webapps/jetty/</Arg>
-    <Call name="addUser">
-      <Arg>admin</Arg>
-      <Arg>OBF:1u2a1toa1w8v1tok1u30</Arg>
-    </Call>
   </Call>
 
   <Call name="addContext">

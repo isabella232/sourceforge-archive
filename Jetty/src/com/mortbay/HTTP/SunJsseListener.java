@@ -40,14 +40,21 @@ public class SunJsseListener extends JsseListener
     }
 
     /* ------------------------------------------------------------ */
-    private Password _password ;
+    private String _keystore=DEFAULT_KEYSTORE ;
+    public void setKeystore(String keystore)
+    {
+	_keystore = keystore;
+    }
+    
+    /* ------------------------------------------------------------ */
+    private Password _password;
     public void setPassword(String password)
     {
 	_password = new Password(PASSWORD_PROPERTY,password);
     }
     
     /* ------------------------------------------------------------ */
-    private Password _keypassword ;
+    private Password _keypassword;
     public void setKeyPassword(String password)
     {
 	_keypassword = new Password(KEYPASSWORD_PROPERTY,password);
@@ -84,9 +91,9 @@ public class SunJsseListener extends JsseListener
     protected SSLServerSocketFactory createFactory()
         throws Exception
     {
-        String keystore = System.getProperty( KEYSTORE_PROPERTY,
-					      DEFAULT_KEYSTORE );
-	Log.event(KEYSTORE_PROPERTY+"="+keystore);
+        _keystore = System.getProperty( KEYSTORE_PROPERTY,_keystore);
+	
+	Log.event(KEYSTORE_PROPERTY+"="+_keystore);
 
 	if (_password==null)
 	    _password = new Password(PASSWORD_PROPERTY);
@@ -101,7 +108,7 @@ public class SunJsseListener extends JsseListener
 	try
 	{
 	    KeyStore ks = KeyStore.getInstance( "JKS" );
-	    ks.load( new FileInputStream( new File( keystore ) ),
+	    ks.load( new FileInputStream( new File( _keystore ) ),
 		     _password.getCharArray());
 	    
 	    KeyManagerFactory km = KeyManagerFactory.getInstance( "SunX509"); 

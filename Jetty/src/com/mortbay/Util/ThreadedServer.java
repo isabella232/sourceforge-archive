@@ -232,13 +232,13 @@ abstract public class ThreadedServer extends ThreadPool
         }
         finally
         {
-            try {
-		if (_lingerTimeSecs>=0)
-		    connection.setSoLinger(true,_lingerTimeSecs);
-		else
-		    connection.setSoLinger(false,0);
-	    }
-            catch ( Exception e ){Code.ignore(e);}
+	    try {
+  		if (_lingerTimeSecs>=0)
+  		    connection.setSoLinger(true,_lingerTimeSecs);
+  		else
+  		    connection.setSoLinger(false,0);
+  	    }
+	    catch ( Exception e ){Code.ignore(e);}
             try {connection.close();}
             catch ( Exception e ){Code.warning("Connection problem",e);}
             connection=null;

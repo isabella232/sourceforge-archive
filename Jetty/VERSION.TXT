@@ -1,11 +1,12 @@
 Stable 2.4.6
-Dev    3.0.B01
+Dev    3.0.B02
 
+Jetty-3.0.B02 - 24st Aug 2000
+ + Fixed LineInput bug with SSL giving CR pause LF.
  + Fixed HTTP/1.0 input close bug
  + Fixed bug in TestRFC2616
  + Improved ThreadedServer stop and destroy
  + Use resources in WebApplication
-
 
 Jetty-3.0.B01 - 21st Aug 2000
  + SSL implemented with JsseListener

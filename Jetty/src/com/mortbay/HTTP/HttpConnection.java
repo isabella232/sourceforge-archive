@@ -362,6 +362,7 @@ public class HttpConnection
             // service the request
             service(_request,_response);
 	    
+	    
             // Complete the request
             if (_persistent)
             {
@@ -397,6 +398,8 @@ public class HttpConnection
             else
             {
                 _response.commit();
+                _outputStream.flush();
+		Thread.sleep(50);
                 _outputStream.close();
             }
 
@@ -517,6 +520,7 @@ public class HttpConnection
                 _response.destroy();
 	    _response=null;
         }
+	
         return _persistent;
     }
 
