@@ -77,11 +77,16 @@ public class Block extends Composite
     public void write(Writer out)
 	 throws IOException
     {
-	out.write("<"+tag+' '+attributes()+">");
-	super.write(out);
-	out.write("</"+tag+"\n>");
+	out.write('<');
+	out.write(tag);
+	out.write(' ');
+	out.write(attributes());
+	out.write('>');
+        super.write(out);
+        out.write("</");
+        out.write(tag);
+        out.write("\n>");
     }
-
 }
 
 
