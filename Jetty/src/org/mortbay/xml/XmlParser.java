@@ -34,6 +34,10 @@ import org.xml.sax.helpers.DefaultHandler;
 /** XML Parser wrapper.
  * This class wraps any standard JAXP1.1 parser with convieniant error and
  * entity handlers and a mini dom-like document tree.
+ * <P>
+ * By default, the parser is created as a validating parser. This can be 
+ * changed by setting the "org.mortbay.xml.XmlParser.NotValidating"
+ * system property to true.
  *
  * @version $Id$
  * @author Greg Wilkins (gregw)

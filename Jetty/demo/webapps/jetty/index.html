@@ -9,23 +9,33 @@ extensible and flexible:
 <BR>&nbsp;
 <TABLE><TR><TD VALIGN=top>
 <UL>
-  <LI><A HREF="#Java">100% Java Server</A>
+  <LI><A HREF="#Java">100% Java</A>
   <LI><A HREF="#Open">Open Source</A>
-  <LI><A HREF="#HTTP11">HTTP Protocol 1.1</A>
-  <LI><A HREF="#Servlets">Servlet API 2.3</A>
-  <LI><A HREF="#JSP">Java Server Pages 1.2</A>
+  <LI><A HREF="#HTTP11">HTTP/1.1</A>
+  <LI><A HREF="#Servlets">Servlet 2.3</A>
+  <LI><A HREF="#JSP">JSP 1.2</A>
   <LI><A HREF="#SSL">SSL Support</A>
 </UL>
-</TD><TD VALIGN=top>
+</TD>
+
+<TD VALIGN=top>
 <UL>
-  <LI><A HREF="#Modular">Modular Architecture</A>  
+  <LI><A HREF="#EJB">J2EE</A>
+  <LI><A HREF="#Proven">Proven</A>
+  <LI><A HREF="#Modular">Modular</A>  
   <LI><A HREF="#Embeddable">Embeddable</A>
-  <LI><A HREF="#Efficient">Small & Efficient</A>
-  <LI><A HREF="#Config">Flexible Configuration</A>
-  <LI><A HREF="#HTML">HTML Generation</A>.
-  <LI><A HREF="#EJB">J2EE & JMX Integration</A>.
+  <LI><A HREF="#Efficient">Efficient</A>
+  <LI><A HREF="#Config">Flexible</A>
 </UL>
-</TD></TR>
+</TD>
+
+<TD VALIGN=top>
+<UL>
+  <LI><small><A href="http://www.meduzo.com">&#26085;&#26412;&#35486;&#12398;&#35299;&#35500;</A></small>
+</UL>
+</TD>
+
+</TR>
 </TABLE>
 <P>
 It was originally written by Greg Wilkins, founder of <A
@@ -121,7 +131,7 @@ WWW centric application architecture. Examples of embedded Jetty usage include:<
 
 
 <A NAME="Efficient"></A>
-<BR>&nbsp;<H3>Small & Efficient</H3>
+<H3>Small & Efficient</H3>
 Jetty has been optimized by commercial and experimental use since 1995 and
 a small and efficient server is the result: <UL>
   <LI>A HTTP server can be configured in a jar file under 200KB.
@@ -141,21 +151,18 @@ provide.  The configuration of a server is controlled by:<UL>
   <LI>XML configuration.
 </UL>
 
-<A NAME="HTML"></A>
-<H3>HTML Generation</H3>
-While HTML is a simple language to learn and write, it can be also be
-very tedious, contrived and error prone.  Furthermore, authored HTML
-is a static resource and cannot be customized to each request or updated
-from a database.
-<P>
-Jetty comes with a rich HTML generation package that can be used on its
-own, with another servlet server or in Jetty servlets. Supported for
-templated look and feel is a key element of this package.
+<A NAME="Proven"></A>
+<H3>Proven in Production</H3>
+Jetty has been widely used in projects and applications from hand helds to
+main frames.   Jetty is shipped in products from major companies such as <A
+href http://www.ibm.com>IBM</a> and <A href=http://www.cisco.com>Cisco</A>,
+plus it has been bundled as the default server in other open source projects
+including <A href="http://www.jboss.org">JBoss</A>, 
+<A href="http://www.jxta.org">JXTA</A> and others.
+
 
 <A NAME="EJB"></A>
 <BR>&nbsp;<H3>J2EE Integration</H3>
-Jetty has been instrumented as JMX model MBeans which allows it
-to be seamlessly integrated into the <A HREF="http://www.jboss.org/developers/jboss-jetty.jsp">JBoss</A> J2EE application server. This gives a complete J2EE solution with HTTP, Servlets, JSPs and EJBs all within a single JVM.
-
+Jetty is now the default server and web container for the <A HREF="http://www.jboss.org">JBoss</A> J2EE application server. This gives a complete J2EE solution with HTTP, Servlets, JSPs and EJBs all within a single JVM.
 <P>
 &nbsp;

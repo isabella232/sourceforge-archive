@@ -120,6 +120,10 @@ public class Compiler {
 
 	if (!isOutDated())
             return false;
+	synchronized(Compiler.class)
+	{
+	    if (!isOutDated())
+                return false;
 
         String javaFileName = mangler.getJavaFileName();
         ctxt.setServletJavaFileName(javaFileName);
@@ -287,6 +291,7 @@ public class Compiler {
         }
 
         return true;
+    }
     }
 
     /**

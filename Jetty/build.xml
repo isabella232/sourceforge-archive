@@ -35,6 +35,7 @@ Other targets:
   <property name="src1.4"         value="${basedir}/src1.4" />
   <property name="etc"            value="${basedir}/etc" />
   <property name="lib"            value="${basedir}/lib"/>
+  <property name="ext"            value="${basedir}/ext"/>
   <property name="classes"        value="${basedir}/classes"/>
   <property name="classes1.4"     value="${basedir}/classes1.4"/>
   <property name="javadoc"        value="${basedir}/javadoc"/>
@@ -43,7 +44,6 @@ Other targets:
   <property name="demo.webapps"   value="${basedir}/demo/webapps"/>
   <property name="demo.src"       value="${basedir}/demo/src"/>
   <property name="test"           value="${basedir}/test"/>
-  <property name="test.lib"       value="${test}/lib"/>
   <property name="test.src"       value="${test}/src"/>
   <property name="test.classes"   value="${test}/classes" />
   <property name="build.compiler" value="jikes" />
@@ -66,24 +66,17 @@ Other targets:
   <property name="mini.http.jar"   value="${basedir}/org.mortbay.http.jar"/>
   <property name="servlet.jar"     value="${lib}/javax.servlet.jar"/>
   <property name="jasper.jar"      value="${lib}/org.apache.jasper.jar"/>
-  <property name="jaxp.jar"        value="${lib}/javax.xml.jaxp.jar"/>
-  <property name="xml.jar"         value="${lib}/org.apache.crimson.jar"/>
-  <property name="jdom.jar"        value="${lib}/jdom.jar"/>
-  <property name="jsse.jar"        value="${lib}/com.sun.net.ssl.jar"/>
-  <property name="jmxri.jar"       value="${lib}/jmxri.jar"/>
-  <property name="jmxtools.jar"    value="${lib}/jmxtools.jar"/>
-  <property name="junit.jar"       value="${test.lib}/junit-3.7.jar"/>
-  
+
   <property name="tools.jar"       value="${env.JAVA_HOME}/lib/tools.jar"/>
 
-  <path id="libpath">
-    <pathelement location="${jsse.jar}" />
-    <pathelement location="${jaxp.jar}" />
-    <pathelement location="${xml.jar}" />
-    <pathelement location="${jdom.jar}" />
-    <pathelement location="${jmxri.jar}" />
-    <pathelement location="${jmxtools.jar}" />
-    <pathelement location="${tools.jar}" />
+  <!-- ==================================================================== -->
+  <path id="extpath">
+    <fileset dir="${ext}">
+      <include name="*.jar"/>
+      <include name="*.JAR"/>
+      <include name="*.zip"/>
+      <include name="*.ZIP"/>
+     </fileset>
   </path>
 
   <!-- ==================================================================== -->
@@ -93,17 +86,29 @@ Other targets:
       <pathelement location="${jetty.jar}" />
       <pathelement location="${jasper.jar}" />
       <pathelement location="${servlet.jar}" />
-      <path refid="libpath" />
+      <path refid="extpath" />
     </path>
   </target>
 
   <!-- ==================================================================== -->
   <target name="classpath1.4" if="jdk1.4.available">
+
+    <path id="extpath">
+      <fileset dir="${ext}">
+        <include name="*.jar"/>
+        <include name="*.JAR"/>
+        <include name="*.zip"/>
+        <include name="*.ZIP"/>
+        <exclude name="javax.xml.jaxp.jar"/>
+        <exclude name="crimson.jar"/>
+       </fileset>
+    </path>
+   
     <path id="classpath">
       <pathelement location="${jetty1.4.jar}" />
       <pathelement location="${jasper.jar}" />
       <pathelement location="${servlet.jar}" />
-      <path refid="libpath" />
+      <path refid="extpath" />
     </path>
   </target>
   
@@ -112,6 +117,7 @@ Other targets:
     <mkdir dir="${jetty.webapp.classes}"/>
     <mkdir dir="${javadoc}" />
     <mkdir dir="${classes}" />
+    <mkdir dir="${lib}" />
     <mkdir dir="${logs}" />
     <mkdir dir="${etc}/dtd" />
     <copy file="${src}/org/mortbay/xml/configure_1_0.dtd" tofile="${etc}/dtd/configure_1_0.dtd" />
@@ -189,7 +195,7 @@ Other targets:
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
            >
-       <classpath refid="libpath" />
+       <classpath refid="extpath" />
        <include name="**/*.java"/>
     </javac>
   </target>
@@ -213,7 +219,7 @@ Other targets:
            deprecation="${javac.deprecation}"
            >
        <classpath>
-         <path refid="libpath"/>
+         <path refid="extpath"/>
          <pathelement path="${classes}"/>
        </classpath>
        <include name="**/*.java"/>

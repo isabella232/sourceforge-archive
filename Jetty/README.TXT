@@ -100,29 +100,27 @@ required (or the non unix equivalent):
   CLASSPATH=\
     $JETTY_HOME/lib/org.mortbay.jetty.jar:\
     $JETTY_HOME/lib/javax.servlet.jar:\
-    $JETTY_HOME/lib/javax.xml.jaxp.jar:\
     $JETTY_HOME/lib/org.apache.jasper.jar:\
-    $JETTY_HOME/lib/org.apache.crimson.jar
+    $JETTY_HOME/ext/javax.xml.jaxp.jar:\
+    $JETTY_HOME/ext/org.apache.crimson.jar
 
 If you are using jdk1.4, you should use the path:
 
   CLASSPATH=\
     $JETTY_HOME/lib/org.mortbay.jetty-jdk1.4.jar:\
     $JETTY_HOME/lib/javax.servlet.jar:\
-    $JETTY_HOME/lib/javax.xml.jaxp.jar:\
-    $JETTY_HOME/lib/org.apache.jasper.jar:\
-    $JETTY_HOME/lib/org.apache.crimson.jar
+    $JETTY_HOME/lib/org.apache.jasper.jar
+
 
 To use SSL you will also need to add the the jar below, which is
 a merge of the jsse, jnet and jcert jars from the JSSE package
 (see $JETTY_HOME/doc/JsseSSL.html for more details):
-    $JETTY_HOME/lib/com.sun.net.ssl.jar
+    $JETTY_HOME/ext/com.sun.net.ssl.jar
 
 
 To use JMX the classpath must also include:
-    $JETTY_HOME/lib/jmxri.jar
-    $JETTY_HOME/lib/jmxtools.jar 
-
+    $JETTY_HOME/ext/jmxri.jar
+    $JETTY_HOME/ext/jmxtools.jar 
 
 To run JSP with the JDK compiler, you will also need to add the
 jar containing the JDK compiler (if you wish to use another compiler
@@ -260,7 +258,7 @@ greatly reduce the threads needed by Jetty.
 JettyExtra
 -----------
 Extra jetty functionality is available via the JettyExtra
-package.  This include JMX and SASL support.
+package.  This include gtp, tools and SASL support.
 
 
 Classpaths Handling.

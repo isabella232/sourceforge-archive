@@ -127,14 +127,10 @@ echo ..Set classpath
 set CP=%JETTY_HOME%\lib\javax.servlet.jar
 set CP=%CP%;%JETTY_HOME%\lib\javax.servlet.jar
 set CP=%CP%;%JETTY_HOME%\lib\org.mortbay.jetty.jar
-rem set CP=%CP%;%JETTY_HOME%\lib\javax.xml.jaxp.jar
-set CP=%CP%;%JETTY_HOME%\cocoon-lib\xercesImpl-2.0.0.jar
-set CP=%CP%;%JETTY_HOME%\cocoon-lib\xml-APIs.jar
-set CP=%CP%;%JETTY_HOME%\cocoon-lib\xalan-2.3.1.jar
-set CP=%CP%;%JETTY_HOME%\cocoon-lib\batik-libs-1.1.1.jar
-rem set CP=%CP%;%JETTY_HOME%\lib\org.apache.crimson.jar
 set CP=%CP%;%JETTY_HOME%\lib\org.apache.jasper.jar
-set CP=%CP%;%JETTY_HOME%\lib\com.sun.net.ssl.jar
+set CP=%CP%;%JETTY_HOME%\ext\com.sun.net.ssl.jar
+set CP=%CP%;%JETTY_HOME%\ext\javax.xml.jaxp.jar
+set CP=%CP%;%JETTY_HOME%\ext\crimson.jar
 set CP=%CP%;%JAVA_HOME%\lib\tools.jar
 set CP="%CP%"
 
