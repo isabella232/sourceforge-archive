@@ -10,6 +10,7 @@ Jetty-4.1.D3 - 5 July 2002
  + Keep notFoundContext out of context mapping lists.
  + mod_jk FAQ
  + Fixed close problem with load balancer
+ + RD.forward changes getRequestURI.
 
 Jetty-4.1.D2 - 24 June 2002
  + Support trusted external authenticators.

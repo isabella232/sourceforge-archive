@@ -1,0 +1,272 @@
+
+<HR>
+<h1>Working with international characters</h2>
+<HR>
+<small>
+<I>by chris@harvington.org.uk</I><BR>
+<I>Original document available at <a href="http://www.harvington.org.uk/jetty/international-faq.html">http://www.harvington.org.uk/jetty/international-faq.html</a>.</I>
+</small>
+
+<p>Internet standards support for international character sets was historically 
+  weak, is now improving, but is still not perfect. The current standards situation 
+  is confusing, and has led to false expectations about what can be reliably achieved 
+  using today's browsers, protocols and servers.</p>
+<p>Jetty fully supports and implements the current relevant standards and specifications, 
+  but this alone is not sufficient to make working with international characters 
+  easy or reliable in all situations. This FAQ explains the current standards, 
+  provides hints and tips for building and decoding Internationalised web pages 
+  (including ones with dynamic data) and explains how Jetty has anticipated the 
+  probable future direction of the standards.</p>
+<p>The intended audience for this FAQ is people developing Servlet applications 
+  and their associated web pages. A basic knowledge of Java and of hexadecimal 
+  notation is required.</p>
+<p>Unless otherwise stated, the information below applies to all current (July 
+  2002) standards-conformant Web Servers, not just to Jetty.</p>
+<h3>Primer and Terminology</h3>
+<p>There are three groups whose standards and specifications affect character 
+  handling in web pages:</p>
+<ul>
+  <li>The Internet Engineering Task Force (<a href="http://www.ietf.org/">IETF</a>) 
+    manages the Requests for Comments (RFCs) which define the basic transportation 
+    protocols, including the HyperTextTransfer Protocol (HTTP) and Uniform Resource 
+    Locators (URLs) with which we are concerned,</li>
+
+  <li>The World Wide Web Consortium (<a href="http://www.w3.org/">W3C</a>) manages 
+    the HTML and XHTML standards, with which web pages are built, and the XML 
+    standard, used in Jetty configuration.</li>
+  <li>Sun Microsystems, Inc. owns the <a href="http://java.sun.com/products/servlet/"> 
+    Servlet</a> specification, which is expressed in <a href="http://java.sun.com">Java</a> 
+    APIs.</li>
+</ul>
+<p>The Internet was initially designed and constructed using basic English characters 
+  encoded in the 7-bit US-ASCII character set. This provides 26 upper and lower 
+  case letters, 10 digits, and a variety of punctuation and other symbols - it 
+  encodes 95 'printing' characters. Today, these are still the only printable 
+  characters which can be used in HTTP and in URLs.</p>
+
+<p>A single byte (8 bits) could be used to represent up to 256 characters. There 
+  are several widely-used encodings which place the US-ASCII characters in the 
+  'lower' 7 bits and a selection of other characters in the 'upper' 7 bits. In 
+  many web browsers the encoding to use can either be specified by the web page 
+  designer or selected by the user. Some of these encodings are proprietary, others 
+  specified by consortia or international standards bodies.</p>
+<p>Today the Internet is converging on a single, common encoding - <a href="http://www.unicode.org">Unicode</a> 
+  - in which can be represented all known written languages, as well as a wide 
+  range of symbols (e.g. mathematical symbols and decorative marks). Unicode requires 
+  a 16-bit integer value to represent each character. By design, the 95 printable 
+  US-ASCII characters have the same code values in Unicode; US-ASCII is a subset 
+  of Unicode. Most modern browsers can decode and display a wide range of the 
+  characters represented by Unicode - but it would be rare to find a browser capable 
+  of displaying <i>all</i> the Unicode characters.</p>
+<p>Unicode is the only character encoding used in XML and is now the default in 
+  HTML, XHML and in most Java implementations.</p>
+<p>The Internet transmits data in groups of 8 bits, which the IETF usually call 
+  'octets', but everyone else calls 'bytes'. When larger values have to be sent, 
+  such as the 16 bits needed for Unicode and some other international character 
+  encodings, there has to be a convention on how the 16 bits are packed into one 
+  or more octets. There are two standards commonly used to encode Unicode: UTF-8 
+  and UTF-16.</p>
+<p>UTF-16 is the 'brute-force' encoding for data transmission. The 16 bits representing 
+  the character value are placed in adjacent octets, with the more significant 
+  8 bits in the first octet to be transmitted.</p>
+<p>UTF-8 is more common, and is recommended for most purposes. Characters with 
+  values less 0080 (hexadecimal notation) are transmitted as a single octet whose 
+  value is that of the character. Characters with values in the range 0080 to 
+  007F are encoded as two octets, whilst the (infrequently-used) Unicode characters 
+  with values between 0800 and FFFF are encoded into three octets. This encoding 
+  has the really useful property that a sequence of (7-bit) US-ASCII characters 
+  sent as bytes and then sent as Unicode UTF-8 octets produce identical octet 
+  streams - a US-ASCII byte stream is a valid UTF-8 octet stream and represents 
+  the same printing characters. This is <i>not</i> the case if other characters 
+  are being sent, or if UTF-16 is in use.</p>
+
+<p>As well as having US-ASCII compatibility, UTF-8 is preferred because, in the 
+  majority of situations, it results in shorter messages than UTF-16.</p>
+<p>Note that, when UTF-8 is specified, it implicitly defines the character encoding 
+  in use as Unicode, as well as the way in which the values are packed into octets.</p>
+<h3>Characters included in HTTP requests</h3>
+<p>There are two places in which <a href="http://www.w3.org/Protocols/rfc2068/rfc2068">HTTP</a> 
+  requests (from browsers to web servers) may include character data:</p>
+<ol>
+  <li>In the URL part of the first line of the HTTP request,</li>
+  <li>In the HTTP content area at the end of the HTTP message, resulting from 
+    an <a href="http://www.w3.org/TR/html4/interact/forms.html#h-17.3">HTML</a> 
+    <code><br>
+
+    &lt;form method='post'...&gt; ... &lt;/form&gt;<br>
+    </code> submission</li>
+</ol>
+<h4>Characters in the HTTP content part</h4>
+<p>Wherever possible, a POST method should be used when international characters 
+  are involved. </p>
+<p>This is because:</p>
+
+<ol>
+  <li>The web browser records the way it has encoded the content data in the MIME 
+    headers that precede the content itself,</li>
+  <li>The web server uses this MIME header to apply the correct decoding to the 
+    character content,</li>
+  <li>There are no (practical) limits to the amount of data which can sent in 
+    this way (URL lengths may be limited by the buffers in some web/proxy servers) 
+  </li>
+</ol>
+<p>The form attribute <code>enctype='multipart/form-data'</code> must be specified 
+  to force the browser to use a Unicode-compatible encoding.</p>
+<p>By the time the characters are made available to the Servlet via its APIs they 
+  are in the default representation of that Java platform - almost always Unicode.</p>
+
+<h4>International characters in URLs</h4>
+<p>A typical URL looks like:</p>
+<p><code>http://www.my.site/dir/page.html</code></p>
+<p>When a form is sent, using the default GET method, the data values from the 
+  form are included in the URL, e.g.:</p>
+<p><code>http://www.my.site/dir/page.html?name=Durst&amp;age=18</code></p>
+<p>It is important to note that only US-ASCII printing characters are permitted 
+  in URLs.</p>
+<p>Something like name=D&uuml;rst (with an umlaut) is illegal. It might work with 
+  some browser/server combinations (and might even deliver the expected value), 
+  but it should never be used.</p>
+<p>The HTTP Specification provides an 'escape' mechanism, which permits arbitrary 
+  octet values to be included in the URL. The three characters %HH - where HH 
+  are hexadecimal characters - inserts the specified octet value into the URL.</p>
+
+<p>It is a common fallacy that this permits international characters to be reliably 
+  transmitted. This is wrong.</p>
+<p><b><i>Current standards (July 2002) provide no basis for the reliable transmission 
+  of international characters using the URL %HH escape mechanism</i>.</b></p>
+<p>This is because the %HH escape permits the transmission of a sequence of octets, 
+  but has nothing to say about what character encoding is in use.</p>
+<p>There is no provision in the HTTP protocol for the sender (the browser) to 
+  tell the receiver (the web server) what encoding has been used in the URI, and 
+  none of the specifications related to HTTP/HTML define a default encoding.</p>
+<p>Thus, although any desired octet sequence can be placed in a URL, none of the 
+  standards tell the web server how to interpret that octet sequence.</p>
+<p>The designers of web servers with Servlet APIs currently have a problem. They 
+  are presented with an octet stream of unspecified encoding, and yet have to 
+  deliver a Java String (a sequence of decoded characters) to the Servlet API.</p>
+<p>There is an <a href="http://www.ietf.org/internet-drafts/draft-duerst-iri-00.txt">Internet 
+  draft </a>(which expires Oct. 2002) which proposes that URLs should evolve into 
+  Internationalized Resource Identifiers (IRIs). This work-in-progress proposes 
+  that an octet sequence (generated by a combination of US-ASCII printing characters 
+  and %HH escapes) should always represent a UTF-8 character sequence.</p>
+
+<p>The 4.0 release of Jetty makes this assumption of UTF-8, in anticipation of 
+  the draft (or something like it) becoming the formal specification. Earlier 
+  releases of Jetty (and other web servers) made different assumptions about the 
+  encoding of octets outside the 'core' US-ASCII range.</p>
+<p>Jetty 4.0 and later will deliver to a servlet a parameter whose name is &quot;name&quot; 
+  and value &quot;D&uuml;rst&quot; if given:</p>
+<p><code>http://www.my.site/servlet?name=D%C3%BCrst</code></p>
+<p>Explanation: The Unicode value of the '&uuml;' character is the 16-bit value 
+  00FC. This is represented in UTF-8 by the two octets C3 and BC.</p>
+<p>It is to be stressed that this helpful behaviour of Jetty is how it now opts 
+  to behave in this area - which is not yet covered by Internet specifications. 
+  Other web servers (and earlier releases of Jetty) behave differently. The interpretation 
+  of the URL octet stream as UTF-8 is not yet standardised and therefore not yet 
+  portable. </p>
+
+<h3>Handling of International characters by browsers</h3>
+<p>There are many ways in which international characters can be displayed or placed 
+  into browsers for inclusion in HTTP requests. Some examples are: </p>
+<ul>
+  <li>&lt;h3&gt;D&amp;uuml;rst&lt;/h3&gt; </li>
+  <li>&lt;h3&gt;D&amp;#252;rst&lt;/h3&gt;</li>
+
+  <li>&lt;h3&gt;D&amp;#xFC;rst;&lt;/h3&gt;</li>
+  <li>&lt;input type='text' value='D&amp;uuml;rst'&gt;</li>
+  <li>&lt;script language='javascript'&gt;name=&quot;D\u00FCrst&quot;;&lt;/script&gt;</li>
+
+  <li>&lt;form action='<code>/servlet?name=D%C3%BCrst</code>'&gt;...&lt;/form&gt;</li>
+  <li>&lt;a href='<code>/servlet?name=D%C3%BCrst</code>'&gt;...&lt;/a&gt;</li>
+</ul>
+<p>It is also possible to manipulate document text using the <a href="http://www.w3.org/DOM">DOM</a> 
+  APIs. </p>
+
+<p>It is believed that, in all the above examples, all modern browsers will treat 
+  the &amp;...; encoding as representing Unicode characters.</p>
+<p>It is, of course, possible for users to enter characters using &lt;input..&gt; 
+  and &lt;textarea...&gt; elements via the operating system. Text can come from 
+  keyboards, and also from 'cut and paste' mechanisms. It appears that most browsers 
+  use their current (user-selectable) 'Encoding' setting (e.g. in MSIE: View..Encode) 
+  to encode such characters. For all subsequent HTTP request submissions, other 
+  than when the <code>&lt;form method='post'enctype='multipart/form-data' ...&gt;</code> 
+  method is used, they appear to transmit the characters in that locally-defined 
+  encoding. </p>
+<h3>Techniques for working with international characters</h3>
+<p>The only reliable, standards-supported way to handle international characters 
+  in a browser- and server-neutral way appears to be:</p>
+
+<ol>
+  <li>To specify the contents of the HTML page using &amp;...; encoding and</li>
+  <li>To use the <code>&lt;form method='post'enctype='multipart/form-data' ...&gt;</code> 
+    method of submission.</li>
+</ol>
+<p>If using Jetty 4.0 it is also now possible to embed UTF-8 encoded characters 
+  into literal URLs (using %HH encoding of each UTF-8 octet) at the time the page 
+  is generated. </p>
+<p>The above two techniques support the majority of needs - there is one other 
+  need for which no reliable solution is currently known. </p>
+<p>To appreciate this need one must consider carefully a significant difference 
+  between submitting a form using POST and GET. When using GET the data values 
+  from the form are appended to the URI and form part of the visible 'address' 
+  seen at the top of the browser. It is also this entire string that is saved 
+  if the page is 'bookmarked' by the browser, and may be moved using 'cut-and-paste' 
+  into an eMail, another web page etc..</p>
+
+<p>It is possible that the dynamic data from the form is an integral part of the 
+  semantics of the 'page address' to be stored. The address may be part of a map; 
+  one of the data values from the map may define the town on which the map view 
+  is to be centered - and this name may only be expressible in, say, Thai characters. 
+  The town name may have been entered or selected by the user - it was not a 'literal' 
+  in the HTML defining the page or in the URL.</p>
+<p>It is believed that there is not yet any standards-based way of constructing 
+  this dynamically-defined URL - there is no direct way to be certain what character 
+  encodings have been applied in constructing the URI-with-query string that the 
+  browser generates.</p>
+<p>A technique which has been reported is to provide additional, known text fields 
+  alongside the unknown text. In the example above, the form with the dynamically-defined 
+  town name could also have a hidden field into which the generated page inserts 
+  'known' text from the same character set (using the &amp;...; encoding). When 
+  the request is eventually received by a servlet the contents of the known field 
+  are inspected. If the Java String value of the 'tracer' field is the same as 
+  that injected into the page when it was generated (and the characters are the 
+  same as or 'close to' those of the unknown town) then there is an assumption 
+  that the encoding used was Unicode and that the town name as present in Java 
+  is accurate.</p>
+<p>If the 'tracer' is not what is expected, some people have converted the String 
+  back into a byte sequence using the (usually-default) Unicode encoding (e.g. 
+  using String.getBytes()). This gives- in a Java byte[] - the same octet values 
+  as were transmitted in the URI. By inspecting these octets people have been 
+  able to deduce the encoding actually applied by the browser to this known string, 
+  and hence have been able to re-code the unknown string by using the same process 
+  of decoding-assuming-Unicode, then re-coding in the deduced code.</p>
+<p>A slightly more elegant approach may be to inspect the URL String - accessed 
+  using request.getQueryString() - to deduce the encoding in use, and then call 
+  request.setCharacterEndoding() before calling any of the .getParameter() methods.</p>
+<p>There is an obvious potential flaw in this technique - the browser may represent 
+  &amp;...;-specified 'tracer' text with its Unicode values, yet may use the local 
+  keyboard/operating system encoding for locally-entered data. The author is not 
+  aware of any conclusive evidence in this area.</p>
+<h3>Future possibilities</h3>
+<p>It is to be hoped that something like the IRI scheme described in the Internet 
+  Draft will evolve into a standard that will be adopted by suppliers of web servers 
+  and browsers. As currently drafted, such a scheme would standardise the decoding 
+  of UTF-8 encoded in URIs (as anticipated by Jetty), but would not, of its own 
+  solve the problem of dynamic data derived from form GET submissions. That would 
+  require changes to HTML4 or, more likely, extensions to a future version of 
+  XHTML. </p>
+
+<p>The whole area of form data handling may be radically improved if the <a href="http://www.w3.org/MarkUp/Forms/">Xforms</a> 
+  program is successful. This has defined an XML-based approach to forms and associated 
+  data and event handling and uses Unicode throughout. The Xforms 1.0 specification 
+  is currently (July 2002) at 'last call working draft' status, and a number of 
+  experimental implementations, some using browser applets or plug-ins, have been 
+  announced. </p>
+<p>Neither of these likely developments will improve the handling of international 
+  characters by 'todays' browsers, so designers of web services for the 'open' 
+  market seem likely to have to work within today's constraints for a long time. 
+</p>
+
+<HR>
+Return to <A HREF="index.html">Jetty FAQ</A>.
+<HR>

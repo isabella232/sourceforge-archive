@@ -14,47 +14,88 @@ extensible and flexible, thus making it an ideal platform for serving
 dynamic HTTP requests from any Java application.
 
 
-Quick start on all platforms
-============================
+Starting Jetty
+==============
+
+Jetty can be started by 
+
+ + Setting the classpath to the appropriate jars in $JETTY_HOME/lib 
+ + Adding to the classpath any jars from $JETTY_HOME/ext that your 
+   java environment does not provide.
+ + If using JSPs, add the tools.jar from your JRE lib to the classpath.
+ + Running "java org.mortbay.jetty.Server <configfile>"
+
+
+Various methods are presented below that automate this process.
+
+
+JDK 1.4 Quick start
+===================
 
 If using jdk 1.4 run:
 
   cd <jetty install directory>
   java -jar lib/org.mortbay.jetty.jar etc/demo.xml
-  
-Where cd and / have been repaced with any non-unix platform versions. 
 
-For JMX demo run:
-  cd <jetty install directory>
+Where cd and / have been repaced with any non-unix platform versions. 
+Browse to http://localhost:8080
+  
+For the JMX enabled demo run:
   java -jar lib/org.mortbay.jmx.jar etc/demo.mlet
 
+If using JDK 1.3, you can still run this way, but you must add the
+libraries from the ext to your classpath.
 
-Medium start on Unix
-===================
-run:
+Note that this start method will not allow JSPs to work, unless
+you have the tools.jar from your JDK in your system classpath.
+
+The other start methods below will set this classpath if possible.
+
+
+
+Ant Quick Start
+===============
+
+If you have the ant java build tool ant installed, you may use that to
+start jetty.  The demo can be started with:
+
+  Unix:  ant demo
+  Win32: ant.bat demo
+
+
+The JMX enabled demo can be started with
+
+  Unix:  ant demo.jmx 
+  Win32: ant.bat demo.jmx
+
+
+The default jetty.xml configuration can be started with:
+
+  Unix:  ant run
+  Win32: ant.bat run
+
+
+
+Unix Quick start
+================
+
+On unix, you can use the supplied shell script to set the classpaths
+and run Jetty:
+
   export JETTY_HOME=<jetty install directory>
   export JAVA_HOME=<JRE install directory>
-  $JETTY_HOME/bin/jetty.sh run
+  $JETTY_HOME/bin/jetty.sh demo
 
-This will start a basic Jetty server on port 8080. Point your browser at
+This will start a demo Jetty server on port 8080. Point your browser at
   http://localhost:8080
-
-This should give a very basic Jetty page. 
 
 By default, output will be logged in the $JETTY_HOME/logs directory.
 
-Type ^C to initiate a graceful shutdown and stop the server.
-
-The full Jetty demo can be started as follows:
-  $JETTY_HOME/bin/jetty.sh run demo admin
-
-Note: an ant demo quick start procedure is documented below along with
-detailed instructions on how to setup the runtime environment.
 
 
 
-Medium start on Windows
-======================
+Win2000 Quick Start
+===================
 Due to problems with the servlet security model (see below).  It is vital
 that windows users use the exact case for drive letters, URLs and filenames.
 
@@ -78,36 +119,7 @@ will need to read some more and setup the environment.
 
 
 
-Ant Start
-=========
-
-If you have the ant java build tool ant installed, you may use that to
-start jetty.  The demo can be started with:
-
-  Unix:  ant demo
-  Win32: ant.bat demo
-
-The default jetty.xml configuration can be started with:
-
-  Unix:  ant run
-  Win32: ant.bat run
-
-
-
-JMX Quick Start
-===============
-
-The Java Management Extension can be used to start Jetty, using the ant
-target:
-
-  ant demo.jmx 
-
-This starts the normal demo on 8080, the admin servlet on 8081 and
-the JMX web agent on 8082.
-
-
-
-Environment
+Slow Start
 ===========
 
 If you are using jdk1.4, you should use the path (or non-unix equivalent):
@@ -118,7 +130,9 @@ If you are using jdk1.4, you should use the path (or non-unix equivalent):
     $JETTY_HOME/lib/org.apache.jasper.jar
 
 
-For jdk1.2 or jdk1.3 us the following classpath
+For jdk1.2 or jdk1.3 us the following classpath, you need to use an
+alternative jetty jar and add the XML jars. Thus the classpath 
+to use is:
 
   CLASSPATH=\
     $JETTY_HOME/lib/org.mortbay.jetty-jdk1.2.jar:\
@@ -131,16 +145,22 @@ For jdk1.2 or jdk1.3 us the following classpath
 To use SSL you will also need to add the the jar below, which is
 a merge of the jsse, jnet and jcert jars from the JSSE package
 (see $JETTY_HOME/doc/JsseSSL.html for more details):
+
     $JETTY_HOME/ext/com.sun.net.ssl.jar
 
+
 To use JMX the classpath must also include:
+
     $JETTY_HOME/ext/jmxri.jar
     $JETTY_HOME/ext/jmxtools.jar 
+
 
 To run JSP with the JDK compiler, you will also need to add the
 jar containing the JDK compiler (if you wish to use another compiler
 you will have to configure jasper):
+
    $JDK_HOME/lib/tools.jar
+
 
 
 Running the Demo Server
@@ -155,10 +175,6 @@ You can access this demo with at http://localhost:8080
 The demo also runs a simple admin servlet at http://localhost:8081,
 with user username=admin, password=admin.
 
-There is also a Unix start/stop script bin/jetty.sh which can run
-the demo with:
-
-  bin/jetty.sh run demo
 
 This script finds the JVM and sets the CLASSPATH, so it can be used as
 an /etc/init.d script and also looks for xml config files in
@@ -189,6 +205,7 @@ There is a Jetty extension configuration mechanism for web
 applications.  If a file WEB-INF/web-jetty.xml is found, it is treated
 as a Jetty XmlConfiguration file and applied to the
 WebApplicationContext object when the context is started.
+
 
 
 Building from source

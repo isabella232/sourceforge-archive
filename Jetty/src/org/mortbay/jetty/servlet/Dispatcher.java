@@ -299,6 +299,7 @@ public class Dispatcher implements RequestDispatcher
     {
         boolean _included;
         boolean _forwarded;
+        String _uri;
         String _contextPath;
         String _servletPath;
         String _pathInfo;
@@ -333,6 +334,14 @@ public class Dispatcher implements RequestDispatcher
         boolean isForwarded()
         {
             return _forwarded;
+        }
+
+        /* ------------------------------------------------------------ */
+        public String getRequestURI()
+        {
+            if (!_forwarded)
+                return super.getRequestURI();
+            return URI.addPaths(_contextPath,URI.addPaths(_servletPath,_pathInfo));
         }
         
         /* ------------------------------------------------------------ */

@@ -1,37 +1,22 @@
 <?xml version="1.0"  encoding="ISO-8859-1"?>
 <!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.2//EN" "http://jetty.mortbay.org/configure_1_2.dtd">
 
+
+
+<!-- =============================================================== -->
+<!-- Configure the Jetty Server                                      -->
+<!-- =============================================================== -->
 <Configure class="org.mortbay.jetty.Server">
 
-  <!-- The following section can be uncommented to control the
-       debugging and logging mechanism.
-  <Set name="Debug" class="org.mortbay.util.Code" type="boolean">false</Set>
-  <Set name="Verbose" class="org.mortbay.util.Code" type="int">0</Set>
-  <Set name="DebugPatterns" class="org.mortbay.util.Code" type="String"></Set>
 
-  <Call name="instance" class="org.mortbay.util.Log">
-    <Call name="disableLog"/>
-    <Call name="add"> 
-      <Arg>
-        <New class="org.mortbay.util.OutputStreamLogSink">
-          <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.log</Arg>
-          <Set name="RetainDays">90</Set>
-          <Set name="Append">true</Set>
-          <Call name="start"/> 
-        </New>
-      </Arg>
-    </Call>
-  </Call>
-  -->
-
-
+  
   <!-- =============================================================== -->
   <!-- Configure the Request Listeners                                 -->
   <!-- =============================================================== -->
 
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- Add a HTTP listener on port 8080                                -->
+  <!-- Add and configure a HTTP listener to port 8080                       -->
   <!-- The default port can be changed using: java -Djetty.port=80     -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Call name="addListener">
@@ -39,12 +24,11 @@
       <New class="org.mortbay.http.SocketListener">
         <Set name="Port"><SystemProperty name="jetty.port" default="8080"/></Set>
         <Set name="MinThreads">5</Set>
-        <Set name="MaxThreads">255</Set>
+        <Set name="MaxThreads">100</Set>
         <Set name="MaxIdleTimeMs">30000</Set>
-        <Set name="MaxReadTimeMs">10000</Set>
+        <Set name="MaxReadTimeMs">60000</Set>
         <Set name="MaxStopTimeMs">5000</Set>
-        <Set name="LowResourcePersistTimeMs">2000</Set>
-        <Set name="confidentialPort">8443</Set>
+        <Set name="LowResourcePersistTimeMs">5000</Set>
       </New>
     </Arg>
   </Call>
@@ -52,16 +36,16 @@
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add a HTTPS SSL listener on port 8843                           -->
-  <!-- Uncomment this section to activate this listener                -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- UNCOMMENT TO ACTIVATE
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.SunJsseListener">
         <Set name="Port">8443</Set>
         <Set name="MinThreads">5</Set>
-        <Set name="MaxThreads">255</Set>
+        <Set name="MaxThreads">100</Set>
         <Set name="MaxIdleTimeMs">30000</Set>
-        <Set name="MaxReadTimeMs">10000</Set>
+        <Set name="MaxReadTimeMs">60000</Set>
         <Set name="MaxStopTimeMs">5000</Set>
         <Set name="LowResourcePersistTimeMs">2000</Set>
         <Set name="Keystore"><SystemProperty name="jetty.home" default="."/>/etc/demokeystore</Set>
@@ -70,6 +54,8 @@
       </New>
     </Arg>
   </Call>
+  -->
+
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add a AJP13 listener on port 8009                               -->
@@ -90,24 +76,31 @@
   </Call>
 
 
+
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add and configure a NIO HTTP listener to port 8888              -->
-  <!-- The default port can be changed using: java -Djetty.port=80     -->
+  <!-- This listener should be used to replace the standard HTTP       -->
+  <!-- listener when deployed on LARGE systems using jdk 1.4           -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- UNCOMMENT TO ACTIVATE
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.SocketChannelListener">
         <Set name="Port"><SystemProperty name="jetty.port" default="8888"/></Set>
-        <Set name="MinThreads">3</Set>
-        <Set name="MaxThreads">50</Set>
+        <Set name="MinThreads">5</Set>
+        <Set name="MaxThreads">500</Set>
         <Set name="MaxIdleTimeMs">30000</Set>
-        <Set name="MaxReadTimeMs">10000</Set>
+        <Set name="MaxReadTimeMs">60000</Set>
         <Set name="MaxStopTimeMs">5000</Set>
       </New>
     </Arg>
   </Call>
+  -->
 
-  
+
+
+
+
 
   <!-- =============================================================== -->
   <!-- Configure the Contexts                                          -->

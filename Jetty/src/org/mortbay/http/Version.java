@@ -21,8 +21,6 @@ import org.mortbay.util.Log;
  */
 public class Version
 {
-    public static String __notice = "This application is using software from the Jetty HTTP server and servlet container.\nJetty is Copyright (c) Mort Bay Consulting Pty. Ltd. (Australia) and others.\nJetty is distributed under an open source license.\nThe license and standard release of Jetty are available from http://jetty.mortbay.org\n";
-
     public static boolean __paranoid = 
         Boolean.getBoolean("org.mortbay.http.Version.paranoid");
     
@@ -33,7 +31,6 @@ public class Version
 
     static
     {
-        System.err.println(__notice);
         if (Boolean.getBoolean("java.org.mortbay.http.Version.paranoid"))
         {
             Code.warning("OLD property set. Use org.mortbay.http.Version.paranoid");
@@ -57,5 +54,15 @@ public class Version
                 System.getProperty("java.version")+")";
         }
     }
+    
+    public static String __notice = "This application is using software from the "+
+        __Version+
+        " HTTP server and servlet container.\nJetty is Copyright (c) Mort Bay Consulting Pty. Ltd. (Australia) and others.\nJetty is distributed under an open source license.\nThe license and standard release of Jetty are available from http://jetty.mortbay.org\n";
+
+    static
+    {
+        System.err.println(__notice);
+    }
+    
 }
 
