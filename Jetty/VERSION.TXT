@@ -8,7 +8,7 @@ Jetty Versions
  + Avoid setting sotimeout for optimization.
  + String comparison of If-Modified-Since headers.
  + Touch files when expanding jars
-
+ + Deprecated maxReadTime.
 
 Jetty-4.1.0 - 22 September 2002
  + Fixed CGI+windows security hole.

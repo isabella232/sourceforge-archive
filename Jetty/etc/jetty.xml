@@ -26,8 +26,6 @@
         <Set name="MinThreads">5</Set>
         <Set name="MaxThreads">100</Set>
         <Set name="MaxIdleTimeMs">30000</Set>
-        <Set name="MaxReadTimeMs">60000</Set>
-        <Set name="MaxStopTimeMs">5000</Set>
         <Set name="LowResourcePersistTimeMs">5000</Set>
       </New>
     </Arg>
@@ -45,8 +43,6 @@
         <Set name="MinThreads">5</Set>
         <Set name="MaxThreads">100</Set>
         <Set name="MaxIdleTimeMs">30000</Set>
-        <Set name="MaxReadTimeMs">60000</Set>
-        <Set name="MaxStopTimeMs">5000</Set>
         <Set name="LowResourcePersistTimeMs">2000</Set>
         <Set name="Keystore"><SystemProperty name="jetty.home" default="."/>/etc/demokeystore</Set>
 	<Set name="Password">OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4</Set>
@@ -68,8 +64,6 @@
         <Set name="MinThreads">5</Set>
         <Set name="MaxThreads">255</Set>
         <Set name="MaxIdleTimeMs">30000</Set>
-        <Set name="MaxReadTimeMs">60000</Set>
-        <Set name="MaxStopTimeMs">5000</Set>
         <Set name="confidentialPort">443</Set>
       </New>
     </Arg>
@@ -90,8 +84,6 @@
         <Set name="MinThreads">5</Set>
         <Set name="MaxThreads">500</Set>
         <Set name="MaxIdleTimeMs">30000</Set>
-        <Set name="MaxReadTimeMs">60000</Set>
-        <Set name="MaxStopTimeMs">5000</Set>
       </New>
     </Arg>
   </Call>
