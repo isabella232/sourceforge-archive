@@ -50,21 +50,24 @@ it as an argument to the server command line (the <a href="GettingStarted.html#m
 
 <ol>
 <li>create the server</li>
-<li> create at least one listener</li>
+<li>configure at least one listener instance</li>
 <li>either:</li>
    &nbsp;&nbsp; create at least one context and handler
    <br>
    or
    <br>
    &nbsp;&nbsp;register a web application
-
+<li>Optionally configure UserRealm instance(s)</li>
+<li>Optionally configure a RequestLog</li>
 </ol>
    
-<p><i><b> Developer's Note: </b></i>&nbsp;The  <a href="/javadoc/org/mortbay/jetty/Server.html">
+<table border=1><tr><td><i>
+<b>Developer's Note: </b>&nbsp;The  <a href="/javadoc/org/mortbay/jetty/Server.html">
         org.mortbay.jetty.Server</a>      class is a subclass of  <a href="/javadoc/org/mortbay/http/HttpServer.html">
             org.mortbay.http.HttpServer</a> that adds convenience methods 
 for   configuring    the servlet container provided by the  <a href="/javadoc/org/mortbay/jetty/servlet/package-summary.html">
             org.mortbay.jetty.servlet</a> package.</p>
+</i></td></tr></table>
                
 <p><br>
         </p>
@@ -198,13 +201,13 @@ context.getServletHandler().setServeDynamicSystemServlets(false);
 <p>
 
 The <a href="http://java.sun.com/products/servlet/download.html">
-        Servlet Specification</a> details a standard layout for web applications.
-       If your content is packaged according to these
+Servlet Specification</a> details a standard layout for web applications.
+If your content is packaged according to these
 specifications,    then simply call the <tt>addWebApplication </tt>method
 on the&nbsp;<a href="/javadoc/org/mortbay/jetty/Server.html">    
-  org.mortbay.jetty.Server</a> instance, specifying at minimum a context 
- path, the directory or <tt>war</tt> file of your application, and a default
-   configuration file. Jetty is then able to discover and configure all the required handlers including security, static content and servlets. 
+org.mortbay.jetty.Server</a> instance, specifying at minimum a context 
+path, the directory or <tt>war</tt> file of your application, and a default
+configuration file. Jetty is then able to discover and configure all the required handlers including security, static content and servlets. 
 </p>
 <p>
 The method call will transparently create and return an
@@ -265,6 +268,10 @@ mechanisms    such as JSP compilation   have difficulty working with un-expanded
 the   parameters  marked as (optional).<br>
 <br>
 <br>
+<table border=1><TR><TD><I>Note: If you run Jetty within <A HREF="http://www.jboss.org">JBoss</A>, then you should <B>NOT</B> use the addWebApplication API (or XML), as this bypasses the
+JBoss classloaders.  Use the JBoss deployment mechanisms instead and only use the Jetty 
+configuration for listeners and logs.</I></TD></TR></TABLE><BR><BR>
+
 <big><b>Multiple Web Applications</b></big>
 <br>
 <br>

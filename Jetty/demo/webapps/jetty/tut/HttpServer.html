@@ -64,8 +64,6 @@ might match  the request, and in this case, all HttpContexts  are tried <i>
  in the order  in which they were registered with the server</i>    until
 the request is  marked as having been handled.<br>
                <br>
-Note that in Jetty 3.1 and previous releases, the HttpContext class was called HandlerContext.<br>
-               <br>
        The trivial code snippet from the Introduction to the HttpServer can 
  then   be represented as:<br>
                 <br>
@@ -176,8 +174,10 @@ HttpServer:
 marked   as handled. Note that it is perfectly possible for more than one
 handler  to process the request, but only one handler can mark the request
 as being  finally handled.  </p>
-                                                                        
-                                                                        
+                                            
+<table border=1><tr><td><i>  
+Note that in Jetty 3.1 and previous releases, the HttpContext class was called HandlerContext.<br>
+</i></td></tr></table>                                                                                                  
                             
 <p>A typical a context might have handlers for security,  servlets  and static
  resources:  </p>
@@ -339,9 +339,10 @@ virtual  hosts</b> </td>
 </table>
    <br>
                                                             <br>
-                                                                        
-                                                            <i><b> Developers 
-  Note:</b></i>  &nbsp;Derivations of HttpServer may implement the       
+                                                                      
+<table border=1><tr><td><i>  
+                                                            <b> Developers 
+  Note:</b>  &nbsp;Derivations of HttpServer may implement the       
                                                                         
                                               <code> newHttpContext()</code>
             method to change the factory method for creating new contexts.
@@ -351,6 +352,7 @@ virtual  hosts</b> </td>
              org.mortbay.jetty.servlet.WebApplicationContext</a> class is 
 a  specialization      of HttpContext that configures the handlers by looking 
  at the standard   web   application XML files.<br>
+</i></td></tr></table>
                                                                         
                                                             <br>
                                                                         
