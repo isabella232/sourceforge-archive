@@ -357,10 +357,6 @@ public class SecurityHandler extends NullHandler
                                   "basic realm=\""+_realmName+'"');
                 response.sendError(HttpResponse.__401_Unauthorized);
             }
-            else if (__FORM_AUTH.equals(_authMethod))
-            {
-                response.sendRedirect(_formErrorPage);
-            }
             else
                 response.sendError(HttpResponse.__403_Forbidden);
             return false;

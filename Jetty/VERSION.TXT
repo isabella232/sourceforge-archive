@@ -4,6 +4,7 @@ Jetty Versions
  + Fix security problem with trailing special characters.
    Trailing %00 enabled JSP source to be viewed or other 
    servlets to be bypassed.
+ + Improved FORM auth handling of role failure.
  + Improved Jasper debug output.
  + Improved ThreadedServer timeout defaults
  
