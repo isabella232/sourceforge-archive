@@ -353,6 +353,34 @@ public class Dump extends HttpServlet
                 }
             }
             
+            String res=request.getParameter("resource");
+            if (res!=null && res.length()>0)
+            {
+                table.newRow();
+                table.newHeading()
+                    .cell().nest(new Font(2,true))
+                    .add("<BR>Get Resource: "+res)
+                    .attribute("COLSPAN","2")
+                    .left();
+                
+                table.newRow();
+                table.addHeading("this.getClass():&nbsp;").cell().right();
+                table.addCell(""+this.getClass().getResource(res));
+                
+                table.newRow();
+                table.addHeading("this.getClass().getClassLoader():&nbsp;").cell().right();
+                table.addCell(""+this.getClass().getClassLoader().getResource(res));
+                
+                table.newRow();
+                table.addHeading("Thread.currentThread().getContextClassLoader():&nbsp;").cell().right();
+                table.addCell(""+Thread.currentThread().getContextClassLoader().getResource(res));
+                
+                table.newRow();
+                table.addHeading("getServletContext():&nbsp;").cell().right();
+                table.addCell(""+getServletContext().getResource(res));
+            }
+
+            
             page.add(Break.para);
             
             page.add(new Heading(1,"Form to generate Dump content"));
@@ -373,6 +401,14 @@ public class Dump extends HttpServlet
             tf.addFileField("file","file");              
             tf.addButton("Upload","Upload");
             page.add(tf);
+            
+            page.add(new Heading(1,"Form to get Resource"));
+            tf = new TableForm(response.encodeURL(request.getRequestURI()));
+            tf.method("POST");
+            tf.addTextField("resource","resource",20,"");              
+            tf.addButton("Action","getResource");
+            page.add(tf);
+
         }
         catch (Exception e)
         {
