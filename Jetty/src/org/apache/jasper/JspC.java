@@ -213,6 +213,10 @@ public class JspC implements Options {
     public boolean isPoolingEnabled() {
         return true;
     }
+    
+    public boolean isOutputDirSet(){
+        return dirset;
+    }
 
     /**
      * Are we supporting HTML mapped servlets?
@@ -397,6 +401,10 @@ public class JspC implements Options {
             } */
             String tmpDir = outputDir + File.separatorChar; // + pathName;
             File f = new File(tmpDir);
+            
+            // set output dir
+            outputDir=f.getAbsolutePath();    
+            
             if (!f.exists()) {
                 f.mkdirs();
             }

@@ -94,6 +94,7 @@ public class JspCompilationContext {
     protected String jspUri;
     private boolean isErrPage;
     protected String servletPackageName = Constants.JSP_PACKAGE_NAME;
+    protected String servletPackageNameSuffix ="";
     protected String servletJavaFileName;
     protected String jspPath;
     protected String classFileName;
@@ -141,6 +142,17 @@ public class JspCompilationContext {
         if (baseURI.charAt(baseURI.length() - 1) != '/') {
             baseURI += '/';
         }
+        
+        boolean isPAckageNeeded= ((JspC)options).isOutputDirSet();//if not -dd option
+        
+        if(isPAckageNeeded && baseURI.length()>1)
+        {
+            //if the file is inside a directory
+            String tempSuffix=baseURI.replace('/','.');
+            this.servletPackageNameSuffix=tempSuffix.substring(0,tempSuffix.length()-1);
+        }
+        
+        
         this.rctxt=rctxt;
     }
 
@@ -307,7 +319,15 @@ public class JspCompilationContext {
      * Package name for the generated class.
      */
     public String getServletPackageName() {
-        return servletPackageName;
+
+        String tempPackageName="";
+	if (servletPackageName!=null && servletPackageName.length()>0) {
+	    tempPackageName= servletPackageName+servletPackageNameSuffix;   
+	}
+	else if(servletPackageNameSuffix.length()>0) {
+	    tempPackageName= servletPackageNameSuffix.substring(1);
+	}
+	return tempPackageName;
     }
 
     /**

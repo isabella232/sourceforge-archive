@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+ + Added commandPrefix init param to CGI
+ + Applied patch to jasper to fix the JspC problem.
+
 Jetty-4.1.0RC4 - 30 August 2002
  + Included IbmJsseListener in the contrib directory.
  + Updated jasper2 to 4.1.10 tag.
