@@ -8,6 +8,7 @@ Jetty Versions
  + Fixed SessionManager init
  + Improved low thread handling
  + FileResource better handles non sun JVM
+ + Monitor closes socket before exit
 
 Jetty-5.0.beta1 - 24 December 2003
  + SecurityConstraints not reset by stop() on custom context
