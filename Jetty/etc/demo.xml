@@ -4,7 +4,7 @@
 <!--
 This is a Jetty HTTP server configuration file.  This configuration
 uses the generic org.mortbay.xml.XmlConfiguration class to call
-the normal org.mortbay.http.HttpServer configuration API from
+the normal org.mortbay.jetty.Server configuration API from
 within an XML script.
 
 The format of this file is described in the configure.dtd file.
@@ -52,7 +52,7 @@ to the org.mortbay.jetty.Demo class.
 $Id$
 -->
 
-<Configure class="org.mortbay.http.HttpServer">
+<Configure class="org.mortbay.jetty.Server">
 
 
   <!-- The following section can be uncommented to control the

@@ -17,7 +17,7 @@ Javadoc for Jetty.
 $Id$
 -->
 
-<Configure class="org.mortbay.http.HttpServer">
+<Configure class="org.mortbay.jetty.Server">
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.SocketListener">

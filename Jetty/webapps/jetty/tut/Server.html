@@ -1,0 +1,85 @@
+<BR><H1>Jetty Server Tutorial
+&nbsp;&nbsp;&nbsp;&nbsp;<FONT size=-2>
+<A href="HttpServer.html">Back</A>
+<A href="index.html">Index</A>
+<A href="..">Exit</A>
+<A href="XmlConfiguration.html">Next</A>
+</FONT></H1>
+
+The 
+<a href="/javadoc/org/mortbay/jetty/Server.html">org.mortbay.jetty.Server</a> 
+class is an subclass of 
+<a href="/javadoc/org/mortbay/http/HttpServer.html">org.mortbay.http.HttpServer</a> that adds conveniance methods for
+configuring the servlet container provided by the 
+<a href="/javadoc/org/mortbay/jetty/servlet/package-summary.html">org.mortbay.jetty.servlet</a> package.
+<P>
+
+<FONT Size=+1><B>Servlet Mappings</B></FONT><BR>
+The <Code>addContext()</Code> methods return instances of the
+<a href="/javadoc/org/mortbay/jetty/servlet/ServletHandlerContext.html">org.mortbay.jetty.servlet.ServletHandlerContext</a> class to allow servlet mappings to be simply configured:
+<PRE>
+    ServletHandlerContext context = 
+        (ServletHandlerContext)server.getContext(null,"/");
+    context.addServlet("Dump",
+                       "/dump/*,*.DUMP",
+                       "org.mortbay.servlet.Dump");
+</PRE>
+This configuration creates a context at / and maps the Dump servlet to all URLs starting
+with "/dump/*" or ending with ".DUMP".   This configuration can also be done without using the 
+conveniance methods and is equivalent to the following:
+<PRE>
+    HandlerContext context = server.getContext(null,"/"); 
+    ServletHandler handler = new ServletHandler();
+    handler.addServlet("Dump",
+                       "/dump/*,*.DUMP",
+                       "org.mortbay.servlet.Dump");
+    context.addHandler(handler);
+</PRE>
+<P>
+<FONT Size=+1><B>Dynamic Servlets</B></FONT><BR>
+The ServletHandler can be configured to dynamically create mappings for servlets that have
+their classnames within the requested URL:
+<PRE>
+    ServletHandlerContext context = 
+        (ServletHandlerContext)server.getContext(null,"/context/*");
+    context.setClassPath("./servlets/");
+    context.setDynamicServletPathSpec("/servlet/*");
+</PRE>
+If I request is made to the URL <Code>/context/servlet/com.acme.HelloWorldServlet/info</Code> and the 
+classloader for the context can find a class <Code>com.acme.HelloWorldServlet</code>, then that servlet is 
+loaded and a dynamic mapping made to it from <Code>/servlet/com.acme.HelloWorldServlet/*</Code>.
+<P>
+Note that this configuration also sets a class path for the context. This allows the directory 
+<Code>./servlets/com/acme</Code> to be searched for a <Code>HelloWorldServlet.class</Code> file.
+Servlets can also be loaded from the system classpath for the JVM, however this can represent a 
+security risk and thus can be disabled with the following call:
+<PRE>
+    context.getServletHandler().setServeDynamicSystemServlets(false);
+</PRE>
+<P>
+<FONT Size=+1><B>Web Applications</B></FONT><BR>
+The Servlet Specification details a standard layout for web applications.  If your static and dynamic content are
+packages as a web applications, then a 
+<a href="/javadoc/org/mortbay/jetty/servlet/WebApplicationContext.html">org.mortbay.jetty.servlet.WebApplicationContext</a> can be used to simple configure a context for the web application:
+<PRE>
+    server.addWebApplication("/","./webapps/myapp/","./etc/webdefaults.xml");
+</PRE>
+A web application can be configured with upto 5 arguments:<UL>
+<LI>Optional virtual host name for the context.
+<LI>A context path.
+<LI>The location of the web application, which may be a directory structure or a WAR file.
+<LI>The defaults configuration file. This file is in the same format as the webapplication 
+deployment descriptor and provides the default values for one or more webapplications
+<LI>Optional boolean to indicate that WAR files should be extracted to a temporary directory 
+structure.  Some mechanisms such as JSP compilation have difficulty working with un-expanded
+WAR files.
+</UL>
+
+
+<FONT size=-1>
+<A href="HttpServer.html">Back</A>
+<A href="index.html">Index</A>
+<A href="..">Exit</A>
+<A href="XmlConfiguration.html">Next</A>
+</FONT>
+<P>

@@ -33,9 +33,10 @@ import java.util.Map;
 /* ------------------------------------------------------------ */
 /** Handler to serve files and resources.
  * Serves files from a given resource URL base and implements
- * the GET, HEAD, DELETE, OPTIONS, MOVE methods and the
+ * the GET, HEAD, DELETE, OPTIONS, PUT, MOVE methods and the
  * IfModifiedSince and IfUnmodifiedSince header fields.
  * A simple memory cache is also provided to reduce file I/O.
+ * HTTP/1.1 ranges are supported.
  * 
  * @version $Id$
  * @author Nuno Preguiça 

@@ -20,13 +20,19 @@ import java.util.Map;
 
 
 /* ------------------------------------------------------------ */
-/** Config file driven HttpServer.
+/** The Jetty HttpServer.
  *
- * This class initializes HttpServer instances from xml config files
+ * This specialization of org.mortbay.http.HttpServer adds knowledge
+ * about servlets and their specialized contexts.   It also included
+ * support for initialization from xml configuration files
  * that follow the XmlConfiguration dtd.
  *
- * @see HttpServer
- * @see XmlConfiguration
+ * HandlerContexts created by Server are of the type
+ * org.mortbay.jetty.servlet.ServletHandlerContext unless otherwise
+ * specified.
+ *
+ * @see org.mortbay.xml.XmlConfiguration
+ * @see org.mortbay.jetty.servlet.ServletHandlerContext
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
@@ -42,7 +48,8 @@ public class Server extends HttpServer
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @param configuration 
+     * @param configuration The filename or URL of the XML
+     * configuration file.
      */
     public Server(String configuration)
         throws IOException
@@ -52,7 +59,8 @@ public class Server extends HttpServer
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @param configuration 
+     * @param configuration The filename or URL of the XML
+     * configuration file.
      */
     public Server(Resource configuration)
         throws IOException
@@ -62,7 +70,8 @@ public class Server extends HttpServer
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @param configuration 
+     * @param configuration The filename or URL of the XML
+     * configuration file.
      */
     public Server(URL configuration)
         throws IOException
@@ -85,8 +94,9 @@ public class Server extends HttpServer
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @param configuration 
+    /**  Configure the server from an XML file.
+     * @param configuration The filename or URL of the XML
+     * configuration file.
      */
     public void configure(String configuration)
         throws IOException
@@ -118,9 +128,13 @@ public class Server extends HttpServer
     }
     
     /* ------------------------------------------------------------ */
-    /** Create a new ServletHandlerContext
+    /** Create a new ServletHandlerContext.
+     * Ths method is called by HttpServer to creat new contexts.  Thus
+     * calls to addContext or getContext that result in a new Context
+     * being created will return an
+     * org.mortbay.jetty.servlet.ServletHandlerContext instance.
      * @param contextPathSpec 
-     * @return 
+     * @return ServletHandlerContext
      */
     protected HandlerContext newHandlerContext(String contextPathSpec)
     {

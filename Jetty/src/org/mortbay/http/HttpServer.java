@@ -47,6 +47,7 @@ import java.beans.beancontext.BeanContextSupport;
  * @see HttpHandler
  * @see HttpConnection
  * @see HttpListener
+ * @see org.mortbay.jetty.Server
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -79,7 +80,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     
     /* ------------------------------------------------------------ */
     /** 
-     * @return 
+     * @return The HttpEncoding helper instance.
      */
     public HttpEncoding getHttpEncoding()
     {
@@ -89,8 +90,9 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @param httpEncoding 
+    /** The HttpEncoding instance is used to extend the transport
+     * encodings supprted by this server.
+     * @param httpEncoding The HttpEncoding helper instance.
      */
     public void setHttpEncoding(HttpEncoding httpEncoding)
     {
@@ -363,22 +365,11 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
 
 
     /* ------------------------------------------------------------ */
-    /** Create and add a new context.
-     * Note that multiple contexts can be created for the same
-     * host and contextPath. Requests are offered to multiple
-     * contexts in the order they where added to the HttpServer.
-     * @param contextPath
-     * @return 
-     */
-    public HandlerContext addContext(String contextPath)
-    {
-        return addContext(null,contextPath);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Create a new HandlerContext
+    /** Create a new HandlerContext.
+     * Specialized HttpServer classes may specialize this method to
+     * return subclasses of HandlerContext.
      * @param contextPathSpec 
-     * @return 
+     * @return A new instance of HandlerContext or a subclass of HandlerContext
      */
     protected HandlerContext newHandlerContext(String contextPathSpec)
     {
@@ -390,9 +381,23 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
      * Note that multiple contexts can be created for the same
      * host and contextPath. Requests are offered to multiple
      * contexts in the order they where added to the HttpServer.
+     * @param contextPath
+     * @return A HandlerContext instance created by a call to newHandlerContext.
+     */
+    public HandlerContext addContext(String contextPath)
+    {
+        return addContext(null,contextPath);
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /** Create and add a new context.
+     * Note that multiple contexts can be created for the same
+     * host and contextPath. Requests are offered to multiple
+     * contexts in the order they where added to the HttpServer.
      * @param host Virtual hostname or null for all hosts.
      * @param contextPathSpec
-     * @return 
+     * @return A HandlerContext instance created by a call to newHandlerContext.
      */
     public HandlerContext addContext(String host, String contextPathSpec)
     {
@@ -529,7 +534,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
      * @param contextPath 
      * @return HandlerContext. If multiple contexts exist for the same
      * host and pathSpec, the most recently added context is returned.
-     * If no context exists, a new context is defined.
+     * If no context exists, a new context is created by a call to newHandlerContext.
      */
     public HandlerContext getContext(String host, String contextPath)
     { 
