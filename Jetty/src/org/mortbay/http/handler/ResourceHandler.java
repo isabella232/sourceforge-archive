@@ -655,7 +655,7 @@ public class ResourceHandler extends NullHandler
 
             if (ibr.getFirst()>=resLength)
             {
-                Code.warning("not satisfiable: "+ibr);
+                Code.debug("not satisfiable: ",ibr);
                 rit.remove();
                 continue;
             }
