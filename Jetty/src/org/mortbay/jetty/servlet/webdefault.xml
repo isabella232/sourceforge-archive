@@ -54,7 +54,7 @@
   <!-- The MOVE method is allowed if PUT and DELETE are allowed             -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <servlet>
-    <servlet-name>Default</servlet-name>
+    <servlet-name>default</servlet-name>
     <servlet-class>org.mortbay.jetty.servlet.Default</servlet-class>
     <init-param>
       <param-name>acceptRanges</param-name>
@@ -128,7 +128,7 @@
   <!--   "org.apache.jasper.compiler.JikesJavaCompiler".                    -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <servlet>
-    <servlet-name>JSP</servlet-name>
+    <servlet-name>jsp</servlet-name>
     <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
     <load-on-startup>0</load-on-startup>
   </servlet>
@@ -153,7 +153,7 @@
   <!--                           each dynamic servlet as init parameters    -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <servlet>
-    <servlet-name>Invoker</servlet-name>
+    <servlet-name>invoker</servlet-name>
     <servlet-class>org.mortbay.jetty.servlet.Invoker</servlet-class>
     <init-param>
       <param-name>verbose</param-name>
@@ -172,19 +172,19 @@
 
   <!-- ==================================================================== -->
   <servlet-mapping>
-    <servlet-name>Default</servlet-name>
+    <servlet-name>default</servlet-name>
     <url-pattern>/</url-pattern>
   </servlet-mapping>
 
   <!-- ==================================================================== -->
   <servlet-mapping>
-    <servlet-name>JSP</servlet-name>
+    <servlet-name>jsp</servlet-name>
     <url-pattern>*.jsp:*.jsP:*.jSp:*.jSP:*.Jsp:*.JsP:*.JSp:*.JSP</url-pattern>
   </servlet-mapping>
 
   <!-- ==================================================================== -->
   <servlet-mapping>
-    <servlet-name>Invoker</servlet-name>
+    <servlet-name>invoker</servlet-name>
     <url-pattern>/servlet/*</url-pattern>
   </servlet-mapping>
 
@@ -215,3 +215,4 @@
   </welcome-file-list>
 
 </web-app>
+
