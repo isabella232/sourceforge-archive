@@ -8,17 +8,18 @@ clean       - Remove all generated files.
 tidy        - Remove unneeded generated files
 prepare     - Set up build directory structure.
 classes     - Builds the classes.
-sasl.jar    - Build the SASL jar
+nbio.jar    - Build the NBIO jar
 demo        - Runs the demo web application.
 
 -->
-<project name="Jetty3 SASL" default="all" basedir=".">
+<project name="Jetty3 NBIO" default="all" basedir=".">
 
   <property environment="env"/>
 
   <property name="src"            value="${basedir}/src" />
   <property name="lib"            value="${basedir}/lib"/>
   <property name="etc"            value="${basedir}/etc"/>
+  <property name="logs"           value="${basedir}/logs"/>
   <property name="classes"        value="${basedir}/classes"/>
   <property name="javadoc"        value="${basedir}/javadoc"/>
 
@@ -28,7 +29,9 @@ demo        - Runs the demo web application.
 
   <property name="jetty"          value="${env.JETTY_HOME}"/>
   <property name="jetty.lib"      value="${jetty}/lib"/>
-  <property name="jetty.sasl.jar" value="${lib}/org.mortbay.jetty.sasl.jar"/>
+  <property name="jetty.nbio.jar" value="${lib}/org.mortbay.jetty.nbio.jar"/>
+
+  <property name="nbio.classes"   value="${env.NBIO_HOME}"/>
 
   <property name="jetty.jar"      value="${jetty.lib}/org.mortbay.jetty.jar"/>
   <property name="servlet.jar"    value="${jetty.lib}/javax.servlet.jar"/>
@@ -37,14 +40,13 @@ demo        - Runs the demo web application.
   <property name="xml.jar"        value="${jetty.lib}/org.apache.crimson.jar"/>
   <property name="jsse.jar"       value="${jetty.lib}/com.sun.net.ssl.jar"/>
 
-  <property name="sasl.jar"       value="${lib}/javax-sasl.jar"/>
-  <property name="cyptix.jar"     value="${lib}/cryptix-sasl-jetty.jar"/>
-
-  <property name="classpath"      value="${jasper.jar};${jetty.jar};${xml.jar};${jaxp.jar};${jsse.jar};${servlet.jar};${cyptix.jar};${sasl.jar}"/>
+  <property name="classpath"      value="${jasper.jar};${jetty.jar};${xml.jar};${jaxp.jar};${jsse.jar};${servlet.jar};${nbio.classes}"/>
 
   <target name="prepare">
     <mkdir dir="${javadoc}" />
     <mkdir dir="${classes}" />
+    <mkdir dir="${lib}" />
+    <mkdir dir="${logs}" />
   </target>
 
   <target name="tidy" >
@@ -53,7 +55,8 @@ demo        - Runs the demo web application.
 
   <target name="clean" depends="tidy">
     <delete dir="${javadoc}"/>
-    <delete file="${jetty.sasl.jar}"/>
+    <delete dir="${lib}"/>
+    <delete dir="${logs}"/>
   </target>
 
   <target name="classes" depends="prepare">
@@ -76,17 +79,17 @@ demo        - Runs the demo web application.
     </javac>
   </target>
 
-  <target name="sasl.jar" depends="classes">
-    <jar jarfile="${jetty.sasl.jar}" basedir="${classes}" >
+  <target name="nbio.jar" depends="classes">
+    <jar jarfile="${jetty.nbio.jar}" basedir="${classes}" >
        <include name="org/mortbay/**"  />
        <exclude name="org/mortbay/**/*Test.class" />
     </jar>
   </target>
 
-  <target name="javadoc" depends="sasl.jar">
-    <javadoc packagenames="org.mortbay.http.sasl"
+  <target name="javadoc" depends="nbio.jar">
+    <javadoc packagenames="org.mortbay.http.nbio"
              sourcepath="${src}"
-             classpath="${classpath}:${jetty.sasl.jar}"
+             classpath="${classpath}:${jetty.nbio.jar}"
              destdir="${javadoc}"
              author="true"
              version="true"
@@ -97,7 +100,7 @@ demo        - Runs the demo web application.
     </javadoc>
   </target>
 
-  <target name="all" depends="sasl.jar,javadoc"/>
+  <target name="all" depends="nbio.jar,javadoc"/>
 
 </project>
 

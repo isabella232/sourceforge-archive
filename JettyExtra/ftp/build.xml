@@ -32,10 +32,10 @@ all         - everything
 
   <property name="jetty"          value="${env.JETTY_HOME}"/>
   <property name="jetty.lib"      value="${jetty}/lib"/>
-  <property name="jetty.jar"      value="${jetty.lib}/com.mortbay.jetty.jar"/>
+  <property name="jetty.jar"      value="${jetty.lib}/org.mortbay.jetty.jar"/>
   <property name="classpath"      value="${jetty.jar}"/>
 
-  <property name="mortbay.ftp.jar" value="${lib}/com.mortbay.ftp.jar"/>
+  <property name="mortbay.ftp.jar" value="${lib}/org.mortbay.ftp.jar"/>
 
   <target name="prepare">
     <mkdir dir="${lib}" />
@@ -74,13 +74,13 @@ all         - everything
 
   <target name="ftp.jar" depends="classes">
     <jar jarfile="${mortbay.ftp.jar}" basedir="${classes}" >
-       <include name="com/mortbay/FTP/**"  />
-       <exclude name="com/mortbay/**/Test*.class" />
+       <include name="org/mortbay/ftp/**"  />
+       <exclude name="org/mortbay/**/Test*.class" />
     </jar>
   </target>
 
   <target name="javadoc" depends="ftp.jar">
-    <javadoc packagenames="com.mortbay.FTP.*"
+    <javadoc packagenames="org.mortbay.ftp.*"
              sourcepath="${src}"
              classpath="${classpath};${jetty.jmx.jar}"
              destdir="${javadoc}"
@@ -94,7 +94,7 @@ all         - everything
   </target>
 
   <target name="test" depends="classes" >
-    <java classname="com.mortbay.FTP.TestFtp"
+    <java classname="org.mortbay.ftp.TestFtp"
           classpath="${classes}:${classpath}"
           fork="yes"
           failonerror="yes"

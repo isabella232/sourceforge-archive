@@ -32,11 +32,11 @@ all         - everything
 
   <property name="jetty"          value="${env.JETTY_HOME}"/>
   <property name="jetty.lib"      value="${jetty}/lib"/>
-  <property name="jetty.jar"      value="${jetty.lib}/com.mortbay.jetty.jar"/>
+  <property name="jetty.jar"      value="${jetty.lib}/org.mortbay.jetty.jar"/>
   <property name="servlet.jar"    value="${jetty.lib}/javax.servlet.jar"/>
   <property name="classpath"      value="${jetty.jar};${servlet.jar}"/>
 
-  <property name="mortbay.tools.jar" value="${lib}/com.mortbay.tools.jar"/>
+  <property name="mortbay.tools.jar" value="${lib}/org.mortbay.tools.jar"/>
 
   <target name="prepare">
     <mkdir dir="${lib}" />
@@ -75,14 +75,14 @@ all         - everything
 
   <target name="tools.jar" depends="classes">
     <jar jarfile="${mortbay.tools.jar}" basedir="${classes}" >
-       <include name="com/mortbay/**"  />
-       <exclude name="com/mortbay/**/Test*.class" />
-       <exclude name="com/mortbay/**/*Test.class" />
+       <include name="org/mortbay/**"  />
+       <exclude name="org/mortbay/**/Test*.class" />
+       <exclude name="org/mortbay/**/*Test.class" />
     </jar>
   </target>
 
   <target name="javadoc" depends="tools.jar">
-    <javadoc packagenames="com.mortbay.Tools.*"
+    <javadoc packagenames="org.mortbay.tools.*"
              sourcepath="${src}"
              classpath="${classpath};${jetty.jmx.jar}"
              destdir="${javadoc}"
@@ -96,7 +96,7 @@ all         - everything
   </target>
 
   <target name="test" depends="classes" >
-    <java classname="com.mortbay.Tools.TestHarness"
+    <java classname="org.mortbay.tools.TestHarness"
           classpath="${classes}:${classpath}"
           fork="yes"
           failonerror="yes"

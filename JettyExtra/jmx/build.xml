@@ -32,9 +32,9 @@ all         - everything
 
   <property name="jetty"          value="${env.JETTY_HOME}"/>
   <property name="jetty.lib"      value="${jetty}/lib"/>
-  <property name="jetty.jmx.jar"  value="${lib}/com.mortbay.jetty.jmx.jar"/>
+  <property name="jetty.jmx.jar"  value="${lib}/org.mortbay.jetty.jmx.jar"/>
 
-  <property name="jetty.jar"      value="${jetty.lib}/com.mortbay.jetty.jar"/>
+  <property name="jetty.jar"      value="${jetty.lib}/org.mortbay.jetty.jar"/>
   <property name="servlet.jar"    value="${jetty.lib}/javax.servlet.jar"/>
   <property name="jasper.jar"     value="${jetty.lib}/org.apache.jasper.jar"/>
   <property name="jaxp.jar"       value="${jetty.lib}/javax.xml.jaxp.jar"/>
@@ -49,7 +49,7 @@ all         - everything
   <target name="prepare">
     <mkdir dir="${javadoc}" />
     <mkdir dir="${classes}" />
-    <copy file="${src}/com/mortbay/Jetty/JMX/jetty.mlet" tofile="${etc}/jetty.mlet" />
+    <copy file="${src}/org/mortbay/jetty/jmx/jetty.mlet" tofile="${etc}/jetty.mlet" />
   </target>
 
   <target name="tidy" >
@@ -82,13 +82,13 @@ all         - everything
 
   <target name="jmx.jar" depends="classes">
     <jar jarfile="${jetty.jmx.jar}" basedir="${classes}" >
-       <include name="com/mortbay/Jetty/JMX/**"  />
-       <exclude name="com/mortbay/**/Test*.class" />
+       <include name="org/mortbay/jetty/jmx/**"  />
+       <exclude name="org/mortbay/**/Test*.class" />
     </jar>
   </target>
 
   <target name="javadoc" depends="jmx.jar">
-    <javadoc packagenames="com.mortbay.Jetty.JMX.*"
+    <javadoc packagenames="org.mortbay.jetty.jmx.*"
              sourcepath="${src}"
              classpath="${classpath}:${jetty.jmx.jar}"
              destdir="${javadoc}"
@@ -102,11 +102,11 @@ all         - everything
   </target>
 
   <target name="demo" depends="jmx.jar" >
-    <copy file="${src}/com/mortbay/Jetty/JMX/jetty.mlet" tofile="${etc}/jetty.mlet" />
+    <copy file="${src}/org/mortbay/jetty/jmx/jetty.mlet" tofile="${etc}/jetty.mlet" />
     <replace file="${etc}/jetty.mlet" token="__JETTY_JMX_HOME__" value="${basedir}" />
     <replace file="${etc}/jetty.mlet" token="__JETTY_HOME__" value="${jetty}" />
     <touch file="${etc}/jetty.mlet" datetime="01/01/2000 12:00 am"/>
-    <java classname="com.mortbay.Jetty.JMX.Main"
+    <java classname="org.mortbay.jetty.jmx.Main"
           classpath="${jetty.jmx.jar}:${classpath}"
           fork="yes"
           failonerror="yes"

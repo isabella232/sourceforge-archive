@@ -22,14 +22,14 @@ Quick Start
 
 Detail
 ======
-Look at the javadoc and code for com.mortbay.Jetty.JMX
+Look at the javadoc and code for org.mortbay.jetty.jmx
 
 The JMX MBeans are started via mlets which are defined in the
 etc/jetty.mlet file.   
 
 The mlet file can be run with:
 
-  java com.mortbay.Jetty.JMX.Main etc/jetty.mlet
+  java org.mortbay.jetty.jmx.Main etc/jetty.mlet
 
 
 
