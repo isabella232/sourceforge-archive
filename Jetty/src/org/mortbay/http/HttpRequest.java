@@ -705,9 +705,9 @@ public class HttpRequest extends HttpMessage
         {
             // Sort the list
             List te=HttpFields.qualityList(tenum);
-            
+            int size=te.size();
             // Process if something there
-            if (te!=null && te.size()>0)
+            if (size >0)
             {
                 LazyList acceptable = null;
                 
@@ -726,7 +726,7 @@ public class HttpRequest extends HttpMessage
                             response.setAcceptTrailer(true);
                     }
                     else if (!HttpFields.__Chunked.equals(coding))
-                        acceptable=LazyList.add(acceptable,coding);
+                        acceptable=LazyList.add(acceptable,size,coding);
                 }
                 _te=LazyList.getList(acceptable);
             }

@@ -11,6 +11,7 @@ import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.util.Code;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.Resource;
 import org.mortbay.util.StringUtil;
@@ -179,8 +180,11 @@ public class ServletRequest
             return
                 Collections.enumeration(Collections.singleton(Locale.getDefault()));
 
+        LazyList langs = null;
+        int size=acceptLanguage.size();
+        
         // convert to locals
-        for (int i=0; i<acceptLanguage.size(); i++)
+        for (int i=0; i<size; i++)
         {
             String language = (String)acceptLanguage.get(i);
             language=HttpFields.valueParameters(language,null);
@@ -191,13 +195,10 @@ public class ServletRequest
                 country = language.substring(dash + 1).trim();
                 language = language.substring(0,dash).trim();
             }
-            
-            acceptLanguage.set(i,new Locale(language, country));
+            LazyList.add(langs,size,new Locale(language, country));
         }
-        
-        return Collections.enumeration(acceptLanguage);
+        return Collections.enumeration(LazyList.getList(langs));
     }
-
     
     /* ------------------------------------------------------------ */
     public String getAuthType()

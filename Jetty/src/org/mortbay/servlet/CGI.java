@@ -19,6 +19,7 @@ import org.mortbay.http.HttpFields;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.LineInput;
+import org.mortbay.util.StringUtil;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -162,13 +163,13 @@ public class CGI extends HttpServlet
       {
         // these ones are from "The WWW Common Gateway Interface Version 1.1"
         // look at : http://Web.Golux.Com/coar/cgi/draft-coar-cgi-v11-03-clean.html#6.1.1
-        "AUTH_TYPE="                + req.getAuthType(),
+        "AUTH_TYPE="                + StringUtil.nonNull(req.getAuthType()),
         "CONTENT_LENGTH="           + req.getContentLength(),
-        "CONTENT_TYPE="             + req.getContentType(),
+        "CONTENT_TYPE="             + StringUtil.nonNull(req.getContentType()),
         "GATEWAY_INTERFACE="        + "CGI/1.1",
-        "PATH_INFO="                + pathInfo,
-        "PATH_TRANSLATED="          + req.getPathTranslated(),
-        "QUERY_STRING="             + req.getQueryString(),
+        "PATH_INFO="                + StringUtil.nonNull(pathInfo),
+        "PATH_TRANSLATED="          + StringUtil.nonNull(req.getPathTranslated()),
+        "QUERY_STRING="             + StringUtil.nonNull(req.getQueryString()),
         "REMOTE_ADDR="              + req.getRemoteAddr(),
         "REMOTE_HOST="              + req.getRemoteHost(),
 
@@ -178,27 +179,27 @@ public class CGI extends HttpServlet
         // not to request the data for efficiency reasons.
         // "REMOTE_IDENT="             + "NYI",
 
-        "REMOTE_USER="              + req.getRemoteUser(),
+        "REMOTE_USER="              + StringUtil.nonNull(req.getRemoteUser()),
         "REQUEST_METHOD="           + req.getMethod(),
         "SCRIPT_NAME="              + req.getRequestURI().substring(0, req.getRequestURI().length() - pathInfo.length()),
         "SERVER_NAME="              + req.getServerName(),
         "SERVER_PORT="              + req.getServerPort(),
         "SERVER_PROTOCOL="          + req.getProtocol(),
         "SERVER_SOFTWARE="          + getServletContext().getServerInfo(),
-        "HTTP_ACCEPT="              + req.getHeader(HttpFields.__Accept),
-        "HTTP_ACCEPT_CHARSET="      + req.getHeader(HttpFields.__AcceptCharset),
-        "HTTP_ACCEPT_ENCODING="     + req.getHeader(HttpFields.__AcceptEncoding),
-        "HTTP_ACCEPT_LANGUAGE="     + req.getHeader(HttpFields.__AcceptLanguage),
-        "HTTP_FORWARDED="           + req.getHeader(HttpFields.__Forwarded),
-        "HTTP_HOST="                + req.getHeader(HttpFields.__Host),
-        "HTTP_PROXY_AUTHORIZATION=" + req.getHeader(HttpFields.__ProxyAuthorization),
-        "HTTP_REFERRER="            + req.getHeader(HttpFields.__Referer),
-        "HTTP_USER_AGENT="          + req.getHeader(HttpFields.__UserAgent),
+        "HTTP_ACCEPT="              + StringUtil.nonNull(req.getHeader(HttpFields.__Accept)),
+        "HTTP_ACCEPT_CHARSET="      + StringUtil.nonNull(req.getHeader(HttpFields.__AcceptCharset)),
+        "HTTP_ACCEPT_ENCODING="     + StringUtil.nonNull(req.getHeader(HttpFields.__AcceptEncoding)),
+        "HTTP_ACCEPT_LANGUAGE="     + StringUtil.nonNull(req.getHeader(HttpFields.__AcceptLanguage)),
+        "HTTP_FORWARDED="           + StringUtil.nonNull(req.getHeader(HttpFields.__Forwarded)),
+        "HTTP_HOST="                + StringUtil.nonNull(req.getHeader(HttpFields.__Host)),
+        "HTTP_PROXY_AUTHORIZATION=" + StringUtil.nonNull(req.getHeader(HttpFields.__ProxyAuthorization)),
+        "HTTP_REFERRER="            + StringUtil.nonNull(req.getHeader(HttpFields.__Referer)),
+        "HTTP_USER_AGENT="          + StringUtil.nonNull(req.getHeader(HttpFields.__UserAgent)),
         
         // found these 2 extra headers in request from Jetty - should
         // they be included ?
-        "HTTP_PRAGMA="              + req.getHeader(HttpFields.__Pragma),
-        "HTTP_COOKIE="              + req.getHeader(HttpFields.__Cookie),
+        "HTTP_PRAGMA="              + StringUtil.nonNull(req.getHeader(HttpFields.__Pragma)),
+        "HTTP_COOKIE="              + StringUtil.nonNull(req.getHeader(HttpFields.__Cookie)),
 
         // these extra ones were from printenv on www.dev.nomura.co.uk
         "HTTPS="                    + (req.isSecure()?"ON":"OFF"),

@@ -147,21 +147,19 @@ public class StringUtil
             }
         }
     }
-    
-    
+
     /* ------------------------------------------------------------ */
-    /** Test main.
-     * @param args args
+    /** Return a non null string.
+     * @param s String
+     * @return The string passed in or empty string if it is null. 
      */
-    public static void main(String[] args)
+    public static String nonNull(String s)
     {
-        StringBuffer b = new StringBuffer(256);
-        for(int i=32;i<127;i++)
-        {
-            b.append((char) i);
-        }
-        System.out.println(b.toString());
-        System.out.println("->");
-        System.out.println(asciiToLowerCase(b.toString()));
+        if (s==null)
+            return "";
+        return s;
     }
+    
+    
+    
 }

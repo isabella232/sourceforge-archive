@@ -70,6 +70,30 @@ public class LazyList
     }
 
     /* ------------------------------------------------------------ */
+    /** Add an item to a LazyList 
+     * @param list The list to add to or null if none yet created.
+     * @param initialSize A size to use when creating the real list
+     * @param item The item to add.
+     * @return The lazylist created or added to.
+     */
+    public static LazyList add(LazyList list, int initialSize, Object item)
+    {
+        if (list==null)
+            return new LazyList(item);
+
+        if (list._list!=null)
+        {
+            list._list.add(item);
+            return list;
+        }
+
+        list._list=new ArrayList(initialSize);
+        list._list.add(list._first);
+        list._list.add(item);
+        return list;    
+    }
+
+    /* ------------------------------------------------------------ */
     /** Get the real List from a LazyList.
      * 
      * @param list A LazyList returned from LazyList.add(Object)
