@@ -149,7 +149,7 @@ public class ServletHolder
         catch(ClassNotFoundException e)
         {
             Code.debug(e);
-            throw new UnavailableException(null,e.toString());
+            throw new UnavailableException(e.toString());
         }
     }
     
@@ -211,7 +211,7 @@ public class ServletHolder
         catch(Exception e)
         {
             Code.warning(e);
-            throw new UnavailableException(null,e.toString());
+            throw new UnavailableException(e.toString());
         }    
     }
 
@@ -340,7 +340,7 @@ public class ServletHolder
         
         // Check that we got one in the end
         if (useServlet==null)
-            throw new UnavailableException(null,"Could not construct servlet");
+            throw new UnavailableException("Could not construct servlet");
 
         // Service the request
         try

@@ -71,7 +71,7 @@ public abstract class Element
      */
     public Element(String attributes)
     {
-        attributes(attributes);
+        attribute(attributes);
     }
 
     /* ----------------------------------------------------------------- */

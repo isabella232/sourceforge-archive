@@ -317,7 +317,6 @@ public class ThreadPool
         
         _running=false;
         
-        
         // interrupt the threads
         Iterator iter=_threadSet.iterator();
         while(iter.hasNext())
@@ -341,24 +340,15 @@ public class ThreadPool
                 {
                     Thread thread=(Thread)iter.next();
                     if (thread.isAlive())
-                        thread.stop( );
-                }
-                
-                // wait until all threads are dead.
-                while(_threadSet.size()>0)
-                {
-                    Code.debug("waiting for threads to stop...");
-                    this.wait(__stopWaitMs);
+                        thread.destroy( );
                 }
             }
         }
-        catch(InterruptedException e)
+        finally
         {
-            Code.warning(e);
+            _threadSet.clear();
+            _threadSet=null;
         }
-        
-        _threadSet.clear();
-        _threadSet=null;
     }
 
     

@@ -357,7 +357,7 @@ abstract public class ThreadedServer extends ThreadPool
         try
         {
             _listen=newServerSocket(_address,
-                                    getMaxSize()>0?(getMaxSize()+1):50);
+                                    getMaxThreads()>0?(getMaxThreads()+1):50);
             _address=new InetAddrPort(_listen.getInetAddress(),
                                       _listen.getLocalPort());
 

@@ -408,7 +408,7 @@ class ServletRequest
         
         if (id != null)
         {
-            _session=_context.getSession(id);
+            _session=_context.getHttpSession(id);
             if (_session == null && !create)
                 return null;
         }

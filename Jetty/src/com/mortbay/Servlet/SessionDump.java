@@ -10,6 +10,7 @@ import com.mortbay.Util.Code;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Date;
+import java.util.Enumeration;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -57,9 +58,9 @@ public class SessionDump extends HttpServlet
             if (action.equals("Invalidate"))
                 session.invalidate();
             else if (action.equals("Add"))
-                session.putValue(name,value);
+                session.setAttribute(name,value);
             else if (action.equals("Remove"))
-                session.removeValue(name);
+                session.removeAttribute(name);
         }
         
         response.sendRedirect(response.encodeRedirectURL(nextUrl));
@@ -101,12 +102,12 @@ public class SessionDump extends HttpServlet
                            new Date(session.getLastAccessedTime()).toString());
                 tf.addText("Max Inactive",
                            ""+session.getMaxInactiveInterval());
-                
-                String[] keys= session.getValueNames();
-                for(int k=keys.length;k-->0;)
+
+                Enumeration keys=session.getAttributeNames();
+                while(keys.hasMoreElements())
                 {
-                    String name=keys[k];
-                    String value=session.getValue(name).toString();
+                    String name=(String)keys.nextElement();
+                    String value=session.getAttribute(name).toString();
                     tf.addText(name,value);
                 }
                 

@@ -361,19 +361,29 @@ public class Context implements ServletContext, HttpSessionContext
     private Map _sessions = new HashMap();
 
     /* ------------------------------------------------------------ */
-    /**
-     * @deprecated
+    /** 
+     * @deprecated From HttpSessionContext
      */   
     public Enumeration getIds()
     {
-        return Collections.enumeration(_sessions.keySet());
+        return Collections.enumeration(Collections.EMPTY_LIST);
     }
     
     /* ------------------------------------------------------------ */
     /**
-     * @deprecated
+     * @deprecated From HttpSessionContext
      */   
     public HttpSession getSession(String id)
+    {
+        return null;
+    }
+     
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param id 
+     * @return 
+     */
+    HttpSession getHttpSession(String id)
     {
         HttpSession s = (HttpSession)_sessions.get(id);
         return s;

@@ -103,7 +103,7 @@ public class Page extends Composite
     public Page(String title, String attributes)
     {
         title(title);
-        attributes(attributes);
+        attribute(attributes);
     }
 
     /* ----------------------------------------------------------------- */

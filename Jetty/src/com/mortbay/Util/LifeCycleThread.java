@@ -110,7 +110,8 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
         {
             _thread.interrupt();
             Thread.yield();
-            _thread.stop();
+            if (_thread.isAlive())
+                _thread.destroy();
             _thread=null;
         }
         _configuration=null;
@@ -191,14 +192,3 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
            Exception;
     
 }
-
-
-
-
-
-
-
-
-
-
-

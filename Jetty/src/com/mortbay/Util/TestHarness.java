@@ -925,13 +925,13 @@ public class TestHarness
             pool.start();
             Thread.sleep(100);
             test.check(pool.isStarted(),"Started");
-            test.checkEquals(pool.getSize(),2,"Minimum Threads");
+            test.checkEquals(pool.getThreads(),2,"Minimum Threads");
             test.checkEquals(pool._calls,0,"Minimum Threads");
             test.checkEquals(pool._waiting,0,"Minimum Threads");
             
             System.err.print(".");System.err.flush();
             Thread.sleep(550);
-            test.checkEquals(pool.getSize(),2,"Minimum Threads");
+            test.checkEquals(pool.getThreads(),2,"Minimum Threads");
             test.checkEquals(pool._calls,0,"Minimum Threads");
             test.checkEquals(pool._waiting,0,"Minimum Threads");
 
@@ -944,90 +944,90 @@ public class TestHarness
             pool.run(j1);
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
-            test.checkEquals(pool.getSize(),2,"Job1");
+            test.checkEquals(pool.getThreads(),2,"Job1");
             test.checkEquals(pool._calls,1,"Job1");
             test.checkEquals(pool._waiting,1,"Job1");
             
             pool.run(j2);
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
-            test.checkEquals(pool.getSize(),3,"Job2");
+            test.checkEquals(pool.getThreads(),3,"Job2");
             test.checkEquals(pool._calls,2,"Job2");
             test.checkEquals(pool._waiting,2,"Job2");
 
             pool.run(j3);
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
-            test.checkEquals(pool.getSize(),4,"Job3");
+            test.checkEquals(pool.getThreads(),4,"Job3");
             test.checkEquals(pool._calls,3,"Job3");
             test.checkEquals(pool._waiting,3,"Job3");
             
             pool.run(j4);
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
-            test.checkEquals(pool.getSize(),4,"Job4");
+            test.checkEquals(pool.getThreads(),4,"Job4");
             test.checkEquals(pool._calls,4,"Job4");
             test.checkEquals(pool._waiting,4,"Job4");
             
             pool.run(j5);
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
-            test.checkEquals(pool.getSize(),4,"Job5");
+            test.checkEquals(pool.getThreads(),4,"Job5");
             test.checkEquals(pool._calls,4,"Job5");
             test.checkEquals(pool._waiting,4,"Job5");
             
             synchronized(j1){j1.notify();}
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
-            test.checkEquals(pool.getSize(),4,"max threads");
+            test.checkEquals(pool.getThreads(),4,"max threads");
             test.checkEquals(pool._calls,5,"max threads");
             test.checkEquals(pool._waiting,4,"max threads");
             
             synchronized(j2){j2.notify();}
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
-            test.checkEquals(pool.getSize(),4,"idle job");
+            test.checkEquals(pool.getThreads(),4,"idle job");
             test.checkEquals(pool._calls,5,"idle job");
             test.checkEquals(pool._waiting,3,"idle job");
             System.err.print(".");System.err.flush();
             Thread.sleep(1000);
-            test.checkEquals(pool.getSize(),4,"idle wait");
+            test.checkEquals(pool.getThreads(),4,"idle wait");
             test.checkEquals(pool._calls,5,"idle wait");
             test.checkEquals(pool._waiting,3,"idle wait");
             
             synchronized(j3){j3.notify();}
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
-            test.checkEquals(pool.getSize(),4,"idle job");
+            test.checkEquals(pool.getThreads(),4,"idle job");
             test.checkEquals(pool._calls,5,"idle job");
             test.checkEquals(pool._waiting,2,"idle job");
             System.err.print(".");System.err.flush();
             Thread.sleep(550);
-            test.checkEquals(pool.getSize(),3,"idle death");
+            test.checkEquals(pool.getThreads(),3,"idle death");
             test.checkEquals(pool._calls,5,"idle death");
             test.checkEquals(pool._waiting,2,"idle death");
 
             synchronized(j4){j4.notify();}
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
-            test.checkEquals(pool.getSize(),3,"idle job");
+            test.checkEquals(pool.getThreads(),3,"idle job");
             test.checkEquals(pool._calls,5,"idle job");
             test.checkEquals(pool._waiting,1,"idle job");
             System.err.print(".");System.err.flush();
             Thread.sleep(550);
-            test.checkEquals(pool.getSize(),2,"idle death");
+            test.checkEquals(pool.getThreads(),2,"idle death");
             test.checkEquals(pool._calls,5,"idle death");
             test.checkEquals(pool._waiting,1,"idle death");
             
             synchronized(j5){j5.notify();}
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
-            test.checkEquals(pool.getSize(),2,"idle job");
+            test.checkEquals(pool.getThreads(),2,"idle job");
             test.checkEquals(pool._calls,5,"idle job");
             test.checkEquals(pool._waiting,0,"idle job");
             System.err.print(".");System.err.flush();
             Thread.sleep(550);
-            test.checkEquals(pool.getSize(),2,"min idle");
+            test.checkEquals(pool.getThreads(),2,"min idle");
             test.checkEquals(pool._calls,5,"min idle");
             test.checkEquals(pool._waiting,0,"min idle");
             
@@ -1035,7 +1035,7 @@ public class TestHarness
             pool.run(j2);
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
-            test.checkEquals(pool.getSize(),3,"steady state");
+            test.checkEquals(pool.getThreads(),3,"steady state");
             test.checkEquals(pool._calls,7,"steady state");
             test.checkEquals(pool._waiting,2,"steady state");
             synchronized(j2){j2.notify();}
@@ -1044,7 +1044,7 @@ public class TestHarness
             pool.run(j2);
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
-            test.checkEquals(pool.getSize(),3,"steady state");
+            test.checkEquals(pool.getThreads(),3,"steady state");
             test.checkEquals(pool._calls,8,"steady state");
             test.checkEquals(pool._waiting,2,"steady state");
             synchronized(j1){j1.notify();}
@@ -1053,7 +1053,7 @@ public class TestHarness
             pool.run(j2);
             System.err.println(".");System.err.flush();
             Thread.sleep(100);
-            test.checkEquals(pool.getSize(),3,"steady state");
+            test.checkEquals(pool.getThreads(),3,"steady state");
             test.checkEquals(pool._calls,9,"steady state");
             test.checkEquals(pool._waiting,2,"steady state");
             
