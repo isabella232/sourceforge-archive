@@ -419,6 +419,9 @@ The XML to do this to a webapplication is:
     </Call>
   </Call>
 
+Note: initialising the SecureRandom object is a one-off time consuming
+operation which may cause the initial request to take much longer.
+
 
 XML Parsing
 -----------
