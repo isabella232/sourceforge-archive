@@ -120,7 +120,7 @@ public class HttpRequest extends HttpMessage
         LineInput line_input = (LineInput)in.getRawStream();
         
         // Get start line
-        com.mortbay.Util.LineInput$LineBuffer line_buffer;
+        com.mortbay.Util.LineInput.LineBuffer line_buffer;
 
         do
         {

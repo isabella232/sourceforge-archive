@@ -502,7 +502,7 @@ public class HttpFields extends HashMap
         char[] buf=null;
         int size=0;
         char[] lbuf=null;
-        com.mortbay.Util.LineInput$LineBuffer line_buffer;
+        com.mortbay.Util.LineInput.LineBuffer line_buffer;
         
         while ((line_buffer=in.readLineBuffer())!=null)
         {
