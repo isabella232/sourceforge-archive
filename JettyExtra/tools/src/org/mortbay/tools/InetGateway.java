@@ -243,6 +243,8 @@ public class InetGateway extends ThreadedServer
                                 finally
                                 {
                                     Code.debug("Finished remoteIn to localOut");
+                                    try { localOut.close() ; }
+                                    catch(Exception e) { Code.debug(e); }
                                     complete[0]=true;
                                 }
                             }
