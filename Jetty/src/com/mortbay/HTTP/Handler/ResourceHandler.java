@@ -786,9 +786,10 @@ public class ResourceHandler extends NullHandler
             CachedFile cachedFile = null;
             synchronized (_cacheMap)
             {
-                cachedFile=_cache[_nextIn];
-                if (cachedFile==null)
-                    cachedFile=_cache[_nextIn]=new CachedFile();
+                if (_cache[_nextIn]!=null)
+                    _cache[_nextIn].flush();
+                
+                cachedFile=_cache[_nextIn]=new CachedFile();
                 _nextIn=(_nextIn+1)%_cache.length;
                 cachedFile.flush();
                 cachedFile.load(resource);
@@ -1090,7 +1091,6 @@ public class ResourceHandler extends NullHandler
             {
                 Code.debug("FLUSH: ",resource);
                 _cacheMap.remove(resource.toString());
-                resource=null;
             }
         }
 
