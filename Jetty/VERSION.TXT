@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Fixed parameter ordering for a forward request.
  + Fixed up HTAccessHandler
  + Improved error messages from ProxyHandler
  + Added missing S to some OPTIONS strings
