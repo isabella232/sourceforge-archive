@@ -118,6 +118,7 @@ the Ant optional tasks from:
   <!-- clean                                                                -->
   <!-- ==================================================================== -->
   <target name="clean" depends="tidy" description="clean up">
+    <delete dir="${test.results}" quiet="true"/>
   </target>
 
   <!-- ==================================================================== -->

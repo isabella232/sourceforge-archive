@@ -61,11 +61,8 @@
 
   <target name="clean" description="Remove generated files"> 
     <delete file="${war}" quiet="false"/>
-    <delete quiet="false">
-      <fileset dir="${webinf.classes}">
-        <include name="**/*.class"/>
-      </fileset>
-    </delete>
+    <delete dir="${webinf.classes}"/>
+    <delete dir="${webinf.lib}"/>
   </target>
 
 </project>

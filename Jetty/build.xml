@@ -119,6 +119,7 @@
     <delete includeEmptyDirs="true" quiet="true">
       <fileset dir="${basedir}/work">
         <include name="*/**"/>
+        <exclude name=".keepme"/>
       </fileset>
     </delete>
     <ant antfile="${test}/build.xml" inheritAll="false" target="tidy"/>
@@ -139,22 +140,17 @@
     <delete file="${etc}/webdefault.xml" quiet="false"/>
     <delete file="${demo.webapps}/jetty/LICENSE.TXT" quiet="false"/>
     <delete file="${demo.webapps}/jetty/versions.txt" quiet="false"/>
+    <delete file="${demo.webapps}/jetty/readme.txt" quiet="false"/>
     <delete file="${webapps}/javadoc.war"/>
 
-    <!--
-    <delete quiet="false">
-      <fileset dir="${demo.webapps}/examples">
-        <include name="**/*.class"/>
-      </fileset>
-    </delete>
     <delete quiet="false">
       <fileset dir="${demo.webapps}/root">
         <include name="*.dtd"/>
       </fileset>
     </delete>
-    -->
     <ant antfile="${test}/build.xml" inheritAll="false" target="clean"/>
     <ant antfile="${extra}/build.xml" inheritAll="false" target="clean"/>
+    <ant antfile="${webapps}/template/build.xml" inheritAll="false" target="clean"/>
   </target>
 
 
