@@ -28,7 +28,7 @@ public class TestTEHandler extends NullHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
-        if (!_started)
+        if (!isStarted())
             return;        
 
         // For testing set transfer encodings

@@ -31,8 +31,14 @@ import java.util.Vector;
  * <LI>Longest suffix match.
  * <LI>default.
  * </NL>
+ * Multiple path specifications can be mapped by providing a coma
+ * separated list of specifications.
+ * <P>
  * Note that this is a very different mapping to that provided by PathMap
  * in Jetty2.
+ * <P>
+ * Note that exact matches can be terminated my the ; or # characters as
+ * used in servlet session rewriting and targets
  *
  * @version 1.0 Tue Oct 12 1999
  * @author Greg Wilkins (gregw)
@@ -47,7 +53,17 @@ public class PathMap extends HashMap
     /** Construct empty PathMap
      */
     public PathMap()
-    {}
+    {
+	super(11);
+    }
+    
+    /* --------------------------------------------------------------- */
+    /** Construct empty PathMap
+     */
+    public PathMap(int capacity)
+    {
+	super (capacity);
+    }
     
     /* --------------------------------------------------------------- */
     /** Construct from dictionary PathMap
@@ -59,39 +75,45 @@ public class PathMap extends HashMap
     
     /* --------------------------------------------------------------- */
     /** Add a single path match to the PathMap
-     * @param pathSpec The path specification.
+     * @param pathSpec The path specification, or coma separated list of
+     * path specifications.
      * @param object The object the path maps to
      */
     public synchronized Object put(Object pathSpec, Object object)
     {
-        String prefix=pathSpec.toString();
-        if (!prefix.startsWith("/") && !prefix.startsWith("*."))
-            throw new IllegalArgumentException("PathSpec must start with '/' or '*.'");
-        
-        Object old = super.put(pathSpec,object);
-
-        // Look for the entry that was just created.
-        Set entries = entrySet();
-        Iterator iter=entries.iterator();
-        while(iter.hasNext())
-        {
-            com.sun.java.util.collections.Map$Entry entry =
-                (com.sun.java.util.collections.Map$Entry)iter.next();
-            if (entry.getKey().equals(pathSpec))
-            {
-                // Create a map to the entry
-                _entryMap.put(pathSpec,entry);
-
-                // Also create a prefix map to the entry
-                if (prefix.length()>2 && prefix.endsWith("/*"))
-                    _prefixMap.put(prefix.substring(0,prefix.length()-2),entry);
-                
-                return old;
-            }
-        }
-        
-        Code.fail("HashMaps don't work the way I thought???");
-        return null;
+	StringTokenizer tok = new StringTokenizer(pathSpec.toString(),",");
+	Object old =null;
+	
+	while (tok.hasMoreTokens())
+	{
+	    String prefix=tok.nextToken();
+	    
+	    if (!prefix.startsWith("/") && !prefix.startsWith("*."))
+		throw new IllegalArgumentException("PathSpec must start with '/' or '*.'");
+	    
+	    old = super.put(prefix,object);
+	    
+	    // Look for the entry that was just created.
+	    Set entries = entrySet();
+	    Iterator iter=entries.iterator();
+	    while(iter.hasNext())
+	    {
+		com.sun.java.util.collections.Map$Entry entry =
+		    (com.sun.java.util.collections.Map$Entry)iter.next();
+		if (entry.getKey().equals(prefix))
+		{
+		    // Create a map to the entry
+		    _entryMap.put(prefix,entry);
+		    
+		    // Also create a prefix map to the entry
+		    if (prefix.length()>2 && prefix.endsWith("/*"))
+			_prefixMap.put(prefix.substring(0,prefix.length()-2),entry);
+		    break;
+		}
+	    }
+	}
+	    
+	return old;
     }
 
     /* ------------------------------------------------------------ */
@@ -101,7 +123,7 @@ public class PathMap extends HashMap
      */
     public Object match(String path)
     {
-        com.sun.java.util.collections.Map$Entry entry = getMatch(path);
+        com.sun.java.util.collections.Map.Entry entry = getMatch(path);
         if (entry!=null)
             return entry.getValue();
         return null;
@@ -113,14 +135,14 @@ public class PathMap extends HashMap
      * @param path the path.
      * @return Map$Entry of the best matched  or null.
      */
-    public synchronized com.sun.java.util.collections.Map$Entry getMatch(String path)
+    public synchronized com.sun.java.util.collections.Map.Entry getMatch(String path)
     {
         Object entry;
 
         // try exact match
         entry=_entryMap.get(path);
         if (entry!=null)
-            return (com.sun.java.util.collections.Map$Entry) entry;
+            return (com.sun.java.util.collections.Map.Entry) entry;
         
         // prefix search
         String prefix=path;
@@ -130,7 +152,7 @@ public class PathMap extends HashMap
             prefix=prefix.substring(0,i);
             entry=_prefixMap.get(prefix);
             if (entry!=null)
-                return (com.sun.java.util.collections.Map$Entry) entry;
+                return (com.sun.java.util.collections.Map.Entry) entry;
         }
         
         // Extension search
@@ -140,9 +162,29 @@ public class PathMap extends HashMap
             String extension="*"+path.substring(i);
             entry=_entryMap.get(extension);
             if (entry!=null)
-                return (com.sun.java.util.collections.Map$Entry) entry;
+                return (com.sun.java.util.collections.Map.Entry) entry;
         }
 
+        // try exact match upto ';'
+        prefix=path;
+        while((i=prefix.lastIndexOf(';'))>0)
+        {
+            prefix=prefix.substring(0,i);
+            entry=_entryMap.get(prefix);
+            if (entry!=null)
+                return (com.sun.java.util.collections.Map.Entry) entry;
+        }
+	
+        // try exact match upto '#'
+        prefix=path;
+        while((i=prefix.lastIndexOf('#'))>0)
+        {
+            prefix=prefix.substring(0,i);
+            entry=_entryMap.get(prefix);
+            if (entry!=null)
+                return (com.sun.java.util.collections.Map.Entry) entry;
+        }
+	
         // Default
         return (com.sun.java.util.collections.Map$Entry) _entryMap.get("/");
     }
@@ -160,10 +202,30 @@ public class PathMap extends HashMap
         entry=_entryMap.get(path);
         if (entry!=null)
             entries.add(entry);
-        
-        // prefix search
+	
+        // exact upto ; search
         String prefix=path;
         int i;
+        while((i=prefix.lastIndexOf(';'))>0)
+        {
+            prefix=prefix.substring(0,i);
+            entry=_entryMap.get(prefix);
+            if (entry!=null)
+                entries.add(entry);
+        }
+	
+        // exact upto # search
+        prefix=path;
+        while((i=prefix.lastIndexOf('#'))>0)
+        {
+            prefix=prefix.substring(0,i);
+            entry=_entryMap.get(prefix);
+            if (entry!=null)
+                entries.add(entry);
+        }
+        
+        // prefix search
+	prefix=path;
         while((i=prefix.lastIndexOf('/'))>0)
         {
             prefix=prefix.substring(0,i);
@@ -171,7 +233,7 @@ public class PathMap extends HashMap
             if (entry!=null)
                 entries.add(entry);
         }
-        
+	
         // Extension search
         i=0;
         while ((i=path.indexOf('.',i+1))>0)
@@ -233,7 +295,12 @@ public class PathMap extends HashMap
             if (pathSpec.endsWith("/*") &&
                 pathSpec.regionMatches(0,path,0,pathSpec.length()-2))
                 return path.substring(0,pathSpec.length()-2);
-                
+	    
+	    if (path.startsWith(pathSpec) &&
+		(path.charAt(pathSpec.length())==';' ||
+		 path.charAt(pathSpec.length())=='#'))
+		return path;
+	    
             throw new IllegalArgumentException("PathSpec does not match path");
         }
 
@@ -267,6 +334,10 @@ public class PathMap extends HashMap
                 pathSpec.regionMatches(0,path,0,pathSpec.length()-2))
                 return path.substring(pathSpec.length()-2);
 
+	    if (path.startsWith(pathSpec) &&
+		(path.charAt(pathSpec.length())==';' ||
+		 path.charAt(pathSpec.length())=='#'))
+		return null;
                 
             throw new IllegalArgumentException("PathSpec does not match path");
         }

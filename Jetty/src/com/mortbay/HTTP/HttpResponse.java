@@ -124,30 +124,7 @@ public class HttpResponse extends HttpMessage
         _version=__HTTP_1_0;
         _state=__MSG_EDITABLE;
     }
-    
 
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
-    public boolean isDirty()
-    {
-	ChunkableOutputStream out=getOutputStream();
-	
-	return _state!=__MSG_EDITABLE
-	    || ( out!=null &&
-		 (out.isWritten() || out.isCommitted()));
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
-    public boolean isCommitted()
-    {
-	ChunkableOutputStream out=getOutputStream();
-	return out.isCommitted();
-    }
 
     /* ------------------------------------------------------------ */
     /** Reset the response.
@@ -207,10 +184,12 @@ public class HttpResponse extends HttpMessage
     public synchronized  void writeHeader(Writer writer) 
         throws IOException
     {
-        if (_state!=__MSG_EDITABLE)
+        if (_state!=__MSG_EDITABLE && _state!=__MSG_SENDING)
             throw new IllegalStateException(__state[_state]+
-                                            " is not EDITABLE");
-
+                                            " is not EDITABLE || SENDING");
+	if (_header==null)
+	    throw new IllegalStateException("Response is destroued");
+	
         String status=_status+" ";
         if (Code.verbose())
             Code.debug("writeHeaders: ",status);

@@ -16,26 +16,56 @@ import java.lang.reflect.*;
 
 /* ------------------------------------------------------------ */
 /** HTTP Server.
+ * Services HTTP requests by maintaining a mapping between
+ * a collection of HttpListeners which generate requests and
+ * HttpContexts which contain collections of HttpHandlers.
  *
- * @see
+ * @see HttpContext
+ * @see HttpHandler
+ * @see HttpConnection
+ * @see HttpListener
  * @version 1.0 Thu Oct  7 1999
  * @author Greg Wilkins (gregw)
  */
 public class HttpServer implements LifeCycle
 {
+    
     /* ------------------------------------------------------------ */
     HashMap _listeners = new HashMap(7);
+    
+    // HttpServer[host->PathMap[contextPath->List[HanderContext]]]
+    // HandlerContext[List[HttpHandler]]
     HashMap _hostMap = new HashMap(7);
-    PathMap _handlerMap = new PathMap();
+    private HttpEncoding _httpEncoding ;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
     public HttpServer()
-    {
-        _hostMap.put(null,_handlerMap);
-    }
+    {}
 
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return 
+     */
+    public HttpEncoding getHttpEncoding()
+    {
+	if (_httpEncoding==null)
+	    _httpEncoding=new HttpEncoding();
+	return _httpEncoding;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param httpEncoding 
+     */
+    public void setHttpEncoding(HttpEncoding httpEncoding)
+    {
+	_httpEncoding = httpEncoding;
+    }    
+
+    
     /* ------------------------------------------------------------ */
     public void initialize(Object config)
     {
@@ -135,9 +165,7 @@ public class HttpServer implements LifeCycle
         }
 
         _hostMap.clear();
-        _handlerMap.clear();
         _listeners.clear();
-        _hostMap.put(null,_handlerMap);
     }
 
     /* ------------------------------------------------------------ */
@@ -215,9 +243,9 @@ public class HttpServer implements LifeCycle
     /** 
      * @return Set of all listeners.
      */
-    public Set getListeners()
+    public Collection getListeners()
     {
-        return new HashSet(_listeners.values());
+        return _listeners.values();
     }
 
     
@@ -230,177 +258,120 @@ public class HttpServer implements LifeCycle
      */
     public void addHostAlias(String host, String alias)
     {
-        PathMap handlerMap=getHandlerMap(host,true);
-        _hostMap.put(alias,handlerMap);
+        Object contextMap=_hostMap.get(host);
+	if (contextMap==null)
+	    throw new IllegalArgumentException("No Such Host: "+host);
+        _hostMap.put(alias,contextMap);
     }
 
-    
+
     /* ------------------------------------------------------------ */
-    /** Add a handler to a path specification.
-     * Requests with paths matching the path specification are passed
-     * to the handle method of the handler. All matching handlers
-     * are offered the request, starting with the best match, until
-     * the request is handled.
-     *
-     * Multiple handlers can be mapped to the same contextPath and
-     * requests are passed to the handlers in the order they
-     * were registered.
-     * @param host Virtual host name or null.
-     * @param contextPath 
-     * @param handler 
+    /** Create and add a new context.
+     * Note that multiple contexts can be created for the same
+     * host and contextPathSpec. Requests are offered to multiple
+     * contexts in the order they where added to the HttpServer.
+     * @param host Virtual hostname or null for all hosts.
+     * @param contextPathSpec
+     * @return 
      */
-    public void addHandler(String host,String contextPath, HttpHandler handler)
+    public HandlerContext defineContext(String host, String contextPathSpec)
     {
-        List list=(List)getHandlerMap(host,true).get(contextPath);
-        if (list==null)
-        {
-            list=new ArrayList(8);
-            getHandlerMap(host,false).put(contextPath,list);
-        }
-        if (!list.contains(handler))
-            list.add(handler);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Unmap a handler from a path specification.
-     * @param host Virtual host name or null.
-     * @param contextPath 
-     * @param handler 
-     */
-    public void removeHandler(String host,
-			      String contextPath,
-			      HttpHandler handler)
-    {
-        List list=(List)getHandlerMap(host,false).get(contextPath);
-        if (list!=null)
-            list.remove(handler);
+	HandlerContext hc = new HandlerContext(this);
+	addContext(host,contextPathSpec,hc);
+	return hc;
     }
 
     /* ------------------------------------------------------------ */
     /** 
-     * @return Collection of all listeners.
+     * @param host The virtual host or null for all hosts.
+     * @param contextPathSpec 
+     * @param i Index among contexts of same host and pathSpec.
+     * @return The HandlerContext of null.
      */
-    public Set getHandlers()
+    public HandlerContext getContext(String host, String contextPathSpec, int i)
     {
-        HashSet set = new HashSet(33);
-        Iterator maps=_hostMap.values().iterator();
-        while (maps.hasNext())
-        {
-            PathMap pm=(PathMap)maps.next();
-            Iterator handlerStacks=pm.values().iterator();
-            while(handlerStacks.hasNext())
-            {
-                List stack=(List)handlerStacks.next();
-                Iterator handlers=stack.iterator();
-                while(handlers.hasNext())
-                    set.add(handlers.next());
-            }
-        }
-        return set;
-    }
-    
-    /* ------------------------------------------------------------ */
-    String _contextHost;
-    public String getContextHost() {return _contextHost;}    
-    public void setContextHost(String  v)
-    {clearDefaultContext();this._contextHost = v;}
-    
-    /* ------------------------------------------------------------ */
-    String _contextPath="/";
-    public String getContextPath() {return _contextPath;}
-    public void setContextPath(String  v)
-    {clearDefaultContext();this._contextPath = v;}
+	HandlerContext hc=null;
 
-    /* ------------------------------------------------------------ */
-    FileHandler _contextFileHandler;
-    public FileHandler getContextFileHandler()
-    {return _contextFileHandler;}
-    public void setContextFileHandler(FileHandler  v)
-    {this._contextFileHandler = v;}
-    
-    /* ------------------------------------------------------------ */
-    ServletHandler _contextServletHandler;
-    public ServletHandler getContextServletHandler()
-    {return _contextServletHandler;}
-    public void setContextServletHandler(ServletHandler  v)
-    {this._contextServletHandler = v;}
+	PathMap contextMap=(PathMap)_hostMap.get(host);
+	if (contextMap!=null)
+	{
+	    List contextList = (List)contextMap.get(contextPathSpec);
+	    if (contextList!=null)
+	    {
+		if (i>=contextList.size())
+		    return null;
+		hc=(HandlerContext)contextList.get(i);
+	    }
+	}
 
-    /* ------------------------------------------------------------ */
-    ServletHandler _contextDynamicServletHandler;
-    public ServletHandler getContextDynamicServletHandler()
-    {return _contextDynamicServletHandler;}
-    public void setContextDynamicServletHandler(ServletHandler  v)
-    {this._contextServletHandler = v;}
-    
-    /* ------------------------------------------------------------ */
-    private void clearDefaultContext()
-    {
-	_contextFileHandler=null;
-	_contextServletHandler=null;
-	_contextDynamicServletHandler=null;
+	return hc;
     }
 
+    
     /* ------------------------------------------------------------ */
-    /**
-     * Creates a FileHandler for the context if one does not exist.
-     * If a ServletHandler exists for the context, it's FileBase is
-     * also set.
-     * @param directory 
+    /** 
+     * @param host The virtual host or null for all hosts.
+     * @param contextPathSpec 
+     * @return HandlerContext. If multiple contexts exist for the same
+     * host and pathSpec, the most recently added context is returned.
+     * If no context exists, a new context is defined.
      */
-    public synchronized void setContextFileBase(String directory)
+    public HandlerContext getContext(String host, String contextPathSpec)
     {
-	if (_contextFileHandler==null)
-	{
-	    _contextFileHandler = new FileHandler();
-	    addHandler(_contextHost,_contextPath,_contextFileHandler);
-	}
-	_contextFileHandler.setFileBase(directory);
-	if (_contextServletHandler!=null)
-	    _contextServletHandler.setFileBase(directory);
-    }
+	HandlerContext hc=null;
 
-    
-  /* ------------------------------------------------------------ */
-    public synchronized ServletHolder addContextServlet(String pathSpec,
-							String className)
-	throws ClassNotFoundException,
-	       InstantiationException,
-	       IllegalAccessException
-    {
-	if (_contextServletHandler==null)
+	PathMap contextMap=(PathMap)_hostMap.get(host);
+	if (contextMap!=null)
 	{
-	    _contextServletHandler=new ServletHandler();
-	    addHandler(_contextHost,_contextPath,_contextServletHandler);
+	    List contextList = (List)contextMap.get(contextPathSpec);
+	    if (contextList!=null && contextList.size()>0)
+		hc=(HandlerContext)contextList.get(contextList.size()-1);
+	    
 	}
-	return _contextServletHandler.addServlet(pathSpec,className);
-    }
+	if (hc==null)
+	    hc=defineContext(host,contextPathSpec);
 
+	return hc;
+    }
     
     /* ------------------------------------------------------------ */
-    public synchronized void setContextDynamicServletClassPath(String classPath)
-	throws ClassNotFoundException,
-	       InstantiationException,
-	       IllegalAccessException
+    /** Add a context.
+     * As contexts cannot be publicly created, this may be used to
+     * alias an existing context.
+     * @param host The virtual host or null for all hosts.
+     * @param contextPathSpec 
+     * @return 
+     */
+    public void addContext(String host,
+			   String contextPathSpec,
+			   HandlerContext context)
     {
-	if (_contextDynamicServletHandler==null)
+	PathMap contextMap=(PathMap)_hostMap.get(host);
+	if (contextMap==null)
 	{
-	    _contextDynamicServletHandler=
-		new DynamicHandler();
-	    addHandler(_contextHost,_contextPath,
-		       _contextDynamicServletHandler);
+	    contextMap=new PathMap(7);
+	    _hostMap.put(host,contextMap);
 	}
-	_contextDynamicServletHandler.setClassPath(classPath);
-    }
 
+	List contextList = (List)contextMap.get(contextPathSpec);
+	if (contextList==null)
+	{
+	    contextList=new ArrayList(1);
+	    contextMap.put(contextPathSpec,contextList);
+	}
+
+	contextList.add(context);
+    }
     
-    
+
+
     /* ------------------------------------------------------------ */
     /** Service a request.
-     * Handle the request by passing it to mapped HttpHandlers.
-     * Requests with paths matching a handlers mapped path specification
-     * are passed to the handle method of the handler. All matching handlers
-     * are offered the request, starting with the best match, until
-     * the request is handled.
+     * Handle the request by passing it to the HttpHandler contained in
+     * the mapped HandlerContexts.
+     * The requests host and path are used to select a list of
+     * HandlerContexts. Each HttpHandler in these context is offered
+     * the request in turn, until the request is handled.
      *
      * If no handler handles the request, 404 Not Found is returned.
      *
@@ -412,158 +383,125 @@ public class HttpServer implements LifeCycle
     public void service(HttpRequest request,HttpResponse response)
         throws IOException, HttpException
     {
-        // find all matching handlers.
-        List matches = (List)getHandlerMap(request.getHost(),false)
-            .getMatches(request.getPath());
+	String host=request.getHost();
 
-        // Try handlers, starting from best match.
-        if (matches==null)
-            response.sendError(response.__404_Not_Found);
-        else
-        {
-            Iterator i1=matches.iterator();
-            while (!request.isHandled() && i1.hasNext())
-            {
-                com.sun.java.util.collections.Map$Entry entry=
-                    (com.sun.java.util.collections.Map$Entry)i1.next();
-                String contextPath=(String)entry.getKey();
-                List handlers = (List)entry.getValue();
+	while (true)
+	{
+	    PathMap contextMap=(PathMap)_hostMap.get(host);
+	    if (contextMap!=null)
+	    {
+		List contextLists =(List)contextMap.getMatches(request.getPath());
+		if(contextLists!=null)
+		{
+		    for (int i=0;i<contextLists.size();i++)
+		    {
+			com.sun.java.util.collections.Map.Entry entry=
+			    (com.sun.java.util.collections.Map.Entry)
+			    contextLists.get(i);
+			String contextPathSpec=(String)entry.getKey();
+			List contextList = (List)entry.getValue();
                 
-                Iterator i2=handlers.iterator();
-                while (!request.isHandled() && i2.hasNext())
-                {
-                    HttpHandler handler = (HttpHandler)i2.next();
-                    if (Code.verbose(9))
-                    {
-                        Code.debug("Try handler ",handler);
-                        handler.handle(contextPath,request,response);
-                        if (request.isHandled())
-                            Code.debug("Handled by ",handler);
-                    }
-                    else
-                        handler.handle(contextPath,request,response);
-                }
-            }
+			for (int j=0;j<contextList.size();j++)
+			{
+			    HandlerContext context=
+				(HandlerContext)contextList.get(j);
+			    
+			    if (Code.verbose(9))
+				Code.debug("Try context [",contextPathSpec,
+					   ",",new Integer(j),
+					   "]=",context);
 
-            if (!request.isHandled())
-                response.sendError(response.__404_Not_Found);
-        }
-    }
+			    List handlers=context.getHandlers();
+			    for (int k=0;k<handlers.size();k++)
+			    {
+				HttpHandler handler =
+				    (HttpHandler)handlers.get(k);
+	    
+				if (Code.verbose(9))
+				{
+				    Code.debug("Try handler ",handler);
+				    handler.handle(contextPathSpec,
+						   request,
+						   response);
+				    if (request.isHandled())
+					Code.debug("Handled by ",handler);
+				}
+				else
+				    handler.handle(contextPathSpec,
+						   request,
+						   response);
 
+				if (request.isHandled())
+				{
+				    response.complete();
+				    return;
+				}
+			    }
+			}
+		    }   
+		}
+	    }
+	    
+	    // try no host
+            if (request.isHandled() || host==null)
+		break;
+	    host=null;
+	}
+	
 
-    /* ------------------------------------------------------------ */
-    /** Enable a transfer encoding.
-     * Enable a transfer encoding on a ChunkableInputStream.
-     * @param in 
-     * @param coding Coding name 
-     * @param parameters Coding parameters or null
-     * @exception HttpException 
-     */
-    public static void enableEncoding(ChunkableInputStream in,
-				      String coding,
-				      Map parameters)
-        throws HttpException
-    {
-        try
-        {
-            if ("gzip".equals(coding))
-            {
-                if (parameters!=null && parameters.size()>0)
-                    throw new HttpException(HttpResponse.__501_Not_Implemented,
-                                            "gzip parameters");
-                in.insertFilter(java.util.zip.GZIPInputStream.class
-                                .getConstructor(ChunkableInputStream.__filterArg),
-                                null);
-            }
-            else if ("deflate".equals(coding))
-            {
-                if (parameters!=null && parameters.size()>0)
-                    throw new HttpException(HttpResponse.__501_Not_Implemented,
-                                            "deflate parameters");
-                in.insertFilter(java.util.zip.InflaterInputStream.class
-                                .getConstructor(ChunkableInputStream.__filterArg),
-                                null);
-            }
-            else if (!HttpFields.__Identity.equals(coding))
-                throw new HttpException(HttpResponse.__501_Not_Implemented);
-        }
-        catch (HttpException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            Code.warning(e);
-            throw new HttpException(HttpResponse.__500_Internal_Server_Error);
-        }
+	response.sendError(response.__404_Not_Found);
+	
     }
     
+    
     /* ------------------------------------------------------------ */
-    /** Enable a transfer encoding.
-     * Enable a transfer encoding on a ChunkableOutputStream.
-     * @param out
-     * @param coding Coding name 
-     * @param parameters Coding parameters or null
-     * @exception HttpException 
+    /** Add a handler to a path specification.
+     * Requests with paths matching the path specification are passed
+     * to the handle method of the handler. All matching handlers
+     * are offered the request, starting with the best match, until
+     * the request is handled.
+     *
+     * Multiple handlers can be mapped to the same contextPath and
+     * requests are passed to the handlers in the order they
+     * were registered.
+     *
+     * @param host Virtual host name or null.
+     * @param contextPath 
+     * @param handler 
      */
-    public static void enableEncoding(ChunkableOutputStream out,
-				      String coding,
-				      Map parameters)
-        throws HttpException
+    public void addHandler(String host,String contextPathSpec, HttpHandler handler)
     {
-        try
-        {
-            if ("gzip".equals(coding))
-            {
-                if (parameters!=null && parameters.size()>0)
-                    throw new HttpException(HttpResponse.__501_Not_Implemented,
-                                            "gzip parameters");
-                out.insertFilter(java.util.zip.GZIPOutputStream.class
-                                 .getConstructor(ChunkableOutputStream.__filterArg),
-                                 null);
-            }
-            else if ("deflate".equals(coding))
-            {
-                if (parameters!=null && parameters.size()>0)
-                    throw new HttpException(HttpResponse.__501_Not_Implemented,
-                                            "deflate parameters");
-                out.insertFilter(java.util.zip.DeflaterOutputStream.class
-                                 .getConstructor(ChunkableOutputStream.__filterArg),
-                                null);
-            }
-            else if (!HttpFields.__Identity.equals(coding))
-                throw new HttpException(HttpResponse.__501_Not_Implemented);
-        }
-        catch (HttpException e)
-        {
-            throw e;
-        }
-        catch (Exception e)
-        {
-            Code.warning(e);
-            throw new HttpException(HttpResponse.__500_Internal_Server_Error);
-        }
+
+	HandlerContext hc = getContext(host,contextPathSpec);
+	hc.addHandler(handler);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Collection of all handler.
+     */
+    public Set getHandlers()
+    {
+        HashSet set = new HashSet(33);
+        Iterator maps=_hostMap.values().iterator();
+        while (maps.hasNext())
+        {
+            PathMap pm=(PathMap)maps.next();
+            Iterator lists=pm.values().iterator();
+            while(lists.hasNext())
+            {
+                List list=(List)lists.next();
+                Iterator contexts=list.iterator();
+                while(contexts.hasNext())
+		{
+		    HandlerContext context = (HandlerContext) contexts.next();
+                    set.addAll(context.getHandlers());
+		}
+            }
+        }
+        return set;
+    }
     
     /* ------------------------------------------------------------ */
     /** Construct server from command line arguments.
@@ -575,12 +513,15 @@ public class HttpServer implements LifeCycle
         {
             String[] newArgs=
 	    {
-		"-contextPath","/",
-		"-fileBase",".",
-		"-dump",
+		"-context","/",
+		"-fileBase","./FileBase",
+		"-files",
 		"-handler","com.mortbay.HTTP.Handler.NotFoundHandler",
-		"-contextPath","/servlet/*",
-		"-dynamic","./servlets",
+		"-context","/servlet/*",
+		"-classPath","./servlets",
+		"-fileBase","./FileBase",
+		"-dynamic",
+		"-handler","com.mortbay.HTTP.Handler.NotFoundHandler",
 		"8080",
 	    };
             args=newArgs;
@@ -588,42 +529,44 @@ public class HttpServer implements LifeCycle
         else if (args.length%2==1)
         {
             System.err.println
-                ("Usage - java com.mortbay.HTTP.HttpServer [ options .. ] [[<addr>:]<port> ..]");
+                ("\nUsage - java com.mortbay.HTTP.HttpServer [ options .. ] [[<addr>:]<port> .. ]");
             System.err.println
-                ("[<addr>:]<port>       - Listen on [ address & ] port");
+                ("\n  [<addr>:]<port>               - Listen on [ address & ] port");
             System.err.println
-                (" -contextPath <path>  - Set default context path. Default=\"/\"");
+                ("  -context [<host>:]<pathSpec>  - Define new context. Default=\"/\"");
             System.err.println
-                (" -contextHost <name>  - Set default context host name");
+                ("  -alias <alias>                - Add Alias for current context host");
 	    
             System.err.println
-                (" -contextAlias <alias>- Add Alias for context host");
+                ("  -classPath <paths>            - Set contexts classpath.");	
+            System.err.println
+                ("  -fileBase <dir>               - Set contexts File Base");    
 
             System.err.println
-                (" -handler <class>     - Add a hander to the context");
+                ("  -handler <class>              - Add a hander to the context");
             
             System.err.println
-                (" -fileBase <dir>      - Set contexts File Base");
+                ("  -servlet <pathSpec>=<class>   - Add Servlet at path to context");
             System.err.println
-                (" -dynamic <classPath> - Set contexts Dynamic servlets class path");
+                ("  -dynamic                      - Context serves dynamic servlets");
+            System.err.println
+                ("  -files                        - Context serves files");
+            System.err.println
+                ("  -dump                         - Add a Dump handler to context");
             
             System.err.println
-                (" -servlet <pathSpec>=<class>");
+                ("\nDefault options configure 2 contexts as:");
             System.err.println
-                ("                      - Add Servlet at path to context");
-            
-            System.err.println
-                (" -dump                - Add a Dump handler to context");
-            
-            System.err.println
-                ("Default options:");
-            System.err.println
-                ("  -contextPath /\n"+
-		 "   -fileBase .\n"+
-		 "   -dump\n"+
+                ("  -context /\n"+
+		 "  -fileBase .\n"+
+		 "  -servlet /dump,/dump/*=com.mortbay.Servlet.Dump\n"+
+		 "  -files\n"+
+		 "  -dump\n"+
 		 "  -handler com.mortbay.HTTP.Handler.NotFoundHandler\n"+
-		 "  -contextPath /servlet/*\n"+
-		 "  -dynamic ./servlets\n"+
+		 "  -context /servlet/*\n"+
+		 "  -classPath ./servlets\n"+
+		 "  -dynamic"+
+		 "  -handler com.mortbay.HTTP.Handler.NotFoundHandler\n"+
 		 "  8080");
             System.exit(1);
         }
@@ -633,43 +576,45 @@ public class HttpServer implements LifeCycle
             HttpServer server = new HttpServer();
 
             // Default is no virtual host
-            String host=null;
-            
+	    String host=null;
+	    HandlerContext context = server.getContext(host,"/");	    
+	    
             // Parse arguments
             for (int i=0;i<args.length;i++)
             {
                 try
                 {
                     // Look for dump handler
-                    if ("-contextPath".equals(args[i]))
+                    if ("-context".equals(args[i]))
 		    {
-                        server.setContextPath(args[++i]);
+                        String spec=args[++i];
+			host=null;
+                        int e=spec.indexOf(":");
+                        if (e>0)
+                        {
+			    host=spec.substring(0,e);
+                            spec=spec.substring(e+1);
+                        }
+			context = server.getContext(host,spec);
 		    }
-		    else if ("-contextHost".equals(args[i]))
+		    else if ("-alias".equals(args[i]))
 		    {
-                        server.setContextHost(args[++i]);
+			server.addHostAlias(host,args[++i]);
 		    }
-		    else if ("-contextAlias".equals(args[i]))
-		    {
-			server.addHostAlias(server.getContextHost(),
-					    args[++i]);
+		    else if ("-classPath".equals(args[i]))
+                    {
+			context.setClassPath(args[++i]);
+		    }
+		    else if ("-fileBase".equals(args[i]))
+                    {
+			context.setFileBase(args[++i]);
 		    }
 		    else if ("-handler".equals(args[i]))
 		    {
                         String className=args[++i];
 			HttpHandler handler = (HttpHandler)
 			    Class.forName(className).newInstance();
-			server.addHandler(server.getContextHost(),
-					  server.getContextPath(),
-					  handler);
-		    }
-		    else if ("-fileBase".equals(args[i]))
-                    {
-			server.setContextFileBase(args[++i]);
-		    }
-		    else if ("-dynamic".equals(args[i]))
-		    {
-			server.setContextDynamicServletClassPath(args[++i]);
+			context.addHandler(handler);
 		    }
 		    else if ("-servlet".equals(args[i]))
                     {
@@ -679,17 +624,23 @@ public class HttpServer implements LifeCycle
                         {
                             String pathSpec=spec.substring(0,e);
                             String className=spec.substring(e+1);
-			    server.addContextServlet(pathSpec,className);
+			    context.addServlet(pathSpec,className);
                         }
                     }
+		    else if ("-dynamic".equals(args[i]))
+		    {
+			context.setServingDynamicServlets(true);
+		    }
+		    else if ("-files".equals(args[i]))
+                    {
+			context.setServingFiles(true);
+		    }
 		    else if ("-dump".equals(args[i]))
 		    {
                         String className="com.mortbay.HTTP.Handler.DumpHandler";
 			HttpHandler handler = (HttpHandler)
 			    Class.forName(className).newInstance();
-			server.addHandler(server.getContextHost(),
-					  server.getContextPath(),
-					  handler);
+			context.addHandler(handler);
 		    }
                     else
                     {
@@ -710,28 +661,6 @@ public class HttpServer implements LifeCycle
             Code.warning(e);
         }
     }
-    
-    /* ------------------------------------------------------------ */
-    private PathMap getHandlerMap(String host, boolean create)
-    {
-        PathMap virtual;
-        if (host!=null && host.length()>0)
-        {
-            virtual=(PathMap)_hostMap.get(host);
-            if (virtual==null && create)
-            {
-                virtual=new PathMap();
-                _hostMap.put(host,virtual);
-            }
-            
-            if (virtual==null)
-                 virtual=_handlerMap;
-        }
-        else
-            virtual=_handlerMap;        
-        return virtual;
-    }
-    
 }
 
 

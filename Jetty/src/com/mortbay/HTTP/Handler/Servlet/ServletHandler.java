@@ -43,71 +43,14 @@ public class ServletHandler extends NullHandler
     }
     
     /* ------------------------------------------------------------ */
-    private String _classPath ;
-    public String getClassPath()
-    {
-	return _classPath;
-    }
-    public void setClassPath(String classPath)
-    {
-	_classPath = classPath;
-    }
-
-    /* ------------------------------------------------------------ */
-    private String _fileBase ;
-    public String getFileBase()
-    {
-	return _fileBase;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * The '/' separator is converted to platform specific file
-     * separator character.
-     * @param fileBase 
-     */
-    public void setFileBase(String fileBase)
-    {
-	_fileBase = fileBase.replace('/',File.separatorChar);;
-    }
-
-    /* ------------------------------------------------------------ */
-    private String _resourceBase ;
-    public String getResourceBase()
-    {
-	return _resourceBase;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * If a relative file is passed, it is converted to a file
-     * URL based on the current working directory.
-     * @param resourceBase 
-     */
-    public void setResourceBase(String resourceBase)
-    {
-	if (resourceBase!=null)
-	{
-	    if( resourceBase.startsWith("./"))
-		_resourceBase =
-		    "file:"+
-		    System.getProperty("user.dir")+
-		    resourceBase.substring(1);
-	    else if (resourceBase.startsWith("/"))
-		_resourceBase = "file:"+resourceBase;
-	    else
-		_resourceBase = resourceBase;
-	}
-	else
-	    _resourceBase = resourceBase;
-    }
-    
-    /* ------------------------------------------------------------ */
     private boolean _autoReload ;
+    
+    /* ------------------------------------------------------------ */
     public boolean isAutoReload()
     {
 	return _autoReload;
     }
+    /* ------------------------------------------------------------ */
     public void setAutoReload(boolean autoReload)
     {
 	_autoReload = autoReload;
@@ -115,6 +58,8 @@ public class ServletHandler extends NullHandler
 
     /* ------------------------------------------------------------ */
     ServletLoader _loader ;
+    
+    /* ------------------------------------------------------------ */
     public ServletLoader getServletLoader()
     {
 	return _loader;
@@ -125,7 +70,7 @@ public class ServletHandler extends NullHandler
     {
 	try
 	{
-	    String classPath=getClassPath();	    
+	    String classPath=getContext().getClassPath();	    
 	    if (classPath!=null && classPath.length()>0)
 		_loader=new FileJarServletLoader(classPath,false);
 	    else
@@ -184,6 +129,9 @@ public class ServletHandler extends NullHandler
                        HttpResponse httpResponse)
          throws IOException
     {
+	if (!isStarted())
+	    return;
+	
 	try
 	{
 	    // Handle reload 
@@ -217,7 +165,7 @@ public class ServletHandler extends NullHandler
 	    Code.debug("Looking for servlet at ",path);
 	    
 	    List matches=_servletMap.getMatches(path);
-	    
+
 	    for (int i=0;i<matches.size();i++)
 	    {
 		com.sun.java.util.collections.Map.Entry entry =
@@ -235,8 +183,12 @@ public class ServletHandler extends NullHandler
 				       httpRequest,
 				       _context);
 		ServletResponse response =
-		    new ServletResponse(httpResponse,httpRequest);
+		    new ServletResponse(request,httpResponse);
 
+		// Check session stuff
+		HttpSession session=null;
+		if ((session=request.getSession(false))!=null)
+		    Context.access(session);
 		
 		// try service request
 		holder.handle(request,response);

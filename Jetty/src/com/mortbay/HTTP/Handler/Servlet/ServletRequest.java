@@ -21,16 +21,6 @@ import java.security.Principal;
 /** Servlet Request Wrapper
  * This class wraps a Jetty HTTP request as a 2.1 Servlet
  * request.
- * <p>
- *
- * <p><h4>Notes</h4>
- * <p>
- *
- * <p><h4>Usage</h4>
- * <pre>
- */
-/*
- * </pre>
  *
  * @see
  * @version 1.0 Thu Jan 27 2000
@@ -46,12 +36,10 @@ class ServletRequest
         __SESSIONID_URL = "url",
         __SESSIONID_COOKIE = "cookie",
         __SESSIONID_NONE = "none";
-    public static final String
-        __SessionId = "JettySessionId",
-        __SessionUrlPrefix = "_s_",
-        __SessionUrlSuffix = "_S_";
 
-    private HttpRequest _request;
+    private HttpRequest _httpRequest;
+    private ServletResponse _servletResponse;
+    
     private String _contextPath=null;
     private String _servletPath=null;
     private String _pathInfo=null;
@@ -64,6 +52,7 @@ class ServletRequest
     private int _inputState=0;
     private Context _context;
 
+    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param request 
@@ -77,14 +66,30 @@ class ServletRequest
 	_contextPath=contextPath;
         _servletPath=servletPath;
 	_pathInfo=pathInfo;
-        _request=request;
+        _httpRequest=request;
 	_context=context;
     }
     
+    /* ------------------------------------------------------------ */
+    HttpRequest getHttpRequest()
+    {
+	return _httpRequest;
+    }
+    
+    /* ------------------------------------------------------------ */
+    ServletResponse getServletResponse()
+    {
+	return _servletResponse;
+    }
+    
+    /* ------------------------------------------------------------ */
+    void setServletResponse(ServletResponse response)
+    {
+	_servletResponse = response;
+    }
     
     /* ------------------------------------------------------------ */
     /**
-     *
      * Returns the preferred <code>Locale</code> that the client will 
      * accept content in, based on the Accept-Language header.
      * If the client request doesn't provide an Accept-Language header,
@@ -122,7 +127,7 @@ class ServletRequest
     /* ------------------------------------------------------------ */
     public String getAuthType()
     {
-        Object o=_request.getAttribute(HttpRequest.__AuthType);
+        Object o=_httpRequest.getAttribute(HttpRequest.__AuthType);
         if (o!=null)
             return o.toString();
         return null;
@@ -148,7 +153,7 @@ class ServletRequest
     /* ------------------------------------------------------------ */
     public Cookie[] getCookies()
     {
-        Map cookies=_request.getCookies();
+        Map cookies=_httpRequest.getCookies();
         if (cookies==null|| cookies.size()==0)
             return null; // XXX or empty set?
 
@@ -167,19 +172,19 @@ class ServletRequest
     /* ------------------------------------------------------------ */
     public long getDateHeader(String name)
     {
-        return _request.getDateField(name);
+        return _httpRequest.getDateField(name);
     }
     
     /* ------------------------------------------------------------ */
     public Enumeration getHeaderNames()
     {
-        return Collections.enumeration(_request.getFieldNames());
+        return Collections.enumeration(_httpRequest.getFieldNames());
     }
     
     /* ------------------------------------------------------------ */
     public String getHeader(String name)
     {
-        return _request.getField(name);
+        return _httpRequest.getField(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -217,13 +222,13 @@ class ServletRequest
     /* ------------------------------------------------------------ */
     public int getIntHeader(String name)
     {
-        return _request.getIntField(name);
+        return _httpRequest.getIntField(name);
     }
     
     /* ------------------------------------------------------------ */
     public String getMethod()
     {
-        return _request.getMethod();
+        return _httpRequest.getMethod();
     }
     
     /* ------------------------------------------------------------ */
@@ -266,13 +271,13 @@ class ServletRequest
     /* ------------------------------------------------------------ */
     public String getQueryString()
     {
-        return _request.getQuery();
+        return _httpRequest.getQuery();
     }
     
     /* ------------------------------------------------------------ */
     public String getRemoteUser()
     {
-        Object o=_request.getAttribute(HttpRequest.__AuthUser);
+        Object o=_httpRequest.getAttribute(HttpRequest.__AuthUser);
         if (o!=null)
             return o.toString();
         return null;
@@ -329,10 +334,10 @@ class ServletRequest
             // Then try cookies
             if (_sessionId == null)
             {
-                Map cookies=_request.getCookies();
+                Map cookies=_httpRequest.getCookies();
                 if (cookies!=null && cookies.size()>0)
                 {
-                    _sessionId=(String)cookies.get(__SessionId);
+                    _sessionId=(String)cookies.get(Context.__SessionId);
                     if (_sessionId!=null && _sessionId.length()>0)
                     {
                         _sessionIdState = __SESSIONID_COOKIE;
@@ -343,16 +348,16 @@ class ServletRequest
             
             // check if there is a url encoded session param.
             String path = _servletPath;
-            int prefix=path.indexOf(__SessionUrlPrefix);
+            int prefix=path.indexOf(Context.__SessionUrlPrefix);
             if (prefix!=-1)
             {
-                int suffix=path.indexOf(__SessionUrlSuffix);
+                int suffix=path.indexOf(Context.__SessionUrlSuffix,prefix);
                 if (suffix!=-1 && prefix<suffix)
                 {
                     // definitely a session id in there!
                     String id =
                         path.substring(prefix+
-                                       __SessionUrlPrefix.length(),
+                                       Context.__SessionUrlPrefix.length(),
                                        suffix);
                     
                     Code.debug("Got Session ",id," from URL");
@@ -369,11 +374,11 @@ class ServletRequest
                             Code.warning("Mismatched session IDs");
                         
                         // translate our path to drop the prefix off.
-                        if (suffix+__SessionUrlSuffix.length()<path.length())
+                        if (suffix+Context.__SessionUrlSuffix.length()<path.length())
                             _servletPath =
                                 path.substring(0,prefix)+
                                 path.substring(suffix+
-                                               __SessionUrlSuffix.length());
+                                               Context.__SessionUrlSuffix.length());
                         else
                             _servletPath = path.substring(0,prefix);
                         
@@ -396,7 +401,29 @@ class ServletRequest
     /* ------------------------------------------------------------ */
     public String getRequestURI()
     {
-        return _request.getPath();
+	String path=_httpRequest.getPath();
+
+	// remove any session stuff
+	if (isRequestedSessionIdFromURL())
+	{
+            int prefix=path.indexOf(Context.__SessionUrlPrefix);
+            if (prefix!=-1)
+            {
+                int suffix=path.indexOf(Context.__SessionUrlSuffix,prefix);
+                if (suffix!=-1 && prefix<suffix)
+                {    
+		    // translate our path to drop the prefix off.
+		    if (suffix+Context.__SessionUrlSuffix.length()<path.length())
+			path =
+			    path.substring(0,prefix)+
+			    path.substring(suffix+
+					   Context.__SessionUrlSuffix.length());
+		    else
+			path = path.substring(0,prefix);
+		}
+	    }    
+	}
+	return path;
     }
     
     /* ------------------------------------------------------------ */
@@ -408,13 +435,37 @@ class ServletRequest
     /* ------------------------------------------------------------ */
     public HttpSession getSession(boolean create)
     {
-        return null; // XXX
+        Code.debug("getSession(",new Boolean(create),")");
+        
+        if (_session != null && _context.isValid(_session))
+            return _session;
+        
+        String id = getRequestedSessionId();
+        
+        if (id != null)
+        {
+            _session=_context.getSession(id);
+            if (_session == null && !create)
+                return null;
+        }
+
+        if (_session == null && create)
+        {
+            _session = _context.newSession();
+            Cookie cookie =
+                new Cookie(_context.__SessionId,_session.getId());
+            cookie.setPath("/");
+            getServletResponse().addCookie(cookie); 
+        }
+
+        return _session;
     }
     
     /* ------------------------------------------------------------ */
     public HttpSession getSession()
     {
-        return null; // XXX
+        HttpSession session = getSession(false);
+        return (session == null) ? getSession(true) : session;
     }
     
     /* ------------------------------------------------------------ */
@@ -447,7 +498,7 @@ class ServletRequest
     /* -------------------------------------------------------------- */
     public Object getAttribute(String name)
     {
-        return _request.getAttribute(name);
+        return _httpRequest.getAttribute(name);
     }
     
     /* -------------------------------------------------------------- */
@@ -459,25 +510,25 @@ class ServletRequest
     /* -------------------------------------------------------------- */
     public Enumeration getAttributeNames()
     {
-        return Collections.enumeration(_request.getAttributeNames());
+        return Collections.enumeration(_httpRequest.getAttributeNames());
     }
     
     /* -------------------------------------------------------------- */
     public String getCharacterEncoding()
     {
-        return _request.getCharacterEncoding();
+        return _httpRequest.getCharacterEncoding();
     }
     
     /* -------------------------------------------------------------- */
     public int getContentLength()
     {
-        return _request.getIntField(HttpFields.__ContentLength);
+        return _httpRequest.getIntField(HttpFields.__ContentLength);
     }
     
     /* -------------------------------------------------------------- */
     public String getContentType()
     {
-        return _request.getField(HttpFields.__ContentType);
+        return _httpRequest.getField(HttpFields.__ContentType);
     }
     
     /* -------------------------------------------------------------- */
@@ -486,7 +537,7 @@ class ServletRequest
         if (_inputState!=0 && _inputState!=1)
             throw new IllegalStateException();
         if (_in==null)
-            _in = new ServletIn(_request.getInputStream());  
+            _in = new ServletIn(_httpRequest.getInputStream());  
         _inputState=1;
         return _in;
     }
@@ -494,19 +545,19 @@ class ServletRequest
     /* -------------------------------------------------------------- */
     public String getParameter(String name)
     {
-        return _request.getParameter(name);
+        return _httpRequest.getParameter(name);
     }
     
     /* -------------------------------------------------------------- */
     public Enumeration getParameterNames()
     {
-        return Collections.enumeration(_request.getParameterNames());
+        return Collections.enumeration(_httpRequest.getParameterNames());
     }
     
     /* -------------------------------------------------------------- */
     public String[] getParameterValues(String name)
     {
-        List v = _request.getParameterValues(name);
+        List v = _httpRequest.getParameterValues(name);
         if (v==null)
             return null;
 	String[]a=new String[v.size()];
@@ -516,25 +567,25 @@ class ServletRequest
     /* -------------------------------------------------------------- */
     public String getProtocol()
     {
-        return _request.getVersion();
+        return _httpRequest.getVersion();
     }
     
     /* -------------------------------------------------------------- */
     public String getScheme()
     {
-        return _request.getScheme();
+        return _httpRequest.getScheme();
     }
     
     /* -------------------------------------------------------------- */
     public String getServerName()
     {
-        return _request.getHost();
+        return _httpRequest.getHost();
     }
     
     /* -------------------------------------------------------------- */
     public int getServerPort()
     {
-        return _request.getPort();
+        return _httpRequest.getPort();
     }
     
     /* -------------------------------------------------------------- */
@@ -561,7 +612,7 @@ class ServletRequest
     /* -------------------------------------------------------------- */
     public String getRemoteAddr()
     {
-        HttpConnection connection = _request.getConnection();
+        HttpConnection connection = _httpRequest.getConnection();
         if (connection!=null)
         {
             InetAddress addr = connection.getRemoteAddr();
@@ -575,7 +626,7 @@ class ServletRequest
     public String getRemoteHost()
     {
         String remoteHost=null;
-        HttpConnection connection = _request.getConnection();
+        HttpConnection connection = _httpRequest.getConnection();
         if (connection!=null)
         {
             InetAddress addr = connection.getRemoteAddr();
@@ -588,7 +639,7 @@ class ServletRequest
     /* -------------------------------------------------------------- */
     public void setAttribute(String name, Object value)
     {
-        _request.setAttribute(name,value);
+        _httpRequest.setAttribute(name,value);
     }
     
     /* -------------------------------------------------------------- */

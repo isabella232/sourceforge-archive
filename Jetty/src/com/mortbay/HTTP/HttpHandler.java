@@ -17,6 +17,12 @@ import java.io.*;
 public interface HttpHandler extends LifeCycle
 {
     /* ------------------------------------------------------------ */
+    /** 
+     * @return 
+     */
+    public HandlerContext getContext();
+    
+    /* ------------------------------------------------------------ */
     /** Start the handler.
      * All requests are ignored until start is called.
      */
@@ -59,11 +65,16 @@ public interface HttpHandler extends LifeCycle
      * @param request The request
      * @param response The response.
      */
-    public void handle(String contextPath,
+    public void handle(String contextPathSpec,
 		       HttpRequest request,
 		       HttpResponse response)
-        throws HttpException, IOException;    
+        throws HttpException, IOException;
+
+
 }
+
+
+
 
 
 

@@ -29,7 +29,8 @@ public class LogSink
     protected boolean _logLabels=true;
     protected boolean _logTags=true;
     protected boolean _logStackSize=true;
-    protected boolean _logStackTrace=false;
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    public boolean _logStackTrace=false;
     protected boolean _logOneLine=false;
     
     /*-------------------------------------------------------------------*/

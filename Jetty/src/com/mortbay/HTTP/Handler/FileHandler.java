@@ -26,24 +26,14 @@ import java.io.*;
 public class FileHandler extends NullHandler
 {
     /* ----------------------------------------------------------------- */
-    String _allowHeader = null;
-    CachedFile[] _cache=null;
-    int _nextIn=0;
-    Map _cacheMap=null;
+    private String _allowHeader = null;
+    private CachedFile[] _cache=null;
+    private int _nextIn=0;
+    private Map _cacheMap=null;
+
 
     
-    /* ------------------------------------------------------------ */
-    String _fileBase ;
-    public String getFileBase()
-    {
-	return _fileBase;
-    }
-    public void setFileBase(String fileBase)
-    {
-	_fileBase = fileBase;
-    }
-
-
+    
     /* ------------------------------------------------------------ */
     boolean _dirAllowed =true;
     public boolean isDirAllowed()
@@ -132,12 +122,11 @@ public class FileHandler extends NullHandler
      */
     public FileHandler()
     {}
-
     
     /* ----------------------------------------------------------------- */
     public void start()
     {
-        Log.event("FileHandler started in "+_fileBase);
+        Log.event("FileHandler started in "+getContext().getFileBase());
         if (_maxCachedFiles>0 && _maxCachedFileSize>0 && _cache==null)
         {
             _cache=new CachedFile[_maxCachedFiles];
@@ -169,7 +158,7 @@ public class FileHandler extends NullHandler
     public String realPath(String pathSpec, String path)
         throws IllegalArgumentException
     {
-        String realpath=_fileBase;
+        String realpath=getContext().getFileBase();;
         if (pathSpec.startsWith("*."))
         {
             realpath+=path;

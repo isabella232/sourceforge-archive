@@ -177,13 +177,16 @@ public class ServletHolder implements ServletConfig
             }
             return _servlet;
         }
+	catch(UnavailableException e)
+	{
+	    throw e;
+	}
         catch(Exception e)
         {
             Code.warning(e);
             throw new UnavailableException(null,e.toString());
         }    
     }
-    
 
     
     /* ---------------------------------------------------------------- */
@@ -282,6 +285,10 @@ public class ServletHolder implements ServletConfig
 			    if (_singleThreadModel)
 				_servlet=null;
 			}
+			catch(UnavailableException e)
+			{
+			    throw e;
+			}
 			catch(Exception e)
 			{
 			    Code.warning(e);
@@ -306,7 +313,7 @@ public class ServletHolder implements ServletConfig
 	try
 	{
 	    useServlet.service(request,response);
-	    response.flush();
+	    response.flushBuffer();
 	}
 	finally
 	{

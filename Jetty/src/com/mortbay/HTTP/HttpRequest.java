@@ -503,7 +503,7 @@ public class HttpRequest extends HttpMessage
         
         // Check sufficient params
         if (s3<0 || e1<0 || e3<s2 )
-            throw new HttpException(400);
+            throw new HttpException(400,"for "+new String(buf,0,len));
 
         // get method
         _method=new String(buf,s1,s2-s1+1);

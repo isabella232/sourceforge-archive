@@ -409,6 +409,7 @@ public class TestRFC2616
             response=listener.getResponses("GET /path/R1 HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "\n");
+	    
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200","Default host")+1;
@@ -552,7 +553,7 @@ public class TestRFC2616
             t.checkEquals(response.indexOf("HTTP/1.1 100"),-1,
                           "8.2.3 no expect no 100");
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 400","8.2.3 no expect no 100")+1;
+                                   "HTTP/1.1 200","8.2.3 no expect no 100")+1;
 
             
             // Expect with body
@@ -583,7 +584,7 @@ public class TestRFC2616
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 100 Continue","8.2.3 expect 100")+1;
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 400","8.2.3 expect 100")+1;
+                                   "HTTP/1.1 200","8.2.3 expect 100")+1;
             
             // No Expect PUT
             offset=0;
@@ -608,7 +609,7 @@ public class TestRFC2616
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 100 Continue","8.2.3 RFC2068")+1;
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 400","8.2.3 RFC2068")+1;
+                                   "HTTP/1.1 200","8.2.3 RFC2068")+1;
         }
         catch(Exception e)
         {
@@ -844,4 +845,22 @@ public class TestRFC2616
             t.check(false,e.toString());
         }
     }
+    
+    /* ------------------------------------------------------------ */
+    public static void main(String[] args)
+    {
+        try{
+            TestRFC2616.test();
+        }
+        catch(Throwable e)
+        {
+            Code.warning(e);
+            new Test("com.mortbay.HTTP.TestRFC2616").check(false,e.toString());
+        }
+        finally
+        {
+            Test.report();
+        }
+    }
+    
 }

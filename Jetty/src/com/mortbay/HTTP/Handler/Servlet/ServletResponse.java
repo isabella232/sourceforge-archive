@@ -3,7 +3,6 @@
 // $Id$
 // ========================================================================
 
-
 package com.mortbay.HTTP.Handler.Servlet;
 
 import com.sun.java.util.collections.*;
@@ -16,7 +15,7 @@ import javax.servlet.http.*;
 import javax.servlet.*;
 
 /* ------------------------------------------------------------ */
-/** 
+/** Wrapper of Jetty request for Servlet API.
  *
  * @see
  * @version 1.0 Sun Apr  9 2000
@@ -24,37 +23,40 @@ import javax.servlet.*;
  */
 public class ServletResponse implements HttpServletResponse
 {
-    private HttpResponse _response;
-    private HttpRequest _request;
+    private HttpResponse _httpResponse;
+    private ServletRequest _servletRequest;
     private int _outputState=0;
     private ServletOut _out =null;
     private PrintWriter _writer=null;
+    private HttpSession _session=null;
+    private boolean _noSession=false;
 
 
     /* ------------------------------------------------------------ */
-    ServletResponse(HttpResponse response, HttpRequest request)
+    ServletResponse(ServletRequest request,HttpResponse response)
     {
-        _response=response;
-        _request=request;
+        _servletRequest=request;
+	_servletRequest.setServletResponse(this);
+        _httpResponse=response;
     }
 
     /* ------------------------------------------------------------ */
     void commit()
 	throws IOException
     {
-	_response.commit();
+	_httpResponse.commit();
     }
 
     /* ------------------------------------------------------------ */
     public boolean isCommitted()
     {
-	return _response.isCommitted();
+	return _httpResponse.isCommitted();
     }
 
     /* ------------------------------------------------------------ */
     public void setBufferSize(int size)
     {
-	ChunkableOutputStream out = _response.getOutputStream();
+	ChunkableOutputStream out = _httpResponse.getOutputStream();
 	if (out.isWritten())
 	    throw new IllegalStateException("Output written");
 	
@@ -64,19 +66,9 @@ public class ServletResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public int getBufferSize()
     {
-	return _response.getOutputStream().getBufferCapacity();
+	return _httpResponse.getOutputStream().getBufferCapacity();
     }
     
-    /* ------------------------------------------------------------ */
-    public void flush()
-	throws IOException
-    {
-	Code.debug("FLUSH");
-	if (_out!=null)
-	    _out.flush();
-	else if (_writer!=null)
-	    _writer.flush();
-    }
     
     /* ------------------------------------------------------------ */
     public void flushBuffer()
@@ -87,16 +79,13 @@ public class ServletResponse implements HttpServletResponse
 	else if (_writer!=null)
 	    _writer.flush();
 	else
-	    _response.getOutputStream().flush();
-
-	if (!_response.isCommitted())
-	    _response.commit();
+	    _httpResponse.getOutputStream().flush();
     }
     
     /* ------------------------------------------------------------ */
     public void reset()
     {
-	_response.reset();
+	_httpResponse.reset();
     }
     
     /* ------------------------------------------------------------ */
@@ -135,85 +124,83 @@ public class ServletResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void addCookie(Cookie cookie) 
     {
-        _response.addSetCookie(cookie.getName(),
-                               cookie.getValue(),
-                               cookie.getDomain(),
-                               cookie.getPath(),
-                               cookie.getMaxAge(),
-                               cookie.getSecure());
+        _httpResponse.addSetCookie(cookie.getName(),
+				   cookie.getValue(),
+				   cookie.getDomain(),
+				   cookie.getPath(),
+				   cookie.getMaxAge(),
+				   cookie.getSecure());
     }
 
     /* ------------------------------------------------------------ */
     public boolean containsHeader(String name) 
     {
-        return _response.containsField(name);
+        return _httpResponse.containsField(name);
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     * Encodes the specified URL by including the session ID in it,
-     * or, if encoding is not needed, returns the URL unchanged.
-     * The implementation of this method includes the logic to
-     * determine whether the session ID needs to be encoded in the URL.
-     * For example, if the browser supports cookies, or session
-     * tracking is turned off, URL encoding is unnecessary.
-     * 
-     * <p>For robust session tracking, all URLs emitted by a servlet 
-     * should be run through this
-     * method.  Otherwise, URL rewriting cannot be used with browsers
-     * which do not support cookies.
-     *
-     * @param	url	the url to be encoded.
-     * @return		the encoded URL if encoding is needed;
-     * 			the unchanged URL otherwise.
-     */
     public String encodeURL(String url) 
     {
-	Code.notImplemented();
-	return null;
+        // should not encode if cookies in evidence
+        if (_servletRequest==null || _servletRequest.isRequestedSessionIdFromCookie())
+            return url;
+        
+        // get session;
+        if (_session==null && !_noSession)
+        {
+            _session=_servletRequest.getSession(false);
+            _noSession=(_session==null);
+        }
+
+        // no session or no url
+        if (_session == null || url==null)
+            return url;
+
+        // invalid session
+        String id = _session.getId();
+        if (id == null)
+            return url;
+
+	// Check host and port are for this server
+	// XXX not implemented
+	
+	// Already encoded
+	int prefix=url.indexOf(Context.__SessionUrlPrefix);
+	if (prefix!=-1)
+	{
+	    int suffix=url.indexOf(Context.__SessionUrlSuffix,prefix);
+	    if (suffix!=-1 && prefix<suffix)
+		// Update ID
+		return
+		    url.substring(0,prefix+Context.__SessionUrlPrefix.length())+
+		    id+
+		    url.substring(suffix);
+	}
+	
+	// edit the session
+	int end=url.indexOf('?');
+	if (end<0)
+	    end=url.indexOf('#');
+	if (end<0)
+	    return url+";sessionid="+id+"_";
+	return url.substring(0,end)+
+	    ";sessionid="+id+"_"+
+	    url.substring(end);
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     * Encodes the specified URL for use in the
-     * <code>sendRedirect</code> method or, if encoding is not needed,
-     * returns the URL unchanged.  The implementation of this method
-     * includes the logic to determine whether the session ID
-     * needs to be encoded in the URL.  Because the rules for making
-     * this determination can differ from those used to decide whether to
-     * encode a normal link, this method is seperate from the
-     * <code>encodeURL</code> method.
-     * 
-     * <p>All URLs sent to the <code>HttpServletResponse.sendRedirect</code>
-     * method should be run through this method.  Otherwise, URL
-     * rewriting cannot be used with browsers which do not support
-     * cookies.
-     *
-     * @param	url	the url to be encoded.
-     * @return		the encoded URL if encoding is needed;
-     * 			the unchanged URL otherwise.
-     *
-     * @see #sendRedirect
-     * @see #encodeUrl
-     */
     public String encodeRedirectURL(String url) 
     {
-	Code.notImplemented();
-	return null;
+	return encodeURL(url);
     }
 
     /* ------------------------------------------------------------ */
     /**
      * @deprecated	As of version 2.1, use encodeURL(String url) instead
-     *
-     * @param	url	the url to be encoded.
-     * @return		the encoded URL if encoding is needed; 
-     * 			the unchanged URL otherwise.
      */
     public String encodeUrl(String url) 
     {
-	Code.notImplemented();
-	return null;
+        return encodeURL(url);
     }
 
     /* ------------------------------------------------------------ */
@@ -221,90 +208,86 @@ public class ServletResponse implements HttpServletResponse
      * @deprecated	As of version 2.1, use 
      *			encodeRedirectURL(String url) instead
      *
-     * @param	url	the url to be encoded.
-     * @return		the encoded URL if encoding is needed; 
-     * 			the unchanged URL otherwise.
      */
     public String encodeRedirectUrl(String url) 
     {
-	Code.notImplemented();
-	return null;
+        return encodeRedirectURL(url);
     }
 
     /* ------------------------------------------------------------ */
     public void sendError(int status, String message)
 	throws IOException
     {
-	_response.sendError(status,message);
+	_httpResponse.sendError(status,message);
     }
 
     /* ------------------------------------------------------------ */
     public void sendError(int status) 
 	throws IOException
     {
-	_response.sendError(status);
+	_httpResponse.sendError(status);
     }
 
     /* ------------------------------------------------------------ */
     public void sendRedirect(String url) 
 	throws IOException
     {
-	_response.sendRedirect(url);
+	_httpResponse.sendRedirect(url);
     }
 
     /* ------------------------------------------------------------ */
     public void setDateHeader(String name, long value) 
     {
-	_response.setDateField(name,value);
+	_httpResponse.setDateField(name,value);
     }
 
     /* ------------------------------------------------------------ */
     public void setHeader(String name, String value) 
     {
-	_response.setField(name,value);
+	_httpResponse.setField(name,value);
     }
 
     /* ------------------------------------------------------------ */
     public void setIntHeader(String name, int value) 
     {
-	_response.setIntField(name,value);
+	_httpResponse.setIntField(name,value);
     }
     
     /* ------------------------------------------------------------ */
     public void addDateHeader(String name, long value) 
     {
-	_response.addDateField(name,new Date(value));
+	_httpResponse.addDateField(name,new Date(value));
     }
 
     /* ------------------------------------------------------------ */
     public void addHeader(String name, String value) 
     {
-	_response.addField(name,value);
+	_httpResponse.addField(name,value);
     }
 
     /* ------------------------------------------------------------ */
     public void addIntHeader(String name, int value) 
     {
-	_response.addIntField(name,value);
+	_httpResponse.addIntField(name,value);
     }
 
     /* ------------------------------------------------------------ */
     public void setStatus(int status) 
     {
-	_response.setStatus(status);
+	_httpResponse.setStatus(status);
     }
 
     /* ------------------------------------------------------------ */
     public void setStatus(int status, String message) 
     {
-	_response.setStatus(status);
-	_response.setReason(message);
+	_httpResponse.setStatus(status);
+	_httpResponse.setReason(message);
     }
 
     /* ------------------------------------------------------------ */
     public String getCharacterEncoding() 
     {
-	return _response.getCharacterEncoding();
+	return _httpResponse.getCharacterEncoding();
     }
 
     /* ------------------------------------------------------------ */
@@ -313,7 +296,8 @@ public class ServletResponse implements HttpServletResponse
         if (_outputState!=0 && _outputState!=1)
             throw new IllegalStateException();
         if (_out==null)
-            _out = new ServletOut(_request.getOutputStream());  
+            _out = new ServletOut(_servletRequest.getHttpRequest()
+				  .getOutputStream());  
         _outputState=1;
         return _out;
     }
@@ -327,7 +311,8 @@ public class ServletResponse implements HttpServletResponse
             _writer =
 		new PrintWriter
 		    (new OutputStreamWriter
-			(_request.getOutputStream()));
+			(_servletRequest.getHttpRequest()
+			 .getOutputStream()));
         _outputState=2;
         return _writer;
     }
@@ -335,13 +320,13 @@ public class ServletResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void setContentLength(int len) 
     {
-	_response.setIntField(HttpFields.__ContentLength,len);
+	_httpResponse.setIntField(HttpFields.__ContentLength,len);
     }
     
     /* ------------------------------------------------------------ */
     public void setContentType(String contentType) 
     {
-	_response.setField(HttpFields.__ContentType,contentType);
+	_httpResponse.setField(HttpFields.__ContentType,contentType);
     }
 }
 

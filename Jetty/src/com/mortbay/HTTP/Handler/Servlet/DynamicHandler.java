@@ -46,7 +46,8 @@ public class DynamicHandler extends ServletHandler
     /* ----------------------------------------------------------------- */
     public void start()
     {
-        Log.event("DynamicHandler started for "+getClassPath());
+        Log.event("DynamicHandler started for "+
+		  getContext().getClassPath());
 	super.start();
     }
     
@@ -70,7 +71,8 @@ public class DynamicHandler extends ServletHandler
 	    if (!_paths.contains(path))
 	    {
 		_paths.add(path);
-		Code.debug(path," from ",getClassPath());
+		Code.debug(path," from ",
+			   getContext().getClassPath());
 		
 		String servletClass=
 		    PathMap.pathInfo(contextPathSpec,path).substring(1);
@@ -86,6 +88,7 @@ public class DynamicHandler extends ServletHandler
 		try{
 		    holder=newServletHolder(servletClass);
 		    holder.setProperties(getProperties());
+		    holder.getServlet();
 		}
 		catch(Exception e)
 		{

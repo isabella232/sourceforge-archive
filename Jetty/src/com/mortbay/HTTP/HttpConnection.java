@@ -113,7 +113,7 @@ public class HttpConnection
     /* ------------------------------------------------------------ */
     /** Close the connection.
      * This method calls close on the input and output streams and
-     * interrupts ny thread in the handle method.
+     * interrupts any thread in the handle method.
      * may be specialized to close sockets etc.
      * @exception IOException 
      */
@@ -380,7 +380,8 @@ public class HttpConnection
                 _inputStream.resetStream();
                 if (_outputStream.isChunking())
                     _outputStream.endChunking(); 
-                _outputStream.resetStream();
+                else
+		    _outputStream.resetStream();
             }
             else
             {
@@ -393,7 +394,7 @@ public class HttpConnection
         {
             // Handle HTTP Exception by sending error code (if output not
             // committed) and closing connection.
-            Code.debug(e);
+            Code.warning(e);
             _persistent=false;
             if (_outputStream.isCommitted())
             {
@@ -412,15 +413,18 @@ public class HttpConnection
         {
             // Handle Exception by sending 500 error code (if output not
             // committed) and closing connection.
+
+	    Code.warning(e);
+	    
             if (Code.debug())
                 Code.warning(e);
             else
                 Code.warning(e.toString());
             
             _persistent=false;
-            if (!_outputStream.isCommitted())
+            if (!_response.isCommitted())
             {
-                _outputStream.resetBuffer();
+                _response.reset();
                 _response.removeField(HttpFields.__TransferEncoding);
                 _response.setField(HttpFields.__Connection,
                                   HttpFields.__Close);
@@ -445,8 +449,10 @@ public class HttpConnection
         {
             if (_request!=null)
                 _request.destroy();
+	    _request=null;
             if (_response!=null)
                 _response.destroy();
+	    _response=null;
         }
         return _persistent;
     }
@@ -521,7 +527,8 @@ public class HttpConnection
                     _inputStream.setChunking();
                 }
                 else
-                    getServer().enableEncoding(_inputStream,coding,coding_params);
+                    getServer().getHttpEncoding()
+			.enableEncoding(_inputStream,coding,coding_params);
             }
         }
         
@@ -596,6 +603,8 @@ public class HttpConnection
     public void outputNotify(ChunkableOutputStream out, int action)
         throws IOException
     {
+	if (_response==null)
+	    return;
 	
         switch(action)
         {
@@ -672,7 +681,8 @@ public class HttpConnection
                                                       " transfer-encoding");
 
                           // Set coding
-                          getServer().enableEncoding(out,coding,coding_params);
+                          getServer().getHttpEncoding()
+			      .enableEncoding(out,coding,coding_params);
                       }
                   }
               }
@@ -688,10 +698,9 @@ public class HttpConnection
               
           case OutputObserver.__COMMITING:
               Code.debug("notify COMMITING");
-              // XXX Unchunked 1.1 requests with content length may
-              // may be made persistent here.
-              _response.writeHeader(_outputStream.getRawWriter());
-              _outputStream.writeRawWriter();
+              // XXX Unchunked 1.1 requests with content length could
+              // be made persistent here.
+	      _response.commit();
               break;
               
           case OutputObserver.__COMMITED:
@@ -700,11 +709,7 @@ public class HttpConnection
               
           case OutputObserver.__CLOSING:
               Code.debug("notify CLOSING");
-
-              // Setup any trailers
-              HttpFields trailer=_response.getTrailer();
-              if (trailer!=null && trailer.size()>0 && _outputStream.isChunking())
-                  _outputStream.setTrailer(_response.getTrailer());
+	      _response.complete();
               break;
               
           case OutputObserver.__CLOSED:

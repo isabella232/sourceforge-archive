@@ -22,17 +22,39 @@ import java.io.*;
 public class NullHandler implements HttpHandler
 {
     /* ----------------------------------------------------------------- */
-    protected boolean _started=false;
-    protected boolean _destroyed=true;
-    protected Object _configuration;
+    private boolean _started=false;
+    private boolean _destroyed=true;
+    private HandlerContext _context;
     
     /* ------------------------------------------------------------ */
     /** 
-     * @param configuration 
+     * @return 
      */
-    public void initialize(Object configuration)
+    public HandlerContext getContext()
     {
-        _configuration=configuration;
+	return _context;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Initialize with a HandlerContext.
+     * The first time it is called, initialize() is called after setting the context.
+     * @param configuration Must be the HandlerContext of the handler
+     */
+    public final void initialize(Object configuration)
+    {
+	if (_context==null)
+	{
+	    _context=(HandlerContext) configuration;
+	    initialize();
+	}
+	else if (_context!=configuration)
+	    throw new IllegalStateException("Can't initialize handler for different context");
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    public void initialize()
+    {
     }
     
     /* ----------------------------------------------------------------- */
@@ -53,6 +75,7 @@ public class NullHandler implements HttpHandler
     {
         _started=false;
         _destroyed=true;
+	_context=null;
     }
 
     /* ----------------------------------------------------------------- */
@@ -74,12 +97,12 @@ public class NullHandler implements HttpHandler
     }
     
     /* ------------------------------------------------------------ */
-    public void handle(String pathSpec,
+    public void handle(String contextPathSpec,
                        HttpRequest request,
                        HttpResponse response)
         throws HttpException, IOException
     {
-	Code.warning("NullHandler called for "+pathSpec);
+	Code.warning("NullHandler called for "+contextPathSpec);
     }
     
 }

@@ -57,7 +57,7 @@ public class BasicAuthHandler extends NullHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
-        if (!_started)
+        if (!isStarted())
             return;        
 
         String credentials =

@@ -26,7 +26,7 @@ import java.net.*;
  * @version $Id$
  * @author Greg Wilkins
  */
-public class Context implements ServletContext
+public class Context implements ServletContext, HttpSessionContext
 {
     /* ------------------------------------------------------------ */
     private ServletHandler _handler;
@@ -90,12 +90,12 @@ public class Context implements ServletContext
     /* ------------------------------------------------------------ */
     String getRealPathInfo(String pathInfo)
     {
-	if (_handler.getFileBase()==null)
+	String fileBase=_handler.getContext().getFileBase();
+	if (fileBase==null)
 	    return null;
 	
 	return
-	    _handler.getFileBase()+
-	    pathInfo.replace('/',File.separatorChar);
+	    (fileBase+pathInfo).replace('/',File.separatorChar);
     }
     
     /* ------------------------------------------------------------ */
@@ -164,7 +164,7 @@ public class Context implements ServletContext
     public URL getResource(String uri)
 	throws MalformedURLException
     {
-	String resourceBase=_handler.getResourceBase();
+	String resourceBase=_handler.getContext().getResourceBase();
 	if (resourceBase==null)
 	    return null;
 	
@@ -325,130 +325,406 @@ public class Context implements ServletContext
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * Returns the name and version of the servlet container on which
-     * the servlet is running. 
-     *
-     * <p>The form of the returned string is 
-     * <i>servername</i>/<i>versionnumber</i>.
-     * For example, the JavaServer Web Development Kit may return the string
-     * <code>JavaServer Web Dev Kit/1.0</code>.
-     *
-     * <p>The servlet container may return other optional information 
-     * after the primary string in parentheses, for example,
-     * <code>JavaServer Web Dev Kit/1.0 (JDK 1.1.6; Windows NT 4.0 x86)</code>.
-     *
-     *
-     * @return 		a <code>String</code> containing at least the 
-     *			servlet container name and version number
-     *
-     */
     public String getServerInfo()
     {
-	Code.notImplemented();
-	return null;
+	return Version.__Version;
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * Returns the servlet container attribute with the given name, 
-     * or <code>null</code> if there is no attribute by that name.
-     * An attribute allows a servlet container to give the
-     * servlet additional information not
-     * already provided by this interface. See your
-     * server documentation for information about its attributes.
-     * A list of supported attributes can be retrieved using
-     * <code>getAttributeNames</code>.
-     *
-     * <p>The attribute is returned as a <code>java.lang.Object</code>
-     * or some subclass.
-     * Attribute names should follow the same convention as package
-     * names. The Java Servlet API specification reserves names
-     * matching <code>java.*</code>, <code>javax.*</code>,
-     * and <code>sun.*</code>.
-     *
-     *
-     * @param name 	a <code>String</code> specifying the name 
-     *			of the attribute
-     *
-     * @return 		an <code>Object</code> containing the value 
-     *			of the attribute, or <code>null</code>
-     *			if no attribute exists matching the given
-     *			name
-     *
-     * @see 		ServletContext#getAttributeNames
-     *
+    /** Get context attribute.
+     * Delegated to HandlerContext.
      */
     public Object getAttribute(String name)
     {
-	Code.notImplemented();
-	return null;
+	return _handler.getContext().getAttribute(name);
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * Returns an <code>Enumeration</code> containing the 
-     * attribute names available
-     * within this servlet context. Use the
-     * {@link #getAttribute} method with an attribute name
-     * to get the value of an attribute.
-     *
-     * @return 		an <code>Enumeration</code> of attribute 
-     *			names
-     *
-     * @see		#getAttribute
-     *
+    /** Get context attribute names.
+     * Delegated to HandlerContext.
      */
     public Enumeration getAttributeNames()
     {
-	Code.notImplemented();
-	return null;
+	return _handler.getContext().getAttributeNames();
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     *
-     * Binds an object to a given attribute name in this servlet context. If
-     * the name specified is already used for an attribute, this
-     * method will remove the old attribute and bind the name
-     * to the new attribute.
-     *
-     * <p>Attribute names should follow the same convention as package
-     * names. The Java Servlet API specification reserves names
-     * matching <code>java.*</code>, <code>javax.*</code>, and
-     * <code>sun.*</code>.
-     *
-     *
-     * @param name 	a <code>String</code> specifying the name 
-     *			of the attribute
-     *
-     * @param object 	an <code>Object</code> representing the
-     *			attribute to be bound
-     *
-     *
-     *
+    /** Set context attribute names.
+     * Delegated to HandlerContext.
      */
     public void setAttribute(String name, Object value)
     {
-	Code.notImplemented();
+	if (name!=null && name.startsWith("com.mortbay."))
+	    Code.warning("Servlet setting com.mortbay.* attribute: "+
+			 name);
+	_handler.getContext().setAttribute(name,value);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Remove context attribute.
+     * Delegated to HandlerContext.
+     */
+    public void removeAttribute(String name)
+    {
+	if (name!=null && name.startsWith("com.mortbay."))
+	    Code.warning("Servlet removing com.mortbay.* attribute: "+
+			 name);
+	_handler.getContext().removeAttribute(name);
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public final static String __SessionUrlPrefix = ";sessionid=";
+    public final static String __SessionUrlSuffix = "_";
+    public final static String __SessionId  = "JettySessionId";
+    public final static int __distantFuture = 60*60*24*7*52*20;
+    private static long __nextSessionId = System.currentTimeMillis();
+    
+    // Setting of max inactive interval for new sessions
+    // -1 means no timeout
+    private int _defaultMaxIdleTime = -1;
+    private SessionScavenger _scavenger = null;
+    private Map _sessions = new HashMap();
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @deprecated
+     */   
+    public Enumeration getIds()
+    {
+        return Collections.enumeration(_sessions.keySet());
     }
     
     /* ------------------------------------------------------------ */
     /**
-     * Removes the attribute with the given name from 
-     * the servlet context. After removal, subsequent calls to
-     * {@link #getAttribute} to retrieve the attribute's value
-     * will return <code>null</code>.
-     *
-     *
-     * @param name	a <code>String</code> specifying the name 
-     * 			of the attribute to be removed
-     *
-     */
-    public void removeAttribute(String name)
+     * @deprecated
+     */   
+    public HttpSession getSession(String id)
     {
-	Code.notImplemented();
-    }					       
+        HttpSession s = (HttpSession)_sessions.get(id);
+        return s;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public HttpSession newSession()
+    {
+        HttpSession session = new Session();
+        session.setMaxInactiveInterval(_defaultMaxIdleTime);
+        _sessions.put(session.getId(),session);
+        return session;
+    }
+
+    /* ------------------------------------------------------------ */
+    public static void access(HttpSession session)
+    {
+        ((Session)session).accessed();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public static boolean isValid(HttpSession session)
+    {
+        return !(((Session)session).invalid);
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Set the default session timeout.
+     *  @param  default The default timeout in seconds
+     */
+    public void setMaxInactiveInterval(int defaultTime)
+    {   
+        _defaultMaxIdleTime = defaultTime;
+        
+        // Start the session scavenger if we haven't already
+        if (_scavenger == null)
+            _scavenger = new SessionScavenger();
+    }
+
+    /* -------------------------------------------------------------- */
+    /** Find sessions that have timed out and invalidate them. 
+     *  This runs in the SessionScavenger thread.
+     */
+    private synchronized void scavenge()
+    {
+        // Set our priority high while we have the sessions locked
+        int oldPriority = Thread.currentThread().getPriority();
+        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+                
+        long now = System.currentTimeMillis();
+                
+        // Since Hashtable enumeration is not safe over deletes,
+        // we build a list of stale sessions, then go back and invalidate them
+        ArrayList staleSessions = null;
+                
+        // For each session
+        for (Iterator i = _sessions.values().iterator(); i.hasNext(); )
+        {
+            Session session = (Session)i.next();
+            long idleTime = session.maxIdleTime;
+            if (idleTime > 0 && session.accessed + idleTime < now) {
+                // Found a stale session, add it to the list
+                if (staleSessions == null)
+                    staleSessions = new ArrayList(5);
+                staleSessions.add(session);
+            }
+        }
+                
+        // Remove the stale sessions
+        if (staleSessions != null)
+	{
+            for (int i = staleSessions.size() - 1; i >= 0; --i) {
+                ((Session)staleSessions.get(i)).invalidate();
+            }
+        }
+                
+        Thread.currentThread().setPriority(oldPriority);
+    }
+
+    // how often to check - XXX - make this configurable
+    final static int scavengeDelay = 30000;
+
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* -------------------------------------------------------------- */
+    /** SessionScavenger is a background thread that kills off old sessions */
+    class SessionScavenger extends Thread
+    {
+        public void run() {
+            while (true) {
+                try {
+                    sleep(scavengeDelay); 
+                } catch (InterruptedException ex) {}
+                Context.this.scavenge();
+            }
+        }
+
+        SessionScavenger() {
+            super("SessionScavenger");
+            setDaemon(true);
+            this.start();
+        }
+        
+    }   // SessionScavenger    
+
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    class Session implements HttpSession
+    {
+	HashMap _values = new HashMap(11);
+        boolean invalid=false;
+        boolean newSession=true;
+        long created=System.currentTimeMillis();
+        long accessed=created;
+        long maxIdleTime = -1;
+        String id=null;
+
+        /* ------------------------------------------------------------- */
+        Session()
+        {
+            synchronized(com.mortbay.HTTP.Handler.Servlet.Context.class)
+            {
+                long idtmp = __nextSessionId;
+                __nextSessionId+=created%4096;
+                this.id=Long.toString(idtmp,30+(int)(created%7));
+            }
+            if (_defaultMaxIdleTime>=0)
+                maxIdleTime=_defaultMaxIdleTime*1000;
+        }
+        
+        /* ------------------------------------------------------------- */
+        void accessed()
+        {
+            newSession=false;
+            accessed=System.currentTimeMillis();
+        }
+        
+        /* ------------------------------------------------------------- */
+        public String getId()
+            throws IllegalStateException
+        {
+            if (invalid) throw new IllegalStateException();
+            return id;
+        }
+        
+        /* ------------------------------------------------------------- */
+        public long getCreationTime()
+            throws IllegalStateException
+        {
+            if (invalid) throw new IllegalStateException();
+            return created;
+        }
+        
+        /* ------------------------------------------------------------- */
+        public long getLastAccessedTime()
+            throws IllegalStateException
+        {
+            if (invalid) throw new IllegalStateException();
+            return accessed;
+        }
+        
+        /* ------------------------------------------------------------- */
+        public int getMaxInactiveInterval()
+        {
+            return (int)(maxIdleTime / 1000);
+        }
+        
+        /* ------------------------------------------------------------- */
+        /**
+         * @deprecated
+         */   
+        public HttpSessionContext getSessionContext()
+            throws IllegalStateException
+        {
+            if (invalid) throw new IllegalStateException();
+            return Context.this;
+        }
+        
+        /* ------------------------------------------------------------- */
+        public void setMaxInactiveInterval(int i)
+        {
+            maxIdleTime = (long)i * 1000;
+        }
+        
+        /* ------------------------------------------------------------- */
+        public void invalidate()
+            throws IllegalStateException
+        {
+            if (invalid) throw new IllegalStateException();
+            invalid=true;
+            
+            // Call valueUnbound on all the HttpSessionBindingListeners
+            // To avoid iterator problems, don't actually remove them
+            Iterator iter = _sessions.keySet().iterator();
+            while (iter.hasNext())
+            {
+                String key = (String)iter.next();
+                Object value = _values.get(key);
+                unbindValue(key, value);
+            }
+            Context.this._sessions.remove(id);
+        }
+        
+        /* ------------------------------------------------------------- */
+        public boolean isNew()
+            throws IllegalStateException
+        {
+            if (invalid) throw new IllegalStateException();
+            return newSession;
+        }
+        
+
+	/* ------------------------------------------------------------ */
+	public Object getAttribute(String name)
+	{
+            if (invalid) throw new IllegalStateException();
+            return _values.get(name);
+	}
+
+	/* ------------------------------------------------------------ */
+	public Enumeration getAttributeNames()
+	{
+            if (invalid) throw new IllegalStateException();
+	    return Collections.enumeration(_values.keySet());
+	}
+	
+	/* ------------------------------------------------------------ */
+	public void setAttribute(String name, Object value)
+	{
+            if (invalid) throw new IllegalStateException();
+            Object oldValue = _values.put(name,value);
+
+            if (value != oldValue)
+            {
+                unbindValue(name, oldValue);
+                bindValue(name, value);
+            }
+	}
+	
+	/* ------------------------------------------------------------ */
+	public void removeAttribute(String name)
+	{
+            if (invalid) throw new IllegalStateException();
+            Object value=_values.remove(name);
+            unbindValue(name, value);
+	}
+	
+        /* ------------------------------------------------------------- */
+	/**
+	 * @deprecated 	As of Version 2.2, this method is
+	 * 		replaced by {@link #getAttribute}
+	 */
+	public Object getValue(String name)
+            throws IllegalStateException
+        {
+	    return getAttribute(name);
+        }
+        
+        /* ------------------------------------------------------------- */
+	/**
+	 * @deprecated 	As of Version 2.2, this method is
+	 * 		replaced by {@link #getAttributeNames}
+	 */
+        public synchronized String[] getValueNames()
+            throws IllegalStateException
+        {
+            if (invalid) throw new IllegalStateException();
+	    String[] a = new String[_values.size()];
+	    return (String[])_values.keySet().toArray(a);
+        }
+        
+        /* ------------------------------------------------------------- */
+	/**
+	 * @deprecated 	As of Version 2.2, this method is
+	 * 		replaced by {@link #setAttribute}
+	 */
+        public void putValue(java.lang.String name,
+                             java.lang.Object value)
+            throws IllegalStateException
+        {
+	    setAttribute(name,value);
+        }
+        
+        /* ------------------------------------------------------------- */
+	/**
+	 * @deprecated 	As of Version 2.2, this method is
+	 * 		replaced by {@link #removeAttribute}
+	 */
+        public void removeValue(java.lang.String name)
+            throws IllegalStateException
+        {
+	    removeAttribute(name);
+        }
+
+        /* ------------------------------------------------------------- */
+        /** If value implements HttpSessionBindingListener, call valueBound() */
+        private void bindValue(java.lang.String name, Object value)
+        {
+            if (value!=null && value instanceof HttpSessionBindingListener)
+                ((HttpSessionBindingListener)value)
+                    .valueBound(new HttpSessionBindingEvent(this,name));
+        }
+
+        /* ------------------------------------------------------------- */
+        /** If value implements HttpSessionBindingListener, call valueUnbound() */
+        private void unbindValue(java.lang.String name, Object value)
+        {
+            if (value!=null && value instanceof HttpSessionBindingListener)
+                ((HttpSessionBindingListener)value)
+                    .valueUnbound(new HttpSessionBindingEvent(this,name));
+        }
+	
+    }   
 }
+
+
+
+
+
+
+
+
 
 

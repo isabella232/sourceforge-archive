@@ -60,49 +60,49 @@ unix equivalent):
 
 WWW Server
 ==========
-A HTTP server can be run with
+
+A Demo server server can be run on port 8080 with the command:
+
+  java com.mortbay.Jetty.Demo
+
+
+A raw HTTP server can be run with the command
  
   java com.mortbay.HTTP.HttpServer
 
-By default it runs on port 8080 and serves files and simple request dumps. 
-If run from the install directory, a set of simple demo pages are served.
-The server can be configured by using the options:
+By default it runs on port 8080 and serves files from "./FileBase" and 
+dynamic servlet from "./servlets" and the system class path. 
+The server can be configured by using command line options, which can 
+be displayed with 
 
-  -a [<addr>:]port    - listen on a port
-  -d <path>           - DumpHandler at path
-  -f <path>=<dir>     - FileHandler at path
-  -h <path>=<class>   - Map a handler at path
-  -v <host>=<alias>   - Remaining options are for virtual host.
-  -ds <path>=<classpath>
-                      - Add a dynamic servlet directory.
-  -s <path>=<class>
-                      - Add a servlet.
+  java com.mortbay.HTTP.HttpServer -?
 
-
-The default is equivalent to
-  java com.mortbay.HTTP.HttpServer            \
-       -a 8080                                \
-       -f /=.                                 \
-       -d /                                   \
-       -ds /servlet/*=./servlets             \
-       -h /=com.mortbay.HTTP.NotFoundHandler  
-
-Multiple addresses, handlers and hosts can be specified.
-
-Servers can also be configured in code.  The default server can be
-configured and started with:
+Servers can also be configured in code.  The demo server is configured
+with code similar to:
 
    // Make server
    HttpServer server = new HttpServer();
 
+   server.addListener(new InetAddrPort(8080));
+
    // Configure handlers
-   server.mapFiles(null,"/",".");
-   server.mapHandler(null,"/",new DumpHandler());
-   server.mapHandler(null,"/",new NotFoundHandler());
-   server.addListener(new SocketListener(server,new InetAddrPort(8080)));
+   HandlerContext context;
+   context=server.getContext(null,"/");
+   context.setFileBase(".");
+   context.addServlet("/dump,/dump/*","com.mortbay.Servlet.Dump");
+   context.setServingFiles(true);
+   context.addHandler(new NotFoundHandler());
+   
+   context=server.getContext(null,"/servlet/*");
+   context.setClassPath("./servlets");
+   context.setServingDynamicServlets(true);
+   context.addHandler(new NotFoundHandler());
 
    // Start handlers and listener
-   server.startAll();
+   server.start();
+
+
+A configuration file format based on XML will soon be developed.
 
 
 Distribution

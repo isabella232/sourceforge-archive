@@ -59,6 +59,8 @@ abstract public class HttpMessage
     protected HttpMessage()
     {
         _header=new HttpFields();
+	if (Code.verbose(999))
+	    Code.debug("New");
     }
     
     /* ------------------------------------------------------------ */
@@ -68,6 +70,8 @@ abstract public class HttpMessage
     {
         _header=new HttpFields();
         _connection=connection;
+	if (Code.verbose(999))
+	    Code.debug("New ",connection);
     }
 
     /* ------------------------------------------------------------ */
@@ -78,6 +82,8 @@ abstract public class HttpMessage
 	_state=__MSG_EDITABLE;
 	_header=new HttpFields();
 	_trailer=null;
+
+	// XXX - also need to cancel any encodings added to output stream!
 	
     }
     
@@ -482,6 +488,8 @@ abstract public class HttpMessage
      */
     public void destroy()
     {
+	if (Code.verbose(999))
+	    Code.debug("Destroy");
         if (_header!=null)
             _header.destroy();
         if (_trailer!=null)
@@ -524,18 +532,22 @@ abstract public class HttpMessage
 
     /* ------------------------------------------------------------ */
     /** Commit the message.
-     * Take whatever actions possible to move the message to the SENT state.
+     * Take whatever actions possible to move the message to the SENDING state.
      */
     public synchronized void commit()
         throws IOException, IllegalStateException
     {
         if (Code.verbose(99))
-            Code.debug("Commit()");
+            Code.debug("Commit from "+__state[_state]);
         
+	int lastState=_state;
+        _state=__MSG_SENDING;
+	
         ChunkableOutputStream out = getOutputStream();
-        out.flush();
-        
-        switch(_state)
+	if (out==null)
+	    throw new IllegalStateException("No output stream");
+	
+        switch(lastState)
         {
           case __MSG_EDITABLE:
               Writer writer = out.getRawWriter();
@@ -552,12 +564,50 @@ abstract public class HttpMessage
           case __MSG_SENT:
               break;
         }
-        
-        out.getRawStream().flush();
+    }
 
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return true if the message has been modified. 
+     */
+    public boolean isDirty()
+    {
+	ChunkableOutputStream out=getOutputStream();
+	
+	return _state!=__MSG_EDITABLE
+	    || ( out!=null &&
+		 (out.isWritten() || out.isCommitted()));
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return 
+     */
+    public boolean isCommitted()
+    {
+	ChunkableOutputStream out=getOutputStream();
+	return out!=null && out.isCommitted() ||
+	    _state==__MSG_SENT || _state==__MSG_SENDING;
+    }
 
-	// XXX Maybe only goto SENDING here and goto SENT with a
-	// complete call?
+    /* ------------------------------------------------------------ */
+    public synchronized void complete()
+	throws IOException
+    {
+	if (!isCommitted())
+	    commit();
+	
+	ChunkableOutputStream out=getOutputStream();
+	if (out!=null)
+	{
+	    if (_trailer!=null && _trailer.size()>0)
+	    {
+		if (out!=null && out.isChunking())
+		    out.setTrailer(_trailer);
+	    }
+	    out.flush();
+	}
         _state=__MSG_SENT;
     }
 }

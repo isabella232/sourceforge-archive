@@ -295,6 +295,7 @@ public class TestHarness
             p.put("*.tar.gz","6");
             p.put("*.gz","7");
             p.put("/","8");
+            p.put("/XXX,/YYY","9");
             
             t.checkEquals(p.get("/abs/path"),"1","Get absolute path");
             t.checkEquals(p.getMatch("/abs/path").getKey(),"/abs/path",
@@ -340,6 +341,25 @@ public class TestHarness
             t.checkEquals(p.pathInfo("/Foo/*","/Foo/bar"),"/bar","pathInfo prefix");
             t.checkEquals(p.pathInfo("*.ext","/Foo/bar.ext"),null,"pathInfo suffix");
             t.checkEquals(p.pathInfo("/","/Foo/bar.ext"),"/Foo/bar.ext","pathInfo default");
+            t.checkEquals(p.getMatch("/XXX").getValue(),"9",
+                          "multi paths");
+            t.checkEquals(p.getMatch("/YYY").getValue(),"9",
+                          "multi paths");
+	    
+            t.checkEquals(p.getMatch("/abs/path;extra").getValue(),"1",
+                          "; in path");
+            t.checkEquals(p.getMatch("/abs/path/longer;extra").getValue(),"2",
+                          "; in path");
+
+            t.checkEquals(p.pathMatch("/abs/path","/abs/path;extra"),
+			  "/abs/path;extra",
+                          "; in path match");
+            t.checkEquals(p.pathInfo("/abs/path","/abs/path;extra"),
+			  null,
+                          "; in path info");
+	    
+            t.checkEquals(p.getMatch("/animal/path#extra").getValue(),"5",
+                          "; in path");
         }
         catch(Exception e)
         {
