@@ -74,12 +74,16 @@ public class Monitor extends Thread
                 String cmd=lin.readLine();
                 if (Main._debug) System.err.println("command="+cmd);
                 if ("stop".equals(cmd))
+                {
+                    try {socket.close();}catch(Exception e){e.printStackTrace();}
+                    try {_socket.close();}catch(Exception e){e.printStackTrace();}
                     System.exit(0);
-                if ("status".equals(cmd))
+                }
+                else if ("status".equals(cmd))
                 {
                     socket.getOutputStream().write("OK\r\n".getBytes());
                     socket.getOutputStream().flush();
-                    }
+                }
             }
             catch(Exception e)
             {
