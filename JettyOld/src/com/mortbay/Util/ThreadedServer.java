@@ -381,11 +381,14 @@ abstract public class ThreadedServer
 			}
 		    }
 		}
+		catch ( java.net.SocketException e )
+		{
+		    // XXX - this is ignored due strange exception from linux java1.2.v1a
+		    Code.ignore(e);
+		}
 		catch ( IOException e )
 		{
 		    Code.warning(e);
-		    newThread();
-		    break;
 		}
 		finally
 		{
