@@ -136,9 +136,7 @@ public abstract class HttpMessage
     protected void reset()
     {
         _state=__MSG_EDITABLE;
-        _header=new HttpFields();
-
-        // TODO - also need to cancel any encodings added to output stream!
+        _header.clear();
     }
     
     /* ------------------------------------------------------------ */

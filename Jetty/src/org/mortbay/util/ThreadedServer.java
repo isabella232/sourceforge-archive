@@ -51,8 +51,9 @@ abstract public class ThreadedServer extends ThreadPool
     private int _lingerTimeSecs=30;
     private boolean _tcpNoDelay=true;
     private int _acceptQueueSize=0;
+    private int _acceptors=1;
     
-    private transient Acceptor _acceptor=null;  
+    private transient Acceptor[] _acceptor;  
     private transient ServerSocket _listen = null;
     private transient boolean _running=false;
     
@@ -296,6 +297,26 @@ abstract public class ThreadedServer extends ThreadPool
     {
         _acceptQueueSize = acceptQueueSize;
     }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set the number of threads used to accept connections.
+     * This should normally be 1, except when multiple CPUs are available and
+     * low latency is a high priority.
+     */
+    public void setAcceptorThreads(int n)
+    {
+        _acceptors = n;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Get the nmber of threads used to accept connections
+     */
+    public int getAcceptorThreads()
+    {
+        return _acceptors;
+    }
     
     /* ------------------------------------------------------------------- */
     /** Handle new connection.
@@ -474,9 +495,13 @@ abstract public class ThreadedServer extends ThreadPool
             open();
             
             _running=true;
-            _acceptor=new Acceptor();
-            _acceptor.setDaemon(isDaemon());
-            _acceptor.start();
+            _acceptor=new Acceptor[_acceptors];
+            for (int a=0;a<_acceptor.length;a++)
+            {
+                _acceptor[a]=new Acceptor();
+                _acceptor[a].setDaemon(isDaemon());
+                _acceptor[a].start();
+            }
             
             super.start();
         }
@@ -503,19 +528,22 @@ abstract public class ThreadedServer extends ThreadPool
             
             // Do we have an acceptor thread (running or not)
             Thread.yield();
-            if (_acceptor!=null)
+            for (int a=0;a<_acceptor.length;a++)
             {
-                // Tell the acceptor to exit and wake it up
-                _acceptor.interrupt();
-                wait(getMaxIdleTimeMs());
-                
-                // Do we still have an acceptor thread? It is playing hard to stop!
-                // Try forcing the stop to be noticed by making a connection to self.
-                if (_acceptor!=null)
+                Acceptor acc=_acceptor[a];
+                if (acc!=null)
+                    acc.interrupt();
+            }
+            Thread.yield();
+
+            for (int a=0;a<_acceptor.length;a++)
+            {
+                Acceptor acc=_acceptor[a];
+            
+                if (acc!=null)
                 {
-                    _acceptor.forceStop();     
-                    // Assume that worked and go on as if it did.
-                    _acceptor=null;
+                    acc.forceStop();    
+                    _acceptor[a]=null;
                 }
             }
         }
@@ -525,6 +553,8 @@ abstract public class ThreadedServer extends ThreadPool
 
         // Clean up
         _listen=null;
+        for (int a=0;a<_acceptor.length;a++)
+            _acceptor[a]=null;
         _acceptor=null;
     }
     
@@ -612,7 +642,12 @@ abstract public class ThreadedServer extends ThreadPool
                     log.info("Stopping "+this.getName());
                 synchronized(threadedServer)
                 {
-                    _acceptor=null;
+                    if (_acceptor!=null)
+                    {
+                        for (int a=0;a<_acceptor.length;a++)
+                            if (_acceptor[a]==this)
+                                _acceptor[a]=null;
+                    }
                     threadedServer.notifyAll();
                 }
             }
@@ -623,7 +658,7 @@ abstract public class ThreadedServer extends ThreadPool
         {
             if(_listen!=null && _address!=null)
             {
-		InetAddress addr=_address.getInetAddress();
+                InetAddress addr=_address.getInetAddress();
                 try{
                     if (addr==null || addr.toString().startsWith("0.0.0.0"))
                         addr=InetAddress.getByName("127.0.0.1");

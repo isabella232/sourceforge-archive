@@ -10,6 +10,7 @@ Jetty-5.1.RC1 - 24 October 2004
  + Build unsealed jars
  + default / mapping does not apply to Filters
  + many minor cleanups suggested from figbug utility
+ + Allow multiple accepting threads
 
 Jetty-5.1.RC0 - 11 October 2004
  + Fixed many minor issues from J2EE 1.4 TCK testing

@@ -496,6 +496,7 @@ public class Default extends HttpServlet
                 String mdlm=metaData.getLastModified();
                 if (ifms!=null && mdlm!=null && ifms.equals(mdlm))
                 {
+                    response.reset();
                     response.setStatus(HttpResponse.__304_Not_Modified);
                     response.flushBuffer();
                     return false;
@@ -518,6 +519,7 @@ public class Default extends HttpServlet
             {
                 if (resource.lastModified()/1000 <= date/1000)
                 {
+                    response.reset();
                     response.setStatus(HttpResponse.__304_Not_Modified);
                     response.flushBuffer();
                     return false;

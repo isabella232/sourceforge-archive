@@ -265,7 +265,6 @@ public class Dispatcher implements RequestDispatcher
                     _servletHandler.dispatch(_pathInContext,request,response,_holder);
                 
                 
-                
                 if (filterType!=FilterHolder.__INCLUDE)
                     response.close();
                 else if (response.isFlushNeeded())

@@ -212,6 +212,10 @@ public class HttpResponse extends HttpMessage
             _status= __200_OK;
             _reason=null;
             super.reset();
+
+            setField(HttpFields.__Date,getRequest().getTimeStampStr());
+            if (!Version.isParanoid())
+                setField(HttpFields.__Server,Version.getDetail());
         }
         catch(Exception e)
         {

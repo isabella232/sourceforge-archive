@@ -934,10 +934,7 @@ public class HttpConnection
             _response.setVersion(HttpMessage.__HTTP_1_1);
             _response.setField(HttpFields.__Date,_request.getTimeStampStr());
             if (!Version.isParanoid())
-            {
                 _response.setField(HttpFields.__Server,Version.getDetail());
-                // _response.setField(HttpFields.__ServletEngine,Version.__ServletEngine);
-            }
             
             // Handle Connection header field
             Enumeration connectionValues =
