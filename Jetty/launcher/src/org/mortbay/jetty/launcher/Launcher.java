@@ -38,7 +38,7 @@ import java.io.InputStreamReader;
  */
  
 public class Launcher {
-    
+    private String _classname = null;
     private File _home_dir = null;
     private Classpath _classpath = new Classpath();
     private boolean _debug = Boolean.getBoolean("org.mortbay.jetty.launcher.debug");
@@ -104,7 +104,10 @@ public class Launcher {
     }
     
     
-    void configureClasspath(String home, Classpath classpath, InputStream config)
+    void configureClasspath(String home,
+                            Classpath classpath,
+                            InputStream config,
+                            String[] args)
     {
         try
         {
@@ -121,39 +124,35 @@ public class Launcher {
                 {
                     if (_debug) System.err.println(">"+line);
                     StringTokenizer st = new StringTokenizer(line);
-                    String file = st.nextToken();
-                    boolean include_jar = false;
-                    boolean include_xml = false;
+                    String subject = st.nextToken();
+                    boolean include_subject = true;
                     String condition=null;
-                    while (st.hasMoreTokens())
+                    while (include_subject && st.hasMoreTokens())
                     {
                         condition = st.nextToken();
                         if (condition.equals("never"))
                         {
-                            include_jar = false;
+                            include_subject = false;
                         }
                         else if (condition.equals("always"))
                         {
-                            include_jar = true;
                         }
                         else if (condition.equals("available"))
                         {
                             String class_to_check = st.nextToken();
-                            if (isAvailable(class_to_check))
-                                include_jar = true;
+                            include_subject &= isAvailable(class_to_check);
                         }
                         else if (condition.equals("!available"))
                         {
                             String class_to_check = st.nextToken();
-                            if (!isAvailable(class_to_check))
-                                include_jar = true;
+                            include_subject &=!isAvailable(class_to_check);
                         }
                         else if (condition.equals("java"))
                         {
                             String operator = st.nextToken();
                             String version = st.nextToken();
                             ver.parse(version);
-                            include_jar =
+                            include_subject &=
                                 (operator.equals("<") && java_version.compare(ver)<0) ||
                                 (operator.equals(">") && java_version.compare(ver)>0) ||
                                 (operator.equals("<=") && java_version.compare(ver)<=0) ||
@@ -163,9 +162,19 @@ public class Launcher {
                                 (operator.equals("==") && java_version.compare(ver)==0) ||
                                 (operator.equals("!=") && java_version.compare(ver)!=0);
                         }
-                        else if (condition.equals("defaultXML"))
+                        else if (condition.equals("nargs"))
                         {
-                            include_xml=true;
+                            String operator = st.nextToken();
+                            int number = Integer.parseInt(st.nextToken());
+                            include_subject &=
+                                (operator.equals("<") && args.length<number) ||
+                                (operator.equals(">") && args.length>number) ||
+                                (operator.equals("<=") && args.length<=number) ||
+                                (operator.equals("=<") && args.length<=number) ||
+                                (operator.equals("=>") && args.length>=number) ||
+                                (operator.equals(">=") && args.length>=number) ||
+                                (operator.equals("==") && args.length==number) ||
+                                (operator.equals("!=") && args.length!=number);
                         }
                         else
                         {
@@ -173,13 +182,21 @@ public class Launcher {
                         }
                     }
 
-                    // System.err.println("file="+file+" condition="+condition+" include_jar="+include_jar);
+                    String file=subject.startsWith("/")
+                        ?(subject.replace('/',File.separatorChar))
+                        :(home+File.separatorChar+subject.replace('/',File.separatorChar));
+
+                    if (_debug)
+                        System.err.println("subject="+subject+
+                                           " file="+file+
+                                           " condition="+condition+
+                                           " include_subject="+include_subject);
                     
                     // ok, should we include?
                     if (file.endsWith("/*"))
                     {
                         // directory of JAR files
-                        File extdir = new File(home+File.separatorChar+file.substring(0,file.length()-1).replace('/',File.separatorChar));
+                        File extdir = new File(file.substring(0,file.length()-1));
                         File[] jars = extdir.listFiles(new FilenameFilter()
                             {
                                 public boolean accept(File dir, String name)
@@ -197,7 +214,7 @@ public class Launcher {
                             if (!done.containsKey(jar))
                             {
                                 done.put(jar,jar);
-                                if (include_jar)
+                                if (include_subject)
                                 {
                                     if (classpath.addComponent(jar) && _debug)
                                         System.err.println("Adding JAR from directory: "+jar);
@@ -208,36 +225,43 @@ public class Launcher {
                     else if (file.endsWith("/"))
                     {
                         // class directory
-                        File cd = new File(home+File.separatorChar+file.replace('/',File.separatorChar));
+                        File cd = new File(file);
                         String d = cd.getCanonicalPath();
                         if (!done.containsKey(d))
                         {
                             done.put(d,d);
-                            if (include_jar)
+                            if (include_subject)
                             {
                                 if (classpath.addComponent(d) && _debug)
                                     System.err.println("Adding directory: "+d);
                             }
                         }
                     }
+                    else if (file.toLowerCase().endsWith(".xml"))
+                    {
+                        // Config file
+                        File f = new File(file);                        
+                        if (f.exists() && include_subject)
+                            _xml.add(f.getCanonicalPath());
+                    }
+                    else if (file.toLowerCase().endsWith(".class"))
+                    {
+                        // Class
+                        _classname = subject.substring(0,subject.length()-6);
+                    }
                     else
                     {
                         // single JAR file
-                        File f = file.startsWith("/")
-                            ?new File(file.replace('/',File.separatorChar))
-                            :new File(home+File.separatorChar+file.replace('/',File.separatorChar));
+                        File f = new File(file);                        
                         String d = f.getCanonicalPath();
                         if (!done.containsKey(d))
                         {
                             done.put(d,d);
-                            if (include_jar)
+                            if (include_subject)
                             {
                                 if (classpath.addComponent(d) &&_debug)
                                     System.err.println("Adding single JAR: "+d);
                             }
-
-                            if (include_xml)
-                                _xml.add(d);
                         }
                     }
                 }
@@ -328,7 +352,7 @@ public class Launcher {
                 {
                     if (_debug) System.err.println("Configuring classpath from etc/classpath.config");
                 }
-                configureClasspath(_home_dir.getPath(), _classpath, cpcfg);
+                configureClasspath(_home_dir.getPath(), _classpath, cpcfg,args);
                 cpcfg.close();
             }
             catch (IOException e)
@@ -391,9 +415,14 @@ public class Launcher {
             
             try
             {
-                if (args.length==0)
-                    args=(String[])_xml.toArray(args);    
-                invokeMain(cl,"org.mortbay.jetty.Server",args);
+                if (_xml.size()>0)
+                {
+                    for (int i=0;i<args.length;i++)
+                        _xml.add(args[i]);
+                    args=(String[])_xml.toArray(args);
+                }
+                
+                invokeMain(cl,_classname,args);
 
                 boolean demo=false;
                 for (int i=0;i<args.length;i++)
