@@ -29,6 +29,7 @@ the $JETTY_HOME/lib directory  eg.
    Unix:
 	CLASSPATH=$CLASSPATH:$JETTY_HOME/lib/javax.servlet.jar
         CLASSPATH=$CLASSPATH:$JETTY_HOME/lib/com.mortbay.Jetty.jar
+        CLASSPATH=$CLASSPATH:$JETTY_HOME/lib/gnujsp.jar
 
 
 RUNNING JETTY
