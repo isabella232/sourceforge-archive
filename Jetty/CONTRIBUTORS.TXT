@@ -2,41 +2,49 @@ Sponsors:
   Mort Bay Consulting Ltd. Pty. (Australia)     http://www.mortbay.com
   Mort Bay Consulting Limited. (United Kingdom) http://www.mortbay.com
   INetU hosting.                                http://www.inetu.net
-  FORGE Information Technology Pty. Ltd.        http://www.forge.com.au
 
 Contributions, Testing & valuable feedback from:
   Greg Wilkins <gregw@mortbay.com>
   Jan Bartel <janb@mortbay.com>
   Matt Watson <mattw@mortbay.com>
-  Kent Johnson <kjohnson@transparent.com>
-  Thomas Pedersen <zeppelin@login.dknet.dk>
-  Jesper Jørgensen <jesper@caput.com>
-  Morten Seifert <ms@belle.dk>
-  Simon Ritchie <sritchie@amo.com>
-  Thomas Beyer <Thomas.Beyer@mch.sni.de>
-  Tobias Miller <millert@informatik.tu-muenchen.de>
-  Daniel Eriksson <daniel.eriksson@softapp.se>
-  John Bergman <JohnB@ImageX.com>
-  Søren Hilmer <sh@itplus.dk> 
-  Juancarlo Añez <juancarlo@modelistica.com>
-  Nikos Anerousis <nikos@research.att.com>
-  Donovan Kolbly <kolbly@mcc.com>
-  Ernest Leipold <everlongh@hotmail.com>
-  Doyle Davidson <ddavidso@automatedlogic.com>
-  Petr Jiricka <petr.jiricka@netbeans.com>
+  Adam Klatzkin <Adam.Klatzkin@bentley.com>
+  Adnan Musi <adnan.musi-@ssmb.com.au>
   Brett Sealey <brett@ind.tansu.com.au>
+  Cris Perdue <cris@perdues.com>
+  Dan Finkelstein <danf@yipinet.com>
+  Daniel Eriksson <daniel.eriksson@softapp.se>
+  David Taylor <dtaylor@forge.com.au>
+  Donovan Kolbly <kolbly@mcc.com>
+  Doyle Davidson <ddavidso@automatedlogic.com>
+  Ernest Leipold <everlongh@hotmail.com>
+  Hans Maerki <hans@maerki.com>
+  Hartmut Benz <Hartmut.Benz@emn.ericsson.se>
+  Jason Weinstein <jasonw@reticular.com>
+  Jesper Jørgensen <jesper@caput.com>
+  John Bergman <JohnB@ImageX.com>
+  Juancarlo Añez <juancarlo@modelistica.com>
+  Julian Gosnell <jules_gosnell@yahoo.com>
+  Kent Johnson <kjohnson@transparent.com>
+  Marko P. O. Nippula <mnippula@cc.hut.fi>
+  Morten Seifert <ms@belle.dk>
+  Nathan Meyers <nmeyers@javalinux.net>
+  Nicholas Christopher <Nicholas.Christopher@worldnet.att.net>
+  Nikos Anerousis <nikos@research.att.com>
   Norbert Renner <norbert.renner@innovations.de>
   Paul Mclachlan <pdm@acm.org>
-  David Taylor <dtaylor@forge.com.au>
-  Dan Finkelstein <danf@yipinet.com>
-  klaus spd <klausspd@hotmail.com>
-  Nicholas Christopher <Nicholas.Christopher@worldnet.att.net>
-  Hans Maerki <hans@maerki.com>
+  Petr Jiricka <petr.jiricka@netbeans.com>
+  Preston L. Bannister <preston@home.com>
+  Rafael Posse <rafael.posse@canaldeportivo.com>
   Shiraz Kanga <skanga@bigfoot.com>
-  Adam Klatzkin <Adam.Klatzkin@bentley.com>
-  Hartmut Benz <Hartmut.Benz@emn.ericsson.se>
+  Simon Ritchie <sritchie@amo.com>
+  Søren Hilmer <sh@itplus.dk> 
+  Thomas Beyer <Thomas.Beyer@mch.sni.de>
+  Thomas Pedersen <zeppelin@login.dknet.dk>
+  Tobias Miller <millert@informatik.tu-muenchen.de>
+  heinrich abele <abel-@zdv.uni-tuebingen.de>
+  klaus spd <klausspd@hotmail.com>
 
-  Plus a few more in the pipe line (tell me if your one of them...)
+  Plus a few more (tell me if your one of them...)
 
 Copyright holders:
   Mort Bay Consulting Pty. Ltd. Australia      http://www.mortbay.com
@@ -47,3 +55,4 @@ Copyright holders:
   Free Software Foundation, Inc.
   Vincent Partington                           <vincentp@xs4all.nl>
   FORGE Information Technology Pty. Ltd.       http://www.forge.com.au
+
