@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+Jetty-3.0.0 - 
+ + SysV unix init script
+ + Improved exit admin handling
  + Change PathMap handling of /* to give precedence over suffix mapping.
  + Forward to welcome pages rather than redirect.
  + Removed special characters from source.
