@@ -136,7 +136,7 @@ public class ProxyHandler extends NullHandler
             // At this point we are committed to sending a response!!!!
             request.setHandled(true);
             response.setState(HttpMessage.__MSG_SENT);
-            ChunkableOutputStream out=response.getOutputStream();
+            OutputStream out=response.getOutputStream();
             
             // Forward 100 responses
             while (resLine.startsWith("100"))

@@ -25,6 +25,7 @@ import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.InclusiveByteRange;
+import org.mortbay.http.Message;
 import org.mortbay.http.MultiPartResponse;
 import org.mortbay.http.PathMap;
 import org.mortbay.util.ByteArrayISO8859Writer;
@@ -264,7 +265,6 @@ public class ResourceHandler extends NullHandler
                        " RESOURCE=",resource);
             
             // check filename
-            
             String method=request.getMethod();
             if (method.equals(HttpRequest.__GET) ||
                 method.equals(HttpRequest.__POST) ||
@@ -354,7 +354,7 @@ public class ResourceHandler extends NullHandler
                         buf.append('?');
                         buf.append(q);
                     }
-                    response.setField(HttpFields.__Location, URI.addPaths(buf.toString(),"/"));
+                    response.getMessageFacade().setField(HttpFields.__Location, URI.addPaths(buf.toString(),"/"));
                     response.sendError(302);
                     return;
                 }
@@ -405,7 +405,7 @@ public class ResourceHandler extends NullHandler
             // check any modified headers.
             long date=0;
             
-            if ((date=request.getDateField(HttpFields.__IfUnmodifiedSince))>0)
+            if ((date=request.getMessageFacade().getDateField(HttpFields.__IfUnmodifiedSince))>0)
             {
                 if (resource.lastModified() > date)
                 {
@@ -414,7 +414,7 @@ public class ResourceHandler extends NullHandler
                 }
             }
             
-            if ((date=request.getDateField(HttpFields.__IfModifiedSince))>0)
+            if ((date=request.getMessageFacade().getDateField(HttpFields.__IfModifiedSince))>0)
             {
                 if (resource.lastModified() <= date)
                 {
@@ -446,8 +446,9 @@ public class ResourceHandler extends NullHandler
         
         try
         {
-            int toRead = request.getIntField(HttpFields.__ContentLength);
-            InputStream in = request.getInputStream();
+            Message facade = request.getMessageFacade();
+            int toRead = facade.getContentLength();
+            InputStream in = facade.getInputStream();
      
             OutputStream fos = resource.getOutputStream();
             final int bufSize = 1024;
@@ -542,7 +543,7 @@ public class ResourceHandler extends NullHandler
             return;
         }
  
-        String newPath = Resource.canonicalPath(request.getField("New-uri"));
+        String newPath = Resource.canonicalPath(request.getMessageFacade().getField("New-uri"));
         if (newPath==null)
         {
             response.sendError(response.__405_Method_Not_Allowed,
@@ -621,7 +622,7 @@ public class ResourceHandler extends NullHandler
             sb.append(HttpRequest.__OPTIONS);
             _allowHeader = sb.toString();
         }
-        response.setField(HttpFields.__Allow, _allowHeader);
+        response.getMessageFacade().setField(HttpFields.__Allow, _allowHeader);
     }
  
 
@@ -638,14 +639,14 @@ public class ResourceHandler extends NullHandler
         //  see if there are any range headers
         Enumeration reqRanges =
             request.getDotVersion()>0
-            ?request.getFieldValues(HttpFields.__Range)
+            ?request.getMessageFacade().getFieldValues(HttpFields.__Range)
             :null;
         
         if (!writeHeaders || reqRanges == null || !reqRanges.hasMoreElements())
         {
             //  if there were no ranges, send entire entity
             if (writeHeaders) data.writeHeaders(request,response, resLength);
-            data.writeBytes(response.getOutputStream(), 0, resLength);
+            data.writeBytes(response.getMessageFacade().getOutputStream(), 0, resLength);
             request.setHandled(true);
             return;
         }
@@ -681,11 +682,11 @@ public class ResourceHandler extends NullHandler
             response.setStatus(response.__416_Requested_Range_Not_Satisfiable);
             response.setReason((String)response.__statusMsg
                                .get(new Integer(response.__416_Requested_Range_Not_Satisfiable)));
-            response.setField(
+            response.getMessageFacade().setField(
                        HttpFields.__ContentRange, 
                        InclusiveByteRange.to416HeaderRangeString(resLength)
             );
-            data.writeBytes(response.getOutputStream(), 0, resLength);
+            data.writeBytes(response.getMessageFacade().getOutputStream(), 0, resLength);
             request.setHandled(true);
             return;
         }
@@ -701,9 +702,9 @@ public class ResourceHandler extends NullHandler
             response.setStatus(response.__206_Partial_Content);
             response.setReason((String)response.__statusMsg
                                .get(new Integer(response.__206_Partial_Content)));
-            response.setField(HttpFields.__ContentRange, 
+            response.getMessageFacade().setField(HttpFields.__ContentRange, 
                               singleSatisfiableRange.toHeaderRangeString(resLength));
-            data.writeBytes(response.getOutputStream(), 
+            data.writeBytes(response.getMessageFacade().getOutputStream(), 
                             singleSatisfiableRange.getFirst(resLength), 
                             singleLength);
             request.setHandled(true);
@@ -724,11 +725,11 @@ public class ResourceHandler extends NullHandler
 	// send an old style multipart/x-byteranges Content-Type. This
 	// keeps Netscape and acrobat happy. This is what Apache does.
 	String ctp;
-	if (request.containsField(HttpFields.__RequestRange))
+	if (request.getMessageFacade().containsField(HttpFields.__RequestRange))
 	    ctp = "multipart/x-byteranges; boundary=";
 	else
 	    ctp = "multipart/byteranges; boundary=";
-	response.setField(HttpFields.__ContentType, ctp+multi.getBoundary());
+	response.getMessageFacade().setContentType(ctp+multi.getBoundary());
 
         rit = validRanges.listIterator();
         while (rit.hasNext())
@@ -805,8 +806,7 @@ public class ResourceHandler extends NullHandler
 
             Code.debug("sendDirectory: "+file);
             String base = URI.addPaths(request.getPath(),"/");
-            response.setField(HttpFields.__ContentType,
-                              "text/html");
+            response.getMessageFacade().setContentType("text/html");
             if (request.getMethod().equals(HttpRequest.__HEAD))
             {
                 // Bail out here otherwise we build the page fruitlessly and get
@@ -855,7 +855,7 @@ public class ResourceHandler extends NullHandler
                 out.write("</TD></TR>\n");
             }
             out.write("</TABLE>\n");
-            out.writeTo(response.getOutputStream());
+            out.writeTo(response.getMessageFacade().getOutputStream());
             request.setHandled(true);
         }
         else
@@ -942,12 +942,13 @@ public class ResourceHandler extends NullHandler
         /* ------------------------------------------------------------ */
         public void writeHeaders(HttpRequest request, HttpResponse response, long count)
         {
-            response.setField(HttpFields.__ContentType,encoding);
+            Message facade = response.getMessageFacade();
+            facade.setContentType(encoding);
             if (length != -1) 
-                response.setIntField(HttpFields.__ContentLength, (int) count);
-            response.setDateField(HttpFields.__LastModified,resource.lastModified());
+                facade.setContentLength((int)count);
+            facade.setDateField(HttpFields.__LastModified,resource.lastModified());
             if (_acceptRanges && request.getDotVersion()>0)
-                response.setField(HttpFields.__AcceptRanges,"bytes");
+                facade.setField(HttpFields.__AcceptRanges,"bytes");
         }
 
         /* ------------------------------------------------------------ */
@@ -1099,18 +1100,19 @@ public class ResourceHandler extends NullHandler
             throws IOException
         {
             Code.debug("HIT: ",resource);
-            response.setField(HttpFields.__ContentType,encoding);
+            Message facade = response.getMessageFacade();
+            facade.setContentType(encoding);
             if (count != -1)
             {
                 if (count==bytes.length)
-                    response.setField(HttpFields.__ContentLength,sizeString);
+                    facade.setField(HttpFields.__ContentLength,sizeString);
                 else
-                    response.setIntField(HttpFields.__ContentLength,(int)count);
+                    facade.setContentLength((int)count);
             }
-            response.setField(HttpFields.__LastModified,lastModifiedString);
+            facade.setField(HttpFields.__LastModified,lastModifiedString);
             
             if (_acceptRanges && request.getDotVersion()>0)
-                response.setField(HttpFields.__AcceptRanges,"bytes");
+                facade.setField(HttpFields.__AcceptRanges,"bytes");
         }
 
         /* ------------------------------------------------------------ */

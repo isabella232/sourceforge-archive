@@ -5,10 +5,14 @@
 
 package org.mortbay.jetty.servlet;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.ServletOutputStream;
@@ -22,6 +26,7 @@ import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpResponse;
+import org.mortbay.http.Message;
 import org.mortbay.http.handler.NullHandler;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URI;
@@ -62,7 +67,8 @@ public class ServletHttpResponse implements HttpServletResponse
     private HttpSession _session=null;
     private boolean _noSession=false;
     private Locale _locale=null;
-    private ServletResponse _wrapper;    
+    private ServletResponse _wrapper;  
+    private Message _facade = new Facade();  
 
     private static Map __charSetMap = new HashMap();
     static
@@ -118,6 +124,12 @@ public class ServletHttpResponse implements HttpServletResponse
         _httpResponse=response;
     }
 
+    /* ------------------------------------------------------------ */
+    Message getFacade()
+    {
+        return _facade;
+    }
+    
     /* ------------------------------------------------------------ */
     void setWrapper(ServletResponse wrapper)
     {
@@ -198,7 +210,7 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void setBufferSize(int size)
     {
-        ChunkableOutputStream out = _httpResponse.getOutputStream();
+        ChunkableOutputStream out = (ChunkableOutputStream)_httpResponse.getOutputStream();
         if (out.isWritten()  || _writer!=null && _writer.isWritten())
             throw new IllegalStateException("Output written");
         out.setBufferCapacity(size);
@@ -207,7 +219,7 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public int getBufferSize()
     {
-        return _httpResponse.getOutputStream().getBufferCapacity();
+        return ((ChunkableOutputStream)_httpResponse.getOutputStream()).getBufferCapacity();
     }
     
     /* ------------------------------------------------------------ */
@@ -228,7 +240,7 @@ public class ServletHttpResponse implements HttpServletResponse
     {
         if (isCommitted())
             throw new IllegalStateException("committed");
-        _httpResponse.getOutputStream().resetBuffer();
+        ((ChunkableOutputStream)_httpResponse.getOutputStream()).resetBuffer();
         if (_writer!=null)
             _writer.reset();
     }
@@ -455,7 +467,7 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void addDateHeader(String name, long value) 
     {
-        try{_httpResponse.addDateField(name,new Date(value));}
+        try{_httpResponse.addDateField(name,value);}
         catch(IllegalStateException e){Code.ignore(e);}
     }
 
@@ -573,6 +585,67 @@ public class ServletHttpResponse implements HttpServletResponse
         return _httpResponse.toString();
     }
 
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public class Facade implements Message
+    {
+        public ServletHttpResponse getServletHttpResponse()
+        {return ServletHttpResponse.this;}
+        
+        public InputStream getInputStream() throws IOException
+        {throw new UnsupportedOperationException();}
+        public OutputStream getOutputStream() throws IOException
+        {return getWrapper().getOutputStream();}
+        
+        
+        public boolean containsField(String name)
+        {throw new UnsupportedOperationException();}
+        public Enumeration getFieldNames()
+        {throw new UnsupportedOperationException();}
+        public Enumeration getFieldValues(String name)
+        {throw new UnsupportedOperationException();}
+        public Enumeration getFieldValues(String name, String separators)
+        {throw new UnsupportedOperationException();}
+        
+        public String getField(String name)
+        {throw new UnsupportedOperationException();}
+        public int getIntField(String name)
+        {throw new UnsupportedOperationException();}
+        public long getDateField(String name)
+        {throw new UnsupportedOperationException();}
+
+        
+        public String setField(String name, String value)
+        {((HttpServletResponse)getWrapper()).setHeader(name,value);return null;}
+        public void setField(String name, List values){throw new UnsupportedOperationException();}
+        public void setIntField(String name, int value)
+        {((HttpServletResponse)getWrapper()).setIntHeader(name,value);}
+        public void setDateField(String name, long date)
+        {((HttpServletResponse)getWrapper()).setDateHeader(name,date);}
+        
+        public void addField(String name, String value)
+        {((HttpServletResponse)getWrapper()).addHeader(name,value);}
+        public void addIntField(String name, int value)
+        {((HttpServletResponse)getWrapper()).addIntHeader(name,value);}
+        public void addDateField(String name, long date)
+        {((HttpServletResponse)getWrapper()).addDateHeader(name,date);}
+        
+        public String removeField(String name){throw new UnsupportedOperationException();}
+        
+        public String getContentType(){throw new UnsupportedOperationException();}
+        public void setContentType(String type){getWrapper().setContentType(type);}
+        public int getContentLength(){throw new UnsupportedOperationException();}
+        public void setContentLength(int len){getWrapper().setContentLength(len);}
+        public String getCharacterEncoding(){throw new UnsupportedOperationException();}
+        public void setCharacterEncoding(String encoding){throw new UnsupportedOperationException();}
+        
+        public Object getAttribute(String name){throw new UnsupportedOperationException();}
+        public Object setAttribute(String name, Object attribute){throw new UnsupportedOperationException();}
+        public Enumeration getAttributeNames(){throw new UnsupportedOperationException();}
+        public void removeAttribute(String name){throw new UnsupportedOperationException();}
+    }
+
+    
     /* ------------------------------------------------------------ */
     /** Unwrap a ServletResponse.
      *

@@ -8,6 +8,9 @@ package org.mortbay.jetty.servlet;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -16,6 +19,7 @@ import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,12 +36,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUtils;
 import javax.servlet.http.HttpServletRequestWrapper;
+import org.mortbay.http.ChunkableInputStream;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
+import org.mortbay.http.Message;
 import org.mortbay.http.handler.NullHandler;
 import org.mortbay.util.Code;
 import org.mortbay.util.LazyList;
@@ -92,6 +98,7 @@ public class ServletHttpRequest
     private ServletHolder _servletHolder;
     private String _pathInContext;
     private ServletRequest _wrapper;
+    private Message _facade = new Facade();
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -110,6 +117,12 @@ public class ServletHttpRequest
     }
 
     /* ------------------------------------------------------------ */
+    Message getFacade()
+    {
+        return _facade;
+    }
+    
+    /* ------------------------------------------------------------ */
     ServletHandler getServletHandler()
     {
         return _servletHandler;
@@ -125,7 +138,11 @@ public class ServletHttpRequest
     /** Set a ServletRequest Wrapper.
      * This call is used by the Dispatcher and the FilterHandler to
      * store a user generated wrapper for this request. The wrapper is
-     * recovered by getWrapper for use by the next filter and/or servlet.
+     * recovered by getWrapper for use by the next filter and/or
+     * servlet.
+     *
+     * Note that the ServletHttpRequest is always the facade object of
+     * the HttpRequest, even if a ServletRequest object is set here.
      * @param wrapper 
      */
     void setWrapper(ServletRequest wrapper)
@@ -563,7 +580,7 @@ public class ServletHttpRequest
     /* -------------------------------------------------------------- */
     public Enumeration getAttributeNames()
     {
-        return Collections.enumeration(_httpRequest.getAttributeNames());
+        return _httpRequest.getAttributeNames();
     }
     
     /* -------------------------------------------------------------- */
@@ -613,13 +630,13 @@ public class ServletHttpRequest
     /* -------------------------------------------------------------- */
     public int getContentLength()
     {
-        return _httpRequest.getIntField(HttpFields.__ContentLength);
+        return _httpRequest.getContentLength();
     }
     
     /* -------------------------------------------------------------- */
     public String getContentType()
     {
-        return _httpRequest.getField(HttpFields.__ContentType);
+        return _httpRequest.getContentType();
     }
     
     /* -------------------------------------------------------------- */
@@ -628,7 +645,7 @@ public class ServletHttpRequest
         if (_inputState!=0 && _inputState!=1)
             throw new IllegalStateException();
         if (_in==null)
-            _in = new ServletIn(_httpRequest.getInputStream());  
+            _in = new ServletIn((ChunkableInputStream)_httpRequest.getInputStream());  
         _inputState=1;
         _reader=null;
         return _in;
@@ -772,6 +789,60 @@ public class ServletHttpRequest
 
 
     /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public class Facade implements Message
+    {
+        public ServletHttpRequest getServletHttpRequest()
+        {return ServletHttpRequest.this;}
+        
+        public InputStream getInputStream() throws IOException
+        {return getWrapper().getInputStream();}
+        public OutputStream getOutputStream()
+        {throw new UnsupportedOperationException();}
+        
+        public boolean containsField(String name)
+        {return getHeader(name)!=null;}
+        public Enumeration getFieldNames()
+        {return ((HttpServletRequest)getWrapper()).getHeaderNames();}
+        public Enumeration getFieldValues(String name)
+        {return ((HttpServletRequest)getWrapper()).getHeaders(name);}
+        public Enumeration getFieldValues(String name, String separators)
+        {throw new UnsupportedOperationException();}
+        
+        public String getField(String name)
+        {return ((HttpServletRequest)getWrapper()).getHeader(name);}
+        public int getIntField(String name)
+        {return ((HttpServletRequest)getWrapper()).getIntHeader(name);}
+        public long getDateField(String name)
+        {return ((HttpServletRequest)getWrapper()).getDateHeader(name);}
+        
+        public String setField(String name, String value){throw new UnsupportedOperationException();}
+        public void setField(String name, List values){throw new UnsupportedOperationException();}
+        public void setIntField(String name, int value){throw new UnsupportedOperationException();}
+        public void setDateField(String name, long date){throw new UnsupportedOperationException();}
+        
+        public void addField(String name, String value){throw new UnsupportedOperationException();}
+        public void addIntField(String name, int value){throw new UnsupportedOperationException();}
+        public void addDateField(String name, long date){throw new UnsupportedOperationException();}
+        
+        public String removeField(String name){throw new UnsupportedOperationException();}
+        
+        public String getContentType(){return getWrapper().getContentType();}
+        public void setContentType(String type){throw new UnsupportedOperationException();}
+        public int getContentLength(){return getWrapper().getContentLength();}
+        public void setContentLength(int len){throw new UnsupportedOperationException();}
+        public String getCharacterEncoding(){return getWrapper().getCharacterEncoding();}
+        public void setCharacterEncoding(String encoding){throw new UnsupportedOperationException();}
+        
+        public Object getAttribute(String name){return getWrapper().getAttribute(name);}
+        public Object setAttribute(String name, Object attribute)
+        {Object old=getAttribute(name);getWrapper().setAttribute(name,attribute);return old;}
+        public Enumeration getAttributeNames(){return getWrapper().getAttributeNames();}
+        public void removeAttribute(String name){getWrapper().removeAttribute(name);}
+    }
+
+    
+    /* ------------------------------------------------------------ */
     /** Unwrap a ServletRequest.
      *
      * @see javax.servlet.ServletRequestWrapper
@@ -796,7 +867,7 @@ public class ServletHttpRequest
 
         return (ServletHttpRequest)request;
     }
-    
+
 }
 
 

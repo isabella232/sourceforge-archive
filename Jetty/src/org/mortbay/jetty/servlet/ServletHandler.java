@@ -43,6 +43,7 @@ import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.HttpServer;
+import org.mortbay.http.Message;
 import org.mortbay.http.PathMap;
 import org.mortbay.http.UserPrincipal;
 import org.mortbay.http.UserRealm;
@@ -415,8 +416,11 @@ public class ServletHandler
                                                     HttpResponse httpResponse)
     {
         // Look for a previously built servlet request.
-        ServletHttpRequest servletHttpRequest = (ServletHttpRequest)
-            httpRequest.getFacade();
+        ServletHttpRequest servletHttpRequest = null;
+        Message facade = httpRequest.getFacade();
+        if (facade!=null)
+            servletHttpRequest =((ServletHttpRequest.Facade)facade).getServletHttpRequest();
+        
         if (servletHttpRequest==null)
             servletHttpRequest=newFacades(pathInContext,
                                           pathParams,
@@ -436,7 +440,10 @@ public class ServletHandler
     public HttpServletResponse getHttpServletResponse(HttpResponse httpResponse)
     {
         // Look for a previously built servlet request.
-        return (ServletHttpResponse)httpResponse.getFacade();
+        Message facade = httpResponse.getFacade();
+        if (facade==null)
+            return null;
+        return ((ServletHttpResponse.Facade)facade).getServletHttpResponse();
     }
     
     /* ------------------------------------------------------------ */
@@ -448,10 +455,10 @@ public class ServletHandler
     {
         // Build the request and response.
         ServletHttpRequest servletHttpRequest  = new ServletHttpRequest(this,pathInContext,httpRequest);
-        httpRequest.setFacade(servletHttpRequest);
+        httpRequest.setFacade(servletHttpRequest.getFacade());
         ServletHttpResponse servletHttpResponse =
             new ServletHttpResponse(servletHttpRequest,httpResponse);
-        httpResponse.setFacade(servletHttpResponse);
+        httpResponse.setFacade(servletHttpResponse.getFacade());
         
         // Handle the session ID
         servletHttpRequest.setSessionId(pathParams);
@@ -518,7 +525,9 @@ public class ServletHandler
             Code.debug("ServletHandler: ",pathInContext);
 
             // Do we already have servlet facades?
-            request = (ServletHttpRequest) httpRequest.getFacade();
+            Message facade = httpRequest.getFacade();
+            if (facade!=null)
+                request =((ServletHttpRequest.Facade)facade).getServletHttpRequest();
             if (request==null)
             {
                 Map.Entry entry=getHolderEntry(pathInContext);

@@ -7,6 +7,7 @@ package org.mortbay.http;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -28,7 +29,7 @@ import org.mortbay.util.StringUtil;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HttpResponse extends HttpMessage 
+public class HttpResponse extends HttpMessage
 { 
       public final static int
           __100_Continue = 100,
@@ -175,7 +176,7 @@ public class HttpResponse extends HttpMessage
 
         try
         {
-            getOutputStream().resetBuffer();
+            ((ChunkableOutputStream)getOutputStream()).resetBuffer();
             _status= __200_OK;
             _reason=null;
             super.reset();
@@ -359,10 +360,14 @@ public class HttpResponse extends HttpMessage
             }
             else
             {
-                _header.put(HttpFields.__ContentType,HttpFields.__TextHtml);
+                Message facade=getFacade();
+                if (facade==null)
+                    facade=this;
+                
+                facade.setContentType(HttpFields.__TextHtml);
                 _mimeType=HttpFields.__TextHtml;
                 _characterEncoding=null;
-                ChunkableOutputStream out=getOutputStream();
+                OutputStream out=facade.getOutputStream();
                 
                 if (message!=null)
                 {
@@ -389,7 +394,7 @@ public class HttpResponse extends HttpMessage
                     body.append("\n                                                ");
                 body.append("\n</BODY>\n</HTML>\n");
                 byte[] buf=body.toString().getBytes(StringUtil.__ISO_8859_1);
-                _header.putIntField(HttpFields.__ContentLength,buf.length);
+                facade.setContentLength(buf.length);
                 out.write(buf);
             }
         }
@@ -411,7 +416,8 @@ public class HttpResponse extends HttpMessage
      * @param code the status code
      * @param message the detail message
      * @exception IOException If an I/O error has occurred.
-     */public void sendError(int code,String message) 
+     */
+    public void sendError(int code,String message) 
         throws IOException
     {
         sendError(code,null,message);

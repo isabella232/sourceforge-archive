@@ -621,8 +621,18 @@ public class HttpServer implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
+    /** Get Context.
+     * This method is just an alias for getHttpContexts();
+     * @return Set of all HttpContexts.
+     */
+    public synchronized Set getContexts()
+    {
+        return getHttpContexts();
+    }
+    
+    /* ------------------------------------------------------------ */
     /** 
-     * @return Collection of all handler.
+     * @return Set of all HttpContexts.
      */
     public synchronized Set getHttpContexts()
     {

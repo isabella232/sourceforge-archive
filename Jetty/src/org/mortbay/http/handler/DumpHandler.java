@@ -8,9 +8,11 @@ package org.mortbay.http.handler;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -61,7 +63,7 @@ public class DumpHandler extends NullHandler
         
         response.setField(HttpFields.__ContentType,
                           HttpFields.__TextHtml);
-        ChunkableOutputStream out = response.getOutputStream();
+        OutputStream out = response.getOutputStream();
         ByteArrayOutputStream buf = new ByteArrayOutputStream(2048);
         Writer writer = new OutputStreamWriter(buf,StringUtil.__ISO_8859_1);
         writer.write("<HTML><H1>Dump HttpHandler</H1>");
@@ -137,14 +139,13 @@ public class DumpHandler extends NullHandler
         }
         
         
-        Collection attributes=request.getAttributeNames();
-        if (attributes!=null && attributes.size()>0)
+        Enumeration attributes=request.getAttributeNames();
+        if (attributes!=null && attributes.hasMoreElements())
         {
             writer.write("</PRE>\n<H3>Attributes:</H3>\n<PRE>");
-            Iterator a=attributes.iterator();
-            while(a.hasNext())
+            while(attributes.hasMoreElements())
             {
-                String attr=a.next().toString();
+                String attr=attributes.nextElement().toString();
                 writer.write(attr);
                 writer.write("=");
                 writer.write(request.getAttribute(attr).toString());

@@ -99,7 +99,6 @@ public class HttpRequest extends HttpMessage
     private boolean _paramsExtracted;
     private boolean _handled;
     private Cookie[] _cookies;
-    private Map _attributes;
     private long _timeStamp;
 
     /* ------------------------------------------------------------ */
@@ -943,53 +942,6 @@ public class HttpRequest extends HttpMessage
     }
 
 
-    /* ------------------------------------------------------------ */
-    /** Get a request attribute.
-     * @param name Attribute name
-     * @return Attribute value
-     */
-    public Object getAttribute(String name)
-    {
-        if (_attributes==null)
-            return null;
-        return _attributes.get(name);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set a request attribute.
-     * @param name Attribute name
-     * @param attribute Attribute value
-     * @return Previous Attribute value
-     */
-    public Object setAttribute(String name, Object attribute)
-    {
-        if (_attributes==null)
-            _attributes=new HashMap(11);
-        return _attributes.put(name,attribute);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get Attribute names.
-     * @return Collection of Strings
-     */
-    public Collection getAttributeNames()
-    {
-        if (_attributes==null)
-            return Collections.EMPTY_LIST;
-        return _attributes.keySet();
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Remove a request attribute.
-     * @param name Attribute name
-     * @return Previous Attribute value
-     */
-    public void removeAttribute(String name)
-    {
-        if (_attributes!=null)
-            _attributes.remove(name);
-    }
-    
     /* ------------------------------------------------------------ */
     public boolean isUserInRole(String role)
     {

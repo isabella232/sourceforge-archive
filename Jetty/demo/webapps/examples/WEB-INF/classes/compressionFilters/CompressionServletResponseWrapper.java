@@ -166,6 +166,7 @@ public class CompressionServletResponseWrapper extends HttpServletResponseWrappe
      * Finish a response.
      */
     public void finishResponse() {
+        System.err.println("Finished COMPRESSED response");
         try {
             if (writer != null) {
                 writer.close();

@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.io.OutputStream;
 import org.mortbay.http.ChunkableOutputStream;
 import org.mortbay.util.Code;
 import org.mortbay.http.HttpContext;
@@ -81,7 +82,7 @@ abstract public class NullHandler implements HttpHandler
         // Handle TRACE by returning request header
         response.setField(HttpFields.__ContentType,
                           HttpFields.__MessageHttp);
-        ChunkableOutputStream out = response.getOutputStream();
+        OutputStream out = response.getOutputStream();
         ByteArrayOutputStream buf = new ByteArrayOutputStream(2048);
         Writer writer = new OutputStreamWriter(buf,StringUtil.__ISO_8859_1);
         writer.write(request.toString());

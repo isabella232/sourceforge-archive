@@ -233,7 +233,7 @@ public class SecurityConstraint
     {
         return "SC{"+_name+
             ","+_methods+
-            ","+(_anyRole?"*":_roles.toString())+
+            ","+(_anyRole?"*":(_roles==null?"-":_roles.toString()))+
             ","+(_dataConstraint==DC_NONE
                  ?"NONE}"
                  :(_dataConstraint==DC_INTEGRAL?"INTEGRAL}":"CONFIDENTIAL}"));

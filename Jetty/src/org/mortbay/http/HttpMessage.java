@@ -8,9 +8,15 @@ package org.mortbay.http;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import org.mortbay.util.Code;
 
@@ -24,7 +30,7 @@ import org.mortbay.util.Code;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-abstract public class HttpMessage
+abstract public class HttpMessage implements Message
 {
     /* ------------------------------------------------------------ */
     /** Message States.
@@ -66,7 +72,8 @@ abstract public class HttpMessage
     protected HttpConnection _connection;
     protected String _characterEncoding;
     protected String _mimeType;
-    protected Object _facade;
+    protected Message _facade;
+    protected Map _attributes;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -89,21 +96,33 @@ abstract public class HttpMessage
      * primary example of a HttpRequest facade is ServletHttpRequest.
      * A single facade object may be associated with the message with
      * this call and retrieved with the getFacade method.
-     * @see getFacade
-     * @param facade 
+     * @see getFacade.
+     * @param facade Message facade
      */
-    public void setFacade(Object facade)
+    public void setFacade(Message facade)
     {
         _facade=facade;
     }
 
     /* ------------------------------------------------------------ */
-    /** Get an assoicated facade object.
+    /** Get an associated facade object.
      * @see setFacade
-     * @return Facade object.
+     * @return Facade message or null.
      */
-    public Object getFacade()
+    public Message getFacade()
     {
+        return _facade;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get an associated facade object or this
+     * @see setFacade
+     * @return Facade message or this.
+     */
+    public Message getMessageFacade()
+    {
+        if (_facade==null)
+            return this;
         return _facade;
     }
     
@@ -124,7 +143,7 @@ abstract public class HttpMessage
     }
 
     /* ------------------------------------------------------------ */
-    public ChunkableInputStream getInputStream()
+    public InputStream getInputStream()
     {
         if (_connection==null)
             return null;
@@ -132,7 +151,7 @@ abstract public class HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    public ChunkableOutputStream getOutputStream()
+    public OutputStream getOutputStream()
     {
         if (_connection==null)
             return null;
@@ -487,6 +506,19 @@ abstract public class HttpMessage
         setFields().putDateField(name,date);
     }
     
+    /* -------------------------------------------------------------- */
+    /** Add the value of a date field.
+     * Header or Trailer fields are set depending on message state.
+     * @param name the field name
+     * @param value the field date value
+     * @exception IllegalStateException Not editable or sending 1.1
+     *                                  with trailers
+     */
+    public void addDateField(String name, long date)
+    {
+        setFields().addDateField(name,date);
+    }
+    
 
     /* ------------------------------------------------------------ */
     /** Remove a field.
@@ -601,6 +633,30 @@ abstract public class HttpMessage
     }
     
     /* -------------------------------------------------------------- */
+    public int getContentLength()
+    {
+        return getIntField(HttpFields.__ContentLength);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setContentLength(int len) 
+    {
+        setIntField(HttpFields.__ContentLength,len);
+    }
+    
+    /* -------------------------------------------------------------- */
+    public String getContentType()
+    {
+        return getField(HttpFields.__ContentType);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setContentType(String contentType) 
+    {
+        setField(HttpFields.__ContentType,contentType);
+    }
+    
+    /* -------------------------------------------------------------- */
     /** Mime Type.
      * The mime type is extracted from the contenttype field when set.
      * @return Content type without parameters
@@ -679,7 +735,7 @@ abstract public class HttpMessage
     public synchronized void commitHeader()
         throws IOException
     {
-        ChunkableOutputStream out = getOutputStream();
+        ChunkableOutputStream out = (ChunkableOutputStream)getOutputStream();
         if (out==null)
             throw new IllegalStateException("No output stream");
         
@@ -702,7 +758,7 @@ abstract public class HttpMessage
         if (Code.verbose(99))
             Code.debug("commit from "+__state[_state]);
         
-        ChunkableOutputStream out = getOutputStream();
+        OutputStream out = getOutputStream();
         
         switch(_state)
         {
@@ -728,7 +784,7 @@ abstract public class HttpMessage
      */
     public boolean isCommitted()
     {
-        ChunkableOutputStream out=getOutputStream();
+        ChunkableOutputStream out=(ChunkableOutputStream)getOutputStream();
         return out!=null && out.isCommitted() ||
             _state==__MSG_SENDING ||
             _state==__MSG_SENT;
@@ -740,7 +796,7 @@ abstract public class HttpMessage
      */
     public boolean isDirty()
     {
-        ChunkableOutputStream out=getOutputStream();
+        ChunkableOutputStream out=(ChunkableOutputStream)getOutputStream();
         
         return _state!=__MSG_EDITABLE
             || ( out!=null &&
@@ -755,7 +811,7 @@ abstract public class HttpMessage
         if (!isCommitted())
             commit();
         
-        ChunkableOutputStream out=getOutputStream();
+        ChunkableOutputStream out=(ChunkableOutputStream)getOutputStream();
         if (out!=null)
         {
             if (_trailer!=null && _trailer.size()>0)
@@ -766,6 +822,55 @@ abstract public class HttpMessage
         }
         _state=__MSG_SENT;
     }
+
+    
+    /* ------------------------------------------------------------ */
+    /** Get a request attribute.
+     * @param name Attribute name
+     * @return Attribute value
+     */
+    public Object getAttribute(String name)
+    {
+        if (_attributes==null)
+            return null;
+        return _attributes.get(name);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set a request attribute.
+     * @param name Attribute name
+     * @param attribute Attribute value
+     * @return Previous Attribute value
+     */
+    public Object setAttribute(String name, Object attribute)
+    {
+        if (_attributes==null)
+            _attributes=new HashMap(11);
+        return _attributes.put(name,attribute);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get Attribute names.
+     * @return Enumeration of Strings
+     */
+    public Enumeration getAttributeNames()
+    {
+        if (_attributes==null)
+            return Collections.enumeration(Collections.EMPTY_LIST);
+        return Collections.enumeration(_attributes.keySet());
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Remove a request attribute.
+     * @param name Attribute name
+     * @return Previous Attribute value
+     */
+    public void removeAttribute(String name)
+    {
+        if (_attributes!=null)
+            _attributes.remove(name);
+    }
+    
 }
 
 

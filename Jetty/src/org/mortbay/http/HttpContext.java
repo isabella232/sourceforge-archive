@@ -776,42 +776,18 @@ public class HttpContext implements LifeCycle
        return (String) _errorPages.remove(error);
     }
     
+    
+
+
+    
     /* ------------------------------------------------------------ */
     /** Get all handlers.
-     * @return 
+     * @return List of all HttpHandlers
      */
     public List getHttpHandlers()
     {
         return _handlers;
     }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @deprecated 
-     */
-    public List getHandlers()
-    {
-        return _handlers;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @deprecated
-     */
-    public synchronized void addHandler(int i,HttpHandler handler)
-    {
-        addHttpHandler(i,handler);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @deprecated
-     */
-    public synchronized void addHandler(HttpHandler handler)
-    {
-        addHttpHandler(_handlers.size(),handler);
-    }
-
 
     /* ------------------------------------------------------------ */
     /** Add a handler.
@@ -845,58 +821,6 @@ public class HttpContext implements LifeCycle
     public HttpHandler getHandler(int i)
     {
         return (HttpHandler)_handlers.get(i);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @deprecated
-     */
-    public int getHandlerIndex(HttpHandler handler)
-    {
-        for (int h=0;h<_handlers.size();h++)
-        {
-            if ( handler == _handlers.get(h))
-                return h;
-        }
-        return -1;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @deprecated
-     */
-    public synchronized HttpHandler getHandler(Class handlerClass)
-    {
-        for (int h=0;h<_handlers.size();h++)
-        {
-            HttpHandler handler = (HttpHandler)_handlers.get(h);
-            if (handlerClass.isInstance(handler))
-                return handler;
-        }
-        return null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @deprecated
-     */
-    public synchronized HttpHandler removeHandler(int i)
-    {
-        HttpHandler handler = getHandler(i);
-        if (handler.isStarted())
-            throw new IllegalStateException("Handler is started");
-        return (HttpHandler)_handlers.remove(i);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @deprecated
-     */
-    public synchronized void removeHandler(HttpHandler handler)
-    {
-        if (handler.isStarted())
-            throw new IllegalStateException("Handler is started");
-        _handlers.remove(handler);
     }
     
     /* ------------------------------------------------------------ */
@@ -941,7 +865,7 @@ public class HttpContext implements LifeCycle
     /* ------------------------------------------------------------ */
     /** Remove a handler.
      * The handler must be stopped before being removed.
-     * @param i 
+     * @param i index of handler
      */
     public synchronized HttpHandler removeHttpHandler(int i)
     {
@@ -962,6 +886,79 @@ public class HttpContext implements LifeCycle
         _handlers.remove(handler);
     }
     
+    /* ------------------------------------------------------------ */
+    /** Get all handlers.
+     * This method is an alias for getHttpHandlers
+     * @return List of all HttpHandlers
+     */
+    public List getHandlers()
+    {
+        return _handlers;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Add a handler.
+     * This method is an alias for addHttpHandler.
+     * @param i The position in the handler list
+     * @param handler The handler.
+     */
+    public synchronized void addHandler(int i,HttpHandler handler)
+    {
+        addHttpHandler(i,handler);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add a HttpHandler to the context.
+     * This method is an alias for addHttpHandler.
+     * @param handler 
+     */
+    public synchronized void addHandler(HttpHandler handler)
+    {
+        addHttpHandler(_handlers.size(),handler);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get handler index.
+     * This method is an alias for getHttpHandlerIndex.
+     * @param Handler instance 
+     * @return Index of handler in context or -1 if not found.
+     */
+    public int getHandlerIndex(HttpHandler handler)
+    {
+        return getHttpHandlerIndex(handler);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get a handler by class.
+     * This method is an alias for getHttpHandler
+     * @param handlerClass 
+     * @return The first handler that is an instance of the handlerClass
+     */
+    public synchronized HttpHandler getHandler(Class handlerClass)
+    {
+        return getHttpHandler(handlerClass);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Remove a handler.
+     * This method is an alias for removeHttpHandler.
+     * The handler must be stopped before being removed.
+     * @param i index of handler
+     */
+    public synchronized HttpHandler removeHandler(int i)
+    {
+        return removeHttpHandler(i);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Remove a handler.
+     * This method is an alias for removeHttpHandler.
+     * The handler must be stopped before being removed.
+     */
+    public synchronized void removeHandler(HttpHandler handler)
+    {
+        removeHttpHandler(handler);
+    }
 
     /* ------------------------------------------------------------ */
     /** Get the context ResourceHandler.

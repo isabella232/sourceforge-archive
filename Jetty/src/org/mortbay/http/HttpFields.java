@@ -837,7 +837,18 @@ public class HttpFields
      */
     public void addDateField(String name, Date date)
     {
-        add(name, __dateSend.format(date));
+        add(name, __dateCache.format(date));
+    }
+    
+    /* -------------------------------------------------------------- */
+    /**
+     * Adds the value of a date field.
+     * @param name the field name
+     * @param value the field date value
+     */
+    public void addDateField(String name, long date)
+    {
+        add(name, __dateCache.format(date));
     }
     
     /* -------------------------------------------------------------- */
