@@ -420,6 +420,7 @@ public class Server extends HttpServer
                                 Log.event("Shutdown hook executing");
                                 for (int i=0;i<servers.length;i++)
                                 {
+				    if (servers[i]==null) continue;
                                     try{servers[i].stop();}
                                     catch(Exception e){Code.warning(e);}
                                 }
@@ -436,6 +437,13 @@ public class Server extends HttpServer
             {
                 Code.debug("No shutdown hook in JVM ",e);
             }
+        }
+
+        // create and start the servers.
+        for (int i=0;i<arg.length;i++)
+        {
+            try{servers[i].join();}
+            catch (Exception e){Code.ignore(e);}
         }
     }
 }
