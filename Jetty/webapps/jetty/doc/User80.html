@@ -9,9 +9,9 @@ A better solution is to run the server on a non-privileged port (eg 8080) and
 use a firewall or routing mechanism to map port 80 to 8080. For example, on some
 Linux systems the ipchains REDIRECT mechanism can be used to redirect from 
 one port to another inside the kernel:
-<code>
+<pre>
   /sbin/ipchains -I input --proto TCP --dport 80 -j REDIRECT 8080
-</code>
+</pre>
 This basically means, "Insert into the kernel's packet filtering the
 following as the first rule to check on incoming packets: If the
 protocol is TCP and the destination port is 80, redirect the packet to
@@ -24,6 +24,10 @@ Once this rule is set up, a Linux 2.2 kernel will redirect all data
 addressed to port 80 to a server such as Jetty running on port 8080.
 This includes all RedHat 6.x distros.  Linux 2.4 kernels, e.g. RedHat
 7.1+,  have a similar "iptables" facility.
+<pre>
+  /sbin/iptables -t nat -I PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
+</pre>
+The underlying model of iptables is different to that of ipchains  so the forwarding normally only happens to packets originating off-box. You will also need to allow incoming packets to port 8080 if you use iptables as a local firewall.
 <BR><BR>
 Be careful to place rules like this one early in your "input" chain.
 Such rules must precede any rule that would accept the packet, otherwise
