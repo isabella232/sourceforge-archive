@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-3.1.rc3 - 
  + Improved ThreadPool stop handling
  + Implemented multi-part ranges so that acrobat is happy.
  + Simplified multipart response class.

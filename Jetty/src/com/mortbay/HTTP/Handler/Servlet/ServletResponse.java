@@ -451,6 +451,14 @@ public class ServletResponse implements HttpServletResponse
     {
         if (_outputState!=0 && _outputState!=1)
             throw new IllegalStateException();
+        
+        if (_writer!=null)
+        {
+            _writer.flush();
+            _writer.disable();
+            _writer=null;
+        }
+        
         if (_out==null)
             _out = new ServletOut(_servletRequest.getHttpRequest()
                                   .getOutputStream());  

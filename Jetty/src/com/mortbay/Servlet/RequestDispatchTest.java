@@ -72,35 +72,53 @@ public class RequestDispatchTest extends HttpServlet
             else
                 info+="&Dispatch=include";
 
+            
             if (System.currentTimeMillis()%2==0)
             {
-                PrintWriter pout = sres.getWriter();
-                pout.write("<H1>Include: "+info+"</H1><HR>");
-                pout.flush();
+                PrintWriter pout=null;
+                if (info.startsWith("/null"))
+                    info=info.substring(5);
+                else
+                {
+                    pout = sres.getWriter();
+                    pout.write("<H1>Include: "+info+"</H1><HR>");
+                }
                 
                 RequestDispatcher dispatch = getServletContext()
                     .getRequestDispatcher(info);
-                if (dispatch==null)    
+                if (dispatch==null)
+                {
+                    pout = sres.getWriter();
                     pout.write("<H1>Null dispatcher</H1>");
+                }
                 else
                     dispatch.include(sreq,sres);
+                pout = sres.getWriter();
                 pout.write("<HR><H1>-- Included (writer)</H1>");
             }
             else 
             {
-                OutputStream out = sres.getOutputStream();
-                PrintWriter pout = new PrintWriter(out);
-                pout.write("<H1>Include: "+info+"</H1><HR>");
-                pout.flush();
+                OutputStream out=null;
+                if (info.startsWith("/null"))
+                    info=info.substring(5);
+                else
+                {
+                    out = sres.getOutputStream();
+                    out.write(("<H1>Include: "+info+"</H1><HR>").getBytes());
+                }                
                 
                 RequestDispatcher dispatch = getServletContext()
                     .getRequestDispatcher(info);
-                if (dispatch==null)    
-                    pout.write("<H1>Null dispatcher</H1>");
+                if (dispatch==null)
+                {
+                    out = sres.getOutputStream();
+                    out.write("<H1>Null dispatcher</H1>".getBytes());
+                }
                 else
                     dispatch.include(sreq,sres);
-                pout.write("<HR><H1>-- Included (outputstream)</H1>");
-                pout.flush();
+                
+                out = sres.getOutputStream();
+                out.write("<HR><H1>-- Included (outputstream)</H1>".getBytes());
             }
         }
         else if (info.startsWith("/forward/"))
@@ -124,17 +142,27 @@ public class RequestDispatchTest extends HttpServlet
         else if (info.startsWith("/includeN/"))
         {
             info=info.substring(10);
-            PrintWriter pout = sres.getWriter();
-            pout.write("<H1>Include named: "+info+"</H1><HL>");
-            pout.flush();
+            PrintWriter pout;
 
+            if (info.startsWith("/null"))
+                info=info.substring(5);
+            else
+            {
+                pout = sres.getWriter();
+                pout.write("<H1>Include named: "+info+"</H1><HL>");
+            }
+            
             RequestDispatcher dispatch = getServletContext()
                 .getNamedDispatcher(info);
             if (dispatch!=null)
                 dispatch.include(sreq,sres);
             else
+            {
+                pout = sres.getWriter();
                 pout.write("<H1>No servlet named: "+info+"</H1>");
-
+            }
+            
+            pout = sres.getWriter();
             pout.write("<HL><H1>Included ");
         }
         else if (info.startsWith("/forwardN/"))

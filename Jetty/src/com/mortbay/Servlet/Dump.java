@@ -268,10 +268,7 @@ public class Dump extends HttpServlet
             select.add("ValueA");
             select.add("ValueB1,ValueB2");
             select.add("ValueC");
-            tf.addButton("Action","Submit");
-
-            page.add("CONTEXT="+getServletContext().getContext("/demo"));
-            
+            tf.addButton("Action","Submit");            
         }
         catch (Exception e)
         {
