@@ -1163,6 +1163,10 @@ public class HttpContext implements LifeCycle,
      * "javax.servlet.context.tempdir" attribute is consulted and if
      * not set, the host, port and context are used to generate a
      * directory within the JVMs temporary directory.
+     * If a temp directory has to be created, then a directory at jetty.home/work
+     * is used if it exists.  If not, then java.io.tempdir is used.
+     * Directories created in java.io.tempdir are marked deleteOnExit and are deleted if discovered
+     * on startup.
      * @return Temporary directory as a File.
      */
     public File getTempDirectory()
@@ -1202,6 +1206,19 @@ public class HttpContext implements LifeCycle,
             }
         }
 
+        // No tempdir so look for a WEB-INF/work directory to use as tempDir base
+        File work=null;
+        try
+        {
+            work=new File(System.getProperty("jetty.home"),"work");
+            if (!work.exists() || !work.canWrite() || !work.isDirectory())
+                work=null;
+        }
+        catch(Exception e)
+        {
+            Code.ignore(e);
+        }
+
         // No tempdir set so make one!
         try
         {
@@ -1223,25 +1240,34 @@ public class HttpContext implements LifeCycle,
             temp=temp.replace('.','_');
             temp=temp.replace('\\','_');
 
-            _tmpDir=new File(System.getProperty("java.io.tmpdir"),temp);
-            if (_tmpDir.exists())
-            {
-                Code.debug("Delete existing temp dir ",_tmpDir," for ",this);
-                if (!IO.delete(_tmpDir))
-                    Code.debug("Failed to delete temp dir "+_tmpDir);
 
+            if (work!=null)
+                _tmpDir=new File(work,temp);
+            else
+            {
+                _tmpDir=new File(System.getProperty("java.io.tmpdir"),temp);
+                
                 if (_tmpDir.exists())
                 {
-                    String old=_tmpDir.toString();
-                    _tmpDir=File.createTempFile(temp+"_","");
+                    Code.warning("Delete existing temp dir "+_tmpDir+" for "+this);
+                    if (!IO.delete(_tmpDir))
+                        Code.warning("Failed to delete temp dir "+_tmpDir);
+
                     if (_tmpDir.exists())
-                        _tmpDir.delete();
-                    Code.warning("Can't reuse "+old+", using "+_tmpDir);
+                    {
+                        String old=_tmpDir.toString();
+                        _tmpDir=File.createTempFile(temp+"_","");
+                        if (_tmpDir.exists())
+                            _tmpDir.delete();
+                        Code.warning("Can't reuse "+old+", using "+_tmpDir);
+                    }
                 }
             }
-
-            _tmpDir.mkdir();
-            _tmpDir.deleteOnExit();
+            
+            if (!_tmpDir.exists())
+                _tmpDir.mkdir();
+            if (work==null)
+                _tmpDir.deleteOnExit();
             Code.debug("Created temp dir ",_tmpDir," for ",this);
         }
         catch(Exception e)
@@ -1701,7 +1727,7 @@ public class HttpContext implements LifeCycle,
             response.setField(HttpFields.__Location,
                               buf.toString());
             if (Code.debug())
-                Code.warning(this+" consumed all of path "+
+                Code.debug(this+" consumed all of path "+
                              request.getPath()+
                              ", redirect to "+buf.toString());
             response.sendError(302);

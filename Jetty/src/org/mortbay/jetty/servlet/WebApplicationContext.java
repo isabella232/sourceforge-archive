@@ -251,10 +251,17 @@ public class WebApplicationContext
 
             Code.debug("webapp=",_webApp);
 
-            // Iw there a WEB-INF directory?
+            // Is there a WEB-INF directory?
             _webInf = _webApp.addPath("WEB-INF/");
             if (!_webInf.exists() || !_webInf.isDirectory())
                 _webInf=null;
+            
+            // Is there a WEB-INF work directory
+            Resource work=_webInf.addPath("work");
+            if (work.exists() && work.isDirectory() && 
+                work.getFile()!=null && work.getFile().canWrite() &&
+                getAttribute("javax.servlet.context.tempdir")==null)
+                setAttribute("javax.servlet.context.tempdir",work.getFile());
             
             // ResourcePath
             super.setBaseResource(_webApp);
