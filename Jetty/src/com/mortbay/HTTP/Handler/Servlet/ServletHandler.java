@@ -206,6 +206,7 @@ public class ServletHandler extends NullHandler
 	catch(Exception e)
 	{
 	    Code.warning(e);
+	    System.err.println(httpRequest);
 	    throw new HttpException();
 	}
     }

@@ -1,3 +1,9 @@
+
+Jetty-3.0.A97 - 8 July 2000
+   + Formatted version in server info string.
+   + Protect setContentLength from a late set in default servlet
+     HEAD handling.
+   + Added error handling to LifeCycleThread
    + implemented removeAttribute on requests
  
 Jetty-3.0.A96 - 27 June 2000

@@ -145,6 +145,11 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
 		{
 		    if (exception(e))
 			break;
+		} 
+		catch(Error e)
+		{
+		    if (error(e))
+			break;
 		}   
 	    }
 	}
@@ -160,6 +165,17 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
      * @return True of the loop should continue;
      */
     public boolean exception(Exception e)
+    {
+	Code.warning(e);
+	return true;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Handle error from loop.
+     * @param e The exception
+     * @return True of the loop should continue;
+     */
+    public boolean error(Error e)
     {
 	Code.warning(e);
 	return true;

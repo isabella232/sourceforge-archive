@@ -320,7 +320,11 @@ public class ServletResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void setContentLength(int len) 
     {
-	_httpResponse.setIntField(HttpFields.__ContentLength,len);
+	// Protect from setting after committed as default handling
+	// of a servlet HEAD request ALWAYS sets content length, even
+	// if the getHandling committed the response!
+	if (!isCommitted())
+	    _httpResponse.setIntField(HttpFields.__ContentLength,len);
     }
     
     /* ------------------------------------------------------------ */
