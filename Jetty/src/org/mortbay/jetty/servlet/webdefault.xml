@@ -189,8 +189,9 @@
   <!--                                                                      -->
   <!-- If you wish to use Jikes to compile JSP pages:                       -->
   <!--   Set the init parameter "compiler" to "jikes".  Define              -->
-  <!--   the property "-Dbuild.compiler.emacs=true" when starting Tomcat    -->
-  <!--   by adding the above to your CATALINA_OPTS environment variable.    -->
+  <!--   the property "-Dbuild.compiler.emacs=true" when starting Jetty     -->
+  <!--   to cause Jikes to emit error messages in a format compatible with  -->
+  <!--   Jasper.                                                            -->
   <!--   If you get an error reporting that jikes can't use UTF8 encoding,  -->
   <!--   try setting the init parameter "javaEncoding" to "ISO-8859-1".     -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
