@@ -42,18 +42,26 @@ public class ResourcePath
     public ResourcePath(String path, boolean quiet)
 	throws IOException
     { 
-	StringTokenizer tokenizer = new StringTokenizer(path,",;");
+	StringTokenizer tokenizer = new StringTokenizer(path,",;" + File.pathSeparator);
 	 
 	while (tokenizer.hasMoreTokens())
 	{
 	    String token=tokenizer.nextToken();
 	    Resource resource = Resource.newResource(token);
 	    if( !resource.exists())
+                resource = Resource.newResource( token +"/");
+	    if( !resource.exists())
 		throw new FileNotFoundException(token);
-	    _paths.add(resource);
+            // XXX More compressed format handled ?
+            if( token.endsWith( ".jar") || token.endsWith( ".war") || token.endsWith( ".zip"))
+                _paths.add( Resource.newCompressedResource( resource));
+            else
+	        _paths.add(resource);
 	}
     }
-	
+
+    
+    
     /* ------------------------------------------------------------ */
     /** 
      */
@@ -61,7 +69,7 @@ public class ResourcePath
     {
 	if (Code.verbose()) Code.debug("get ",filename);
 	 
-	// Maybe it should get here with / instead of \.
+	// XXX Maybe it should get here with / instead of \.
 	filename = filename.replace( '\\', '/');
 	InputStream in=null;
 	int length=0;

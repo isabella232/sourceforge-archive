@@ -72,6 +72,35 @@ public class Resource
 	
 	return newResource(url);
     }
+    
+    /* ------------------------------------------------------------ */
+    /** Construct a resource for extracting files from a compressed resource.
+     * Creates a temporary file for compressed files inside not file resources
+     * @param resource
+     * @return
+     */
+    public static Resource newCompressedResource( Resource resource)
+        throws IOException
+    {
+        if( resource.getFile() == null) {
+            InputStream is = resource.getInputStream();
+            File file = File.createTempFile( "uncompressed", ".jar");
+            FileOutputStream os = new FileOutputStream( file);
+            byte[] arr = new byte[1024];
+            int len;
+            while( (len = is.read( arr, 0, 1024)) > 0) {
+                os.write( arr, 0, len);
+            }
+            os.close();
+            URL url = new URL( "jar:" + file.toURL().toExternalForm() + "!/");
+            URLConnection connection = url.openConnection();
+            return new CompressedResource( url, connection, file);
+        } else {
+            URL url = new URL( "jar:" + resource.getURL().toExternalForm() + "!/");
+            URLConnection connection = url.openConnection();
+            return new Resource( url, connection);
+        }
+    }
 
     
     /* ------------------------------------------------------------ */
@@ -271,7 +300,22 @@ public class Resource
     public Resource relative(String name)
 	throws IOException,MalformedURLException
     {
-	return newResource(new URL(_url,name));
+// XXX - it seems not to work with files, jar files, ...
+//	return newResource(new URL(_url,name));
+        String resourceBase = _url.toExternalForm();
+        if( name.startsWith( "./"))
+            name = name.substring( 2);
+        if( resourceBase.endsWith( "/"))
+            if( name.startsWith( "/"))
+                name = resourceBase + name.substring( 1);
+            else
+                name = resourceBase + name;
+        else
+            if( name.startsWith( "/"))
+                name = resourceBase + name;
+            else
+                name = resourceBase + "/" + name;
+        return newResource(new URL(name));
     }
 
     /* ------------------------------------------------------------ */
@@ -427,13 +471,26 @@ public class Resource
 		_file.equals(((FileResource)o)._file);
 	}
     }
+
+    private static class CompressedResource extends Resource
+    {
+	File _file;
+	
+	/* -------------------------------------------------------- */
+	private CompressedResource(URL url, URLConnection connection, File file)
+	{
+	    super(url,connection);
+	    _file=file;
+	}
+
+        protected void finalize()
+        {
+    	    super.finalize();
+            _file.delete();
+        }
+    }
+
 }
-
-
-
-
-
-
 
 
 
