@@ -930,49 +930,48 @@ public class TestRFC2616
 
             boolean noRangeHasContentLocation = (response.indexOf("\r\nContent-Location: ") != -1);
 
-
             // now try again for the same resource but this time WITH range header
 
             response=listener.getResponses("GET /" + TestRFC2616.testFiles[0].name + " HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "Connection: close\n"+
-                                           "Range: bytes=1-3\n"+
+                                           "Range: bytes=1-3,bytes=6-9\n"+
+                                           "Range: bytes=12-14\n"+
                                            "\n");
 
             if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=0;
-            offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 206 Partial Content\r\n",
-                                   "1. proper 206 status code");
-            offset=t.checkContains(response,offset, 
-                                   "Content-Type: text/plain",
-                                   "2. content type") + 2;
-            offset=t.checkContains(response,offset,
-                                   "Last-Modified: " + TestRFC2616.testFiles[0].modDate + "\r\n", 
-                                   "3. correct resource mod date");
+            offset=t.checkContains(response,offset,"HTTP/1.1 206 Partial Content\r\n","1. proper 206 status code");
+            offset=t.checkContains(response,offset,"Last-Modified: " + TestRFC2616.testFiles[0].modDate + "\r\n","3. correct resource mod date");
 
             // if GET w/o range had Content-Location, then the corresponding 
             // response for the a GET w/ range must also have that same header
 
+            offset=t.checkContains(response,offset,"--org.mortbay.http.MultiPartResponse.boundary","4a. content type") + 2;
+            offset=t.checkContains(response,offset,"Content-Type: text/plain","4a. content type") + 2;
+            offset=t.checkContains(response,offset,"Content-Range: bytes 1-3/26","4a. content range") + 2;
             offset=t.checkContains(response,offset, 
-                                   "Content-Range: bytes 1-3/26",
-                                   "4. content range") + 2;
-
+                    				TestRFC2616.testFiles[0].data.substring(1, 3+1), 
+                                   "6. subrange data");
+            offset=t.checkContains(response,offset,"--org.mortbay.http.MultiPartResponse.boundary","4b. content type") + 2;
+            offset=t.checkContains(response,offset,"Content-Type: text/plain","4bontent type") + 2;
+            offset=t.checkContains(response,offset,"Content-Range: bytes 6-9/26","4b. content range") + 2;
+            offset=t.checkContains(response,offset, 
+                    				TestRFC2616.testFiles[0].data.substring(6, 9+1), 
+                                   "6. subrange data");
+            offset=t.checkContains(response,offset,"--org.mortbay.http.MultiPartResponse.boundary","4c. content type") + 2;
+            offset=t.checkContains(response,offset,"Content-Type: text/plain","4c. content type") + 2;
+            offset=t.checkContains(response,offset,"Content-Range: bytes 12-14/26","4c. content range") + 2;
+            offset=t.checkContains(response,offset, 
+                    				TestRFC2616.testFiles[0].data.substring(12, 14+1), 
+                                   "6. subrange data");
+             
             if (noRangeHasContentLocation) {
                     offset=t.checkContains(response,offset, 
                                   "Content-Location: ", 
                                   "5. Content-Location header as with 200");
             } 
-            else {
-                    log.debug("no need to check for Conten-Location header in 206 response");
-                    // spec does not require existence or absence if these want any
-                    // header for the get w/o range
-            }
 
-            String expectedData = TestRFC2616.testFiles[0].data.substring(1, 3+1);
-            offset=t.checkContains(response,offset, 
-                                   expectedData, 
-                                   "6. subrange data: \"" + expectedData + "\"");
 	}
         catch(Exception e)
         {

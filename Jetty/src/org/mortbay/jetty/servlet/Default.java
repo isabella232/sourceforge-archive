@@ -594,9 +594,9 @@ public class Default extends HttpServlet
                     if (accept!=null && resLength>_minGzipLength &&
                         !pathInContext.endsWith(".gz"))
                     {
-			Resource gz = getResource(pathInContext+".gz");
+                        Resource gz = getResource(pathInContext+".gz");
                         if (gz.exists() && accept.indexOf("gzip")>=0 &&
-			    request.getAttribute(Dispatcher.__INCLUDE_REQUEST_URI)==null)
+			                request.getAttribute(Dispatcher.__INCLUDE_REQUEST_URI)==null)
                         {
                             response.setHeader(HttpFields.__ContentEncoding,"gzip");
                             data=gz;
@@ -649,21 +649,22 @@ public class Default extends HttpServlet
         //  216 response which does not require an overall 
         //  content-length header
         //
+        writeHeaders(response,resource,-1);
         ResourceCache.ResourceMetaData metaData =
             _httpContext.getResourceMetaData(resource);
         String encoding = metaData.getEncoding();
         MultiPartResponse multi = new MultiPartResponse(response.getOutputStream());
         response.setStatus(HttpResponse.__206_Partial_Content);
-
-	// If the request has a "Request-Range" header then we need to
-	// send an old style multipart/x-byteranges Content-Type. This
-	// keeps Netscape and acrobat happy. This is what Apache does.
-	String ctp;
-	if (request.getHeader(HttpFields.__RequestRange)!=null)
-	    ctp = "multipart/x-byteranges; boundary=";
-	else
-	    ctp = "multipart/byteranges; boundary=";
-	response.setContentType(ctp+multi.getBoundary());
+        
+        // If the request has a "Request-Range" header then we need to
+        // send an old style multipart/x-byteranges Content-Type. This
+        // keeps Netscape and acrobat happy. This is what Apache does.
+        String ctp;
+        if (request.getHeader(HttpFields.__RequestRange)!=null)
+            ctp = "multipart/x-byteranges; boundary=";
+        else
+            ctp = "multipart/byteranges; boundary=";
+        response.setContentType(ctp+multi.getBoundary());
 
         InputStream in=(resource instanceof CachedResource)
             ?null:resource.getInputStream();

@@ -244,8 +244,7 @@ public abstract class HttpMessage
     
     /* ------------------------------------------------------------ */
     /** Get a multi valued message field.
-     * Get a field from a message header. If no header field is found,
-     * trailer fields are searched.
+     * Get a field from a message header. 
      * @param name The field name
      * @return Enumeration of field values or null
      */
@@ -256,8 +255,7 @@ public abstract class HttpMessage
     
     /* ------------------------------------------------------------ */
     /** Get a multi valued message field.
-     * Get a field from a message header. If no header field is found,
-     * trailer fields are searched.
+     * Get a field from a message header. 
      * @param name The field name
      * @param separators String of separators.
      * @return Enumeration of field values or null

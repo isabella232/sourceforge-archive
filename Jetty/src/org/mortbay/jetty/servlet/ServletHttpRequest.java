@@ -308,7 +308,7 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public Enumeration getHeaders(String s)
     {
-        Enumeration enm=_httpRequest.getFieldValues(s,",");
+        Enumeration enm=_httpRequest.getFieldValues(s);
         if (enm==null)
             return __emptyEnum;
         return enm;
