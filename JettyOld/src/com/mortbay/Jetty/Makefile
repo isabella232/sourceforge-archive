@@ -16,13 +16,7 @@ UUFILES := \
 
 INSTALLPATH := .
 INSTALLFILES := \
-	etc/JettyServer.prp \
-	etc/RealmDemo.prp \
-	etc/RealmOther.prp \
-	etc/ParamDemo.prp \
-	etc/JettyDemo.prp \
-	etc/NSRoamDemo.prp \
-	etc/gnujsp.prp \
+	$(wildcard etc/*.prp) \
         classes/HelloWorldServlet.class \
 	$(wildcard FileBase/Images/*.gif) \
 	$(wildcard FileBase/*.txt) \

@@ -28,6 +28,10 @@ import java.util.*;
 public interface HttpHandler 
 {
     /* ----------------------------------------------------------------- */
+    public void setProperties(Properties properties)
+	throws IllegalStateException;
+    
+    /* ----------------------------------------------------------------- */
     /** Constructor
      * @param request The HTTP requests to be handled
      * @param response The HTTP response to be used.

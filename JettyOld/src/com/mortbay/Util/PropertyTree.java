@@ -41,8 +41,10 @@ import java.util.StringTokenizer;
  * </pre>
  * All the standard Properties methods work as usual, but keys such as
  * "a.b.c" can be used to retrieve nested values. 
- *
- * <p> To aid in constructing and saving Properties files,
+ * <p>
+ * PropertyTree produces debug output if debug verbosity is greater than 9
+ * <p>
+ * To aid in constructing and saving Properties files,
  * <code>getConverter</code> will convert Dictionaries into PropertyTrees
  * recursively.
  */
@@ -67,6 +69,25 @@ public class PropertyTree extends Properties
     /* ------------------------------------------------------------ */
     public PropertyTree()
     {}
+
+    /* ------------------------------------------------------------ */
+    public void load(InputStream in)
+	throws IOException
+    {
+	Code.debug("Load "+in);
+	super.load(in);
+    }
+
+    /* ------------------------------------------------------------ */
+    public void load(Properties properties)
+    {
+	Enumeration e=properties.keys();
+	while (e.hasMoreElements())
+	{
+	    Object k=e.nextElement();
+	    put(k,properties.get(k));    
+	}
+    }
     
     /* ------------------------------------------------------------ */
     /** Override Hashtable.get() */
@@ -81,7 +102,7 @@ public class PropertyTree extends Properties
 		value=super.get(realKey);
 	}
 	
-	Code.debug("Get ",realKey,"(",key,")=",value);
+	if (Code.verbose(9)) Code.debug("Get ",realKey,"(",key,")=",value);
 	return value;
     }
 
@@ -96,7 +117,7 @@ public class PropertyTree extends Properties
     /** Override Hashtable.put() */
     public synchronized Object put(Object key, Object value)
     {
-	Code.debug("Put ",key,"=",value);
+	if (Code.verbose(9)) Code.debug("Put ",key,"=",value);
 	String keyStr=key.toString();
 	putTokenKey(keyStr,keyStr);
 	return super.put(key,value);
@@ -116,7 +137,7 @@ public class PropertyTree extends Properties
 	Object value=super.get(key);
 	if (value!=null)
 	{
-	    Code.debug("Remove ",key);
+	    if (Code.verbose(9)) Code.debug("Remove ",key);
 	    putTokenKey(key.toString(),null);
 	    return super.remove(key);
 	}
@@ -124,7 +145,7 @@ public class PropertyTree extends Properties
 	String realKey=getTokenKey(key.toString());
 	if (realKey!=null)
 	{
-	    Code.debug("Remove ",realKey,"(",key,")");
+	    if (Code.verbose(9)) Code.debug("Remove ",realKey,"(",key,")");
 	    putTokenKey(realKey,null);
 	    return super.remove(realKey);
 	}
@@ -171,6 +192,37 @@ public class PropertyTree extends Properties
 		return get(keys.nextElement());
 	    }
 	};	
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Enumeration getNodes(String key)
+    {
+	Vector tokens=getTokens(key);
+	Node node=rootNode;
+	int index=0;
+	while(index<tokens.size())
+	{
+	    Node subNode = (Node)node.get(tokens.elementAt(index));
+	    if (subNode==null)
+		return null;
+	    node=subNode;
+	    index++;
+	}
+	return node.keys();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Vector getVector(String key, String separators)
+    {
+	String values=getProperty(key);
+	if (values==null)
+	    return null;
+
+	Vector v=new Vector();
+	StringTokenizer tok=new StringTokenizer(values,separators);
+	while(tok.hasMoreTokens())
+	    v.addElement(tok.nextToken());
+	return v;
     }
     
     /* ------------------------------------------------------------ */

@@ -23,6 +23,9 @@ public class NullHandler implements HttpHandler
 {
     /* ----------------------------------------------------------------- */
     protected HttpServer httpServer=null;
+
+    public void setProperties(Properties p)
+    {}
     
     /* ----------------------------------------------------------------- */
     public void handle(HttpRequest request,

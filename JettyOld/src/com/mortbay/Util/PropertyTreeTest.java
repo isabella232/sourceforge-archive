@@ -104,9 +104,38 @@ public class PropertyTreeTest
 	    v=v.substring(0,v.indexOf(ev))+v.substring(v.indexOf(ev)+ev.length());
 	}
 	
+	Vector nodes;
+	nodes=enum2vector(props.getNodes(""));
+	test.checkEquals(nodes.size(),2,"Get root node");
+	test.check(nodes.contains("a"),"Get root node");
+	test.check(nodes.contains("*"),"Get root node");
+	
+	nodes=enum2vector(props.getNodes("a"));
+	test.checkEquals(nodes.size(),2,"Get a node");
+	test.check(nodes.contains("b"),"Get a node");
+	test.check(nodes.contains("*"),"Get a node");
+	
+	nodes=enum2vector(props.getNodes("*"));
+	test.checkEquals(nodes.size(),2,"Get wild node");
+	test.check(nodes.contains("b"),"Get wild node");
+	test.check(nodes.contains("B"),"Get wild node");
+	
+	nodes=enum2vector(props.getNodes("a.*"));
+	test.checkEquals(nodes.size(),3,"Get node");
+	test.check(nodes.contains("b"),"Get node");
+	test.check(nodes.contains("B"),"Get node");
+	test.check(nodes.contains("c"),"Get node");
 	
 	test.report();
     }
     /* ------------------------------------------------------------ */
+    static Vector enum2vector(Enumeration e)
+    {
+	Vector v = new Vector();
+	while (e.hasMoreElements())
+	    v.addElement(e.nextElement());
+	return v;
+    }
+    
 };
 

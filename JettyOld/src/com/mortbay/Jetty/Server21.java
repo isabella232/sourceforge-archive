@@ -43,12 +43,13 @@ import java.util.*;
  * ServerName./pathOfStack.Log./path             filename|err|out
  * </pre>
  *
+ * @deprecated 
  * @see JettyServer.prp
  * @version 1.0 Sat Sep 26 1998
  * @author Greg Wilkins (gregw)
  */
 
-public class Server extends BaseConfiguration
+public class Server21 extends BaseConfiguration
 {
     /* ------------------------------------------------------------ */
     private String serverName=null;
@@ -76,7 +77,7 @@ public class Server extends BaseConfiguration
      * @param port 
      * @exception IOException 
      */
-    public Server(String serverName)
+    public Server21(String serverName)
 	 throws IOException
     {
 	this.serverName=serverName;
@@ -427,10 +428,10 @@ public class Server extends BaseConfiguration
 	    }
 	    
 	    // Get a server instance for the name
-	    Server server=(Server)server_map.get(name);
+	    Server21 server=(Server21)server_map.get(name);
 	    if (server==null)
 	    {
-		server = new Server(name);
+		server = new Server21(name);
 		server_map.put(name,server);
 	    }
 
@@ -561,11 +562,11 @@ public class Server extends BaseConfiguration
 	    // Start all severs
 	    Enumeration e = server_map.elements();
 	    while (e.hasMoreElements())
-		((Server)e.nextElement()).start();
+		((Server21)e.nextElement()).start();
 	    // Join all severs
 	    e = server_map.elements();
 	    while (e.hasMoreElements())
-		((Server)e.nextElement()).join();   
+		((Server21)e.nextElement()).join();   
 	}
 	catch(Throwable e){
 	    Code.warning(e);
