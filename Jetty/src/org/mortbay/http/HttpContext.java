@@ -974,8 +974,11 @@ public class HttpContext implements LifeCycle,
         if (lib.exists() && lib.isDirectory())
         {
             StringBuffer classPath=new StringBuffer();
-            String[] files=lib.list();
 
+            if (append && this.getClassPath()!=null)
+                classPath.append(_classPath);
+            
+            String[] files=lib.list();
             for (int f=0;files!=null && f<files.length;f++)
             {
                 try {
@@ -994,11 +997,7 @@ public class HttpContext implements LifeCycle,
             }
 
             if (classPath.length()>0)
-            {
-                if (append && this.getClassPath()!=null)
-                       classPath.append(",").append(_classPath);
                 _classPath=classPath.toString();
-            }
         }
     }
 
