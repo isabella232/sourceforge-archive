@@ -226,10 +226,21 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             catch(Exception e){Code.warning(e);}
         }
 
-        _hostMap.clear();
-        _hostMap=null;
-        _listeners.clear();
-        _listeners=null;
+	if (_hostMap==null)
+	    Code.warning("HttpServer.destroy() on an"
+			 +" already destroyed HttpServer.");
+	else
+	{
+	    _hostMap.clear();
+	    _hostMap=null;
+	}
+
+	if (_listeners!=null)
+	{
+	    _listeners.clear();
+	    _listeners=null;
+	}
+	
         setLogSink(null);
     }
 
