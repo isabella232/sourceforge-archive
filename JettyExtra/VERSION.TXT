@@ -1,6 +1,10 @@
 JettyExtra Versions
 --------------------
 
+JettyExtra-4.1.D0
+  + Handle other ModelMBean implementations better.
+  + JSSE listener MBeans
+
 JettyExtra-4.0.1
   + Support graceful stopping of context and server.
   + Updated HttpListenerMBean for SSL redirection

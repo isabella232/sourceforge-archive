@@ -165,14 +165,21 @@ public class ModelMBeanImpl
                     mbean.setManagedResource(o,"objectReference");
                     return mbean;
                 }
-                catch(InstantiationException e)
+                catch(ClassNotFoundException e)
+                {
+                    if (e.toString().endsWith("MBean"))
+                        Code.ignore(e);
+                    else
+                        Code.warning(e);
+                }
+                catch(Error e)
                 {
                     Code.warning(e);
                     mbean=null;
                 }
                 catch(Exception e)
                 {
-                    Code.ignore(e);
+                    Code.warning(e);
                     mbean=null;
                 }
 
@@ -408,6 +415,9 @@ public class ModelMBeanImpl
      */
     public synchronized void defineAttribute(ModelMBeanAttributeInfo attrInfo)
     {
+        if (_object==null)
+            throw new IllegalStateException("No Object");
+        
         _dirty=true;
         
         String name=attrInfo.getName();
@@ -523,7 +533,7 @@ public class ModelMBeanImpl
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            Code.warning("operation "+name,e);
             throw new IllegalArgumentException(e.toString());
         }
         
@@ -1038,9 +1048,17 @@ public class ModelMBeanImpl
     public synchronized ObjectName uniqueObjectName(MBeanServer server,
                                                     String objectName)
     {
+        return uniqueObjectName(server,_object,objectName);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public synchronized ObjectName uniqueObjectName(MBeanServer server,
+                                                    Object object,
+                                                    String objectName)
+    {
         if (!objectName.endsWith("="))
         {
-            String className = _object.getClass().getName();
+            String className = object.getClass().getName();
             if (className.indexOf(".")>0)
                 className=className.substring(className.lastIndexOf(".")+1);
             if (className.endsWith("MBean"))
@@ -1049,7 +1067,6 @@ public class ModelMBeanImpl
                 objectName+=",";
             objectName+=className+"=";
         }
-        
 
         ObjectName oName=null;
         try
@@ -1081,5 +1098,4 @@ public class ModelMBeanImpl
 
         return oName;
     }
-    
 }

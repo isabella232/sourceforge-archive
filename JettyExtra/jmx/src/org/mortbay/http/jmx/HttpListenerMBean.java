@@ -51,7 +51,6 @@ public class HttpListenerMBean
         defineAttribute("confidentialPort");
         defineAttribute("confidentialScheme");
         defineAttribute("integralPort");
-        defineAttribute("integralScheme");        
-    }
-    
+        defineAttribute("integralScheme"); 
+    }    
 }

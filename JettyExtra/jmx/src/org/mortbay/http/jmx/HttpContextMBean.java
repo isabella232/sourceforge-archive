@@ -54,18 +54,22 @@ public class HttpContextMBean extends LifeCycleMBean
     {
         super.defineManagedResource();
 
-        defineAttribute("logSink");
+        defineAttribute("virtualHosts");
         defineAttribute("contextPath");
+        defineAttribute("mimeMap");
+        
+        defineAttribute("handlers",false);
+
         defineAttribute("classPath");
         defineAttribute("classLoader");
+        
         defineAttribute("realm");
         defineAttribute("redirectNullPath");
         defineAttribute("resourceBase");
         defineAttribute("servingResources");
-        defineAttribute("hosts");
-        defineAttribute("handlers");
         
         defineAttribute("statsOn");
+        defineAttribute("statsOnMs");
         defineOperation("statsReset",IMPACT_ACTION);
         defineAttribute("requests");
         defineAttribute("requestsActive");
@@ -76,9 +80,7 @@ public class HttpContextMBean extends LifeCycleMBean
         defineAttribute("responses4xx");
         defineAttribute("responses5xx");
         
-        defineOperation("stop",
-                        new String[] {"java.lang.Boolean.TYPE"},
-                        IMPACT_ACTION);
+        defineOperation("stop",new String[] {"java.lang.Boolean.TYPE"},IMPACT_ACTION);
         
         defineOperation("destroy",
                         IMPACT_ACTION);
@@ -93,32 +95,15 @@ public class HttpContextMBean extends LifeCycleMBean
                         NO_PARAMS,
                         IMPACT_INFO);
         
-        defineOperation("setAttribute",
-                        new String[] {STRING,OBJECT},
-                        IMPACT_ACTION);
-        defineOperation("getAttribute",
-                        new String[] {STRING},
-                        IMPACT_INFO);
-        defineOperation("getAttributeNames",
-                        NO_PARAMS,
-                        IMPACT_INFO);
-        defineOperation("removeAttribute",
-                        new String[] {STRING},
-                        IMPACT_ACTION);
+        defineOperation("setAttribute",new String[] {STRING,OBJECT},IMPACT_ACTION);
+        defineOperation("getAttribute",new String[] {STRING},IMPACT_INFO);
+        defineOperation("getAttributeNames",NO_PARAMS,IMPACT_INFO);
+        defineOperation("removeAttribute",new String[] {STRING},IMPACT_ACTION);
         
-        defineOperation("addHttpHandler",
-                        new String[] {INT, "org.mortbay.http.HttpHandler"},
-                        IMPACT_ACTION);
-        defineOperation("getHttpHandler",
-                        new String[] {INT},
-                        IMPACT_INFO);
-        defineOperation("removeHttpHandler",
-                        new String[] {INT},
-                        IMPACT_ACTION);
+        defineOperation("addHandler",new String[] {INT,"org.mortbay.http.HttpHandler"},IMPACT_ACTION);
+        defineOperation("removeHandler",new String[] {INT},IMPACT_ACTION);
         
-        defineOperation("setMimeMapping",
-                        new String[] {STRING,STRING},
-                        IMPACT_ACTION);
+        defineOperation("setMimeMapping",new String[] {STRING,STRING},IMPACT_ACTION);
 
         _httpContext=(HttpContext)getManagedResource();
     }

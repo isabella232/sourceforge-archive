@@ -90,22 +90,21 @@ public class HttpServerMBean extends LifeCycleMBean
     {
         super.defineManagedResource();
         
+        defineAttribute("listeners",false);
+        defineAttribute("contexts",false);
         defineAttribute("requestLog");
+
         
-        defineOperation("addListener",
-                        new String[]{"java.lang.String"},
-                        IMPACT_ACTION);
-        defineOperation("addListener",
-                        new String[]{"org.mortbay.http.HttpListener"},
-                        IMPACT_ACTION);
-        defineOperation("addContext",
-                        new String[]{"java.lang.String","java.lang.String"},
-                        IMPACT_ACTION);
-        defineOperation("addHostAlias",
-                        new String[]{"java.lang.String","java.lang.String"},
-                        IMPACT_ACTION);
+        defineOperation("addListener",new String[]{"java.lang.String"},IMPACT_ACTION);
+        defineOperation("addListener",new String[]{"org.mortbay.util.InetAddrPort"},IMPACT_ACTION);
+        defineOperation("addListener",new String[]{"org.mortbay.http.HttpListener"},IMPACT_ACTION);
+        defineOperation("removeListener",new String[]{"org.mortbay.http.HttpListener"},IMPACT_ACTION);
+        defineOperation("addContext",new String[]{"org.mortbay.http.HttpContext"},IMPACT_ACTION);
+        defineOperation("removeContext",new String[]{"org.mortbay.http.HttpContext"},IMPACT_ACTION);
+        defineOperation("addContext",new String[]{"java.lang.String","java.lang.String"},IMPACT_ACTION);
         
         defineAttribute("statsOn");
+        defineAttribute("statsOnMs");
         defineOperation("statsReset",IMPACT_ACTION);
         defineAttribute("connections");
         defineAttribute("connectionsOpen");
@@ -120,6 +119,8 @@ public class HttpServerMBean extends LifeCycleMBean
         defineAttribute("requestsActiveMax");
         defineAttribute("requestsDurationAve");
         defineAttribute("requestsDurationMax");
+        
+        defineOperation("stop",new String[]{"java.lang.Boolean.TYPE"},IMPACT_ACTION);
         defineOperation("destroy",IMPACT_ACTION);
     }
     
@@ -136,10 +137,21 @@ public class HttpServerMBean extends LifeCycleMBean
                 Code.warning("No MBean for "+o);
             else
             {
+                ObjectName oName=null;
                 if (mbean instanceof ModelMBeanImpl)
+                {
                     ((ModelMBeanImpl)mbean).setBaseObjectName(getObjectName().toString());
-                ObjectName oName=
-                    getMBeanServer().registerMBean(mbean,null).getObjectName();
+                    oName=
+                        getMBeanServer().registerMBean(mbean,null).getObjectName();
+                }
+                else
+                {
+                    oName=uniqueObjectName(getMBeanServer(),
+                                           o,
+                                           getObjectName().toString());
+                    oName=getMBeanServer().registerMBean(mbean,oName)
+                        .getObjectName();
+                }
                 Holder holder = new Holder(oName,mbean);
                 _mbeanMap.put(o,holder);
             }

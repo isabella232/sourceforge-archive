@@ -30,8 +30,10 @@ public class TestModelMBean extends ModelMBeanImpl
 
     /* ------------------------------------------------------------ */
     public TestModelMBean()
-        throws MBeanException
+        throws Exception
     {
+        setManagedResource(this,"objectreference");
+        
         defineAttribute(new ModelMBeanAttributeInfo("www",
                                                     "java.lang.Float",
                                                     "Description",
