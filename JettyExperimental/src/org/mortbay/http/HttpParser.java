@@ -1,7 +1,6 @@
 package org.mortbay.http;
 
 import org.mortbay.util.Buffer;
-import org.mortbay.util.BufferView;
 import org.mortbay.util.Portable;
 
 /**
@@ -55,7 +54,7 @@ public class HttpParser
      * @param buf 
      * @exception ParserException 
      */
-    public static int parse(Handler handler, BufferView source)
+    public static int parse(Handler handler, Buffer source)
     {
         /* Initialize global variables. */
         source.mark(-1);
@@ -92,10 +91,7 @@ public class HttpParser
      * @param buf
      * @param ctx
      */
-    protected static void parseBuffer(
-        Handler handler,
-        BufferView source,
-        Context ctx)
+    protected static void parseBuffer(Handler handler, Buffer source, Context ctx)
     {
         if (ctx == null)
             ctx= new Context();
@@ -118,7 +114,7 @@ public class HttpParser
                 case STATE_START :
                     if (ch > SPACE)
                     {
-                        source.markPosition(-1);
+                        source.markOffset(-1);
                         ctx.state= STATE_FIELD0;
                     }
                     break;
@@ -140,7 +136,7 @@ public class HttpParser
                 case STATE_SPACE1 :
                     if (ch > SPACE)
                     {
-                        source.markPosition(-1);
+                        source.markOffset(-1);
                         ctx.state= STATE_FIELD1;
                     }
                     else if (ch < SPACE)
@@ -160,7 +156,7 @@ public class HttpParser
                 case STATE_SPACE2 :
                     if (ch > SPACE)
                     {
-                        source.markPosition(-1);
+                        source.markOffset(-1);
                         ctx.state= STATE_FIELD2;
                     }
                     else if (ch < SPACE)
@@ -208,7 +204,7 @@ public class HttpParser
                     else
                     {
                         ctx.trimLength= 1;
-                        source.markPosition(-1);
+                        source.markOffset(-1);
                         ctx.state= STATE_HEADER_NAME;
                     }
                     break;
@@ -233,8 +229,8 @@ public class HttpParser
                     else if (ch != SPACE && ch != TAB)
                     {
                         if (ctx.trimLength == -1)
-                            source.markPosition(-1);
-                        ctx.trimLength= source.position() - source.mark();
+                            source.markOffset(-1);
+                        ctx.trimLength= source.offset() - source.mark();
                     }
                     break;
 
@@ -251,8 +247,8 @@ public class HttpParser
                     else if (ch != SPACE && ch != TAB)
                     {
                         if (ctx.trimLength == -1)
-                            source.markPosition(-1);
-                        ctx.trimLength= source.position() - source.mark();
+                            source.markOffset(-1);
+                        ctx.trimLength= source.offset() - source.mark();
                     }
                     break;
             }
@@ -381,9 +377,10 @@ public class HttpParser
         public int chunkLength;
         public int chunkOffset;
 
-        private String toString(BufferView buf)
+        private String toString(Buffer buf)
         {
-            return "CTX";
+           // TODO  better string.
+            return "CTX";  
         }
     }
 

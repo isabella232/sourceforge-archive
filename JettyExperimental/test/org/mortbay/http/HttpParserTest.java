@@ -1,6 +1,5 @@
 package org.mortbay.http;
 
-import org.mortbay.util.BufferView;
 import org.mortbay.util.ByteArrayBuffer;
 import org.mortbay.util.Buffer;
 
@@ -63,8 +62,7 @@ public class HttpParserTest extends TestCase implements HttpParser.Handler
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZ\015\012"+
 		"0\015\012";
 		ByteArrayBuffer buffer = new ByteArrayBuffer(http.getBytes());
-		BufferView view = new BufferView(buffer);
-		HttpParser.parse(this,view);
+		HttpParser.parse(this,buffer);
     }
 
     /**

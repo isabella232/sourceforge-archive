@@ -4,46 +4,30 @@ package org.mortbay.util;
  * @author gregw
  *
  */
-public class ByteArrayBuffer implements Buffer
+public class ByteArrayBuffer extends AbstractBuffer
 {
-    protected final static boolean __MUTABLE= true;
 
     private byte[] _bytes;
-    private int _offset;
-    private int _limit;
-    private boolean _mutable;
-    private ByteArrayBuffer _subBuffer;
 
+	public ByteArrayBuffer(byte[] bytes, int offset, int length, boolean mutable)
+	{
+		super(mutable);
+		_bytes= bytes;
+		offset(offset);
+		limit(offset+length);
+	}
+	
     public ByteArrayBuffer(byte[] bytes)
     {
-        this(bytes, 0, bytes.length);
+        this(bytes, 0, bytes.length,MUTABLE);
     }
 
     public ByteArrayBuffer(byte[] bytes, int offset, int length)
     {
-        _bytes= bytes;
-        _offset= offset;
-        _limit= offset + length;
-        _mutable= true;
+    	this(bytes,offset,length,MUTABLE);
     }
 
-    public ByteArrayBuffer(byte[] bytes, int offset, int length, boolean mutable)
-    {
-        this(bytes, offset, length);
-        _mutable= mutable;
-    }
 
-    private Buffer subBuffer(int offset, int length)
-    {
-        if (_subBuffer == null)
-            _subBuffer= new ByteArrayBuffer(_bytes, offset, length, __MUTABLE);
-        else
-        {
-            _subBuffer._offset= offset;
-            _subBuffer._limit= offset + length;
-        }
-        return _subBuffer;
-    }
 
     /**
      * @see org.mortbay.util.Buffer#array()
@@ -51,59 +35,6 @@ public class ByteArrayBuffer implements Buffer
     public byte[] array()
     {
         return _bytes;
-    }
-
-    /**
-     * @see org.mortbay.util.Buffer#offset()
-     */
-    public int offset()
-    {
-        return _offset;
-    }
-
-    /**
-     * @see org.mortbay.util.Buffer#offset(int)
-     */
-    public void offset(int newOffset)
-    {
-		if (!_mutable)
-			Portable.throwIllegalState("immutable");
-		if (newOffset < 0)
-			Portable.throwIllegalArgument("newOffset<0 " + newOffset);
-		if (newOffset>limit())
-			Portable.throwIllegalArgument("newOffset>limit(): " + newOffset + ">" + limit());	
-
-        _offset= newOffset;
-    }
-
-    /**
-     * @see org.mortbay.util.Buffer#limit()
-     */
-    public int limit()
-    {
-        return _limit;
-    }
-
-    /**
-     * @see org.mortbay.util.Buffer#limit(int)
-     */
-    public void limit(int newLimit)
-    {
-		if (!_mutable)
-			Portable.throwIllegalState("immutable");
-		if (newLimit > capacity())
-			Portable.throwIllegalArgument("newLimit>capacity(): " + newLimit + ">" + capacity());
-		if (offset()>newLimit)
-			Portable.throwIllegalArgument("offset()>newLimit: " + offset() + ">" + newLimit);	
-        _limit= newLimit;
-    }
-
-    /**
-     * @see org.mortbay.util.Buffer#length()
-     */
-    public int length()
-    {
-        return _limit - _offset;
     }
 
     /**
@@ -117,52 +48,54 @@ public class ByteArrayBuffer implements Buffer
     /**
      * @see org.mortbay.util.Buffer#get(int)
      */
-    public byte get(int offset)
+    public byte peek(int offset)
     {
-    	if (offset < offset())
-			Portable.throwIllegalArgument("offset<offset(): " + offset + "<" + offset());
-        if (offset >= limit())
-            Portable.throwIllegalArgument("offset>=limit: " + offset + ">=" + limit());
+		if (offset < 0)
+			Portable.throwIllegalArgument("offset<0: " + offset + "<0");
+		if (offset > capacity())
+			Portable.throwIllegalArgument("offset>capacity(): " + offset + ">" + capacity());
         return _bytes[offset];
     }
 
     /**
      * @see org.mortbay.util.Buffer#get(int, int)
      */
-    public Buffer get(int offset, int length)
+    public Buffer peek(int offset, int length)
     {
-		if (offset < offset())
-			Portable.throwIllegalArgument("offset<offset(): " + offset + "<" + offset());
-        if (offset + length > limit())
-            Portable.throwIllegalArgument("offset+length>limit: " + offset + "+" + length + ">" + limit());
+		if (offset < 0)
+			Portable.throwIllegalArgument("offset<0: " + offset + "<0");
+        if (offset + length > capacity())
+            Portable.throwIllegalArgument("offset+length>capacity(): " + offset + "+" + length + ">" + capacity());
         return subBuffer(offset, length);
     }
 
     /** 
      * @see org.mortbay.util.Buffer#put(int, byte)
      */
-    public void put(int offset, byte b)
+    public void poke(int offset, byte b)
     {
-		if (offset < offset())
-			Portable.throwIllegalArgument("offset<offset(): " + offset + "<" + offset());
-        if (offset >= limit())
-            Portable.throwIllegalArgument("offset>=limit: " + offset + ">=" + limit());
-        if (!_mutable)
-            Portable.throwIllegalState("immutable");
+		if (!isMutable())
+			Portable.throwIllegalState("immutable");
+			
+		if (offset < 0)
+			Portable.throwIllegalArgument("offset<0: " + offset + "<0");
+		if (offset > capacity())
+			Portable.throwIllegalArgument("offset>capacity(): " + offset + ">" + capacity());
+			
         _bytes[offset]= b;
     }
 
     /** 
      * @see org.mortbay.util.Buffer#put(int, org.mortbay.util.Buffer)
      */
-    public void put(int offset, Buffer src)
+    public void poke(int offset, Buffer src)
     {
-        if (!_mutable)
+        if (!isMutable())
             Portable.throwIllegalState("immutable");
-		if (offset < offset())
-			Portable.throwIllegalArgument("offset<offset(): " + offset + "<" + offset());
-        if (offset + src.length() > limit())
-            Portable.throwIllegalArgument("offset+length>limit: " + offset + "+" + src.length() + ">" + limit());
+		if (offset < 0)
+			Portable.throwIllegalArgument("offset<0: " + offset + "<0");
+		if (offset + src.length() > capacity())
+			Portable.throwIllegalArgument("offset+length>capacity(): " + offset + "+" + src.length() + ">" + capacity());
         Portable.arraycopy(src.array(), src.offset(), _bytes, offset, src.length());
     }
 
@@ -171,22 +104,10 @@ public class ByteArrayBuffer implements Buffer
 	 */
 	public void clear()
 	{
-		_offset=0;
-		_limit=0;
+		offset(0);
+		limit(0);
 	}
 
-	/**
-	 * @see org.mortbay.util.Buffer#compact()
-	 */
-	public void compact()
-	{
-		if (_offset>0)
-		{
-			Portable.arraycopy(_bytes, _offset, _bytes, 0, length());
-			_limit-=_offset;
-			_offset=0;
-		}
-	}
 
 	/**
 	 * @see org.mortbay.util.Buffer#fill()
@@ -204,34 +125,5 @@ public class ByteArrayBuffer implements Buffer
 		return -1;
 	}
 	
-    /**
-     * @see org.mortbay.util.Buffer#immutable()
-     */
-    public Buffer immutable()
-    {
-        if (_mutable)
-        {
-            byte[] bytes= new byte[_limit - _offset];
-            Portable.arraycopy(_bytes, _offset, bytes, 0, bytes.length);
-
-            ByteArrayBuffer view= new ByteArrayBuffer(_bytes, _offset, length(), !__MUTABLE);
-            return view;
-        }
-        else
-            return this;
-    }
-
-    /**
-     * @see org.mortbay.util.Buffer#isMutable()
-     */
-    public boolean isMutable()
-    {
-        return _mutable;
-    }
-
-    public String toString()
-    {
-        return new String(array(), offset(), length());
-    }
 
 }

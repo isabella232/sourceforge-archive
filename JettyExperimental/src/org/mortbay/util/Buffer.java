@@ -18,21 +18,38 @@ public interface Buffer
      * @return limit-offset
      */
     int length();
+	int available();
 
     /**
      * @return max limit
      */
     int capacity();
-   
-	byte get(int offset);
-	Buffer get(int offset, int length);
-    
-	void put(int offset, byte b);
-	void put(int offset, Buffer src);
 
+	byte peek();
+	byte peek(int offset);
+	Buffer peek(int offset, int length);
+	
+	void poke(int offset,byte b);
+	void poke(int offset, Buffer src);
+	
+	byte get();
+	Buffer get(int length);
+
+	void put(byte b);
+	void put(Buffer src);
+	
+
+	public int mark();
+	public void mark(int newMark);
+	public void markOffset();
+	public void markOffset(int offset);
+	public Buffer marked();
+	public Buffer marked(int length);
+	
 	int fill();
 	int flush();
 	void clear();
+	void rewind();
 	void compact();
     
      boolean isMutable();
