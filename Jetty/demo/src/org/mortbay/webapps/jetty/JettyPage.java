@@ -40,13 +40,15 @@ public class JettyPage extends Page
         catch(Exception e) {Code.ignore(e);}
     }
     
-    
     /* ------------------------------------------------------------ */
     /** 
      * @param context 
      */
-    static void initialize(String context)  
+    static synchronized void initialize(String context)  
     {
+        if (__section!=null)
+	    return;
+
         // This only works for 1 context.
         Log.event("Loading JettyPage Index");
         int i=0;
