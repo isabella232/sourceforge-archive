@@ -8,6 +8,7 @@ Jetty-4.0.3 -
  + Better recycling of HttpRequests.
  + Protect session.getAttributeNames from concurrent modifications.
  + Allow session manager to be initialized when set.
+ + Fixed japanese locale
 
 Jetty-4.0.2 - 6 June 2002
  + Fixed web.dtd references.

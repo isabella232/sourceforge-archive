@@ -92,7 +92,7 @@ public class ServletHttpResponse implements HttpServletResponse
         __charSetMap.put("is", StringUtil.__ISO_8859_1);
         __charSetMap.put("it", StringUtil.__ISO_8859_1);
         __charSetMap.put("iw", "ISO-8859-8");
-        __charSetMap.put("ja", "Shift__JIS");
+        __charSetMap.put("ja", "Shift_JIS");
         __charSetMap.put("ko", "EUC-KR");     
         __charSetMap.put("lt", "ISO-8859-2");
         __charSetMap.put("lv", "ISO-8859-2");
