@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Fixed DOS attack problem
+
 Jetty-4.2.18 - 1 Mar 2004
  + Added log4j context repository to jettyplus
  + NPE guard for no-listener junit deployment
