@@ -210,7 +210,7 @@ public class InclusiveByteRange {
         return formatHeaderRangeString(
                    Long.toString(getFirst(size)) +"-"+
                    Long.toString(getLast(size)),
-                   Long.toString(size)
+                   Long.toString(getSize(size))
         );
     }
 
