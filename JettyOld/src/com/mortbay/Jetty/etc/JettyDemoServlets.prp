@@ -1,6 +1,7 @@
 PATHS				    : /servlet/;/SERVLET/;/Servlet/
 CLASSPATH			    : ./servlets
 AutoReloadDynamicServlets	    : True
+Loader                              : com.mortbay.HTTP.Handler.FileJarServletLoader
 
 SERVLET.Dump.CLASS		    : com.mortbay.Servlets.Dump
 SERVLET.Dump.PATHS		    : /Dump%;*.DUMP
@@ -10,6 +11,10 @@ SERVLET.Dump.PROPERTY.AttrY	    : ValueY
 SERVLET.Dump.PROPERTY.AttrZ	    : ValueZ
 SERVLET.Dump.PROPERTIES		    : ./etc/JettyDemoDump.prp
 SERVLET.Dump.Initialize		    : True
+SERVLET.Dump.Loader                 : com.mortbay.HTTP.Handler.FileJarServletLoader
+
+SERVLET.Exit.CLASS		    : com.mortbay.Servlets.Exit
+SERVLET.Exit.PATHS		    : /Exit
 
 SERVLET.Session.CLASS		    : com.mortbay.Servlets.SessionDump
 SERVLET.Session.PATHS		    : /SessionDump

@@ -11,6 +11,9 @@ SERVERS                                   : main
 main.CLASS				  : com.mortbay.HTTP.HttpServer
 main.STACKS				  : root
 main.PROPERTY.SessionMaxInactiveInterval  : 3600
+main.PROPERTY.MinListenerThreads	  : 1
+main.PROPERTY.MaxListenerThreads	  : 20
+main.PROPERTY.MaxListenerThreadIdleMs	  : 60000
 main.PROPERTY.MimeMap			  : ./etc/Mime.prp
 main.LISTENER.all.CLASS                   : com.mortbay.HTTP.HttpListener
 main.LISTENER.all.ADDRS                   : 0.0.0.0:8080

@@ -1,4 +1,7 @@
 /** $Id$ */
+// (c)1999 Transparent Language, Inc.
+
+
 package com.mortbay.Jetty;
 
 import java.io.FileReader;
@@ -7,6 +10,14 @@ import java.util.*;
 import java.net.*;
 import java.io.*;
 
+/* ------------------------------------------------------------ */
+/** Stress test a WWW server. 
+ * (c)1999 Transparent Language, Inc.
+ * @version $Id$
+ * @author Kent Johnson <kjohnson@transparent.com>
+ * @author Juancarlo Añez <juancarlo@modelistica.com>
+ * @author Greg Wilkins <gregw@mortbay.com>
+ */
 public class  StressTester
 {
     int totalRequests=0;
@@ -126,14 +137,23 @@ public class  StressTester
 	    int totalBytes = 0;
 	    URL u = new URL(inURL);
 	    URLConnection conn = u.openConnection();
-	    conn.setRequestProperty("Accept", "*/*");
-	    InputStream in = conn.getInputStream(); // Open the URL
-	    totalBytes = flush(in);                 // Read and throw away the contents
-        
-	    // Check for a successful connection
-	    HttpURLConnection httpConn = (HttpURLConnection)conn;
-	    if (httpConn.getResponseCode() >= 400)
-		throw new Exception(Integer.toString(httpConn.getResponseCode()));
+		conn.setRequestProperty("Accept", "*/*");
+		InputStream in = conn.getInputStream(); // Open the URL
+		try
+		{
+		    totalBytes = flush(in);// Read and throw away the contents
+		}
+		finally
+		{
+		    in.close();
+		}
+		
+		// Check for a successful connection
+		HttpURLConnection httpConn = (HttpURLConnection)conn;
+		if (httpConn.getResponseCode() >= 400)
+		    throw new Exception(Integer.toString(httpConn.getResponseCode()));
+	   
+	    
 	    return totalBytes;
  
 	}

@@ -168,16 +168,22 @@ public class ForwardHandler extends NullHandler
 				       proxy.getPort());
 		    request.translateAddress(requestPath,url.toString());
 		}
-		
-		Code.debug("Forward to "+url+
-			   " via "+request.getResourcePath());
-		request.setHeader(HttpHeader.Connection,null);
-		request.setHeader("Host",null);
-		request.setVersion(request.HTTP_1_0);
 
-		request.write(socket.getOutputStream());
-		Code.debug("waiting for forward reply...");
-		response.writeInputStream(socket.getInputStream(),-1,true);
+		try{
+		    Code.debug("Forward to "+url+
+			       " via "+request.getResourcePath());
+		    request.setHeader(HttpHeader.Connection,null);
+		    request.setHeader("Host",null);
+		    request.setVersion(request.HTTP_1_0);
+		    
+		    request.write(socket.getOutputStream());
+		    Code.debug("waiting for forward reply...");
+		    response.writeInputStream(socket.getInputStream(),-1,true);
+		}
+		finally
+		{
+		    socket.close();
+		}
 	    }
 	}
     }    

@@ -29,6 +29,7 @@ public class ServletHandler extends NullHandler
     PathMap servletMap;
     PathMap dynamicMap=null;
     String dynamicClassPath=null;
+    String dynamicLoader=null;
     Hashtable nameMap=null;
     boolean autoReloadDynamicServlets=true;
     
@@ -57,12 +58,14 @@ public class ServletHandler extends NullHandler
      * PATHS : /servlet/:/SERVLET/    # URL Paths for dynamic servlet loading
      * CLASSPATH : ./servlets:        # CLASS Paths for dynamic servlet loading
      * AutoReloadDynamicServlets: True# Should dynamic servlets auto reload
+     * Loader : className             # ServletLoader for dynamic servlets
      * SERVLET.name.CLASS: className  # Class of servlet
      * SERVLET.name.PATHS: /path      # Servlet path
      * SERVLET.name.CHUNK: False      # Should servlet HTTP/1.1 chunk by default
      * SERVLET.name.PROPERTY.key:val  # Servlet property
      * SERVLET.name.PROPERTIES: file  # File of servlet properties
      * SERVLET.name.Initialize: False # Initialize when loaded. 
+     * SERVLET.name.Loader: className # ServletLoader for servlet
      * </PRE>
      * @param properties Configuration.
      */
@@ -81,12 +84,13 @@ public class ServletHandler extends NullHandler
 	// Setup dynamic servlets
 	Vector dynamicPaths = tree.getVector("PATHS",";");
 	dynamicClassPath = tree.getProperty("CLASSPATH");
+	dynamicLoader = tree.getProperty("Loader");
 	autoReloadDynamicServlets = tree.getBoolean("AutoReloadDynamicServlets");
 	if (dynamicPaths!=null && dynamicClassPath!=null &&
 	    dynamicPaths.size()>0 && dynamicClassPath.length()>0)
 	{
 	    // check path;
-	    new ServletLoader(dynamicClassPath);
+	    new FileJarServletLoader(dynamicClassPath);
 	    dynamicMap = new PathMap();
 	    for (int p=dynamicPaths.size();p-->0;)
 		dynamicMap.put(dynamicPaths.elementAt(p),"");
@@ -104,12 +108,14 @@ public class ServletHandler extends NullHandler
 		
 		String servletClass = servletTree.getProperty("CLASS");
 		String servletClassPath = servletTree.getProperty("CLASSPATH");
-		
+		String servletLoaderName = servletTree.getProperty("Loader");
 		Properties servletProperties = getProperties(servletTree);
-		ServletHolder servletHolder= new ServletHolder(servletName,
-							       servletClass,
-							       servletClassPath,
-							       servletProperties);
+		ServletHolder servletHolder=
+		    new ServletHolder(servletLoaderName,
+				      servletName,
+				      servletClass,
+				      servletClassPath,
+				      servletProperties);
 		
 		boolean chunk = servletTree.getBoolean("CHUNK");
 		servletHolder.setChunkByDefault(chunk);
@@ -120,7 +126,7 @@ public class ServletHandler extends NullHandler
 	    }
 	    catch(ClassNotFoundException e)
 	    {
-		Code.ignore(e);
+		Code.warning(e);
 	    }
 	}
     }
@@ -168,7 +174,8 @@ public class ServletHandler extends NullHandler
 		servletClass=servletClass.substring(0,servletClass.length()-6);
 	    Log.event("Dynamic load "+servletClass);
 	    
-	    ServletHolder holder= new ServletHolder(servletClass,
+	    ServletHolder holder= new ServletHolder(dynamicLoader,
+						    servletClass,
 						    servletClass,
 						    dynamicClassPath,
 						    null);

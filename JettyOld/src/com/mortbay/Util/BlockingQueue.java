@@ -5,7 +5,7 @@
 
 package com.mortbay.Util;
 import java.util.Vector;
-
+import com.mortbay.Base.Code;
 
 /* ------------------------------------------------------------ */
 /** Blocking queue
@@ -19,7 +19,8 @@ import java.util.Vector;
  */
 public class BlockingQueue
 {
-    private Vector elements = new Vector();
+    Object[] elements;
+    int maxSize;
     int size=0;
     int head=0;
     int tail=0;
@@ -27,9 +28,12 @@ public class BlockingQueue
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
-    public BlockingQueue()
+    public BlockingQueue(int maxSize)
     {
-	elements.addElement("");
+	this.maxSize=maxSize;
+	if (maxSize==0)
+	    this.maxSize=255;
+	elements = new Object[this.maxSize];
     }
 
     /* ------------------------------------------------------------ */
@@ -38,33 +42,60 @@ public class BlockingQueue
      */
     public int size()
     {
-	synchronized(elements)
-	{
-	    return size;
-	}
+	return size;
     }
-  
+    
     /* ------------------------------------------------------------ */
     /** 
-     * @param o 
+     * @return 
+     */
+    public int maxSize()
+    {
+	return maxSize;
+    }
+    
+  
+    /* ------------------------------------------------------------ */
+    /** Put object in queue.
+     * @param o Object
      */
     public void put(Object o)
+	throws InterruptedException
     {
 	synchronized(elements)
 	{
-	    int esize=elements.size();
-	    if (size==esize)
+	    while (size==maxSize)
+		elements.wait();
+
+	    elements[tail]=o;
+	    if(++tail==maxSize)
+		tail=0;
+	    size++;
+	    elements.notify();
+	}
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Put object in queue.
+     * @param timeout If timeout expires, throw InterruptedException
+     * @param o Object
+     * @exception InterruptedException Timeout expired or otherwise interrupted
+     */
+    public void put(Object o, int timeout)
+	throws InterruptedException
+    {
+	synchronized(elements)
+	{
+	    if (size==maxSize)
 	    {
-		elements.insertElementAt(o,++tail);
-		if(head>=tail)
-		    head++;
+		elements.wait(timeout);
+		if (size==maxSize)
+		    throw new InterruptedException("Timed out");
 	    }
-	    else
-	    {
-		if(++tail==esize)
-		    tail=0;
-		elements.setElementAt(o,tail);
-	    }
+	    
+	    elements[tail]=o;
+	    if(++tail==maxSize)
+		tail=0;
 	    size++;
 	    elements.notify();
 	}
@@ -80,13 +111,13 @@ public class BlockingQueue
 	synchronized(elements)
 	{
 	    while (size==0)
-	    {
 		elements.wait();
-	    }
-	    Object o = elements.elementAt(head++);
-	    if(head==elements.size())
+	    
+	    Object o = elements[head];
+	    if(++head==maxSize)
 		head=0;
 	    size--;
+	    elements.notify();
 	    return o;
 	}
     }
@@ -99,7 +130,7 @@ public class BlockingQueue
      */
     public Object get(long timeout)
 	throws InterruptedException
-    {
+    {	
 	synchronized(elements)
 	{
 	    if (size==0)
@@ -107,10 +138,12 @@ public class BlockingQueue
 	    if (size==0)
 		return null;
 	    
-	    Object o = elements.elementAt(head++);
-	    if(head==elements.size())
+	    Object o = elements[head];
+	    if(++head==maxSize)
 		head=0;
 	    size--;
+	    elements.notify();
+	    
 	    return o;
 	}
     }

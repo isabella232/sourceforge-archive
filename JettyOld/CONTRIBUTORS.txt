@@ -1,6 +1,6 @@
 
+Contributions, Testing & valuable feedback from:
 
-Authors & Testers:
   Greg Wilkins <gregw@mortbay.com>
   Jan Bartel <janb@mortbay.com>
   Matt Watson <mattw@mortbay.com>
@@ -18,8 +18,19 @@ Authors & Testers:
   Nikos Anerousis <nikos@research.att.com>
   Donovan Kolbly <kolbly@mcc.com>
   Ernest Leipold <everlongh@hotmail.com>
+  Doyle Davidson <ddavidso@automatedlogic.com>
+  Petr Jiricka <petr.jiricka@netbeans.com>
+
 
   Plus a few more in the pipe line (tell me if your one of them...)
 
 
-
+Copyright holders:
+  Mort Bay Consulting Pty. Ltd. (Australia)
+  Mort Bay Consulting Limited (United Kingdom)
+  Optimus Solutions Pty. Ltd.
+  Intelligent Switched Systems, Sydney
+  Sun Microsystems, Inc.
+  Transparent Language, Inc.
+  Free Software Foundation, Inc.
+  Vincent Partington <vincentp@xs4all.nl>

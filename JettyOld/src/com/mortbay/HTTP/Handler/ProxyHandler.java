@@ -107,14 +107,20 @@ public class ProxyHandler extends NullHandler
 	int port = url.getPort() ;
 	Socket socket= new Socket(url.getHost(),port<0?80:port);
 
-	String newPath = new URI(url.getFile()).getPath();
-	request.translateAddress(request.getResourcePath(),newPath);
-	request.setHeader(HttpHeader.Connection,null);
-	request.setHeader("Host",null);
-	request.setVersion(request.HTTP_1_0);
-	request.write(socket.getOutputStream());
-	Code.debug("waiting for forward reply...");
-	response.writeInputStream(socket.getInputStream(),-1,true);
+	try{
+	    String newPath = new URI(url.getFile()).getPath();
+	    request.translateAddress(request.getResourcePath(),newPath);
+	    request.setHeader(HttpHeader.Connection,null);
+	    request.setHeader("Host",null);
+	    request.setVersion(request.HTTP_1_0);
+	    request.write(socket.getOutputStream());
+	    Code.debug("waiting for forward reply...");
+	    response.writeInputStream(socket.getInputStream(),-1,true);
+	}
+	finally
+	{
+	    socket.close();
+	};
     }
     
     /* ---------------------------------------------------------------- */

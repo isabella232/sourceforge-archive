@@ -41,6 +41,10 @@ abstract public class ThreadedServer implements Runnable
     /* ------------------------------------------------------------ */
     static int __maxThreads =
 	Integer.getInteger("THREADED_SERVER_MAX_THREADS",0).intValue();
+    
+    /* ------------------------------------------------------------ */
+    static int __minThreads =
+	Integer.getInteger("THREADED_SERVER_MIN_THREADS",0).intValue();
 
     /* ------------------------------------------------------------------- */
     private Thread serverThread = null;
@@ -54,7 +58,7 @@ abstract public class ThreadedServer implements Runnable
      */
     public ThreadedServer() 
     {
-	_threadPool=new ThreadPool(__maxThreads);
+	_threadPool=new ThreadPool(__minThreads,__maxThreads,null,0);
     }
     
     /* ------------------------------------------------------------------- */
@@ -62,7 +66,7 @@ abstract public class ThreadedServer implements Runnable
      */
     public ThreadedServer(String name) 
     {
-	_threadPool=new ThreadPool(__maxThreads,name);
+	_threadPool=new ThreadPool(__minThreads,__maxThreads,name,0);
     }
 
     /* ------------------------------------------------------------------- */
@@ -72,7 +76,7 @@ abstract public class ThreadedServer implements Runnable
 	 throws java.io.IOException
     {
 	String name="Port:"+port;
-	_threadPool=new ThreadPool(__maxThreads,name);
+	_threadPool=new ThreadPool(__minThreads,__maxThreads,name,0);
 	setAddress(null,port);
     }
     
@@ -83,7 +87,7 @@ abstract public class ThreadedServer implements Runnable
 	 throws java.io.IOException
     {
 	String name=((address==null)?"Port:":(address.toString()+":"))+port;
-	_threadPool=new ThreadPool(__maxThreads,name);
+	_threadPool=new ThreadPool(__minThreads,__maxThreads,name,0);
 	setAddress(address,port);
     }
     
@@ -94,7 +98,7 @@ abstract public class ThreadedServer implements Runnable
 	 throws java.io.IOException
     {
 	String name=address.toString();
-	_threadPool=new ThreadPool(__maxThreads,name);
+	_threadPool=new ThreadPool(__minThreads,__maxThreads,name,0);
 	setAddress(address.getInetAddress(),address.getPort());
     }
     
@@ -102,11 +106,13 @@ abstract public class ThreadedServer implements Runnable
     /** Construct for specific address, port and ThreadPool size
      */
     public ThreadedServer(InetAddrPort address,
-			  int threadPoolSize) 
+			  int minThreads, 
+			  int maxThreads,
+			  int maxIdleTime) 
 	 throws java.io.IOException
     {
 	String name=address.toString();
-	_threadPool = new ThreadPool(threadPoolSize,name);
+	_threadPool = new ThreadPool(minThreads,maxThreads,name,maxIdleTime);
 	setAddress(address.getInetAddress(),address.getPort());
     }
     
@@ -269,8 +275,11 @@ abstract public class ThreadedServer implements Runnable
 	    Code.debug( "Listening at lower priority");
 	    serverThread.setPriority(serverThread.getPriority()-1);
 	}
-	if (_threadPool.getSize()>0)    
-	    Code.debug( "Max Threads = " + _threadPool.getSize() );
+	if (_threadPool.getSize()>0)
+	{
+	    Code.debug( "Min Threads = " + _threadPool.getMinSize() );
+	    Code.debug( "Max Threads = " + _threadPool.getMaxSize() );
+	}
 	
 	// While the thread is running . . .
 	try{
@@ -288,7 +297,9 @@ abstract public class ThreadedServer implements Runnable
 			    handleConnection(connection);
 			}
 		    };
+		    
 		    _threadPool.run(handler);
+
 		}
 		catch ( Exception e )
 		{

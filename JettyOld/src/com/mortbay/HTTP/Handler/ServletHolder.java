@@ -12,6 +12,7 @@ import java.io.*;
 import java.net.*;
 import javax.servlet.*;
 import java.util.*;
+import java.lang.reflect.*;
 
 
 /* --------------------------------------------------------------------- */
@@ -40,6 +41,7 @@ public class ServletHolder implements ServletConfig
     private boolean singleThreadModel;
     private boolean chunkByDefault=false;
     private String classPath=null;
+    private Constructor servletLoaderConstructor=null;
     
     private Class servletClass=null;
     private Stack servlets=new Stack();
@@ -58,7 +60,8 @@ public class ServletHolder implements ServletConfig
     public ServletHolder(String name,String className)
 	throws ClassNotFoundException
     {
-	this(name,className,"",null);
+	this("com.mortbay.HTTP.Handler.FileJarServletLoader",
+	     name,className,"",null);
     }
     
     /* ---------------------------------------------------------------- */
@@ -73,18 +76,21 @@ public class ServletHolder implements ServletConfig
 			 Hashtable initParams)
 	throws ClassNotFoundException
     {
-	this(name,className,"",initParams);
+	this("com.mortbay.HTTP.Handler.FileJarServletLoader",
+	     name,className,"",initParams);
     }
     
     /* ---------------------------------------------------------------- */
     /** Construct a Servlet property mostly from the servers config
      * file.
+     * @param servletLoaderName ServletLoader class name (or null)
      * @param name Servlet name
      * @param className Servlet class name (fully qualified)
      * @param classPath Servlet class path of directories and jars
      * @param initParams Hashtable of paramters
      */
-    public ServletHolder(String name,
+    public ServletHolder(String servletLoaderName,
+			 String name,
 			 String className,
 			 String classPath,
 			 Hashtable initParams)
@@ -94,14 +100,31 @@ public class ServletHolder implements ServletConfig
 	this.classPath  = classPath==null?"":classPath;
 	this.initParams=initParams==null?new Hashtable(10):initParams;
 
+	if (servletLoaderName==null)
+	    servletLoaderName=
+		"com.mortbay.HTTP.Handler.FileJarServletLoader";
+	Class servletLoaderClass = Class.forName(servletLoaderName);
+	Class[] constructorArgs = { java.lang.String.class };
 	try
 	{
-	    loader = new ServletLoader(this.classPath);
+	    servletLoaderConstructor =
+		servletLoaderClass.getConstructor(constructorArgs);
+	}
+	catch(NoSuchMethodException e)
+	{
+	    Code.warning(e);
+	    throw new ClassNotFoundException(servletLoaderName+
+					     " with constructor(String path)");
+	}
+	
+	try
+	{
+	    loader = newServletLoader();
 	    servletClass = loader.loadClass(className,true);
 	}
 	catch(Exception e)
 	{
-	    Code.warning("Cannot find servlet class "+className,e);
+	    Code.warning(e);
 	    throw new ClassNotFoundException(className);
 	}
 
@@ -111,6 +134,13 @@ public class ServletHolder implements ServletConfig
 	singleThreadModel =
 	    javax.servlet.SingleThreadModel.class
 	    .isAssignableFrom(servletClass);
+    }
+
+    private ServletLoader newServletLoader()
+	throws Exception
+    {
+	String[] args={classPath};
+	return (ServletLoader)servletLoaderConstructor.newInstance(args);
     }
     
     /* ---------------------------------------------------------------- */
@@ -128,7 +158,8 @@ public class ServletHolder implements ServletConfig
 			 boolean initialize)
 	throws ClassNotFoundException
     {
-	this(name, className,"",initParams);
+	this("com.mortbay.HTTP.Handler.FileJarServletLoader",
+	     name, className,"",initParams);
     }
 
     /* ---------------------------------------------------------------- */
@@ -199,7 +230,8 @@ public class ServletHolder implements ServletConfig
 		
 		// Setup new classloader
 		String className=servletClass.getName();
-		loader = new ServletLoader(this.classPath);
+		
+		loader = newServletLoader();
 		servletClass = loader.loadClass(className,true);
 	    }
 	    catch(Exception e)
@@ -212,7 +244,6 @@ public class ServletHolder implements ServletConfig
 		reloading=false;
 	    }
 	}
-	
     }
 
     /* ------------------------------------------------------------ */

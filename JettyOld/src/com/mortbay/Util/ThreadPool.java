@@ -24,16 +24,18 @@ import com.mortbay.Base.Code;
  * threadPool.run(new Runnable() { public void run() { myHandler(myArg); }} );
  * </pre>
  *
- * @version 1.0 Sun Feb 21 1999
- * @author Greg Wilkins <gregw@mortbay.com>
+ * @version $Id$
  * @author Juancarlo Añez <juancarlo@modelistica.com>
+ * @author Greg Wilkins <gregw@mortbay.com>
  */
 public class ThreadPool
 {
     private String _name="PoolThread";
+    private int _minThreads=0;
     private int _maxThreads=0;
+    private int _threadID=0;
     private int _nThreads=0;
-    private BlockingQueue jobs = new BlockingQueue();
+    private BlockingQueue jobs;
     private int _maxIdleTimeMs=0;
     
     /* ------------------------------------------------------------ */
@@ -43,22 +45,48 @@ public class ThreadPool
     /* ------------------------------------------------------------ */
     public ThreadPool(int maxThreads)
     {
+	_minThreads=0;
 	_maxThreads=maxThreads;
+	jobs=new BlockingQueue(_maxThreads);
     }
     
     /* ------------------------------------------------------------ */
     public ThreadPool(int maxThreads, String name)
     {
+	_minThreads=0;
 	_maxThreads=maxThreads;
 	_name=name;
+	jobs=new BlockingQueue(_maxThreads);
     }
     
     /* ------------------------------------------------------------ */
     public ThreadPool(int maxThreads, String name, int maxIdleTimeMs)
     {
+	_minThreads=0;
 	_maxThreads=maxThreads;
 	_maxIdleTimeMs=maxIdleTimeMs;
-	_name=name;
+	if (name!=null)
+	    _name=name;
+	jobs=new BlockingQueue(_maxThreads);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public ThreadPool(int minThreads,
+		      int maxThreads,
+		      String name,
+		      int maxIdleTimeMs)
+    {
+	_minThreads=minThreads;
+	_maxThreads=maxThreads;
+	_maxIdleTimeMs=maxIdleTimeMs;
+	if (name!=null)
+	    _name=name;
+	jobs=new BlockingQueue(_maxThreads);
+	for (int i=_minThreads;i-->0;)
+	{
+	    _nThreads++;
+	    new PoolThread();
+	}
     }
 
     /* ------------------------------------------------------------ */
@@ -68,16 +96,23 @@ public class ThreadPool
     }
     
     /* ------------------------------------------------------------ */
+    public int getMinSize()
+    {
+	return _minThreads;
+    }
+    
+    /* ------------------------------------------------------------ */
     public int getMaxSize()
     {
 	return _maxThreads;
     }
     
     /* ------------------------------------------------------------ */
-    /** Constructor. 
+    /** Run job 
      * @param runnable 
      */
-    public synchronized void run(Runnable runnable)
+    public void run(Runnable runnable)
+	throws InterruptedException
     {
 	// Place job on job queue
 	jobs.put(runnable);
@@ -87,12 +122,19 @@ public class ThreadPool
 	
 	// If there are jobs in the queue and we are not at our
 	// maximum number of threads, create a new thread
-	if (jobs.size()>0 && _maxThreads==0 || _nThreads<_maxThreads)
+	if (jobs.size()>0 && (_maxThreads==0 || _nThreads<_maxThreads))
 	{
-	    new PoolThread();
+	    synchronized(this)
+	    {
+		if (jobs.size()>0 && (_maxThreads==0 || _nThreads<_maxThreads))
+		{
+		    _nThreads++;
+		    new PoolThread();
+		}
+	    }
 	}
     }
-	
+    
     
     /* ------------------------------------------------------------ */
     /** A Thread in the pool
@@ -105,7 +147,7 @@ public class ThreadPool
 	public PoolThread()
 	{
 	    super();
-	    _nameN=_name+"-"+_nThreads+"/";
+	    _nameN=_name+"-"+(_threadID++);
 	    super.setName(_nameN);
 	    Code.debug("New ",this);
 	    setDaemon(true);
@@ -119,11 +161,7 @@ public class ThreadPool
 	{
 	    try
 	    {
-		synchronized(ThreadPool.this)
-		{
-		    Code.debug("Starting PoolThread: ",this);
-		    _nThreads++;
-		}
+		Code.debug("Running PoolThread: ",this);
 
 		int runs=0;
 		while(true)
@@ -132,11 +170,18 @@ public class ThreadPool
 			?((Runnable) jobs.get(_maxIdleTimeMs))
 			:((Runnable) jobs.get());
 		    if (job == null)
-			break;
-		    
-		    super.setName(_nameN+runs++);
-		    if (Code.verbose())
-			Code.debug("Thread: ",this," Handling ",job);
+		    {
+			if (_nThreads>_minThreads)
+			    break;
+			continue;
+		    }
+
+		    if (Code.debug())
+		    {
+			super.setName(_nameN+"/"+runs++);
+			if (Code.verbose())
+			    Code.debug("Thread: ",this," Handling ",job);
+		    }
 		    job.run();
 		}
 	    }
@@ -155,3 +200,6 @@ public class ThreadPool
 	}
     }
 };
+
+
+

@@ -1,5 +1,25 @@
 
-Release 2.1.Beta0 - 31 May 1999
+Release 2.2.Beta1 -  June 1999
+  + Defined abstract ServletLoader, derivations of which can be 
+    specified in HttpConfiguration properties. 
+  + Implemented all HttpServer attribute methods by mapping to the
+    HttpConfiguration properties.  Dynamic reconfiguratin is NOT
+    supported by these methods (but we are thinking about it).
+  + Close files after use to avoid "file leak" under heavy load and
+    slow GC. There still appears to be a file leak, but we are hunting
+    for it.
+  + Fixed missing copyright messages from some contributions
+  + Fixed incorrect version numbers in a few places.
+  + Improved ThreadPool synchronization and added minThreads.
+  + Allow configuration of MinListenerThreads, MaxListenerThreads,
+    MaxListenerThreadIdleMs
+  + HtmlFilter optimized for being called by a buffered writer.
+  + Don't warn about IOExceptions unless Debug is on.
+  + Limit the job queue only grow to the max number of threads.
+  + Included GNUJSP 0.9.9
+  + Optional use of DateCache in log file format
+
+Release 2.2.Beta0 - 31 May 1999
   + Servlet loader handles jar files with different files separator.
   + ThreadedServer gently shutsdown.
   + Handle malformed % characters in URLs.
@@ -19,7 +39,7 @@ Release 2.1.Beta0 - 31 May 1999
   + Token effort to keep test files out of the jar 
   + Removed support for STF
 
-Release 2.1.Alpha1 - 7 May 1999
+Release 2.2.Alpha1 - 7 May 1999
   + ServletHolder can auto reload servlets
   + Dynamic servlets can have autoReload configured 
   + Wait for requests to complete before reloading.

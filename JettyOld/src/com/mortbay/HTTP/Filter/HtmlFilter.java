@@ -33,9 +33,13 @@ import java.lang.reflect.*;
  * <li>Any HTTPRequest parameter
  * <ul>
  * Any object returned by the tag is sent to the response output.
- * <P>
+ * 
  * The special tag &lt;!=SESSION&gt; is expanded to the session
  * URL encoding if it is required.
+ *
+ * The assumption is made that <!= is fairly infrequent, so that
+ * write(byte[]) can be efficiently implemented.
+ *
  * @see com.mortbay.HTTP.Handler.FilterHandler
  * @version $Id$
  * @author Greg Wilkins
@@ -45,6 +49,7 @@ public class HtmlFilter extends HttpFilter
     /* ------------------------------------------------------------- */
     int state=0;
     StringBuffer tagBuf = new StringBuffer(128);
+    byte[] ba={0};
     
     /* ------------------------------------------------------------- */
     public void write(byte[]  b)
@@ -54,51 +59,68 @@ public class HtmlFilter extends HttpFilter
     }
      
     /* ------------------------------------------------------------- */
-    public void write(byte  b[], int  off, int  len)
+    public void write(byte  buf[], int  off, int  len)
 	 throws IOException
     {
+	int end = off-1;
 	int l = off+len;
-	for (int i=off; i<l;i++)
-	    write(b[i]);
-    }
-    
-    /* ------------------------------------------------------------- */
-    public void write(int  b)
-	 throws IOException
-    {
 	String tag=null;
 	
-	switch((char)b)
+	for (int i=off; i<l;i++)
 	{
-	  case '<':
-	      state=(state==0)?1:0;
-	      break;
-	  case '!':
-	      state=(state==1)?2:0;
-	      break;
-	  case '=':
-	      state=(state==2)?3:0;
-	      break;
-	  case '>':
-	      state=(state==4)?5:0;
-	      break;
-	  default:
-	      state=(state==3||state==4)?4:0;
-	}
+	    byte b = buf[i];
+	    char c = (char)b;
+	    int last=state;
+	    
+	    switch(c)
+	    {
+	      case '<':
+		  state=(state==0)?1:0;
+		  break;
+	      case '!':
+		  state=(state==1)?2:0;
+		  break;
+	      case '=':
+		  state=(state==2)?3:0;
+		  break;
+	      case '>':
+		  state=(state==4)?5:0;
+		  break;
+	      default:
+		  state=(state==3||state==4)?4:0;
+	    }
 
-	switch(state)
-	{
-	  case 1:
-	  case 2:
-	  case 3:
-	  case 4:
-	      tagBuf.append((char)b);
-	      break;
-	  case 5:
-	      try{
+	    switch(state)
+	    {
+	      case 0:
+		  end=i;
+		  // If we are sitting on some tag chars which are not
+		  // in the buffer, write them out.
+		  if(last==1 && end==off)
+		      out.write('<');
+		  if(last==2 && end<=off+1)
+		      out.write("<!".getBytes());
+		  break;
+		  
+	      case 1:
+	      case 2:
+		  break;
+		  
+	      case 3:
+		  // write what we have got
+		  if (end>=off)
+		      out.write(buf,off,end-off+1);
+		  break;
+		  
+	      case 4:
+		  tagBuf.append(c);
+		  break;
+		  
+	      case 5:
+		  off=i+1;
 		  tag=tagBuf.toString();
-		  tag=tag.substring(3);
-
+		  tagBuf.setLength(0);
+		  
 		  Code.debug("Found tag "+tag);
 		  Hashtable named = new Hashtable(10);
 		  named.put("this",info);
@@ -120,23 +142,24 @@ public class HtmlFilter extends HttpFilter
 		  }
 		  catch(ClassNotFoundException e)
 		  {
-		      Code.debug("tag problem with "+tag,e);
+		      Code.warning("tag problem with "+tag,e);
 		      out.write("<P><B><PRE>".getBytes());
 		      e.printStackTrace(new PrintWriter(out));
 		      out.write("</PRE></B><P>".getBytes());
 		  }
 		  catch(NoSuchMethodException e)
 		  {
-		      Code.debug("tag problem with "+tag,e);
+		      Code.warning("tag problem with "+tag,e);
 		      out.write("<P><B><PRE>".getBytes());
 		      e.printStackTrace(new PrintWriter(out));
 		      out.write("</PRE></B><P>".getBytes());
 		  }
 		  catch(InvocationTargetException e)
 		  {
-		      Code.debug("tag problem with "+tag,
-				 e.getTargetException());
-		      Code.debug("at",e);
+		      if (e.getTargetException() instanceof java.io.IOException)
+			  throw (java.io.IOException)e.getTargetException();
+			  
+		      Code.warning("tag problem with "+tag,e);
 		      out.write("<P><B><PRE>".getBytes());
 		      e.getTargetException()
 			  .printStackTrace(new PrintWriter(out));
@@ -144,26 +167,29 @@ public class HtmlFilter extends HttpFilter
 		  }
 		  catch(IllegalAccessException e)
 		  {
-		      Code.debug("tag problem with "+tag,e);
+		      Code.warning("tag problem with "+tag,e);
 		      out.write("<P><B><PRE>".getBytes());
 		      e.printStackTrace(new PrintWriter(out));
 		      out.write("</PRE></B><P>".getBytes());
 		  }
 		  if (o!=null)
 		      out.write(o.toString().getBytes());
-	      }
-	      finally{
-		  tagBuf.setLength(0);
-	      }
-	      break;
-	  case 0:
-	      if (tagBuf.length()>0)
-	      {
-		  out.write(tagBuf.toString().getBytes());
-		  tagBuf.setLength(0);
-	      }
-	      out.write(b);
-	}	
+		 
+		  break;
+	    }	
+	}
+
+	// write what we have got that is OK
+	if (end>off)
+	    out.write(buf,off,end-off+1);
+    }
+    
+    /* ------------------------------------------------------------- */
+    public void write(int  b)
+	 throws IOException
+    {
+	ba[0]=(byte)b;
+	write(ba,0,1);
     }
 
 

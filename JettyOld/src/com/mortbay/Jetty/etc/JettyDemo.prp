@@ -9,11 +9,13 @@ SERVERS                                   : main;proxy
 main.CLASS				  : com.mortbay.HTTP.HttpServer
 main.STACKS				  : root;javadoc
 main.PROPERTY.SessionMaxInactiveInterval  : 3600
+main.PROPERTY.MinListenerThreads	  : 3
+main.PROPERTY.MaxListenerThreads	  : 20
+main.PROPERTY.MaxListenerThreadIdleMs	  : 60000
 main.PROPERTY.MimeMap			  : ./etc/Mime.prp
 main.LISTENER.all.CLASS                   : com.mortbay.HTTP.HttpListener
 main.LISTENER.all.ADDRS                   : 0.0.0.0:8080;127.0.0.1:8888
 
-# ------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------
 main.root.HOSTS				  :
@@ -26,6 +28,7 @@ main.root.Log.PROPERTY.File               : ./log/demo.log
 main.root.Log.PROPERTY.Append             : False
 main.root.Log.PROPERTY.LongForm           : True
 main.root.Log.PROPERTY.CountContentLength : False
+main.root.Log.PROPERTY.DateFormat         : dd/MMM/yyyy:HH:mm:ss
 
 main.root.Auth.CLASS			  : com.mortbay.HTTP.Handler.BasicAuthHandler
 main.root.Auth.PROPERTIES		  : ./etc/JettyDemoRealms.prp

@@ -60,16 +60,10 @@ import java.util.*;
  * The configuration of the server is done via an abstract class to
  * decouple the server from any particular configuration technology and
  * to allow lightweight installations.
- * com.mortbay.HTTP.Configure.SimpleServletConfig is a simple configuration
- * that allows servlets to be "run" from the command line.
- * com.mortbay.HTTP.Configure.Demo is an example of hard coding a
- * server configuration.
- * MortBay.ISS contains an implementation of HttpConfiguration that reads
- * ISS.Util.CfgFile's for the server configuration (of the same format as
- * MBServler 4.5).
  *
  * <p><h4>Notes</h4>
- * The server understands HTTP/1.0 without keep-alive extensions.
+ * The server understands HTTP/1.1 and HTTP/1.0.
+ * HTTP/1.0 is without keep-alive extensions.
  * <p><h4>Usage</h4><PRE>
  * java com.mortbay.HTTP.HttpServer [ HttpConfigurationClass ]
  * </PRE>
@@ -86,6 +80,7 @@ public class HttpServer implements ServletContext
     private PathMap exceptionHandlersMap;
     private Hashtable servletHandlerMap = new Hashtable(10);
     
+	    	
     /* -------------------------------------------------------------------- */
     /** Construct, must be configured later
      */
@@ -169,6 +164,17 @@ public class HttpServer implements ServletContext
 	Code.assert(exceptionHandlersMap.get("/")!=null,
 		    "No mapping for / in exceptionHandlersMap");
 
+	Properties p = config.getProperties();
+	int minThreads =
+	    Integer.parseInt(p.getProperty(HttpConfiguration
+					   .MinListenerThreads,"0"));
+	int maxThreads =
+	    Integer.parseInt(p.getProperty(HttpConfiguration
+					   .MaxListenerThreads,"0"));
+	int maxThreadIdle =
+	    Integer.parseInt(p.getProperty(HttpConfiguration
+					   .MaxListenerThreadIdleMs,"0"));
+	
 	InetAddrPort[] addresses = config.addresses();
 	Class[] classes = config.listenerClasses();
 	listeners = new HttpListener[addresses.length];
@@ -176,7 +182,13 @@ public class HttpServer implements ServletContext
 	{
 	    try{
 		Constructor c = classes[a].getConstructor(HttpListener.ConstructArgs);
-		Object[] args = {addresses[a],this};
+		Object[] args = {
+		    addresses[a],
+		    this,
+		    new Integer(minThreads),
+		    new Integer(maxThreads),
+		    new Integer(maxThreadIdle),
+		};
 		listeners[a] = (HttpListener) c.newInstance(args);
 		listeners[a].start();
 	    }
@@ -186,16 +198,12 @@ public class HttpServer implements ServletContext
 		throw ioe;
 	    }
 	}
-		     
-	String sessionMaxInactiveInterval = 
-	    config.getProperty(HttpConfiguration.SessionMaxInactiveInterval);
-	if (sessionMaxInactiveInterval != null &&
-	    sessionMaxInactiveInterval.length()>0)
-	{
-	    int maxIdle = Integer.parseInt(sessionMaxInactiveInterval);
-	    if (maxIdle > 0)
-		HttpRequest.setSessionMaxInactiveInterval(maxIdle);
-	}
+	int maxSessionIdle = 
+	    Integer.parseInt(p.getProperty(HttpConfiguration.SessionMaxInactiveInterval,"0"));
+	if (maxSessionIdle > 0)
+	    HttpRequest.setSessionMaxInactiveInterval(maxSessionIdle);
+	
+
     }
 
     /* -------------------------------------------------------------------- */
@@ -548,7 +556,9 @@ public class HttpServer implements ServletContext
      * names should follow the same convention as package names, and those
      * beginning with 'com.sun.*' are reserved for use by Sun Microsystems.
      *
-     * These are mapped the the properties of HttpConfiguration.
+     * This implementation maps the attribute requests to properties of
+     * HttpConfiguration.  The Jetty configuration does not adhere to
+     * the naming conventions described above.
      * @param name the attribute key name
      * @return the value of the attribute, or null if not defined
      */
@@ -558,27 +568,37 @@ public class HttpServer implements ServletContext
     }
     
     /* ---------------------------------------------------------------- */
+    /** .
+     * This implementation maps the attribute requests to properties of
+     * HttpConfiguration.  The Jetty configuration does not adhere to
+     * the naming conventions described above.
+     */
     public Enumeration getAttributeNames()
     {
-	// XXX
-	Code.notImplemented();
-	return null;
+	return config.getProperties().keys();
     }
     
     /* ---------------------------------------------------------------- */
+    /** .
+     * This implementation maps the attribute requests to properties of
+     * HttpConfiguration.  The Jetty configuration does not adhere to
+     * the naming conventions described above.
+     */
     public void setAttribute(String name, Object value)
     {
-	// XXX
-	Code.notImplemented();
+	config.getProperties().put(name,value);
     }
     
     /* ---------------------------------------------------------------- */
+    /** .
+     * This implementation maps the attribute requests to properties of
+     * HttpConfiguration.  The Jetty configuration does not adhere to
+     * the naming conventions described above.
+     */
     public void removeAttribute(String name)
     {
-	// XXX
-	Code.notImplemented();
+	config.getProperties().remove(name);
     }
-
     
     /* -------------------------------------------------------------------- */
     /** Main

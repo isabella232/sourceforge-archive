@@ -467,7 +467,14 @@ public class FileHandler extends NullHandler
 	response.setContentLength(len);
 	response.setDateHeader("Last-Modified", file.lastModified());
 	InputStream in = new FileInputStream(file);
-	response.writeInputStream(in,len);
+	try
+	{
+	    response.writeInputStream(in,len);
+	}
+	finally
+	{
+	    in.close();
+	}
     }
 
 

@@ -36,6 +36,7 @@ public class LogHandler extends NullHandler implements Observer
     boolean longForm;
     Writer out;
     Hashtable outMap=new Hashtable();
+    DateCache dateCache=null;
     
     /* ----------------------------------------------------------------- */
     /** Constructor from properties.
@@ -68,6 +69,8 @@ public class LogHandler extends NullHandler implements Observer
      * file names that log to System.err and System.out.
      * <BR>Append - Boolean, if true append to the log file.
      * <BR>LongForm - Boolean, if true the log is the long format
+     * <BR>DateFormat - Simple date format. If not present, use 
+     *                  the format in the request.
      * <BR>CountContentLength - Boolean, if true count the bytes of 
      * replies without a content length header (expensive).
      * @param properties configuration.
@@ -84,6 +87,9 @@ public class LogHandler extends NullHandler implements Observer
 	boolean append = tree.getBoolean("Append");	
 	countContentLength=tree.getBoolean("CountContentLength");
 	longForm=tree.getBoolean("LongForm");
+	String dateFormat=tree.getProperty("DateFormat");
+	if (dateFormat!=null && dateFormat.length()>0)
+	    dateCache=new DateCache(dateFormat);
 
 	if ("out".equals(logFilename))
 	    out=new OutputStreamWriter(System.out);
@@ -174,7 +180,9 @@ public class LogHandler extends NullHandler implements Observer
 		" - "+
 		user +
 		" [" +
-		response.getHeader(response.Date)+
+		(dateCache==null
+		 ?response.getHeader(response.Date)
+		 :dateCache.format(System.currentTimeMillis()))+
 		"] \""+
 		request.getRequestLine()+
 		"\" "+

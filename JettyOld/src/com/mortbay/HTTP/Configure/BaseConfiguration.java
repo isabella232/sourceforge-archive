@@ -149,6 +149,15 @@ public class BaseConfiguration implements HttpConfiguration
     
     /* ------------------------------------------------------------ */
     /**
+     * Returns properties object.
+     */
+    public Properties getProperties()
+    {
+	return properties;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
      * Writes a message to the servlet log file.
      */
     public void log(String message)

@@ -28,6 +28,11 @@ public interface HttpConfiguration
     // The name of the default session max idle time attribute
     public static final String SessionMaxInactiveInterval = 
         "SessionMaxInactiveInterval";
+    
+    public static final String MinListenerThreads="MinListenerThreads";
+    public static final String MaxListenerThreads="MaxListenerThreads";
+    public static final String MaxListenerThreadIdleMs="MaxListenerThreadIdleMs";
+    
 
     /* ------------------------------------------------------------ */
     /** The IP addresses and ports the HTTP server listens on
@@ -83,6 +88,14 @@ public interface HttpConfiguration
     /** Returns an attribute of the server given the specified key name.
      */
     public String getProperty(String name);
+
+    /* ------------------------------------------------------------ */
+    /** Returns the properties.
+     * This may be modified and care must be taken in it's use.
+     * Modifications may or may not effect the currently running
+     * server (dynamic reconfiguration is under consideration).
+     */
+    public Properties getProperties();
     
     /* ------------------------------------------------------------ */
     /** Writes a message to the servlet log file.

@@ -52,9 +52,9 @@ public class TestHarness
     public static void testBlockingQueue()
 	throws Exception
     {
-	Test t = new Test("com.mortbay.Util.BlockingQueue");
+	final Test t = new Test("com.mortbay.Util.BlockingQueue");
 
-	final BlockingQueue bq=new BlockingQueue();
+	final BlockingQueue bq=new BlockingQueue(5);
 	t.checkEquals(bq.size(),0,"empty");
 	bq.put("A");
 	t.checkEquals(bq.size(),1,"size");
@@ -75,15 +75,51 @@ public class TestHarness
 	new Thread(new Runnable()
 		   {
 		       public void run(){
-			   try{Thread.sleep(1000);}
+			   try{
+			       Thread.sleep(1000);
+			       bq.put("F");
+			   }
 			   catch(InterruptedException e){}
-			   bq.put("F");
 		       }
 		   }
 		   ).start();  
 	
 	t.checkEquals(bq.get(),"F","F");
 	t.checkEquals(bq.get(100),null,"null");
+	
+	bq.put("G1");
+	bq.put("G2");
+	bq.put("G3");
+	bq.put("G4");
+	bq.put("G5");
+	
+	new Thread(new Runnable()
+		   {
+		       public void run(){
+			   try{
+			       Thread.sleep(500);
+			       t.checkEquals(bq.get(),"G1","G1");
+			   }
+			   catch(InterruptedException e){}
+		       }
+		   }
+		   ).start();  
+	try{
+	    bq.put("G6",100);
+	    t.check(false,"put timeout");
+	}
+	catch(InterruptedException e)
+	{
+	    t.checkContains(e.toString(),"Timed out","put timeout");
+	}
+	
+	bq.put("G6");
+	t.checkEquals(bq.get(),"G2","G2");
+	t.checkEquals(bq.get(),"G3","G3");
+	t.checkEquals(bq.get(),"G4","G4");
+	t.checkEquals(bq.get(),"G5","G5");
+	t.checkEquals(bq.get(),"G6","G6");
+	t.checkEquals(bq.get(100),null,"that's all folks");
     }
     
     /* ------------------------------------------------------------ */

@@ -29,7 +29,8 @@ public class HttpListener extends ThreadedServer
     public static Class[] ConstructArgs =
     {
 	com.mortbay.Util.InetAddrPort.class,
-	com.mortbay.HTTP.HttpServer.class
+	com.mortbay.HTTP.HttpServer.class,
+	Integer.TYPE,Integer.TYPE,Integer.TYPE
     };
     
     /* ------------------------------------------------------------ */
@@ -54,11 +55,35 @@ public class HttpListener extends ThreadedServer
 			HttpServer server)
 	throws IOException
     {
-	super(address.getInetAddress(),
-	      (address.getPort()==0)?80:address.getPort());
-	
+	this(address,server,0,0,0);
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param address The InetAddress and port on which to listen
+     *                If address.inetAddress==null,
+     *                InetAddrPort.getLocalHost() is used and set in address.
+     *                If address.port==0, 80 is used and set in address.
+     * @param server  The HttpServer to pass requests to.
+     * @param minThreads 
+     * @param maxThreads 
+     * @param maxIdleTimeMs 
+     * @exception IOException 
+     */
+    public HttpListener(InetAddrPort address,
+			HttpServer server,
+			int minThreads,
+			int maxThreads,
+			int maxIdleTimeMs)
+	throws IOException
+    {
+	super(address,minThreads,maxThreads,maxIdleTimeMs);
 	if (address.getPort()==0)
+	{
 	    address.setPort(80);
+	    super.setAddress(address.getInetAddress(),address.getPort());
+	}
 	
 	this.address=address;
 	this.server=server;
