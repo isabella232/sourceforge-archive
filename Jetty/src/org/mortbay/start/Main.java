@@ -450,6 +450,13 @@ public class Main
                 args=(String[])_xml.toArray(args);
             }
                 
+
+	    //check for override of start class
+	    String serverOverride = System.getProperty("jetty.server");
+	    if (_debug) System.err.println ("server.override="+serverOverride);
+
+	    if (serverOverride != null)
+		_classname = serverOverride;
             invokeMain(cl,_classname,args);            
         }
         catch (Exception e)

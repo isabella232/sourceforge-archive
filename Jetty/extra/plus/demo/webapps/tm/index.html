@@ -1,0 +1,160 @@
+<html>
+  <head><title>Transaction, Datasource and JNDI Test</title></head>
+
+  <body>
+    <h1>JettyPlus Transaction, Datasource and JNDI  Test</h1>
+
+<A HREF="test.jsp">Skip to the demo</A>
+
+<H2>Background to the demo</H2>
+
+JettyPlus integrates a number of valuable J2EE features with the core Jetty server: 
+ UserTransactions, Datasources and JNDI lookups.
+
+This demonstration illustrates programmatic JNDI lookups of
+<b><code>env</code></b> and <b><code>resource-env</code></b> values specified in the
+<b><code>web.xml</code></b> descriptor, connecting to a a DataSource, and
+using UserTransactions to bracket increments to an integer value
+stored in the DataSource.
+<P>
+
+The demo's web.xml file contains the following environment entries:
+
+<table width="70%">
+<tr>
+<td width="10%">
+&nbsp;
+</td>
+<td>
+<pre>
+<font size=-1>
+<code>
+&lt;web-app&gt;
+<font color="blue">
+  &lt;!-- Set up the resource-env-ref for the DataSource --&gt;
+</font>
+  &lt;resource-env-ref&gt;
+    &lt;description&gt;
+      DB Connection
+    &lt;/description&gt;
+    &lt;resource-env-ref-name&gt;
+      jdbc/myDB
+    &lt;/resource-env-ref-name&gt;
+    &lt;resource-env-ref-type&gt;
+      javax.sql.DataSource
+    &lt;/resource-env-ref-type&gt;
+  &lt;/resource-env-ref&gt;
+<font color="blue">
+  &lt;!-- Set up a couple of env-entries  --&gt;
+</font>
+  &lt;env-entry&gt;
+    &lt;env-entry-name&gt;
+       select
+    &lt;/env-entry-name&gt;
+    &lt;env-entry-value&gt;
+       select id, foo from testdata
+    &lt;/env-entry-value&gt;
+    &lt;env-entry-type&gt;
+       java.lang.String
+    &lt;/env-entry-type&gt;
+  &lt;/env-entry&gt;
+  &lt;env-entry&gt;
+    &lt;env-entry-name&gt;
+       update
+    &lt;/env-entry-name&gt;
+    &lt;env-entry-value&gt;
+       update testdata set foo=? where id=1
+    &lt;/env-entry-value&gt;
+    &lt;env-entry-type&gt;
+       java.lang.String
+    &lt;/env-entry-type&gt;
+  &lt;/env-entry&gt;
+&lt;/web-app&gt;
+</code>
+</pre>
+</font>
+<b><i>Application web.xml descriptor</i></b>
+</td>
+</tr>
+</table>
+
+
+<BR>
+<BR>
+
+The relevant sections of the jetty xml configuration file are:
+<table width="70%">
+<tr>
+<td width="10%">
+&nbsp;
+</td>
+<td align=left valign=top>
+<font size="-1">
+<pre>
+<code>
+<font color="blue">
+&lt;!-- =============================================================== --&gt;
+&lt;!-- Configure the JettyPlus Server                                  --&gt;
+&lt;!-- =============================================================== --&gt;
+</font>
+&lt;Configure class=<b>"org.mortbay.jetty.plus.Server"</b>&gt;
+
+<font color="blue">
+  &lt;!-- =============================================================== --&gt;
+  &lt;!-- Configure a Log4J log sink                                      --&gt;
+  &lt;!-- =============================================================== --&gt;
+</font>
+  &lt;Call name="instance" class="org.mortbay.util.Log"&gt;
+    &lt;Call name="disableLog"/&gt;
+    &lt;Call name="add"&gt;
+      &lt;Arg&gt;
+        &lt;New class="org.mortbay.util.log4j.Log4jSink"&gt;
+          &lt;Call name="start"/&gt;
+        &lt;/New&gt;
+      &lt;/Arg&gt;
+    &lt;/Call&gt;
+  &lt;/Call&gt;
+<font color="blue">
+  &lt;!-- =============================================================== --&gt;
+  &lt;!-- Set the transaction manager, datasource                         --&gt;
+  &lt;!-- =============================================================== --&gt;
+</font>
+  &lt;Call name="setTransactionManager"&gt;
+    &lt;Arg&gt;
+      &lt;New class="org.mortbay.jetty.plus.JotmService "&gt;
+        &lt;Call name="addDataSource"&gt;
+           &lt;Arg&gt;jdbc/myDB&lt;/Arg&gt;                    <font color=blue>&lt;-- name --&gt;</font>
+           &lt;Arg&gt;org.hsqldb.jdbcDriver&lt;/Arg&gt;        <font color=blue>&lt;-- driver class --&gt;</font>
+           &lt;Arg&gt;jdbc:hsqldb:extra/etc/tmtest&lt;/Arg&gt; <font color=blue>&lt;-- url --&gt;</font>
+           &lt;Arg&gt;sa&lt;/Arg&gt; <font color=blue>&lt;-- username --&gt;</font>
+           &lt;Arg&gt;&lt;/Arg&gt;   <font color=blue>&lt;-- password --&gt;</font>
+           &lt;Arg&gt;8&lt;/Arg&gt; <font color=blue> &lt;-- inital connection pool size --&gt;</font>
+           &lt;Arg&gt;4&lt;/Arg&gt;  <font color=blue>&lt;-- min connection pool size --&gt;</font>
+           &lt;Arg&gt;15&lt;/Arg&gt;<font color=blue> &lt;-- max connection pool size --&gt;</font>
+        &lt;/Call&gt;
+      &lt;/New&gt;
+    &lt;/Arg&gt;
+  &lt;/Call&gt;
+&lt;Configure&gt;
+</code>
+</pre>
+</font> 
+ <b><i>jettyplus.xml configuration file</i></b>
+</td>
+</tr>
+</table>
+</center>
+<P>
+Notice particularly that it is the JettyPlus server class
+org.mortbay.jetty.<b>plus</b>.Server being configured, not the
+normal Jetty server (org.mortbay.jetty.Server).
+<P>
+Note also that a log4J log sink must be configured. You must
+specify the location of the log4j configuration file on the run
+line. For this demo, this is located in the
+<code>org.mortbay.jetty.plus.resource.jar</code> file, the source of which is in <code>$jetty.home/extra/plus/resources/log4j.xml</code>.
+<P>
+Now, you're ready to <A HREF="/tm/test.jsp">try the demo</A>.
+
+  </body>
+</html>

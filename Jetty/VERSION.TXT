@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+ + Moved Log4JLogSink into JettyPlus
+ + Added ability to override jetty startup class by using -Djetty.server on runline
+ + Incorporate JettyPlus jotm etc into build.
  + Massive reorg of the CVS tree.
  + Incorporate jetty extra and plus into build
  + Integrate with JAAS
