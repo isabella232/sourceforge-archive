@@ -196,7 +196,8 @@ public class Tests extends junit.framework.TestCase
         checkContains(desc+": method", f.getStack(),  method);
         assertEquals( desc+": depth",  depth,     f.getDepth());
         assertEquals( desc+": thread", thread,    f.getThread());
-        checkContains(desc+": file",   f.getFile(),   file);
+        if (file!=null)
+            checkContains(desc+": file",   f.getFile(),   file);
     }
     
     /* ------------------------------------------------------------ */
@@ -232,11 +233,11 @@ public class Tests extends junit.framework.TestCase
         f = new Frame(2);
         testFrameChecker(f, "new Frame(2)",
                          "java.lang.reflect.Method.invoke",
-                         depth-2, "main", "UnknownFile");
+                         depth-2, "main", null);
 
         f = new Frame(1, true);
         testFrameChecker(f, "partial",
-                         "callFrame", 0, "unknownThread", "UnknownFile");
+                         "callFrame", 0, "unknownThread", null);
 
         f.complete();
         testFrameChecker(f, "complete",

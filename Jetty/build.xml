@@ -32,6 +32,7 @@ Other targets:
 <project name="Jetty HTTP Server" default="webapps" basedir=".">
   <property environment="env"/>
   <property name="src"            value="${basedir}/src" />
+  <property name="src1.4"         value="${basedir}/src1.4" />
   <property name="etc"            value="${basedir}/etc" />
   <property name="lib"            value="${basedir}/lib"/>
   <property name="classes"        value="${basedir}/classes"/>
@@ -101,8 +102,8 @@ Other targets:
         <include name="*.dtd"/>
       </fileset>
     </copy>
-    <available property="extra.available" 
-            file="${extra}" />
+    <available property="extra.available" file="${extra}" />
+    <available property="jdk1.4.available" classname="java.util.logging.Handler" />
   </target>
 
   <!-- ==================================================================== -->
@@ -176,6 +177,28 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
+  <target name="classes1.4" depends="prepare" if="jdk1.4.available"
+   description="Compile the java 1.4 classes" >
+    <copy todir="${classes}">
+      <fileset dir="${src1.4}">
+        <include name="**/defaultManifest.mf" />
+        <include name="**/*.properties" />
+        <include name="**/*.dtd" />
+        <include name="**/*.xml" />
+      </fileset>
+    </copy>
+    <javac srcdir="${src1.4}"
+           destdir="${classes}"
+           debug="${javac.debug}"
+           optimize="${javac.optimize}"
+           deprecation="${javac.deprecation}"
+           >
+       <classpath refid="classpath" />
+       <include name="**/*.java"/>
+    </javac>
+  </target>
+
+  <!-- ==================================================================== -->
   <target name="servlet.jar" depends="classes">
     <jar jarfile="${servlet.jar}" basedir="${classes}" >
        <include name="javax/servlet/**" />
@@ -183,7 +206,7 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="jetty.jar" depends="classes,servlet.jar">
+  <target name="jetty.jar" depends="classes,classes1.4,servlet.jar">
     <delete file="${mini.http.jar}" quiet="true"/>
     <jar jarfile="${jetty.jar}" basedir="${classes}" manifest="${src}/org/mortbay/MANIFEST.MF" >
        <include name="org/mortbay/**"  />
@@ -290,7 +313,7 @@ Other targets:
    description="Build the javadoc">
     <mkdir dir="${javadoc}"/>
     <javadoc packagenames="org.mortbay.*,javax.servlet.*,org.apache.jasper.*"
-             sourcepath="${src}"
+             sourcepath="${src};${src1.4}"
              destdir="${javadoc}"
              author="true"
              version="true"
@@ -312,6 +335,7 @@ Other targets:
   <target name="all" depends="prepare,jars,webapps,javadoc,test,extra"
    description="Build everything"/>
 
+  <!-- ==================================================================== -->
   <target name="extra" depends="prepare"  if="extra.available" >
     <ant dir="${extra}" inheritAll="false" target="all" />
   </target>

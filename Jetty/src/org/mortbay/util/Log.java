@@ -80,7 +80,7 @@ public class Log
         if (!_initialized)
         {
             _logOptions=System.getProperty("LOG_OPTIONS",
-                                           Code.debug()?"stLT":"tT");
+                                           Code.getDebug()?"stLT":"tT");
             String sinkClasses = System.getProperty("LOG_CLASSES",
                                                     "org.mortbay.util.OutputStreamLogSink");
             StringTokenizer sinkTokens = new StringTokenizer(sinkClasses, ";");

@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+ + Added optional JDK 1.4 src tree
+ + o.m.u.Frame uses JDK1.4 stack frame handling 
+ + Added LoggerLogSink to direct Jetty Logs to JDK1.4 Log.
  + Start ServletHandler as part of the FilterHandler start.
  + Simplified addWebApplication
  + Added String constructor to XmlConfiguration.

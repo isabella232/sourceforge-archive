@@ -95,7 +95,7 @@ public class Frame
     
     /* ------------------------------------------------------------ */
     /** Internal only Constructor. */
-    Frame(String stack, int ignoreFrames, boolean partial)
+    private Frame(String stack, int ignoreFrames, boolean partial)
     {
         _stack = stack;
         internalInit(ignoreFrames, partial);
@@ -246,9 +246,7 @@ public class Frame
         if (f._where == null) return null;
         f._thread = _thread;
         return f;
-    }
-    
-    
+    }    
 }
 
 
