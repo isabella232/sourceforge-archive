@@ -35,7 +35,7 @@ abstract public class ThreadedServer extends ThreadPool
     private InetAddrPort _address = null;    
     private ServerSocket _listen = null;
     private int _soTimeOut=-1;
-    private int _maxReadTimeMs=-1;
+    private int _maxReadTimeMs=0;
     private int _lingerTimeSecs=30;
     private Acceptor _acceptor=null;
     
@@ -163,7 +163,7 @@ abstract public class ThreadedServer extends ThreadPool
      * Setting this to a none zero value results in setSoTimeout being
      * called for all accepted sockets.  This causes an
      * InterruptedIOException if a read blocks for this period of time.
-     * @param ms 
+     * @param ms Max read time in ms or 0 for no limit.
      */
     public void setMaxReadTimeMs(int ms)
     {
@@ -342,7 +342,7 @@ abstract public class ThreadedServer extends ThreadPool
             s=_listen.accept();
             
             try {
-                if (_maxReadTimeMs>0)
+                if (_maxReadTimeMs>=0)
                     s.setSoTimeout(_maxReadTimeMs);
   		if (_lingerTimeSecs>=0)
   		    s.setSoLinger(true,_lingerTimeSecs);
@@ -396,7 +396,7 @@ abstract public class ThreadedServer extends ThreadPool
         }
         
         _soTimeOut=getMaxIdleTimeMs();
-        if (_soTimeOut>0)
+        if (_soTimeOut>=0)
             _listen.setSoTimeout(_soTimeOut);
 
         _acceptor=new Acceptor();
