@@ -29,8 +29,10 @@ public class ServletResponse implements HttpServletResponse
     private PrintWriter _writer=null;
     private HttpSession _session=null;
     private boolean _noSession=false;
-
-
+    private boolean _locked=false;
+    
+    private static String __lockedMsg = "Response locked by inclusion";
+    
     /* ------------------------------------------------------------ */
     ServletResponse(ServletRequest request,HttpResponse response)
     {
@@ -39,6 +41,36 @@ public class ServletResponse implements HttpServletResponse
         _httpResponse=response;
     }
 
+    /* ------------------------------------------------------------ */
+    boolean getLocked()
+    {
+	return _locked;
+    }
+    
+    /* ------------------------------------------------------------ */
+    void setLocked(boolean locked)
+    {
+	_locked=locked;
+    }
+
+    /* ------------------------------------------------------------ */
+    int getOutputState()
+    {
+	return _outputState;
+    }
+    
+    /* ------------------------------------------------------------ */
+    void setOutputState(int s)
+	throws IOException
+    {
+	_outputState=s;
+	if (_out!=null)
+	    _out.flush();
+	if (_writer!=null)
+	    _writer.flush();
+    }
+    
+    
     /* ------------------------------------------------------------ */
     HttpResponse getHttpResponse()
     {
@@ -249,36 +281,69 @@ public class ServletResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void setDateHeader(String name, long value) 
     {
+	if (_locked)
+	{
+	    if (_httpResponse.getDateField(name)==value)
+		return;
+	    throw new IllegalStateException(__lockedMsg);
+	}
+	
 	_httpResponse.setDateField(name,value);
     }
 
     /* ------------------------------------------------------------ */
     public void setHeader(String name, String value) 
     {
+	if (_locked)
+	{
+	    if (value==null)
+	    {
+		if (_httpResponse.getField(name)==null)
+		    return;
+	    }
+	    else if (value.equals(_httpResponse.getField(name)))
+		return;
+	    throw new IllegalStateException(__lockedMsg);
+	}
 	_httpResponse.setField(name,value);
     }
 
     /* ------------------------------------------------------------ */
     public void setIntHeader(String name, int value) 
     {
+	if (_locked)
+	{
+	    if (_httpResponse.getIntField(name)==value)
+		return;
+	    throw new IllegalStateException(__lockedMsg);
+	}
 	_httpResponse.setIntField(name,value);
     }
     
     /* ------------------------------------------------------------ */
     public void addDateHeader(String name, long value) 
     {
+	if (_locked)
+	    throw new IllegalStateException(__lockedMsg);
+	
 	_httpResponse.addDateField(name,new Date(value));
     }
 
     /* ------------------------------------------------------------ */
     public void addHeader(String name, String value) 
     {
+	if (_locked)
+	    throw new IllegalStateException(__lockedMsg);
+	
 	_httpResponse.addField(name,value);
     }
 
     /* ------------------------------------------------------------ */
     public void addIntHeader(String name, int value) 
     {
+	if (_locked)
+	    throw new IllegalStateException(__lockedMsg);
+	
 	_httpResponse.addIntField(name,value);
     }
 
@@ -291,7 +356,7 @@ public class ServletResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void setStatus(int status, String message) 
     {
-	_httpResponse.setStatus(status);
+	setStatus(status);
 	_httpResponse.setReason(message);
     }
 
@@ -335,13 +400,13 @@ public class ServletResponse implements HttpServletResponse
 	// of a servlet HEAD request ALWAYS sets content length, even
 	// if the getHandling committed the response!
 	if (!isCommitted())
-	    _httpResponse.setIntField(HttpFields.__ContentLength,len);
+	    setIntHeader(HttpFields.__ContentLength,len);
     }
     
     /* ------------------------------------------------------------ */
     public void setContentType(String contentType) 
     {
-	_httpResponse.setField(HttpFields.__ContentType,contentType);
+	setHeader(HttpFields.__ContentType,contentType);
     }
 }
 

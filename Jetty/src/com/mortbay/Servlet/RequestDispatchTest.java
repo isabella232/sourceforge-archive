@@ -45,7 +45,13 @@ public class RequestDispatchTest extends HttpServlet
 	
         sres.setContentType("text/html");
 
-	String info = sreq.getPathInfo();
+	String info ;
+
+	if (sreq.getAttribute("javax.servlet.include.servlet_path")!=null)
+	    info=(String)sreq.getAttribute("javax.servlet.include.path_info");
+	else
+	    info=sreq.getPathInfo();
+	
 	if (info==null)
 	    info="NULL";
 
@@ -53,7 +59,9 @@ public class RequestDispatchTest extends HttpServlet
 	{
 	    info=info.substring(8);
             if (info.indexOf('?')<0)
-                info+="?Dispatch=Demo1&Dispatch=Demo2";
+                info+="?Dispatch=includeWriter";
+	    else
+                info+="&Dispatch=includeWriter";
 	    PrintWriter pout = sres.getWriter();
 	    pout.write("<H1>Include: "+info+"</H1><HL>");
 	    pout.flush();
@@ -67,7 +75,9 @@ public class RequestDispatchTest extends HttpServlet
 	{
 	    info=info.substring(8);
             if (info.indexOf('?')<0)
-                info+="?Dispatch=Demo1&Dispatch=Demo2";
+                info+="?Dispatch=includeOutputStream";
+	    else
+                info+="&Dispatch=includeOutputStream";
 	    OutputStream out = sres.getOutputStream();
 	    PrintWriter pout = new PrintWriter(out);
 	    pout.write("<H1>Include: "+info+"</H1><HL>");
@@ -84,6 +94,8 @@ public class RequestDispatchTest extends HttpServlet
 	    info=info.substring(8);
             if (info.indexOf('?')<0)
                 info+="?Dispatch=forward";
+	    else
+		info+="&Dispatch=forward";
 	    RequestDispatcher dispatch = getServletContext().getRequestDispatcher(info);
 	    dispatch.forward(sreq,sres);
 	}
@@ -92,7 +104,6 @@ public class RequestDispatchTest extends HttpServlet
 	    PrintWriter pout = sres.getWriter();
 	    pout.write("<H1>Dispatch URL must be of the form: </H1>"+
 		       "<PRE>"+prefix+"/include/path\n"+
-		       prefix+"/INCLUDE/path\n"+
 		       prefix+"/forward/path</PRE>");
 	    pout.flush();
 	}

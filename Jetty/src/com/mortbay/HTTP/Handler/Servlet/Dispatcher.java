@@ -80,9 +80,9 @@ public class Dispatcher implements RequestDispatcher
 	    throw new IllegalStateException("Request is committed");
 
 	// merge query string
-	MultiMap parameters = servletRequest.getParameters();
 	if (_query!=null && _query.length()>0)
 	{
+	    MultiMap parameters=new MultiMap(servletRequest.getParameters());
 	    UrlEncoded.decodeTo(_query,parameters);
 	    servletRequest.setParameters(parameters);
 
@@ -92,7 +92,6 @@ public class Dispatcher implements RequestDispatcher
 	}
 
 	// Try each holder in turn until request is handled.
-	
 	for (int i=0;i<_holders.size();i++)
 	{
 	    Map.Entry entry =
@@ -117,8 +116,6 @@ public class Dispatcher implements RequestDispatcher
 	    if (servletResponse.isDirty())
 	    {
 		Code.debug("Forwarded to ",entry);
-		if (!servletResponse.isCommitted())
-		    servletResponse.commit();
 		break;
 	    }
 	}
@@ -139,26 +136,104 @@ public class Dispatcher implements RequestDispatcher
 	ServletRequest servletRequest=(ServletRequest)request;
 	ServletResponse servletResponse=(ServletResponse)response;
 	    
-	Code.notImplemented();
-
-	// Need to ensure that there is no change to the
-	// response other than write
-
 	// Request has all original path and info etc.
 	// New path is in attributes - whose values are
 	// saved to handle chains of includes.
 
+	// Need to ensure that there is no change to the
+	// response other than write
+	boolean old_locked = servletResponse.getLocked();
+	servletResponse.setLocked(true);
+	int old_output_state = servletResponse.getOutputState();
+	servletResponse.setOutputState(0);
+	
+	// merge query string
+	MultiMap old_parameters=null;
+	if (_query!=null && _query.length()>0)
+	{
+	    old_parameters = servletRequest.getParameters();
+	    MultiMap parameters=new MultiMap(old_parameters);
+	    UrlEncoded.decodeTo(_query,parameters);
+	    servletRequest.setParameters(parameters);
+	}
+	
 	// javax.servlet.include.request_uri
+	Object old_request_uri =
+	    request.getAttribute("javax.servlet.include.request_uri");
+	request.setAttribute("javax.servlet.include.request_uri",
+			     servletRequest.getRequestURI());
+	
 	// javax.servlet.include.context_path
-	// javax.servlet.include.servlet_path
-	// javax.servlet.include.path_info
+	Object old_context_path =
+	    request.getAttribute("javax.servlet.include.context_path");
+	request.setAttribute("javax.servlet.include.context_path",
+			     servletRequest.getContextPath());
+	
 	// javax.servlet.include.query_string
+	Object old_query_string =
+	    request.getAttribute("javax.servlet.include.query_string");
+	request.setAttribute("javax.servlet.include.query_string",
+			     _query);
+	
+	// javax.servlet.include.servlet_path
+	Object old_servlet_path =
+	    request.getAttribute("javax.servlet.include.servlet_path");
+	
+	// javax.servlet.include.path_info
+	Object old_path_info =
+	    request.getAttribute("javax.servlet.include.path_info");
 
-	// merge in query params (but must be reversable)
-
-	// pass request to the servlet -we will have to locate it
-	// with new path or name????
-
-	// revert request back to it's old self.
+	// Try each holder until handled.
+	try
+	{
+	    for (int i=0;i<_holders.size();i++)
+	    {
+		Map.Entry entry =
+		    (Map.Entry)_holders.get(i);
+		
+		// The path of the new request is the forward path
+		// context must be the same, info is recalculate.
+		String servletPathSpec=(String)entry.getKey();
+		ServletHolder holder = (ServletHolder)entry.getValue();
+	    
+		Code.debug("Try forward request to ",entry);
+		request.setAttribute("javax.servlet.include.servlet_path",
+				     PathMap.pathMatch(servletPathSpec,
+						       _path));
+		request.setAttribute("javax.servlet.include.path_info",
+				     PathMap.pathInfo(servletPathSpec,
+						      _path));
+		
+		// try service request
+		holder.handle(servletRequest,servletResponse);
+	    
+		// Break if the response has been updated
+		if (servletResponse.isDirty())
+		{
+		    Code.debug("Included from ",entry);
+		    break;
+		}
+	    }
+	}
+	finally
+	{
+	    // revert request back to it's old self.
+	    servletResponse.setLocked(old_locked);
+	    servletResponse.setOutputState(old_output_state);
+	    if (_query!=null && _query.length()>0)
+		servletRequest.setParameters(old_parameters);
+	    request.setAttribute("javax.servlet.include.request_uri",
+				 old_request_uri);
+	    request.setAttribute("javax.servlet.include.context_path",
+				 old_context_path);
+	    request.setAttribute("javax.servlet.include.query_string",
+				 old_query_string);
+	    request.setAttribute("javax.servlet.include.servlet_path",
+				 old_servlet_path);
+	    request.setAttribute("javax.servlet.include.path_info",
+				 old_path_info);
+	}
     }
 };
+
+
