@@ -149,7 +149,6 @@
   <!-- ==================================================================== -->
   <target name="tidy" description="Remove generated files not needed for running">
     <delete dir="${classes}" quiet="true"/>
-    <delete dir="${classes1.2}" quiet="true"/>
     <delete dir="${classes1.4}" quiet="true"/>
     <delete dir="${test.classes}" quiet="true"/>
     <delete file="${mini.http.jar}" quiet="true"/>
