@@ -94,10 +94,6 @@ public abstract class AbstractSessionManager implements SessionManager
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * @param id
-     * @return
-     */
     public HttpSession getHttpSession(String id)
     {
         HttpSession s = (HttpSession)_sessions.get(id);

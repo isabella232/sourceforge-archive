@@ -8,6 +8,11 @@ package org.mortbay.util;
 // ====================================================================
 /** Fast String Utilities.
  *
+ * These string utilities provide both conveniance methods and
+ * performance improvements over most standard library versions. The
+ * main aim of the optimizations is to avoid object creation unless
+ * absolutely required.
+ *
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
@@ -53,7 +58,6 @@ public class StringUtil
     /* ------------------------------------------------------------ */
     /**
      * fast lower case conversion. Only works on ascii (not unicode)
-     * @author Jesper Jørgensen, Caput
      * @param s the string to convert
      * @return a lower case version of s
      */
@@ -112,9 +116,7 @@ public class StringUtil
     }
 
     /* ------------------------------------------------------------ */
-    /** Remove single or double quotes. 
-     * @param s 
-     * @return 
+    /** Remove single or double quotes.
      */
     public static String unquote(String s)
     {

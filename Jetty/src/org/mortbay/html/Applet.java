@@ -63,7 +63,6 @@ public class Applet extends Block
     /** Set whether debugging is on in the Applet.
      * <p> This controls whether the org.mortbay.util.Code debug messages
      * will be printed to the java console.
-     * @see org.mortbay.util.Code#initParamsFromApplet
      * <p> Defaults to whether debug is turned on in the generating app */
     public Applet setDebug(boolean debug){
         this.debug = debug;

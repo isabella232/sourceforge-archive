@@ -30,7 +30,6 @@ import org.xml.sax.SAXException;
  * and uses it to configure and object by calling set, put or other
  * methods on the object.
  *
- * @see configure.dtd
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

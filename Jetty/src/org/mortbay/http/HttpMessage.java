@@ -152,7 +152,6 @@ public interface HttpMessage
          * primary example of a HttpRequest facade is ServletHttpRequest.
          * A single facade object may be associated with the message with
          * this call and retrieved with the getFacade method.
-         * @see getFacade.
          * @param facade Message facade
          */
         public void setFacade(HttpMessage facade)
@@ -162,7 +161,6 @@ public interface HttpMessage
 
         /* ------------------------------------------------------------ */
         /** Get an associated facade object.
-         * @see setFacade
          * @return Facade message or null.
          */
         public HttpMessage getFacade()
@@ -172,7 +170,7 @@ public interface HttpMessage
     
         /* ------------------------------------------------------------ */
         /** Get an associated facade object or this HttpMessage itself.
-         * @see setFacade
+         * @see setFacade()
          * @return Facade message or this.
          */
         public HttpMessage getHttpMessage()
@@ -264,7 +262,7 @@ public interface HttpMessage
 
         /* ------------------------------------------------------------ */
         /** Get field names.
-         * @return 
+         * @return Enumeration of Field Names
          */
         public Enumeration getFieldNames()
         {
@@ -835,9 +833,6 @@ public interface HttpMessage
         }
 
         /* ------------------------------------------------------------ */
-        /** 
-         * @return 
-         */
         public boolean isCommitted()
         {
             ChunkableOutputStream out=(ChunkableOutputStream)getOutputStream();
@@ -849,7 +844,7 @@ public interface HttpMessage
         /* ------------------------------------------------------------ */
         /** 
          * @return true if the message has been modified. 
-     */
+         */
         public boolean isDirty()
         {
             ChunkableOutputStream out=(ChunkableOutputStream)getOutputStream();

@@ -165,9 +165,6 @@ public class Log
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
     public LogSink[] getLogSinks()
     {
         return _sinks;

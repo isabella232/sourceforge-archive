@@ -46,7 +46,7 @@ public abstract class JsseListener extends SocketListener
     /** String name of keystore location path property. */
     public static final String KEYSTORE_PROPERTY = "jetty.ssl.keystore";
 
-    /** Default value for the keystore location path. (~/.keystore) */
+    /** Default value for the keystore location path. */
     public static final String DEFAULT_KEYSTORE  =
         System.getProperty("user.home" ) + File.separator + ".keystore";
 

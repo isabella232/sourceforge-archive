@@ -93,10 +93,6 @@ public class XmlParser
 
     /* ------------------------------------------------------------ */
     /** Parse URL.
-     * @param url 
-     * @return 
-     * @exception IOException 
-     * @exception SAXException 
      */
     public synchronized Node parse(String url)
         throws IOException,SAXException
@@ -116,10 +112,6 @@ public class XmlParser
     
     /* ------------------------------------------------------------ */
     /** Parse File. 
-     * @param file 
-     * @return 
-     * @exception IOException 
-     * @exception SAXException 
      */
     public synchronized Node parse(File file)
         throws IOException,SAXException
@@ -129,10 +121,6 @@ public class XmlParser
 
     /* ------------------------------------------------------------ */
     /** Parse InputStream.
-     * @param url 
-     * @return 
-     * @exception IOException 
-     * @exception SAXException 
      */
     public synchronized Node parse(InputStream in)
         throws IOException,SAXException
@@ -466,10 +454,11 @@ public class XmlParser
         }
         
         /* ------------------------------------------------------------ */
-        /** Combined get(tag).toString(tags).
-         * @param tag 
-         * @param tags 
-         * @return 
+        /** Get a tag as a string.
+         * @param tag The tag to get 
+         * @param tags IF true, tags are included in the value.
+         * @param trim If true, trim the value.
+         * @return  results of get(tag).toString(tags).
          */
         public String getString(String tag, boolean tags, boolean trim)
         {

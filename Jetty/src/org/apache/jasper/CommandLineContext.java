@@ -217,12 +217,12 @@ public class CommandLineContext implements JspCompilationContext {
      */
     public String getServletPackageName() {
         //get the path to the jsp file
-        int indexOfSlash = getJspFile().lastIndexOf('/');
+        int indexOfSlash = getJspFile().lastIndexOf(File.separatorChar);
         String pathName;
         if (indexOfSlash != -1) {
             pathName = getJspFile().substring(0, indexOfSlash);
         } else {
-            pathName = "/";
+            pathName = File.separator;
         }
         //Assemble the package name from the base package name speced on
         //the command line and the package name derived from the path to
@@ -232,9 +232,9 @@ public class CommandLineContext implements JspCompilationContext {
             packageName = servletPackageName;
         }
         if (packageName.equals("")) {
-            packageName = pathName.replace('/', '.');
+            packageName = pathName.replace(File.separatorChar, '.');
         } else {
-            packageName += pathName.replace('/', '.');
+            packageName += pathName.replace(File.separatorChar, '.');
         }
         //strip off any leading '.' in the package name
         if (!packageName.equals("") && packageName.charAt(0) == '.') {

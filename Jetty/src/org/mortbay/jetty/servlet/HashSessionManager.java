@@ -32,8 +32,7 @@ import java.util.Random;
 
 
 /* ------------------------------------------------------------ */
-/** An in-memory implementation of SessionManager
- * <p>
+/** An in-memory implementation of SessionManager.
  *
  * @version $Id$
  * @author Greg Wilkins (gregw)

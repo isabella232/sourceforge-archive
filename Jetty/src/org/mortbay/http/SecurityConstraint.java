@@ -133,7 +133,7 @@ public class SecurityConstraint
 
     /* ------------------------------------------------------------ */
     /** 
-     * @return 
+     * @return List of roles for this constraint.
      */
     public List getRoles()
     {
@@ -193,7 +193,7 @@ public class SecurityConstraint
 
     /* ------------------------------------------------------------ */
     /** 
-     * @return 
+     * @return Data constrain indicator: 0=DC+NONE, 1=DC_INTEGRAL & 2=DC_CONFIDENTIAL
      */
     public int getDataConstraint()
     {
@@ -226,9 +226,6 @@ public class SecurityConstraint
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
     public String toString()
     {
         return "SC{"+_name+

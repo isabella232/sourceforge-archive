@@ -16,7 +16,6 @@ import org.mortbay.http.PathMap;
 
 /* --------------------------------------------------------------------- */
 /** 
- * @see org.mortbay.jetty.ServletHandler
  * @version $Id$
  * @author Greg Wilkins
  */

@@ -383,9 +383,8 @@ public class HttpRequest extends HttpMessage.Implementation
     
     /* ------------------------------------------------------------ */
     /** Get the request host.
-     * The host is obtained from an absolute URI, the HTTP header field,
+     * @return The host name obtained from an absolute URI, the HTTP header field,
      * the requests connection or the local host name.
-     * @return 
      */
     public String getHost()
     {
@@ -459,7 +458,7 @@ public class HttpRequest extends HttpMessage.Implementation
     
     /* ------------------------------------------------------------ */
     /** Get the request path.
-     * @return 
+     * @return The URI path of the request.
      */
     public String getPath()
     {
@@ -468,7 +467,7 @@ public class HttpRequest extends HttpMessage.Implementation
     
     /* ------------------------------------------------------------ */
     /** Get the encoded request path.
-     * @return 
+     * @return The path with % encoding.
      */
     public String getEncodedPath()
     {
@@ -477,7 +476,7 @@ public class HttpRequest extends HttpMessage.Implementation
     
     /* ------------------------------------------------------------ */
     /** Get the request query.
-     * @return 
+     * @return the request query excluding the '?'
      */
     public String getQuery()
     {
@@ -777,7 +776,7 @@ public class HttpRequest extends HttpMessage.Implementation
 
     /* ------------------------------------------------------------ */
     /** 
-     * @return 
+     * @return Map of parameters
      */
     public MultiMap getParameters()
     {

@@ -272,7 +272,7 @@ public class HttpContext implements LifeCycle
      * @return a coma or ';' separated list of class
      * resources. These may be jar files, directories or URLs to jars
      * or directories.
-     * @see getFileClassPath();
+     * @see #getFileClassPath()
      */
     public String getClassPath()
     {
@@ -338,7 +338,7 @@ public class HttpContext implements LifeCycle
      * @param lib the resource that contains the jar and/or zip files.
      * @param append true if the classpath entries are to be appended to any
      * existing classpath, or false if they replace the existing classpath.
-     * @see setClassPath
+     * @see setClassPath(String)
      */
     public void setClassPaths(Resource lib, boolean append)
     {
@@ -382,7 +382,6 @@ public class HttpContext implements LifeCycle
      * @param lib the resource that contains the jar and/or zip files.
      * @param append true if the classpath entries are to be appended to any
      * existing classpath, or false if they are to be prepended.
-     * @see setClassPaths
      * @exception IOException
      */
     public void setClassPaths(String lib, boolean append) throws IOException
@@ -421,7 +420,7 @@ public class HttpContext implements LifeCycle
      * "javax.servlet.context.tempdir" attribute is consulted and if
      * not set, the host, port and context are used to generate a
      * directory within the JVMs temporary directory.
-     * @return 
+     * @return Temporary directory as a File.
      */
     public File getTempDirectory()
     {
@@ -1105,9 +1104,10 @@ public class HttpContext implements LifeCycle
     }
 
     /* ------------------------------------------------------------ */
-    /** 
-     * @param filename 
-     * @return 
+    /** Get the MIME type by filename extension.
+     * @param filename A file name
+     * @return MIME type matching the longest dot extension of the
+     * file name.
      */
     public String getMimeByExtension(String filename)
     {
@@ -1149,7 +1149,7 @@ public class HttpContext implements LifeCycle
     
     /* ------------------------------------------------------------ */
     /** Get the map of mime type to char encoding.
-     * @return 
+     * @return Map of mime type to character encodings.
      */
     public synchronized Map getEncodingMap()
     {
@@ -1161,7 +1161,7 @@ public class HttpContext implements LifeCycle
     /* ------------------------------------------------------------ */
     /** Set the map of mime type to char encoding.
      * Also sets the org.mortbay.http.encodingMap context attribute
-     * @param encodingMap 
+     * @param encodingMap Map of mime type to character encodings.
      */
     public void setEncodingMap(Map encodingMap)
     {
@@ -1170,8 +1170,8 @@ public class HttpContext implements LifeCycle
 
     /* ------------------------------------------------------------ */
     /** Get char encoding by mime type.
-     * @param type 
-     * @return 
+     * @param type A mime type.
+     * @return The prefered character encoding for that type if known.
      */
     public String getEncodingByMimeType(String type)
     {

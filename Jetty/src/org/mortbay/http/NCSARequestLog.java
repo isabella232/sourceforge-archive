@@ -159,12 +159,6 @@ public class NCSARequestLog implements RequestLog
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @param request 
-     * @param response 
-     * @param responseLength 
-     * @return 
-     */
     public void log(HttpRequest request,
                     HttpResponse response,
                     int responseLength)

@@ -16,9 +16,7 @@ import java.security.Permission;
 
 
 /* ------------------------------------------------------------ */
-/**
- * Class that represents a resource accessible through the file or URL
- * <p>
+/** Abstract resource class.
  *
  * @version $Id$
  * @author Nuno Preguiça
@@ -32,10 +30,6 @@ public class Resource
     protected InputStream _in=null;
 
     /* ------------------------------------------------------------ */
-    /**
-     * @param url
-     * @return
-     */
     public static Resource newResource(URL url)
         throws IOException
     {
@@ -79,10 +73,8 @@ public class Resource
 
     /* ------------------------------------------------------------ */
     /** Construct a resource from a string.
-     * If the string is not a URL, it is treated as an absolute or
-     * relative file path.
-     * @param resource.
-     * @return
+     * @param resource A URL or filename.
+     * @return A Resource object.
      */
     public static Resource newResource(String resource)
         throws MalformedURLException, IOException
@@ -150,8 +142,6 @@ public class Resource
     /** Construct a system resource from a string.
      * The resource is tried as classloader resource before being
      * treated as a normal resource.
-     * @param resource.
-     * @return
      */
     public static Resource newSystemResource(String resource)
         throws IOException

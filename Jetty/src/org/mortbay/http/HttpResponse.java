@@ -135,7 +135,7 @@ public class HttpResponse extends HttpMessage.Implementation
 
     /* ------------------------------------------------------------ */
     /** Get the HttpContext handling this reponse. 
-     * @return 
+     * @return The HttpContext that is handling this request.
      */
     public HttpContext getHttpContext()
     {

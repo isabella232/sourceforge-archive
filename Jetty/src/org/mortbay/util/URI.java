@@ -664,8 +664,6 @@ public class URI
     /* ------------------------------------------------------------ */
     /** Return the parent Path.
      * Treat a URI like a directory path and return the parent directory.
-     * @param p 
-     * @return 
      */
     public static String parentPath(String p)
     {
@@ -680,8 +678,6 @@ public class URI
     /* ------------------------------------------------------------ */
     /** Strip parameters from a path.
      * Return path upto any semicolon parameters.
-     * @param path 
-     * @return 
      */
     public static String stripPath(String path)
     {

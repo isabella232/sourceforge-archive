@@ -7,7 +7,7 @@ import java.util.StringTokenizer;
 import org.mortbay.util.Code;
 
 /* ------------------------------------------------------------ */
-/** class for dealing with byte ranges
+/** class for dealing with byte ranges.
  * <PRE>
  * 
  *   parses the following types of byte ranges:
@@ -23,12 +23,10 @@ import org.mortbay.util.Code;
  * 
  * </PRE>
  * 
- * @see RFC2616 3.12, 14.16, 14.35.1, 14.35.2
+ * Based on RFC2616 3.12, 14.16, 14.35.1, 14.35.2
  * @version $version$
  * @author Helmut Hissen
  */
-
-
 public class InclusiveByteRange {
 
     long first = 0;

@@ -189,9 +189,7 @@ public class IO extends ThreadPool
     }
 
     /* ------------------------------------------------------------ */
-    /** Read input stream to string 
-     * @param in 
-     * @return 
+    /** Read input stream to string.
      */
     public static String toString(InputStream in)
         throws IOException

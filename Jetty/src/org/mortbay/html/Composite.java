@@ -225,9 +225,6 @@ public class Composite extends Element
 
     /* ------------------------------------------------------------ */
     /** Replace an object within the composite.
-     * @param oldObj 
-     * @param newObj 
-     * @return 
      */
     public boolean replace(Object oldObj, Object newObj)
     {  

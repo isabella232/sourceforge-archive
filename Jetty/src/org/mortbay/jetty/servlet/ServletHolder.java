@@ -32,7 +32,6 @@ import org.mortbay.util.URI;
  * This class will organise the loading of the servlet when needed or
  * requested.
  *
- * @see org.mortbay.jetty.ServletHandler
  * @version $Id$
  * @author Greg Wilkins
  */

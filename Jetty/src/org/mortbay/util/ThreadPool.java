@@ -97,7 +97,7 @@ public class ThreadPool
 
     /* ------------------------------------------------------------ */
     /** 
-     * @return 
+     * @return The name of the ThreadPool.
      */
     public String getName()
     {
@@ -106,7 +106,7 @@ public class ThreadPool
 
     /* ------------------------------------------------------------ */
     /** 
-     * @param name 
+     * @param name Name of the ThreadPool to use when naming Threads.
      */
     public void setName(String name)
     {

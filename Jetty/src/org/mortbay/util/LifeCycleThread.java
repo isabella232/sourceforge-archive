@@ -16,35 +16,24 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
     private Object _configuration;
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
     public boolean isDaemon()
     {
         return _daemon;
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @param d 
-     */
     public void setDaemon(boolean d)
     {
         _daemon = d;
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
     public boolean isStarted()
     {
         return _running;
     }
 
     /* ------------------------------------------------------------ */
-    /** 
-     */
     public synchronized void start()
         throws Exception
     {

@@ -29,15 +29,14 @@ import org.mortbay.util.StringUtil;
 import org.mortbay.util.URI;
 import org.mortbay.util.UnixCrypt;
 
-
-
-
-
 /* ------------------------------------------------------------ */
 /** Handler to authenticate access using the Apache's .htaccess files.
  * 
  * @version HTAccessHandler v1.0a
- * @authors Van den Broeke Iris, Deville Daniel, Dubois Roger, Greg Wilkins
+ * @author Van den Broeke Iris
+ * @author Deville Daniel
+ * @author Dubois Roger
+ * @author  Greg Wilkins
  *
  */
 public class HTAccessHandler extends NullHandler

@@ -35,18 +35,12 @@ public class BlockingQueue
     }
 
     /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
     public int size()
     {
         return size;
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
     public int maxSize()
     {
         return maxSize;

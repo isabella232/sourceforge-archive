@@ -58,7 +58,6 @@ import java.util.Vector;
 *      my.package.main
 * </pre>
 *
-* @see ISS.Base.Log
 * @version $Id$
 * @author Greg Wilkins
 */
@@ -453,7 +452,7 @@ public class Code
     
     /*-------------------------------------------------------------------*/
     /** Get debug status for the current stack frame.
-     * @returns true if debug is on for this stack frame
+     * @return true if debug is on for this stack frame
      */
     public static boolean debug()
     {
