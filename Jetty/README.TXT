@@ -21,7 +21,7 @@ Quick start on Unix
 ===================
 
 run:
-  <install-directory>/bin/jetty.sh start admin demo
+  $JETTY_HOME/bin/jetty.sh start admin demo
 
 Browse to:
   http://localhost:8080
@@ -90,7 +90,6 @@ file and configures 1 or more instances of com.mortbay.HTTP.HttpServer:
 
   java com.mortbay.Jetty.Server [configuration.xml]
 
-
 The class com.mortbay.HTTP.HttpServer is the main class to be
 configured.  It has a configuratin API and a command line API and
 can be run with
@@ -113,14 +112,6 @@ are also placed in etc for reference.
 
 Building from source
 ====================
-To compile the code, the following addition to the CLASSPATH should 
-be used:
-
-   $JETTY_HOME/src:
-
-The code can be build with gnu make just by typing 'make'.  Other
-make options can be viewed with the command 'make help'.  
-
 An Ant build file is included in build.xml.  This file is configured to
 use the jikes compiler from IBM. To use the normal JDK compiler comment
 out the jikes line in build.xml.  Ant is available from
@@ -221,7 +212,6 @@ The following WebApplication tags are not implemented:
 
 Run script
 ----------
-
 The unix start/stop script bin/jetty.sh which can run with:
 
    bin/jetty.sh start [ jetty.xml ... ]
