@@ -40,6 +40,7 @@ import org.mortbay.util.Code;
 import org.mortbay.util.LifeCycle;
 import org.mortbay.util.Log;
 import org.mortbay.util.UrlEncoded;
+import org.mortbay.util.URI;
 
 
 /* ------------------------------------------------------------ */
@@ -353,10 +354,10 @@ public class AdminServlet extends HttpServlet
         String action=lc.isStarted()?"Stop":"Start";
         
         comp.add("&nbsp;[");
-        comp.add(new Link(request.getContextPath()+
-                          request.getServletPath()+"/"+
-                          Long.toString(System.currentTimeMillis(),36)+
-                          "?A="+action+"&ID="+UrlEncoded.encodeString(id),
+        comp.add(new Link(URI.addPaths(request.getContextPath(),request.getServletPath())+
+                          "?T="+Long.toString(System.currentTimeMillis(),36)+
+                          "&A="+action+
+                          "&ID="+UrlEncoded.encodeString(id),
                           action));
         comp.add("]");
         return comp;

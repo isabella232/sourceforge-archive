@@ -135,13 +135,13 @@ public class Default extends HttpServlet
 	throws ServletException, IOException
     {
         String pathInContext=(String)request.getAttribute(Dispatcher.__SERVLET_PATH);
-        if (pathInContext==null || pathInContext.length()==0)
+        if (pathInContext==null)
         {
             pathInContext=(String)request.getAttribute(Dispatcher.__PATH_INFO);
             if (pathInContext==null)
             {
                 pathInContext=request.getServletPath();
-                if (pathInContext==null || pathInContext.length()==0)
+                if (pathInContext==null)
                     pathInContext=request.getPathInfo();
             }
         }

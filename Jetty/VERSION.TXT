@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Fixed AdminServlet to handle changed getServletPath better.
+
 Jetty-4.2.7 - 4 February 2003
  + Upgraded to JSSE 1.0.3_01 to fix security problem.
  + Fixed proxy tunnel for non persistent connections.
