@@ -103,7 +103,6 @@
     <copy todir="${demo.webapps}/root">
       <fileset dir="${etc}/dtd" includes="*.dtd"/>
     </copy>
-    <copy file="LICENSE.TXT" tofile="${classes}/org/mortbay/LICENSE.TXT" />
     <copy file="${src}/org/mortbay/jetty/servlet/webdefault.xml" tofile="${etc}/webdefault.xml" />
     <available property="demo.available" type="dir" file="${demo.src}" />
     <echo message="Demo available=${demo.available}" level="info"/>
@@ -288,12 +287,13 @@
 
   <!-- ==================================================================== -->
   <target name="mini.http.jar" depends="classes"
-     description="Builds minimal dynmaic http server">
+     description="Builds minimal dynamic http server">
     <jar jarfile="${mini.http.jar}" basedir="${classes}" compress="true">
        <include name="org/mortbay/util/*" />
        <include name="org/mortbay/http/*" />
        <include name="org/mortbay/http/handler/AbstractHttpHandler.class" />
        <include name="org/mortbay/http/handler/ResourceHandler.class" />
+       <include name="org/mortbay/http/handler/ErrorPageHandler.class" />
        <include name="org/mortbay/http/handler/DumpHandler.class" />
        <include name="org/mortbay/http/handler/NullHandler.class" />
        <include name="org/mortbay/http/handler/NotFoundHandler.class" />
@@ -308,6 +308,12 @@
        <exclude name="**/ajp" />
        <exclude name="org/mortbay/start/**" />
        <exclude name="org/mortbay/stop/**" />
+            <manifest>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Main-Class" value="org.mortbay.http.HttpServer"/>
+				<attribute name="Class-Path" value="ext\commons-logging.jar"/>
+<!-- doc update: only runs as command line: java -cp ext\commons-logging.jar;lib\org.mortbay.http.jar org.mortbay.http.HttpServer %1 %2 -->
+              </manifest>
     </jar>
   </target>
 
