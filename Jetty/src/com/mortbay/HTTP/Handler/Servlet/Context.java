@@ -64,7 +64,8 @@ public class Context implements ServletContext, HttpSessionContext
     {
         _handler=handler;
         _handlerContext=_handler.getHandlerContext();
-        _logSink=(LogSink)_handlerContext.getAttribute(CONTEXT_LOG);
+        if(_handlerContext!=null)
+            _logSink=(LogSink)_handlerContext.getAttribute(CONTEXT_LOG);
     }
 
     /* ------------------------------------------------------------ */
