@@ -1,6 +1,7 @@
 Jetty-3.0.A5 - 19 Oct 1999
    + Use ISO8859_1 instead of UTF8 for headers etc.
    + Use char array in UrlEncoded.decode
+   + Do our own URL string encoding with 8859-1
 
 Jetty-3.0.A4 - 16 Oct 1999
    + Request attributes

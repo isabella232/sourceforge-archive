@@ -102,7 +102,7 @@ public class ChunkableOutputStream extends FilterOutputStream
             try
             {
                 _rawWriterBuffer=new ByteArrayOutputStream(1024);
-                _rawWriter=new OutputStreamWriter(_rawWriterBuffer,"ISO8859_1");
+                _rawWriter=new OutputStreamWriter(_rawWriterBuffer,"ISO-8859-1");
             }
             catch(IOException e)
             {

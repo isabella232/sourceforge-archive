@@ -44,7 +44,7 @@ public class ChunkableInputStream extends FilterInputStream
     {
         super(null);
         try {
-            _realIn= new LineInput(in,0,"ISO8859_1");
+            _realIn= new LineInput(in,0,"ISO-8859-1");
         }
         catch(UnsupportedEncodingException e)
         {

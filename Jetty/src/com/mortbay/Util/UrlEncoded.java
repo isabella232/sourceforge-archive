@@ -204,9 +204,9 @@ public class UrlEncoded extends MultiMap
 
         try
         {    
-            return new String(bytes,0,n,"ISO8859_1");
+            return new String(bytes,0,n,"ISO-8859-1");
         }
-        catch(Exception e)
+        catch(UnsupportedEncodingException e)
         {
             Code.warning(e);
             return new String(bytes,0,n);
@@ -221,7 +221,66 @@ public class UrlEncoded extends MultiMap
      */
     public static String encodeString(String string)
     {
-        return URLEncoder.encode(string);    
+        byte[] bytes=null;
+        try
+        {
+            bytes=string.getBytes("ISO-8859-1");
+        }
+        catch(UnsupportedEncodingException e)
+        {
+            Code.warning(e);
+            bytes=string.getBytes();
+        }
+        
+        int len=bytes.length;
+        byte[] encoded= new byte[bytes.length*3];
+        int n=0;
+        boolean noEncode=true;
+        
+        for (int i=0;i<len;i++)
+        {
+            byte b = bytes[i];
+            
+            if (b==' ')
+            {
+                noEncode=false;
+                encoded[n++]='+';
+            }
+            else if (b>='a' && b<='z' ||
+                     b>='A' && b<='Z' ||
+                     b>='0' && b<='9')
+            {
+                encoded[n++]=b;
+            }
+            else
+            {
+                noEncode=false;
+                encoded[n++]=(byte)'%';
+                byte nibble= (byte) ((b&0xf0)>>4);
+                if (nibble>=10)
+                    encoded[n++]=(byte)('A'+nibble-10);
+                else
+                    encoded[n++]=(byte)('0'+nibble);
+                nibble= (byte) (b&0xf);
+                if (nibble>=10)
+                    encoded[n++]=(byte)('A'+nibble-10);
+                else
+                    encoded[n++]=(byte)('0'+nibble);
+            }
+        }
+
+        if (noEncode)
+            return string;
+        
+        try
+        {    
+            return new String(encoded,0,n,"ISO-8859-1");
+        }
+        catch(UnsupportedEncodingException e)
+        {
+            Code.warning(e);
+            return new String(encoded,0,n);
+        }
     }
 }
 
