@@ -1007,6 +1007,11 @@ public class ServletHandler extends AbstractHttpHandler
         }
 
         /* ------------------------------------------------------------ */
+        /**
+         * @deprecated As of Java Servlet API 2.1, use
+         * 			{@link #log(String message, Throwable throwable)} 
+         *			instead.
+         */
         public void log(Exception e, String msg)
         {
             Code.warning(msg,e);
