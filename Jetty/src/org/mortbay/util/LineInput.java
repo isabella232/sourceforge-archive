@@ -207,10 +207,19 @@ public class LineInput extends FilterInputStream
             return 0;
         
         _byteBuffer.setStream(_mark,blen);
-        len=_reader.read(c,off,len);
+        
+        int read=0;
+        while(read<len && _reader.ready())
+        {
+            int r = _reader.read(c,off+read,len-read);
+            if (r<=0)
+                break;
+            read+=r;
+        }
+        
         _mark=-1;
 
-        return len;
+        return read;
     }
     
     /* ------------------------------------------------------------ */
@@ -278,8 +287,19 @@ public class LineInput extends FilterInputStream
         }
 
         _byteBuffer.setStream(_mark,len);
-        _lineBuffer.size=
-            _reader.read(_lineBuffer.buffer,0,_lineBuffer.buffer.length);
+        
+        _lineBuffer.size=0;
+        int read=0;
+        while(read<len && _reader.ready())
+        {
+            int r = _reader.read(_lineBuffer.buffer,
+                                 read,
+                                 len-read);
+            if (r<=0)
+                break;
+            read+=r;
+        }
+        _lineBuffer.size=read;
         _mark=-1;
 
         return _lineBuffer;
