@@ -6,6 +6,7 @@
 package org.mortbay.jetty.servlet;
 
 import java.util.Enumeration;
+import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
@@ -55,6 +56,17 @@ public class FilterHolder
         return
             _pathSpecs!=null &&
             _pathSpecs.getMatch(path)!=null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String appliedPathSpec(String path)
+    {
+        if (_pathSpecs==null)
+            return null;
+        Map.Entry entry = _pathSpecs.getMatch(path);
+        if (entry==null)
+            return null;
+        return (String)entry.getKey();
     }
 
     /* ------------------------------------------------------------ */

@@ -270,7 +270,9 @@ public class FilterHandler
                     }
                     
                     // call the filter
-                    Code.debug("Path doFilter: ",filter);
+                    if (Code.debug())
+                        Code.debug("Path doFilter: ",filter," at ",
+                                   holder.appliedPathSpec(_pathInContext));
                     filter.doFilter(request,response,this);
 
                     
