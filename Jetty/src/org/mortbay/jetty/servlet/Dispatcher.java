@@ -534,7 +534,7 @@ public class Dispatcher implements RequestDispatcher
                 try {_out=super.getOutputStream();}
                 catch(IllegalStateException e)
                 {
-                    Code.warning(e);
+                    if (Code.debug()) Code.warning(e);
                     _out=new ServletOut(new WriterOutputStream(super.getWriter()));
                 }
             }
