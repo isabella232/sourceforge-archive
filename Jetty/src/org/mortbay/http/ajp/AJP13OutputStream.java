@@ -16,6 +16,12 @@ import org.mortbay.util.Code;
 
 
 
+/** OutputStream for AJP13 protocol.
+ * 
+ *
+ * @version $Revision$
+ * @author Greg Wilkins (gregw)
+ */
 public class AJP13OutputStream extends BufferedOutputStream
 {
     private AJP13Packet _packet;
@@ -29,24 +35,19 @@ public class AJP13OutputStream extends BufferedOutputStream
     AJP13OutputStream(OutputStream out,int bufferSize)
     {
         super(out,
-              AJP13Packet.__MAX_BUF*2,
+              bufferSize,
               AJP13Packet.__DATA_HDR,
               AJP13Packet.__DATA_HDR,
               0);
         setFixed(true);
         _packet=new AJP13Packet(_buf);
-        
-        _packet.addByte((byte)'A');
-        _packet.addByte((byte)'B');
-        _packet.addInt(0);
+        _packet.prepare();
         
         setBypassBuffer(false);
         setFixed(true);
         
         _ajpResponse=new AJP13Packet(bufferSize);
-        _ajpResponse.addByte((byte)'A');
-        _ajpResponse.addByte((byte)'B');
-        _ajpResponse.addInt(0);
+        _ajpResponse.prepare();
     }
 
     
@@ -117,7 +118,6 @@ public class AJP13OutputStream extends BufferedOutputStream
     {
         _complete=true;
         flush();
-        System.err.println();
     }
     
     /* ------------------------------------------------------------ */
@@ -126,7 +126,6 @@ public class AJP13OutputStream extends BufferedOutputStream
         _complete=false;
         _completed=false;
         super.resetStream();
-        System.err.println();
     }
     
     /* ------------------------------------------------------------ */
@@ -154,6 +153,12 @@ public class AJP13OutputStream extends BufferedOutputStream
         if (size()==0)
             return;
 
+        if (_buf!=_packet.getBuffer())
+        {
+            _packet=new AJP13Packet(_buf);
+            _packet.prepare();
+        }
+
         prewrite(_buf,0,AJP13Packet.__DATA_HDR);
         _packet.resetData();
         _packet.addByte(AJP13Packet.__SEND_BODY_CHUNK);
@@ -171,38 +176,31 @@ public class AJP13OutputStream extends BufferedOutputStream
     public void writeTo(OutputStream out)
         throws IOException
     {
-        System.err.println("writeTo "+size());
         int sz = size();
         
-//         if (s<=AJP13Packet.__MAX_BUF)
-//         {
-//             super.writeTo(out);
-//             return;
-//         }
-
-        System.err.println("\noffset="+preReserve());
-        
-        int data=sz-AJP13Packet.__DATA_HDR;
-
-        while (data>AJP13Packet.__MAX_DATA)
-        {   
-            _packet.setDataSize(AJP13Packet.__MAX_BUF-AJP13Packet.__HDR_SIZE);
-            System.err.println("data="+data);
-            System.err.println("len ="+AJP13Packet.__MAX_BUF);
-            out.write(_buf,0,AJP13Packet.__MAX_BUF);
-
-            data-=AJP13Packet.__MAX_DATA;
-            System.arraycopy(_buf,AJP13Packet.__MAX_BUF,
-                             _buf,AJP13Packet.__DATA_HDR,
-                             data);
-        }
+        if (sz<=AJP13Packet.__MAX_BUF)
+            super.writeTo(out);
+        else
+        {
+            int offset=preReserve();
+            int data=sz-AJP13Packet.__DATA_HDR;
             
-        int len=data+AJP13Packet.__DATA_HDR;
-        _packet.setDataSize(len-AJP13Packet.__HDR_SIZE);
-        
-        System.err.println("Data="+data);
-        System.err.println("Len ="+len);
-        out.write(_buf,0,len);
-        
+            while (data>AJP13Packet.__MAX_DATA)
+            {   
+                _packet.setDataSize(AJP13Packet.__MAX_BUF-AJP13Packet.__HDR_SIZE);
+                if (offset>0)
+                    System.arraycopy(_buf,0,_buf,offset,AJP13Packet.__DATA_HDR);
+                out.write(_buf,offset,AJP13Packet.__MAX_BUF);
+                
+                data-=AJP13Packet.__MAX_DATA;
+                offset+=AJP13Packet.__MAX_DATA;
+            }
+            
+            int len=data+AJP13Packet.__DATA_HDR;
+            _packet.setDataSize(len-AJP13Packet.__HDR_SIZE);
+            if (offset>0)
+                System.arraycopy(_buf,0,_buf,offset,AJP13Packet.__DATA_HDR);
+            out.write(_buf,offset,len);
+        }
     }
 }

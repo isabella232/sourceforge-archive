@@ -203,6 +203,17 @@
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/examples</Arg>
   </Call>
 
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Add tomcat examples in naming context                           -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- NamingWebAppContext in JettyExtra package
+  <Call name="addContext">
+    <Arg><New class="org.mortbay.jetty.servlet.NamingWebAppContext">
+           <Set name="contextPath">/naming</Set>
+             <Set name="WAR"><SystemProperty name="jetty.home" default="."/>/demo/webapps/examples</Set>
+    </New></Arg>
+  </Call>
+  -->
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Build a demo context manually.                                  -->

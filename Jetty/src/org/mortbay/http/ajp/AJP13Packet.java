@@ -122,6 +122,16 @@ public class AJP13Packet
     }
 
     /* ------------------------------------------------------------ */
+    public void prepare()
+    {
+        _bytes=0;
+        _pos=0;
+        addByte((byte)'A');
+        addByte((byte)'B');
+        addInt(0);
+    }
+    
+    /* ------------------------------------------------------------ */
     public void destroy()
     {
         if (_ownBuffer)

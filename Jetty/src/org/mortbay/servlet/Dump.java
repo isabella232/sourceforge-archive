@@ -74,6 +74,10 @@ public class Dump extends HttpServlet
             return;
         }
         
+        String buffer=request.getParameter("buffer");
+        if (buffer!=null && buffer.length()>0)
+            response.setBufferSize(Integer.parseInt(buffer));
+        
         request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html");
 
@@ -376,6 +380,19 @@ public class Dump extends HttpServlet
         }
     
         page.write(pout);
+
+        String data=request.getParameter("data");
+        if (data!=null && data.length()>0)
+        {
+            int d = Integer.parseInt(data);
+            while (d>0)
+            {
+                pout.println("1234567890123456789012345678901234567890123456789\n");
+                d=d-50;
+
+            }
+        }
+        
         pout.close();
         
         if (pi!=null)
