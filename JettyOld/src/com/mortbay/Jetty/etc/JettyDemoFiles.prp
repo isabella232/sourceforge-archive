@@ -1,0 +1,8 @@
+INDEXS		         : index.html;index.htm
+PUT			 : false
+DELETE			 : false
+FILES.FileBase.PATHS     : /
+FILES.FileBase.DIRECTORY : ./FileBase
+FILES.jsp.PATHS          : /JSP/
+FILES.jsp.DIRECTORY      : ./FileBase/jsp
+

@@ -1,0 +1,5 @@
+/$                        : /Jetty
+/Auth%                    : /
+/Other%                   : /
+/Translate%               : /Dump/
+/Proxy%                   : http://localhost:8080/
