@@ -47,6 +47,8 @@ public class HandlerContext
     private ServletHandler _servletHandler;
     private String _classPath;
     private Resource _resourceBase;
+
+    // XXX Need initparams as well as attributes 
     private Map _attributes = new HashMap(11);
     private Map _mimeMap;
     
@@ -132,6 +134,7 @@ public class HandlerContext
     /* ------------------------------------------------------------ */
     public void setResourceBase(Resource resourceBase)
     {
+        Code.debug("resourceBase=",resourceBase," for ", this);
         _resourceBase=resourceBase;
         _attributes.put("com.mortbay.HTTP.resourceBase",
                         _resourceBase.toString());
@@ -150,6 +153,7 @@ public class HandlerContext
             _resourceBase=Resource.newResource(resourceBase);
             _attributes.put("com.mortbay.HTTP.resourceBase",
                             _resourceBase.toString());
+            Code.debug("resourceBase=",_resourceBase," for ", this);
         }
         catch(IOException e)
         {
@@ -443,13 +447,18 @@ public class HandlerContext
      */
     public synchronized void setAttribute(String name, Object value)
     {
-        _attributes.put(name,value);
         if ("com.mortbay.HTTP.resourceBase".equals(name))
             setResourceBase(value.toString());
         else if ("com.mortbay.HTTP.classPath".equals(name))
-            _classPath=value.toString();
+            setClassPath(value.toString());
         else if ("com.mortbay.HTTP.mimeMap".equals(name))
+        {
             _mimeMap=(Map)value;
+            _attributes.put(name,value);
+        }
+        else
+            _attributes.put(name,value);
+
     }
 
     
@@ -459,13 +468,17 @@ public class HandlerContext
      */
     public synchronized void removeAttribute(String name)
     {
-        _attributes.remove(name);
         if ("com.mortbay.HTTP.resourceBase".equals(name))
-            _resourceBase=null;
+            setResourceBase((String)null);
         else if ("com.mortbay.HTTP.classPath".equals(name))
-            _classPath=null;
+            setClassPath(null);
         else if ("com.mortbay.HTTP.mimeMap".equals(name))
+        {
             _mimeMap=null;
+            _attributes.remove(name);
+        }
+        else
+            _attributes.remove(name);
     }
     
     /* ------------------------------------------------------------ */

@@ -6,10 +6,12 @@
 package com.mortbay.Jetty;
 import com.mortbay.HTML.Include;
 import com.mortbay.Util.Code;
+import com.mortbay.Util.Resource;
 import com.mortbay.Util.StringUtil;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URL;
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -32,24 +34,24 @@ public class JettyServlet extends HttpServlet
     {	
         String path=request.getServletPath();
         
-        File file=(File)
-            request.getAttribute("JettyFile");
-        if (file==null)
-            file = new File(request.getRealPath(path));
-
-        if (file==null || !file.exists())
+        Resource resource=(Resource)request.getAttribute("JettyResource");
+        if (resource==null)
+            resource =
+                Resource.newResource(getServletContext().getResource(path));
+        
+        if (resource==null || !resource.exists())
         {
             response.sendError(404);
             return;
         }
         
-        Code.debug("FILE="+file);
+        Code.debug("Resource=",resource);
         
         JettyPage page = new JettyPage(request.getContextPath(),path);
         if (page.getSection()==null)
             return;
         
-        page.add(new Include(file));
+        page.add(new Include(resource.getInputStream()));
         
         PrintWriter pout = response.getWriter();
         page.write(pout);
@@ -64,28 +66,22 @@ public class JettyServlet extends HttpServlet
         try{
             String path=request.getServletPath();
             
-            File file=null;
+            Resource resource=
+                Resource.newResource(getServletContext().getResource(path));
 
-            file = new File(request.getRealPath(path));
-            request.setAttribute("JettyFile",file);
+            request.setAttribute("JettyResource",resource);
             
-            if (file!=null && file.exists())
+            if (resource==null || !resource.exists())
             {
-                lm=file.lastModified();
+                lm=resource.lastModified();
                 if (lm<__minModTime)
                     lm=__minModTime;
             }
-            
         }
         catch(Exception e)
         {
             Code.ignore(e);
         }
         return lm;
-    }
-    
-    
+    }   
 }
-
-
-

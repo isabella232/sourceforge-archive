@@ -57,10 +57,18 @@ public class WebApplicationContext extends HandlerContext
             ("web-app_2_2.dtd",
              Resource.newSystemResource("com/mortbay/HTTP/web.dtd"));
 
+        if (webApp.endsWith(".war"))
+        {
+            Resource warFile = Resource.newResource(webApp);
+            webApp="jar:"+warFile+"!/";
+        }
+        
         Resource _webApp = Resource.newResource(webApp);
-        if (!_webApp.exists() || !_webApp.isDirectory())
-            throw new IllegalArgumentException("No such directory: "+_webApp);
-        _webAppName=_webApp.getName();
+        Resource _webInf = _webApp.addPath("WEB-INF/");
+        if (!_webInf.exists() || !_webInf.isDirectory())
+            throw new IllegalArgumentException("No such directory: "+_webInf);
+        _webAppName=_webApp.toString();
+        
 
         // Check web.xml file
         Resource web = _webApp.addPath("WEB-INF/web.xml");
@@ -105,7 +113,7 @@ public class WebApplicationContext extends HandlerContext
             _context=_servletHandler.getContext();
             
             // ResourcePath
-            super.setResourceBase(_webAppName);
+            super.setResourceBase(_webApp);
             setServingResources(true);
             ResourceHandler rh = getResourceHandler();
             rh.setDirAllowed(true);
@@ -229,6 +237,8 @@ public class WebApplicationContext extends HandlerContext
         String name=node.get("param-name").toString(false);
         String value=node.get("param-value").toString(false);
         Code.debug("ContextParam: ",name,"=",value);
+
+        // XXX - This should not be in the attribute space
         setAttribute(name,value); 
     }
 
@@ -402,7 +412,7 @@ public class WebApplicationContext extends HandlerContext
     public String toString()
     {
         if (_name!=null)
-            return "'"+_name+"' @ "+_webAppName;
+            return _name+"@"+_webAppName;
         return _webAppName;
     }
     

@@ -981,7 +981,7 @@ public class Code
                 StringBuffer buf = new StringBuffer(256);
                 synchronized(buf)
                 {   
-                    buf.append("Ignored");
+                    buf.append("IGNORED ");
                     formatObject(buf,ex);
                 }
                 Log.message(Log.CODE_DEBUG, buf.toString(),frame);

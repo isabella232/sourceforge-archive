@@ -27,5 +27,6 @@ include $(JETTY_HOME)/etc/Global.mk
 
 jars: 
 	cd classes && \
-	jar cfv ../lib/com.mortbay.jetty.jar com org/apache/jasper && \
+	jar cfv ../lib/com.mortbay.jetty.jar com && \
+	jar cfv ../lib/org.apache.jasper.jar org/apache/jasper && \
 	jar cfv ../lib/javax.servlet.jar javax

@@ -689,7 +689,7 @@ public class ResourceHandler extends NullHandler
   
                 out.print("<TR><TD><A HREF=\"");
                 String path=base+ls[i];
-                if (item.isDirectory())
+                if (item.isDirectory() && !path.endsWith("/"))
                     path+="/";
                 out.print(padSpaces(path));
                 out.print("\">");

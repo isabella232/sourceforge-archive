@@ -25,6 +25,7 @@ Development has been done in JDK1.2 and the following CLASSPATH is required
   CLASSPATH=\
     $JETTY_HOME/lib/com.mortbay.jetty.jar:\
     $JETTY_HOME/lib/javax.servlet.jar:\
+    $JETTY_HOME/lib/org.apache.jasper.jar:\
     $JETTY_HOME/lib/com.microstar.xml.jar
 
 To use SSL you will also need to add the the jar below, which is

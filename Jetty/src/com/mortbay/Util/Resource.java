@@ -28,9 +28,10 @@ import java.security.Permission;
  */
 public class Resource 
 {
-    private URL _url;
-    private URLConnection _connection;
-    private InputStream _in=null;
+    protected URL _url;
+    protected String _urlString;
+    protected URLConnection _connection;
+    protected InputStream _in=null;
 
     /* ------------------------------------------------------------ */
     /** 
@@ -43,9 +44,9 @@ public class Resource
         if (url==null)
             return null;
         
-        URLConnection connection=url.openConnection();
         if( url.toExternalForm().startsWith( "file:"))
         {
+            URLConnection connection=url.openConnection();
             Permission perm = connection.getPermission();
             if (perm instanceof java.io.FilePermission)
             {
@@ -54,8 +55,18 @@ public class Resource
                     url=new URL(url.toString()+"/");
                 return new FileResource(url,connection,file);
             }
+            Code.warning("File resource without FilePermission:"+url);
         }
-        return new Resource(url,connection);
+        else if( url.toExternalForm().startsWith( "jar:file:"))
+        {
+            return new JarFileResource(url);
+        }
+        else if( url.toExternalForm().startsWith( "jar:"))
+        {
+            return new JarResource(url);
+        }
+        
+        return new Resource(url,null);
     }
 
     /* ------------------------------------------------------------ */
@@ -76,8 +87,13 @@ public class Resource
         }
         catch(MalformedURLException e)
         {
-            // Nope - try it as a file
-            url = new File(resource).toURL();
+            if (!resource.startsWith("ftp:") &&
+                !resource.startsWith("file:") &&
+                !resource.startsWith("jar:"))
+                // Nope - try it as a file
+                url = new File(resource).toURL();
+            else
+                Code.warning(e);
         }
         
         return newResource(url);
@@ -103,14 +119,15 @@ public class Resource
 
     
     /* ------------------------------------------------------------ */
-    private Resource(URL url, URLConnection connection)
+    protected Resource(URL url, URLConnection connection)
     {
         _url = url;
+        _urlString=_url.toString();
         _connection=connection;
     }
 
     /* ------------------------------------------------------------ */
-    private boolean checkConnection()
+    protected boolean checkConnection()
     {
         if (_connection==null)
         {
@@ -174,7 +191,7 @@ public class Resource
      */
     public boolean isDirectory()
     {
-        return _url.getFile().endsWith("/");
+        return exists() && _url.toString().endsWith("/");
     }
 
     
@@ -226,7 +243,7 @@ public class Resource
      */
     public String getName()
     {
-        return _url.getFile();
+        return _url.toExternalForm();
     }
         
     /* ------------------------------------------------------------ */
@@ -285,7 +302,7 @@ public class Resource
     /**
      * Returns a list of resource names contained in the given resource
      */
-    public synchronized String[] list()
+    public String[] list()
     {
         return null;
     }
@@ -299,6 +316,9 @@ public class Resource
     public Resource addPath(String path)
         throws IOException,MalformedURLException
     {
+        if (path==null)
+            return null;
+        
         // XXX - need to check for ../ which might take us
         // out-side of resourcebase - or at least make sure we
         // never see that here.
@@ -329,9 +349,8 @@ public class Resource
      */
     public String toString()
     {
-        return _url.toString();
+        return _urlString;
     }
-    
         
     /* ------------------------------------------------------------ */
     /** 
@@ -343,147 +362,4 @@ public class Resource
         return o instanceof Resource &&
             _url.equals(((Resource)o)._url);
     }
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private static class FileResource extends Resource
-    {
-        File _file;
-        
-        /* -------------------------------------------------------- */
-        private FileResource(URL url, URLConnection connection, File file)
-        {
-            super(url,connection);
-            _file=file;
-        }
-
-
-        /* -------------------------------------------------------- */
-        /**
-         * Returns true if the respresenetd resource exists.
-         */
-        public boolean exists()
-        {
-            return _file.exists();
-        }
-        
-        /* -------------------------------------------------------- */
-        /**
-         * Returns the last modified time
-         */
-        public long lastModified()
-        {
-            return _file.lastModified();
-        }
-
-        /* -------------------------------------------------------- */
-        /**
-         * Returns true if the respresenetd resource is a container/directory.
-         */
-        public boolean isDirectory()
-        {
-            return _file.isDirectory();
-        }
-
-        /* --------------------------------------------------------- */
-        /**
-         * Return the length of the resource
-         */
-        public long length()
-        {
-            return _file.length();
-        }
-        
-
-        /* --------------------------------------------------------- */
-        /**
-         * Returns the name of the resource
-         */
-        public String getName()
-        {
-            try{
-                return _file.getCanonicalPath();
-            }
-            catch(IOException e)
-            {
-                Code.ignore(e);
-                return _file.getName();
-            }
-        }
-        
-        /* ------------------------------------------------------------ */
-        /**
-         * Returns an File representing the given resource or NULL if this
-         * is not possible.
-         */
-        public File getFile()
-        {
-            return _file;
-        }
-        
-        /* --------------------------------------------------------- */
-        /**
-         * Returns an input stream to the resource
-         */
-        public InputStream getInputStream() throws IOException
-        {
-            return new FileInputStream(_file);
-        }
-        
-        /* --------------------------------------------------------- */
-        /**
-         * Returns an output stream to the resource
-         */
-        public OutputStream getOutputStream()
-            throws java.io.IOException, SecurityException
-        {
-            return new FileOutputStream(_file);
-        }
-        
-        /* --------------------------------------------------------- */
-        /**
-         * Deletes the given resource
-         */
-        public boolean delete()
-            throws SecurityException
-        {
-            return _file.delete();
-        }
-
-        /* --------------------------------------------------------- */
-        /**
-         * Rename the given resource
-         */
-        public boolean renameTo( Resource dest)
-            throws SecurityException
-        {
-            if( dest instanceof FileResource)
-                return _file.renameTo( ((FileResource)dest)._file);
-            else
-                return false;
-        }
-
-        /* --------------------------------------------------------- */
-        /**
-         * Returns a list of resources contained in the given resource
-         */
-        public String[] list()
-        {
-            return _file.list();
-        }
-        
-        /* ------------------------------------------------------------ */
-        /** 
-         * @param o
-         * @return 
-         */
- 	public boolean equals( Object o)
-        {
-            return o instanceof FileResource &&
-                _file.equals(((FileResource)o)._file);
-        }
-    }
 }
-
-
-

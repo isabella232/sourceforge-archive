@@ -83,28 +83,6 @@ public class Context implements ServletContext, HttpSessionContext
     
     
     /* ------------------------------------------------------------ */
-    /**
-     * Returns a <code>ServletContext</code> object that 
-     * corresponds to a specified URL on the server.
-     *
-     * <p>This method allows servlets to gain
-     * access to the context for various parts of the server, and as
-     * needed obtain {@link RequestDispatcher} objects from the context.
-     * The given path must be absolute (beginning with "/") and is 
-     * interpreted based on the server's document root. 
-     * 
-     * <p>In a security conscious environment, the servlet container may
-     * return <code>null</code> for a given URL.
-     *       
-     * @param uripath 	a <code>String</code> specifying the absolute URL of 
-     *			a resource on the server
-     *
-     * @return		the <code>ServletContext</code> object that
-     *			corresponds to the named URL
-     *
-     * @see 		RequestDispatcher
-     *
-     */
     public ServletContext getContext(String uri)
     {
         HandlerContext context=
@@ -291,6 +269,8 @@ public class Context implements ServletContext, HttpSessionContext
     /* ------------------------------------------------------------ */
     /** Get context attribute.
      * Delegated to HandlerContext.
+     * @param name attribute name.
+     * @return attribute
      */
     public Object getAttribute(String name)
     {
@@ -334,6 +314,8 @@ public class Context implements ServletContext, HttpSessionContext
     /* ------------------------------------------------------------ */
     /** Set context attribute names.
      * Delegated to HandlerContext.
+     * @param name attribute name.
+     * @param value attribute value
      */
     public void setAttribute(String name, Object value)
     {
@@ -350,6 +332,7 @@ public class Context implements ServletContext, HttpSessionContext
     /* ------------------------------------------------------------ */
     /** Remove context attribute.
      * Delegated to HandlerContext.
+     * @param name attribute name.
      */
     public void removeAttribute(String name)
     {

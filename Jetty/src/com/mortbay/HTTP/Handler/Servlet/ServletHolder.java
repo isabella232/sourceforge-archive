@@ -66,10 +66,11 @@ public class ServletHolder
         setServletName(className);
         _className=className;
 
-        
+
+        // XXX - This is horrible - got to find a better way.
         if (className.equals("org.apache.jasper.servlet.JspServlet"))
         {
-            Code.debug("HACK FOR JASPER");
+            Code.debug("Fiddle classpath for Jasper");
             put("classpath",_handler.getHandlerContext().getClassPath());
         }
     }

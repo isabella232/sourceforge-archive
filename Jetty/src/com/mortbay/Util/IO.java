@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.io.ByteArrayOutputStream;
 
 /* ======================================================================== */
 /** IO Utilities
@@ -196,6 +197,20 @@ public class IO extends ThreadPool
             out.flush();
         }
     }
+
+    /* ------------------------------------------------------------ */
+    /** Read input stream to string 
+     * @param in 
+     * @return 
+     */
+    public static String toString(InputStream in)
+        throws IOException
+    {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        copy(in,out);
+        return new String(out.toByteArray());
+    }
+
     
     /* ------------------------------------------------------------ */
     /** Run copy for copyThread()

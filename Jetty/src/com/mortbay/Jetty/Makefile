@@ -30,9 +30,13 @@ WEBAPPFILES := \
 	$(INSTALLROOT)/webapps/$(WEBAPP)/LICENSE.html \
 	$(INSTALLROOT)/webapps/$(WEBAPP)/versions.txt \
 
+WAR := $(INSTALLROOT)/webapps/$(WEBAPP).war
 
-install: $(WEBAPPDIRS) $(WEBAPPFILES) $(WEBAPPCLASSES)
+install: $(WAR)
 
+$(WAR): $(WEBAPPDIRS) $(WEBAPPFILES) $(WEBAPPCLASSES)
+	cd $(INSTALLROOT)/webapps/$(WEBAPP) && \
+	jar cfv ../$(WEBAPP).war [A-B]* [D-Z]* [a-z]*
 
 $(INSTALLROOT)/webapps/$(WEBAPP)/WEB-INF/classes/com/mortbay/Jetty:
 	mkdir -p $(INSTALLROOT)/webapps/$(WEBAPP)/WEB-INF/classes/com/mortbay/Jetty

@@ -24,16 +24,15 @@
   <property name="javadoc"        value="${basedir}/javadoc"/>
 
   <property name="jetty.webapp"           value="${webapps}/jetty"/>
+  <property name="jetty.war"              value="${webapps}/jetty.war"/>
   <property name="jetty.webapp.webinf"    value="${jetty.webapp}/WEB-INF"/>
   <property name="jetty.webapp.classes"   value="${jetty.webapp.webinf}/classes"/>
 
   <property name="jetty.jar"      value="${lib}/com.mortbay.jetty.jar"/>
   <property name="servlet.jar"    value="${lib}/javax.servlet.jar"/>
   <property name="jasper.jar"     value="${lib}/org.apache.jasper.jar"/>
-  <property name="aelfred.jar"    value="${lib}/aelfred.sax.jar"/>
-  <property name="jsse.jar"       value="${lib}/jsse.jar"/>
-  <property name="jnet.jar"       value="${lib}/jnet.jar"/>
-  <property name="jcert.jar"      value="${lib}/jcert.jar"/>
+  <property name="aelfred.jar"    value="${lib}/com.microstar.xml.jar"/>
+  <property name="jsse.jar"       value="${lib}/com.sun.net.ssl.jar"/>
   <property name="libs"           value="${aelfred.jar};${jsse.jar};${jnet.jar};${jcert.jar};${jasper.jar}"/>
   
   
@@ -144,6 +143,11 @@
       <include name="com/mortbay/Jetty/JettyServlet.java" />
     </javac>
     <copyfile src="LICENSE.html" dest="${jetty.webapp}/LICENSE.html" />
+    <jar jarfile="${jetty.war}"
+         basedir="${jetty.webapp}" 
+         >
+       <include name="**"  />
+    </jar>
   </target>
 
   <target name="javadoc" depends="libs">
@@ -176,3 +180,4 @@
 </target>
   
 </project>
+

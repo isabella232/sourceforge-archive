@@ -1240,43 +1240,8 @@ public class TestHarness
             Code.warning(e);
             test.check(false,e.toString());
         }
-    }
-    
+    }    
 
-    /* ------------------------------------------------------------ */
-    static void testZipResource()
-    {
-        Test test = new Test("com.mortbay.Util.ZipResource");
-        try
-        {
-            try
-            {
-                new ZipResource("com/mortbay/Util/TestData/unknown.zip");
-                test.check(false,"Not found");
-            }
-            catch(IllegalArgumentException e)
-            {
-                test.check(true,"No Such Resource");
-            }
-            
-            ZipResource zr = new
-                ZipResource("com/mortbay/Util/TestData/test.zip");
-            test.checkEquals(zr.getNames().size(),3,"getNames()");
-
-            ZipEntry entry = zr.getEntry("alphabet");
-            test.checkEquals(entry.getName(),"alphabet","getEntry(alphabet)");	    
-
-            byte[] b = zr.getBytes("alphabet");
-            test.checkEquals(b.length,27,"getBytes(alphabet)");
-            test.checkEquals(b[0],'A',"getBytes(alphabet)");
-            
-        }
-        catch(Exception e)
-        {
-            Code.warning(e);
-            test.check(false,e.toString());
-        }
-    }
     
     /* ------------------------------------------------------------ */
     static void testMultiMap()
@@ -1315,16 +1280,20 @@ public class TestHarness
 
     
     /* --------------------------------------------------------------- */
-    public static void resourceTest()
+    public static void testResource()
     {
         Test t = new Test("com.mortbay.Util.Resource");
         try
         {
-            Resource r =
+              Resource r;
+            r =
                 Resource.newResource("file:"+
                                      System.getProperty("user.dir")+
                                      "/TestHarness.java");
             t.check(r.exists(),"File URL exists");
+            t.checkEquals(r.getName(),System.getProperty("user.dir")+
+                          "/TestHarness.java","File name");
+            
             t.check(!r.isDirectory(),"File URL not directory");
             r = Resource.newResource(System.getProperty("user.dir")+
                                      "/TestHarness.java");
@@ -1378,10 +1347,65 @@ public class TestHarness
             r = r.addPath("UnknownFile");
             t.check(!r.exists(),"AddPath resource ! exists");
 
-            r = Resource.newResource("jar:file:/somejar.jar!/content/");
-            t.checkEquals(r.getFile(),null,"no file for jar:");
+            // Test JAR Resource
+            Resource j = Resource.newResource("jar:file:/somejar.jar!/content/");
+            t.checkEquals(j.getFile(),null,"no file for jar:");
+            t.check(!j.exists(),"no jar file with content");
+            j = Resource.newResource("jar:file:/somejar.jar!/");
+            t.check(!j.exists(),"no jar file");
             
+            j = Resource.newResource("jar:file:"+
+                                     System.getProperty("user.dir")+
+                                     "/TestData/test.zip!/");
+            t.check(j instanceof JarFileResource,"Jar Resource");
+            t.checkEquals(j.getFile(),null,"no file for jar:");
+            t.checkEquals(j.getName(),"jar:file:"+
+                          System.getProperty("user.dir")+
+                          "/TestData/test.zip!/","jar name");
+            t.check(j.exists(),"jar exists");
+            t.check(j.isDirectory(),"root directory");
+            t.check(j.lastModified()!=-1,"Last Modified");
 
+            r=j.addPath("Unknown");
+            t.checkContains(r.toString(),"!/Unknown","jar unknown content");
+            t.check(!r.exists(),"jar unknown content");
+            t.check(!r.isDirectory(),"unknown directory");
+            r=r.addPath("/Unknown/");
+            t.checkContains(r.toString(),"!/Unknown/","jar unknown content/");
+            t.check(!r.exists(),"jar unknown content/");
+            t.check(!r.isDirectory(),"unknown/ directory");
+
+            r=j.addPath("subdir");
+            t.checkContains(r.toString(),"!/subdir","jar directory");
+            t.check(!r.exists(),"jar directory exists");
+            t.check(!r.isDirectory(),"jar directory");
+            
+            r=j.addPath("/subdir/");
+            t.checkContains(r.toString(),"!/subdir/","jar directory/");
+            t.check(r.exists(),"jar directory/");
+            t.check(r.isDirectory(),"jar directory/");
+            t.check(r.lastModified()!=-1,"Last Modified");
+            String[] l = r.list();
+            t.checkEquals(l.length,3,"List directory");
+            
+            r=j.addPath("alphabet");
+            t.checkContains(r.toString(),"!/alphabet","jar file");
+            t.check(r.exists(),"jar file");
+            t.check(!r.isDirectory(),"jar file");
+            t.check(r.lastModified()!=-1,"Last Modified");
+            InputStream in = r.getInputStream();
+            String data=IO.toString(in);
+            t.checkContains(data,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","Fetched file");
+            
+            r=j.addPath("/subdir/alphabet");
+            t.checkContains(r.toString(),"!/subdir/alphabet","jar file");
+            t.check(r.exists(),"jar file");
+            t.check(!r.isDirectory(),"jar file");
+            t.check(r.lastModified()!=-1,"Last Modified");
+            in = r.getInputStream();
+            data=IO.toString(in);
+            t.checkContains(data,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","Fetched file");
+            
             
         }
         catch(Exception e)
@@ -1526,9 +1550,8 @@ public class TestHarness
      	    testThreadPool();
        	    testThreadedServer();
        	    testB64();
-       	    testZipResource();
+      	    testResource();
        	    PropertyTreeTest.test();
-      	    resourceTest();
      	    testXmlParser();
      	    testXmlConfiguration();
         }

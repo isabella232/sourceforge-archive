@@ -64,7 +64,7 @@ $ID: $
     </Arg>
   </Call>
 
-<!--
+<!--  Uncomment this to add an SSL listener.
   <Call name="addListener">
     <Arg>
       <New class="com.mortbay.HTTP.SunJsseListener">
@@ -81,7 +81,7 @@ $ID: $
 
   <Call name="addWebApplication">
     <Arg>/jetty</Arg>
-    <Arg>file:<SystemProperty name="user.dir"/>/webapps/jetty/</Arg>
+    <Arg>file:<SystemProperty name="user.dir"/>/webapps/jetty.war</Arg>
     <Arg><SystemProperty name="user.dir"/>/etc/webdefault.xml/</Arg>
   </Call>
 
@@ -108,10 +108,10 @@ $ID: $
       <Arg>*.jsp</Arg>
       <Arg>org.apache.jasper.servlet.JspServlet</Arg>
     </Call>
+    <Set name="ServingResources">TRUE</Set>y
     <Call name="addHandler">
       <Arg><New class="com.mortbay.HTTP.Handler.DumpHandler"/></Arg>
     </Call>
-    <Set name="ServingResources">TRUE</Set>
   </Call>
 
   <Call name="addContext">
@@ -125,7 +125,6 @@ $ID: $
     <Set name="ResourceBase">./javadoc/</Set>
     <Set name="ServingResources">TRUE</Set>
   </Call>
-
   <Call name="addContext">
     <Arg>/</Arg>
     <Call name="addServlet">
@@ -149,6 +148,8 @@ $ID: $
   </Set>
 
 </Configure>
+
+
 
 
 

@@ -39,7 +39,7 @@ public class Demo
             // Configure handlers
             HandlerContext context;
             server.addWebApplication(null,"/jetty",
-                                     "./webapps/jetty",
+                                     "./webapps/jetty.war",
                                      "./etc/webdefault.xml");
             
             context=server.getContext(null,"/demo");
