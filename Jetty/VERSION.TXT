@@ -1,4 +1,5 @@
 Jetty-3.0.A97 - in progress
+   + Tempory request log implementation
    + Less verbose debug
    + Better tuned SocketListener parameters
    + Started RequestDispatcher implementation.
