@@ -214,15 +214,13 @@ public class AJP13Listener
     /* ------------------------------------------------------------ */
     public boolean isIntegral(HttpConnection connection)
     {
-        Code.warning("Not correct");
-        return false;
+        return ((AJP13Connection)connection).isSSL();
     }
     
     /* ------------------------------------------------------------ */
     public boolean isConfidential(HttpConnection connection)
     {
-        Code.warning("Not correct");
-        return false;
+        return ((AJP13Connection)connection).isSSL();
     }
 
     /* ------------------------------------------------------------ */

@@ -109,6 +109,12 @@ public class AJP13Connection extends HttpConnection
     }
 
     /* ------------------------------------------------------------ */
+    public boolean isSSL()
+    {
+        return _isSSL;
+    }
+    
+    /* ------------------------------------------------------------ */
     public boolean handleNext()
     {
         Socket socket=(Socket)getConnection();
@@ -119,7 +125,14 @@ public class AJP13Connection extends HttpConnection
 
         try
         {
-            packet = _ajpIn.nextPacket();
+            try
+            { packet = _ajpIn.nextPacket(); }
+            catch (IOException e)
+            {
+                Code.ignore(e);
+                return false;
+            }
+            
             int type=packet.getByte();
             if (Code.debug())
                 Code.debug("AJP13 type="+type);
@@ -201,7 +214,9 @@ public class AJP13Connection extends HttpConnection
                   response.setField(HttpFields.__ServletEngine,Version.__ServletEngine);
                   
                   // Service request
+                  Code.debug("REQUEST: ",request);
                   context=service(request,response);
+                  Code.debug("RESPONSE: ",response);
 
                   break;
                   
@@ -221,14 +236,18 @@ public class AJP13Connection extends HttpConnection
         }
         finally
         {
+            // flush the output
+            try{getOutputStream().flush(true);} catch (Exception e){Code.warning(e);}
+            
             // Consume unread input.
             try{while(_ajpIn.skip(4096)>0 || _ajpIn.read()>=0);}
             catch (IOException e){Code.ignore(e);}
 
+            // Close the outout
             try{_ajpOut.close();} catch (IOException e){Code.warning(e);}
-            
-            statsRequestEnd();
-            try{getOutputStream().resetStream();}catch (Exception e){Code.warning(e);}
+
+
+            try{getOutputStream().resetStream();} catch (Exception e){Code.warning(e);}
             getOutputStream().addObserver(this);
             try{getInputStream().resetStream();}catch (Exception e){Code.warning(e);}
             _ajpIn.recycle();
