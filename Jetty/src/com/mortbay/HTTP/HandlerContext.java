@@ -833,6 +833,19 @@ public class HandlerContext implements LifeCycle
         SecurityHandler sh=getSecurityHandler();
         sh.addSecurityConstraint(pathSpec,sc);
     }
+    
+    /* ------------------------------------------------------------ */
+    /** Add an auth security constraint.
+     * Conveniance method.
+     * @param pathSpec 
+     * @param Auth role
+     */
+    public void addAuthConstraint(String pathSpec,
+                                  String role)
+    {
+        SecurityHandler sh=getSecurityHandler();
+        sh.addSecurityConstraint(pathSpec,new SecurityConstraint(role,role));
+    }
 
     /* ------------------------------------------------------------ */
     public synchronized Map getMimeMap()

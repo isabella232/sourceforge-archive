@@ -385,8 +385,15 @@ JAVA_OPTIONS="-Djetty.home=$JETTY_HOME -Djetty.log=$JETTY_LOG $JAVA_OPTIONS"
 #####################################################
 # This is how the Jetty server will be started
 #####################################################
-RUN_CMD="$JAVA -cp $CLASSPATH $JAVA_OPTIONS com.mortbay.Jetty.Server $CONFIGS"
 
+case "$ACTION" in
+  start)
+     RUN_CMD="$JAVA -DLOG_FILE=$JETTY_LOG/yyyy_mm_dd.jetty.log -cp $CLASSPATH $JAVA_OPTIONS com.mortbay.Jetty.Server $CONFIGS"
+  ;;
+  *)
+     RUN_CMD="$JAVA -cp $CLASSPATH $JAVA_OPTIONS com.mortbay.Jetty.Server $CONFIGS"
+  ;;
+esac
 
 #####################################################
 # Comment these out after you're happy with what 
@@ -419,8 +426,7 @@ case "$ACTION" in
 
         echo "STARTED Jetty `date`" >> $JETTY_CONSOLE
 
-        RUN_CMD="$JAVA -DLOG_FILE=$JETTY_LOG/yyyy_mm_dd.jetty.log -cp $CLASSPATH $JAVA_OPTIONS com.mortbay.Jetty.Server $CONFIGS"
-        nohup $RUN_CMD >>$JETTY_CONSOLE 2>&1 &
+        nohup sh -c "$RUN_CMD >>$JETTY_CONSOLE 2>&1" >/dev/null &
         echo $! > $JETTY_RUN/jetty.pid
         echo "Jetty running pid="`cat $JETTY_RUN/jetty.pid`
         ;;
@@ -450,7 +456,6 @@ case "$ACTION" in
             exit 1
         fi
 
-        echo "RUN_CMD        =  $RUN_CMD"
         $RUN_CMD
         ;;
 

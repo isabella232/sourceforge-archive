@@ -20,23 +20,12 @@ public class IO extends ThreadPool
 {
     /* ------------------------------------------------------------------- */
     public static int bufferSize = 8192;
-    /* ------------------------------------------------------------------- */
-    private static IO __instance=null;
-    private static int __instanceChecks=0;
     
+    /* ------------------------------------------------------------------- */
+    private static class Singleton {static final IO __instance=new IO();}
     public static IO instance()
     {
-        if (__instance==null || __instanceChecks<ThreadPool.__nullLockChecks)
-        {
-            synchronized(com.mortbay.Util.IO.class)
-            {
-                if (__instance==null)
-                    __instance=new IO();
-                if(__instanceChecks<Integer.MAX_VALUE)
-                    __instanceChecks++;
-            }
-        }
-        return __instance;
+        return Singleton.__instance;
     }
     
     /* ------------------------------------------------------------------- */

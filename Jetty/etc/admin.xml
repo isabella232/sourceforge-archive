@@ -31,8 +31,22 @@ $Id$
     </Arg>
   </Call>
 
+  <Call name="addRealm">
+    <Arg>
+      <New class="com.mortbay.HTTP.HashUserRealm">
+        <Arg>Jetty Demo Realm</Arg>
+        <Arg><SystemProperty name="jetty.home" default="."/>/etc/demoRealm.properties</Arg>
+      </New>
+    </Arg>
+  </Call>
+
   <Call name="addContext">
-    <Arg>/</Arg>
+    <Arg>/</Arg>   
+    <Set name="Realm">Jetty Demo Realm</Set>
+    <Call name="addAuthConstraint">
+      <Arg>/</Arg> 
+      <Arg>server-administrator</Arg>   
+    </Call>
     <Call name="addServlet">
       <Arg>Admin</Arg>
       <Arg>/</Arg>

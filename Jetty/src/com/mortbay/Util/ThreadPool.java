@@ -462,7 +462,7 @@ public class ThreadPool
     protected Object getJob(int idleTimeoutMs)
         throws InterruptedException, InterruptedIOException
     {
-        if (_queue==null || _queueChecks<2)
+        if (_queue==null || _queueChecks<__nullLockChecks)
         {
             synchronized(this)
             {

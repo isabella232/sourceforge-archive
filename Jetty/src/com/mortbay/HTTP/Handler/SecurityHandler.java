@@ -110,7 +110,21 @@ public class SecurityHandler extends NullHandler
         }
         else if (_constraintMap.size()>0)
         {
-            Code.warning("No Realm set for "+this);
+            Iterator i = _constraintMap.values().iterator();
+            while(i.hasNext())
+            {
+                Iterator j= ((ArrayList)i.next()).iterator();
+                while(j.hasNext())
+                {
+                    SecurityConstraint sc = (SecurityConstraint)j.next();
+                    if (sc.isAuthenticated())
+                    {
+                        Code.warning("No Realm set for "+this);
+                        super.start();
+                        return;
+                    }
+                }
+            }
             super.start();
         }
     }

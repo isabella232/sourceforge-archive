@@ -100,9 +100,7 @@ public class Demo
             context=server.addContext(null,"/");
             context.addHandler(new ForwardHandler("/jetty/index.html"));
             context.setRealm("Jetty Demo Realm");
-            context.addSecurityConstraint
-                ("/admin/*",
-                 new SecurityConstraint("admin","content-administrator"));
+            context.addAuthConstraint("/admin/*","content-administrator");
             context.setClassPath("servlets/");
             context.setDynamicServletPathSpec("/servlet/*");
             context.addServlet("Admin","/admin/*","com.mortbay.HTTP.AdminServlet");
@@ -125,6 +123,8 @@ public class Demo
             listener.setMaxIdleTimeMs(60000);
             listener.setMaxReadTimeMs(60000);
             context=admin.addContext(null,"/");
+            context.setRealm("Jetty Demo Realm");
+            context.addAuthConstraint("/","server-administrator");
             context.addServlet("Admin","/","com.mortbay.HTTP.AdminServlet");
             context.addServlet("Debug","/Debug/*","com.mortbay.Servlet.Debug");
             admin.start();

@@ -159,24 +159,16 @@ public class Resource
     }
 
     /* ------------------------------------------------------------ */
-    protected boolean checkConnection()
+    protected synchronized boolean checkConnection()
     {
         if (_connection==null)
         {
-            synchronized(this)
+            try{
+                _connection=_url.openConnection();
+            }
+            catch(IOException e)
             {
-                // XXX - vulnerable to double null check sync problem.
-                // but should not be a problem for this class.
-                if (_connection==null)
-                {
-                    try{
-                        _connection=_url.openConnection();
-                    }
-                    catch(IOException e)
-                    {
-                        Code.ignore(e);
-                    }
-                }
+                Code.ignore(e);
             }
         }
         return _connection!=null;
@@ -191,7 +183,7 @@ public class Resource
     /* ------------------------------------------------------------ */
     /** Release any resources held by the resource.
      */
-    public void release()
+    public synchronized void release()
     {
         if (_in!=null)
         {

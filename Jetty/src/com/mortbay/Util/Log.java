@@ -66,23 +66,12 @@ public class Log
     private boolean _initialized = false;
 
     /*-------------------------------------------------------------------*/
-    private static Log __instance = null;
-    private static int __instanceChecks=0;
+    private static class Singleton {static final Log __instance = new Log();}
     
     /*-------------------------------------------------------------------*/
     public static Log instance()
-    {   
-        if (__instance==null || __instanceChecks<ThreadPool.__nullLockChecks)
-        {
-            synchronized(Log.class)
-            {
-                if (__instance==null)
-                    __instance=new Log();
-                if(__instanceChecks<Integer.MAX_VALUE)
-                    __instanceChecks++;
-            }
-        }
-        return __instance;
+    {
+        return Singleton.__instance;
     }
     
     /*-------------------------------------------------------------------*/
@@ -112,7 +101,7 @@ public class Log
                         sink = (LogSink)sinkClass.newInstance();
                         sink.setOptions(_logOptions);
                         sink.start();
-                        __instance.add(sink);
+                        Singleton.__instance.add(sink);
                     }
                     else
                         // Can't use Code.fail here, that's what we're setting up

@@ -67,8 +67,6 @@ public class Code
 {
     /*-------------------------------------------------------------------*/
     private static final String __lock="LOCK";
-    private static Code __instance=null;
-    private static int __instanceChecks=0;
 
     /*-------------------------------------------------------------------*/
     /** Shared static instances, reduces object creation at expense
@@ -78,19 +76,10 @@ public class Code
     private static PrintWriter __out = new PrintWriter(__stringWriter,false);
     
     /*-------------------------------------------------------------------*/
+    private static class Singleton {static Code __instance=new Code();}
     static Code instance()
-    {   
-        if (__instance==null || __instanceChecks<ThreadPool.__nullLockChecks)
-        {
-            synchronized(__lock)
-            {
-                if (__instance==null)
-                    new Code();
-                if(__instanceChecks<Integer.MAX_VALUE)
-                    __instanceChecks++;
-            }
-        }
-        return __instance;
+    {
+        return Singleton.__instance;
     }
     
     /*-------------------------------------------------------------------*/
@@ -144,7 +133,7 @@ public class Code
      */
     protected Code()
     {
-        __instance=this;
+        Singleton.__instance=this;
         try{
             boolean d = System.getProperty("DEBUG") != null;
             setDebug(d);

@@ -328,6 +328,9 @@ public class WriterLogSink
                 e.printStackTrace();
             }
         }
+        
+        if (_filename==null && _out==null)
+            _out=new PrintWriter(System.err);
     }
 
     /* ------------------------------------------------------------ */
@@ -485,6 +488,8 @@ public class WriterLogSink
      */
     public void log(String formattedLog)
     {
+        if (_out==null)
+            return;
         synchronized(_stringBuffer)
         {
             _out.println(formattedLog);
