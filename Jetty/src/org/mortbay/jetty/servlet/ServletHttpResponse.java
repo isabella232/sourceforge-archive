@@ -220,7 +220,6 @@ public class ServletHttpResponse implements HttpServletResponse
     {
         resetBuffer();
         _httpResponse.reset();
-        if (_writer!=null) _writer.reset();
     }
     
     /* ------------------------------------------------------------ */
