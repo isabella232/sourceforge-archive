@@ -41,7 +41,7 @@ grant codeBase "file:${jetty.home}/lib/-"
   permission java.lang.RuntimePermission "accessClassInPackage.sun.tools.*";
 };
 
-grant codeBase "file:${jetty.home}/extra/lib/jaas.jar"
+grant codeBase "file:${jetty.home}/extra/lib/org.mortbay.jaas.jar"
 {
   permission javax.security.auth.AuthPermission "createLoginContext.jdbc";
   permission javax.security.auth.AuthPermission "modifyPrincipals";
