@@ -1,0 +1,35 @@
+<project name="Jetty launcher" default="jar">
+    <property name="srcdir" value="${basedir}/src"/>
+    <property name="classdir" value="${basedir}/classes"/>
+    <property name="jarfile" value="${basedir}/../start.jar"/>
+    
+    <target name="prepare">
+        <mkdir dir="${classdir}"/>
+    </target>
+    
+    <target name="compile" depends="prepare">
+        <javac srcdir="${srcdir}" destdir="${classdir}">
+            <include name="**/*.java"/>
+        </javac>
+    </target>
+    
+    <target name="jar" depends="compile">
+        <delete file="${jarfile}" quiet="true"/>
+        <jar jarfile="${jarfile}"
+             manifest="${srcdir}/MANIFEST.MF"
+             basedir="${classdir}"
+         >
+            <include name="org/mortbay/**"/>
+        </jar>
+    </target>
+
+    
+    <target name="tidy">
+        <delete dir="${classdir}" quiet="true"/>
+    </target>
+
+    <target name="clean" depends="tidy">
+        <delete file="${jarfile}" quiet="true"/>
+    </target>
+
+</project>
