@@ -287,6 +287,12 @@ public class ServletHandler extends Container implements HttpHandler
     }    
 
     /* ------------------------------------------------------------ */
+    /** 
+     * Map a servlet to a pathSpec
+     * @param pathSpec The pathspec to map
+     * @param servletName The name of the servlet, which must have already been added.
+     * @return The servlet holder of the mapped servlet.
+     */
     public ServletHolder mapPathToServlet(String pathSpec,
                                           String servletName)
     {
@@ -347,32 +353,24 @@ public class ServletHandler extends Container implements HttpHandler
 
     
     /* ------------------------------------------------------------ */
+    /**
+     * Add a servlet instance to this handler and map it to a pathspec.
+     * @param pathSpec The pathmapping
+     * @param servletClass The class of the servlet
+     * @return The created ServletHolder
+     */
     public ServletHolder addServlet(String pathSpec,
                                     String servletClass)
     {
         return addServlet(servletClass,pathSpec,servletClass,null);
     }
-
+    
     /* ------------------------------------------------------------ */
-    void addServletHolder(String pathSpec, ServletHolder holder)
-    {
-        try
-        {
-            addServletHolder(holder);
-            
-            if (isStarted() && !holder.isStarted())
-                holder.start();
-            
-            _servletMap.put(pathSpec,holder);
-        }
-        catch(Exception e)
-        {
-            log.warn(LogSupport.EXCEPTION,e);
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    void addServletHolder(ServletHolder holder)
+    /**
+     * Register an existing ServletHolder with this handler.
+     * @param holder the ServletHolder to register.
+     */
+    public void addServletHolder(ServletHolder holder)
     {
         ServletHolder existing = (ServletHolder)
         _nameMap.get(holder.getName());
@@ -479,19 +477,23 @@ public class ServletHandler extends Container implements HttpHandler
     }
 
     /* ------------------------------------------------------------ */
-    HttpSession getHttpSession(String id)
+    public HttpSession getHttpSession(String id)
     {
         return _sessionManager.getHttpSession(id);
     }
     
     /* ------------------------------------------------------------ */
-    HttpSession newHttpSession(HttpServletRequest request)
+    public HttpSession newHttpSession(HttpServletRequest request)
     {
         return _sessionManager.newHttpSession(request);
     }
 
     /* ------------------------------------------------------------ */
-    void setSessionInactiveInterval(int seconds)
+    /**
+     * Set the session timeout interval in seconds.
+     * @param seconds the length of the session timeout interval in seconds.
+     */
+    public void setSessionInactiveInterval(int seconds)
     {
         _sessionManager.setMaxInactiveInterval(seconds);
     }
@@ -842,7 +844,7 @@ public class ServletHandler extends Container implements HttpHandler
 
     
     /* ------------------------------------------------------------ */
-    void notFound(HttpServletRequest request,
+    protected void notFound(HttpServletRequest request,
                   HttpServletResponse response)
         throws IOException
     {
@@ -869,7 +871,7 @@ public class ServletHandler extends Container implements HttpHandler
     }
     
     /* ------------------------------------------------------------ */
-    void handleTrace(HttpServletRequest request,
+    protected void handleTrace(HttpServletRequest request,
                             HttpServletResponse response)
         throws IOException
     {
@@ -885,7 +887,7 @@ public class ServletHandler extends Container implements HttpHandler
     }
     
     /* ------------------------------------------------------------ */
-    void handleOptions(HttpServletRequest request,
+    protected void handleOptions(HttpServletRequest request,
                               HttpServletResponse response)
         throws IOException
     {
@@ -902,7 +904,7 @@ public class ServletHandler extends Container implements HttpHandler
     }
 
     /* ------------------------------------------------------------ */
-    String getErrorPage(int status,ServletHttpRequest request)
+    public String getErrorPage(int status,ServletHttpRequest request)
     {
         return null;
     }

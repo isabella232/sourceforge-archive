@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+ + Some minor findbugs code cleanups
+ + Made more WebApplicationHandle configuration methods public.
+
 Jetty-5.1.1RC0 - 17 November 2004
  + fix for adding recognized EventListeners
  + fix commons logging imports to IbmJsseListener

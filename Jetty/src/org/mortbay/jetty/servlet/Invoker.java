@@ -127,7 +127,8 @@ public class Invoker extends HttpServlet
         if (holder!=null)
         {
             // Add named servlet mapping
-            _servletHandler.addServletHolder(URI.addPaths(servlet_path,servlet)+"/*",holder);
+            _servletHandler.addServletHolder(holder);
+            _servletHandler.mapPathToServlet(URI.addPaths(servlet_path,servlet)+"/*", holder.getName());
         }
         else
         {
@@ -189,8 +190,9 @@ public class Invoker extends HttpServlet
                     // Add the holder for all the possible paths
                     if (_verbose)
                         log("Dynamic load '"+servlet+"' at "+path);
-                    _servletHandler.addServletHolder(path+"/*",holder);
-                    _servletHandler.addServletHolder(path+".class/*",holder);
+                    _servletHandler.addServletHolder(holder);
+                    _servletHandler.mapPathToServlet(path+"/*",holder.getName());
+                    _servletHandler.mapPathToServlet(path+".class/*",holder.getName());
                 }
             }
             

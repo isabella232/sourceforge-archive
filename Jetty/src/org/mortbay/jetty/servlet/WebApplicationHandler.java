@@ -111,10 +111,14 @@ public class WebApplicationHandler extends ServletHandler
     public FilterHolder defineFilter(String name, String className)
     {
         FilterHolder holder= new FilterHolder(this, name, className);
+        addFilterHolder(holder);
+        return holder;
+    }
+
+    public void addFilterHolder(FilterHolder holder) {
         _filterMap.put(holder.getName(), holder);
         _filters.add(holder);
         addComponent(holder);
-        return holder;
     }
 
     /* ------------------------------------------------------------ */
@@ -124,6 +128,12 @@ public class WebApplicationHandler extends ServletHandler
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * Add a servlet filter
+     * @param servletName The name of the servlet to be filtered.
+     * @param filterName The name of the filter.
+     * @return The holder of the filter instance.
+     */
     public FilterHolder mapServletToFilter(String servletName, String filterName)
     {
         FilterHolder holder= (FilterHolder)_filterMap.get(filterName);
@@ -131,9 +141,20 @@ public class WebApplicationHandler extends ServletHandler
             throw new IllegalArgumentException("Unknown filter :" + filterName);
         if (log.isDebugEnabled())
             log.debug("Filter servlet " + servletName + " --> " + filterName);
-        _servletFilterMap.add(servletName, holder);
+        mapServletToFilter(servletName, holder);
         holder.addServlet(servletName);
         return holder;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Register that a Filter is applied to a Servlet. 
+     * @param servletName the name of the Servlet the filter applies to.
+     * @param holder the FilterHolder that will be applied to calls to the Servlet.
+     */
+    public void mapServletToFilter(String servletName, FilterHolder holder) 
+    {
+        _servletFilterMap.add(servletName, holder);
     }
 
     /* ------------------------------------------------------------ */
@@ -143,6 +164,11 @@ public class WebApplicationHandler extends ServletHandler
     }
 
     /* ------------------------------------------------------------ */
+    /** Map path to Filter.
+     * @param pathSpec The pathSpec to map.
+     * @param filterName The name of the filter.
+     * @return The holder of the filter instance.
+     */
     public FilterHolder mapPathToFilter(String pathSpec, String filterName)
     {
         FilterHolder holder= (FilterHolder)_filterMap.get(filterName);
@@ -154,10 +180,12 @@ public class WebApplicationHandler extends ServletHandler
 
         if (!holder.isMappedToPath())
             _pathFilters.add(holder);
+        
         holder.addPathSpec(pathSpec);
 
         return holder;
     }
+
 
     /* ------------------------------------------------------------ */
     public synchronized void addEventListener(EventListener listener)
@@ -348,7 +376,7 @@ public class WebApplicationHandler extends ServletHandler
     }
 
     /* ------------------------------------------------------------ */
-    protected String getErrorPage(int status, ServletHttpRequest request)
+    public String getErrorPage(int status, ServletHttpRequest request)
     {
         String error_page= null;
         Class exClass= (Class)request.getAttribute(ServletHandler.__J_S_ERROR_EXCEPTION_TYPE);
