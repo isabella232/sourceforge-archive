@@ -177,61 +177,11 @@ An alternative configuration file can be run with
 
 
 
-Unix Start Scripts
-==================
+Win32 Service
+=============
 
-On unix, you can use the supplied shell script to set the classpaths
-and run Jetty:
-
-  export JETTY_HOME=<jetty install directory>
-  export JAVA_HOME=<JRE install directory>
-  $JETTY_HOME/bin/jetty.sh demo
-
-This will start a demo Jetty server on port 8080. Point your browser at
-  http://localhost:8080
-
-This script is controlled by the following environment variables:
-
- JAVA       - executable JVM
- JAVA_HOME  - Home of java, specifically $JAVA_HOME/lib/tools.jar
- JETTY_HOME - Home of jetty
- JETTY_CONF - Location of the script's configuration file, set to
-              /etc/jetty.conf, or $JETTY_HOME/etc/jetty.conf by
-              default.
- JETTY_RUN  - Directory for jetty pid file
- JETTY_LOG  - Directory for jetty output log
-
-If any of these variables are not set, then frantic searches are made
-of likely locations to try and find them.
-
-The /etc/jetty.conf file may contain:
- - Coment lines starting with #
- - References to files, which are considered .xml server configurations, and
-   passed to jetty for serving.
- - References to directories (i.e. /etc/jetty.d). Each directory is scanned
-   for .xml files, and those found are passed to jetty for serving.
-
-Note: If .xml configuration files are given in the command line, jetty will
-not use /etc/jetty.conf. This is useful for running single servers while
-testing.
-
-Note: if you don't setup the /etc/jetty.conf file, then running
-"jetty.sh start" without a config specified may start multiple
-servers (demo, jetty, watchdog) on the same port - causing errors.
-
-Other jetty.sh actions are:
-   start -- To start the server.
-   stop  -- Stops a server started with "start".
-   run   -- Runs Jetty in foreground mode.
-   check -- Does nothing. Useful checking the configuration.
-
-
-
-Windows and other Start Scripts
-===============================
-
-There are various unmaintained start scripts in extra/win32 that
-may be of assistance writing your own start script.
+The extra/win32 directory contains instructions of how to start Jetty as
+a win32 service.
 
 
 
@@ -532,53 +482,9 @@ If this proves to be a problem for you, then unpack your WAR files
 (which is what most other containers do by default anyway).
 
 
-
-Unix SystemV Init
------------------
-Jetty includes a SystemV Init script that has been tested under
-RedHat Linux 6.2. This script allows Jetty to be automatically started
-and stoped when the operating system is booted or shutdown.
-
-To use the script, follow these steps:
-
-  - Login as root.
-
-  - Make the script executable:
-
-       chmod u+x $JETTY_HOME/bin/jetty.sysvinit
-
-  - Place a  symbolic link to the script in the /etc/rc.d/init.d directory:
-
-       ln -s $JETTY_HOME/bin/jetty.sysvinit /etc/rc.d/init.d/jetty
-
-    you can also copy the script there. Just remember to make it executable.
-
-  - Edit the script and make sure that the JETTY_HOME and JAVA_HOME
-    variables are set properly.
-
-  - Enable the script:
-
-      chkconfig --add jetty
-      chkconfig --level 345 jetty on
-
-    you can also use ntsysv if available for this purpose.
-
-To start the jetty server for the first time without rebooting the machine,
-execute:
-
-   /etc/rc.d/init.d/jetty start
-
-Check /var/log/messages to see if everything worked fine.
-
-The Jetty SystemV Init script uses the $JETTY_HOME/bin/jetty.sh shell
-script to launch Jetty. Read the shell script's documentation above,
-or the one in the script's initial comments to learn about available
-configuration options.
-
-
 Win32 Service
 -------------
-The win32 directory contains instructions of how to start Jetty as
+The extra/win32 directory contains instructions of how to start Jetty as
 a win32 service.
 
 
