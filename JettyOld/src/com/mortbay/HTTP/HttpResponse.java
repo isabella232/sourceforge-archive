@@ -77,7 +77,6 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	{
 	    Code.warning(e);
 	}
-	Code.debug("__errorCodeMap = ",__errorCodeMap);
     }
     
     /* -------------------------------------------------------------- */
@@ -360,6 +359,15 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	return httpOut;
     }
 
+    void flush()
+	throws IOException
+    {
+	if (outputState==3)
+	    writer.flush();
+	else
+	    httpOut.flush();
+    }
+    
     /* -------------------------------------------------------------- */
     /* ServletResponse methods -------------------------------------- */
     /* -------------------------------------------------------------- */

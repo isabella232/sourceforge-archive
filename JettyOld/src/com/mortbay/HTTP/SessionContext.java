@@ -23,12 +23,7 @@ public class SessionContext extends Hashtable
     public final static String SessionUrlPrefix = "_s_";
     public final static String SessionUrlSuffix = "_S_";
     
-    
     public static final String SessionId  = "JettySessionId";
-    public static final String SessionStatus  = "JettySessionStatus";
-    public static final String OldSession  = "Old";
-    public static final String OkSession  = "OK";
-    public static final String NewSession  = "New";
     public static final int distantFuture = 60*60*24*7*52*20; 
 
     static long nextSessionId = System.currentTimeMillis();
@@ -44,7 +39,7 @@ public class SessionContext extends Hashtable
 	implements HttpSession
     {
 	boolean invalid=false;
-	boolean old=false;
+	boolean newSession=true;
 	long created=System.currentTimeMillis();
 	long accessed=created;
 	long maxIdleTime = -1;
@@ -55,8 +50,6 @@ public class SessionContext extends Hashtable
 	{
 	    super(10);
 	    this.id=Long.toString(nextSessionId++,36);
-	    put(SessionId,id);
-	    put(SessionStatus,NewSession);
 	}
 
 	/* ------------------------------------------------------------- */
@@ -64,16 +57,13 @@ public class SessionContext extends Hashtable
 	{
 	    super(10);
 	    id=sid;
-	    put(SessionId,id);
-	    put(SessionStatus,OldSession);
 	}
 	
 	/* ------------------------------------------------------------- */
 	void accessed()
 	{
-	    old=true;
+	    newSession=false;
 	    accessed=System.currentTimeMillis();
-	    put(SessionStatus,OkSession);
 	}
 	
 	/* ------------------------------------------------------------- */
@@ -156,12 +146,13 @@ public class SessionContext extends Hashtable
 	    
 	    // Call valueUnbound on all the HttpSessionBindingListeners
 	    // To avoid iterator problems, don't actually remove them
-		Enumeration e = keys();
-		while (e.hasMoreElements()) {
-		    String key = (String)e.nextElement();
-		    Object value = get(key);
-		    unbindValue(key, value);
-		   }
+	    Enumeration e = keys();
+	    while (e.hasMoreElements())
+	    {
+		String key = (String)e.nextElement();
+		Object value = get(key);
+		unbindValue(key, value);
+	    }
 	    SessionContext.this.remove(id);
 	}
 	
@@ -170,7 +161,7 @@ public class SessionContext extends Hashtable
 	    throws IllegalStateException
 	{
 	    if (invalid) throw new IllegalStateException();
-	    return !old;
+	    return newSession;
 	}
 	
 	/* ------------------------------------------------------------- */
@@ -181,12 +172,11 @@ public class SessionContext extends Hashtable
 	    if (invalid) throw new IllegalStateException();
 	    Object oldValue = put(name,value);
 
-		// Don't rebind if the value is unchanged
-		// XXX Is this right or should we always unbind & bind?
-	    if (value != oldValue) {
+	    if (value != oldValue)
+	    {
 	    	unbindValue(name, oldValue);
 	    	bindValue(name, value);
-		}
+	    }
 	}
 	
 	/* ------------------------------------------------------------- */
@@ -216,7 +206,7 @@ public class SessionContext extends Hashtable
 		    .valueUnbound(new HttpSessionBindingEvent(this,name));
 	}
 	
-    }	// Session
+    }	
 
     /* ------------------------------------------------------------ */
     /**
@@ -233,7 +223,8 @@ public class SessionContext extends Hashtable
      */   
     public HttpSession getSession(String id)
     {
-	return (HttpSession)get(id);
+	HttpSession s = (HttpSession)get(id);
+	return s;
     }
     
     /* ------------------------------------------------------------ */
@@ -246,11 +237,10 @@ public class SessionContext extends Hashtable
     }
     
     /* ------------------------------------------------------------ */
-    public HttpSession oldSession(String sessionId)
+    public HttpSession invalidSession(String sessionId)
     {
 	HttpSession session = new Session(sessionId);
-	session.setMaxInactiveInterval(defaultMaxIdleTime);
-	put(sessionId,session);
+	session.invalidate();
 	return session;
     }
 
@@ -258,6 +248,12 @@ public class SessionContext extends Hashtable
     public static void access(HttpSession session)
     {
 	((Session)session).accessed();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public static boolean isValid(HttpSession session)
+    {
+	return !(((Session)session).invalid);
     }
     
     /* -------------------------------------------------------------- */
@@ -329,7 +325,6 @@ public class SessionContext extends Hashtable
 
 	SessionScavenger() {
 	    super("SessionScavenger");
-	    setPriority(Thread.MIN_PRIORITY);
 	    setDaemon(true);
 	    this.start();
 	}
@@ -337,6 +332,7 @@ public class SessionContext extends Hashtable
     }	// SessionScavenger
 
 }
+
 
 
 

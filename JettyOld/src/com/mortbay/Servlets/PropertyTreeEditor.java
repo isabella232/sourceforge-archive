@@ -182,6 +182,7 @@ public class PropertyTreeEditor
 	    page.add(table);
 	    table.cellPadding(2);
 	    table.newRow();
+	    table.addHeading("TREE");
 	    table.addHeading("KEY");
 	    table.addHeading("VALUE");
 
@@ -221,13 +222,20 @@ public class PropertyTreeEditor
 		    path += "/"+t;
 		    if (tok.hasMoreTokens())
 		    {
-			table.add(new Link(myUrl+path,t));
+			if (myUrl.endsWith("*") && path.startsWith("/*"))
+			    table.add(t);
+			else
+			    table.add(new Link(myUrl+path,t));
 			table.add(" . ");
 		    }
 		    else
+		    {
+			table.add("&nbsp;");
+			table.newCell();
 			table.add(new Link(myUrl+"/edit?action=Get&key="+
 					   path.replace('/','.')
 					   .substring(1),t));
+		    }
 		}
 		table.addCell(value);
 	    }

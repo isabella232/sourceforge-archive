@@ -6,6 +6,7 @@
 package com.mortbay.HTTP.Handler;
 import com.mortbay.Base.*;
 import com.mortbay.HTTP.*;
+import com.mortbay.Util.PropertyTree;
 import java.io.*;
 import java.util.*;
 import javax.servlet.http.*;
@@ -27,16 +28,28 @@ public class FileHandler extends NullHandler
 {    
     /* ----------------------------------------------------------------- */
     PathMap dirMap;
-    String indexFile;
+    Vector indexFiles=new Vector(2);
     boolean putAllowed;
     boolean deleteAllowed;
     String allowHeader = null;
+
+    /* ----------------------------------------------------------------- */
+    /** Construct from properties.
+     * @param properties Passed to setProperties
+     */
+    public FileHandler(Properties properties)
+	throws IOException
+    {
+	setProperties(properties);
+    }
+    
     /* ----------------------------------------------------------------- */
     /** Construct a FileHandler at "/" for the given fileBase
      */
     public FileHandler(String fileBase)
     {
 	this(fileBase,"index.html");
+	indexFiles.addElement("index.htm");
     }
 
     /* ----------------------------------------------------------------- */
@@ -48,7 +61,7 @@ public class FileHandler extends NullHandler
     {
 	dirMap = new PathMap();
 	dirMap.put("/",fileBase);
-	this.indexFile = indexFile;
+	indexFiles.addElement(indexFile);
     }
     
     /* ----------------------------------------------------------------- */
@@ -58,10 +71,57 @@ public class FileHandler extends NullHandler
     public FileHandler(PathMap directoryMap)
     {
 	dirMap=directoryMap;
-	this.indexFile = "index.html";
+	indexFiles.addElement("index.htm");
+	indexFiles.addElement("index.html");
 	Code.debug(dirMap);
     }
 
+    /* ------------------------------------------------------------ */
+    /** Configure from Properties.
+     * Properties are assumed to be in the format of a PropertyTree
+     * like:<PRE>
+     * INDEXS               : index.html,index.htm
+     * PUT                  : False
+     * DELETE               : False
+     * FILES.name.PATHS     : /pathSpec;/list%
+     * FILES.name.DIRECTORY : /Directory
+     *</PRE>
+     * @param properties Configuration.
+     */
+    public void setProperties(Properties properties)
+	throws IOException
+    {
+	PropertyTree tree=null;
+	if (properties instanceof PropertyTree)
+	    tree = (PropertyTree)properties;
+	else
+	    tree = new PropertyTree(properties);
+	Code.debug(tree);
+
+	putAllowed=tree.getBoolean("PUT");
+	deleteAllowed=tree.getBoolean("DELETE");
+	indexFiles=tree.getVector("INDEXES",";,");
+	if (indexFiles==null || indexFiles.size()==0)
+	{
+	    indexFiles=new Vector(2);
+	    indexFiles.addElement("index.html");
+	    indexFiles.addElement("index.htm");
+	}    
+	
+	dirMap=new PathMap();
+	Enumeration names = tree.getTree("FILES").getNodes();
+	while (names.hasMoreElements())
+	{
+	    String filesName = names.nextElement().toString();
+	    Code.debug("Configuring files "+filesName);
+	    PropertyTree filesTree = tree.getTree("FILES."+filesName);
+	    String filesDir = filesTree.getProperty("DIRECTORY");
+	    
+	    Vector paths = filesTree.getVector("PATHS",",;");
+	    for (int d=paths.size();d-->0;)
+		dirMap.put(paths.elementAt(d),filesDir);
+	}    
+    }
     
     /* ----------------------------------------------------------------- */
     public boolean isPutAllowed()
@@ -222,17 +282,25 @@ public class FileHandler extends NullHandler
 		}
 		    
 		// See if index file exists
-		File index = new File(filename+
-				      File.separator +
-				      indexFile);
-		if (index.isFile())
-		    sendFile(request,response,index);
-		else
+		boolean indexSent=false;
+		for (int i=indexFiles.size();i-->0;)
+		{
+		    File index = new File(filename+
+					  File.separator +
+					  indexFiles.elementAt(i));
+		    if (index.isFile())
+		    {
+			sendFile(request,response,index);
+			indexSent=true;
+			break;
+		    }
+		}
+		
+		if (!indexSent)
 		    sendDirectory(request,response,file,
 				  !("/".equals(pathInfo) ||
 				    pathInfo.length()==0));
 	    }
-	    
 	    // check if it is a file
 	    else if (file.isFile())
 	    {

@@ -6,6 +6,7 @@
 package com.mortbay.HTTP.Handler;
 import com.mortbay.Base.*;
 import com.mortbay.HTTP.*;
+import com.mortbay.Util.PropertyTree;
 import java.io.*;
 import java.util.*;
 import javax.servlet.http.*;
@@ -18,9 +19,30 @@ import javax.servlet.http.*;
 public class SessionHandler extends NullHandler
 {    
     
-    /* ----------------------------------------------------------------- */
+    /* ------------------------------------------------------------ */
+    /** Constructor from properties.
+     * Calls setProperties.
+     * @param properties Configuration properties
+     */
+    public SessionHandler(Properties properties)
+    {
+	setProperties(properties);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     */
     public SessionHandler()
     {}
+    
+    /* ------------------------------------------------------------ */
+    /** Configure from properties.
+     * No configuration paramters for this handler
+     * @param properties configuration.
+     */
+    public void setProperties(Properties properties)
+    {
+    }
     
     /* ----------------------------------------------------------------- */
     public void handle(HttpRequest request,
@@ -29,7 +51,6 @@ public class SessionHandler extends NullHandler
     {
 	HttpSession session = request.getSession(false);
 	if (session!=null)
-	    // XXX - Will have to use private interface?
 	    SessionContext.access(session);
     }
 

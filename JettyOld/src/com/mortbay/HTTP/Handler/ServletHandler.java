@@ -6,6 +6,7 @@
 package com.mortbay.HTTP.Handler;
 import com.mortbay.Base.*;
 import com.mortbay.HTTP.*;
+import com.mortbay.Util.PropertyTree;
 import java.io.*;
 import java.util.*;
 import javax.servlet.http.*;
@@ -29,6 +30,16 @@ public class ServletHandler extends NullHandler
     Hashtable nameMap=null;
     
     /* ----------------------------------------------------------------- */
+    /** Construct basic auth handler.
+     * @param properties Passed to setProperties
+     */
+    public ServletHandler(Properties properties)
+	throws IOException
+    {
+	setProperties(properties);
+    }
+    
+    /* ----------------------------------------------------------------- */
     /** Construct with servlet PathMap
      * @param servletMap Map of servlet path to ServletHolder instances
      */
@@ -36,6 +47,44 @@ public class ServletHandler extends NullHandler
     {
 	this.servletMap=servletMap;
     }
+
+    /* ------------------------------------------------------------ */
+    /** Configure from Properties.
+     * @param properties Configuration.
+     */
+    public void setProperties(Properties properties)
+	throws IOException
+    {
+	servletMap=new PathMap();
+	
+	PropertyTree tree=null;
+	if (properties instanceof PropertyTree)
+	    tree = (PropertyTree)properties;
+	else
+	    tree = new PropertyTree(properties);
+	Code.debug(tree);
+	
+	PropertyTree servlets = tree.getTree("SERVLET");
+	
+	Enumeration names = servlets.getNodes();
+	while (names.hasMoreElements())
+	{
+	    String servletName = names.nextElement().toString();
+	    Code.debug("Configuring servlet "+servletName);
+	    PropertyTree servletTree = servlets.getTree(servletName);
+	    
+	    String servletClass = servletTree.getProperty("CLASS");
+	    Properties servletProperties = getProperties(servletTree);
+	    ServletHolder servletHolder= new ServletHolder(servletName,
+							   servletClass,
+							   servletProperties);
+	    
+	    Vector paths = servletTree.getVector("PATHS",",;");
+	    for (int p=paths.size();p-->0;)
+		servletMap.put(paths.elementAt(p),servletHolder);
+	}
+    }
+    
     
     /* ----------------------------------------------------------------- */
     public void handle(HttpRequest request,

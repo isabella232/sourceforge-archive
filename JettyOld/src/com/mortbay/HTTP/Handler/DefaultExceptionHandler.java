@@ -35,8 +35,17 @@ public class DefaultExceptionHandler implements ExceptionHandler
 	    Code.warning(exception);
 	    if (!response.headersWritten())
 		response.setStatus(HttpResponse.SC_INTERNAL_SERVER_ERROR);
-	    OutputStream out = response.getOutputStream();
-	    PrintWriter pout=new PrintWriter(out);
+	    
+	    PrintWriter pout=null;
+	    try{
+		pout=new PrintWriter(response.getOutputStream());
+	    }
+	    catch(IllegalStateException ise)
+	    {
+		Code.ignore(ise);
+		pout=new PrintWriter(response.getWriter());
+	    }
+	    
 	    pout.println("<HTML><HEAD><TITLE>Exception</TITLE>");
 	    pout.println("<BODY><H2>");
 	    pout.println(exception.toString());
@@ -52,3 +61,5 @@ public class DefaultExceptionHandler implements ExceptionHandler
     }    
 }
 	
+
+

@@ -7,6 +7,7 @@ package com.mortbay.HTTP;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.util.*;
+import java.io.*;
 
 
 /* ------------------------------------------------------------------ */
@@ -29,7 +30,7 @@ public interface HttpHandler
 {
     /* ----------------------------------------------------------------- */
     public void setProperties(Properties properties)
-	throws IllegalStateException;
+	throws IllegalStateException, IOException;
     
     /* ----------------------------------------------------------------- */
     /** Constructor

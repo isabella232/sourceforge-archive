@@ -6,6 +6,7 @@
 package com.mortbay.HTTP.Handler;
 import com.mortbay.Base.*;
 import com.mortbay.HTTP.*;
+import com.mortbay.Util.PropertyTree;
 import com.mortbay.Util.*;
 import java.io.*;
 import java.net.*;
@@ -36,6 +37,16 @@ public class ForwardHandler extends NullHandler
     InetAddrPort proxy=null;
     
     /* ----------------------------------------------------------------- */
+    /** Construct from properties.
+     * @param properties Passed to setProperties
+     */
+    public ForwardHandler(Properties properties)
+	throws IOException
+    {
+	setProperties(properties);
+    }
+    
+    /* ----------------------------------------------------------------- */
     /** Construct a ForwardHandler
      * @param forwardMap Maps path to a URL
      */
@@ -62,6 +73,52 @@ public class ForwardHandler extends NullHandler
     {
 	this(forwardMap);	
         this.proxy=proxy;
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /** Configure from Properties.
+     * Properties are assumed to be in the format of a PropertyTree
+     * like:<PRE>
+     * ProxyAddrPort        : 0.0.0.0:1234
+     * FORWARD.name.PATHS   : /pathSpec;/list%
+     * FORWARD.name.URL     : http:/forward/url
+     *</PRE>
+     * The Proxy address is optional.
+     * @param properties Configuration.
+     */
+    public void setProperties(Properties properties)
+	throws IOException
+    {
+	PropertyTree tree=null;
+	if (properties instanceof PropertyTree)
+	    tree = (PropertyTree)properties;
+	else
+	    tree = new PropertyTree(properties);
+	Code.debug(tree);
+
+	String proxyStr = tree.getProperty("ProxyAddrPort");
+	if (proxyStr!=null && proxyStr.trim().length()>0)
+	    proxy=new InetAddrPort(proxyStr);
+	
+	forwardMap=new PathMap();
+	Enumeration names = tree.getTree("FORWARD").getNodes();
+	while (names.hasMoreElements())
+	{
+	    String forwardName = names.nextElement().toString();
+	    Code.debug("Configuring forward "+forwardName);
+	    PropertyTree forwardTree = tree.getTree("FORWARD."+forwardName);
+	    URL url = new URL(forwardTree.getProperty("URL"));
+	    
+	    Vector paths = forwardTree.getVector("PATHS",",;");
+	    for (int f=paths.size();f-->0;)
+	    {
+		String path=(String)paths.elementAt(f);
+		Code.debug(path,"-->",url);
+		forwardMap.put(path,url);
+	    }
+	    
+	}    
     }
     
     /* ----------------------------------------------------------------- */

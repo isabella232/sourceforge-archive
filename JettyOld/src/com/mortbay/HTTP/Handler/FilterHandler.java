@@ -6,6 +6,7 @@
 package com.mortbay.HTTP.Handler;
 import com.mortbay.Base.*;
 import com.mortbay.HTTP.*;
+import com.mortbay.Util.PropertyTree;
 import java.io.*;
 import java.util.*;
 
@@ -22,10 +23,12 @@ import java.util.*;
  * <li>etc.
  * <ul>
  * It is configured with a PathMap of paths to HttpFilter class names
- * or vector of class names.
+ * or Properties instance containing a similar mapping.
+ * <P>
  * If the path matches a request, new filter instances are added to the
  * response. These will only be activated if their content types match
  * that of the response (which may be set later).
+ * 
  * @version $Id$
  * @author Greg Wilkins
  */
@@ -33,6 +36,16 @@ public class FilterHandler extends NullHandler
 {
     /* ----------------------------------------------------------------- */
     PathMap filterMap = null;
+    
+    /* ----------------------------------------------------------------- */
+    /** Construct basic auth handler.
+     * @param properties Passed to setProperties
+     */
+    public FilterHandler(Properties properties)
+	throws IOException
+    {
+	setProperties(properties);
+    }
     
     /* ----------------------------------------------------------------- */
     /** Construct a FilterHandler
@@ -63,6 +76,39 @@ public class FilterHandler extends NullHandler
 	}
 	catch (Exception e){
 	    Code.fail("Can't instantiate HttpFilter",e);
+	}
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Configure from Properties.
+     * Properties are assumed to be in the format of a PropertyTree
+     * like:<PRE>
+     * name.CLASS : filterClassName
+     * name.PATHS : /list/of/paths
+     *</PRE>
+     * @param properties Configuration.
+     */
+    public void setProperties(Properties properties)
+	throws IOException
+    {
+	PropertyTree tree=null;
+	if (properties instanceof PropertyTree)
+	    tree = (PropertyTree)properties;
+	else
+	    tree = new PropertyTree(properties);
+	Code.debug(tree);
+	
+	filterMap = new PathMap();
+
+	Enumeration names = tree.getNodes();
+	while (names.hasMoreElements())
+	{
+	    String filterName = names.nextElement().toString();
+	    Code.debug("Configuring filter "+filterName);
+	    Vector paths = tree.getVector(filterName+".PATHS",",;");
+	    for (int r=paths.size();r-->0;)
+		filterMap.put(paths.elementAt(r),
+			      tree.getProperty(filterName+".CLASS"));
 	}
     }
     

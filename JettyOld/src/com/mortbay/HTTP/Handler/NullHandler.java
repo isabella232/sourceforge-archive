@@ -6,9 +6,11 @@
 package com.mortbay.HTTP.Handler;
 import com.mortbay.Base.*;
 import com.mortbay.HTTP.*;
+import com.mortbay.Util.PropertyTree;
 import java.util.*;
 import javax.servlet.http.*;
 import javax.servlet.*;
+import java.io.*;
 
 
 /* --------------------------------------------------------------------- */
@@ -25,7 +27,10 @@ public class NullHandler implements HttpHandler
     protected HttpServer httpServer=null;
 
     public void setProperties(Properties p)
-    {}
+	throws IOException
+    {
+	Code.notImplemented();
+    }
     
     /* ----------------------------------------------------------------- */
     public void handle(HttpRequest request,
@@ -57,6 +62,31 @@ public class NullHandler implements HttpHandler
     {
 	httpServer=server;
     }
+
+    /* ------------------------------------------------------------ */
+    /** Exract property sub tree.
+     * Extract sub tree from file name PROPERTIES key merged with property
+     * tree below PROPERTY key.
+     * @param props PropertyTree
+     * @return PropertyTree
+     */
+    protected static PropertyTree getProperties(PropertyTree props)
+	throws IOException, FileNotFoundException
+    {
+	PropertyTree properties=new PropertyTree();
+	String filename = props.getProperty("PROPERTIES");
+	if (filename!=null&&filename.length()>0)
+	{
+	    Code.debug("Load ",filename);
+	    properties.load(new BufferedInputStream(new FileInputStream(filename)));
+	}
+	PropertyTree property= props.getTree("PROPERTY");
+	if (property!=null)
+	    properties.load(property);
+	return properties;
+    }
+    
+    
 }
 
 

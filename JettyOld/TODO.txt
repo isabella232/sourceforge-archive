@@ -1,4 +1,5 @@
  + Update this todo list 
+ + Handle spaces in request paths
  + Virtual Hosts
  + New configuration file
  + Graceful exit

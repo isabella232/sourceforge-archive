@@ -142,10 +142,8 @@ public class HttpServer implements ServletContext
 		if (handlerSet.put(handler,handler)==null)
 		{
 		    // First time this handler has been seen so ...
-		    
 		    // set the server
 		    try{
-			Code.debug("setServer on "+httpHandlers[h]);
 			httpHandlers[h].setServer(this);
 		    }
 		    catch (java.io.IOException ioe){
@@ -273,8 +271,9 @@ public class HttpServer implements ServletContext
 		    HttpHandler handler=httpHandlers[h++];
 		    if (handler==null)
 			continue;
+		   
 		    if (Code.verbose())
-			Code.debug("Give request to handler: "+handler);
+			Code.debug("Handler: ",handler);
 		    handler.handle(request,response);
 		    handled=response.headersWritten();
 		    if (Code.verbose())
@@ -325,7 +324,7 @@ public class HttpServer implements ServletContext
 
 	    if (handled)
 	    {
-		response.getOutputStream().flush();
+		response.flush();
 	    }
 	    else
 	    {

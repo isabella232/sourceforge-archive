@@ -19,7 +19,7 @@ public class PropertyTreeTest
 	Test test = new Test("PropertyTree");
 	PropertyTree props = new PropertyTree();
 	props.load(new FileInputStream("PropertyTreeTest.prp"));
-	Code.debug(props);
+	Code.debug("tree=",props);
 	
 	test.checkEquals(props.get("a.f.g.c"), "4", "a.f.g.c");
 	test.checkEquals(props.get("a.b.g.c"), "4", "a.b.g.c");
@@ -53,6 +53,8 @@ public class PropertyTreeTest
 	test.checkEquals(props.get("h.f.g.g"), "hfstar", "h.f.g.g");
 
 	PropertyTree sub = props.getTree("a");
+	Code.debug("getTree(a)=",sub);
+	
 	test.checkEquals(sub.get("f.g.c"), "4", "[a.]f.g.c");
 	test.checkEquals(sub.get("b.g.c"), "4", "[a.]b.g.c");
 	test.checkEquals(sub.get("b.c"), "2", "[a.]b.c");
@@ -70,23 +72,32 @@ public class PropertyTreeTest
 	test.checkEquals(sub.getProperty("c", "def"), "def", "getProperty([a.]c, def)");
 	props=new PropertyTree();
 	String[] init =
-	{
-	    "*","*.b.c","a.*.c","a.b.*","*.b.*","a.*",
-	    "*.b","*.B","a.b.c","a.*.b","a.*.B"
+	{//  0   1       2       3       4       5     6     7     8       9       10
+	    "*","*.b.c","a.*.c","a.b.*","*.b.*","a.*","*.b","*.B","a.b.c","a.*.b","a.*.B"
 	};
 	for (int i=0;i<init.length;i++)
 	    props.put(init[i],new Integer(i));
+
+	
+	sub=props.getTree("a.b");	
+	Code.debug("getTree(a.b)=",sub);
+	test.checkEquals(sub.toString(),
+			 "{c=8, b=9, *.b.c=1, *.B=10, B=10, b.*=4, *=3, *.b.*=4, b.c=1, *.c=2, *.b=9}",
+			 "SubTree get");
+	
 	sub=props.getTree("a");
 	test.checkEquals(sub.get("*.b"),new Integer(9),"subtree get");
 	
 	sub=sub.getTree("b");	
 	test.checkEquals(sub.toString(),
-			 "{c=8, *.b.c=1, *.B=10, *=3, *.b.*=4, *.c=2, *.b=9}",
+			 "{c=8, b=9, *.b.c=1, *.B=10, B=10, b.*=4, *=3, *.b.*=4, b.c=1, *.c=2, *.b=9}",
 			 "SubTree");
+	
 	Properties clone = (Properties)sub.clone();
 	test.checkEquals(clone.toString(),
-			 "{c=8, *.b.c=1, *.B=10, *=3, *.b.*=4, *.c=2, *.b=9}",
-			 "SubTree");
+			 "{c=8, b=9, *.b.c=1, *.B=10, B=10, b.*=4, *=3, *.b.*=4, b.c=1, *.c=2, *.b=9}",
+			 "Clone");
+	
 	sub.put("C","C");
 	test.checkContains(props.toString(),"a.b.C=C","Subtree changed");
 	clone.put("C","X");
@@ -125,6 +136,38 @@ public class PropertyTreeTest
 	test.check(nodes.contains("b"),"Get node");
 	test.check(nodes.contains("B"),"Get node");
 	test.check(nodes.contains("c"),"Get node");
+
+	// wild sub trees
+	props=new PropertyTree();
+	String[] init2 =
+	{//  0   1     2     3       4       5       6
+	    "*","*.A","*.C","a.*.A","a.*.B","a.b.A","a.*"
+	};
+	for (int i=0;i<init2.length;i++)
+	    props.put(init2[i],new Integer(i));
+	sub=props.getTree("a.*");
+	String subs=sub.toString();
+	Code.debug(subs);
+	
+	test.checkContains(subs,"*=6","wild tree *=6");
+	test.checkContains(subs,"A=3","wild tree A=A");
+	test.checkContains(subs,"B=4","wild tree B=4");
+	test.checkContains(subs,"C=2","wild tree C=2");
+	test.checkContains(subs,"*.A=3","wild tree *.A=3");
+	test.checkContains(subs,"*.B=4","wild tree *.B=4");
+	test.checkContains(subs,"*.C=2","wild tree *.C=2");
+	
+	sub.put("*.C",new Integer(7));
+	sub.put("*",new Integer(8));
+	test.checkContains(sub.toString(),"*.C=7","mod wild tree *.C=7");
+	test.checkContains(sub.toString(),"*=8","mod wild tree *=8");
+
+	String propss=props.toString();
+	Code.debug(propss);
+	test.checkContains(propss,"*.C=2","mod wild tree *.C=2");
+	test.checkContains(propss,"a.*.C=7","mod wild tree a.*.C=7");
+	test.checkContains(propss,"*=0","mod wild tree *=0");
+	test.checkContains(propss,"a.*=8","mod wild tree a.*=8");
 	
 	test.report();
     }

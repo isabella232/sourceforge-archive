@@ -29,6 +29,30 @@ import javax.servlet.*;
  */
 public class ProxyHandler extends NullHandler
 {
+    /* ------------------------------------------------------------ */
+    /** Constructor from properties.
+     * Calls setProperties.
+     * @param properties Configuration properties
+     */
+    public ProxyHandler(Properties properties)
+    {
+	setProperties(properties);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     */
+    public ProxyHandler()
+    {}
+    
+    /* ------------------------------------------------------------ */
+    /** Configure from properties.
+     * No configuration paramters for this handler
+     * @param properties configuration.
+     */
+    public void setProperties(Properties properties)
+    {}
+    
     /* ----------------------------------------------------------------- */
     /** Handle proxy requests.
      */

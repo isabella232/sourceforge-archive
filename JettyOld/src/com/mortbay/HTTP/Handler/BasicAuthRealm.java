@@ -4,6 +4,7 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTTP.Handler;
+import com.mortbay.Base.*;
 import java.util.*;
 import java.io.*;
 
@@ -19,6 +20,25 @@ public class BasicAuthRealm extends Properties
 {
     /* ----------------------------------------------------------------- */
     private String name =null;
+    
+    /* ----------------------------------------------------------------- */
+    /** Construct realm from properties
+     * @param name The name of the realm
+     * @param properties Map from username to password
+     * @exception IOException 
+     */
+    public BasicAuthRealm(String name,Properties properties)
+	throws IOException
+    {
+	this.name=name;
+	Enumeration e=properties.keys();
+	while(e.hasMoreElements())
+	{
+	    Object k=e.nextElement();
+	    put(k,properties.get(k));
+	}
+	Code.debug(this);
+    }
     
     /* ----------------------------------------------------------------- */
     /** Construct realm from property file

@@ -24,6 +24,30 @@ import javax.servlet.*;
  */
 public class NotFoundHandler extends NullHandler
 {
+    /* ------------------------------------------------------------ */
+    /** Constructor from properties.
+     * Calls setProperties.
+     * @param properties Configuration properties
+     */
+    public NotFoundHandler(Properties properties)
+    {
+	setProperties(properties);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     */
+    public NotFoundHandler()
+    {}
+    
+    /* ------------------------------------------------------------ */
+    /** Configure from properties.
+     * No configuration paramters for this handler
+     * @param properties configuration.
+     */
+    public void setProperties(Properties properties)
+    {}
+    
     /* ----------------------------------------------------------------- */
     public void handle(HttpRequest request,
 		       HttpResponse response)

@@ -6,6 +6,7 @@
 package com.mortbay.HTTP.Handler;
 import com.mortbay.Base.*;
 import com.mortbay.HTTP.*;
+import com.mortbay.Util.PropertyTree;
 import java.io.*;
 import java.util.*;
 import javax.servlet.http.*;
@@ -31,9 +32,37 @@ public class TranslateHandler extends NullHandler
     PathMap translations;
     
     /* ----------------------------------------------------------------- */
+    /** Construct basic auth handler.
+     * @param properties Passed to setProperties
+     */
+    public TranslateHandler(Properties properties)
+	throws IOException
+    {
+	setProperties(properties);
+    }
+    
+    /* ----------------------------------------------------------------- */
     public TranslateHandler(PathMap translations)
     {
 	this.translations=translations;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Configure from Properties.
+     * @param properties 
+     * @exception IOException 
+     */
+    public void setProperties(Properties properties)
+	throws IOException
+    {
+	PropertyTree tree=null;
+	if (properties instanceof PropertyTree)
+	    tree = (PropertyTree)properties;
+	else
+	    tree = new PropertyTree(properties);
+
+	translations=new PathMap(tree);
+	Code.debug(translations);
     }
     
     /* ----------------------------------------------------------------- */

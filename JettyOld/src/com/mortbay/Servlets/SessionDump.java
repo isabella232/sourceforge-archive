@@ -38,77 +38,81 @@ public class SessionDump extends HttpServlet
 			HttpServletResponse response) 
 	throws ServletException, IOException
     {
-	HttpSession session =
-	    request.getSession(true);
-	    
 	PrintWriter pout = new PrintWriter(response.getOutputStream());
-	Page page=null;
-
-	try{
-
-	    String action = request.getParameter("Action");
-	    if (action!=null)
-	    {
-		String name =  request.getParameter("Name");
-		String value =  request.getParameter("Value");
-		Code.debug(action);
-		if (action.equals("Add to Session"))
-		    session.putValue(name,value);
-		else
-		    session.removeValue(name);
-	    }
+	Page page=Page.getPage(pageType,request,response);
+	page.title("Session Dump Servlet");
+	String action = request.getParameter("Action");
+	
+	HttpSession session = request.getSession("New Session".equals(action));
+	TableForm tf =
+	    new TableForm(response.encodeURL(request.getRequestURI()));
 	    
-	    page = Page.getPage(pageType,request,response);
-	    page.title("Session Dump Servlet");	    
-
-	    page.add("Turn off cookies in your browser to try url encoding");
-	    
-	    Table table = new Table(0).cellPadding(0).cellSpacing(0);
-	    page.add(table);
-	    table.newRow();
-	    table.newHeading()
-		.cell().nest(new Font(2,true))
-		.add("<BR>Session Data")
-		.attribute("COLSPAN","2")
-		.left();
-
-	    String[] keys= session.getValueNames();
-
-	    for (int k=keys.length;k-->0;)
-	    {
-		String name=keys[k];
-		
-		table.newRow();
-		table.addHeading(name+":&nbsp;").cell().right().top();
-		Object value = session.getValue(name);
-
-		// XXX - Get rid of session context ????
-		if (name.equals(SessionContext.SessionStatus))
-		{
-		    if (value.equals(SessionContext.NewSession))
-			table.addCell("New  - This is the first hit of the session<BR>(or the browser does not support cookies).");
-		    else if (value.equals(SessionContext.OldSession))
-			table.addCell("Old  - The server has been restarted.<BR> Session data lost.");
-		    else
-			table.addCell(value.toString()+
-				      "   - This session is confirmed");
-		}
-		else
-		    table.addCell(value);
-	    }
-	    
-	    page.add("<P><B>Form to modify session</B>");
-	    TableForm tf = new TableForm(response.encodeURL(request.getRequestURI()));
+	if (session==null)
+	{
+	    page.add("<B>No Session</B>");
+	    tf.addButton("Action","New Session");
 	    page.add(tf);
-	    tf.addTextField("Name","Name",20,"name");
-	    tf.addTextField("Value","Value",20,"value");
-	    tf.addButton("Action","Add to Session");
-	    tf.addButton("Action","Delete from Session");
 	}
-	catch (Exception e){
-	    Code.warning("SessionDump",e);
+	else
+	{
+	    try
+	    {
+		String id = session.getId();
+	    
+		if (action!=null)
+		{
+		    String name =  request.getParameter("Name");
+		    String value =  request.getParameter("Value");
+		    if (action.equals("Invalidate"))
+			session.invalidate();
+		    else if (action.equals("Add"))
+			session.putValue(name,value);
+		    else if (action.equals("Remove"))
+			session.removeValue(name);
+		}
+	    
+		Table table = new Table(0).cellPadding(0).cellSpacing(0);
+		page.add(table);
+		table.newRow();
+		table.newHeading()
+		    .cell().nest(new Font(2,true))
+		    .add("<BR>Session "+id+
+			 (session.isNew()?" is NEW</B>":" is valid</B><BR>"))
+		    .attribute("COLSPAN","2")
+		    .left();
+
+		String[] keys= session.getValueNames();
+		for(int k=keys.length;k-->0;)
+		{
+		    String name=keys[k];
+		    
+		    table.newRow();
+		    table.addHeading(name+":&nbsp;").cell().right().top();
+		    Object value = session.getValue(name);
+		    table.addCell(value);
+		}
+	    
+		page.add(tf);
+		tf.addTextField("Name","Name",20,"name");
+		tf.addTextField("Value","Value",20,"value");
+		tf.addButton("Action","Add");
+		tf.addButton("Action","Remove");
+		tf.addButton("Action","Invalidate");
+
+		
+		page.add("<P>Turn off cookies in your browser to try url encoding<BR>");
+
+	    }
+	    catch (IllegalStateException e)
+	    {
+		Code.debug(e);
+		page.add("<B>INVALID Session</B>");
+		tf=new TableForm(request.getRequestURI());
+		tf.addButton("Action","New Session");
+		page.add(tf);
+	    }
 	}
-    
+	
 	page.write(pout);
 	pout.flush();
     }

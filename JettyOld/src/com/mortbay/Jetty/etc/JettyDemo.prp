@@ -9,8 +9,8 @@ SERVERS                                   : main;proxy
 main.CLASS				  : com.mortbay.HTTP.HttpServer
 main.STACKS				  : root;javadoc
 main.PROPERTY.DefaultSessionTimeout	  : 3600
-main.PROPERTY.Listener.all.CLASS          : com.mortbay.HTTP.HttpListener
-main.PROPERTY.Listener.all.AddrPort       : 0.0.0.0:8080
+main.PROPERTY.LISTENER.all.CLASS          : com.mortbay.HTTP.HttpListener
+main.PROPERTY.LISTENER.all.ADDRS          : 0.0.0.0:8080;127.0.0.1:8888
 
 # ------------------------------------------------------------------------
 
@@ -22,7 +22,7 @@ main.root.EXCEPTIONS			  : Default
 
 main.root.Log.CLASS			  : com.mortbay.HTTP.Handler.LogHandler
 main.root.Log.PROPERTY.LongForm           : True
-main.root.Log.PROPERTY.CountContentLength : True
+main.root.Log.PROPERTY.CountContentLength : False
 main.root.Log.PROPERTY.Log./              : err
 
 main.root.Auth.CLASS			  : com.mortbay.HTTP.Handler.BasicAuthHandler
@@ -32,10 +32,11 @@ main.root.Alias.CLASS			  : com.mortbay.HTTP.Handler.TranslateHandler
 main.root.Alias.PROPERTIES		  : ./etc/JettyDemoAlias.prp
 
 main.root.Filter.CLASS			  : com.mortbay.HTTP.Handler.FilterHandler
-main.root.Filter.PROPERTY./.CLASS         : com.mortbay.HTTP.Filter.HtmlFilter
+main.root.Filter.PROPERTY.Html.CLASS      : com.mortbay.HTTP.Filter.HtmlFilter
+main.root.Filter.PROPERTY.Html.PATHS      : /
 
 main.root.Param.CLASS			  : com.mortbay.HTTP.Handler.ParamHandler
-main.root.Param.PROPERTY.Cookies          : True 
+main.root.Param.PROPERTY.Cookies          : True
 
 main.root.Session.CLASS			  : com.mortbay.HTTP.Handler.SessionHandler
 
@@ -45,38 +46,42 @@ main.root.Servlet.PROPERTIES		  : ./etc/JettyDemoServlets.prp
 main.root.File.CLASS			  : com.mortbay.HTTP.Handler.FileHandler
 main.root.File.PROPERTIES		  : ./etc/JettyDemoFiles.prp
 
-main.root.Forward.CLASS			  : com.mortbay.HTTP.Handler.ForwardHandler
-main.root.Forward.PROPERTY.Proxy	  :
-main.root.Forward.PROPERTY.Forward./Forward% : http://localhost:8080
-main.root.Forward.PROPERTY.Forward.http   : http://localhost:8081
+main.root.Forward.CLASS			       : com.mortbay.HTTP.Handler.ForwardHandler
+main.root.Forward.PROPERTY.PROXYADDRPORT       :
+main.root.Forward.PROPERTY.FORWARD.demo.PATHS  : /Forward%
+main.root.Forward.PROPERTY.FORWARD.demo.URL    : http://localhost:8080
+main.root.Forward.PROPERTY.FORWARD.proxy.PATHS : http
+main.root.Forward.PROPERTY.FORWARD.proxy.URL   : http://localhost:8081
 
 main.root.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
 
 main.root.Default.CLASS			  : com.mortbay.HTTP.Handler.DefaultExceptionHandler
 
 # ------------------------------------------------------------------------
-main.javadoc.HOSTS			  :
-main.javadoc.PATHS                        : /javadoc%
-main.javadoc.HANDLERS                     : File;NotFound
-main.javadoc.File.CLASS			  : com.mortbay.HTTP.Handler.FileHandler
-main.javadoc.File.PROPERTY.Directory./javadoc                : javadoc
-main.javadoc.File.PROPERTY.Directory./javadoc/javax/servlet% : src/javax/servlet/javadoc
+main.javadoc.HOSTS			           :
+main.javadoc.PATHS                                 : /javadoc%
+main.javadoc.HANDLERS                              : File;NotFound
+main.javadoc.File.CLASS			           : com.mortbay.HTTP.Handler.FileHandler
+main.javadoc.File.PROPERTY.FILES.Javadoc.PATHS     : /javadoc
+main.javadoc.File.PROPERTY.FILES.Javadoc.DIRECTORY : ./javadoc
+main.javadoc.File.PROPERTY.FILES.Servlet.PATHS     : ./javadoc/javax/servlet%
+main.javadoc.File.PROPERTY.FILES.Servlet.DIRECTORY : src/javax/servlet/javadoc
 main.javadoc.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
 
 # ------------------------------------------------------------------------
 proxy.CLASS				  : com.mortbay.HTTP.HttpServer
 proxy.STACKS				  : root
-proxy.PROPERTY.Listener.all.CLASS         : com.mortbay.HTTP.HttpListener
-proxy.PROPERTY.Listener.all.AddrPort      : 0.0.0.0:8081
+proxy.PROPERTY.LISTENER.all.CLASS         : com.mortbay.HTTP.HttpListener
+proxy.PROPERTY.LISTENER.all.ADDRS         : 0.0.0.0:8081
 
 proxy.root.HANDLERS			  : Log;Proxy;NotFound
-
+proxy.root.PATHS			  : /
 proxy.root.Log.CLASS			  : com.mortbay.HTTP.Handler.LogHandler
 proxy.root.Log.PROPERTY./                 : out
 proxy.root.Log.PROPERTY.http              : out
 proxy.root.Log.PROPERTY.ftp               : out
 
-proxy.root.Proxy.CLASS			  :  com.mortbay.HTTP.Handler.ProxyHandler
+proxy.root.Proxy.CLASS			  : com.mortbay.HTTP.Handler.ProxyHandler
 proxy.root.Proxy.PROPERTY.PATHS           : /;http;ftp
 
 proxy.root.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler

@@ -46,8 +46,10 @@ public class ConfigDump extends HttpServlet
 	Page page = Page.getPage(pageType,request,response);
 
 	page.title("Jetty Configuration Dump");
-	
-	page.nest(new Table(0).newRow().newCell());
+
+	Table table = new Table(0).newRow().newCell();
+	table.width("80%");
+	page.nest(table);
 
 	page.add("<P><B>Connections:</B><BR><BLOCKQUOTE>");
 	String s = "Listen on ";

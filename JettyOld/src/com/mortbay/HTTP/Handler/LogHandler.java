@@ -6,6 +6,7 @@
 package com.mortbay.HTTP.Handler;
 import com.mortbay.Base.*;
 import com.mortbay.HTTP.*;
+import com.mortbay.Util.PropertyTree;
 import java.io.*;
 import java.util.*;
 import javax.servlet.http.*;
@@ -34,23 +35,83 @@ public class LogHandler extends NullHandler implements Observer
 {
     /* ----------------------------------------------------------------- */
     PathMap loggers;
-    boolean countContentSize;
+    boolean countContentLength;
     boolean longForm;	
+    
+    /* ----------------------------------------------------------------- */
+    /** Constructor from properties.
+     * Calls setProperties.
+     */
+    public LogHandler(Properties properties)
+    {
+	setProperties(properties);
+    }
     
     /* ----------------------------------------------------------------- */
     /** Constructor
      * @param loggers PathMap of path to Writer to write log to.
-     * @param countContentSize if true the output is filtered for the
+     * @param countContentLength if true the output is filtered for the
      *        content size.
      * @param longForm if true, output is in the long form aka Netscape
      */
     public LogHandler(PathMap loggers,
-		      boolean countContentSize,
+		      boolean countContentLength,
 		      boolean longForm)
     {
 	this.loggers=loggers;
-	this.countContentSize=countContentSize;
+	this.countContentLength=countContentLength;
 	this.longForm=longForm;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Configure from properties.
+     * Format of properties is expected to be that of a PropertyTree with
+     * the following root nodes:
+     * <BR>Log - A property tree mapping keys to log sinks.
+     * <BR>LongForm - Boolean, if true the log is the long format
+     * <BR>CountContentLength - Boolean, if true count the bytes of 
+     * replies without a content length header (expensive).
+     * @param properties configuration.
+     */
+    public void setProperties(Properties properties)
+    {
+	PropertyTree tree=null;
+	if (properties instanceof PropertyTree)
+	    tree = (PropertyTree)properties;
+	else
+	    tree = new PropertyTree(properties);
+
+	loggers=new PathMap();
+	
+	Properties logs = tree.getTree("Log");
+	Enumeration e = logs.keys();
+	while (e.hasMoreElements())
+	{
+	    String logPath = e.nextElement().toString();
+	    String log = logs.getProperty(logPath);
+	    
+	    OutputStreamWriter out = null;
+	    if ("out".equals(log))
+		out=new OutputStreamWriter(System.out);
+	    else if ("err".equals(log))
+		out=new OutputStreamWriter(System.err);
+	    else
+	    {
+		try
+		{
+		    out=new OutputStreamWriter(new FileOutputStream(log));
+		}
+		catch(IOException ex)
+		{
+		    Code.warning(ex);
+		    out=new OutputStreamWriter(System.err);
+		}
+	    }
+	    loggers.put(logPath,out);
+	}
+	
+	countContentLength=tree.getBoolean("CountContentLength");
+	longForm=tree.getBoolean("LongForm");
     }
     
     /* ----------------------------------------------------------------- */
@@ -76,7 +137,7 @@ public class LogHandler extends NullHandler implements Observer
 	{
 		
 	    try{
-		if (countContentSize)
+		if (countContentLength)
 		    new LogFilter(this,writer).activateOn(response);
 		else
 		{

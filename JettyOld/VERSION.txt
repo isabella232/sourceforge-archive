@@ -1,3 +1,6 @@
+  + Improved PropertyTree implementation
+  + Removed historic API from sessions
+
 
 Release 2.1.7 - 22 April 1999
   + Fixed showstopper bug with getReader and getWriter in
