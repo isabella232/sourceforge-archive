@@ -17,6 +17,7 @@ package org.mortbay.jetty.servlet.jsr77;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.WebApplicationContext;
@@ -91,7 +92,7 @@ public class Configuration implements WebApplicationContext.Configuration
            {
                String filterName = FILTER_PREFIX+servlets[i].getName();
                FilterHolder holder = _context.getWebApplicationHandler().defineFilter(filterName, Jsr77Filter.class.getName());              
-               _context.getWebApplicationHandler().addFilterServletMapping(servlets[i].getName(), filterName,FilterHolder.__ALL);
+               _context.getWebApplicationHandler().addFilterServletMapping(servlets[i].getName(), filterName,Dispatcher.__ALL);
                holder.put ("servlet-name", servlets[i].getName());        
                if (log.isDebugEnabled())
                {
