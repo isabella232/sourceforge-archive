@@ -964,9 +964,7 @@ public class HttpConnection
                 
                 // Complete the request
                 if (_persistent)
-                {
-                    System.err.println("read remaining input");
-                    
+                {                    
                     try{
                         // Read remaining input
                         while(_inputStream.skip(4096)>0 || _inputStream.read()>=0);
@@ -981,7 +979,6 @@ public class HttpConnection
                                                     "Missing Content"));
                     }
                     
-                    System.err.println("check no more content");
                     // Check for no more content
                     if (_inputStream.getContentLength()>0)
                     {
@@ -991,7 +988,6 @@ public class HttpConnection
                                                      "Missing Content"));
                     }
 
-                    System.err.println("commit the response");
                     // Commit the response
                     try{
                         _outputStream.flush(true);
