@@ -89,7 +89,6 @@ public class Dispatcher implements RequestDispatcher
      * @exception IllegalStateException 
      */
     Dispatcher(ServletHandler servletHandler,
-               ResourceHandler resourceHandler,
                String uriInContext,
                String query)
         throws IllegalStateException

@@ -43,11 +43,18 @@ public class FilterHolder
     }
     
     /* ------------------------------------------------------------ */
-    private Filter _filter;
-    private Config _config;
     private PathMap _pathSpecs;
     private int _applyTo;
+
+    private transient Filter _filter;
+    private transient Config _config;
         
+    /* ---------------------------------------------------------------- */
+    /** Constructor for Serialization.
+     */
+    FilterHolder()
+    {}
+    
     /* ---------------------------------------------------------------- */
     public FilterHolder(HttpHandler httpHandler,
                         String name,

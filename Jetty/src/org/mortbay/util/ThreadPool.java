@@ -6,6 +6,8 @@
 package org.mortbay.util;
 
 import java.io.InterruptedIOException;
+import java.io.ObjectInputValidation;
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
@@ -31,7 +33,7 @@ import java.util.Iterator;
  * @author Greg Wilkins <gregw@mortbay.com>
  */
 public class ThreadPool
-    implements LifeCycle
+    implements LifeCycle, Serializable
 {
     /* ------------------------------------------------------------ */
     /** The number of times a null lock check should synchronize.
@@ -48,21 +50,24 @@ public class ThreadPool
         System.getProperty("THREADPOOL_THREAD_CLASS");
     
     /* ------------------------------------------------------------------- */
-    private HashSet _threadSet;
     private int _maxThreads = __maxThreads;
     private int _minThreads = __minThreads;
     private int _maxIdleTimeMs=10000;
     private int _maxStopTimeMs=-1;
     private String _name;
-    private int _threadId=0;
-    private HashSet _idleSet=new HashSet();
-    private boolean _running=false;
-    private Class _threadClass;
-    private Constructor _constructThread;
+    private String _threadClassName;
     
-    private BlockingQueue _queue;
-    private int _queueChecks;
+    private transient Class _threadClass;           
+    private transient Constructor _constructThread; 
+
+    private transient HashSet _threadSet;
+    private transient BlockingQueue _queue;
+    private transient int _queueChecks;
+    private transient int _threadId=0;
+    private transient HashSet _idleSet=new HashSet();
+    private transient boolean _running=false;
     
+
     /* ------------------------------------------------------------------- */
     /* Construct
      */
@@ -94,6 +99,26 @@ public class ThreadPool
         _name=name;
     }
 
+    /* ------------------------------------------------------------ */
+    private void readObject(java.io.ObjectInputStream in)
+        throws java.io.IOException, ClassNotFoundException
+    {
+        in.defaultReadObject();
+        _idleSet=new HashSet();
+        if (_threadClass==null || !_threadClass.getName().equals(_threadClassName))
+        {
+            try
+            {
+                setThreadClass(Loader.loadClass(ThreadPool.class,_threadClassName));
+            }
+            catch (Exception e)
+            {
+                Code.warning(e);
+                throw new java.io.InvalidObjectException(e.toString());
+            }
+        }
+    }
+    
 
     /* ------------------------------------------------------------ */
     /** 
@@ -130,6 +155,7 @@ public class ThreadPool
             throw new IllegalStateException("Thread Pool Running");
         
         _threadClass=threadClass;
+        _threadClassName=_threadClass.getName();
                 
         if(_threadClass == null ||
             !Thread.class.isAssignableFrom( _threadClass ) )
@@ -294,8 +320,7 @@ public class ThreadPool
      */
     synchronized public void start()
         throws Exception
-    {
-        getName();
+    {   
         if (_running)
         {
             Code.debug("Already started");

@@ -32,12 +32,13 @@ import java.net.UnknownHostException;
 abstract public class ThreadedServer extends ThreadPool
 {    
     /* ------------------------------------------------------------------- */
-    private InetAddrPort _address = null;    
-    private ServerSocket _listen = null;
+    private InetAddrPort _address = null;  
     private int _soTimeOut=-1;
     private int _maxReadTimeMs=0;
     private int _lingerTimeSecs=30;
-    private Acceptor _acceptor=null;
+    
+    private transient Acceptor _acceptor=null;  
+    private transient ServerSocket _listen = null;
     
     /* ------------------------------------------------------------------- */
     /* Construct

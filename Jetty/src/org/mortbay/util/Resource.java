@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -20,7 +21,7 @@ import java.net.URLConnection;
  * @author Nuno Preguiça
  * @author Greg Wilkins (gregw)
  */
-public abstract class Resource
+public abstract class Resource implements Serializable
 {
     Object _associate;
     

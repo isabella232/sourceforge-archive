@@ -7,6 +7,7 @@ package org.mortbay.http;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.AbstractCollection;
 import java.util.AbstractMap;
@@ -60,7 +61,8 @@ import org.mortbay.util.URI;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HttpServer implements LifeCycle
+public class HttpServer implements LifeCycle,
+                                   Serializable
 {
     /* ------------------------------------------------------------ */
     private final static String __notice=Version.__notice;
@@ -96,12 +98,13 @@ public class HttpServer implements LifeCycle
     private HashMap _realmMap = new HashMap(3);    
     private StringMap _virtualHostMap = new StringMap();
     
-    private HttpContext _notFoundContext=null;
     private boolean _chunkingForced=false;
     
     private RequestLog _requestLog;
-    private List _eventListeners;
-    private List _components;
+    
+    private transient HttpContext _notFoundContext=null;
+    private transient List _eventListeners;
+    private transient List _components;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -121,7 +124,21 @@ public class HttpServer implements LifeCycle
         setAnonymous(anonymous);
         _virtualHostMap.setIgnoreCase(true);
     }
-
+    
+    /* ------------------------------------------------------------ */
+    private void readObject(java.io.ObjectInputStream in)
+        throws IOException, ClassNotFoundException
+    {
+        in.defaultReadObject();
+        HttpListener[] listeners=getListeners();
+        HttpContext[] contexts=getContexts();
+        _listeners.clear();
+        _virtualHostMap.clear();
+        setContexts(contexts);
+        setListeners(listeners);
+    }
+ 
+    
     /* ------------------------------------------------------------ */
     /** 
      * @param anonymous If true, the server is not included in the

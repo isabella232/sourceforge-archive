@@ -4,8 +4,10 @@
 // ========================================================================
 package org.mortbay.util;
 
+import java.io.Externalizable;
 import java.util.AbstractMap;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -26,7 +28,7 @@ import java.util.Set;
  * @version 1.0 Thu Aug 16 2001
  * @author Greg Wilkins (gregw)
  */
-public class StringMap extends AbstractMap
+public class StringMap extends AbstractMap implements Externalizable
 {
     private static final int __HASH_WIDTH=9;
     
@@ -657,5 +659,20 @@ public class StringMap extends AbstractMap
             {Object old=_nullValue;_nullValue=(String)o;return old;}
         public String toString(){return "[:null="+_nullValue+"]";}
     }
+
+    /* ------------------------------------------------------------ */
+    public void writeExternal(java.io.ObjectOutput out)
+        throws java.io.IOException
+    {
+        HashMap map = new HashMap(this);
+        out.writeObject(map);
+    }
     
+    /* ------------------------------------------------------------ */
+    public void readExternal(java.io.ObjectInput in)
+        throws java.io.IOException, ClassNotFoundException
+    {
+        HashMap map = (HashMap)in.readObject();
+        this.putAll(map);
+    }
 }

@@ -5,14 +5,15 @@
 
 package org.mortbay.util;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /* ======================================================================== */
 /** InetAddress and Port.
  */
-public class InetAddrPort
-    implements Cloneable
+public class InetAddrPort implements Cloneable,
+                                     Serializable
 {
     /* ------------------------------------------------------------ */
     public final static String __0_0_0_0 = "0.0.0.0";

@@ -5,6 +5,7 @@
 
 package org.mortbay.http;
 import java.io.IOException;
+import java.io.Serializable;
 import org.mortbay.util.LifeCycle;
 
 
@@ -23,7 +24,7 @@ import org.mortbay.util.LifeCycle;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public interface HttpHandler extends LifeCycle
+public interface HttpHandler extends LifeCycle, Serializable
 {
     /* ------------------------------------------------------------ */
     /** Get the name of the handler.

@@ -20,7 +20,7 @@ import java.util.Date;
  * @version $Id$
  * @author Brett Sealey
  */
-public class ExpiryHandler extends NullHandler
+public class ExpiryHandler extends AbstractHttpHandler
 {
     /**
      * The default expiry time in seconds

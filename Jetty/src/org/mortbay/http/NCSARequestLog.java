@@ -26,13 +26,17 @@ import java.util.Locale;
 public class NCSARequestLog implements RequestLog
 {
     private String _filename;
-    private DateCache _logDateCache;
     private boolean _extended;
     private boolean _append;
     private int _retainDays;
-    private OutputStream _fileOut;
     private boolean _closeFileOut;
-    private ByteArrayISO8859Writer _buf=new ByteArrayISO8859Writer();
+    private String _logDateFormat="dd/MMM/yyyy:HH:mm:ss ZZZ";
+    private Locale _logLocale=Locale.US;
+    private String _logTimeZone=TimeZone.getDefault().getID();
+    
+    private transient OutputStream _fileOut;
+    private transient DateCache _logDateCache;
+    private transient ByteArrayISO8859Writer _buf;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -41,8 +45,6 @@ public class NCSARequestLog implements RequestLog
     public NCSARequestLog()
         throws IOException
     {
-        _logDateCache=new DateCache("dd/MMM/yyyy:HH:mm:ss ZZZ",Locale.US);
-        _logDateCache.setTimeZoneID(TimeZone.getDefault().getID());
         _extended=true;
         _append=true;
         _retainDays=31;
@@ -92,27 +94,25 @@ public class NCSARequestLog implements RequestLog
     /* ------------------------------------------------------------ */
     public void setLogDateFormat(String format)
     {
-        TimeZone tz=_logDateCache.getTimeZone();
-        _logDateCache=new DateCache(format);
-        _logDateCache.setTimeZone(tz);
+        _logDateFormat=format;
     }
 
     /* ------------------------------------------------------------ */
     public String getLogDateFormat()
     {
-        return _logDateCache.getFormatString();
+        return _logDateFormat;
     }
     
     /* ------------------------------------------------------------ */
     public void setLogTimeZone(String tz)
     {
-        _logDateCache.setTimeZone(TimeZone.getTimeZone(tz));
+        _logTimeZone=tz;
     }
 
     /* ------------------------------------------------------------ */
     public String getLogTimeZone()
     {
-        return _logDateCache.getTimeZone().getID();
+        return _logTimeZone;
     }
     
     /* ------------------------------------------------------------ */
@@ -155,6 +155,10 @@ public class NCSARequestLog implements RequestLog
     public void start()
         throws Exception
     {
+        _buf=new ByteArrayISO8859Writer();
+        _logDateCache=new DateCache(_logDateFormat,_logLocale);
+        _logDateCache.setTimeZoneID(_logTimeZone);
+        
         if (_filename != null)
         {
             _fileOut=new RolloverFileOutputStream(_filename,_append,_retainDays);
@@ -177,6 +181,8 @@ public class NCSARequestLog implements RequestLog
             try{_fileOut.close();}catch(IOException e){Code.ignore(e);}
         _fileOut=null;
         _closeFileOut=false;
+        _buf=null;
+        _logDateCache=null;
     }
     
     /* ------------------------------------------------------------ */

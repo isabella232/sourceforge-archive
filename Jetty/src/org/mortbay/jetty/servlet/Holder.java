@@ -5,6 +5,7 @@
 
 package org.mortbay.jetty.servlet;
 
+import java.io.Serializable;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -25,15 +26,23 @@ import org.mortbay.util.LifeCycle;
  */
 public class Holder
     extends AbstractMap
-    implements LifeCycle                        
+    implements LifeCycle,
+               Serializable
 {
     /* ---------------------------------------------------------------- */
     protected HttpHandler _httpHandler;
     protected String _name;
     protected String _displayName;
     protected String _className;
-    protected Class _class;
     protected Map _initParams;
+    
+    protected transient Class _class;
+
+    /* ---------------------------------------------------------------- */
+    /** Constructor for Serialization.
+     */
+    Holder()
+    {}
     
     /* ---------------------------------------------------------------- */
     public Holder(HttpHandler httpHandler,

@@ -5,6 +5,7 @@
 
 package org.mortbay.http;
 
+import java.io.Externalizable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -46,7 +47,7 @@ import org.mortbay.util.Code;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class PathMap extends HashMap
+public class PathMap extends HashMap implements Externalizable
 {
     /* ------------------------------------------------------------ */
     private static String __pathSpecSeparators = System.getProperty("org.mortbay.http.PathMap.separators",":,");
@@ -68,9 +69,10 @@ public class PathMap extends HashMap
     StringMap _prefixMap=new StringMap();
     StringMap _suffixMap=new StringMap();
     StringMap _exactMap=new StringMap();
+
+    List _defaultSingletonList=null;
     Map.Entry _prefixDefault=null;
     Map.Entry _default=null;
-    List _defaultSingletonList=null;
     Set _entrySet;
     
     /* --------------------------------------------------------------- */
@@ -98,6 +100,22 @@ public class PathMap extends HashMap
     {
         putAll(m);
         _entrySet=entrySet();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void writeExternal(java.io.ObjectOutput out)
+        throws java.io.IOException
+    {
+        HashMap map = new HashMap(this);
+        out.writeObject(map);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void readExternal(java.io.ObjectInput in)
+        throws java.io.IOException, ClassNotFoundException
+    {
+        HashMap map = (HashMap)in.readObject();
+        this.putAll(map);
     }
     
     /* --------------------------------------------------------------- */

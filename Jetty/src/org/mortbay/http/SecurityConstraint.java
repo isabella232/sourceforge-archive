@@ -6,6 +6,7 @@
 package org.mortbay.http;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -22,7 +23,7 @@ import org.mortbay.util.LazyList;
  * @author Greg Wilkins (gregw)
  */
 public class SecurityConstraint
-    implements Cloneable
+    implements Cloneable, Serializable
 {
     /* ------------------------------------------------------------ */
     public final static String __BASIC_AUTH="BASIC";
@@ -33,7 +34,7 @@ public class SecurityConstraint
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public interface Authenticator
+    public interface Authenticator extends Serializable
     {
         /* ------------------------------------------------------------ */
         /** Authenticate.

@@ -6,6 +6,7 @@
 package org.mortbay.http;
 
 import org.mortbay.util.LifeCycle;
+import java.io.Serializable;
 
 /* ------------------------------------------------------------ */
 /** Abstract HTTP Request Log format
@@ -13,7 +14,9 @@ import org.mortbay.util.LifeCycle;
  * @author Tony Thompson
  * @author Greg Wilkins
  */
-public interface RequestLog extends LifeCycle
+public interface RequestLog
+    extends LifeCycle,
+            Serializable
 {
     public void log(HttpRequest request,
                     HttpResponse response,

@@ -5,6 +5,7 @@
 
 package org.mortbay.jetty.servlet;
 
+import java.io.Serializable;
 import java.util.EventListener;
 import javax.servlet.http.HttpSession;
 import org.mortbay.util.LifeCycle;
@@ -16,7 +17,7 @@ import org.mortbay.util.LifeCycle;
  * @version $Id$
  * @author Greg Wilkins
  */
-public interface SessionManager extends LifeCycle
+public interface SessionManager extends LifeCycle, Serializable
 {
     /* ------------------------------------------------------------ */
     public final static String __SessionId  = "jsessionid";

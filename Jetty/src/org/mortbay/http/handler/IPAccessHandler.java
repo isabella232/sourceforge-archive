@@ -41,7 +41,8 @@ import org.mortbay.http.HttpResponse;
  * @version v0.1 2002/03/20
  * @author Gösta Jonasson <a href="mailto:gosta@kth.se">gosta@kth.se</a>
  */
-public class IPAccessHandler extends NullHandler {
+public class IPAccessHandler extends AbstractHttpHandler
+{
 
     /** The standard way to deal with not configured IPs (true=allowed) */
     boolean standard = false;

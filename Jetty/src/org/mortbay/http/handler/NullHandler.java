@@ -23,107 +23,14 @@ import org.mortbay.util.StringUtil;
 import org.mortbay.util.ByteArrayISO8859Writer;
 
 /* ------------------------------------------------------------ */
-/** Base HTTP Handler.
- * This No-op handler is a good base for other handlers
- *
+/** Abstract HTTP Handler.
+ * @deprecated Use AbstractHttpHandler
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-abstract public class NullHandler implements HttpHandler
+abstract public class NullHandler extends AbstractHttpHandler
 {
-    /* ----------------------------------------------------------------- */
-    private boolean _started=false;
-    private HttpContext _context;
-    private String _name;
-
-    /* ------------------------------------------------------------ */
-    public void setName(String name)
-    {
-        _name=name;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public String getName()
-    {
-        if (_name==null)
-        {
-            _name=this.getClass().getName();
-            if (!Code.debug())
-                _name=_name.substring(_name.lastIndexOf('.')+1);
-        }
-        return _name;
-    }
-    
-    
-    /* ------------------------------------------------------------ */
-    public HttpContext getHttpContext()
-    {
-        return _context;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Initialize with a HttpContext.
-     * Called by addHandler methods of HttpContext.
-     * @param configuration Must be the HttpContext of the handler
-     */
-    public void initialize(HttpContext context)
-    {
-        if (_context==null)
-            _context=context;
-        else if (_context!=context)
-            throw new IllegalStateException("Can't initialize handler for different context");
-    }
-
-
-    /* ----------------------------------------------------------------- */
-    public void handleTrace(HttpRequest request,
-                            HttpResponse response)
-        throws IOException
-    {
-        // Handle TRACE by returning request header
-        response.setField(HttpFields.__ContentType,
-                          HttpFields.__MessageHttp);
-        OutputStream out = response.getOutputStream();
-        ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer();
-        writer.write(request.toString());
-        writer.flush();
-        response.setIntField(HttpFields.__ContentLength,writer.length());
-        writer.writeTo(out);
-        out.flush();
-        request.setHandled(true);
-    }
-    
-    
-    /* ----------------------------------------------------------------- */
-    public void start()
-        throws Exception
-    {
-        if (_context==null)
-            throw new IllegalStateException("No context for "+this);        
-        _started=true;
-        Code.debug("Started "+this);
-    }
-    
-    /* ----------------------------------------------------------------- */
-    public void stop()
-        throws InterruptedException
-    {
-        _started=false;
-        Code.debug("Stopped "+this);
-    }
-
-    /* ----------------------------------------------------------------- */
-    public boolean isStarted()
-    {
-        return _started;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public String toString()
-    {
-        return getName()+" in "+_context;
-    }    
-
+    private NullHandler(){}
 }
 
 

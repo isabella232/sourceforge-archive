@@ -43,20 +43,30 @@ public class ServletHolder extends Holder
     implements Comparable
 {
     /* ---------------------------------------------------------------- */
-    private ServletHandler _servletHandler;
-    private Stack _servlets;
-    private Servlet _servlet;
     
     private int _initOrder;
     private boolean _initOnStartup=false;
-    private Config _config;
     private Map _roleMap;
     private String _forcedPath;
-    private long _unavailable;
-    private UnavailableException _unavailableEx;
     private String _run_as;
     private UserRealm _realm;
+
     
+    private transient Stack _servlets;
+    private transient Servlet _servlet;
+    private transient Config _config;
+    private transient long _unavailable;
+    private transient ServletHandler _servletHandler;
+    private transient UnavailableException _unavailableEx;
+
+    
+    /* ---------------------------------------------------------------- */
+    /** Constructor for Serialization.
+     */
+    ServletHolder()
+    {}
+    
+
     /* ---------------------------------------------------------------- */
     /** Constructor.
      */

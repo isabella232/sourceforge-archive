@@ -54,7 +54,7 @@ import org.mortbay.util.Code;
  * @author Greg Wilkins (gregw)
  */
 public class ContentEncodingHandler
-    extends NullHandler
+    extends AbstractHttpHandler
     implements OutputObserver
 {
     private HttpEncoding _httpEncoding;
@@ -62,12 +62,13 @@ public class ContentEncodingHandler
     private PathMap _pathMap;
     
     /* ------------------------------------------------------------ */
-    public void initialize(HttpContext context)
+    public void start()
+        throws Exception
     {
-        super.initialize(context);
-        _httpEncoding = context.getHttpServer().getHttpEncoding();    
+        super.start();
+        _httpEncoding = getHttpContext().getHttpServer().getHttpEncoding();
     }
-
+    
     /* ------------------------------------------------------------ */
     public void setMinimumLength(int l)
     {

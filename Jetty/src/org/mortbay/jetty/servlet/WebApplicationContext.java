@@ -75,20 +75,31 @@ public class WebApplicationContext extends ServletHttpContext
 {
     /* ------------------------------------------------------------ */
     private String _name;
-    private Resource _webApp;
-    private Resource _webInf;
-    private WebApplicationHandler _webAppHandler;
-    private Map _tagLibMap=new HashMap(3);
     private String _deploymentDescriptor;
     private String _defaultsDescriptor="org/mortbay/jetty/servlet/webdefault.xml";
     private String _war;
     private boolean _extract;
-    private ArrayList _contextListeners;
-    private ArrayList _contextAttributeListeners;
-    private Set _warnings;
-    private FormAuthenticator _formAuthenticator;
-    private Map _resourceAliases;
     private boolean _ignorewebjetty;
+    
+    private transient FormAuthenticator _formAuthenticator;
+    private transient Map _resourceAliases;
+    private transient Resource _webApp;
+    private transient Resource _webInf;
+    private transient Set _warnings;
+    private transient WebApplicationHandler _webAppHandler;
+    private transient Map _tagLibMap;
+    private transient ArrayList _contextListeners;
+    private transient ArrayList _contextAttributeListeners;
+
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @exception IOException 
+     */
+    public WebApplicationContext()
+        throws IOException
+    {
+    }
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -100,7 +111,24 @@ public class WebApplicationContext extends ServletHttpContext
     {
         _war=webApp;
     }
-
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param war Filename or URL of the web application directory or WAR file. 
+     */
+    public void setWAR(String war)
+    {
+        if (isStarted())
+            throw new IllegalStateException();
+        _war=war;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getWAR()
+    {
+        return _war;
+    }
+    
     /* ------------------------------------------------------------ */
     public WebApplicationHandler getWebApplicationHandler()
     {
@@ -200,7 +228,6 @@ public class WebApplicationContext extends ServletHttpContext
                 _webAppHandler=new WebApplicationHandler();
                 addHandler(_webAppHandler);
             }
-            setServletHandler(_webAppHandler);
         }
         return _webAppHandler;
     }
@@ -230,7 +257,8 @@ public class WebApplicationContext extends ServletHttpContext
     {
         if (isStarted())
             return;
-
+        _tagLibMap=new HashMap(3);
+        
         // save context classloader
         Thread thread = Thread.currentThread();
         ClassLoader lastContextLoader=thread.getContextClassLoader();
@@ -564,23 +592,6 @@ public class WebApplicationContext extends ServletHttpContext
     public String getDefaultsDescriptor()
     {
         return _defaultsDescriptor;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @param war Filename or URL of the web application directory or WAR file. 
-     */
-    public void setWAR(String war)
-    {
-        if (isStarted())
-            throw new IllegalStateException();
-        _war=war;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public String getWAR()
-    {
-        return _war;
     }
     
     /* ------------------------------------------------------------ */

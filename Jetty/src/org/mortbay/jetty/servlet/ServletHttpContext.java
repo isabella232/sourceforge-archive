@@ -19,11 +19,7 @@ import org.mortbay.util.Code;
  * @author Greg Wilkins (gregw)
  */
 public class ServletHttpContext extends HttpContext
-{
-    /* ------------------------------------------------------------ */
-    private ServletContext _servletContext;
-    private ServletHandler _servletHandler;
-    
+{    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param server 
@@ -45,36 +41,15 @@ public class ServletHttpContext extends HttpContext
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the ServletContext.
-     * Called by the ServletHandler to 
-     * @param servletContext 
-     */
-    void setServletContext(ServletContext servletContext)
-    {
-        if (_servletContext!=null && servletContext!=_servletContext)
-            throw new IllegalStateException("ServletContext already set");
-        _servletContext=servletContext;
-    }
-    
-    /* ------------------------------------------------------------ */
     /**
      * @return The ServletContext. 
      */
     public ServletContext getServletContext()
     {
-        return _servletContext;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Set the ServletHandler.
-     * Called by the ServletHandler to 
-     * @param servletHandler 
-     */
-    void setServletHandler(ServletHandler servletHandler)
-    {
-        if (_servletHandler!=null && _servletHandler!=servletHandler)
-            throw new IllegalStateException("ServletHandler already set");
-        _servletHandler=servletHandler;
+        ServletHandler shandler=getServletHandler();
+        if (shandler!=null)
+            return shandler.getServletContext();
+        return null;
     }
     
     /* ------------------------------------------------------------ */
@@ -85,16 +60,14 @@ public class ServletHttpContext extends HttpContext
      */
     public synchronized ServletHandler getServletHandler()
     {
-        if (_servletHandler==null)
-            _servletHandler= (ServletHandler) getHandler(ServletHandler.class);
-        if (_servletHandler==null)
+        ServletHandler shandler=(ServletHandler) getHandler(ServletHandler.class);
+        if (shandler==null)
         {
-            _servletHandler=new ServletHandler();
-            addHandler(_servletHandler);
+            shandler=new ServletHandler();
+            addHandler(shandler);
         }
-        return _servletHandler;
+        return shandler;
     }
-    
     
     /* ------------------------------------------------------------ */
     /** Add a servlet to the context.
@@ -152,8 +125,6 @@ public class ServletHttpContext extends HttpContext
         throws InterruptedException
     {
         super.stop();
-        _servletHandler=null;
-        _servletContext=null;
     }
     
     /* ------------------------------------------------------------ */

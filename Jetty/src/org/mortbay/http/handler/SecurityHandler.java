@@ -39,12 +39,10 @@ import org.mortbay.util.StringUtil;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class SecurityHandler extends NullHandler
+public class SecurityHandler extends AbstractHttpHandler
 {   
     /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
     private String _authMethod=SecurityConstraint.__BASIC_AUTH;
-    private Map _authRealmMap;
     private String _realmName ;
     private boolean _realmForced=false;
 

@@ -42,8 +42,8 @@ import org.mortbay.util.Password;
 public class SunJsseListener extends JsseListener
 {
     private String _keystore=DEFAULT_KEYSTORE ;
-    private Password _password;
-    private Password _keypassword;
+    private transient Password _password;
+    private transient Password _keypassword;
 
     /* ------------------------------------------------------------ */
     static

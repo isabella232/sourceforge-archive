@@ -35,7 +35,7 @@ import org.mortbay.util.StringUtil;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class DumpHandler extends NullHandler
+public class DumpHandler extends AbstractHttpHandler
 {
     /* ----------------------------------------------------------------- */
     public String realPath(String pathSpec, String path)

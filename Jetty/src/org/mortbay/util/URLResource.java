@@ -26,8 +26,8 @@ public class URLResource extends Resource
 {
     protected URL _url;
     protected String _urlString;
-    protected URLConnection _connection;
-    protected InputStream _in=null;
+    protected transient URLConnection _connection;
+    protected transient InputStream _in=null;
     
     /* ------------------------------------------------------------ */
     protected URLResource(URL url, URLConnection connection)

@@ -40,12 +40,12 @@ import org.mortbay.util.UnixCrypt;
  * @author  Greg Wilkins
  *
  */
-public class HTAccessHandler extends NullHandler
+public class HTAccessHandler extends AbstractHttpHandler
 {
     String _default = null;
     String _accessFile = ".htaccess";
 
-    HashMap _htCache = new HashMap();
+    transient HashMap _htCache = new HashMap();
  
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,

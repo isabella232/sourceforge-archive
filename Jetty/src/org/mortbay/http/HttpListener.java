@@ -4,6 +4,7 @@
 // ========================================================================
 
 package org.mortbay.http;
+import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import org.mortbay.util.LifeCycle;
@@ -24,7 +25,7 @@ import org.mortbay.util.LifeCycle;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public interface HttpListener extends LifeCycle
+public interface HttpListener extends LifeCycle, Serializable
 {
     public static final String ATTRIBUTE="org.mortbay.http.HttpListener";
         

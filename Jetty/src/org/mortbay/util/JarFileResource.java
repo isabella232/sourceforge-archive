@@ -18,13 +18,13 @@ import java.util.zip.ZipFile;
 /* ------------------------------------------------------------ */
 class JarFileResource extends JarResource
 {
-    JarFile _jarFile;
-    File _file;
-    String[] _list;
-    JarEntry _entry;
-    boolean _directory;
-    String _jarUrl;
-    String _path;
+    transient JarFile _jarFile;
+    transient File _file;
+    transient String[] _list;
+    transient JarEntry _entry;
+    transient boolean _directory;
+    transient String _jarUrl;
+    transient String _path;
     
     /* -------------------------------------------------------- */
     JarFileResource(URL url)

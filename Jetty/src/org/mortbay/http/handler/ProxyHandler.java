@@ -32,7 +32,7 @@ import org.mortbay.util.StringUtil;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class ProxyHandler extends NullHandler
+public class ProxyHandler extends AbstractHttpHandler
 {
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,

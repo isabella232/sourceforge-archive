@@ -4,6 +4,7 @@
 // ========================================================================
 
 package org.mortbay.util;
+import java.io.Serializable;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,9 +43,10 @@ import java.util.NoSuchElementException;
  * @author Greg Wilkins (gregw)
  */
 public class LazyList extends AbstractList
-                              implements Cloneable
+    implements Cloneable, Serializable
 {
     private static final String[] __EMTPY_STRING_ARRAY = new String[0];
+    
     private Object _first;
     private List _list;
 

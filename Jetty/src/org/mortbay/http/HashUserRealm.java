@@ -6,6 +6,7 @@
 package org.mortbay.http;
 
 import java.io.IOException;
+import java.io.Externalizable;
 import java.io.PrintStream;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -32,11 +33,19 @@ import org.mortbay.util.Resource;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HashUserRealm extends HashMap implements UserRealm
+public class HashUserRealm extends HashMap implements UserRealm, Externalizable
 {
     private String _realmName;
+    private String _config;
     protected HashMap _roles=new HashMap(7);
 
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param name 
+     */
+    public HashUserRealm()
+    {}
+    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param name 
@@ -57,6 +66,25 @@ public class HashUserRealm extends HashMap implements UserRealm
         _realmName=name;
         load(config);
     }
+    
+    /* ------------------------------------------------------------ */
+    public void writeExternal(java.io.ObjectOutput out)
+        throws java.io.IOException
+    {
+        out.writeObject(_realmName);
+        out.writeObject(_config);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void readExternal(java.io.ObjectInput in)
+        throws java.io.IOException, ClassNotFoundException
+    {
+        _realmName= (String)in.readObject();
+        _config=(String)in.readObject();
+        if (_config!=null)
+            load(_config);
+    }
+    
 
     /* ------------------------------------------------------------ */
     /** Load realm users from properties file.
@@ -69,6 +97,7 @@ public class HashUserRealm extends HashMap implements UserRealm
     public void load(String config)
         throws IOException
     {
+        _config=config;
         Code.debug("Load ",this," from ",config);
         Properties properties = new Properties();
         Resource resource=Resource.newResource(config);
@@ -101,6 +130,12 @@ public class HashUserRealm extends HashMap implements UserRealm
                 }
             }
         }
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setName(String name)
+    {
+        _realmName=name;
     }
     
     /* ------------------------------------------------------------ */

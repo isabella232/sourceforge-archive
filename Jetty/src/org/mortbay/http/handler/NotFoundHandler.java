@@ -25,7 +25,7 @@ import org.mortbay.util.StringUtil;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class NotFoundHandler extends NullHandler
+public class NotFoundHandler extends AbstractHttpHandler
 {
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,

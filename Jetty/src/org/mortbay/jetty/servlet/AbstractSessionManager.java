@@ -53,14 +53,15 @@ public abstract class AbstractSessionManager implements SessionManager
     // Setting of max inactive interval for new sessions
     // -1 means no timeout
     private int _dftMaxIdleSecs = -1;
-    private SessionScavenger _scavenger = null;
-    private Map _sessions;
     private int _scavengePeriodMs = 30000;
-    private ServletHandler _handler;
 
-    private ArrayList _sessionListeners=new ArrayList();
-    private ArrayList _sessionAttributeListeners=new ArrayList();
-    private Random _random;
+    private transient ArrayList _sessionListeners=new ArrayList();
+    private transient ArrayList _sessionAttributeListeners=new ArrayList();
+    private transient Map _sessions;
+    private transient Random _random;
+    private transient ServletHandler _handler;
+    private transient SessionScavenger _scavenger = null;
+
     
     /* ------------------------------------------------------------ */
     public AbstractSessionManager()

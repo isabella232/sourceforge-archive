@@ -26,7 +26,7 @@ import java.util.Map;
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
-public class ForwardHandler extends NullHandler
+public class ForwardHandler extends AbstractHttpHandler
 {
     PathMap _forward = new PathMap();
     String _root;

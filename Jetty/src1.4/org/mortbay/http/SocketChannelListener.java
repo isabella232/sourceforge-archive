@@ -39,14 +39,7 @@ public class SocketChannelListener
     implements HttpListener
 {
     private InetSocketAddress _address;
-    private HttpServer _server;
     private String _scheme=HttpMessage.__SCHEME;
-    private boolean _lastLow=false;
-    private boolean _lastOut=false;
-    private ServerSocketChannel _acceptChannel;
-    private Selector _selector;
-    private SelectorThread _selectorThread;
-    private ArrayList _idling=new ArrayList();
     private int _maxReadTimeMs=0;
     private int _lingerTimeSecs=30;
     private String _integralScheme=HttpMessage.__SSL_SCHEME;
@@ -54,6 +47,14 @@ public class SocketChannelListener
     private int _integralPort=0;
     private int _confidentialPort=0;
     private int _bufferSize=4096;
+    
+    private transient HttpServer _server;
+    private transient boolean _lastLow=false;
+    private transient boolean _lastOut=false;
+    private transient ServerSocketChannel _acceptChannel;
+    private transient Selector _selector;
+    private transient SelectorThread _selectorThread;
+    private transient ArrayList _idling=new ArrayList();
 
     /* ------------------------------------------------------------------- */
     public SocketChannelListener()

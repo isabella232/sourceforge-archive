@@ -50,7 +50,7 @@ import org.mortbay.util.URI;
  * @author Nuno Preguiça 
  * @author Greg Wilkins
  */
-public class ResourceHandler extends NullHandler
+public class ResourceHandler extends AbstractHttpHandler
 {
     /* ----------------------------------------------------------------- */
     private boolean _acceptRanges=true;
@@ -67,7 +67,6 @@ public class ResourceHandler extends NullHandler
                 HttpRequest.__TRACE
             });
     }
-
 
     /* ----------------------------------------------------------------- */
     /** Construct a ResourceHandler.

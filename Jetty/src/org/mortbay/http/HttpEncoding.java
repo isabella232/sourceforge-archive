@@ -5,6 +5,7 @@
 
 package org.mortbay.http;
 
+import java.io.Serializable;
 import java.util.Map;
 import org.mortbay.util.Code;
 
@@ -21,7 +22,7 @@ import org.mortbay.util.Code;
  * @version 1.0 Wed Mar  6 2002
  * @author Greg Wilkins (gregw)
  */
-public class HttpEncoding
+public class HttpEncoding implements Serializable
 {
     /* ------------------------------------------------------------ */
     public boolean knownEncoding(String coding)

@@ -53,7 +53,7 @@ import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.http.UserPrincipal;
 import org.mortbay.http.UserRealm;
 import org.mortbay.http.Version;
-import org.mortbay.http.handler.NullHandler;
+import org.mortbay.http.handler.AbstractHttpHandler;
 import org.mortbay.http.handler.SecurityHandler;
 import org.mortbay.http.handler.ResourceHandler;
 import org.mortbay.util.ByteArrayISO8859Writer;
@@ -86,8 +86,7 @@ import org.mortbay.util.URI;
  * @version $Id$
  * @author Greg Wilkins
  */
-public class ServletHandler
-    extends NullHandler
+public class ServletHandler extends AbstractHttpHandler
 {
     /* ------------------------------------------------------------ */
     private static final boolean __Slosh2Slash=File.separatorChar=='\\';
@@ -96,36 +95,29 @@ public class ServletHandler
     /* ------------------------------------------------------------ */
     private PathMap _servletMap=new PathMap();
     private Map _nameMap=new HashMap();
-    private Context _context;
-    private ClassLoader _loader;
     private boolean _usingCookies=true;
     private LogSink _logSink;
     private SessionManager _sessionManager;
     private boolean _autoInitializeServlets=true;
     private String _formLoginPage;
     private String _formErrorPage;
-    private ResourceHandler _resourceHandler;
-    private List _sessionListeners=new ArrayList();
+
+    private transient List _sessionListeners;
+    private transient Context _context;
+    private transient ClassLoader _loader;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
     public ServletHandler()
-    {
-        _context=new Context();
-    }
+    {}
     
     /* ------------------------------------------------------------ */
     public void initialize(HttpContext context)
     {
         SessionManager sessionManager=getSessionManager();
         super.initialize(context);
-        if (context instanceof ServletHttpContext)
-        {
-            ServletHttpContext servletHttpContext= (ServletHttpContext)context;
-            servletHttpContext.setServletHandler(this);
-            servletHttpContext.setServletContext(_context);
-        }
+        _context=new Context();
         sessionManager.initialize(this);
     }
 
@@ -135,8 +127,7 @@ public class ServletHandler
     {
         _formLoginPage=formLoginPage;
         _formErrorPage=formErrorPage;
-    }
-    
+    }    
     
     /* ------------------------------------------------------------ */
     public void setSessionManager(SessionManager sm)
@@ -146,25 +137,31 @@ public class ServletHandler
 
         if (getHttpContext()!=null && _sessionManager!=null)
 	{
-	  _sessionManager.initialize(null);
-	  for (Iterator i=_sessionListeners.iterator();i.hasNext();)
-	  {
-	    EventListener listener=(EventListener)i.next();
-	    _sessionManager.removeEventListener(listener);
-	  }
+            _sessionManager.initialize(null);
+            if (_sessionListeners!=null)
+            {
+                for (Iterator i=_sessionListeners.iterator();i.hasNext();)
+                {
+                    EventListener listener=(EventListener)i.next();
+                    _sessionManager.removeEventListener(listener);
+                }
+            }
 	}
 
         _sessionManager=sm;
 
         if (getHttpContext()!=null)
 	{
-	  for (Iterator i=_sessionListeners.iterator();i.hasNext();)
-	    {
-	      EventListener listener=(EventListener)i.next();
-	      _sessionManager.addEventListener(listener);
-	    }
-	  _sessionManager.initialize(this);
-	}
+            if (_sessionListeners!=null)
+            {
+                for (Iterator i=_sessionListeners.iterator();i.hasNext();)
+                {
+                    EventListener listener=(EventListener)i.next();
+                    _sessionManager.addEventListener(listener);
+                }
+                _sessionManager.initialize(this);
+            }
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -345,8 +342,10 @@ public class ServletHandler
             (listener instanceof HttpSessionBindingListener) ||
             (listener instanceof HttpSessionListener))
 	{
-	  _sessionManager.addEventListener(listener);
-	  _sessionListeners.add(listener);
+            _sessionManager.addEventListener(listener);
+            if (_sessionListeners==null)
+                _sessionListeners=new ArrayList(3);
+            _sessionListeners.add(listener);
 	}
         else 
             throw new IllegalArgumentException(listener.toString());
@@ -359,10 +358,11 @@ public class ServletHandler
             (listener instanceof HttpSessionAttributeListener) ||
             (listener instanceof HttpSessionBindingListener) ||
             (listener instanceof HttpSessionListener))
-          {
+        {
 	    _sessionManager.removeEventListener(listener);
-	    _sessionListeners.remove(_sessionListeners.indexOf(listener));
-	  }
+            if (_sessionListeners!=null)
+                _sessionListeners.remove(_sessionListeners.indexOf(listener));
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -390,7 +390,6 @@ public class ServletHandler
         if (isStarted())
             return;
         
-        _resourceHandler=(ResourceHandler)getHttpContext().getHandler(ResourceHandler.class);
         if (_sessionManager!=null)
             _sessionManager.start();
         
@@ -784,7 +783,6 @@ public class ServletHandler
             }
 
             return new Dispatcher(ServletHandler.this,
-                                  _resourceHandler,
                                   uriInContext,query);
         }
         catch(Exception e)

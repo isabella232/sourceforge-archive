@@ -7,6 +7,7 @@ package org.mortbay.http;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.security.Permission;
 import java.security.PermissionCollection;
@@ -66,7 +67,8 @@ import org.mortbay.http.SecurityConstraint.Authenticator;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HttpContext implements LifeCycle
+public class HttpContext implements LifeCycle,
+                                    Serializable
 {
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -92,25 +94,18 @@ public class HttpContext implements LifeCycle
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private HttpServer _httpServer;
     private List _handlers=new ArrayList(3);
-    private HttpHandler[] _handlersArray;
     private String _classPath;
-    private ClassLoader _parent;
-    private ClassLoader _loader;
-    private boolean _started;
+    private boolean _statsOn=false;
 
     private Map _attributes = new HashMap(11);
     private Map _initParams = new HashMap(11);
     
     private List _hosts=new ArrayList(2);
-    private String[] _hostsArray=null;
     private String _contextPath;
     private String _name;
     private boolean _redirectNullPath=true;
     private boolean _httpServerAccess=false;
-    
-    private File _tmpDir;
     
     private Map _encodingMap;
     private Map _errorPages;
@@ -121,10 +116,6 @@ public class HttpContext implements LifeCycle
     private Authenticator _authenticator;
 
     private Resource _resourceBase;
-    private Map _cache=new HashMap();
-    private CachedMetaData _mostRecentlyUsed=null;
-    private CachedMetaData _leastRecentlyUsed=null;
-    private int _cacheSize;
     private Map _mimeMap;
     private int _maxCachedFileSize =400*1024;
     private int _maxCacheSize =4*1024*1024;
@@ -139,6 +130,31 @@ public class HttpContext implements LifeCycle
 
     private PermissionCollection _permissions;
     
+    /* ------------------------------------------------------------ */
+    private transient boolean _started;
+    private transient ClassLoader _parent;
+    private transient ClassLoader _loader;
+    private transient HttpServer _httpServer;
+    private transient File _tmpDir;
+    private transient Map _cache=new HashMap();
+    private transient int _cacheSize;
+    private transient CachedMetaData _mostRecentlyUsed;
+    private transient CachedMetaData _leastRecentlyUsed;
+    private transient HttpHandler[] _handlersArray;
+    private transient String[] _hostsArray;
+
+    /* ------------------------------------------------------------ */
+    transient long _statsStartedAt;
+    transient int _requests;
+    transient int _requestsActive;
+    transient int _requestsActiveMax;
+    transient int _responses1xx; // Informal
+    transient int _responses2xx; // Success
+    transient int _responses3xx; // Redirection
+    transient int _responses4xx; // Client Error
+    transient int _responses5xx; // Server Error
+
+
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
@@ -156,6 +172,17 @@ public class HttpContext implements LifeCycle
         setContextPath(contextPathSpec);
     }
 
+    /* ------------------------------------------------------------ */
+    private void readObject(java.io.ObjectInputStream in)
+        throws IOException, ClassNotFoundException
+    {
+        in.defaultReadObject();
+        _cache=new HashMap();
+        getHandlers();
+        for (int i=0;i<_handlersArray.length;i++)
+            _handlersArray[i].initialize(this);
+    }
+    
     /* ------------------------------------------------------------ */
     /** Get the ThreadLocal HttpConnection.
      * Get the ThreadLocal HttpConnection.
@@ -1786,18 +1813,7 @@ public class HttpContext implements LifeCycle
         _permissions=null;
     }
     
-
-    /* ------------------------------------------------------------ */
-    private boolean _statsOn=false;
-    long _statsStartedAt;
-    int _requests;
-    int _requestsActive;
-    int _requestsActiveMax;
-    int _responses1xx; // Informal
-    int _responses2xx; // Success
-    int _responses3xx; // Redirection
-    int _responses4xx; // Client Error
-    int _responses5xx; // Server Error
+    
 
     /* ------------------------------------------------------------ */
     /** True set statistics recording on for this context.
@@ -1820,7 +1836,8 @@ public class HttpContext implements LifeCycle
     /* ------------------------------------------------------------ */
     public synchronized void statsReset()
     {
-        _statsStartedAt=System.currentTimeMillis();
+        if (_statsOn)
+            _statsStartedAt=System.currentTimeMillis();
         _requests=0;
         _requestsActive=0;
         _requestsActiveMax=0;

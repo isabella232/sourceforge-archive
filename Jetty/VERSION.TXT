@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Made HttpServer serializable
  + Updated international URI doco
  + Updated jasper to CVS snapshot 200208011920
  + Fixed forward to jsp-file servlet

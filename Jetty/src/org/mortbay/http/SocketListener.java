@@ -33,11 +33,7 @@ public class SocketListener
     implements HttpListener
 {
     /* ------------------------------------------------------------------- */
-    private HttpServer _server;
     private int _lowResourcePersistTimeMs=2000;
-    private int _throttled=0;
-    private boolean _lastLow=false;
-    private boolean _lastOut=false;
     private String _scheme=HttpMessage.__SCHEME;
     private String _integralScheme=HttpMessage.__SSL_SCHEME;
     private String _confidentialScheme=HttpMessage.__SSL_SCHEME;
@@ -45,7 +41,12 @@ public class SocketListener
     private int _confidentialPort=0;
     private boolean _identifyListener=false;
     private int _bufferSize=4096;
-    
+
+    private transient HttpServer _server;
+    private transient int _throttled=0;
+    private transient boolean _lastLow=false;
+    private transient boolean _lastOut=false;
+
     /* ------------------------------------------------------------------- */
     public SocketListener()
     {}
