@@ -459,7 +459,7 @@ public class UnixCrypt extends Object
     {
         if (arg.length!=2)
         {
-            System.err.println("Usage - java org.mortbay.util.UnixCrypt <key> <value>");
+            System.err.println("Usage - java org.mortbay.util.UnixCrypt <key> <salt>");
             System.exit(1);
         }
 

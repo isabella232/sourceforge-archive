@@ -72,7 +72,6 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
     private boolean _distributable;
     private Configuration _configuration;
 
-    private transient String _name;
     private transient Map _resourceAliases;
     private transient Resource _webApp;
     private transient Resource _webInf;
@@ -597,13 +596,13 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
     /* ------------------------------------------------------------ */
     public String getDisplayName()
     {
-        return _name;
+        return getHttpContextName();
     }
     
     /* ------------------------------------------------------------ */
     public void setDisplayName(String name)
     {
-         _name=name;
+        setHttpContextName(name);
     }
 
     /* ------------------------------------------------------------ */
@@ -663,7 +662,8 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "WebApplicationContext[" + getHttpContextName() + "," + (_name == null ? _war : _name) + "]";
+        String name = getDisplayName();
+        return "WebApplicationContext[" + getHttpContextName() + "," + (name == null ? _war : name) + "]";
     }
 
     /* ------------------------------------------------------------ */

@@ -264,6 +264,9 @@
          </section>
 
        </manifest>
+       <metainf dir="${src}/org/mortbay/log">
+         <include name="services/*"/>
+       </metainf>
 
        <fileset dir="${classes}">
          <include name="org/mortbay/**"/>

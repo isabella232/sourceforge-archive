@@ -106,6 +106,7 @@ public class ServletHandler extends AbstractHttpHandler
 
     protected transient Context _context;
     protected transient ClassLoader _loader;
+    protected transient Log _contextLog;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -352,7 +353,11 @@ public class ServletHandler extends AbstractHttpHandler
     {
         if (isStarted())
             return;
-
+        
+        _contextLog = LogFactory.getLog(getHttpContext().getHttpContextName());
+        if (_contextLog==null)
+            _contextLog=log;
+        
         if (_sessionManager!=null)
             _sessionManager.start();
         
@@ -543,8 +548,12 @@ public class ServletHandler extends AbstractHttpHandler
                 throw (IOException)th;
             else if (log.isDebugEnabled() || !( th instanceof java.io.IOException))
             {
-                LogSupport.warn(log,"Exception for "+httpRequest.getURI(),th);
-                if(log.isDebugEnabled())log.debug(httpRequest);
+                _contextLog.warn(httpRequest.getURI()+": ",th);
+                if(log.isDebugEnabled())
+                {
+                    log.warn(httpRequest.getURI()+": ",th);
+                    log.debug(httpRequest);
+                }
             }
             
             httpResponse.getHttpConnection().forceClose();
@@ -966,7 +975,7 @@ public class ServletHandler extends AbstractHttpHandler
          */
         public void log(String msg)
         {
-            log.info(msg);
+            _contextLog.info(msg);
         }
 
         /* ------------------------------------------------------------ */
@@ -977,13 +986,13 @@ public class ServletHandler extends AbstractHttpHandler
          */
         public void log(Exception e, String msg)
         {
-            log.warn(msg,e);
+            _contextLog.warn(msg,e);
         }
 
         /* ------------------------------------------------------------ */
         public void log(String msg, Throwable th)
         {
-            log.warn(msg,th);
+            _contextLog.warn(msg,th);
         }
 
         /* ------------------------------------------------------------ */

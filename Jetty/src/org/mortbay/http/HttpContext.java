@@ -1530,6 +1530,12 @@ public class HttpContext extends ResourceCache
     }
 
     /* ------------------------------------------------------------ */
+    public void setHttpContextName(String s)
+    {
+        _contextName=s;
+    }
+    
+    /* ------------------------------------------------------------ */
     public String toString()
     {
         return "HttpContext["+getHttpContextName()+"]";

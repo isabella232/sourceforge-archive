@@ -50,32 +50,6 @@ public class LogSupport
         return log.isTraceEnabled() && (trace || log.getClass().getName().indexOf("Log4J")>=0);
     }
 
-    /*-------------------------------------------------------------------*/
-    private static final Class[] __noArgs=new Class[0];
-    private static final String[] __nestedEx =
-        {"getTargetException","getTargetError","getException","getRootCause"};
 
-    /** Log nested exceptions 
-     */
-    public static void warn(Log log,String msg, Throwable th)
-    {
-        log.warn(msg,th);
-
-        if (th==null)
-            return;
-        for (int i=0;i<__nestedEx.length;i++)
-        {
-            try
-            {
-                Method get_target = th.getClass().getMethod(__nestedEx[i],__noArgs);
-                Throwable th2=(Throwable)get_target.invoke(th,null);
-                if (th2!=null)
-                {
-                    warn(log,"Nested in "+th+":",th2);
-                }
-            }
-            catch(Exception ignore){}
-        }
-    }
 }
 
