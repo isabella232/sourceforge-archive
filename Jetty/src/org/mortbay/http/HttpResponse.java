@@ -322,19 +322,21 @@ public class HttpResponse extends HttpMessage
     public void sendError(int code,String message) 
         throws IOException
     {        
+        setStatus(code);
         Integer code_integer=TypeUtil.newInteger(code);
         if (message == null)
         {
             message = (String)__statusMsg.get(code_integer);
             if (message==null)
                 message=""+code;
+
+            setReason(message);
         }
+        else
+            setReason(UrlEncoded.encodeString(message));
+            
         HttpRequest request=getHttpRequest();
-        Class exClass=(Class)request.getAttribute("javax.servlet.error.exception_type");
-             
-        // Generate normal error page.
-        setStatus(code);
-        setReason(UrlEncoded.encodeString(message));
+        Class exClass=(Class)request.getAttribute("javax.servlet.error.exception_type"); 
 
         // If we are allowed to have a body 
         if (code!=__204_No_Content &&
@@ -397,16 +399,12 @@ public class HttpResponse extends HttpMessage
                     Code.warning("Error "+code+" while serving error page for "+
                                  request.getAttribute("javax.servlet.error.status_code"));
             }
-            else
+            else if (getHttpContext()!=null)
             {   
-                setContentType(HttpFields.__TextHtml);
-                _mimeType=HttpFields.__TextHtml;
-                _characterEncoding=null;
-                ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(2048);
-                writeErrorPage(writer,code,message);
-                writer.flush();
-                setContentLength(writer.size());
-                writer.writeTo(getOutputStream());
+                Object o=
+                    getHttpContext().getAttribute("org.mortbay.http.ErrorHandler");
+                if (o!=null && o instanceof HttpHandler)
+                    ((HttpHandler)o).handle(request.getPath(), null, request, this);
             }
         }
         else if (code!=__206_Partial_Content) 
@@ -418,36 +416,6 @@ public class HttpResponse extends HttpMessage
         }
 
         commit();
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void writeErrorPage(Writer writer, int code,String message)
-        throws IOException
-    {
-        if (message!=null)
-        {
-            message=StringUtil.replace(message,"<","&lt;");
-            message=StringUtil.replace(message,">","&gt;");
-        }
-        String uri=getHttpRequest().getPath();
-        uri=StringUtil.replace(uri,"<","&lt;");
-        uri=StringUtil.replace(uri,">","&gt;");
-        
-        writer.write("<html>\n<head>\n<title>Error ");
-        writer.write(Integer.toString(code));
-        writer.write(' ');
-        writer.write(message);
-        writer.write("</title>\n<BODY>\n<h2>HTTP ERROR: ");
-        writer.write(Integer.toString(code));
-        writer.write(' ');
-        writer.write(message);
-        writer.write("</h2>\n");
-        writer.write("RequestURI=");
-        writer.write(uri);
-        writer.write("<p><i><small><a href=\"http://jetty.mortbay.org\">Powered by Jetty://</a></small></i></p>");
-        for (int i=0;i<20;i++)
-            writer.write("\n                                                ");
-        writer.write("\n</body>\n</html>\n");
     }
     
     

@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import org.mortbay.http.SecurityConstraint.Authenticator;
+import org.mortbay.http.handler.ErrorPageHandler;
 import org.mortbay.util.CachedResource;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
@@ -171,7 +172,9 @@ public class HttpContext implements LifeCycle,
     /** Constructor.
      */
     public HttpContext()
-    {}
+    {
+        setAttribute("org.mortbay.http.ErrorHandler",new ErrorPageHandler());
+    }
 
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -1724,13 +1727,11 @@ public class HttpContext implements LifeCycle,
             String q=request.getQuery();
             if (q!=null&&q.length()!=0)
                 buf.append("?"+q);
-            response.setField(HttpFields.__Location,
-                              buf.toString());
+            response.sendRedirect(buf.toString());
             if (Code.debug())
                 Code.debug(this+" consumed all of path "+
                              request.getPath()+
                              ", redirect to "+buf.toString());
-            response.sendError(302);
             return true;
         }
 
