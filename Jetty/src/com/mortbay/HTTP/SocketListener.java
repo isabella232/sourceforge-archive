@@ -86,7 +86,7 @@ public class SocketListener
         Log.event("Destroy SocketListener on "+getInetAddrPort());
         super.destroy();
         if (_server!=null)
-            _server.remove(this);
+            _server.removeListener(this);
         _server=null;
     }
 

@@ -319,8 +319,8 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
                 (Map.Entry) iterator.next();
             if (entry.getValue()==listener)
             {
-                remove(listener);
                 iterator.remove();
+                remove(listener);
             }
         }
     }
@@ -476,7 +476,8 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             while(i2.hasNext())
             {
                 List contextList = (List)i2.next();
-                contextList.remove(context);
+                if(contextList.remove(context))
+                    remove(context);
             }
         }
     }

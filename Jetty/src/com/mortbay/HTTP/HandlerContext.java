@@ -1211,7 +1211,7 @@ public class HandlerContext implements LifeCycle
     {
         _started=false;
         if (_httpServer!=null)
-            _httpServer.remove(this);
+            _httpServer.removeContext(this);
         
         Thread thread = Thread.currentThread();
         ClassLoader lastContextLoader=thread.getContextClassLoader();
