@@ -236,7 +236,11 @@ public class HttpResponse extends HttpMessage
             _state=__MSG_BAD;
             synchronized(writer)
             {
-                writer.write(_version+' '+status+getReason()+HttpFields.__CRLF);
+                writer.write(_version);
+                writer.write(' ');
+                writer.write(status);
+                writer.write(getReason());
+                writer.write(HttpFields.__CRLF);
                 _header.write(writer);
             }
         }
