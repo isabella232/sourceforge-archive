@@ -33,6 +33,29 @@ import java.util.GregorianCalendar;
  * a backup is created with a timestamp.
  * Dated log files are deleted after retain days.
  * 
+ * <p> If the property LOG_DATE_FORMAT is set, then it is interpreted
+ * as a format string for java.text.SimpleDateFormat and used to
+ * format the log timestamps. Note: The character '+' is replaced with
+ * space in the date format string. Default value: HH:mm:ss.SSS
+ *
+ * <p> If LOG_TIMEZONE is set, it is used to set the timezone of the log date
+ * format, otherwise GMT is used.
+ *
+ * <p> If LOG_FILE_BACKUP_FORMAT is set, it is used as a format string for
+ * java.text.SimpleDateFormat and used to suffix the existing log file when
+ * it is backed up - log files are backed up when this class starts and finds
+ * the log file already exists and append is set to false (append is on by
+ * default, so this only needs to be overridden if append is turned
+ * off). Default value: HHmmssSSS
+ *
+ * <p> If LOG_FILE_RETAIN_DAYS is set, it is used to set the number of days
+ * after which old log files will be deleted. Default: 31
+ *
+ * <p> If LOG_FILE_DATE_FORMAT is set, it is used as a format string for
+ * java.text.SimpleDateFormat and used to format the date part of the log
+ * file name. Default value: yyyy_MM_dd
+ *
+ * @see com.mortbay.Util.Log
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

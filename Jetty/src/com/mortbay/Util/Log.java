@@ -34,22 +34,20 @@ import java.util.StringTokenizer;
  * is added to the list of log sinks.
  * 
  * Some possibilities for LOG_CLASSES are
- *  com.mortbay.Util.LogSink - log to System.err
- *  com.mortbay.Util.FileLogSink - log to file whose name is in LOG_FILE
- *  com.mortbay.Util.RolloverFileLogSink - log to daily rollover logs
+ *  com.mortbay.Util.WriterLogSink - log to System.err, a file whose name is
+ * specified in LOG_FILE, and optionally rollover the logs on a daily basis.
+ * See the javadoc for com.mortbay.Util.WriterLogSink for information on the
+ * options LOG_DATE_FORMAT, LOG_FILE_BACKUP_FORMAT, LOG_FILE_RETAIN_DAYS,
+ * LOG_FILE_DATE_FORMAT and LOG_TIME_ZONE.
  *
- * <p> If the property LOG_CLASSES is missing, a single LogSink is
+ * <p> If the property LOG_CLASSES is missing, a single WriterLogSink is
  * used to output to System.err.
- *
- * <p> If the property LOG_DATE_FORMAT is set, then it is interpreted
- * as a format string for java.text.SimpleDateFormat and used to
- * format the log timestamps. Note: The character '+' is replaced with
- * space in the date format string.  If LOG_TIMEZONE is set, it is used
- * to set the timezone of the log date format, otherwise GMT is used.
  *
  * <p> As an alternative to the above behavior, you can create LogSinks
  * in code and add() them to the Log. If you do this before the first
  * use of the log, the default initialization will be skipped.
+ *
+ * @see com.mortbay.Util.WriterLogSink
  */
 public class Log 
 {
