@@ -140,6 +140,13 @@
 
   <security-constraint>
     <web-resource-collection>
+      <web-resource-name>relaxOnAuth</web-resource-name>
+      <url-pattern>/auth</url-pattern>
+    </web-resource-collection>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
       <web-resource-name>relax</web-resource-name>
       <url-pattern>/auth/relax/*</url-pattern>
       <http-method>GET</http-method>
@@ -177,12 +184,10 @@
     </user-data-constraint>
   </security-constraint>
 
-<!--
   <login-config>
     <auth-method>BASIC</auth-method>
     <realm-name>Jetty Demo Realm</realm-name>
   </login-config>
--->
 
 <!--
   <login-config>
@@ -191,6 +196,7 @@
   </login-config>
 -->
 
+<!--
   <login-config>
     <auth-method>FORM</auth-method>
     <realm-name>Jetty Demo Realm</realm-name>
@@ -199,6 +205,7 @@
        <form-error-page>/auth/logonError.html</form-error-page>
     </form-login-config>
   </login-config>
+-->
 
   <security-role>
       <role-name>adminRef</role-name>
