@@ -14,6 +14,7 @@ Jetty-4.2.9
  + Reduced default context cache sizes (Total 1MB file 100KB).
  + ProxyHandler has black and white host list.
  + Added requestlog to HttpContext.
+ + Allow delegated creation of WebApplication derivations.
 
 Jetty-4.2.8_01 - 18 February 2004
  + Patched first release of 4.2.8 with correct version number

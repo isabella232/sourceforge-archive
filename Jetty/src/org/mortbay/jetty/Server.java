@@ -168,6 +168,24 @@ public class Server extends HttpServer
     }
     
     /* ------------------------------------------------------------ */
+    /** Create a new WebApplicationContext.
+     * Ths method is called by Server to creat new contexts for web 
+     * applications.  Thus calls to addWebApplication that result in 
+     * a new Context being created will return an correct class instance.
+     * Derived class can override this method to create instance of its
+     * own class derived from WebApplicationContext in case it needs more
+     * functionality.
+     * @param webApp The Web application directory or WAR file.
+     * @return WebApplicationContext
+     */
+    protected WebApplicationContext newWebApplicationContext(
+       String webApp
+    )
+    {
+        return new WebApplicationContext(webApp);
+    }
+
+    /* ------------------------------------------------------------ */
     /** Add Web Application.
      * @param contextPathSpec The context path spec. Which must be of
      * the form / or /path/*
@@ -197,7 +215,7 @@ public class Server extends HttpServer
         throws IOException
     {
         WebApplicationContext appContext =
-            new WebApplicationContext(webApp);
+            newWebApplicationContext(webApp);
         appContext.setContextPath(contextPathSpec);
         addContext(virtualHost,appContext);
         Code.debug("Web Application ",appContext," added");
