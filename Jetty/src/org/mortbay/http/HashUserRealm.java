@@ -31,9 +31,7 @@ import org.mortbay.util.Resource;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HashUserRealm
-    extends HashMap
-    implements UserRealm
+public class HashUserRealm extends HashMap implements UserRealm
 {
     private String _name;
     protected HashMap _roles=new HashMap(7);
@@ -111,13 +109,18 @@ public class HashUserRealm
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized UserPrincipal getUser(String username)
+    public synchronized UserPrincipal authenticate(String username,
+                                                   String credentials,
+                                                   HttpRequest request)
     {
-        return (UserPrincipal)super.get(username);
+        KnownUser user = (KnownUser)super.get(username);
+        if (user !=null && user.authenticate(credentials,request))
+            return user;
+        return null;
     }
     
     /* ------------------------------------------------------------ */
-    public void deAuthenticate(UserPrincipal user)
+    public void dissassociate(UserPrincipal user)
     {
     }
     
@@ -209,7 +212,6 @@ public class HashUserRealm
         out.println(_roles);
     }
 
-
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -224,14 +226,14 @@ public class HashUserRealm
             return HashUserRealm.this;
         }
         
+        private boolean authenticate(String credentials, HttpRequest request)
+        {
+            return false;
+        }
+        
         public String getName()
         {
             return "Anonymous";
-        }
-        
-        public boolean authenticate(String credentials, HttpRequest request)
-        {
-            return false;
         }
                 
         public boolean isAuthenticated()
@@ -257,7 +259,6 @@ public class HashUserRealm
     {
         private String _name;
         private Password _pw;
-        private boolean _authed=false;
         
         /* -------------------------------------------------------- */
         KnownUser(String name,Password password)
@@ -267,6 +268,12 @@ public class HashUserRealm
             _pw.zero();
         }
         
+        /* -------------------------------------------------------- */
+        private synchronized boolean authenticate(String password, HttpRequest request)
+        {
+            return _pw!=null && _pw.check(password);
+        }
+        
         /* ------------------------------------------------------------ */
         public String getName()
         {
@@ -274,16 +281,9 @@ public class HashUserRealm
         }
         
         /* -------------------------------------------------------- */
-        public synchronized boolean authenticate(String password, HttpRequest request)
-        {
-            _authed=_pw!=null && _pw.check(password);
-            return _authed;
-        }
-        
-        /* -------------------------------------------------------- */
         public boolean isAuthenticated()
         {
-            return _authed;
+            return true;
         }
     
         /* -------------------------------------------------------- */
@@ -316,11 +316,6 @@ public class HashUserRealm
         public String getName()
         {
             return user.getName();
-        }
-        
-        public boolean authenticate(String credentials, HttpRequest request)
-        {
-            return user.authenticate(credentials,request);
         }
                 
         public boolean isAuthenticated()

@@ -19,18 +19,14 @@ import java.security.Principal;
 public interface UserPrincipal extends Principal
 {    
     /* ------------------------------------------------------------ */
-    /** Authenticate the users credentials 
-     * @param credentials The user credentials, normally a password. 
-     * @param request The request to be authenticated. Additional
-     * parameters may be extracted or set on this request as needed
-     * for the authentication mechanism (none required for BASIC and
-     * FORM authentication).
-     * @return True if the user credentials are OK.
-     */
-    public boolean authenticate(String credentials, HttpRequest request);
-
-    /* ------------------------------------------------------------ */
     /** Check authentication status.
+     * 
+     * Implementations of this method may adorn the calling context to
+     * assoicate it with the authenticated principal (eg ThreadLocals). If
+     * such context associations are made, they should be considered valid
+     * until a UserRealm.deAuthenticate(UserPrincipal) call is made for this
+     * UserPrincipal.
+     *
      * @return True if this user is still authenticated.
      */
     public boolean isAuthenticated();

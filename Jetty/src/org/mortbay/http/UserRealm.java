@@ -18,12 +18,30 @@ public interface UserRealm
 {
     static public String __UserRole="org.mortbay.http.User";
     
+    /* ------------------------------------------------------------ */
     public String getName();
 
-    public UserPrincipal getUser(String username);
+    /* ------------------------------------------------------------ */
+    /** Authenticate a users credentials.
+     * Implementations of this method may adorn the calling context to
+     * assoicate it with the authenticated principal (eg ThreadLocals). If
+     * such context associations are made, they should be considered valid
+     * until a UserRealm.deAuthenticate(UserPrincipal) call is made for this
+     * UserPrincipal.
+     * @param username The username. 
+     * @param credentials The user credentials, normally a password. 
+     * @param request The request to be authenticated. Additional
+     * parameters may be extracted or set on this request as needed
+     * for the authentication mechanism (none required for BASIC and
+     * FORM authentication).
+     * @return The authenticated UserPrincipal.
+     */
+    public UserPrincipal authenticate(String username,
+                                      String credentials,
+                                      HttpRequest request);
 
     /* ------------------------------------------------------------ */
-    /** Deauthenticate the calling context with a Principal.
+    /** Dissassociate the calling context with a Principal.
      * This method is called when the calling context is not longer
      * associated with the Principal.  It should be used by an implementation
      * to remove context associations such as ThreadLocals.
@@ -31,7 +49,7 @@ public interface UserRealm
      * associated with other contexts.
      * @param user A UserPrincipal allocated from this realm.
      */
-    public void deAuthenticate(UserPrincipal user);
+    public void dissassociate(UserPrincipal user);
     
     /* ------------------------------------------------------------ */
     /** Push role onto a Principal.

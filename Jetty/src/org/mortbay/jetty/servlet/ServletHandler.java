@@ -799,8 +799,8 @@ public class ServletHandler
             String username = request.getParameter(__J_USERNAME);
             String password = request.getParameter(__J_PASSWORD);
             
-            UserPrincipal user = realm.getUser(username);
-            if (user!=null && user.authenticate(password,httpRequest))
+            UserPrincipal user = realm.authenticate(username,password,httpRequest);
+            if (user!=null)
             {
                 Code.debug("Form authentication OK for ",username);
                 httpRequest.setAttribute(HttpRequest.__AuthType,"FORM");

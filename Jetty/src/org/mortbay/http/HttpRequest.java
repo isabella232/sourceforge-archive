@@ -1015,8 +1015,8 @@ public class HttpRequest
             String username = credentials.substring(0,i);
             String password = credentials.substring(i+1);
 
-            UserPrincipal user = realm.getUser(username);
-            if (user!=null && user.authenticate(password,this))
+            UserPrincipal user = realm.authenticate(username,password,this);
+            if (user!=null)
             {
                 setAttribute(__AuthType,"BASIC");
                 setAttribute(__AuthUser,username);
