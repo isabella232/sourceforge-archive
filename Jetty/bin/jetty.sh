@@ -101,7 +101,8 @@ JETTY_JAR="lib/com.mortbay.jetty.jar"
 ##################################################
 if [ -z $JETTY_HOME ] ;
 then
-  JETTY_HOME_1=`dirname "$0"`/..
+  JETTY_HOME_1=`dirname "$0"`
+  JETTY_HOME_1=`dirname "$JETTY_HOME_1"`
   echo "** WARNING: Guessing JETTY_HOME from jetty.sh to ${JETTY_HOME_1}" 
   if [ -f "${JETTY_HOME_1}/${JETTY_JAR}" ] ; 
   then 
@@ -368,7 +369,7 @@ fi
 # Build the classpath with Jetty's bundled libraries.
 #####################################################
 CP=`ls $JETTY_HOME/lib/*.jar | tr "\n" "$PATH_SEPARATOR"`
-CLASSPATH="$CP $CLASSPATH"
+CLASSPATH="$CP$PATH_SEPARATOR$CLASSPATH"
 
 #####################################################
 # Add jetty properties to Java VM options.
