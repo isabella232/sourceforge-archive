@@ -38,9 +38,9 @@ class FileResource extends URLResource
     {
         __checkAliases=
             "true".equalsIgnoreCase
-            (System.getProperty("org.mortbay.util.FileResource.checkAliases",
-                                File.separatorChar=='/'?"false":"true"));
-        if (__checkAliases)
+            (System.getProperty("org.mortbay.util.FileResource.checkAliases","true"));
+ 
+       if (__checkAliases)
             Log.event("Checking Resource aliases");
     }
     
@@ -86,7 +86,10 @@ class FileResource extends URLResource
         if (path.length()>0 && !path.endsWith("/") && newFile.isDirectory())
             path+="/";
 
-        return new FileResource(new URL(_url,path),null,newFile);
+        FileResource r=new FileResource(new URL(_url,path),null,newFile);
+        if (r!=null && r.getAlias()!=null)
+            return r.getAlias();
+        return r;
     }
     
     

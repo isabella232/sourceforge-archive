@@ -136,6 +136,7 @@ public class TestRFC2616
         setMaxThreads(10);
         setMaxIdleTimeMs(30000);
         _server=new HttpServer();
+        _server.setTrace(true);
         HttpContext context = _server.getContext(null,"/");
 	context.setResourceBase(docRoot.getName());
         context.addHandler(new TestTEHandler());

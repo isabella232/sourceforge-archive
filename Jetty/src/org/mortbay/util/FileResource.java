@@ -41,7 +41,6 @@ class FileResource extends URLResource
         __checkAliases=
             "true".equalsIgnoreCase
             (System.getProperty("org.mortbay.util.FileResource.checkAliases","true"));
-             //                                File.separatorChar=='/'?"false":"true"));
  
        if (__checkAliases)
             Log.event("Checking Resource aliases");
@@ -95,31 +94,6 @@ class FileResource extends URLResource
         checkAliases(url);
     }
     
-    /* ------------------------------------------------------------ */
-    private void checkAliases(URL url)
-    {
-        if (__checkAliases)
-        {
-            try{
-                String abs=_file.getAbsolutePath();
-                String can=_file.getCanonicalPath();
-
-                if (!abs.equals(can))
-                    _alias=new BadResource(url,abs+" is alias of "+can);
-                
-                if (_alias!=null && Code.debug())
-                {
-                    Code.debug("ALIAS abs=",abs);
-                    Code.debug("ALIAS can=",can);
-                }
-            }
-            catch(IOException e)
-            {
-                Code.ignore(e);
-            }
-        }
-    }
-    
     /* -------------------------------------------------------- */
     public Resource addPath(String path)
         throws IOException,MalformedURLException
@@ -139,16 +113,41 @@ class FileResource extends URLResource
                 path = path.substring(1);
             
             File newFile = new File(_file,path);
-            String nfs=newFile.toString();            
+
+//             if (path.length()>0 && !path.endsWith("/") && newFile.isDirectory())
+//                 path+="/";
             
-            if (path.length()>0 && !path.endsWith("/") && newFile.isDirectory())
-                path+="/";
-            
-            r=new FileResource(new URL(_url,path),null,newFile);
+            r=new FileResource(newFile.toURL(),null,newFile);
         }
+
         if (r!=null && r.getAlias()!=null)
             return r.getAlias();
         return r;
+    }
+    
+    /* ------------------------------------------------------------ */
+    private void checkAliases(URL url)
+    {
+        if (__checkAliases)
+        {
+            try{
+                String abs=_file.getAbsolutePath();
+                String can=_file.getCanonicalPath();
+
+                if (abs.length()!=can.length() || !abs.equals(can))
+                    _alias=new BadResource(url,abs+" is alias of "+can);
+                
+                if (_alias!=null && Code.debug())
+                {
+                    Code.debug("ALIAS abs=",abs);
+                    Code.debug("ALIAS can=",can);
+                }
+            }
+            catch(IOException e)
+            {
+                Code.ignore(e);
+            }
+        }
     }
     
     /* ------------------------------------------------------------ */

@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Fixed JSP code visibility problem introduced in Jetty-4.2.10pre0
  + Added stop.jar
  + Added SSO implementation for FORM authentication.
  + WebApplicationContext does not reassign defaults descriptor value.
