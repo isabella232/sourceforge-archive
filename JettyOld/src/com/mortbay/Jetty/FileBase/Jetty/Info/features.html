@@ -3,27 +3,23 @@
 
 <BLOCKQUOTE>
 <TABLE><TR><TD>
-Jetty is a HTTP Server written entirely in
+Jetty is a HTTP Servlet Server written entirely in
 Java. It is designed to be embedable, extensible and
 flexible, thus making it an ideal platform for serving 
 dynamic HTTP requests from any Java application.
 Jetty supports the javax.servlet API defined
 by JavaSoft plus many more features.
 <P>
-Jetty is not intended to be used as a stand-alone WWW server. While it
-can be used in that mode, there are many other full featured servers available
-that do that job very well.  Jetty is primarily intended to be embedded in
-Java applications, either to provide a primarary or management interface
-over HTTP. Just as java is an ideal language for developing cross platform
-distributed applications, embedded HTTP with generated HTML are an ideal
-way of providing a distributed cross platform user interfaces.
-
+Jetty is primarily intended as a light weight, high performance
+servlet engine for embedding in Java applications. It is also
+an ideal platform for servlet development and testing.
 </TD></TR></TABLE>
 
 <h1>Jetty Features</h1>
 <A HREF="#Java HTTP Server">Java HTTP Servlet Server</A>
 <BR><A HREF="#Software Engineering">Software Engineering</A>
 <BR><A HREF="#Flexible Deployment">Flexible Deployment</A>
+<BR><A HREF="#HTTP11">HTTP/1.1 Protocol</A>
 <BR><A HREF="#Standard HTTP File serving">Standard HTTP File serving</A>
 <BR><A HREF="#Serving Standard Servlets">Serving Standard Servlets</A>
 <BR><A HREF="#Extensible Request Handlers">Extensible Request Handlers</A>
@@ -49,14 +45,15 @@ of Jetty and other Mort Bay packages</A>
 <A NAME="Java HTTP Server"></A>
 <P><B>Java HTTP Servlet Server</B></BR>  
 Jetty is a HTTP Server written in Java.  It is an ideal
-platform for server-side generated dynamic WWW services or as a basis
+platform for server-side development of Dynamic WWW services or as a basis
 for WWW enabling Java applications.
 Quoting from Javasofts <A HREF=http://www.javasoft.com/products/java-server/servlets/index.html>
 Java Servlet API White Paper</A>:
 <BLOCKQUOTE><I>
-Java is a great platform for writing the server side of your web-based application. The same features which make Java a better platform
-for writing client applications make it better for writing servers. Your server applications will benefit from its type safety and other rapid
-development features even more than your client applications did, because multi-threading support is built into the Java platform. 
+Java is a great platform for writing the server side of your web-based
+application. Servlets are emerging as the preferred way of creating highly
+dynamic WWW services linked to real backend applications and databases.
+See the growing trend at <a href="http://www.servletcentral.com">http://www.servletcentral.com</a>.
 <P>
 Java makes it easy to develop and deploy all parts of a professional, maintainable distributed system application. The Servlet API
 provides you the fastest way to start using Java Server technology in your networked applications. You can start with applications which
@@ -70,11 +67,12 @@ applications.
 <A NAME="Software Engineering"></A>
 <P><B>Software Engineering</B></BR>  
 Traditional WWW development using authored HTML pages is not a scalable
-approach for the development of significant service using WWW technologies,
-The authored HTML plus CGI approach creates configuration and maintenance
-problems for even small sites.
+approach for the development of significant WWW sites, nor does CGI access
+provide and adequate mechanism for accessing dynamic state of a running
+application. The authored HTML plus CGI approach creates configuration and
+maintenance problems for even small sites.
 <P>
-Using the highly productive Java language for WWW
+Using the highly productive Java programming environment for WWW
 server development allows object oriented software engineering
 techniques to be applied to:<UL>
   <LI>Extraction of common elements for re-use within the site and
@@ -110,6 +108,10 @@ to present a management interface of application status and statistics.
 <p>The many extensible features of Jetty are provided via handlers,
 that only need to be loaded if they are configured to be used. Thus a
 minimal Jetty installation consumes very few system resources.
+<A NAME="HTTP11"></A>
+<P><B>HTTP/1.1 Protocol</B><BR>
+Jetty supports the HTTP/1.0 and HTTP/1.1 protocols. The 1.1 protocol offers
+much greater network performance.
 <A NAME="Standard HTTP File serving"></A>
 <P><B>Standard HTTP File serving</B><BR>
 Jetty can serve standard files like most other HTTP servers and supports:
@@ -320,5 +322,4 @@ detection for accidental, malicious and systematic attacks.
 
 </TD></TR></TABLE>
 </BLOCKQUOTE>
-
 
