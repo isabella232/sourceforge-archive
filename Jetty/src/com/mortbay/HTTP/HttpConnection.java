@@ -820,7 +820,6 @@ public class HttpConnection
         
         // if we have no content or encoding,
         // and no content length
-        // need to set content length (XXX or may just close connection?)
         if (!_outputStream.isWritten() &&
             !_response.containsField(HttpFields.__TransferEncoding) &&
             !_response.containsField(HttpFields.__ContentLength))
@@ -859,7 +858,9 @@ public class HttpConnection
                       break;
                       
                   default:
-                    _response.setIntField(HttpFields.__ContentLength,0);
+                      _close=true;
+                      _response.setField(HttpFields.__Connection,
+                                         HttpFields.__Close);
                       break;
                 }
             }
