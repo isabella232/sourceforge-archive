@@ -271,7 +271,7 @@ public class UrlEncoded extends Hashtable
             if (b==' ')
             {
                 noEncode=false;
-                encoded[n++]='+';
+                encoded[n++]=(byte)'+';
             }
             else if (b>='a' && b<='z' ||
                      b>='A' && b<='Z' ||
