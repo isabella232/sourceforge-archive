@@ -3,14 +3,10 @@
 # Use 'make help' to see what it can do
 ###################################################################
 
-
 ifndef MKFILEPATH
 MKFILEPATH := $(JETTY_HOME)/etc
 endif
 
-ifndef JAVA_PACKAGES
-JAVA_PACKAGES := /usr/local/java.packages
-endif
 ifndef JDK_HOME
 JDK_HOME := /usr/local/jdk
 endif
@@ -28,7 +24,7 @@ include $(MKFILEPATH)/Recurse.mk
 
 
 # Recursive targets.
-RECURSIVE := rall rclean rtests install ridl rnative rnodebug ralljava
+RECURSIVE := rall rclean rtests install ridl rnative rnodebug ralljava rechoclassfiles rechoclasses rechopackages
 RECURSIVETARGETS := $(addsuffix .recurse,$(RECURSIVE))
 .PHONY : $(RECURSIVE) $(RECURSIVETARGETS)
 ifneq ($(SUBDIRS),)
@@ -37,35 +33,104 @@ $(RECURSIVETARGETS) :
 	@$(MAKE) -f $(MKFILEPATH)/Recurse.mk recurse TARGET=$(patsubst %.recurse,%,$@)
 endif
 
-ifndef JAVAC
-JAVAC := ${JDK_HOME}/bin/javac
+ifneq ($(JIKES),)
+FOO := $(shell  echo JIKES=$(JIKES))
+ifeq ($(SYSCLASSPATH),)
+FOO2 := $(shell  echo SYSCLASSPATH=$(SYSCLASSPATH))
+SYSCLASSPATH = ${JDK_HOME}/jre/lib/rt.jar
 endif
-
-JAVA := ${JDK_HOME}/bin/java
-JAVAH := ${JDK_HOME}/bin/javah
-NATIVEOPTS := -I${JDK_HOME}/include \
- -I${JDK_HOME}/include/${ARCH} \
- -I${JDK_HOME}/include/$(shell echo ${ARCH} | tr A-Z a-z)
+JAVAC = $(JIKES) -classpath ${SYSCLASSPATH}:${CLASSPATH} +D +P
+FOO32 := $(shell echo JAVAC=$(JAVAC))
+endif
+ifeq ($(JAVAC),)
+JAVAC = ${JDK_HOME}/bin/javac
+FOO3 := $(shell echo JAVAC=$(JAVAC))
+endif
+ifeq ($(JAVA),)
+JAVA = ${JDK_HOME}/bin/java
+endif
+ifeq ($(JAVAH),)
+JAVAH = ${JDK_HOME}/bin/javah
+endif
+ifeq ($(NATIVEOPTS),)
+INCDIRS := solaris $(shell echo ${ARCH} | tr A-Z a-z)
+NATIVEOPTS = $(prepend -I,${JDK_HOME}/include $(wildcard $(prepend ${JDK_HOME}/include/,$(INCDIRS))))
+endif
 
 SUFFIXES := $(SUFFIXES) .java .class
 # Java files
 #help var:	JAVACOPTIONS	Options passed to javac
 %.class: %.java
 	$(JAVAC) ${JAVACOPTIONS} $<
+#help var:	MAKE_MODULES	Include optional make rules for:
+#help var:			javacc: The IBM javacc compiler compiler
+#help var:			JLex: JLex java lexer
+#help var:			jell: sbktech.tools.jell parser generator
+#help var:			idlj: the java idl compiler
+
+# javacc files
+ifeq ($(filter javacc,$(MAKE_MODULES)),javacc)
+%.java: %.jj
+	$(JAVACC_HOME)/bin/javacc $<
+	touch $(GENJAVACC)
+JAVACCFILES := $(filter-out $(EXCLUDE),$(wildcard *.jj))
+GENJAVACC := $(patsubst %.jj,%.java,$(JAVACCFILES))
+GENJAVACC += $(patsubst %.jj,%Constants.java,$(JAVACCFILES))
+GENJAVACC += $(patsubst %.jj,%TokenManager.java,$(JAVACCFILES))
+ifneq ($(JAVACCFILES),)
+GENJAVACC += $(wildcard ASCII_CharStream.java ParseException.java \
+			Token.java TokenMgrError.java)
+$(GENJAVACC) : $(JAVACCFILES)
+endif
+endif
+
 # Lex files
+ifeq ($(filter JLex,$(MAKE_MODULES)),JLex)
 %.java: %.lex
-	$(JAVA) JavaLex.JavaLex $<
+	$(JAVA) JLex.Main $<
 	mv ${<}.java $@
+GENLEX := $(patsubst %.lex,%.java,$(filter-out $(EXCLUDE),$(wildcard *.lex)))
+endif
+
 # gram files
+ifeq ($(filter jell,$(MAKE_MODULES)),jell)
 %Parser.java %Token.java : %.gram
 	$(JAVA) sbktech.tools.jell.driver -tokenFile ${*}Token.java \
 		-tokenPackage $(PACKAGE) -tokenClass ${*}Token \
 		-parserFile ${*}Parser.java $<
+GRAMFILES := $(filter-out $(EXCLUDE),$(wildcard *.gram))
+GENGRAM := $(patsubst %.gram,%Parser.java,$(GRAMFILES))
+GENGRAM += $(patsubst %.gram,%Token.java,$(GRAMFILES))
+endif
+
+# rmi servers - we make the stubs appear in the current directory...
+#help var:	RMI		List of java files implementing rmi servers
+ifneq ($(RMI),)
+GENRMICLASSES := $(patsubst %.java,%_Skel.class,$(RMI))
+GENRMICLASSES += $(patsubst %.java,%_Stub.class,$(RMI))
+RMISERVERS = $(patsubst %.java,$(PACKAGE).%,$(RMI))
+ifneq ($(GENRMICLASSES),)
+$(GENRMICLASSES) : $(patsubst %.java,%.class,$(RMI))
+	rmic -d $(CLASSROOT) $(RMISERVERS)
+endif
+endif
+
 # idl files
+ifeq ($(filter idlj,$(MAKE_MODULES)),idlj)
+ifneq ($(RMI_IIOP_HOME),)
+  IDLJ := $(JAVA) -classpath $(RMI_IIOP_HOME)/lib/idlj.jar com.sun.idl.toJavaPortable.Compile
+else
+  IDLJ := $(JDK_HOME)/bin/idlj
+endif
 idl/%.gen : %.idl
 	if [ ! -d idl ];then mkdir idl;fi
-	idlgen -fclient -fserver -j $(CLASSROOT) -J $@ $<
-	make -C idl -f $(MKFILEPATH)/Global.mk
+	$(IDLJ) -fall -td $(CLASSROOT) -pkgPrefix idl $(PACKAGE) -v $<
+	make -C idl ROOTNAME=$(ROOTNAME) -f $(MKFILEPATH)/Global.mk
+	echo done > $@
+CLEANDIRS += $(filter-out $(EXCLUDE),idl)
+IDLFILES := $(filter-out $(EXCLUDE),$(wildcard *.idl))
+GENIDL := $(patsubst %.idl,idl/%.gen,$(IDLFILES))
+endif
 
 # Determine where we are relative to the root.
 LOOKINGFOR := $(ROOTNAME)
@@ -76,19 +141,12 @@ CLASSROOT := ${RESULT}
 CLASSPATH := $(CLASSROOT):${CLASSPATH}
 export CLASSPATH
 
-# Generated files....
-IDLFILES := $(filter-out $(EXCLUDE),$(wildcard *.idl))
-GENIDL := $(patsubst %.idl,idl/%.gen,$(IDLFILES))
-GENLEX := $(patsubst %.lex,%.java,$(filter-out $(EXCLUDE),$(wildcard *.lex)))
-GRAMFILES := $(filter-out $(EXCLUDE),$(wildcard *.gram))
-GENGRAM := $(patsubst %.gram,%Parser.java,$(GRAMFILES))
-GENGRAM += $(patsubst %.gram,%Token.java,$(GRAMFILES))
 # Full list of class files
-NONGENJAVAFILES := $(filter-out $(EXCLUDE),$(wildcard *.java))
-GENJAVAFILES := $(filter-out $(EXCLUDE),$(GENGRAM) $(GENLEX))
+GENJAVAFILES := $(filter-out $(EXCLUDE),$(GENGRAM) $(GENLEX) $(GENJAVACC))
+NONGENJAVAFILES := $(filter-out $(EXCLUDE) $(GENJAVAFILES),$(wildcard *.java))
 JAVAFILES := $(NONGENJAVAFILES) $(GENJAVAFILES)
 NONGENCLASSES := $(patsubst %.java,%.class,$(NONGENJAVAFILES))
-GENCLASSES := $(patsubst %.java,%.class,$(GENJAVAFILES))
+GENCLASSES := $(patsubst %.java,%.class,$(GENJAVAFILES)) $(GENRMICLASSES)
 CLASSES := $(patsubst %.java,%.class,$(JAVAFILES))
 
 #help var:	EXCLUDE 	List of files/directories to ignore when
@@ -98,7 +156,7 @@ CLASSES := $(patsubst %.java,%.class,$(JAVAFILES))
 #help 
 #help target:	all     	The default target - builds everything.
 #help target:	rall    	Rescursively build everything.
-all: $(CLASSES) $(GENIDL) $(GENLEX) $(GENGRAM)
+all: $(CLASSES) $(GENIDL) $(GENLEX) $(GENGRAM) $(GENJAVACC) $(GENRMICLASSES)
 rall : all
 
 # generate the idl first...
@@ -168,7 +226,7 @@ endif
 #help var:	NATIVELIB	Stem name of native library to build
 #help target:	native  	Build native libs in this directory. This
 #help     	        	builds the library lib$(NATIVELIB).so
-#help     	        	(on solaris!) from all the .cc and .c
+#help     	        	(on unix!) from all the .cc and .c
 #help     	        	files in the current directory, first
 #help     	        	building headers from all of the $(NATIVE)
 #help     	        	classes.
@@ -202,15 +260,16 @@ $(NATIVECLASSINCSH) :
 # If NATIVE is defined, try and build the headers
 native : $(NATIVESRCINCS)
 all : native
-NATIVEGENFILES := $(NATIVECLASSESSTUBS) $(NATIVECLASSINCSH) $(NATIVESRCINCS) $(NATIVESRCSTUBS)
+NATIVEGENFILES := $(NATIVECLASSINCSH) $(NATIVESRCINCS) # $(NATIVECLASSESSTUBS) $(NATIVESRCSTUBS)
 clean ::
 	$(RM) $(NATIVEGENFILES)
 endif
 ifneq ($(NATIVELIB),)
 ARCH := $(shell uname -m)-$(shell uname -s)
+CLEANDIRS += $(ARCH)
 # Be careful - sometimes the stubs get built but need to be excluded...
-NATIVELIBSRCC := $(patsubst %.c,$(ARCH)/%.o,$(filter-out $(EXCLUDE) $(NATIVECLASSESSTUBS) $(NATIVESTUBS),$(wildcard *.c))) \
-		$(patsubst %.c,$(ARCH)/%.o,$(filter-out $(EXCLUDE),$(NATIVESTUBS) $(NATIVECLASSESSTUBS)))
+NATIVELIBSRCC := $(patsubst %.c,$(ARCH)/%.o,$(filter-out $(EXCLUDE) $(NATIVECLASSESSTUBS),$(wildcard *.c))) \
+		$(patsubst %.c,$(ARCH)/%.o,$(filter-out $(EXCLUDE),$(NATIVECLASSESSTUBS)))
 NATIVELIBSRCCC := $(patsubst %.cc,$(ARCH)/%.o,$(filter-out $(EXCLUDE),$(wildcard *.cc)))
 NATIVELIBSRC := $(NATIVELIBSRCCC) $(NATIVELIBSRCC)
 ifneq ($(NATIVELIBSRC),)
@@ -322,6 +381,26 @@ $(ALLINSTALLEDFILES) :
 	$(installFile)
 endif
 
+#help taget:	echoclasses	Echo a list of classes - EXCLUDECLASSES
+#help taget:	echoclassfiles	Echo a list of class files - EXCLUDECLASSES
+ECHOCLASSFILES := $(filter-out $(EXCLUDECLASSES),$(CLASSES))
+.PHONY : echopackages echoclasses echoclassfiles
+echopackages :
+ifneq ($(ECHOCLASSFILES),)
+	@echo $(PACKAGE)
+endif
+rechopackages : echopackages
+echoclasses :
+ifneq ($(ECHOCLASSFILES),)
+	@echo $(patsubst %.class,$(PACKAGE).%,$(ECHOCLASSFILES))
+endif
+rechoclasses : echoclasses
+echoclassfiles :
+ifneq ($(ECHOCLASSFILES),)
+	@echo $(addprefix $(subst .,/,$(PACKAGE))/,$(ECHOCLASSFILES))
+endif
+rechoclassfiles : echoclassfiles
+
 # uudecoding
 #help var:	UUFILES		List of uuencode files to decode
 #help target:	uufiles		Decode all UUFILES - make all also does this
@@ -353,11 +432,19 @@ endif
 #help 
 #help target:	clean   	Remove traces of build
 #help target:	rclean  	Recursive clean
+#help var:	CLEANDIRS	Directories to remove during clean
 rclean : clean
 clean ::
-	/bin/rm -f idl/* *.class *.o *.so ${GENLEX} ${GENGRAM} \
-		${NATIVEINCS} ${NATIVESTUBS} ${UNUUFILES}
-	if [ -d idl ];then /bin/rmdir idl;fi
+	/bin/rm -f *.class ${GENJAVAFILES} ${NATIVEINCS} ${UNUUFILES}
+ifneq ($(CLEANDIRS),)
+	@for i in $(CLEANDIRS); \
+	do \
+		if [ -d $$i ];then \
+			echo "/bin/rm -f $$i/*" && /bin/rm -f $$i/*;\
+			echo "/bin/rmdir $$i" && /bin/rmdir $$i;\
+		fi;\
+	done
+endif
 
 ralljava: alljava
 alljava:

@@ -5,17 +5,18 @@
 
 package com.mortbay.Util;
 
+import com.mortbay.Util.Code;
 import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
+import java.beans.IntrospectionException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Vector;
+import java.util.Hashtable;
+import java.util.Enumeration;
 
 /** Provide an Enumeration over a Classes Properties
  * Optionally, this class allows the user to enumerate over a Classes public
@@ -103,7 +104,6 @@ public class PropertyEnumeration implements Enumeration
                InvocationTargetException,
                IllegalAccessException
     {
-        Code.debug("Set "+name+" on "+obj+"="+value+"("+value.getClass().getName()+")");
         try {
             BeanInfo beanInf = Introspector.getBeanInfo(obj.getClass());
             PropertyDescriptor props[] = beanInf.getPropertyDescriptors();
@@ -134,6 +134,45 @@ public class PropertyEnumeration implements Enumeration
         } else
             Code.debug("Field "+name+" static or final");
         return false;
+    }
+    /* ------------------------------------------------------------ */
+    /** utility method for transparently getting a property or field
+     * @param obj The object to set the value on
+     * @param name The name of the property or field
+     * @return The value of the property, or null if an error (or it was null!)
+     * @exception InvocationTargetException If the set throws an Exception
+     * @exception IllegalAccessException If the field is not public
+     */
+    public static Object get(Object obj, String name)
+	throws InvocationTargetException,
+	       IllegalAccessException
+    {
+        try {
+            BeanInfo beanInf = Introspector.getBeanInfo(obj.getClass());
+            PropertyDescriptor props[] = beanInf.getPropertyDescriptors();
+            for (int i = 0; i < props.length; i++){
+                if (!name.equals(props[i].getName()))
+                    continue;
+                Method method = props[i].getReadMethod();
+                if (method == null) return null; // no get method
+                return method.invoke(obj, null);
+            }
+        } catch (IntrospectionException ex){
+            Code.debug("While BeanIntrospecting", ex);
+        }
+        Field field = null;
+        try {
+            field = obj.getClass().getField(name);
+        } catch (Exception ex){
+            Code.debug("Looking up field:"+name, ex);
+            return null;
+        }
+        int mod = field.getModifiers();
+        if (!Modifier.isStatic(mod) && !Modifier.isFinal(mod)){
+            return field.get(obj);
+        } else
+            Code.debug("Field "+name+" static or final");
+        return null;
     }
     /* ------------------------------------------------------------ */
 }

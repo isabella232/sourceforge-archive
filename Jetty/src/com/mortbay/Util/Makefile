@@ -9,7 +9,7 @@
 #JAVACOPTIONS :=
 TESTS := TestHarness.java
 ROOTNAME := com
-SUBDIRS := DataClassTest
+SUBDIRS := Converter Servlet DataClassTest
 INSTALLPATH := etc
 INSTALLFILES := \
 	InetGateway.prp \
