@@ -307,7 +307,7 @@ public class Server extends HttpServer
                                                       boolean extract)
         throws IOException
     {
-        return addWebApplications(host,webapps,null,extract,true);
+        return addWebApplications(host,webapps,defaults,extract,true);
     }
 
     /* ------------------------------------------------------------ */
