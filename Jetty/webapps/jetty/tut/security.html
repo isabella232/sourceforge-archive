@@ -1,0 +1,69 @@
+<BR><H1>Web Application Security
+&nbsp;&nbsp;&nbsp;&nbsp;<FONT size=-2>
+<A href="logging.html">Back</A>
+<A href="index.html">Index</A>
+<A href="..">Exit</A>
+<A href="other.html">Next</A>
+</FONT></H1>
+Jetty has made a few interpretations of the security mechanism "described" in the servlet
+specifiction.  The default security model is that all access is allowed unless a 
+particular security constraint prevents access. This is vulnerable to alias attacks
+where alternate case or names can be used to get to a resource.
+<P>
+Jetty makes the following interpretations:<UL>
+<LI>Methods PUT, DELETE and GET are disabled unless both a web.xml and a default
+    config file are provided.
+
+<LI>If multiple security constraints are defined, the most specific applies to a
+    request.
+
+<LI>A security constraint with no data or auth constraint prevents all access.
+
+<LI>A security constraint with only a transport guarentee of NONE grants access.
+
+<LI>On platforms without the / file separator or when the system parameter 
+    org.mortbay.util.FileResource.checkAliases is true, then the FileResouce class 
+    compares the absolutePath and canonicalPath and treats the resource as not found
+    if they do not match.
+</UL>
+It is strongly recommended that secure WebApplications take following 
+approach.  All access should be denied by default with<PRE>
+  &lt;security-constraint&gt;    
+  &lt;display-name&gt;Default contraint denies all&lt;/display-name&gt;
+    &lt;web-resource-collection&gt;
+      &lt;url-pattern&gt;/&lt;/url-pattern&gt;
+    &lt;/web-resource-collection&gt;
+  &lt;/security-constraint&gt;
+</PRE>
+
+Specific access should be granted with constraints like:
+<PRE>
+  &lt;security-constraint&gt;
+  &lt;display-name&gt;Relax contstraint for specific requests&lt;/display-name&gt;
+    &lt;web-resource-collection&gt;
+      &lt;url-pattern&gt;/public/*&lt;/url-pattern&gt;
+      &lt;url-pattern&gt;/images/*&lt;/url-pattern&gt;
+      &lt;http-method&gt;GET&lt;/http-method&gt;
+      &lt;http-method&gt;HEAD&lt;/http-method&gt;
+    &lt;/web-resource-collection&gt;
+    &lt;web-resource-collection&gt;
+      &lt;url-pattern&gt;/servlet/*&lt;/url-pattern&gt;
+      &lt;http-method&gt;GET&lt;/http-method&gt;
+      &lt;http-method&gt;HEAD&lt;/http-method&gt;
+      &lt;http-method&gt;POST&lt;/http-method&gt;
+    &lt;/web-resource-collection&gt;
+    &lt;user-data-constraint&gt;
+      &lt;transport-guarantee&gt;NONE&lt;/transport-guarantee&gt;
+    &lt;/user-data-constraint&gt;
+  &lt;/security-constraint&gt;
+</PRE>
+
+
+<P>
+<FONT size=-1>
+<A href="logging.html">Back</A>
+<A href="index.html">Index</A>
+<A href="..">Exit</A>
+<A href="other.html">Next</A>
+</FONT>
+<P>
