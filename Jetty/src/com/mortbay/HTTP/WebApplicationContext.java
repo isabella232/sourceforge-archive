@@ -68,9 +68,10 @@ public class WebApplicationContext extends HandlerContext
 
         // Get parser
         XmlParser xmlParser=new XmlParser();
-        xmlParser.redirectEntity
-            ("web-app_2_2.dtd",
-             Resource.newSystemResource("com/mortbay/HTTP/web.dtd"));
+        Resource dtd=Resource.newSystemResource("com/mortbay/HTTP/web.dtd");
+        xmlParser.redirectEntity("web.dtd",dtd);
+        xmlParser.redirectEntity("web-app_2_2.dtd",dtd);
+        xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN",dtd);
 
         // Set dir or WAR
         Resource _webApp = Resource.newResource(webApp);

@@ -338,15 +338,10 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
 	tld = JspUtil.parseXMLDoc(in,
 				  Constants.TAGLIB_DTD_RESOURCE,
 				  Constants.TAGLIB_DTD_PUBLIC_ID);
-	
-        Vector tagVector = new Vector();
-        Iterator list = tld.iterator("taglib");
-        
-        XmlParser.Node elem=(XmlParser.Node)list.next();
-        if (list.hasNext())
-            throw new JasperException(Constants.getString("jsp.error.more.than.one.taglib"));
 
-        list = elem.iterator();
+        Vector tagVector = new Vector();
+        Iterator list = tld.iterator();
+        
 
         while (list.hasNext())
         {

@@ -69,6 +69,9 @@ public class XmlConfiguration
                 __parser.redirectEntity
                     ("http://jetty.mortbay.com/configure_1_0.dtd",
                      configResource);
+                __parser.redirectEntity
+                    ("-//Mort Bay Consulting//DTD Configure 1.0//EN",
+                     configResource);
             }
         }
         _config = __parser.parse(configuration.toString());	

@@ -128,7 +128,22 @@ public class Resource
     {
         URL url=null;
         // Try to format as a URL?
-        url = Resource.class.getClassLoader().getResource(resource);
+        ClassLoader
+            loader=Thread.currentThread().getContextClassLoader();
+        if (loader!=null)
+        {
+            url=loader.getResource(resource);
+            if (url==null && resource.startsWith("/"))
+                url=loader.getResource(resource.substring(1));
+        }
+        if (url==null)
+        {
+            loader=Resource.class.getClassLoader();
+            url=loader.getResource(resource);
+            if (url==null && resource.startsWith("/"))
+                url=loader.getResource(resource.substring(1));
+        }
+        
         if (url==null)
             return null;
         return newResource(url);

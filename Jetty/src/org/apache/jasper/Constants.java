@@ -231,12 +231,12 @@ public class Constants {
     
     public static final void message(String key)
     {
-        Log.event(getString(key));
+        Code.debug(getString(key));
     }
 
     public static final void message(String key, Object[] args)
     {
-        Log.event(getString(key,args));
+        Code.debug(getString(key,args));
     }
         
     public static final void warning(String key)

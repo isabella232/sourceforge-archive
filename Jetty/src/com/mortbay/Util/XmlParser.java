@@ -212,10 +212,19 @@ public class XmlParser
         public InputSource resolveEntity
             (String pid, String sid)
         {
-            String dtd = sid;
-            if (dtd.lastIndexOf("/")>=0)
-                dtd=dtd.substring(dtd.lastIndexOf("/")+1);
-            Resource resource = (Resource)_redirectMap.get(dtd);
+            Resource resource=null;
+            if(pid!=null)
+                resource = (Resource)_redirectMap.get(pid);
+            if(resource==null)
+                resource = (Resource)_redirectMap.get(sid);
+            if (resource==null)
+            {
+                String dtd = sid;
+                if (dtd.lastIndexOf("/")>=0)
+                    dtd=dtd.substring(dtd.lastIndexOf("/")+1);
+                resource = (Resource)_redirectMap.get(dtd);
+            }
+
             if (resource!=null && resource.exists())
             {
                 try
@@ -517,6 +526,7 @@ public class XmlParser
                             if (o instanceof Node)
                             {
                                 Node n=(Node)o;
+                                
                                 if (tag.equals(n._tag))
                                 {
                                     _node=n;

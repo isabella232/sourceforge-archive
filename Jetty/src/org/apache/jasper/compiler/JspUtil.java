@@ -139,8 +139,11 @@ public class JspUtil {
         {
             XmlParser.Node tld;
             XmlParser parser = new XmlParser();
-            parser.redirectEntity(dtdId,
-                                  Resource.newResource(dtdResource));
+            Resource resource=Resource.newSystemResource(dtdResource);
+            if (resource==null || !resource.exists())
+                resource=Resource.newResource(dtdResource);
+            parser.redirectEntity(dtdId,resource);
+            
 	    tld = parser.parse(in);
 	    return tld;
 	} catch ( SAXException sx ) {
