@@ -134,11 +134,17 @@ public class Default extends HttpServlet
     protected void service(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException
     {
-        String pathInContext=(String)request.getAttribute(Dispatcher.__PATH_INFO);
-        if (pathInContext==null)
-            pathInContext=request.getServletPath();
+        String pathInContext=(String)request.getAttribute(Dispatcher.__SERVLET_PATH);
         if (pathInContext==null || pathInContext.length()==0)
-            pathInContext=request.getPathInfo();
+        {
+            pathInContext=(String)request.getAttribute(Dispatcher.__PATH_INFO);
+            if (pathInContext==null)
+            {
+                pathInContext=request.getServletPath();
+                if (pathInContext==null || pathInContext.length()==0)
+                    pathInContext=request.getPathInfo();
+            }
+        }
         
         boolean endsWithSlash= pathInContext.endsWith("/");
         Resource resource=getResource(pathInContext);
