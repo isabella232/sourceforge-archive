@@ -14,7 +14,6 @@
 // ========================================================================
 package org.mortbay.http.ibmjsse;
 
-import com.ibm.jsse.IBMJSSEProvider;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,11 +30,11 @@ import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.http.JsseListener;
 import org.mortbay.util.InetAddrPort;
-import org.mortbay.util.Log;
 import org.mortbay.util.Password;
-
-import org.mortbay.http.*;
 
 /* ------------------------------------------------------------ */
 
