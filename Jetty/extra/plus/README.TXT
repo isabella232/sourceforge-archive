@@ -21,7 +21,6 @@ This will produce the following jars in $jetty.home/extra/lib:
         The JAAS integration 
 
 
-
 Demos
 -----
 
