@@ -1,7 +1,7 @@
 Stable 2.4.6
-Dev    3.0.B01
+Dev    3.0.B0
 
-Release 3.0.B01
+Release 3.0.B0 - 21st Aug 2000
    + SSL implemented with JsseListener
    + Partial implementation of webapp securitycontraints
    + Switched to the aelfred parser from microstar, which is
