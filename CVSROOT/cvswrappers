@@ -23,6 +23,7 @@
 *.GIF -k 'b' -m 'COPY'
 *.JPG -k 'b' -m 'COPY'
 *.PNG -k 'b' -m 'COPY'
+*.bin -k 'b' -m 'COPY'
 *.ear -k 'b' -m 'COPY'
 *.exe -k 'b' -m 'COPY'
 *.gif -k 'b' -m 'COPY'
