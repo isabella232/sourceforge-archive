@@ -163,7 +163,7 @@ public class Dispatcher implements RequestDispatcher
         {
             // Add the parameters
             parameters=new MultiMap();
-            UrlEncoded.decodeTo(query,parameters);
+            UrlEncoded.decodeTo(query,parameters,request.getCharacterEncoding());
             request.addParameters(parameters);
         }
         
