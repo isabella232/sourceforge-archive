@@ -5,9 +5,6 @@
 
 package com.mortbay.Util;
 
-
-
-
 // ====================================================================
 public class StringUtil
 {
@@ -29,6 +26,7 @@ public class StringUtil
           '\160','\161','\162','\163','\164','\165','\166','\167',
           '\170','\171','\172','\173','\174','\175','\176','\177' };
 
+    /* ------------------------------------------------------------ */
     /**
      * fast lower case conversion. Only works on ascii (not unicode)
      * @author Jesper Jørgensen, Caput
@@ -46,6 +44,7 @@ public class StringUtil
         return(new String(c));
     }
     
+    /* ------------------------------------------------------------ */
     /**
      * returns the next index of a character from the chars string
      */

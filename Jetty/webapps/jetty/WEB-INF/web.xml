@@ -17,7 +17,11 @@
 
   <servlet-mapping>
     <servlet-name>Jetty Demo Page</servlet-name>
-    <url-pattern>/</url-pattern>
+    <url-pattern>*.html</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>Jetty Demo Page</servlet-name>
+    <url-pattern>*.txt</url-pattern>
   </servlet-mapping>
 
   <session-config>

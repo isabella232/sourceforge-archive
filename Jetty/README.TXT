@@ -22,37 +22,28 @@ Environment
 Development has been done in JDK1.2 and the following CLASSPATH is required 
 (or the non unix equivalent):
 
-  CLASSPATH=$JETTY_HOME/lib/com.mortbay.jetty.jar:$JETTY_HOME/lib/aelfred.sax.jar:$JETTY_HOME/lib/javax.servlet.jar
+  CLASSPATH=\
+    $JETTY_HOME/lib/com.mortbay.jetty.jar:\
+    $JETTY_HOME/lib/javax.servlet.jar:\
+    $JETTY_HOME/lib/com.microstar.xml.jar
+
+To use SSL you will also need to add the the jar below, which is
+a merge of the jsse, jnet and jcert jars from the JSSE package
+(see $JETTY_HOME/doc/JsseSSL.html for more details):
+
+    $JETTY_HOME/com.sun.net.ssl.jar
+
+To run JSP with the JDK compiler, you will also need to add the
+jar containing the JDK compiler (if you wish to use another compiler
+you will have to configure jasper):
+
+   $JDK_HOME/lib/tools.jar
 
 
-To compile the code, the following CLASSPATH should be used:
+To compile the code, the following addition to the CLASSPATH should 
+be used:
 
-  CLASSPATH=$JETTY_HOME/src:$JETTY_HOME/lib/aelfred.sax.jar
-
-
-Configuring the Server
-======================
-The class com.mortbay.HTTP.HttpServer is the main class to be
-configured.  It has a configuratin API and a command line API and
-can be run with
-
-  java com.mortbay.HTTP.HttpServer [options | -?]
-
-
-The class com.mortbay.Jetty.Server reads and xml configuration
-file and configures 1 or more instances of com.mortbay.HTTP.HttpServer.
-
-  java com.mortbay.Jetty.Server [configuration.xml]
-
-Jetty comes with the tiny aelfred SAX parser from microstar.com.  This
-is only a partially validating parser, so care must be taken when 
-editiing xml files.  If in doubt, use the org.sml.sax.parser property
-to specify an alternative parser (eg jaxp, xerces etc.).
-
-The DTDs used by jetty are resolved as resources from the system classpath,
-thus they are stored in com.mortbay.HTTP/web.dtd and 
-com.mortbay.Util.configure.dtd within the source tree and jar file.  Copies
-are also placed in etc for reference.
+   $JETTY_HOME/src:
 
 
 Running the Demo Server
@@ -69,11 +60,40 @@ xml file $JETTY_HOME/etc/demo.xml and can be run with the command:
 
 
 
+Configuring the Server
+======================
+
+The class com.mortbay.Jetty.Server reads an xml configuration
+file and configures 1 or more instances of com.mortbay.HTTP.HttpServer:
+
+  java com.mortbay.Jetty.Server [configuration.xml]
+
+
+The class com.mortbay.HTTP.HttpServer is the main class to be
+configured.  It has a configuratin API and a command line API and
+can be run with
+
+  java com.mortbay.HTTP.HttpServer [options | -?]
+
+The com.mortbay.Jetty.Server class is simply an xml configuration
+frontend to com.mortbay.HTTP.HttpServer.
+
+
+Jetty comes with the tiny aelfred SAX parser from microstar.com.  This
+is only a partially validating parser, so care must be taken when 
+editing xml files.  If in doubt, use the org.sml.sax.parser property
+to specify an alternative parser (eg jaxp, xerces etc.).
+
+The DTDs used by jetty are resolved as resources from the system classpath,
+thus they are stored in com.mortbay.HTTP/web.dtd and 
+com.mortbay.Util.configure.dtd within the source tree and jar file.  Copies
+are also placed in etc for reference.
+
+
 Test Harnesses
 ==============
-The class com.mortbay.HTTP.TestRFC2616 is the start of 
-a test harness linked to the RFC document.   This and the other test
-harnesses can be run with
+The class com.mortbay.HTTP.TestRFC2616 is a test harness linked 
+to the RFC document.  This and the other test harnesses can be run with
 
   java com.mortbay.Util.TestHarness
   java com.mortbay.HTTP.TestHarness
@@ -109,10 +129,4 @@ CGI:
 ----
 A CGI servlet is included in src/com/mortbay/Servlet/CGI.java  ,  but
 it is not yet configured into the release demo, nor is it documented.
-
-
-What's Missing:
----------------
-WebApplication as a war file support (almost there...)
-JSP
 

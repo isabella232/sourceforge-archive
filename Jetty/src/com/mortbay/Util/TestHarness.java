@@ -1251,7 +1251,7 @@ public class TestHarness
         {
             try
             {
-                new ZipResource("com/mortbay/Util/Test/unknown.zip");
+                new ZipResource("com/mortbay/Util/TestData/unknown.zip");
                 test.check(false,"Not found");
             }
             catch(IllegalArgumentException e)
@@ -1260,7 +1260,7 @@ public class TestHarness
             }
             
             ZipResource zr = new
-                ZipResource("com/mortbay/Util/Test/test.zip");
+                ZipResource("com/mortbay/Util/TestData/test.zip");
             test.checkEquals(zr.getNames().size(),3,"getNames()");
 
             ZipEntry entry = zr.getEntry("alphabet");
@@ -1404,7 +1404,7 @@ public class TestHarness
                  ("com/mortbay/Util/configure.dtd"));
             
             String url = "file:"+System.getProperty("user.dir")+
-                "/Test/configure.xml";
+                "/TestData/configure.xml";
             XmlParser.Node testDoc = parser.parse(url);
             String testDocStr = testDoc.toString().trim();
             Code.debug(testDocStr);
@@ -1426,7 +1426,7 @@ public class TestHarness
         try
         {
             String url = "file:"+System.getProperty("user.dir")+
-                "/Test/configure.xml";
+                "/TestData/configure.xml";
             XmlConfiguration configuration =
                 new XmlConfiguration(new URL(url));
             TestConfiguration tc = new TestConfiguration();

@@ -30,8 +30,8 @@ public class Dispatcher implements RequestDispatcher
 {
     Context _context;
     HandlerContext _handlerContext;
-    List _holders=new ArrayList(8);
     ServletHolder _holder=null;
+    String _pathSpec;
     String _path;
     String _query;
     
@@ -57,12 +57,17 @@ public class Dispatcher implements RequestDispatcher
                 ServletHandler handler=(ServletHandler)
                     _handlerContext.getHandler(i);
 
-                List matches=handler.holderMatches(_path);
-                _holders.addAll(matches);
+                Map.Entry entry=handler.getHolderEntry(_path);
+                if(entry!=null)
+                {
+                    _pathSpec=(String)entry.getKey();
+                    _holder = (ServletHolder)entry.getValue();
+                    break;
+                }
             }
         }
         
-        if (_holders.size()==0)
+        if (_holder==null)
             throw new IllegalStateException("No servlet handlers in context");
     }
 
@@ -121,7 +126,7 @@ public class Dispatcher implements RequestDispatcher
 
 
         // handle named servlet
-        if (_holder!=null)
+        if (_pathSpec==null)
         {
             // just call it with existing request/response
             _holder.handle(servletRequest,servletResponse);
@@ -140,34 +145,16 @@ public class Dispatcher implements RequestDispatcher
                 _query=oldQ+'&'+_query;
         }
 
-        // Try each holder in turn until request is handled.
-        for (int i=0;i<_holders.size();i++)
-        {
-            Map.Entry entry =
-                (Map.Entry)_holders.get(i);
+        // The path of the new request is the forward path
+        // context must be the same, info is recalculate.
+        Code.debug("Forward request to ",_holder,
+                   " at ",_pathSpec);
+        servletRequest.setForwardPaths(PathMap.pathMatch(_pathSpec,_path),
+                                       PathMap.pathInfo(_pathSpec,_path),
+                                       _query);
             
-            // The path of the new request is the forward path
-            // context must be the same, info is recalculate.
-            String servletPathSpec=(String)entry.getKey();
-            ServletHolder holder = (ServletHolder)entry.getValue();
-            
-            Code.debug("Try forward request to ",entry);
-            servletRequest.setForwardPaths(PathMap.pathMatch(servletPathSpec,
-                                                             _path),
-                                           PathMap.pathInfo(servletPathSpec,
-                                                            _path),
-                                           _query);
-            
-            // try service request
-            holder.handle(servletRequest,servletResponse);
-            
-            // Break if the response has been updated
-            if (servletResponse.isDirty())
-            {
-                Code.debug("Forwarded to ",entry);
-                break;
-            }
-        }
+        // try service request
+        _holder.handle(servletRequest,servletResponse);
     }
         
         
@@ -197,7 +184,7 @@ public class Dispatcher implements RequestDispatcher
         servletResponse.setOutputState(0);
 
         // handle named servlet
-        if (_holder!=null)
+        if (_pathSpec==null)
         {
             // just call it with existing request/response
             try
@@ -251,34 +238,17 @@ public class Dispatcher implements RequestDispatcher
         // Try each holder until handled.
         try
         {
-            for (int i=0;i<_holders.size();i++)
-            {
-                Map.Entry entry =
-                    (Map.Entry)_holders.get(i);
+            // The path of the new request is the forward path
+            // context must be the same, info is recalculate.
+            Code.debug("Include request to ",_holder,
+                       " at ",_pathSpec);
+            request.setAttribute("javax.servlet.include.servlet_path",
+                                 PathMap.pathMatch(_pathSpec,_path));
+            request.setAttribute("javax.servlet.include.path_info",
+                                 PathMap.pathInfo(_pathSpec,_path));
                 
-                // The path of the new request is the forward path
-                // context must be the same, info is recalculate.
-                String servletPathSpec=(String)entry.getKey();
-                ServletHolder holder = (ServletHolder)entry.getValue();
-            
-                Code.debug("Try forward request to ",entry);
-                request.setAttribute("javax.servlet.include.servlet_path",
-                                     PathMap.pathMatch(servletPathSpec,
-                                                       _path));
-                request.setAttribute("javax.servlet.include.path_info",
-                                     PathMap.pathInfo(servletPathSpec,
-                                                      _path));
-                
-                // try service request
-                holder.handle(servletRequest,servletResponse);
-            
-                // Break if the response has been updated
-                if (servletResponse.isDirty())
-                {
-                    Code.debug("Included from ",entry);
-                    break;
-                }
-            }
+            // try service request
+            _holder.handle(servletRequest,servletResponse);
         }
         finally
         {
@@ -300,5 +270,6 @@ public class Dispatcher implements RequestDispatcher
         }
     }
 };
+
 
 

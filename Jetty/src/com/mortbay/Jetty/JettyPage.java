@@ -25,8 +25,15 @@ public class JettyPage extends Page
 {
     private static  Section[][] __section;
     private static final PathMap __pathMap = new PathMap();
-    static   
+
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param context 
+     */
+    static void initialize(String context)  
     {
+        // This only works for 1 context.
         Log.event("Loading JettyPage Index");
         int i=0;
         int j=0;
@@ -46,7 +53,7 @@ public class JettyPage extends Page
                     major.add(minor);
                     do
                     {
-                        Section section=new Section(value);
+                        Section section=new Section(context,value);
                         Code.debug(key," = ",section);
                         minor.add(section);
                         if (section._pathSpec!=null)
@@ -104,21 +111,24 @@ public class JettyPage extends Page
     public Section getSection() {return _section;}
     
     /* ------------------------------------------------------------ */
-    public JettyPage(String path)
+    public JettyPage(String context,String path)
     {
-        _path=path;
+        if (__section==null)
+            initialize(context);
         
-        String root = ""; // XXX may be ../ or ../../ etc.
+        _path=path;
+        if (context==null)
+            context="";        
         
         addHeader
             ("<link REL=\"STYLESHEET\" TYPE=\"text/css\" HREF=\""+
-             root+"jetty.css\">");
+             context+"/jetty.css\">");
         attribute("text","#000000");
         attribute(BGCOLOR,"#FFFFFF");
         attribute("link","#606CC0");
         attribute("vlink","#606CC0");
         attribute("alink","#606CC0");
-        attribute("background",root+"images/jettybg.png");
+        attribute("background",context+"/images/jettybg.png");
         attribute("MARGINWIDTH","0");
         attribute("MARGINHEIGHT","0");
         attribute("LEFTMARGIN","0");
@@ -153,7 +163,7 @@ public class JettyPage extends Page
         _table.cell().top();
         _table.cell().center();
 
-        _table.add("<A HREF=http://jetty.mortbay.com><IMG SRC=\""+root+"images/powered.png\" BORDER=0></A>\n");
+        _table.add("<A HREF=http://jetty.mortbay.com><IMG SRC=\""+context+"/images/powered.png\" BORDER=0></A>\n");
 
         boolean para=true;
         // navigation
@@ -193,13 +203,13 @@ public class JettyPage extends Page
         _table.add("&nbsp;<P>");
 
         // home logos
-        _table.add("<A HREF=\"http://www.mortbay.com\"><IMG SRC=\""+root+"images/mbLogoBar.png\" BORDER=0></A><P>\n");
-        _table.add("<A HREF=\"http://www.inetu.com\"><IMG SRC=\""+root+"images/inetu.png\" BORDER=0></A><P>\n");
-        _table.add("<A HREF=\"http://sourceforge.net/projects/jetty\"><IMG SRC=\""+root+"images/sourceforge.png\" BORDER=0></A><P>\n");
+        _table.add("<A HREF=\"http://www.mortbay.com\"><IMG SRC=\""+context+"/images/mbLogoBar.png\" BORDER=0></A><P>\n");
+        _table.add("<A HREF=\"http://www.inetu.com\"><IMG SRC=\""+context+"/images/inetu.png\" BORDER=0></A><P>\n");
+        _table.add("<A HREF=\"http://sourceforge.net/projects/jetty\"><IMG SRC=\""+context+"/images/sourceforge.png\" BORDER=0></A><P>\n");
         //_table.add("<A HREF=\"http://sourceforge.net/projects/jetty\"><IMG SRC=\"http://sourceforge.net/sflogo.php?group_id=7322&type=1\" width=\"88\" height=\"31\" border=\"0\" alt=\"SourceForge Logo\" ></A><P>\n");
         
         _table.newCell();
-        _table.add("<IMG SRC=\""+root+"images/blank.png\">");
+        _table.add("<IMG SRC=\""+context+"/images/blank.png\">");
         _table.newCell();
         _table.cell().top();
         _table.cell().left();
@@ -214,25 +224,6 @@ public class JettyPage extends Page
     }
 
     /* ------------------------------------------------------------ */
-    public static void main(String[] args)
-    {
-        try{
-            Page page = args.length>0
-                ? new JettyPage(args[0])
-                    : new JettyPage("/index.html");
-
-            page.add("Stuff");
-            
-            page.write(System.out);
-            
-        }
-        catch(Exception e)
-        {
-            Code.warning(e);
-        }
-    }
-
-    /* ------------------------------------------------------------ */
     public static class Section
     {
         String _uri;
@@ -242,7 +233,7 @@ public class JettyPage extends Page
         String _subSection;
         String _link;
 
-        Section(String value)
+        Section(String context, String value)
         {
             StringTokenizer tok = new StringTokenizer(value,"\t ");
             Code.assert(tok.hasMoreTokens(),"No name");
@@ -258,7 +249,9 @@ public class JettyPage extends Page
                 _section=_key.substring(0,c);
                 _subSection=_key.substring(c+1);
                 Font font=new Font(-1,true);
-                font.add(new Link(_uri,_subSection));
+                font.add(new Link(_uri.startsWith("/")
+                                  ?(context+_uri):_uri,
+                                  _subSection));
                 _link=font.toString();
             }
             else
@@ -266,7 +259,9 @@ public class JettyPage extends Page
                 _section=_key;
                 _subSection=null;
                 Font font=new Font(1,true);
-                font.add(new Link(_uri,_section));
+                font.add(new Link(_uri.startsWith("/")
+                                  ?(context+_uri):_uri,
+                                  _section));
                 _link=font.toString();
             }
         }

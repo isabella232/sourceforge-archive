@@ -618,8 +618,7 @@ class ServletRequest
     /* -------------------------------------------------------------- */
     public String getRealPath(String path)
     {
-        _context.getRealPath(path);
-        return null;
+        return _context.getRealPath(path);
     }
 
     /* ------------------------------------------------------------ */

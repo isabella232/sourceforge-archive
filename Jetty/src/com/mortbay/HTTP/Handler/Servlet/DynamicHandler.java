@@ -50,22 +50,22 @@ public class DynamicHandler extends ServletHandler
                   getHandlerContext().getClassPath());
         super.start();
     }
-    
+
 
     /* ------------------------------------------------------------ */
-    /** List of ServletHolders matching path. 
+    /** get ServletHolder matching path. 
      * @param contextPathSpec Context path spec
      * @param pathInContext Path including context
      * @return List of matching holders.
      */
-    synchronized List holderMatches(String pathInContext)
+    synchronized Map.Entry getHolderEntry(String pathInContext)
     {
         String path=pathInContext;
         
         // Do we have any matches already
-        List holders = super.holderMatches(path);
-        if (holders!=null && holders.size()>0)
-            return holders;
+        Map.Entry entry=super.getHolderEntry(pathInContext);
+        if (entry!=null)
+            return entry;
 
         // OK lets look for a dynamic servlet.
         if (!_paths.contains(path))
@@ -96,7 +96,7 @@ public class DynamicHandler extends ServletHandler
             catch(Exception e)
             {
                 Code.ignore(e);
-                return super.holderMatches(path);
+                return null;
             }
             
             Log.event("Dynamic load '"+servletClass+"' at "+path);
@@ -107,7 +107,7 @@ public class DynamicHandler extends ServletHandler
         }
 
         // return the normal list
-        return super.holderMatches(pathInContext);
+        return super.getHolderEntry(pathInContext);
     }
 }
 

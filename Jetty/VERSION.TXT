@@ -4,6 +4,8 @@ Dev    3.0.B03
  + Fixed problem with session ID in paths
  + Added modified version of JasperB3.2 for JSP
  + Moved FileBase to docroot
+ + Merged and renamed third party jars.
+ + Do not try multiple servlets for a request.
 
 Jetty-3.0.B03 - 9th Oct 2000
  + Expanded import package.*; lines

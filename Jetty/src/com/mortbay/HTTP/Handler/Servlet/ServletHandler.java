@@ -232,13 +232,15 @@ public class ServletHandler extends NullHandler
 
     
     /* ------------------------------------------------------------ */
-    /** List of ServletHolders matching path. 
+    /** ServletHolder matching path.
+     * In a separate method so that dynamic servlet loading can be
+     * implemented by derived handlers.
      * @param pathInContext Path within context.
-     * @return List of PathMap Entries pathspec to ServletHolder
+     * @return PathMap Entries pathspec to ServletHolder
      */
-    List holderMatches(String pathInContext)
+    Map.Entry getHolderEntry(String pathInContext)
     {
-        return _servletMap.getMatches(pathInContext);
+        return _servletMap.getMatch(pathInContext);
     }
     
 
@@ -258,16 +260,14 @@ public class ServletHandler extends NullHandler
     {
         Code.debug("Looking for servlet at ",pathInContext);
         HttpResponse httpResponse=response.getHttpResponse();
+
+        Map.Entry entry=getHolderEntry(pathInContext);
         
-        List matches=holderMatches(pathInContext);
-        
-        for (int i=0;i<matches.size();i++)
+        if (entry!=null)
         {
-            Map.Entry entry =
-                (Map.Entry)matches.get(i);
             String servletPathSpec=(String)entry.getKey();
             ServletHolder holder = (ServletHolder)entry.getValue();
-            
+        
             Code.debug("Pass request to servlet at ",entry);
             request.setPaths(PathMap.pathMatch(servletPathSpec,
                                                pathInContext),
@@ -279,16 +279,17 @@ public class ServletHandler extends NullHandler
             if ((session=request.getSession(false))!=null)
                 Context.access(session);
             
-            // try service request
-            holder.handle(request,response);
-            
-            // Break if the response has been updated
-            if (httpResponse.isDirty())
+            // service request
+            try
             {
+                holder.handle(request,response);
+            }
+            finally
+            {
+                response.setOutputState(0);
                 Code.debug("Handled by ",entry);
                 if (!httpResponse.isCommitted())
                     httpResponse.commit();
-                break;
             }
         }
     }

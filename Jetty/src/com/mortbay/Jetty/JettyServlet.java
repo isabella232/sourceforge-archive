@@ -6,6 +6,7 @@
 package com.mortbay.Jetty;
 import com.mortbay.HTML.Include;
 import com.mortbay.Util.Code;
+import com.mortbay.Util.StringUtil;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -22,37 +23,29 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class JettyServlet extends HttpServlet
 {
+    static long __minModTime = System.currentTimeMillis();
+    
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) 
         throws ServletException, IOException
     {	
-        String pathInfo=request.getPathInfo();
+        String path=request.getServletPath();        
 
         File file=(File)
             request.getAttribute("JettyFile");
-        if (file==null && "/".equals(pathInfo))
-        {
-            pathInfo="/index.html";
-            String index=getServletContext().getRealPath("/index.html");
-            if (index!=null)
-                file=new File(index);
-        }
-        
         if (file==null)
-        {    
-            if (!pathInfo.endsWith(".html") && !pathInfo.endsWith(".txt") )
-                return;
-            
-            file = new File(request.getPathTranslated());
-        }
+            file = new File(request.getRealPath(path));
 
         if (file==null || !file.exists())
+        {
+            response.sendError(404);
             return;
+        }
         
         Code.debug("FILE="+file);
         
-        JettyPage page = new JettyPage(pathInfo);
+        JettyPage page = new JettyPage(request.getContextPath(),path);
         if (page.getSection()==null)
             return;
         
@@ -69,25 +62,20 @@ public class JettyServlet extends HttpServlet
     {
         long lm=-1;
         try{
-            String pathInfo=request.getPathInfo();
+            String path=request.getServletPath();
+            
             File file=null;
 
-            if ("/".equals(pathInfo))
-            {
-                pathInfo="/index.html";
-                String filename=request.getPathTranslated()+"index.html";
-                file = new File(filename);
-            }
-            else if (pathInfo.endsWith(".html"))
-            {
-                file = new File(request.getPathTranslated());
-            }
+            file = new File(request.getRealPath(path));
+            request.setAttribute("JettyFile",file);
             
             if (file!=null && file.exists())
             {
-                request.setAttribute("JettyFile",file);
                 lm=file.lastModified();
+                if (lm<__minModTime)
+                    lm=__minModTime;
             }
+            
         }
         catch(Exception e)
         {

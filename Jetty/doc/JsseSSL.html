@@ -282,9 +282,8 @@ into the runtime environment so is vulnerable to theft.
 <p>
 Change the way you start Jetty to:
 <ul>
- <li> Include all three JSSE provided jar files in the classpath:
-      jsse.jar, jnet.jar & jcert.jar. Remember you no longer need
-      bouncycastle in you classpath.</li>
+ <li> Include con.sun.net.ssl.jar in the classpath.
+      Remember you no longer need bouncycastle in you classpath.</li>
  <li> Provide the path to the keystore file as the jetty.ssl.keystore property </li>
  <li> Provide the keystore and key passwords, either as the
       jetty.ssl.password and jetty.ssl.keypassword properties or 

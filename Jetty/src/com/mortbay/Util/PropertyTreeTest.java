@@ -88,9 +88,13 @@ public class PropertyTreeTest
             sub=props.getTree("a.b");
             
             Code.debug("getTree(a.b)=",sub);
-            test.checkEquals(sub.toString(),
-                             "{b=9, *=3, c=8, B=10}", // XXX could be platform order?
+            test.checkEquals(sub.toString().length(),
+                             "{b=9, *=3, c=8, B=10}".length(), 
                              "SubTree get");
+            test.checkContains(sub.toString(),"b=9","SubTree get");
+            test.checkContains(sub.toString(),"*=3","SubTree get");
+            test.checkContains(sub.toString(),"c=8","SubTree get");
+            test.checkContains(sub.toString(),"B=10","SubTree get");
         
             sub=props.getTree("a");
         
@@ -98,9 +102,13 @@ public class PropertyTreeTest
         
         
             sub=sub.getTree("b");       
-            test.checkEquals(sub.toString(),
-                             "{b=9, *=3, B=10, c=8}", // XXX could be platform order?
+            test.checkEquals(sub.toString().length(),
+                             "{b=9, *=3, c=8, B=10}".length(), 
                              "SubTree");
+            test.checkContains(sub.toString(),"b=9","SubTree");
+            test.checkContains(sub.toString(),"*=3","SubTree");
+            test.checkContains(sub.toString(),"c=8","SubTree");
+            test.checkContains(sub.toString(),"B=10","SubTree");
 
             Enumeration e=sub.getRealNodes();
             test.check(e.hasMoreElements(),"getRealNodes");
@@ -111,9 +119,13 @@ public class PropertyTreeTest
         
         
             Properties clone = (Properties)sub.clone();
-            test.checkEquals(clone.toString(),
-                             "{b=9, *=3, c=8, B=10}",
+            test.checkEquals(sub.toString().length(),
+                             "{b=9, *=3, c=8, B=10}".length(), 
                              "Clone");
+            test.checkContains(sub.toString(),"b=9","Clone");
+            test.checkContains(sub.toString(),"*=3","Clone");
+            test.checkContains(sub.toString(),"c=8","Clone");
+            test.checkContains(sub.toString(),"B=10","Clone");
         
             sub.put("C","C");
             test.checkContains(props.toString(),"a.b.C=C","Subtree changed");
