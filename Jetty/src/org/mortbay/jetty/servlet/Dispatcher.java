@@ -42,6 +42,7 @@ import org.mortbay.util.Code;
 import org.mortbay.util.Log;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.Resource;
+import org.mortbay.util.StringMap;
 import org.mortbay.util.UrlEncoded;
 import org.mortbay.util.URI;
 import org.mortbay.util.WriterOutputStream;
@@ -60,6 +61,15 @@ public class Dispatcher implements RequestDispatcher
     public final static String __SERVLET_PATH= "javax.servlet.include.servlet_path";
     public final static String __PATH_INFO= "javax.servlet.include.path_info";
     public final static String __QUERY_STRING= "javax.servlet.include.query_string";
+    public final static StringMap __managedAttributes = new StringMap();
+    static
+    {
+        __managedAttributes.put(__REQUEST_URI,__REQUEST_URI);
+        __managedAttributes.put(__CONTEXT_PATH,__CONTEXT_PATH);
+        __managedAttributes.put(__SERVLET_PATH,__SERVLET_PATH);
+        __managedAttributes.put(__PATH_INFO,__PATH_INFO);
+        __managedAttributes.put(__QUERY_STRING,__QUERY_STRING);
+    }
     
     ServletHandler _servletHandler;
     ServletHolder _holder=null;
@@ -153,7 +163,7 @@ public class Dispatcher implements RequestDispatcher
         DispatcherRequest request = new DispatcherRequest(httpServletRequest);
         DispatcherResponse response = new DispatcherResponse(httpServletResponse);
         
-        if (!_include)
+        if (_include)
             servletResponse.resetBuffer();
         
         // Merge parameters
@@ -217,6 +227,7 @@ public class Dispatcher implements RequestDispatcher
         String _pathInfo;
         String _query;
         MultiMap _parameters;
+        HashMap _attributes;
         
         /* ------------------------------------------------------------ */
         DispatcherRequest(HttpServletRequest request)
@@ -346,8 +357,25 @@ public class Dispatcher implements RequestDispatcher
         }
 
         /* ------------------------------------------------------------ */
+        public void setAttribute(String name, Object value)
+        {
+            if (__managedAttributes.containsKey(name))
+            {
+                if (_attributes==null)
+                    _attributes=new HashMap(3);
+                _attributes.put(name,value);
+            }
+            else
+                super.setAttribute(name,value);
+        }
+        
+        
+        /* ------------------------------------------------------------ */
         public Object getAttribute(String name)
         {
+            if (_attributes!=null && _attributes.containsKey(name))
+                return _attributes.get(name);
+                
             if (_include && !isNamed())
             {
                 if (name.equals(__PATH_INFO))    return _pathInfo;
@@ -375,7 +403,7 @@ public class Dispatcher implements RequestDispatcher
             Enumeration e=super.getAttributeNames();
             while (e.hasMoreElements())
                 set.add(e.nextElement());
-                
+            
             if (_include && !isNamed())
             {
                 set.add(__PATH_INFO);
@@ -392,6 +420,9 @@ public class Dispatcher implements RequestDispatcher
                 set.remove(__CONTEXT_PATH);
                 set.remove(__QUERY_STRING);
             }
+            
+            if (_attributes!=null)
+                set.addAll(_attributes.keySet());
             
             return Collections.enumeration(set);
         }

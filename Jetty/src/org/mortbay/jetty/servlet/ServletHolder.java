@@ -51,7 +51,7 @@ public class ServletHolder extends Holder
     private boolean _initOnStartup=false;
     private Config _config;
     private Map _roleMap;
-    private String _path;
+    private String _forcedPath;
     private long _unavailable;
     private UnavailableException _unavailableEx;
     private String _run_as;
@@ -76,7 +76,7 @@ public class ServletHolder extends Holder
                   String forcedPath)
     {
         this(handler,(name==null)?className:name,className);
-        _path=forcedPath;
+        _forcedPath=forcedPath;
     }
 
     
@@ -327,12 +327,8 @@ public class ServletHolder extends Holder
         try
         {
             // Handle aliased path
-            if (_path!=null)
-            {
-                request.setAttribute("javax.servlet.include.request_uri",
-                                     URI.addPaths(_servletHandler.getHttpContext().getContextPath(),_path));
-                request.setAttribute("javax.servlet.include.servlet_path",_path);
-            }
+            if (_forcedPath!=null)
+                request.setAttribute("javax.servlet.include.servlet_path",_forcedPath);
 
             // Handle run as
             if (_run_as!=null && _realm!=null)
