@@ -50,6 +50,7 @@ import org.mortbay.xml.XmlConfiguration;
 public class Server extends HttpServer 
 {
     private String _configuration;
+    private String _rootWebApp;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -103,6 +104,24 @@ public class Server extends HttpServer
             throw new IOException("Jetty configuration problem: "+e);
         }
     }
+
+    /* ------------------------------------------------------------ */
+    /** Get the root webapp name.
+     * @return The name of the root webapp (eg. "root" for root.war). 
+     */
+    public String getRootWebApp()
+    {
+        return _rootWebApp;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the root webapp name.
+     * @param rootWebApp The name of the root webapp (eg. "root" for root.war). 
+     */
+    public void setRootWebApp(String rootWebApp)
+    {
+        _rootWebApp = rootWebApp;
+    }
     
     /* ------------------------------------------------------------ */
     /**  Configure the server from an XML file.
@@ -153,8 +172,6 @@ public class Server extends HttpServer
     {
         return new ServletHttpContext();
     }
-
-
     
     /* ------------------------------------------------------------ */
     /** Add Web Application.
@@ -211,8 +228,8 @@ public class Server extends HttpServer
     /* ------------------------------------------------------------ */
     /**  Add Web Applications.
      * Add auto webapplications to the server.  The name of the
-     * webapp directory or war is used as the context name. If a
-     * webapp is called "root" it is added at "/".
+     * webapp directory or war is used as the context name. If the
+     * webapp matches the rootWebApp it is added as the "/" context.
      * @param host Virtual host name or null
      * @param webapps Directory file name or URL to look for auto webapplication.
      * @exception IOException 
@@ -227,8 +244,8 @@ public class Server extends HttpServer
     /* ------------------------------------------------------------ */
     /**  Add Web Applications.
      * Add auto webapplications to the server.  The name of the
-     * webapp directory or war is used as the context name. If a
-     * webapp is called "root" it is added at "/".
+     * webapp directory or war is used as the context name. If the
+     * webapp matches the rootWebApp it is added as the "/" context.
      * @param host Virtual host name or null
      * @param webapps Directory file name or URL to look for auto
      * webapplication.
@@ -246,8 +263,8 @@ public class Server extends HttpServer
     /* ------------------------------------------------------------ */
     /**  Add Web Applications.
      * Add auto webapplications to the server.  The name of the
-     * webapp directory or war is used as the context name. If a
-     * webapp is called "root" it is added at "/".
+     * webapp directory or war is used as the context name. If the
+     * webapp matches the rootWebApp it is added as the "/" context.
      * @param host Virtual host name or null
      * @param webapps Directory file name or URL to look for auto
      * webapplication.
@@ -294,11 +311,8 @@ public class Server extends HttpServer
                     continue;
             }
             
-            if (context.equalsIgnoreCase("root")||
-                context.equalsIgnoreCase("root/"))
-            {
+            if (_rootWebApp!=null && (context.equals(_rootWebApp)||context.equals(_rootWebApp+"/")))
                 context="/";
-            }
             else
                 context="/"+context;
 

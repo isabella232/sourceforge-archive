@@ -100,6 +100,7 @@ public class ServerMBean extends HttpServerMBean
         super.defineManagedResource();
         
         defineAttribute("configuration");
+        defineAttribute("rootWebApp");
         
         defineOperation("addWebApplication",
                         new String[]{"java.lang.String",

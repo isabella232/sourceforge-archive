@@ -901,7 +901,18 @@ public class HttpServer implements LifeCycle,
                 _notFoundContext=new HttpContext();
                 _notFoundContext.setContextPath("/");
                 _notFoundContext.setHttpServer(this);
-                _notFoundContext.addHandler(new NotFoundHandler());
+
+                try
+                {
+                    _notFoundContext
+                        .addHandler((NotFoundHandler)Class.forName
+                                    ("org.mortbay.http.handler.RootNotFoundHandler").newInstance());
+                }
+                catch (Exception e)
+                {
+                    _notFoundContext.addHandler(new NotFoundHandler());
+                }
+                
                 addComponent(_notFoundContext);
                 try{_notFoundContext.start();}catch(Exception e){Code.warning(e);}
             }
