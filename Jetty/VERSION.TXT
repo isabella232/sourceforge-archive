@@ -16,6 +16,7 @@ Jetty-4.2.4rc0
  + Added HttpContext.flushCache
  + Configurable root context.
  + RootNotFoundHandler to help when no context found.
+ + Update jasper to 4.1.16beta
 
 Jetty-4.2.3 - 2 December 2002
  + Removed aggressive threadpool shrinkage to avoid deadlock on SMP machines. 

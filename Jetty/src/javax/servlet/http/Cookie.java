@@ -169,11 +169,11 @@ public class Cookie implements Cloneable {
 
     public Cookie(String name, String value) {
 	if (!isToken(name)
-		|| name.equalsIgnoreCase("Comment")	// rfc2109
-		|| name.equalsIgnoreCase("Discard")	// 2109++
+		|| name.equalsIgnoreCase("Comment")	// rfc2019
+		|| name.equalsIgnoreCase("Discard")	// 2019++
 		|| name.equalsIgnoreCase("Domain")
 		|| name.equalsIgnoreCase("Expires")	// (old cookies)
-		|| name.equalsIgnoreCase("Max-Age")	// rfc2109
+		|| name.equalsIgnoreCase("Max-Age")	// rfc2019
 		|| name.equalsIgnoreCase("Path")
 		|| name.equalsIgnoreCase("Secure")
 		|| name.equalsIgnoreCase("Version")
