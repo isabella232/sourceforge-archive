@@ -285,7 +285,7 @@ public class HttpConnection
 	    if (Code.debug())
 	    {
 		_response.setField("Jetty-Request",_request.getRequestLine());
-		Code.debug("REQUEST:\n"+_request.toString());
+		Code.debug("REQUEST:\n",_request);
 	    }
 	    
             // Pick response version
@@ -398,8 +398,9 @@ public class HttpConnection
                 _response.commit();
                 _outputStream.close();
             }
-	    
-	    Code.debug("RESPONSE:\n"+_response.toString());
+
+	    if (Code.debug())
+		Code.debug("RESPONSE:\n",_response);
 	    
         }
         catch (HttpException e)
@@ -407,7 +408,7 @@ public class HttpConnection
             // Handle HTTP Exception by sending error code (if output not
             // committed) and closing connection.
             _persistent=false;
-            if (_outputStream.isCommitted())
+            if (_response.isCommitted())
             {
                 Code.warning(e.toString());
             }
@@ -493,7 +494,11 @@ public class HttpConnection
 		    referer +
 		    " " +
 		    agent;
-		System.out.println(log);
+
+		synchronized(Log.instance())
+		{
+		    System.out.println(log);
+		}
 	    }
 	    
 

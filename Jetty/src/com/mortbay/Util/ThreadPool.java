@@ -336,7 +336,7 @@ public class ThreadPool
         try{
             long end_wait=System.currentTimeMillis()+__stopWaitMs;
             while (_threadSet.size()>0 && end_wait>System.currentTimeMillis())
-                wait(__stopWaitMs);
+                this.wait(__stopWaitMs);
 
             // Stop any still running
             if (_threadSet.size()>0)
@@ -353,7 +353,7 @@ public class ThreadPool
                 while(_threadSet.size()>0)
                 {
                     Code.debug("waiting for threads to stop...");
-                    wait(__stopWaitMs);
+                    this.wait(__stopWaitMs);
                 }
             }
         }
@@ -591,7 +591,7 @@ public class ThreadPool
                 {
                     if (_threadSet!=null)
                         _threadSet.remove(Thread.currentThread());
-                    notify();
+                    this.notify();
                 }
                 if (Code.verbose(9))
                     Code.debug("Stopped thread in ", _name);
