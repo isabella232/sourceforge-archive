@@ -1,0 +1,33 @@
+SECTION: 400-Security
+TITLE: Aliases
+QUESTION: Aliases and Symbolic Links
+<p>Jetty by defaults runs in a mode where all file accesses are checked for aliases, such as case
+insensitivity, short names and symbolic links.  If a resource is an alias, then it is treated as
+not found.
+</p>
+<p>
+Alias requests are a security problem because webapplication security constraints are
+applied with case sensitive URL patterns.    For example, if a security constraint is 
+place on a /mySecretFolder/* and alias checking was not implemented then
+on a win32 system the following requests could retrieve files from that URL:
+</p>
+<ul>
+<li>/MySeCrEtFoLdEr/secret.html</li>
+<li>/mysec~a0.dir/secret.html</li>
+</ul>
+<p>
+File name aliases come in many forms including case insensitivity, VMS version numbers,
+Unix symbolic links, 8.3 short names, etc.   While some of these aliases (eg symbolic
+links) are deliberate, there is no general way to tell this in portable 100% java.
+</p>
+Jetty detects aliases by comparing the files absolutePath with its canonicalPath. If the
+JVM reports these as different an alias is assumed and the resource treated as not found.
+</p>
+<p>
+Alias checking can be turned off by setting the  system parameter
+org.mortbay.util.FileResource.checkAliases to false.   If alias checking is not used, then
+greater care is needed when designing security constraints.  It is recomended that a
+restrictive contstraint be applied to a whole subtree of URL space and then selective
+constraints be applied to relax security only for specific URLs.
+</p>
+
