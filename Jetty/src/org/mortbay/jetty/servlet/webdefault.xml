@@ -2,7 +2,6 @@
 
 <!-- This file contains the default settings for webapplications -->
 
-
 <web-app>
  <welcome-file-list>
     <welcome-file>index.jsp</welcome-file>

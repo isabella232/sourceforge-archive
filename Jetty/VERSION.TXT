@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ - addWebApplication fixed in tutorial
+ + Simplified addWebApplication
  + Added String constructor to XmlConfiguration.
  + Added org.mortbay.http.JDBCUserRealm
  + Init classloader for JspServlet
