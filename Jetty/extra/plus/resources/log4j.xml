@@ -27,7 +27,7 @@
 
   <appender name="FILE" class="org.apache.log4j.FileAppender">
     <param name="Threshold" value="TRACE"/>
-    <param name="File" value="${jetty.home}/extra/logs/jetty.log"/>
+    <param name="File" value="${jetty.home}/logs/log4jetty.log"/>
 
     <layout class="org.apache.log4j.PatternLayout">
       <!-- The default pattern: Date Priority [Category] Message\n -->
@@ -64,39 +64,44 @@
 
   <!-- Jotm -->
   <category name="org.objectweb.jotm">
-    <priority value="DEBUG"/>
+    <priority value="INFO"/>
   </category>
 
 
   <!-- jta  -->
   <category name="org.objectweb.jotm.jta">
-    <priority value="DEBUG"/>
+    <priority value="INFO"/>
   </category>
 
 
   <!-- jotm recovery  -->
   <category name="org.objectweb.jotm.recovery">
-    <priority value="DEBUG"/>
+    <priority value="INFO"/>
   </category>
 
   <!-- jotm tests  -->
   <category name="org.objectweb.carol">
-    <priority value="DEBUG"/>
+    <priority value="INFO"/>
   </category>
 
   <!-- carol rmi   -->
   <category name="org.objectweb.carol.rmi">
-    <priority value="DEBUG"/>
+    <priority value="INFO"/>
   </category>
 
   <!-- carol jndi   -->
   <category name="org.objectweb.carol.jndi">
-    <priority value="DEBUG"/>
+    <priority value="INFO"/>
   </category>
 
   <!-- carol lmi   -->
   <category name="org.objectweb.carol.lmi">
-    <priority value="DEBUG"/>
+    <priority value="INFO"/>
+  </category>
+
+  <!-- connect pool   -->
+  <category name="org.enhydra.jdbc">
+    <priority value="INFO"/>
   </category>
 
   <!-- ======================= -->
