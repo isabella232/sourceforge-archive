@@ -3,6 +3,7 @@ Jetty Versions
 
 Jetty-4.0.RC2 - wait for it....
  + Fixed version for String XmlConfigurations
+ + Fixed empty referrer in NCSA log.
  + Dont try to extract directories
  + Added experimental nio SocketChannelListener
  + Added skeleton load balancer

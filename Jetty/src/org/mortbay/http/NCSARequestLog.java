@@ -192,7 +192,7 @@ public class NCSARequestLog implements RequestLog
                 {
                     String referer = request.getField(HttpFields.__Referer);
                     if(referer==null)
-                        _out.print("- ");
+                        _out.print("\"-\" ");
                     else
                     {
                         _out.print('"');
@@ -202,7 +202,7 @@ public class NCSARequestLog implements RequestLog
                     
                     String agent = request.getField(HttpFields.__UserAgent);
                     if(agent==null)
-                    _out.print('-');
+                    _out.print("\"-\"");
                     else
                     {
                         _out.print('"');
