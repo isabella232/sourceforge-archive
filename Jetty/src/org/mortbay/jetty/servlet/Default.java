@@ -43,6 +43,7 @@ import org.mortbay.util.IO;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.Resource;
 import org.mortbay.util.URI;
+import org.mortbay.util.WriterOutputStream;
 
 
 /* ------------------------------------------------------------ */
@@ -577,6 +578,17 @@ public class Default extends HttpServlet
         long resLength=resource.length();
 
         boolean include = request.getAttribute(Dispatcher.__INCLUDE_REQUEST_URI)!=null;
+
+        // Get the output stream (or writer)
+        OutputStream out =null;
+        try
+        {
+            out = response.getOutputStream();
+        }
+        catch(IllegalStateException e)
+        {
+            out = new WriterOutputStream(response.getWriter());
+        }
         
         //  see if there are any range headers
         Enumeration reqRanges = include?null:request.getHeaders(HttpFields.__Range);
@@ -607,7 +619,7 @@ public class Default extends HttpServlet
                 writeHeaders(response,resource,resLength);
             }
             
-            OutputStream out = response.getOutputStream();
+            
             data.writeTo(out,0,resLength);
             return;
         }
@@ -622,8 +634,6 @@ public class Default extends HttpServlet
             response.setStatus(HttpResponse.__416_Requested_Range_Not_Satisfiable);
             response.setHeader(HttpFields.__ContentRange, 
                                InclusiveByteRange.to416HeaderRangeString(resLength));
-            
-            OutputStream out = response.getOutputStream();
             resource.writeTo(out,0,resLength);
             return;
         }
@@ -640,7 +650,6 @@ public class Default extends HttpServlet
             response.setStatus(HttpResponse.__206_Partial_Content);
             response.setHeader(HttpFields.__ContentRange, 
                                singleSatisfiableRange.toHeaderRangeString(resLength));
-            OutputStream out = response.getOutputStream();
             resource.writeTo(out,singleSatisfiableRange.getFirst(resLength),singleLength);
             return;
         }
@@ -668,7 +677,6 @@ public class Default extends HttpServlet
 
         InputStream in=(resource instanceof CachedResource)
             ?null:resource.getInputStream();
-        OutputStream out = response.getOutputStream();
         long pos=0;
             
         for (int i=0;i<ranges.size();i++)
