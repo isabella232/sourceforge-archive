@@ -408,9 +408,9 @@ public class JspC implements Options { //, JspCompilationContext {
 
             targetClassName = null;
             String thisServletName;
-            if  (clc.getPackageName() == null) {
+            if ("".equals(clc.getPackageName())) {
                 thisServletName = clc.getClassName();
-             } else {
+            } else {
                 thisServletName = clc.getPackageName()
                     + '.' + clc.getClassName();
             }

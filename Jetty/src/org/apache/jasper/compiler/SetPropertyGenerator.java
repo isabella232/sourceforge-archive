@@ -103,7 +103,7 @@ public class SetPropertyGenerator
 	    if (property.equals("*")) {
 		
 		if (value != null) {
-		    String m = Constants.getString("jsp.error.setproperty.invalidSyantx");
+		    String m = Constants.getString("jsp.error.setproperty.invalidSyntax");
 		    throw new CompileException(start, m);
 		}
 		

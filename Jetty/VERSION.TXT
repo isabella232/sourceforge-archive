@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+ + OutputStreamLogSink config improvements
+ + Updated jasper to 16 May snapshot
+
 Jetty-4.0.1RC2 - 14 May 2002
  + Better error for jre1.3 with 1.4 classes
  + Cleaned up RD query string regeneration.

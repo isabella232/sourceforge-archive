@@ -96,6 +96,7 @@ public class OutputStreamLogSink
     private boolean _append=true;
     protected boolean _flushOn=true;
     protected int _bufferSize=4096;
+    protected boolean _reopen=false;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -262,6 +263,7 @@ public class OutputStreamLogSink
     /* ------------------------------------------------------------ */
     public synchronized void setOutputStream(OutputStream out)
     {
+        _reopen=isStarted() && out!=out;
         _filename=null;
         _buffer.reset();
         _out=out;
@@ -282,13 +284,28 @@ public class OutputStreamLogSink
             if (filename.length()==0)
                 filename=null;
         }
-        _filename=filename;        
+        _reopen=isStarted() &&
+            ((_filename==null && filename!=null)||
+             (_filename!=null && !_filename.equals(filename)));
+        _filename=filename;
     }
 
     /* ------------------------------------------------------------ */
     public String getFilename()
     {
         return _filename;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getDatedFilename()
+    {
+        if (_filename==null)
+            return null;
+
+        if (_out==null || ! (_out instanceof RolloverFileOutputStream))
+            return null;
+
+        return ((RolloverFileOutputStream)_out).getDatedFilename();
     }
     
     /* ------------------------------------------------------------ */
@@ -300,6 +317,7 @@ public class OutputStreamLogSink
     /* ------------------------------------------------------------ */
     public void setRetainDays(int retainDays)
     {
+        _reopen=isStarted() && _retainDays!=retainDays;
         _retainDays = retainDays;
     }
     
@@ -343,6 +361,12 @@ public class OutputStreamLogSink
                                   Frame frame,
                                   long time)
     {
+        if (_reopen)
+        {
+            stop();
+            start();
+        }
+        
         if (_out==null)
             return;
 
@@ -423,6 +447,11 @@ public class OutputStreamLogSink
      */
     public synchronized void log(String formattedLog)
     {
+        if (_reopen)
+        {
+            stop();
+            start();
+        }
         try
         {
             _buffer.write(formattedLog);
@@ -444,7 +473,8 @@ public class OutputStreamLogSink
      * The default implementation does nothing 
      */
     public synchronized void start()
-    {
+    {        
+        _reopen=false;
         if (_started)
             return;
         
@@ -494,7 +524,10 @@ public class OutputStreamLogSink
         {
             try{_out.close();}
             catch(Exception e){if (Code.debug())e.printStackTrace();}
-        }       
+        }
+
+        if (_filename!=null)
+            _out=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -503,7 +536,3 @@ public class OutputStreamLogSink
         return _started;
     }    
 };
-
-
-
-
