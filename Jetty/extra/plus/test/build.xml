@@ -166,7 +166,32 @@ Test results in ${test.results}
   <!-- ==================================================================== -->
   <!-- test                                                                 -->
   <!-- ==================================================================== -->
-  <target name="test" depends="junit, testJAAS"/>
+  <target name="test" depends="junit, testJAAS, testJNDI"/>
+
+
+
+
+  <!-- ==================================================================== -->
+  <!-- testJNDI                                                           -->
+  <!-- ==================================================================== -->
+  <target name="testJNDI" depends="prepare, check.junit.task, check.junit, classes">   
+   <junit fork="yes" printsummary="yes" haltonerror="yes" haltonfailure="yes" >
+      <jvmarg value="-Djava.naming.factory.url.pkgs=org.mortbay.jndi:org.objectweb.carol.naming"/>
+      <jvmarg value="-Djava.naming.factory.initial=org.objectweb.carol.jndi.spi.MultiOrbInitialContextFactory"/>
+      <formatter type="plain" usefile="true" />                  
+      <classpath> 
+         <path refid="classpath" />
+         <pathelement location="${test.classes}" />     
+         <pathelement location="${junit.jar}" />     
+      </classpath>        
+      <batchtest fork="yes" todir="${test.results}">
+        <fileset dir="${test.src}">
+          <include name="**/TestJNDI*.java" />
+        </fileset>
+      </batchtest>   
+    </junit>
+  </target>
+
 
 
   <!-- ==================================================================== -->
