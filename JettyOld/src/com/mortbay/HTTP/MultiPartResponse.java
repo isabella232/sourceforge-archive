@@ -48,8 +48,8 @@ import java.util.*;
 public class MultiPartResponse implements Runnable
 {
     /* ------------------------------------------------------------ */
-    private static final String boundary =
-    "com.mortbay.HTTP.MutliPartResponse.boundary";
+    private static String boundary =
+    "com.mortbay.HTTP.MutliPartResponse.boundary.";
     
     /* ------------------------------------------------------------ */
     ServletResponse response=null;
@@ -88,6 +88,12 @@ public class MultiPartResponse implements Runnable
 	in = request.getInputStream();
 	outputStream=response.getOutputStream();
 	out=new OutputStreamWriter(response.getOutputStream());
+
+	String ua = request.getHeader(HttpHeader.UserAgent);
+	if (ua!=null && ua.indexOf("MSIE")>0)
+	    boundary="MSIE.CANNOT.HANDLE.MULTI.PART.MIME.";
+	
+	boundary+=Long.toString(System.currentTimeMillis(),36);
 	response.setContentType("multipart/mixed;boundary="+boundary);
 	if (alwaysExpire)
 	    response.setHeader("Expires","1 Jan 1971");
@@ -97,10 +103,10 @@ public class MultiPartResponse implements Runnable
 
 	servlet = Thread.currentThread();
 
-	if (HttpHeader.HTTP_1_0.equals(request.getProtocol()))
-	    new Thread(this).start();
-	else
-	    Code.warning("Don't know how to terminate HTTP/1.1 requests");
+	if (HttpHeader.HTTP_1_1.equals(request.getProtocol()))
+	    response.setHeader(HttpHeader.Connection,HttpHeader.Close);
+
+	new Thread(this).start();
     }
     
     /* ------------------------------------------------------------ */

@@ -18,6 +18,8 @@ Release 2.0Beta1
   + Provided reset on com.mortbay.HTML.Composite.
   + Proxy demo in different server instance
   + Handle full URLs in HTTP requests (to some extent)
+  + Improved performance with special asciiToLowerCase
+  + Warn if MSIE used for multi part MIME.
 
 Release 2.0Alpha2
   + JDK1.2 javax.servlet API

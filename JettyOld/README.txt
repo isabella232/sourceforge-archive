@@ -15,7 +15,7 @@ INSTALLATION
 
     3. cd to /usr/local/MortBay
 
-    4. Run a server:
+    4. Run the server demo:
 
         + To run the demo server:
            java [-DDEBUG] com.mortbay.Jetty.Demo [port]
@@ -37,7 +37,7 @@ HTTP/1.1
       many HTTP/1.1 clients. Please give lots of feed back.
 
     + Servlets by default will only use persistent connections if
-      the content lenght is set or the chunked transfer encoding has
+      the content length is set or the chunked transfer encoding has
       been set in the response header.  However, chunking can be used
       by default if the java property CHUNK_BY_DEFAULT is set or 
       ServletHolder.setChunkByDefault(true) is called, which allows

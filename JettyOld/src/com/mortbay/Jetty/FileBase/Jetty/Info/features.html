@@ -10,13 +10,14 @@ dynamic HTTP requests from any Java application.
 Jetty supports the javax.servlet API defined
 by JavaSoft plus many more features.
 <P>
-Jetty is not intended to be used as a stand-alone WWW server. Although it
-can be used in that mode, they are many other full featured servers available
+Jetty is not intended to be used as a stand-alone WWW server. While it
+can be used in that mode, there are many other full featured servers available
 that do that job very well.  Jetty is primarily intended to be embedded in
 Java applications, either to provide a primarary or management interface
 over HTTP. Just as java is an ideal language for developing cross platform
 distributed applications, embedded HTTP with generated HTML are an ideal
 way of providing a distributed cross platform user interfaces.
+
 </TD></TR></TABLE>
 
 <h1>Jetty Features</h1>
@@ -48,7 +49,7 @@ of Jetty and other Mort Bay packages</A>
 <A NAME="Java HTTP Server"></A>
 <P><B>Java HTTP Servlet Server</B></BR>  
 Jetty is a HTTP Server written in Java.  It is an ideal
-platform for server-side development of Dynamic WWW services or as a basis
+platform for server-side generated dynamic WWW services or as a basis
 for WWW enabling Java applications.
 Quoting from Javasofts <A HREF=http://www.javasoft.com/products/java-server/servlets/index.html>
 Java Servlet API White Paper</A>:
@@ -69,12 +70,11 @@ applications.
 <A NAME="Software Engineering"></A>
 <P><B>Software Engineering</B></BR>  
 Traditional WWW development using authored HTML pages is not a scalable
-approach for the development of significant WWW sites, nor does CGI access
-provide and adequate mechanism for accessing dynamic state of a running
-application. The authored HTML plus CGI approach creates configuration and
-maintenance problems for even small sites.
+approach for the development of significant service using WWW technologies,
+The authored HTML plus CGI approach creates configuration and maintenance
+problems for even small sites.
 <P>
-Using the highly productive Java programming environment for WWW
+Using the highly productive Java language for WWW
 server development allows object oriented software engineering
 techniques to be applied to:<UL>
   <LI>Extraction of common elements for re-use within the site and

@@ -81,11 +81,11 @@ public class HttpHeader
     /**
      * Returns the value of a  header field, or null if not found.
      * The case of the header field name is ignored.
-     * @param name the case-insensitive header field name
+     * @param keythe case-insensitive header field name
      */
-    public String getHeader(String headerKey)
+    public String getHeader(String key)
     {
-	return (String)keyMap.get(headerKey.toLowerCase());
+	return (String)keyMap.get(StringUtil.asciiToLowerCase(key));
     }
     
     /* -------------------------------------------------------------- */
@@ -93,7 +93,7 @@ public class HttpHeader
      */
     public void setHeader(String key,String value)
     {
-	String lkey = key.toLowerCase().trim();
+	String lkey = StringUtil.asciiToLowerCase(key);
 
 	if (value==null)
 	{
@@ -125,7 +125,7 @@ public class HttpHeader
 	    {
 		String key = s.substring(0,c).trim();
 		String value = s.substring(c+1,s.length()).trim();
-		String lkey = key.toLowerCase();
+		String lkey = StringUtil.asciiToLowerCase(key);
 		String ev = (String) keyMap.get(lkey);
 		if (ev!=null)
 		    keyMap.put(lkey,ev+';'+value);

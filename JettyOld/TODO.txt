@@ -5,9 +5,10 @@
  
  + HTTP/1.1:
      - Timeout connection
+     - Handle termination of multipart mime server push.
+
+ + Detect MSIE and complain for server push.
 
  + Convert Servlets to use get & post methods
 
  + Check head method against Head exception
-
- + Change connection monitoring method.

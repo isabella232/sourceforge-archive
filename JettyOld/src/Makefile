@@ -15,6 +15,6 @@ ROOTNAME := src
 SUBDIRS := com
 
 ifndef MORTBAY_HOME
-MORTBAY_HOME := /usr/local/MortBay
+MORTBAY_HOME := ${PWD}/..
 endif
 include $(MORTBAY_HOME)/etc/Global.mk

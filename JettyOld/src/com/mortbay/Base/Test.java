@@ -72,6 +72,7 @@ public class Test
 	if (b)
 	{
 	    reportBuf.append(pass);
+	    Code.debug(check," OK");
 	}
 	else
 	{
@@ -81,6 +82,7 @@ public class Test
 	    reportBuf.append('\n');
 	    reportBuf.append(spaces,0,testCase.length()+3);
 	    reportBuf.append("check!=true");
+	    Code.debug(check," FAILED");
 	}
 	reportBuf.append('\n');
     }
@@ -97,6 +99,7 @@ public class Test
 	    || (string!=null && (subString==null || string.indexOf(subString)>=0)))
 	{
 	    reportBuf.append(pass);
+	    Code.debug(check," OK");
 	}
 	else
 	{
@@ -107,6 +110,7 @@ public class Test
 	    reportBuf.append(spaces,0,testCase.length()+3);
 	    reportBuf.append('"' + subString + "\" not contained in \"" +
 			     string + '"');
+	    Code.debug(check," FAILED");
 	}
 	reportBuf.append('\n');
     }
@@ -196,6 +200,7 @@ public class Test
 	if (o1==o2 || ( o1!=null && o1.equals(o2)))
 	{
 	    reportBuf.append(pass);
+	    Code.debug(check," OK");
 	}
 	else
 	{
@@ -206,6 +211,7 @@ public class Test
 	    reportBuf.append(spaces,0,testCase.length()+3);
 	    reportBuf.append(((o1!=null)?(o1.toString()):"null") + " != " +
 			     ((o2!=null)?(o2.toString()):"null"));
+	    Code.debug(check," FAILED");
 	}
 	reportBuf.append('\n');
     }

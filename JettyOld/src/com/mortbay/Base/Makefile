@@ -8,7 +8,7 @@
 #JAVAOPTIONS := 
 #JAVACOPTIONS :=
 ROOTNAME := com
-TESTS := Log.java Code.java Test.java
+TESTS := Log.java Code.java Test.java Frame.java
 
 ifndef MORTBAY_HOME
 MORTBAY_HOME := /usr/local/MortBay
