@@ -54,11 +54,10 @@ public class HttpRequest extends HttpMessage
         if (line_buffer==null)
             throw new IOException("EOF");
         if (line_buffer.size==in.__maxLineLength)
-            throw new HttpException(400,"Request line too long");
+            throw new HttpException(HttpResponse.__414_Request_URI_Too_Large);
         decodeRequestLine(line_buffer.buffer,line_buffer.size);
         
         // Read headers
-        _header=new HttpFields();
         _header.read(in);
 
         // Handle version
@@ -68,7 +67,7 @@ public class HttpRequest extends HttpMessage
             _version=__HTTP_1_1;
 
             // Handle Expectations
-            String expect=_header.get(HttpFields.Expect);
+            String expect=_header.get(HttpFields.__Expect);
             if (expect!=null && expect.length()>0)
             {
                 if (StringUtil.asciiToLowerCase(expect)
@@ -85,24 +84,24 @@ public class HttpRequest extends HttpMessage
             }
 
             // Handle host
-            String host=_header.get(HttpFields.Host);
+            String host=_header.get(HttpFields.__Host);
             if (host==null || host.length()==0)
-                throw new HttpException(400);
+                throw new HttpException(HttpResponse.__400_Bad_Request);
         
             // XXX handle difference to _uri.getHost()
 
             // Handle input encodings
             // XXX need to be better than this.... gzip content encoding etc.
             // XXX case insensitive?
-            if (HttpFields.Chunked.equals(_header.get(HttpFields.TransferEncoding)))
+            if (HttpFields.__Chunked.equals(_header.get(HttpFields.__TransferEncoding)))
             {
-                _header.remove(HttpFields.ContentLength);
+                _header.remove(HttpFields.__ContentLength);
                 in.setChunking(true);
             }
             else 
             {
                 int content_length=
-                    _header.getIntField(HttpFields.ContentLength);
+                    _header.getIntField(HttpFields.__ContentLength);
                 if (content_length>=0)
                     in.setContentLength(content_length);
             }
@@ -113,7 +112,7 @@ public class HttpRequest extends HttpMessage
             _version=__HTTP_1_0;
             
             // Handle content length
-            int content_length=_header.getIntField(HttpFields.ContentLength);
+            int content_length=_header.getIntField(HttpFields.__ContentLength);
             if (content_length>=0)
                 in.setContentLength(content_length);
         }
@@ -140,46 +139,24 @@ public class HttpRequest extends HttpMessage
     public synchronized void writeHeader(OutputStream out)
         throws IOException
     {
+        if (_state!=__MSG_EDITABLE)
+            throw new IllegalStateException("Not MSG_EDITABLE");
+        
         _state=__MSG_BAD;
-        out.write(_method.getBytes());
-        out.write(' ');
-        out.write(_uri.toString().getBytes());
-        out.write(' ');
-        out.write(_version.getBytes());
-        out.write(HttpFields.__CRLF_B);
-        _header.write(out);
-        out.flush();
+        synchronized(out)
+        {
+            out.write(_method.getBytes());
+            out.write(' ');
+            out.write(_uri.toString().getBytes());
+            out.write(' ');
+            out.write(_version.getBytes());
+            out.write(HttpFields.__CRLF_B);
+            _header.write(out);
+            out.flush();
+        }
         _state=__MSG_SENDING;
     }
 
-    /* -------------------------------------------------------------- */
-    /** Returns the character set encoding for the input of this request.
-     * Checks the Content-Type header for a charset parameter and return its
-     * value if found or ISO-8859-1 otherwise.
-     * @return Character Encoding.
-     */
-    public String getCharacterEncoding ()
-    {
-        String encoding = _header.get(HttpFields.ContentType);
-        if (encoding==null || encoding.length()==0)
-            return "ISO-8859-1";
-        
-        int i=encoding.indexOf(';');
-        if (i<0)
-            return "ISO-8859-1";
-        
-        i=encoding.indexOf("charset=",i);
-        if (i<0 || i+8>=encoding.length())
-            return "ISO-8859-1";
-            
-        encoding=encoding.substring(i+8);
-        i=encoding.indexOf(' ');
-        if (i>0)
-            encoding=encoding.substring(0,i);
-            
-        return encoding;
-    }
-    
     /* -------------------------------------------------------------- */
     /** Get the HTTP method for this request.
      * Returns the method with which the request was made. The returned
@@ -279,7 +256,7 @@ public class HttpRequest extends HttpMessage
             return _host;
 
         // Return host from header field
-        _host=_header.get(HttpFields.Host);
+        _host=_header.get(HttpFields.__Host);
         _port=0;
         if (_host!=null)
         {
@@ -334,9 +311,9 @@ public class HttpRequest extends HttpMessage
         
         getPort();
         if (_port>0)
-            _header.put(HttpFields.Host,host+":"+_port);
+            _header.put(HttpFields.__Host,host+":"+_port);
         else
-            _header.put(HttpFields.Host,host);
+            _header.put(HttpFields.__Host,host);
     }
     
     /* ------------------------------------------------------------ */
@@ -375,9 +352,9 @@ public class HttpRequest extends HttpMessage
         
         getHost();
         if (_port>0)
-            _header.put(HttpFields.Host,_host+":"+_port);
+            _header.put(HttpFields.__Host,_host+":"+_port);
         else
-            _header.put(HttpFields.Host,_host);
+            _header.put(HttpFields.__Host,_host);
     }
     
     /* ------------------------------------------------------------ */
@@ -522,6 +499,31 @@ public class HttpRequest extends HttpMessage
         
     }
 
+    /* ------------------------------------------------------------ */
+    /** Convert to String.
+     * The message header is converted to a String.
+     * @return String
+     */
+    public synchronized String toString()
+    {
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+
+        int save_state=_state;
+        try{
+            _state=__MSG_EDITABLE;
+            writeHeader(bout);
+        }
+        catch(IOException e)
+        {
+            Code.warning(e);
+        }
+        finally
+        {
+            _state=save_state;
+        }
+        return bout.toString();
+    }
+    
 
     /* ------------------------------------------------------------ */
     /** Destroy the request.

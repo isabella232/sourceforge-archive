@@ -26,8 +26,10 @@ public class HttpMessage
         __MSG_SENT=4;      // Entity and footers sent.
 
     /* ------------------------------------------------------------ */
+    public final static String __HTTP_0_9 ="HTTP/0.9";
     public final static String __HTTP_1_0 ="HTTP/1.0";
     public final static String __HTTP_1_1 ="HTTP/1.1";
+    public final static String __HTTP_1_X ="HTTP/1.X";
 
     protected int _state;
     protected String _version;
@@ -36,6 +38,14 @@ public class HttpMessage
     protected HttpFields _footer;
     protected Connection _connection;
 
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     */
+    protected HttpMessage()
+    {
+        _header=new HttpFields();
+    }
+    
     /* ------------------------------------------------------------ */
     /** Destroy the header.
      * Help the garbage collector by nulling everything that we can.
@@ -98,6 +108,35 @@ public class HttpMessage
      */
     public void writeNotify()
     {}
+
+    
+    /* -------------------------------------------------------------- */
+    /** Character Encoding.
+     * Checks the Content-Type header for a charset parameter and return its
+     * value if found or ISO-8859-1 otherwise.
+     * @return Character Encoding.
+     */
+    public String getCharacterEncoding ()
+    {
+        String encoding = _header.get(HttpFields.__ContentType);
+        if (encoding==null || encoding.length()==0)
+            return "ISO-8859-1";
+        
+        int i=encoding.indexOf(';');
+        if (i<0)
+            return "ISO-8859-1";
+        
+        i=encoding.indexOf("charset=",i);
+        if (i<0 || i+8>=encoding.length())
+            return "ISO-8859-1";
+            
+        encoding=encoding.substring(i+8);
+        i=encoding.indexOf(' ');
+        if (i>0)
+            encoding=encoding.substring(0,i);
+            
+        return encoding;
+    }
     
     
 }

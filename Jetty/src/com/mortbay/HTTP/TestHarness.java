@@ -234,10 +234,10 @@ public class TestHarness
             t.checkEquals(new String(b,0,11),
                           "Other Stuff","Read other");
         
-            t.checkEquals(f.get(HttpFields.ContentType),
+            t.checkEquals(f.get(HttpFields.__ContentType),
                           "xyz","getHeader");
-            f.put(HttpFields.ContentType,"pqy");
-            t.checkEquals(f.get(HttpFields.ContentType),
+            f.put(HttpFields.__ContentType,"pqy");
+            t.checkEquals(f.get(HttpFields.__ContentType),
                           "pqy","setHeader");
         
             t.checkEquals(f.getIntField("I1"),42,"getIntHeader");

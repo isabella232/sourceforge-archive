@@ -27,93 +27,95 @@ public class HttpFields extends HashMap
     /** General Fields
      */
     public final static String
-        CacheControl = "Cache-Control",
-        Connection = "Connection",
-        Date = "Date",
-        Pragma = "Pragma",
-        Trailer = "Trailer",
-        TransferEncoding = "Transfer-Encoding",
-        Upgrade = "Upgrade",
-        Via = "Via",
-        Warning = "Warning";
+        __CacheControl = "Cache-Control",
+        __Connection = "Connection",
+        __Date = "Date",
+        __Pragma = "Pragma",
+        __Trailer = "Trailer",
+        __TransferEncoding = "Transfer-Encoding",
+        __Upgrade = "Upgrade",
+        __Via = "Via",
+        __Warning = "Warning";
         
     /* ------------------------------------------------------------ */
     /** Entity Fields
      */
     public final static String
-        Allow = "Allow",
-        ContentEncoding = "Content-Encoding",
-        ContentLanguage = "Content-Language",
-        ContentLength = "Content-Length",
-        ContentLocation = "Content-Location",
-        ContentMD5 = "Content-MD5",
-        ContentRange = "Content-Range",
-        ContentType = "Content-Type",
-        Expires = "Expires",
-        LastModified = "Last-Modified";
+        __Allow = "Allow",
+        __ContentEncoding = "Content-Encoding",
+        __ContentLanguage = "Content-Language",
+        __ContentLength = "Content-Length",
+        __ContentLocation = "Content-Location",
+        __ContentMD5 = "Content-MD5",
+        __ContentRange = "Content-Range",
+        __ContentType = "Content-Type",
+        __Expires = "Expires",
+        __LastModified = "Last-Modified";
     
     /* ------------------------------------------------------------ */
     /** Request Fields
      */
     public final static String
-        Accept = "Accept",
-        AcceptCharset = "Accept-Charset",
-        AcceptEncoding = "Accept-Encoding",
-        AcceptLanguage = "Accept-Language",
-        Authorization = "Authorization",
-        Expect = "Expect",
-        From = "From",
-        Host = "Host",
-        IfMatch = "If-Match",
-        IfModifiedSince = "If-Modified-Since",
-        IfNoneMatch = "If-None-Match",
-        IfRange = "If-Range",
-        IfUnmodifiedSince = "If-Unmodified-Since",
-        MaxForwards = "Max-Forwards",
-        ProxyAuthentication = "Proxy-Authentication",
-        Range = "Range",
-        Referer = "Referer",
-        TE = "TE",
-        UserAgent = "User-Agent";
+        __Accept = "Accept",
+        __AcceptCharset = "Accept-Charset",
+        __AcceptEncoding = "Accept-Encoding",
+        __AcceptLanguage = "Accept-Language",
+        __Authorization = "Authorization",
+        __Expect = "Expect",
+        __From = "From",
+        __Host = "Host",
+        __IfMatch = "If-Match",
+        __IfModifiedSince = "If-Modified-Since",
+        __IfNoneMatch = "If-None-Match",
+        __IfRange = "If-Range",
+        __IfUnmodifiedSince = "If-Unmodified-Since",
+        __MaxForwards = "Max-Forwards",
+        __ProxyAuthentication = "Proxy-Authentication",
+        __Range = "Range",
+        __Referer = "Referer",
+        __TE = "TE",
+        __UserAgent = "User-Agent";
 
     /* ------------------------------------------------------------ */
     /** Response Fields
      */
     public final static String
-        AcceptRanges = "Accept-Ranges",
-        Age = "Age",
-        ETag = "ETag",
-        Location = "Location",
-        ProxyAuthenticate = "Proxy-Authenticate",
-        RetryAfter = "Retry-After",
-        Server = "Server",
-        Vary = "Vary",
-        WwwAuthenticate = "WWW-Authenticate";
+        __AcceptRanges = "Accept-Ranges",
+        __Age = "Age",
+        __ETag = "ETag",
+        __Location = "Location",
+        __ProxyAuthenticate = "Proxy-Authenticate",
+        __RetryAfter = "Retry-After",
+        __Server = "Server",
+        __Vary = "Vary",
+        __WwwAuthenticate = "WWW-Authenticate";
      
     /* ------------------------------------------------------------ */
     /** Other Fields
      */
-    public final static String Cookie = "Cookie";
-    public final static String SetCookie = "Set-Cookie";
+    public final static String __Cookie = "Cookie";
+    public final static String __SetCookie = "Set-Cookie";
+    public final static String __MimeVersion ="MIME-Version";
     
     /* ------------------------------------------------------------ */
     /** Fields Values
      */    
-    public final static String Chunked = "chunked";
-    public final static String Close = "close";
-    public final static String WwwFormUrlEncode = "application/x-www-form-urlencoded";
-    
+    public final static String __Chunked = "chunked";
+    public final static String __Close = "close";
+    public final static String __TextHtml = "test/html";
+    public final static String __WwwFormUrlEncode =
+        "application/x-www-form-urlencoded";
     
     /* ------------------------------------------------------------ */
     /** Single valued Fields
      */  
     public final static String[] __SingleValued=
     {
-        Age,Authorization,ContentLength,ContentLocation,ContentMD5,
-        ContentRange,ContentType,Date,ETag,Expires,From,Host,
-        IfModifiedSince,IfRange,IfUnmodifiedSince,LastModified,
-        Location,MaxForwards,ProxyAuthentication,Range,Referer,
-        RetryAfter,Server,UserAgent
+        __Age,__Authorization,__ContentLength,__ContentLocation,__ContentMD5,
+        __ContentRange,__ContentType,__Date,__ETag,__Expires,__From,__Host,
+        __IfModifiedSince,__IfRange,__IfUnmodifiedSince,__LastModified,
+        __Location,__MaxForwards,__ProxyAuthentication,__Range,__Referer,
+        __RetryAfter,__Server,__UserAgent
     };
     public final static Set __singleValuedSet=new HashSet(37);
     static
@@ -130,8 +132,10 @@ public class HttpFields extends HashMap
     public final static byte[] __COLON_B = {(byte)':',(byte)' '};
 
     /* -------------------------------------------------------------- */
-    public final static DateCache __dateSend = 
+    public final static DateCache __dateCache = 
         new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
+    public final static SimpleDateFormat __dateSend = 
+        new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
     public final static SimpleDateFormat __dateReceive[] =
     {
         new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz"),
@@ -161,7 +165,8 @@ public class HttpFields extends HashMap
     {
         TimeZone tz = TimeZone.getTimeZone("GMT");
         tz.setID("GMT");
-        __dateSend.getFormat().setTimeZone(tz);
+        __dateSend.setTimeZone(tz);
+        __dateCache.getFormat().setTimeZone(tz);
         for(int i=0;i<__dateReceive.length;i++)
             __dateReceive[i].setTimeZone(tz);
     }
@@ -439,9 +444,31 @@ public class HttpFields extends HashMap
      * @param name the field name
      * @param value the field date value
      */
-    public void putDateField(String name, long date)
+    public void putDateField(String name, Date date)
     {
         put(name, __dateSend.format(date));
+    }
+    
+    /* -------------------------------------------------------------- */
+    /**
+     * Sets the value of a date field.
+     * @param name the field name
+     * @param value the field date value
+     */
+    public void putDateField(String name, long date)
+    {
+        put(name, __dateSend.format(new Date(date)));
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Set date field to the current time.
+     * Sets the value of a date field to the current time.  Uses
+     * efficient DateCache mechanism.
+     * @param name the field name
+     */
+    public void putCurrentTime(String name)
+    {
+        put(name, __dateCache.format(System.currentTimeMillis()));
     }
 
     /* -------------------------------------------------------------- */

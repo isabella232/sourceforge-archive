@@ -74,7 +74,7 @@ public class HttpListener extends ThreadPool
                 
                     if (HttpMessage.__HTTP_1_0.equals(request.getProtocol()))
                         break;
-                    if (HttpFields.Close
+                    if (HttpFields.__Close
                         .equals(null/*XXX response.getHeader(HttpHeader.Connection)*/))
                     {
                         Code.debug("Closing persistent connection");
