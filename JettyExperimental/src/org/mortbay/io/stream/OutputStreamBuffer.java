@@ -73,15 +73,15 @@ public class OutputStreamBuffer extends ByteArrayBuffer implements OutBuffer
     /* 
      * @see org.mortbay.io.OutBuffer#flush(org.mortbay.io.Buffer)
      */
-    public int flush(Buffer header) throws IOException
+    public int flush(Buffer header, Buffer trailer) throws IOException
     {
         // TODO lots of efficiency stuff here to avoid double write
 
         int total=0;
         
         // See if the header buffer will fit in front of buffer content.
-        int length=header.length();
-        if (length<=getIndex())
+        int length=header==null?0:header.length();
+        if (length>0 && length<=getIndex())
         {
             int pi=putIndex();
             setGetIndex(getIndex()-length);
@@ -91,20 +91,34 @@ public class OutputStreamBuffer extends ByteArrayBuffer implements OutBuffer
         }
         else if (length>0)
         {
-            System.err.println(header.toDetailString());
             _out.write(header.array(),header.getIndex(),length);
             total=length;
         }
         header.clear();
+
+        // See if the trailer buffer will fit in front of buffer content.
+        length=trailer==null?0:trailer.length();
+        if (length>0 && length<=space())
+        {
+            put(trailer); 
+            trailer.clear();
+        }
         
         length=length();
         if (length>0)
-        {
-            System.err.println(this.toDetailString());
             _out.write(array(),getIndex(),length);
-        }
+       
         total+=length;
         clear();
+        
+        // write trailer if it was not stuffed in the buffer.
+        length=trailer==null?0:trailer.length();
+        if (length>0 && length<=space())
+        {
+            _out.write(trailer.array(),trailer.getIndex(),length);
+            total+=length;
+            trailer.clear();
+        }
         
         return total;
     }

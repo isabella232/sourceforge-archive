@@ -15,13 +15,8 @@ import org.mortbay.io.InBuffer;
 import org.mortbay.io.Portable;
 
 /**
- * 
- */
-/**
  * @author gregw
  *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
 public class InputStreamBuffer extends ByteArrayBuffer implements InBuffer
 {

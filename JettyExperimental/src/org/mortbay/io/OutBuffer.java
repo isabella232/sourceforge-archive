@@ -37,12 +37,13 @@ public interface OutBuffer extends Buffer
      * sink is backing the buffer. The getIndex is updated with the number of bytes flushed.
      * Any mark set is cleared.
      * If the entire contents of the buffer are flushed, then an implicit empty() is done.
-     * The passed header buffer is written before the contents of this buffer. This may be done 
-     * either as gather write, as a poke into this buffer or as two writes. The implementation is free to
+     * The passed header/trailer buffers are written before/after the contents of this buffer. This may be done 
+     * either as gather writes, as a poke into this buffer or as several writes. The implementation is free to
      * select the optimal mechanism.
      * @param header A buffer to write before flushing this buffer. This buffers getIndex is updated.
+     * @param trailer A buffer to write after flushing this buffer. This buffers getIndex is updated.
      * @return the total number of bytes written.
      */
-    int flush(Buffer header) throws IOException;
+    int flush(Buffer header, Buffer trailer) throws IOException;
 
 }
