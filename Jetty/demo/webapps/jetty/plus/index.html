@@ -331,8 +331,8 @@ To use JAAS:
           &lt;Set name="RoleCheckPolicy"&gt;
             &lt;New class="org.mortbay.jaas.StrictRoleCheckPolicy"/&gt;
           &lt;/Set&gt;
-          &lt;Set name="CallbackHandler"&gt;
-            &lt;New class="org.mortbay.jaas.callback.DefaultCallbackHandler"/&gt;
+          &lt;Set name="CallbackHandlerClass"&gt;
+            org.mortbay.jaas.callback.DefaultCallbackHandler
           &lt;/Set&gt;
         &lt;/New&gt;
     &lt;/Set&gt;
@@ -340,7 +340,7 @@ To use JAAS:
   </pre></code>
   Note that it is only actually necessary to specify the
         <code>RoleCheckPolicy</code> or
-        <code>CallbackHandler</code> if you have provided custom
+        <code>CallbackHandlerClass</code> if you have provided custom
         implementations of them.
  </li>
 <BR>
