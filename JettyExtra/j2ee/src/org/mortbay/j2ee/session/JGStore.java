@@ -316,7 +316,7 @@ public class
       Object[] data={new Long(System.currentTimeMillis()), state};
       try
       {
-	return org.javagroups.util.Util.objectToByteBuffer (data);
+	return MarshallingInterceptor.marshal(data);
       }
       catch (Exception e)
       {
@@ -324,6 +324,7 @@ public class
 	return null;
       }
     }
+
   /**
    * initialise ourself from the current state of another store...
    *
@@ -341,7 +342,7 @@ public class
 	{
 	  // TODO - this needs to be loaded into webapps ClassLoader,
 	  // then we can lose the MarshallingInterceptor...
-	  data=(Object[])org.javagroups.util.Util.objectFromByteBuffer (tmp);
+	  data=(Object[])MarshallingInterceptor.demarshal(tmp);
 	}
 	catch (Exception e)
 	{
