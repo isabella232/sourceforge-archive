@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+
 Jetty-4.1.D2
  + Support trusted external authenticators.
  + Moved jmx classes from JettyExtra to here.
@@ -10,6 +11,14 @@ Jetty-4.1.D2
  + Better recycling of HttpRequests.
  + Protect session.getAttributeNames from concurrent modifications.
  + Allow coma separated cookies and headers
+ + Back out Don't chunk 30x empty responses. 
+ + Conditional header tested against welcome file not directory.
+ + Improved ThreadedServer stopping on bad networks
+
+Jetty-4.0.4 - 23 June 2002
+ + Back out change: Don't chunk 30x empty responses.
+ + Conditional header tested against welcome file not directory.
+ + Improved ThreadedServer stopping on bad networks
 
 Jetty-4.0.3 - 20 June 2002
  + WebapplicationContext.start sets context loader

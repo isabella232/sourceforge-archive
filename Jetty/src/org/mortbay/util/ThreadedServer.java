@@ -583,10 +583,10 @@ abstract public class ThreadedServer extends ThreadPool
         {
             if(_listen!=null && _address!=null)
             {
+		InetAddress addr=_address.getInetAddress();
                 try{
-                    InetAddress addr=_address.getInetAddress();
                     if (addr==null || addr.toString().startsWith("0.0.0.0"))
-                        addr=InetAddress.getLocalHost();
+                        addr=InetAddress.getByName("127.0.0.1");
                     Code.debug("Self connect to close listener ",addr,
                                ":"+_address.getPort());
                     Socket socket = new
@@ -597,10 +597,10 @@ abstract public class ThreadedServer extends ThreadPool
                 }
                 catch(IOException e)
                 {
-                    Code.warning("problem stopping acceptor "+_listen,e);
+                    Code.warning("problem stopping acceptor "+addr+": "+e.toString());
+                    Code.debug(e);
                 }
             }
         }
     }
-    
 }

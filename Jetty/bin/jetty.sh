@@ -432,10 +432,18 @@ esac
 #####################################################
 # Build the classpath with Jetty's bundled libraries.
 #####################################################
-CP=`ls $JETTY_HOME/lib/*.jar | paste -s -d"$PATH_SEPARATOR" - `
+
+JAVA_VERSION=`expr "$(java -version 2>&1 | head -1)" : '.*1\.\([0-9]\)'`
+if [ $JAVA_VERSION -lt 4 ] 
+then
+   CP=$(ls $JETTY_HOME/lib/*.jar | egrep -v jdk1.4 | paste -s -d"$PATH_SEPARATOR" - )
+else
+   CP=$(ls $JETTY_HOME/lib/*.jar | egrep -v jetty.jar | paste -s -d"$PATH_SEPARATOR" - )
+fi
 [ "$CLASSPATH" != "" ] && CP=$CP$PATH_SEPARATOR$CLASSPATH
 [ -f $JAVA_HOME/lib/tools.jar ] && CP="$CP$PATH_SEPARATOR$JAVA_HOME/lib/tools.jar"
 CLASSPATH="$CP"
+
 
 #####################################################
 # Add jetty properties to Java VM options.

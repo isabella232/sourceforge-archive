@@ -646,37 +646,30 @@ public class HttpConnection
         {
             if(_persistent)
             {
-                if (status>=300 && status<400)
+                switch (_dotVersion)
                 {
-                    _response.setField(HttpFields.__ContentLength,"0");
-                }
-                else
-                {    
-                    switch (_dotVersion)
-                    {
-                      case 0:
-                          {
-                              _close=true;
-                              _persistent=false;
-                              _response.setField(HttpFields.__Connection,
-                                                 HttpFields.__Close);
-                          }
-                          break;
-                      case 1:
-                          {
-                              // force chunking on.
-                              _response.setField(HttpFields.__TransferEncoding,
-                                                 HttpFields.__Chunked);
-                              _outputStream.setChunking();
-                          }
-                          break;
-                          
-                      default:
+                  case 0:
+                      {
                           _close=true;
+                          _persistent=false;
                           _response.setField(HttpFields.__Connection,
                                              HttpFields.__Close);
-                          break;
-                    }
+                      }
+                      break;
+                  case 1:
+                      {
+                          // force chunking on.
+                          _response.setField(HttpFields.__TransferEncoding,
+                                             HttpFields.__Chunked);
+                          _outputStream.setChunking();
+                      }
+                      break;
+                      
+                  default:
+                      _close=true;
+                      _response.setField(HttpFields.__Connection,
+                                         HttpFields.__Close);
+                      break;
                 }
             }
             else

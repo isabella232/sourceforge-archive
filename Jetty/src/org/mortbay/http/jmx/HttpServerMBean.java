@@ -90,8 +90,9 @@ public class HttpServerMBean extends LifeCycleMBean
     {
         super.defineManagedResource();
         
-        defineAttribute("listeners",false);
-        defineAttribute("contexts",false);
+        defineAttribute("listeners",READ_ONLY);
+        defineAttribute("contexts",READ_ONLY);
+        defineAttribute("components",READ_ONLY,ON_MBEAN);
         defineAttribute("requestLog");
 
         
@@ -161,6 +162,17 @@ public class HttpServerMBean extends LifeCycleMBean
             Code.warning(e);
         }
     }
+
+    /* ------------------------------------------------------------ */
+    public ObjectName[] getComponents()
+    {
+        Holder[] h=(Holder[])_mbeanMap.values().toArray(new Holder[_mbeanMap.size()]);
+        ObjectName[] on = new ObjectName[h.length];
+        for (int i=0;i<on.length;i++)
+            on[i]=h[i].oName;
+        return on;
+    }
+    
     
     /* ------------------------------------------------------------ */
     public synchronized void removeComponent(ComponentEvent event)

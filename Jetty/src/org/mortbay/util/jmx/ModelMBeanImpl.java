@@ -102,6 +102,12 @@ public class ModelMBeanImpl
     public final static String INT="int";
     
     public final static String[] NO_PARAMS=new String[0];
+
+    public final static boolean READ_WRITE=true;
+    public final static boolean READ_ONLY=false;
+    public final static boolean ON_MBEAN=true;
+    public final static boolean ON_OBJECT=false;
+    
     
     private static HashMap __objectId = new HashMap();
 
@@ -316,7 +322,7 @@ public class ModelMBeanImpl
      */
     public synchronized void defineAttribute(String name)
     {
-        defineAttribute(name,true);
+        defineAttribute(name,true,false);
     }
     
     /* ------------------------------------------------------------ */
@@ -330,11 +336,28 @@ public class ModelMBeanImpl
      */
     public synchronized void defineAttribute(String name, boolean writable)
     {
+        defineAttribute(name,writable,false);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Define an attribute on the managed object.
+     * The meta data is defined by looking for standard getter and
+     * setter methods. Descriptions are obtained with a call to
+     * findDescription with the attribute name.
+     * @param name The name of the attribute. Normal java bean
+     * capitlization is enforced on this name.
+     * @param writable If false, do not look for a setter.
+     * @param onMBean .
+     */
+    public synchronized void defineAttribute(String name,
+                                             boolean writable,
+                                             boolean onMBean)
+    {
         _dirty=true;
         
         String uName=name.substring(0,1).toUpperCase()+name.substring(1);
         name=java.beans.Introspector.decapitalize(name);
-        Class oClass=_object.getClass();
+        Class oClass=onMBean?this.getClass():_object.getClass();
 
         Class type=null;
         Method getter=null;
@@ -615,7 +638,10 @@ public class ModelMBeanImpl
             throw new AttributeNotFoundException(name);
         try
         {
-            return getter.invoke(_object,null);
+            Object o=_object;
+            if (getter.getDeclaringClass().isInstance(this))
+                o=this;
+            return getter.invoke(o,null);
         }
         catch(IllegalAccessException e)
         {
@@ -663,7 +689,10 @@ public class ModelMBeanImpl
             throw new AttributeNotFoundException(attr.getName());
         try
         {
-            setter.invoke(_object,new Object[]{attr.getValue()});
+            Object o=_object;
+            if (setter.getDeclaringClass().isInstance(this))
+                o=this;
+            setter.invoke(o,new Object[]{attr.getValue()});
         }
         catch(IllegalAccessException e)
         {

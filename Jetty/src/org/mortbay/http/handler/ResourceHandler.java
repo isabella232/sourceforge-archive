@@ -242,10 +242,6 @@ public class ResourceHandler extends NullHandler
  
         if (resource!=null && resource.exists())
         {            
-            // Check modified dates
-            if (!passConditionalHeaders(request,response,resource))
-                return;
-     
             // check if directory
             if (resource.isDirectory())
             {
@@ -278,12 +274,20 @@ public class ResourceHandler extends NullHandler
                     return;
                 }
 
+                // Check modified dates
+                if (!passConditionalHeaders(request,response,resource))
+                    return;
                 // If we got here, no forward to index took place
                 sendDirectory(request,response,resource,pathInContext.length()>1);
             }
             // check if it is a file
             else if (resource.exists())
+            {
+                // Check modified dates
+                if (!passConditionalHeaders(request,response,resource))
+                    return;
                 sendData(request,response,resource,true);
+            }
             else
                 // don't know what it is
                 Code.warning("Unknown file type");
