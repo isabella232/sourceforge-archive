@@ -145,7 +145,7 @@ public class HttpContext implements LifeCycle,
     private transient String[] _hostsArray;
 
     /* ------------------------------------------------------------ */
-    transient Object _statsLock;
+    transient Object _statsLock=new Object[0];
     transient long _statsStartedAt;
     transient int _requests;
     transient int _requestsActive;
@@ -161,9 +161,7 @@ public class HttpContext implements LifeCycle,
     /** Constructor. 
      */
     public HttpContext()
-    {
-        _statsLock=new Object[0];
-    }
+    {}
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -182,6 +180,7 @@ public class HttpContext implements LifeCycle,
         throws IOException, ClassNotFoundException
     {
         in.defaultReadObject();
+        _statsLock=new Object[0];
         _cache=new HashMap();
         getHandlers();
         for (int i=0;i<_handlersArray.length;i++)

@@ -112,7 +112,7 @@ public class HttpServer implements LifeCycle,
     
     /* ------------------------------------------------------------ */
     private boolean _statsOn=false;
-    private transient Object _statsLock;
+    private transient Object _statsLock=new Object[0];
     private transient long _statsStartedAt=0;
     private transient int _connections;
     private transient int _connectionsOpen;
@@ -147,7 +147,6 @@ public class HttpServer implements LifeCycle,
     {
         setAnonymous(anonymous);
         _virtualHostMap.setIgnoreCase(true);
-        _statsLock=new Object[0];
     }
     
     /* ------------------------------------------------------------ */
@@ -161,6 +160,7 @@ public class HttpServer implements LifeCycle,
         _virtualHostMap.clear();
         setContexts(contexts);
         setListeners(listeners);
+        _statsLock=new Object[0];
     }
  
     
@@ -684,7 +684,7 @@ public class HttpServer implements LifeCycle,
             if (!listener.isStarted())
                 try{listener.start();}catch(Exception e){mex.add(e);}
         }
-        
+
         mex.ifExceptionThrowMulti();
         Log.event("Started "+this);
     }
