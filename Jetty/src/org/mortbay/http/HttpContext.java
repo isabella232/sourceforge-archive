@@ -721,7 +721,7 @@ public class HttpContext extends ResourceCache
             if (loader instanceof URLClassLoader)
             {
                 URL[] urls = ((URLClassLoader)loader).getURLs();
-                for (int j=0;j<urls.length;j++)
+                for (int j=0;urls!=null && j<urls.length;j++)
                 {
                     try
                     {
