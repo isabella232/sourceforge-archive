@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Fixed recursive DEBUG loop in Logging.
  + jetty.sh run was ignoring arguments
 
 Jetty-4.0.B2 - 25 Feb 2002

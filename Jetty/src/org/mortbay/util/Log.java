@@ -79,6 +79,7 @@ public class Log
     {
         if (!_initialized)
         {
+            _initialized = true;
             _logOptions=System.getProperty("LOG_OPTIONS",
                                            Code.getDebug()?"stLT":"tT");
             String sinkClasses = System.getProperty("LOG_CLASSES",
@@ -107,7 +108,6 @@ public class Log
                     e.printStackTrace();
                 }
             }
-            _initialized = true;
         }
     }
     
