@@ -18,7 +18,8 @@ package org.mortbay.j2ee.session;
 // Stores manage State, and will have to notify the Session Manager
 // when they believe that this has timed-out.
 
-interface Store
+public interface
+  Store
 {
   // Store LifeCycle
   void start();

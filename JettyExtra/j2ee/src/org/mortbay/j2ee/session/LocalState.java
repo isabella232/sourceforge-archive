@@ -18,7 +18,8 @@ import java.util.Map;
 // a simple implementation used to hold the State of an HttpSession
 // that is Local (not Distributed).
 
-class LocalState
+public class
+  LocalState
   implements State
 {
   protected final String _id;
