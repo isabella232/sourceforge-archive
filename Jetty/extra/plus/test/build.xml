@@ -39,6 +39,7 @@ the Ant optional tasks from:
   <property name="etc"            value="${extra}/etc" />
   <property name="lib"            value="${extra}/lib"/>
   <property name="ext"            value="${extra}/ext"/>
+  <property name="resources"      value="${extra}/resources"/>
   <property name="classes"        value="${plus}/classes"/>
   <property name="logs"           value="${extra}/logs"/>
   <property name="test"           value="${plus}/test"/>
@@ -83,6 +84,7 @@ the Ant optional tasks from:
 
     <path id="classpath">
       <pathelement path="${classes}" />
+      <pathelement path="${resources}"/>
       <path refid="extpath" />
     </path>
 

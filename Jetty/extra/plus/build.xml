@@ -54,15 +54,15 @@ Other targets:
         <include name="*.ZIP"/>
      </fileset>
       <fileset dir="${ext}">
-        <include name="hsqldb.jar"/>
+        <include name="*.jar"/>
+        <include name="*.JAR"/>
+        <include name="*.zip"/>
+        <include name="*.ZIP"/>
      </fileset>
     </path>
 
     <path id="resourcepath">
-     <fileset dir="${basedir}/../resources">
-        <include name="*.xml"/>
-        <include name="*.properties"/>
-     </fileset>
+      <pathelement path="${basedir}/../resources"/>
     </path>
 
     <path id="libpath">
@@ -307,6 +307,7 @@ Other targets:
        <jvmarg value="-Djava.security.manager"/>
        <jvmarg value="-Djava.security.policy=${etc}/jaas.policy"/>
        <jvmarg value="-Djava.security.auth.login.config=${etc}/login.conf"/>
+       <jvmarg value="-DSTART=${jetty.home}/extra/etc/start.config"/>
        <arg value="${etc}/jaas.xml"/>
        <classpath>
 	 <path refid="resourcepath"/>

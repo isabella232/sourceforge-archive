@@ -11,6 +11,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.security.AccessController;
+import java.security.Principal;
 import java.security.SecurityPermission;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -20,7 +21,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.mortbay.jaas.callback.DefaultCallbackHandler;
-import org.mortbay.http.UserPrincipal;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.util.Loader;
 
@@ -152,10 +152,10 @@ public class TestJAASUserRealm extends TestCase
         realm.setRoleCheckPolicy (new StrictRoleCheckPolicy());
         
 
-        UserPrincipal userPrincipal = realm.authenticate ("me", "blah",(HttpRequest)null);
+        JAASUserPrincipal userPrincipal = (JAASUserPrincipal)realm.authenticate ("me", "blah",(HttpRequest)null);
         assertNull (userPrincipal);
         
-        userPrincipal = realm.authenticate ("me", "me", (HttpRequest)null);
+        userPrincipal = (JAASUserPrincipal)realm.authenticate ("me", "me", (HttpRequest)null);
 
         assertNotNull (userPrincipal);
         assertNotNull (userPrincipal.getName());

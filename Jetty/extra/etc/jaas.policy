@@ -16,6 +16,7 @@ grant
   permission java.io.FilePermission "${jdk.home}${/}lib${/}-", "read";
   permission java.io.FilePermission "${jdk.home}${/}jre${/}lib${/}-", "read";
   permission java.io.FilePermission "${java.io.tmpdir}/-", "read,write,delete";
+  permission java.io.FilePermission "logs/log4j.log", "write";
   permission java.security.SecurityPermission "getPolicy";
   permission javax.security.auth.AuthPermission "doAsPrivileged";
 };

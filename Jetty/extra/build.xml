@@ -30,7 +30,7 @@ Other targets:
   <!-- all                                                                  -->
   <!-- ==================================================================== -->
   <target name="all" 
-	  depends="do.plus,do.loadbalancer,do.ftp,do.jdk1.2,do.j2ee"
+	  depends="do.plus,do.loadbalancer,do.ftp,do.jdk1.2,do.j2ee,test"
 	  description="Build all extras">
   </target>
 

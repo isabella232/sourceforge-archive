@@ -21,7 +21,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.mortbay.jndi.NamingContext;
-import org.mortbay.util.LogX;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
