@@ -63,11 +63,10 @@ set ACTION=%1
 set ARGS=%2 %3 %4 %5 %6 %7 %8 %9
 set CONFIGS=
 
-
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check for JAVA_HOME
 :::::::::::::::::::::::::::::::::::::::::::::::::::
-if not ""=="%JAVA_HOME%" goto have_java_home
+if not x==x%JAVA_HOME% goto have_java_home
   echo "** ERROR: JAVA_HOME variable not set. Sorry, can't find java command."
   goto ERROR
 :have_java_home
@@ -90,7 +89,7 @@ goto check_jetty_home
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 :: if no JETTY_HOME, search likely locations.
 :::::::::::::::::::::::::::::::::::::::::::::::::::
-if not ""=="%JETTY_HOME%" goto check_jetty_home
+if not x==x%JETTY_HOME% goto check_jetty_home
    ::@TODO Find a way to search for the jetty directory
    if not exist .\%JETTY_JAR% goto check_parent_dir
    set JETTY_HOME=.
@@ -103,7 +102,7 @@ if not ""=="%JETTY_HOME%" goto check_jetty_home
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 :: No JETTY_HOME yet? We're out of luck!
 :::::::::::::::::::::::::::::::::::::::::::::::::::
-if not ""=="%JETTY_HOME%" goto check_jetty_jar
+if not x==x%JETTY_HOME% goto check_jetty_jar
     echo "** ERROR: JETTY_HOME not set, you need to set it or install in a standard location" 
     goto ERROR
 
@@ -115,9 +114,9 @@ if exist %JETTY_HOME%\%JETTY_JAR% goto have_jetty_home
 :have_jetty_home
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Get the list of config.xml files from the command line.
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if ""=="%ARGS%" goto no_args
-    set CONFIGS=%CONFIGS% %ARGS%
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+if x==x%ARGS% goto no_args
+    set CONFIGS=%ARGS%
 :no_args
 
 ::@TODO Find a way to parse jetty.conf
@@ -127,13 +126,13 @@ goto no_jetty_conf
 :: but only if no configurations were given on the
 :: command line.
 :::::::::::::::::::::::::::::::::::::::::::::::::::
-if ""=="%JETTY_CONF%" set JETTY_CONF=%JETTY_HOME%\etc\jetty.conf
+if x==x%JETTY_CONF% set JETTY_CONF=%JETTY_HOME%\etc\jetty.conf
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Read the configuration file if one exists
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 set CONFIG_LINES=
-if not ""=="%CONFIGS%" goto have_configs
+if not x==x%CONFIGS% goto have_configs
   if not exist "%JETTY_CONF%" goto no_jetty_conf
      for /f %%L in (%JETTY_CONF%) do set CONFIG_LINES=%CONFIG_LINES% %%L
 
@@ -141,7 +140,7 @@ if not ""=="%CONFIGS%" goto have_configs
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Get the list of config.xml files from jetty.conf
 :::::::::::::::::::::::::::::::::::::::::::::::::::
-if not ""=="%CONFIG_LINES" (
+if not x==x%CONFIG_LINES (
   for /f %%C in (%CONFIG_LINES%) do (
     if not exist "%%C" (
       echo "** WARNING: Cannot read '%%C' specified in '%JETTY_CONF%' 
@@ -165,6 +164,8 @@ if not ""=="%CONFIG_LINES" (
 )
 
 :no_jetty_conf
+
+echo CONFIGS=%CONFIGS%
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the demo server if there's nothing else to run
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -173,6 +174,8 @@ if not x==x%CONFIGS% goto have_configs
 
 
 :have_configs
+echo CONFIGS=%CONFIGS%
+
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check if the admin servlet was added. 
 :: Add it if not. 
@@ -187,19 +190,19 @@ if not x==x%CONFIGS% goto have_configs
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check where logs should go.
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if ""=="%JETTY_LOG%" set JETTY_LOG=%JETTY_HOME%\logs
+if x==x%JETTY_LOG% set JETTY_LOG=%JETTY_HOME%\logs
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Find a location for the pid file
 :::::::::::::::::::::::::::::::::::::::::::::::::::::
-if ""=="%JETTY_RUN%" set JETTY_RUN=%TEMP%
+if x==x%JETTY_RUN% set JETTY_RUN=%TEMP%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Determine which JVM of version >1.2
 :: Try to use JAVA_HOME
 :::::::::::::::::::::::::::::::::::::::::::::::::::
-if ""=="%JAVA%" (
-  if not ""=="%JAVACMD%" (
+if x==x%JAVA% (
+  if not x==x%JAVACMD% (
      set JAVA="%JAVACMD%"
   ) else (
     if exist %JAVA_HOME%\bin\jre (
@@ -219,7 +222,8 @@ set CP=%CP%;%JETTY_HOME%\lib\com.mortbay.jetty.jar
 set CP=%CP%;%JETTY_HOME%\lib\com.microstar.xml.jar
 if exist "%JETTY_HOME%\LIB\org.apache.jasper.jar"  set CP=%CP%;%JETTY_HOME%\lib\org.apache.jasper.jar
 if exist "%JETTY_HOME%\LIB\com.sun.net.ssl.jar"    set CP=%CP%;%JETTY_HOME%\lib\com.sun.net.ssl.jar
-set CLASSPATH=%CP% %CLASSPATH%
+if exist "%JAVA_HOME%\lib\tools.jar"               set CP=%CP%;%JAVA_HOME%\lib\tools.jar
+set CLASSPATH=%CP%;%CLASSPATH%
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Add jetty properties to Java VM options.
@@ -254,7 +258,6 @@ echo RUN_CMD        =  %RUN_CMD%
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 
 if not "%ACTION%"=="start" goto try_stop
-        set RUN_CMD=%JAVA% -DLOG_FILE=%JETTY_LOG%\yyyy_mm_dd.jetty.log %JAVA_OPTIONS% com.mortbay.Jetty.Server %CONFIGS%
         echo "Starting Jetty: "
         echo "STARTED `date`" >>%JETTY_LOG%\jetty.out
         start %RUN_CMD% >> %JETTY_LOG%\jetty.out
