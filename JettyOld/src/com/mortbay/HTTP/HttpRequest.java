@@ -156,6 +156,8 @@ public class HttpRequest extends HttpHeader
             if (content_length>=0)
                 in.setContentLength(content_length);
         }
+        
+        Code.debug(this);
     }
 
     /* -------------------------------------------------------------- */
@@ -1394,7 +1396,6 @@ public class HttpRequest extends HttpHeader
         }
 
         uri = new URI(uris);
-        Code.debug(requestLine);
     }
 
 

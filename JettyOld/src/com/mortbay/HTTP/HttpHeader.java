@@ -349,7 +349,7 @@ public class HttpHeader
         try
         {
             StringWriter sw = new StringWriter();
-            write(sw,null);
+            write(sw);
             return sw.toString();
         }
         catch(Exception e)
@@ -455,17 +455,3 @@ public class HttpHeader
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
