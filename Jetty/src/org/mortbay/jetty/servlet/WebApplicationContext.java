@@ -186,7 +186,7 @@ public class WebApplicationContext
     /* ------------------------------------------------------------ */
     private void resolveWebApp()
         throws IOException
-    {
+    {   
         if (_webApp==null && _war!=null && _war.length()>0)
         {
             // Set dir or WAR
@@ -551,6 +551,7 @@ public class WebApplicationContext
             _errorPages.clear();
         _errorPages=null;
 
+        _webApp=null;
     }
     
     /* ------------------------------------------------------------ */
