@@ -8,10 +8,19 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
     <param-name>home</param-name>
     <param-value>http://jetty.mortbay.org</param-value>
   </context-param>
+
   <context-param>
     <param-name>admin</param-name>
     <param-value>mortbay@mortbay.com</param-value>
   </context-param>
+
+  <!-- set the path for session cookies. Needs to be common for all webapps sharing 
+       the same session ID space -->
+  <context-param>
+    <param-name>org.mortbay.jetty.servlet.SessionPath</param-name>
+    <param-value>/</param-value>
+  </context-param>
+
 
   <listener>
     <listener-class>org.mortbay.webapps.jetty.DemoListener</listener-class>
@@ -37,7 +46,10 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
   </filter-mapping>
   -->
 
-  <!--
+
+  <!-- A sample filter that allows servlets to be used as welcome 
+       files without the need for the file to exist.
+       Uncomment to activate.
   <filter>
     <filter-name>Welcome Filter</filter-name>
     <filter-class>org.mortbay.servlet.WelcomeFilter</filter-class>

@@ -107,25 +107,18 @@
   <Call name="addWebApplication">
     <Arg>/jetty/*</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/jetty</Arg>
+    <!-- See demo/webapps/jetty/WEB-INF/jetty-web.xml for more configuration       -->
+    <!-- That configuration could go here, but is more flexible in a separate file -->
+  </Call>
 
-    <!-- uncomment this section to add a session manager with a SecureRandom generator
-    <Call name="getServletHandler">
-      <Set name="sessionManager">
-        <New class="org.mortbay.jetty.servlet.HashSessionManager">
-          <Arg><New class="java.security.SecureRandom"/></Arg>
-        </New>
-      </Set>
-    </Call>
-    -->  
-
-    <!-- uncomment to add a worker tag to the session manager
-    <Call name="getServletHandler">
-      <Call name="getSessionManager">
-        <Set name="workerName">demo0</Set>
-      </Call>
-    </Call>
-    -->
-
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Add jetty demo web applications.                                -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <Call name="addWebApplication">
+    <Arg>/jetty2/*</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/jetty</Arg>
+    <!-- See demo/webapps/jetty/WEB-INF/jetty-web.xml for more configuration       -->
+    <!-- That configuration could go here, but is more flexible in a separate file -->
   </Call>
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -136,6 +129,7 @@
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/servlets-examples.war</Arg>
     <Set name="extractWAR">false</Set>
   </Call>
+
   <Call name="addWebApplication">
     <Arg>/jsp-examples/*</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/jsp-examples.war</Arg>
@@ -148,6 +142,7 @@
   <Call name="addWebApplication">
     <Arg>/javadoc/*</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/javadoc.war</Arg>
+    <Set name="extractWAR">false</Set>
   </Call>
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

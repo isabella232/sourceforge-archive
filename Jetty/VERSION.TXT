@@ -3,6 +3,7 @@ Jetty Versions
 
 
 Jetty-5.0.alpha3
+ + Reworked Dispatcher to better support cross context sessions.
  + Use File.toURI().toURL() when jdk 1.2 alternative is available.
  + Priority added to ThreadPool
  + replaced win32 service with http://wrapper.tanukisoftware.org

@@ -55,7 +55,7 @@ public class SessionDump extends HttpServlet
         String value =  request.getParameter("Value");
         String age =  request.getParameter("MaxAge");
 
-        String nextUrl = request.getRequestURI()+"?R="+redirectCount++;
+        String nextUrl = getURI(request)+"?R="+redirectCount++;
         if (action.equals("New Session"))
         {   
             session = request.getSession(true);
@@ -98,10 +98,10 @@ public class SessionDump extends HttpServlet
         
         page.title("Session Dump Servlet");        
         
-        HttpSession session = request.getSession(request.getRequestURI().indexOf("new")>0);
+        HttpSession session = request.getSession(getURI(request).indexOf("new")>0);
         
         TableForm tf =
-            new TableForm(response.encodeURL(request.getRequestURI()));
+            new TableForm(response.encodeURL(getURI(request)));
         tf.method("POST");
         
         if (session==null)
@@ -151,7 +151,7 @@ public class SessionDump extends HttpServlet
             {
                 log.debug(LogSupport.EXCEPTION,e);
                 page.add("<H1>INVALID Session</H1>");
-                tf=new TableForm(request.getRequestURI());
+                tf=new TableForm(getURI(request));
                 tf.addButton("Action","New Session");
             }
         }
@@ -168,4 +168,14 @@ public class SessionDump extends HttpServlet
     public String getServletInfo() {
         return "Session Dump Servlet";
     }
+
+    /* ------------------------------------------------------------ */
+    private String getURI(HttpServletRequest request)
+    {
+        String uri=(String)request.getAttribute("javax.servlet.forward.request_uri");
+        if (uri==null)
+            uri=request.getRequestURI();
+        return uri;
+    }
+    
 }

@@ -64,4 +64,32 @@ org.mortbay.jetty.servlet.WebApplicationContext objet
     </Set>
     -->
 
+    <!-- uncomment this section to add a session manager with a SecureRandom generator
+    <Call name="getServletHandler">
+      <Set name="sessionManager">
+        <New class="org.mortbay.jetty.servlet.HashSessionManager">
+          <Arg><New class="java.security.SecureRandom"/></Arg>
+        </New>
+      </Set>
+    </Call>
+    -->  
+
+    <!-- uncomment to add a worker tag to the session manager
+    <Call name="getServletHandler">
+      <Call name="getSessionManager">
+        <Set name="workerName">demo0</Set>
+      </Call>
+    </Call>
+    -->
+
+    <!-- uncomment to allow shared session IDs for SSO or cross context dispatch 
+    -->
+    <Call name="getServletHandler">
+      <Call name="getSessionManager">
+        <Call name="setUseRequestedId">
+          <Arg type="boolean">true</Arg>
+        </Call>
+      </Call>
+    </Call>
+
 </Configure>

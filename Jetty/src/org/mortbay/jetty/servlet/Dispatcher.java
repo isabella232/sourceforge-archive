@@ -191,7 +191,6 @@ public class Dispatcher implements RequestDispatcher
         }
         
         Object old_scope = null;
-        ServletHandler servletHandler = servletHttpRequest.getServletHandler();
         try
         {
             if (request.crossContext())
@@ -221,7 +220,6 @@ public class Dispatcher implements RequestDispatcher
                 
                 
                 // Adjust servlet paths
-                servletHttpRequest.setServletHandler(_servletHandler);
                 request.setPaths(_servletHandler.getHttpContext().getContextPath(),
                                  PathMap.pathMatch(_pathSpec,_pathInContext),
                                  PathMap.pathInfo(_pathSpec,_pathInContext),
@@ -242,8 +240,6 @@ public class Dispatcher implements RequestDispatcher
                     .leaveContextScope(httpConnection.getRequest(),
                                        httpConnection.getResponse(),
                                        old_scope);
-            // restore servlet handler
-            servletHttpRequest.setServletHandler(servletHandler);
         }   
     }
 
@@ -258,8 +254,7 @@ public class Dispatcher implements RequestDispatcher
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     class DispatcherRequest extends HttpServletRequestWrapper
-    {
-        
+    {   
         int _filterType;
         String _contextPath;
         String _servletPath;
@@ -269,7 +264,7 @@ public class Dispatcher implements RequestDispatcher
         HashMap _attributes;
         boolean _xContext;
         HttpSession _xSession;
-        
+        String _requestedSessionId;
         ServletHttpRequest _servletHttpRequest;
         
         /* ------------------------------------------------------------ */
@@ -284,8 +279,25 @@ public class Dispatcher implements RequestDispatcher
             // Is this being dispatched to a different context?
             _xContext=
                 servletHttpRequest.getServletHandler()!=_servletHandler;
+            if (_xContext)
+            {
+                // Look for an existing or requested session ID.
+                HttpSession session=httpServletRequest.getSession(false);
+                String session_id=(session==null)
+                    ?httpServletRequest.getRequestedSessionId()
+                    :session.getId();
+
+                // Look for that session in new context to access it.
+                if (session_id!=null)
+                {
+                    _xSession=_servletHandler.getHttpSession(session_id);
+                    if (_xSession!=null)
+                        ((SessionManager.Session)_xSession).access(); 
+                }
+            }
         }
 
+        /* ------------------------------------------------------------ */
         boolean crossContext()
         {
             return _xContext;
@@ -339,7 +351,10 @@ public class Dispatcher implements RequestDispatcher
         /* ------------------------------------------------------------ */
         public String getPathTranslated()
         {
-            return getRealPath(getPathInContext());
+            String info=getPathInfo();
+            if (info==null)
+                return null;
+            return getRealPath(info);
         }
         
         /* ------------------------------------------------------------ */
@@ -559,10 +574,11 @@ public class Dispatcher implements RequestDispatcher
                 if (_xSession==null)
                 {
                     log.debug("Ctx dispatch session");
-                    _xSession=_servletHandler.getHttpSession(getRequestedSessionId());
-                    if (create && ( _xSession==null ||
-                                    !((SessionManager.Session)_xSession).isValid()))
-                        _xSession=_servletHttpRequest.newSession();                    
+                    if (_requestedSessionId==null)
+                        _requestedSessionId=super.getSession(true).getId();
+                    _xSession=_servletHandler.getHttpSession(_requestedSessionId);
+                    if (create && _xSession==null)
+                        _xSession=_servletHandler.newHttpSession(this);
                 }
                 return _xSession;
             }
@@ -575,6 +591,41 @@ public class Dispatcher implements RequestDispatcher
         {
             return getSession(true);
         }
+
+        /* ------------------------------------------------------------ */
+        public String getRequestedSessionId()
+        {
+            if (_requestedSessionId!=null)
+                return _requestedSessionId;
+            return super.getRequestedSessionId();
+        }
+        
+        /* ------------------------------------------------------------ */
+        public String getRealPath(String path)
+        {
+            return _servletHandler.getServletContext().getRealPath(path);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public RequestDispatcher getRequestDispatcher(String url)
+        {
+            if (url == null)
+                return null;
+            
+            if (!url.startsWith("/"))
+            {
+                String relTo=URI.addPaths(getServletPath(),getPathInfo());
+                int slash=relTo.lastIndexOf("/");
+                if (slash>1)
+                    relTo=relTo.substring(0,slash+1);
+                else
+                    relTo="/";
+                url=URI.addPaths(relTo,url);
+            }
+            
+            return _servletHandler.getServletContext().getRequestDispatcher(url);
+        }
+        
     }
     
     /* ------------------------------------------------------------ */

@@ -420,7 +420,7 @@ public class Dump extends HttpServlet
             page.add(Break.para);
             
             page.add(new Heading(1,"Form to generate Dump content"));
-            TableForm tf = new TableForm(response.encodeURL(request.getRequestURI()));
+            TableForm tf = new TableForm(response.encodeURL(getURI(request)));
             tf.method("POST");
             tf.addTextField("TextField","TextField",20,"value");
             Select select = tf.addSelect("Select","Select",true,3);
@@ -431,7 +431,7 @@ public class Dump extends HttpServlet
             page.add(tf);
 
             page.add(new Heading(1,"Form to upload content"));
-            tf = new TableForm(response.encodeURL(request.getRequestURI()));
+            tf = new TableForm(response.encodeURL(getURI(request)));
             tf.method("POST");
             tf.attribute("enctype","multipart/form-data");
             tf.addFileField("file","file");              
@@ -439,7 +439,7 @@ public class Dump extends HttpServlet
             page.add(tf);
             
             page.add(new Heading(1,"Form to get Resource"));
-            tf = new TableForm(response.encodeURL(request.getRequestURI()));
+            tf = new TableForm(response.encodeURL(getURI(request)));
             tf.method("POST");
             tf.addTextField("resource","resource",20,"");              
             tf.addButton("Action","getResource");
@@ -491,6 +491,15 @@ public class Dump extends HttpServlet
     public synchronized void destroy()
     {
         log.debug("Destroyed");
+    }
+    
+    /* ------------------------------------------------------------ */
+    private String getURI(HttpServletRequest request)
+    {
+        String uri=(String)request.getAttribute("javax.servlet.forward.request_uri");
+        if (uri==null)
+            uri=request.getRequestURI();
+        return uri;
     }
     
     /* ------------------------------------------------------------ */
