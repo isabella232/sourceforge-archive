@@ -155,6 +155,35 @@ public class SecurityHandler extends NullHandler
     public void start()
         throws Exception
     {
+        // Check there is a realm
+        if (_realmName!=null && _realmName.length()>0)
+        {
+            _realm = getHandlerContext().getHttpServer()
+                .getRealm(_realmName);
+            super.start();
+            if (_realm==null)
+                Code.warning("Unknown realm: "+_realmName+" for "+this);
+        }
+        // Or that we have some contraints.
+        else if (_constraintMap.size()>0)
+        {
+            Iterator i = _constraintMap.values().iterator();
+            while(i.hasNext())
+            {
+                Iterator j= ((ArrayList)i.next()).iterator();
+                while(j.hasNext())
+                {
+                    SecurityConstraint sc = (SecurityConstraint)j.next();
+                    if (sc.isAuthenticated())
+                    {
+                        Code.warning("No Realm set for "+this);
+                        super.start();
+                        return;
+                    }
+                }
+            }
+        }
+
         // If method is FORM
         if (__FORM_AUTH.equals(_authMethod))
         {
@@ -191,35 +220,7 @@ public class SecurityHandler extends NullHandler
             }
         }
 
-        // Check there is a realm
-        if (_realmName!=null && _realmName.length()>0)
-        {
-            _realm = getHandlerContext().getHttpServer()
-                .getRealm(_realmName);
-            super.start();
-            if (_realm==null)
-                Code.warning("Unknown realm: "+_realmName+" for "+this);
-        }
-        // Or that we have some contraints.
-        else if (_constraintMap.size()>0)
-        {
-            Iterator i = _constraintMap.values().iterator();
-            while(i.hasNext())
-            {
-                Iterator j= ((ArrayList)i.next()).iterator();
-                while(j.hasNext())
-                {
-                    SecurityConstraint sc = (SecurityConstraint)j.next();
-                    if (sc.isAuthenticated())
-                    {
-                        Code.warning("No Realm set for "+this);
-                        super.start();
-                        return;
-                    }
-                }
-            }
-            super.start();
-        }
+        super.start();
     }
     
     /* ------------------------------------------------------------ */

@@ -2,11 +2,12 @@ Jetty3 Versions
 --------------
 
 Jetty-3.1.rc7 -
+ + Fix bug in sendRedirect for HTTP/1.1
  + Added doco for Linux port redirection.
  + Don't persist connections if low on threads.
  + Added shutdown hooks to Jetty.Server to trap Ctl-C
  + Fixed bug with session ID generation.
- + Added untested FORM authentication.
+ + Added FORM authentication.
  + Remove old context path specs
  + Added UML diagrams to Jetty architecture documentation.
  + Use Enumerations to reduce conversions for servlet API.
@@ -15,6 +16,7 @@ Jetty-3.1.rc7 -
  + Dump Servlet displays cert chains
  + Fixed redirect handling by the CGI Servlet.
  + Fixed request.getPort for redirections from 80
+ + Added utility methods to ServletHandler for wrapping req/res pairs.
 
 Jetty-3.1.rc6 - 10 Jul 2001
  + Avoid script vulnerability in error pages.

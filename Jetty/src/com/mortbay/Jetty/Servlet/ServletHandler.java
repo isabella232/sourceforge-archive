@@ -289,7 +289,59 @@ public class ServletHandler
             Code.warning(e);
         }
     }
+
+
+    /* ------------------------------------------------------------ */
+    /** Get or create a ServletRequest.
+     * Create a new or retrieve a previously created servlet request
+     * that wraps the http request. Note that the ServletResponse is
+     * also created and can be retrieved from the ServletRequest.
+     * @param httpRequest 
+     * @return ServletRequest wrapping the passed HttpRequest.
+     */
+    public ServletRequest getServletRequest(HttpRequest httpRequest,
+                                            HttpResponse httpResponse)
+    {
+        // Look for a previously built servlet request.
+        ServletRequest servletRequest = (ServletRequest)
+            httpRequest.getAttribute(ServletHandler.__SERVLET_REQUEST);
+        
+        if (servletRequest==null)
+        {
+            servletRequest  = new ServletRequest(_context,httpRequest);
+            httpRequest.setAttribute(ServletHandler.__SERVLET_REQUEST,servletRequest);
+            ServletResponse servletResponse =
+                new ServletResponse(servletRequest,httpResponse);
+            servletRequest.setAttribute(ServletHandler.__SERVLET_RESPONSE,servletResponse);
+        }
+        return servletRequest;
+    }
     
+
+    /* ------------------------------------------------------------ */
+    /** Strip session from path.
+     * Strip the session ID from a request path.  The session is
+     * accessed in this process.
+     * @param pathInContext The path which may contain the session ID
+     * @param request The request made on the path.
+     * @return The path in the context, stripped of any session ID.
+     */
+    public String stripSession(String pathInContext,
+                               ServletRequest request)
+    {
+        String pic = (String)request.getAttribute(ServletHandler.__SERVLET_PATH);
+        if (pic==null)
+        {
+            pic=request.setSessionId(pathInContext);
+            request.setAttribute(ServletHandler.__SERVLET_PATH,pic);
+            HttpSession session=request.getSession(false);
+            if (session!=null)
+                Context.access(session);
+        }
+        return pic;
+    }
+    
+
     
     /* ----------------------------------------------------------------- */
     /** Handle request.
@@ -306,29 +358,10 @@ public class ServletHandler
     {
         try
         {
-            // Look for a previously built servlet request.
-            ServletRequest request = (ServletRequest)
-                httpRequest.getAttribute(ServletHandler.__SERVLET_REQUEST);
-            ServletResponse response;
-            if (request==null)
-            {
-                // Build servlet request and response
-                request  = new ServletRequest(_context,httpRequest);
-                response = new ServletResponse(request,httpResponse);
-                // Check session stuff
-                pathInContext=request.setSessionId(pathInContext);
-                HttpSession session=null;
-                if ((session=request.getSession(false))!=null)
-                    Context.access(session);
-            }
-            else
-            {
-                response=(ServletResponse)request.getAttribute(ServletHandler.__SERVLET_RESPONSE);
-                String pic = (String)request.getAttribute(ServletHandler.__SERVLET_PATH);
-                if (pic!=null)
-                    pathInContext=pic;
-            }
-
+            ServletRequest request = getServletRequest(httpRequest,httpResponse);
+            ServletResponse response = request.getServletResponse();
+            pathInContext=stripSession(pathInContext,request);
+            
             // handle
             handle(pathInContext,request,response);
         }
@@ -568,22 +601,8 @@ public class ServletHandler
                                      HttpResponse httpResponse)
         throws IOException
     {
-        // Look for a previously built servlet request.
-        ServletRequest request = (ServletRequest)
-            httpRequest.getAttribute(ServletHandler.__SERVLET_REQUEST);
-        ServletResponse response;
-        if (request==null)
-        {
-            // Build servlet request and response
-            request  = new ServletRequest(_context,httpRequest);
-            response = new ServletResponse(request,httpResponse);
-            request.setAttribute(ServletHandler.__SERVLET_REQUEST,request);
-            request.setAttribute(ServletHandler.__SERVLET_RESPONSE,response);
-        }
-        else
-        {
-            response=(ServletResponse)request.getAttribute(ServletHandler.__SERVLET_RESPONSE);
-        }
+        ServletRequest request = getServletRequest(httpRequest,httpResponse);
+        ServletResponse response = request.getServletResponse();
 
         // Handle paths
         pathInContext = request.setSessionId(pathInContext); 
@@ -609,7 +628,7 @@ public class ServletHandler
                 request.setAttribute(HttpRequest.__AuthUser,username);
                 request.setAttribute(UserPrincipal.__ATTR,user);
                 session.setAttribute(__J_AUTHENTICATED,__J_AUTHENTICATED);
-                String nuri=(String)session.getValue(__J_URI);
+                String nuri=(String)session.getAttribute(__J_URI);
                 response.sendRedirect(nuri==null?shandler.getErrorPage():nuri);
             }
             else
@@ -623,10 +642,12 @@ public class ServletHandler
         }
 
         // Check if the session is already authenticated.
-        if (session.getAttribute(__J_AUTHENTICATED).equals(__J_AUTHENTICATED))
-            return true;
+        if (session.getAttribute(__J_AUTHENTICATED) != null)
+          if (session.getAttribute(__J_AUTHENTICATED).equals(__J_AUTHENTICATED))
+              return true;
 
         // redirect to login page
+        session.setAttribute(__J_URI, uri);
         response.sendRedirect(shandler.getLoginPage());
         return false;
     }

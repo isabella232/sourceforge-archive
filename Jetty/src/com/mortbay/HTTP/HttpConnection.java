@@ -274,17 +274,18 @@ public class HttpConnection
                     _request.readHeader(getInputStream());
                     _listener.customizeRequest(this,_request);
                 }
-                catch(InterruptedIOException e)
-                {
-                    Code.debug(e.toString());
-                    _persistent=false;
-                    _response.destroy();
-                    _response=null;
-                    return;
-                }
                 catch(HttpException e){throw e;}
                 catch(IOException e)
                 {
+                    if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
+                    {
+                        Code.debug("Bad request: ",e);
+                        _persistent=false;
+                        _response.destroy();
+                        _response=null;
+                        return;
+                    }
+                    
                     exception(e);
                     _persistent=false;
                     _response.destroy();
