@@ -10,6 +10,7 @@ import com.mortbay.HTTP.Version;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.Frame;
 import com.mortbay.Util.Log;
+import com.mortbay.Util.LogSink;
 import com.mortbay.Util.Resource;
 import java.io.File;
 import java.io.IOException;
@@ -42,8 +43,13 @@ import javax.servlet.http.HttpSessionContext;
 public class Context implements ServletContext, HttpSessionContext
 {
     /* ------------------------------------------------------------ */
+    private static final String
+        CONTEXT_LOG="com.mortbay.HTTP.Handler.Servlet.Context.LogSink";
+    
+    /* ------------------------------------------------------------ */
     private ServletHandler _handler;
     private HandlerContext _handlerContext;
+    private LogSink _logSink;
 
     /* ------------------------------------------------------------ */
     ServletHandler getHandler(){return _handler;}
@@ -58,6 +64,7 @@ public class Context implements ServletContext, HttpSessionContext
     {
         _handler=handler;
         _handlerContext=_handler.getHandlerContext();
+        _logSink=(LogSink)_handlerContext.getAttribute(CONTEXT_LOG);
     }
 
     /* ------------------------------------------------------------ */
@@ -230,9 +237,19 @@ public class Context implements ServletContext, HttpSessionContext
     }
 
     /* ------------------------------------------------------------ */
+    /** Servlet Log.
+     * Log message to servlet log. Use either the system log or a
+     * LogSinkset via the context attribute
+     * com.mortbay.HTTP.Handler.Servlet.Context.LogSink
+     * @param msg 
+     */
     public void log(String msg)
     {
-        Log.message(Log.EVENT,msg,new Frame(2));
+        if (_logSink!=null)
+            _logSink.log(Log.EVENT,msg,new
+                Frame(2),System.currentTimeMillis());
+        else
+            Log.message(Log.EVENT,msg,new Frame(2));
     }
 
     /* ------------------------------------------------------------ */

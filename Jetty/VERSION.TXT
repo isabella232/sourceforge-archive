@@ -1,5 +1,7 @@
 Jetty Versions
 --------------
+
+Jetty-3.0.0.rc7 - 02 Dec 2000
  + Fixed security problem with lowercase WEB-INF uris on windows.
  + Extended security constraints (see README and WebApp Demo).
  + Set thread context classloader during handler start/stop calls.
@@ -20,7 +22,9 @@ Jetty Versions
  + Changed log options to less verbose defaults.
  + ThreadedServer.forceStop() now makes a connection to itself to handle non-premptive close.
  + Double null lock checks use ThreadPool.__nullLockChecks.
- + Split Debug servlet out of Admin Servlet
+ + Split Debug servlet out of Admin Servlet.
+ + Added Com.mortbay.HTTP.Handler.Servlet.Context.LogSink attribute
+   to Servlet Context. If set, it is used in preference to the system log.
  
 Jetty-3.0.0.rc6 - 20 Nov 2000
  + RequestDispatcher.forward() only resets buffer, not headers.
