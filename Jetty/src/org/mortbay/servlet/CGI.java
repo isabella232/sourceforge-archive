@@ -21,8 +21,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -51,6 +53,10 @@ import org.mortbay.util.StringUtil;
  * The "Path" init param is passed to the exec environment as PATH.
  * Note: Must be run unpacked somewhere in the filesystem.
  *
+ * Any initParameter that starts with ENV_ is used to set an environment
+ * variable with the name stripped of the leading ENV_ and using the init
+ * parameter value.
+ *
  * @version $Revision$
  * @author Julian Gosnell
  */
@@ -61,12 +67,13 @@ public class CGI extends HttpServlet
     protected File _docRoot;
     protected String _path;
     protected String _cmdPrefix;
+    protected EnvList _env;
 
     /* ------------------------------------------------------------ */
-    public void
-        init()
+    public void init()
         throws ServletException
     {
+        _env= new EnvList();
         _cmdPrefix=getInitParameter("commandPrefix");
 
         String tmp = getInitParameter("cgibinResourceBase");
@@ -114,7 +121,16 @@ public class CGI extends HttpServlet
 
         _path=getInitParameter("Path");
         if(log.isDebugEnabled())log.debug("CGI: PATH accepted - "+_path);
-        if(log.isDebugEnabled())log.debug("CGI: System.Properties : " + System.getProperties().toString());
+        if (_path != null)
+            _env.set("PATH", _path);
+
+        Enumeration e= getInitParameterNames();
+        while (e.hasMoreElements())
+        {
+            String n= (String)e.nextElement();
+            if (n != null && n.startsWith("ENV_"))
+                _env.set(n.substring(4),getInitParameter(n));
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -182,7 +198,7 @@ public class CGI extends HttpServlet
         File dir=command.getParentFile();
         if(log.isDebugEnabled())log.debug("CGI: execing: "+path);
 
-	EnvList env = new EnvList();
+	EnvList env = new EnvList(_env);
 
 	// these ones are from "The WWW Common Gateway Interface Version 1.1"
 	// look at : http://Web.Golux.Com/coar/cgi/draft-coar-cgi-v11-03-clean.html#6.1.1
@@ -195,24 +211,19 @@ public class CGI extends HttpServlet
 	env.set("QUERY_STRING", req.getQueryString());
 	env.set("REMOTE_ADDR", req.getRemoteAddr());
 	env.set("REMOTE_HOST", req.getRemoteHost());
-
 	// The identity information reported about the connection by a
 	// RFC 1413 [11] request to the remote agent, if
 	// available. Servers MAY choose not to support this feature, or
 	// not to request the data for efficiency reasons.
 	// "REMOTE_IDENT" => "NYI"
-
 	env.set("REMOTE_USER", req.getRemoteUser());
 	env.set("REQUEST_METHOD", req.getMethod());
-	env.set("SCRIPT_NAME",
-	       req.getRequestURI()
-	       .substring(0, req.getRequestURI().length() - pathInfo.length()));
+        env.set("SCRIPT_NAME",
+                req.getRequestURI().substring(0, req.getRequestURI().length() - pathInfo.length()));
 	env.set("SERVER_NAME", req.getServerName());
 	env.set("SERVER_PORT", Integer.toString(req.getServerPort()));
 	env.set("SERVER_PROTOCOL", req.getProtocol());
-	env.set("SERVER_SOFTWARE",
-	       getServletContext().getServerInfo());
-
+        env.set("SERVER_SOFTWARE", getServletContext().getServerInfo());
 	Enumeration enum = req.getHeaderNames();
 	while (enum.hasMoreElements())
 	{
@@ -223,7 +234,6 @@ public class CGI extends HttpServlet
 
 	// these extra ones were from printenv on www.dev.nomura.co.uk
 	env.set("HTTPS", (req.isSecure()?"ON":"OFF"));
-	env.set("PATH", _path);
 	// "DOCUMENT_ROOT" => root + "/docs",
 	// "SERVER_URL" => "NYI - http://us0245",
 	// "TZ" => System.getProperty("user.timezone"),
@@ -344,20 +354,28 @@ public class CGI extends HttpServlet
      */
     private static class EnvList
     {
-	private List envList = new ArrayList();
+        private Map envMap;
+
+        EnvList()
+        {
+            envMap= new HashMap();
+        }
+
+        EnvList(EnvList l)
+        {
+            envMap= new HashMap(l.envMap);
+        }
 
 	/** Set a name/value pair, null values will be treated as
 	 * an empty String */
 	public void set(String name, String value) {
-	    envList.add(name + "=" + StringUtil.nonNull(value));
+            envMap.put(name, name + "=" + StringUtil.nonNull(value));
 	}
 
 	/** Get representation suitable for passing to exec. */
 	public String[] getEnvArray()
 	{
-	    return (String[]) envList.toArray(new String[0]);
+            return (String[])envMap.values().toArray(new String[envMap.size()]);
 	}
     }
 }
-
-//-----------------------------------------------------------------------------
