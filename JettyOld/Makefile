@@ -24,9 +24,18 @@ ROOTNAME := .
 include $(JETTY_HOME)/etc/Global.mk
 
 #help target  jetty-release    Make a release of Jetty
-jetty-release: jetty-jars javadoc cleansrc
+jetty-release: jetty-jar javax-jar javadoc cleansrc
 
-jetty-jars:
+javax-jar:
+	cd $(INSTALLROOT)/classes \
+	&& jar cfv javax.servlet.jar \
+		javax \
+	&& mv javax.servlet.jar ../lib
+	@echo 
+	@echo Add $(shell pwd)/lib/javax.servlet.jar to your CLASSPATH
+	@echo 
+
+jetty-jar:
 	make rall 
 	make install
 	cd $(INSTALLROOT)/classes \
@@ -43,8 +52,8 @@ jetty-jars:
 	&& mkdir -p ../lib \
 	&& mv com.mortbay.Jetty.jar ../lib
 	@echo 
-	@echo 
 	@echo Add $(shell pwd)/lib/com.mortbay.Jetty.jar to your CLASSPATH
+	@echo 
 
 javadoc:
 	bin/generateJavaDoc
@@ -52,4 +61,3 @@ javadoc:
 cleansrc:
 	cd src && make rclean
 
-    
