@@ -2,102 +2,100 @@
 <h1>Jetty and <A href="http://www.borland.com/optimizeit/">OptimizeIt</A></h1>
 
 Jetty development has been supported by the <A
-href="http://www.borland.com/optimizeit/">OptimizeIt</A> suite of java
-software tools, by giving access to acedemic pricing for Jetty developers.
-The OptimizeIt suite has proved invaluable to the development of jetty as
-a efficient and quality software project.
+href="http://www.borland.com/optimizeit/">OptimizeIt</A> suite of Java
+software tools. By allowing Jetty developers the use of OptimizeIt at reduced prices,
+we have been able to focus our attention on key areas of the
+code to maintain Jetty as an efficient and quality software project.
 <P>
 <H3>Memory Profiler</H3>
-In java, Object creation is a key resource issue that needs to be addressed
-if program is to have, good execution speed, a minimal footprint and
-reasonable garbage collection behaviour.  OptimizeIt allows Object creation
-to be analyzed in individual detail or from the on-mass views:<UL>
+In Java, object creation is a key resource issue that needs to be addressed
+if program is to have good execution speed, a minimal footprint and
+reasonable garbage collection behaviour.  OptimizeIt allows object creation
+to be analyzed in individual detail or from a global perspective:<UL>
 <LI>
 The <strong>heap</strong> view is an excellent dynamic view of all the objects in the 
-heap. Objects can be viewed by class, instance count or by changes in the
+heap. Objects can be viewed by class, instance count, or by changes in the
 instance count.   Together with the ability to disable or selectively run
-garbage collection this view allows you to quickly determine the static and
+garbage collection, this view allows you to quickly determine the static and
 dynamic object creation behaviour of a program.
 <P>
-A good tip with this view is to disable garbage collection, mark the current 
-instant count and then run some load at your program.  Sorting by change of 
-instance count with show you which objects are being created in order to
-handle that load. Marking the instance count again and running garbage
-collection manually, will then allow you to see which of those objects are
+A good tip with this view is to first disable garbage collection, mark the current 
+instance count and then run some load against your program.  Sorting by change of 
+instance count will show you which objects are being created in order to
+handle that load. Marking the instance count again then running garbage
+collection manually will allow you to see which of those objects are
 being discarded.   Large performance gains can be obtained by targetting
-these object to reduce their creation and/or increate their reuse.
+these objects and either reducing creation of them, and/or increase their reuse.
 <P>
-With early version of Jetty, this view was able to quickly show how many
-String instances where being created and discarded, all with the similar 
-values "GET", "POST", etc. Avoid duplication of the strings associated with
-the HTTP protocol has greatly increased the performance of jetty.
+For example:  in early versions of Jetty the heap view was used to identify
+excessive String instance creation. We discovered many Strings being allocated then
+discarded, all with the same values of "GET", "POST", etc. Avoiding the duplication 
+of common strings associated with the HTTP protocol has significantly contributed to 
+Jetty's performance.
 <LI>
-Once an object has been identified as being commonly allocated or discarded,
-the <strong>Allocation Backtraces</strong> view allows you to see where the
-objects are allocated from. Each object class selected from the heap view is 
-displayed in a tree view showing the all the execution stacks of each 
-allocation organized by percentage.   
-<P>The stacks may be view top-down (e.g. 75% of all String are allocated from 
+Having identified an object being commonly allocated or discarded,
+the <strong>Allocation Backtraces</strong> view can be used to pinpoint
+the origin of the allocation.  The selected object class is 
+displayed in a tree depicting all execution stacks for each allocation, organized by percentage.   
+<P>The stacks can be viewed top-down (e.g. 75% of all Strings are allocated from 
 calls originating in com.acme.MyThread.run()) or bottom-up (eg. 20% of String
-allocations where made in a call to java.io.BufferedReader.readLine().  
+allocations were made in a call to java.io.BufferedReader.readLine()).  
 
-<P>Note that OptimizeIt can see allocations made inside libraries that you 
-don't have to source for.  It is surprising how inefficient in terms of object creation
-many common library methods are and Jetty has gained greatly by identifying
-these and replacing them with efficient versions.  For example, the 
+<P>A useful feature is OptimizeIt's ability to see allocations made inside libraries for which you 
+don't have source code.  It is surprising how inefficient in terms of object creation
+many common library methods are, and Jetty has made great performance gains by identifying
+these and replacing them with more efficient versions.  For example, the 
 <a href="/javadoc/org/mortbay/util/StringUtil.html">org.mortbay.util.StringUtils</a>,
-<a href="/javadoc/org/mortbay/util/ByteArrayISO8859Writer.html">ByteArrayISO8859Writer</a>
+<a href="/javadoc/org/mortbay/util/ByteArrayISO8859Writer.html">org.mortbay.util.ByteArrayISO8859Writer</a>
+
 and
-<a href="/javadoc/org/mortbay/util/StringMap.html">StringMap</a> classes
-have mostly been developed as efficient replacements of inefficient library
-APIs identified by OptimizeIt.
+<a href="/javadoc/org/mortbay/util/StringMap.html">org.mortbay.util.StringMap</a> classes
+have mostly been developed as improved replacements for poor library APIs identified by OptimizeIt.
 
 <p> If you do have the source available, a simple double click will
 display the code at any level of the stack, with the allocation paths
 highlighted.
 <LI>
-If looking at you objects by class and percentages has provided enough
-information, then individal instances can be view with the <strong>instance
-and reference view</strong>view.  This gives you have view into the actual
+If looking at your objects by class and percentages has not provided enough
+information, then individal instances can be inspected with the <strong>Instance
+and Reference</strong> view.  This gives you information about the 
 value of every instance of the selected class. Each selected instance can
-be examined for the stack of its allocation and a reference graph of tracing
+be examined for it's allocation execution stack and a reference graph tracing
 back from every object refering to the selected instance.
 <P>
-It is this view that allows "Object Leaks" to be traced by simply by identifying
+It is this view that allows "object leaks" to be traced simply by identifying
 which objects are holding hard references to an instance to prevent it's
 garbage collection.
 <LI>
 If the heap view has not been sufficient to locate target objects for
-detailed analysis, then the <strong>browse references from root</strong> view
-allows the heap to be examined by tracing the reference graph down from 
+deeper analysis, then you can use the <strong>Browse References from Root</strong> view
+examine the heap by tracing the reference graph from 
 the JVM root references (including class statics) to all object instances.
 </UL>
 
 
 <H3>CPU Profiler</H3>
 If object allocation is not the problem, then the <Strong>CPU
-Profiler</Strong> allows the program execution to be timed by time spent
-within each method. Again the percentage based tree view of the calling stack
+Profiler</Strong> analyzes program execution in terms of time spent
+within each method. Again, the percentage-based tree view of the calling stack
 is used to present the data either top-down or botton-up.
 <P>
-The view may be presented for the system, a thread group or and individual
+The view may be presented for the system, a thread group or individual
 thread.  Useful pop-ups give percentage summaries against the currently
-selected stack position.
-<p>
-This view allows hotspots to be quickly identified and analyzed.
+selected stack position.  Hotspots can be quickly identified and analyzed.
 
 
 <H3>VM Info</H3>
 The graphical <Strong>VM Info</Strong> view gives dynamic charts of 
-heap size, threads, classes and GC times.  This can be the considered the
-20,000 foot view of your program and you can quickly see the general area
-that any performance problems may lie.
+heap size, threads, classes and GC times.  This can be considered the
+"20,000 foot" view of your program and you can quickly see the general area
+in which any performance problems may lie.
 
 <H3>Installation and Configuration</H3>
 OptimizeIt was extremely simple and flexible to install and configure:
 <UL>
-  <LI>It was able to find and use any of the JVM installed on the system.
-  <LI>The classpath was able to be determined from the environment.
+  <LI>It was able to find and use any of the JVMs installed on the system.
+  <LI>The classpath was able to be determined automatically from the environment.
   <LI>There were no problems with programs that use dynamic classloading.
 </UL>
 
