@@ -237,18 +237,14 @@ public class Dispatcher implements RequestDispatcher
                 
                 // merge query string
                 String oldQ=httpServletRequest.getQueryString();
-                if (oldQ!=null && oldQ.length()>0 &&
-                    parameters!=null)
+                if (oldQ!=null && oldQ.length()>0 && parameters!=null)
                 {
                     UrlEncoded encoded = new UrlEncoded(oldQ);
-                    Iterator iter = parameters.entrySet().iterator();
-                    while(iter.hasNext())
-                    {
-                        Map.Entry entry = (Map.Entry)iter.next();
-                        encoded.put(entry.getKey(),entry.getValue());
-                    }
+                    encoded.putAll(parameters);
                     query=encoded.encode();
                 }
+                else
+                    query=oldQ;
                 
                 // Adjust servlet paths
                 servletHttpRequest.setServletHandler(_servletHandler);
