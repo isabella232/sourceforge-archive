@@ -64,6 +64,7 @@ public class HttpContextMBean extends LifeCycleMBean
         defineAttribute("classLoader");
         
         defineAttribute("realm");
+        defineAttribute("realmName");
         defineAttribute("redirectNullPath");
         defineAttribute("resourceBase");
         defineAttribute("servingResources");
