@@ -622,7 +622,8 @@ public class XmlConfiguration
         if ("SystemProperty".equals(tag))
         {
             String name=node.getAttribute("name");
-            return System.getProperty(name);
+            String defaultValue=node.getAttribute("default");
+            return System.getProperty(name, defaultValue);
         }
         
         Code.warning("Unknown value tag: "+node,new Throwable());
