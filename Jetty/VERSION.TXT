@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-
+ + Fixed forward query string handling
  + fixed forward attribute handling for jsp-file servlets
  + Fixed setCharacterEncoding to work with getReader
  + Fixed handling of relative sendRedirect after forward.
