@@ -17,50 +17,72 @@ of the basics.  The following links provide some good starting points:
 
 
 <H2>The Basics</H2>
-
-the following steps are required to configure Jetty for SSL:<UL>
+<p>
+The following steps are required to configure Jetty for SSL:<UL>
 <A href="#step1">Step 1</A>) Generate or obtain a public/private key pair and x509 certificate.<BR>
 <A href="#step2">Step 2</A>) Optionally obtain a certificate from a known certificate authority.<BR>
 <A href="#step3">Step 3</A>) Load the keys and the certificates into a JSSE Keystore.<BR>
 <A href="#step4">Step 4</A>) Configure a JsseListener with the location and passwords for the keystore.<BR>
 </UL>
+</p>
+<h3>OpenSSL Versus Keytool</h3>
+<P>
+For testing, keytool is probably the simplest way to generate the key and
+certificate you will need.
+<P>
+The OpenSSL tools can also be used to generate keys and certificates or to
+convert ones that have been used with Apache or other servers.
+The OpenSSL tool suite is commonly used by other servers such as Apache to
+generate manipulate keys and certificates.  So you may already have some keys
+and certificates created by openssl, or openssl may be more trusted than
+keytool or some certificate authorities for step 2 may also prefer the 
+formats produced by ssl.
+<P>
 
-<a name="step1"></a><BR>
-<h2>Step 1) Keys and Certificates</H2>
+If you want the option of using the same certificate with Jetty or a
+web server such as Apache not written in Java, you may prefer to
+generate your private key and certificate with openSSL.  The Java
+keytool does not provide options for exporting private keys, and Apache
+needs the private key. If you create the key and certificate
+with openSSL your non-Java web server will have ready access to it.
 
+
+<h2><a name="step1">Step 1) Keys and Certificates</a></H2>
+<p>
 The simplest way generate keys and certificates is to use the  keytool
 application that comes with the JDK, as it generates keys and certificates 
 directly into the keystore. See <A href="#step1a">step 1a</A>
-<P>
-The OpenSSL tools can also be used to generate keys and certificates or to
-convert ones that have been used with apache or other servers.
+
 <p>
 If you already have keys and certificates, please goto <A href="#step3">step
 3</A> to load them into a JSSE key store.
 <P>
+If you have a renewal certificate to replace one that is expiring, take
+a look at <a href="#renewals">Renewing Certificates</a>.
+<p>
 The commands below only generate minimal keys and certificates.  You should read the
 full manuals of the tools you are using if you wish to specify:<UL>
 <LI>Key size.
 <LI>Certificate expiry.
 <LI>Alternate security providers.
 </UL>
+</p>
 
-<a name="step1a"></a><BR>
-<H3>1a) Generating a certificate with JDK keytool</H3>
+<H3><a name="step1a">1a) Generating a certificate with JDK keytool</a></H3>
 
 The following command will generate a key pair and certificate directly into
 a keystore:<BR>
 
-<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD<PRE>
+<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD><PRE>
 # <b>keytool -keystore keystore -alias jetty -genkey -keyalg RSA</b>
 </PRE></TD></TR></TABLE></UL>
 
 This command will prompt for information about the certificate and for
 passwords to protect both the keystore and the keys within it.  The only
-manditory response is to provide the fully qualified host name of the server
+mandatory response is to provide the fully qualified host name of the server
 at the "first and last name" prompt.  For example:<BR>
 
-<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD<PRE><small>
+<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD><PRE><small>
 # <b>keytool -keystore keystore -alias jetty -genkey -keyalg RSA</b>
 Enter keystore password:  <b>password</b>
 What is your first and last name?
@@ -83,27 +105,21 @@ Enter key password for <jetty>
         (RETURN if same as keystore password):  <b>password</b>
 #
 </small></PRE></TD></TR></TABLE></UL>
-
+<p>
 You now have the minimal requirements to run an SSL connection and could
 proceed directly to <A href="#step4">step 4</A> to configure an SSL listener.   
 However the certificate you have generated will not be trusted by the browser
 and the user will be prompted to this effect.  This is often sufficient for 
 testing, but most public site will need to <A href="#step2a">step 2a</A> to 
 obtain a certificate trusted by most popular clients.
-
-
-
-<a name="step1b"></a><BR>
+</p>
+<a name="step1b"></a>
 <H3>Step 1b) Keys and Certificates with openssl</H3>
-The OpenSSL tool suite is commonly used by other servers such as apache to
-generate manipulate keys and certificates.  So you may already have some keys
-and certificates created by openssl, or openssl may be more trusted than
-keytool or some certificate authorities for step 2 may also prefer the 
-formats produced by ssl.
+
 <P>
 The following command generates a key pair in the file jetty.key:<BR>
 
-<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD<PRE>
+<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD><PRE>
 # <b>openssl genrsa -des3 -out jetty.key</b>
 </PRE></TD></TR></TABLE></UL>
 
@@ -113,17 +129,17 @@ to help seed the random number generator.
 <P>
 The following command generates a certificate for the key into the file jetty.crt:<BR>
 
-<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD<PRE>
+<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD><PRE>
 # <b>openssl req -new -x509 -key jetty.key -out jetty.crt</b>
 </PRE></TD></TR></TABLE></UL>
 
 
 This command will prompt for information about the certificate and for
 passwords to protect both the keystore and the keys within it.  The only
-manditory response is to provide the fully qualified host name of the server
+mandatory response is to provide the fully qualified host name of the server
 at the "Common Name" prompt.  For example:<BR>
 
-<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD<PRE><small>
+<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD><PRE><small>
 # <b>openssl genrsa -des3 -out jetty.key</b>
 Generating RSA private key, 512 bit long modulus
 ...........................++++++++++++
@@ -144,7 +160,7 @@ If you enter '.', the field will be left blank.
 Country Name (2 letter code) [AU]:.
 State or Province Name (full name) [Some-State]:.
 Locality Name (eg, city) []:.
-Organization Name (eg, company) [Internet Widgits Pty Ltd]:<b>Mort Bay Consulting Pty. Ltd.</b>
+Organization Name (eg, company) [Internet Widgets Pty Ltd]:<b>Mort Bay Consulting Pty. Ltd.</b>
 Organizational Unit Name (eg, section) []:<b>Jetty</b>
 Common Name (eg, YOUR name) []:<b>jetty.mortbay.org</b>
 Email Address []:
@@ -153,21 +169,21 @@ Email Address []:
 </small></PRE></TD></TR></TABLE></UL>
 
 You now have the minimal requirements to run an SSL connection and could
-proceed directly to <A href="#step3">step 3</A> to load these keys and certificats into a
+proceed directly to <A href="#step3">step 3</A> to load these keys and certificates into a
 JSSE keystore.   However the certificate you have generated will not be
 trusted by the browser and the user will be prompted to this effect.  This is 
 often sufficient for testing, but most public site will need to <A href="#step2b">step
 2b</A> to obtain a certificate trusted by most popular clients.
+</p>
 
 
-<a name="step1c"></a><BR>
-<H3>Step 1c) Keys and Certificates from other sources</H3>
+<H3><a name="step1c">Step 1c) Keys and Certificates from other sources</a></H3>
 If you have keys and certificates from other sources, then you can proceed
 directly to <A href="#step3">step 3</A>
 
 
-<a name="step2"></a><BR>
-<H2>Step 2) Request a trusted certificate</H2>
+
+<H2><a name="step2">Step 2) Request a trusted certificate</a></H2>
 The keys and certificats generated in steps 1a and 1b are sufficient to run
 an SSL listener.  However the certificate you have generated will not be
 trusted by the browser and the user will be prompted to this effect. 
@@ -181,44 +197,45 @@ Each CA will have their own instructions which should be followed (look for
 JSSE or openssl sections), but all will involved a step to
 generate a certificate signing request (CSR). 
 
-<a name="step2a"></a><BR>
-<H3>Step 2a) CSR from keytool</H3>
+
+<H3><a name="step2a">Step 2a) CSR from keytool</a></H3>
 The following commands generates the file jetty.csr using keytool for a
 key/cert already in the keystore:<BR>
 
-<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD<PRE>
+<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD><PRE>
 # <b>keytool -certreq -alias jetty -keystore keystore -file jetty.csr</b>
 </PRE></TD></TR></TABLE></UL>
 
-<a name="step2b"></a><BR>
-<H3>Step 2b) CSR from openssl</H3>
+
+<H3><a name="step2b">Step 2b) CSR from openssl</a></H3>
 The following commands generates the file jetty.csr using openssl for a
 key in the file jetty.key:<BR>
 
-<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD<PRE>
+<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD><PRE>
 # <b>openssl req -new -key jetty.key -out jetty.csr</b>
 </PRE></TD></TR></TABLE></UL>
-Note that this command only uses the existing keu from jetty.key file and not
+<p>
+Note that this command only uses the existing key from jetty.key file and not
 a certificate in jetty.crt generated by step 1b. The details for the
 certificate need to be entered again.
+</p>
 
 
-<a name="step3"></a><BR>
-<H2>Step 3) Loading Keys and Certificates</H2>
-
+<H2><a name="step3">Step 3) Loading Keys and Certificates</a></H2>
+<p>
 Once a CA has sent you a certificate, or if you generated your own
 certificate without keytool, then it will need to be loaded into
 a JSSE keystore.  If you did not use keytool to generate the key, then it
 will also need to be loaded into the keystore.
+</p>
 
-<a name="step3a"></a><BR>
-<H3>Step 3a) Loading Certificates with keytool</H3>
+<H3><a name="step3a">Step 3a) Loading Certificates with keytool</a></H3>
 
 A certificate in PEM form may be directly loaded into a keystore with
 keytool. The PEM format is a text encoding of certificates and is produced by
 openssl (as in step 1b) and is returned by some CAs.  An example PEM file is:<BR>
 
-<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD<PRE><small>
+<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD><PRE><small>
 # <b>jetty.crt</b>
 -----BEGIN CERTIFICATE-----
 MIICSDCCAfKgAwIBAgIBADANBgkqhkiG9w0BAQQFADBUMSYwJAYDVQQKEx1Nb3J0
@@ -240,10 +257,14 @@ Rcz6oCRvCGCe5kDB
 The following command will load a PEM encoded certificate in the jetty.crt 
 file into a JSSE keystore:<BR>
 
-<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD<PRE>
-# <b>keytool -keystore keystore -import -alias jetty -file jetty.crt</b>
+<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD><PRE>
+# <b>keytool -keystore keystore -import -alias jetty -file jetty.crt \
+  -trustcacerts</b>
 </PRE></TD></TR></TABLE></UL>
-
+Depending on the situation you may not require the
+<tt>-trustcacerts</tt> option.  Try the operation without it if you
+like. 
+<p>
 NOTE. That you need both the private key and the certificate in the
 keystore. So the certificate should be loaded into the keystore used to
 generate the CSR (step 2a).  If your key pair is not in a keystore (eg if
@@ -251,16 +272,16 @@ generated as step 1b), then you will need to use the PKCS12 format to
 load both key and certificate as in step 3b.
 <P>
 If the certificate your receive from the CA is not in a format that
-keytools understands, then the openssl command can be used to convert
+keytool understands, then the openssl command can be used to convert
 formats:<BR>
 
-<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD<PRE>
+<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD><PRE>
 # <b>openssl x509 -in jetty.der -inform DER -outform PEM -out jetty.crt</b>
 </PRE></TD></TR></TABLE></UL>
+</p>
 
 
-<a name="step3b"></a><BR>
-<H3>Step 3b) Loading keys and certificates via PKCS12</H3>
+<H3><a name="step3b">Step 3b) Loading keys and certificates via PKCS12</a></H3>
 
 If you have a key and certificate in separate files, they need to be combined
 into a PKCS12 format file to be loaded into a new keystore. The certificate
@@ -270,16 +291,8 @@ response to your CSR.
 The following openssl command will combine the keys in jetty.key and the
 certificate in the jetty.crt file into the jetty.pkcs12 file:<BR>
 
-<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD<PRE>
+<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD><PRE>
 # <b>openssl pkcs12 -inkey jetty.key -in jetty.crt -export -out jetty.pkcs12</b>
-</PRE></TD></TR></TABLE></UL>
-
-The resulting PKCS12 file may be loaded into a JSSE keystore with the
-following jetty utility class:<BR>
-
-<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD<PRE>
-# <b>java -classpath $JETTY_HOME/lib/org.mortbay.jetty.jar \
-       org.mortbay.util.PKCS12Import jetty.pkcs12 keystore</b>
 </PRE></TD></TR></TABLE></UL>
 
 If you have a chain of certificates, because your CA is an intermediary,
@@ -290,11 +303,25 @@ build the pkcs12 file like this:
 
 The order of certificates must be from server to rootCA, as per RFC2246
 section 7.4.2.
+<p>
+OpenSSL is going to ask you for an "export password".  A non-empty
+password seems to be required to make the next step work.  The
+resulting PKCS12 file may be loaded into a JSSE keystore with the
+following jetty utility class:<BR>
+
+<UL><TABLE border=1 cellpadding=5 width="90%"><TR><TD><PRE>
+# <b>java -classpath $JETTY_HOME/lib/org.mortbay.jetty.jar \
+       org.mortbay.util.PKCS12Import jetty.pkcs12 keystore</b>
+</PRE></TD></TR></TABLE></UL>
+<p>
+This asks for two passphrases.  Give the password from the last step
+as the input passphrase and you are set.  The "output passphrase" will
+need to appear in your jetty.xml config file as both the Password and
+KeyPassword of the SunJsseListener that will use the certificate.
+</p>
 
 
-
-<a name="step4"></a><BR>
-<h2>Step 4) Configure Jetty.</h2>
+<h2><a name="step4">Step 4) Configure Jetty.</a></h2>
 
 <p>Assuming you already have a functioning Jetty Server and are using the Sun JVM,
 add the SunJsseListener as a HttpListeners, e.g. In the jetty.xml file 
@@ -330,14 +357,30 @@ to keep your keystore in. Even though it has a password on it, the password
 may be configured into the runtime environment so is vulnerable to theft.
 <P>
 Jetty can now be started the normal way (make sure that jcert.jar, jnet.jar
-and jsse.jar are on your classpath) and SSL can be used with a URL like:<PRE>
-
+and jsse.jar are on your classpath) and SSL can be used with a URL like:
+<PRE>
    https://localhost:8443/
-
 </PRE>
 Note. The most common mistake at this point is to try to access port 8443
 with http rather than https.
+</p>
+If CONFIDENTIAL or INTEGRAL security constraints are being used, then you should
+also configure the normal HTTP listener which port to use for SSL:<pre>
+  &lt;Call name="addListener"&gt;
+    &lt;Arg&gt;
+      &lt;New class="org.mortbay.http.SocketListener"&gt;
+        &lt;Set name="Port"&gt;&lt;SystemProperty name="jetty.port" default="8080"/&gt;&lt;/Set&gt;
+        &lt;Set name="MinThreads"&gt;10&lt;/Set&gt;
+        &lt;Set name="MaxThreads"&gt;100&lt;/Set&gt;
+        &lt;Set name="MaxIdleTimeMs"&gt;30000&lt;/Set&gt;
+        &lt;Set name="LowResourcePersistTimeMs"&gt;5000&lt;/Set&gt;
+        &lt;Set name="ConfidentialPort"&gt;8443&lt;/Set&gt;
+        &lt;Set name="IntegralPort"&gt;8443&lt;/Set&gt;
+      &lt;/New&gt;
+    &lt;/Arg&gt;
+  &lt;/Call&gt;
 
+</pre>
 
 <H2>Password Issues</H2>
 <p>
@@ -353,8 +396,15 @@ If jetty is given a password that begins with &quot;OBF:&quot; it is
 treated as an obfuscated password. Passwords can be obfuscated by
 running org.mortbay.util.Password as a main class. This can protect passwords
 from casual observation.
-<p>
+</p>
 
+<h2><a name="renewals">Renewing Certificates</h2></a>
+<p>
+If you are updating your configuration to use a newer certificate, as
+when the old one is expiring, just do <a href="#step3">step
+3</a>.  If you imported the key and certificate originally using the
+PKCS 12 method, use an alias of "1" rather than "jetty", because that is
+the alias the PKCS12 process enters into the keystore.
+<p>
 <A HREF="index.html" TITLE="Back to JettyFAQ"><IMG SRC="/jetty/images/info_sm.gif" BORDER="0"><BR
 CLEAR="bottom"> JettyFaq</A>
-<BR><BR>
