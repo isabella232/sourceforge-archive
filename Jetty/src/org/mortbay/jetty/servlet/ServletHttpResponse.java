@@ -200,13 +200,13 @@ public class ServletHttpResponse implements HttpServletResponse
         HttpOutputStream out = (HttpOutputStream)_httpResponse.getOutputStream();
         if (out.isWritten()  || _writer!=null && _writer.isWritten())
             throw new IllegalStateException("Output written");
-        out.setBufferCapacity(size);
+        out.setBufferSize(size);
     }
     
     /* ------------------------------------------------------------ */
     public int getBufferSize()
     {
-        return ((HttpOutputStream)_httpResponse.getOutputStream()).getBufferCapacity();
+        return ((HttpOutputStream)_httpResponse.getOutputStream()).getBufferSize();
     }
     
     /* ------------------------------------------------------------ */

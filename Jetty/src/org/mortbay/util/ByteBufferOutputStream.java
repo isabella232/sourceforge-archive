@@ -19,9 +19,20 @@ import java.io.OutputStream;
 public class ByteBufferOutputStream extends OutputStream
 {
     protected byte[] _buf;
+    
+    /** The start of data capacity in the buffer 
+     */
     private int _start;
-    private int _pos;
+    
+    /** The end of data capacity in the buffer
+     */
     private int _end;
+    
+    /** The last byte of data written to the buffer
+     * _start <= _pos <= _end
+     */
+    private int _pos;
+    
     private int _preReserve;
     private int _postReserve;
     private boolean _resized;
@@ -40,7 +51,6 @@ public class ByteBufferOutputStream extends OutputStream
     {
         this(capacity,0,0);
     }
-    
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -89,30 +99,55 @@ public class ByteBufferOutputStream extends OutputStream
     }
     
     /* ------------------------------------------------------------ */
+    /** 
+     * @return The size of valid data in the buffer.
+     */
     public int size()
     {
         return _pos-_start;
     }
     
     /* ------------------------------------------------------------ */
+    /** 
+     * @return The size of the buffer.
+     */
+    public int bufferSize()
+    {
+        return _buf.length;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return The capacity of the buffer excluding pre and post reserves. 
+     */
     public int capacity()
     {
         return _end-_start;
     }
     
     /* ------------------------------------------------------------ */
+    /** 
+     * @return The available capacity of the buffer excluding pre and post
+     * reserves and data already written.  
+     */
     public int spareCapacity()
     {
         return _end-_pos;
     }
     
     /* ------------------------------------------------------------ */
+    /** 
+     * @return The current pre reserve. 
+     */
     public int preReserve()
     {
         return _start;
     }
     
     /* ------------------------------------------------------------ */
+    /** 
+     * @return The current post reserve.
+     */
     public int postReserve()
     {
         return _buf.length-_end;
@@ -264,22 +299,31 @@ public class ByteBufferOutputStream extends OutputStream
     
     
     /* ------------------------------------------------------------ */
-    public void ensureCapacity(int n,int pre, int post)
+    public void ensureSize(int bufSize)
+        throws IOException
+    {
+        ensureSize(bufSize,_preReserve,_postReserve);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void ensureSize(int bufSize, int pre, int post)
         throws IOException
     {
         // Do we have space?
-        if (n>_end || pre > _preReserve || post > _postReserve)
+        if (bufSize>_buf.length || pre>_preReserve || post>_postReserve)
         {
             // Make a bigger buffer if we are allowed.
             if (_fixed)
                 throw new IllegalStateException("Fixed");
-            if (_start!=_pos)
-                throw new IllegalStateException("Not reset");
-            
+
+            byte[] old=_buf;
+            _buf=ByteArrayPool.getByteArray(bufSize);
+
+            if (_pos>_start)
+                System.arraycopy(old,_start,_buf,pre,_pos-_start);
             if (!_resized)
-                ByteArrayPool.returnByteArray(_buf);
-                
-            _buf=ByteArrayPool.getByteArray(n+pre+post);
+                ByteArrayPool.returnByteArray(old);
+            
             _end=_buf.length-post;
             _preReserve=pre;
             _start=pre;
@@ -293,28 +337,38 @@ public class ByteBufferOutputStream extends OutputStream
         throws IOException
     {
         // Do we have space?
-        if ((_pos+n)>_end)
+        if (n>spareCapacity())
         {
             // No, then try flushing what we do have
-            flush();
-            
-            // Do we have space now?
-            if ((_pos+n)>_end)
-            {
-                // Make a bigger buffer if we are allowed.
-                if (_fixed)
-                    throw new IllegalStateException("Buffer Full");
+            if (_pos>_start )
+                flush();
+
+            ensureCapacity(n);
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void ensureCapacity(int n)
+        throws IOException
+    {
+        // Do we have space?
+        if (n>capacity())
+        {
+            // Make a bigger buffer if we are allowed.
+            if (_fixed)
+                throw new IllegalStateException("Fixed");
                 
-                int bl = ((_pos+n+4095)/4096)*4096;
-                byte[] buf = new byte[bl];
-                if (Code.debug())Code.debug("New buf for ensure: "+_pos+"+"+n+">"+_buf.length+" --> "+buf.length);
-                System.arraycopy(_buf,_start,buf,_start,_pos-_start);
-                if (!_resized)
-                    ByteArrayPool.returnByteArray(_buf);
-                _buf=buf;
-                _end=_buf.length-_postReserve;
-                _resized=true;
-            }
+            int new_size = ((n+_preReserve+_postReserve+4095)/4096)+4096;
+            
+            byte[] old = _buf;
+            _buf = new byte[new_size];
+            if (_pos>_start)
+                System.arraycopy(old,_start,_buf,_start,_pos-_start);
+            if (!_resized)
+                ByteArrayPool.returnByteArray(old);
+                
+            _end=_buf.length-_postReserve;
+            _resized=true;
         }
     }
 }

@@ -160,38 +160,37 @@ public class HttpOutputStream
     /** Get the output buffer capacity.
      * @return Buffer capacity in bytes.
      */
-    public int getBufferCapacity()
+    public int getBufferSize()
     {
-        if (_bufferedOut==null)
-            return _bufferSize-_headerReserve;
-        return _bufferedOut.capacity();
+        return _bufferSize;
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the output buffer capacity.
-     * Note that this is the minimal buffer capacity and that installed
+    /** Set the output buffer size.
+     * Note that this is the minimal buffer size and that installed
      * filters may perform their own buffering and are likely to change
-     * the size of the output.
-     * @param capacity Minimum buffer capacity in bytes
+     * the size of the output. Also the pre and post reserve buffers may be
+     * allocated within the buffer for headers and chunking.
+     * @param capacity Minimum buffer size in bytes
      * @exception IllegalStateException If output has been written.
      */
-    public void setBufferCapacity(int capacity)
+    public void setBufferSize(int size)
         throws IllegalStateException
     {
-        if (capacity<=getBufferCapacity())
+        if (size<=_bufferSize)
             return;
         
         if (_bufferedOut!=null && _bufferedOut.size()>0)
-            throw new IllegalStateException("Buffer is not empty");
+            throw new IllegalStateException("Not Reset");
 
         try
         {
-            _bufferSize=capacity;
+            _bufferSize=size;
             if (_bufferedOut!=null)
             {
                 boolean fixed=_bufferedOut.isFixed();
                 _bufferedOut.setFixed(false);
-                _bufferedOut.ensureSpareCapacity(capacity);
+                _bufferedOut.ensureSize(size);
                 _bufferedOut.setFixed(fixed);
             }
             
@@ -199,7 +198,7 @@ public class HttpOutputStream
             {
                 boolean fixed=_chunkingOut.isFixed();
                 _chunkingOut.setFixed(false);
-                _chunkingOut.ensureSpareCapacity(capacity);
+                _chunkingOut.ensureSize(size);
                 _chunkingOut.setFixed(fixed);
             }
         }
