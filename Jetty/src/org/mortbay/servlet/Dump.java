@@ -203,9 +203,15 @@ public class Dump extends HttpServlet
             while (h.hasMoreElements())
             {
                 name=(String)h.nextElement();
-                table.newRow();
-                table.addHeading(name+":&nbsp;").cell().right();
-                table.addCell(request.getHeader(name));
+
+                Enumeration h2=request.getHeaders(name);
+                while (h2.hasMoreElements())
+                {
+                    String hv=(String)h2.nextElement();
+                    table.newRow();
+                    table.addHeading(name+":&nbsp;").cell().right();
+                    table.addCell(hv);
+                }
             }
             
             table.newRow();
