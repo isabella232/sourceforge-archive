@@ -251,7 +251,7 @@ public class HttpFields
 
         __values.put(__KeepAlive,__KeepAlive);
         
-    };
+    }
     
     /* ------------------------------------------------------------ */
     private static FieldInfo getFieldInfo(String name)
