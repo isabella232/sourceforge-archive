@@ -1518,6 +1518,11 @@ public class HttpContext implements LifeCycle,
         return false;
     }
 
+    /* ------------------------------------------------------------ */
+    public void clearSecurityConstraints()
+    {
+        _constraintMap.clear();
+    }
 
     /* ------------------------------------------------------------ */
     public boolean checkSecurityConstraints(String pathInContext,
@@ -1986,9 +1991,6 @@ public class HttpContext implements LifeCycle,
             _loader=null;
         }
         _cache.clear();
-	_constraintMap.clear();
-        if (_attributes!=null)
-            _attributes.clear();
         Log.event("Stopped "+this);
     }
 
@@ -2013,6 +2015,8 @@ public class HttpContext implements LifeCycle,
         _parent=null;
         _loader=null;
         _resourceBase=null;
+        if (_attributes!=null)
+            _attributes.clear();
         _attributes=null;
         if (_initParams!=null)
             _initParams.clear();
