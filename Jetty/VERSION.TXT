@@ -1,6 +1,8 @@
 Jetty3 Versions
 --------------
 
+ + Fixed handling of rel form authentication URLs
+ + Added support for Nonblocking listener.
  + Added lowResourcePersistTimeMs for more graceful degradation when
    we run out of threads.
 

@@ -18,6 +18,7 @@ import com.mortbay.HTTP.UserPrincipal;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.IO;
 import com.mortbay.Util.Log;
+import com.mortbay.Util.URI;
 import com.mortbay.Util.Resource;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -639,7 +640,7 @@ public class ServletHandler
               return true;
 
         // redirect to login page
-        session.setAttribute(__J_URI, uri);
+        session.setAttribute(__J_URI, URI.addPaths(request.getContextPath(),uri));
         response.sendRedirect(shandler.getLoginPage());
         return false;
     }
