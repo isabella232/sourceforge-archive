@@ -218,8 +218,8 @@ public class Dump extends HttpServlet
             table.addCell(""+request.isSecure());
             
             table.newRow();
-            table.addHeading("isUserInRole(dumpRole):&nbsp;").cell().right();
-            table.addCell(""+request.isUserInRole("dumpRole"));
+            table.addHeading("isUserInRole(admin):&nbsp;").cell().right();
+            table.addCell(""+request.isUserInRole("admin"));
             
             table.newRow();
             table.addHeading("getLocale:&nbsp;").cell().right();

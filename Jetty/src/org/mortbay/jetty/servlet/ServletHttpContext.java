@@ -11,8 +11,6 @@ import java.util.Locale;
 
 import javax.servlet.ServletContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
@@ -27,8 +25,6 @@ import org.mortbay.http.HttpResponse;
  */
 public class ServletHttpContext extends HttpContext
 {
-    private static Log log = LogFactory.getLog(ServletHttpContext.class);
-
     private HashMap _localeEncodingMap  = new HashMap();
     
     /* ------------------------------------------------------------ */
@@ -110,15 +106,6 @@ public class ServletHttpContext extends HttpContext
     }
 
     /* ------------------------------------------------------------ */
-    /** Setup context for serving dynamic servlets.
-     * @deprecated Use org.mortbay.jetty.servlet.Invoker
-     */
-    public synchronized void setDynamicServletPathSpec(String pathSpecInContext)
-    {
-        log.warn("setDynamicServletPathSpec is deprecated.");
-    }
-
-    /* ------------------------------------------------------------ */
     protected boolean jSecurityCheck(String pathInContext,
                                      HttpRequest request,
                                      HttpResponse response)
@@ -127,10 +114,9 @@ public class ServletHttpContext extends HttpContext
         if (getAuthenticator() instanceof FormAuthenticator &&
             pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK) &&
             getAuthenticator().authenticate(getRealm(),
-                                            pathInContext,
-                                            request,
-                                            response,
-                                            true)==null)
+                                                        pathInContext,
+                                                        request,
+                                                        response)==null)
             return false;
         return true;
     }

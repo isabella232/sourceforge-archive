@@ -17,6 +17,7 @@ import org.mortbay.http.HttpRequest;
 import org.mortbay.http.UserRealm;
 import org.mortbay.jaas.callback.AbstractCallbackHandler;
 import org.mortbay.jaas.callback.DefaultCallbackHandler;
+import org.mortbay.util.LogSupport;
 
 
 
@@ -75,7 +76,7 @@ public class JAASUserRealm implements UserRealm
         roleCheckPolicy = policy;
     }
 
-    public Principal getUserPrincipal(String username)
+    public Principal getPrincipal(String username)
     {
         return (Principal)userMap.get(username);
     }
@@ -128,7 +129,7 @@ public class JAASUserRealm implements UserRealm
 
     
     /* ------------------------------------------------------------ */
-    public boolean isAuthenticated(Principal user)
+    public boolean reauthenticate(Principal user)
     {
         // TODO This is not correct if auth can expire! We need to
         // get the user out of the cache
@@ -163,6 +164,12 @@ public class JAASUserRealm implements UserRealm
     {
         ((JAASUserPrincipal)user).popRole();
         return user;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void logout(Principal user)
+    {
+        log.warn(LogSupport.NOT_IMPLEMENTED);
     }
 
 }

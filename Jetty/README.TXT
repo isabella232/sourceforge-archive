@@ -55,7 +55,6 @@ The demo server (in the all or extra bundle ) can be run with the commands
 
 
 The JMX variants may be started with 
-
    java -Dstart.class=org.mortbay.util.jmx.Main -jar start.jar etc/jetty.mlet 
 or
    java -Dstart.class=org.mortbay.util.jmx.Main -jar start.jar etc/demo.mlet 
@@ -105,6 +104,11 @@ etc/jetty.xml
 The system propoerty -DDEBUG can be set to see the workings of start.jar
 
   java -DDEBUG -jar start.jar
+
+If you have your own start configuration file (see javadoc), you can use
+it with
+
+  java -DSTART=mystart.config -jar start.jar
 
 
 

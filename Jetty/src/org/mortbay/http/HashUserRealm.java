@@ -177,7 +177,7 @@ public class HashUserRealm
     }
 
     /* ------------------------------------------------------------ */
-    public Principal getUserPrincipal(String username)
+    public Principal getPrincipal(String username)
     {
         return (Principal)super.get(username);
     }
@@ -264,7 +264,7 @@ public class HashUserRealm
     }
     
     /* -------------------------------------------------------- */
-    public boolean isAuthenticated(Principal user)
+    public boolean reauthenticate(Principal user)
     {
         return ((User)user).isAuthenticated();
     }
@@ -287,6 +287,10 @@ public class HashUserRealm
         return userSet!=null && userSet.contains(user.getName());
     }
 
+    /* ------------------------------------------------------------ */
+    public void logout(Principal user)
+    {}
+    
     /* ------------------------------------------------------------ */
     public String toString()
     {
@@ -392,7 +396,7 @@ public class HashUserRealm
         }
         
         /* -------------------------------------------------------- */
-        private boolean authenticate(Object credentials)
+        boolean authenticate(Object credentials)
         {
             return _cred!=null && _cred.check(credentials);
         }
@@ -418,13 +422,13 @@ public class HashUserRealm
         private Principal user;
         private String role;
 
-        private WrappedUser(Principal user, String role)
+        WrappedUser(Principal user, String role)
         {
             this.user=user;
             this.role=role;
         }
 
-        private Principal getUserPrincipal()
+        Principal getUserPrincipal()
         {
             return user;    
         }

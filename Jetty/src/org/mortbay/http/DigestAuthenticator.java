@@ -11,7 +11,6 @@ import java.security.Principal;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.util.Credential;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.QuotedStringTokenizer;
@@ -36,20 +35,11 @@ public class DigestAuthenticator implements Authenticator
      * @exception IOException 
      */
     public Principal authenticate(UserRealm realm,
-                                  String pathInContext,
-                                  HttpRequest request,
-                                  HttpResponse response,
-                                  boolean check)
+                                           String pathInContext,
+                                           HttpRequest request,
+                                           HttpResponse response)
         throws IOException
     {
-        
-        if (realm==null)
-        {
-            response.sendError(HttpResponse.__500_Internal_Server_Error,
-                               "Realm Not Configured");
-            return null;
-        }
-
         // Get the user if we can
         Principal user=null;
         String credentials = request.getField(HttpFields.__Authorization);
@@ -87,11 +77,7 @@ public class DigestAuthenticator implements Authenticator
                       if (name!=null)
                       {
                           if ("username".equalsIgnoreCase(name))
-                          {
                               digest.username=tok;
-                              if (!check)
-                                  break loop;
-                          }
                           else if ("realm".equalsIgnoreCase(name))
                               digest.realm=tok;
                           else if ("nonce".equalsIgnoreCase(name))
@@ -111,22 +97,20 @@ public class DigestAuthenticator implements Authenticator
                 }
             }            
 
-            user = check
-                ?realm.authenticate(digest.username,digest,request)
-                :realm.getUserPrincipal(digest.username);
+            user = realm.authenticate(digest.username,digest,request);
             
-            if (user!=null)
+            if (user==null)
+                log.warn("AUTH FAILURE: user "+digest.username);
+            else    
             {
                 request.setAuthType(SecurityConstraint.__DIGEST_AUTH);
                 request.setAuthUser(digest.username);
                 request.setUserPrincipal(user);                
             }
-            else if (check)
-                log.warn("AUTH FAILURE: user "+digest.username);
         }
 
         // Challenge if we have no user
-        if (user==null)
+        if (user==null && response!=null)
             sendChallenge(realm,request,response);
         
         return user;

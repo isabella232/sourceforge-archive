@@ -142,6 +142,12 @@ public class JDBCUserRealm extends HashUserRealm
             + " and r." + _roleTableKey + " = u."
             + _userRoleTableRoleKey;
     }
+
+    /* ------------------------------------------------------------ */
+    public void logout(Principal user)
+    {
+        remove(user.getName());
+    }
     
     /* ------------------------------------------------------------ */
     /** (re)Connect to database with parameters setup by loadConfig()

@@ -1127,6 +1127,8 @@ public class HttpRequest extends HttpMessage
     /* ------------------------------------------------------------ */
     public String getAuthType()
     {
+        if (_authType==null)
+            getUserPrincipal();
         return _authType;
     }
     
@@ -1139,6 +1141,8 @@ public class HttpRequest extends HttpMessage
     /* ------------------------------------------------------------ */
     public String getAuthUser()
     {
+        if (_authUser==null)
+            getUserPrincipal();
         return _authUser;
     }
     
@@ -1147,10 +1151,41 @@ public class HttpRequest extends HttpMessage
     {
         _authUser=user;
     }
+
+    /* ------------------------------------------------------------ */
+    public boolean hasUserPrincipal()
+    {
+        return _userPrincipal!=null && _userPrincipal!=__NO_USER;
+    }
     
     /* ------------------------------------------------------------ */
     public Principal getUserPrincipal()
     {
+        if (_userPrincipal==__NO_USER)
+            return null;
+            
+        if (_userPrincipal==null)
+        {
+            HttpContext context=getHttpResponse().getHttpContext();
+            if (context!=null)
+            {
+                Authenticator auth=context.getAuthenticator();
+                UserRealm realm=context.getRealm();
+                if (realm!=null && auth!=null)
+                {
+                    try
+                    {
+                        auth.authenticate(realm, getPath(), this,null);
+                    }
+                    catch(Exception e)
+                    {
+                        LogSupport.ignore(log, e);
+                    }
+                }
+            }
+            if (_userPrincipal==null)
+                _userPrincipal=__NO_USER;
+        }
         return _userPrincipal;
     }
     
@@ -1206,4 +1241,6 @@ public class HttpRequest extends HttpMessage
             _attributes.clear();
         super.destroy();
     }
+    
+    private static Principal __NO_USER=new Principal(){public String getName(){return null;}};
 }

@@ -26,6 +26,7 @@ import javax.servlet.UnavailableException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.http.Authenticator;
 import org.mortbay.http.BasicAuthenticator;
 import org.mortbay.http.ClientCertAuthenticator;
 import org.mortbay.http.DigestAuthenticator;
@@ -35,7 +36,6 @@ import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.SecurityConstraint;
 import org.mortbay.http.UserRealm;
-import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.util.JarResource;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;

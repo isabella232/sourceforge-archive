@@ -33,7 +33,6 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.util.CachedResource;
 import org.mortbay.util.IO;
 import org.mortbay.util.LazyList;
@@ -1690,9 +1689,8 @@ public class HttpContext implements LifeCycle,
         }
         finally
         {
-            Principal user = request.getUserPrincipal();
-            if (_userRealm!=null)
-                _userRealm.disassociate(user);
+            if (_userRealm!=null && request.hasUserPrincipal())
+                _userRealm.disassociate(request.getUserPrincipal());
         }
     }
 

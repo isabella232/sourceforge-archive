@@ -60,6 +60,9 @@ import java.util.StringTokenizer;
  * Classpath operations are evaluated on the fly, so once a class or jar is
  * added to the classpath, subsequent available conditions will see that class.
  *
+ * The system parameter CLASSPATH, if set is given to the start classloader before
+ * any paths from the configuration file.
+ *
  * Programs started with start.jar may be stopped with the stop.jar, which connects
  * via a local port to stop the server. The default port can be set with the 
  * STOP.PORT system property (a port of < 0 disables the stop mechanism). If the STOP.KEY 
@@ -182,6 +185,14 @@ public class Main
         // JAR's already processed
         java.util.Hashtable done = new Hashtable();
         
+       // Initial classpath
+       String classpath = System.getProperty("CLASSPATH");
+       if (classpath!=null)
+       {
+           StringTokenizer tok = new StringTokenizer(classpath,File.pathSeparator);
+            while (tok.hasMoreTokens())
+                _classpath.addComponent(tok.nextToken());
+       }
         
         // Handle line by line
         String line = null;

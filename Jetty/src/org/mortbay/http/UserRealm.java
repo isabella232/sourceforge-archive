@@ -24,9 +24,10 @@ public interface UserRealm
     public String getName();
 
     /* ------------------------------------------------------------ */
-    /** Get the principal for a username
+    /** Get the principal for a username.
+     * This method is not guaranteed to return a Principal for non-authenticated users.
      */
-    public Principal getUserPrincipal(String username);
+    public Principal getPrincipal(String username);
     
     /* ------------------------------------------------------------ */
     /** Authenticate a users credentials.
@@ -44,11 +45,12 @@ public interface UserRealm
      * @return The authenticated UserPrincipal.
      */
     public Principal authenticate(String username,
-                                  Object credentials,
-                                  HttpRequest request);
+                                            Object credentials,
+                                            HttpRequest request);
 
     /* ------------------------------------------------------------ */
-    /** Check authentication status.
+    /** Re Authenticate a Principal.
+     * Authenicate a principal that has previously been return from the authenticate method.
      * 
      * Implementations of this method may adorn the calling context to
      * assoicate it with the authenticated principal (eg ThreadLocals). If
@@ -58,7 +60,7 @@ public interface UserRealm
      *
      * @return True if this user is still authenticated.
      */
-    public boolean isAuthenticated(Principal user);
+    public boolean reauthenticate(Principal user);
     
     /* ------------------------------------------------------------ */
     /** Check if the user is in a role. 
@@ -96,5 +98,12 @@ public interface UserRealm
      * original UserPrincipal passed.
      */
     public Principal popRole(Principal user);
+
+    /* ------------------------------------------------------------ */
+    /** logout a user Principal.
+     * Called by authentication mechanisms (eg FORM) that can detect logout.
+     * @param user A Principal previously returned from this realm
+     */
+    public void logout(Principal user);
     
 }

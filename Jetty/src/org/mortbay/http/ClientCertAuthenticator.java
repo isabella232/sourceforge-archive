@@ -12,7 +12,6 @@ import javax.net.ssl.SSLSocket;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.http.SecurityConstraint.Authenticator;
 
 /* ------------------------------------------------------------ */
 /** Client Certificate Authenticator.
@@ -59,16 +58,16 @@ public class ClientCertAuthenticator implements Authenticator
      * @exception IOException 
      */
     public Principal authenticate(UserRealm realm,
-                                  String pathInContext,
-                                  HttpRequest request,
-                                  HttpResponse response,
-                                  boolean check)
+                                           String pathInContext,
+                                           HttpRequest request,
+                                           HttpResponse response)
         throws IOException
     {
         java.security.cert.X509Certificate[] certs =
             (java.security.cert.X509Certificate[])
             request.getAttribute("javax.servlet.request.X509Certificate");
-        if (check && (certs==null || certs.length==0 || certs[0]==null))
+            
+        if (response!=null && (certs==null || certs.length==0 || certs[0]==null))
         {
             // No certs available so lets try and force the issue
             
@@ -106,20 +105,13 @@ public class ClientCertAuthenticator implements Authenticator
         if (principal==null)
             principal=certs[0].getIssuerDN();
         String username=principal==null?"clientcert":principal.getName();
-        Principal user = check
-            ?realm.authenticate(username,certs,request)
-            :realm.getUserPrincipal(username);
+        
+        Principal user = realm.authenticate(username,certs,request);
         
         request.setAuthType(SecurityConstraint.__CERT_AUTH);
         request.setAuthUser(user.getName());
         request.setUserPrincipal(user);                
         return user;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public Principal identify(UserRealm realm,HttpRequest request)
-    {
-        return null;
     }
     
     /* ------------------------------------------------------------ */

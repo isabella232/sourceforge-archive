@@ -56,7 +56,7 @@ public class HashSSORealm implements SSORealm
         
         if (principal!=null && credential!=null)
         {
-            if (response.getHttpContext().getRealm().isAuthenticated(principal))
+            if (response.getHttpContext().getRealm().reauthenticate(principal))
             {
                 request.setUserPrincipal(principal);
                 request.setAuthUser(principal.getName());
