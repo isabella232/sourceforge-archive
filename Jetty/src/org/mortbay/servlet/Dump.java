@@ -104,9 +104,11 @@ public class Dump extends HttpServlet
             cookie.setMaxAge(300);
             cookie.setPath("/");
             cookie.setComment("Cookie from dump servlet");
-            if (info.indexOf("Cookie1")>=0)
+            if (info.indexOf("Cookie0")>=0)
+                cookie.setVersion(0);
+            else if (info.indexOf("Cookie1")>=0)
                 cookie.setVersion(1);
-            if (info.indexOf("Cookie2")>=0)
+            else if (info.indexOf("Cookie2")>=0)
                 cookie.setVersion(2);
             response.addCookie(cookie);
         }

@@ -229,10 +229,14 @@ public class Pool
             for (int i=0;i<_pondLife.length;i++)
                 stopPondLife(i);
         }
-        _pondLife=null;
-        _index=null;
-        _size=0;
-        _available=0;
+
+        synchronized(this)
+        {
+            _pondLife=null;
+            _index=null;
+            _size=0;
+            _available=0;
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -269,11 +273,11 @@ public class Pool
                     new_id=reservePondLife(false);
                 }
             }
-        }
 
-        // create reserved pondlife
-        if (pl==null && new_id>=0)
-            pl=newPondLife(new_id);
+            // create reserved pondlife
+            if (pl==null && new_id>=0)
+                pl=newPondLife(new_id);
+        }
 
         return pl;
     }

@@ -27,8 +27,8 @@ import org.mortbay.http.HttpResponse;
  *        &lt;Arg&gt; <br>
  *          &lt;New class="IPAccessHandler"&gt; <br>
  *            &lt;Set name="Standard"&gt;deny&lt;/Set&gt; <br>
- *		      &lt;Set name="AllowIP"&gt;192.168.0.103&lt;/Set&gt; <br>
- *		      &lt;Set name="AllowIP"&gt;192.168.0.100&lt;/Set&gt; <br>
+ *                    &lt;Set name="AllowIP"&gt;192.168.0.103&lt;/Set&gt; <br>
+ *                    &lt;Set name="AllowIP"&gt;192.168.0.100&lt;/Set&gt; <br>
  *          &lt;/New&gt; <br>
  *        &lt;/Arg&gt; <br>
  *     &lt;/Call&gt; <br>
@@ -53,32 +53,32 @@ public class IPAccessHandler extends AbstractHttpHandler
      * Constructor for the class
      */
     public IPAccessHandler() {
-	super();
-	ips = new Hashtable();
+        super();
+        ips = new Hashtable();
     }
 
     /**
      * Checks if the given ipstring (x.x.x.x) is authorized or not
      *
-     * @param ipstring	The ip-address as a String
+     * @param ipstring  The ip-address as a String
      * @return True if the IP is allowed access, otherwise false.
      */
     public boolean checkIP(String ipstring) {
-	Boolean ipconstrain = (Boolean)ips.get(ipstring);
-	if (ipconstrain != null)	{
-	    return ipconstrain.booleanValue();
-	} else {
-	    return standard;
-	}
+        Boolean ipconstrain = (Boolean)ips.get(ipstring);
+        if (ipconstrain != null)        {
+            return ipconstrain.booleanValue();
+        } else {
+            return standard;
+        }
     }
-	
+        
     /**
      * Handles the incoming request
      *
-     * @param pathInContext	
-     * @param pathParams	
-     * @param request	The incoming HTTP-request
-     * @param response	The outgoing HTTP-response
+     * @param pathInContext     
+     * @param pathParams        
+     * @param request   The incoming HTTP-request
+     * @param response  The outgoing HTTP-response
      */
     public void handle(String pathInContext,
                        String pathParams,
@@ -86,21 +86,26 @@ public class IPAccessHandler extends AbstractHttpHandler
                        HttpResponse response)
         throws HttpException, IOException {
 
-	try	{
-			
-	    String ip = request.getRemoteAddr();
-	    boolean authorized = checkIP(ip);
-		
-	    if (!authorized) {
-				// The IP is NOT allowed
-		response.sendError(HttpResponse.__403_Forbidden);
-		request.setHandled(true);
-		return; 
-	    } else {
-				// The IP is allowed
-		return;
-	    }
-	} catch (Exception ex) {
+        // exempt error pages
+	// TODO This probably should be more general?
+        if(request.getAttribute("javax.servlet.error.status_code") != null) 
+           return;
+
+        try     {
+                        
+            String ip = request.getRemoteAddr();
+            boolean authorized = checkIP(ip);
+                
+            if (!authorized) {
+                // The IP is NOT allowed
+                response.sendError(HttpResponse.__403_Forbidden);
+                request.setHandled(true);
+                return; 
+            } else {
+                // The IP is allowed
+                return;
+            }
+        } catch (Exception ex) {
             System.out.println(ex);
             response.sendError(HttpResponse.__500_Internal_Server_Error);
             request.setHandled(true);
@@ -110,19 +115,19 @@ public class IPAccessHandler extends AbstractHttpHandler
     /**
      * Allow the given ip-address access
      *
-     * @param ipstring	The ip-address as a String on the format "x.x.x.x"
+     * @param ipstring  The ip-address as a String on the format "x.x.x.x"
      */
     public void setAllowIP(String ipstring) {
-	ips.put(ipstring,new Boolean(true));
+        ips.put(ipstring,new Boolean(true));
     }
 
     /**
      * Deny the given ip-address access
      *
-     * @param ipstring	The ip-address as a String on the format "x.x.x.x"
+     * @param ipstring  The ip-address as a String on the format "x.x.x.x"
      */
     public void setDenyIP(String ipstring) {
-	ips.put(ipstring,new Boolean(false));
+        ips.put(ipstring,new Boolean(false));
     }
 
     /**
@@ -132,12 +137,12 @@ public class IPAccessHandler extends AbstractHttpHandler
      * @param s The standard-string (either 'allow' or 'deny')
      */
     public void setStandard(String s) {
-	s = s.toLowerCase();
-	if (s.indexOf("allow") > -1) {
-	    standard = true;
-	} else {
-	    standard = false;
-	}
+        s = s.toLowerCase();
+        if (s.indexOf("allow") > -1) {
+            standard = true;
+        } else {
+            standard = false;
+        }
     }
 
 
@@ -146,22 +151,22 @@ public class IPAccessHandler extends AbstractHttpHandler
      *
      */
     private static void main(String[] args) {
-	IPAccessHandler ipah = new IPAccessHandler();
-	ipah.setStandard("deny");
-	ipah.setAllowIP("217.215.71.167");
-	ipah.setDenyIP("217.215.71.149");
-	System.out.println(ipah.checkIP("217.215.71.245")+" = false");
-	System.out.println(ipah.checkIP("217.215.71.167")+" = true");
-	System.out.println(ipah.checkIP("217.215.71.149")+" = false");
-	System.out.println(ipah.checkIP("0.0.0.0")+" = false");
+        IPAccessHandler ipah = new IPAccessHandler();
+        ipah.setStandard("deny");
+        ipah.setAllowIP("217.215.71.167");
+        ipah.setDenyIP("217.215.71.149");
+        System.out.println(ipah.checkIP("217.215.71.245")+" = false");
+        System.out.println(ipah.checkIP("217.215.71.167")+" = true");
+        System.out.println(ipah.checkIP("217.215.71.149")+" = false");
+        System.out.println(ipah.checkIP("0.0.0.0")+" = false");
 
-	IPAccessHandler ipah2 = new IPAccessHandler();
-	ipah2.setStandard("allow");
-	ipah2.setAllowIP("217.215.71.167");
-	ipah2.setDenyIP("217.215.71.149");
-	System.out.println(ipah2.checkIP("217.215.71.245")+" = true");
-	System.out.println(ipah2.checkIP("217.215.71.167")+" = true");
-	System.out.println(ipah2.checkIP("217.215.71.149")+" = false");
-	System.out.println(ipah2.checkIP("0.0.0.0")+" = true");
+        IPAccessHandler ipah2 = new IPAccessHandler();
+        ipah2.setStandard("allow");
+        ipah2.setAllowIP("217.215.71.167");
+        ipah2.setDenyIP("217.215.71.149");
+        System.out.println(ipah2.checkIP("217.215.71.245")+" = true");
+        System.out.println(ipah2.checkIP("217.215.71.167")+" = true");
+        System.out.println(ipah2.checkIP("217.215.71.149")+" = false");
+        System.out.println(ipah2.checkIP("0.0.0.0")+" = true");
     }
 }
