@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-5.1.2 - 16 January 2005
+Jetty-5.1.2 - 18 January 2005
  + Added id and ref support to XmlConfiguration
  + Cleaned up AbstractSessionManager synchronization.
  + Fixed potential concurrent login problem with JAAS
