@@ -6,13 +6,11 @@
 package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -22,16 +20,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
-
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.handler.NullHandler;
 import org.mortbay.util.Code;
-import org.mortbay.util.MultiMap;
 import org.mortbay.util.MultiException;
-
+import org.mortbay.util.MultiMap;
 
 /* ------------------------------------------------------------ */
 /** Filter Handler.
