@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-4.2.16 - 29 Jan 2004
+Jetty-4.2.16 - 30 Jan 2004
  + Fixed setDate multi-cpu race
  + Improved low thread handling
  + FileResource better handles non sun JVM
