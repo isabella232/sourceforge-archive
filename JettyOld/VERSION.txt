@@ -1,4 +1,4 @@
-Release 2.1.1 - n March 1999
+Release 2.1.1 - 5 March 1999
   + Reduced number of calls to getRemoteHost for optimization
   + Faster version of HttpInputStream.readLine().
   + com.mortbay.Base.DateCache class added and used to speed date handling. 
@@ -6,6 +6,7 @@ Release 2.1.1 - n March 1999
   + Fast char buffer handling in HttpInputStream
   + Faster version of HttpHeader.read()
   + Faster version of HttpRequest
+  + Size all StringBuffers
 
 Release 2.1.0 - 22 February 1999
   + Session URL Encoding
