@@ -102,12 +102,10 @@ public abstract class AbstractSessionManager implements SessionManager
             if (r<0)r=-r;
             id=Long.toString(r,30+(int)(created%7));
             String worker = (String)request.getAttribute("org.mortbay.http.ajp.JVMRoute");
-            System.err.println("jvmRoute="+worker);
             if (worker!=null)
                 id+="."+worker;
             else if (_workerName!=null)
                 id+="."+_workerName;
-            System.err.println("id="+id);
         }
         while (_sessions.containsKey(id));
         return id;
