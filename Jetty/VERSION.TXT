@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+ + Added EOFException to reduce log verbosity on closed connections.
+ + Avoided bad buffer status after closed connection.
+
 Jetty-4.2.1 - 18 November 2002
  + Fixed bad optimization in UrlEncoding
  + Re-enabled UrlEncoding test harnesses
