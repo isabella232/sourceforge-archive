@@ -69,14 +69,15 @@
     </java>
   </target>
 
+
   <!-- ==================================================================== -->
   <target name="node0" depends="classpath" description="Run the wadi demo loadbalancer">
     <java jar="${start.jar}"
           dir="${jetty.home}"
           fork="yes"
-          failonerror="yes"
+          failonerror="no"
           >
-       <jvmarg line="${jvmargs} -Dhttp.port=8085" />
+       <jvmarg line="${jvmargs} -DSTOP_PORT=7995 -Dhttp.port=8085" />
        <arg line="${extra}/wadi/jetty.xml" />
     </java>
   </target>
@@ -86,9 +87,9 @@
     <java jar="${start.jar}"
           dir="${jetty.home}"
           fork="yes"
-          failonerror="yes"
+          failonerror="no"
           >
-       <jvmarg line="${jvmargs} -DSTOP.PORT=7998 -Dhttp.port=8086" />
+       <jvmarg line="${jvmargs} -DSTOP_PORT=7996 -Dhttp.port=8086" />
        <arg line="${extra}/wadi/jetty.xml" />
     </java>
   </target>
