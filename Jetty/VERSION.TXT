@@ -8,6 +8,7 @@ Jetty-3.1.rc7 -
  + ServletRequest SSL attributes in line with 2.2 and 2.3 specs.
  + Dump Servlet displays cert chains
  + Fixed redirect handling by the CGI Servlet.
+ + Fixed request.getPort for redirections from 80
 
 Jetty-3.1.rc6 - 10 Jul 2001
  + Avoid script vulnerability in error pages.
