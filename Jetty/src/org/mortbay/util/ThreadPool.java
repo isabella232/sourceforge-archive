@@ -300,7 +300,11 @@ public class ThreadPool
             synchronized(_join)
             {
                 try{if (isStarted() && _pool!=null)_join.wait(30000);}
-                catch (Exception e) {Code.ignore(e);}
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                    Code.ignore(e);
+                }
             }
         }
     }

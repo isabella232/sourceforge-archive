@@ -723,7 +723,7 @@ public class HttpServer implements LifeCycle,
      */
     public synchronized void stop(boolean graceful)
         throws InterruptedException
-    { 
+    {
         for (int l=0;l<_listeners.size();l++)
         {
             HttpListener listener =(HttpListener)_listeners.get(l); 
@@ -768,14 +768,16 @@ public class HttpServer implements LifeCycle,
      * Join all listeners that are instances of ThreadPool.
      * @exception InterruptedException 
      */
-    public synchronized void join()
+    public void join()
         throws InterruptedException
     { 
         for (int l=0;l<_listeners.size();l++)
         {
             HttpListener listener =(HttpListener)_listeners.get(l); 
             if (listener.isStarted() && listener instanceof ThreadPool)
+            {
                 ((ThreadPool)listener).join();
+            }
         }
     }
     
