@@ -126,6 +126,27 @@ If no configuration file is provided, start.jar will use etc/admin.xml and
 etc/jetty.xml
 
 
+Programs started with the start.jar mechanism may be stopped with the
+stop.jar:
+
+   java -jar stop.jar
+
+This connects via a local port to stop the server. The default port can be set with the 
+STOP.PORT system property (a port of < 0 disables the stop mechanism). 
+If the STOP.KEY system property is set, then a random key is generated and 
+written to stdout. This key  must be passed to the stop.jar. eg
+
+  [540] java -DSTOP.PORT=9999 -DSTOP.KEY -jar start.jar
+  1rukbu7owi3uo
+  17:39:49.082 EVENT  Starting Jetty/4.2.10pre0
+  ...
+
+
+  [526] java -DSTOP.PORT=9999 -DSTOP.KEY=1rukbu7owi3uo -jar stop.jar 
+
+
+
+
 
 Starting with Ant
 =================

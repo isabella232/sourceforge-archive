@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Added stop.jar
  + Added SSO implementation for FORM authentication.
  + WebApplicationContext does not reassign defaults descriptor value.
  + Fixed AJP13 protocol so that request/response header enums are correct.

@@ -11,7 +11,11 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.io.FileInputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.InetAddress;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.Policy;
@@ -60,6 +64,11 @@ import java.util.StringTokenizer;
  * Classpath operations are evaluated on the fly, so once a class or jar is
  * added to the classpath, subsequent available conditions will see that class.
  *
+ * Programs started with start.jar may be stopped with the stop.jar, which connects
+ * via a local port to stop the server. The default port can be set with the 
+ * STOP.PORT system property (a port of < 0 disables the stop mechanism). If the STOP.KEY 
+ * system property is set, then a random key is generated and written to stdout. This key 
+ * must be passed to the stop.jar.
  *
  * @author Jan Hlavaty (hlavac@code.cz)
  * @author Greg Wilkins
@@ -72,13 +81,15 @@ public class Main
     private Classpath _classpath = new Classpath();
     private boolean _debug = System.getProperty("DEBUG",null)!=null;
     private String _config = System.getProperty("START","org/mortbay/start/start.config");
+    private int _port = Integer.getInteger("STOP.PORT",8079).intValue();
+    private String _key = System.getProperty("STOP.KEY","mortbay");
     private ArrayList _xml = new ArrayList();
        
     public static void main(String[] args)
     {
         try
         {
-            new Main().run(args);
+            new Main().start(args);
         }
         catch (Exception e)
         {
@@ -392,11 +403,12 @@ public class Main
     
     
     /* ------------------------------------------------------------ */
-    public void run(String[] args)
+    public void start(String[] args)
     {    
         // set up classpath:
         try
         {
+            new Monitor();
             InputStream cpcfg =getClass().getClassLoader().getResourceAsStream(_config);
             if (_debug) System.err.println("config="+_config);
             if (cpcfg==null)
@@ -463,5 +475,82 @@ public class Main
         {
             e.printStackTrace();
         } 
+    }
+
+
+    class Monitor extends Thread
+    {
+        ServerSocket _socket;
+
+        Monitor()
+        {
+            try
+            {
+                if(_port<0)
+                    return;
+                setDaemon(true);
+                _socket=new ServerSocket(_port,1,InetAddress.getByName("127.0.0.1"));
+                if (_port==0)
+                {
+                    _port=_socket.getLocalPort();
+                    System.out.println(_port);
+                }
+                if (!"mortbay".equals(_key))
+                {
+                    _key=Long.toString((long)(Long.MAX_VALUE*Math.random()),36);
+                    System.out.println(_key);
+                }
+            }
+            catch(Exception e)
+            {
+                if (_debug)
+                    e.printStackTrace();
+                else
+                    System.err.println(e.toString());
+            }
+            start();
+        }
+
+        public void run()
+        {
+            while (true)
+            {
+                Socket socket=null;
+                try{
+                    socket=_socket.accept();
+
+                    LineNumberReader lin=
+                        new LineNumberReader(new InputStreamReader(socket.getInputStream()));
+                    String key=lin.readLine();
+                    if (!_key.equals(key))
+                        continue;
+
+                    String cmd=lin.readLine();
+                    if (_debug) System.err.println("command="+cmd);
+                    if ("stop".equals(cmd))
+                        System.exit(0);
+                    if ("status".equals(cmd))
+                    {
+                        socket.getOutputStream().write("OK\r\n".getBytes());
+                        socket.getOutputStream().flush();
+                    }
+                }
+                catch(Exception e)
+                {
+                    if (_debug)
+                        e.printStackTrace();
+                    else
+                        System.err.println(e.toString());
+                }
+                finally
+                {
+                    if (socket!=null)
+                    {
+                        try{socket.close();}catch(Exception e){}
+                    }
+                    socket=null;
+                }
+            }
+        }
     }
 }

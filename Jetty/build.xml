@@ -40,6 +40,7 @@
   <property name="jetty.webapp.classes"   value="${jetty.webapp.webinf}/classes"/>
 
   <property name="start.jar"              value="${basedir}/start.jar"/>
+  <property name="stop.jar"               value="${basedir}/stop.jar"/>
   <property name="jetty.jar"              value="${lib}/org.mortbay.jetty.jar"/>
   <property name="mortbay.jmx.jar"        value="${lib}/org.mortbay.jmx.jar"/>
   <property name="mini.http.jar"          value="${lib}/org.mortbay.http.jar"/>
@@ -131,6 +132,7 @@
     <delete file="${mortbay.jmx.jar}" quiet="false"/>
     <delete file="${servlet.jar}" quiet="false"/> 
     <delete file="${start.jar}" quiet="false"/>
+    <delete file="${stop.jar}" quiet="false"/>
     <delete file="${etc}/demo.mlet" quiet="false"/>
     <delete file="${etc}/webdefault.xml" quiet="false"/>
     <delete file="${demo.webapps}/jetty/LICENSE.html" quiet="false"/>
@@ -218,6 +220,17 @@
        <exclude name="**/jmx/**" />
     </jar>
   </target>
+
+  <!-- ==================================================================== -->
+  <target name="stop.jar" depends="classes">
+    <jar jarfile="${stop.jar}" basedir="${classes}"  >
+       <manifest>    
+         <attribute name="Main-Class" value="org.mortbay.stop.Main"/>
+       </manifest>    
+       <include name="org/mortbay/stop/**" />
+       <exclude name="**/jmx/**" />
+    </jar>
+  </target>
   
   <!-- ==================================================================== -->
   <target name="servlet.jar" depends="classes">
@@ -258,6 +271,7 @@
        <fileset dir="${classes}">
          <include name="org/mortbay/**"/>
          <exclude name="org/mortbay/start/**" />
+         <exclude name="org/mortbay/stop/**" />
          <exclude name="**/jmx/**" />
        </fileset>
     </jar>
@@ -299,12 +313,13 @@
        <exclude name="**/jmx" />
        <exclude name="**/ajp" />
        <exclude name="org/mortbay/start/**" />
+       <exclude name="org/mortbay/stop/**" />
     </jar>
   </target>
 
 
   <!-- ==================================================================== -->
-  <target name="jars" depends="start.jar,servlet.jar,jetty.jar,mortbay.jmx.jar"
+  <target name="jars" depends="start.jar,stop.jar,servlet.jar,jetty.jar,mortbay.jmx.jar"
    description="Build the jar files" >
   </target>
 

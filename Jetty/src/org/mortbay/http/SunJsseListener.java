@@ -21,8 +21,6 @@ import org.mortbay.util.Log;
 import org.mortbay.util.Password;
 
 
-
-
 /* ------------------------------------------------------------ */
 /** SSL Socket Listener for Sun's JSSE.
  *
