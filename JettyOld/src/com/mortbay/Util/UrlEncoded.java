@@ -202,35 +202,33 @@ public class UrlEncoded extends Hashtable
     {
 	encoded = encoded.replace('+',' ');
 	int index = 0;
-	int marker = 0;
-	StringBuffer result = new StringBuffer();    
+	int marker = 0;   
 
-        // if there are no encoded bits, just return the string
-        if ((marker = encoded.indexOf('%', index)) == -1)
-        {
-	    result.append(encoded);
-        }
-        else
-        {
-	    // there is at least one encoding
-	    while (((marker = encoded.indexOf('%', index)) != -1)
-		   &&(index < encoded.length()))
-	    {
-		result.append(encoded.substring (index, marker));
+	// there is at least one encoding
+	StringBuffer result=null;
+	while (((marker = encoded.indexOf('%', index)) != -1)
+	       &&(index < encoded.length()))
+	{
+	    if(result==null)
+		result=new StringBuffer();
+	    
+	    result.append(encoded.substring (index, marker));
+	    
+	    // convert the 2 hex chars following the % into a byte,
+	    // which will be a character
+	    result.append((char)(Integer.parseInt
+				 (encoded.substring(marker+1,marker+3),16)));
+	    index = marker+3;  
+	}
 
-		// convert the 2 hex chars following the % into a byte,
-		// which will be a character
-		result.append((char)(Integer.parseInt
-				     (encoded.substring(marker+1,
-							marker+3),
-				      16)));
-		index = marker+3;  
-	    }
+	// if no encoded characters return the original
+	if (result==null)
+	    return encoded;
 
-	    // if there is some at the end then copy it in
-	    if (index < encoded.length())
+	// if there is some at the end then copy it in
+	if (index < encoded.length())
             result.append(encoded.substring(index, encoded.length()));
-        }
+   
         return result.toString();
     }
     
@@ -337,6 +335,7 @@ public class UrlEncoded extends Hashtable
     /* -------------------------------------------------------------- */
     public static void main(String[] args)
     {
+	    
 	test();
 	Test.report(); 
     }

@@ -36,7 +36,7 @@ public class LogHandler extends NullHandler implements Observer
     /* ----------------------------------------------------------------- */
     PathMap loggers;
     boolean countContentSize;
-    boolean longForm;
+    boolean longForm;	
     
     /* ----------------------------------------------------------------- */
     /** Constructor
@@ -120,11 +120,11 @@ public class LogHandler extends NullHandler implements Observer
 	    else
 		agent="\""+agent+"\"";
 	    
-	    log= request.getRemoteHost()+
+	    log= request.getRemoteAddr()+
 		" - "+
 		user +
 		" [" +
-		(new Date()).toString()+
+		response.getHeader(response.Date)+
 		"] \""+
 		request.getRequestLine()+
 		"\" "+
@@ -139,11 +139,11 @@ public class LogHandler extends NullHandler implements Observer
 	}
 	else
 	{
-	    log= request.getRemoteHost()+
+	    log= request.getRemoteAddr()+
 		" - "+
 		user +
 		" [" +
-		(new Date()).toString()+
+		response.getHeader(response.Date)+
 		"] \""+
 		request.getRequestLine()+
 		"\" "+

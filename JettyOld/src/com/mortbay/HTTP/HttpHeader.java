@@ -36,13 +36,14 @@ public class HttpHeader
     public final static String CRLF = "\015\012";
     public final static byte[] __CRLF = {(byte)'\015',(byte)'\012'};
     public final static byte[] __COLON = {(byte)':',(byte)' '};
+    public final static String COLON = ": ";
     
     public final static String HTTP_1_0 ="HTTP/1.0"   ;
     public final static String HTTP_1_1 ="HTTP/1.1"   ;
 
     /* -------------------------------------------------------------- */
-    public final static SimpleDateFormat __dateSend = 
-	new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
+    public final static DateCache __dateSend = 
+	new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
     public final static SimpleDateFormat __dateReceive[] =
     {
 	new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz"),
@@ -58,7 +59,7 @@ public class HttpHeader
     {
 	TimeZone tz = TimeZone.getTimeZone("GMT");
 	tz.setID("GMT");
-	__dateSend.setTimeZone(tz);
+	__dateSend.getFormat().setTimeZone(tz);
 	for(int i=0;i<__dateReceive.length;i++)
 	    __dateReceive[i].setTimeZone(tz);
     }
@@ -133,29 +134,91 @@ public class HttpHeader
     public void read(HttpInputStream in)
     throws IOException
     {
-	String s;
-	while ((s=in.readLine())!=null)
+	com.mortbay.HTTP.HttpInputStream$CharBuffer cbuf;
+	char[] lbuf=null;
+	while ((cbuf=in.readCharBufferLine())!=null)
 	{
-	    if (s.length()==0)
-	       break;
-	    
-	    int c = s.indexOf(':',0);
-	    if (c>0)
+	    // check for empty line to end headers
+	    if (cbuf.size==0)
+		break;
+
+	    // check space in teh lowercase buffer
+	    char[] buf = cbuf.chars;
+	    if (lbuf==null || lbuf.length < cbuf.size)
+		lbuf= new char[cbuf.chars.length];
+
+	    // setup loop state machine
+	    int state=0;
+	    int i1=-1;
+	    int i2=-1;
+	    String key=null;
+	    String lkey=null;
+
+	    // loop for all chars in buffer
+	    for (int i=0;i<cbuf.size;i++)
 	    {
-		String key = s.substring(0,c).trim();
-		String value = s.substring(c+1,s.length()).trim();
-		String lkey = StringUtil.asciiToLowerCase(key);
-		String ev = (String) keyMap.get(lkey);
-		if (ev!=null)
-		    keyMap.put(lkey,ev+';'+value);
-		else
+		char c=buf[i];
+
+		switch(state)
 		{
-		    keyMap.put(lkey,value);
-		    keys.addElement(key);
+		  case 0: // leading white
+		      if (c==' ')
+			  continue;
+		      state=1;
+		      i1=i;
+		      i2=i-1;
+		  case 1: // reading key
+		      if (c==':')
+		      {
+			  key=new String(buf,i1,i2-i1+1);
+			  lkey=new String(lbuf,i1,i2-i1+1);  
+			  state=2;
+			  i1=i;i2=i-1;
+			  continue;
+		      }
+		      if (c>='A'&&c<='Z')
+		      {
+			  lbuf[i]=(char)(('a'-'A')+c);
+			  i2=i;
+		      }
+		      else
+		      {
+			  lbuf[i]=c;
+			  if (c!=' ')
+			      i2=i;
+		      }
+		      continue;
+
+		  case 2: // skip whitespace after :
+		      if (c==' ')
+			  continue;
+		      state=3;
+		      i1=i;
+		      i2=i-1;
+
+		  case 3: // looking for last non-white
+		      if (c!=' ')
+			  i2=i;
 		}
+		continue;
+	    }
+	    
+	    if (lkey==null || lkey.length()==0)
+		continue;
+
+	    String existing=(String)keyMap.get(lkey);
+	    if (existing!=null)
+	    {
+		StringBuffer sb = new StringBuffer(existing);
+		sb.append(';');
+		sb.append(buf,i1,i2-i1+1);
+		keyMap.put(lkey,sb.toString());
 	    }
 	    else
-		Code.warning("header field without ':'");
+	    {
+		keyMap.put(lkey,new String(buf,i1,i2-i1+1));
+		keys.addElement(key);
+	    }
 	}
     }
 
@@ -164,32 +227,34 @@ public class HttpHeader
     /* Write Extra HTTP headers.
      */
     protected void write(OutputStream out, String extra)
-    throws IOException
+	throws IOException
     {
-	ByteArrayOutputStream buf= new ByteArrayOutputStream();
-	synchronized(buf)
-	{
-	    int size=keys.size();
-	    for(int k=0;k<size;k++)
-	    {
-		String key = (String)keys.elementAt(k);
-		String value = getHeader(key);
-		buf.write(key.getBytes());
-		buf.write(__COLON);
-		buf.write(value.getBytes());
-		buf.write(__CRLF);
-	    }
-	    if (extra!=null&&extra.length()>0)
-	    {
-		buf.write(extra.getBytes());
-		buf.write(__CRLF);
-	    }
-	    buf.write(__CRLF);
-	    buf.writeTo(out);
-	}
-	
-	out.flush();
+        OutputStreamWriter writer = new OutputStreamWriter(out);
+        synchronized(out)   // Lock on the same object writer.write will use
+        {
+            int size=keys.size();
+            for(int k=0;k<size;k++)
+            {
+                String key = (String)keys.elementAt(k);
+                String value = getHeader(key);
+                writer.write(key);
+                writer.write(COLON);
+                writer.write(value);
+                writer.write(CRLF);
+            }
+            if (extra!=null&&extra.length()>0)
+            {
+                writer.write(extra);
+                writer.write(CRLF);
+            }
+            writer.write(CRLF);
+        
+            writer.flush();
+        }
+    
+        out.flush();
     }
+    
     
     /* -------------------------------------------------------------- */
     protected void write(OutputStream out)
@@ -271,7 +336,7 @@ public class HttpHeader
      */
     public void setDateHeader(String name, long date)
     {
-	setHeader(name, __dateSend.format(new Date(date)));
+	setHeader(name, __dateSend.format(date));
     }
 }
 

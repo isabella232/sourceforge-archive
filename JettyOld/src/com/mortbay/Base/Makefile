@@ -8,6 +8,6 @@
 #JAVAOPTIONS := 
 #JAVACOPTIONS :=
 ROOTNAME := com
-TESTS := Log.java Code.java Test.java Frame.java
+TESTS := DateCache.java Log.java Code.java Test.java Frame.java
 
 include $(JETTY_HOME)/etc/Global.mk

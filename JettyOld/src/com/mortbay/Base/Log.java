@@ -60,7 +60,7 @@ public class Log
     public boolean _logStackTrace=false;
     public boolean _logOneLine=false;
     public PrintWriter _out = null;;
-    public DateFormat _dateFormat=null;
+    public DateCache _dateFormat=null;
 
     /*-------------------------------------------------------------------*/
     private static Log __instance=null;
@@ -145,13 +145,13 @@ public class Log
 	if (dateFormat!=null && dateFormat.trim().length()>0)
 	{
 	    dateFormat=dateFormat.replace('+',' ');
-	    _dateFormat = new SimpleDateFormat(dateFormat);
+	    _dateFormat = new DateCache(dateFormat);
 	    if (timezone==null || timezone.length()==0)
 		timezone="GMT";
-	    _dateFormat.setTimeZone(TimeZone.getTimeZone(timezone));
+	    _dateFormat.getFormat().setTimeZone(TimeZone.getTimeZone(timezone));
 	}
 	else
-	    _dateFormat=null;
+	    _dateFormat=new DateCache("yyyyMMdd HHmmss.SSS zzz ");
 	
 	try {
 	    if (logFile==null)

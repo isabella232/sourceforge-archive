@@ -412,14 +412,18 @@ public class Server extends BaseConfiguration
 		fields.addElement(tok.nextToken());
 	    
 	    // Extract the server name and handler stack
-	    if (fields.size()<3 || fields.size()>4)
+	    if (fields.size()<3)
 		throw new Exception("Badly formatted configuration key: "+key);
 	    String name = (String)fields.elementAt(0);
 	    String stack = (String)fields.elementAt(1);
 	    String type = (String)fields.elementAt(2);
 	    String path = null;
 	    if (fields.size() > 3)
+	    {
 		path=(String)fields.elementAt(3);
+		for (int i=4;i<fields.size();i++)
+		    path+="."+fields.elementAt(i);
+	    }
 	    
 	    // Get a server instance for the name
 	    Server server=(Server)server_map.get(name);

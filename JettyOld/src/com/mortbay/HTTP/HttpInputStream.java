@@ -30,6 +30,19 @@ public class HttpInputStream extends ServletInputStream
     private boolean chunking=false;
 
     /* ------------------------------------------------------------ */
+    /** Buffer for readLine, gets reused across calls */
+    /* Note that the readCharBufferLine method break encapsulation
+     * by returning this buffer, so BE CAREFUL!!!
+     */
+    static class CharBuffer
+    {
+	char[] chars = new char[128];
+	int size=0;
+    };
+    CharBuffer charBuffer = new CharBuffer();
+    
+    
+    /* ------------------------------------------------------------ */
     /** Constructor
      */
     public HttpInputStream( InputStream in)
@@ -45,7 +58,8 @@ public class HttpInputStream extends ServletInputStream
     {
 	this.chunking=chunking;
     }
-    
+
+	
     /* ------------------------------------------------------------ */
     /** Read a line ended by CR or CRLF or LF.
      * More forgiving of line termination than ServletInputStream.readLine().
@@ -54,9 +68,25 @@ public class HttpInputStream extends ServletInputStream
      */
     public String readLine() throws IOException
     {
-	StringBuffer buf = new StringBuffer(1024);
-
-	int c;	
+	CharBuffer buf = readCharBufferLine();
+	if (buf==null)
+	    return null;
+	return new String(buf.chars,0,buf.size);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Read a line ended by CR or CRLF or LF.
+     * More forgiving of line termination than ServletInputStream.readLine().
+     * This method only read raw data, that may be chunked.  Calling
+     * ServletInputStream.readLine() will always return unchunked data.
+     */
+    CharBuffer readCharBufferLine() throws IOException
+    {
+	BufferedInputStream in = this.in;
+	
+	int room = charBuffer.chars.length;
+	charBuffer.size=0;
+	int c;  
 	boolean cr = false;
 	boolean lf = false;
 
@@ -68,13 +98,13 @@ public class HttpInputStream extends ServletInputStream
 	      case 10:
 		  lf = true;
 		  break LineLoop;
-		
+        
 	      case 13:
 		  cr = true;
 		  if (!chunking)
 		      in.mark(2);
 		  break;
-		
+        
 	      default:
 		  if(cr)
 		  {
@@ -84,17 +114,25 @@ public class HttpInputStream extends ServletInputStream
 		      break LineLoop;
 		  }
 		  else
-		      buf.append((char)c);
+		  {
+		      if (--room < 0)
+		      {
+			  char[] old = charBuffer.chars;
+			  charBuffer.chars =new char[charBuffer.chars.length+128];
+			  room = charBuffer.chars.length-charBuffer.size-1;
+			  System.arraycopy(old,0,charBuffer.chars,0,charBuffer.size);
+		      }
+		      charBuffer.chars[charBuffer.size++] = (char) c;
+		  }
 		  break;
 	    }    
 	}
 
-	if (c==-1 && buf.length()==0)
-	   return null;
+	if (c==-1 && charBuffer.size==0)
+	    return null;
 
-	return buf.toString();
-    }    
-
+	return charBuffer;
+    }
     
     /* ------------------------------------------------------------ */
     public int read() throws IOException
