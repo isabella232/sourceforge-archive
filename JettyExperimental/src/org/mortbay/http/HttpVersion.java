@@ -31,8 +31,8 @@ public class HttpVersion extends BufferCache
 	
 	private HttpVersion()
 	{
-		add(__HTTP_0_9,HTTP_0_9);
-		add(__HTTP_1_0,HTTP_1_0);
-		add(__HTTP_1_1,HTTP_1_1);
+		add(HTTP_0_9,__HTTP_0_9);
+		add(HTTP_1_0,__HTTP_1_0);
+		add(HTTP_1_1,__HTTP_1_1);
 	}
 }

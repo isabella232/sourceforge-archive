@@ -45,14 +45,14 @@ public class HttpMethod extends BufferCache
     
     private HttpMethod()
     {
-        add(__GET,GET);
-        add(__POST,POST);
-        add(__HEAD,HEAD);
-        add(__PUT,PUT);
-        add(__OPTIONS,OPTIONS);
-        add(__DELETE,DELETE);
-        add(__TRACE,TRACE);
-        add(__CONNECT,CONNECT);
-        add(__MOVE,MOVE);
+        add(GET,__GET);
+        add(POST,__POST);
+        add(HEAD,__HEAD);
+        add(PUT,__PUT);
+        add(OPTIONS,__OPTIONS);
+        add(DELETE,__DELETE);
+        add(TRACE,__TRACE);
+        add(CONNECT,__CONNECT);
+        add(MOVE,__MOVE);
     }
 }
