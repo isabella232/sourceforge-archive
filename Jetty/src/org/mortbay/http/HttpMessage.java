@@ -5,18 +5,14 @@
 
 package org.mortbay.http;
 
-import org.mortbay.util.Code;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.HashSet;
-import java.util.HashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
+import org.mortbay.util.Code;
 
 
 /* ------------------------------------------------------------ */

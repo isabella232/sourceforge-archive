@@ -4,8 +4,8 @@
 // ========================================================================
 
 package org.mortbay.http;
-import org.mortbay.util.DateCache;
 import java.util.TimeZone;
+import org.mortbay.util.DateCache;
 
 /* ------------------------------------------------------------ */
 /** NCSA HTTP Request Log format.

@@ -5,12 +5,12 @@
 
 package org.mortbay.http;
 
-import org.mortbay.util.Code;
-import org.mortbay.util.InetAddrPort;
-import org.mortbay.util.LineInput;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.Socket;
+import org.mortbay.util.Code;
+import org.mortbay.util.InetAddrPort;
+import org.mortbay.util.LineInput;
 
 /* ------------------------------------------------------------ */
 /** HTTP 1.0 Test Client.

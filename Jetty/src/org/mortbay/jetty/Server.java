@@ -1,22 +1,17 @@
 package org.mortbay.jetty;
 
-import org.mortbay.http.HttpServer;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.lang.reflect.Method;
+import java.net.URL;
 import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpServer;
+import org.mortbay.jetty.servlet.ServletHandlerContext;
+import org.mortbay.jetty.servlet.WebApplicationContext;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
 import org.mortbay.util.Resource;
 import org.mortbay.xml.XmlConfiguration;
-import org.mortbay.jetty.servlet.ServletHandlerContext;
-import org.mortbay.jetty.servlet.WebApplicationContext;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.Runtime;
-import java.net.URL;
-import org.xml.sax.SAXException;
-import java.util.List;
-import java.util.Map;
 
 
 /* ------------------------------------------------------------ */

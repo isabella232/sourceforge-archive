@@ -5,8 +5,6 @@
 
 package org.mortbay.util;
 
-import java.applet.Applet;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.StringTokenizer;
 

@@ -1,11 +1,10 @@
 package org.mortbay.http;
 
-import org.mortbay.util.Code;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.StringTokenizer;
+import org.mortbay.util.Code;
 
 /* ------------------------------------------------------------ */
 /** class for dealing with byte ranges

@@ -4,9 +4,9 @@
 // ========================================================================
 
 package org.mortbay.http;
-import org.mortbay.util.LifeCycle;
-import java.net.UnknownHostException;
 import java.net.ServerSocket;
+import java.net.UnknownHostException;
+import org.mortbay.util.LifeCycle;
 
 
 /* ------------------------------------------------------------ */

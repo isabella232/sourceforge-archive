@@ -5,16 +5,7 @@
 
 package org.mortbay.jetty.servlet;
 
-import org.mortbay.http.ChunkableOutputStream;
-import org.mortbay.http.HttpFields;
-import org.mortbay.http.HttpRequest;
-import org.mortbay.http.HttpResponse;
-import org.mortbay.util.Code;
-import org.mortbay.util.IO;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.URI;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,6 +15,14 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.mortbay.http.ChunkableOutputStream;
+import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpFields;
+import org.mortbay.http.HttpMessage;
+import org.mortbay.http.HttpResponse;
+import org.mortbay.http.handler.NullHandler;
+import org.mortbay.util.StringUtil;
+import org.mortbay.util.URI;
 
 /* ------------------------------------------------------------ */
 /** Servlet Response Wrapper.

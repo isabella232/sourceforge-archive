@@ -4,10 +4,10 @@
 // ---------------------------------------------------------------------------
 
 package org.mortbay.html;
-import org.mortbay.util.Code;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import org.mortbay.util.Code;
 
 /* ---------------------------------------------------------------- */
 /** HTML Image Tag.

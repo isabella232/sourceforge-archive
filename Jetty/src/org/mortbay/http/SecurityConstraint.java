@@ -5,11 +5,11 @@
 
 package org.mortbay.http;
 
-import org.mortbay.util.Code;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import org.mortbay.util.Code;
 
 
 

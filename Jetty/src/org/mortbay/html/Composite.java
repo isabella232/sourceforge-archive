@@ -4,12 +4,12 @@
 // ---------------------------------------------------------------------------
 
 package org.mortbay.html;
-import org.mortbay.util.Code;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import org.mortbay.util.Code;
 
 /* -------------------------------------------------------------------- */
 /** HTML Composite Element.

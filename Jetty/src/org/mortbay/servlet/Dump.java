@@ -4,11 +4,26 @@
 // ---------------------------------------------------------------------------
 
 package org.mortbay.servlet;
-import org.mortbay.html.Block;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.lang.reflect.Field;
+import java.util.Enumeration;
+import java.util.Locale;
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.UnavailableException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.mortbay.html.Break;
 import org.mortbay.html.Composite;
 import org.mortbay.html.Element;
 import org.mortbay.html.Font;
+import org.mortbay.html.Form;
 import org.mortbay.html.Heading;
 import org.mortbay.html.Page;
 import org.mortbay.html.Select;
@@ -16,17 +31,6 @@ import org.mortbay.html.Table;
 import org.mortbay.html.TableForm;
 import org.mortbay.http.HttpException;
 import org.mortbay.util.Code;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Enumeration;
-import java.util.Locale;
-import java.lang.reflect.Field;
-import javax.servlet.UnavailableException;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /* ------------------------------------------------------------ */
 /** Dump Servlet Request.

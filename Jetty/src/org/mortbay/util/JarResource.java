@@ -4,16 +4,15 @@
 // ---------------------------------------------------------------------------
 package org.mortbay.util;
 
-import java.io.InputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.File;
-import java.net.URL;
-import java.net.URLConnection;
+import java.io.InputStream;
 import java.net.JarURLConnection;
-import java.util.jar.JarInputStream;
+import java.net.URL;
 import java.util.jar.JarEntry;
-import java.util.Enumeration;
+import java.util.jar.JarInputStream;
+import java.util.zip.ZipEntry;
 
 
 /* ------------------------------------------------------------ */

@@ -4,13 +4,13 @@
 // ========================================================================
 
 package org.mortbay.http;
+import java.io.IOException;
+import java.net.Socket;
 import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.Log;
+import org.mortbay.util.ThreadPool;
 import org.mortbay.util.ThreadedServer;
-import org.mortbay.util.ThreadPool.PoolThread;
-import java.io.IOException;
-import java.net.Socket;
 
 
 /* ------------------------------------------------------------ */

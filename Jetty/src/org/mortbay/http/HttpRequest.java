@@ -5,33 +5,32 @@
 
 package org.mortbay.http;
 
-import org.mortbay.util.Code;
-import org.mortbay.util.LineInput;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.MultiMap;
-import org.mortbay.util.QuotedStringTokenizer;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.StringMap;
-import org.mortbay.util.URI;
-import org.mortbay.util.UrlEncoded;
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.Writer;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.servlet.http.Cookie;
+import org.mortbay.util.Code;
+import org.mortbay.util.LazyList;
+import org.mortbay.util.LineInput;
+import org.mortbay.util.MultiMap;
+import org.mortbay.util.StringMap;
+import org.mortbay.util.StringUtil;
+import org.mortbay.util.URI;
+import org.mortbay.util.UrlEncoded;
 
 
 /* ------------------------------------------------------------ */

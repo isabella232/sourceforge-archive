@@ -6,11 +6,9 @@
 package org.mortbay.jetty.servlet;
 
 import java.util.EventListener;
-
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionContext;
 import javax.servlet.http.HttpSession;
 import org.mortbay.util.LifeCycle;
+
     
 /* --------------------------------------------------------------------- */
 /**

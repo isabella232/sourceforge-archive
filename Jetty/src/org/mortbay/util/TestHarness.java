@@ -7,35 +7,32 @@ package org.mortbay.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.FilePermission;
 import java.io.FileOutputStream;
+import java.io.FilePermission;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.JarURLConnection;
 import java.net.Socket;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.ArrayList;
+import java.net.URLConnection;
+import java.net.UnknownHostException;
+import java.security.Permission;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
-import java.util.zip.ZipEntry;
-import java.util.Iterator;
-import java.util.ListIterator;
-
-import java.util.Enumeration;
-import java.net.JarURLConnection;
-import java.util.jar.JarInputStream;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
 
 /* ------------------------------------------------------------ */
 /** Util meta TestHarness.

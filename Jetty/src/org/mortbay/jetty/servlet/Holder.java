@@ -5,24 +5,16 @@
 
 package org.mortbay.jetty.servlet;
 
-import org.mortbay.util.Code;
-import org.mortbay.util.Log;
-import org.mortbay.util.LifeCycle;
-import org.mortbay.http.HandlerContext;
-import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.Collections;
-import java.util.EmptyStackException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.SingleThreadModel;
-import javax.servlet.UnavailableException;
+import org.mortbay.http.HandlerContext;
+import org.mortbay.http.handler.NullHandler;
+import org.mortbay.util.Code;
+import org.mortbay.util.LifeCycle;
 
 
 /* --------------------------------------------------------------------- */

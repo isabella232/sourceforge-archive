@@ -5,17 +5,18 @@
 
 package org.mortbay.http.handler;
 
-import org.mortbay.http.ChunkableOutputStream;
-import org.mortbay.http.HttpException;
-import org.mortbay.http.HttpFields;
-import org.mortbay.http.HttpRequest;
-import org.mortbay.http.HttpResponse;
-import org.mortbay.util.Code;
-import org.mortbay.util.StringUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import org.mortbay.http.ChunkableOutputStream;
+import org.mortbay.http.HttpException;
+import org.mortbay.http.HttpFields;
+import org.mortbay.http.HttpMessage;
+import org.mortbay.http.HttpRequest;
+import org.mortbay.http.HttpResponse;
+import org.mortbay.util.Code;
+import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
 /** Handler for resources that were not found.

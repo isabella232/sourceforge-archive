@@ -5,10 +5,6 @@
 
 package org.mortbay.util;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.Writer;
 import java.io.OutputStream;
 
 /* ------------------------------------------------------------ */

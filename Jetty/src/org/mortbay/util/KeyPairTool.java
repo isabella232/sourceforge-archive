@@ -5,16 +5,16 @@
 
 package org.mortbay.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.DataInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.FilterInputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -23,11 +23,9 @@ import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Collection;
 import java.util.ArrayList;
 
 // Document our single dependency on the Util package.
-import org.mortbay.util.Password;
 
 /* ------------------------------------------------------------ */
 /**

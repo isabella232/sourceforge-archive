@@ -5,19 +5,21 @@
 
 package org.mortbay.http;
 
-import org.mortbay.util.Code;
-import org.mortbay.util.LineInput;
-import org.mortbay.util.Test;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FilePermission;
 import java.io.FileOutputStream;
+import java.io.FilePermission;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
+import java.net.URLConnection;
+import java.security.Permission;
 import java.util.Enumeration;
-import java.util.List;
+import java.util.HashMap;
+import org.mortbay.util.Code;
+import org.mortbay.util.LineInput;
+import org.mortbay.util.Test;
 
 /* ------------------------------------------------------------ */
 /** Top level test harness.

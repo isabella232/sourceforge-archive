@@ -5,16 +5,18 @@
 
 package org.mortbay.servlet;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Hashtable;
+import java.util.Set;
+import java.util.StringTokenizer;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import org.mortbay.http.HttpFields;
 import org.mortbay.util.Code;
 import org.mortbay.util.LineInput;
-import javax.servlet.http.HttpServletRequest;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.IOException;
-import java.util.Hashtable;
-import java.util.StringTokenizer;
 
 /* ------------------------------------------------------------ */
 /** Multipart Form Data request.

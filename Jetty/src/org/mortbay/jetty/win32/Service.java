@@ -6,23 +6,15 @@
 // ========================================================================
 
 package org.mortbay.jetty.win32;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.util.Vector;
+import org.mortbay.http.HttpServer;
 import org.mortbay.jetty.Server;
-import org.mortbay.http.HttpServer;
-import org.mortbay.http.HttpServer;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
 import org.mortbay.util.OutputStreamLogSink;
-import org.mortbay.util.Resource;
-import org.mortbay.xml.XmlConfiguration;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.OutputStreamWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
-import java.util.Vector;
-import org.xml.sax.SAXException;
 
 /* ------------------------------------------------------------ */
 /** Run Jetty as a Win32 service.

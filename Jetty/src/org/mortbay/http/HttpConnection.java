@@ -5,21 +5,21 @@
 
 package org.mortbay.http;
 
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
 import org.mortbay.util.Code;
+import org.mortbay.util.LifeCycle;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.ThreadPool;
 import org.mortbay.util.ThreadPool.PoolThread;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.BufferedOutputStream;
-import java.io.InterruptedIOException;
-import java.net.InetAddress;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.ArrayList;
-import java.util.List;
 
 
 /* ------------------------------------------------------------ */

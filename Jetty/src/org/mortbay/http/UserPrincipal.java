@@ -5,7 +5,6 @@
 
 package org.mortbay.http;
 
-import org.mortbay.util.Code;
 import java.security.Principal;
 
 

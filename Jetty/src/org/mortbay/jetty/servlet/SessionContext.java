@@ -4,10 +4,10 @@
 // ---------------------------------------------------------------------------
 
 package org.mortbay.jetty.servlet;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionContext;
 import java.util.Collections;
 import java.util.Enumeration;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionContext;
 
 /* ------------------------------------------------------------ */
 /** 

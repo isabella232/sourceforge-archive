@@ -5,8 +5,6 @@
 // ---------------------------------------------------------------------------
 
 package org.mortbay.html;
-import org.mortbay.util.Code;
-import org.mortbay.util.IO;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,6 +17,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URL;
+import org.mortbay.util.Code;
+import org.mortbay.util.IO;
 
 /* -------------------------------------------------------------------- */
 /** Include File, InputStream or Reader Element.

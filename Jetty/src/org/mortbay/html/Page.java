@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Vector;
 
 /* --------------------------------------------------------------------- */
 /** HTML Page.

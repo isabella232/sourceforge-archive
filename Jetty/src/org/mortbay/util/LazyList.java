@@ -6,12 +6,12 @@
 package org.mortbay.util;
 import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Iterator;
-import java.util.ListIterator;
 import java.util.Collections;
-import java.util.NoSuchElementException;
 import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 /* ------------------------------------------------------------ */
 /** Lazy List creation.

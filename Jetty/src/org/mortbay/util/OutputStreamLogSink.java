@@ -5,18 +5,18 @@
 
 package org.mortbay.util;
 
-import java.io.OutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.io.FileWriter;
-import java.io.File;
+import java.io.OutputStream;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.StringTokenizer;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.StringTokenizer;
+import java.util.TimeZone;
 
 
 /* ------------------------------------------------------------ */

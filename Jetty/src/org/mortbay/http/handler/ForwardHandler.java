@@ -5,19 +5,19 @@
 
 package org.mortbay.http.handler;
 
+import java.io.IOException;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.mortbay.http.HandlerContext;
 import org.mortbay.http.HttpException;
-import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
+import org.mortbay.http.HttpServer;
 import org.mortbay.http.PathMap;
-import org.mortbay.util.UrlEncoded;
 import org.mortbay.util.Code;
-import org.mortbay.util.Log;
 import org.mortbay.util.URI;
-import java.io.IOException;
-import java.util.Map;
+import org.mortbay.util.UrlEncoded;
 
 
 /* ------------------------------------------------------------ */

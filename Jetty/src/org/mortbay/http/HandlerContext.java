@@ -5,36 +5,27 @@
 
 package org.mortbay.http;
 
-import org.mortbay.http.handler.ResourceHandler;
-import org.mortbay.http.handler.SecurityHandler;
-import org.mortbay.http.handler.ForwardHandler;
-import org.mortbay.util.Code;
-import org.mortbay.util.DateCache;
-import org.mortbay.util.Log;
-import org.mortbay.util.IO;
-import org.mortbay.util.LogSink;
-import org.mortbay.util.Resource;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.LifeCycle;
-import org.mortbay.util.MultiException;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.security.Permission;
+import java.security.PermissionCollection;
+import java.security.Permissions;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.StringTokenizer;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.security.PermissionCollection;
-import java.security.Permissions;
-import java.security.Permission;
+import org.mortbay.http.handler.ResourceHandler;
+import org.mortbay.http.handler.SecurityHandler;
+import org.mortbay.util.Code;
+import org.mortbay.util.LifeCycle;
+import org.mortbay.util.Log;
+import org.mortbay.util.LogSink;
+import org.mortbay.util.MultiException;
+import org.mortbay.util.Resource;
+import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
 /** Context for a collection of HttpHandlers.

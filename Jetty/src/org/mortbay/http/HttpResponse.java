@@ -5,19 +5,14 @@
 
 package org.mortbay.http;
 
-import org.mortbay.util.Code;
-import org.mortbay.util.IO;
-import org.mortbay.util.UrlEncoded;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.Resource;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import javax.servlet.http.Cookie;
+import org.mortbay.util.Code;
+import org.mortbay.util.StringUtil;
 
 
 /* ------------------------------------------------------------ */

@@ -4,15 +4,16 @@
 // ---------------------------------------------------------------------------
 package org.mortbay.util;
 
-import java.io.IOException;
 import java.io.File;
-import java.net.URL;
-import java.net.URLConnection;
+import java.io.IOException;
 import java.net.JarURLConnection;
-import java.util.jar.JarFile;
-import java.util.jar.JarEntry;
-import java.util.Enumeration;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /* ------------------------------------------------------------ */
 class JarFileResource extends JarResource

@@ -5,19 +5,9 @@
 
 package org.mortbay.jetty.servlet;
 
-import org.mortbay.http.HttpServer;
 import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpServer;
 
-import org.mortbay.util.Code;
-import org.mortbay.util.Resource;
-import org.mortbay.xml.XmlConfiguration;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
-import org.xml.sax.SAXException;
-import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.jetty.servlet.ServletHolder;
 
 /* ------------------------------------------------------------ */
 /** ServletHandlerContext.

@@ -4,8 +4,8 @@
 // ========================================================================
 
 package org.mortbay.http;
-import org.mortbay.util.LifeCycle;
 import java.io.IOException;
+import org.mortbay.util.LifeCycle;
 
 
 /* ------------------------------------------------------------ */

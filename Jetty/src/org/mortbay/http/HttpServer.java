@@ -5,19 +5,12 @@
 
 package org.mortbay.http;
 
-import org.mortbay.http.handler.NotFoundHandler;
-import org.mortbay.http.handler.DumpHandler;
-import org.mortbay.util.Code;
-import org.mortbay.util.DateCache;
-import org.mortbay.util.InetAddrPort;
-import org.mortbay.util.LifeCycle;
-import org.mortbay.util.Log;
-import org.mortbay.util.LogSink;
-import org.mortbay.util.MultiException;
-import org.mortbay.util.StringMap;
-import org.mortbay.util.URI;
+import java.beans.beancontext.BeanContextSupport;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.Method;
+import java.util.AbstractCollection;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,8 +21,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
-import java.lang.reflect.Method;
-import java.beans.beancontext.BeanContextSupport;
+import org.mortbay.http.handler.DumpHandler;
+import org.mortbay.http.handler.NotFoundHandler;
+import org.mortbay.util.Code;
+import org.mortbay.util.InetAddrPort;
+import org.mortbay.util.LifeCycle;
+import org.mortbay.util.Log;
+import org.mortbay.util.LogSink;
+import org.mortbay.util.MultiException;
+import org.mortbay.util.StringMap;
+import org.mortbay.util.URI;
 
 
 

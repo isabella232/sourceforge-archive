@@ -6,38 +6,42 @@
 
 package org.mortbay.jetty.servlet;
 
-import org.mortbay.http.HandlerContext;
-import org.mortbay.http.HttpConnection;
-import org.mortbay.http.HttpFields;
-import org.mortbay.http.HttpRequest;
-import org.mortbay.util.Code;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.MultiMap;
-import org.mortbay.util.Resource;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.URI;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.security.Principal;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.HashSet;
-import java.util.Set;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUtils;
+import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpConnection;
+import org.mortbay.http.HttpFields;
+import org.mortbay.http.HttpMessage;
+import org.mortbay.http.HttpRequest;
+import org.mortbay.http.HttpResponse;
+import org.mortbay.http.handler.NullHandler;
+import org.mortbay.util.Code;
+import org.mortbay.util.LazyList;
+import org.mortbay.util.MultiMap;
+import org.mortbay.util.Resource;
+import org.mortbay.util.StringUtil;
+import org.mortbay.util.URI;
 
 
 /* ------------------------------------------------------------ */

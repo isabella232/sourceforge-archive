@@ -5,14 +5,10 @@
 
 package org.mortbay.servlet;
 
-import org.mortbay.util.Code;
+import java.io.IOException;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletResponse;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
 
 
 

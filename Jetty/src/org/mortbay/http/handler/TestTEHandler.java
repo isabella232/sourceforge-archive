@@ -5,11 +5,12 @@
 
 package org.mortbay.http.handler;
 
+import java.io.IOException;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
+import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
-import java.io.IOException;
 
 /* ------------------------------------------------------------ */
 /** Handler to test TE transfer encoding.

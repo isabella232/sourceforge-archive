@@ -5,10 +5,8 @@
 
 package org.mortbay.http;
 
-import org.mortbay.util.Code;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Enumeration;
+import org.mortbay.util.Code;
 
 public class HttpEncoding
 {

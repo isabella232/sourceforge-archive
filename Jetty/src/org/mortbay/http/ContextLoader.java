@@ -5,19 +5,18 @@
 
 package org.mortbay.http;
 
-import org.mortbay.util.Code;
-import org.mortbay.util.IO;
-import org.mortbay.util.Resource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.StringTokenizer;
-import java.util.HashMap;
-import java.security.Policy;
-import java.security.PermissionCollection;
 import java.security.CodeSource;
+import java.security.PermissionCollection;
+import java.util.HashMap;
+import java.util.StringTokenizer;
+import org.mortbay.util.Code;
+import org.mortbay.util.IO;
+import org.mortbay.util.Resource;
 
 /* ------------------------------------------------------------ */
 /** ClassLoader for HandlerContext.

@@ -5,26 +5,29 @@
 
 package org.mortbay.jetty.servlet;
 
-import org.mortbay.http.HttpFields;
-import org.mortbay.http.HttpHandler;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import org.mortbay.http.ChunkableOutputStream;
 import org.mortbay.http.HandlerContext;
-import org.mortbay.http.handler.ResourceHandler;
+import org.mortbay.http.HttpFields;
+import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.PathMap;
+import org.mortbay.http.handler.NullHandler;
+import org.mortbay.http.handler.ResourceHandler;
 import org.mortbay.util.Code;
+import org.mortbay.util.Log;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.Resource;
 import org.mortbay.util.UrlEncoded;
-import java.io.InputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
 
 
 /* ------------------------------------------------------------ */

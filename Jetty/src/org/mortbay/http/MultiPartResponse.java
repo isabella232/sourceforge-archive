@@ -5,11 +5,8 @@
 
 package org.mortbay.http;
 
-import org.mortbay.util.Code;
-import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.Writer;
 
 /* ================================================================ */
 /** Handle a multipart MIME response.

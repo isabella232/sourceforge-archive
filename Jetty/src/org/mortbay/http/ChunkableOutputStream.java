@@ -5,22 +5,18 @@
 
 package org.mortbay.http;
 
-import org.mortbay.util.Code;
-import org.mortbay.util.ByteBufferOutputStream;
-import org.mortbay.util.ByteArrayISO8859Writer;
-import org.mortbay.util.IO;
-import org.mortbay.util.StringUtil;
-import java.io.ByteArrayOutputStream;
-import java.io.CharArrayWriter;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import org.mortbay.util.ByteArrayISO8859Writer;
+import org.mortbay.util.ByteBufferOutputStream;
+import org.mortbay.util.Code;
+import org.mortbay.util.IO;
 
 /* ---------------------------------------------------------------- */
 /** HTTP Chunkable OutputStream.

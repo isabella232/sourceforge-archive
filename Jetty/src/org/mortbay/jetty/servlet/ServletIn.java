@@ -5,9 +5,10 @@
 
 package org.mortbay.jetty.servlet;
 
-import org.mortbay.http.ChunkableInputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import javax.servlet.ServletInputStream;
+import org.mortbay.http.ChunkableInputStream;
 
 
 class ServletIn extends ServletInputStream

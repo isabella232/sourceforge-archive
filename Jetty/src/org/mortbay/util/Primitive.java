@@ -5,9 +5,9 @@
 
 package org.mortbay.util;
 
-import java.util.HashMap;
-import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 
 /* ------------------------------------------------------------ */
 /** Utility handling of primitive types 

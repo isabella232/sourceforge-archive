@@ -5,7 +5,6 @@
 
 package org.mortbay.jetty.servlet;
 
-import org.mortbay.http.HandlerContext;
 import java.util.Enumeration;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;

@@ -7,11 +7,16 @@ package org.mortbay.http;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.security.Principal;
+import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 import org.mortbay.util.Code;
 import org.mortbay.util.Password;

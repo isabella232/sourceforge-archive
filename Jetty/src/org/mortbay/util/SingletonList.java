@@ -4,13 +4,10 @@
 // ========================================================================
 
 package org.mortbay.util;
-import java.util.NoSuchElementException;
 import java.util.AbstractList;
-import java.util.List;
 import java.util.Iterator;
-import java.util.HashSet;
 import java.util.ListIterator;
-import java.util.Collections;
+import java.util.NoSuchElementException;
 
 /* ------------------------------------------------------------ */
 /** Singleton List.

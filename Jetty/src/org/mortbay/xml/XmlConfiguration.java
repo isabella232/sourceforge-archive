@@ -5,10 +5,6 @@
 
 package org.mortbay.xml;
 
-import org.mortbay.util.Code;
-import org.mortbay.util.Resource;
-import org.mortbay.util.Primitive;
-import org.mortbay.util.InetAddrPort;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -20,6 +16,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Map;
+import org.mortbay.util.Code;
+import org.mortbay.util.InetAddrPort;
+import org.mortbay.util.Primitive;
+import org.mortbay.util.Resource;
 import org.xml.sax.SAXException;
 
 

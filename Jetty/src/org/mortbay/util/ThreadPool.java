@@ -10,7 +10,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.lang.reflect.InvocationTargetException;
 
 /* ------------------------------------------------------------ */
 /** A pool of threads.

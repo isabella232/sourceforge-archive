@@ -8,25 +8,30 @@
 // ========================================================================
 
 package org.mortbay.http.handler;
-import org.mortbay.http.HandlerContext;
-
-import java.io.*;
-import java.net.*;
-
-
-import org.mortbay.http.HttpException;
-import org.mortbay.http.HttpFields;
-import org.mortbay.http.HttpRequest;
-import org.mortbay.http.HttpResponse;
-import org.mortbay.util.*;
-import org.mortbay.util.URI;
-
+import java.io.DataInputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.ArrayList;
 import java.util.Map;
-import java.util.Iterator;
 import java.util.StringTokenizer;
+import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpException;
+import org.mortbay.http.HttpFields;
+import org.mortbay.http.HttpMessage;
+import org.mortbay.http.HttpRequest;
+import org.mortbay.http.HttpResponse;
+import org.mortbay.util.B64Code;
+import org.mortbay.util.Code;
+import org.mortbay.util.Resource;
+import org.mortbay.util.StringUtil;
+import org.mortbay.util.URI;
+import org.mortbay.util.UnixCrypt;
+
+
+
+
 
 /* ------------------------------------------------------------ */
 /** Handler to authenticate access using the Apache's .htaccess files.

@@ -5,9 +5,6 @@
 
 package org.mortbay.http;
 
-import org.mortbay.util.InetAddrPort;
-import org.mortbay.util.Log;
-import org.mortbay.util.Password;
 import com.sun.net.ssl.KeyManager;
 import com.sun.net.ssl.KeyManagerFactory;
 import com.sun.net.ssl.SSLContext;
@@ -21,6 +18,9 @@ import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.Security;
 import javax.net.ssl.SSLServerSocketFactory;
+import org.mortbay.util.InetAddrPort;
+import org.mortbay.util.Log;
+import org.mortbay.util.Password;
 
 
 

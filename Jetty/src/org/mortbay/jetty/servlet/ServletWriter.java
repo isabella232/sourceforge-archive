@@ -5,13 +5,13 @@
 
 package org.mortbay.jetty.servlet;
 
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.io.OutputStreamWriter;
-import java.io.FilterOutputStream;
+import java.io.PrintWriter;
+import java.io.Writer;
 import org.mortbay.util.IO;
-import javax.servlet.ServletOutputStream;
 
 
 /* ------------------------------------------------------------ */

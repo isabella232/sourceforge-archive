@@ -5,31 +5,30 @@
 
 package org.mortbay.http.handler;
 
-import org.mortbay.http.HttpException;
-import org.mortbay.http.HttpFields;
-import org.mortbay.http.HttpRequest;
-import org.mortbay.http.HttpResponse;
-import org.mortbay.http.PathMap;
-import org.mortbay.http.SecurityConstraint;
-import org.mortbay.http.HashUserRealm;
-import org.mortbay.http.HttpHandler;
-import org.mortbay.http.UserRealm;
-import org.mortbay.http.UserPrincipal;
-import java.security.Principal;
-import org.mortbay.util.B64Code;
-import org.mortbay.util.Code;
-import org.mortbay.util.StringUtil;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.security.Principal;
+import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Collection;
-import java.util.Iterator;
-import java.lang.reflect.Method;
+import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpException;
+import org.mortbay.http.HttpFields;
+import org.mortbay.http.HttpHandler;
+import org.mortbay.http.HttpMessage;
+import org.mortbay.http.HttpRequest;
+import org.mortbay.http.HttpResponse;
+import org.mortbay.http.HttpServer;
+import org.mortbay.http.PathMap;
+import org.mortbay.http.SecurityConstraint;
+import org.mortbay.http.UserPrincipal;
+import org.mortbay.http.UserRealm;
+import org.mortbay.util.B64Code;
+import org.mortbay.util.Code;
+import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
 /** Handler to enforce SecurityConstraints.

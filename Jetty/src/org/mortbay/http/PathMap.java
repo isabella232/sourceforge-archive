@@ -5,17 +5,15 @@
 
 package org.mortbay.http;
 
-import org.mortbay.util.StringMap;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.SingletonList;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import org.mortbay.util.LazyList;
+import org.mortbay.util.SingletonList;
+import org.mortbay.util.StringMap;
 
 /* ------------------------------------------------------------ */
 /** URI path map to Object.

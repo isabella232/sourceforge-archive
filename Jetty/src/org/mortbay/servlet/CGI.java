@@ -15,21 +15,25 @@
 
 package org.mortbay.servlet;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.mortbay.http.HttpFields;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.StringUtil;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Enumeration;
-import java.util.List;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 //-----------------------------------------------------------------------------
 /** CGI Servlet.

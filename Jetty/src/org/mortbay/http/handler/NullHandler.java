@@ -5,6 +5,7 @@
 
 package org.mortbay.http.handler;
 
+import java.io.IOException;
 import org.mortbay.http.HandlerContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpHandler;
@@ -12,7 +13,6 @@ import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
-import java.io.IOException;
 
 /* ------------------------------------------------------------ */
 /** Base HTTP Handler.

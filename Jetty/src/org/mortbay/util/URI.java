@@ -6,11 +6,10 @@ package org.mortbay.util;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.ArrayList;
 
 /* ------------------------------------------------------------ */
 /** URI Holder.
