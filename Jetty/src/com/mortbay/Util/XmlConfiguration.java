@@ -1,0 +1,475 @@
+// ========================================================================
+// Copyright (c) 1999 Mort Bay Consulting (Australia) Pty. Ltd.
+// $Id$
+// ========================================================================
+
+package com.mortbay.Util;
+
+import java.io.*;
+import java.net.*;
+import java.lang.reflect.*;
+//import com.sun.java.util.collections.*; XXX-JDK1.1
+import java.util.*; //XXX-JDK1.2
+import com.mortbay.HTTP.*;
+import com.mortbay.Util.*;
+
+import org.xml.sax.*;
+import javax.xml.parsers.*;
+
+/* ------------------------------------------------------------ */
+/** Configure Objects from XML
+ *
+ * @see
+ * @version $Id$
+ * @author Greg Wilkins (gregw)
+ */
+public class XmlConfiguration
+{
+    private static XmlParser __parser;
+    XmlParser.Node _config;
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param configuration 
+     */
+    public XmlConfiguration(URL configuration)
+	throws SAXException, IOException
+    {
+	if (__parser==null)
+	{
+	    synchronized(this.getClass())
+	    {
+		if (__parser==null)
+		{
+		    __parser = new XmlParser();
+		    __parser.redirectEntity
+			("configure.dtd",
+			 Resource.newSystemResource
+			 ("com/mortbay/Util/configure.dtd"));
+		}
+	    }
+	}
+	_config = __parser.parse(configuration.toString());	
+    }
+
+
+    /* ------------------------------------------------------------ */
+    public void configure(Object obj)
+	throws ClassNotFoundException,
+	       NoSuchMethodException,
+	       InvocationTargetException
+    {
+	//Check the class of the object
+	Class oClass = nodeClass(_config);
+	if (!oClass.isInstance(obj))
+	    throw new IllegalArgumentException("Object is not of type "+oClass);
+	configure(obj,_config,0);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Object newInstance()
+	throws ClassNotFoundException,
+	       NoSuchMethodException,
+	       InvocationTargetException,
+	       InstantiationException,
+	       IllegalAccessException
+    {
+	Class oClass = nodeClass(_config);
+	Object obj = oClass.newInstance();
+	configure(obj,_config,0);
+	return obj;
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    private Class nodeClass(XmlParser.Node node)
+	throws ClassNotFoundException
+    {
+	String className=node.getAttribute("class");
+	if (className==null)
+	    return null;
+	return Class.forName(className);
+    }
+    
+    /* ------------------------------------------------------------ */
+    private void configure(Object obj,XmlParser.Node cfg,int i)
+	throws ClassNotFoundException,
+	       NoSuchMethodException,
+	       InvocationTargetException
+    {
+	for(;i<cfg.size();i++)
+	{
+	    XmlParser.Node node = (XmlParser.Node)cfg.get(i);
+	    String tag=node.getTag();
+	    if("Set".equals(tag))
+		set(obj,node);
+	    else if("Put".equals(tag))
+		put(obj,node);
+	    else if("Call".equals(tag))
+		call(obj,node);
+	    else
+		throw new IllegalStateException("Unknown tag: "+tag);
+	}
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @param obj 
+     * @param node 
+     */
+    private void set(Object obj,XmlParser.Node node)
+	throws ClassNotFoundException,
+	       NoSuchMethodException,
+	       InvocationTargetException
+    {
+	String name = "set"+node.getAttribute("name");
+	Object value= value(obj,node);
+	Object[] arg={value};
+	Class oClass = obj.getClass();
+	Class[] vClass = {Object.class};
+	if (value!=null)
+	    vClass[0]=value.getClass();
+
+	Code.debug(obj,".",name,"(",vClass[0]," ",value,")");
+	
+	// Try for trivial match
+	try{
+	    Method set = oClass.getMethod(name,vClass);
+	    set.invoke(obj,arg);
+	    return;
+	}
+	catch(IllegalArgumentException e){Code.ignore(e);}
+	catch(IllegalAccessException e){Code.ignore(e);}
+	catch(NoSuchMethodException e){Code.ignore(e);}
+	
+	// Try for native match
+	try{
+	    Field type = vClass[0].getField("TYPE");
+	    vClass[0]=(Class)type.get(null);
+	    Method set = oClass.getMethod(name,vClass);
+	    set.invoke(obj,arg);
+	    return;
+	}
+	catch(NoSuchFieldException e){Code.ignore(e);}
+	catch(IllegalArgumentException e){Code.ignore(e);}
+	catch(IllegalAccessException e){Code.ignore(e);}
+	catch(NoSuchMethodException e){Code.ignore(e);}
+
+
+	// Search for a match
+	Method[] sets = oClass.getMethods();
+	for (int s=0;sets!=null && s<sets.length;s++)
+	{
+	    if (name.equals(sets[s].getName()))
+	    {
+		// lets try it
+		try
+		{
+		    sets[s].invoke(obj,arg);
+		    return;
+		}
+		catch(IllegalArgumentException e){Code.ignore(e);}
+		catch(IllegalAccessException e){Code.ignore(e);}
+	    }
+	}
+
+	// No Joy
+	throw new NoSuchMethodException(oClass+"."+name+"("+vClass[0]+")");
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @param obj 
+     * @param node 
+     */
+    private void put(Object obj,XmlParser.Node node)
+	throws NoSuchMethodException,
+	       ClassNotFoundException,
+	       InvocationTargetException
+    {
+	if (!(obj instanceof Map))
+	    throw new IllegalArgumentException("Object for put is not a Map: "+
+					       obj);
+	Map map = (Map) obj;
+	
+	String name = node.getAttribute("name");
+	Object value= value(obj,node);
+	map.put(name,value);
+	Code.debug(obj+".put("+name+","+value+")");
+    }
+    
+    
+    
+    /* ------------------------------------------------------------ */
+    private Object call(Object obj,XmlParser.Node node)
+	throws NoSuchMethodException,
+	       ClassNotFoundException,
+	       InvocationTargetException
+    {
+	Class oClass = obj.getClass();
+	int size=0;
+	for (int i=0;i<node.size();i++)
+	{
+	    if(!((XmlParser.Node)node.get(i)).getTag().equals("Arg"))
+		break;
+	    size++;
+	}
+
+	Object[] arg = new Object[size];
+	for (int i=0;i<size;i++)
+	    arg[i]=value(obj,(XmlParser.Node)node.get(i));
+
+	String method=node.getAttribute("name");
+	Code.debug("call ",node);
+	
+	// Lets just try all methods for now
+	Method[] methods = oClass.getMethods();
+	for (int c=0;methods!=null && c<methods.length;c++)
+	{
+	    if (!methods[c].getName().equals(method))
+		continue;
+	    if (methods[c].getParameterTypes().length!=size)
+		continue;
+	    
+	    try{
+		Object n=methods[c].invoke(obj,arg);
+		configure(n,node,size);
+		return n;
+	    }
+	    catch(IllegalAccessException e){Code.ignore(e);}
+	    catch(IllegalArgumentException e){Code.ignore(e);}
+	}
+
+	throw new IllegalStateException("No Method: "+node);
+    }
+    
+    /* ------------------------------------------------------------ */
+    private Object newObj(Object obj,XmlParser.Node node)
+	throws NoSuchMethodException,
+	       ClassNotFoundException,
+	       InvocationTargetException
+    {
+	Class oClass = nodeClass(node);
+	int size=0;
+	for (int i=0;i<node.size();i++)
+	{
+	    if(!((XmlParser.Node)node.get(i)).getTag().equals("Arg"))
+		break;
+	    size++;
+	}
+
+	Object[] arg = new Object[size];
+	for (int i=0;i<size;i++)
+	    arg[i]=value(obj,(XmlParser.Node)node.get(i));
+
+	Code.debug("new ",oClass);
+	
+	// Lets just try all constructors for now
+	Constructor[] constructors = oClass.getConstructors();
+	for (int c=0;constructors!=null && c<constructors.length;c++)
+	{
+	    if (constructors[c].getParameterTypes().length!=size)
+		continue;
+	    try{
+		Object n=constructors[c].newInstance(arg);
+		configure(n,node,size);
+		return n;
+	    }
+	    catch(IllegalAccessException e){Code.ignore(e);}
+	    catch(InstantiationException e){Code.ignore(e);}
+	    catch(IllegalArgumentException e){Code.ignore(e);}
+	}
+
+	throw new IllegalStateException("No Constructor: "+node);
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @param node 
+     */
+    private Object value(Object obj,XmlParser.Node node)
+	throws NoSuchMethodException,
+	       ClassNotFoundException,
+	       InvocationTargetException
+    {
+	// Get the type
+	String type = node.getAttribute("type");
+	
+	// handle trivial case
+	if (node.size()==0)
+	{
+	    if ("String".equals(type))
+		return "";
+	    return null;
+	}
+
+	// Trim values
+	int first=0;
+	int last=node.size()-1;
+	    
+	// Handle default trim type
+	if (type==null || !"String".equals(type))
+	{
+	    // Skip leading white
+	    Object item=null;
+	    while(first<=last )
+	    {
+		item=node.get(first);
+		if (!(item instanceof String))
+		    break;
+		item=((String)item).trim();
+		if (((String)item).length()>0)
+		    break;
+		first++;
+	    }
+
+	    // Skip trailing white
+	    while(first<last)
+	    {
+		item=node.get(last);
+		if (!(item instanceof String))
+		    break;
+		item=((String)item).trim();
+		if (((String)item).length()>0)
+		    break;
+		last--;
+	    }
+
+	    // All white, so return null
+	    if (first>last)
+		return null;
+	}
+
+	Object value=null;
+	
+	if (first==last)
+	    //  Single Item value
+	    value=itemValue(obj,node.get(first));
+	else
+	{
+	    // Get the multiple items as a single string
+	    StringBuffer buf = new StringBuffer();
+	    synchronized(buf)
+	    {
+		for (int i=first;i<=last;i++)
+		{
+		    Object item = node.get(i);
+		    buf.append(itemValue(obj,item));
+		}
+		value=buf.toString();
+	    }
+	}
+
+	// Untyped or unknown
+	if (value==null )
+	{
+	    if ("String".equals(type))
+		return "";
+	    return null;
+	}
+	
+	if (type==null)
+	{
+	    if (value !=null && value instanceof String)
+		return ((String)value).trim();
+	    return value;
+	}
+
+	// Try to type the object
+	if ("String".equals(type))
+	    return value.toString();
+	
+	if ("int".equals(type))
+	{
+	    if (value instanceof Integer)
+		return value;
+	    return new Integer(value.toString());
+	}
+	if ("long".equals(type))
+	{
+	    if (value instanceof Long)
+		return value;
+	    return new Long(value.toString());
+	}
+	if ("boolean".equals(type))
+	{
+	    if (value instanceof Boolean)
+		return value;
+	    String bs=value.toString();
+	    if (bs.length()==0)
+		return Boolean.FALSE;
+	    char b=bs.charAt(0);
+	    return (b=='1'||b=='t'||b=='T')?Boolean.TRUE:Boolean.FALSE;
+	}	
+	if ("URL".equals(type))
+	{
+	    if (value instanceof URL)
+		return value;
+	    try{return new URL(value.toString());}
+	    catch(MalformedURLException e)
+	    {throw new InvocationTargetException(e);}
+	}
+	
+	if ("InetAddress".equals(type))
+	{
+	    if (value instanceof InetAddress)
+		return value;
+	    try {return InetAddress.getByName(value.toString());}
+	    catch(UnknownHostException e)
+	    {throw new InvocationTargetException(e);}
+	}
+	
+	if ("InetAddrPort".equals(type))
+	{
+	    if (value instanceof InetAddrPort)
+		return value;
+	    try{return new InetAddrPort(value.toString());}
+	    catch(UnknownHostException e)
+	    {throw new InvocationTargetException(e);}
+	}
+
+	throw new IllegalStateException("Unknown type "+type);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @param obj 
+     * @param item 
+     * @return 
+     * @exception ClassNotFoundException 
+     */
+    private Object itemValue(Object obj, Object item)
+	throws NoSuchMethodException,
+	       ClassNotFoundException,
+	       InvocationTargetException
+    {
+	// String value
+	if (item instanceof String)
+	    return item;
+	
+	XmlParser.Node node=(XmlParser.Node)item;
+	String tag=node.getTag();
+	if ("Call".equals(tag))
+	    return call(obj,node);
+	
+	if ("New".equals(tag))
+	    return newObj(obj,node);
+	
+	if ("SystemProperty".equals(tag))
+	{
+	    String name=node.getAttribute("name");
+	    return System.getProperty(name);
+	}
+	
+	Code.warning("Unknown value tag: "+node,new Throwable());
+	return null;
+    }    
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public static void main(String[] arg)
+    {
+    }
+}

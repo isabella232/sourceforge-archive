@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="ISO8859_1"?>
+
+<!ENTITY % CONFIG "Set|Put|Call">
+<!ENTITY % TYPE "String|int|long|boolean|URL|InetAddress|InetAddrPort">
+<!ENTITY % VALUE "#PCDATA|Call|New|SystemProperty">
+<!ENTITY % TYPEATTR "type (%TYPE;) #IMPLIED " >
+<!ENTITY % CLASSATTR "class NMTOKEN #REQUIRED" >
+<!ENTITY % NAMEATTR "name NMTOKEN #REQUIRED" >
+
+<!ELEMENT Configure (%CONFIG;)* >
+<!ATTLIST Configure %CLASSATTR; >
+
+<!ELEMENT New (Arg*,(%CONFIG;)*)>
+<!ATTLIST New %CLASSATTR; >
+
+<!ELEMENT Set ( %VALUE; )* >
+<!ATTLIST Set %NAMEATTR; %TYPEATTR; >
+
+<!ELEMENT Put ( %VALUE; )* >
+<!ATTLIST Put %NAMEATTR; %TYPEATTR;>
+
+<!ELEMENT Call (Arg*,(%CONFIG;)*)>
+<!ATTLIST Call %NAMEATTR;>
+
+<!ELEMENT Arg ( %VALUE; )* >
+<!ATTLIST Arg %TYPEATTR; >
+
+<!ELEMENT Value ( #PCDATA | SystemProperty  )* >
+
+<!ELEMENT SystemProperty EMPTY>
+<!ATTLIST SystemProperty %NAMEATTR; default NMTOKEN #IMPLIED>
+
+
+

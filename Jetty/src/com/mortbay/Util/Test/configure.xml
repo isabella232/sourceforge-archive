@@ -1,0 +1,98 @@
+<?xml version="1.0"  encoding="ISO8859-1"?> 
+<!DOCTYPE Configure SYSTEM "configure.dtd"> 
+
+<Configure class="com.mortbay.Util.TestConfiguration">
+
+  <Set name="Test">SetValue</Set>
+  <Set name="Test" type="int">2</Set>
+
+  <Put name="Test">PutValue</Put>
+  <Put name="TestDft">2</Put>
+  <Put name="TestInt" type="int">2</Put>
+
+  <Put name="Trim">
+    PutValue
+  </Put>
+
+  <Put name="Null"></Put>
+
+  <Put name="NullTrim">
+  </Put>
+
+  <Put name="Object"><New class="java.lang.Double">
+      <Arg>1.2345</Arg>
+  </New></Put>
+
+  <Put name="ObjectTrim">
+    <New class="java.lang.Double">
+      <Arg>1.2345</Arg>
+    </New>
+  </Put>
+
+  <Put name="Objects"><New class="java.lang.Integer">
+      <Arg>-1</Arg>
+  </New><New class="java.lang.String">
+      <Arg>String</Arg>
+  </New></Put>
+
+
+  <Put name="ObjectsTrim">
+    <New class="java.lang.Integer">
+      <Arg>-1</Arg>
+  </New><New class="java.lang.String">
+      <Arg>String</Arg>
+  </New></Put>
+
+
+  <Put name="String" type="String">
+    PutValue
+  </Put>
+
+  <Put name="NullString" type="String"></Put>
+
+  <Put name="WhiteSpace" type="String">
+  </Put>
+
+  <Put name="ObjectString" type="String">
+    <New class="java.lang.Double">
+      <Arg>1.2345</Arg>
+    </New>
+  </Put>
+
+  <Put name="ObjectsString" type="String"><New class="java.lang.Integer">
+      <Arg>-1</Arg>
+  </New><New class="java.lang.String">
+      <Arg>String</Arg>
+  </New></Put>
+
+
+  <Put name="ObjectsWhiteString">
+    <New class="java.lang.Integer">
+      <Arg>-1</Arg>
+  </New>
+  <New class="java.lang.String">
+      <Arg>String</Arg>
+  </New></Put>
+
+  <Put name="Property" ><SystemProperty name="user.dir"/>/stuff</Put>
+
+  <Call name="call">
+  </Call>
+
+  <Call name="call">
+    <Arg type="boolean">false</Arg>
+  </Call>
+
+  <Call name="call">
+    <Arg type="boolean">true</Arg>
+    <Put name="nested">put</Put>
+    <Set name="Test">Call1</Set>
+    <Set name="Test" type="int">4</Set>
+    <Call name="call">
+      <Arg type="URL">http://www.mortbay.com</Arg>
+      <Arg type="boolean">false</Arg>
+    </Call>
+  </Call>
+</Configure>
+
+

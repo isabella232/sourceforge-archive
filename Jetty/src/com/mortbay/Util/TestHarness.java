@@ -1347,8 +1347,6 @@ public class TestHarness
 	    r = r.addPath("UnknownFile");
 	    t.check(!r.exists(),"AddPath resource ! exists");
 
-
-
 	    r = Resource.newResource("jar:file:/somejar.jar!/content/");
 	    t.checkEquals(r.getFile(),null,"no file for jar:");
 	    
@@ -1387,6 +1385,89 @@ public class TestHarness
             t.check(false,e.toString());
 	}
     }
+
+    /* ------------------------------------------------------------ */
+    public static void testXmlConfiguration()
+    {
+        Test t = new Test("com.mortbay.Util.XmlConfiguration");
+	try
+	{
+	    String url = "file:"+System.getProperty("user.dir")+
+		"/Test/configure.xml";
+	    XmlConfiguration configuration =
+		new XmlConfiguration(new URL(url));
+	    TestConfiguration tc = new TestConfiguration();
+	    configuration.configure(tc);
+
+	    t.checkEquals(tc.testObject,"SetValue","Set String");
+	    t.checkEquals(tc.testInt,2,"Set Type");
+
+	    t.checkEquals(tc.get("Test"),"PutValue","Put");
+	    t.checkEquals(tc.get("TestDft"),"2","Put dft");
+	    t.checkEquals(tc.get("TestInt"),new Integer(2),"Put type");
+	    
+	    t.checkEquals(tc.get("Trim"),"PutValue","Trim");
+	    t.checkEquals(tc.get("Null"),null,"Null");
+	    t.checkEquals(tc.get("NullTrim"),null,"NullTrim");
+	    
+	    t.checkEquals(tc.get("ObjectTrim"),
+			  new Double(1.2345),
+			  "ObjectTrim");
+	    t.checkEquals(tc.get("Objects"),
+			  "-1String",
+			  "Objects");
+	    t.checkEquals(tc.get("ObjectsTrim"),
+			  "-1String",
+			  "ObjectsTrim");
+	    t.checkEquals(tc.get("String"),
+			  "\n    PutValue\n  ",
+			  "String");
+	    t.checkEquals(tc.get("NullString"),
+			  "",
+			  "NullString");
+	    t.checkEquals(tc.get("WhiteSpace"),
+			  "\n  ",
+			  "WhateSpace");
+	    t.checkEquals(tc.get("ObjectString"),
+			  "\n    1.2345\n  ",
+			  "ObjectString");
+	    t.checkEquals(tc.get("ObjectsString"),
+			  "-1String",
+			  "ObjectsString");
+	    t.checkEquals(tc.get("ObjectsWhiteString"),
+			  "-1\n  String",
+			  "ObjectsWhiteString");
+
+	    t.checkEquals(tc.get("Property"),
+			  System.getProperty("user.dir")+"/stuff",
+			  "Property");
+
+	    
+	    t.checkEquals(tc.get("Called"),
+			  "Yes",
+			  "Called");
+
+	    TestConfiguration tc2=tc.nested;
+	    t.check(tc2!=null,"Called(bool)");
+	    t.checkEquals(tc2.get("Arg"),
+			  new Boolean(true),
+			  "Called(bool)");
+
+	    t.checkEquals(tc.get("Arg"),null,"nested config");
+	    t.checkEquals(tc2.get("Arg"),new Boolean(true),"nested config");
+	    
+	    t.checkEquals(tc2.testObject,"Call1","nested config");
+	    t.checkEquals(tc2.testInt,4,"nested config");
+	    t.checkEquals(tc2.url.toString(),
+			  "http://www.mortbay.com/",
+			  "nested call");
+	}
+	catch(Exception e)
+	{
+	    Code.warning(e);
+            t.check(false,e.toString());
+	}
+    }
     
     
     /* ------------------------------------------------------------ */
@@ -1396,26 +1477,27 @@ public class TestHarness
     {
         try
         {
-    	    testMultiMap();
-  	    testQuotedStringTokenizer();            
-  	    testDateCache();
-  	    testTest();
-  	    testLog();
-  	    testFrame();
-  	    testCode();
-  	    testDataHelper();
-  	    testBlockingQueue();
-  	    testIO();
-  	    testUrlEncoded();
-  	    testURI();
-  	    testLineInput();
-	    testThreadPool();
-	    testThreadedServer();
-  	    testB64();
-    	    testZipResource();
-  	    PropertyTreeTest.test();
-  	    resourceTest();
-  	    testXmlParser();
+//      	    testMultiMap();
+//    	    testQuotedStringTokenizer();            
+//    	    testDateCache();
+//    	    testTest();
+//    	    testLog();
+//    	    testFrame();
+//    	    testCode();
+//    	    testDataHelper();
+//    	    testBlockingQueue();
+//    	    testIO();
+//    	    testUrlEncoded();
+//    	    testURI();
+//    	    testLineInput();
+//  	    testThreadPool();
+//  	    testThreadedServer();
+//    	    testB64();
+//      	    testZipResource();
+//    	    PropertyTreeTest.test();
+//    	    resourceTest();
+//    	    testXmlParser();
+	    testXmlConfiguration();
         }
         catch(Throwable th)
         {
