@@ -72,10 +72,10 @@ public class AJP13Connection extends HttpConnection
 
         LineInput lin = (LineInput)getInputStream().getInputStream();
         _ajpIn=(AJP13InputStream)lin.getInputStream();
-        _ajpOut=new AJP13OutputStream(getOutputStream().getFilterStream(),
+        _ajpOut=new AJP13OutputStream(getOutputStream().getOutputStream(),
                                       bufferSize);
         _ajpOut.setCommitObserver(this);
-        getOutputStream().setBufferedOutputStream(_ajpOut,true);
+        getOutputStream().setBufferedOutputStream(_ajpOut);
         _listener=listener;
     }
 

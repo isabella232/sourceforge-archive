@@ -415,6 +415,12 @@ public class HttpResponse extends HttpMessage
     {
         _header.addSetCookie(cookie,cookie2);
     }
+
+    /* ------------------------------------------------------------ */
+    public void completing()
+    {
+        getHttpConnection().completing();
+    }
     
     /* ------------------------------------------------------------ */
     /** 
@@ -425,6 +431,7 @@ public class HttpResponse extends HttpMessage
     {
         if (!isCommitted())
             getOutputStream().flush();
+        getHttpConnection().commit();
     }
     
     /* ------------------------------------------------------------ */

@@ -31,16 +31,16 @@ public class ChunkingOutputStream
     final static byte[]
         __CRLF   =   {(byte)'\015',(byte)'\012'};
     final static byte[]
-        __CHUNK_EOF ={(byte)'0',(byte)'\015',(byte)'\012'};
+        __CHUNK_EOF ={(byte)'0',(byte)'\015',(byte)'\012',(byte)'\015',(byte)'\012'};
 
     final static int __CHUNK_RESERVE=8;
     final static int __EOF_RESERVE=8;
     
     /* ------------------------------------------------------------ */
-    private HttpFields _trailer;
+    private boolean _chunking;
     private boolean _complete;
     private boolean _completed;
-    
+
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param outputStream The outputStream to buffer or chunk to.
@@ -49,40 +49,37 @@ public class ChunkingOutputStream
                                 int bufferSize,
                                 int headerReserve)
     {
+        this(outputStream,bufferSize,headerReserve,true);
+    }
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param outputStream The outputStream to buffer or chunk to.
+     */
+    public ChunkingOutputStream(OutputStream outputStream,
+                                int bufferSize,
+                                int headerReserve,
+                                boolean chunking)
+    {
         super(outputStream,
               bufferSize,
               headerReserve,
               __CHUNK_RESERVE,
               __EOF_RESERVE);
+        _chunking=chunking;
         setBypassBuffer(true);
         setFixed(true);
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** Set the trailer to send with a chunked close.
-     * @param trailer 
-     */
-    public void setTrailer(HttpFields trailer)
+    public boolean isChunking()
     {
-        _trailer=trailer;
+        return _chunking;
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** Flush.
-     * @exception IOException 
-     */
-    public void flush()
-        throws IOException
-    {        
-        super.flush();
-        
-        // Handle any trailers
-        if (_trailer!=null && _completed)
-        {
-            _trailer.write(_httpMessageWriter);
-            _httpMessageWriter.writeTo(_out);
-            _httpMessageWriter.resetWriter();
-        }
+    public void setChunking(boolean chunking)
+    {
+        _chunking=chunking;
     }
     
     /* ------------------------------------------------------------ */
@@ -98,6 +95,7 @@ public class ChunkingOutputStream
     {
         _complete=false;
         _completed=false;
+        _chunking=true;
         super.resetStream();
     }
     
@@ -107,7 +105,7 @@ public class ChunkingOutputStream
     {
         // Handle chunking
         int size=size();
-        if (size()>0)
+        if (_chunking && size()>0)
         {
             prewrite(__CRLF,0,__CRLF.length);
             while (size>0)
@@ -126,9 +124,8 @@ public class ChunkingOutputStream
         if (_complete & !_completed)
         {
             _completed=true;
-            postwrite(__CHUNK_EOF,0,__CHUNK_EOF.length);
-            if (_trailer==null)
-                postwrite(__CRLF,0,__CRLF.length);
+            if (_chunking)
+                postwrite(__CHUNK_EOF,0,__CHUNK_EOF.length);
         }
     }
     
@@ -149,9 +146,11 @@ public class ChunkingOutputStream
                 _buf[--i]=(byte)('a'-10+d);
             chunk=chunk/16;
         }
-        _out.write(_buf,i,10-i+1);
+        if (_chunking)
+            _out.write(_buf,i,10-i+1);
         _out.write(b,offset,length);
-        _out.write(__CRLF,0,__CRLF.length);
+        if (_chunking)
+            _out.write(__CRLF,0,__CRLF.length);
         _out.flush();
     }
     

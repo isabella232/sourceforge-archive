@@ -107,10 +107,6 @@ public class TestHarness
             test.checkEquals(cin.read(buf),-1,"Read EOF");
             test.checkEquals(cin.read(buf),-1,"Read EOF again");
 
-            System.err.println("\n\nTrailer:\n"+cin.getTrailer());
-            test.checkEquals(cin.getTrailer().get("some-trailer"),
-                             "some-value","Trailer fields");
-
             // Read some more after a reset
             cin.resetStream();
             cin.setChunking();
@@ -175,10 +171,6 @@ public class TestHarness
             byte[] eleven = "0123456789\n".getBytes();
             for (int i=0;i<400;i++)
                 cout.write(eleven);
-            HttpFields trailer=new HttpFields();
-            trailer.put("trailer1","value1");
-            trailer.put("trailer2","value2");
-            cout.setTrailer(trailer);
             cout.close();
             
             FileInputStream ftmp= new FileInputStream(tmpFile);
@@ -193,8 +185,8 @@ public class TestHarness
             LineInput lin = new LineInput(cin);            
             String line=lin.readLine();
             
-            test.checkEquals(line.length(),33,"def...");            test.checkEquals(line,"defghijklmnopqrstuvwxyz0123456789",
-                             "readLine");
+            test.checkEquals(line.length(),33,"def...");            
+            test.checkEquals(line,"defghijklmnopqrstuvwxyz0123456789","readLine");
             int chars=0;
             while (cin.read()!=-1)
                 chars++;
@@ -248,10 +240,6 @@ public class TestHarness
             byte[] eleven = "0123456789\n".getBytes();
             for (int i=0;i<400;i++)
                 cout.write(eleven);
-            HttpFields trailer=new HttpFields();
-            trailer.put("trailer1","value1");
-            trailer.put("trailer2","value2");
-            cout.setTrailer(trailer);
             cout.close();
             
             FileInputStream ftmp= new FileInputStream(tmpFile);
@@ -267,8 +255,8 @@ public class TestHarness
             LineInput lin = new LineInput(cin);            
             String line=lin.readLine();
             
-            test.checkEquals(line.length(),33,"def...");            test.checkEquals(line,"defghijklmnopqrstuvwxyz0123456789",
-                             "readLine");
+            test.checkEquals(line.length(),33,"def...");            
+            test.checkEquals(line,"defghijklmnopqrstuvwxyz0123456789","readLine");
             int chars=0;
             while (cin.read()!=-1)
                 chars++;
@@ -288,48 +276,7 @@ public class TestHarness
         }
     }
 
-    /* --------------------------------------------------------------- */
-    public static void filters()
-    {
-        TestCase t = new TestCase("org.mortbay.http.HttpXxxputStream");
-        try
-        {
-            File tmpFile=File.createTempFile("HTTP.TestHarness",".gzip");
-            tmpFile.deleteOnExit();
-            FileOutputStream fout =
-                new FileOutputStream(tmpFile);
-            HttpOutputStream cout = new HttpOutputStream(fout);
-            cout.setChunking();
-
-            cout.setFilterStream(new java.util.zip.GZIPOutputStream(cout.getFilterStream()));
-            
-            byte[] data =
-                "ABCDEFGHIJKlmnopqrstuvwxyz;:#$0123456789\n".getBytes();
-            for (int i=0;i<400;i++)
-                cout.write(data,0,data.length);
-            
-            cout.close();
-            
-            FileInputStream fin=
-                new FileInputStream(tmpFile);
-            HttpInputStream cin = new HttpInputStream(fin);
-            cin.setChunking();
-            cin.setFilterStream(new java.util.zip.GZIPInputStream(cin.getFilterStream()));
-            
-            for (int i=0;i<400;i++)
-            {
-                for (int j=0;j<data.length;j++)
-                    if (cin.read()!=data[j])
-                        t.check(false,"Data in differs at "+i+","+j);
-            }
-            t.checkEquals(cin.read(),-1,"EOF from gzip");
-        }
-        catch(Exception e)
-        {
-            log.warn(LogSupport.EXCEPTION,e);
-            t.check(false,e.toString());
-        }
-    }
+ 
     
     /* --------------------------------------------------------------- */
     public static void httpFields()
@@ -612,7 +559,6 @@ public class TestHarness
             chunkInTest();
             chunkOutTest();
             chunkingOSTest();
-            filters();
             httpFields();
             pathMap();
             

@@ -144,7 +144,19 @@ public class ServletHttpResponse implements HttpServletResponse
     void commit()
         throws IOException
     {
-        _httpResponse.commit();
+        if (_writer!=null && _writer.isWritten())
+            _writer.flush();
+        else
+            _httpResponse.commit();
+    }
+    
+    /* ------------------------------------------------------------ */
+    void complete()
+        throws IOException
+    {
+        _httpResponse.completing();
+        commit();
+        setOutputState(DISABLED);
     }
 
     /* ------------------------------------------------------------ */
@@ -194,11 +206,8 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void resetBuffer()
     {
-        if (isCommitted())
-            throw new IllegalStateException("committed");
-        ((HttpOutputStream)_httpResponse.getOutputStream()).resetBuffer();
-        if (_writer!=null)
-            _writer.reset();
+        _httpResponse.reset();
+        if (_writer!=null) _writer.reset();
     }
     
     /* ------------------------------------------------------------ */
@@ -370,6 +379,8 @@ public class ServletHttpResponse implements HttpServletResponse
         String error_page =
             _servletHttpRequest.getServletHandler().getErrorPage(status,_servletHttpRequest);
 
+        resetBuffer();
+        
         // Handle error page?
         if (error_page==null)
         {
@@ -377,10 +388,7 @@ public class ServletHttpResponse implements HttpServletResponse
             _httpResponse.sendError(status,message);
         }
         else
-        {
-            if (!_httpResponse.isCommitted())
-                _httpResponse.setStatus(status);
-            
+        {   
             if (message == null)
             {
                 message= (String)HttpResponse.__statusMsg.get(TypeUtil.newInteger(status));
@@ -414,6 +422,7 @@ public class ServletHttpResponse implements HttpServletResponse
                 _httpResponse.sendError(status,message); 
             }
         }
+        complete();
     }
 
     /* ------------------------------------------------------------ */
@@ -447,7 +456,13 @@ public class ServletHttpResponse implements HttpServletResponse
             
             url=buf.toString();
         }
-        _httpResponse.sendRedirect(url);
+        
+        if (isCommitted())
+            throw new IllegalStateException("Commited");
+        
+        _httpResponse.setField(HttpFields.__Location,url);
+        _httpResponse.setStatus(HttpResponse.__302_Moved_Temporarily);
+        complete();
     }
 
     /* ------------------------------------------------------------ */

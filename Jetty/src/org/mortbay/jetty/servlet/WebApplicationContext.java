@@ -519,7 +519,10 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
                 httpResponse.sendError(HttpResponse.__404_Not_Found);
             httpRequest.setHandled(true);
             if (!httpResponse.isCommitted())
+            {
+                httpResponse.completing();
                 httpResponse.commit();
+            }
         }
     }
 

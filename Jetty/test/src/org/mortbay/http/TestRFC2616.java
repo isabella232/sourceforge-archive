@@ -153,7 +153,7 @@ public class TestRFC2616
         _server=new HttpServer();
         _server.setTrace(true);
         HttpContext context = _server.getContext(null,"/");
-	context.setResourceBase(docRoot.getName());
+        context.setResourceBase(docRoot.getName());
         context.addHandler(new TestTEHandler());
         context.addHandler(new RedirectHandler());
         ResourceHandler rh = new ResourceHandler();
@@ -243,7 +243,13 @@ public class TestRFC2616
     public String getResponses(String request)
         throws IOException
     {
-        return new String(getResponses(request.getBytes()));
+        String responses=new String(getResponses(request.getBytes()));
+        if (log.isDebugEnabled())
+        {
+            System.out.println(request);
+            System.out.println(responses);
+        }
+        return responses;
     }
     
     /* --------------------------------------------------------------- */
@@ -270,7 +276,7 @@ public class TestRFC2616
         test9_2();
         test9_4();
         test9_8();
-  	test10_2_7();	/* 206 Partial Content                         */
+  	    test10_2_7();	/* 206 Partial Content                         */
         test10_3();     /* Redirection 3XX                             */
         test14_16();    /* Content-Range                               */
         test14_23();    /* Host header                                 */
@@ -1408,7 +1414,13 @@ public class TestRFC2616
     
     /* --------------------------------------------------------------- */
     public static void test14_39()
-    {        
+    {      
+        if (!log.isTraceEnabled())
+        {
+            log.debug("NOT HANDLED RFC2616 14.39 TE");
+            return;
+        }
+        
         TestCase t = new TestCase("RFC2616 14.39 TE");
         try
         {

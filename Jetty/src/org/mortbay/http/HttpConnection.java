@@ -68,13 +68,14 @@ public class HttpConnection
     protected HttpResponse _response;
     protected boolean _persistent;
     protected boolean _keepAlive;
+    protected int _dotVersion;
 
     private HttpListener _listener;
     private HttpInputStream _inputStream;
     private HttpOutputStream _outputStream;
     private boolean _close;
-    private int _dotVersion;
     private boolean _firstWrite;
+    private boolean _completing;
     private Thread _handlingThread;
     
     private InetAddress _remoteInetAddress;
@@ -264,6 +265,7 @@ public class HttpConnection
         throws IOException
     {
         try{
+            _completing=true;
             _outputStream.close();
             _inputStream.close();
         }
@@ -461,14 +463,13 @@ public class HttpConnection
         // check and enable requests transfer encodings.
         String transfer_coding=
             _request.getField(HttpFields.__TransferEncoding);
-        
+
         if (transfer_coding!=null && transfer_coding.length()>0)
         {
             // Handling of codings other than chunking is now
             // the responsibility of handlers, filters or servlets.
             // Thanks to the compression filter, we now don't know if
             // what we can handle here.
-
             if (transfer_coding.equalsIgnoreCase(HttpFields.__Chunked) ||
                 StringUtil.endsWithIgnoreCase(transfer_coding,HttpFields.__Chunked))
                 _inputStream.setChunking();
@@ -530,7 +531,6 @@ public class HttpConnection
         // Persistent unless requested otherwise
         _persistent=!_close;
     }
-    
 
     /* ------------------------------------------------------------ */
     /** Output Notifications.
@@ -559,7 +559,7 @@ public class HttpConnection
               break;
               
           case OutputObserver.__RESET_BUFFER:
-              _firstWrite=false;
+              resetBuffer();
               break;
               
           case OutputObserver.__COMMITING:
@@ -567,10 +567,14 @@ public class HttpConnection
               break;
               
           case OutputObserver.__CLOSING:
-              if (_response!=null &&
-                  !_response.isCommitted() &&
+              
+              if (_response!=null)
+              {
+                  completing();
+                  if (!_response.isCommitted() &&
                   _request.getState()==HttpMessage.__MSG_RECEIVED)
                   commit();
+              }
               break;
               
           case OutputObserver.__CLOSED:
@@ -589,89 +593,27 @@ public class HttpConnection
         if (_response.isCommitted())
             return;
         
-        // Determine how to limit content length and
-        // enable output transfer encodings
-
-        String transfer_coding=_response.getField(HttpFields.__TransferEncoding);
-        if (transfer_coding==null ||
-            transfer_coding.length()==0 ||
-            HttpFields.__Identity.equalsIgnoreCase(transfer_coding))
-        {
-            switch(_dotVersion)
-            {
-              case 1:
-                  {
-                      // if (not closed and no length)
-                      if ((!HttpFields.__Close.equals(_response.getField(HttpFields.__Connection)))&&
-                          (_response.getField(HttpFields.__ContentLength)==null))
-                      {
-                          // Chunk it!
-                          _response.setField(HttpFields.__TransferEncoding,HttpFields.__Chunked);
-                          _outputStream.setChunking();
-                      }
-                      break;
-                  }
-              case 0:
-                  {
-                      // If we dont have a content length (except 304 replies), 
-                  	  // or we have been requested to close
-		              // then we can't be persistent 
-                      if (!_keepAlive || !_persistent ||
-                          HttpResponse.__304_Not_Modified!=_response.getStatus() &&
-                          _response.getField(HttpFields.__ContentLength)==null ||
-                          HttpFields.__Close.equals(_response.getField(HttpFields.__Connection)))
-                      {
-                          _persistent=false;
-                          _response.setField(HttpFields.__Connection,HttpFields.__Close);
-                          _keepAlive=false;
-                      }
-                      else if (_keepAlive)
-                          _response.setField(HttpFields.__Connection,
-                                             HttpFields.__KeepAlive);
-                      break;
-                  }
-              default:
-                  _keepAlive=false;
-                  _persistent=false;
-            }
-        }
-        else if (_dotVersion<1)
-        {
-            // Error for transfer encoding to be set in HTTP/1.0
-            _response.removeField(HttpFields.__TransferEncoding);
-            throw new HttpException(HttpResponse.__501_Not_Implemented,
-                                    "Transfer-Encoding not supported in HTTP/1.0");
-        }
-        else
-        {
-            // Use transfer encodings to determine length
-            _response.removeField(HttpFields.__ContentLength);
-            _outputStream.setChunking();
-
-            if (!HttpFields.__Chunked.equalsIgnoreCase(transfer_coding))
-            {
-                // Check against any TE field
-                List te = _request.getAcceptableTransferCodings();
-                Enumeration enm =
-                    _response.getFieldValues(HttpFields.__TransferEncoding,
-                                             HttpFields.__separators);
-                while (enm.hasMoreElements())
-                {
-                    String coding=(String)enm.nextElement();
-                    if (HttpFields.__Identity.equalsIgnoreCase(coding) ||
-                        HttpFields.__Chunked.equalsIgnoreCase(coding))
-                        continue;
-                    if (te==null || !te.contains(coding))
-                        throw new HttpException(HttpResponse.__501_Not_Implemented,coding);
-                }
-            }
-        }
-
         // Nobble the OutputStream for HEAD requests
         if (HttpRequest.__HEAD.equals(_request.getMethod()))
-            _outputStream.nullOutput();
+            _outputStream.nullOutput();    
+        int length=_response.getIntField(HttpFields.__ContentLength);
+        if (length>=0)
+            _outputStream.setContentLength(length);
     }
 
+    /**
+     * Reset headers after response reset
+     */
+    private void resetBuffer()
+    {
+    }
+
+    /* ------------------------------------------------------------ */
+    /* Signal that the next commit/flush is the last */
+    void completing()
+    {
+        _completing=true;
+    }
     
     /* ------------------------------------------------------------ */
     protected void commit()
@@ -680,79 +622,121 @@ public class HttpConnection
         if (_response.isCommitted())
             return;
 
-        // Mark request as handled.
-        _request.setHandled(true);
+        int status=_response.getStatus();
+        int length=-1;
         
         // Handler forced close, listener stopped or no idle threads left.
-        _close=HttpFields.__Close.equals(_response.getField(HttpFields.__Connection));
-        if (!_close && _listener!=null && (!_listener.isStarted()||_listener.isOutOfResources()))
+        boolean has_close=HttpFields.__Close.equals(_response.getField(HttpFields.__Connection));
+        if (!_persistent || _close || _listener!=null && (!_listener.isStarted()||_listener.isOutOfResources()))
         {
             _close=true;
-            _response.setField(HttpFields.__Connection,
-                               HttpFields.__Close);
+            if (!has_close)
+                _response.setField(HttpFields.__Connection,HttpFields.__Close);
+            has_close=true;
         }
         if (_close)
             _persistent=false;
-
         
-        // if we have no content or encoding, and no content length
-        int status = _response.getStatus();
-        if (!_outputStream.isWritten() &&
-            !_response.containsField(HttpFields.__ContentLength) &&
-            !_response.containsField(HttpFields.__TransferEncoding))
+        // Determine how to limit content length
+        if (_persistent)
         {
-            // Special case for responses with no content.
-            if (status==HttpResponse.__304_Not_Modified ||
-                status==HttpResponse.__204_No_Content)
+            switch(_dotVersion)
             {
-                if (_persistent && _keepAlive && _dotVersion==0)
-                    _response.setField(HttpFields.__Connection,
-                                       HttpFields.__KeepAlive);
-            }
-            else
-            {
-                if(_persistent)
+                case 1:
                 {
-                    switch (_dotVersion)
+                    String transfer_coding=_response.getField(HttpFields.__TransferEncoding);
+                    if (transfer_coding==null || transfer_coding.length()==0 || HttpFields.__Identity.equalsIgnoreCase(transfer_coding))
                     {
-                    case 0:
+                        // if (can have content and no content length)
+                        if (status!=HttpResponse.__304_Not_Modified &&
+                            status!=HttpResponse.__204_No_Content &&
+                            _response.getField(HttpFields.__ContentLength)==null)
                         {
-                            _close=true;
-                            _persistent=false;
-                            _response.setField(HttpFields.__Connection,
-                                               HttpFields.__Close);
+                            if (_completing)
+                            {
+                                length=_outputStream.getBytesWritten();
+                                _response.setContentLength(length);
+                            }
+                            else
+                            {   
+                                // Chunk it!
+                                _response.setField(HttpFields.__TransferEncoding,HttpFields.__Chunked);
+                                _outputStream.setChunking();
+                            }
                         }
-                        break;
-                    case 1:
+                    }
+                    else
+                    {
+                        // Use transfer encodings to determine length
+                        _response.removeField(HttpFields.__ContentLength);
+                        _outputStream.setChunking();
+
+                        if (!HttpFields.__Chunked.equalsIgnoreCase(transfer_coding))
                         {
-                            // Nobble the OutputStream for HEAD requests
-                            if (HttpRequest.__HEAD.equals(_request.getMethod()))
-                                _outputStream.nullOutput();
-
-                            // force chunking on.
-                            _response.setField(HttpFields.__TransferEncoding,
-                                               HttpFields.__Chunked);
-                            _outputStream.setChunking();
-
+                            // Check against any TE field
+                            List te = _request.getAcceptableTransferCodings();
+                            Enumeration enm =
+                                _response.getFieldValues(HttpFields.__TransferEncoding,
+                                                         HttpFields.__separators);
+                            while (enm.hasMoreElements())
+                            {
+                                String coding=(String)enm.nextElement();
+                                if (HttpFields.__Identity.equalsIgnoreCase(coding) ||
+                                    HttpFields.__Chunked.equalsIgnoreCase(coding))
+                                    continue;
+                                if (te==null || !te.contains(coding))
+                                    throw new HttpException(HttpResponse.__501_Not_Implemented,coding);
+                            }
                         }
-                        break;
-                        
-                    default:
-                        _close=true;
-                        _response.setField(HttpFields.__Connection,
-                                           HttpFields.__Close);
-                        break;
                     }
                 }
-                else
+                break;
+                
+                case 0:
+                {
+                    // if (can have content and no content length)
+                    _response.removeField(HttpFields.__TransferEncoding);
+                    if (_keepAlive)
+                    {
+                        if (status!=HttpResponse.__304_Not_Modified &&
+                            status!=HttpResponse.__204_No_Content &&
+                            _response.getField(HttpFields.__ContentLength)==null)
+                        {
+                            if (_completing)
+                            {
+                                length=_outputStream.getBytesWritten();
+                                _response.setContentLength(length);
+                                _response.setField(HttpFields.__Connection,HttpFields.__KeepAlive);
+                            }
+                            else
+                            {
+                                _response.setField(HttpFields.__Connection,HttpFields.__Close);
+                                has_close=_close=true;
+                                _persistent=false;
+                            }
+                        }
+                        else
+                            _response.setField(HttpFields.__Connection,HttpFields.__KeepAlive);
+                    }
+                    else if (!has_close)
+                        _response.setField(HttpFields.__Connection,HttpFields.__Close);
+                        
+                        
+                    break;
+                }
+                default:
                 {
                     _close=true;
-                    _response.setField(HttpFields.__Connection,
-                                       HttpFields.__Close);
+                    _persistent=false;
+                    _keepAlive=false;
                 }
             }
         }
-
+        
+        
+        // Mark request as handled.
+        _request.setHandled(true);
+        
         _outputStream.writeHeader(_response);
     }
 
@@ -763,8 +747,9 @@ public class HttpConnection
      */
     private void exception(Throwable e)
     {
-	try{
-	    _persistent=false;
+        try
+        {
+            _persistent=false;
             int error_code=HttpResponse.__500_Internal_Server_Error;
             
             if (e instanceof HttpException)
@@ -786,21 +771,21 @@ public class HttpConnection
             {
                 _request.setAttribute("javax.servlet.error.exception_type",e.getClass());
                 _request.setAttribute("javax.servlet.error.exception",e);
-
+                
                 if (_request==null)
                     log.warn(LogSupport.EXCEPTION,e);
                 else
                     log.warn(_request.getRequestLine(),e);
             }
             
-	    if (_response != null && !_response.isCommitted())
-	    {
-		_response.reset();
-		_response.removeField(HttpFields.__TransferEncoding);
-		_response.setField(HttpFields.__Connection,HttpFields.__Close);
-		_response.sendError(error_code);
-	    }
-	}
+            if (_response != null && !_response.isCommitted())
+            {
+                _response.reset();
+                _response.removeField(HttpFields.__TransferEncoding);
+                _response.setField(HttpFields.__Connection,HttpFields.__Close);
+                _response.sendError(error_code);
+            }
+        }
         catch(Exception ex)
         {
             LogSupport.ignore(log,ex);
@@ -915,6 +900,7 @@ public class HttpConnection
             _close=false;
             _keepAlive=false;
             _firstWrite=false;
+            _completing=false;
             _dotVersion=0;
 
             // Read requests
@@ -1174,4 +1160,5 @@ public class HttpConnection
             _httpServer.statsCloseConnection(_tmpTime-_openTime,_requests);
         }
     }
+
 }

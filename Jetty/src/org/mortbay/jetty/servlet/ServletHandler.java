@@ -588,11 +588,9 @@ public class ServletHandler extends AbstractHttpHandler
         }
         finally
         {
-            if (servletHolder!=null)
+            if (servletHolder!=null && response!=null)
             {
-                response.flushBuffer();
-                if (!httpRequest.isHandled())
-                    new Throwable().printStackTrace();
+                response.complete();
             }
         }
     }

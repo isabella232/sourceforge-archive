@@ -186,7 +186,6 @@ public class Page extends Composite
         writeBodyTag(out);
         writeElements(out);
         writeHtmlEnd(out);
-        out.flush();
     }
     
     /* ------------------------------------------------------------ */
@@ -230,8 +229,8 @@ public class Page extends Composite
     public void writeHtmlEnd(Writer out)
          throws IOException
     {
-        out.write("</body>");
-        out.write("</html>");
+        out.write("\n</body>\n");
+        out.write("</html>\n");
     }
     
     /* ------------------------------------------------------------ */
