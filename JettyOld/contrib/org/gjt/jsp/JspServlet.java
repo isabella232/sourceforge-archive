@@ -49,14 +49,14 @@ import org.gjt.jsp.jsdk20.HttpServletResponseWrapper;
 import org.gjt.jsp.jsdk20.ServletConfigWrapper;
 import org.gjt.jsp.jsdk20.ServletContextWrapper;
 
-public class JspServlet extends HttpServlet 
+public class JspServlet extends HttpServlet
     implements JspMsg
 {
     // FIXME: should we use that in gnujsp 1.0 in general? Needed? (alph)
     private static final String        lineSeparator
 	= System.getProperty("line.separator");
 
-    /** make GNUJSP use packages/sub directoried for generated files */ 
+    /** make GNUJSP use packages/sub directoried for generated files */
     private static boolean	usePackages = false;
 
     private File		scratchDir;
@@ -71,14 +71,14 @@ public class JspServlet extends HttpServlet
     private Hashtable		pages;
     private JspParser           parser;
     private String		dirSep;
-        
+
     // If we emulate jsdk 2.1 on jsdk 2.0 we need one ServletContext
     // so that jsp servlets may share their data
     private ServletContextWrapper jspServletContext = null;
     // the server environment needs page base and has to use it.
     private boolean usePageBase = false;
     private int time = 0;
- 
+
     static {
 	JspFactory.setDefaultFactory (new JspFactoryImpl ());
 	Emitter.setEmitter("java", new JavaEmitter());
@@ -87,8 +87,8 @@ public class JspServlet extends HttpServlet
     public JspServlet () {
 	pages = new Hashtable();
     }
-    
-    /** 
+
+    /**
      * This is part of GenericServlet in JSDK 2.1, but for backward
      * compatibility we override.
      */
@@ -130,10 +130,10 @@ public class JspServlet extends HttpServlet
 
 	time++;
 
-	String scratchPath     = config.getInitParameter ("scratchdir");
+	String scratchPath     = config.getInitParameter ("scratchdir").replace('/',File.separatorChar);
 	String compilerCommand = config.getInitParameter ("compiler");
 
-	String pageBaseProp    = config.getInitParameter ("pagebase");    
+	String pageBaseProp    = config.getInitParameter ("pagebase");
 
 	checkDeps = !"false".equals(config.getInitParameter ("checkdependencies"));
 	checkClass = "true".equals(config.getInitParameter ("checkclass"));
@@ -145,7 +145,7 @@ public class JspServlet extends HttpServlet
 	pathDebug = "true".equals(config.getInitParameter("pathdebug"));
 
 	// eg. DE or US
-	String countryProp     = config.getInitParameter ("country"); 
+	String countryProp     = config.getInitParameter ("country");
 	// eg. de or en
 	String languageProp    = config.getInitParameter ("language");
 
@@ -154,19 +154,19 @@ public class JspServlet extends HttpServlet
 	}
 
 	if (scratchPath == null) {
-	    throw new ServletException 
+	    throw new ServletException
 		(JspConfig.getLocalizedMsg(ERR_gnujsp_missing_init_parameter)
 		 + ": \"scratchdir\", " + time);
 	}
 
 	if (pageBaseProp == null && usePageBase) {
-	    throw new ServletException 
+	    throw new ServletException
 		(JspConfig.getLocalizedMsg(ERR_gnujsp_missing_init_parameter)
 		+ ": \"pageBase\", " + time);
 	}
 
-	if(debug) { 
-	    log("Debugging enabled"); 
+	if(debug) {
+	    log("Debugging enabled");
 	}
 
 	if (compilerCommand == null)
@@ -180,9 +180,15 @@ public class JspServlet extends HttpServlet
 
 	javacArgs  = new String [st.countTokens ()];
 
-	for (int i = 0;  i < javacArgs.length;  ++i)
-	    javacArgs[i] = st.nextToken ();
-   
+	for (int i = 0;  i < javacArgs.length;  ++i) {
+	    String s = st.nextToken ();
+	    if (0 <= s.indexOf("%classpath%")) {
+		// Map from canonical to platform-specific form.
+		s = s.replace(':',File.pathSeparatorChar).replace('/',File.separatorChar);
+	    }
+	    javacArgs[i] = s;
+	}
+
 	if (pageBaseProp != null)
 	    pageBase = new File (pageBaseProp);
 
@@ -278,7 +284,7 @@ public class JspServlet extends HttpServlet
 		pages.put (jspURI, page);
 	    }
 	}
-	
+
 	// Forward the request to the page
 	try {
 	    page.process (request, response);
@@ -361,17 +367,17 @@ public class JspServlet extends HttpServlet
 
     /** Identifies the version of the GNUJSP servlet. */
     public String getServletInfo() {
-	return "GNUJSP 1.0.0"; 
+	return "GNUJSP 1.0.0";
     }
-    
+
     // this is the ServletConfig to be passed to JspPages
     private ServletConfig getJspServletConfig() {
 	if(jspServletContext == null)
-	    jspServletContext = 
+	    jspServletContext =
 		new ServletContextWrapper(getServletContext(),
 					  this);
-	return PageContextImpl.JSDK20 
-	    ? new ServletConfigWrapper(getServletConfig(), 
+	return PageContextImpl.JSDK20
+	    ? new ServletConfigWrapper(getServletConfig(),
 				       jspServletContext)
 	    : getServletConfig();
     }
@@ -394,7 +400,7 @@ public class JspServlet extends HttpServlet
 	String               filePath = javaFile.getPath();
 
 	try {
-	    /* Build mapping from java line numbers to jsp file/line# 
+	    /* Build mapping from java line numbers to jsp file/line#
 	     * combinations.
 	     * We could have done this while writing the java file, but using
 	     * LineNumberReader is easier, and it would take extra time when
@@ -410,7 +416,7 @@ public class JspServlet extends HttpServlet
 			    MapEntry me = new MapEntry(in.getLineNumber(),
 							new Pos(s));
 			    map.addElement(me);
-			} catch(NumberFormatException nfexc) { 
+			} catch(NumberFormatException nfexc) {
 			} catch(IllegalArgumentException ee) { }
 		    }
 		}
@@ -428,31 +434,31 @@ public class JspServlet extends HttpServlet
 		    i = s.indexOf(filePath);
 		    if(i != -1) {
 			j = i + filePath.length();
-			if(j < s.length()-1 
-			   && s.charAt(j) == ':' 
+			if(j < s.length()-1
+			   && s.charAt(j) == ':'
 			   && Character.isDigit(s.charAt(j+1))) {
 			    j++;
 			    k = j;
-			    while(k < s.length() 
+			    while(k < s.length()
 				  && Character.isDigit(s.charAt(k))) {
 				k++;
 			    }
 			    l = k;
-			    while(l+1 < s.length() 
-				  && s.charAt(l) == ':' 
+			    while(l+1 < s.length()
+				  && s.charAt(l) == ':'
 				  && Character.isDigit(s.charAt(l+1))) {
 				l += 2;
-				while(l < s.length() 
+				while(l < s.length()
 				      && Character.isDigit(s.charAt(l))) {
 				    l++;
 				}
 			    }
-			    
+
 			    try {
 				javaLineNr = Integer.parseInt(s.substring(j, k));
 				jspFile = null;
 				jspLineNr = 0;
-				for(e = map.elements(); 
+				for(e = map.elements();
 				    e.hasMoreElements(); ) {
 				    entry = (MapEntry) e.nextElement();
 				    if(entry.javaLineNr > javaLineNr) {
@@ -492,7 +498,7 @@ public class JspServlet extends HttpServlet
 	    return errors;
 	}
     }
-	
+
     public static File getFileName (File scratchdir, String classname, String ext, boolean mkdir) {
         File resp;
         if (usePackages) {
@@ -517,12 +523,12 @@ public class JspServlet extends HttpServlet
     /**
      * FIXME: does using static here has any benefits (alph)
      * (copied from gnujsp 0.9)
-     */ 
+     */
 
     private static class MapEntry {
 	int	javaLineNr;
 	Pos     jspPos;
-	
+
 	MapEntry(int javaLineNr, Pos pos) {
 	    this.javaLineNr = javaLineNr;
 	    this.jspPos = pos;
@@ -533,7 +539,7 @@ public class JspServlet extends HttpServlet
     class Page {
 	// The virtual path of this JSP page
 	private String jspURI;
-	
+
 	// The actual path of the JSP file
 	private URL jspURL;
 
@@ -560,7 +566,7 @@ public class JspServlet extends HttpServlet
 	    this.jspURI = jspURI;
 	}
 
-	/** Process a servlet request destined for the 
+	/** Process a servlet request destined for the
 	    generated JSP servlet. */
 	// FIXME: Deal with exceptions more elegantly.
 	void process (HttpServletRequest request, HttpServletResponse response)
@@ -580,7 +586,7 @@ public class JspServlet extends HttpServlet
 			}
 			if (debug) log("Parsing " + jspURL);
 			StackedReader sr = new StackedReader
-			    (new InputStreamReader(jspURL.openStream()), 
+			    (new InputStreamReader(jspURL.openStream()),
 			     jspURI);
 			JspNode body = parser.parse(sr);
 
@@ -597,7 +603,7 @@ public class JspServlet extends HttpServlet
 			    deps[i] = getResourceImpl(predeps[i], request);
 			}
 			body.setAttribute("gnujspDeps", concatDeps.toString());
-			body.setAttribute("gnujspCompilerVersion", 
+			body.setAttribute("gnujspCompilerVersion",
 					  String.valueOf(getCompilerVersion()));
 			String className = getClassName(jspURI);
 			String classPart = className;
@@ -612,11 +618,11 @@ public class JspServlet extends HttpServlet
 			body.setAttribute("package", packageName);
 			body.setAttribute("class", classPart);
 
-			sourceFile = JspServlet.getFileName (scratchDir, 
-							     className, 
+			sourceFile = JspServlet.getFileName (scratchDir,
+							     className,
 							     ".java", true);
 			if (debug) log("Emitting source to " + sourceFile);
-			BufferedWriter w = 
+			BufferedWriter w =
 			    new BufferedWriter(new FileWriter(sourceFile));
 			Emitter.emit(w, body);
 			w.close();
@@ -637,13 +643,13 @@ public class JspServlet extends HttpServlet
 	    }
 	    if (generationException != null) throw generationException;
 	    if (request.getParameter("jsp_precompile") == null) {
-		servlet.service ((PageContextImpl.JSDK20) 
-				 ? new HttpServletRequestWrapper(request) 
+		servlet.service ((PageContextImpl.JSDK20)
+				 ? new HttpServletRequestWrapper(request)
 				 : request, response);
 	    }
 	}
-    
-	URL getResourceImpl(String path, HttpServletRequest request) 
+
+	URL getResourceImpl(String path, HttpServletRequest request)
 	    throws MalformedURLException {
 	    URL retval = null;
 	    ServletContext sc = getServletConfig().getServletContext();
@@ -654,7 +660,7 @@ public class JspServlet extends HttpServlet
 		if (request.getPathInfo() != null)
 		    s = request.getPathInfo();
 		if (pathDebug) log("getResIm: s2="+s);
-		if (s == null || "".equals(s)) 
+		if (s == null || "".equals(s))
 		    s = request.getServletPath();
 		if (pathDebug) log("getResIm: s3="+s);
 		String p = sc.getRealPath(s);
@@ -663,7 +669,7 @@ public class JspServlet extends HttpServlet
 		if (pathDebug) log("getResIm: p2="+p);
 		// prepend path with pageBase. Vqserver or mac (alph)
 		if(usePageBase) {
-		    p = (new File(pageBase,p)).getAbsolutePath(); 
+		    p = (new File(pageBase,p)).getAbsolutePath();
 		}
 		if (pathDebug) log("getResIm: p3="+p);
 		// this works hopefully on jserv/NT
@@ -682,7 +688,7 @@ public class JspServlet extends HttpServlet
 		if(debug) log("getResIm: return "+retval.toString());
 	    } else {
 		retval = sc.getResource(path);
-		// This is a workaround for problematic engines 
+		// This is a workaround for problematic engines
 		// Remind me to file a bug report for Jigsaw. --Wes
 		if (retval == null) {
 		    log(JspConfig.getLocalizedMsg(ERR_gnujsp_broken_getresource));
@@ -692,7 +698,7 @@ public class JspServlet extends HttpServlet
 	    return retval;
 	}
 
-	boolean needToRecompile (HttpServletRequest request) 
+	boolean needToRecompile (HttpServletRequest request)
 	    throws MalformedURLException, ServletException {
 
 	    if (checkClass && (servlet == null)) {
@@ -708,7 +714,7 @@ public class JspServlet extends HttpServlet
 		    } else { // Try reflection
 			try {
 			    compilerVersion = ((Long) servlet.getClass().getMethod
-					       ("_gnujspGetCompilerVersion", 
+					       ("_gnujspGetCompilerVersion",
 						null).invoke(null, null)).longValue();
 			} catch (Exception reflectEx) { }
 		    }
@@ -724,7 +730,7 @@ public class JspServlet extends HttpServlet
 				    getMethod("_gnujspGetDeps", null).invoke(null, null);
 			    } catch (Exception reflectEx) { }
 			}
-			
+
 			if (predeps != null) {
 			    deps = new URL [predeps.length];
 			    for (int i = 0; i < predeps.length; i++) {
@@ -732,7 +738,7 @@ public class JspServlet extends HttpServlet
 				deps[i] = getResourceImpl(predeps[i], request);
 			    }
 			} // else what? FIXME.
-			
+
 			// We should really only do this after checking deps
 			servlet.init(getJspServletConfig());
 		    }
@@ -761,7 +767,7 @@ public class JspServlet extends HttpServlet
 
 	    if (servlet == null) return true;
 	    if (deps == null) return true; // First time
-	   
+
 	    if (checkDeps) {
 		long compileTime = Long.MAX_VALUE; // Workaround non HttpJspPageImpl
 		if (servlet instanceof HttpJspPageImpl) {
@@ -771,7 +777,7 @@ public class JspServlet extends HttpServlet
 			compileTime = ((Long) servlet.getClass().getMethod("_gnujspGetTimestamp", null).invoke(null, null)).longValue();
 		    } catch (Exception reflectEx) { }
 		}
-		    
+
 		if (debug) log("compileTime was " + compileTime);
 		try {
 		    for (int i = 0;  i < deps.length;  ++i) {
@@ -792,7 +798,7 @@ public class JspServlet extends HttpServlet
 		    return false;
 		}
 	    }
-	    
+
 	    return false;
 	}
 
@@ -803,7 +809,7 @@ public class JspServlet extends HttpServlet
 	    ByteArrayOutputStream compilerOut = new ByteArrayOutputStream();
 	    PrintStream compilerOutStream = new PrintStream(compilerOut, true);
 	    int j;
-	   
+
 	    // build compiler command line
 	    if (javacArgs[0].equals("builtin-javac")) {
 		compilerArgs = new String [javacArgs.length - 1];
@@ -815,13 +821,13 @@ public class JspServlet extends HttpServlet
 		useBuiltinJavac = false;
 		j = 1;
 	    }
-	   
+
 	    compilerOutStream.print (javacArgs[0]);
 
 	    for(int i = 1; i < javacArgs.length; i++) {
 		String arg  = javacArgs[i];
 		String repl = null;
-	   
+
 		if (arg.indexOf ("%classpath%") != -1)
 		    repl = System.getProperty ("java.class.path");
 		else if (arg.indexOf ("%scratchdir%") != -1)
@@ -829,12 +835,12 @@ public class JspServlet extends HttpServlet
 		else if (arg.indexOf ("%source%") != -1)
 		    repl = javaFile.toString ();
 		else if (arg.indexOf ("%encoding%") != -1)
-		    repl = (charset != null) 
+		    repl = (charset != null)
 			? charset : System.getProperty("file.encoding");
-	
+
 		int first = arg.indexOf ('%');
 		int last  = arg.lastIndexOf ('%');
-	
+
 		if (first != -1 && last != -1 && first != last) {
 		    compilerArgs[j] = (arg.substring (0, first) + repl +
 				       arg.substring (last+1));
@@ -845,7 +851,7 @@ public class JspServlet extends HttpServlet
 		compilerOutStream.print((char) ' ');
 		compilerOutStream.print (compilerArgs[j++]);
 	    }
-	   
+
 	    compilerOutStream.println();
 	    if (debug) {
 		log("Compiler command: " + compilerOut.toString());
@@ -858,7 +864,7 @@ public class JspServlet extends HttpServlet
 			OutputStream.class, String.class });
 		    Object javac = twoArg.newInstance(new Object[] {
 			compilerOutStream, "javac" });
-		    Method compile = javacMain.getMethod("compile", 
+		    Method compile = javacMain.getMethod("compile",
 							 new Class[] {
 			String[].class });
 		    Object compileOut = compile.invoke(javac, new Object[] {
@@ -878,23 +884,23 @@ public class JspServlet extends HttpServlet
 		String		line;
 		int		exitValue = -1;
 		long		classLastModified;
-	
+
 		// FIXME
 		//		classLastModified = classFile.lastModified();
-	
+
 		try {
 		    p = Runtime.getRuntime().exec (compilerArgs);
 		    stdout = new BufferedReader (new InputStreamReader
 						 (p.getInputStream()));
 		    stderr = new BufferedReader (new InputStreamReader
 						 (p.getErrorStream()));
-		   
+
 		    while((line = stdout.readLine()) != null)
 			compilerOutStream.println(line);
-		   
+
 		    while((line = stderr.readLine()) != null)
 			compilerOutStream.println(line);
-		   
+
 		    try {
 			p.waitFor();
 			exitValue = p.exitValue();
@@ -958,7 +964,7 @@ public class JspServlet extends HttpServlet
 
 	    while (st.hasMoreTokens ()) {
 		token = st.nextToken();
-	
+
 		buf.append(dirSep);
 
 		for (i = 0;  i < token.length();  i++) {
@@ -971,7 +977,7 @@ public class JspServlet extends HttpServlet
 			    append (Integer.toHexString (c));
 		}
 	    }
-	
+
 	    return buf.toString();
 	}
 	/**
@@ -988,22 +994,22 @@ public class JspServlet extends HttpServlet
 
     public void doForward(ServletContext sc,
 			  String relativeURL,
-			  ServletRequest srequest, 
-			  ServletResponse sresponse) 
+			  ServletRequest srequest,
+			  ServletResponse sresponse)
 	throws ServletException, IOException
     {
 	String s = null;
-	HttpServletRequestWrapper request 
+	HttpServletRequestWrapper request
 	    = (HttpServletRequestWrapper) srequest;
 	HttpServletResponse response = (HttpServletResponse) sresponse;
 
-	// We set parameters similiar to include  but don't need to 
+	// We set parameters similiar to include  but don't need to
 	// wrap it because old values should not be used anymore. (alph)
 
-	request.setAttribute("javax.servlet.forward.request", 
+	request.setAttribute("javax.servlet.forward.request",
 			      relativeURL);
 
-	/* servletpath component */ 
+	/* servletpath component */
 	s = request.getServletPath();
 	if(s != null) {
 	    request.setAttribute("javax.servlet.forward.servlet", s);
@@ -1027,7 +1033,7 @@ public class JspServlet extends HttpServlet
 	    if(pathDebug)
 		log("doForward: jspURI2 = "+jspURI);
 	}
-	
+
 	if(jspURI == null) {
  	    jspURI = request.getPathTranslated();
 	    if(pathDebug)
@@ -1048,19 +1054,19 @@ public class JspServlet extends HttpServlet
 	    // for same page are possible here (alph)
 	    synchronized(pages) {
 		if ((page = (Page) pages.get (jspURI)) == null) {
-		    
+
 		    page = new Page (jspURI);
-		    
+
 		    pages.put (jspURI, page);
 		}
 	    }
 	    // FIXME: need to change/wrap response?
 	    page.process (request, response);
 	} catch(FileNotFoundException e) {
-	    // FIXME: another way without exception to check if jsp 
+	    // FIXME: another way without exception to check if jsp
 	    // file exists?
 
-	    // the file was not found as a jsp page, 
+	    // the file was not found as a jsp page,
 	    // so we try it as a servlet
 
 	    if(!doServletInclude(jspURI, relativeURL,
@@ -1080,17 +1086,17 @@ public class JspServlet extends HttpServlet
     public void doInclude(ServletContext sc,
 			  String relativeURL,
 			  JspWriter jspWriter,
-			  ServletRequest srequest, 
-			  ServletResponse sresponse) 
+			  ServletRequest srequest,
+			  ServletResponse sresponse)
 	throws ServletException, IOException
     {
 	String s = null;
-	if(relativeURL == null) 
+	if(relativeURL == null)
 	    throw new IOException
 		(JspConfig.getLocalizedMsg(ERR_gnujsp_internal_error)
 		 + ": relativeURL==null");
 
-	HttpServletRequestWrapper request 
+	HttpServletRequestWrapper request
 	    = (HttpServletRequestWrapper) srequest;
 	HttpServletResponse response = (HttpServletResponse) sresponse;
 
@@ -1101,10 +1107,10 @@ public class JspServlet extends HttpServlet
 	HttpServletRequestWrapper wrequest = new
 	    HttpServletRequestWrapper(request);
 
-	wrequest.setAttribute("javax.servlet.include.request", 
+	wrequest.setAttribute("javax.servlet.include.request",
 			      relativeURL);
 
-	/* servletpath component */ 
+	/* servletpath component */
 	s = request.getServletPath();
 	if(s != null) {
 	    wrequest.setAttribute("javax.servlet.include.servlet", s);
@@ -1124,7 +1130,7 @@ public class JspServlet extends HttpServlet
 	if(jspURI == null) {
  	    jspURI = wrequest.getRequestURI();
 	}
-	
+
 	if(jspURI == null)
  	    jspURI = wrequest.getPathTranslated();
 
@@ -1142,27 +1148,27 @@ public class JspServlet extends HttpServlet
 	    // for same page are possible here (alph)
 	    synchronized(pages) {
 		if ((page = (Page) pages.get (jspURI)) == null) {
-		    
+
 		    page = new Page (jspURI);
-		    
+
 		    pages.put (jspURI, page);
 		}
 	    }
-	    JspWriter w = new org.gjt.jsp.jsdk20.JspWriterImpl(jspWriter, 
-					      8192 /* FIXME */, 
+	    JspWriter w = new org.gjt.jsp.jsdk20.JspWriterImpl(jspWriter,
+					      8192 /* FIXME */,
 					      false);
-	    HttpServletResponseWrapper wres = 
+	    HttpServletResponseWrapper wres =
 		new HttpServletResponseWrapper(response);
-	    PrintWriter pw = new PrintWriter(w); 
+	    PrintWriter pw = new PrintWriter(w);
 	    wres.setWriter(pw);
-	    
+
 	    page.process (wrequest, wres);
 	    pw.flush();
 	} catch(FileNotFoundException e) {
-	    // FIXME: another way without exception to check if jsp 
+	    // FIXME: another way without exception to check if jsp
 	    // file exists?
 
-	    // the file was not found as a jsp page, 
+	    // the file was not found as a jsp page,
 	    // so we try it as a servlet
 
 	    if(!doServletInclude(jspURI, relativeURL,
@@ -1185,7 +1191,7 @@ public class JspServlet extends HttpServlet
     private boolean doServletInclude(String jspURI,
 				  String relativeURL,
 				  HttpServletRequest request,
-				  HttpServletResponse res) 
+				  HttpServletResponse res)
 	throws IOException, ServletException
     {
 	// relativeURI?
@@ -1198,45 +1204,45 @@ public class JspServlet extends HttpServlet
 	    // because getWriter() was already called.
 	    // I didn't used it in doInclude() because it
 	    // is not needed and may break things (not tested) (alph)
-	    HttpServletResponse response = 
+	    HttpServletResponse response =
 		new HttpServletResponseWrapper(res);
-	    
-	    
+
+
 	    // FIXME: calling init must be done by servlet engine!
 	    // FIXME: we don't know if it is already called!
 	    // FIXME: document that! (alph)
 	    // servlet.init(info);
-	    
+
 	    // This is from ApacheJSSI:
-	    
+
 	    // there is no defined way to get a STM-servlet to execute
 	    // it. The behaviour is undefined
 	    if (servlet instanceof SingleThreadModel &&
 		servlet instanceof GenericServlet) {
-		((GenericServlet) servlet).log 
+		((GenericServlet) servlet).log
 		    (JspConfig.getLocalizedMsg
 		     (ERR_gnujsp_unsafe_singletread_execute));
 	    }
 
 	    // execute servlet
-	    servlet.service((ServletRequest) request, 
+	    servlet.service((ServletRequest) request,
 			    (ServletResponse) response);
 	}
 
 	return (servlet != null);
     }
-	    
-    private void doHTTPInclude(String relativeURL, JspWriter out, 
-			       HttpServletRequest request) 
+
+    private void doHTTPInclude(String relativeURL, JspWriter out,
+			       HttpServletRequest request)
 	throws IOException
     {
 	int resCode = 0;
 	try {
 	    char buf[] = new char[8192];
 	    URL url = new URL(makeRequestURL(request));
-		
+
 	    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-	    BufferedReader r = 
+	    BufferedReader r =
 		new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
 	    int i = 0;
@@ -1259,8 +1265,8 @@ public class JspServlet extends HttpServlet
      *
      * reconstruct the url this page was called with
      *
-     */ 
-    private String makeRequestURL(HttpServletRequest req) 
+     */
+    private String makeRequestURL(HttpServletRequest req)
 	throws IOException
     {
 	int port = req.getServerPort();
@@ -1272,10 +1278,10 @@ public class JspServlet extends HttpServlet
 	if(path == null || path.equals(""))
 	    path = req.getServletPath();
 
-        if(path == null)	
+        if(path == null)
 	    throw new IOException(JspConfig.getLocalizedMsg
 				  (ERR_gnujsp_could_not_reconstruct_url));
-          
-	return req.getScheme()+"://"+req.getServerName()+strPort+path;        
+
+	return req.getScheme()+"://"+req.getServerName()+strPort+path;
     }
 }
