@@ -124,6 +124,27 @@ public class KeyPairTool
         byte[] keyBytes = new byte[(int) privateKeyFile.length()];
         privateKeyInputStream.read(keyBytes);
 
+        // Dynamically install the Bouncy Castle provider for RSA support.
+	Provider provider;
+        try
+        {
+            Class providerClass = Class.forName(providerClassName);
+	    provider = (Provider)providerClass.newInstance();
+            Security.insertProviderAt(provider, 1);
+	    //            Security.addProvider(provider);
+        }
+        catch (Exception e)
+        {
+            System.out.println("Exception: " + e.getMessage());
+            e.printStackTrace();
+
+            System.out.println("Unable to load provider: "
+                               + providerClassName);
+            
+            usage();
+	    return;
+        }
+
         PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
@@ -143,17 +164,20 @@ public class KeyPairTool
         System.out.println("Loaded the public key...");
 
         //--------------------------------------------------
+        // Dynamically deinstall the RSA provider
+	Security.removeProvider(provider.getName());
 
         // Load the KeyStore
         if (keyPassword == null)
             keyPassword = keyStorePassword;
 
-        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        KeyStore keyStore = KeyStore.getInstance(keyStoreType);
         InputStream keyStoreStream = null;
         try
         {
              keyStoreStream = new FileInputStream(keyStoreFile);
-             System.out.println("Will load keystore: " + keyStoreFile);
+             System.out.println("Will load " + keyStoreType
+				+ " keystore: " + keyStoreFile);
         }
         catch (FileNotFoundException e)
         {
@@ -234,25 +258,6 @@ public class KeyPairTool
         keyPassword = new Password("jetty.ssl.keypassword",
                                    null,
                                    keyStorePassword.toString());
-        
-
-        // Dynamically install the Bouncy Castle provider for RSA support.
-        try
-        {
-            Class providerClass = Class.forName(providerClassName);
-            Provider provider = (Provider)providerClass.newInstance();
-            Security.addProvider(provider);
-        }
-        catch (Exception e)
-        {
-            System.out.println("Exception: " + e.getMessage());
-            e.printStackTrace();
-
-            System.out.println("Unable to load provider: "
-                               + providerClassName);
-            
-            usage();
-        }
     }
 }
 
