@@ -173,9 +173,15 @@ public class Code
     /** Set if debugging is on or off
      * @param debug 
      */
-    public static void setDebug(boolean debug)
+    public static synchronized void setDebug(boolean debug)
     {
-        instance()._debugOn=debug;
+	Code code =instance();
+	boolean oldDebug=code._debugOn;
+	if (code._debugOn && !debug)
+	    Code.debug(2,"DEBUG OFF");
+        code._debugOn=debug;
+	if (!oldDebug && debug)
+	    Code.debug(2,"DEBUG ON");
     }
 
     /* ------------------------------------------------------------ */
@@ -649,6 +655,30 @@ public class Code
                 synchronized(buf)
                 {   
                     formatObject(buf,ex);
+                }
+                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+            }
+        }
+    }
+    
+    /*-------------------------------------------------------------------*/
+    /** Debug with frame depth
+     * @param depth Depth of debug frame, 1=caller, 2=callers caller...
+     * @param o Object
+     */
+    public static void debug(int depth,Object o)
+    {
+        Code code = instance();
+        if (code._debugOn)
+        {
+            Frame frame = new Frame(depth,true);
+            if (code.isDebugOnFor(frame))
+            {
+                frame.complete();
+                StringBuffer buf = new StringBuffer(256);
+                synchronized(buf)
+                {   
+                    formatObject(buf,o);
                 }
                 Log.message(Log.CODE_DEBUG, buf.toString(),frame);
             }

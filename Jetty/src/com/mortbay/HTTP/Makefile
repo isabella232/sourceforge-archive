@@ -16,6 +16,12 @@ EXCLUDECLASSES := \
 	TestHarness.class \
 	TestRFC2616.class \
 	TestRFC2616$$TestConnection.class \
+	TestRFC2616$$RedirectHandler.class \
+	TestRequest.class \
+	Http10TestClient.class \
+
+
+CLASSFILES := web.dtd $(wildcard *.class)
 
 ROOTNAME := com
 BINFILES := 

@@ -30,6 +30,7 @@ abstract public class ThreadedServer extends ThreadPool
     /* ------------------------------------------------------------------- */
     private InetAddrPort _address = null;    
     ServerSocket _listen = null;
+    int _soTimeOut=-1;
     int _maxReadTimeMs=-1;
     
     /* ------------------------------------------------------------------- */
@@ -266,15 +267,22 @@ abstract public class ThreadedServer extends ThreadPool
      * @param serverSocket
      * @return Accepted Socket
      */
-    protected Socket acceptSocket(ServerSocket serverSocket)
+    protected Socket acceptSocket(ServerSocket serverSocket,
+				  int timeout)
     {
         try
         {
 	    Socket s;
-	    synchronized(_listen)
-	    {
+	    //synchronized(_listen)
+	    //{
+		if (_soTimeOut!=timeout)
+		{
+		    _soTimeOut=timeout;
+		    _listen.setSoTimeout(_soTimeOut);
+		}
+		
 		s=_listen.accept();
-	    }
+		//}
             if (_maxReadTimeMs>0)
                 s.setSoTimeout(_maxReadTimeMs);
             return s;
@@ -308,7 +316,7 @@ abstract public class ThreadedServer extends ThreadPool
      */
     protected final Object getJob(int timeoutMs)
     {
-        return acceptSocket(_listen);
+        return acceptSocket(_listen,timeoutMs);
     }
     
     /* ------------------------------------------------------------------- */
@@ -328,9 +336,10 @@ abstract public class ThreadedServer extends ThreadPool
                                     getMaxSize()>0?(getMaxSize()+1):50);
             _address=new InetAddrPort(_listen.getInetAddress(),
                                       _listen.getLocalPort());
-            
-            if (getMaxIdleTimeMs()>0)
-                _listen.setSoTimeout((int)getMaxIdleTimeMs());
+
+	    _soTimeOut=getMaxIdleTimeMs();
+            if (_soTimeOut>0)
+                _listen.setSoTimeout(_soTimeOut);
             
             super.start();
         }

@@ -132,7 +132,7 @@ public class HttpResponse extends HttpMessage
      */
     public boolean isDirty()
     {
-	return _state!=__200_OK || super.isDirty();
+	return _status!=__200_OK || super.isDirty();
     }
     
 

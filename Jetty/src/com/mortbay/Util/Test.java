@@ -214,7 +214,7 @@ public class Test
         if (o1==o2 || ( o1!=null && o1.equals(o2)))
         {
             reportBuf.append(pass);
-            Code.debug(check," OK");
+            Code.debug(3,check+" OK");
         }
         else
         {
@@ -225,7 +225,7 @@ public class Test
             reportBuf.append(spaces,0,testCase.length()+3);
             reportBuf.append(((o1!=null)?(o1.toString()):"null") + " != " +
                              ((o2!=null)?(o2.toString()):"null"));
-            Code.debug(check," FAILED");
+            Code.debug(3,check+" FAILED");
         }
         reportBuf.append('\n');
     }

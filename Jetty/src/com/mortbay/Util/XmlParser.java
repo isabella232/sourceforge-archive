@@ -23,7 +23,7 @@ import javax.xml.parsers.*;
  */
 public class XmlParser 
 {
-    private Map _localDtdMap = new HashMap();
+    private Map _redirectMap = new HashMap();
     private SAXParserFactory _spf;
     private SAXParser _sp;
     
@@ -93,10 +93,10 @@ public class XmlParser
      * @param name 
      * @param local 
      */
-    public synchronized void addLocalDTD(String name,File local)
+    public synchronized void redirectEntity(String name,Resource entity)
     {
-	if (local.exists())
-	    _localDtdMap.put(name,local);
+	if (entity!=null)
+	    _redirectMap.put(name,entity);
     }
 
     
@@ -185,11 +185,15 @@ public class XmlParser
 	    String dtd = sid;
 	    if (dtd.lastIndexOf("/")>=0)
 		dtd=dtd.substring(dtd.lastIndexOf("/")+1);
-	    File dtdf = (File)_localDtdMap.get(dtd);
-	    if (dtdf!=null)
+	    Resource resource = (Resource)_redirectMap.get(dtd);
+	    if (resource!=null && resource.exists())
 	    {
-		try{return new InputSource(new FileReader(dtdf));}
-		catch(FileNotFoundException e){Code.ignore(e);}
+		try
+		{
+		    InputStream in= resource.getInputStream();
+		    return new InputSource(in);
+		}
+		catch(IOException e){Code.ignore(e);}
 	    }
 	    return null;
 	}
@@ -485,30 +489,6 @@ public class XmlParser
 		    }
 		    
 		};
-	}
-    }
-    
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    public static void main(String[] arg)
-    {
-	try
-	{
-	    XmlParser parser = new XmlParser();
-	    parser.addLocalDTD("jetty.dtd",
-			       new File("../../../../etc/jetty.dtd"));
-	    
-	    String url = "file:"+System.getProperty("user.dir")+
-		"/../../../../etc/jetty.xml";
-	    Node testDoc = parser.parse(url);
-	    
-	    System.err.println(testDoc);
-	    
-	}
-	catch(Exception e)
-	{
-	    Code.warning(e);
 	}
     }
 }

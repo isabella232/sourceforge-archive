@@ -398,7 +398,7 @@ class ServletRequest
     public HttpSession getSession(boolean create)
     {
         Code.debug("getSession(",new Boolean(create),")");
-        
+	
         if (_session != null && _context.isValid(_session))
             return _session;
         

@@ -52,9 +52,9 @@ public class WebApplicationContext extends HandlerContext
 	{
 	    __xmlParser=new XmlParser();
 	    // XXX - need to configure this better
-	    __xmlParser.addLocalDTD("web-app_2_2.dtd",
-				    new File(System.getProperty("user.dir")+
-					     "/etc/web.dtd"));
+	    __xmlParser.redirectEntity
+		("web-app_2_2.dtd",
+		 Resource.newSystemResource("com/mortbay/HTTP/web.dtd"));
 	}
 
 	File _directory = new File(directory);

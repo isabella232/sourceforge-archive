@@ -51,7 +51,8 @@ public class JettyPage extends Page
 		}
 		catch(MissingResourceException e)
 		{
-		    Code.ignore(e);
+		    if (Code.verbose(99999))
+			Code.ignore(e);
 		}
 		finally
 		{

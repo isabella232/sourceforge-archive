@@ -76,6 +76,24 @@ public class Resource
 	
 	return newResource(url);
     }
+    
+    /* ------------------------------------------------------------ */
+    /** Construct a resource from a string.
+     * If the string is not a URL, it is treated as an absolute or
+     * relative file path.
+     * @param resource. 
+     * @return 
+     */
+    public static Resource newSystemResource(String resource)
+	throws IOException
+    {
+	URL url=null;
+	// Try to format as a URL?
+	url = ClassLoader.getSystemResource(resource);
+	if (url==null)
+	    return null;
+	return newResource(url);
+    }
 
     
     /* ------------------------------------------------------------ */
@@ -132,7 +150,7 @@ public class Resource
     {
 	try
 	{
-	    if (checkConnection())
+	    if (checkConnection() && _in!=null )
 		_in = _connection.getInputStream();
 	}
 	catch (IOException e)
@@ -209,7 +227,7 @@ public class Resource
     /**
      * Returns an input stream to the resource
      */
-    public synchronized java.io.InputStream getInputStream()
+    public synchronized InputStream getInputStream()
 	throws java.io.IOException
     {
 	if (!checkConnection())  

@@ -1069,7 +1069,7 @@ public class TestHarness
 	    setMinThreads(2);
 	    setMaxThreads(4);
 	    setMaxIdleTimeMs(500);
-	    setMaxIdleTimeMs(60000);
+	    setMaxReadTimeMs(60000);
         }
         
         /* -------------------------------------------------------- */
@@ -1140,32 +1140,32 @@ public class TestHarness
             test.check(server.isStarted(),"Started");
             test.checkEquals(server._connections,0,"Minimum Threads");
             test.checkEquals(server._jobs,0,"Minimum Threads");
-            test.checkEquals(server.getSize(),2,"Minimum Threads");
+            test.checkEquals(server.getThreads(),2,"Minimum Threads");
             System.err.print(".");System.err.flush();
             Thread.sleep(550);
             test.check(server.isStarted(),"Started");
             test.checkEquals(server._connections,0,"Minimum Threads");
             test.checkEquals(server._jobs,0,"Minimum Threads");
-            test.checkEquals(server.getSize(),2,"Minimum Threads");
+            test.checkEquals(server.getThreads(),2,"Minimum Threads");
             
             PrintWriter p1 = server.stream();
             System.err.print(".");System.err.flush();
             Thread.sleep(200);
             test.checkEquals(server._connections,1,"New connection");
             test.checkEquals(server._jobs,1,"New connection");
-            test.checkEquals(server.getSize(),2,"New connection");
+            test.checkEquals(server.getThreads(),2,"New connection");
             
             PrintWriter p2 = server.stream();
             System.err.print(".");System.err.flush();
             Thread.sleep(200);
             test.checkEquals(server._connections,2,"New thread");
             test.checkEquals(server._jobs,2,"New thread");
-            test.checkEquals(server.getSize(),3,"New thread");
+            test.checkEquals(server.getThreads(),3,"New thread");
             System.err.print(".");System.err.flush();
             Thread.sleep(550);
             test.checkEquals(server._connections,2,"Steady State");
             test.checkEquals(server._jobs,2,"Steady State");
-            test.checkEquals(server.getSize(),3,"Steady State");
+            test.checkEquals(server.getThreads(),3,"Steady State");
 
             p1.print("Exit\015");
             p1.flush();
@@ -1174,19 +1174,20 @@ public class TestHarness
             
             test.checkEquals(server._connections,2,"exit job");
             test.checkEquals(server._jobs,1,"exit job");
-            test.checkEquals(server.getSize(),3,"exit job");
+            test.checkEquals(server.getThreads(),3,"exit job");
             p1 = server.stream();
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
             test.checkEquals(server._connections,3,"reuse thread");
             test.checkEquals(server._jobs,2,"reuse thread");
-            test.checkEquals(server.getSize(),3,"reuse thread");
+            test.checkEquals(server.getThreads(),3,"reuse thread");
             System.err.print(".");System.err.flush();
             Thread.sleep(550);
             test.checkEquals(server._connections,3,"1 idle");
             test.checkEquals(server._jobs,2,"1 idle");
-            test.checkEquals(server.getSize(),3,"1 idle");
+            test.checkEquals(server.getThreads(),3,"1 idle");
 
+	    
             p1.print("Exit\015");
             p1.flush();
             System.err.print(".");System.err.flush();
@@ -1194,19 +1195,20 @@ public class TestHarness
             
             test.checkEquals(server._connections,3,"idle thread");
             test.checkEquals(server._jobs,1,"idle thread");
-            test.checkEquals(server.getSize(),3,"idle thread");
+            test.checkEquals(server.getThreads(),3,"idle thread");
             System.err.print(".");System.err.flush();
             Thread.sleep(800);
             test.checkEquals(server._connections,3,"idle death");
             test.checkEquals(server._jobs,1,"idle death");
-            test.checkEquals(server.getSize(),2,"idle death");
+            test.checkEquals(server.getThreads(),2,"idle death");
             
+	    
             p1 = server.stream();
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
             test.checkEquals(server._connections,4,"restart thread");
             test.checkEquals(server._jobs,2,"restart thread");
-            test.checkEquals(server.getSize(),3,"restart thread");
+            test.checkEquals(server.getThreads(),3,"restart thread");
             
             PrintWriter p3 = server.stream();
             PrintWriter p4 = server.stream();
@@ -1214,12 +1216,12 @@ public class TestHarness
             Thread.sleep(100);
             test.checkEquals(server._connections,6,"max thread");
             test.checkEquals(server._jobs,4,"max thread");
-            test.checkEquals(server.getSize(),4,"max thread");
+            test.checkEquals(server.getThreads(),4,"max thread");
 
             server.destroy();
             server.join();
             test.check(!server.isStarted(),"Stopped");
-            test.checkEquals(server.getSize(),0,"No Threads");
+            test.checkEquals(server.getThreads(),0,"No Threads");
         }
         catch(Exception e)
         {
@@ -1360,6 +1362,32 @@ public class TestHarness
         }
     }
 
+    /* ------------------------------------------------------------ */
+    public static void testXmlParser()
+    {
+        Test t = new Test("com.mortbay.Util.XmlParser");
+	try
+	{
+	    XmlParser parser = new XmlParser();
+	    parser.redirectEntity("jetty.dtd",
+				  Resource.newSystemResource("com/mortbay/Jetty/jetty.dtd"));
+	    
+	    String url = "file:"+System.getProperty("user.dir")+
+		"/../../../../etc/jetty.xml";
+	    XmlParser.Node testDoc = parser.parse(url);
+	    String testDocStr = testDoc.toString().trim();
+	    Code.debug(testDocStr);
+
+	    t.check(testDocStr.startsWith("<Server>"),"Server");
+	    t.check(testDocStr.endsWith("</Server>"),"Server");
+	}
+	catch(Exception e)
+	{
+	    Code.warning(e);
+            t.check(false,e.toString());
+	}
+    }
+    
     
     /* ------------------------------------------------------------ */
     /** main
@@ -1368,26 +1396,26 @@ public class TestHarness
     {
         try
         {
-//  	    testMultiMap();
-//              testQuotedStringTokenizer();            
-//              testDateCache();
-//              testTest();
-//              testLog();
-//              testFrame();
-//              testCode();
-//              testDataHelper();
-//              testBlockingQueue();
-//              testIO();
-//              testUrlEncoded();
-//              testURI();
-//              testLineInput();
-//              testThreadPool();
-//              testThreadedServer();
-//              testB64();
-//  	    testZipResource();
-//              PropertyTreeTest.test();
-	    resourceTest();
-	    
+    	    testMultiMap();
+  	    testQuotedStringTokenizer();            
+  	    testDateCache();
+  	    testTest();
+  	    testLog();
+  	    testFrame();
+  	    testCode();
+  	    testDataHelper();
+  	    testBlockingQueue();
+  	    testIO();
+  	    testUrlEncoded();
+  	    testURI();
+  	    testLineInput();
+	    testThreadPool();
+	    testThreadedServer();
+  	    testB64();
+    	    testZipResource();
+  	    PropertyTreeTest.test();
+  	    resourceTest();
+  	    testXmlParser();
         }
         catch(Throwable th)
         {

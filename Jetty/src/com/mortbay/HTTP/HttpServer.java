@@ -538,7 +538,7 @@ public class HttpServer implements LifeCycle
 	    };
             args=newArgs;
         }
-        else if (args.length%2==1)
+        else if (args.length==1 && args[0].startsWith("-"))
         {
             System.err.println
                 ("\nUsage - java com.mortbay.HTTP.HttpServer [ options .. ] [[<addr>:]<port> .. ]");
