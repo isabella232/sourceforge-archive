@@ -309,13 +309,15 @@ public class SocketListener
      */
     public boolean isLowOnResources()
     {
-        boolean low =
-            getThreads()==getMaxThreads() &&
-            getIdleThreads()<getMinThreads();
+        boolean low = (getMaxThreads()-getThreads()+getIdleThreads())<getMinThreads();
         
         if (low && !_isLow)
         {
-            log.info("LOW ON THREADS: "+this);
+            log.info("LOW ON THREADS (("+
+                      getMaxThreads()+"-"+
+                      getThreads()+"+"+
+                      getIdleThreads()+")<"+
+                      getMinThreads()+") on "+ this);
             _warned=System.currentTimeMillis();
             _isLow=true;
         }
@@ -346,6 +348,7 @@ public class SocketListener
         {
             log.warn("OUT OF THREADS: "+this);
             _warned=System.currentTimeMillis();
+            _isLow=true;
             _isOut=true;
         }
         
