@@ -838,13 +838,16 @@ public class HttpRequest extends HttpMessage
                         try
                         {
                             int max=content_length;
-                            if (max<0)
-                                max=__maxFormContentSize;
-                            else if (max>__maxFormContentSize)
-                            {
-                                Code.warning("Form content truncated");
-                                max=__maxFormContentSize;
-                            }
+			    if (__maxFormContentSize>0)
+			    {
+				if (max<0)
+				    max=__maxFormContentSize;
+				else if (max>__maxFormContentSize)
+				{
+				    Code.warning("Form content truncated");
+				    max=__maxFormContentSize;
+				}
+			    }
 
                             // Read the content
                             ByteArrayOutputStream2 bout =
@@ -1006,25 +1009,17 @@ public class HttpRequest extends HttpMessage
                     {                   
                         String n;
                         String v;
-                        if (c.startsWith("JSESSION_ID="))
-                        {
-                            n="JSESSION_ID";
-                            v=c.substring(12);    
-                        }
-                        else
-                        {
-                            int e = c.indexOf('=');
-                            if (e>0)
-                            {
-                                n=c.substring(0,e);
-                                v=c.substring(e+1);
-                            }
-                            else
-                            {
-                                n=c;
-                                v="";
-                            }
-                        }
+			int e = c.indexOf('=');
+			if (e>0)
+			{
+			    n=c.substring(0,e);
+			    v=c.substring(e+1);
+			}
+			else
+			{
+			    n=c;
+			    v="";
+			}
                         
                         // Handle quoted values
                         if (version>0)
@@ -1041,7 +1036,7 @@ public class HttpRequest extends HttpMessage
                                     version=Integer.parseInt
                                         (StringUtil.unquote(v.substring(0,comma)));
                                     v=v.substring(comma+1);
-                                    int e=v.indexOf('=');
+                                    e=v.indexOf('=');
                                     if (e>0)
                                     {
                                         n=v.substring(0,e);
