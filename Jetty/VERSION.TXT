@@ -5,6 +5,7 @@ Jetty-4.0.0 - 22 March 2002
  + Updated tutorial configure version
  + Added IPAddressHandler for IP restrictions
  + Updated contributors.
+ + Minor documentation updates.
  
 Jetty-4.0.RC3 - 20 March 2002
  + Fixed ZZZ offset format to +/-HHMM
