@@ -77,9 +77,11 @@
     <realm-name>Test Basic Authentication</realm-name>
   </login-config>
 
+  <!--
   <security-role>
       <role-name>roleName</role-name>
   </security-role>
+  -->
 
 </web-app>
 

@@ -6,7 +6,7 @@ It is designed to be light weight, high performance, embeddable,
 extensible and flexible, thus making it an ideal platform for serving  
 dynamic HTTP requests from any Java application.
 
-This is an ALPHA release of Jetty 3, which is a significant revision of
+This is a BETA release of Jetty 3, which is a significant revision of
 the Jetty 2 code base. The aims of the Jetty 3 developement include:
 
   + Fully RFC2616 compliant implementation of HTTP/1.1.
@@ -54,6 +54,7 @@ thus they are stored in com.mortbay.HTTP/web.dtd and
 com.mortbay.Util.configure.dtd within the source tree and jar file.  Copies
 are also placed in etc for reference.
 
+A document in the doc directory describes the configuration for SSL in Jetty.
 
 
 Running the Demo Server

@@ -50,7 +50,7 @@ $(INSTALLROOT)/webapps/$(WEBAPP)/WEB-INF/classes/com/mortbay/Jetty/JettyPage.cla
 $(INSTALLROOT)/webapps/$(WEBAPP)/WEB-INF/classes/com/mortbay/Jetty/JettyPage$$Section.class: JettyPage$$Section.class
 	cp `basename '$@'` $(INSTALLROOT)/webapps/$(WEBAPP)/WEB-INF/classes/com/mortbay/Jetty
 
-$(INSTALLROOT)/webapps/$(WEBAPP)/WEB-INF/classes/com/mortbay/Jetty/JettyIndex_en.properties:
+$(INSTALLROOT)/webapps/$(WEBAPP)/WEB-INF/classes/com/mortbay/Jetty/JettyIndex_en.properties: JettyIndex_en.properties
 	cp `basename $@` $(INSTALLROOT)/webapps/$(WEBAPP)/WEB-INF/classes/com/mortbay/Jetty
 
 

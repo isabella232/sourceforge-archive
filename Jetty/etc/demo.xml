@@ -65,7 +65,6 @@ $ID: $
     </Arg>
   </Call>
 
-  <!--
   <Call name="addListener">
     <Arg>
       <New class="com.mortbay.HTTP.SunJsseListener">
@@ -73,12 +72,11 @@ $ID: $
         <Set name="MinThreads">5</Set>
         <Set name="MaxThreads">255</Set>
         <Set name="MaxIdleTimeMs">50000</Set>
-	<Set name="Password">secretPassword</Set>
-	<Set name="KeyPassword">verySecretPassword</Set>
+	<Set name="Password">fish2bike</Set>
+	<Set name="KeyPassword">woman2man</Set>
       </New>
     </Arg>
   </Call>
-  -->
 
   <Call name="addWebApplication">
     <Arg>/</Arg>

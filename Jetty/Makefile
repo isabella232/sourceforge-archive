@@ -25,5 +25,7 @@ SUBDIRS := \
 
 include $(JETTY_HOME)/etc/Global.mk
 
-jdk2: 
-	bin/useJava2Collections
+jars: 
+	cd classes && \
+	jar cfv ../lib/com.mortbay.jetty.jar com && \
+	jar cfv ../lib/javax.servlet.jar javax
