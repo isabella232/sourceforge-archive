@@ -1,12 +1,13 @@
-/*
- * Created on 20-Mar-2003
- *
- */
+
 package org.mortbay.util;
 
-/**
+import java.io.UnsupportedEncodingException;
+
+/* ------------------------------------------------------------------------------- */
+/** 
+ * 
+ * @version $Revision$
  * @author gregw
- *
  */
 public class Portable
 {
@@ -33,5 +34,17 @@ public class Portable
 	public static void throwRuntime(String msg)
 	{
 		throw new RuntimeException(msg);
+	}
+	
+	public static byte[] getBytes(String s)
+	{
+		try
+        {
+            return s.getBytes("ISO8859_1");
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            return s.getBytes();
+        }
 	}
 }

@@ -29,7 +29,26 @@ public class ByteArrayBuffer extends AbstractBuffer
     	this(bytes,offset,length,MUTABLE);
     }
 
+	/* ------------------------------------------------------------------------------- */
+	/** Constructor.
+	 * @param value
+	 */
+	public ByteArrayBuffer(String value)
+	{
+		super(!MUTABLE);
+		_bytes = Portable.getBytes(value);
+		offset(0);
+		limit(_bytes.length);
+	}
 
+	public void mimic(Buffer buffer)
+	{
+		offset(0);
+		_bytes=buffer.array();
+		limit(buffer.limit());
+		offset(buffer.offset());
+		mark(buffer.mark());
+	}
 
     /**
      * @see org.mortbay.util.Buffer#array()
@@ -44,6 +63,8 @@ public class ByteArrayBuffer extends AbstractBuffer
      */
     public int capacity()
     {
+    	if (_bytes==null)
+    	   return 0;	
         return _bytes.length;
     }
 

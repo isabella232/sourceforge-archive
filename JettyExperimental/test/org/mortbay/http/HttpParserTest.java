@@ -80,7 +80,7 @@ public class HttpParserTest extends TestCase implements HttpParser.Handler
 		assertEquals("Header1",hdr[0]);
 		assertEquals("value1",val[0]);
 		assertEquals("Header2",hdr[1]);
-		assertEquals("value 2avalue 2b",val[1]);
+		assertEquals("value 2a  \015\012                    value 2b",val[1]);
 		assertEquals("Header3",hdr[2]);
 		assertEquals(null,val[2]);
 		assertEquals("Header4",hdr[3]);
@@ -177,7 +177,7 @@ public class HttpParserTest extends TestCase implements HttpParser.Handler
 	int h;
 	int contentLength;
 	
-    public void foundContent(int offset, Buffer ref)
+    public void gotContent(int offset, Buffer ref)
     {
     	if (offset==0)
     		content="";
@@ -185,40 +185,33 @@ public class HttpParserTest extends TestCase implements HttpParser.Handler
     	System.out.println("Content["+offset+"]="+ref);
     }
 
-    public void foundField0(Buffer ref)
+    public void gotMethodOrVersion(Buffer ref)
     {
     	h=-1;
 		hdr = new String[9];
 		val = new String[9];
     	f0=ref.toString();
-    	System.out.println("Field0="+ref);
+    	System.out.print("\n"+ref);
     }
 
-    public void foundField1(Buffer ref)
+    public void gotUriOrCode(Buffer ref)
     {
 		f1=ref.toString();
-		System.out.println("Field1="+ref);
+		System.out.print(" "+ref);
     }
 
-    public void foundField2(Buffer ref)
+    public void gotVersionOrReason(Buffer ref)
     {
 		f2=ref.toString();
-		System.out.println("Field2="+ref);
+		System.out.print(" "+ref);
     }
 
-    public void foundHttpHeader(Buffer ref)
+    public void gotHeader(Buffer name, Buffer value)
     {
-    	hdr[++h]=ref.toString();
-		System.out.println("Header="+ref);
-    }
-
-    public void foundHttpValue(Buffer ref)
-    {
-    	if (val[h]==null)
-    		val[h]=ref.toString();
-    	else
-    		val[h]+=ref.toString();
-		System.out.println("Value='"+ref+"'");
+		System.out.print("\n"+name+":"+value);
+    	hdr[++h]=name.toString();
+    	if (value!=null)
+	    	val[h]=value.toString();
     }
 
     public int getContentLength()
@@ -229,7 +222,7 @@ public class HttpParserTest extends TestCase implements HttpParser.Handler
     public void headerComplete()
     {
     	content=null;
-		System.out.println("Header Complete");
+		System.out.println("\n");
     }
 
     public void messageComplete(int contentLength)

@@ -1,6 +1,7 @@
 package org.mortbay.http;
 
 import org.mortbay.util.Buffer;
+import org.mortbay.util.ByteArrayBuffer;
 import org.mortbay.util.Portable;
 
 /* ------------------------------------------------------------------------------- */
@@ -123,7 +124,7 @@ public class HttpParser
                 case STATE_FIELD0 :
                     if (ch == SPACE)
                     {
-                        handler.foundField0(source.marked());
+                        handler.gotMethodOrVersion(source.marked());
                         ctx.state= STATE_SPACE1;
                     }
                     else if (ch < SPACE)
@@ -147,7 +148,7 @@ public class HttpParser
                 case STATE_FIELD1 :
                     if (ch == SPACE)
                     {
-                        handler.foundField1(source.marked());
+                        handler.gotUriOrCode(source.marked());
                         ctx.state= STATE_SPACE2;
                     }
                     else if (ch < SPACE)
@@ -167,8 +168,9 @@ public class HttpParser
                 case STATE_FIELD2 :
                     if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                     {
-                        handler.foundField2(source.marked());
+                        handler.gotVersionOrReason(source.marked());
                         ctx.eol= ch;
+                        ctx.length=-1;
                         ctx.state= STATE_HEADER;
                     }
                     break;
@@ -176,6 +178,13 @@ public class HttpParser
                 case STATE_HEADER :
                     if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                     {
+                    	if (ctx.length>0 && ctx.name.length()>0)
+                    	{
+                    		handler.gotHeader(ctx.name,source.marked(ctx.length));
+                    		ctx.name.clear();
+                    		ctx.length=-1;
+                    	}
+                    	
                         handler.headerComplete();
                         ctx.contentLength= handler.getContentLength();
                         ctx.contentOffset= 0;
@@ -197,13 +206,20 @@ public class HttpParser
                                 break;
                         }
                     }
-                    else if (ch == COLON || ch == SPACE || ch == TAB)
+                    else if (ch == SPACE || ch == TAB)
                     {
-                        ctx.length= -1;
                         ctx.state= STATE_HEADER_VALUE;
                     }
                     else
                     {
+						if (ctx.name.length()>0)
+						{
+							if (ctx.length>=0)
+								handler.gotHeader(ctx.name,source.marked(ctx.length));
+							else
+								handler.gotHeader(ctx.name,null);
+						} 
+						ctx.name.clear();
                         ctx.length= 1;
                         source.markOffset();
                         ctx.state= STATE_HEADER_NAME;
@@ -214,16 +230,17 @@ public class HttpParser
                     if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                     {
                         if (ctx.length > 0)
-                            handler.foundHttpHeader(
-                                source.marked(ctx.length));
+                        {
+                        	ctx.name.mimic(source.marked(ctx.length));
+                        	ctx.length=-1;
+                        }
                         ctx.eol= ch;
                         ctx.state= STATE_HEADER;
                     }
                     else if (ch == COLON)
                     {
                         if (ctx.length > 0)
-                            handler.foundHttpHeader(
-                                source.marked(ctx.length));
+							ctx.name.mimic(source.marked(ctx.length));
                         ctx.length= -1;
                         ctx.state= STATE_HEADER_VALUE;
                     }
@@ -238,10 +255,6 @@ public class HttpParser
                 case STATE_HEADER_VALUE :
                     if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                     {
-                        if (ctx.length > 0)
-                            handler.foundHttpValue(
-                                source.marked(ctx.length));
-
                         ctx.eol= ch;
                         ctx.state= STATE_HEADER;
                     }
@@ -270,7 +283,7 @@ public class HttpParser
             {
                 case STATE_EOF_CONTENT :
                     chunk= source.get(-1);
-                    handler.foundContent(ctx.contentOffset, chunk);
+                    handler.gotContent(ctx.contentOffset, chunk);
                     ctx.contentOffset += chunk.length();
                     break;
 
@@ -287,7 +300,7 @@ public class HttpParser
                         else if (length > remaining)
                             length= remaining;
                         chunk= source.get(length);
-                        handler.foundContent(ctx.contentOffset, chunk);
+                        handler.gotContent(ctx.contentOffset, chunk);
                         ctx.contentOffset += chunk.length();
                     }
                     break;
@@ -359,7 +372,7 @@ public class HttpParser
                         else if (length > remaining)
                             length= remaining;
                         chunk= source.get(length);
-                        handler.foundContent(ctx.contentOffset, chunk);
+                        handler.gotContent(ctx.contentOffset, chunk);
                         ctx.contentOffset += chunk.length();
                         ctx.chunkOffset += chunk.length();
                     }
@@ -380,6 +393,7 @@ public class HttpParser
         public int contentOffset;
         public int chunkLength;
         public int chunkOffset;
+        public ByteArrayBuffer name = new ByteArrayBuffer(null,0,0,true);
 
         private String toString(Buffer buf)
         {
@@ -393,35 +407,30 @@ public class HttpParser
     public interface Handler
     {
         /**
-         * This is the method called by parser when the HTTP version is found
+         * This is the method called by parser when the HTTP request method or response version is found
          */
-        public abstract void foundField0(Buffer ref);
+        public abstract void gotMethodOrVersion(Buffer ref);
 
         /**
-         * This is the method called by parser when HTTP response code is found
+         * This is the method called by parser when HTTP request URI or response code is found
          */
-        public abstract void foundField1(Buffer ref);
+        public abstract void gotUriOrCode(Buffer ref);
 
         /**
-         * This is the method called by parser when HTTP response reason is found
+         * This is the method called by parser when HTTP request version or response reason is found
          */
-        public abstract void foundField2(Buffer ref);
+        public abstract void gotVersionOrReason(Buffer ref);
 
         /**
          * This is the method called by parser when A HTTP Header name is found
          */
-        public abstract void foundHttpHeader(Buffer ref);
-
-        /**
-         * This is the method called by parser when a HTTP Header value is found
-         */
-        public abstract void foundHttpValue(Buffer ref);
+        public abstract void gotHeader(Buffer name, Buffer value);
 
         public abstract void headerComplete();
 
         public abstract int getContentLength();
 
-        public abstract void foundContent(int offset, Buffer ref);
+        public abstract void gotContent(int offset, Buffer ref);
 
         public abstract void messageComplete(int contextLength);
 

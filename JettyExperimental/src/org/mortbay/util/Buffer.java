@@ -3,7 +3,7 @@ package org.mortbay.util;
  * @author gregw
  *
  */
-public interface Buffer
+public interface Buffer extends Cloneable
 {
     public final static boolean MUTABLE= true;
     byte[] array();
@@ -54,4 +54,6 @@ public interface Buffer
     
      boolean isMutable();
      Buffer immutable();
+     
+     Object clone();
 }

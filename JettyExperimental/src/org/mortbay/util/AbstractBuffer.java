@@ -12,7 +12,8 @@ public abstract class AbstractBuffer implements Buffer
     private int _offset;
     private int _limit;
     private boolean _mutable;
-
+    private String _string;
+    private int _hash;
     private ByteArrayBuffer _subBuffer;
 
     /**
@@ -24,11 +25,19 @@ public abstract class AbstractBuffer implements Buffer
         _mutable=mutable;
     }
 
+    /* ------------------------------------------------------------------------------- */
+    /**
+     * @see org.mortbay.util.Buffer#offset()
+     */
     public int offset()
     {
         return _offset;
     }
 
+    /* ------------------------------------------------------------------------------- */
+    /**
+     * @see org.mortbay.util.Buffer#offset(int)
+     */
     public void offset(int newOffset)
     {
         if (!_mutable)
@@ -203,6 +212,83 @@ public abstract class AbstractBuffer implements Buffer
 
 	public String toString()
 	{
-		return new String(array(), offset(), length());
+		if (isMutable())
+			return new String(array(), offset(), length());
+		 if(_string==null)
+			_string=new String(array(), offset(), length());
+		return _string;
 	}
+	
+	
+    /* ------------------------------------------------------------------------------- */
+    /**
+     * @see java.lang.Object#clone()
+     */
+    public Object clone() 
+    {
+		byte[] bytes= new byte[limit() - offset()];
+		Portable.arraycopy(array(), offset(), bytes, 0, bytes.length);
+		ByteArrayBuffer view= 
+			new ByteArrayBuffer(array(), _offset, length(), !__MUTABLE);
+		return view;
+    }
+
+    /* ------------------------------------------------------------------------------- */
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    public boolean equals(Object obj)
+    {
+    	if (obj==null || !(obj instanceof Buffer))
+    		return false;
+    	Buffer b = (Buffer)obj;
+    	if (b.length()!=length())
+    		return false;
+    	for (int i=offset()+length();i-->offset();)
+    	{
+    		byte b1=peek(i);
+    		byte b2=b.peek(i);
+    		if (b1!=b2)
+    		{
+    			if ('a'<=b1&&b1<='z')
+    				b1=(byte) (b1-'a'+'A');
+				if ('a'<=b2&&b2<='z')
+					b2=(byte) (b2-'a'+'A');
+				if (b1!=b2)
+					return false;
+    		}
+    	}
+    	return true;
+    }
+
+    /* ------------------------------------------------------------------------------- */
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    public int hashCode()
+    {
+    	if (isMutable())
+    	{
+    		int hash=0;
+			for (int i=offset()+length();i-->offset();)
+			{
+				byte b=peek(i);
+				if ('a'>=b && b<='z')
+					b=(byte) (b-'a'+'A');
+				hash=31*hash+b;
+			}
+			return hash;
+    	}
+    	if (_hash==0)
+    	{
+			for (int i=offset()+length();i-->offset();)
+			{
+				byte b=peek(i);
+				if ('a'>=b && b<='z')
+					b=(byte) (b-'a'+'A');
+				_hash=31*_hash+b;	
+			}
+    	}
+    	return _hash;
+    }
 }
