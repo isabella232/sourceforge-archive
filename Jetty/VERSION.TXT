@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-4.1.3 - 24 October 2002
  + Fixed RolloverFileOutputStream without date.
  + Fixed SessionManager initialization
  + Added authenticator to admin.xml
