@@ -3,12 +3,12 @@
 // $Id$
 // ---------------------------------------------------------------------------
 
-package com.mortbay.webapps.jetty;
-import com.mortbay.HTML.Include;
-import com.mortbay.Util.Code;
-import com.mortbay.Util.IO;
-import com.mortbay.Util.Resource;
-import com.mortbay.Util.StringUtil;
+package org.mortbay.webapps.jetty;
+import org.mortbay.html.Include;
+import org.mortbay.util.Code;
+import org.mortbay.util.IO;
+import org.mortbay.util.Resource;
+import org.mortbay.util.StringUtil;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;

@@ -3,18 +3,18 @@
 // $Id$
 // ---------------------------------------------------------------------------
 
-package com.mortbay.webapps.jetty;
+package org.mortbay.webapps.jetty;
 
-import com.mortbay.HTML.Block;
-import com.mortbay.HTML.Composite;
-import com.mortbay.HTML.Element;
-import com.mortbay.HTML.Font;
-import com.mortbay.HTML.Link;
-import com.mortbay.HTML.Page;
-import com.mortbay.HTML.Table;
-import com.mortbay.HTTP.PathMap;
-import com.mortbay.Util.Code;
-import com.mortbay.Util.Log;
+import org.mortbay.html.Block;
+import org.mortbay.html.Composite;
+import org.mortbay.html.Element;
+import org.mortbay.html.Font;
+import org.mortbay.html.Link;
+import org.mortbay.html.Page;
+import org.mortbay.html.Table;
+import org.mortbay.http.PathMap;
+import org.mortbay.util.Code;
+import org.mortbay.util.Log;
 import java.util.ArrayList;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -56,7 +56,7 @@ public class JettyPage extends Page
         try
         {
             ResourceBundle index =
-                ResourceBundle.getBundle("com.mortbay.webapps.jetty.JettyIndex");
+                ResourceBundle.getBundle("org.mortbay.webapps.jetty.JettyIndex");
             
             String key=i+"."+j;
             String value=index.getString(key);    
@@ -178,7 +178,7 @@ public class JettyPage extends Page
         _table.cell().top();
         _table.cell().center();
 
-        _table.add("<A HREF=http://jetty.mortbay.com><IMG SRC=\""+context+"/images/powered.png\" WIDTH=140 HEIGHT=58 BORDER=0></A>\n");
+        _table.add("<A HREF=http://jetty.mortbay.org><IMG SRC=\""+context+"/images/powered.png\" WIDTH=140 HEIGHT=58 BORDER=0></A>\n");
 
         boolean para=true;
         // navigation
