@@ -1,8 +1,9 @@
 package org.mortbay.http;
 
-import org.mortbay.util.Portable;
-import org.mortbay.util.io.Buffer;
-import org.mortbay.util.io.ByteArrayBuffer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.io.Buffer;
+import org.mortbay.io.Portable;
 
 /* ------------------------------------------------------------------------------- */
 /** 
@@ -10,8 +11,10 @@ import org.mortbay.util.io.ByteArrayBuffer;
  * @version $Revision$
  * @author gregw
  */
-public class HttpParser
+public abstract class HttpParser
 {
+    private static Log log= LogFactory.getLog(HttpParser.class);
+
     // Terminal symbols.
     static final byte COLON= (byte)':';
     static final byte SEMI_COLON= (byte)';';
@@ -21,11 +24,13 @@ public class HttpParser
     static final byte TAB= 0x09;
 
     // States
-    public static final int STATE_START= -9;
-    public static final int STATE_FIELD0= -8;
-    public static final int STATE_SPACE1= -7;
-    public static final int STATE_FIELD1= -6;
-    public static final int STATE_SPACE2= -5;
+    public static final int STATE_START= -11;
+    public static final int STATE_FIELD0= -10;
+    public static final int STATE_SPACE1= -9;
+    public static final int STATE_FIELD1= -8;
+    public static final int STATE_SPACE2= -7;
+    public static final int STATE_END0= -6;
+    public static final int STATE_END1= -5;
     public static final int STATE_FIELD2= -4;
     public static final int STATE_HEADER= -3;
     public static final int STATE_HEADER_NAME= -2;
@@ -43,224 +48,241 @@ public class HttpParser
     public static final int NO_CONTENT= 0;
 
     /* ------------------------------------------------------------------------------- */
-    /** Constructor.
-     * 
+    protected int state= STATE_START;
+    protected byte eol;
+    protected int length;
+    protected int contentLength;
+    protected int contentPosition;
+    protected int chunkLength;
+    protected int chunkPosition;
+
+    /* ------------------------------------------------------------------------------- */
+    /** Constructor. 
      */
-    private HttpParser()
+    public HttpParser()
+    {}
+
+    /* ------------------------------------------------------------------------------- */
+    public int getState()
     {
+        return state;
+    }
+
+    /* ------------------------------------------------------------------------------- */
+    public String toString(Buffer buf)
+    {
+        return "state=" + state + " length=" + length + " buf=" + buf.hashCode();
     }
 
     /* ------------------------------------------------------------------------------- */
     /** parse.
      * @param handler
      * @param source
-     * @return
+     * @return parser state
      */
-    public static int parse(Handler handler, Buffer source)
+    public void parse(Buffer source)
     {
-        /* Initialize global variables. */
-        source.mark(-1);
-        Context ctx= new Context();
+        state= STATE_START;
 
-        // Parse stream
-        while (ctx.state != STATE_END)
-        {
-            parseBuffer(handler, source, ctx);
-            source.compact();
-            int filled= source.fill();
-            if (filled < 0 && ctx.state == STATE_EOF_CONTENT)
-            {
-                ctx.state= STATE_END;
-                handler.gotCompleteMessage(ctx.contentOffset);
-            }
-
-            if (filled <= 0)
-                break;
-        }
-
-        // Exception if we are not at a finishing state.
-        if (ctx.state != STATE_END)
-        {
-            Portable.throwIllegalState("Unexpected end of stream: " + source);
-        }
-
-        return ctx.state;
+        // continue parsing
+        while (state != STATE_END)
+            parseNext(source);
     }
 
+    /* ------------------------------------------------------------------------------- */
     /**
      * Method parseBuffer.
      * @param handler
      * @param buf
      * @param ctx
      */
-    protected static void parseBuffer(Handler handler, Buffer source, Context ctx)
+    public void parseNext(Buffer source)
     {
-        if (ctx == null)
-            ctx= new Context();
+		if (log.isTraceEnabled()) log.trace("parseNext s="+state+","+source.toDetailString());
+		
+        if (state == STATE_END)
+            state= STATE_START;
+
+        if (source.remaining() == 0)
+        {
+            source.compact();
+            int filled= source.fill();
+            if (filled < 0 && state == STATE_EOF_CONTENT)
+            {
+                state= STATE_END;
+                messageComplete(contentPosition);
+                return;
+            }
+        }
 
         byte ch;
 
         // Handler header
-        while (ctx.state < STATE_END && source.available() > 0)
+        while (state < STATE_END && source.remaining() > 0)
         {
             ch= source.get();
-            if (ctx.eol == CARRIAGE_RETURN && ch == LINE_FEED)
+            if (eol == CARRIAGE_RETURN && ch == LINE_FEED)
             {
-                ctx.eol= LINE_FEED;
+                eol= LINE_FEED;
                 continue;
             }
-            ctx.eol= 0;
+            eol= 0;
 
-            switch (ctx.state)
+            switch (state)
             {
                 case STATE_START :
                     if (ch > SPACE)
                     {
-                        source.markOffset();
-                        ctx.state= STATE_FIELD0;
+                        source.mark();
+                        state= STATE_FIELD0;
                     }
                     break;
 
                 case STATE_FIELD0 :
                     if (ch == SPACE)
                     {
-                        handler.gotMethodOrVersion(source.marked());
-                        ctx.state= STATE_SPACE1;
+                        foundField0(source.sliceFromMark());
+                        state= STATE_SPACE1;
+                        return;
                     }
                     else if (ch < SPACE)
                     {
-                    	Portable.throwNotSupported();
-                        ctx.state= STATE_END;
+                        throw new RuntimeException(toString(source));
                     }
                     break;
 
                 case STATE_SPACE1 :
                     if (ch > SPACE)
                     {
-                        source.markOffset();
-                        ctx.state= STATE_FIELD1;
+                        source.mark();
+                        state= STATE_FIELD1;
                     }
                     else if (ch < SPACE)
-                    	Portable.throwRuntime(ctx.toString(source));
+                        throw new RuntimeException(toString(source));
                     break;
 
                 case STATE_FIELD1 :
                     if (ch == SPACE)
                     {
-                        handler.gotUriOrCode(source.marked());
-                        ctx.state= STATE_SPACE2;
+                        foundField1(source.sliceFromMark());
+                        state= STATE_SPACE2;
+                        return;
                     }
                     else if (ch < SPACE)
-						Portable.throwRuntime(ctx.toString(source));
+                    {
+                        // HTTP/0.9
+                        foundField1(source.sliceFromMark());
+                        headerComplete();
+                        state= STATE_END;
+                        messageComplete(contentPosition);
+                        return;
+                    }
                     break;
 
                 case STATE_SPACE2 :
                     if (ch > SPACE)
                     {
-                        source.markOffset();
-                        ctx.state= STATE_FIELD2;
+                        source.mark();
+                        state= STATE_FIELD2;
                     }
                     else if (ch < SPACE)
-						Portable.throwRuntime(ctx.toString(source));
+                    {
+                        // HTTP/0.9
+                        headerComplete();
+                        state= STATE_END;
+                        messageComplete(contentPosition);
+                        return;
+                    }
                     break;
 
                 case STATE_FIELD2 :
                     if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                     {
-                        handler.gotVersionOrReason(source.marked());
-                        ctx.eol= ch;
-                        ctx.length=-1;
-                        ctx.state= STATE_HEADER;
+                        foundField2(source.sliceFromMark());
+                        eol= ch;
+                        state= STATE_HEADER;
+                        return;
                     }
                     break;
 
                 case STATE_HEADER :
                     if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                     {
-                    	if (ctx.length>0 && ctx.name.length()>0)
-                    	{
-                    		handler.gotHeader(ctx.name,source.marked(ctx.length));
-                    		ctx.name.clear();
-                    		ctx.length=-1;
-                    	}
-                    	
-                        ctx.contentLength= handler.gotCompleteHeader();
-                        ctx.contentOffset= 0;
-                        ctx.eol= ch;
-                        switch (ctx.contentLength)
+                        headerComplete();
+                        contentLength= getContentLength();
+                        contentPosition= 0;
+                        eol= ch;
+                        switch (contentLength)
                         {
                             case HttpParser.EOF_CONTENT :
-                                ctx.state= STATE_EOF_CONTENT;
+                                state= STATE_EOF_CONTENT;
                                 break;
                             case HttpParser.CHUNKED_CONTENT :
-                                ctx.state= STATE_CHUNKED_CONTENT;
+                                state= STATE_CHUNKED_CONTENT;
                                 break;
                             case HttpParser.NO_CONTENT :
-                                handler.gotCompleteMessage(ctx.contentOffset);
-                                ctx.state= STATE_END;
+                                state= STATE_END;
+                                messageComplete(contentPosition);
                                 break;
                             default :
-                                ctx.state= STATE_CONTENT;
+                                state= STATE_CONTENT;
                                 break;
                         }
+                        return;
                     }
-                    else if (ch == SPACE || ch == TAB)
+                    else if (ch == COLON || ch == SPACE || ch == TAB)
                     {
-                        ctx.state= STATE_HEADER_VALUE;
+                        length= -1;
+                        state= STATE_HEADER_VALUE;
                     }
                     else
                     {
-						if (ctx.name.length()>0)
-						{
-							if (ctx.length>=0)
-								handler.gotHeader(ctx.name,source.marked(ctx.length));
-							else
-								handler.gotHeader(ctx.name,null);
-						} 
-						ctx.name.clear();
-                        ctx.length= 1;
-                        source.markOffset();
-                        ctx.state= STATE_HEADER_NAME;
+                        length= 1;
+                        source.mark();
+                        state= STATE_HEADER_NAME;
                     }
                     break;
 
                 case STATE_HEADER_NAME :
                     if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                     {
-                        if (ctx.length > 0)
-                        {
-                        	ctx.name.mimic(source.marked(ctx.length));
-                        	ctx.length=-1;
-                        }
-                        ctx.eol= ch;
-                        ctx.state= STATE_HEADER;
+                        if (length > 0)
+                            foundHttpHeader(source.sliceFromMark(length));
+                        eol= ch;
+                        state= STATE_HEADER;
+                        return;
                     }
                     else if (ch == COLON)
                     {
-                        if (ctx.length > 0)
-							ctx.name.mimic(source.marked(ctx.length));
-                        ctx.length= -1;
-                        ctx.state= STATE_HEADER_VALUE;
+                        if (length > 0)
+                            foundHttpHeader(source.sliceFromMark(length));
+                        length= -1;
+                        state= STATE_HEADER_VALUE;
+                        return;
                     }
                     else if (ch != SPACE && ch != TAB)
                     {
-                        if (ctx.length == -1)
-                            source.markOffset();
-                        ctx.length= source.offset() - source.mark();
+                        if (length == -1)
+                            source.mark();
+                        length= source.position() - source.markValue();
                     }
                     break;
 
                 case STATE_HEADER_VALUE :
                     if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                     {
-                        ctx.eol= ch;
-                        ctx.state= STATE_HEADER;
+                        if (length > 0)
+                            foundHttpValue(source.sliceFromMark(length));
+
+                        eol= ch;
+                        state= STATE_HEADER;
+                        return;
                     }
                     else if (ch != SPACE && ch != TAB)
                     {
-                        if (ctx.length == -1)
-                            source.markOffset();
-                        ctx.length= source.offset() - source.mark();
+                        if (length == -1)
+                            source.mark();
+                        length= source.position() - source.markValue();
                     }
                     break;
             }
@@ -268,52 +290,52 @@ public class HttpParser
 
         // Handle content
         Buffer chunk;
-        while (ctx.state > STATE_END && source.available() > 0)
-        {	
-            if (ctx.eol == CARRIAGE_RETURN && source.peek() == LINE_FEED)
+        while (state > STATE_END && source.remaining() > 0)
+        {
+            if (eol == CARRIAGE_RETURN && source.peek() == LINE_FEED)
             {
-                ctx.eol= source.get();
+                eol= source.get();
                 continue;
             }
-            ctx.eol= 0;
+            eol= 0;
 
-            switch (ctx.state)
+            switch (state)
             {
                 case STATE_EOF_CONTENT :
-                    chunk= source.get(-1);
-                    handler.gotContent(ctx.contentOffset, chunk);
-                    ctx.contentOffset += chunk.length();
-                    break;
+                    chunk= source.getBuffer(-1);
+                    foundContent(contentPosition, chunk);
+                    contentPosition += chunk.remaining();
+                    return;
 
                 case STATE_CONTENT :
                     {
-                        int length= source.available();
-                        int remaining= ctx.contentLength - ctx.contentOffset;
+                        int length= source.remaining();
+                        int remaining= contentLength - contentPosition;
                         if (remaining == 0)
                         {
-                            ctx.state= STATE_END;
-                            handler.gotCompleteMessage(ctx.contentOffset);
-                            break;
+                            state= STATE_END;
+                            messageComplete(contentPosition);
+                            return;
                         }
                         else if (length > remaining)
                             length= remaining;
-                        chunk= source.get(length);
-                        handler.gotContent(ctx.contentOffset, chunk);
-                        ctx.contentOffset += chunk.length();
+                        chunk= source.getBuffer(length);
+                        foundContent(contentPosition, chunk);
+                        contentPosition += chunk.remaining();
                     }
-                    break;
+                    return;
 
                 case STATE_CHUNKED_CONTENT :
                     ch= source.peek();
                     if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
-                        ctx.eol= source.get();
+                        eol= source.get();
                     else if (ch <= SPACE)
                         source.get();
                     else
                     {
-						ctx.chunkLength=0;
-						ctx.chunkOffset=0;
-                        ctx.state= STATE_CHUNK_SIZE;
+                        chunkLength= 0;
+                        chunkPosition= 0;
+                        state= STATE_CHUNK_SIZE;
                     }
                     break;
 
@@ -321,114 +343,125 @@ public class HttpParser
                     ch= source.get();
                     if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                     {
-                        ctx.eol= ch;
-						if (ctx.chunkLength==0)
-						{
-							ctx.state=STATE_END;
-							handler.gotCompleteMessage(ctx.contentOffset);
-						}
-						else
-							ctx.state= STATE_CHUNK;
+                        eol= ch;
+                        if (chunkLength == 0)
+                        {
+                            state= STATE_END;
+                            messageComplete(contentPosition);
+                            return;
+                        }
+                        else
+                            state= STATE_CHUNK;
                     }
                     else if (ch <= SPACE || ch == SEMI_COLON)
-                        ctx.state= STATE_CHUNK_PARAMS;
+                        state= STATE_CHUNK_PARAMS;
                     else if (ch >= '0' && ch <= '9')
-                        ctx.chunkLength= ctx.chunkLength * 16 + (ch - '0');
+                        chunkLength= chunkLength * 16 + (ch - '0');
                     else if (ch >= 'a' && ch <= 'f')
-                        ctx.chunkLength= ctx.chunkLength * 16 + (10+ch - 'a');
+                        chunkLength= chunkLength * 16 + (10 + ch - 'a');
                     else if (ch >= 'A' && ch <= 'F')
-                        ctx.chunkLength= ctx.chunkLength * 16 + (10+ch - 'A');
+                        chunkLength= chunkLength * 16 + (10 + ch - 'A');
                     else
                         Portable.throwRuntime("bad chunk char: " + ch);
-                        
+
                     break;
 
                 case STATE_CHUNK_PARAMS :
                     ch= source.get();
                     if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                     {
-                        ctx.eol= ch;
-                        if (ctx.chunkLength==0)
+                        eol= ch;
+                        if (chunkLength == 0)
                         {
-                        	ctx.state=STATE_END;
-                        	handler.gotCompleteMessage(ctx.contentOffset);
+                            state= STATE_END;
+                            messageComplete(contentPosition);
+                            return;
                         }
                         else
-	                        ctx.state= STATE_CHUNK;
+                            state= STATE_CHUNK;
                     }
                     break;
 
                 case STATE_CHUNK :
                     {
-                        int length= source.available();
-                        int remaining= ctx.chunkLength - ctx.chunkOffset;
+                        int length= source.remaining();
+                        int remaining= chunkLength - chunkPosition;
                         if (remaining == 0)
                         {
-                            ctx.state= STATE_CHUNKED_CONTENT;
+                            state= STATE_CHUNKED_CONTENT;
                             break;
                         }
                         else if (length > remaining)
                             length= remaining;
-                        chunk= source.get(length);
-                        handler.gotContent(ctx.contentOffset, chunk);
-                        ctx.contentOffset += chunk.length();
-                        ctx.chunkOffset += chunk.length();
+                        chunk= source.getBuffer(length);
+                        foundContent(contentPosition, chunk);
+                        contentPosition += chunk.remaining();
+                        chunkPosition += chunk.remaining();
                     }
-                    break;
+                    return;
             }
         }
     }
 
     /**
-     * @author gregw
+     * This is the method called by parser when the HTTP version is found
      */
-    protected static class Context
+    protected void foundField0(Buffer ref)
     {
-        public int state= STATE_START;
-        public byte eol;
-        public int length;
-        public int contentLength;
-        public int contentOffset;
-        public int chunkLength;
-        public int chunkOffset;
-        public ByteArrayBuffer name = new ByteArrayBuffer(null,0,0,true);
-
-        private String toString(Buffer buf)
-        {
-        	return "state="+state+" length="+length;
-        }
+		if(log.isTraceEnabled()) log.trace("foundField0:" + ref.toDetailString());
     }
 
     /**
-     * @author gregw
+     * This is the method called by parser when HTTP response code is found
      */
-    public interface Handler
+    protected void foundField1(Buffer ref)
     {
-        /**
-         * This is the method called by parser when the HTTP request method or response version is found
-         */
-        public abstract void gotMethodOrVersion(Buffer ref);
-
-        /**
-         * This is the method called by parser when HTTP request URI or response code is found
-         */
-        public abstract void gotUriOrCode(Buffer ref);
-
-        /**
-         * This is the method called by parser when HTTP request version or response reason is found
-         */
-        public abstract void gotVersionOrReason(Buffer ref);
-
-        /**
-         * This is the method called by parser when A HTTP Header name is found
-         */
-        public abstract void gotHeader(Buffer name, Buffer value);
-
-        public abstract int gotCompleteHeader();
-
-        public abstract void gotContent(int offset, Buffer ref);
-
-        public abstract void gotCompleteMessage(int contextLength);
-
+		if(log.isTraceEnabled()) log.trace("foundField1:" + ref.toDetailString());
     }
+
+    /**
+     * This is the method called by parser when HTTP response reason is found
+     */
+    protected void foundField2(Buffer ref)
+    {
+		if(log.isTraceEnabled()) log.trace("foundField2:" + ref.toDetailString());
+    }
+
+    /**
+     * This is the method called by parser when A HTTP Header name is found
+     */
+    protected void foundHttpHeader(Buffer ref)
+    {
+		if(log.isTraceEnabled()) log.trace("foundHttpHeader:" + ref.toDetailString());
+    }
+
+    /**
+     * This is the method called by parser when a HTTP Header value is found
+     */
+    protected void foundHttpValue(Buffer ref)
+    {
+		if(log.isTraceEnabled()) log.trace("foundHttpValue:" + ref.toDetailString());
+    }
+
+    protected void headerComplete()
+    {
+		log.trace("headerComplete:");
+    }
+
+    protected int getContentLength()
+    {
+		log.trace("getContentLength:");
+    	return 0;
+    }
+
+    protected void foundContent(int index, Buffer ref)
+    {
+        if(log.isTraceEnabled()) log.trace("foundContent:" + index+","+ref.toDetailString());
+    }
+
+    protected void messageComplete(int contextLength)
+    {
+        log.trace("messageComplete:" + contextLength);
+    }
+
 }

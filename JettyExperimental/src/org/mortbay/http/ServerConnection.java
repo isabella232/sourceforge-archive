@@ -7,8 +7,8 @@
  
 package org.mortbay.http;
 
-import org.mortbay.util.io.Buffer;
-import org.mortbay.util.io.BufferUtil;
+import org.mortbay.io.BufferUtil;
+import org.mortbay.io.Buffer;
 
 /* ------------------------------------------------------------------------------- */
 /** 
@@ -25,7 +25,7 @@ public class ServerConnection
 	private int _httpVersion;
 	private int _contentLength;
 
-	private class RequestParser implements HttpParser.Handler
+	private class RequestParser extends HttpParser
 	{        
         /* ------------------------------------------------------------------------------- */
         /**
@@ -44,7 +44,7 @@ public class ServerConnection
          */
         public void gotUriOrCode(Buffer ref)
         {
-        	_uri=(Buffer)(ref.clone()); 
+        	_uri=(Buffer)(ref.duplicate()); // TODO 
         }
 
         /* ------------------------------------------------------------------------------- */
@@ -54,14 +54,14 @@ public class ServerConnection
         public void gotVersionOrReason(Buffer ref)
         {
         	_httpVersion=9;
-        	if (ref.length()>0)
+        	if (ref.remaining()>0)
         	{
         		_httpVersion=10;
-        		if (ref.length()==8)
+        		if (ref.remaining()==8)
         		{
         			_httpVersion+=
-        				(ref.peek(ref.offset()+5)-'0')*10+
-        				(ref.peek(ref.offset()+7)-'0');
+        				(ref.get(ref.position()+5)-'0')*10+
+        				(ref.get(ref.position()+7)-'0');
         			if (_httpVersion<10 || _httpVersion>=100)
         				_httpVersion=10;
         		}
@@ -77,7 +77,7 @@ public class ServerConnection
         	int header = HttpHeader.CACHE.lookupIndex(name);
         	switch(header)
         	{
-        		case HttpHeader.CONTENT_LENGTH_INDEX:
+        		case HttpHeader.__CONTENT_LENGTH:
         			_contentLength=BufferUtil.toInt(val);
         	}
         	
