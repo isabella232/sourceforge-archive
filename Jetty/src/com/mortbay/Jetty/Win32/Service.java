@@ -96,10 +96,7 @@ public class Service
                 {
                     try
                     {
-                        Server server = new Server();
-                        Resource config = Resource.newResource((String)_configs.get(i));
-                        XmlConfiguration xml=new XmlConfiguration(config.getURL());
-                        xml.configure(server);
+                        Server server = new Server((String)_configs.get(i));
                         _servers.add(server);
                     }
                     catch(Exception e)

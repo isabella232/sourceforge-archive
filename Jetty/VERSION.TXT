@@ -24,6 +24,7 @@ Jetty-3.1.rc6 - 10 Jul 2001
  + RequestDispatch.forward() uses normal HandlerContext.handle() path if possible.
  + Cleaned up destroy handling of listeners and contexts.
  + Removed getConfiguration from LifeCycleThread to avoid JMX clash.
+ + Cleaned up Win32 Service server creation.
 
 Jetty-3.1.rc5 - 1 May 2001
  + Added build target for mini.jetty.jar - see README.
