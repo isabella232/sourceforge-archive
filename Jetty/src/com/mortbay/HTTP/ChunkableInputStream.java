@@ -43,40 +43,65 @@ public class ChunkableInputStream extends FilterInputStream
     }
     
     /* ------------------------------------------------------------ */
+    /** Get the raw stream.
+     * A stream without filters or chunking is returned. This stream
+     * may still be buffered and uprocessed bytes may be in the buffer.
+     * @return Raw InputStream.
+     */
+    public InputStream getRawStream()
+    {
+        return _realIn;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Get chunking mode 
      */
-    public boolean getChunking()
+    public boolean isChunking()
     {
         return _chunking;
     }
     
     /* ------------------------------------------------------------ */
-    /** Set chunking mode 
-     * @param on Chunk if this is true.
+    /** Set chunking mode.
+     * Chunking can only be turned off with a call to resetStream().
+     * @exception IllegalStateException Checking cannot be set if
+     * a content length has been set.
      */
-    public synchronized void setChunking(boolean on)
+    public synchronized void setChunking()
+        throws IllegalStateException
     {
-        if (on)
-        {
-            if (_realIn.getByteLimit()>=0)
-                throw new IllegalStateException("Has Content-Length");
-            if (_deChunker==null)
-                _deChunker=new DeChunker();
-            in=_deChunker;
-        }
-        else
-        {
-            if (_deChunker._chunkSize>0)
-                throw new IllegalStateException("Within Chunk");
-            in=_realIn;
-            _filters=0;
-        }
+        if (_realIn.getByteLimit()>=0)
+            throw new IllegalStateException("Has Content-Length");
+        if (_deChunker==null)
+            _deChunker=new DeChunker();
+        in=_deChunker;
         
-        _chunking=on;
-        if (_deChunker!=null)
-            _deChunker._footer=null;
+        _chunking=true;
+        _deChunker._footer=null;
     }
 
+    /* ------------------------------------------------------------ */
+    /** Reset the stream.
+     * Turn chunking off and disable all filters.
+     * @exception IllegalStateException The stream cannot be reset if
+     * there is some unread chunked input or a content length greater
+     * than zero remaining.
+     */
+    public synchronized void resetStream()
+        throws IllegalStateException
+    {
+        if ((_deChunker!=null && _deChunker._chunkSize>0) ||
+            _realIn.getByteLimit()>0)
+            throw new IllegalStateException("Unread input");
+        if (Code.verbose())
+            Code.debug("resetStream()");
+        in=_realIn;
+        _filters=0;
+        if (_deChunker!=null)
+            _deChunker._footer=null;
+        _chunking=false;
+        _realIn.setByteLimit(-1);
+    }
     
     /* ------------------------------------------------------------ */
     /** Insert FilterInputStream.
@@ -132,7 +157,6 @@ public class ChunkableInputStream extends FilterInputStream
             throw new IllegalStateException("Chunking or filters");
         return _realIn.readLine(maxLen);
     }
-    
 
     /* ------------------------------------------------------------ */
     public HttpFields getFooter()
@@ -219,7 +243,6 @@ public class ChunkableInputStream extends FilterInputStream
         public void close()
             throws IOException
         {
-            _realIn.close();
             _chunkSize=-1;
         }
  
@@ -293,4 +316,3 @@ public class ChunkableInputStream extends FilterInputStream
         }
     };
 };
-

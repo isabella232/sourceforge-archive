@@ -37,7 +37,7 @@ public class TestHarness
             
             fin= new FileInputStream("TestData/test.chunkIn");
             cin = new ChunkableInputStream(fin);
-            cin.setChunking(true);
+            cin.setChunking();
             test.checkEquals(cin.read(),'a',"Read 1st char");
             test.checkEquals(cin.read(),'b',"Read cont char");
             test.checkEquals(cin.read(),'c',"Read next chunk char");
@@ -87,10 +87,10 @@ public class TestHarness
         try{
             FileOutputStream fout = new FileOutputStream("TestData/tmp.chunkOut");
             ChunkableOutputStream cout = new ChunkableOutputStream(fout);
-            cout.setChunking(true);
+            cout.setChunking();
             
             cout.write("Reset Output".getBytes());
-            cout.reset();
+            cout.resetBuffer();
             
             cout.flush();
             cout.write('a');
@@ -113,7 +113,7 @@ public class TestHarness
             
             FileInputStream ftmp= new FileInputStream("TestData/tmp.chunkOut");
             ChunkableInputStream cin = new ChunkableInputStream(ftmp);
-            cin.setChunking(true);
+            cin.setChunking();
 
             test.checkEquals(cin.read(),'a',"a in 1");
             byte[] b = new byte[100];
@@ -152,7 +152,7 @@ public class TestHarness
             FileOutputStream fout =
                 new FileOutputStream("TestData/tmp.gzip");
             ChunkableOutputStream cout = new ChunkableOutputStream(fout);
-            cout.setChunking(true);
+            cout.setChunking();
             
             cout.insertFilter(java.util.zip.GZIPOutputStream.class
                               .getConstructor(cout.__filterArg),null);
@@ -166,7 +166,7 @@ public class TestHarness
             
             FileInputStream fin= new FileInputStream("TestData/tmp.gzip");
             ChunkableInputStream cin = new ChunkableInputStream(fin);
-            cin.setChunking(true);
+            cin.setChunking();
             cin.insertFilter(java.util.zip.GZIPInputStream.class
                               .getConstructor(cin.__filterArg),null);
             
@@ -358,6 +358,8 @@ public class TestHarness
             httpFields();
             httpRequest();
             //pathMap();
+
+            TestRFC2616.test();
         }
         catch(Throwable e)
         {

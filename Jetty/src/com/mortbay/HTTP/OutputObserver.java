@@ -6,6 +6,7 @@
 package com.mortbay.HTTP;
 
 import com.mortbay.Util.Code;
+import java.io.IOException;
 
 /* ------------------------------------------------------------ */
 /** Observer output events.
@@ -17,11 +18,18 @@ import com.mortbay.Util.Code;
 public interface OutputObserver
 {
     public final static int
-        FIRST_WRITE=0,
-        RESET_BUFFER=1,
-        COMMITING=2,
-        COMMITED=3,
-        CLOSING=4,
-        CLOSED=5;
-    void outputNotify(ChunkableOutputStream out, int action);
+        __FIRST_WRITE=0,
+        __RESET_BUFFER=1,
+        __COMMITING=2,
+        __COMMITED=3,
+        __CLOSING=4,
+        __CLOSED=5;
+    
+    /* ------------------------------------------------------------ */
+    /** XXX 
+     * @param out 
+     * @param action 
+     */
+    void outputNotify(ChunkableOutputStream out, int action)
+        throws IOException;
 };

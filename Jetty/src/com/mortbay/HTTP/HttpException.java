@@ -31,5 +31,12 @@ public class HttpException extends IOException
         super(message);
         _code=code;
     }
-    
+
+    public String toString()
+    {
+        String message=getMessage();
+        if (message==null)
+            message=(String)HttpResponse.__statusMsg.get(new Integer(_code));
+        return "HttpException("+_code+","+message+")";
+    }
 };

@@ -87,16 +87,29 @@ public class Test
         reportBuf.append('\n');
     }
     
+    
     /*-------------------------------------------------------------------*/
     /** Check that string contains a substring
-     *  @param b        Boolean to check
-     *  @param check    Description of this check
+     *  @return Index of substring
      */
-    public void checkContains(String string, String subString, String check)
+    public int checkContains(String string, String subString, String check)
     {
+        return checkContains(string,0,subString,check);
+    }
+    
+    /*-------------------------------------------------------------------*/
+    /** Check that string contains a substring
+     *  @return Index of substring
+     */
+    public int checkContains(String string,
+                             int offset,
+                             String subString, String check)
+    {
+        int index=-1;
         reportBuf.append(testCase+" : "+check+" - ");
         if ((string==null && subString==null)
-            || (string!=null && (subString==null || string.indexOf(subString)>=0)))
+            || (string!=null && (subString==null ||
+                                 (index=string.indexOf(subString,offset))>=0)))
         {
             reportBuf.append(pass);
             Code.debug(check," OK");
@@ -113,6 +126,7 @@ public class Test
             Code.debug(check," FAILED");
         }
         reportBuf.append('\n');
+        return index;
     }
     
  

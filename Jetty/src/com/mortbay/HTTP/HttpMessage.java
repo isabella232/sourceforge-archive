@@ -13,7 +13,7 @@ import java.text.*;
 
 
 // ====================================================================
-public class HttpMessage
+abstract public class HttpMessage
 {
     /* ------------------------------------------------------------ */
     /** Message States
@@ -25,6 +25,15 @@ public class HttpMessage
         __MSG_SENDING=3,   // Headers sent.
         __MSG_SENT=4;      // Entity and footers sent.
 
+    public final static String[] __state =
+    {
+        "EDITABLE",
+        "BAD",
+        "RECEIVED",
+        "SENDING",
+        "SENT"
+    };
+    
     /* ------------------------------------------------------------ */
     public final static String __HTTP_0_9 ="HTTP/0.9";
     public final static String __HTTP_1_0 ="HTTP/1.0";
@@ -36,7 +45,7 @@ public class HttpMessage
     protected HttpFields _header;
     protected Map _cookies;
     protected HttpFields _footer;
-    protected Connection _connection;
+    protected HttpConnection _connection;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -49,23 +58,45 @@ public class HttpMessage
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
-    protected HttpMessage(Connection connection)
+    protected HttpMessage(HttpConnection connection)
     {
         _header=new HttpFields();
         _connection=connection;
     }
+
+
+    /* ------------------------------------------------------------ */
+    /** XXX
+     * @return 
+     */
+    public HttpConnection getConnection()
+    {
+        return _connection;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** XXX
+     * @return 
+     */
+    public ChunkableInputStream getInputStream()
+    {
+        if (_connection==null)
+            return null;
+        return _connection.getInputStream();
+    }
     
     /* ------------------------------------------------------------ */
-    /** Destroy the header.
-     * Help the garbage collector by nulling everything that we can.
+    /** XXX
+     * @return 
      */
-    public void destroy()
+    public ChunkableOutputStream getOutputStream()
     {
-        _header.destroy();
-        _footer.destroy();
-        _header=null;
-        _footer=null;
+        if (_connection==null)
+            return null;
+        return _connection.getOutputStream();
     }
+    
+
     
     /* ------------------------------------------------------------ */
     /** Get the message state.
@@ -142,7 +173,9 @@ public class HttpMessage
             return _footer;
         }
         
-        throw new IllegalStateException("Can't set fields in "+_state);
+        throw new IllegalStateException("Can't set fields in "+
+                                        __state[_state]+
+                                        " for "+_version);
     }
     
 
@@ -278,6 +311,22 @@ public class HttpMessage
     {
         setFields().putCurrentTime(name);
     }
+
+    /* ------------------------------------------------------------ */
+    /** Remove a field.
+     * If the message is editable, then a header field is removed. Otherwise
+     * if the message is sending and a HTTP/1.1 version, then a footer
+     * field is removed.
+     * @param name Name of field 
+     * @return Old value of field
+     * @exception IllegalStateException Not editable or sending 1.1
+     */
+    public String removeField(String name)
+        throws IllegalStateException
+    {
+        HttpFields fields=setFields();
+        return (String) fields.remove(name);
+    }
     
     /* ------------------------------------------------------------ */
     /** Set the request version 
@@ -287,7 +336,8 @@ public class HttpMessage
     public void setVersion(String version)
     {
         if (_state!=__MSG_EDITABLE)
-            throw new IllegalStateException("Not EDITABLE");
+            throw new IllegalStateException(__state[_state]+
+                                            "is not EDITABLE");
         
         version=version.toUpperCase();
         if (version.equals(__HTTP_1_1))
@@ -297,28 +347,6 @@ public class HttpMessage
         else
             throw new IllegalArgumentException("Unknown version");
     }
-
-
-    /* ------------------------------------------------------------ */
-    /** XXX
-     * @param contentEncoding 
-     * @exception HttpException 
-     */
-    public void checkEncodings(boolean contentEncoding)
-        throws HttpException
-    {
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** XXX
-     * @param contentEncoding 
-     * @exception HttpException 
-     */
-    public void enableEncodings(boolean contentEncoding)
-        throws HttpException
-    {
-    }
-
     
     /* -------------------------------------------------------------- */
     /** Character Encoding.
@@ -348,7 +376,77 @@ public class HttpMessage
         return encoding;
     }
     
+    /* ------------------------------------------------------------ */
+    /** Destroy the header.
+     * Help the garbage collector by nulling everything that we can.
+     */
+    public void destroy()
+    {
+        if (_header!=null)
+            _header.destroy();
+        if (_footer!=null)
+            _footer.destroy();
+        _header=null;
+        _footer=null;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** XXX 
+     * @param out 
+     */
+    abstract void writeHeader(OutputStream out)
+        throws IOException;
     
+    /* ------------------------------------------------------------ */
+    /** Convert to String.
+     * The message header is converted to a String.
+     * @return String
+     */
+    public synchronized String toString()
+    {
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+
+        int save_state=_state;
+        try{
+            _state=__MSG_EDITABLE;
+            writeHeader(bout);
+        }
+        catch(IOException e)
+        {
+            Code.warning(e);
+        }
+        finally
+        {
+            _state=save_state;
+        }
+        return bout.toString();
+    }
+
+    /* ------------------------------------------------------------ */
+    /** XXX 
+     */
+    public synchronized void completeSend()
+        throws IOException, IllegalStateException
+    {
+        ChunkableOutputStream out = getOutputStream();
+        out.flush();
+        
+        switch(_state)
+        {
+          case __MSG_EDITABLE:
+              writeHeader(out.getRawStream());
+              break;
+          case __MSG_BAD:
+              throw new IllegalStateException("BAD");
+          case __MSG_RECEIVED:
+              throw new IllegalStateException("RECEIVED");
+          case __MSG_SENDING:
+              break;
+          case __MSG_SENT:
+              break;
+        }
+        _state=__MSG_SENT;
+    }
 }
 
 

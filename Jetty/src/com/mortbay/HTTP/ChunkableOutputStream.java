@@ -53,8 +53,8 @@ public class ChunkableOutputStream extends FilterOutputStream
     byte[] _chunkSize;
     HttpFields _footer;
     boolean _committed;
-    boolean _noWrite;
-    ArrayList _filters;
+    boolean _written;
+    int _filters;
     ArrayList _observers;
     
     /* ------------------------------------------------------------ */
@@ -67,16 +67,26 @@ public class ChunkableOutputStream extends FilterOutputStream
         _buffer=(Buffer)out;
         _realOut=outputStream;
         _committed=false;
-        _noWrite=false;
+        _written=false;
     }
 
+    /* ------------------------------------------------------------ */
+    /** Get the raw stream.
+     * A stream without filters or chunking is returned.
+     * @return Raw InputStream.
+     */
+    public OutputStream getRawStream()
+    {
+        return _realOut;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Has any data been written to the stream.
      * @return True if write has been called.
      */
     public synchronized boolean isWritten()
     {
-        return !_noWrite;
+        return !_written;
     }
     
     /* ------------------------------------------------------------ */
@@ -121,21 +131,26 @@ public class ChunkableOutputStream extends FilterOutputStream
         out=_buffer=new Buffer(capacity);
     }
 
+    
     /* ------------------------------------------------------------ */
     /** Reset Buffered output.
      * If no data has been committed, the buffer output is discarded and
-     * the filters are reinitialized.
-     * @exception IllegalStateException 
+     * the filters may be reinitialized.
+     * @exception IllegalStateException
+     * @exception Problem with observer notification.
      */
-    public synchronized void reset()
-        throws IllegalStateException
+    public synchronized void resetBuffer()
+        throws IllegalStateException, IOException
     {
         if (_committed)
             throw new IllegalStateException("Output committed");
-        if (out!=_buffer)  // XXX need to re-install filters.
-            throw new IllegalStateException("Filter(s) installed");
 
-        // Shutdown filters 
+        if (Code.verbose())
+            Code.debug("resetBuffer()");
+        
+        // Shutdown filters without observation
+        ArrayList save_observers=_observers;
+        _observers=null;
         try
         {
             out.flush();
@@ -145,25 +160,18 @@ public class ChunkableOutputStream extends FilterOutputStream
         {
             Code.ignore(e);
         }
-        out=_buffer;
-        _buffer.reset();
+        finally
+        {
+            _observers=save_observers;
+        }
 
-        // reinstall filters
-        try
-        {
-            for (int i=0;_filters!=null && i<_filters.size();i++)
-            {
-                Constructor filter= (Constructor)_filters.get(i++);
-                Object[] args = (Object[])_filters.get(i);
-                insertFilter(filter,args);
-            }
-        }
-        catch(Exception e)
-        {
-            // Should not fail as they have been installed before.
-            Code.fail(e);
-        }
-        notify(OutputObserver.RESET_BUFFER);
+        // discard current buffer and set it to output
+        _buffer.reset();
+        out=_buffer;
+        _filters=0;
+        _written=false;
+        _committed=false;
+        notify(OutputObserver.__RESET_BUFFER);
     }
 
     /* ------------------------------------------------------------ */
@@ -179,11 +187,81 @@ public class ChunkableOutputStream extends FilterOutputStream
         _observers.add(observer);
     }
     
+    
+    /* ------------------------------------------------------------ */
+    /** Set chunking mode.
+     */
+    public synchronized void setChunking()
+        throws IOException
+    {
+        flush();
+        _chunkSize=new byte[16];
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Send the final chunk chunking mode.
+     * This also calls resetStream().
+     * @exception IOException 
+     * @exception IllegalStateException chunking not set
+     */
+    public synchronized void endChunking()
+        throws IOException,IllegalStateException
+    {
+        if (!isChunking())
+            throw new IllegalStateException("Not Chunking");
+        
+        if (Code.verbose())
+            Code.debug("endChunking()");
+        
+        flush();
+        
+        // send last chunk and revert to normal output
+        _realOut.write(__CHUNK_EOF_B);
+        if (_footer!=null)
+            _footer.write(_realOut);
+        else
+            _realOut.write(__CRLF_B);
+        _realOut.flush();
+        _chunkSize=null;
+        resetStream();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Reset the stream.
+     * Turn disable all filters.
+     * @exception IllegalStateException The stream cannot be
+     * reset if chunking is enabled.
+     */
+    public synchronized void resetStream()
+        throws IllegalStateException
+    {
+        if (isChunking())
+            throw new IllegalStateException("Chunking");
+        
+        if (Code.verbose())
+            Code.debug("resetStream()");
+        
+        _footer=null;
+        _committed=false;
+        _written=false;
+        _buffer.reset();
+        out=_buffer;    
+        _filters=0;
+    }
+    
+        
+    /* ------------------------------------------------------------ */
+    /** Get chunking mode 
+     */
+    public boolean isChunking()
+    {
+        return _chunkSize!=null;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Insert FilterOutputStream.
      * Place a Filtering OutputStream into this stream, but before the
-     * chunking stream.  If the reset() is called, new instances of
-     * the filters are automatically re-inserted.
+     * chunking stream.  
      * @param filter The Filter constructor.  It must take an OutputStream
      *             as the first arguement.
      * @param arg  Optional argument array to pass to filter constructor.
@@ -196,48 +274,21 @@ public class ChunkableOutputStream extends FilterOutputStream
                InvocationTargetException,
                IllegalAccessException
     {
-        if (_filters==null)
-            _filters=new ArrayList(4);
-        
         if (args==null || args.length<1)
             args=new Object[1];
         
         args[0]=out;
         out=(OutputStream)filter.newInstance(args);
-        _filters.add(filter);
-        _filters.add(args);
+        _filters++;
     }
 
-    
-    /* ------------------------------------------------------------ */
-    /** Set chunking mode.
-     * @param on 
-     */
-    public void setChunking(boolean on)
-        throws IOException
-    {
-        flush();
-        if (on)
-            _chunkSize=new byte[16];
-        else
-            _chunkSize=null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get chunking mode 
-     */
-    public boolean getChunking()
-    {
-        return _chunkSize!=null;
-    }
-    
     /* ------------------------------------------------------------ */
     /** Set the footer to send with a chunked close
      * @param footer 
      */
     public void setFooter(HttpFields footer)
     {
-        if (!getChunking())
+        if (!isChunking())
             throw new IllegalStateException("Not Chunking");
         _footer=footer;
     }
@@ -245,10 +296,10 @@ public class ChunkableOutputStream extends FilterOutputStream
     /* ------------------------------------------------------------ */
     public void write(int b) throws IOException
     {
-        if (!_noWrite)
+        if (!_written)
         {
-            _noWrite=false;
-            notify(OutputObserver.FIRST_WRITE);
+            _written=true;
+            notify(OutputObserver.__FIRST_WRITE);
         }
         
         out.write(b);
@@ -259,10 +310,10 @@ public class ChunkableOutputStream extends FilterOutputStream
     /* ------------------------------------------------------------ */
     public void write(byte b[]) throws IOException
     {
-        if (!_noWrite)
+        if (!_written)
         {
-            _noWrite=false;
-            notify(OutputObserver.FIRST_WRITE);
+            _written=true;
+            notify(OutputObserver.__FIRST_WRITE);
         }
         out.write(b);
         if (_buffer.isFull())
@@ -272,10 +323,10 @@ public class ChunkableOutputStream extends FilterOutputStream
     /* ------------------------------------------------------------ */
     public void write(byte b[], int off, int len) throws IOException
     {
-        if (!_noWrite)
+        if (!_written)
         {
-            _noWrite=false;
-            notify(OutputObserver.FIRST_WRITE);
+            _written=true;
+            notify(OutputObserver.__FIRST_WRITE);
         }
         out.write(b,off,len);
         if (_buffer.isFull())
@@ -289,7 +340,9 @@ public class ChunkableOutputStream extends FilterOutputStream
             out.flush();
         if (_buffer.size()>0)
         {
-            notify(OutputObserver.COMMITING);
+            if (!_committed)
+                notify(OutputObserver.__COMMITING);
+            
             if (_chunkSize!=null)
             {
                 String size = Integer.toString(_buffer.size(),16);
@@ -300,7 +353,6 @@ public class ChunkableOutputStream extends FilterOutputStream
                 _chunkSize[i++]=(byte)';';
                 _chunkSize[i++]=__CRLF_B[0];
                 _chunkSize[i++]=__CRLF_B[1];
-                _committed=true;
                 _realOut.write(_chunkSize,0,i);
                 _buffer.writeTo(_realOut);
                 _buffer.reset();
@@ -308,12 +360,14 @@ public class ChunkableOutputStream extends FilterOutputStream
             }
             else
             {
-                _committed=true;
                 _buffer.writeTo(_realOut);
                 _buffer.reset();
             }
             _realOut.flush();
-            notify(OutputObserver.COMMITED);
+            
+            if (!_committed)
+                notify(OutputObserver.__COMMITED);
+            _committed=true;
         }
     }
 
@@ -326,38 +380,26 @@ public class ChunkableOutputStream extends FilterOutputStream
     public synchronized void close()
         throws IOException
     {
+        // Are we already closed?
+        if (out==null)
+            return;
+
+        // Close
         try {
-            notify(OutputObserver.CLOSING);
+            notify(OutputObserver.__CLOSING);
             flush();
 
             // close filters
             out.close();
             out=null;
             flush();
-            out=_buffer;
             
             // If chunking
-            if (_chunkSize!=null)
-            {
-                // send last chunk and revert to normal output
-                _realOut.write(__CHUNK_EOF_B);
-                if (_footer!=null)
-                    _footer.write(_realOut);
-                else
-                    _realOut.write(__CRLF_B);
-                _realOut.flush();
-                _chunkSize=null;
-                _footer=null;
-                _committed=false;
-                _buffer.reset();
-                if (_filters!=null)
-                    _filters.clear();
-            }
+            if (isChunking())
+                endChunking();
             else
                 _realOut.close();
-            notify(OutputObserver.CLOSED);
-            if (_observers!=null)
-                _observers.clear();
+            notify(OutputObserver.__CLOSED);
         }
         catch (IOException e)
         {
@@ -371,21 +413,34 @@ public class ChunkableOutputStream extends FilterOutputStream
      * @param action the action.
      */
     private void notify(int action)
+        throws IOException
     {
         if (_observers!=null)
             for (int i=0;i<_observers.size();i++)
                 ((OutputObserver)_observers.get(i))
                     .outputNotify(this,action);
     }
+
+
+    /* ------------------------------------------------------------ */
+    public void println()
+        throws IOException
+    {
+        write("\n".getBytes());
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void println(String s)
+        throws IOException
+    {
+        write(s.getBytes());
+        write("\n".getBytes());
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void print(String s)
+        throws IOException
+    {
+        write(s.getBytes());
+    }
 }
-
-
-
-
-
-
-
-
-
-
-

@@ -12,7 +12,11 @@ rall: all
 #JAVAOPTIONS := 
 #JAVACOPTIONS :=
 TESTS := TestHarness.java
-EXCLUDECLASSES := TestHarness.class
+EXCLUDECLASSES := \
+	TestHarness.class \
+	TestRFC2616.class \
+	TestRFC2616$$TestConnection.class \
+
 ROOTNAME := com
 BINFILES := 
 CFGFILES := 

@@ -9,7 +9,12 @@ import java.io.*;
 import java.util.*;
 
 
-// ====================================================================
+/* ------------------------------------------------------------ */
+/** XXX
+ *
+ * @version 1.0 Thu Oct  7 1999
+ * @author Greg Wilkins (gregw)
+ */
 public class LineInput extends BufferedInputStream
 {
     /* ------------------------------------------------------------ */
@@ -263,8 +268,14 @@ public class LineInput extends BufferedInputStream
         if (_byteLimit==0)
             return -1;
         int b=in.read();
+        
         if (_byteLimit>0)
-            _byteLimit--;
+        {
+            if (b!=-1)
+                _byteLimit--;
+            else if (Code.debug())
+                Code.warning("Premature EOF");
+        }
         return b;
     }
  
@@ -277,8 +288,14 @@ public class LineInput extends BufferedInputStream
         if (len>_byteLimit && _byteLimit>=0)
             len=_byteLimit;
         len=in.read(b,0,len);
-        if (_byteLimit>0 && len>0)
-            _byteLimit-=len;
+        
+        if (_byteLimit>0) 
+        {
+            if (len>=0)
+                _byteLimit-=len;
+            else if (Code.debug())
+                Code.warning("Premature EOF");
+        }
         return len;
     }
  
@@ -290,8 +307,14 @@ public class LineInput extends BufferedInputStream
         if (len>_byteLimit && _byteLimit>=0)
             len=_byteLimit;
         len=in.read(b,off,len);
-        if (_byteLimit>0 && len>0)
-            _byteLimit-=len;
+        
+        if (_byteLimit>0) 
+        {
+            if (len>=0)
+                _byteLimit-=len;
+            else if (Code.debug())
+                Code.warning("Premature EOF");
+        }
         return len;
     }
     
@@ -301,10 +324,12 @@ public class LineInput extends BufferedInputStream
         if (n>_byteLimit)
             n=_byteLimit;
         n=in.skip(n);
-        _byteLimit-=n;
+        if (n>0)
+            _byteLimit-=n;
         return n;
     }
 };
+
 
 
 

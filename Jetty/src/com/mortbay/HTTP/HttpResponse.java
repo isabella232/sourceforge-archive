@@ -107,15 +107,20 @@ public class HttpResponse extends HttpMessage
     /** Constructor. 
      */
     public HttpResponse()
-    {}
+    {
+        _version=__HTTP_1_0;
+        _state=__MSG_EDITABLE;
+    }
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param connection 
      */
-    public HttpResponse(Connection connection)
+    public HttpResponse(HttpConnection connection)
     {
         super(connection);
+        _version=__HTTP_1_0;
+        _state=__MSG_EDITABLE;
     }
     
     /* -------------------------------------------------------------- */
@@ -149,14 +154,18 @@ public class HttpResponse extends HttpMessage
         throws IOException
     {
         if (_state!=__MSG_EDITABLE)
-            throw new IllegalStateException("Not MSG_EDITABLE");
-        
+            throw new IllegalStateException(__state[_state]+
+                                            " is not EDITABLE");
+
+        String status=_status+" ";
+        if (Code.verbose())
+            Code.debug("writeHeaders: ",status);
         _state=__MSG_BAD;
         synchronized(out)
         {
             out.write(_version.getBytes());
             out.write(' ');
-            out.write((_status+" ").getBytes());
+            out.write(status.getBytes());
             out.write(getReason().getBytes());
             out.write(HttpFields.__CRLF_B);
             if (_cookies!=null)
@@ -166,12 +175,10 @@ public class HttpResponse extends HttpMessage
         }
         _state=__MSG_SENDING;
     }
-
-    
     
       
     /* ------------------------------------------------------------- */
-    /**
+    /** Send Error Response.
      * Sends an error response to the client using the specified status
      * code and detail message.
      * @param code the status code
@@ -185,18 +192,17 @@ public class HttpResponse extends HttpMessage
         setStatus(code);
         setReason(reason);
 
-// XXX         out=getOutputStream();
-//          synchronized(out)
-//          {
-//              writeHeaders(out);
-//              out.write("<HTML>\n<HEAD>\n<TITLE>Error ".getBytes());
-//              out.write((code+"</TITLE>\n").getBytes());
-//              out.write("<BODY>\n<H2>HTTP ERROR: ".getBytes());
-//              out.write((code +" ").getbytes());
-//              out.write((reason + "</H2>\n").getbytes());       
-//              out.write("</BODY>\n</HTML>\n".getbytes());
-//              out.flush();
-//          }
+        ChunkableOutputStream out=getOutputStream();
+        synchronized(out)
+        {
+            out.print("<HTML>\n<HEAD>\n<TITLE>Error ");
+            out.print((code+"</TITLE>\n"));
+            out.print("<BODY>\n<H2>HTTP ERROR: ");
+            out.print((code +" "));
+            out.print((reason + "</H2>\n"));       
+            out.print("</BODY>\n</HTML>\n");
+            out.flush();
+        }
     }
       
     /* ------------------------------------------------------------- */

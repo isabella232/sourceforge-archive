@@ -17,16 +17,15 @@ public class HttpRequest extends HttpMessage
     /** Request METHODS
      */
     public static final String
-        OPTIONS="OPTIONS",
-        GET="GET",
-        HEAD="HEAD",
-        POST="POST",
-        PUT="PUT",
-        DELETE="DELETE",
-        TRACE="TRACE",
-        CONNECT="CONNECT",
-        MOVE="MOVE";
-
+        __OPTIONS="OPTIONS",
+        __GET="GET",
+        __HEAD="HEAD",
+        __POST="POST",
+        __PUT="PUT",
+        __DELETE="DELETE",
+        __TRACE="TRACE",
+        __CONNECT="CONNECT",
+        __MOVE="MOVE";
 
     /* ------------------------------------------------------------ */
     private String _method=null;
@@ -44,7 +43,7 @@ public class HttpRequest extends HttpMessage
     /** Constructor. 
      * @param connection 
      */
-    public HttpRequest(Connection connection)
+    public HttpRequest(HttpConnection connection)
     {
         super(connection);
     }
@@ -81,7 +80,6 @@ public class HttpRequest extends HttpMessage
         
         _state=__MSG_RECEIVED;
     }
-
     
     /* -------------------------------------------------------------- */
     /** Return the HTTP request line as it was received
@@ -90,7 +88,6 @@ public class HttpRequest extends HttpMessage
     {
         return _method+" "+_uri+" "+_version;
     }
-
     
     /* -------------------------------------------------------------- */
     /** Write the request header.
@@ -460,32 +457,6 @@ public class HttpRequest extends HttpMessage
         _uri= new URI(new String(buf,s3,e3-s3+1));
         
     }
-
-    /* ------------------------------------------------------------ */
-    /** Convert to String.
-     * The message header is converted to a String.
-     * @return String
-     */
-    public synchronized String toString()
-    {
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-
-        int save_state=_state;
-        try{
-            _state=__MSG_EDITABLE;
-            writeHeader(bout);
-        }
-        catch(IOException e)
-        {
-            Code.warning(e);
-        }
-        finally
-        {
-            _state=save_state;
-        }
-        return bout.toString();
-    }
-    
 
     /* ------------------------------------------------------------ */
     /** Destroy the request.

@@ -96,6 +96,7 @@ public class HttpFields extends HashMap
     public final static String __Cookie = "Cookie";
     public final static String __SetCookie = "Set-Cookie";
     public final static String __MimeVersion ="MIME-Version";
+    public final static String __Identity ="identity";
     
     /* ------------------------------------------------------------ */
     /** Fields Values
@@ -241,7 +242,7 @@ public class HttpFields extends HashMap
     /* -------------------------------------------------------------- */
     /**
      * Returns multiple values of a field, or null if not found.
-     * The case of the field name is ignored.
+     * Non quoted multiple spaces are replaced with a single space
      * @param name the case-insensitive field name
      */
     public List getValues(String name)
@@ -253,7 +254,7 @@ public class HttpFields extends HashMap
         List list = new ArrayList();
 
         QuotedStringTokenizer tok =
-            new QuotedStringTokenizer(v,", ",true,false);
+            new QuotedStringTokenizer(v,", \t",true,false);
         String value=null;
         boolean space=false;
         while (tok.hasMoreTokens())
@@ -265,7 +266,7 @@ public class HttpFields extends HashMap
                     list.add(value);
                 value=null;
             }
-            else if (" ".equals(token))
+            else if (" ".equals(token) || "\t".equals(token))
             {
                 space=(value!=null);
             }

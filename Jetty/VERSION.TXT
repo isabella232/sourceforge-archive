@@ -17,13 +17,12 @@ Jetty-3.0.A0
    + Cleanup of HttpRequest and decoupled from Servlet API
    + Cleanup and abstraction of ThreadPool.
    + ThreadedServer based on ThreadPool. 
+   + Cleanup of HttpResponse and decoupled from Servlet API
+   + Created RFC2616 test harness.
+   + Does gzip and deflate request transfer encodings
 
 
 TODO NEXT
-   + Input filters
-   + Listener
-   + Local Listener and connection
-   + HttpResponse
-   + content/transfer encoding/decoding
+   + content/transfer encoding
    + param decoding
    + cookies
