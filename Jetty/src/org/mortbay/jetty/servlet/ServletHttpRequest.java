@@ -25,10 +25,13 @@ import java.util.Map;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestWrapper;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUtils;
+import javax.servlet.http.HttpServletRequestWrapper;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpFields;
@@ -811,6 +814,34 @@ public class ServletHttpRequest
             getContextPath()+"+"+getServletPath()+"+"+getPathInfo()+"\n"+
             _httpRequest.toString();
     }
+
+
+    /* ------------------------------------------------------------ */
+    /** Unwrap a ServletRequest.
+     *
+     * @see javax.servlet.ServletRequestWrapper
+     * @see javax.servlet.http.HttpServletRequestWrapper
+     * @param request 
+     * @return The core ServletHttpRequest which must be the
+     * underlying request object 
+     */
+    public static ServletHttpRequest unwrap(ServletRequest request)
+    {
+        while (!(request instanceof ServletHttpRequest))
+        {
+            if (request instanceof ServletRequestWrapper)
+            {
+                ServletRequestWrapper wrapper =
+                    (ServletRequestWrapper)request;
+                request=wrapper.getRequest();
+            }
+            else
+                throw new IllegalArgumentException("Does not wrap ServletHttpRequest");
+        }
+
+        return (ServletHttpRequest)request;
+    }
+    
 }
 
 

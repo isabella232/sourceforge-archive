@@ -29,8 +29,14 @@ import org.mortbay.util.MultiMap;
 
 
 /* ------------------------------------------------------------ */
-/** 
- * @see
+/** Filter Handler.
+ * Determine and call chains of Filters as configured by the
+ * WebApplicationContext.
+ * This handler currently implements optional brute force caching of
+ * FilterChains. Work (XXX) is needed to either limit the size of the cache
+ * or more intelligently merge entries in the cache.
+ *
+ * @since Servlet 2.3
  * @version  $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -44,6 +50,29 @@ public class FilterHandler
     private Map _filterMap=new HashMap();
     private List _pathFilters=new ArrayList();
     private MultiMap _servletFilterMap=new MultiMap();
+
+    private boolean _cacheFilterChains=true;
+    private Map _chainMap;
+
+    /* ------------------------------------------------------------ */
+    public boolean getCacheFilterChains()
+    {
+        return _cacheFilterChains;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set Caching of FilterChains.
+     * FilterChains are expensive on processing to calculate and moderately
+     * expensive on memory to cache them.   The default is to cache FilterChains.
+     * @param cache  If true a
+     * FilterChain will be cached for every path presented to this
+     * handler. If false FilterChains will be calculated for each
+     * request to this handler.
+     */
+    public void setCacheFilterChains(boolean cache)
+    {
+        _cacheFilterChains=cache;
+    }
     
     /* ------------------------------------------------------------ */
     FilterHolder newFilterHolder(String name, String className)
@@ -99,7 +128,7 @@ public class FilterHandler
 
     
     /* ------------------------------------------------------------ */
-    public void start()
+    public synchronized void start()
         throws Exception
     {
         super.start();        
@@ -107,6 +136,9 @@ public class FilterHandler
         _handlerIndex = _httpContext.getHttpHandlerIndex(this);
         _servletHandler = (ServletHandler)
             _httpContext.getHttpHandler(ServletHandler.class);
+
+        if (_cacheFilterChains)
+            _chainMap=new HashMap();
         
         // Start filters
         Iterator iter = _filterMap.values().iterator();
@@ -121,9 +153,11 @@ public class FilterHandler
     }
     
     /* ------------------------------------------------------------ */
-    public void stop()
+    public synchronized void stop()
         throws  InterruptedException
     {
+        super.stop();
+        
         // Stop filters
         Iterator iter = _filterMap.values().iterator();
         while (iter.hasNext())
@@ -131,7 +165,11 @@ public class FilterHandler
             FilterHolder holder = (FilterHolder)iter.next();
             holder.stop();
         }
-        super.stop();
+        if (_chainMap!=null)
+        {
+            _chainMap.clear();
+            _chainMap=null;
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -143,7 +181,8 @@ public class FilterHandler
     {
         if (!isStarted() || _filterMap.size()==0)
             return;
-        
+
+        // Get the servlet wrappers
         ServletHttpRequest servletHttpRequest =
             _servletHandler.getServletHttpRequest(pathInContext,
                                                   pathParams,
@@ -152,15 +191,16 @@ public class FilterHandler
         ServletHttpResponse servletHttpResponse =
              servletHttpRequest.getServletHttpResponse();
 
-        Chain chain = new Chain(_handlerIndex+1,
-                                pathInContext,
-                                pathParams,
-                                httpRequest,
-                                httpResponse);
-        try
-        {
-            chain.doFilter(servletHttpRequest,servletHttpResponse);
-        }
+        FilterChain chain=null;
+        
+        // Look for a cached chain
+        if (_cacheFilterChains)
+            chain=(FilterChain)_chainMap.get(pathInContext);
+        
+        if (chain==null)
+            chain = new Chain(_handlerIndex+1,pathInContext);
+        
+        try {chain.doFilter(servletHttpRequest,servletHttpResponse);}
         catch(ServletException e)
         {
             Throwable th=e.getRootCause();
@@ -184,26 +224,19 @@ public class FilterHandler
         int _nextServletFilter;
         int _nextHandler;
         String _pathInContext;
-        String _pathParams;
-        HttpRequest _httpRequest;
-        HttpResponse _httpResponse;
         List _servletFilters;
-
+        CacheChain _cacheChain;
+        CacheChain _previousChain;
+        
         /* ------------------------------------------------------------ */
         Chain(int nextHandler,
-              String pathInContext,
-              String pathParams,
-              HttpRequest httpRequest,
-              HttpResponse httpResponse)
+              String pathInContext)
         {
             Code.debug("FilterChain: ",pathInContext);
             _nextPathFilter=0;
             _nextServletFilter=0;
             _nextHandler=nextHandler;
             _pathInContext=pathInContext;
-            _pathParams=pathParams;
-            _httpRequest=httpRequest;
-            _httpResponse=httpResponse;
         }
         
         /* ------------------------------------------------------------ */
@@ -218,8 +251,20 @@ public class FilterHandler
                 if (holder.appliesTo(_pathInContext))
                 {
                     Filter filter = holder.getFilter();
+                    
+                    // Do the cache thang
+                    if (_cacheFilterChains)
+                    {
+                        _previousChain = new CacheChain(filter,_previousChain);
+                        if (_cacheChain==null)
+                            _cacheChain=_previousChain;
+                    }
+                    
+                    // call the filter
                     Code.debug("Path doFilter: ",filter);
                     filter.doFilter(request,response,this);
+
+                    
                     return;
                 }
             }
@@ -245,19 +290,100 @@ public class FilterHandler
                     FilterHolder holder=(FilterHolder)
                         _servletFilters.get(_nextServletFilter++);
                     Filter filter = holder.getFilter();
+
+                    // Do the cache thang
+                    if (_cacheFilterChains)
+                    {
+                        _previousChain = new CacheChain(filter,_previousChain);
+                        if (_cacheChain==null)
+                            _cacheChain=_previousChain;
+                    }
+
+                    // Call the filter
                     Code.debug("Servlet doFilter: ",filter);
                     filter.doFilter(request,response,this);
+                    
                     return;
                 }
             }
-
+            
+            // Do the cache thang
+            if (_cacheFilterChains)
+            {
+                _previousChain = new CacheChain(_nextHandler,
+                                                _pathInContext,
+                                                _previousChain);
+                if (_cacheChain==null)
+                    _cacheChain=_previousChain;
+                _chainMap.put(_pathInContext,_cacheChain);
+                Code.debug("Cached chain for ",_pathInContext);
+            }
+            
             // Goto the original resource
+            HttpRequest httpRequest =
+                ServletHttpRequest.unwrap(request).getHttpRequest();
+            HttpResponse httpResponse = httpRequest.getHttpResponse();
             _httpContext.handle(_nextHandler,
                                 _pathInContext,
-                                _pathParams,
-                                _httpRequest,
-                                _httpResponse);
+                                null, // Assume path params have
+                                      // already been processed.
+                                httpRequest,
+                                httpResponse);
+            
         }   
     }
     
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class CacheChain implements FilterChain
+    {
+        CacheChain _nextChain;
+        Filter _filter;
+        int _nextHandler;
+        String _pathInContext;
+
+        /* ------------------------------------------------------------ */
+        CacheChain(Filter filter, CacheChain previous)
+        {
+            Code.debug("CacheChain: ",filter);
+            _filter=filter;
+            if (previous!=null)
+                previous._nextChain=this;
+        }
+        
+        /* ------------------------------------------------------------ */
+        CacheChain(int nextHandler,String pathInContext,CacheChain previous)
+        {
+            Code.debug("CacheChain: ",pathInContext);
+            _nextHandler=nextHandler;
+            _pathInContext=pathInContext;
+            if (previous!=null)
+                previous._nextChain=this;
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void doFilter(ServletRequest request, ServletResponse response)
+            throws IOException,
+                   ServletException
+        {
+            if (_nextChain!=null)
+            {
+                Code.debug("Call cached filter: ",_filter);
+                _filter.doFilter(request,response,_nextChain);
+            }
+            else
+            {
+                // Goto the original resource
+                HttpRequest httpRequest =
+                    ServletHttpRequest.unwrap(request).getHttpRequest();
+                HttpResponse httpResponse = httpRequest.getHttpResponse();
+                _httpContext.handle(_nextHandler,
+                                    _pathInContext,
+                                    null, // Assume path params have
+                                          // already been processed.
+                                    httpRequest,
+                                    httpResponse);
+            }
+        }
+    }
 }

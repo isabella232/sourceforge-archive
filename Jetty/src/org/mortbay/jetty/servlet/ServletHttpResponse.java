@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletResponse;
+import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -545,6 +547,33 @@ public class ServletHttpResponse implements HttpServletResponse
     {
         return _httpResponse.toString();
     }
+
+    /* ------------------------------------------------------------ */
+    /** Unwrap a ServletResponse.
+     *
+     * @see javax.servlet.ServletResponseWrapper
+     * @see javax.servlet.http.HttpServletResponseWrapper
+     * @param response 
+     * @return The core ServletHttpResponse which must be the
+     * underlying response object 
+     */
+    public static ServletHttpResponse unwrap(ServletResponse response)
+    {
+        while (!(response instanceof ServletHttpResponse))
+        {
+            if (response instanceof ServletResponseWrapper)
+            {
+                ServletResponseWrapper wrapper =
+                    (ServletResponseWrapper)response;
+                response=wrapper.getResponse();
+            }
+            else
+                throw new IllegalArgumentException("Does not wrap ServletHttpResponse");
+        }
+
+        return (ServletHttpResponse)response;
+    }
+    
 }
 
 
