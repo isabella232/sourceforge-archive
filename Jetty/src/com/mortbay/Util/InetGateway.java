@@ -4,7 +4,6 @@
 // ========================================================================
 
 package com.mortbay.Util;
-import com.mortbay.Base.*;
 import java.util.*;
 import java.io.*;
 import java.net.*;

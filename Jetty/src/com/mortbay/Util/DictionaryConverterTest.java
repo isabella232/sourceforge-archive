@@ -5,8 +5,6 @@
 
 package com.mortbay.Util;
 
-import com.mortbay.Base.Code;
-import com.mortbay.Base.Test;
 import java.io.FileInputStream;
 
 public class DictionaryConverterTest

@@ -7,9 +7,9 @@
 
 #JAVAOPTIONS := 
 #JAVACOPTIONS :=
-TESTS := PropertyTreeTest.java TestHarness.java DictionaryConverterTest.java
+TESTS := TestHarness.java PropertyTreeTest.java DictionaryConverterTest.java
 ROOTNAME := com
-SUBDIRS := Test
+SUBDIRS := DataClassTest
 INSTALLPATH := etc
 INSTALLFILES := InetGateway.prp
 EXCLUDECLASSES := TestHarness.class PropertyTreeTest.class DictionaryConverterTest.class DictionaryConverterTest$$TestClass1.class DictionaryConverterTest$$TestClass2.class TestHarness$$1.class

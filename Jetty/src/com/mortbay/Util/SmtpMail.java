@@ -8,7 +8,6 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 import java.lang.InterruptedException;
-import com.mortbay.Base.*;
 
 // =======================================================================
 public class SmtpMail implements Runnable 

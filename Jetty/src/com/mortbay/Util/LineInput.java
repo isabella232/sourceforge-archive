@@ -5,7 +5,6 @@
 
 package com.mortbay.Util;
 
-import com.mortbay.Base.*;
 import java.io.*;
 import java.util.*;
 

@@ -4,22 +4,190 @@
 // ========================================================================
 
 package com.mortbay.Util;
-
-import com.mortbay.Base.Code;
-import com.mortbay.Base.Test;
-import com.mortbay.Util.Test.*;
+import com.mortbay.Util.DataClassTest.*;
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 public class TestHarness
 {
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     */
+    static void testDateCache()
+    {
+        Test t = new Test("com.mortbay.Util.DateCache");
+        
+        DateCache dc = new DateCache();
+        try
+        {
+            for (int i=0;i<25;i++)
+            {
+                Thread.sleep(100);
+                System.err.println(dc.format(System.currentTimeMillis()));
+            }
+            t.check(true,"Very poor test harness");
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
+            
+        }
+    }
+    
+    static void testTest()
+    {
+        Test t1 = new Test("Test all pass");
+        Test t2 = new Test(Test.SelfFailTest);
+
+        t1.check(true,"Boolean check that passes");
+        t2.check(false,"Boolean check that fails");
+        t1.checkEquals("Foo","Foo","Object comparison that passes");
+        t2.checkEquals("Foo","Bar","Object comparison that fails");
+        t1.checkEquals(1,1,"Long comparison that passes");
+        t2.checkEquals(1,2,"Long comparison that fails");
+        t1.checkEquals(1.1,1.1,"Double comparison that passes");
+        t2.checkEquals(1.1,2.2,"Double comparison that fails");
+        t1.checkEquals('a','a',"Char comparison that passes");
+        t2.checkEquals('a','b',"Char comparison that fails");
+        t1.checkContains("ABCD","BC","Contains check that passes");
+        t2.checkContains("ABCD","CB","Contains check that fails");
+    }
+    
+    /*-------------------------------------------------------------------*/
+    static void testLog()
+    {
+        // XXX - this is not even a test harness - poor show!
+        Log.instance();
+        Log.message("TAG","MSG",new Frame());
+        Log.event("Test event");
+        Log.warning("Test warning");
+    }
+
+    /* ------------------------------------------------------------ */
+    private static void testFrameChecker(Test t, Frame f, String desc,
+                                         String method, int depth,
+                                         String thread, String file)
+    {
+        t.checkContains(f._method, method, desc+": method");
+        t.checkEquals(f._depth, depth, desc+": depth");
+        t.checkEquals(f._thread, thread, desc+": thread");
+        t.checkContains(f._file, file, desc+": file");
+    }
+    
+    /* ------------------------------------------------------------ */
+    static void testFrame()
+    {
+        Test t = new Test("com.mortbay.Util.Frame");
+        Frame f = new Frame();
+        testFrameChecker(t, f, "default constructor",
+                         "com.mortbay.Util.TestHarness.testFrame",
+                         2, "main", "TestHarness.java");
+        f = f.getParent();
+        testFrameChecker(t, f, "getParent",
+                         "com.mortbay.Util.TestHarness.main",
+                         1, "main", "TestHarness.java");
+        f = f.getParent();
+        t.checkEquals(f, null, "getParent() off top of stack");
+        f = new Frame(1);
+        testFrameChecker(t, f, "new Frame(1)",
+                         "com.mortbay.Util.TestHarness.main",
+                         1, "main", "TestHarness.java");
+        f = new Frame(1, true);
+        testFrameChecker(t, f, "partial",
+                         "unknownMethod", 0, "unknownThread", "UnknownFile");
+        f.complete();
+        testFrameChecker(t, f, "new Frame(1)",
+                         "com.mortbay.Util.TestHarness.main",
+                         1, "main", "TestHarness.java");
+    }
+    
+    /*-------------------------------------------------------------------*/
+    /** 
+     */
+    static void testCode()
+    {
+        // Also not a test harness
+        Test t = new Test("com.mortbay.Util.Code");
+        Code code = Code.instance();
+        
+        code._debugOn=false;
+        Code.debug("message");
+        
+        code._debugOn=true;
+        Code.debug("message");
+        Code.debug("message",new Throwable());
+        Code.debug("object",new Throwable(),"\n",code);
+        
+        code._debugPatterns = new Vector();
+        code._debugPatterns.addElement("ZZZZZ");
+        Code.debug("YOU SHOULD NOT SEE THIS");
+        Code.debug("YOU SHOULD"," NOT SEE ","THIS");
+        
+        code._debugPatterns.addElement("ISS.Base");
+        Code.debug("message");
+        
+        code._debugPatterns = null;
+
+        Code.warning("warning");
+        
+        Code.setDebug(false);
+        Code.setDebugTriggers("FOO,BAR");
+        Code.debug("YOU SHOULD NOT SEE THIS");
+        Code.triggerOn("BLAH");
+        Code.debug("YOU SHOULD NOT SEE THIS");
+        Code.triggerOn("FOO");
+        Code.debug("triggered");
+        Code.triggerOn("BAR");
+        Code.debug("triggered");
+        Code.triggerOn("FOO");
+        Code.triggerOff("FOO");
+        Code.debug("triggered");
+        Code.triggerOff("BAR");
+        Code.debug("YOU SHOULD NOT SEE THIS");
+        Code.triggerOff("BLAH");
+        Code.debug("YOU SHOULD NOT SEE THIS");
+        
+        Code.setDebug(true);
+        
+        try
+        {
+            Code.fail("fail");
+            t.check(false,"fail");
+        }
+        catch(CodeException e)
+        {
+            Code.debug(e);
+            t.check(true,"fail");
+        }
+        
+        try
+        {
+            Code.assert(true,"assert");
+            Code.assertEquals("String","String","equals");
+            Code.assertEquals(1,1,"equals");
+            Code.assertContains("String","rin","contains");         
+            
+            Code.assertEquals("foo","bar","assert");
+            t.check(false,"Assert");
+        }
+        catch(CodeException e)
+        {
+            Code.warning(e);
+            t.check(true,"Assert");
+        }
+        t.check(true,"Output must be visually inspected");
+    }
+    
     /* ------------------------------------------------------------ */
     public static void testDataHelper()
     {
         Test t = new Test("com.mortbay.Util.DataHelper");
         try{
-            T2 t2 = (com.mortbay.Util.Test.T2)
-                DataClass.emptyInstance(com.mortbay.Util.Test.T2.class);
+            T2 t2 = (com.mortbay.Util.DataClassTest.T2)
+                DataClass.emptyInstance(com.mortbay.Util.DataClassTest.T2.class);
 
             t.check(t2!=null,"empty t2 constructed");
             t.checkEquals(t2.a.length,0,"empty array");
@@ -31,8 +199,8 @@ public class TestHarness
             t2.t1.i=42;
             t2.t1.s="check";
             t2.a=new T1[2];
-            t2.a[0]=(com.mortbay.Util.Test.T1)
-                DataClass.emptyInstance(com.mortbay.Util.Test.T1.class);
+            t2.a[0]=(com.mortbay.Util.DataClassTest.T1)
+                DataClass.emptyInstance(com.mortbay.Util.DataClassTest.T1.class);
 
             String out = DataClass.toString(t2);
             System.out.println(out);
@@ -248,6 +416,12 @@ public class TestHarness
     public static void main(String[] args)
     {
         try{
+            testDateCache();
+            testTest();
+            testLog();
+            testFrame();
+            testCode();
+            
             testDataHelper();
             testBlockingQueue();
             testIO();

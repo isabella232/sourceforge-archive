@@ -5,8 +5,6 @@
 
 package com.mortbay.Util;
 
-import com.mortbay.Base.Code;
-
 import java.util.Properties;
 import java.io.InputStream;
 import java.io.IOException;

@@ -5,7 +5,6 @@
 
 package com.mortbay.Util;
 
-import com.mortbay.Base.Code;
 
 /** Interface for converting classes */
 public interface Converter

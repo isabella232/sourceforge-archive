@@ -5,7 +5,6 @@
 
 package com.mortbay.Util;
 import java.util.Vector;
-import com.mortbay.Base.Code;
 
 /* ------------------------------------------------------------ */
 /** Blocking queue

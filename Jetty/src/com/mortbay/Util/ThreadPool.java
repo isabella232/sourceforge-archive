@@ -6,7 +6,6 @@
 package com.mortbay.Util;
 
 import java.util.*;
-import com.mortbay.Base.Code;
 
 /* ------------------------------------------------------------ */
 /** A pool of threads.

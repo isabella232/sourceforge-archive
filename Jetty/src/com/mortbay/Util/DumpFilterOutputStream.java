@@ -5,7 +5,6 @@
 
 package com.mortbay.Util;
 import java.io.*;
-import com.mortbay.Base.Code;
 
 /* ------------------------------------------------------------ */
 /** Filtered OutputStream that summarized throughput on stderr

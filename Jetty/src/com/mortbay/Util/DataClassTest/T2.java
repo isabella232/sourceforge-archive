@@ -3,7 +3,7 @@
 // $Id$
 // ========================================================================
 
-package com.mortbay.Util.Test;
+package com.mortbay.Util.DataClassTest;
 
 
 public class T2

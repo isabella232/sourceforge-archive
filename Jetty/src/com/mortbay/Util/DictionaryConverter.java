@@ -5,7 +5,6 @@
 
 package com.mortbay.Util;
 
-import com.mortbay.Base.Code;
 import java.util.Dictionary;
 
 /** Class to convert Dictionary's to complex object types.
