@@ -25,25 +25,25 @@ import java.net.Socket;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class SocketListener 
+public class SocketListener
     extends ThreadedServer
     implements HttpListener
 {
     /* ------------------------------------------------------------------- */
     private HttpServer _server;
-    
+
     /* ------------------------------------------------------------------- */
     public SocketListener()
         throws IOException
     {}
-    
+
     /* ------------------------------------------------------------------- */
     public SocketListener(InetAddrPort address)
         throws IOException
     {
         super(address);
     }
-    
+
     /* ------------------------------------------------------------ */
     public void setHttpServer(HttpServer server)
     {
@@ -51,13 +51,13 @@ public class SocketListener
                     "Cannot share listeners");
         _server=server;
     }
-    
+
     /* ------------------------------------------------------------ */
     public HttpServer getHttpServer()
     {
         return _server;
     }
-    
+
     /* --------------------------------------------------------------- */
     public String getDefaultScheme()
     {
@@ -70,7 +70,7 @@ public class SocketListener
         super.start();
         Log.event("Started SocketListener on "+getInetAddrPort());
     }
-    
+
     /* --------------------------------------------------------------- */
     public void stop()
         throws InterruptedException
@@ -78,7 +78,7 @@ public class SocketListener
         super.stop();
         Log.event("Stopped SocketListener on "+getInetAddrPort());
     }
-    
+
     /* --------------------------------------------------------------- */
     public void destroy()
     {
@@ -88,13 +88,14 @@ public class SocketListener
             _server.remove(this);
         _server=null;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Handle Job.
      * Implementation of ThreadPool.handle(), calls handleConnection.
      * @param job A Connection.
      */
-    public final void handleConnection(Socket socket)
+//    public final void handleConnection(Socket socket)
+    public void handleConnection(Socket socket)
         throws IOException
     {
         HttpConnection connection =
@@ -105,20 +106,20 @@ public class SocketListener
                                socket);
         connection.handle();
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** 
-     * @param request 
+    /**
+     * @param request
      */
     public final void customizeRequest(HttpConnection connection,
                                        HttpRequest request)
     {
         customizeRequest((Socket)(connection.getConnection()),request);
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** 
-     * @param request 
+    /**
+     * @param request
      */
     protected void customizeRequest(Socket socket,
                                     HttpRequest request)
