@@ -40,6 +40,13 @@ public class HttpConnection
 {
     /* ------------------------------------------------------------ */
     private static ThreadLocal __threadConnection=new ThreadLocal();
+
+
+    /** Support for FRC2068 Continues.
+     * If true, then 100 Continues will be sent when expected or for POST requests. If false, 100 Continues will
+     * only be sent if expected. Can be configured with the org.mortbay.http.HttpConnection.2068Continue system
+     * property.
+     */
     private static boolean __2068_Continues=Boolean.getBoolean("org.mortbay.http.HttpConnection.2068Continue");
     
     /* ------------------------------------------------------------ */
