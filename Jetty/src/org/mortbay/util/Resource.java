@@ -167,6 +167,7 @@ public abstract class Resource implements Serializable
         
         if (url==null)
             return null;
+        
         return newResource(url);
     }
 

@@ -9,6 +9,7 @@ import java.io.Externalizable;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.PermissionCollection;
 import java.util.ArrayList;
 import java.util.EventListener;
@@ -334,15 +335,24 @@ public class WebApplicationContext
             XmlParser xmlParser=new XmlParser();
             
             //set up cache of DTDs and schemas locally
-            Resource dtd22=Resource.newSystemResource("/javax/servlet/resources/web-app_2_2.dtd");
-            Resource dtd23=Resource.newSystemResource("/javax/servlet/resources/web-app_2_3.dtd");
-            Resource jsp20xsd = Resource.newSystemResource("/javax/servlet/resources/jsp_2_0.xsd");
-            Resource j2ee14xsd = Resource.newSystemResource("/javax/servlet/resources/j2ee_1_4.xsd");
-            Resource webapp24xsd = Resource.newSystemResource ("/javax/servlet/resources/web-app_2_4.xsd");
-            Resource schemadtd = Resource.newSystemResource ("/javax/servlet/resources/XMLSchema.dtd");
-            Resource xmlxsd = Resource.newSystemResource ("/javax/servlet/resources/xml.xsd");
-            Resource webservice11xsd = Resource.newSystemResource ("/javax/servlet/resources/j2ee_web_services_client_1_1.xsd");
-            Resource datatypesdtd = Resource.newSystemResource ("/javax/servlet/resources/datatypes.dtd");
+            URL dtd22=WebApplicationContext.class
+                .getResource("/javax/servlet/resources/web-app_2_2.dtd");
+            URL dtd23=WebApplicationContext.class
+                .getResource("/javax/servlet/resources/web-app_2_3.dtd");
+            URL jsp20xsd = WebApplicationContext.class
+                .getResource("/javax/servlet/resources/jsp_2_0.xsd");
+            URL j2ee14xsd = WebApplicationContext.class
+                .getResource("/javax/servlet/resources/j2ee_1_4.xsd");
+            URL webapp24xsd = WebApplicationContext.class
+                .getResource ("/javax/servlet/resources/web-app_2_4.xsd");
+            URL schemadtd = WebApplicationContext.class
+                .getResource ("/javax/servlet/resources/XMLSchema.dtd");
+            URL xmlxsd = WebApplicationContext.class
+                .getResource ("/javax/servlet/resources/xml.xsd");
+            URL webservice11xsd = WebApplicationContext.class
+                .getResource ("/javax/servlet/resources/j2ee_web_services_client_1_1.xsd");
+            URL datatypesdtd = WebApplicationContext.class
+                .getResource ("/javax/servlet/resources/datatypes.dtd");
 
 
             xmlParser.redirectEntity("web.dtd",dtd23);

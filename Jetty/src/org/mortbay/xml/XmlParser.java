@@ -8,6 +8,7 @@ package org.mortbay.xml;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,7 +19,6 @@ import java.util.Stack;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.mortbay.util.Code;
-import org.mortbay.util.Resource;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -58,8 +58,6 @@ public class XmlParser
             boolean notValidating = Boolean.getBoolean("org.mortbay.xml.XmlParser.NotValidating");
             factory.setValidating(!notValidating);
             _parser = factory.newSAXParser();
-
-
 
             try
             {  
@@ -127,7 +125,7 @@ public class XmlParser
      * @param name 
      * @param entity
      */
-    public synchronized void redirectEntity(String name,Resource entity)
+    public synchronized void redirectEntity(String name,URL entity)
     {
         if (entity!=null)
             _redirectMap.put(name,entity);
@@ -323,32 +321,27 @@ public class XmlParser
 
             Code.debug ("resolveEntity("+pid+", "+sid+")");
 
-            Resource resource=null;
+            URL entity=null;
             if(pid!=null)
-                resource = (Resource)_redirectMap.get(pid);
-            if(resource==null)
-                resource = (Resource)_redirectMap.get(sid);
-            if (resource==null)
+                entity = (URL)_redirectMap.get(pid);
+            if(entity==null)
+                entity = (URL)_redirectMap.get(sid);
+            if (entity==null)
             {
-               
                 String dtd = sid;
                 if (dtd.lastIndexOf('/')>=0)
                     dtd=dtd.substring(dtd.lastIndexOf('/')+1);
 
                 Code.debug("Can't exact match entity in redirect map, trying "+dtd);
-                resource = (Resource)_redirectMap.get(dtd);
+                entity = (URL)_redirectMap.get(dtd);
             }
 
-            if (resource!=null && resource.exists())
+            if (entity!=null)
             {
-
-                Code.debug("Locally resolved entity");
-
                 try
                 {
-                    InputStream in= resource.getInputStream();
-                    Code.debug("Redirected entity ",
-                               sid," --> ",resource);
+                    InputStream in= entity.openStream();
+                    Code.debug("Redirected entity ",sid," --> ",entity);
                     InputSource is = new InputSource(in);
                     is.setSystemId(sid);
                     return is;

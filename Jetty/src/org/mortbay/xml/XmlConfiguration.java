@@ -62,46 +62,33 @@ public class XmlConfiguration
             return;
         
         __parser = new XmlParser();
-        Resource config12Resource=Resource.newSystemResource("org/mortbay/xml/configure_1_2.dtd");
-        Code.assertTrue(config12Resource.exists(),
-                        "org/mortbay/xml/configure_1_2.dtd");
-        __parser.redirectEntity
-            ("configure.dtd",config12Resource);
-        __parser.redirectEntity
-            ("configure_1_2.dtd",
-                     config12Resource);
-        __parser.redirectEntity
-            ("http://jetty.mortbay.org/configure_1_2.dtd",
-             config12Resource);
-        __parser.redirectEntity
-            ("-//Mort Bay Consulting//DTD Configure 1.2//EN",
-             config12Resource);
+        URL config12URL=XmlConfiguration.class.getClassLoader()
+            .getResource("org/mortbay/xml/configure_1_2.dtd");
+        __parser.redirectEntity("configure.dtd",config12URL);
+        __parser.redirectEntity("configure_1_2.dtd",config12URL);
+        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_2.dtd",
+                                config12URL);
+        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.2//EN",
+                                config12URL);
         
-        Resource config11Resource=Resource.newSystemResource("org/mortbay/xml/configure_1_1.dtd");
-        Code.assertTrue(config11Resource.exists(),
-                        "org/mortbay/xml/configure_1_1.dtd");
-        __parser.redirectEntity
-            ("configure_1_1.dtd",
-             config11Resource);
-        __parser.redirectEntity
-            ("http://jetty.mortbay.org/configure_1_1.dtd",
-             config11Resource);
-        __parser.redirectEntity
-            ("-//Mort Bay Consulting//DTD Configure 1.1//EN",
-             config11Resource);
         
-        Resource config10Resource=Resource.newSystemResource("org/mortbay/xml/configure_1_0.dtd");  
-        Code.assertTrue(config10Resource.exists(),
-                        "org/mortbay/xml/configure_1_0.dtd");  
-        __parser.redirectEntity
-            ("configure_1_0.dtd",
-             config10Resource);
-        __parser.redirectEntity
-            ("http://jetty.mortbay.org/configure_1_0.dtd",
-             config10Resource);
-        __parser.redirectEntity
-            ("-//Mort Bay Consulting//DTD Configure 1.0//EN",
-             config10Resource);
+        URL config11URL=XmlConfiguration.class.getClassLoader()
+            .getResource("org/mortbay/xml/configure_1_1.dtd");
+        
+        __parser.redirectEntity("configure_1_1.dtd",config11URL);
+        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_1.dtd",
+                                config11URL);
+        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.1//EN",
+                                config11URL);
+        
+        
+        URL config10URL=XmlConfiguration.class.getClassLoader()
+            .getResource("org/mortbay/xml/configure_1_0.dtd");  
+        __parser.redirectEntity("configure_1_0.dtd",config10URL);
+        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_0.dtd",
+                                config10URL);
+        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.0//EN",
+                                config10URL);
     }
     
     /* ------------------------------------------------------------ */
