@@ -36,7 +36,7 @@ public class HttpTests
     {
         String h1 =
             "Content-Type: xyz" + CRLF +
-            "I1  : 42   " + CRLF +
+            "I1	:	42   " + CRLF +
             "D1: Fri, 31 Dec 1999 23:59:59 GMT" + CRLF +
             "D2: Friday, 31-Dec-99 23:59:59 GMT" + CRLF +
             "D3: Fri Dec 31 23:59:59 1999" + CRLF +

@@ -192,7 +192,7 @@ public class HttpHeader
                 switch(state)
                 {
                   case 0: // leading white
-                      if (c==' ' || c=='        ')
+                      if (c==' ' || c=='\t')
                       {
                           // continuation line
                           state=2;
@@ -218,20 +218,20 @@ public class HttpHeader
                       else
                       {
                           lbuf[i]=c;
-                          if (c!=' ' && c!='    ')
+                          if (c!=' ' && c!='\t')
                               i2=i;
                       }
                       continue;
 
                   case 2: // skip whitespace after :
-                      if (c==' ' || c=='        ')
+                      if (c==' ' || c=='\t')
                           continue;
                       state=3;
                       i1=i;
                       i2=i-1;
 
                   case 3: // looking for last non-white
-                      if (c!=' ' && c!='        ')
+                      if (c!=' ' && c!='\t')
                           i2=i;
                 }
                 continue;
