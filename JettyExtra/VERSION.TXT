@@ -1,6 +1,9 @@
 JettyExtra Versions
 --------------------
 
+JettyExtra-4.1.0
+  + Improved StressTester
+
 JettyExtra-4.1.0RC0
   + Merged HttpContext
   + Moved jmx to main release
