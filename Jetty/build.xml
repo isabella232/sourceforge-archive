@@ -7,28 +7,8 @@
  java build tool from the Apache/Jakarta project.
   <http://jakarta.apache.org/ant/index.html>
 ========================================================================
-
-The default target is "webapps", which will build and package everything
-needed to run Jetty's demo application.
-
-Other targets:
-
-  clean         - Remove all generated files.
-  prepare       - Set up build directory structure.
-  servlet.jar   - Buils the servlet library.
-  jasper.jar    - Builds the Jasper JSP engine library.
-  jetty.jar     - Builds the Jetty library.
-  jars          - Builds the above three libraries.
-  dist          - Constructs a distribution file with all the source.
-  webapps       - Builds the demo web application.
-  javadoc       - Builds the API documentation.
-  demo          - Runs the demo web application.
-  run           - Runs the jetty.xml configuration.
-  test          - Runs the Jetty test harnesses.
-  all           - Almost everything.
-  mini.http.jar - Build a minimal HTTP server jar.
-
 -->
+
 <project name="Jetty HTTP Server" default="webapps" basedir=".">
 
   <!-- ==================================================================== -->
@@ -52,6 +32,7 @@ Other targets:
   <property name="etc"            value="${basedir}/etc" />
   <property name="lib"            value="${basedir}/lib"/>
   <property name="ext"            value="${basedir}/ext"/>
+  <property name="contrib"        value="${basedir}/contrib"/>
   <property name="classes"        value="${basedir}/classes"/>
   <property name="classes1.4"     value="${basedir}/classes1.4"/>
   <property name="javadoc"        value="${basedir}/javadoc"/>
@@ -418,7 +399,7 @@ Other targets:
    description="Build the javadoc">
     <mkdir dir="${javadoc}"/>
     <javadoc packagenames="org.mortbay.*,javax.servlet.*"
-             sourcepath="${src};${src1.4}"
+             sourcepath="${src};${src1.4};${contrib}/src"
              destdir="${javadoc}"
              author="true"
              version="true"

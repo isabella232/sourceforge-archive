@@ -965,6 +965,8 @@ public class HttpConnection
                 // Complete the request
                 if (_persistent)
                 {
+                    System.err.println("read remaining input");
+                    
                     try{
                         // Read remaining input
                         while(_inputStream.skip(4096)>0 || _inputStream.read()>=0);
@@ -979,6 +981,7 @@ public class HttpConnection
                                                     "Missing Content"));
                     }
                     
+                    System.err.println("check no more content");
                     // Check for no more content
                     if (_inputStream.getContentLength()>0)
                     {
@@ -987,10 +990,12 @@ public class HttpConnection
                         exception (new HttpException(_response.__400_Bad_Request,
                                                      "Missing Content"));
                     }
-                    
+
+                    System.err.println("commit the response");
                     // Commit the response
                     try{
                         _outputStream.flush(true);
+                        _response.commit();
                         bytes_written=_outputStream.getBytesWritten();
                         _outputStream.resetStream();
                         _outputStream.addObserver(this);
@@ -1010,8 +1015,8 @@ public class HttpConnection
                 
                     // commit non persistent
                     try{
-                        _response.commit();
                         _outputStream.flush();
+                        _response.commit();
                         bytes_written=_outputStream.getBytesWritten();
                         _outputStream.close();
                         _outputStream.resetStream();

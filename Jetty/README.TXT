@@ -177,9 +177,9 @@ to use is:
     $JETTY_HOME/ext/org.apache.crimson.jar
 
 
-To use SSL you will also need to add the the jar below, which is
-a merge of the jsse, jnet and jcert jars from the JSSE package
-(see $JETTY_HOME/doc/JsseSSL.html for more details):
+To use the default SSL you will also need to add the the jar below, 
+which is a merge of the jsse, jnet and jcert jars from the JSSE package
+(see $JETTY_HOME/demo/webapps/jetty/doc/JsseSSL.html for more details):
 
     $JETTY_HOME/ext/com.sun.net.ssl.jar
 
