@@ -136,7 +136,6 @@ public class HttpConnection
             _out.write(content.toString().getBytes());
             _out.write("</pre></html>\n".getBytes());
             
-            System.out.println("EOR");
             _out.close();
             return true;
         }
