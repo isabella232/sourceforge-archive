@@ -12,6 +12,7 @@ Jetty-4.1.2 ...
  + Use "standard" names for default,jsp & invoker servlets.
  + Fixed caching of directories to avoid shared buffers.
  + Fixed bad log dir detection
+ + Fix Session invalidation bug
 
 Jetty-4.1.1 - 30 September 2002
  + Fixed client scripting vulnerability with jasper2.
