@@ -46,6 +46,11 @@
 #
 #    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/jetty.war</Arg>
 #
+# JETTY_CONSOLE
+#   Where Jetty console output should go. Defaults to first writeable of
+#      /dev/console
+#      /dev/tty
+#
 # JETTY_LOG 
 #   Where jetty logs should be stored. The only effect of this 
 #   variable is to set the "jetty.log" java system property so
@@ -55,6 +60,13 @@
 #
 #   This variable will be tipically set to something like /var/log/jetty. If
 #   not set, it will default to $JETTY_HOME/logs
+#
+# JETTY_PORT
+#   Default port for Jetty servers. The default value is 8080. The java 
+#   system property "jetty.port" will be set to this value for use in 
+#   configure.xml files, f.e:
+#
+#    <Arg><SystemProperty name="jetty.port" default="80"/></Arg>
 #
 # JETTY_RUN
 #   Where the jetty.pid file should be stored. It defaults to the
@@ -387,6 +399,15 @@ then
 fi
 
 #####################################################
+# See if JETTY_PORT is defined
+#####################################################
+if [ -z "$JETTY_PORT" ] 
+then
+  JETTY_PORT="8080" 
+fi
+
+
+#####################################################
 # Are we running on Windows? Could be, with Cygwin/NT.
 #####################################################
 if [ -z "$WINBOOTDIR" ] 
@@ -408,7 +429,7 @@ CLASSPATH="$CP"
 #####################################################
 # Add jetty properties to Java VM options.
 #####################################################
-JAVA_OPTIONS="-Djetty.home=$JETTY_HOME -Djetty.log=$JETTY_LOG $JAVA_OPTIONS"
+JAVA_OPTIONS="-Djetty.home=$JETTY_HOME -Djetty.log=$JETTY_LOG -Djetty.port=$JETTY_PORT $JAVA_OPTIONS"
 
 #####################################################
 # This is how the Jetty server will be started
@@ -504,6 +525,7 @@ case "$ACTION" in
         echo "JETTY_RUN      =  $JETTY_RUN"
         echo "JETTY_PID      =  $JETTY_PID"
         echo "JETTY_CONSOLE  =  $JETTY_CONSOLE"
+        echo "JETTY_PORT     =  $JETTY_PORT"
         echo "CONFIGS        =  $CONFIGS"
         echo "PATH_SEPARATOR =  $PATH_SEPARATOR"
         echo "JAVA_OPTIONS   =  $JAVA_OPTIONS"
