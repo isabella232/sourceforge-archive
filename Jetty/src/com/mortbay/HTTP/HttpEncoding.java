@@ -4,15 +4,9 @@
 // ========================================================================
 
 package com.mortbay.HTTP;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import com.mortbay.Util.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import com.mortbay.HTTP.Handler.*;
-import com.mortbay.HTTP.Handler.Servlet.*;
-import java.lang.reflect.*;
+import com.mortbay.Util.Code;
+import java.util.Map;
 
 public class HttpEncoding
 {
@@ -25,8 +19,8 @@ public class HttpEncoding
      * @exception HttpException 
      */
     public void enableEncoding(ChunkableInputStream in,
-			       String coding,
-			       Map parameters)
+                               String coding,
+                               Map parameters)
         throws HttpException
     {
         try
@@ -72,8 +66,8 @@ public class HttpEncoding
      * @exception HttpException 
      */
     public void enableEncoding(ChunkableOutputStream out,
-			       String coding,
-			       Map parameters)
+                               String coding,
+                               Map parameters)
         throws HttpException
     {
         try

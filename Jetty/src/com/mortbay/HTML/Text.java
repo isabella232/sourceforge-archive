@@ -4,8 +4,7 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTML;
-import java.io.*;
-import java.util.*;
+import java.util.Vector;
 
 /* -------------------------------------------------------------------- */
 /** A simple block of straight text

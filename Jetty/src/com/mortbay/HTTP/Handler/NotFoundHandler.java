@@ -4,13 +4,17 @@
 // ========================================================================
 
 package com.mortbay.HTTP.Handler;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import com.mortbay.HTTP.*;
-import com.mortbay.Util.*;
-import java.util.*;
-import java.text.*;
-import java.io.*;
+import com.mortbay.HTTP.ChunkableOutputStream;
+import com.mortbay.HTTP.HttpException;
+import com.mortbay.HTTP.HttpFields;
+import com.mortbay.HTTP.HttpRequest;
+import com.mortbay.HTTP.HttpResponse;
+import com.mortbay.Util.Code;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 /* ------------------------------------------------------------ */
 /** Handler for resources that were not found.
@@ -22,7 +26,8 @@ import java.io.*;
 public class NotFoundHandler extends NullHandler
 {
     /* ------------------------------------------------------------ */
-    public void handle(String pathSpec,
+    public void handle(String contextPath,
+                       String pathInContext,
                        HttpRequest request,
                        HttpResponse response)
         throws HttpException, IOException
@@ -30,7 +35,7 @@ public class NotFoundHandler extends NullHandler
         if (!isStarted())
             return;
 
-	Code.debug("Not Found");
+        Code.debug("Not Found");
 
         // Not found GET request
         String method=request.getMethod();

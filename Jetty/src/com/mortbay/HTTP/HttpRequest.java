@@ -4,12 +4,27 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTTP;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
-import com.mortbay.Util.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
+
+import com.mortbay.Util.Code;
+import com.mortbay.Util.LineInput;
+import com.mortbay.Util.MultiMap;
+import com.mortbay.Util.QuotedStringTokenizer;
+import com.mortbay.Util.StringUtil;
+import com.mortbay.Util.URI;
+import com.mortbay.Util.UrlEncoded;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.Principal;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
 
 /* ------------------------------------------------------------ */
@@ -230,24 +245,24 @@ public class HttpRequest extends HttpMessage
      */
     public StringBuffer getRequestURL()
     {
-	StringBuffer url = new StringBuffer ();
-	synchronized(url)
-	{
-	    String scheme = getScheme();
-	    int port = getPort();
+        StringBuffer url = new StringBuffer ();
+        synchronized(url)
+        {
+            String scheme = getScheme();
+            int port = getPort();
 
-	    url.append (scheme);
-	    url.append ("://");
-	    url.append (getHost());
-	    if (port>0 && ((scheme.equals ("http") && port != 80)||
-			   (scheme.equals ("https") && port != 443)))
-	    {
-		url.append (':');
-		url.append (port);
-	    }
-	    url.append(getPath());
-	    return url;
-	}
+            url.append (scheme);
+            url.append ("://");
+            url.append (getHost());
+            if (port>0 && ((scheme.equals ("http") && port != 80)||
+                           (scheme.equals ("https") && port != 443)))
+            {
+                url.append (':');
+                url.append (port);
+            }
+            url.append(getPath());
+            return url;
+        }
     }
 
     
@@ -593,7 +608,7 @@ public class HttpRequest extends HttpMessage
     public synchronized Object forceRemoveField(String name)
     {
         if (Code.verbose(99))
-	    Code.debug("force remove ",name);
+            Code.debug("force remove ",name);
         int saved_state=_state;
         try{
             _state=__MSG_EDITABLE;
@@ -701,9 +716,9 @@ public class HttpRequest extends HttpMessage
 
                             // Add form params to query params
                             String contentStr = new String(content,
-							   0,
-							   content_length,
-							   "ISO-8859-1");
+                                                           0,
+                                                           content_length,
+                                                           "ISO-8859-1");
                             UrlEncoded.decodeTo(contentStr,_parameters);
                         }
                         catch (IOException e)
@@ -727,7 +742,7 @@ public class HttpRequest extends HttpMessage
     {
         if (_parameters==null)
             extractParameters();
-	return _parameters;
+        return _parameters;
     }
     
     
@@ -862,21 +877,21 @@ public class HttpRequest extends HttpMessage
     /* ------------------------------------------------------------ */
     public boolean isUserInRole(String role)
     {
-	Code.debug("XXX - WARNING Temp implementation");
+        Code.debug("XXX - WARNING Temp implementation");
 
-	// This role is true for any authenticated user
-	if ("com.mortbay.HTTP.HttpRequest.ANY_ROLE".equals(role))
-	{
-	    return getAttribute(HttpRequest.__AuthUser)!=null;
-	}
-	return false;
+        // This role is true for any authenticated user
+        if ("com.mortbay.HTTP.HttpRequest.ANY_ROLE".equals(role))
+        {
+            return getAttribute(HttpRequest.__AuthUser)!=null;
+        }
+        return false;
     }
     
     /* ------------------------------------------------------------ */
     public Principal getUserPrincipal()
     {
-	Code.warning("Not implemented");
-	return null;
+        Code.warning("Not implemented");
+        return null;
     }
     
     /* ------------------------------------------------------------ */
@@ -888,8 +903,8 @@ public class HttpRequest extends HttpMessage
         _method=null;
         _uri=null;
         _version=null;
-	if (_attributes!=null)
-	    _attributes.clear();
+        if (_attributes!=null)
+            _attributes.clear();
         super.destroy();
     }  
 }

@@ -4,10 +4,15 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.Util;
-import java.util.*;
-import java.io.*;
-import java.net.*;
-import java.lang.InterruptedException;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 // =======================================================================
 public class SmtpMail implements Runnable 

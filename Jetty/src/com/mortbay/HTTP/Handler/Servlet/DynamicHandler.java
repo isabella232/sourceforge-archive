@@ -4,14 +4,15 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTTP.Handler.Servlet;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import com.mortbay.HTTP.*;
-import com.mortbay.Util.*;
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
-import java.net.URL;
+import com.mortbay.HTTP.Handler.NullHandler;
+import com.mortbay.HTTP.HandlerContext;
+import com.mortbay.Util.Code;
+import com.mortbay.Util.Log;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 /* --------------------------------------------------------------------- */
@@ -26,16 +27,16 @@ import java.net.URL;
 public class DynamicHandler extends ServletHandler 
 {
     private Set _paths = new HashSet();
-	
+        
     /* ------------------------------------------------------------ */
     Map _initParams ;
     public Map getInitParams()
     {
-	return _initParams;
+        return _initParams;
     }
     public void setInitParams(Map initParams)
     {
-	_initParams = initParams;
+        _initParams = initParams;
     }
     
     /* ----------------------------------------------------------------- */
@@ -46,8 +47,8 @@ public class DynamicHandler extends ServletHandler
     public void start()
     {
         Log.event("DynamicHandler started for "+
-		  getHandlerContext().getClassPath());
-	super.start();
+                  getHandlerContext().getClassPath());
+        super.start();
     }
     
 
@@ -59,54 +60,54 @@ public class DynamicHandler extends ServletHandler
      */
     synchronized List holderMatches(String pathInContext)
     {
-	String path=pathInContext;
-	
-	// Do we have any matches already
-	List holders = super.holderMatches(path);
-	if (holders!=null && holders.size()>0)
-	    return holders;
+        String path=pathInContext;
+        
+        // Do we have any matches already
+        List holders = super.holderMatches(path);
+        if (holders!=null && holders.size()>0)
+            return holders;
 
-	// OK lets look for a dynamic servlet.
-	if (!_paths.contains(path))
-	{
-	    _paths.add(path);
-	    Code.debug(path," from ",
-		       getHandlerContext().getClassPath());
-	    
-	    String servletClass=path.substring(1);
-	    int slash=servletClass.indexOf("/");
-	    if (slash>=0)
-		servletClass=servletClass.substring(0,slash);            
-	    if (servletClass.endsWith(".class"))
-		servletClass=servletClass.substring(0,servletClass.length()-6);
-	    
-	    path="/"+servletClass;
-	    
-	    Code.debug("Dynamic path=",path);
-	    
-	    ServletHolder holder=null;
-	    try{
-		holder=newServletHolder(servletClass);
-		Map params=getInitParams();
-		if (params!=null)
-		    holder.putAll(params);
-		holder.getServlet();
-	    }
-	    catch(Exception e)
-	    {
-		Code.ignore(e);
-		return super.holderMatches(path);
-	    }
-	    
-	    Log.event("Dynamic load '"+servletClass+"' at "+path);
-	    addHolder(path,holder);
-	    addHolder(path+".class",holder);
-	    addHolder(path+"/*",holder);
-	    addHolder(path+".class/*",holder);
-	}
+        // OK lets look for a dynamic servlet.
+        if (!_paths.contains(path))
+        {
+            _paths.add(path);
+            Code.debug(path," from ",
+                       getHandlerContext().getClassPath());
+            
+            String servletClass=path.substring(1);
+            int slash=servletClass.indexOf("/");
+            if (slash>=0)
+                servletClass=servletClass.substring(0,slash);            
+            if (servletClass.endsWith(".class"))
+                servletClass=servletClass.substring(0,servletClass.length()-6);
+            
+            path="/"+servletClass;
+            
+            Code.debug("Dynamic path=",path);
+            
+            ServletHolder holder=null;
+            try{
+                holder=newServletHolder(servletClass);
+                Map params=getInitParams();
+                if (params!=null)
+                    holder.putAll(params);
+                holder.getServlet();
+            }
+            catch(Exception e)
+            {
+                Code.ignore(e);
+                return super.holderMatches(path);
+            }
+            
+            Log.event("Dynamic load '"+servletClass+"' at "+path);
+            addHolder(path,holder);
+            addHolder(path+".class",holder);
+            addHolder(path+"/*",holder);
+            addHolder(path+".class/*",holder);
+        }
 
-	// return the normal list
-	return super.holderMatches(pathInContext);
+        // return the normal list
+        return super.holderMatches(pathInContext);
     }
 }
 

@@ -5,7 +5,6 @@
 
 package com.mortbay.HTML;
 
-import java.io.*;
 
 /* -------------------------------------------------------------------- */
 /** HTML Script Block

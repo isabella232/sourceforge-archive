@@ -5,8 +5,8 @@
 
 package com.mortbay.Util;
 
-import java.text.SimpleDateFormat;
 import java.text.DateFormatSymbols;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -142,7 +142,7 @@ public class DateCache
      */
     public SimpleDateFormat getFormat()
     {
-	return minuteFormat;
+        return minuteFormat;
     }
 
     /* ------------------------------------------------------------ */
@@ -152,8 +152,8 @@ public class DateCache
     public void setTimeZone(TimeZone tz)
     {
         minuteFormat.setTimeZone(tz);
-	if (format!=null)
-	    format.setTimeZone(tz);
+        if (format!=null)
+            format.setTimeZone(tz);
     }
 }       
 

@@ -4,12 +4,15 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTTP;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
-import com.mortbay.Util.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.text.*;
+
+import com.mortbay.Util.Code;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 
 
 /* ------------------------------------------------------------ */
@@ -59,8 +62,8 @@ abstract public class HttpMessage
     protected HttpMessage()
     {
         _header=new HttpFields();
-	if (Code.verbose(999))
-	    Code.debug("New");
+        if (Code.verbose(999))
+            Code.debug("New");
     }
     
     /* ------------------------------------------------------------ */
@@ -70,8 +73,8 @@ abstract public class HttpMessage
     {
         _header=new HttpFields();
         _connection=connection;
-	if (Code.verbose(999))
-	    Code.debug("New ",connection);
+        if (Code.verbose(999))
+            Code.debug("New ",connection);
     }
 
     /* ------------------------------------------------------------ */
@@ -79,12 +82,12 @@ abstract public class HttpMessage
      */
     protected void reset()
     {
-	_state=__MSG_EDITABLE;
-	_header=new HttpFields();
-	_trailer=null;
+        _state=__MSG_EDITABLE;
+        _header=new HttpFields();
+        _trailer=null;
 
-	// XXX - also need to cancel any encodings added to output stream!
-	
+        // XXX - also need to cancel any encodings added to output stream!
+        
     }
     
     /* ------------------------------------------------------------ */
@@ -480,23 +483,23 @@ abstract public class HttpMessage
      */
     public String getCharacterEncoding()
     {
-	String encoding="ISO-8859-1";
+        String encoding="ISO-8859-1";
         String s = _header.get(HttpFields.__ContentType);
-	if (s!=null)
-	{
-	    int i0=s.indexOf(';');
-	    if (i0>=0)
-	    {
-		int i1 = s.indexOf("charset=",i0);
-		if (i1>=0)
-		{
-		    i1+=8;
-		    int i2 = s.indexOf(' ',i1);
-		    encoding = (0 < i2) ? s.substring(i1,i2) : s.substring(i1);
-		}
-	    }
-	}
-	return encoding;
+        if (s!=null)
+        {
+            int i0=s.indexOf(';');
+            if (i0>=0)
+            {
+                int i1 = s.indexOf("charset=",i0);
+                if (i1>=0)
+                {
+                    i1+=8;
+                    int i2 = s.indexOf(' ',i1);
+                    encoding = (0 < i2) ? s.substring(i1,i2) : s.substring(i1);
+                }
+            }
+        }
+        return encoding;
     }
     
     /* ------------------------------------------------------------ */
@@ -505,8 +508,8 @@ abstract public class HttpMessage
      */
     public void destroy()
     {
-	if (Code.verbose(999))
-	    Code.debug("Destroy");
+        if (Code.verbose(999))
+            Code.debug("Destroy");
         if (_header!=null)
             _header.destroy();
         if (_trailer!=null)
@@ -557,13 +560,13 @@ abstract public class HttpMessage
         if (Code.verbose(99))
             Code.debug("Commit from "+__state[_state]);
         
-	int lastState=_state;
+        int lastState=_state;
         _state=__MSG_SENDING;
-	
+        
         ChunkableOutputStream out = getOutputStream();
-	if (out==null)
-	    throw new IllegalStateException("No output stream");
-	
+        if (out==null)
+            throw new IllegalStateException("No output stream");
+        
         switch(lastState)
         {
           case __MSG_EDITABLE:
@@ -590,11 +593,11 @@ abstract public class HttpMessage
      */
     public boolean isDirty()
     {
-	ChunkableOutputStream out=getOutputStream();
-	
-	return _state!=__MSG_EDITABLE
-	    || ( out!=null &&
-		 (out.isWritten() || out.isCommitted()));
+        ChunkableOutputStream out=getOutputStream();
+        
+        return _state!=__MSG_EDITABLE
+            || ( out!=null &&
+                 (out.isWritten() || out.isCommitted()));
     }
     
     /* ------------------------------------------------------------ */
@@ -603,28 +606,28 @@ abstract public class HttpMessage
      */
     public boolean isCommitted()
     {
-	ChunkableOutputStream out=getOutputStream();
-	return out!=null && out.isCommitted() ||
-	    _state==__MSG_SENT || _state==__MSG_SENDING;
+        ChunkableOutputStream out=getOutputStream();
+        return out!=null && out.isCommitted() ||
+            _state==__MSG_SENT || _state==__MSG_SENDING;
     }
 
     /* ------------------------------------------------------------ */
     public synchronized void complete()
-	throws IOException
+        throws IOException
     {
-	if (!isCommitted())
-	    commit();
-	
-	ChunkableOutputStream out=getOutputStream();
-	if (out!=null)
-	{
-	    if (_trailer!=null && _trailer.size()>0)
-	    {
-		if (out!=null && out.isChunking())
-		    out.setTrailer(_trailer);
-	    }
-	    out.flush();
-	}
+        if (!isCommitted())
+            commit();
+        
+        ChunkableOutputStream out=getOutputStream();
+        if (out!=null)
+        {
+            if (_trailer!=null && _trailer.size()>0)
+            {
+                if (out!=null && out.isChunking())
+                    out.setTrailer(_trailer);
+            }
+            out.flush();
+        }
         _state=__MSG_SENT;
     }
 }

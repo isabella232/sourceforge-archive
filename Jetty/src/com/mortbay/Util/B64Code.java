@@ -4,7 +4,7 @@
 // ========================================================================
 
 package com.mortbay.Util;
-import java.io.*;
+import java.io.UnsupportedEncodingException;
 
 public class B64Code
 {

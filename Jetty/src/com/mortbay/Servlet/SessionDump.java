@@ -4,13 +4,19 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.Servlet;
-import com.mortbay.Util.*;
-import com.mortbay.HTML.*;
+import com.mortbay.HTML.Page;
+import com.mortbay.HTML.TableForm;
+import com.mortbay.Util.Code;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Date;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-import java.io.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
 
 /**
  * This is an example of a simple Servlet
@@ -41,16 +47,16 @@ public class SessionDump extends HttpServlet
         if (action.equals("New Session"))
             session = request.getSession(true);
         else 
-	if (session!=null)
-	{
-	    if (action.equals("Invalidate"))
-		session.invalidate();
-	    else if (action.equals("Add"))
-		session.putValue(name,value);
-	    else if (action.equals("Remove"))
-		session.removeValue(name);
-	}
-	
+        if (session!=null)
+        {
+            if (action.equals("Invalidate"))
+                session.invalidate();
+            else if (action.equals("Add"))
+                session.putValue(name,value);
+            else if (action.equals("Remove"))
+                session.removeValue(name);
+        }
+        
         response.sendRedirect
             (response.encodeURL
              (request.getRequestURI()+"?R="+redirectCount++));
@@ -63,7 +69,7 @@ public class SessionDump extends HttpServlet
         throws ServletException, IOException
     {
         Page page= new Page();
-	
+        
         page.title("Session Dump Servlet");
         
         HttpSession session = request.getSession(false);
@@ -108,13 +114,13 @@ public class SessionDump extends HttpServlet
                 tf.addButton("Action","Remove");
                 tf.addButton("Action","Invalidate");
 
-		if (request.isRequestedSessionIdFromCookie())
-		    page.add("<P>Turn off cookies in your browser to try url encoding<BR>");
-		
-		if (request.isRequestedSessionIdFromURL())
-		    page.add("<P>Turn on cookies in your browser to try cookie encoding<BR>");
-		
-	    }
+                if (request.isRequestedSessionIdFromCookie())
+                    page.add("<P>Turn off cookies in your browser to try url encoding<BR>");
+                
+                if (request.isRequestedSessionIdFromURL())
+                    page.add("<P>Turn on cookies in your browser to try cookie encoding<BR>");
+                
+            }
             catch (IllegalStateException e)
             {
                 Code.debug(e);

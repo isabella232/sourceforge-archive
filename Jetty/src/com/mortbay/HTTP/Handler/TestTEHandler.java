@@ -4,13 +4,12 @@
 // ========================================================================
 
 package com.mortbay.HTTP.Handler;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import com.mortbay.HTTP.*;
-import com.mortbay.Util.*;
-import java.util.*;
-import java.text.*;
-import java.io.*;
+import com.mortbay.HTTP.HttpException;
+import com.mortbay.HTTP.HttpFields;
+import com.mortbay.HTTP.HttpRequest;
+import com.mortbay.HTTP.HttpResponse;
+import java.io.IOException;
 
 /* ------------------------------------------------------------ */
 /** Handler to test TE transfer encoding.
@@ -23,14 +22,12 @@ import java.io.*;
 public class TestTEHandler extends NullHandler
 {
     /* ------------------------------------------------------------ */
-    public void handle(String pathSpec,
+    public void handle(String contextPath,
+                       String pathInContext,
                        HttpRequest request,
                        HttpResponse response)
         throws HttpException, IOException
     {
-        if (!isStarted())
-            return;        
-
         // For testing set transfer encodings
         if (request.getQuery()!=null)
         {

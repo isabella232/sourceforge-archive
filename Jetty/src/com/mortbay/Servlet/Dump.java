@@ -4,14 +4,26 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.Servlet;
-import com.mortbay.Util.*;
-import com.mortbay.HTML.*;
-import com.mortbay.HTTP.*;
+import com.mortbay.HTML.Block;
+import com.mortbay.HTML.Break;
+import com.mortbay.HTML.Composite;
+import com.mortbay.HTML.Element;
+import com.mortbay.HTML.Font;
+import com.mortbay.HTML.Heading;
+import com.mortbay.HTML.Page;
+import com.mortbay.HTML.Select;
+import com.mortbay.HTML.Table;
+import com.mortbay.HTML.TableForm;
+import com.mortbay.Util.Code;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Enumeration;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import java.io.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
 
 /**
  * This is an example of a simple Servlet
@@ -48,7 +60,7 @@ public class Dump extends HttpServlet
             page = new Page();
             page.title("Dump Servlet");     
 
-	    page.add(new Heading(1,"Dump Servlet"));
+            page.add(new Heading(1,"Dump Servlet"));
             Table table = new Table(0).cellPadding(0).cellSpacing(0);
             page.add(table);
             table.newRow();
@@ -112,17 +124,17 @@ public class Dump extends HttpServlet
             table.newRow();
             table.addHeading("getRequestedSessionId:&nbsp;").cell().right();
             table.addCell(""+sreq.getRequestedSessionId());            
-	                
+                        
             table.newRow();
             table.addHeading("getLocales:&nbsp;").cell().right();
-	    Enumeration locales = sreq.getLocales();
-	    table.newCell();
-	    while(locales.hasMoreElements())
-	    {
-		table.add(locales.nextElement());
-		if (locales.hasMoreElements())
-		    table.add(",&nbsp;");
-	    }
+            Enumeration locales = sreq.getLocales();
+            table.newCell();
+            while(locales.hasMoreElements())
+            {
+                table.add(locales.nextElement());
+                if (locales.hasMoreElements())
+                    table.add(",&nbsp;");
+            }
 
             table.newRow();
             table.newHeading()
@@ -196,7 +208,7 @@ public class Dump extends HttpServlet
         }
         catch (Exception e)
         {
-	    Code.warning(e);
+            Code.warning(e);
         }
     
         page.write(pout);

@@ -4,9 +4,8 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTML;
-import java.io.*;
-import java.util.*;
-import com.mortbay.Util.*;
+import com.mortbay.Util.Code;
+import java.util.Enumeration;
 
 /* -------------------------------------------------------------------- */
 /** HTML select Block

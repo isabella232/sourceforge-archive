@@ -5,8 +5,13 @@
 
 package com.mortbay.Util;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 
 
 /* ------------------------------------------------------------ */
@@ -103,8 +108,8 @@ public class LineInput extends FilterInputStream
     public void setByteLimit(int bytes)
     {
         _byteLimit=bytes;
-	_origLimit=bytes;
-	
+        _origLimit=bytes;
+        
         if (bytes>=0)
         {
             _byteLimit-=_contents-_pos;
@@ -184,8 +189,8 @@ public class LineInput extends FilterInputStream
         if (blen<0)
             return -1;
         if (blen==0)
-	    return 0;
-	
+            return 0;
+        
         _byteBuffer.setStream(_mark,blen);
         len=_reader.read(c,off,len);
         _mark=-1;
@@ -264,7 +269,7 @@ public class LineInput extends FilterInputStream
         _lineBuffer.size=
             _reader.read(_lineBuffer.buffer,0,_lineBuffer.buffer.length);
         _mark=-1;
-	
+        
         return _lineBuffer;
     }
     
@@ -342,7 +347,7 @@ public class LineInput extends FilterInputStream
     public synchronized void mark(int limit)
         throws IllegalArgumentException
     {
-	System.err.println("MARK!");
+        System.err.println("MARK!");
         if (limit>_buf.length)
             throw new IllegalArgumentException("limit larger than buffer");
         _mark=_pos;
@@ -357,7 +362,7 @@ public class LineInput extends FilterInputStream
         if (_byteLimit>=0)
             _byteLimit+=_pos-_mark;
         _pos=_mark;
-	_mark=-1;
+        _mark=-1;
     }
 
     /* ------------------------------------------------------------ */
@@ -397,9 +402,9 @@ public class LineInput extends FilterInputStream
             return;
         }
 
-	int n=0;
+        int n=0;
         _eof=false;
-	
+        
         if (_byteLimit==0)
             _eof=true;
         else if (_buf.length>_contents)
@@ -427,27 +432,27 @@ public class LineInput extends FilterInputStream
             }
         }
 
-	// If we have some characters
-	if (_avail-_pos>0)
-	{
-	    // if the last read was a CR, may need to consume LF
-	    if (_lastCr && _buf[_pos]==10)
-	    {
-		_pos++;
+        // If we have some characters
+        if (_avail-_pos>0)
+        {
+            // if the last read was a CR, may need to consume LF
+            if (_lastCr && _buf[_pos]==10)
+            {
+                _pos++;
 
-		// If this was part of the header, don't count
-		// as content.
-		if(_byteLimit>=0 && _byteLimit+n==_origLimit)
-		{
-		    _byteLimit++;
-		    if (_avail<_contents)
-			_avail++;
-		}
-		// If we ate all that ws filled, fill some more
-		if (_pos==_avail)
-		    fill();
-	    }
-	    
+                // If this was part of the header, don't count
+                // as content.
+                if(_byteLimit>=0 && _byteLimit+n==_origLimit)
+                {
+                    _byteLimit++;
+                    if (_avail<_contents)
+                        _avail++;
+                }
+                // If we ate all that ws filled, fill some more
+                if (_pos==_avail)
+                    fill();
+            }
+            
 //  	    String buffer=new String(_buf,_pos,_avail-_pos);
 //  	    buffer=StringUtil.replace(buffer,"\r","<CR>");
 //  	    buffer=StringUtil.replace(buffer,"\n","<LF>");
@@ -456,7 +461,7 @@ public class LineInput extends FilterInputStream
 //  			       "\n'"+
 //  			       buffer+
 //  			       "'");
-	}
+        }
     }
 
     
@@ -499,20 +504,20 @@ public class LineInput extends FilterInputStream
                 // return a line.
                 if (cr && in.available()==0)
                 {
-		    _lastCr=true;
-		    cr=true;
-		    lf=true;
-		    break;
+                    _lastCr=true;
+                    cr=true;
+                    lf=true;
+                    break;
                 }
-		else
-		{
-		    // Else just wait for more...
-		    _pos=_mark;
-		    fill();
-		    _pos=len;
-		    cr=false;
-		    continue;
-		}
+                else
+                {
+                    // Else just wait for more...
+                    _pos=_mark;
+                    fill();
+                    _pos=len;
+                    cr=false;
+                    continue;
+                }
             }
 
             // Get the byte
@@ -605,6 +610,6 @@ public class LineInput extends FilterInputStream
         public LineBuffer(int maxLineLength)
         {buffer=new char[maxLineLength];}
 
-	public String toString(){return new String(buffer,0,size);}
+        public String toString(){return new String(buffer,0,size);}
     }
 }

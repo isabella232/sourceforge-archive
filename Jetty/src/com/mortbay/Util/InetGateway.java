@@ -4,10 +4,17 @@
 // ========================================================================
 
 package com.mortbay.Util;
-import java.util.*;
-import java.io.*;
-import java.net.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Constructor;
+import java.net.Socket;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 /* ------------------------------------------------------------ */
 /** IP gateway.
@@ -218,7 +225,7 @@ public class InetGateway extends ThreadedServer
                             catch(Exception e) { Code.ignore(e); }
                         }       
                     }
-		    },Thread.currentThread().getName()+"+").start();
+                    },Thread.currentThread().getName()+"+").start();
 
                 // Use this thread to copy local in to remote out
                 IO.copy(localIn,remoteOut);
@@ -238,10 +245,10 @@ public class InetGateway extends ThreadedServer
         {
             Code.warning(e);
         }
-	finally
-	{
-	    System.err.println("COMPLETE: "+Thread.currentThread().toString());
-	}
+        finally
+        {
+            System.err.println("COMPLETE: "+Thread.currentThread().toString());
+        }
     }
 
     

@@ -5,9 +5,11 @@
 
 package com.mortbay.HTML;
 
-import java.io.*;
-import java.util.*;
-import com.mortbay.Util.*;
+import com.mortbay.Util.Code;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 /* ---------------------------------------------------------------- */
 /** An Applet Block

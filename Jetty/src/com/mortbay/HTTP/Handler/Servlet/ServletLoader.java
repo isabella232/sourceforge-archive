@@ -4,13 +4,17 @@
 // ========================================================================
 
 package com.mortbay.HTTP.Handler.Servlet;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import com.mortbay.Util.*;
-import java.util.*;
-import java.util.zip.*;
-import java.io.*;
-import java.net.*;
+import com.mortbay.Util.Code;
+import com.mortbay.Util.IO;
+import com.mortbay.Util.Resource;
+import com.mortbay.Util.ResourcePath;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.HashMap;
 
 /* ------------------------------------------------------------ */
 /** Servlet Class Loader.
@@ -38,9 +42,9 @@ public class ServletLoader extends ClassLoader
      * with '/'.
      */
     protected ServletLoader()
-	throws IOException
+        throws IOException
     {
-	this(null,false);
+        this(null,false);
     }
     
     /* ------------------------------------------------------------ */
@@ -50,9 +54,9 @@ public class ServletLoader extends ClassLoader
      * with '/'.
      */
     protected ServletLoader(String servletClassPath)
-	throws IOException
+        throws IOException
     {
-	this(servletClassPath,false);
+        this(servletClassPath,false);
     }
     
     
@@ -65,12 +69,12 @@ public class ServletLoader extends ClassLoader
      * @exception IOException 
      */
     public ServletLoader(String servletClassPath,
-			 boolean quiet)
+                         boolean quiet)
         throws IOException
     {
-	Code.debug("new ServletLoader(",servletClassPath,")");
-	if (servletClassPath!=null && servletClassPath.length()>0)
-	    _classPath=new ResourcePath(servletClassPath,quiet);
+        Code.debug("new ServletLoader(",servletClassPath,")");
+        if (servletClassPath!=null && servletClassPath.length()>0)
+            _classPath=new ResourcePath(servletClassPath,quiet);
     }
 
     
@@ -84,40 +88,40 @@ public class ServletLoader extends ClassLoader
      * @exception ClassNotFoundException 
      */
     final public Class loadClass(String name)
-	throws ClassNotFoundException
+        throws ClassNotFoundException
     {
-	try
-	{
-	    // look in the cache
-	    Class c=(Class)_cache.get(name);
-	    if (c!=null)
-		return c;
-	
-	    // If it is a system class, it must be loaded from the
-	    // base loader
-	    if (isSystemClass(name))
-		return findSystemClass(name);    
-	    
-	    // try loading from the handler class path
-	    c=loadFromClassPath(name);
-	    if (c!=null)
-	    {
-		if (Code.verbose())Code.debug("loaded  ",name);
-		_cache.put(name,c);
-		return c;
-	    }
+        try
+        {
+            // look in the cache
+            Class c=(Class)_cache.get(name);
+            if (c!=null)
+                return c;
+        
+            // If it is a system class, it must be loaded from the
+            // base loader
+            if (isSystemClass(name))
+                return findSystemClass(name);    
+            
+            // try loading from the handler class path
+            c=loadFromClassPath(name);
+            if (c!=null)
+            {
+                if (Code.verbose())Code.debug("loaded  ",name);
+                _cache.put(name,c);
+                return c;
+            }
 
-	    return findSystemClass(name);
-	}
-	catch(ClassNotFoundException e)
-	{
-	    throw e;
-	}
-	catch(Throwable e)
-	{
-	    Code.warning(e);
-	    throw new ClassNotFoundException(name);
-	}
+            return findSystemClass(name);
+        }
+        catch(ClassNotFoundException e)
+        {
+            throw e;
+        }
+        catch(Throwable e)
+        {
+            Code.warning(e);
+            throw new ClassNotFoundException(name);
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -130,9 +134,9 @@ public class ServletLoader extends ClassLoader
      */
     protected Class loadFromClassPath(String name)
     {
-	if (_classPath==null)
-	    return null;
-	
+        if (_classPath==null)
+            return null;
+        
         Class c;        
         //remove the .class
         if (name.endsWith(".class"))
@@ -143,17 +147,17 @@ public class ServletLoader extends ClassLoader
         if (c!=null)
             return c;
 
-	// get the package name
-	String packageName="";
-	if (name.indexOf(".")>=0)
-	    packageName=name.substring(0,name.lastIndexOf('.'));
-	
-	// Check permission
-	SecurityManager sm=System.getSecurityManager();
-	if (sm!=null)
-	    sm.checkPackageAccess(packageName);
-	
-	// Load & define
+        // get the package name
+        String packageName="";
+        if (name.indexOf(".")>=0)
+            packageName=name.substring(0,name.lastIndexOf('.'));
+        
+        // Check permission
+        SecurityManager sm=System.getSecurityManager();
+        if (sm!=null)
+            sm.checkPackageAccess(packageName);
+        
+        // Load & define
         String filename = name.replace('.',File.separatorChar)+".class";
         InputStream in=_classPath.getInputStream(filename);
         if (in!=null)
@@ -165,11 +169,11 @@ public class ServletLoader extends ClassLoader
                 
                 byte data[] = out.toByteArray();
                 c= defineClass(name,data,0,data.length);
-		_cache.put(name,c);
+                _cache.put(name,c);
             }
             catch(Exception e)
             {
-		Code.ignore(e);
+                Code.ignore(e);
             }
             finally
             {
@@ -178,7 +182,7 @@ public class ServletLoader extends ClassLoader
             }
         }
 
-	if (Code.verbose())Code.debug("Loaded ",c," for ",name);
+        if (Code.verbose())Code.debug("Loaded ",c," for ",name);
         return c;
     }
     
@@ -190,15 +194,15 @@ public class ServletLoader extends ClassLoader
      */
     final public InputStream getResourceAsStream(String filename)
     {
-	if (Code.verbose()) Code.debug("Load resource as stream ",filename);
+        if (Code.verbose()) Code.debug("Load resource as stream ",filename);
 
-	InputStream in=null;
-	if (_classPath!=null)
-	    in=_classPath.getInputStream(filename);
-	if (in==null)
-	    in=ClassLoader.getSystemResourceAsStream(filename);
-	
-	return in;
+        InputStream in=null;
+        if (_classPath!=null)
+            in=_classPath.getInputStream(filename);
+        if (in==null)
+            in=ClassLoader.getSystemResourceAsStream(filename);
+        
+        return in;
     }
 
     /* ------------------------------------------------------------ */
@@ -209,17 +213,17 @@ public class ServletLoader extends ClassLoader
      */
     public URL getResource(String filename)
     {
-	Code.debug("Load resource ",filename);
-	URL url=null;
-	if (_classPath!=null)
-	{
-	    Resource resource=_classPath.getResource(filename);
-	    if (resource!=null)
-		url=resource.getURL();
-	}
-	if (url==null)
-	    url=ClassLoader.getSystemResource(filename);
-	return url;
+        Code.debug("Load resource ",filename);
+        URL url=null;
+        if (_classPath!=null)
+        {
+            Resource resource=_classPath.getResource(filename);
+            if (resource!=null)
+                url=resource.getURL();
+        }
+        if (url==null)
+            url=ClassLoader.getSystemResource(filename);
+        return url;
     }
     
     
@@ -231,7 +235,7 @@ public class ServletLoader extends ClassLoader
      */
     public boolean isModified()
     {	
-	return _classPath.isModified();
+        return _classPath.isModified();
     }
     
     
@@ -262,11 +266,11 @@ public class ServletLoader extends ClassLoader
     private final static String[] __systemClasses =
     {
         "java.",
-	"javax.",
-	"com.mortbay.Util.",
-	"com.mortbay.HTTP.",
-	"com.mortbay.HTML.",
-	"com.mortbay.FTP.",
+        "javax.",
+        "com.mortbay.Util.",
+        "com.mortbay.HTTP.",
+        "com.mortbay.HTML.",
+        "com.mortbay.FTP.",
     };
       
 

@@ -4,10 +4,9 @@
 // ========================================================================
 
 package com.mortbay.HTML;
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.Writer;
 
-import com.mortbay.Util.Code;
 
 /* ------------------------------------------------------------ */
 /** HTML Comment

@@ -4,10 +4,16 @@
 // ========================================================================
 
 package com.mortbay.HTTP;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
-import java.util.*;
-import com.mortbay.Util.*;
-import java.io.*;
+
+import com.mortbay.Util.Code;
+import com.mortbay.Util.LineInput;
+import com.mortbay.Util.Test;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 
 /* ------------------------------------------------------------ */
 /** 
@@ -344,19 +350,19 @@ public class TestHarness
                           "multi paths");
             t.checkEquals(p.getMatch("/YYY").getValue(),"9",
                           "multi paths");
-	    
+            
             t.checkEquals(p.getMatch("/abs/path;extra").getValue(),"1",
                           "; in path");
             t.checkEquals(p.getMatch("/abs/path/longer;extra").getValue(),"2",
                           "; in path");
 
             t.checkEquals(p.pathMatch("/abs/path","/abs/path;extra"),
-			  "/abs/path;extra",
+                          "/abs/path;extra",
                           "; in path match");
             t.checkEquals(p.pathInfo("/abs/path","/abs/path;extra"),
-			  null,
+                          null,
                           "; in path info");
-	    
+            
             t.checkEquals(p.getMatch("/animal/path#extra").getValue(),"5",
                           "; in path");
         }
@@ -373,7 +379,7 @@ public class TestHarness
     public static void main(String[] args)
     {
         try{
-	    chunkInTest();
+            chunkInTest();
             chunkOutTest();
             filters();
             httpFields();

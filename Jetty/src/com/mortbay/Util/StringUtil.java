@@ -71,20 +71,20 @@ public class StringUtil
     
         StringBuffer buf = new StringBuffer(s.length()+with.length());
 
-	synchronized(buf)
-	{
-	    do
-	    {
-		buf.append(s.substring(c,i));
-		buf.append(with);
-		c=i+sub.length();
-	    } while ((i=s.indexOf(sub,c))!=-1);
-	    
-	    if (c<s.length())
-		buf.append(s.substring(c,s.length()));
-	    
-	    return buf.toString();
-	}
+        synchronized(buf)
+        {
+            do
+            {
+                buf.append(s.substring(c,i));
+                buf.append(with);
+                c=i+sub.length();
+            } while ((i=s.indexOf(sub,c))!=-1);
+            
+            if (c<s.length())
+                buf.append(s.substring(c,s.length()));
+            
+            return buf.toString();
+        }
     }
     
     

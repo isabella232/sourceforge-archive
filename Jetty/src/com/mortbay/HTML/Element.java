@@ -4,9 +4,14 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTML;
-import com.mortbay.Util.*;
-import java.util.*;
-import java.io.*;
+import com.mortbay.Util.Code;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 /* -------------------------------------------------------------------- */
 /** HTML Element

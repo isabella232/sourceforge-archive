@@ -5,9 +5,6 @@
 
 package com.mortbay.Util;
 
-import java.util.*;
-import java.io.*;
-import java.text.*;
 
 
 /* ------------------------------------------------------------ */
@@ -31,12 +28,12 @@ public interface LogSink extends LifeCycle
      */
     public void setOptions(String dateFormat,
                            String timezone,
-			   boolean logTimeStamps,
-			   boolean logLabels,
-			   boolean logTags,
-			   boolean logStackSize,
-			   boolean logStackTrace,
-			   boolean logOneLine);
+                           boolean logTimeStamps,
+                           boolean logLabels,
+                           boolean logTags,
+                           boolean logStackSize,
+                           boolean logStackTrace,
+                           boolean logOneLine);
     
     /* ------------------------------------------------------------ */
     /** Log a message.
@@ -50,9 +47,9 @@ public interface LogSink extends LifeCycle
      * @param time The time stamp of the message.
      */
     public void log(String tag,
-		    Object msg,
-		    Frame frame,
-		    long time);
+                    Object msg,
+                    Frame frame,
+                    long time);
     
     /* ------------------------------------------------------------ */
     /** Log a message.

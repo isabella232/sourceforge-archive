@@ -4,7 +4,10 @@
 // ========================================================================
 
 package com.mortbay.Util;
-import java.io.*;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 
 /* ------------------------------------------------------------ */
 /** Filtered OutputStream that summarized throughput on stderr
@@ -93,11 +96,11 @@ public class SummaryFilterOutputStream extends FilterOutputStream
     {
         out.write(b,off,len);
         StringBuffer buf=new
-	    StringBuffer("=============================================================================\n"+
-			 Thread.currentThread().getName()+": "+
-			 len+
-			 _msg+
-			 "-----------------------------------------------------------------------------\n");
+            StringBuffer("=============================================================================\n"+
+                         Thread.currentThread().getName()+": "+
+                         len+
+                         _msg+
+                         "-----------------------------------------------------------------------------\n");
         int i=0;
         for (i=0; (_size==0 || i<_size) && i<len; i++)
         {

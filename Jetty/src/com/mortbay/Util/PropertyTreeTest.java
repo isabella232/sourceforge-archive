@@ -6,11 +6,19 @@
 package com.mortbay.Util;
 
 import java.io.FileInputStream;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.Vector;
 
 public class PropertyTreeTest
 {
     /* ------------------------------------------------------------ */
+    public static void main(String argv[])
+    {
+        test();
+	Test.report();
+    }
+     
     public static void test()
     {
         Test test = new Test("PropertyTree");
@@ -81,7 +89,7 @@ public class PropertyTreeTest
             
             Code.debug("getTree(a.b)=",sub);
             test.checkEquals(sub.toString(),
-                             "{c=8, b=9, B=10, *=3}", // XXX could be platform order?
+                             "{b=9, *=3, c=8, B=10}", // XXX could be platform order?
                              "SubTree get");
         
             sub=props.getTree("a");
@@ -91,7 +99,7 @@ public class PropertyTreeTest
         
             sub=sub.getTree("b");       
             test.checkEquals(sub.toString(),
-                             "{c=8, b=9, B=10, *=3}", // XXX could be platform order?
+                             "{b=9, *=3, B=10, c=8}", // XXX could be platform order?
                              "SubTree");
 
             Enumeration e=sub.getRealNodes();
@@ -104,7 +112,7 @@ public class PropertyTreeTest
         
             Properties clone = (Properties)sub.clone();
             test.checkEquals(clone.toString(),
-                             "{c=8, b=9, B=10, *=3}",
+                             "{b=9, *=3, c=8, B=10}",
                              "Clone");
         
             sub.put("C","C");
@@ -191,4 +199,5 @@ public class PropertyTreeTest
         return v;
     }
     
-}
+};
+

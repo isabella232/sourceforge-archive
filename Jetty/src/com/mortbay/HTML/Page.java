@@ -4,9 +4,11 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTML;
-import com.mortbay.Util.*;
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /* --------------------------------------------------------------------- */
 /** HTML Page

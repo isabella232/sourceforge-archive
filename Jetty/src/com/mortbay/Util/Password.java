@@ -4,8 +4,11 @@
 // ========================================================================
 
 package com.mortbay.Util;
-import com.mortbay.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.Arrays;
 
 /* ------------------------------------------------------------ */
 /** Get a password 
@@ -36,7 +39,7 @@ public class Password
      */
     public Password(String name)
     {
-	this(name,"",null);
+        this(name,"",null);
     }
     
     /* ------------------------------------------------------------ */
@@ -45,7 +48,7 @@ public class Password
      */
     public Password(String name,String passwd)
     {
-	setPassword(name,passwd);
+        setPassword(name,passwd);
     }
     
     /* ------------------------------------------------------------ */
@@ -54,27 +57,27 @@ public class Password
      */
     public Password(String name,String dft,String promptDft)
     {
-	String passwd=System.getProperty(name,dft);
-	if (passwd==null || passwd.length()==0)
-	{
-	    try
-	    {
-		System.out.print(name+
-				 ((promptDft!=null && promptDft.length()>0)
-				  ?" [dft]":"")+" : ");
-		System.out.flush();
-		byte[] buf = new byte[512];
-		int len=System.in.read(buf);
-		passwd=new String(buf,0,len).trim();
-	    }
-	    catch(IOException e)
-	    {
-		Code.warning(e);
-	    }
-	    if (passwd==null || passwd.length()==0)
-		passwd=promptDft;
-	}
-	setPassword(name,passwd);
+        String passwd=System.getProperty(name,dft);
+        if (passwd==null || passwd.length()==0)
+        {
+            try
+            {
+                System.out.print(name+
+                                 ((promptDft!=null && promptDft.length()>0)
+                                  ?" [dft]":"")+" : ");
+                System.out.flush();
+                byte[] buf = new byte[512];
+                int len=System.in.read(buf);
+                passwd=new String(buf,0,len).trim();
+            }
+            catch(IOException e)
+            {
+                Code.warning(e);
+            }
+            if (passwd==null || passwd.length()==0)
+                passwd=promptDft;
+        }
+        setPassword(name,passwd);
     }
 
     /* ------------------------------------------------------------ */
@@ -83,15 +86,15 @@ public class Password
      */
     private void setPassword(String name,String password)
     {
-	pw=password;
-	
-	// expand password
-	while (pw!=null && pw.startsWith("EXEC:"))
-	    pw=expand(name,pw.substring(5).trim());
+        pw=password;
+        
+        // expand password
+        while (pw!=null && pw.startsWith("EXEC:"))
+            pw=expand(name,pw.substring(5).trim());
 
-	while (pw!=null && pw.startsWith("OBF:"))
-	    pw=deobfiscate(pw);
-	pwc = pw.toCharArray();
+        while (pw!=null && pw.startsWith("OBF:"))
+            pw=deobfiscate(pw);
+        pwc = pw.toCharArray();
     }
 
     /* ------------------------------------------------------------ */
@@ -101,54 +104,54 @@ public class Password
      */
     private String expand(String name, String pass)
     {
-	Process process=null;
-	try{
-	    process = Runtime.getRuntime().exec(pass);
-	    OutputStream out = process.getOutputStream();
-	    out.write((name+"\n").getBytes());
-	    out.flush();
-	    InputStream in = process.getInputStream();
-	    byte[] buf = new byte[512];
-	    int len=in.read(buf);
-	    pass=new String(buf,0,len).trim();
-	}
-	catch(Exception e)
-	{
-	    Code.warning(e);
-	}
-	finally
-	{
-	    if (process!=null)
-		process.destroy();
-	}
-	System.err.println("PW="+pass);
-	return pass;
+        Process process=null;
+        try{
+            process = Runtime.getRuntime().exec(pass);
+            OutputStream out = process.getOutputStream();
+            out.write((name+"\n").getBytes());
+            out.flush();
+            InputStream in = process.getInputStream();
+            byte[] buf = new byte[512];
+            int len=in.read(buf);
+            pass=new String(buf,0,len).trim();
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+        }
+        finally
+        {
+            if (process!=null)
+                process.destroy();
+        }
+        System.err.println("PW="+pass);
+        return pass;
     }
     
     /* ------------------------------------------------------------ */
     public String toString()
     {
-	return pw;
+        return pw;
     }
     
     /* ------------------------------------------------------------ */
     public String toStarString()
     {
-	return "********************************************************************************".substring(0,pw.length());
+        return "********************************************************************************".substring(0,pw.length());
     }
 
     /* ------------------------------------------------------------ */
     public char[] getCharArray()
     {
-	return pwc;
+        return pwc;
     }
 
     /* ------------------------------------------------------------ */
     public void zero()
     {
-	pw=null;
-	java.util.Arrays.fill(pwc,'\0');
-	pwc=null;
+        pw=null;
+        java.util.Arrays.fill(pwc,'\0');
+        pwc=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -158,31 +161,31 @@ public class Password
      */
     private static String obfiscate(String s)
     {
-	StringBuffer buf = new StringBuffer();
-	byte[] b = s.getBytes();
-	
-	synchronized(buf)
-	{
-	    buf.append("OBF:");
-	    for (int i=0;i<b.length;i++)
-	    {
-		byte b1 = b[i];
-		byte b2 = b[s.length()-(i+1)];
-		int i1= (int)b1+(int)b2+127;
-		int i2= (int)b1-(int)b2+127;
-		int i0=i1*256+i2;
-		String x=Integer.toString(i0,36);
+        StringBuffer buf = new StringBuffer();
+        byte[] b = s.getBytes();
+        
+        synchronized(buf)
+        {
+            buf.append("OBF:");
+            for (int i=0;i<b.length;i++)
+            {
+                byte b1 = b[i];
+                byte b2 = b[s.length()-(i+1)];
+                int i1= (int)b1+(int)b2+127;
+                int i2= (int)b1-(int)b2+127;
+                int i0=i1*256+i2;
+                String x=Integer.toString(i0,36);
 
-		switch(x.length())
-		{
-		  case 1:buf.append('0');
-		  case 2:buf.append('0');
-		  case 3:buf.append('0');
-		  default:buf.append(x);
-		}
-	    }
-	    return buf.toString();
-	}
+                switch(x.length())
+                {
+                  case 1:buf.append('0');
+                  case 2:buf.append('0');
+                  case 3:buf.append('0');
+                  default:buf.append(x);
+                }
+            }
+            return buf.toString();
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -192,21 +195,21 @@ public class Password
      */
     private static String deobfiscate(String s)
     {
-	if (s.startsWith("OBF:"))
-	    s=s.substring(4);
-	
-	byte[] b=new byte[s.length()/2];
-	int l=0;
-	for (int i=0;i<s.length();i+=4)
-	{
-	    String x=s.substring(i,i+4);
-	    int i0 = Integer.parseInt(x,36);
-	    int i1=(i0/256);
-	    int i2=(i0%256);
-	    b[l++]=(byte)((i1+i2-254)/2);
-	}
+        if (s.startsWith("OBF:"))
+            s=s.substring(4);
+        
+        byte[] b=new byte[s.length()/2];
+        int l=0;
+        for (int i=0;i<s.length();i+=4)
+        {
+            String x=s.substring(i,i+4);
+            int i0 = Integer.parseInt(x,36);
+            int i1=(i0/256);
+            int i2=(i0%256);
+            b[l++]=(byte)((i1+i2-254)/2);
+        }
 
-	return new String(b,0,l);
+        return new String(b,0,l);
     }
 
     
@@ -216,8 +219,8 @@ public class Password
      */
     public static void main(String[] arg)
     {
-	Password pw = new Password("password");
-	System.err.println(obfiscate(pw.toString()));
+        Password pw = new Password("password");
+        System.err.println(obfiscate(pw.toString()));
     }
     
 }

@@ -5,7 +5,7 @@
 
 package com.mortbay.Util;
 
-import java.util.*;
+import java.util.Observable;
 
 /* ======================================================================== */
 /** Helpful extension to Observable.

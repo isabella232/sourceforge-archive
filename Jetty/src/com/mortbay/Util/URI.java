@@ -3,10 +3,11 @@
 // $Id$
 // ========================================================================
 package com.mortbay.Util;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import java.io.*;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /* ------------------------------------------------------------ */
 /** URI Holder.
@@ -277,11 +278,11 @@ public class URI
     public String getQuery()
     {
         if (_dirty)
-	{
-	    _query = _parameters.encode(_encodeNulls);
-	    if (_query!=null && _query.length()==0)
-		_query=null;
-	}
+        {
+            _query = _parameters.encode(_encodeNulls);
+            if (_query!=null && _query.length()==0)
+                _query=null;
+        }
         return _query;
     }
     

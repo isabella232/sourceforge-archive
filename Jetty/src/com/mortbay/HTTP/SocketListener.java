@@ -4,11 +4,13 @@
 // ========================================================================
 
 package com.mortbay.HTTP;
-import com.mortbay.Util.*;
+import com.mortbay.Util.Code;
+import com.mortbay.Util.InetAddrPort;
+import com.mortbay.Util.Log;
+import com.mortbay.Util.ThreadedServer;
+import java.io.IOException;
+import java.net.Socket;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
 
 /* ------------------------------------------------------------ */
 /** Socket HTTP Listener.
@@ -38,8 +40,8 @@ public class SocketListener
     /* ------------------------------------------------------------ */
     public void setHttpServer(HttpServer server)
     {
-	Code.assert(_server==null || _server==server,
-		    "Cannot share listeners");
+        Code.assert(_server==null || _server==server,
+                    "Cannot share listeners");
         _server=server;
     }
     
@@ -87,7 +89,7 @@ public class SocketListener
         try
         {
             Code.debug("ACCEPT:",socket);
-	    socket.setSoLinger(true,30000);
+            socket.setSoLinger(true,30000);
             HttpConnection connection =
                 new SocketConnection(socket);
             connection.handle();
@@ -102,10 +104,10 @@ public class SocketListener
      * @param request 
      */
     public final void customizeRequest(HttpConnection connection,
-				       HttpRequest request)
+                                       HttpRequest request)
     {
-	customizeRequest(((SocketConnection)connection).getSocket(),
-			 request);
+        customizeRequest(((SocketConnection)connection).getSocket(),
+                         request);
     }
     
     /* ------------------------------------------------------------ */
@@ -113,31 +115,31 @@ public class SocketListener
      * @param request 
      */
     protected void customizeRequest(Socket socket,
-				    HttpRequest request)
+                                    HttpRequest request)
     {
-	// Do nothing
+        // Do nothing
     }
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     private class SocketConnection extends HttpConnection
     {
-	private Socket _socket;
-	public Socket getSocket()
-	{
-	    return _socket;
-	}
+        private Socket _socket;
+        public Socket getSocket()
+        {
+            return _socket;
+        }
 
-	/* -------------------------------------------------------- */
-	SocketConnection(Socket socket)
-	    throws IOException
-	{
-	    super(SocketListener.this,
-		  socket.getInetAddress(),
-		  socket.getInputStream(),
-		  socket.getOutputStream());
-	    _socket=socket;
-	}
+        /* -------------------------------------------------------- */
+        SocketConnection(Socket socket)
+            throws IOException
+        {
+            super(SocketListener.this,
+                  socket.getInetAddress(),
+                  socket.getInputStream(),
+                  socket.getOutputStream());
+            _socket=socket;
+        }
     }
 }
 

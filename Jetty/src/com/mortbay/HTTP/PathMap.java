@@ -4,14 +4,14 @@
 // ========================================================================
 
 package com.mortbay.HTTP;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import com.mortbay.Util.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.Hashtable;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 /* ------------------------------------------------------------ */
 /** URI path map to Object.
@@ -53,7 +53,7 @@ public class PathMap extends HashMap
      */
     public PathMap()
     {
-	super(11);
+        super(11);
     }
     
     /* --------------------------------------------------------------- */
@@ -61,7 +61,7 @@ public class PathMap extends HashMap
      */
     public PathMap(int capacity)
     {
-	super (capacity);
+        super (capacity);
     }
     
     /* --------------------------------------------------------------- */
@@ -80,39 +80,39 @@ public class PathMap extends HashMap
      */
     public synchronized Object put(Object pathSpec, Object object)
     {
-	StringTokenizer tok = new StringTokenizer(pathSpec.toString(),",");
-	Object old =null;
-	
-	while (tok.hasMoreTokens())
-	{
-	    String prefix=tok.nextToken();
-	    
-	    if (!prefix.startsWith("/") && !prefix.startsWith("*."))
-		throw new IllegalArgumentException("PathSpec must start with '/' or '*.'");
-	    
-	    old = super.put(prefix,object);
-	    
-	    // Look for the entry that was just created.
-	    Set entries = entrySet();
-	    Iterator iter=entries.iterator();
-	    while(iter.hasNext())
-	    {
-		Map.Entry entry =
-		    (Map.Entry)iter.next();
-		if (entry.getKey().equals(prefix))
-		{
-		    // Create a map to the entry
-		    _entryMap.put(prefix,entry);
-		    
-		    // Also create a prefix map to the entry
-		    if (prefix.length()>2 && prefix.endsWith("/*"))
-			_prefixMap.put(prefix.substring(0,prefix.length()-2),entry);
-		    break;
-		}
-	    }
-	}
-	    
-	return old;
+        StringTokenizer tok = new StringTokenizer(pathSpec.toString(),",");
+        Object old =null;
+        
+        while (tok.hasMoreTokens())
+        {
+            String prefix=tok.nextToken();
+            
+            if (!prefix.startsWith("/") && !prefix.startsWith("*."))
+                throw new IllegalArgumentException("PathSpec must start with '/' or '*.'");
+            
+            old = super.put(prefix,object);
+            
+            // Look for the entry that was just created.
+            Set entries = entrySet();
+            Iterator iter=entries.iterator();
+            while(iter.hasNext())
+            {
+                Map.Entry entry =
+                    (Map.Entry)iter.next();
+                if (entry.getKey().equals(prefix))
+                {
+                    // Create a map to the entry
+                    _entryMap.put(prefix,entry);
+                    
+                    // Also create a prefix map to the entry
+                    if (prefix.length()>2 && prefix.endsWith("/*"))
+                        _prefixMap.put(prefix.substring(0,prefix.length()-2),entry);
+                    break;
+                }
+            }
+        }
+            
+        return old;
     }
 
     /* ------------------------------------------------------------ */
@@ -173,7 +173,7 @@ public class PathMap extends HashMap
             if (entry!=null)
                 return (Map.Entry) entry;
         }
-	
+        
         // try exact match upto '#'
         prefix=path;
         while((i=prefix.lastIndexOf('#'))>0)
@@ -183,7 +183,7 @@ public class PathMap extends HashMap
             if (entry!=null)
                 return (Map.Entry) entry;
         }
-	
+        
         // Default
         return (Map.Entry) _entryMap.get("/");
     }
@@ -203,7 +203,7 @@ public class PathMap extends HashMap
         entry=_entryMap.get(path);
         if (entry!=null)
             entries.add(entry);
-	
+        
         // exact upto ; search
         String prefix=path;
         int i;
@@ -214,7 +214,7 @@ public class PathMap extends HashMap
             if (entry!=null)
                 entries.add(entry);
         }
-	
+        
         // exact upto # search
         prefix=path;
         while((i=prefix.lastIndexOf('#'))>0)
@@ -226,7 +226,7 @@ public class PathMap extends HashMap
         }
         
         // prefix search
-	prefix=path;
+        prefix=path;
         while((i=prefix.lastIndexOf('/'))>0)
         {
             prefix=prefix.substring(0,i);
@@ -234,7 +234,7 @@ public class PathMap extends HashMap
             if (entry!=null)
                 entries.add(entry);
         }
-	
+        
         // Extension search
         i=0;
         while ((i=path.indexOf('.',i+1))>0)
@@ -297,12 +297,12 @@ public class PathMap extends HashMap
             if (pathSpec.endsWith("/*") &&
                 pathSpec.regionMatches(0,path,0,pathSpec.length()-2))
                 return path.substring(0,pathSpec.length()-2);
-	    
-	    if (path.startsWith(pathSpec) &&
-		(path.charAt(pathSpec.length())==';' ||
-		 path.charAt(pathSpec.length())=='#'))
-		return path;
-	    
+            
+            if (path.startsWith(pathSpec) &&
+                (path.charAt(pathSpec.length())==';' ||
+                 path.charAt(pathSpec.length())=='#'))
+                return path;
+            
             throw new IllegalArgumentException("PathSpec does not match path");
         }
 
@@ -322,7 +322,7 @@ public class PathMap extends HashMap
 
         if (pathSpec.equals("/"))
             return path;
-	
+        
         if (pathSpec.startsWith("/"))
         {
             if (pathSpec.equals(path))
@@ -332,10 +332,10 @@ public class PathMap extends HashMap
                 pathSpec.regionMatches(0,path,0,pathSpec.length()-2))
                 return path.substring(pathSpec.length()-2);
 
-	    if (path.startsWith(pathSpec) &&
-		(path.charAt(pathSpec.length())==';' ||
-		 path.charAt(pathSpec.length())=='#'))
-		return null;
+            if (path.startsWith(pathSpec) &&
+                (path.charAt(pathSpec.length())==';' ||
+                 path.charAt(pathSpec.length())=='#'))
+                return null;
                 
             throw new IllegalArgumentException("PathSpec does not match path");
         }
@@ -352,26 +352,26 @@ public class PathMap extends HashMap
      * @return base plus path with pathspec removed 
      */
     public static String relativePath(String base,
-				      String pathSpec,
-				      String path )
+                                      String pathSpec,
+                                      String path )
     {
-	String info=pathInfo(pathSpec,path);
-	if (info==null)
-	    info=path;
+        String info=pathInfo(pathSpec,path);
+        if (info==null)
+            info=path;
 
-	if( info.startsWith( "./"))
-	    info = info.substring( 2);
-	if( base.endsWith( "/"))
-	    if( info.startsWith( "/"))
-		path = base + info.substring(1);
-	    else
-		path = base + info;
-	else
-	    if( info.startsWith( "/"))
-		path = base + info;
-	    else
-		path = base + "/" + info;
-	return path;
+        if( info.startsWith( "./"))
+            info = info.substring( 2);
+        if( base.endsWith( "/"))
+            if( info.startsWith( "/"))
+                path = base + info.substring(1);
+            else
+                path = base + info;
+        else
+            if( info.startsWith( "/"))
+                path = base + info;
+            else
+                path = base + "/" + info;
+        return path;
     }
     
 }

@@ -4,7 +4,9 @@
 
 package com.mortbay.Util;
 
-import java.io.*;
+import java.io.CharArrayWriter;
+import java.io.IOException;
+import java.io.Writer;
 
 /** 
 *  A Writer that writes to the Log when it is flushed. For best results

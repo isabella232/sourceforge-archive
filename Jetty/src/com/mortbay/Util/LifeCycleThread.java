@@ -1,7 +1,6 @@
 package com.mortbay.Util;
 
-import com.mortbay.Util.*;
-import java.io.*;
+import java.io.InterruptedIOException;
 
 public abstract class LifeCycleThread implements LifeCycle, Runnable
 {
@@ -16,10 +15,10 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
      * @exception InterruptedException 
      */
     public void initialize(Object o)
-	throws InterruptedException
+        throws InterruptedException
     {
-	if (_running)
-	    stop();
+        if (_running)
+            stop();
         _configuration=o;
     }
     
@@ -29,7 +28,7 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
      */
     public boolean isDaemon()
     {
-	return _daemon;
+        return _daemon;
     }
     
     /* ------------------------------------------------------------ */
@@ -38,7 +37,7 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
      */
     public void setDaemon(boolean d)
     {
-	_daemon = d;
+        _daemon = d;
     }
     
     /* ------------------------------------------------------------ */
@@ -47,7 +46,7 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
      */
     public Object getConfiguration()
     {
-	return _configuration;
+        return _configuration;
     }
     
     /* ------------------------------------------------------------ */
@@ -56,7 +55,7 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
      */
     public boolean isStarted()
     {
-	return _running;
+        return _running;
     }
     
     /* ------------------------------------------------------------ */
@@ -65,7 +64,7 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
      */
     public boolean isDestroyed()
     {
-	return _thread==null && _configuration==null;
+        return _thread==null && _configuration==null;
     }
 
     /* ------------------------------------------------------------ */
@@ -77,28 +76,28 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
         {
             Code.debug("Already started");
             return;
-	}
+        }
         _running=true;
-	if (_thread==null)
-	{
-	    _thread=new Thread(this);
-	    _thread.setDaemon(_daemon);
-	}
-	_thread.start();
+        if (_thread==null)
+        {
+            _thread=new Thread(this);
+            _thread.setDaemon(_daemon);
+        }
+        _thread.start();
     }
     
     /* ------------------------------------------------------------ */
     /** 
      */
     public synchronized void stop()
-	throws InterruptedException
+        throws InterruptedException
     {
-	_running=false;
-	if (_thread!=null)
-	{
-	    _thread.interrupt();
-	    _thread.join();
-	}
+        _running=false;
+        if (_thread!=null)
+        {
+            _thread.interrupt();
+            _thread.join();
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -106,15 +105,15 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
      */
     public void destroy()
     {
-	_running=false;
-	if (_thread!=null)
-	{
-	    _thread.interrupt();
-	    Thread.yield();
-	    _thread.stop();
-	    _thread=null;
-	}
-	_configuration=null;
+        _running=false;
+        if (_thread!=null)
+        {
+            _thread.interrupt();
+            Thread.yield();
+            _thread.stop();
+            _thread=null;
+        }
+        _configuration=null;
     }
 
 
@@ -123,40 +122,40 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
      */
     public final void run()
     {
-	try
-	{
-	    while(_running)
-	    {
-		try
-		{
-		    loop();
-		}
-		catch(InterruptedException e)
-		{
-		    if (Code.verbose())
-			Code.ignore(e);
-		}
-		catch(InterruptedIOException e)
-		{
-		    if (Code.verbose())
-			Code.ignore(e);
-		}
-		catch(Exception e)
-		{
-		    if (exception(e))
-			break;
-		} 
-		catch(Error e)
-		{
-		    if (error(e))
-			break;
-		}   
-	    }
-	}
-	finally
-	{
-	    _running=false;
-	}
+        try
+        {
+            while(_running)
+            {
+                try
+                {
+                    loop();
+                }
+                catch(InterruptedException e)
+                {
+                    if (Code.verbose())
+                        Code.ignore(e);
+                }
+                catch(InterruptedIOException e)
+                {
+                    if (Code.verbose())
+                        Code.ignore(e);
+                }
+                catch(Exception e)
+                {
+                    if (exception(e))
+                        break;
+                } 
+                catch(Error e)
+                {
+                    if (error(e))
+                        break;
+                }   
+            }
+        }
+        finally
+        {
+            _running=false;
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -166,8 +165,8 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
      */
     public boolean exception(Exception e)
     {
-	Code.warning(e);
-	return true;
+        Code.warning(e);
+        return true;
     }
     
     /* ------------------------------------------------------------ */
@@ -177,8 +176,8 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
      */
     public boolean error(Error e)
     {
-	Code.warning(e);
-	return true;
+        Code.warning(e);
+        return true;
     }
     
     /* ------------------------------------------------------------ */
@@ -188,8 +187,8 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
      */
     public abstract void loop()
     throws InterruptedException,
-	   InterruptedIOException,
-	   Exception;
+           InterruptedIOException,
+           Exception;
     
 }
 

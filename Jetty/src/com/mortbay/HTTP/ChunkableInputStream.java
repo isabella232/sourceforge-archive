@@ -4,12 +4,16 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTTP;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
-import com.mortbay.Util.*;
-import java.util.*;
 
-import java.io.*;
-import java.lang.reflect.*;
+import com.mortbay.Util.Code;
+import com.mortbay.Util.LineInput;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 
 /* ------------------------------------------------------------ */
 /** HTTP Chunking InputStream. 
@@ -118,9 +122,9 @@ public class ChunkableInputStream extends FilterInputStream
  
     /* ------------------------------------------------------------ */
     public void close()
-	throws IOException
+        throws IOException
     {
-	in=__closedStream;
+        in=__closedStream;
     }
  
     /* ------------------------------------------------------------ */
@@ -185,8 +189,8 @@ public class ChunkableInputStream extends FilterInputStream
         public int read()
             throws IOException
         {
-	    return -1;
-	}
+            return -1;
+        }
     }
     
     
@@ -269,7 +273,7 @@ public class ChunkableInputStream extends FilterInputStream
         public void close()
             throws IOException
         {
-	    Code.debug("Close");
+            Code.debug("Close");
             _chunkSize=-1;
         }
  

@@ -4,9 +4,9 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTML;
+import java.io.IOException;
+import java.io.Writer;
 import com.mortbay.HTTP.HttpFields;
-import java.io.*;
-import java.util.*;
 
 /* -------------------------------------------------------------------- */
 /** HTML Form

@@ -5,8 +5,10 @@
 
 package com.mortbay.Util;
 
-import java.util.*;
-import java.io.*;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /*-------------------------------------------------------------------*/
 /** Test Harness and report.

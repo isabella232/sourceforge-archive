@@ -5,7 +5,6 @@
 
 package com.mortbay.HTTP;
 
-import com.mortbay.Util.Code;
 import java.io.IOException;
 
 /* ------------------------------------------------------------ */

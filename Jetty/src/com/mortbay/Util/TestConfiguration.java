@@ -4,8 +4,8 @@
 // ========================================================================
 
 package com.mortbay.Util;
-import java.util.*;
-import java.net.*;
+import java.net.URL;
+import java.util.HashMap;
 
 public class TestConfiguration extends HashMap
 {
@@ -16,30 +16,30 @@ public class TestConfiguration extends HashMap
     
     public void setTest(Object value)
     {
-	testObject=value;
+        testObject=value;
     }
     
     public void setTest(int value)
     {
-	testInt=value;
+        testInt=value;
     }
 
     public void call()
     {
-	put("Called","Yes");
+        put("Called","Yes");
     }
     
     public TestConfiguration call(Boolean b)
     {
-	nested=new TestConfiguration();
-	nested.put("Arg",b);
-	return nested;
+        nested=new TestConfiguration();
+        nested.put("Arg",b);
+        return nested;
     }
     
     public void call(URL u,boolean b)
     {
-	put("URL",b?"1":"0");
-	url=u;
+        put("URL",b?"1":"0");
+        url=u;
     }    
 }
 

@@ -4,12 +4,16 @@
 // ========================================================================
 
 package com.mortbay.HTTP;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
-import com.mortbay.Util.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.lang.reflect.*;
+
+import com.mortbay.Util.Code;
+import com.mortbay.Util.UrlEncoded;
+import java.io.IOException;
+import java.io.Writer;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 
 
 /* ------------------------------------------------------------ */
@@ -132,7 +136,7 @@ public class HttpResponse extends HttpMessage
      */
     public boolean isDirty()
     {
-	return _status!=__200_OK || super.isDirty();
+        return _status!=__200_OK || super.isDirty();
     }
     
 
@@ -147,21 +151,21 @@ public class HttpResponse extends HttpMessage
      */
     public void reset()
     {
-	if (isCommitted())
-	    throw new IllegalStateException("Already committed");
+        if (isCommitted())
+            throw new IllegalStateException("Already committed");
 
-	try
-	{
-	    getOutputStream().resetBuffer();
-	    _status= __200_OK;
-	    _reason=null;
-	    super.reset();
-	}
-	catch(Exception e)
-	{
-	    Code.warning(e);
-	    throw new IllegalStateException(e.toString());
-	}
+        try
+        {
+            getOutputStream().resetBuffer();
+            _status= __200_OK;
+            _reason=null;
+            super.reset();
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            throw new IllegalStateException(e.toString());
+        }
     }
     
     
@@ -197,9 +201,9 @@ public class HttpResponse extends HttpMessage
         if (_state!=__MSG_EDITABLE && _state!=__MSG_SENDING)
             throw new IllegalStateException(__state[_state]+
                                             " is not EDITABLE || SENDING");
-	if (_header==null)
-	    throw new IllegalStateException("Response is destroued");
-	
+        if (_header==null)
+            throw new IllegalStateException("Response is destroued");
+        
         String status=_status+" ";
         if (Code.verbose())
             Code.debug("writeHeaders: ",status);
@@ -276,15 +280,15 @@ public class HttpResponse extends HttpMessage
         throws IOException
     {
         _header.put(HttpFields.__ContentType,HttpFields.__TextHtml);
-	
+        
         int code=exception.getCode();
         String message=exception.getMessage();
-	if (message==null)
-	    message="";
+        if (message==null)
+            message="";
         String reason=exception.getReason();
-	if (reason==null)
-	    reason="";
-	
+        if (reason==null)
+            reason="";
+        
         setStatus(code);
         setReason(reason);
 
@@ -292,18 +296,18 @@ public class HttpResponse extends HttpMessage
         {
             _header.put(HttpFields.__ContentType,"text/html");
 
-	    byte[] buf =
-		("<HTML>\n<HEAD>\n<TITLE>Error "+code+
-		 " "+reason+
-		 "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
-		 " "+reason+
-		 "</H2>\n"+(message==null?"":message)+
-		 "\n</BODY>\n</HTML>\n").getBytes("ISO-8859-1");
-	    
-	    _header.putIntField(HttpFields.__ContentLength,buf.length);
+            byte[] buf =
+                ("<HTML>\n<HEAD>\n<TITLE>Error "+code+
+                 " "+reason+
+                 "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
+                 " "+reason+
+                 "</H2>\n"+(message==null?"":message)+
+                 "\n</BODY>\n</HTML>\n").getBytes("ISO-8859-1");
+            
+            _header.putIntField(HttpFields.__ContentLength,buf.length);
             ChunkableOutputStream out=getOutputStream();
-	    out.write(buf);
-	    out.flush();
+            out.write(buf);
+            out.flush();
         }
         else
         {
@@ -332,18 +336,18 @@ public class HttpResponse extends HttpMessage
         {
             _header.put(HttpFields.__ContentType,"text/html");
 
-	    byte[] buf =
-		("<HTML>\n<HEAD>\n<TITLE>Error "+code+
-		 " "+reason+
-		 "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
-		 " "+reason+
-		 "</H2>\n"+(message==null?"":message)+
-		 "\n</BODY>\n</HTML>\n").getBytes("ISO-8859-1");
-	    
-	    _header.putIntField(HttpFields.__ContentLength,buf.length);
+            byte[] buf =
+                ("<HTML>\n<HEAD>\n<TITLE>Error "+code+
+                 " "+reason+
+                 "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
+                 " "+reason+
+                 "</H2>\n"+(message==null?"":message)+
+                 "\n</BODY>\n</HTML>\n").getBytes("ISO-8859-1");
+            
+            _header.putIntField(HttpFields.__ContentLength,buf.length);
             ChunkableOutputStream out=getOutputStream();
-	    out.write(buf);
-	    out.flush();
+            out.write(buf);
+            out.flush();
         }
         else
         {
@@ -418,10 +422,10 @@ public class HttpResponse extends HttpMessage
             throw new IllegalArgumentException("Bad cookie value");
         for(int i = 0; i < name.length(); i++)
         {
-	    char c = name.charAt(i);
+            char c = name.charAt(i);
             if (Character.isWhitespace(c) || c==',' || c==';' || c=='=')
                 throw new IllegalArgumentException("Bad cookie name:'"+name+"'");
-	}
+        }
         if(name.equalsIgnoreCase ("Comment") ||
            name.equalsIgnoreCase ("Discard") ||
            name.equalsIgnoreCase ("Domain")  ||
@@ -456,8 +460,8 @@ public class HttpResponse extends HttpMessage
             if (maxAge>=0)
             {
                 buf.append(";expires=");
-		Date expires = new Date(System.currentTimeMillis()+1000L*maxAge);
-		buf.append(HttpFields.__dateSend.format(expires));
+                Date expires = new Date(System.currentTimeMillis()+1000L*maxAge);
+                buf.append(HttpFields.__dateSend.format(expires));
             }
         
             name_value_params=buf.toString();
@@ -482,17 +486,17 @@ public class HttpResponse extends HttpMessage
      * @exception IOException 
      */
     public synchronized void commit()
-	throws IOException
+        throws IOException
     {
-	// XXX - should be able to avoid this recursion protection!
-	if (isCommitted())
-	    return;
-	
-	_connection.commitResponse();
-	super.commit();
-	HttpRequest request=getRequest();
-	if (request!=null)
-	    request.setHandled(true);
+        // XXX - should be able to avoid this recursion protection!
+        if (isCommitted())
+            return;
+        
+        _connection.commitResponse();
+        super.commit();
+        HttpRequest request=getRequest();
+        if (request!=null)
+            request.setHandled(true);
     }
 }
 

@@ -4,15 +4,21 @@
 // ========================================================================
 
 package com.mortbay.HTTP.Handler.Servlet;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import com.mortbay.HTTP.*;
-import com.mortbay.Util.*;
-import java.io.*;
-import java.net.InetAddress;
-import java.util.*;
-import javax.servlet.http.*;
-import javax.servlet.*;
+import com.mortbay.HTTP.ChunkableOutputStream;
+import com.mortbay.HTTP.HttpFields;
+import com.mortbay.HTTP.HttpRequest;
+import com.mortbay.HTTP.HttpResponse;
+import com.mortbay.Util.Code;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.util.Date;
+import java.util.Locale;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /* ------------------------------------------------------------ */
 /** Wrapper of Jetty request for Servlet API.
@@ -37,98 +43,98 @@ public class ServletResponse implements HttpServletResponse
     ServletResponse(ServletRequest request,HttpResponse response)
     {
         _servletRequest=request;
-	_servletRequest.setServletResponse(this);
+        _servletRequest.setServletResponse(this);
         _httpResponse=response;
     }
 
     /* ------------------------------------------------------------ */
     boolean getLocked()
     {
-	return _locked;
+        return _locked;
     }
     
     /* ------------------------------------------------------------ */
     void setLocked(boolean locked)
     {
-	_locked=locked;
+        _locked=locked;
     }
 
     /* ------------------------------------------------------------ */
     int getOutputState()
     {
-	return _outputState;
+        return _outputState;
     }
     
     /* ------------------------------------------------------------ */
     void setOutputState(int s)
-	throws IOException
+        throws IOException
     {
-	_outputState=s;
-	if (_out!=null)
-	    _out.flush();
-	if (_writer!=null)
-	    _writer.flush();
+        _outputState=s;
+        if (_out!=null)
+            _out.flush();
+        if (_writer!=null)
+            _writer.flush();
     }
     
     
     /* ------------------------------------------------------------ */
     HttpResponse getHttpResponse()
     {
-	return _httpResponse;
+        return _httpResponse;
     }
     
     /* ------------------------------------------------------------ */
     void commit()
-	throws IOException
+        throws IOException
     {
-	_httpResponse.commit();
+        _httpResponse.commit();
     }
 
     /* ------------------------------------------------------------ */
     public boolean isCommitted()
     {
-	return _httpResponse.isCommitted();
+        return _httpResponse.isCommitted();
     }
     
     /* ------------------------------------------------------------ */
     boolean isDirty()
     {
-	return _httpResponse.isDirty();
+        return _httpResponse.isDirty();
     }
 
     /* ------------------------------------------------------------ */
     public void setBufferSize(int size)
     {
-	ChunkableOutputStream out = _httpResponse.getOutputStream();
-	if (out.isWritten())
-	    throw new IllegalStateException("Output written");
-	
-	out.setBufferCapacity(size);
+        ChunkableOutputStream out = _httpResponse.getOutputStream();
+        if (out.isWritten())
+            throw new IllegalStateException("Output written");
+        
+        out.setBufferCapacity(size);
     }
     
     /* ------------------------------------------------------------ */
     public int getBufferSize()
     {
-	return _httpResponse.getOutputStream().getBufferCapacity();
+        return _httpResponse.getOutputStream().getBufferCapacity();
     }
     
     
     /* ------------------------------------------------------------ */
     public void flushBuffer()
-	throws IOException
+        throws IOException
     {
-	if (_out!=null)
-	    _out.flush();
-	else if (_writer!=null)
-	    _writer.flush();
-	else
-	    _httpResponse.getOutputStream().flush();
+        if (_out!=null)
+            _out.flush();
+        else if (_writer!=null)
+            _writer.flush();
+        else
+            _httpResponse.getOutputStream().flush();
     }
     
     /* ------------------------------------------------------------ */
     public void reset()
     {
-	_httpResponse.reset();
+        _httpResponse.reset();
     }
     
     /* ------------------------------------------------------------ */
@@ -146,7 +152,7 @@ public class ServletResponse implements HttpServletResponse
 
     public void setLocale(Locale locale)
     {
-	Code.notImplemented();
+        Code.notImplemented();
     }
     
     /* ------------------------------------------------------------ */
@@ -159,8 +165,8 @@ public class ServletResponse implements HttpServletResponse
      */
     public Locale getLocale()
     {
-	Code.notImplemented();
-	return null;
+        Code.notImplemented();
+        return null;
     }
     
     
@@ -168,11 +174,11 @@ public class ServletResponse implements HttpServletResponse
     public void addCookie(Cookie cookie) 
     {
         _httpResponse.addSetCookie(cookie.getName(),
-				   cookie.getValue(),
-				   cookie.getDomain(),
-				   cookie.getPath(),
-				   cookie.getMaxAge(),
-				   cookie.getSecure());
+                                   cookie.getValue(),
+                                   cookie.getDomain(),
+                                   cookie.getPath(),
+                                   cookie.getMaxAge(),
+                                   cookie.getSecure());
     }
 
     /* ------------------------------------------------------------ */
@@ -204,37 +210,37 @@ public class ServletResponse implements HttpServletResponse
         if (id == null)
             return url;
 
-	// Check host and port are for this server
-	// XXX not implemented
-	
-	// Already encoded
-	int prefix=url.indexOf(Context.__SessionUrlPrefix);
-	if (prefix!=-1)
-	{
-	    int suffix=url.indexOf(Context.__SessionUrlSuffix,prefix);
-	    if (suffix!=-1 && prefix<suffix)
-		// Update ID
-		return
-		    url.substring(0,prefix+Context.__SessionUrlPrefix.length())+
-		    id+
-		    url.substring(suffix);
-	}
-	
-	// edit the session
-	int end=url.indexOf('?');
-	if (end<0)
-	    end=url.indexOf('#');
-	if (end<0)
-	    return url+";jsessionid="+id+"_";
-	return url.substring(0,end)+
-	    ";jsessionid="+id+"_"+
-	    url.substring(end);
+        // Check host and port are for this server
+        // XXX not implemented
+        
+        // Already encoded
+        int prefix=url.indexOf(Context.__SessionUrlPrefix);
+        if (prefix!=-1)
+        {
+            int suffix=url.indexOf(Context.__SessionUrlSuffix,prefix);
+            if (suffix!=-1 && prefix<suffix)
+                // Update ID
+                return
+                    url.substring(0,prefix+Context.__SessionUrlPrefix.length())+
+                    id+
+                    url.substring(suffix);
+        }
+        
+        // edit the session
+        int end=url.indexOf('?');
+        if (end<0)
+            end=url.indexOf('#');
+        if (end<0)
+            return url+";jsessionid="+id+"_";
+        return url.substring(0,end)+
+            ";jsessionid="+id+"_"+
+            url.substring(end);
     }
 
     /* ------------------------------------------------------------ */
     public String encodeRedirectURL(String url) 
     {
-	return encodeURL(url);
+        return encodeURL(url);
     }
 
     /* ------------------------------------------------------------ */
@@ -259,111 +265,111 @@ public class ServletResponse implements HttpServletResponse
 
     /* ------------------------------------------------------------ */
     public void sendError(int status, String message)
-	throws IOException
+        throws IOException
     {
-	_httpResponse.sendError(status,message);
+        _httpResponse.sendError(status,message);
     }
 
     /* ------------------------------------------------------------ */
     public void sendError(int status) 
-	throws IOException
+        throws IOException
     {
-	_httpResponse.sendError(status);
+        _httpResponse.sendError(status);
     }
 
     /* ------------------------------------------------------------ */
     public void sendRedirect(String url) 
-	throws IOException
+        throws IOException
     {
-	_httpResponse.sendRedirect(url);
+        _httpResponse.sendRedirect(url);
     }
 
     /* ------------------------------------------------------------ */
     public void setDateHeader(String name, long value) 
     {
-	if (_locked)
-	{
-	    if (_httpResponse.getDateField(name)==value)
-		return;
-	    throw new IllegalStateException(__lockedMsg);
-	}
-	
-	_httpResponse.setDateField(name,value);
+        if (_locked)
+        {
+            if (_httpResponse.getDateField(name)==value)
+                return;
+            throw new IllegalStateException(__lockedMsg);
+        }
+        
+        _httpResponse.setDateField(name,value);
     }
 
     /* ------------------------------------------------------------ */
     public void setHeader(String name, String value) 
     {
-	if (_locked)
-	{
-	    if (value==null)
-	    {
-		if (_httpResponse.getField(name)==null)
-		    return;
-	    }
-	    else if (value.equals(_httpResponse.getField(name)))
-		return;
-	    throw new IllegalStateException(__lockedMsg);
-	}
-	_httpResponse.setField(name,value);
+        if (_locked)
+        {
+            if (value==null)
+            {
+                if (_httpResponse.getField(name)==null)
+                    return;
+            }
+            else if (value.equals(_httpResponse.getField(name)))
+                return;
+            throw new IllegalStateException(__lockedMsg);
+        }
+        _httpResponse.setField(name,value);
     }
 
     /* ------------------------------------------------------------ */
     public void setIntHeader(String name, int value) 
     {
-	if (_locked)
-	{
-	    if (_httpResponse.getIntField(name)==value)
-		return;
-	    throw new IllegalStateException(__lockedMsg);
-	}
-	_httpResponse.setIntField(name,value);
+        if (_locked)
+        {
+            if (_httpResponse.getIntField(name)==value)
+                return;
+            throw new IllegalStateException(__lockedMsg);
+        }
+        _httpResponse.setIntField(name,value);
     }
     
     /* ------------------------------------------------------------ */
     public void addDateHeader(String name, long value) 
     {
-	if (_locked)
-	    throw new IllegalStateException(__lockedMsg);
-	
-	_httpResponse.addDateField(name,new Date(value));
+        if (_locked)
+            throw new IllegalStateException(__lockedMsg);
+        
+        _httpResponse.addDateField(name,new Date(value));
     }
 
     /* ------------------------------------------------------------ */
     public void addHeader(String name, String value) 
     {
-	if (_locked)
-	    throw new IllegalStateException(__lockedMsg);
-	
-	_httpResponse.addField(name,value);
+        if (_locked)
+            throw new IllegalStateException(__lockedMsg);
+        
+        _httpResponse.addField(name,value);
     }
 
     /* ------------------------------------------------------------ */
     public void addIntHeader(String name, int value) 
     {
-	if (_locked)
-	    throw new IllegalStateException(__lockedMsg);
-	
-	_httpResponse.addIntField(name,value);
+        if (_locked)
+            throw new IllegalStateException(__lockedMsg);
+        
+        _httpResponse.addIntField(name,value);
     }
 
     /* ------------------------------------------------------------ */
     public void setStatus(int status) 
     {
-	_httpResponse.setStatus(status);
+        _httpResponse.setStatus(status);
     }
 
     /* ------------------------------------------------------------ */
     public void setStatus(int status, String message) 
     {
-	setStatus(status);
-	_httpResponse.setReason(message);
+        setStatus(status);
+        _httpResponse.setReason(message);
     }
 
     /* ------------------------------------------------------------ */
     public String getCharacterEncoding() 
     {
-	return _httpResponse.getCharacterEncoding();
+        return _httpResponse.getCharacterEncoding();
     }
 
     /* ------------------------------------------------------------ */
@@ -373,7 +379,7 @@ public class ServletResponse implements HttpServletResponse
             throw new IllegalStateException();
         if (_out==null)
             _out = new ServletOut(_servletRequest.getHttpRequest()
-				  .getOutputStream());  
+                                  .getOutputStream());  
         _outputState=1;
         return _out;
     }
@@ -385,10 +391,10 @@ public class ServletResponse implements HttpServletResponse
             throw new IllegalStateException();
         if (_writer==null)
             _writer =
-		new PrintWriter
-		    (new OutputStreamWriter
-			(_servletRequest.getHttpRequest()
-			 .getOutputStream()));
+                new PrintWriter
+                    (new OutputStreamWriter
+                        (_servletRequest.getHttpRequest()
+                         .getOutputStream()));
         _outputState=2;
         return _writer;
     }
@@ -396,17 +402,17 @@ public class ServletResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void setContentLength(int len) 
     {
-	// Protect from setting after committed as default handling
-	// of a servlet HEAD request ALWAYS sets content length, even
-	// if the getHandling committed the response!
-	if (!isCommitted())
-	    setIntHeader(HttpFields.__ContentLength,len);
+        // Protect from setting after committed as default handling
+        // of a servlet HEAD request ALWAYS sets content length, even
+        // if the getHandling committed the response!
+        if (!isCommitted())
+            setIntHeader(HttpFields.__ContentLength,len);
     }
     
     /* ------------------------------------------------------------ */
     public void setContentType(String contentType) 
     {
-	setHeader(HttpFields.__ContentType,contentType);
+        setHeader(HttpFields.__ContentType,contentType);
     }
 }
 

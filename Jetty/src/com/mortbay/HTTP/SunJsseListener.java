@@ -5,15 +5,23 @@
 
 package com.mortbay.HTTP;
 
-import java.io.*;
-import java.net.*;
-import javax.net.ssl.*;
-import java.security.*;
-import com.sun.net.ssl.*;
+import com.mortbay.Util.InetAddrPort;
+import com.mortbay.Util.Log;
+import com.mortbay.Util.Password;
+import com.sun.net.ssl.KeyManager;
+import com.sun.net.ssl.KeyManagerFactory;
+import com.sun.net.ssl.SSLContext;
+import com.sun.net.ssl.TrustManager;
+import com.sun.net.ssl.TrustManagerFactory;
+import com.sun.net.ssl.internal.ssl.Provider;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.security.SecureRandom;
+import java.security.Security;
+import javax.net.ssl.SSLServerSocketFactory;
 
-import com.mortbay.Util.*;
-import com.mortbay.HTTP.HttpListener;
-import com.mortbay.HTTP.HttpServer;
 
 
 
@@ -43,21 +51,21 @@ public class SunJsseListener extends JsseListener
     private String _keystore=DEFAULT_KEYSTORE ;
     public void setKeystore(String keystore)
     {
-	_keystore = keystore;
+        _keystore = keystore;
     }
     
     /* ------------------------------------------------------------ */
     private Password _password;
     public void setPassword(String password)
     {
-	_password = new Password(PASSWORD_PROPERTY,password);
+        _password = new Password(PASSWORD_PROPERTY,password);
     }
     
     /* ------------------------------------------------------------ */
     private Password _keypassword;
     public void setKeyPassword(String password)
     {
-	_keypassword = new Password(KEYPASSWORD_PROPERTY,password);
+        _keypassword = new Password(KEYPASSWORD_PROPERTY,password);
     }
     
     /* ------------------------------------------------------------ */
@@ -67,7 +75,7 @@ public class SunJsseListener extends JsseListener
     public SunJsseListener()
         throws IOException
     {
-	super();
+        super();
     }
 
     /* ------------------------------------------------------------ */
@@ -79,7 +87,7 @@ public class SunJsseListener extends JsseListener
     public SunJsseListener(InetAddrPort p_address)
         throws IOException
     {
-	super( p_address);
+        super( p_address);
     }
 
     
@@ -92,43 +100,43 @@ public class SunJsseListener extends JsseListener
         throws Exception
     {
         _keystore = System.getProperty( KEYSTORE_PROPERTY,_keystore);
-	
-	Log.event(KEYSTORE_PROPERTY+"="+_keystore);
+        
+        Log.event(KEYSTORE_PROPERTY+"="+_keystore);
 
-	if (_password==null)
-	    _password = new Password(PASSWORD_PROPERTY);
-	Log.event(PASSWORD_PROPERTY+"="+_password.toStarString());
+        if (_password==null)
+            _password = new Password(PASSWORD_PROPERTY);
+        Log.event(PASSWORD_PROPERTY+"="+_password.toStarString());
 
-	if (_keypassword==null)
-	    _keypassword = new Password(KEYPASSWORD_PROPERTY,
-					null,
-					_password.toString());
-	Log.event(KEYPASSWORD_PROPERTY+"="+_keypassword.toStarString());
+        if (_keypassword==null)
+            _keypassword = new Password(KEYPASSWORD_PROPERTY,
+                                        null,
+                                        _password.toString());
+        Log.event(KEYPASSWORD_PROPERTY+"="+_keypassword.toStarString());
 
-	try
-	{
-	    KeyStore ks = KeyStore.getInstance( "JKS" );
-	    ks.load( new FileInputStream( new File( _keystore ) ),
-		     _password.getCharArray());
-	    
-	    KeyManagerFactory km = KeyManagerFactory.getInstance( "SunX509"); 
-	    km.init( ks, _keypassword.getCharArray() );
-	    KeyManager[] kma = km.getKeyManagers();                        
-	    
-	    TrustManagerFactory tm = TrustManagerFactory.getInstance("SunX509" );
-	    tm.init( ks ); 
-	    TrustManager[] tma = tm.getTrustManagers(); 
-	    SSLContext sslc = SSLContext.getInstance( "SSL" ); 
-	    sslc.init( kma, tma, SecureRandom.getInstance( "SHA1PRNG" ) ); 
-	    SSLServerSocketFactory ssfc = sslc.getServerSocketFactory();
-	    Log.event("SSLServerSocketFactory="+ssfc);
-	    return ssfc;
-	}
-	finally
-	{
-	    _password.zero();
-	    _keypassword.zero();
-	}
+        try
+        {
+            KeyStore ks = KeyStore.getInstance( "JKS" );
+            ks.load( new FileInputStream( new File( _keystore ) ),
+                     _password.getCharArray());
+            
+            KeyManagerFactory km = KeyManagerFactory.getInstance( "SunX509"); 
+            km.init( ks, _keypassword.getCharArray() );
+            KeyManager[] kma = km.getKeyManagers();                        
+            
+            TrustManagerFactory tm = TrustManagerFactory.getInstance("SunX509" );
+            tm.init( ks ); 
+            TrustManager[] tma = tm.getTrustManagers(); 
+            SSLContext sslc = SSLContext.getInstance( "SSL" ); 
+            sslc.init( kma, tma, SecureRandom.getInstance( "SHA1PRNG" ) ); 
+            SSLServerSocketFactory ssfc = sslc.getServerSocketFactory();
+            Log.event("SSLServerSocketFactory="+ssfc);
+            return ssfc;
+        }
+        finally
+        {
+            _password.zero();
+            _keypassword.zero();
+        }
     }
 }
 

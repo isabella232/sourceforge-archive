@@ -5,8 +5,14 @@
 
 package com.mortbay.Util;
 
-import java.util.*;
-import java.io.*;
+import java.applet.Applet;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 /* ----------------------------------------------------------------------- */
 /** Coding Standards support.
@@ -175,13 +181,13 @@ public class Code
      */
     public static synchronized void setDebug(boolean debug)
     {
-	Code code =instance();
-	boolean oldDebug=code._debugOn;
-	if (code._debugOn && !debug)
-	    Code.debug(2,"DEBUG OFF");
+        Code code =instance();
+        boolean oldDebug=code._debugOn;
+        if (code._debugOn && !debug)
+            Code.debug(2,"DEBUG OFF");
         code._debugOn=debug;
-	if (!oldDebug && debug)
-	    Code.debug(2,"DEBUG ON");
+        if (!oldDebug && debug)
+            Code.debug(2,"DEBUG ON");
     }
 
     /* ------------------------------------------------------------ */

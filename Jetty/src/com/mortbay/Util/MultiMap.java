@@ -4,9 +4,16 @@
 // ========================================================================
 
 package com.mortbay.Util;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
 /* ------------------------------------------------------------ */
 /** A multi valued Map.
@@ -55,15 +62,15 @@ public class MultiMap extends HashMap
     public MultiMap(MultiMap map)
     {
         super(map);
-	
-	Iterator i = map.entrySet().iterator();
+        
+        Iterator i = map.entrySet().iterator();
         while(i.hasNext())
-	{
+        {
             Map.Entry entry =
                 (Map.Entry)i.next();
-	    if (entry.getValue() instanceof List)
-		entry.setValue(new ArrayList((List)entry.getValue()));
-	}
+            if (entry.getValue() instanceof List)
+                entry.setValue(new ArrayList((List)entry.getValue()));
+        }
     }
 
     
@@ -224,20 +231,20 @@ public class MultiMap extends HashMap
         if (o==null)
             putValues(name,values);
         else if (o instanceof List)
-	{
-	    try
-	    {
-		((List)o).addAll(values);
-	    }
-	    catch(UnsupportedOperationException e)
-	    {
-		List l=new ArrayList(((List)o).size()+
-				     values.size());
-		l.addAll((List)o);
-		l.addAll(values);
-	    }
+        {
+            try
+            {
+                ((List)o).addAll(values);
+            }
+            catch(UnsupportedOperationException e)
+            {
+                List l=new ArrayList(((List)o).size()+
+                                     values.size());
+                l.addAll((List)o);
+                l.addAll(values);
+            }
         }
-	else
+        else
         {
             List l=new ArrayList(8+values.size());
             l.add(o);
@@ -286,16 +293,16 @@ public class MultiMap extends HashMap
         if (o==null)
             return false;
         if (o instanceof List)
-	{
-	    List l=(List)o;
-	    return l.remove(value);
-	}
-	if (o.equals(value))
-	{
-	    remove(name);
-	    return true;
-	}
-	return false;
+        {
+            List l=(List)o;
+            return l.remove(value);
+        }
+        if (o.equals(value))
+        {
+            remove(name);
+            return true;
+        }
+        return false;
     }
     
     /* ------------------------------------------------------------ */
@@ -320,7 +327,7 @@ public class MultiMap extends HashMap
      */
     public Object clone()
     {
-	return new MultiMap(this);
+        return new MultiMap(this);
     }
     
 }

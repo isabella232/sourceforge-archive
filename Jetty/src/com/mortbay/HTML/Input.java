@@ -4,9 +4,6 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTML;
-import com.mortbay.Util.*;
-import java.io.*;
-import java.util.*;
 
 /* -------------------------------------------------------------------- */
 /** HTML Form Input Tag

@@ -4,14 +4,10 @@
 // ========================================================================
 
 package com.mortbay.HTTP.Handler.Servlet;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import com.mortbay.HTTP.*;
-import com.mortbay.Util.*;
-import java.io.*;
-import java.util.*;
-import javax.servlet.http.*;
-import javax.servlet.*;
+import com.mortbay.HTTP.ChunkableInputStream;
+import java.io.IOException;
+import javax.servlet.ServletInputStream;
 
 
 class ServletIn extends ServletInputStream

@@ -4,16 +4,33 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTTP.Handler.Servlet;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import com.mortbay.HTTP.Handler.NullHandler;
-import com.mortbay.HTTP.*;
-import com.mortbay.Util.*;
-import java.io.*;
-import java.util.*;
-import javax.servlet.http.*;
-import javax.servlet.*;
-import java.net.*;
+import com.mortbay.HTTP.HandlerContext;
+import com.mortbay.HTTP.Version;
+import com.mortbay.Util.Code;
+import com.mortbay.Util.Frame;
+import com.mortbay.Util.Log;
+import com.mortbay.Util.Resource;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
+import javax.servlet.http.HttpSessionContext;
 
 
 /* --------------------------------------------------------------------- */
@@ -34,7 +51,7 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public Context(ServletHandler handler)
     {
-	_handler=handler;
+        _handler=handler;
     }
 
     /* ------------------------------------------------------------ */
@@ -43,10 +60,10 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public String getInitParameter(String param)
     {
-	Object p = getAttribute(param);
-	if (p!=null)
-	    return p.toString();
-	return null;
+        Object p = getAttribute(param);
+        if (p!=null)
+            return p.toString();
+        return null;
     }
     
     /* ------------------------------------------------------------ */
@@ -55,7 +72,7 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public Enumeration getInitParameterNames()
     {
-	return getAttributeNames();
+        return getAttributeNames();
     }
     
     
@@ -84,130 +101,130 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public ServletContext getContext(String uri)
     {
-	Code.warning("Not Implemented");
-	return null;
+        Code.warning("Not Implemented");
+        return null;
     }
     
     /* ------------------------------------------------------------ */
     public int getMajorVersion()
     {
-	return 2;
+        return 2;
     }
     
     /* ------------------------------------------------------------ */
     public int getMinorVersion()
     {
-	return 1;
+        return 1;
     }
 
     /* ------------------------------------------------------------ */
     public String getMimeType(String file)
     {
-	return _handler.getHandlerContext().getMimeByExtension(file);
+        return _handler.getHandlerContext().getMimeByExtension(file);
     }
     
     /* ------------------------------------------------------------ */
     public URL getResource(String uri)
-	throws MalformedURLException
+        throws MalformedURLException
     {
-	Resource resourceBase=_handler.getHandlerContext().getResourceBase();
-	if (resourceBase==null)
-	    return null;
+        Resource resourceBase=_handler.getHandlerContext().getResourceBase();
+        if (resourceBase==null)
+            return null;
 
-	try{
-	    Resource resource = resourceBase.addPath(uri);
-	    return resource.getURL();
-	}
-	catch(IOException e)
-	{
-	    Code.warning(e);
-	    return null;
-	}
+        try{
+            Resource resource = resourceBase.addPath(uri);
+            return resource.getURL();
+        }
+        catch(IOException e)
+        {
+            Code.warning(e);
+            return null;
+        }
     }
     
     /* ------------------------------------------------------------ */
     public InputStream getResourceAsStream(String uri)
     {
-	try
-	{
-	    URL url = getResource(uri);
-	    if (url!=null)
-		return url.openStream();
-	}
-	catch(MalformedURLException e)
-	{
-	    Code.ignore(e);
-	}
-	catch(IOException e)
-	{
-	    Code.ignore(e);
-	}
-	return null;
+        try
+        {
+            URL url = getResource(uri);
+            if (url!=null)
+                return url.openStream();
+        }
+        catch(MalformedURLException e)
+        {
+            Code.ignore(e);
+        }
+        catch(IOException e)
+        {
+            Code.ignore(e);
+        }
+        return null;
     }
     
     /* ------------------------------------------------------------ */
     public RequestDispatcher getRequestDispatcher(String uriInContext)
     {
-	if (uriInContext == null || !uriInContext.startsWith("/"))
+        if (uriInContext == null || !uriInContext.startsWith("/"))
             return null;
 
-	try
-	{
-	    String pathInContext=uriInContext;
-	    String query=null;
-	    int q=0;
-	    if ((q=pathInContext.indexOf("?"))>0)
-	    {
-		pathInContext=uriInContext.substring(0,q);
-		query=uriInContext.substring(q+1);
-	    }
-	    
-	    return new Dispatcher(this,pathInContext,query);
-	}
-	catch(Exception e)
-	{
-	    Code.ignore(e);
-	    return null;
-	}
+        try
+        {
+            String pathInContext=uriInContext;
+            String query=null;
+            int q=0;
+            if ((q=pathInContext.indexOf("?"))>0)
+            {
+                pathInContext=uriInContext.substring(0,q);
+                query=uriInContext.substring(q+1);
+            }
+            
+            return new Dispatcher(this,pathInContext,query);
+        }
+        catch(Exception e)
+        {
+            Code.ignore(e);
+            return null;
+        }
     }
     
     /* ------------------------------------------------------------ */
     public RequestDispatcher getNamedDispatcher(String name)
     {
-	if (name == null || name.length()==0)
+        if (name == null || name.length()==0)
             return null;
 
-	try
-	{
-	    return new Dispatcher(this,name);
-	}
-	catch(Exception e)
-	{
-	    Code.ignore(e);
-	    return null;
-	}
+        try
+        {
+            return new Dispatcher(this,name);
+        }
+        catch(Exception e)
+        {
+            Code.ignore(e);
+            return null;
+        }
     }
 
 
     /* ------------------------------------------------------------ */
     public Servlet getServlet(String name)
     {
-	Code.warning("No longer supported");
-	return null;
+        Code.warning("No longer supported");
+        return null;
     }
     
     /* ------------------------------------------------------------ */
     public Enumeration getServlets()
     {
-	Code.warning("No longer supported");
-	return null;
+        Code.warning("No longer supported");
+        return null;
     }
     
     /* ------------------------------------------------------------ */
     public Enumeration getServletNames()
     {
-	Code.warning("No longer supported");
-	return null;
+        Code.warning("No longer supported");
+        return null;
     }
     
     /* ------------------------------------------------------------ */
@@ -219,43 +236,43 @@ public class Context implements ServletContext, HttpSessionContext
     /* ------------------------------------------------------------ */
     public void log(Exception e, String msg)
     {
-	Code.warning(msg,e);
+        Code.warning(msg,e);
     }
     
     /* ------------------------------------------------------------ */
     public void log(String msg, Throwable th)
     {
-	Code.warning(msg,th);
+        Code.warning(msg,th);
     }
     
     /* ------------------------------------------------------------ */
     public String getRealPath(String path)
     {
-	Resource resourceBase=_handler.getHandlerContext().getResourceBase();
-	if (resourceBase==null )
-	    return null;
+        Resource resourceBase=_handler.getHandlerContext().getResourceBase();
+        if (resourceBase==null )
+            return null;
 
-	// XXX - May need to strip some leading components off the the path
-	// but i can't tell from the comments. 
-	
-	try{
-	    Resource resource = resourceBase.addPath(path);
-	    File file = resource.getFile();
-	    if (file==null)
-		return null;
-	    return file.getAbsolutePath();
-	}
-	catch(IOException e)
-	{
-	    Code.warning(e);
-	    return null;
-	}
+        // XXX - May need to strip some leading components off the the path
+        // but i can't tell from the comments. 
+        
+        try{
+            Resource resource = resourceBase.addPath(path);
+            File file = resource.getFile();
+            if (file==null)
+                return null;
+            return file.getAbsolutePath();
+        }
+        catch(IOException e)
+        {
+            Code.warning(e);
+            return null;
+        }
     }
     
     /* ------------------------------------------------------------ */
     public String getServerInfo()
     {
-	return Version.__Version;
+        return Version.__Version;
     }
     
     /* ------------------------------------------------------------ */
@@ -264,7 +281,7 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public Object getAttribute(String name)
     {
-	return _handler.getHandlerContext().getAttribute(name);
+        return _handler.getHandlerContext().getAttribute(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -273,7 +290,7 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public Enumeration getAttributeNames()
     {
-	return _handler.getHandlerContext().getAttributeNames();
+        return _handler.getHandlerContext().getAttributeNames();
     }
     
     /* ------------------------------------------------------------ */
@@ -282,14 +299,14 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public void setAttribute(String name, Object value)
     {
-	if (name!=null &&
-	    ( name.startsWith("com.mortbay.") ||
-	      name.startsWith("java.") ||
-	      name.startsWith("javax.")))
-	    Code.warning("Servlet attempted to set com.mortbay.* attribute: "+
-			 name);
-	else
-	    _handler.getHandlerContext().setAttribute(name,value);
+        if (name!=null &&
+            ( name.startsWith("com.mortbay.") ||
+              name.startsWith("java.") ||
+              name.startsWith("javax.")))
+            Code.warning("Servlet attempted to set com.mortbay.* attribute: "+
+                         name);
+        else
+            _handler.getHandlerContext().setAttribute(name,value);
     }
     
     /* ------------------------------------------------------------ */
@@ -298,14 +315,14 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public void removeAttribute(String name)
     {
-	if (name!=null &&
-	    ( name.startsWith("com.mortbay.") ||
-	      name.startsWith("java.") ||
-	      name.startsWith("javax.")))
-	    Code.warning("Servlet removing com.mortbay.* attribute: "+
-			 name);
-	else
-	    _handler.getHandlerContext().removeAttribute(name);
+        if (name!=null &&
+            ( name.startsWith("com.mortbay.") ||
+              name.startsWith("java.") ||
+              name.startsWith("javax.")))
+            Code.warning("Servlet removing com.mortbay.* attribute: "+
+                         name);
+        else
+            _handler.getHandlerContext().removeAttribute(name);
     }
 
 
@@ -407,7 +424,7 @@ public class Context implements ServletContext, HttpSessionContext
                 
         // Remove the stale sessions
         if (staleSessions != null)
-	{
+        {
             for (int i = staleSessions.size() - 1; i >= 0; --i) {
                 ((Session)staleSessions.get(i)).invalidate();
             }
@@ -449,7 +466,7 @@ public class Context implements ServletContext, HttpSessionContext
     /* ------------------------------------------------------------ */
     class Session implements HttpSession
     {
-	HashMap _values = new HashMap(11);
+        HashMap _values = new HashMap(11);
         boolean invalid=false;
         boolean newSession=true;
         long created=System.currentTimeMillis();
@@ -552,23 +569,23 @@ public class Context implements ServletContext, HttpSessionContext
         }
         
 
-	/* ------------------------------------------------------------ */
-	public Object getAttribute(String name)
-	{
+        /* ------------------------------------------------------------ */
+        public Object getAttribute(String name)
+        {
             if (invalid) throw new IllegalStateException();
             return _values.get(name);
-	}
+        }
 
-	/* ------------------------------------------------------------ */
-	public Enumeration getAttributeNames()
-	{
+        /* ------------------------------------------------------------ */
+        public Enumeration getAttributeNames()
+        {
             if (invalid) throw new IllegalStateException();
-	    return Collections.enumeration(_values.keySet());
-	}
-	
-	/* ------------------------------------------------------------ */
-	public void setAttribute(String name, Object value)
-	{
+            return Collections.enumeration(_values.keySet());
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void setAttribute(String name, Object value)
+        {
             if (invalid) throw new IllegalStateException();
             Object oldValue = _values.put(name,value);
 
@@ -577,61 +594,61 @@ public class Context implements ServletContext, HttpSessionContext
                 unbindValue(name, oldValue);
                 bindValue(name, value);
             }
-	}
-	
-	/* ------------------------------------------------------------ */
-	public void removeAttribute(String name)
-	{
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void removeAttribute(String name)
+        {
             if (invalid) throw new IllegalStateException();
             Object value=_values.remove(name);
             unbindValue(name, value);
-	}
-	
-        /* ------------------------------------------------------------- */
-	/**
-	 * @deprecated 	As of Version 2.2, this method is
-	 * 		replaced by {@link #getAttribute}
-	 */
-	public Object getValue(String name)
-            throws IllegalStateException
-        {
-	    return getAttribute(name);
         }
         
         /* ------------------------------------------------------------- */
-	/**
-	 * @deprecated 	As of Version 2.2, this method is
-	 * 		replaced by {@link #getAttributeNames}
-	 */
+        /**
+         * @deprecated 	As of Version 2.2, this method is
+         * 		replaced by {@link #getAttribute}
+         */
+        public Object getValue(String name)
+            throws IllegalStateException
+        {
+            return getAttribute(name);
+        }
+        
+        /* ------------------------------------------------------------- */
+        /**
+         * @deprecated 	As of Version 2.2, this method is
+         * 		replaced by {@link #getAttributeNames}
+         */
         public synchronized String[] getValueNames()
             throws IllegalStateException
         {
             if (invalid) throw new IllegalStateException();
-	    String[] a = new String[_values.size()];
-	    return (String[])_values.keySet().toArray(a);
+            String[] a = new String[_values.size()];
+            return (String[])_values.keySet().toArray(a);
         }
         
         /* ------------------------------------------------------------- */
-	/**
-	 * @deprecated 	As of Version 2.2, this method is
-	 * 		replaced by {@link #setAttribute}
-	 */
+        /**
+         * @deprecated 	As of Version 2.2, this method is
+         * 		replaced by {@link #setAttribute}
+         */
         public void putValue(java.lang.String name,
                              java.lang.Object value)
             throws IllegalStateException
         {
-	    setAttribute(name,value);
+            setAttribute(name,value);
         }
         
         /* ------------------------------------------------------------- */
-	/**
-	 * @deprecated 	As of Version 2.2, this method is
-	 * 		replaced by {@link #removeAttribute}
-	 */
+        /**
+         * @deprecated 	As of Version 2.2, this method is
+         * 		replaced by {@link #removeAttribute}
+         */
         public void removeValue(java.lang.String name)
             throws IllegalStateException
         {
-	    removeAttribute(name);
+            removeAttribute(name);
         }
 
         /* ------------------------------------------------------------- */
@@ -651,7 +668,7 @@ public class Context implements ServletContext, HttpSessionContext
                 ((HttpSessionBindingListener)value)
                     .valueUnbound(new HttpSessionBindingEvent(this,name));
         }
-	
+        
     }
 
     

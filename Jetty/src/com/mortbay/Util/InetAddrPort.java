@@ -5,7 +5,8 @@
 
 package com.mortbay.Util;
 
-import java.net.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /* ======================================================================== */
 /** InetAddress and Port
@@ -48,9 +49,9 @@ public class InetAddrPort
     public InetAddrPort(String host, int port)
         throws java.net.UnknownHostException
     {
-	if (host!=null)
-	    _addr=InetAddress.getByName(host);
-	
+        if (host!=null)
+            _addr=InetAddress.getByName(host);
+        
         _port=port;
     }
     
@@ -101,8 +102,8 @@ public class InetAddrPort
     public void setHost(String host)
         throws java.net.UnknownHostException
     {
-	if (host!=null)
-	    _addr=InetAddress.getByName(host);
+        if (host!=null)
+            _addr=InetAddress.getByName(host);
     }
     
     /* ------------------------------------------------------------ */

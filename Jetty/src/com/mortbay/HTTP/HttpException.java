@@ -5,6 +5,7 @@
 
 package com.mortbay.HTTP;
 import java.io.IOException;
+import java.util.HashMap;
 
 
 public class HttpException extends IOException

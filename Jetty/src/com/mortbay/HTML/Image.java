@@ -4,9 +4,10 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTML;
-import com.mortbay.Util.*;
-import java.io.*;
-import java.util.*;
+import com.mortbay.Util.Code;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 /* ---------------------------------------------------------------- */
 /** HTML Image Tag

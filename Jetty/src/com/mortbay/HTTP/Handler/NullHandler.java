@@ -4,13 +4,14 @@
 // ========================================================================
 
 package com.mortbay.HTTP.Handler;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import com.mortbay.HTTP.*;
-import com.mortbay.Util.*;
-import java.util.*;
-import java.text.*;
-import java.io.*;
+import com.mortbay.HTTP.HandlerContext;
+import com.mortbay.HTTP.HttpException;
+import com.mortbay.HTTP.HttpHandler;
+import com.mortbay.HTTP.HttpRequest;
+import com.mortbay.HTTP.HttpResponse;
+import com.mortbay.Util.Code;
+import java.io.IOException;
 
 /* ------------------------------------------------------------ */
 /** Null HTTP Handler
@@ -33,7 +34,7 @@ public class NullHandler implements HttpHandler
      */
     public HandlerContext getHandlerContext()
     {
-	return _context;
+        return _context;
     }
     
     /* ------------------------------------------------------------ */
@@ -43,13 +44,13 @@ public class NullHandler implements HttpHandler
      */
     public final void initialize(Object configuration)
     {
-	if (_context==null)
-	{
-	    _context=(HandlerContext) configuration;
-	    initialize();
-	}
-	else if (_context!=configuration)
-	    throw new IllegalStateException("Can't initialize handler for different context");
+        if (_context==null)
+        {
+            _context=(HandlerContext) configuration;
+            initialize();
+        }
+        else if (_context!=configuration)
+            throw new IllegalStateException("Can't initialize handler for different context");
     }
     
     
@@ -76,7 +77,7 @@ public class NullHandler implements HttpHandler
     {
         _started=false;
         _destroyed=true;
-	_context=null;
+        _context=null;
     }
 
     /* ----------------------------------------------------------------- */
@@ -91,30 +92,34 @@ public class NullHandler implements HttpHandler
         return _destroyed;
     }
     
+    
     /* ------------------------------------------------------------ */
-    public void handle(String contextPathSpec,
+    public void handle(String contextPath,
+                       String pathInContext,
                        HttpRequest request,
                        HttpResponse response)
         throws HttpException, IOException
     {
-	Code.warning("NullHandler called for "+contextPathSpec);
+        Code.warning("NullHandler called for "+contextPath+
+                     ": "+getClass());
     }
 
+    
     /* ------------------------------------------------------------ */
-  public String toString()
-  {
-    if(_name==null)
+    public String toString()
     {
-      _name=this.getClass().getName();
-      if (!Code.debug())
-      {
-	int i=_name.lastIndexOf(".");
-        _name=_name.substring(i+1);
-      }
-      _name+=" in "+_context;
-    }
-    return _name;
-  }    
+        if(_name==null)
+        {
+            _name=this.getClass().getName();
+            if (!Code.debug())
+            {
+                int i=_name.lastIndexOf(".");
+                _name=_name.substring(i+1);
+            }
+            _name+=" in "+_context;
+        }
+        return _name;
+    }    
 
 }
 

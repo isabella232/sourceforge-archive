@@ -4,12 +4,29 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTTP;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
-import java.util.Vector;
-import com.mortbay.Util.*;
-import java.io.*;
-import java.util.*;
-import java.text.*;
+
+import com.mortbay.Util.Code;
+import com.mortbay.Util.DateCache;
+import com.mortbay.Util.LineInput;
+import com.mortbay.Util.QuotedStringTokenizer;
+import com.mortbay.Util.StringUtil;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TimeZone;
 
 
 /* ------------------------------------------------------------ */

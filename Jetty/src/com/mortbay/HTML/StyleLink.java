@@ -4,9 +4,7 @@
 // ========================================================================
 
 package com.mortbay.HTML;
-import com.mortbay.Util.*;
 
-import com.mortbay.Util.Code;
 
 /* ------------------------------------------------------------ */
 /** CSS Style LINK

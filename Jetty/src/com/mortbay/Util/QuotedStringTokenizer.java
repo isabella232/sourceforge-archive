@@ -5,9 +5,8 @@
 
 package com.mortbay.Util;
 
-import java.util.StringTokenizer;
-import java.util.Enumeration;
 import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
 
 /* ------------------------------------------------------------ */
 /** StringTokenizer with Quoting 

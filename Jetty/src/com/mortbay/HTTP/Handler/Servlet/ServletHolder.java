@@ -4,15 +4,24 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTTP.Handler.Servlet;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import com.mortbay.HTTP.*;
-import com.mortbay.Util.*;
-import java.io.*;
-import java.net.*;
-import javax.servlet.*;
-import java.util.*;
-import java.lang.reflect.*;
+import com.mortbay.Util.Code;
+import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.EmptyStackException;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
+import javax.servlet.GenericServlet;
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.SingleThreadModel;
+import javax.servlet.UnavailableException;
 
 
 /* --------------------------------------------------------------------- */
@@ -52,82 +61,82 @@ public class ServletHolder
     public ServletHolder(ServletHandler handler,
                          String className)
     {
-	_handler=handler;
-	_context=_handler.getContext();
+        _handler=handler;
+        _context=_handler.getContext();
         setServletName(className);
-	_className=className;
+        _className=className;
     }
     
     /* ------------------------------------------------------------ */
     public String getServletName()
     {
-	return _name;
+        return _name;
     }
     
     /* ------------------------------------------------------------ */
     public void setServletName(String name)
     {
-	synchronized(_handler)
-	{
-	    _handler.mapHolder(name,this,_name);
-	    _name=name;
-	}
+        synchronized(_handler)
+        {
+            _handler.mapHolder(name,this,_name);
+            _name=name;
+        }
     }
 
     /* ------------------------------------------------------------ */
     public String getClassName()
     {
-	return _className;
+        return _className;
     }
     
     /* ------------------------------------------------------------ */
     public void setClassName(String className)
     {
-	_className = className;
+        _className = className;
     }
 
     
     /* ------------------------------------------------------------ */
     public boolean isInitOnStartup()
     {
-	return _initOnStartup;
+        return _initOnStartup;
     }
     
     /* ------------------------------------------------------------ */
     public void setInitOnStartup(boolean b)
     {
-	_initOnStartup = b;
+        _initOnStartup = b;
     }
     
     /* ------------------------------------------------------------ */
     public void initialize()
     {
-	try{
-	    getServlet();
-	}
-	catch(javax.servlet.UnavailableException e)
-	{
-	    Code.warning(e);
-	    throw new IllegalStateException(e.toString());
-	}
+        try{
+            getServlet();
+        }
+        catch(javax.servlet.UnavailableException e)
+        {
+            Code.warning(e);
+            throw new IllegalStateException(e.toString());
+        }
     }
 
     /* ------------------------------------------------------------ */
     private void initializeClass()
-	throws UnavailableException
+        throws UnavailableException
     {
         try
         {
-	    ServletLoader loader=_context.getHandler().getServletLoader();
-	    if (loader==null)
-		_servletClass=Class.forName(getClassName());
-	    else
-		_servletClass=loader.loadClass(getClassName());
-	    Code.debug("Servlet Class ",_servletClass);
-	    if (!javax.servlet.GenericServlet.class
-		.isAssignableFrom(_servletClass))
-		Code.fail("Servlet class "+getClassName()+
-			  " is not a javax.servlet.GenericServlet");
+            ServletLoader loader=_context.getHandler().getServletLoader();
+            if (loader==null)
+                _servletClass=Class.forName(getClassName());
+            else
+                _servletClass=loader.loadClass(getClassName());
+            Code.debug("Servlet Class ",_servletClass);
+            if (!javax.servlet.GenericServlet.class
+                .isAssignableFrom(_servletClass))
+                Code.fail("Servlet class "+getClassName()+
+                          " is not a javax.servlet.GenericServlet");
         }
         catch(ClassNotFoundException e)
         {
@@ -153,7 +162,7 @@ public class ServletHolder
             s.destroy();
         }
         _servlets=new Stack();
-	_servletClass=null;
+        _servletClass=null;
     }
     
     
@@ -167,9 +176,9 @@ public class ServletHolder
         throws UnavailableException
     {
         try{
-	    if (_servletClass==null)
-		initializeClass();
-	    
+            if (_servletClass==null)
+                initializeClass();
+            
             if (_servlet==null)
             {
                 GenericServlet newServlet =
@@ -177,20 +186,20 @@ public class ServletHolder
                 newServlet.init(this);
                 synchronized (this)
                 {
-		    _singleThreadModel =
-			newServlet instanceof
-			javax.servlet.SingleThreadModel;
-		    
-		    if (_servlet==null && !_singleThreadModel)
+                    _singleThreadModel =
+                        newServlet instanceof
+                        javax.servlet.SingleThreadModel;
+                    
+                    if (_servlet==null && !_singleThreadModel)
                         _servlet=newServlet;
                 }
             }
             return _servlet;
         }
-	catch(UnavailableException e)
-	{
-	    throw e;
-	}
+        catch(UnavailableException e)
+        {
+            throw e;
+        }
         catch(Exception e)
         {
             Code.warning(e);
@@ -211,7 +220,7 @@ public class ServletHolder
     /* ------------------------------------------------------------ */
     public void setInitParameter(String param,String value)
     {
-	put(param,value);
+        put(param,value);
     }
 
     /* ---------------------------------------------------------------- */
@@ -221,8 +230,8 @@ public class ServletHolder
      */
     public String getInitParameter(String param)
     {
-	if (_initParams==null)
-	    return null;
+        if (_initParams==null)
+            return null;
         Object obj = _initParams.get(param);
         if (obj == null)
             return null;
@@ -232,111 +241,111 @@ public class ServletHolder
     /* ------------------------------------------------------------ */
     public Enumeration getInitParameterNames()
     {
-	if (_initParams==null)
-	    return Collections.enumeration(Collections.EMPTY_LIST);
-	return Collections.enumeration(_initParams.values());
+        if (_initParams==null)
+            return Collections.enumeration(Collections.EMPTY_LIST);
+        return Collections.enumeration(_initParams.values());
     }
     
     /* --------------------------------------------------------------- */
     /** Service a request with this servlet.
      */
     public void handle(ServletRequest request,
-		       ServletResponse response)
+                       ServletResponse response)
         throws ServletException,
                UnavailableException,
                IOException
     {
-	GenericServlet useServlet=null;
-	
-	// reference pool to protect from reloads
-	Stack pool=_servlets;
+        GenericServlet useServlet=null;
         
-	if (_singleThreadModel)    
-	{
-	    // try getting a servlet from the pool of servlets
-	    try{useServlet = (GenericServlet)pool.pop();}
-	    catch(EmptyStackException e)
-	    {
-		// Create a new one for the pool
-		try
-		{
-		    if (_servletClass==null)
-			initializeClass();
-	    
-		    useServlet = 
+        // reference pool to protect from reloads
+        Stack pool=_servlets;
+        
+        if (_singleThreadModel)    
+        {
+            // try getting a servlet from the pool of servlets
+            try{useServlet = (GenericServlet)pool.pop();}
+            catch(EmptyStackException e)
+            {
+                // Create a new one for the pool
+                try
+                {
+                    if (_servletClass==null)
+                        initializeClass();
+            
+                    useServlet = 
                             (GenericServlet) _servletClass.newInstance();
-		    useServlet.init(this);
-		}
-		catch(Exception e2)
-		{
-		    Code.warning(e2);
-		    useServlet = null;
-		}
-	    }
-	}
-	else
-	{
-	    // Is the singleton instance ready?
-	    if (_servlet == null)
-	    {
-		// no so get a lock on the class
-		synchronized(this)
-		{
-		    // check if still not ready
-		    if (_servlet == null)
-		    {
-			// no so build it
-			try
-			{
-			    if (_servletClass==null)
-				initializeClass();
-			    useServlet = 
-				(GenericServlet) _servletClass.newInstance();
-			    useServlet.init(this);
-			    _servlet = useServlet;
-			    
-			    _singleThreadModel =
-				_servlet instanceof
-				javax.servlet.SingleThreadModel;
-			    if (_singleThreadModel)
-				_servlet=null;
-			}
-			catch(UnavailableException e)
-			{
-			    throw e;
-			}
-			catch(Exception e)
-			{
-			    Code.warning(e);
-			    useServlet = _servlet = null;
-			}
-		    }
-		    else
-			// yes so use it.
-			useServlet = _servlet;
-		}
-	    }
-	    else
-		// yes so use it.
-		useServlet = _servlet;
-	}
-	
-	// Check that we got one in the end
-	if (useServlet==null)
-	    throw new UnavailableException(null,"Could not construct servlet");
+                    useServlet.init(this);
+                }
+                catch(Exception e2)
+                {
+                    Code.warning(e2);
+                    useServlet = null;
+                }
+            }
+        }
+        else
+        {
+            // Is the singleton instance ready?
+            if (_servlet == null)
+            {
+                // no so get a lock on the class
+                synchronized(this)
+                {
+                    // check if still not ready
+                    if (_servlet == null)
+                    {
+                        // no so build it
+                        try
+                        {
+                            if (_servletClass==null)
+                                initializeClass();
+                            useServlet = 
+                                (GenericServlet) _servletClass.newInstance();
+                            useServlet.init(this);
+                            _servlet = useServlet;
+                            
+                            _singleThreadModel =
+                                _servlet instanceof
+                                javax.servlet.SingleThreadModel;
+                            if (_singleThreadModel)
+                                _servlet=null;
+                        }
+                        catch(UnavailableException e)
+                        {
+                            throw e;
+                        }
+                        catch(Exception e)
+                        {
+                            Code.warning(e);
+                            useServlet = _servlet = null;
+                        }
+                    }
+                    else
+                        // yes so use it.
+                        useServlet = _servlet;
+                }
+            }
+            else
+                // yes so use it.
+                useServlet = _servlet;
+        }
+        
+        // Check that we got one in the end
+        if (useServlet==null)
+            throw new UnavailableException(null,"Could not construct servlet");
 
-	// Service the request
-	try
-	{
-	    useServlet.service(request,response);
-	    response.flushBuffer();
-	}
-	finally
-	{
-	    // Return to singleThreaded pool
-	    if (_singleThreadModel && useServlet!=null)
-		pool.push(useServlet);
-	}
+        // Service the request
+        try
+        {
+            useServlet.service(request,response);
+            response.flushBuffer();
+        }
+        finally
+        {
+            // Return to singleThreaded pool
+            if (_singleThreadModel && useServlet!=null)
+                pool.push(useServlet);
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -348,9 +357,9 @@ public class ServletHolder
      */
     public Set entrySet()
     {
-	if (_initParams==null)
-	    _initParams=new HashMap(3);
-	return _initParams.entrySet();
+        if (_initParams==null)
+            _initParams=new HashMap(3);
+        return _initParams.entrySet();
     }
 
     /* ------------------------------------------------------------ */
@@ -361,9 +370,9 @@ public class ServletHolder
      */
     public Object put(Object name,Object value)
     {
-	if (_initParams==null)
-	    _initParams=new HashMap(3);
-	return _initParams.put(name,value);
+        if (_initParams==null)
+            _initParams=new HashMap(3);
+        return _initParams.put(name,value);
     }
     
     /* ------------------------------------------------------------ */

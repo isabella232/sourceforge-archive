@@ -4,22 +4,20 @@
 // ========================================================================
 
 package com.mortbay.Util;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
-import java.util.*; //XXX-JDK1.2
 
-import java.util.Properties;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.OutputStreamWriter;
-import java.io.StringWriter;
-import java.util.Dictionary;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Vector;
+import java.util.List;
+import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.Vector;
+
 
 /* ------------------------------------------------------------ */
 /** Property map with keys in tree hierarchy.
@@ -100,7 +98,7 @@ public class PropertyTree extends Properties
         {
             Object k=e.nextElement();
             String v=(String)properties.get(k);
-	    v=expandMacros(v);
+            v=expandMacros(v);
             put(k,trim?v.trim():v);    
         }
     }
@@ -209,14 +207,14 @@ public class PropertyTree extends Properties
     {
         final Enumeration keys=keys();
         return new Enumeration()
-	{
+        {
             public boolean hasMoreElements(){
                 return keys.hasMoreElements();
             }
             public Object nextElement(){
                 return get(keys.nextElement());
             }
-	};
+        };
     }
     
     
@@ -516,13 +514,13 @@ public class PropertyTree extends Properties
     {
         // do limited substitution on values
         for (int i=0; i<v.length();)
-	{
+        {
             int i1 = v.indexOf('%',i);
             if (i1 < 0) break;
             int i2 = v.indexOf('%',i1+1);
             if (i2 < 0) break;
             i = i2 + 1;
-	    
+            
             String sk = v.substring(i1+1,i2);
             String sv = sk.length()==0?"%":System.getProperty(sk);
             if (null == sv) continue;
@@ -533,7 +531,7 @@ public class PropertyTree extends Properties
             b.append(sv);
             if ((i2+1) < v.length()) 
                 b.append(v.substring(i2+1));
-	    
+            
             Code.debug("EXPANDED \"" , v , "\" TO \"" ,b);
             v = b.toString();
         }

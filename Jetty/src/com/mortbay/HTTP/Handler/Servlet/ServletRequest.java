@@ -5,16 +5,32 @@
 
 
 package com.mortbay.HTTP.Handler.Servlet;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import com.mortbay.HTTP.*;
-import com.mortbay.Util.*;
-import java.io.*;
+import com.mortbay.HTTP.HandlerContext;
+import com.mortbay.HTTP.HttpConnection;
+import com.mortbay.HTTP.HttpFields;
+import com.mortbay.HTTP.HttpRequest;
+import com.mortbay.Util.Code;
+import com.mortbay.Util.MultiMap;
+import com.mortbay.Util.Resource;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
-import java.util.*;
-import javax.servlet.http.*;
-import javax.servlet.*;
 import java.security.Principal;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 
 /* ------------------------------------------------------------ */
@@ -59,93 +75,93 @@ class ServletRequest
      * @param request 
      */
     ServletRequest(String contextPath,
-		   HttpRequest request,
-		   Context context)
+                   HttpRequest request,
+                   Context context)
     {
-	_contextPath=contextPath;
+        _contextPath=contextPath;
         _httpRequest=request;
-	_context=context;
+        _context=context;
     }
 
     /* ------------------------------------------------------------ */
     void setPaths(String servletPath,String pathInfo)
     {
         _servletPath=servletPath;
-	_pathInfo=pathInfo;
+        _pathInfo=pathInfo;
     }
     
     /* ------------------------------------------------------------ */
     void setForwardPaths(String servletPath,String pathInfo,String query)
     {
         _servletPath=servletPath;
-	_pathInfo=pathInfo;
-	_query=query;
+        _pathInfo=pathInfo;
+        _query=query;
 
-	if (getContextPath()==null)
-	    _uri=_servletPath+_pathInfo;
-	else
-	    _uri=getContextPath()+_servletPath+_pathInfo;
+        if (getContextPath()==null)
+            _uri=_servletPath+_pathInfo;
+        else
+            _uri=getContextPath()+_servletPath+_pathInfo;
     }
     
     /* ------------------------------------------------------------ */
     HttpRequest getHttpRequest()
     {
-	return _httpRequest;
+        return _httpRequest;
     }
     
     /* ------------------------------------------------------------ */
     ServletResponse getServletResponse()
     {
-	return _servletResponse;
+        return _servletResponse;
     }
     
     /* ------------------------------------------------------------ */
     void setServletResponse(ServletResponse response)
     {
-	_servletResponse = response;
+        _servletResponse = response;
     }
     
     /* ------------------------------------------------------------ */
     public Locale getLocale()
     {
-	return (Locale)getLocales().nextElement();
+        return (Locale)getLocales().nextElement();
     }
     
     /* ------------------------------------------------------------ */
     public Enumeration getLocales()
     {
-	List acceptLanguage =
-	    _httpRequest.getHeader().getValues("Accept-Language");
+        List acceptLanguage =
+            _httpRequest.getHeader().getValues("Accept-Language");
 
-	// handle no locale
+        // handle no locale
         if (acceptLanguage == null || acceptLanguage.size()==0)
-	    return
-		Collections.enumeration(Collections.singleton(Locale.getDefault()));
-	
-	
-	// sort the list in quality order
-	acceptLanguage = HttpFields.qualityList(acceptLanguage);
-	
-	if (acceptLanguage.size()==0)
-	    return
-		Collections.enumeration(Collections.singleton(Locale.getDefault()));
+            return
+                Collections.enumeration(Collections.singleton(Locale.getDefault()));
+        
+        
+        // sort the list in quality order
+        acceptLanguage = HttpFields.qualityList(acceptLanguage);
+        
+        if (acceptLanguage.size()==0)
+            return
+                Collections.enumeration(Collections.singleton(Locale.getDefault()));
 
-	// convert to locals
-	for (int i=0; i<acceptLanguage.size(); i++)
-	{
-	    String language = (String)acceptLanguage.get(i);
-	    String country = "";
-	    int dash = language.indexOf("-");
-	    if (dash > -1)
-	    {
-		country = language.substring(dash + 1).trim();
-		language = language.substring(0,dash).trim();
-	    }
-	    
-	    acceptLanguage.set(i,new Locale(language, country));
-	}
-	
-	return Collections.enumeration(acceptLanguage);
+        // convert to locals
+        for (int i=0; i<acceptLanguage.size(); i++)
+        {
+            String language = (String)acceptLanguage.get(i);
+            String country = "";
+            int dash = language.indexOf("-");
+            if (dash > -1)
+            {
+                country = language.substring(dash + 1).trim();
+                language = language.substring(0,dash).trim();
+            }
+            
+            acceptLanguage.set(i,new Locale(language, country));
+        }
+        
+        return Collections.enumeration(acceptLanguage);
     }
 
     
@@ -161,7 +177,7 @@ class ServletRequest
     /* ------------------------------------------------------------ */
     public boolean isSecure()
     {
-	return "https".equals(_httpRequest.getScheme());
+        return "https".equals(_httpRequest.getScheme());
     }
     
     /* ------------------------------------------------------------ */
@@ -204,10 +220,10 @@ class ServletRequest
     /* ------------------------------------------------------------ */
     public Enumeration getHeaders(String s)
     {
-	List list=_httpRequest.getFieldValues(s);
-	if (list==null)
-	    return null;
-	return Collections.enumeration(list);
+        List list=_httpRequest.getFieldValues(s);
+        if (list==null)
+            return null;
+        return Collections.enumeration(list);
     }
     
     /* ------------------------------------------------------------ */
@@ -225,7 +241,7 @@ class ServletRequest
     /* ------------------------------------------------------------ */
     public String getContextPath()
     {
-	return _contextPath;
+        return _contextPath;
     }
     
     /* ------------------------------------------------------------ */
@@ -240,38 +256,38 @@ class ServletRequest
         if (_pathInfo==null || _pathInfo.length()==0)
             return null;
         if (_pathTranslated==null)
-	{
-	    Resource resource =
-		_context.getHandler()
-		.getHandlerContext()
-		.getResourceBase();
+        {
+            Resource resource =
+                _context.getHandler()
+                .getHandlerContext()
+                .getResourceBase();
 
-	    if (resource==null)
-		return null;
+            if (resource==null)
+                return null;
 
-	    try
-	    {
-		resource=resource.addPath(_pathInfo);
-		File file = resource.getFile();
-		if (file==null)
-		    return null;
-		_pathTranslated=file.getAbsolutePath();
-	    }
-	    catch(Exception e)
-	    {
-		Code.debug(e);
-	    }
-	}
-	
+            try
+            {
+                resource=resource.addPath(_pathInfo);
+                File file = resource.getFile();
+                if (file==null)
+                    return null;
+                _pathTranslated=file.getAbsolutePath();
+            }
+            catch(Exception e)
+            {
+                Code.debug(e);
+            }
+        }
+        
         return _pathTranslated;
     }
     
     /* ------------------------------------------------------------ */
     public String getQueryString()
     {
-	if (_query==null)
-	    _query =_httpRequest.getQuery();
-	return _query;
+        if (_query==null)
+            _query =_httpRequest.getQuery();
+        return _query;
     }
     
     /* ------------------------------------------------------------ */
@@ -286,13 +302,13 @@ class ServletRequest
     /* ------------------------------------------------------------ */
     public boolean isUserInRole(String role)
     {
-	return _httpRequest.isUserInRole(role);
+        return _httpRequest.isUserInRole(role);
     }
 
     /* ------------------------------------------------------------ */
     public Principal getUserPrincipal()
     {
-	return _httpRequest.getUserPrincipal();
+        return _httpRequest.getUserPrincipal();
     }
     
     /* ------------------------------------------------------------ */
@@ -370,32 +386,32 @@ class ServletRequest
     /* ------------------------------------------------------------ */
     public String getRequestURI()
     {
-	if (_uri!=null)
-	    return _uri;
-	
-	String path=_httpRequest.getPath();
+        if (_uri!=null)
+            return _uri;
+        
+        String path=_httpRequest.getPath();
 
-	// remove any session stuff
-	if (isRequestedSessionIdFromURL())
-	{
+        // remove any session stuff
+        if (isRequestedSessionIdFromURL())
+        {
             int prefix=path.indexOf(Context.__SessionUrlPrefix);
             if (prefix!=-1)
             {
                 int suffix=path.indexOf(Context.__SessionUrlSuffix,prefix);
                 if (suffix!=-1 && prefix<suffix)
                 {    
-		    // translate our path to drop the prefix off.
-		    if (suffix+Context.__SessionUrlSuffix.length()<path.length())
-			path =
-			    path.substring(0,prefix)+
-			    path.substring(suffix+
-					   Context.__SessionUrlSuffix.length());
-		    else
-			path = path.substring(0,prefix);
-		}
-	    }    
-	}
-	return path;
+                    // translate our path to drop the prefix off.
+                    if (suffix+Context.__SessionUrlSuffix.length()<path.length())
+                        path =
+                            path.substring(0,prefix)+
+                            path.substring(suffix+
+                                           Context.__SessionUrlSuffix.length());
+                    else
+                        path = path.substring(0,prefix);
+                }
+            }    
+        }
+        return path;
     }
     
     /* ------------------------------------------------------------ */
@@ -408,7 +424,7 @@ class ServletRequest
     public HttpSession getSession(boolean create)
     {
         Code.debug("getSession(",new Boolean(create),")");
-	
+        
         if (_session != null && _context.isValid(_session))
             return _session;
         
@@ -476,7 +492,7 @@ class ServletRequest
     /* -------------------------------------------------------------- */
     public void removeAttribute(String name)
     {
-	_httpRequest.removeAttribute(name);
+        _httpRequest.removeAttribute(name);
     }
     
     /* -------------------------------------------------------------- */
@@ -523,42 +539,42 @@ class ServletRequest
     /* -------------------------------------------------------------- */
     MultiMap getParameters()
     {
-	if (_parameters!=null)
-	    return _parameters;
-	return _httpRequest.getParameters();
+        if (_parameters!=null)
+            return _parameters;
+        return _httpRequest.getParameters();
     }
     
     /* -------------------------------------------------------------- */
     void setParameters(MultiMap parameters)
     {
-	_parameters=parameters;
+        _parameters=parameters;
     }
     
     /* -------------------------------------------------------------- */
     public String getParameter(String name)
     {
-	if (_parameters!=null)
-	    return _parameters.getString(name);
+        if (_parameters!=null)
+            return _parameters.getString(name);
         return _httpRequest.getParameter(name);
     }
     
     /* -------------------------------------------------------------- */
     public Enumeration getParameterNames()
     {
-	if (_parameters!=null)
-	    return Collections.enumeration(_parameters.keySet());
+        if (_parameters!=null)
+            return Collections.enumeration(_parameters.keySet());
         return Collections.enumeration(_httpRequest.getParameterNames());
     }
     
     /* -------------------------------------------------------------- */
     public String[] getParameterValues(String name)
     {
-	List v = (_parameters!=null)
-	    ? _parameters.getValues(name)
-	    : _httpRequest.getParameterValues(name);
+        List v = (_parameters!=null)
+            ? _parameters.getValues(name)
+            : _httpRequest.getParameterValues(name);
         if (v==null)
             return null;
-	String[]a=new String[v.size()];
+        String[]a=new String[v.size()];
         return (String[])v.toArray(a);
     }
     
@@ -583,7 +599,7 @@ class ServletRequest
     /* -------------------------------------------------------------- */
     public int getServerPort()
     {
-	int port = _httpRequest.getPort();
+        int port = _httpRequest.getPort();
         return port==0?80:port;
     }
     
@@ -611,7 +627,7 @@ class ServletRequest
     /* -------------------------------------------------------------- */
     public String getRemoteAddr()
     {
-	return _httpRequest.getRemoteAddr();
+        return _httpRequest.getRemoteAddr();
     }
     
     /* -------------------------------------------------------------- */
@@ -631,37 +647,37 @@ class ServletRequest
     /* -------------------------------------------------------------- */
     public String getRealPath(String path)
     {
-	_context.getRealPath(path);
+        _context.getRealPath(path);
         return null;
     }
 
     /* ------------------------------------------------------------ */
     public RequestDispatcher getRequestDispatcher(String url)
     {
-	if (url == null)
+        if (url == null)
             return null;
 
         if (!url.startsWith("/"))
-	{
-	    String relTo=_servletPath+_pathInfo;
-	    
-	    int slash=relTo.lastIndexOf("/");
-	    relTo=relTo.substring(0,slash);
-	    
-	    while(url.startsWith("../"))
-	    {
-		if (relTo.length()==0)
-		    return null;
-		url=url.substring(3);
-		slash=relTo.lastIndexOf("/");
-		relTo=relTo.substring(0,slash);
-	    }
+        {
+            String relTo=_servletPath+_pathInfo;
+            
+            int slash=relTo.lastIndexOf("/");
+            relTo=relTo.substring(0,slash);
+            
+            while(url.startsWith("../"))
+            {
+                if (relTo.length()==0)
+                    return null;
+                url=url.substring(3);
+                slash=relTo.lastIndexOf("/");
+                relTo=relTo.substring(0,slash);
+            }
 
-	    url=relTo+url;
-	    
-	}
+            url=relTo+url;
+            
+        }
     
-	return _context.getRequestDispatcher(url);
+        return _context.getRequestDispatcher(url);
     }
 
     /* ------------------------------------------------------------ */
@@ -670,7 +686,7 @@ class ServletRequest
      */
     public String toString()
     {
-	return _httpRequest.toString();
+        return _httpRequest.toString();
     }
 }
 

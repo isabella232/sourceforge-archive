@@ -4,11 +4,9 @@
 // ========================================================================
 
 package com.mortbay.HTTP;
-import com.mortbay.Util.*;
+import com.mortbay.Util.LifeCycle;
+import java.net.UnknownHostException;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
 
 /* ------------------------------------------------------------ */
 /** HTTP Listener
@@ -22,13 +20,13 @@ public interface HttpListener extends LifeCycle
     public abstract void setHttpServer(HttpServer server);
     public abstract HttpServer getHttpServer();
     public abstract void setHost(String host)
-	throws UnknownHostException;
+        throws UnknownHostException;
     public abstract String getHost();
     public abstract void setPort(int port);
     public abstract int getPort();
 
     public abstract void customizeRequest(HttpConnection connection,
-					  HttpRequest request);
+                                          HttpRequest request);
     public abstract String getDefaultScheme();
 }
 

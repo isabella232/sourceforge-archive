@@ -4,11 +4,17 @@
 // ========================================================================
 
 package com.mortbay.Util;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
     
-import java.util.*;
-import java.util.zip.*;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /* ------------------------------------------------------------ */
 /** ZIP resource.
@@ -25,7 +31,7 @@ public class ZipResource
     String _responseName;
     Map _entryMap = new HashMap();
     Map _byteMap = new HashMap();
-	
+        
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param resouceName 
@@ -33,44 +39,44 @@ public class ZipResource
      * @exception IllegalArgumentException 
      */
     public ZipResource(String resouceName)
-	throws IOException, IllegalArgumentException
+        throws IOException, IllegalArgumentException
     {
-	if (Code.verbose(9)) Code.debug("ZipResource ",resouceName);
-	
-	_responseName=resouceName;
+        if (Code.verbose(9)) Code.debug("ZipResource ",resouceName);
+        
+        _responseName=resouceName;
 
-	// Check that it exists
-	InputStream in = ClassLoader.getSystemResourceAsStream(resouceName);
-	if (in==null)
-	    throw new IllegalArgumentException("No such resource");
+        // Check that it exists
+        InputStream in = ClassLoader.getSystemResourceAsStream(resouceName);
+        if (in==null)
+            throw new IllegalArgumentException("No such resource");
 
-	// Load the index
-	ZipInputStream zipin = new ZipInputStream(in);
-	ZipEntry entry=null;
-	while((entry=zipin.getNextEntry())!=null)
-	{
-	    if (Code.verbose(99)) Code.debug(entry.getName());
-	    _entryMap.put(entry.getName(),entry);
-	}
-	in.close();
+        // Load the index
+        ZipInputStream zipin = new ZipInputStream(in);
+        ZipEntry entry=null;
+        while((entry=zipin.getNextEntry())!=null)
+        {
+            if (Code.verbose(99)) Code.debug(entry.getName());
+            _entryMap.put(entry.getName(),entry);
+        }
+        in.close();
     }
 
     /* ------------------------------------------------------------ */
     public Set getNames()
     {
-	return _entryMap.keySet();
+        return _entryMap.keySet();
     }
     
     /* ------------------------------------------------------------ */
     public Collection getEntries()
     {
-	return _entryMap.values();
+        return _entryMap.values();
     }
     
     /* ------------------------------------------------------------ */
     public ZipEntry getEntry(String name)
     {
-	return (ZipEntry)_entryMap.get(name);
+        return (ZipEntry)_entryMap.get(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -79,36 +85,36 @@ public class ZipResource
      * @return byte array or null if not found/
      */
     public byte[] getBytes(String name)
-	throws IOException
+        throws IOException
     {
-	// Is it already loaded?
-	byte[] b = (byte[])_byteMap.get(name);
-	if (b!=null)
-	    return b;
+        // Is it already loaded?
+        byte[] b = (byte[])_byteMap.get(name);
+        if (b!=null)
+            return b;
 
-	// Is it in the index?
-	ZipEntry entry=(ZipEntry)_entryMap.get(name);
-	if (entry==null)
-	    return null;
+        // Is it in the index?
+        ZipEntry entry=(ZipEntry)_entryMap.get(name);
+        if (entry==null)
+            return null;
 
-	// find it in stream.
-	InputStream in = ClassLoader.getSystemResourceAsStream(_responseName);
-	ZipInputStream zipin = new ZipInputStream(in);
-	while((entry=zipin.getNextEntry())!=null)
-	{
-	    if (entry.getName().equals(name))
-	    {
-		if (Code.verbose(9)) Code.debug("Loading ",name);
+        // find it in stream.
+        InputStream in = ClassLoader.getSystemResourceAsStream(_responseName);
+        ZipInputStream zipin = new ZipInputStream(in);
+        while((entry=zipin.getNextEntry())!=null)
+        {
+            if (entry.getName().equals(name))
+            {
+                if (Code.verbose(9)) Code.debug("Loading ",name);
 
-		// found the entry
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		IO.copy(zipin,out);
-		b = out.toByteArray();
-		_byteMap.put(name,b);
-		break;
-	    }
-	}
-	return b;
+                // found the entry
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                IO.copy(zipin,out);
+                b = out.toByteArray();
+                _byteMap.put(name,b);
+                break;
+            }
+        }
+        return b;
     }
 
     /* ------------------------------------------------------------ */
@@ -119,19 +125,19 @@ public class ZipResource
      */
     public InputStream getInputStream(String name)
     {
-	try
-	{
-	    byte[] b = getBytes(name);
-	    if (b==null)
-		return null;
-	    
-	    return new ByteArrayInputStream(b);
-	}
-	catch(IOException e)
-	{
-	    Code.ignore(e);
-	}
-	return null;
+        try
+        {
+            byte[] b = getBytes(name);
+            if (b==null)
+                return null;
+            
+            return new ByteArrayInputStream(b);
+        }
+        catch(IOException e)
+        {
+            Code.ignore(e);
+        }
+        return null;
     }
     
 }

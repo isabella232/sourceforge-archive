@@ -4,12 +4,24 @@
 // ========================================================================
 
 package com.mortbay.Util;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
-import com.mortbay.Util.DataClassTest.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.zip.*;
+
+import com.mortbay.Util.DataClassTest.T1;
+import com.mortbay.Util.DataClassTest.T2;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.Vector;
+import java.util.zip.ZipEntry;
 
 
 public class TestHarness
@@ -874,9 +886,9 @@ public class TestHarness
             throws Exception
         {
             setName("TestPool");
-	    setMinThreads(2);
-	    setMaxThreads(4);
-	    setMaxIdleTimeMs(500);
+            setMinThreads(2);
+            setMaxThreads(4);
+            setMaxIdleTimeMs(500);
         }
         
         /* -------------------------------------------------------- */
@@ -1066,10 +1078,10 @@ public class TestHarness
             throws Exception
         {
             super(new InetAddrPort(8765));
-	    setMinThreads(2);
-	    setMaxThreads(4);
-	    setMaxIdleTimeMs(500);
-	    setMaxReadTimeMs(60000);
+            setMinThreads(2);
+            setMaxThreads(4);
+            setMaxIdleTimeMs(500);
+            setMaxReadTimeMs(60000);
         }
         
         /* -------------------------------------------------------- */
@@ -1187,7 +1199,7 @@ public class TestHarness
             test.checkEquals(server._jobs,2,"1 idle");
             test.checkEquals(server.getThreads(),3,"1 idle");
 
-	    
+            
             p1.print("Exit\015");
             p1.flush();
             System.err.print(".");System.err.flush();
@@ -1202,7 +1214,7 @@ public class TestHarness
             test.checkEquals(server._jobs,1,"idle death");
             test.checkEquals(server.getThreads(),2,"idle death");
             
-	    
+            
             p1 = server.stream();
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
@@ -1237,28 +1249,28 @@ public class TestHarness
         Test test = new Test("com.mortbay.Util.ZipResource");
         try
         {
-	    try
-	    {
-		new ZipResource("com/mortbay/Util/Test/unknown.zip");
-		test.check(false,"Not found");
-	    }
-	    catch(IllegalArgumentException e)
-	    {
-		test.check(true,"No Such Resource");
-	    }
-	    
-	    ZipResource zr = new
-		ZipResource("com/mortbay/Util/Test/test.zip");
-	    test.checkEquals(zr.getNames().size(),3,"getNames()");
+            try
+            {
+                new ZipResource("com/mortbay/Util/Test/unknown.zip");
+                test.check(false,"Not found");
+            }
+            catch(IllegalArgumentException e)
+            {
+                test.check(true,"No Such Resource");
+            }
+            
+            ZipResource zr = new
+                ZipResource("com/mortbay/Util/Test/test.zip");
+            test.checkEquals(zr.getNames().size(),3,"getNames()");
 
-	    ZipEntry entry = zr.getEntry("alphabet");
-	    test.checkEquals(entry.getName(),"alphabet","getEntry(alphabet)");	    
+            ZipEntry entry = zr.getEntry("alphabet");
+            test.checkEquals(entry.getName(),"alphabet","getEntry(alphabet)");	    
 
-	    byte[] b = zr.getBytes("alphabet");
-	    test.checkEquals(b.length,27,"getBytes(alphabet)");
-	    test.checkEquals(b[0],'A',"getBytes(alphabet)");
-	    
-	}
+            byte[] b = zr.getBytes("alphabet");
+            test.checkEquals(b.length,27,"getBytes(alphabet)");
+            test.checkEquals(b[0],'A',"getBytes(alphabet)");
+            
+        }
         catch(Exception e)
         {
             Code.warning(e);
@@ -1273,27 +1285,27 @@ public class TestHarness
         
         try
         {
-	    MultiMap mm = new MultiMap();
+            MultiMap mm = new MultiMap();
 
-	    mm.put("K1","V1");
-	    t.checkEquals(mm.get("K1"),"V1","as Map");
-	    t.checkEquals(mm.getValues("K1").get(0),"V1","as List");
-	    mm.add("K1","V2");
-	    t.checkEquals(mm.getValues("K1").get(0),"V1","add List");
-	    t.checkEquals(mm.getValues("K1").get(1),"V2","add List");
+            mm.put("K1","V1");
+            t.checkEquals(mm.get("K1"),"V1","as Map");
+            t.checkEquals(mm.getValues("K1").get(0),"V1","as List");
+            mm.add("K1","V2");
+            t.checkEquals(mm.getValues("K1").get(0),"V1","add List");
+            t.checkEquals(mm.getValues("K1").get(1),"V2","add List");
 
-	    mm.put("K2",new Integer(2));
-	    t.checkEquals(mm.getValues("K2").get(0),new Integer(2),"as Object");
+            mm.put("K2",new Integer(2));
+            t.checkEquals(mm.getValues("K2").get(0),new Integer(2),"as Object");
 
-	    MultiMap m2=(MultiMap)mm.clone();
-	    m2.add("K1","V3");
-	    t.checkEquals(mm.getValues("K1").size(),2,"unchanged List");
-	    t.checkEquals(mm.getValues("K1").get(0),"V1","unchanged List");
-	    t.checkEquals(mm.getValues("K1").get(1),"V2","unchanged List");
-	    t.checkEquals(m2.getValues("K1").get(0),"V1","clone List");
-	    t.checkEquals(m2.getValues("K1").get(1),"V2","clone List");
-	    t.checkEquals(m2.getValues("K1").get(2),"V3","clone List");
-	}
+            MultiMap m2=(MultiMap)mm.clone();
+            m2.add("K1","V3");
+            t.checkEquals(mm.getValues("K1").size(),2,"unchanged List");
+            t.checkEquals(mm.getValues("K1").get(0),"V1","unchanged List");
+            t.checkEquals(mm.getValues("K1").get(1),"V2","unchanged List");
+            t.checkEquals(m2.getValues("K1").get(0),"V1","clone List");
+            t.checkEquals(m2.getValues("K1").get(1),"V2","clone List");
+            t.checkEquals(m2.getValues("K1").get(2),"V3","clone List");
+        }
         catch(Exception e)
         {
             Code.warning(e);
@@ -1308,70 +1320,70 @@ public class TestHarness
         Test t = new Test("com.mortbay.Util.Resource");
         try
         {
-	    Resource r =
-		Resource.newResource("file:"+
-				     System.getProperty("user.dir")+
-				     "/TestHarness.java");
-	    t.check(r.exists(),"File URL exists");
-	    t.check(!r.isDirectory(),"File URL not directory");
-	    r = Resource.newResource(System.getProperty("user.dir")+
-				     "/TestHarness.java");
-	    t.check(r.exists(),"Abs File exists");
-	    t.check(!r.isDirectory(),"Abs URL not directory");
-	    r = Resource.newResource("TestHarness.java");
-	    t.check(r.exists(),"Rel File exists");
-	    t.check(!r.isDirectory(),"Rel URL not directory");
+            Resource r =
+                Resource.newResource("file:"+
+                                     System.getProperty("user.dir")+
+                                     "/TestHarness.java");
+            t.check(r.exists(),"File URL exists");
+            t.check(!r.isDirectory(),"File URL not directory");
+            r = Resource.newResource(System.getProperty("user.dir")+
+                                     "/TestHarness.java");
+            t.check(r.exists(),"Abs File exists");
+            t.check(!r.isDirectory(),"Abs URL not directory");
+            r = Resource.newResource("TestHarness.java");
+            t.check(r.exists(),"Rel File exists");
+            t.check(!r.isDirectory(),"Rel URL not directory");
 
 
-	    Resource rt = Resource.newResource("file:"+
-					       System.getProperty("user.dir"));
-	    Resource rt1=rt.addPath("Test");
-	    t.check(rt1.exists(),"Test File exists");
-	    t.check(rt1.isDirectory(),"Test URL is directory");
-	    Resource rt2=rt.addPath("Test/");
-	    t.check(rt2.exists(),"Test File exists");
-	    t.check(rt2.isDirectory(),"Test URL is directory");
-	    
-	    
-	    Resource b = Resource.newResource("file:"+
-					      System.getProperty("user.dir")+
-					      "/");
-	    
-	    r = b.addPath("Resource.java");
-	    t.check(r.exists(),"AddPath resource exists");
-	    r = b.addPath("UnknownFile");
-	    t.check(!r.exists(),"AddPath resource ! exists");
-	    r = b.addPath("/Resource.java");
-	    t.check(r.exists(),"AddPath resource exists");
-	    r = b.addPath("/UnknownFile");
-	    t.check(!r.exists(),"AddPath resource ! exists");
-	    
-	    b = Resource.newResource("file:"+
-				     System.getProperty("user.dir"));
-	    r = b.addPath("Resource.java");
-	    t.check(r.exists(),"AddPath resource exists");
-	    r = b.addPath("UnknownFile");
-	    t.check(!r.exists(),"AddPath resource ! exists");
-	    r = b.addPath("/Resource.java");
-	    t.check(r.exists(),"AddPath resource exists");
-	    r = b.addPath("/UnknownFile");
-	    t.check(!r.exists(),"AddPath resource ! exists");
-	    
+            Resource rt = Resource.newResource("file:"+
+                                               System.getProperty("user.dir"));
+            Resource rt1=rt.addPath("Test");
+            t.check(rt1.exists(),"Test File exists");
+            t.check(rt1.isDirectory(),"Test URL is directory");
+            Resource rt2=rt.addPath("Test/");
+            t.check(rt2.exists(),"Test File exists");
+            t.check(rt2.isDirectory(),"Test URL is directory");
+            
+            
+            Resource b = Resource.newResource("file:"+
+                                              System.getProperty("user.dir")+
+                                              "/");
+            
+            r = b.addPath("Resource.java");
+            t.check(r.exists(),"AddPath resource exists");
+            r = b.addPath("UnknownFile");
+            t.check(!r.exists(),"AddPath resource ! exists");
+            r = b.addPath("/Resource.java");
+            t.check(r.exists(),"AddPath resource exists");
+            r = b.addPath("/UnknownFile");
+            t.check(!r.exists(),"AddPath resource ! exists");
+            
+            b = Resource.newResource("file:"+
+                                     System.getProperty("user.dir"));
+            r = b.addPath("Resource.java");
+            t.check(r.exists(),"AddPath resource exists");
+            r = b.addPath("UnknownFile");
+            t.check(!r.exists(),"AddPath resource ! exists");
+            r = b.addPath("/Resource.java");
+            t.check(r.exists(),"AddPath resource exists");
+            r = b.addPath("/UnknownFile");
+            t.check(!r.exists(),"AddPath resource ! exists");
+            
 
-	    r = Resource.newResource("file:"+System.getProperty("user.dir"));
-	    t.check(r.exists(),"Dir URL exists");
-	    t.check(r.isDirectory(),"Dir URL directory");
-	    r = r.addPath("Resource.java");
-	    t.check(r.exists(),"AddPath resource exists");
-	    r = r.addPath("UnknownFile");
-	    t.check(!r.exists(),"AddPath resource ! exists");
+            r = Resource.newResource("file:"+System.getProperty("user.dir"));
+            t.check(r.exists(),"Dir URL exists");
+            t.check(r.isDirectory(),"Dir URL directory");
+            r = r.addPath("Resource.java");
+            t.check(r.exists(),"AddPath resource exists");
+            r = r.addPath("UnknownFile");
+            t.check(!r.exists(),"AddPath resource ! exists");
 
-	    r = Resource.newResource("jar:file:/somejar.jar!/content/");
-	    t.checkEquals(r.getFile(),null,"no file for jar:");
-	    
+            r = Resource.newResource("jar:file:/somejar.jar!/content/");
+            t.checkEquals(r.getFile(),null,"no file for jar:");
+            
 
-	    
-	}
+            
+        }
         catch(Exception e)
         {
             Code.warning(e);
@@ -1383,111 +1395,111 @@ public class TestHarness
     public static void testXmlParser()
     {
         Test t = new Test("com.mortbay.Util.XmlParser");
-	try
-	{
-	    XmlParser parser = new XmlParser();
-	    parser.redirectEntity
-		("configure.dtd",
-		 Resource.newSystemResource
-		 ("com/mortbay/Util/configure.dtd"));
-	    
-	    String url = "file:"+System.getProperty("user.dir")+
-		"/Test/configure.xml";
-	    XmlParser.Node testDoc = parser.parse(url);
-	    String testDocStr = testDoc.toString().trim();
-	    Code.debug(testDocStr);
-	    
-	    t.check(testDocStr.startsWith("<Configure"),"Parsed");
-	    t.check(testDocStr.endsWith("</Configure>"),"Parsed");
-	}
-	catch(Exception e)
-	{
-	    Code.warning(e);
+        try
+        {
+            XmlParser parser = new XmlParser();
+            parser.redirectEntity
+                ("configure.dtd",
+                 Resource.newSystemResource
+                 ("com/mortbay/Util/configure.dtd"));
+            
+            String url = "file:"+System.getProperty("user.dir")+
+                "/Test/configure.xml";
+            XmlParser.Node testDoc = parser.parse(url);
+            String testDocStr = testDoc.toString().trim();
+            Code.debug(testDocStr);
+            
+            t.check(testDocStr.startsWith("<Configure"),"Parsed");
+            t.check(testDocStr.endsWith("</Configure>"),"Parsed");
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
             t.check(false,e.toString());
-	}
+        }
     }
 
     /* ------------------------------------------------------------ */
     public static void testXmlConfiguration()
     {
         Test t = new Test("com.mortbay.Util.XmlConfiguration");
-	try
-	{
-	    String url = "file:"+System.getProperty("user.dir")+
-		"/Test/configure.xml";
-	    XmlConfiguration configuration =
-		new XmlConfiguration(new URL(url));
-	    TestConfiguration tc = new TestConfiguration();
-	    configuration.configure(tc);
+        try
+        {
+            String url = "file:"+System.getProperty("user.dir")+
+                "/Test/configure.xml";
+            XmlConfiguration configuration =
+                new XmlConfiguration(new URL(url));
+            TestConfiguration tc = new TestConfiguration();
+            configuration.configure(tc);
 
-	    t.checkEquals(tc.testObject,"SetValue","Set String");
-	    t.checkEquals(tc.testInt,2,"Set Type");
+            t.checkEquals(tc.testObject,"SetValue","Set String");
+            t.checkEquals(tc.testInt,2,"Set Type");
 
-	    t.checkEquals(tc.get("Test"),"PutValue","Put");
-	    t.checkEquals(tc.get("TestDft"),"2","Put dft");
-	    t.checkEquals(tc.get("TestInt"),new Integer(2),"Put type");
-	    
-	    t.checkEquals(tc.get("Trim"),"PutValue","Trim");
-	    t.checkEquals(tc.get("Null"),null,"Null");
-	    t.checkEquals(tc.get("NullTrim"),null,"NullTrim");
-	    
-	    t.checkEquals(tc.get("ObjectTrim"),
-			  new Double(1.2345),
-			  "ObjectTrim");
-	    t.checkEquals(tc.get("Objects"),
-			  "-1String",
-			  "Objects");
-	    t.checkEquals(tc.get("ObjectsTrim"),
-			  "-1String",
-			  "ObjectsTrim");
-	    t.checkEquals(tc.get("String"),
-			  "\n    PutValue\n  ",
-			  "String");
-	    t.checkEquals(tc.get("NullString"),
-			  "",
-			  "NullString");
-	    t.checkEquals(tc.get("WhiteSpace"),
-			  "\n  ",
-			  "WhateSpace");
-	    t.checkEquals(tc.get("ObjectString"),
-			  "\n    1.2345\n  ",
-			  "ObjectString");
-	    t.checkEquals(tc.get("ObjectsString"),
-			  "-1String",
-			  "ObjectsString");
-	    t.checkEquals(tc.get("ObjectsWhiteString"),
-			  "-1\n  String",
-			  "ObjectsWhiteString");
+            t.checkEquals(tc.get("Test"),"PutValue","Put");
+            t.checkEquals(tc.get("TestDft"),"2","Put dft");
+            t.checkEquals(tc.get("TestInt"),new Integer(2),"Put type");
+            
+            t.checkEquals(tc.get("Trim"),"PutValue","Trim");
+            t.checkEquals(tc.get("Null"),null,"Null");
+            t.checkEquals(tc.get("NullTrim"),null,"NullTrim");
+            
+            t.checkEquals(tc.get("ObjectTrim"),
+                          new Double(1.2345),
+                          "ObjectTrim");
+            t.checkEquals(tc.get("Objects"),
+                          "-1String",
+                          "Objects");
+            t.checkEquals(tc.get("ObjectsTrim"),
+                          "-1String",
+                          "ObjectsTrim");
+            t.checkEquals(tc.get("String"),
+                          "\n    PutValue\n  ",
+                          "String");
+            t.checkEquals(tc.get("NullString"),
+                          "",
+                          "NullString");
+            t.checkEquals(tc.get("WhiteSpace"),
+                          "\n  ",
+                          "WhateSpace");
+            t.checkEquals(tc.get("ObjectString"),
+                          "\n    1.2345\n  ",
+                          "ObjectString");
+            t.checkEquals(tc.get("ObjectsString"),
+                          "-1String",
+                          "ObjectsString");
+            t.checkEquals(tc.get("ObjectsWhiteString"),
+                          "-1\n  String",
+                          "ObjectsWhiteString");
 
-	    t.checkEquals(tc.get("Property"),
-			  System.getProperty("user.dir")+"/stuff",
-			  "Property");
+            t.checkEquals(tc.get("Property"),
+                          System.getProperty("user.dir")+"/stuff",
+                          "Property");
 
-	    
-	    t.checkEquals(tc.get("Called"),
-			  "Yes",
-			  "Called");
+            
+            t.checkEquals(tc.get("Called"),
+                          "Yes",
+                          "Called");
 
-	    TestConfiguration tc2=tc.nested;
-	    t.check(tc2!=null,"Called(bool)");
-	    t.checkEquals(tc2.get("Arg"),
-			  new Boolean(true),
-			  "Called(bool)");
+            TestConfiguration tc2=tc.nested;
+            t.check(tc2!=null,"Called(bool)");
+            t.checkEquals(tc2.get("Arg"),
+                          new Boolean(true),
+                          "Called(bool)");
 
-	    t.checkEquals(tc.get("Arg"),null,"nested config");
-	    t.checkEquals(tc2.get("Arg"),new Boolean(true),"nested config");
-	    
-	    t.checkEquals(tc2.testObject,"Call1","nested config");
-	    t.checkEquals(tc2.testInt,4,"nested config");
-	    t.checkEquals(tc2.url.toString(),
-			  "http://www.mortbay.com/",
-			  "nested call");
-	}
-	catch(Exception e)
-	{
-	    Code.warning(e);
+            t.checkEquals(tc.get("Arg"),null,"nested config");
+            t.checkEquals(tc2.get("Arg"),new Boolean(true),"nested config");
+            
+            t.checkEquals(tc2.testObject,"Call1","nested config");
+            t.checkEquals(tc2.testInt,4,"nested config");
+            t.checkEquals(tc2.url.toString(),
+                          "http://www.mortbay.com/",
+                          "nested call");
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
             t.check(false,e.toString());
-	}
+        }
     }
     
     
@@ -1498,7 +1510,7 @@ public class TestHarness
     {
         try
         {
-	    testMultiMap();
+            testMultiMap();
        	    testQuotedStringTokenizer();            
        	    testDateCache();
        	    testTest();

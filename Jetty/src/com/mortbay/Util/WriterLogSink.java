@@ -5,9 +5,10 @@
 
 package com.mortbay.Util;
 
-import java.util.*;
-import java.io.*;
-import java.text.*;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 
 /* ------------------------------------------------------------ */
@@ -42,13 +43,13 @@ public class WriterLogSink
     
     /* ------------------------------------------------------------ */
     private static final String __lineSeparator =
-	System.getProperty("line.separator");
+        System.getProperty("line.separator");
     private static final String __indentBase = 
     "  ";
     private static final String __indentSeparator =
-	__lineSeparator+__indentBase;
+        __lineSeparator+__indentBase;
     private static final int __lineSeparatorLen =
-	__lineSeparator.length();
+        __lineSeparator.length();
     private static String __indent =
         ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
 
@@ -58,7 +59,7 @@ public class WriterLogSink
      */
     public WriterLogSink()
     {
-	_out=new PrintWriter(System.err);
+        _out=new PrintWriter(System.err);
     }
     
     /* ------------------------------------------------------------ */
@@ -67,7 +68,7 @@ public class WriterLogSink
      */
     public WriterLogSink(PrintWriter out)
     {
-	_out=out;
+        _out=out;
     }
     
     /*-------------------------------------------------------------------*/
@@ -78,23 +79,23 @@ public class WriterLogSink
      */
     public void setOptions(String dateFormat,
                            String timezone,
-			   boolean logTimeStamps,
-			   boolean logLabels,
-			   boolean logTags,
-			   boolean logStackSize,
-			   boolean logStackTrace,
-			   boolean logOneLine)
+                           boolean logTimeStamps,
+                           boolean logLabels,
+                           boolean logTags,
+                           boolean logStackSize,
+                           boolean logStackTrace,
+                           boolean logOneLine)
     {
-	dateFormat=dateFormat.replace('+',' ');
-	_dateFormat = new DateCache(dateFormat);
-	_dateFormat.getFormat().setTimeZone(TimeZone.getTimeZone(timezone));
+        dateFormat=dateFormat.replace('+',' ');
+        _dateFormat = new DateCache(dateFormat);
+        _dateFormat.getFormat().setTimeZone(TimeZone.getTimeZone(timezone));
         
-	_logTimeStamps      = logTimeStamps;
-	_logLabels          = logLabels;
-	_logTags            = logTags;
-	_logStackSize       = logStackSize;
-	_logStackTrace      = logStackTrace;
-	_logOneLine         = logOneLine;
+        _logTimeStamps      = logTimeStamps;
+        _logLabels          = logLabels;
+        _logTags            = logTags;
+        _logStackSize       = logStackSize;
+        _logStackTrace      = logStackTrace;
+        _logOneLine         = logOneLine;
     }    
 
 
@@ -110,9 +111,9 @@ public class WriterLogSink
      * @param time The time stamp of the message.
      */
     public void log(String tag,
-		    Object msg,
-		    Frame frame,
-		    long time)
+                    Object msg,
+                    Frame frame,
+                    long time)
     {
         // Lock static buffer
         synchronized(_stringBuffer)
@@ -157,7 +158,7 @@ public class WriterLogSink
             
             if (_logStackSize && frame != null) {
             	indent = __indent.substring(0,frame._depth)+" ";
-	            _stringBuffer.append(indent);
+                    _stringBuffer.append(indent);
             }
             indent = indentSeparator + __indentBase + indent;
             
@@ -168,12 +169,12 @@ public class WriterLogSink
             // Log indented message
             int i=0;
             int last=0;
-	    String smsg=(msg==null)
-		?"null"
-		:((msg instanceof String)
-		  ?((String)msg)
-		  :msg.toString());
-	    
+            String smsg=(msg==null)
+                ?"null"
+                :((msg instanceof String)
+                  ?((String)msg)
+                  :msg.toString());
+            
             while ((i=smsg.indexOf(__lineSeparator,i))>=last)
             {
                 _stringBuffer.append(smsg.substring(last,i));
@@ -184,8 +185,8 @@ public class WriterLogSink
             if (smsg.length()>last)
                 _stringBuffer.append(smsg.substring(last));
 
-	    log(_stringBuffer.toString());
-	}
+            log(_stringBuffer.toString());
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -196,14 +197,14 @@ public class WriterLogSink
      */
     public synchronized void log(String formattedLog)
     {
-	_out.println(formattedLog);
-	_out.flush();
+        _out.println(formattedLog);
+        _out.flush();
     }
 
     /* ------------------------------------------------------------ */
     protected void setWriter(PrintWriter out)
     {
-	_out=out;
+        _out=out;
     }
 
     /* ------------------------------------------------------------ */
@@ -212,8 +213,8 @@ public class WriterLogSink
      */
     public void initialize(Object o)
     {
-	if (o instanceof PrintWriter)
-	    setWriter((PrintWriter)o);
+        if (o instanceof PrintWriter)
+            setWriter((PrintWriter)o);
     }
     
     /* ------------------------------------------------------------ */
@@ -222,7 +223,7 @@ public class WriterLogSink
      */
     public void start()
     {
-	_started=true;
+        _started=true;
     }
     
     /* ------------------------------------------------------------ */
@@ -232,25 +233,25 @@ public class WriterLogSink
      */
     public void stop()
     {
-	_started=false;
+        _started=false;
     }
 
     /* ------------------------------------------------------------ */
     public boolean isStarted()
     {
-	return _started;
+        return _started;
     }
 
     /* ------------------------------------------------------------ */
     public void destroy()
     {
-	_out=null;
+        _out=null;
     }
     
     /* ------------------------------------------------------------ */
     public boolean isDestroyed()
     {
-	return !_started && _out==null;
+        return !_started && _out==null;
     }
     
 };

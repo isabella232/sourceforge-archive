@@ -4,13 +4,23 @@
 // ========================================================================
 
 package com.mortbay.HTTP.Handler;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import com.mortbay.HTTP.*;
-import com.mortbay.Util.*;
-import java.util.*;
-import java.text.*;
-import java.io.*;
+import com.mortbay.HTTP.ChunkableOutputStream;
+import com.mortbay.HTTP.HttpException;
+import com.mortbay.HTTP.HttpFields;
+import com.mortbay.HTTP.HttpRequest;
+import com.mortbay.HTTP.HttpResponse;
+import com.mortbay.Util.Code;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /* ------------------------------------------------------------ */
 /** Dump request handler.
@@ -29,22 +39,23 @@ public class DumpHandler extends NullHandler
     }
     
     /* ------------------------------------------------------------ */
-    public void handle(String pathSpec,
+    public void handle(String contextPath,
+                       String pathInContext,
                        HttpRequest request,
                        HttpResponse response)
         throws HttpException, IOException
     {
         if (!isStarted())
             return;
-	
+        
         // Only handle GET, HEAD and POST
         if (!request.__GET.equals(request.getMethod()) &&
             !request.__HEAD.equals(request.getMethod()) &&
             !request.__POST.equals(request.getMethod()))
             return;
 
-	Code.debug("Dump");
-	
+        Code.debug("Dump");
+        
         response.setField(HttpFields.__ContentType,
                           HttpFields.__TextHtml);
         ChunkableOutputStream out = response.getOutputStream();
@@ -52,10 +63,8 @@ public class DumpHandler extends NullHandler
         Writer writer = new OutputStreamWriter(buf,"ISO-8859-1");
         writer.write("<HTML><H1>Dump HttpHandler</H1>");
         writer.write("<PRE>\npath="+request.getPath()+
-                    "\nmatch="+
-                    PathMap.pathMatch(pathSpec,request.getPath())+
-                    "\ninfo="+
-                    PathMap.pathInfo(pathSpec,request.getPath())+
+                    "\ncontextPath="+contextPath+
+                    "\npathInContext="+pathInContext+
                     "\n</PRE>\n");
         writer.write("<H3>Header:</H3><PRE>");
         writer.write(request.toString());

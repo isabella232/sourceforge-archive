@@ -4,15 +4,23 @@
 // ========================================================================
 
 package com.mortbay.HTTP;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import com.mortbay.Util.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import com.mortbay.HTTP.Handler.*;
-import com.mortbay.HTTP.Handler.Servlet.*;
-import java.lang.reflect.*;
+import com.mortbay.Util.Code;
+import com.mortbay.Util.DateCache;
+import com.mortbay.Util.InetAddrPort;
+import com.mortbay.Util.LifeCycle;
+import com.mortbay.Util.Log;
+import com.mortbay.Util.LogSink;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /* ------------------------------------------------------------ */
 /** HTTP Server.
@@ -39,7 +47,7 @@ public class HttpServer implements LifeCycle
     private HttpEncoding _httpEncoding ;
     private LogSink _logSink;
     private DateCache _dateCache=
-	new DateCache("dd/MMM/yyyy:HH:mm:ss");
+        new DateCache("dd/MMM/yyyy:HH:mm:ss");
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -54,9 +62,9 @@ public class HttpServer implements LifeCycle
      */
     public HttpEncoding getHttpEncoding()
     {
-	if (_httpEncoding==null)
-	    _httpEncoding=new HttpEncoding();
-	return _httpEncoding;
+        if (_httpEncoding==null)
+            _httpEncoding=new HttpEncoding();
+        return _httpEncoding;
     }
     
     /* ------------------------------------------------------------ */
@@ -65,14 +73,14 @@ public class HttpServer implements LifeCycle
      */
     public void setHttpEncoding(HttpEncoding httpEncoding)
     {
-	_httpEncoding = httpEncoding;
+        _httpEncoding = httpEncoding;
     }    
 
     
     /* ------------------------------------------------------------ */
     public void initialize(Object config)
     {
-	Code.notImplemented();
+        Code.notImplemented();
     }
     
     
@@ -81,13 +89,13 @@ public class HttpServer implements LifeCycle
      */
     public synchronized void start()
     {
-	if (Code.verbose(99))
-	{
-	    Code.debug("LISTENERS: ",_listeners);
-	    Code.debug("HANDLER: ",_hostMap);
-	}
-	
-	
+        if (Code.verbose(99))
+        {
+            Code.debug("LISTENERS: ",_listeners);
+            Code.debug("HANDLER: ",_hostMap);
+        }
+        
+        
         Iterator handlers = getHandlers().iterator();
         while(handlers.hasNext())
         {
@@ -100,7 +108,7 @@ public class HttpServer implements LifeCycle
         while(listeners.hasNext())
         {
             HttpListener listener =(HttpListener)listeners.next();
-	    listener.setHttpServer(this);
+            listener.setHttpServer(this);
             if (!listener.isStarted())
                 listener.start();
         }
@@ -116,7 +124,7 @@ public class HttpServer implements LifeCycle
         {
             HttpHandler handler=(HttpHandler)handlers.next();
             if (handler.isStarted())
-		return true;
+                return true;
         }
         
         Iterator listeners = getListeners().iterator();
@@ -124,9 +132,9 @@ public class HttpServer implements LifeCycle
         {
             HttpListener listener =(HttpListener)listeners.next();
             if (listener.isStarted())
-		return true;
+                return true;
         }
-	return false;
+        return false;
     }
     
     /* ------------------------------------------------------------ */
@@ -142,10 +150,10 @@ public class HttpServer implements LifeCycle
         {
             HttpListener listener =(HttpListener)listeners.next();
             if (listener.isStarted())
-	    {
-		try{listener.stop();}
-		catch(Exception e){Code.warning(e);}
-	    }
+            {
+                try{listener.stop();}
+                catch(Exception e){Code.warning(e);}
+            }
         }
         
         Iterator handlers = getHandlers().iterator();
@@ -153,13 +161,13 @@ public class HttpServer implements LifeCycle
         {
             HttpHandler handler=(HttpHandler)handlers.next();
             if (handler.isStarted())
-	    {
-		try{handler.stop();}
-		catch(Exception e){Code.warning(e);}
-	    }
+            {
+                try{handler.stop();}
+                catch(Exception e){Code.warning(e);}
+            }
         }
 
-	setLogSink(null);
+        setLogSink(null);
     }
 
     
@@ -173,20 +181,20 @@ public class HttpServer implements LifeCycle
         while(listeners.hasNext())
         {
             HttpListener listener =(HttpListener)listeners.next();
-	    {
-		try{listener.destroy();}
-		catch(Exception e){Code.warning(e);}
-	    }
+            {
+                try{listener.destroy();}
+                catch(Exception e){Code.warning(e);}
+            }
         }
         
         Iterator handlers = getHandlers().iterator();
         while(handlers.hasNext())
         {
             HttpHandler handler=(HttpHandler)handlers.next();
-	    {
-		try{handler.destroy();}
-		catch(Exception e){Code.warning(e);}
-	    }
+            {
+                try{handler.destroy();}
+                catch(Exception e){Code.warning(e);}
+            }
         }
 
         _hostMap.clear();
@@ -201,7 +209,7 @@ public class HttpServer implements LifeCycle
         {
             HttpHandler handler=(HttpHandler)handlers.next();
             if (!handler.isDestroyed())
-		return false;
+                return false;
         }
         
         Iterator listeners = getListeners().iterator();
@@ -209,9 +217,9 @@ public class HttpServer implements LifeCycle
         {
             HttpListener listener =(HttpListener)listeners.next();
             if (!listener.isDestroyed())
-		return false;
+                return false;
         }
-	return true;
+        return true;
     }
     
     /* ------------------------------------------------------------ */
@@ -228,7 +236,7 @@ public class HttpServer implements LifeCycle
         if (listener==null)
         {
             listener=new SocketListener(address);
-	    listener.setHttpServer(this);
+            listener.setHttpServer(this);
             _listeners.put(address,listener);
         }
 
@@ -243,7 +251,7 @@ public class HttpServer implements LifeCycle
     public void addListener(HttpListener listener)
         throws IllegalArgumentException
     {
-	listener.setHttpServer(this);        
+        listener.setHttpServer(this);        
         _listeners.put(listener,listener);
     }
     
@@ -283,8 +291,8 @@ public class HttpServer implements LifeCycle
     public void addHostAlias(String host, String alias)
     {
         Object contextMap=_hostMap.get(host);
-	if (contextMap==null)
-	    throw new IllegalArgumentException("No Such Host: "+host);
+        if (contextMap==null)
+            throw new IllegalArgumentException("No Such Host: "+host);
         _hostMap.put(alias,contextMap);
     }
 
@@ -299,7 +307,7 @@ public class HttpServer implements LifeCycle
      */
     public HandlerContext addContext(String contextPathSpec)
     {
-	return addContext(null,contextPathSpec);
+        return addContext(null,contextPathSpec);
     }
     
     /* ------------------------------------------------------------ */
@@ -313,9 +321,9 @@ public class HttpServer implements LifeCycle
      */
     public HandlerContext addContext(String host, String contextPathSpec)
     {
-	HandlerContext hc = new HandlerContext(this);
-	addContext(host,contextPathSpec,hc);
-	return hc;
+        HandlerContext hc = new HandlerContext(this);
+        addContext(host,contextPathSpec,hc);
+        return hc;
     }
 
     /* ------------------------------------------------------------ */
@@ -327,21 +335,21 @@ public class HttpServer implements LifeCycle
      */
     public HandlerContext getContext(String host, String contextPathSpec, int i)
     {
-	HandlerContext hc=null;
+        HandlerContext hc=null;
 
-	PathMap contextMap=(PathMap)_hostMap.get(host);
-	if (contextMap!=null)
-	{
-	    List contextList = (List)contextMap.get(contextPathSpec);
-	    if (contextList!=null)
-	    {
-		if (i>=contextList.size())
-		    return null;
-		hc=(HandlerContext)contextList.get(i);
-	    }
-	}
+        PathMap contextMap=(PathMap)_hostMap.get(host);
+        if (contextMap!=null)
+        {
+            List contextList = (List)contextMap.get(contextPathSpec);
+            if (contextList!=null)
+            {
+                if (i>=contextList.size())
+                    return null;
+                hc=(HandlerContext)contextList.get(i);
+            }
+        }
 
-	return hc;
+        return hc;
     }
 
     
@@ -355,20 +363,20 @@ public class HttpServer implements LifeCycle
      */
     public HandlerContext getContext(String host, String contextPathSpec)
     { 
-	HandlerContext hc=null;
+        HandlerContext hc=null;
 
-	PathMap contextMap=(PathMap)_hostMap.get(host);
-	if (contextMap!=null)
-	{
-	    List contextList = (List)contextMap.get(contextPathSpec);
-	    if (contextList!=null && contextList.size()>0)
-		hc=(HandlerContext)contextList.get(contextList.size()-1);
-	    
-	}
-	if (hc==null)
-	    hc=addContext(host,contextPathSpec);
+        PathMap contextMap=(PathMap)_hostMap.get(host);
+        if (contextMap!=null)
+        {
+            List contextList = (List)contextMap.get(contextPathSpec);
+            if (contextList!=null && contextList.size()>0)
+                hc=(HandlerContext)contextList.get(contextList.size()-1);
+            
+        }
+        if (hc==null)
+            hc=addContext(host,contextPathSpec);
 
-	return hc;
+        return hc;
     }
     
     /* ------------------------------------------------------------ */
@@ -380,27 +388,27 @@ public class HttpServer implements LifeCycle
      * @return 
      */
     public void addContext(String host,
-			   String contextPathSpec,
-			   HandlerContext context)
+                           String contextPathSpec,
+                           HandlerContext context)
     {
-	PathMap contextMap=(PathMap)_hostMap.get(host);
-	if (contextMap==null)
-	{
-	    contextMap=new PathMap(7);
-	    _hostMap.put(host,contextMap);
-	}
+        PathMap contextMap=(PathMap)_hostMap.get(host);
+        if (contextMap==null)
+        {
+            contextMap=new PathMap(7);
+            _hostMap.put(host,contextMap);
+        }
 
-	List contextList = (List)contextMap.get(contextPathSpec);
-	if (contextList==null)
-	{
-	    contextList=new ArrayList(1);
-	    contextMap.put(contextPathSpec,contextList);
-	}
+        List contextList = (List)contextMap.get(contextPathSpec);
+        if (contextList==null)
+        {
+            contextList=new ArrayList(1);
+            contextMap.put(contextPathSpec,contextList);
+        }
 
-	contextList.add(context);
-	String name=(host==null
-		     ?"":(host+":"))+contextPathSpec;
-	context.addName(name);    
+        contextList.add(context);
+        String name=(host==null
+                     ?"":(host+":"))+contextPathSpec;
+        context.addName(name);    
     }
 
     
@@ -411,10 +419,10 @@ public class HttpServer implements LifeCycle
      * @exception IOException 
      */
     public WebApplicationContext addWebApplication(String contextPathSpec,
-						   String directory)
-	throws IOException
+                                                   String directory)
+        throws IOException
     {
-	return addWebApplication(null,contextPathSpec,directory);
+        return addWebApplication(null,contextPathSpec,directory);
     }
     
     /* ------------------------------------------------------------ */
@@ -425,16 +433,16 @@ public class HttpServer implements LifeCycle
      * @exception IOException 
      */
     public WebApplicationContext addWebApplication(String host,
-						   String contextPathSpec,
-						   String directory)
-	throws IOException
+                                                   String contextPathSpec,
+                                                   String directory)
+        throws IOException
     {
-	WebApplicationContext appContext =
-	    new WebApplicationContext(this,directory);
-	addContext(host,contextPathSpec,appContext);
-	Log.event("Web Application "+appContext+" added at "+
-		  (host!=null?(host+":"+contextPathSpec):contextPathSpec));
-	return appContext;
+        WebApplicationContext appContext =
+            new WebApplicationContext(this,directory);
+        addContext(host,contextPathSpec,appContext);
+        Log.event("Web Application "+appContext+" added at "+
+                  (host!=null?(host+":"+contextPathSpec):contextPathSpec));
+        return appContext;
     }
     
     
@@ -456,8 +464,8 @@ public class HttpServer implements LifeCycle
      */
     public void addHandler(String host,String contextPathSpec, HttpHandler handler)
     {
-	HandlerContext hc = getContext(host,contextPathSpec);
-	hc.addHandler(handler);
+        HandlerContext hc = getContext(host,contextPathSpec);
+        hc.addHandler(handler);
     }
 
     /* ------------------------------------------------------------ */
@@ -477,10 +485,10 @@ public class HttpServer implements LifeCycle
                 List list=(List)lists.next();
                 Iterator contexts=list.iterator();
                 while(contexts.hasNext())
-		{
-		    HandlerContext context = (HandlerContext) contexts.next();
+                {
+                    HandlerContext context = (HandlerContext) contexts.next();
                     set.addAll(context.getHandlers());
-		}
+                }
             }
         }
         return set;
@@ -493,24 +501,24 @@ public class HttpServer implements LifeCycle
      */
     public synchronized void setLogSink(LogSink logSink)
     {
-	if (_logSink!=null)
-	{
-	    try{
-		_logSink.stop();
-	    }
-	    catch(InterruptedException e)
-	    {
-		Code.ignore(e);
-	    }
-	    finally
-	    {
-		_logSink.destroy();
-	    }
-	}	
-	    
-	_logSink=logSink;
-	if (_logSink!=null)
-	    _logSink.start();
+        if (_logSink!=null)
+        {
+            try{
+                _logSink.stop();
+            }
+            catch(InterruptedException e)
+            {
+                Code.ignore(e);
+            }
+            finally
+            {
+                _logSink.destroy();
+            }
+        }	
+            
+        _logSink=logSink;
+        if (_logSink!=null)
+            _logSink.start();
     }
     
     /* ------------------------------------------------------------ */
@@ -519,9 +527,9 @@ public class HttpServer implements LifeCycle
      */
     public synchronized void setLogDateFormate(String format)
     {
-	_dateCache=new DateCache(format);
+        _dateCache=new DateCache(format);
     }
-	
+        
     /* ------------------------------------------------------------ */
     /** Service a request.
      * Handle the request by passing it to the HttpHandler contained in
@@ -540,54 +548,54 @@ public class HttpServer implements LifeCycle
     public void service(HttpRequest request,HttpResponse response)
         throws IOException, HttpException
     {
-	String host=request.getHost();
+        String host=request.getHost();
 
-	while (true)
-	{
-	    PathMap contextMap=(PathMap)_hostMap.get(host);
-	    if (contextMap!=null)
-	    {
-		List contextLists =contextMap.getMatches(request.getPath());
-		if(contextLists!=null)
-		{
-		    if (Code.verbose(99))
-			Code.debug("Contexts at ",request.getPath(),
-				   ": ",contextLists);
-		    
-		    for (int i=0;i<contextLists.size();i++)
-		    {
-			Map.Entry entry=
-			    (Map.Entry)
-			    contextLists.get(i);
-			String contextPathSpec=(String)entry.getKey();
-			List contextList = (List)entry.getValue();
+        while (true)
+        {
+            PathMap contextMap=(PathMap)_hostMap.get(host);
+            if (contextMap!=null)
+            {
+                List contextLists =contextMap.getMatches(request.getPath());
+                if(contextLists!=null)
+                {
+                    if (Code.verbose(99))
+                        Code.debug("Contexts at ",request.getPath(),
+                                   ": ",contextLists);
+                    
+                    for (int i=0;i<contextLists.size();i++)
+                    {
+                        Map.Entry entry=
+                            (Map.Entry)
+                            contextLists.get(i);
+                        String contextPathSpec=(String)entry.getKey();
+                        List contextList = (List)entry.getValue();
                 
-			for (int j=0;j<contextList.size();j++)
-			{
-			    HandlerContext context=
-				(HandlerContext)contextList.get(j);
-			    
-			    if (Code.debug())
-				Code.debug("Try ",context,
-					   ",",new Integer(j));
+                        for (int j=0;j<contextList.size();j++)
+                        {
+                            HandlerContext context=
+                                (HandlerContext)contextList.get(j);
+                            
+                            if (Code.debug())
+                                Code.debug("Try ",context,
+                                           ",",new Integer(j));
 
-			    if (context.handle(contextPathSpec,
-					       request,
-					       response))
-				return;
-			}
-		    }   
-		}
-	    }
-	    
-	    // try no host
+                            if (context.handle(contextPathSpec,
+                                               request,
+                                               response))
+                                return;
+                        }
+                    }   
+                }
+            }
+            
+            // try no host
             if (request.isHandled() || host==null)
-		break;
-	    host=null;
-	}	
+                break;
+            host=null;
+        }	
 
-	response.sendError(response.__404_Not_Found);
-	
+        response.sendError(response.__404_Not_Found);
+        
     }
     
     /* ------------------------------------------------------------ */
@@ -597,46 +605,46 @@ public class HttpServer implements LifeCycle
      */
     public synchronized void log(HttpRequest request,HttpResponse response)
     {
-	// Log request - XXX should be in HttpHandler
-	if (_logSink!=null && request!=null && response!=null)
-	{
-	    int length =
-		response.getIntField(HttpFields.__ContentLength);
-	    String bytes = ((length>=0)?Long.toString(length):"-");
-	    String user = (String)request.getAttribute(HttpRequest.__AuthUser);
-	    if (user==null)
-		user = "-";
-	    
-	    String referer = request.getField(HttpFields.__Referer);
-	    if (referer==null)
-		referer="-";
-	    else
-		referer="\""+referer+"\"";
-	    
-	    String agent = request.getField(HttpFields.__UserAgent);
-	    if (agent==null)
-		agent="-";
-	    else
-		agent="\""+agent+"\"";	    
-	    
-	    String log= request.getRemoteAddr() +
-		" - "+
-		user +
-		" [" +
-		_dateCache.format(System.currentTimeMillis())+
-		"] \""+
-		request.getRequestLine()+
-		"\" "+
-		response.getStatus()+
-		" " +
-		bytes +
-		" " +
-		referer +
-		" " +
-		agent;
+        // Log request - XXX should be in HttpHandler
+        if (_logSink!=null && request!=null && response!=null)
+        {
+            int length =
+                response.getIntField(HttpFields.__ContentLength);
+            String bytes = ((length>=0)?Long.toString(length):"-");
+            String user = (String)request.getAttribute(HttpRequest.__AuthUser);
+            if (user==null)
+                user = "-";
+            
+            String referer = request.getField(HttpFields.__Referer);
+            if (referer==null)
+                referer="-";
+            else
+                referer="\""+referer+"\"";
+            
+            String agent = request.getField(HttpFields.__UserAgent);
+            if (agent==null)
+                agent="-";
+            else
+                agent="\""+agent+"\"";	    
+            
+            String log= request.getRemoteAddr() +
+                " - "+
+                user +
+                " [" +
+                _dateCache.format(System.currentTimeMillis())+
+                "] \""+
+                request.getRequestLine()+
+                "\" "+
+                response.getStatus()+
+                " " +
+                bytes +
+                " " +
+                referer +
+                " " +
+                agent;
 
-	    _logSink.log(log);
-	}
+            _logSink.log(log);
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -648,15 +656,15 @@ public class HttpServer implements LifeCycle
         if (args.length==0)
         {
             String[] newArgs=
-	    {
-		"-appContext","/=./webapps/default",
-		"-context","/",
-		"-classPath","./servlets",
-		"-dynamic",
-		"-resourceBase","./FileBase/",
-		"-resources",
-		"8080",
-	    };
+            {
+                "-appContext","/=./webapps/default",
+                "-context","/",
+                "-classPath","./servlets",
+                "-dynamic",
+                "-resourceBase","./FileBase/",
+                "-resources",
+                "8080",
+            };
             args=newArgs;
         }
         else if (args.length==1 && args[0].startsWith("-"))
@@ -673,7 +681,7 @@ public class HttpServer implements LifeCycle
                 ("  -context [<host>:]<pathSpec>  - Define new context. Default=\"/\"");
             System.err.println
                 ("  -alias <alias>                - Add Alias for current context host");
-	    
+            
             System.err.println
                 ("  -classPath <paths>            - Set contexts classpath.");	
             System.err.println
@@ -695,12 +703,12 @@ public class HttpServer implements LifeCycle
                 ("\nDefault options:");
             System.err.println
                 ("  -appContext /=./webapps/default\n"+
-		 "  -content /\n"+
-		 "  -classPath ./servlets\n"+
-		 "  -dynamic\n"+
-		 "  -resourceBase ./FileBase/\n"+
-		 "  -resources\n"+
-		 "  8080");
+                 "  -content /\n"+
+                 "  -classPath ./servlets\n"+
+                 "  -dynamic\n"+
+                 "  -resourceBase ./FileBase/\n"+
+                 "  -resources\n"+
+                 "  8080");
             System.exit(1);
         }
         
@@ -709,9 +717,9 @@ public class HttpServer implements LifeCycle
             HttpServer server = new HttpServer();
 
             // Default is no virtual host
-	    String host=null;
-	    HandlerContext context = server.getContext(host,"/");	    
-	    
+            String host=null;
+            HandlerContext context = server.getContext(host,"/");	    
+            
             // Parse arguments
             for (int i=0;i<args.length;i++)
             {
@@ -719,60 +727,60 @@ public class HttpServer implements LifeCycle
                 {
                     // Look for dump handler
                     if ("-appContext".equals(args[i]))
-		    {
-			String appHost=null;
-			String spec=args[++i];
-			String dir=null;
+                    {
+                        String appHost=null;
+                        String spec=args[++i];
+                        String dir=null;
                         int c=spec.indexOf(":");
                         int e=spec.indexOf("="); 
 
-			
+                        
                         if (c>0 && c<e)
                         {
-			    appHost=spec.substring(0,c);
-			    dir=spec.substring(e+1);
+                            appHost=spec.substring(0,c);
+                            dir=spec.substring(e+1);
                             spec=spec.substring(c+1,e);
                         }
-			else if (e>0)
-			{
-			    dir=spec.substring(e+1);
+                        else if (e>0)
+                        {
+                            dir=spec.substring(e+1);
                             spec=spec.substring(0,e);
-			}
-			server.addWebApplication(appHost,spec,dir);
-		    }
+                        }
+                        server.addWebApplication(appHost,spec,dir);
+                    }
                     // Look for context
                     else if ("-context".equals(args[i]))
-		    {
+                    {
                         String spec=args[++i];
-			host=null;
+                        host=null;
                         int e=spec.indexOf(":");
                         if (e>0)
                         {
-			    host=spec.substring(0,e);
+                            host=spec.substring(0,e);
                             spec=spec.substring(e+1);
                         }
-			context = server.getContext(host,spec);
-		    }
-		    else if ("-alias".equals(args[i]))
-		    {
-			server.addHostAlias(host,args[++i]);
-		    }
-		    else if ("-classPath".equals(args[i]))
+                        context = server.getContext(host,spec);
+                    }
+                    else if ("-alias".equals(args[i]))
                     {
-			context.setClassPath(args[++i]);
-		    }
-		    else if ("-resourceBase".equals(args[i]))
+                        server.addHostAlias(host,args[++i]);
+                    }
+                    else if ("-classPath".equals(args[i]))
                     {
-			context.setResourceBase(args[++i]);
-		    }
-		    else if ("-handler".equals(args[i]))
-		    {
+                        context.setClassPath(args[++i]);
+                    }
+                    else if ("-resourceBase".equals(args[i]))
+                    {
+                        context.setResourceBase(args[++i]);
+                    }
+                    else if ("-handler".equals(args[i]))
+                    {
                         String className=args[++i];
-			HttpHandler handler = (HttpHandler)
-			    Class.forName(className).newInstance();
-			context.addHandler(handler);
-		    }
-		    else if ("-servlet".equals(args[i]))
+                        HttpHandler handler = (HttpHandler)
+                            Class.forName(className).newInstance();
+                        context.addHandler(handler);
+                    }
+                    else if ("-servlet".equals(args[i]))
                     {
                         String spec=args[++i];
                         int e=spec.indexOf("=");
@@ -780,24 +788,24 @@ public class HttpServer implements LifeCycle
                         {
                             String pathSpec=spec.substring(0,e);
                             String className=spec.substring(e+1);
-			    context.addServlet(pathSpec,className);
+                            context.addServlet(pathSpec,className);
                         }
                     }
-		    else if ("-dynamic".equals(args[i]))
-		    {
-			context.setServingDynamicServlets(true);
-		    }
-		    else if ("-resources".equals(args[i]))
+                    else if ("-dynamic".equals(args[i]))
                     {
-			context.setServingResources(true);
-		    }
-		    else if ("-dump".equals(args[i]))
-		    {
+                        context.setServingDynamicServlets(true);
+                    }
+                    else if ("-resources".equals(args[i]))
+                    {
+                        context.setServingResources(true);
+                    }
+                    else if ("-dump".equals(args[i]))
+                    {
                         String className="com.mortbay.HTTP.Handler.DumpHandler";
-			HttpHandler handler = (HttpHandler)
-			    Class.forName(className).newInstance();
-			context.addHandler(handler);
-		    }
+                        HttpHandler handler = (HttpHandler)
+                            Class.forName(className).newInstance();
+                        context.addHandler(handler);
+                    }
                     else
                     {
                         // Add listener.
@@ -810,7 +818,7 @@ public class HttpServer implements LifeCycle
                     Code.warning(e);
                 }
             }
-	    server.start();
+            server.start();
         }
         catch (Exception e)
         {

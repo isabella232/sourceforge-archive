@@ -4,12 +4,16 @@
 // ========================================================================
 
 package com.mortbay.HTTP;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import com.mortbay.Util.*;
-import java.util.*;
-import java.io.*;
+import com.mortbay.Util.Code;
+import com.mortbay.Util.StringUtil;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 
 
 /* ------------------------------------------------------------ */
@@ -58,11 +62,11 @@ public class HttpConnection
     {
         _listener=listener;
         _remoteAddr=remoteAddr;
-	if (in instanceof ChunkableInputStream)
-	    throw new IllegalArgumentException("InputStream is already chunkable");
+        if (in instanceof ChunkableInputStream)
+            throw new IllegalArgumentException("InputStream is already chunkable");
         _inputStream=new ChunkableInputStream(in);
-	if (out instanceof ChunkableOutputStream)
-	    throw new IllegalArgumentException("OutputStream is already chunkable");
+        if (out instanceof ChunkableOutputStream)
+            throw new IllegalArgumentException("OutputStream is already chunkable");
         _outputStream=new ChunkableOutputStream(out);
         _outputStream.addObserver(this);
     }
@@ -144,9 +148,9 @@ public class HttpConnection
      */
     public HttpServer getHttpServer()
     {
-	if (_httpServer==null)
-	    _httpServer=_listener.getHttpServer();
-	return _httpServer;
+        if (_httpServer==null)
+            _httpServer=_listener.getHttpServer();
+        return _httpServer;
     }
 
     /* ------------------------------------------------------------ */
@@ -232,8 +236,8 @@ public class HttpConnection
     protected void service(HttpRequest request, HttpResponse response)
         throws HttpException, IOException
     {
-	if (_httpServer==null)
-	    getHttpServer();
+        if (_httpServer==null)
+            getHttpServer();
         if (_httpServer==null)
                 throw new HttpException(response.__503_Service_Unavailable);
         _httpServer.service(request,response);
@@ -250,15 +254,15 @@ public class HttpConnection
         _request = new HttpRequest(this);
         _response = new HttpResponse(this);
 
-	
+        
         // Assume the connection is not persistent, unless told otherwise.
         _persistent=false;
         _close=false;
         _keepAlive=false;
         _http1_0=true;
         _http1_1=false;
-	boolean logRequest=false;
-	
+        boolean logRequest=false;
+        
         try
         {       
             Code.debug("Wait for request header...");
@@ -266,7 +270,7 @@ public class HttpConnection
             try
             {
                 _request.readHeader(getInputStream());
-		_listener.customizeRequest(this,_request);
+                _listener.customizeRequest(this,_request);
             }
             catch(HttpException e)
             {
@@ -278,16 +282,16 @@ public class HttpConnection
                 return false;
             }
             logRequest=true;
-	    
+            
             if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
                 throw new HttpException(_response.__400_Bad_Request);
-	    
-	    if (Code.debug())
-	    {
-		_response.setField("Jetty-Request",_request.getRequestLine());
-		Code.debug("REQUEST:\n",_request);
-	    }
-	    
+            
+            if (Code.debug())
+            {
+                _response.setField("Jetty-Request",_request.getRequestLine());
+                Code.debug("REQUEST:\n",_request);
+            }
+            
             // Pick response version
             _version=_request.getVersion();
             if (HttpMessage.__HTTP_0_9.equals(_version))
@@ -360,8 +364,8 @@ public class HttpConnection
             
             // service the request
             service(_request,_response);
-	    
-	    
+            
+            
             // Complete the request
             if (_persistent)
             {
@@ -386,25 +390,25 @@ public class HttpConnection
                 }
 
                 // Commit the response
-		if (!_response.isCommitted())
-		    _response.commit();
+                if (!_response.isCommitted())
+                    _response.commit();
                 _inputStream.resetStream();
                 if (_outputStream.isChunking())
                     _outputStream.endChunking(); 
                 else
-		    _outputStream.resetStream();
+                    _outputStream.resetStream();
             }
             else
             {
                 _response.commit();
                 _outputStream.flush();
-		Thread.sleep(50);
+                Thread.sleep(50);
                 _outputStream.close();
             }
 
-	    if (Code.debug())
-		Code.debug("RESPONSE:\n",_response);
-	    
+            if (Code.debug())
+                Code.debug("RESPONSE:\n",_response);
+            
         }
         catch (HttpException e)
         {
@@ -413,10 +417,10 @@ public class HttpConnection
             _persistent=false;
             if (_response.isCommitted())
             {
-		if (Code.debug())
-		    Code.warning(_request.toString(),e);
-		else
-		    Code.warning(e.toString());
+                if (Code.debug())
+                    Code.warning(_request.toString(),e);
+                else
+                    Code.warning(e.toString());
             }
             else
             {
@@ -431,11 +435,11 @@ public class HttpConnection
         {
             // Handle Exception by sending 500 error code (if output not
             // committed) and closing connection.
-	    if (Code.debug())
-		Code.warning(_request.toString(),e);
-	    else
-		Code.warning(e.toString());
-	    
+            if (Code.debug())
+                Code.warning(_request.toString(),e);
+            else
+                Code.warning(e.toString());
+            
             _persistent=false;
             if (!_response.isCommitted())
             {
@@ -448,7 +452,7 @@ public class HttpConnection
         }
         catch (Error e)
         {
-	    Code.warning(e);
+            Code.warning(e);
             
             _persistent=false;
             if (!_outputStream.isCommitted())
@@ -459,20 +463,20 @@ public class HttpConnection
                                   HttpFields.__Close);
                 _response.sendError(HttpResponse.__500_Internal_Server_Error);
             }
-	}
+        }
         finally
         {
-	    if (logRequest)
-		_httpServer.log(_request,_response);
-	    
+            if (logRequest && _httpServer!=null)
+                _httpServer.log(_request,_response);
+            
             if (_request!=null)
                 _request.destroy();
-	    _request=null;
+            _request=null;
             if (_response!=null)
                 _response.destroy();
-	    _response=null;
+            _response=null;
         }
-	
+        
         return _persistent;
     }
 
@@ -491,8 +495,8 @@ public class HttpConnection
             _inputStream.setContentLength(content_length);
         else if (content_length<0)
         {
-	    // XXX - can't do this check because IE does this after
-	    // a redirect.
+            // XXX - can't do this check because IE does this after
+            // a redirect.
             // Can't have content without a content length
 //              String content_type=_request.getField(HttpFields.__ContentType);
 //              if (content_type!=null && content_type.length()>0)
@@ -549,7 +553,7 @@ public class HttpConnection
                 }
                 else
                     getHttpServer().getHttpEncoding()
-			.enableEncoding(_inputStream,coding,coding_params);
+                        .enableEncoding(_inputStream,coding,coding_params);
             }
         }
         
@@ -572,12 +576,12 @@ public class HttpConnection
                 _inputStream.setContentLength(0);
             // else we need a content length
             else
-	    {
-		// XXX - can't do this check as IE stuff up on
-		// a redirect.
-	        // throw new HttpException(_response.__411_Length_Required);
-		_inputStream.setContentLength(0);
-	    }
+            {
+                // XXX - can't do this check as IE stuff up on
+                // a redirect.
+                // throw new HttpException(_response.__411_Length_Required);
+                _inputStream.setContentLength(0);
+            }
         }
 
         // Handle Continue Expectations
@@ -629,14 +633,14 @@ public class HttpConnection
     public void outputNotify(ChunkableOutputStream out, int action)
         throws IOException
     {
-	if (_response==null)
-	    return;
-	
+        if (_response==null)
+            return;
+        
         switch(action)
         {
           case OutputObserver.__FIRST_WRITE:
               if(Code.verbose()) Code.debug("notify FIRST_WRITE ");
-	      
+              
               // Determine how to limit content length and
               // enable output transfer encodings 
               List transfer_coding=_response.getFieldValues(HttpFields.__TransferEncoding);
@@ -660,9 +664,9 @@ public class HttpConnection
                           _response.setField(HttpFields.__Connection,
                                              HttpFields.__Close);
                       }
-		      else if (_keepAlive)
-			  _response.setField(HttpFields.__Connection,
-					     HttpFields.__KeepAlive);
+                      else if (_keepAlive)
+                          _response.setField(HttpFields.__Connection,
+                                             HttpFields.__KeepAlive);
                   }
               }
               else if (_http1_0)
@@ -711,7 +715,7 @@ public class HttpConnection
 
                           // Set coding
                           getHttpServer().getHttpEncoding()
-			      .enableEncoding(out,coding,coding_params);
+                              .enableEncoding(out,coding,coding_params);
                       }
                   }
               }
@@ -727,7 +731,7 @@ public class HttpConnection
               
           case OutputObserver.__COMMITING:
               if(Code.verbose()) Code.debug("notify COMMITING");
-	      _response.commit();
+              _response.commit();
               break;
               
           case OutputObserver.__COMMITED:
@@ -736,7 +740,7 @@ public class HttpConnection
               
           case OutputObserver.__CLOSING:
               if(Code.verbose()) Code.debug("notify CLOSING");
-	      _response.complete();
+              _response.complete();
               break;
               
           case OutputObserver.__CLOSED:
@@ -750,33 +754,33 @@ public class HttpConnection
      */
     void commitResponse()
     {
-	// Handler forced close
-	_close=HttpFields.__Close.equals
-	    (_response.getField(HttpFields.__Connection));
-	if (_close)
-	    _persistent=false;
-	
-	// if we have no content or encoding,
-	// and no content length
-	// need to set content length (XXX or may just close connection?)
-	if (!_outputStream.isWritten() &&
-	    !_response.containsField(HttpFields.__TransferEncoding) &&
-	    !_response.containsField(HttpFields.__ContentLength))
-	{
-	    if(_persistent)
-	    {
-		_response.setIntField(HttpFields.__ContentLength,0);
-		if (_http1_0)
-		    _response.setField(HttpFields.__Connection,
-				       HttpFields.__KeepAlive);
-	    }
-	    else
-	    {
-		_close=true;
-		_response.setField(HttpFields.__Connection,
-				   HttpFields.__Close);
-	    }
-	}
+        // Handler forced close
+        _close=HttpFields.__Close.equals
+            (_response.getField(HttpFields.__Connection));
+        if (_close)
+            _persistent=false;
+        
+        // if we have no content or encoding,
+        // and no content length
+        // need to set content length (XXX or may just close connection?)
+        if (!_outputStream.isWritten() &&
+            !_response.containsField(HttpFields.__TransferEncoding) &&
+            !_response.containsField(HttpFields.__ContentLength))
+        {
+            if(_persistent)
+            {
+                _response.setIntField(HttpFields.__ContentLength,0);
+                if (_http1_0)
+                    _response.setField(HttpFields.__Connection,
+                                       HttpFields.__KeepAlive);
+            }
+            else
+            {
+                _close=true;
+                _response.setField(HttpFields.__Connection,
+                                   HttpFields.__Close);
+            }
+        }
     }
 }
 

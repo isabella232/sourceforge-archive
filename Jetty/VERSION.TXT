@@ -1,10 +1,13 @@
-Stable 2.4.6
-Dev    3.0.B02
+Stable 2.4.7
+Dev    3.0.B03
 
-Jetty-3.0.B03 - ???????????????????????????????
-
+Jetty-3.0.B03 - 9th Oct 2000
+ + Expanded import package.*; lines
+ + Expanded leading tabs to spaces
+ + Improved Context to Handler contract.
  + Parse but not handler startup ordering in web applications.
  + Send request log via a LogSink
+ + Added append mode in RolloverFileLogSink
  + Made LogSink a Lifecycle interface 
  + Improved handler toString
  + Redirect context only paths.
@@ -18,6 +21,18 @@ Jetty-3.0.B03 - ???????????????????????????????
  + Handle ignorable spaces in WebApplication
  + Warn about explicit sets of WebApplication
  + Remove 411 checks as IE breaks this rule after redirect.
+ + Removed last remnants JDK 1.1 support
+ + Added release script
+
+Jetty-2.4.7 - 6th Oct 2000
+ + Allow Objects to be passed to LogSink
+ + Set content length on errors for keep alive.
+ + Added encode methods to URI
+ + Improved win32 build
+ + fixes to SSL doco
+ + Support key and keystore passwords
+ + Various improvements to  ServletDispatch, PropertyTree and
+   associated classes.
 
 Jetty-3.0.B02 - 24st Aug 2000
  + Fixed LineInput bug with SSL giving CR pause LF.

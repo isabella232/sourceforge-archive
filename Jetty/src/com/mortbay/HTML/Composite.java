@@ -4,10 +4,12 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTML;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
-import com.mortbay.Util.*;
-import java.io.*;
-import java.util.*;
+import com.mortbay.Util.Code;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.ArrayList;
 
 /* -------------------------------------------------------------------- */
 /** HTML Composite Element
@@ -229,24 +231,24 @@ public class Composite extends Element
      */
     public boolean replace(Object oldObj, Object newObj)
     {  
-	if (nest != null)
-	{
-	    return nest.replace(oldObj, newObj);
-	}
-	else
-	{
-	    int sz = elements.size();
-	    for (int i = 0; i < sz; i++)
-	    {
-		if (elements.get(i) == oldObj)
-		{
-		    elements.set(i,newObj);
-		    return true;
-		}     
-	    }
-	}
-	
-	return false;
+        if (nest != null)
+        {
+            return nest.replace(oldObj, newObj);
+        }
+        else
+        {
+            int sz = elements.size();
+            for (int i = 0; i < sz; i++)
+            {
+                if (elements.get(i) == oldObj)
+                {
+                    elements.set(i,newObj);
+                    return true;
+                }     
+            }
+        }
+        
+        return false;
     }           
 
 }

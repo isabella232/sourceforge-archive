@@ -5,9 +5,9 @@
 
 package com.mortbay.Util;
 
-import java.util.*;
-import java.io.*;
-import java.text.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 
 /* ------------------------------------------------------------ */
@@ -28,23 +28,23 @@ public class FileLogSink extends WriterLogSink
     
     /* ------------------------------------------------------------ */
     public FileLogSink()
-	throws IOException
+        throws IOException
     {
     	this(System.getProperty("LOG_FILE","log.txt"));
     }
     
     /* ------------------------------------------------------------ */
     public FileLogSink(String filename)
-	throws IOException
+        throws IOException
     {
-	super(new PrintWriter(new FileWriter(filename)));
-	_fileName=filename;
+        super(new PrintWriter(new FileWriter(filename)));
+        _fileName=filename;
     }
     
     /* ------------------------------------------------------------ */
     public void stop()
     {
-	_out.close();
+        _out.close();
     }
 }
 

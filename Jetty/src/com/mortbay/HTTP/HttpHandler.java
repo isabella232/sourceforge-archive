@@ -5,7 +5,7 @@
 
 package com.mortbay.HTTP;
 import com.mortbay.Util.LifeCycle;
-import java.io.*;
+import java.io.IOException;
 
 
 /* ------------------------------------------------------------ */
@@ -61,13 +61,15 @@ public interface HttpHandler extends LifeCycle
     /** Handle a request.
      * If the response is not sending or committed, then the request
      * is not considered handled.
-     * @param contextPath The path specification that mapped to this handler.
+     * @param contextPath 
+     * @param pathInContext 
      * @param request The request
      * @param response The response.
      */
-    public void handle(String contextPathSpec,
-		       HttpRequest request,
-		       HttpResponse response)
+    public void handle(String contextPath,
+                       String pathInContext,
+                       HttpRequest request,
+                       HttpResponse response)
         throws HttpException, IOException;
 
 

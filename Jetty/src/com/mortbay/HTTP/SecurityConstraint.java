@@ -5,19 +5,21 @@
 
 package com.mortbay.HTTP;
 
-//import com.sun.java.util.collections.*; XXX-JDK1.1
-import java.util.*; //XXX-JDK1.2
+import com.mortbay.Util.Code;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
-import com.mortbay.Util.*;
 
 
 public class SecurityConstraint
     implements Cloneable
 {
     public final static int
-	DC_NONE=0,
-	DC_INTEGRAL=1,
-	DC_CONFIDENTIAL=2;
+        DC_NONE=0,
+        DC_INTEGRAL=1,
+        DC_CONFIDENTIAL=2;
     
     private String _name;
     private List _methods;
@@ -30,7 +32,7 @@ public class SecurityConstraint
      */
     public void setName(String name)
     {
-	_name=name;
+        _name=name;
     }    
 
     /* ------------------------------------------------------------ */
@@ -39,9 +41,9 @@ public class SecurityConstraint
      */
     public void addMethod(String method)
     {
-	if (_methods==null)
-	    _methods=new ArrayList(3);
-	_methods.add(method);
+        if (_methods==null)
+            _methods=new ArrayList(3);
+        _methods.add(method);
     }
 
     /* ------------------------------------------------------------ */
@@ -51,9 +53,9 @@ public class SecurityConstraint
      */
     public boolean forMethod(String method)
     {
-	if (_methods==null)
-	    return true;
-	return _methods.contains(method);
+        if (_methods==null)
+            return true;
+        return _methods.contains(method);
     }
     
     
@@ -63,9 +65,9 @@ public class SecurityConstraint
      */
     public void addRole(String role)
     {
-	if (_roles==null)
-	    _roles=new ArrayList(3);
-	_roles.add(role);
+        if (_roles==null)
+            _roles=new ArrayList(3);
+        _roles.add(role);
     }
 
     /* ------------------------------------------------------------ */
@@ -74,9 +76,9 @@ public class SecurityConstraint
      */
     public Iterator roles()
     {
-	if (_roles==null)
-	    return Collections.EMPTY_LIST.iterator();
-	return _roles.iterator();
+        if (_roles==null)
+            return Collections.EMPTY_LIST.iterator();
+        return _roles.iterator();
     }
     
     /* ------------------------------------------------------------ */
@@ -85,7 +87,7 @@ public class SecurityConstraint
      */
     public boolean isAuthenticated()
     {
-	return _roles!=null && _roles.size()>0;
+        return _roles!=null && _roles.size()>0;
     }
     
     /* ------------------------------------------------------------ */
@@ -94,9 +96,9 @@ public class SecurityConstraint
      */
     public void setDataConstraint(int c)
     {
-	if (c<0 || c>DC_CONFIDENTIAL)
-	    throw new IllegalArgumentException("Constraint out of range");
-	_dataConstraint=c;
+        if (c<0 || c>DC_CONFIDENTIAL)
+            throw new IllegalArgumentException("Constraint out of range");
+        _dataConstraint=c;
     }
 
 
@@ -106,26 +108,26 @@ public class SecurityConstraint
      */
     public int getDataConstraint()
     {
-	return _dataConstraint;
+        return _dataConstraint;
     }
 
     
     /* ------------------------------------------------------------ */
     public Object clone()
     {
-	SecurityConstraint sc=null;
-	try{
-	    sc = (SecurityConstraint)super.clone();
-	    if (_methods!=null)
-		sc._methods=new ArrayList(_methods);
-	    if (_roles!=null)
-		sc._roles=new ArrayList(_roles);
-	}
-	catch (CloneNotSupportedException e)
-	{
-	    Code.fail("Oh yes it does");
-	}
-	return sc;
+        SecurityConstraint sc=null;
+        try{
+            sc = (SecurityConstraint)super.clone();
+            if (_methods!=null)
+                sc._methods=new ArrayList(_methods);
+            if (_roles!=null)
+                sc._roles=new ArrayList(_roles);
+        }
+        catch (CloneNotSupportedException e)
+        {
+            Code.fail("Oh yes it does");
+        }
+        return sc;
     }
     
     /* ------------------------------------------------------------ */
@@ -134,11 +136,11 @@ public class SecurityConstraint
      */
     public String toString()
     {
-	return "SC{"+_name+
-	    ","+_methods+
-	    ","+_roles+
-	    ","+(_dataConstraint==DC_NONE
-		 ?"NONE}"
-		 :(_dataConstraint==DC_INTEGRAL?"INTEGRAL}":"CONFIDENTIAL}"));
+        return "SC{"+_name+
+            ","+_methods+
+            ","+_roles+
+            ","+(_dataConstraint==DC_NONE
+                 ?"NONE}"
+                 :(_dataConstraint==DC_INTEGRAL?"INTEGRAL}":"CONFIDENTIAL}"));
     }
 }

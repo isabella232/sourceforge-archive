@@ -5,8 +5,8 @@
 
 package com.mortbay.Util;
 
-import java.util.*;
-import java.io.*;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 
 /*-----------------------------------------------------------------------*/
@@ -104,10 +104,10 @@ public class Frame
     /* ------------------------------------------------------------ */
     protected void internalInit(int ignoreFrames, boolean partial)
     {   
-	// Extract stack components, after we look for the Frame constructor
+        // Extract stack components, after we look for the Frame constructor
  	// itself and pull that off the stack!
  	_lineStart = _stack.indexOf("Frame.<init>(",_lineStart);
-	_lineStart = _stack.indexOf(__lineSeparator,_lineStart)+
+        _lineStart = _stack.indexOf(__lineSeparator,_lineStart)+
  	    __lineSeparatorLen;
         for (int i = 0; _lineStart > 0 && i < ignoreFrames; i++)
         {

@@ -1,11 +1,15 @@
 // =========================================================================== 
 // $Id$
 package com.mortbay.Util;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 /* ------------------------------------------------------------ */
 /** Handles coding of MIME  "x-www-form-urlencoded".
@@ -289,6 +293,6 @@ public class UrlEncoded extends MultiMap
      */
     public Object clone()
     {
-	return new UrlEncoded(this);
+        return new UrlEncoded(this);
     }
 }

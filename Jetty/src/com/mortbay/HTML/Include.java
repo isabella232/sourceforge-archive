@@ -5,11 +5,20 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTML;
-import com.mortbay.Util.*;
-import com.mortbay.Util.*;
-import java.util.*;
-import java.net.*;
-import java.io.*;
+import com.mortbay.Util.Code;
+import com.mortbay.Util.IO;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.net.URL;
 
 /* -------------------------------------------------------------------- */
 /** Include File, InputStream or Reader Element
@@ -88,8 +97,8 @@ public class Include extends Element
     public Include(InputStream in)
         throws IOException
     {
-	if (in!=null)
-	    reader=new InputStreamReader(in);
+        if (in!=null)
+            reader=new InputStreamReader(in);
     }
     
     /* ------------------------------------------------------------ */
@@ -104,8 +113,8 @@ public class Include extends Element
     public Include(URL url)
         throws IOException
     {
-	if (url!=null)
-	    reader=new InputStreamReader(url.openStream());
+        if (url!=null)
+            reader=new InputStreamReader(url.openStream());
     }
     
     /* ------------------------------------------------------------ */
@@ -148,9 +157,9 @@ public class Include extends Element
     public void write(Writer out)
          throws IOException
     {
-	if (reader==null)
-	    return;
-	
+        if (reader==null)
+            return;
+        
         try{
             IO.copy(reader,out);
         }

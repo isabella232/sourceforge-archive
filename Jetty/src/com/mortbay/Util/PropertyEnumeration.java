@@ -6,16 +6,16 @@
 package com.mortbay.Util;
 
 import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.beans.IntrospectionException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Vector;
-import java.util.Hashtable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Vector;
 
 /** Provide an Enumeration over a Classes Properties
  * Optionally, this class allows the user to enumerate over a Classes public

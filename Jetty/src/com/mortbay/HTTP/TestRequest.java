@@ -4,13 +4,15 @@
 // ========================================================================
 
 package com.mortbay.HTTP;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import com.mortbay.Util.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.zip.*;
+import com.mortbay.Util.Code;
+import com.mortbay.Util.Test;
+import com.mortbay.Util.URI;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 
 /* ------------------------------------------------------------ */
 /** Test HTTP Request
@@ -135,7 +137,7 @@ public class TestRequest
                                "123\015\012");
             Code.debug("Request: ",request);
             t.checkEquals(request.getQuery(),null,"No query");
-	    
+            
             request=getRequest("GET /R1?A=1,2,3&B=4&B=5&B=6 HTTP/1.0\n"+
                                "Content-Type: text/plain\n"+
                                "Content-Length: 5\n"+

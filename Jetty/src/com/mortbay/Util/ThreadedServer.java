@@ -4,11 +4,15 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.Util;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.lang.InterruptedException;
-import java.lang.reflect.Constructor;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
 
 /* ======================================================================= */
@@ -60,7 +64,7 @@ abstract public class ThreadedServer extends ThreadPool
     /** Construct for specific address and port
      */
     public ThreadedServer(String host, int port) 
-	throws UnknownHostException
+        throws UnknownHostException
     {
         setAddress(new InetAddrPort(host,port));
     }
@@ -96,9 +100,9 @@ abstract public class ThreadedServer extends ThreadPool
      * @param host 
      */
     public synchronized void setHost(String host)
-	throws UnknownHostException
+        throws UnknownHostException
     {
-	setAddress(new InetAddrPort(host,_address==null?0:_address.getPort()));
+        setAddress(new InetAddrPort(host,_address==null?0:_address.getPort()));
         
     }
     
@@ -108,7 +112,7 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public synchronized void setInetAddress(InetAddress addr)
     {
-	setAddress(new InetAddrPort(addr,_address==null?0:_address.getPort()));
+        setAddress(new InetAddrPort(addr,_address==null?0:_address.getPort()));
     }
     
     /* ------------------------------------------------------------ */
@@ -117,8 +121,8 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public synchronized void setPort(int port)
     {
-	setAddress(_address==null?new InetAddrPort(port)
-	    :new InetAddrPort(_address.getInetAddress(),port));
+        setAddress(_address==null?new InetAddrPort(port)
+            :new InetAddrPort(_address.getInetAddress(),port));
     }
 
 
@@ -128,7 +132,7 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public void setMaxReadTimeMs(int ms)
     {
-	_maxReadTimeMs=ms;
+        _maxReadTimeMs=ms;
     }
     
     /* ------------------------------------------------------------ */
@@ -137,7 +141,7 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public int getMaxReadTimeMs()
     {
-	return _maxReadTimeMs;
+        return _maxReadTimeMs;
     }
     
     /* ------------------------------------------------------------ */
@@ -146,7 +150,7 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public void setLingerTimeSecs(int ls)
     {
-	_lingerTimeSecs=ls;
+        _lingerTimeSecs=ls;
     }
     
     /* ------------------------------------------------------------ */
@@ -155,7 +159,7 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public int getLingerTimeSecs()
     {
-	return _lingerTimeSecs;
+        return _lingerTimeSecs;
     }
     
     
@@ -232,13 +236,13 @@ abstract public class ThreadedServer extends ThreadPool
         }
         finally
         {
-	    try {
+            try {
   		if (_lingerTimeSecs>=0)
   		    connection.setSoLinger(true,_lingerTimeSecs);
   		else
   		    connection.setSoLinger(false,0);
   	    }
-	    catch ( Exception e ){Code.ignore(e);}
+            catch ( Exception e ){Code.ignore(e);}
             try {connection.close();}
             catch ( Exception e ){Code.warning("Connection problem",e);}
             connection=null;
@@ -287,20 +291,20 @@ abstract public class ThreadedServer extends ThreadPool
      * @return Accepted Socket
      */
     protected Socket acceptSocket(ServerSocket serverSocket,
-				  int timeout)
+                                  int timeout)
     {
         try
         {
-	    Socket s;
-	    
-	    if (_soTimeOut!=timeout)
-	    {
-		_soTimeOut=timeout;
-		_listen.setSoTimeout(_soTimeOut);
-	    }
-	    
-	    s=_listen.accept();
-	    
+            Socket s;
+            
+            if (_soTimeOut!=timeout)
+            {
+                _soTimeOut=timeout;
+                _listen.setSoTimeout(_soTimeOut);
+            }
+            
+            s=_listen.accept();
+            
             if (_maxReadTimeMs>0)
                 s.setSoTimeout(_maxReadTimeMs);
             return s;
@@ -355,7 +359,7 @@ abstract public class ThreadedServer extends ThreadPool
             _address=new InetAddrPort(_listen.getInetAddress(),
                                       _listen.getLocalPort());
 
-	    _soTimeOut=getMaxIdleTimeMs();
+            _soTimeOut=getMaxIdleTimeMs();
             if (_soTimeOut>0)
                 _listen.setSoTimeout(_soTimeOut);
             
@@ -373,29 +377,29 @@ abstract public class ThreadedServer extends ThreadPool
     public void stop()
         throws InterruptedException
     {
-	if (_listen!=null)
-	{
-	    try{_listen.setSoTimeout(0);}
-	    catch(SocketException e){Code.warning(e);}
-	    try{_listen.close();}
-	    catch(IOException e){Code.warning(e);}
-	    _listen=null;
-	}
+        if (_listen!=null)
+        {
+            try{_listen.setSoTimeout(0);}
+            catch(SocketException e){Code.warning(e);}
+            try{_listen.close();}
+            catch(IOException e){Code.warning(e);}
+            _listen=null;
+        }
         super.stop();
     }
     
     /* --------------------------------------------------------------- */
     public void destroy()
     {
-	if (_listen!=null)
-	{
-	    try{_listen.setSoTimeout(0);}
-	    catch(SocketException e){Code.warning(e);}
-	    try{_listen.close();}
-	    catch(IOException e){Code.warning(e);}
-	    _listen=null;
-	}
-	_address=null;
+        if (_listen!=null)
+        {
+            try{_listen.setSoTimeout(0);}
+            catch(SocketException e){Code.warning(e);}
+            try{_listen.close();}
+            catch(IOException e){Code.warning(e);}
+            _listen=null;
+        }
+        _address=null;
         super.destroy();
     }
 

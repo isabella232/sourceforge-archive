@@ -4,12 +4,12 @@
 // ========================================================================
 
 package com.mortbay.Util;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.lang.InterruptedException;
+
+import java.io.InterruptedIOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
+import java.util.Iterator;
 
 /* ------------------------------------------------------------ */
 /** A pool of threads.
@@ -100,7 +100,7 @@ public class ThreadPool
      */
     public String getName()
     {
-	return _name;
+        return _name;
     }
 
     /* ------------------------------------------------------------ */
@@ -109,7 +109,7 @@ public class ThreadPool
      */
     public void setName(String name)
     {
-	_name=name;
+        _name=name;
     }
     
     /* ------------------------------------------------------------ */
@@ -289,16 +289,16 @@ public class ThreadPool
         Code.debug("Stop Pool ",_name);
         _running=false;
         
-	synchronized(this)
-	{
-	    Iterator iter=_threadSet.iterator();
-	    while(iter.hasNext())
-	    {
-		Thread thread=(Thread)iter.next();
-		thread.interrupt();
-	    }
-	}
-	
+        synchronized(this)
+        {
+            Iterator iter=_threadSet.iterator();
+            while(iter.hasNext())
+            {
+                Thread thread=(Thread)iter.next();
+                thread.interrupt();
+            }
+        }
+        
         join();
     }
     
@@ -326,13 +326,13 @@ public class ThreadPool
             thread.interrupt();
         }
         // wait a while for all threads to die
-	Thread.yield();
+        Thread.yield();
         try{
             long end_wait=System.currentTimeMillis()+__stopWaitMs;
             while (_threadSet.size()>0 &&
-		   end_wait>System.currentTimeMillis())
-		Thread.yield();
-	    
+                   end_wait>System.currentTimeMillis())
+                Thread.yield();
+            
             // Stop any still running
             if (_threadSet.size()>0)
             {
@@ -528,12 +528,12 @@ public class ThreadPool
                     catch(InterruptedException e)
                     {
                         Code.ignore(e);
-			continue;
+                        continue;
                     }
                     catch(InterruptedIOException e)
                     {
                         Code.ignore(e);
-			continue;
+                        continue;
                     }
                     catch(Exception e)
                     {

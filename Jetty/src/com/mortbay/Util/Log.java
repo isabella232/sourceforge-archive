@@ -5,10 +5,10 @@
 
 package com.mortbay.Util;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.io.*;
-import java.text.*;
+import java.applet.Applet;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.StringTokenizer;
 
 /*-----------------------------------------------------------------------*/
 /** Log formatted and tagged messages.
@@ -100,57 +100,57 @@ public class Log
     private synchronized void defaultInit() 
     {
         if (_needInit)
-	{
+        {
             _needInit = false;
-		    
-	    String logOptions = "tLTs";
-	    String logFile = null;
-	    String dateFormat = "yyyyMMdd HHmmss.SSS zzz ";
-	    String timezone = "GMT";
-	    try {
-		logOptions = System.getProperty("LOG_OPTIONS","tLTs");
-		dateFormat = System.getProperty("LOG_DATE_FORMAT",
-						"yyyyMMdd HHmmss.SSS zzz ");
-		timezone = System.getProperty("LOG_TIMEZONE","GMT");
-	    }
-	    catch (Throwable ex)
-	    {
-		System.err.println("Exception from getProperty - probably running in applet\nUse Log.initParamsFromApplet or Log.setOptions to control debug output.");
-	    }
-		    
-	    String sinkClasses = System.getProperty("LOG_CLASSES", "com.mortbay.Util.WriterLogSink");
-	    StringTokenizer sinkTokens = new StringTokenizer(sinkClasses, ";");
-		    
-	    LogSink sink= null;
-	    while (sinkTokens.hasMoreTokens())
-	    {
-		String sinkClassName = sinkTokens.nextToken();
-		    	
-		try{
-		    Class sinkClass = Class.forName(sinkClassName);
-		    if (com.mortbay.Util.LogSink.class.isAssignableFrom(sinkClass)) {
-			sink = (LogSink)sinkClass.newInstance();
-					    
-			sink.setOptions(dateFormat,timezone,
-					(logOptions.indexOf(TIMESTAMP) >= 0),
-					(logOptions.indexOf(LABEL) >= 0),
-					(logOptions.indexOf(TAG) >= 0),
-					(logOptions.indexOf(STACKSIZE) >= 0),
-					(logOptions.indexOf(STACKTRACE) >= 0),
-					(logOptions.indexOf(ONELINE) >= 0));
-					    
-			__instance.add(sink);
-		    }
-		    else {
-			// Can't use Code.fail here, that's what we're setting up
-			System.err.println(sinkClass+" is not a com.mortbay.Util.LogSink");
-		    }
-		}
-		catch (Exception e) {
-		    e.printStackTrace();
-		}
-	    }
-	}
+                    
+            String logOptions = "tLTs";
+            String logFile = null;
+            String dateFormat = "yyyyMMdd HHmmss.SSS zzz ";
+            String timezone = "GMT";
+            try {
+                logOptions = System.getProperty("LOG_OPTIONS","tLTs");
+                dateFormat = System.getProperty("LOG_DATE_FORMAT",
+                                                "yyyyMMdd HHmmss.SSS zzz ");
+                timezone = System.getProperty("LOG_TIMEZONE","GMT");
+            }
+            catch (Throwable ex)
+            {
+                System.err.println("Exception from getProperty - probably running in applet\nUse Log.initParamsFromApplet or Log.setOptions to control debug output.");
+            }
+                    
+            String sinkClasses = System.getProperty("LOG_CLASSES", "com.mortbay.Util.WriterLogSink");
+            StringTokenizer sinkTokens = new StringTokenizer(sinkClasses, ";");
+                    
+            LogSink sink= null;
+            while (sinkTokens.hasMoreTokens())
+            {
+                String sinkClassName = sinkTokens.nextToken();
+                    	
+                try{
+                    Class sinkClass = Class.forName(sinkClassName);
+                    if (com.mortbay.Util.LogSink.class.isAssignableFrom(sinkClass)) {
+                        sink = (LogSink)sinkClass.newInstance();
+                                            
+                        sink.setOptions(dateFormat,timezone,
+                                        (logOptions.indexOf(TIMESTAMP) >= 0),
+                                        (logOptions.indexOf(LABEL) >= 0),
+                                        (logOptions.indexOf(TAG) >= 0),
+                                        (logOptions.indexOf(STACKSIZE) >= 0),
+                                        (logOptions.indexOf(STACKTRACE) >= 0),
+                                        (logOptions.indexOf(ONELINE) >= 0));
+                                            
+                        __instance.add(sink);
+                    }
+                    else {
+                        // Can't use Code.fail here, that's what we're setting up
+                        System.err.println(sinkClass+" is not a com.mortbay.Util.LogSink");
+                    }
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }    
     
 
@@ -163,42 +163,42 @@ public class Log
      */
     public static void initParamsFromApplet(java.applet.Applet appl)
     {
-	synchronized(com.mortbay.Util.Log.class)
-	{
-	    String logOptions = appl.getParameter("LOG_OPTIONS");
-	    String logFile = appl.getParameter("LOG_FILE");
-	    String dateFormat = appl.getParameter("LOG_DATE_FORMAT");
-	    String timezone = appl.getParameter("LOG_TIMEZONE");
+        synchronized(com.mortbay.Util.Log.class)
+        {
+            String logOptions = appl.getParameter("LOG_OPTIONS");
+            String logFile = appl.getParameter("LOG_FILE");
+            String dateFormat = appl.getParameter("LOG_DATE_FORMAT");
+            String timezone = appl.getParameter("LOG_TIMEZONE");
 
-	    if (logOptions==null)
-		logOptions="tLTs";
-	    
-	    LogSink sink= null;
-	    try
-	    {
-		if(logFile==null)
-		    sink=new WriterLogSink();
-		else
-		    sink=new FileLogSink(logFile);
-	    }
-	    catch(IOException e)
-	    {
-		e.printStackTrace();
-		sink=new WriterLogSink();
-	    }
-	
-	    sink.setOptions((dateFormat!=null)
-			    ?dateFormat:"yyyyMMdd HHmmss.SSS zzz ",
-			    (timezone!=null)?timezone:"GMT",
-			    (logOptions.indexOf(TIMESTAMP) >= 0),
-			    (logOptions.indexOf(LABEL) >= 0),
-			    (logOptions.indexOf(TAG) >= 0),
-			    (logOptions.indexOf(STACKSIZE) >= 0),
-			    (logOptions.indexOf(STACKTRACE) >= 0),
-			    (logOptions.indexOf(ONELINE) >= 0));
-	    
-	    __instance.add(sink);
-	}
+            if (logOptions==null)
+                logOptions="tLTs";
+            
+            LogSink sink= null;
+            try
+            {
+                if(logFile==null)
+                    sink=new WriterLogSink();
+                else
+                    sink=new FileLogSink(logFile);
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
+                sink=new WriterLogSink();
+            }
+        
+            sink.setOptions((dateFormat!=null)
+                            ?dateFormat:"yyyyMMdd HHmmss.SSS zzz ",
+                            (timezone!=null)?timezone:"GMT",
+                            (logOptions.indexOf(TIMESTAMP) >= 0),
+                            (logOptions.indexOf(LABEL) >= 0),
+                            (logOptions.indexOf(TAG) >= 0),
+                            (logOptions.indexOf(STACKSIZE) >= 0),
+                            (logOptions.indexOf(STACKTRACE) >= 0),
+                            (logOptions.indexOf(ONELINE) >= 0));
+            
+            __instance.add(sink);
+        }
     }
     
     
@@ -216,20 +216,20 @@ public class Log
      */
     public synchronized void add(LogSink logSink)
     {
-	if (_sinks==null)
-	{
-	    _sinks=new LogSink[1];
-	    _sinks[0]=logSink;
-	}
-	else
-	{
-	    LogSink[] ns = new LogSink[_sinks.length+1];
-	    for (int i=_sinks.length;i-->0;)
-		ns[i]=_sinks[i];
-	    ns[_sinks.length]=logSink;
-	    _sinks=ns;
-	}
-	_needInit = false;
+        if (_sinks==null)
+        {
+            _sinks=new LogSink[1];
+            _sinks[0]=logSink;
+        }
+        else
+        {
+            LogSink[] ns = new LogSink[_sinks.length+1];
+            for (int i=_sinks.length;i-->0;)
+                ns[i]=_sinks[i];
+            ns[_sinks.length]=logSink;
+            _sinks=ns;
+        }
+        _needInit = false;
     }
     
     
@@ -239,26 +239,26 @@ public class Log
      */
     public void disableLog()
     {
-	if (_sinks!=null) {
-	    for (int s=_sinks.length;s-->0;)
-	    {
-		try{
-		    _sinks[s].stop();
-		}
-		catch(InterruptedException e)
-		{
-		    Code.ignore(e);
-		}
-	    }
-	    _sinks=null;
-	}
+        if (_sinks!=null) {
+            for (int s=_sinks.length;s-->0;)
+            {
+                try{
+                    _sinks[s].stop();
+                }
+                catch(InterruptedException e)
+                {
+                    Code.ignore(e);
+                }
+            }
+            _sinks=null;
+        }
     }
     
     
     /*-------------------------------------------------------------------*/
     public static void message(String tag,
-			       String msg,
-			       Frame frame)
+                               String msg,
+                               Frame frame)
     {
         long time = System.currentTimeMillis();
         instance().message(tag,msg,frame,time);
@@ -272,20 +272,20 @@ public class Log
      * @param time The time stamp of the message.
      */
     public synchronized void message(String tag,
-				     String msg,
-				     Frame frame,
-				     long time)
+                                     String msg,
+                                     Frame frame,
+                                     long time)
     {
-	if (_needInit)
-	    defaultInit();
-	if (_sinks==null)
-	    return;
-	for (int s=_sinks.length;s-->0;)
-	{
-	    if (!_sinks[s].isStarted())
-		_sinks[s].start();
-	    _sinks[s].log(tag,msg,frame,time);
-	}
+        if (_needInit)
+            defaultInit();
+        if (_sinks==null)
+            return;
+        for (int s=_sinks.length;s-->0;)
+        {
+            if (!_sinks[s].isStarted())
+                _sinks[s].start();
+            _sinks[s].log(tag,msg,frame,time);
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -327,8 +327,8 @@ public class Log
      * @deprecated.
      */
     public void setOptions(String logOptions,
-			   String logFile,
-			   String dateFormat,
+                           String logFile,
+                           String dateFormat,
                            String timezone)
     {}
     

@@ -4,14 +4,23 @@
 // ========================================================================
 
 package com.mortbay.HTTP;
-//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import com.mortbay.Util.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.zip.*;
-import com.mortbay.HTTP.Handler.*;
+import com.mortbay.HTTP.Handler.DumpHandler;
+import com.mortbay.HTTP.Handler.NotFoundHandler;
+import com.mortbay.HTTP.Handler.NullHandler;
+import com.mortbay.HTTP.Handler.TestTEHandler;
+import com.mortbay.Util.Code;
+import com.mortbay.Util.IO;
+import com.mortbay.Util.LineInput;
+import com.mortbay.Util.Test;
+import com.mortbay.Util.ThreadPool;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /* ------------------------------------------------------------ */
 /** Test against RFC 2616
@@ -29,10 +38,10 @@ public class TestRFC2616
     public TestRFC2616()
         throws IOException
     {
-	setName("Test");
-	setMinThreads(1);
-	setMaxThreads(10);
-	setMaxIdleTimeMs(30000);
+        setName("Test");
+        setMinThreads(1);
+        setMaxThreads(10);
+        setMaxIdleTimeMs(30000);
         _server=new HttpServer();
         _server.addHandler(null,"/",new TestTEHandler());
         _server.addHandler(null,"/",new RedirectHandler());
@@ -385,7 +394,7 @@ public class TestRFC2616
                                    "123456","3. content-length")+1;
             
             // No content length
-	    t.check(true,"Skip 411 checks as IE breaks this rule");
+            t.check(true,"Skip 411 checks as IE breaks this rule");
 //              offset=0;
 //              response=listener.getResponses("GET /R2 HTTP/1.1\n"+
 //                                             "Host: localhost\n"+
@@ -419,7 +428,7 @@ public class TestRFC2616
         {
             TestRFC2616 listener = new TestRFC2616();
             listener.getHttpServer().addHandler("VirtualHost",
-						"/path/*",
+                                                "/path/*",
                                             new DumpHandler());
             listener.getHttpServer().start();
             String response;
@@ -430,27 +439,34 @@ public class TestRFC2616
             response=listener.getResponses("GET /path/R1 HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "\n");
-	    
+            
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 200","Default host")+1;
+                                   "HTTP/1.1 200",
+                                   "Default host")+1;
             offset=t.checkContains(response,offset,
-                                   "match=","Default host")+1;
+                                   "contextPath=",
+                                   "Default host")+1;
             offset=t.checkContains(response,offset,
-                                   "info=/path/R1","Default host")+1;
+                                   "pathInContext=/path/R1",
+                                   "Default host")+1;
             
             // Virtual Host
             offset=0;
             response=listener.getResponses("GET http://VirtualHost/path/R1 HTTP/1.1\n"+
                                            "Host: ignored\n"+
                                            "\n");
+            
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 200","1. virtual host uri")+1;
+                                   "HTTP/1.1 200",
+                                   "1. virtual host uri")+1;
             offset=t.checkContains(response,offset,
-                                   "match=/path","1. virtual host uri")+1;
+                                   "contextPath=/path",
+                                   "1. virtual host uri")+1;
             offset=t.checkContains(response,offset,
-                                   "info=/R1","1. virtual host uri")+1;
+                                   "pathInContext=/R1",
+                                   "1. virtual host uri")+1;
 
             // Virtual Host
             offset=0;
@@ -459,11 +475,14 @@ public class TestRFC2616
                                            "\n");
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 200","2. virtual host field")+1;
+                                   "HTTP/1.1 200",
+                                   "2. virtual host field")+1;
             offset=t.checkContains(response,offset,
-                                   "match=/path","2. virtual host field")+1;
+                                   "contextPath=/path",
+                                   "2. virtual host field")+1;
             offset=t.checkContains(response,offset,
-                                   "info=/R1","2. virtual host field")+1;
+                                   "pathInContext=/R1",
+                                   "2. virtual host field")+1;
 
             // Virtual Host
             offset=0;
@@ -757,111 +776,111 @@ public class TestRFC2616
             response=listener.getResponses("GET /redirect HTTP/1.0\n"+
                                            "Connection: Keep-Alive\n"+
                                            "\n"+
-					   "GET /redirect HTTP/1.0\n"+
+                                           "GET /redirect HTTP/1.0\n"+
                                            "\n"
-					   );
+                                           );
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.0 302","302")+1;
             t.checkContains(response,offset,
-			    "Location: /dump",
-			    "redirected");
+                            "Location: /dump",
+                            "redirected");
             t.checkContains(response,offset,
-			    "Content-Length: 0",
-			    "content length");
+                            "Content-Length: 0",
+                            "content length");
             t.checkContains(response,offset,
-			    "Connection: keep-alive",
-			    "keep-alive");
-	    
+                            "Connection: keep-alive",
+                            "keep-alive");
+            
             offset=t.checkContains(response,offset,
                                    "HTTP/1.0 302","302")+1;
             t.checkContains(response,offset,
-			    "Location: /dump",
-			    "redirected");
+                            "Location: /dump",
+                            "redirected");
             t.checkContains(response,offset,
-			    "Connection: close",
-			    "closed");
+                            "Connection: close",
+                            "closed");
 
-	    
+            
             // HTTP/1.1
             offset=0;
             response=listener.getResponses("GET /redirect HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "\n"+
-					   "GET /redirect HTTP/1.1\n"+
+                                           "GET /redirect HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "Connection: close\n"+
                                            "\n"
-					   );
+                                           );
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 302","302")+1;
             t.checkContains(response,offset,
-			    "Location: /dump",
-			    "redirected");
+                            "Location: /dump",
+                            "redirected");
             t.checkContains(response,offset,
-			    "Content-Length: 0",
-			    "content length");
-	    
+                            "Content-Length: 0",
+                            "content length");
+            
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 302","302")+1;
             t.checkContains(response,offset,
-			    "Location: /dump",
-			    "redirected");
+                            "Location: /dump",
+                            "redirected");
             t.checkContains(response,offset,
-			    "Connection: close",
-			    "closed");
-	    
+                            "Connection: close",
+                            "closed");
+            
             // HTTP/1.0 content
             offset=0;
             response=listener.getResponses("GET /redirect/content HTTP/1.0\n"+
                                            "Connection: Keep-Alive\n"+
                                            "\n"+
-					   "GET /redirect/content HTTP/1.0\n"+
+                                           "GET /redirect/content HTTP/1.0\n"+
                                            "\n"
-					   );
+                                           );
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.0 302","302")+1;
             t.checkContains(response,offset,
-			    "Location: /dump",
-			    "redirected");
+                            "Location: /dump",
+                            "redirected");
             t.checkContains(response,offset,
-			    "Connection: close",
-			    "close no content length");
-	    
+                            "Connection: close",
+                            "close no content length");
+            
             // HTTP/1.1 content
             offset=0;
             response=listener.getResponses("GET /redirect/content HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "\n"+
-					   "GET /redirect/content HTTP/1.1\n"+
+                                           "GET /redirect/content HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "Connection: close\n"+
                                            "\n"
-					   );
+                                           );
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 302","302")+1;
             t.checkContains(response,offset,
-			    "Location: /dump",
-			    "redirected");
+                            "Location: /dump",
+                            "redirected");
             t.checkContains(response,offset,
-			    "Transfer-Encoding: chunked",
-			    "chunked content length");
-	    
+                            "Transfer-Encoding: chunked",
+                            "chunked content length");
+            
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 302","302")+1;
             t.checkContains(response,offset,
-			    "Location: /dump",
-			    "redirected");
+                            "Location: /dump",
+                            "redirected");
             t.checkContains(response,offset,
-			    "Connection: close",
-			    "closed");
+                            "Connection: close",
+                            "closed");
             t.checkContains(response,offset,
-			    "Transfer-Encoding: chunked",
-			    "chunked content length");
-	    
+                            "Transfer-Encoding: chunked",
+                            "chunked content length");
+            
         }
         catch(Exception e)
         {
@@ -962,17 +981,17 @@ public class TestRFC2616
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.0 200 OK\015\012","19.6.2 Keep-alive 1")+1;
-	    offset=t.checkContains(response,offset,
-				   "Connection: keep-alive",
-				   "19.6.2 Keep-alive 1")+1;
-	    
-	    offset=t.checkContains(response,offset,
-				   "<HTML>",
-				   "19.6.2 Keep-alive 1")+1;
+            offset=t.checkContains(response,offset,
+                                   "Connection: keep-alive",
+                                   "19.6.2 Keep-alive 1")+1;
             
             offset=t.checkContains(response,offset,
-				   "/R1","19.6.2 Keep-alive 1")+1;
-	    
+                                   "<HTML>",
+                                   "19.6.2 Keep-alive 1")+1;
+            
+            offset=t.checkContains(response,offset,
+                                   "/R1","19.6.2 Keep-alive 1")+1;
+            
             offset=t.checkContains(response,offset,
                                    "HTTP/1.0 200 OK\015\012","19.6.2 Keep-alive 2")+11;
             offset=t.checkContains(response,offset,
@@ -990,7 +1009,7 @@ public class TestRFC2616
     }
     
     public void customizeRequest(HttpConnection connection,
-				       HttpRequest request)
+                                       HttpRequest request)
     {
     }
     
@@ -1019,23 +1038,24 @@ public class TestRFC2616
     /* ------------------------------------------------------------ */
     public class RedirectHandler extends NullHandler
     {
-	/* ------------------------------------------------------------ */
-	public void handle(String pathSpec,
-			   HttpRequest request,
-			   HttpResponse response)
-	    throws HttpException, IOException
-	{
-	    if (!super.isStarted())
-		return;        
-	    
-	    // For testing set transfer encodings
-	    if (request.getPath().startsWith("/redirect"))
-	    {
-		if (request.getPath().startsWith("/redirect/content"))
-		    response.getOutputStream().write("Content".getBytes());
-		response.sendRedirect("/dump");
-		request.setHandled(true);
-	    }
-	}
+        /* ------------------------------------------------------------ */
+        public void handle(String contextPath,
+                           String pathInContext,
+                           HttpRequest request,
+                           HttpResponse response)
+            throws HttpException, IOException
+        {
+            if (!super.isStarted())
+                return;        
+            
+            // For testing set transfer encodings
+            if (request.getPath().startsWith("/redirect"))
+            {
+                if (request.getPath().startsWith("/redirect/content"))
+                    response.getOutputStream().write("Content".getBytes());
+                response.sendRedirect("/dump");
+                request.setHandled(true);
+            }
+        }
     }
 }
