@@ -14,6 +14,7 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URISyntaxException;
+import java.security.Permission;
 
 
 /* ------------------------------------------------------------ */
@@ -53,7 +54,34 @@ class FileResource extends URLResource
         throws IOException, URISyntaxException
     {
         super(url,null);
-        _file =new File(new URI(url.toString()));
+
+        try
+        {
+            // Try standard API to convert URL to file.
+            _file =new File(new URI(url.toString()));
+        }
+        catch (Exception e)
+        {
+            Code.ignore(e);
+            try
+            {
+                // Assume that File.toURL produced unencoded chars. So try
+                // encoding them.
+                String urls=
+                    "file:"+org.mortbay.util.URI.encodePath(url.toString().substring(5));
+                _file =new File(new URI(urls));
+            }
+            catch (Exception e2)
+            {
+                Code.ignore(e2);
+
+                // Still can't get the file.  Doh! try good old hack!
+                checkConnection();
+                Permission perm = _connection.getPermission();
+                _file =new File(perm.getName());
+            }
+        }
+        
         checkAliases(url);
     }
     
@@ -215,7 +243,18 @@ class FileResource extends URLResource
         }
         return list;
     }
-        
+         
+    /* ------------------------------------------------------------ */
+    /** Encode according to this resource type.
+     * File URIs are encoded.
+     * @param uri URI to encode.
+     * @return The uri unchanged.
+     */
+    public String encode(String uri)
+    {
+        return uri;
+    }
+    
     /* ------------------------------------------------------------ */
     /** 
      * @param o

@@ -55,8 +55,6 @@ class FileResource extends URLResource
         super(url,url.openConnection());
 
         Permission perm = _connection.getPermission();
-        if (!(perm instanceof java.io.FilePermission) && Code.debug())
-            Code.warning("Caution: File resource without FilePermission:"+url);
         _file =new File(perm.getName());
         
         checkAliases(url);

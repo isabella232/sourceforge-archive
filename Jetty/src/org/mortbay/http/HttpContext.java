@@ -12,16 +12,22 @@ import java.net.MalformedURLException;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Permissions;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.http.handler.ResourceHandler;
 import org.mortbay.http.handler.SecurityHandler;
+import org.mortbay.util.ByteArrayISO8859Writer;
+import org.mortbay.util.CachedResource;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.InetAddrPort;
@@ -31,14 +37,8 @@ import org.mortbay.util.LogSink;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
 import org.mortbay.util.StringUtil;
-import org.mortbay.util.URI;
-import org.mortbay.util.ByteArrayISO8859Writer;
-import java.util.Arrays;
-import org.mortbay.util.CachedResource;
 import org.mortbay.util.TypeUtil;
-import java.text.DateFormat;
-import java.util.Date;
-import org.mortbay.http.SecurityConstraint.Authenticator;
+import org.mortbay.util.URI;
 
 
 /* ------------------------------------------------------------ */
@@ -721,7 +721,7 @@ public class HttpContext implements LifeCycle,
             }
 
             // Make the resource
-            resource=_resourceBase.addPath(pathInContext);
+            resource=_resourceBase.addPath(_resourceBase.encode(pathInContext));
             if (Code.verbose()) Code.debug("CACHE MISS: ",resource);
             if (resource==null)
                 return null;
@@ -783,7 +783,8 @@ public class HttpContext implements LifeCycle,
         String[] ls = resource.list();
         if (ls==null)
             return null;
-                
+        Arrays.sort(ls);
+        
         String title = "Directory: "+base;
         
         ByteArrayISO8859Writer out = new ByteArrayISO8859Writer();
@@ -974,8 +975,11 @@ public class HttpContext implements LifeCycle,
         if (lib.exists() && lib.isDirectory())
         {
             StringBuffer classPath=new StringBuffer();
-            String[] files=lib.list();
 
+            if (append && this.getClassPath()!=null)
+                classPath.append(_classPath);
+            
+            String[] files=lib.list();
             for (int f=0;files!=null && f<files.length;f++)
             {
                 try {
@@ -994,11 +998,7 @@ public class HttpContext implements LifeCycle,
             }
 
             if (classPath.length()>0)
-            {
-                if (append && this.getClassPath()!=null)
-                       classPath.append(",").append(_classPath);
                 _classPath=classPath.toString();
-            }
         }
     }
 
@@ -1142,7 +1142,17 @@ public class HttpContext implements LifeCycle,
             if (_tmpDir.exists())
             {
                 Code.debug("Delete existing temp dir ",_tmpDir," for ",this);
-                IO.delete(_tmpDir); 
+                if (!IO.delete(_tmpDir))
+                    Code.debug("Failed to delete temp dir "+_tmpDir);
+
+                if (_tmpDir.exists())
+                {
+                    String old=_tmpDir.toString();
+                    _tmpDir=File.createTempFile(temp+"_","");
+                    if (_tmpDir.exists())
+                        _tmpDir.delete();
+                    Code.warning("Can't reuse "+old+", using "+_tmpDir);
+                }
             }
             
             _tmpDir.mkdir();
