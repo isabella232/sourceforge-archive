@@ -23,7 +23,7 @@ import org.mortbay.util.Code;
 import org.mortbay.util.LineInput;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.io.StringBufferInputStream;
+import java.io.ByteArrayInputStream;
 
 /* ------------------------------------------------------------ */
 /** 
@@ -220,11 +220,14 @@ public class AJP13Connection extends HttpConnection
                             break;
                         case 7: // SSL cert
                             //request.setAttribute("javax.servlet.request.X509Certificate",value);
-							CertificateFactory cf = CertificateFactory.getInstance("X.509");
-							InputStream certstream = new StringBufferInputStream(value);
-							X509Certificate cert = (X509Certificate) cf.generateCertificate(certstream);
-							X509Certificate certs[] = {cert};
-							request.setAttribute("javax.servlet.request.X509Certificate",certs);
+                            CertificateFactory cf =
+                                CertificateFactory.getInstance("X.509");
+                            InputStream certstream =
+                                new ByteArrayInputStream(value.getBytes());
+                            X509Certificate cert = (X509Certificate)
+                                cf.generateCertificate(certstream);
+                            X509Certificate certs[] = {cert};
+                            request.setAttribute("javax.servlet.request.X509Certificate",certs);
                             break;
                         case 6: // JVM Route
                             request.setAttribute("org.mortbay.http.ajp.JVMRoute",value);
