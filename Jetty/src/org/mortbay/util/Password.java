@@ -38,7 +38,7 @@ public class Password extends Credential
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @param realm  
+     * @param password The String password.
      */
     public Password(String password)
     {
@@ -85,16 +85,27 @@ public class Password extends Credential
     {
 	if (this == o)
 	    return true;
-	
+
+        if (null == o)
+            return false;
+
         if (o instanceof Password)
-            return o.equals(_pw);
+        {
+            Password p=(Password)o;
+            return p._pw == _pw || (null != _pw && _pw.equals(p._pw));
+        }
         
         if (o instanceof String)
             return o.equals(_pw);
             
         return false;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public int hashCode() {
+        return null == _pw ? super.hashCode() : _pw.hashCode();
+    }
+
     /* ------------------------------------------------------------ */
     public static String obfuscate(String s)
     {

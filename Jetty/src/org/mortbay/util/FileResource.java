@@ -246,14 +246,28 @@ class FileResource extends URLResource
     }
     
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @param o
-     * @return 
+     * @return
      */
     public boolean equals( Object o)
     {
-        return o instanceof FileResource &&
-            _file.equals(((FileResource)o)._file);
+        if (this == o)
+            return true;
+
+        if (null == o || ! (o instanceof FileResource))
+            return false;
+
+        FileResource f=(FileResource)o;
+        return f._file == _file || (null != _file && _file.equals(f._file));
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the hashcode.
+     */
+    public int hashCode()
+    {
+       return null == _file ? super.hashCode() : _file.hashCode();
+    }
 }
