@@ -1,5 +1,6 @@
 Jetty3 Versions
 --------------
+ + Fixed redirect handling by the CGI Servlet.
 
 Jetty-3.1.rc6 - 10 Jul 2001
  + Avoid script vulnerability in error pages.

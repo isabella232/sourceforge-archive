@@ -230,22 +230,21 @@ public class CGI extends HttpServlet
       String location = fields.get(HttpFields.__ContentLocation);
       String status   = fields.get(ContentStatus);
 
-      if (location!=null)
-      {
-        Code.debug("CGI: Found Location header - what to do?");
-        // TODO
-        // for location do redirect HttpResponse - sendRedirect ?
-        fields.remove(HttpFields.__ContentLocation);
-      }
-      
       if (status!=null)
       {
-        Code.debug("CGI: Found a Status header - setting status on response");
-        res.setStatus(new Integer(status).intValue());
-        fields.remove(ContentStatus);
+	  Code.debug("Found a Status header - setting status on response");
+	  fields.remove(ContentStatus);
+
+	  // NOTE: we ignore any reason phrase, otherwise we
+	  // would need to use res.sendError() selectively.
+	  int i = status.indexOf(' ');
+	  if (i>0)
+	      status = status.substring(0,i);
+	  
+	  res.setStatus(Integer.parseInt(status));
       }
       
-      // copy remaining fields into response...
+      // copy remaining headers into response...
       List headers = fields.getFieldNames();
       for (int i = 0, size=headers.size(); i<size; i++)
       {
@@ -264,11 +263,6 @@ public class CGI extends HttpServlet
       Code.debug("CGI: Client closed connection!");
       p.destroy();
     }
-    // think about this a bit more :
-    // what should we do with our processes error stream ?
-    // what should we do with it's exit value ?
-    // so should we wait for it ?
-    // will Greg's stuff flush and close all streams correctly ?
   }
 };
 
