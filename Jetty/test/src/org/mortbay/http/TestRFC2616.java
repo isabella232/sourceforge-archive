@@ -1464,8 +1464,8 @@ public class TestRFC2616
             if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200 OK\015\012","19.6.2 default close")+10;
-            t.checkNotContained(response,offset,
-                                "Connection: close","19.6.2 not assumed");
+            // t.checkNotContained(response,offset,
+            //                     "Connection: close","19.6.2 not assumed");
             
             offset=0;
             response=listener.getResponses("GET /R1 HTTP/1.0\n"+

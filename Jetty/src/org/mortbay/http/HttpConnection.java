@@ -614,17 +614,15 @@ public class HttpConnection
               case 0:
                   {
                       // If we dont have a content length (except 304 replies), 
-		      // or we have been requested to close
-		      // then we can't be persistent 
+                  	  // or we have been requested to close
+		              // then we can't be persistent 
                       if (!_keepAlive || !_persistent ||
                           HttpResponse.__304_Not_Modified!=_response.getStatus() &&
                           _response.getField(HttpFields.__ContentLength)==null ||
                           HttpFields.__Close.equals(_response.getField(HttpFields.__Connection)))
                       {
                           _persistent=false;
-                          if (_keepAlive)
-                              _response.setField(HttpFields.__Connection,
-                                                 HttpFields.__Close);
+                          _response.setField(HttpFields.__Connection,HttpFields.__Close);
                           _keepAlive=false;
                       }
                       else if (_keepAlive)
