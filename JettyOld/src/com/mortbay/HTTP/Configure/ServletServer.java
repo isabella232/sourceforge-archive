@@ -94,6 +94,7 @@ public class SimpleServletConfig extends BaseConfiguration
 						   args[1],
 						   args[2],
 						   Integer.parseInt(args[3]));
+		  break;
 	      default:
 		  System.err.println("Usage - java com.mortbay.HTTP.Configure.SimpleServletConfig path name class [port]");
 		  System.exit(1);
