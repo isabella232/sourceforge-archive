@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $# != 2 -o $# != 3 ]
+if [ $# != 2 -a $# != 3 ]
 then
     echo "Usage - $0 <sourceforge user name> <version> [<branch>]" >&2
     exit 1
