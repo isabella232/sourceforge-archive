@@ -9,6 +9,16 @@ import com.mortbay.Base.Code;
 import java.io.*;
 import javax.servlet.*;
 
+/* ------------------------------------------------------------ */
+/** Dispatch requests to other resources.
+ * IT IS NOT RECOMMENDED THAT THIS API IS USED.
+ * The resources that can be referenced by the RequestDispatcher
+ * API, are very restricted and cannot be written as generic servlet.
+ *
+ * @see HttpServer
+ * @version 1.0 Sat Feb 13 1999
+ * @author Greg Wilkins (gregw)
+ */
 public class HttpRequestDispatcher implements javax.servlet.RequestDispatcher
 {
 

@@ -93,21 +93,24 @@ public class SummaryFilterOutputStream extends FilterOutputStream
 	throws IOException
     {
 	out.write(b,off,len);
-	StringBuffer buf=new StringBuffer(len+_msg);
-	if (_size>0)
-	    buf.append("bytes[0.."+_size+"]=");
-	
-	for (int i=0; (_size==0 || i<_size) && i<len; i++)
+	StringBuffer buf=new StringBuffer("=============================================================================\n"+
+					  len+
+					  _msg+
+					  "-----------------------------------------------------------------------------\n");
+	int i=0;
+	for (i=0; (_size==0 || i<_size) && i<len; i++)
 	{
 	    char c = (char)b[i];
 	    if (Character.isISOControl(c) && c!=10 && c!=13)
 		buf.append('.');
 	    else 
 		buf.append(c);
+	}   
+	buf.append((i<len)?"\n...\n":"\n");
+	synchronized(System.err)
+	{
+	    System.err.println(buf.toString());
 	}
-	
-	buf.append("\n");
-	System.err.println(buf.toString());
     }
 };
 

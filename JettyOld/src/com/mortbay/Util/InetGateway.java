@@ -10,6 +10,26 @@ import java.io.*;
 import java.net.*;
 import java.lang.reflect.Constructor;
 
+/* ------------------------------------------------------------ */
+/** IP gateway.
+ * Forwards IP connections to another IP:port address and copies
+ * all data received in both directions.  Suitable for opening up
+ * a specific port through a firewall.
+ *
+ * <p><h4>Notes</h4>
+ * A property file can be used to specify multiple addresses
+ * for forwarding. See the example propertyFile.prp file for
+ * details.
+ *
+ * <p><h4>Usage</h4>
+ * <PRE>
+ * java com.mortbay.Util.InetGateway [-dump|-summary] [LocalHost:]LocalPort ForwardHost:ForwardPort
+ * java com.mortbay.Util.InetGateway propertyFile.prp
+ * </pre>
+ *
+ * @version 1.0 Thu Feb 11 1999
+ * @author Greg Wilkins (inspired by M Watson and J Gosnell)
+ */
 public class InetGateway extends ThreadedServer
 {
     /* ------------------------------------------------------------ */
@@ -21,6 +41,14 @@ public class InetGateway extends ThreadedServer
     {
 	java.io.OutputStream.class,java.lang.String.class
     };
+    private static final String[] __dumpFilter = 
+    {
+	"com.mortbay.Util.DumpFilterOutputStream"
+    };
+    private static final String[] __summaryFilter = 
+    {
+	"com.mortbay.Util.SummaryFilterOutputStream"
+    };
     
     /* ------------------------------------------------------------ */
     InetAddrPort _local;
@@ -30,6 +58,9 @@ public class InetGateway extends ThreadedServer
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
+     * @param local Listen address and port.
+     * @param remote Forward address and port.
+     * @exception IOException Problem listening on local port.
      */
     public InetGateway (InetAddrPort local,
 			InetAddrPort remote)
@@ -41,11 +72,18 @@ public class InetGateway extends ThreadedServer
 	       
     /* ------------------------------------------------------------ */
     /** Constructor. 
+     * @param local Listen address and port.
+     * @param remote Forward address and port.
+     * @param l2rFilters Array of class names of FilterOutputStream derived
+     *                   classes used to filter data from local to remote.
+     * @param r2lFilters Array of class names of FilterOutputStream derived
+     *                   classes used to filter data from remote to remote.
+     * @exception IOException  Problem listening on local port.
      */
     public InetGateway (InetAddrPort local,
 			InetAddrPort remote,
-			Vector l2rFilters,
-			Vector r2lFilters)
+			String[] l2rFilters,
+			String[] r2lFilters)
 	throws IOException
     {
 	super(local);
@@ -61,9 +99,9 @@ public class InetGateway extends ThreadedServer
 	    // Get local to remote filter classes
 	    if (l2rFilters!=null)
 	    {
-		for (int f=l2rFilters.size();f-->0;)
+		for (int f=l2rFilters.length;f-->0;)
 		{
-		    filter=(String)l2rFilters.elementAt(f);
+		    filter=(String)l2rFilters[f];
 		    Class c = Class.forName(filter);
 		    if(!java.io.FilterOutputStream.class.isAssignableFrom(c))
 			throw new IOException("Filter "+ filter +
@@ -85,9 +123,9 @@ public class InetGateway extends ThreadedServer
 	    // Get remote to local filter classes
 	    if (r2lFilters!=null)
 	    {
-		for (int f=r2lFilters.size();f-->0;)
+		for (int f=r2lFilters.length;f-->0;)
 		{
-		    filter=(String)r2lFilters.elementAt(f);
+		    filter=(String)r2lFilters[f];
 		    Class c = Class.forName(filter);
 		    if(!java.io.FilterOutputStream.class.isAssignableFrom(c))
 			throw new IOException("Filter "+filter+
@@ -208,7 +246,7 @@ public class InetGateway extends ThreadedServer
     public static void usage()
     {
 	System.err.println("Usage - ");
-	System.err.println("  java com.mortbay.Util.InetGateway [LocalHost:]LocalPort ForwardHost:ForwardPort");
+	System.err.println("  java com.mortbay.Util.InetGateway [-dump|-summary] [LocalHost:]LocalPort ForwardHost:ForwardPort");
 	System.err.println("  java com.mortbay.Util.InetGateway propertyFile.prp");
     }
     
@@ -282,9 +320,12 @@ public class InetGateway extends ThreadedServer
 		
 		try
 		{
+		    String[] r2la = new String[local2remote.size()];
+		    local2remote.copyInto(r2la);
+		    String[] l2ra = new String[remote2local.size()];
+		    remote2local.copyInto(r2la);
 		    new InetGateway(localAddr,remoteAddr,
-				    local2remote,remote2local)
-		    .start();
+				    l2ra,r2la).start();
 		}
 		catch (IOException e)
 		{
@@ -308,6 +349,14 @@ public class InetGateway extends ThreadedServer
 	    else if (argv.length == 2)
 		new InetGateway(new InetAddrPort(argv[0]),
 				new InetAddrPort(argv[1])).start();
+	    else if (argv.length == 3 && "-dump".equals(argv[0]))
+		new InetGateway(new InetAddrPort(argv[1]),
+				new InetAddrPort(argv[2]),
+				__dumpFilter,__dumpFilter).start();
+	    else if (argv.length == 3 && "-summary".equals(argv[0]))
+		new InetGateway(new InetAddrPort(argv[1]),
+				new InetAddrPort(argv[2]),
+				__summaryFilter,__summaryFilter).start();
 	    else
 		usage();
 	}

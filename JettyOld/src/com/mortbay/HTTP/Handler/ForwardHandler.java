@@ -71,7 +71,7 @@ public class ForwardHandler extends NullHandler
                        HttpResponse response)
          throws IOException
     {
-	String requestPath=request.getRequestPath();
+	String requestPath=request.getResourcePath();
 	String path = forwardMap.longestMatch(requestPath);
 	
         if (path!=null)
@@ -113,7 +113,7 @@ public class ForwardHandler extends NullHandler
 		}
 		
 		Code.debug("Forward to "+url+
-			   " via "+request.getRequestPath());
+			   " via "+request.getResourcePath());
 		request.setHeader(HttpHeader.Connection,null);
 		request.setHeader("Host",null);
 		request.setVersion(request.HTTP_1_0);

@@ -249,14 +249,14 @@ public class HttpServer implements ServletContext
 	    }
 
 	    // Give request to handlers
-	    String requestPath = request.getRequestPath();
+	    String resourcePath = request.getResourcePath();
 	    Exception exception=null;
 	    boolean handled=false;
 	    int h = 0;
 	    try{
 		// Select request handler statck by path
 		HttpHandler[] httpHandlers = (HttpHandler[])
-		    httpHandlersMap.getLongestMatch(requestPath);
+		    httpHandlersMap.getLongestMatch(resourcePath);
 
 		// Try all handlers in the stack
 		while (httpHandlers!=null &&
@@ -288,17 +288,18 @@ public class HttpServer implements ServletContext
 	    catch (Exception e1)
 	    {
 		exception=e1;
-		Code.debug("HttpHandler "+h,exception);
+		Code.debug("Exception in HttpHandler "+h,exception);
 
 		// Select exception handler stack by path
 		ExceptionHandler[] exceptionHandlers = (ExceptionHandler[])
-		    exceptionHandlersMap.getLongestMatch(requestPath);
+		    exceptionHandlersMap.getLongestMatch(resourcePath);
 		
 		// try all handlers in the stack
 		int e=0;
 		while(exceptionHandlers!=null &&
 		      !handled && e<exceptionHandlers.length)
 		{
+		    Code.debug("Try ExceptionHandler "+e);
 		    try {
 			exceptionHandlers[e++].handle(request,response,exception);
 			handled=response.headersWritten();
@@ -391,7 +392,6 @@ public class HttpServer implements ServletContext
     /* ---------------------------------------------------------------- */
     public ServletContext getContext(String url)
     {
-	// XXX - This is almost certainly wrong
 	return this;
     }
 
@@ -413,33 +413,47 @@ public class HttpServer implements ServletContext
      * @return null
      * @exception MalformedURLException 
      */
-    public  URL getResource(String path)
+    public URL getResource(String path)
 	throws MalformedURLException
     {
-	Code.notImplemented();
-	return null;
+	// This is probably very inefficient, but it is
+	// a stupid API anyway.
+	return new URL("http",
+		       listeners[0].getAddress().getInetAddress()
+		       .getHostAddress(),
+		       listeners[0].getPort(),
+		       path);	       
     }
 
     /* ------------------------------------------------------------ */
-    /** Not implemented
+    /** Get a resource as a Stream.
+     * @see getResource(String path)
      * @param path URL path of resource
      * @return null 
      */
     public InputStream getResourceAsStream(String path)
     {
-	Code.notImplemented();
+	try {
+	    return getResource(path).openStream();
+	}
+	catch (IOException e)
+	{
+	    Code.ignore(e);
+	}
 	return null;
     }
     
     /* ------------------------------------------------------------ */
-    /** Not implemented
+    /** Get a RequestDispatcher.
+     * While implemented, this API is not recommended. The resources
+     * that can be addressed are very restricted and be specially
+     * written. Hopefully this will go away sometime.
      * @param path URL path of resource 
      * @return null
      */
     public RequestDispatcher getRequestDispatcher(String path)
     {
-	Code.notImplemented();
-	return null;
+	return new HttpRequestDispatcher(this,path);
     }
     
     /* ---------------------------------------------------------------- */
@@ -484,8 +498,21 @@ public class HttpServer implements ServletContext
      */
     public String getRealPath(String path)
     {
-	Code.notImplemented();
-	return null;
+	String realPath = path;
+	// Select request handler statck by path
+	HttpHandler[] httpHandlers =
+	    (HttpHandler[])httpHandlersMap.getLongestMatch(realPath);
+	if (httpHandlers != null)
+	{
+	    for (int i = 0; i < httpHandlers.length; i++)
+	    {
+		if (httpHandlers[i] != null) {
+		    realPath = httpHandlers[i].translate(realPath);
+		    break;
+		}
+	    }
+	}
+	return realPath.replace('/', File.separatorChar);
     }
     
 

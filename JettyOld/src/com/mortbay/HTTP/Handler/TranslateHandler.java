@@ -42,7 +42,7 @@ public class TranslateHandler extends NullHandler
 		       HttpResponse response)
 	 throws Exception
     {
-	String address = request.getRequestPath();
+	String address = request.getResourcePath();
 	
 	String path=translations.longestMatch(address);
 	if (path != null)
@@ -52,8 +52,28 @@ public class TranslateHandler extends NullHandler
 		       " to "+translation);
 		
 	    request.translateAddress(path,translation);
+
+	    // recurse for more translations
 	    handle(request,response);
 	}
+    }
+    
+    /* ----------------------------------------------------------------- */
+    public String translate(String address)
+    {
+	String path=translations.longestMatch(address);
+	if (path != null)
+	{
+	    String translation = (String)translations.get(path);
+	    Code.debug("Translation from "+path+
+		       " to "+translation);
+
+	    address = PathMap.translate(address,path,translation);
+	    
+	    // recurse for more translations
+	    address = translate(address);
+	}
+	return address;
     }
 }
 

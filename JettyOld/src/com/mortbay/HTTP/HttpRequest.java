@@ -67,6 +67,7 @@ public class HttpRequest extends HttpHeader
     private String requestLine=null;
     private String requestURI=null;
     private String protocolHostPort=null;
+    private String resourcePath=null;
     private String servletPath=null;
     private String pathInfo=null;
     private String remoteUser=null;
@@ -139,7 +140,7 @@ public class HttpRequest extends HttpHeader
 
 	// Build URI
 	uri = new URI(requestURI);
-	pathInfo=uri.path();
+	pathInfo=uri.getPath();
 
 	// Handle version
 	if (version==null || !version.startsWith("HTTP/"))
@@ -178,7 +179,7 @@ public class HttpRequest extends HttpHeader
 	this.method  = method;
 	this.uri = new URI(uri);
 	this.requestURI=uri;
-	pathInfo=this.uri.path();
+	pathInfo=this.uri.getPath();
 	version=HttpHeader.HTTP_1_0;
     }
     
@@ -192,7 +193,7 @@ public class HttpRequest extends HttpHeader
 	this.method  = method;
 	this.uri = uri;
 	this.requestURI=uri.toString();
-	pathInfo=this.uri.path();
+	pathInfo=this.uri.getPath();
 	version=HttpHeader.HTTP_1_0;
     }
 
@@ -212,11 +213,59 @@ public class HttpRequest extends HttpHeader
      * /Servlet/Path/Foo/Bar
      * </PRE>
      */
-    public  String getRequestPath()
+    public String getRequestPath()
     {
 	if (uri==null)
 	    return null;
-	return uri.path();
+	return uri.getPath();
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Set the URI path 
+     * @return For the given example, this would return <PRE>
+     * /Servlet/Path/Foo/Bar
+     * </PRE>
+     */
+    public void setRequestPath(String path)
+    {
+	if (uri!=null)
+	    uri.setPath(path);
+	servletPath=null;
+	pathInfo=path;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the resource path.
+     * If set, the resource path is the path used by Jetty Handlers
+     * to locate the resource that will handle the request. If not
+     * set, the RequestPath is returned.  A resource path is required
+     * to implement the RequestDispatcher.include method, which leaves
+     * the requestPath unmodified when calling a new resource for content.
+     * HttpHandlers should use the resource path to determine which
+     * entity should handle the request. The RequestPath should be used
+     * for any actually handling.  Note that this just shows how much
+     * the RequestDispatcher API sux and is not really generic.
+     * @return the resource path or the request path.
+     */
+    public String getResourcePath()
+    {
+	if (resourcePath != null)
+	    return resourcePath;
+	return getRequestPath();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the resource path.
+     * The resource path is the path used by Jetty Handlers
+     * to locate the resource that will handle the request.
+     * A resource path is required
+     * to implement the RequestDispatcher.include method, which leaves
+     * the requestPath unmodified when calling a new resource for content.
+     * @param path 
+     */
+    public void setResourcePath(String path)
+    {
+	resourcePath=path;
     }
     
     /* -------------------------------------------------------------- */
@@ -256,6 +305,10 @@ public class HttpRequest extends HttpHeader
     public void setServletPath(String servletPath)
 	 throws MalformedURLException
     {
+	// XXX - don't set the servlet path if we have a resource path
+	if (resourcePath!=null)
+	    return;
+	
 	switch (servletPath.charAt(servletPath.length()-1))
 	{
 	  case '|':
@@ -271,7 +324,7 @@ public class HttpRequest extends HttpHeader
 		   "' in " + uri );
 					
 	this.servletPath=servletPath;
-	String path=uri.path();
+	String path=uri.getPath();
 
 	if (!path.startsWith(servletPath))
 	    throw new MalformedURLException("Bad servletPath '"+
@@ -299,28 +352,12 @@ public class HttpRequest extends HttpHeader
      */
     public void translateAddress(String pathSpec,String newPath)
     {
-	String old = uri.path();
-	String match=PathMap.match(pathSpec,old);
-	Code.assert(match!=null,"translate non matching address");
-
-	if (pathSpec.endsWith("%") && match.endsWith("/") &&
-	    ! newPath.endsWith("/"))
-	    newPath += "/";
-	
-	if (match.length()==old.length())    
-	    uri.path(newPath);
-	else
-	    uri.path(newPath+old.substring(match.length()));
-	
-	Code.debug("Translated '"+match+
-		   "' part of '" + old +
-		   "' to '"+newPath+
-		   "' resulted with "+uri.path());
+	uri.setPath(PathMap.translate(uri.getPath(),pathSpec,newPath));
 	
 	servletPath=null;
-	pathInfo=uri.path();
+	pathInfo=uri.getPath();
     }
-
+    
     /* -------------------------------------------------------------- */
     /** Set the remoteUser from authentication headers
      */
@@ -556,8 +593,7 @@ public class HttpRequest extends HttpHeader
      */  
     public String getRealPath(String path)
     {
-	// XXX
-	return null;
+         return path.replace('/', File.separatorChar);
     }
 
     /* -------------------------------------------------------------- */
@@ -649,10 +685,10 @@ public class HttpRequest extends HttpHeader
     public Enumeration getParameterNames()
     {
 	if (formParameters==null && cookieParameters==null)
-	    return uri.parameters().keys();
+	    return uri.getParameters().keys();
 
 	Vector names = new Vector();
-	Enumeration e = uri.parameters().keys();
+	Enumeration e = uri.getParameters().keys();
 	while (e.hasMoreElements())
 	    names.addElement(e.nextElement());
 
@@ -798,7 +834,7 @@ public class HttpRequest extends HttpHeader
     public  String getPathTranslated()
     {
 	if (pathTranslated==null)
-	    return uri.path();
+	    return uri.getPath();
 	return pathTranslated;
     }
 
@@ -810,7 +846,7 @@ public class HttpRequest extends HttpHeader
      */
     public  String getQueryString()
     {
-	return uri.query();
+	return uri.getQuery();
     }
 
     /* -------------------------------------------------------------- */

@@ -70,7 +70,7 @@ public class LogHandler extends NullHandler implements Observer
 	HttpResponse response = (HttpResponse)arg;
 	HttpRequest request = response.getRequest();
 	
-	String path = request.getRequestPath();
+	String path = request.getResourcePath();
 	Writer writer = (Writer)loggers.getLongestMatch(path);
 	
 	if (writer != null)

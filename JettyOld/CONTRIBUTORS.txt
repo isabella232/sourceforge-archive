@@ -1,4 +1,5 @@
 
+
 Authors & Testers:
   Greg Wilkins <gregw@mortbay.com>
   Jan Bartel <janb@mortbay.com>
@@ -13,6 +14,7 @@ Authors & Testers:
   Daniel Eriksson <daniel.eriksson@softapp.se>
   John Bergman <JohnB@ImageX.com>
   Søren Hilmer <sh@itplus.dk> 
+  Juancarlo Añez <juancarlo@modelistica.com>
 
 Sponsors:
   Mort Bay Consulting.   http://www.mortbay.com

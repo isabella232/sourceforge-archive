@@ -25,9 +25,7 @@ import java.text.DateFormat;
  * @author Greg Wilkins
  */
 public class FileHandler extends NullHandler 
-{
-    // XXX - Need to check over matts modifications.
-    
+{    
     /* ----------------------------------------------------------------- */
     PathMap dirMap;
     String indexFile;
@@ -71,6 +69,8 @@ public class FileHandler extends NullHandler
     {
 	return putAllowed;
     }
+    
+    /* ----------------------------------------------------------------- */
     public void setPutAllowed(boolean putAllowed_)
     {
 	putAllowed = putAllowed_;
@@ -81,42 +81,67 @@ public class FileHandler extends NullHandler
     {
 	return deleteAllowed;
     }
+    
+    /* ----------------------------------------------------------------- */
     public void setDeleteAllowed(boolean deleteAllowed_)
     {
 	deleteAllowed = deleteAllowed_;
 	allowHeader = null;
     }
+
+    /* ----------------------------------------------------------------- */
+    public String translate(String path)
+    {
+	try
+	{
+	    // Find pathSpec
+	    String pathSpec=dirMap.longestMatch(path);
+	    if (pathSpec==null)
+		return path;
+	    String pathInfo = PathMap.pathInfo(pathSpec,path);
+	    String filename= dirMap.get(pathSpec)+
+		(pathInfo.startsWith("/")?"":"/")+pathInfo;
+	    return filename.replace('/',File.separatorChar);
+	}
+	catch(Exception e)
+	{
+	    Code.ignore(e);
+	    return path;
+	}
+    }
+    
+    
     /* ------------------------------------------------------------ */
     public void handle(HttpRequest request,
 		       HttpResponse response)
 	 throws Exception
     {
 	// Extract and check filename
-	String uri = request.getRequestPath();
+	String uri = request.getResourcePath();
 	if (uri.indexOf("..")>=0)
 	{
 	    Code.warning("Path with .. not handled");
 	    return;
 	}
 	
-	// Find path
-	String path=dirMap.longestMatch(uri);
-	if (path==null)
-	    return;
-	String pathInfo = PathMap.pathInfo(path,uri);
-	String filename = dirMap.get(path)+
-	    (pathInfo.startsWith("/")?"":"/")+
-	    pathInfo;
-	
-	Code.debug("URI=",uri,
-		   " PATH=",path,
-		   " PATHINFO=",pathInfo,
-		   " FILENAME=",filename+
-		   " METHOD="+request.getMethod());
-	
+        // Find path
+        String path=dirMap.longestMatch(uri);
+        if (path==null)
+            return;
+        String pathInfo = PathMap.pathInfo(path,uri);
+        String filename =
+	    (dirMap.get(path)+
+	     (pathInfo.startsWith("/")?"":"/")+
+	     pathInfo)
+	    .replace('/',File.separatorChar);;
+        
+        Code.debug("URI=",uri,
+                   " PATHINFO=",pathInfo,
+                   " FILENAME=",filename+
+                   " METHOD=",request.getMethod());
 	
 	// check filename
-	boolean endsWithSlash= filename.endsWith("/");
+	boolean endsWithSlash= filename.endsWith(File.separator);
 	if (endsWithSlash)
 	    filename = filename.substring(0,filename.length()-1);
 	
@@ -191,14 +216,16 @@ public class FileHandler extends NullHandler
 				       "http://"+
 				       request.getServerName()+
 				       (port==80?"":(":"+port))+
-				       request.getRequestPath()+"/"+
+				       request.getResourcePath()+"/"+
 				       (q==null?"":("?"+q)));
 		    response.sendError(301,"Moved Permanently");
 		    return;
 		}
 		    
 		// See if index file exists
-		File index = new File(filename+"/"+indexFile);
+		File index = new File(filename+
+				      File.separator +
+				      indexFile);
 		if (index.isFile())
 		    sendFile(request,response,index);
 		else
@@ -316,7 +343,7 @@ public class FileHandler extends NullHandler
 	try {
 	    String newPathInfo = PathMap.pathInfo(path,newUri);
 	    String newFilename = dirMap.get(path) +
-		(newPathInfo.startsWith("/")?"":"/")+
+		(newPathInfo.startsWith("/")?"":File.separator)+
 		newPathInfo;
 	    File file = new File(filename);
 	    File newFile = new File(newFilename);
@@ -428,3 +455,15 @@ public class FileHandler extends NullHandler
 	page.write(response.getOutputStream());
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+

@@ -56,7 +56,7 @@ public class ServletHandler extends NullHandler
 		       HttpResponse response)
 	 throws Exception
     {
-	String address = request.getRequestPath();
+	String address = request.getResourcePath();
 
 	String path=servletMap.longestMatch(address);
 	
@@ -72,7 +72,6 @@ public class ServletHandler extends NullHandler
 	    // handle translated path
 	    if (fileBase!=null)
 	    {
-		// XXX - use servlet version ????
 		String filename = fileBase+request.getPathInfo();
 		File file= new File(filename);
 		request.setPathTranslated(file.getAbsolutePath());

@@ -26,7 +26,7 @@ public class UploadServlet extends HttpServlet
 		lines++;
 	    
 	    page.add("Filename \"<FONT FACE=courier>"+filename+
-		     "\"</FONT> has "+lines+" lines<P>");
+		     "</FONT>\" has "+lines+" lines<P>");
 	}
 	else
 	    page.add("No file uploaded.");

@@ -1,4 +1,19 @@
-Release 2.1.B0 - xx January 1999
+
+Release 2.1.B1 - 13 February 1999
+  + Fixed bug with if-modified-since in FileHandler
+  + Added video/quicktime to default MIME types.
+  + Fixed bug with MultipartRequest.
+  + Updated DefaultExceptionHandler.
+  + Updated InetAddrport.
+  + Updated URI.
+  + Implemented Handler translations and getRealPath.
+  + Improved handling of File.separator in FileHandler.
+  + Implemented RequestDispatcher (NOT Tested!).
+  + Implemented getResource and getResourceAsStream (NOT Tested!).
+  + Replace package com.mortbay.Util.Gateway with 
+    class  com.mortbay.Util.InetGateway
+
+Release 2.1.B0 - 30 January 1999
   + Uses JSDK2.1 API, but not all methods implemented.
   + Added support for PUT, MOVE, DELETE in filehandler
   + FileHandler now sets content length.
@@ -6,7 +21,6 @@ Release 2.1.B0 - xx January 1999
   + Fixed command line bug with SimpleServletConfig
   + Minor changes to support MS J++ and its non standard 
     language extensions - MMMmmm should have left it unchanged!
-  + Somehow broke File upload???
 
 Release 2.0.5 - 15 December 1998
   + Temp fix to getCharacterEncoding

@@ -27,31 +27,26 @@ public class DefaultExceptionHandler implements ExceptionHandler
     public void handle(HttpRequest request,
 		       HttpResponse response,
 		       Exception exception)
-	 throws Exception
+	throws Exception
     {
-	try{
-	    throw exception;
-	}
-	catch (Exception e)
+	// Send exception response
+	try
 	{
-	    // Send exception response
-	    try
-	    {
-		if (!response.headersWritten())
-		    response.setStatus(HttpResponse.SC_INTERNAL_SERVER_ERROR);
-		OutputStream out = response.getOutputStream();
-		out.write("<HTML><HEAD><TITLE>Exception</TITLE>".getBytes());
-		out.write("<BODY><H2>".getBytes());
-		out.write(e.toString().getBytes());
-		out.write("</H2><br><PRE>".getBytes());
-		e.printStackTrace(new PrintWriter(out));
-		out.write("</PRE></BODY></HTML>".getBytes());
-		out.flush();
-	    }
-	    catch (Exception e2)
-	    {
-		Code.debug("Exception creating error page",e);
-	    }
+	    if (!response.headersWritten())
+		response.setStatus(HttpResponse.SC_INTERNAL_SERVER_ERROR);
+	    OutputStream out = response.getOutputStream();
+	    PrintWriter pout=new PrintWriter(out);
+	    pout.println("<HTML><HEAD><TITLE>Exception</TITLE>");
+	    pout.println("<BODY><H2>");
+	    pout.println(exception.toString());
+	    pout.println("</H2><br><PRE>");
+	    exception.printStackTrace(pout);
+	    pout.println("</PRE></BODY></HTML>");
+	    pout.flush();
+	}
+	catch (Exception e2)
+	{
+	    Code.debug("Exception creating error page",exception);
 	}
     }    
 }

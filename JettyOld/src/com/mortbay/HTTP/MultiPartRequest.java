@@ -53,10 +53,12 @@ public class MultiPartRequest
 	throws IOException
     {
 	_request=request;
-	String content_type = request.getContentType();
+	String content_type = request.getHeader(HttpHeader.ContentType);
 	if (!content_type.startsWith("multipart/form-data"))
 	    throw new IOException("Not multipart/form-data request");
 
+	Code.debug("Multipart content type = ",content_type);
+	
 	if (! (request instanceof com.mortbay.HTTP.HttpRequest))
 	    Code.fail("Only works for Jetty server requests");
 	_in = (HttpInputStream) request.getInputStream();

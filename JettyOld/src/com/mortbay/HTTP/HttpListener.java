@@ -28,6 +28,12 @@ public class HttpListener extends ThreadedServer
     /* ------------------------------------------------------------ */
     InetAddrPort address=null;
     HttpServer server=null;
+
+    /* ------------------------------------------------------------ */
+    public InetAddrPort getAddress()
+    {
+	return address;
+    }
     
     /* ------------------------------------------------------------ */
     /** Construct a HttpListener

@@ -75,7 +75,7 @@ public class FilterHandler extends NullHandler
 	 throws Exception
     {
 	Object filter =
-	    filterMap.getLongestMatch(request.getRequestPath());
+	    filterMap.getLongestMatch(request.getResourcePath());
 
 	if (filter!=null)
 	{    

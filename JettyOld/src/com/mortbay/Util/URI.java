@@ -25,6 +25,7 @@ public class URI
     private String query;
     private UrlEncoded parameters = new UrlEncoded();
     private boolean modified=false;
+    private boolean encodeNulls=false;
     
     /* ------------------------------------------------------------ */
     /** Construct from a String can contain both a path and
@@ -55,35 +56,33 @@ public class URI
     /** Get the uri path
      * @return the URI path
      */
-    public String path()
+    public String getPath()
     {
 	return path;
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the uri query String
+    /** Get the uri path
      * @return the URI path
      */
-    public String query()
+    public void setPath(String path)
     {
-	if (modified)
-	    query = parameters.encode();
-	return query;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get the uri query String
-     * @return the URI path
-     */
-    public String query(boolean equalsForNullValue)
-    {
-	if (modified)
-	    query = parameters.encode(equalsForNullValue);
-	return query;
+	this.path=path;
     }
     
     /* ------------------------------------------------------------ */
     /** Get the uri path
+     * @deprecated Use getPath
+     * @return the URI path
+     */
+    public String path()
+    {
+	return path;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get the uri path
+     * @deprecated Use setPath
      * @return the URI path
      */
     public void path(String path)
@@ -91,10 +90,44 @@ public class URI
 	this.path=path;
     }
     
+    
+    /* ------------------------------------------------------------ */
+    /** Get the uri query String
+     * @return the URI query string
+     */
+    public String getQuery()
+    {
+	if (modified)
+	    query = parameters.encode(encodeNulls);
+	return query;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the uri query String
+     * @deprecated Use getQuery
+     * @return the URI query string
+     */
+    public String query()
+    {
+	if (modified)
+	    query = parameters.encode(encodeNulls);
+	return query;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set if this URI should encode nulls as an empty = clause
+     * @param b If true then encode nulls
+     */
+    public void encodeNulls(boolean b)
+    {
+	this.encodeNulls=b;
+    }
+    
+    
     /* ------------------------------------------------------------ */
     /** Get the uri query parameters
      * @return the URI query parameters
-     * @deprecated use parameters
+     * @deprecated use getParameters
      */
     public Dictionary queryContent()
     {
@@ -104,8 +137,19 @@ public class URI
     /* ------------------------------------------------------------ */
     /** Get the uri query parameters
      * @return the URI query parameters
+     * @deprecated use getParameters
      */
     public Dictionary parameters()
+    {
+	modified=true;
+	return parameters;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the uri query parameters
+     * @return the URI query parameters
+     */
+    public Dictionary getParameters()
     {
 	modified=true;
 	return parameters;
@@ -210,18 +254,6 @@ public class URI
 	    result+="?"+query;
 	return result;
     }
-    
-    /* ------------------------------------------------------------ */
-    /** @return the URI string encoded.
-     */
-    public String toString(boolean equalsForNullValue)
-    {
-	String result = path;
-	query(equalsForNullValue);
-	if (query!=null && query.length()>0)
-	    result+="?"+query;
-	return result;
-    }
 
     /* ------------------------------------------------------------ */
     public static void test()
@@ -253,7 +285,8 @@ public class URI
 	    test.checkEquals(uri.toString(),"/Test/URI?a=","null param");
 	    uri.parameters();
 	    test.checkEquals(uri.toString(),"/Test/URI?a","null param");
-	    test.checkEquals(uri.toString(true),"/Test/URI?a=","null= param");
+	    uri.encodeNulls(true);
+	    test.checkEquals(uri.toString(),"/Test/URI?a=","null= param");
 	}
 	catch(Exception e){
 	    test.check(false,e.toString());

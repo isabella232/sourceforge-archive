@@ -357,6 +357,43 @@ public class PathMap extends Dictionary
 
 	return buf.toString();
     }
+
+
+    /* ------------------------------------------------------------ */
+    /** Return a translated address.
+     * The part of the address that matches the path is replaced
+     * with the translation string.
+     * @param oldPath A URL path to be translated
+     * @param pathSpec The PathMap path string that matched (may include
+     *             special %|$ etc characters).
+     * @param newPath The string to replace the path with.
+     * @return translated address.
+     */
+    public static String translate(String oldPath,
+				   String pathSpec,
+				   String newPath)
+    {
+	String result = null;
+	
+	String match=match(pathSpec,oldPath);
+	Code.assert(match!=null,"translate non matching address");
+	
+	if (pathSpec.endsWith("%") && match.endsWith("/") &&
+	    ! newPath.endsWith("/"))
+	    newPath += "/";
+	
+	if (match.length()==oldPath.length())    
+	    result= newPath;
+
+	result = newPath+oldPath.substring(match.length());
+	
+	Code.debug("Translated '",match,
+		   "' part of '",oldPath,
+		   "' to '",newPath,
+		   "' resulted with ",result);
+	return result;
+    }
+    
 }
 
 

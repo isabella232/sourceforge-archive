@@ -35,5 +35,7 @@
 
  + Find XMLServlet and make it work
 
+ + Include a CGI servlet
+
  + HTTP-DAV????
 
