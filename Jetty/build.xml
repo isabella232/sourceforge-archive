@@ -116,7 +116,7 @@
     <delete dir="${test.classes}" quiet="true"/>
     <delete dir="${javadoc}" quiet="false"/>
     <delete file="${mini.http.jar}" quiet="true"/>
-    <delete includeEmptyDirs="true" quiet="false">
+    <delete includeEmptyDirs="true" quiet="true">
       <fileset dir="${basedir}/work">
         <include name="*/**"/>
       </fileset>
