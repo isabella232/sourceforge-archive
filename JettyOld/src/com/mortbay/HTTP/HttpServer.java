@@ -81,7 +81,6 @@ public class HttpServer implements ServletContext
     private PathMap exceptionHandlersMap;
     private Hashtable servletHandlerMap = new Hashtable(11);
     private String resourceBase=null;
-
     
     /* -------------------------------------------------------------------- */
     /** Construct, must be configured later
@@ -168,6 +167,8 @@ public class HttpServer implements ServletContext
                     "No mapping for / in exceptionHandlersMap");
 
         Properties p = config.getProperties();
+        
+        
         int minThreads =
             Integer.parseInt(p.getProperty(HttpConfiguration
                                            .MinListenerThreads,"0"));
@@ -177,6 +178,7 @@ public class HttpServer implements ServletContext
         int maxThreadIdle =
             Integer.parseInt(p.getProperty(HttpConfiguration
                                            .MaxListenerThreadIdleMs,"0"));
+
         
         InetAddrPort[] addresses = config.addresses();
         Class[] classes = config.listenerClasses();
@@ -212,6 +214,7 @@ public class HttpServer implements ServletContext
             resourceBase=null;
 
         __servers.addElement(this);
+
     }
 
     /* -------------------------------------------------------------------- */

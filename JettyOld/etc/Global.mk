@@ -40,7 +40,7 @@ endif
 JAVAC := ${JDK_HOME}/bin/javac
 JAVA := ${JDK_HOME}/bin/java
 JAVAH := ${JDK_HOME}/bin/javah
-NATIVEOPTS := -I${JDK_HOME}/include -I${JDK_HOME}/include/solaris
+NATIVEOPTS := -I${JDK_HOME}/include -I${JDK_HOME}/include/genunix
 
 SUFFIXES := $(SUFFIXES) .java .class
 # Java files
@@ -182,18 +182,18 @@ NATIVESRCINCS := \
 NATIVESRCSTUBS := \
 	$(addsuffix .c,$(subst .,_,$(NATIVESRCCLASSES)))
 $(NATIVESRCINCS) : $(subst .,_,$(PACKAGE))_%.h : %.java
-	$(JAVAH) $(addprefix $(PACKAGE).,$(patsubst %.java,%,$^))
+	$(JAVAH) -jni -v $(addprefix $(PACKAGE).,$(patsubst %.java,%,$^))
 	@touch $@
-$(NATIVESRCSTUBS) : $(subst .,_,$(PACKAGE))_%.c : %.java
-	$(JAVAH) -stubs $(addprefix $(PACKAGE).,$(patsubst %.java,%,$^))
+#$(NATIVESRCSTUBS) : $(subst .,_,$(PACKAGE))_%.c : %.java
+#	$(JAVAH) -jni -v -stubs $(addprefix $(PACKAGE).,$(patsubst %.java,%,$^))
 	@touch $@
 rnative : native
 NATIVECLASSINCSH = $(addsuffix .h,$(subst .,_,$(NATIVECLASSINCS)))
 NATIVECLASSESSTUBS = $(addsuffix .c,$(subst .,_,$(NATIVECLASSES)))
 $(NATIVECLASSINCSH) :
-	$(JAVAH) $(subst _,.,$(subst .h,,$@))
-$(NATIVECLASSESSTUBS) :
-	$(JAVAH) -stubs $(subst _,.,$(subst .c,,$@))
+	$(JAVAH) -jni -v $(subst _,.,$(subst .h,,$@))
+#$(NATIVECLASSESSTUBS) :
+#	$(JAVAH) -jni -v -stubs $(subst _,.,$(subst .c,,$@))
 # If NATIVE is defined, try and build the headers
 native : $(NATIVESRCINCS)
 all : native
@@ -202,7 +202,7 @@ clean ::
 	$(RM) $(NATIVEGENFILES)
 endif
 ifneq ($(NATIVELIB),)
-ARCH := $(shell uname -p)
+ARCH := $(shell uname -m)-$(shell uname -s)
 # Be careful - sometimes the stubs get built but need to be excluded...
 NATIVELIBSRCC := $(patsubst %.c,$(ARCH)/%.o,$(filter-out $(EXCLUDE) $(NATIVECLASSESSTUBS) $(NATIVESTUBS),$(wildcard *.c))) \
 		$(patsubst %.c,$(ARCH)/%.o,$(filter-out $(EXCLUDE),$(NATIVESTUBS) $(NATIVECLASSESSTUBS)))
@@ -233,7 +233,7 @@ clean ::
 	$(RM) -r $(ARCH)
 all : native
 $(NATIVELIBNAME) : $(NATIVELIBSRC)
-	$(CC) -G -shared -o $@ $^ $(LDFLAGS) $(LDLIBS)
+	$(CC) -shared -o $@ $^ $(LDFLAGS) $(LDLIBS)
 endif
 endif
 ifdef NSNATIVE

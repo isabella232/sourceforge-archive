@@ -11,6 +11,8 @@
 
 # ======================================================================== 
 # Define the server instances to be configured by this file:
+# SETUID            - User ID to run server as if started as root
+#                     under unix.  Uses native method to call setuid.
 # SERVERS           - list if defined server names
 # PROPERTY.*        - Definition of global properties
 # PROPERTIES        - File of globl properties 
@@ -22,7 +24,7 @@
 # ------------------------------------------------------------------------
 SERVERS                                   : main;proxy
 PROPERTY.DefaultPageType		  : com.mortbay.Jetty.JettyLaF
-
+#SETUID                                   : 100
 
 # ======================================================================== 
 # Define the server instance named "main"

@@ -18,6 +18,5 @@ BINFILES :=
 CFGFILES := 
 SUBDIRS = Configure Handler Filter HTML
 
-
 include $(JETTY_HOME)/etc/Global.mk
 

@@ -20,7 +20,6 @@ import java.util.*;
 import java.lang.reflect.*;
 
 
-
 /* ------------------------------------------------------------ */
 /** A configuration file based Jetty HttpServer.
  * This HttpConfiguration class uses PropertyTree based 
@@ -50,10 +49,12 @@ public class Server extends BaseConfiguration
     /* ------------------------------------------------------------ */
     private static final Hashtable __serverMap = new Hashtable(7);
     private static Properties __globalProperties=null;
+    private static int userID=0;
     
     /* ------------------------------------------------------------ */
     private String serverName=null;
     private HttpServer httpServer=null;
+
     
     /* ------------------------------------------------------------ */
     /** Get a JVM wide server property.
@@ -85,6 +86,9 @@ public class Server extends BaseConfiguration
      * Build server instances from the contents of the
      * passed property tree. The contents of the
      * property tree must be structured as follows: <PRE>
+     * SETUID                   : User ID to run server as if started as
+     *                            root under unix.  Uses native method to
+     *                            call setuid.
      * SERVERS                  : servername1;servername2
      * PROPERTY.GlobalProperty  : GlobalValue
      * PROPERTIES               : FileOfGlobalProperties.prp
@@ -139,6 +143,9 @@ public class Server extends BaseConfiguration
                 Code.warning("Configuration error for "+serverName);
                 throw e;
             }
+            
+            // Set user ID if we need to ( UNIX ONLY )
+            userID=Integer.parseInt(serversTree.getProperty("SETUID","0"));
         }
     }
     
@@ -237,6 +244,9 @@ public class Server extends BaseConfiguration
     
     /* ------------------------------------------------------------ */
     /** Start all configured servers.
+     * If a User ID is configured on a Unix system, a native call
+     * is made to set the effective User ID after the servers have
+     * been started.
      */
     public static void startAll()
         throws Exception
@@ -244,6 +254,18 @@ public class Server extends BaseConfiguration
         Enumeration e = __serverMap.elements();
         while (e.hasMoreElements())
             ((Server)e.nextElement()).start();
+
+        if (userID!=0)
+        {
+            // do this using reflection, so that the SetUID class
+            // is only loaded if needed.
+            Class[] types = {java.lang.Integer.TYPE};
+            java.lang.reflect.Method setUid =
+                Class.forName("com.mortbay.Jetty.SetUID")
+                .getMethod("setUID",types);
+            Object[] uid ={new Integer(userID)};
+            setUid.invoke(null,uid);
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -559,6 +581,7 @@ public class Server extends BaseConfiguration
         }
     }
 
+    
     /* ------------------------------------------------------------ */
     /** Start serving.
      */
@@ -568,6 +591,7 @@ public class Server extends BaseConfiguration
         // initialize the server
         httpServer = new HttpServer(this);
     }
+
     
     /* ------------------------------------------------------------ */
     /** Stop serving.
@@ -620,11 +644,12 @@ public class Server extends BaseConfiguration
      */
     public static void main(String args[])
     {
-        try{
+        try
+        {
             String filename = "JettyServer.prp";
             if (args.length==1)
                 filename = args[0];
-            else if ( ! new File(filename).exists())
+            else if (!new File(filename).exists())
                 filename = "etc/JettyServer.prp";
             loadConfigurationFile(filename);  
         }

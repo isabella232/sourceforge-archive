@@ -304,6 +304,29 @@ in quality of functionality, thus allowing us all to get on with using
 it to develop better and more intersting WWW applications for our clients.
 
 
+Can Jetty listen on a privileged port
+--------------------------------------
+On many operating systems, IP ports below 1024 need special privileges
+to be opened for listening. The standard HTTP port, 80, is such a port.
+Under Unix, a frequent solution for WWW servers is to run as superuser
+(root) and to change to a safer user ID only after the ports have been
+opened.   Jetty supports this mode of operation with a simple 
+native method call, that allows Jetty running on Unix systems to 
+change to a configured effective user ID after the server has started.  
+To run with this option configured, the $JETTY_HOME/lib/<machine>-<system>
+directory must be included in the LD_LIBRARY_PATH or equivalent:
+
+  LD_LIBRARY_PATH=$JETTY_HOME/lib/i686-Linux java com.mortbay.Jetty.Server
+
+The distribution comes with the native library built for i686-Linux.
+To build the library for your platform, run the following commands:
+
+  cd $JETTY_HOME/src/com/mortbay/Jetty
+  make native
+  make install
+
+Note that this will only work for Unix systems, but the approach 
+should be able to be adapted to other operating systems.
 
 
 MISCELLANEOUS

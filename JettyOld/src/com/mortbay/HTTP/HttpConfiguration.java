@@ -41,6 +41,8 @@ public interface HttpConfiguration
     /** Property name for the getResource url base (eg. "file:" */
     public static final String ResourceBase="ResourceBase";
     
+    /** Property name for User ID of the server (UNIX ONLY) */
+    public static final String SetUserID="SetUserID";
 
     /* ------------------------------------------------------------ */
     /** The IP addresses and ports the HTTP server listens on
