@@ -79,7 +79,7 @@ public class Log4jSink implements LogSink
         if (!log.isEnabledFor(priority))
             return;
 
-        log.log("com.mortbay.util.Log4jSink",
+        log.log("org.mortbay.util.Log4jSink",
                 priority,
                 msg.toString(),
                 null);
@@ -88,7 +88,7 @@ public class Log4jSink implements LogSink
     /* ------------------------------------------------------------ */
     public  synchronized void log(String s)
     {
-        Logger.getRootLogger().log("com.mortbay.util.Log4jSink",
+        Logger.getRootLogger().log("org.mortbay.util.Log4jSink",
                                    Priority.INFO,
                                    s,
                                    null);
