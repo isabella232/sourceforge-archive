@@ -1163,7 +1163,7 @@ public class HttpFields
                 }
                 
                 // Reverse Parse the "name : value" to last char of value
-                for (i=size;i-->i1;)
+                for (i=size;i-->i1 && i>=0;)
                 {
                     c=buf[i];
                     if (c!=' ' && c!='\t')
