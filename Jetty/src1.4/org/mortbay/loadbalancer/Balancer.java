@@ -13,11 +13,8 @@ import java.nio.channels.*;
 import java.util.*;
 
 /* ------------------------------------------------------------ */
-/** 
- * The start of a TCP/IP connection load balancer
+/** TCP/IP connection load balancer
  *
- * currently takes a single listener and server.
- * @see
  * @version 1.0 Sat Mar  9 2002
  * @author Greg Wilkins (gregw)
  */

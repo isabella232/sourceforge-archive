@@ -51,6 +51,7 @@ public class Connection
             _listener.getPolicy().allocate(this,_serverQ,0);
     }
     
+    
     /* ------------------------------------------------------------ */
     public synchronized void serverWriteWakeup(SelectionKey key)
         throws IOException
@@ -102,6 +103,7 @@ public class Connection
         _serverQ._selector=selector;
         if (!_serverQ.isEmpty())
             _serverQ.writeWakeup(null);
+        Code.debug("Connect ",this);
     }
     
     /* ------------------------------------------------------------ */
@@ -109,14 +111,46 @@ public class Connection
     {
         return _server!=null;
     }
-    
+
     /* ------------------------------------------------------------ */
-    public void close()
+    public synchronized void close()
     {
-        try{_clientQ._channel.close();}catch(IOException e){Code.warning(e);}
-        try{if (_serverQ._channel!=null)_serverQ._channel.close();}
+        Code.debug("Closing ",this);
+        try{
+            if (_clientQ._channel!=null && _clientQ._channel.isOpen())
+            {
+                _clientQ._channel.socket().setTcpNoDelay(true);
+                _clientQ._channel.socket().shutdownOutput();
+                _clientQ._channel.socket().close();
+                _clientQ._channel.close();
+            }
+        }
+        catch(IOException e){Code.warning(e);}
+        
+        try{
+            if (_serverQ._channel!=null && _serverQ._channel.isOpen())
+            {
+                _serverQ._channel.close();
+            }
+        }
         catch(IOException e){Code.warning(e);}
     }
+
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return 
+            (_clientQ._channel!=null
+             ?(_clientQ._channel.socket().getRemoteSocketAddress()+
+               "-->"+
+               _clientQ._channel.socket().getLocalPort())
+             :"?-->?")
+            + "-->" +
+            (_serverQ._channel!=null
+             ?_serverQ._channel.socket().getRemoteSocketAddress().toString()
+             :"?");
+    }
+    
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -289,7 +323,6 @@ public class Connection
         /* ------------------------------------------------------------ */
         void close()
         {
-            Code.debug("CLOSE: "+this);
             Connection.this.close();
         }
     }

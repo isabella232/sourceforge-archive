@@ -132,6 +132,7 @@ public class Listener extends LifeCycleThread
     {
         if (Code.debug())
             Code.debug("client keys=",_selector.keys());
+        
         if (_selector.select()>0)
         {
             Set ready=_selector.selectedKeys();
@@ -151,7 +152,6 @@ public class Listener extends LifeCycleThread
                 {
                     SocketChannel socket_channel =(SocketChannel)
                         ((ServerSocketChannel)channel).accept();
-                    Code.debug("Accepted ",socket_channel);
                     socket_channel.configureBlocking(false);
                     socket_channel.socket().setTcpNoDelay(true);
 
@@ -168,11 +168,18 @@ public class Listener extends LifeCycleThread
                 {
                     Connection connection=(Connection)key.attachment();
 
-                    if ((key.interestOps()&SelectionKey.OP_WRITE)!=0)
-                        connection.clientWriteWakeup(key);
-                    else if ((key.interestOps()&SelectionKey.OP_READ)!=0)
-                        connection.client2server(key);
-                }       
+                    try
+                    {
+                        if ((key.interestOps()&SelectionKey.OP_WRITE)!=0)
+                            connection.clientWriteWakeup(key);
+                        else if ((key.interestOps()&SelectionKey.OP_READ)!=0)
+                            connection.client2server(key);
+                    }
+                    catch(ClosedChannelException e)
+                    {
+                        Code.ignore(e);
+                    }
+                }
             }
         }
     }

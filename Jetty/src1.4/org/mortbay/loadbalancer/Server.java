@@ -76,10 +76,7 @@ public class Server extends LifeCycleThread
         Code.debug("Connecting... ",socket_channel);
 
         if (socket_channel.connect(_address))
-        {
-            Log.event("Connected! "+socket_channel);
             connection.connected(socket_channel,_selector);
-        }
         
         _pending.add(socket_channel);
         _pending.add(connection);
@@ -131,27 +128,28 @@ public class Server extends LifeCycleThread
                         
                         try{connected=socket_channel.finishConnect();}
                         catch(Exception e)
-                        {if (Code.debug())Code.warning(e);else Log.event(e.toString());}
+                        {
+                            if (Code.debug())Code.warning(e);
+                            else Log.event(e.toString());
+                            key.cancel();
+                            connection.deallocate();
+                        }
                         
                         if (connected)
                         {
-                            Log.event("Connected "+socket_channel);
                             connection.connected(socket_channel,_selector);
                             socket_channel.socket().setTcpNoDelay(true);
                             key.interestOps(key.interestOps()&~SelectionKey.OP_CONNECT
                                             |SelectionKey.OP_READ);
                         }
                         else
-                        {
-                            Log.warning("Not Connected "+socket_channel);
-                            key.cancel();
-                            connection.deallocate();
-                        }
+                            Code.debug("Not Connected ",socket_channel);
                     }
                     else if ((key.interestOps()&SelectionKey.OP_WRITE)!=0)
                         connection.serverWriteWakeup(key);
                     else if ((key.interestOps()&SelectionKey.OP_READ)!=0)
                         connection.server2client(key);
+
                 }
             }
         }
