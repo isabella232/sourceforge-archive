@@ -384,7 +384,9 @@ public class Code
         Code code = instance();
         Frame frame = new Frame(1);
         if (!code._suppressWarnings || code.isDebugOnFor(frame) )
-            Log.message(Log.WARN, code.formatThrowable(m,ex), frame);
+            Log.message(Log.WARN,
+                        new LogMsg(new Object[]{m,ex}),
+                        frame);
     }
     
     /*-------------------------------------------------------------------*/
@@ -397,7 +399,9 @@ public class Code
         Code code = instance();
         Frame frame = new Frame(1);
         if (!code._suppressWarnings || code.isDebugOnFor(frame) )
-            Log.message(Log.WARN, code.formatThrowable("",ex), frame);
+            Log.message(Log.WARN,
+                        new LogMsg(ex),
+                        frame);
     }
     
     /*-------------------------------------------------------------------*/
@@ -420,8 +424,10 @@ public class Code
     public static void fail(String m, Throwable ex) 
     {
         Code code = instance();
-        Log.message(Log.FAIL, code.formatThrowable(m,ex), new Frame(1));
-        throw new CodeException("FAIL: "+m);
+        Log.message(Log.FAIL,
+                    new LogMsg(new Object[]{m,ex}),
+                    new Frame(1));
+        throw new CodeException("FAIL: "+m+ex.toString());
     }
 
     /*-------------------------------------------------------------------*/
@@ -432,9 +438,10 @@ public class Code
     public static void fail(Throwable ex) 
     {
         Code code = instance();
-        String m=code.formatThrowable("",ex);
-        Log.message(Log.FAIL, m, new Frame(1));
-        throw new CodeException("FAIL: "+m);
+        Log.message(Log.FAIL,
+                    new LogMsg(ex),
+                    new Frame(1));
+        throw new CodeException("FAIL: "+ex.toString());
     }
 
     /*-------------------------------------------------------------------*/
@@ -518,13 +525,9 @@ public class Code
             if (code.isDebugOnFor(frame))
             {
                 frame.complete();
-                StringBuffer buf = new StringBuffer(256);
-                synchronized(buf)
-                {
-                    buf.append(m);
-                    formatObject(buf,ex);
-                }
-                Log.message(Log.DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG,
+                            new LogMsg(new Object[]{m,ex}),
+                            frame);
             }
         }
     }
@@ -543,12 +546,9 @@ public class Code
             if (code.isDebugOnFor(frame))
             {
                 frame.complete();
-                StringBuffer buf = new StringBuffer(256);
-                synchronized(buf)
-                {   
-                    formatObject(buf,ex);
-                }
-                Log.message(Log.DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG,
+                            new LogMsg(ex),
+                            frame);
             }
         }
     }
@@ -567,12 +567,9 @@ public class Code
             if (code.isDebugOnFor(frame))
             {
                 frame.complete();
-                StringBuffer buf = new StringBuffer(256);
-                synchronized(buf)
-                {   
-                    formatObject(buf,o);
-                }
-                Log.message(Log.DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG,
+                            new LogMsg(o),
+                            frame);
             }
         }
     }
@@ -591,12 +588,9 @@ public class Code
             if (code.isDebugOnFor(frame))
             {
                 frame.complete();
-                StringBuffer buf = new StringBuffer(256);
-                synchronized(buf)
-                {   
-                    formatObject(buf,o);
-                }
-                Log.message(Log.DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG,
+                            new LogMsg(o),
+                            frame);
             }
         }
     }
@@ -615,13 +609,9 @@ public class Code
             if (code.isDebugOnFor(frame))
             {
                 frame.complete();
-                StringBuffer buf = new StringBuffer(256);
-                synchronized(buf)
-                {   
-                    formatObject(buf,o1);
-                    formatObject(buf,o2);
-                }
-                Log.message(Log.DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG,
+                            new LogMsg(new Object[]{o1,o2}),
+                            frame);
             }
         }
     }
@@ -640,13 +630,9 @@ public class Code
             if (code.isDebugOnFor(frame))
             {
                 frame.complete();
-                StringBuffer buf = new StringBuffer(256);
-                synchronized(buf)
-                {   
-                    formatObject(buf,o1);
-                    formatObject(buf,new Long(i));
-                }
-                Log.message(Log.DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG,
+                            new LogMsg(new Object[]{o1,new Long(i)}),
+                            frame);
             }
         }
     }
@@ -665,14 +651,9 @@ public class Code
             if (code.isDebugOnFor(frame))
             {
                 frame.complete();
-                StringBuffer buf = new StringBuffer(256);
-                synchronized(buf)
-                {   
-                    formatObject(buf,o1);
-                    formatObject(buf,o2);
-                    formatObject(buf,o3);
-                }
-                Log.message(Log.DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG,
+                            new LogMsg(new Object[]{o1,o2,o3}),
+                            frame);
             }
         }
     }
@@ -691,15 +672,9 @@ public class Code
             if (code.isDebugOnFor(frame))
             {
                 frame.complete();
-                StringBuffer buf = new StringBuffer(256);
-                synchronized(buf)
-                {   
-                    formatObject(buf,o1);
-                    formatObject(buf,o2);
-                    formatObject(buf,o3);
-                    formatObject(buf,o4);
-                }
-                Log.message(Log.DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG,
+                            new LogMsg(new Object[]{o1,o2,o3,o4}),
+                            frame);
             }
         }
     }
@@ -718,15 +693,9 @@ public class Code
             if (code.isDebugOnFor(frame))
             {
                 frame.complete();
-                StringBuffer buf = new StringBuffer(256);
-                synchronized(buf)
-                {   
-                    formatObject(buf,o1);
-                    formatObject(buf,new Long(l1));
-                    formatObject(buf,o2);
-                    formatObject(buf,new Long(l2));
-                }
-                Log.message(Log.DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG,
+                            new LogMsg(new Object[]{o1,new Long(l1),o2,new Long(l2)}),
+                            frame);
             }
         }
     }
@@ -746,16 +715,9 @@ public class Code
             if (code.isDebugOnFor(frame))
             {
                 frame.complete();
-                StringBuffer buf = new StringBuffer(256);
-                synchronized(buf)
-                {   
-                    formatObject(buf,o1);
-                    formatObject(buf,o2);
-                    formatObject(buf,o3);
-                    formatObject(buf,o4);
-                    formatObject(buf,o5);
-                }
-                Log.message(Log.DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG,
+                            new LogMsg(new Object[]{o1,o2,o3,o4,o5}),
+                            frame);
             }
         }
     }
@@ -774,17 +736,9 @@ public class Code
             if (code.isDebugOnFor(frame))
             {
                 frame.complete();
-                StringBuffer buf = new StringBuffer(256);
-                synchronized(buf)
-                {   
-                    formatObject(buf,o1);
-                    formatObject(buf,o2);
-                    formatObject(buf,o3);
-                    formatObject(buf,o4);
-                    formatObject(buf,o5);
-                    formatObject(buf,o6);
-                }
-                Log.message(Log.DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG,
+                            new LogMsg(new Object[]{o1,o2,o3,o4,o5,o6}),
+                            frame);
             }
         }
     }
@@ -803,18 +757,9 @@ public class Code
             if (code.isDebugOnFor(frame))
             {
                 frame.complete();
-                StringBuffer buf = new StringBuffer(256);
-                synchronized(buf)
-                {   
-                    formatObject(buf,o1);
-                    formatObject(buf,o2);
-                    formatObject(buf,o3);
-                    formatObject(buf,o4);
-                    formatObject(buf,o5);
-                    formatObject(buf,o6);
-                    formatObject(buf,o7);
-                }
-                Log.message(Log.DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG,
+                            new LogMsg(new Object[]{o1,o2,o3,o4,o5,o6,o7}),
+                            frame);
             }
         }
     }
@@ -833,19 +778,9 @@ public class Code
             if (code.isDebugOnFor(frame))
             {
                 frame.complete();
-                StringBuffer buf = new StringBuffer(256);
-                synchronized(buf)
-                {   
-                    formatObject(buf,o1);
-                    formatObject(buf,o2);
-                    formatObject(buf,o3);
-                    formatObject(buf,o4);
-                    formatObject(buf,o5);
-                    formatObject(buf,o6);
-                    formatObject(buf,o7);
-                    formatObject(buf,o8);
-                }
-                Log.message(Log.DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG,
+                            new LogMsg(new Object[]{o1,o2,o3,o4,o5,o6,o7,o8}),
+                            frame);
             }
         }
     }
@@ -864,16 +799,14 @@ public class Code
             if (code.isDebugOnFor(frame))
             {
                 frame.complete();
-                StringBuffer buf = new StringBuffer(256);
-                synchronized(buf)
-                {   
-                    buf.append("IGNORED ");
-                    if (code._verbose>1)
-                        formatObject(buf,ex);
-                    else
-                        formatObject(buf,ex.toString());
-                }
-                Log.message(Log.DEBUG, buf.toString(),frame);
+                if (code._verbose>1)
+                    Log.message(Log.DEBUG,
+                                new LogMsg(new Object[]{"IGNORED ",ex}),
+                                frame);
+                else
+                    Log.message(Log.DEBUG,
+                                new LogMsg(new Object[]{"IGNORED ",ex.toString()}),
+                                frame);
             }
         }
     }
@@ -965,11 +898,56 @@ public class Code
     }
     
     /*-------------------------------------------------------------------*/
-    private static String formatThrowable(String msg,Throwable ex)
+    /** Log Message Object passed to the Log by Code.
+     */
+    public final static class LogMsg
     {
-        StringBuffer buf = new StringBuffer(msg);
-        formatObject(buf,ex);
-        return buf.toString();
+        private Object _item;
+        private Object[] _items;
+
+        private LogMsg(Object item)
+        {
+            _item=item;
+        }
+        
+        private LogMsg(Object[] items)
+        {
+            _items=items;
+        }
+
+        public int size()
+        {
+            if (_items==null)
+                return 1;
+            return _items.length;
+        }
+        
+        public Object item(int i)
+        {
+            if (_items==null && i==0)
+                return _item;
+            return _items[i];
+        }
+
+        public Throwable getThrowable()
+        {
+            for (int i=0;i<size();i++)
+                if (item(i) instanceof Throwable)
+                    return (Throwable)item(i);
+            return null;
+        }
+        
+        public String toString()
+        {
+            StringBuffer buf = new StringBuffer(256);
+            synchronized(buf)
+            {
+                for (int i=0;i<size();i++)
+                    formatObject(buf,item(i));
+                return buf.toString();
+            }
+        }
     }
     
 }
+
