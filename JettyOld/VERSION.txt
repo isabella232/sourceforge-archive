@@ -1,3 +1,4 @@
+  + Force locale of date formats to US.
   + Fixed expires bug in Cookies
   + Added configuration option to turn off Keep-Alive in HTTP/1.0
   + Allow configured servlets to be auto reloaded.

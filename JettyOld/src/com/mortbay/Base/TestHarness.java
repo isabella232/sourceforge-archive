@@ -31,6 +31,23 @@ public class TestHarness
             t.check(false,e.toString());
             
         }
+
+	dc=new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'",Locale.US);
+        try
+        {
+            for (int i=0;i<25;i++)
+            {
+                Thread.sleep(100);
+                System.err.println(dc.format(System.currentTimeMillis()));
+            }
+            t.check(true,"Very poor test harness");
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
+            
+        }
     }
 
     static void testTest()
@@ -192,6 +209,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
+            Code.warning(e);
             Test t=new Test(e.toString());
             t.check(false,e.toString());
         }

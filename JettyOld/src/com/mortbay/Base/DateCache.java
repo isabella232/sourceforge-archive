@@ -44,7 +44,7 @@ public final class DateCache
     public DateCache()
     {
         this("EEE MMM dd HH:mm:ss zzz yyyy");
-        getFormat().setTimeZone(TimeZone.getDefault());
+        minuteFormat.setTimeZone(TimeZone.getDefault());
     }
     
     /* ------------------------------------------------------------ */
@@ -59,13 +59,13 @@ public final class DateCache
     /* ------------------------------------------------------------ */
     public DateCache(String format,Locale l)
     {
-        this.format=new SimpleDateFormat(mFormat(format),l);
+        this.minuteFormat=new SimpleDateFormat(mFormat(format),l);
     }
     
     /* ------------------------------------------------------------ */
     public DateCache(String format,DateFormatSymbols s)
     {
-        this.format=new SimpleDateFormat(mFormat(format),s);
+        this.minuteFormat=new SimpleDateFormat(mFormat(format),s);
     }
 
     /* ------------------------------------------------------------ */
@@ -140,6 +140,17 @@ public final class DateCache
         lastResult = format.format(d);
                 
         return lastResult;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the timezone
+     * @param tz TimeZone
+     */
+    public void setTimeZone(TimeZone tz)
+    {
+        minuteFormat.setTimeZone(tz);
+	if (format!=null)
+	    format.setTimeZone(tz);
     }
 }       
 
