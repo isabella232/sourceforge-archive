@@ -401,7 +401,7 @@
 
 
   <!-- ==================================================================== -->
-  <target name="tests" depends="test"/>
+  <target name="tests" depends="javadoc,test"/>
   <target name="test" 
           depends="webapps"
           description="Build and run the test harnesses">
@@ -460,6 +460,7 @@
     </java>
   </target>
 
+
   <!-- ==================================================================== -->
   <target name="watchdog" depends="jars"
    description="Run the watchdog configuration">
@@ -480,7 +481,7 @@
 
   <!-- ==================================================================== -->
   <target name="dist" 
-          depends="jars,webapps,extra,test,javadoc,tidy" 
+          depends="jars,webapps,extra,javadoc,test,tidy" 
           description="Build the distribution archives">
     <mkdir dir="${dist}"/>
     
@@ -561,9 +562,17 @@
       </tarfileset>
     </tar>
 
+    <zip destfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-all.zip">
+      <zipfileset 
+       dir="${basedir}"
+       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
+        <exclude name="dist/**"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/logs/*.log"/>
+        <exclude name="testdocs/**"/>
+      </zipfileset>
+    </zip>
 
   </target>
 
-
 </project>
-
