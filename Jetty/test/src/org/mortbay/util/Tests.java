@@ -181,37 +181,55 @@ public class Tests extends junit.framework.TestCase
                                   String method, int depth,
                                   String thread, String file)
     {
-        checkContains(desc+": method", f._stack,  method);
-        assertEquals( desc+": depth",  depth,     f._depth);
-        assertEquals( desc+": thread", thread,    f._thread);
-        checkContains(desc+": file",   f._file,   file);
+        checkContains(desc+": method", f.getStack(),  method);
+        assertEquals( desc+": depth",  depth,     f.getDepth());
+        assertEquals( desc+": thread", thread,    f.getThread());
+        checkContains(desc+": file",   f.getFile(),   file);
     }
     
     /* ------------------------------------------------------------ */
     public void testFrame()
     {
+        callFrame();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void callFrame()
+    {
         Frame f = new Frame();
-        int depth = f._depth;
+        int depth = f.getDepth();
         testFrameChecker(f, "method",
-                         "org.mortbay.util.Tests.testFrame",
+                         "org.mortbay.util.Tests.callFrame",
                          depth, "main", "Tests.java");
+
         f = f.getParent();
         testFrameChecker(f, "getParent",
                          "org.mortbay.util.Tests.testFrame",
                          depth-1, "main", "Tests.java");
-        f = f.getParent();
-        assertEquals("getParent() off top of stack", f, null);
+
+        f = new Frame(0);
+        testFrameChecker(f, "new Frame(0)",
+                         "org.mortbay.util.Tests.callFrame",
+                         depth, "main", "Tests.java");
+
         f = new Frame(1);
         testFrameChecker(f, "new Frame(1)",
                          "org.mortbay.util.Tests.testFrame",
-                         depth-1, "testFrame", "Tests.java");
+                         depth-1, "main", "Tests.java");
+
+        f = new Frame(2);
+        testFrameChecker(f, "new Frame(2)",
+                         "java.lang.reflect.Method.invoke",
+                         depth-2, "main", "UnknownFile");
+
         f = new Frame(1, true);
         testFrameChecker(f, "partial",
-                         "unknownMethod", 0, "unknownThread", "UnknownFile");
+                         "callFrame", 0, "unknownThread", "UnknownFile");
+
         f.complete();
-        testFrameChecker(f, "new Frame(1)",
+        testFrameChecker(f, "complete",
                          "org.mortbay.util.Tests.testFrame",
-                         depth-1, "testFrame", "Tests.java");
+                         depth-1, "main", "Tests.java");
     }
 
 

@@ -113,6 +113,9 @@ the Ant optional tasks from:
 
   <!-- ==================================================================== -->
   <target name="junit" depends="prepare,check.junit.task,check.junit,classes">
+    <echo>
+Test results in ${test.results}
+    </echo>
     <delete file="${test.results}/*" quiet="true" />
     <junit fork="no" printsummary="yes" haltonerror="yes" haltonfailure="yes" >
       <formatter type="plain" usefile="true" />                  
@@ -125,8 +128,7 @@ the Ant optional tasks from:
         <fileset dir="${test.src}">
           <include name="**/Tests.java" />
         </fileset>
-      </batchtest>
-      
+      </batchtest>   
     </junit>
   </target>
 

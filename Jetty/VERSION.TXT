@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Made Frame members private and fixed test harness
  + cookies with maxAge==0 expire on 1 jan 1970
  + setCookie always has equals
 

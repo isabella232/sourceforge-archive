@@ -26,17 +26,17 @@ public class Frame
     
     /*-------------------------------------------------------------------*/
     /** The full stack of where the Frame was created. */
-    public String _stack;
+    private String _stack;
     /** The Method (including the "(file.java:99)") the Frame was created in */
-    public String _method= "unknownMethod";
+    private String _method= "unknownMethod";
     /** The stack depth where the Frame was created (main is 1) */
-    public int _depth=0;
+    private int _depth=0;
     /** Name of the Thread the Frame was created in */
-    public String _thread= "unknownThread";
+    private String _thread= "unknownThread";
     /** The file and linenumber of where the Frame was created. */
-    public String _file= "UnknownFile";
+    private String _file= "UnknownFile";
 
-    String _where;
+    private String _where;
     private int _lineStart=0;
     private int _lineEnd;
     /*-------------------------------------------------------------------*/
@@ -95,18 +95,17 @@ public class Frame
     
     /* ------------------------------------------------------------ */
     /** Internal only Constructor. */
-    protected Frame(String stack, int ignoreFrames, boolean partial)
+    Frame(String stack, int ignoreFrames, boolean partial)
     {
         _stack = stack;
         internalInit(ignoreFrames, partial);
     }
     
     /* ------------------------------------------------------------ */
-    protected void internalInit(int ignoreFrames, boolean partial)
-    {   
+    void internalInit(int ignoreFrames, boolean partial)
+    {
         // Extract stack components, after we look for the Frame constructor
  	// itself and pull that off the stack!
-
         
         _lineStart = 0;
  	_lineStart = _stack.indexOf("Frame.<init>(",_lineStart);
@@ -196,9 +195,39 @@ public class Frame
     
     
     /*-------------------------------------------------------------------*/
-    public String file()
+    public String getStack()
+    {
+        return _stack;
+    }
+    
+    /*-------------------------------------------------------------------*/
+    public String getMethod()
+    {
+        return _method;
+    }
+    
+    /*-------------------------------------------------------------------*/
+    public int getDepth()
+    {
+        return _depth;
+    }
+    
+    /*-------------------------------------------------------------------*/
+    public String getThread()
+    {
+        return _thread;
+    }
+    
+    /*-------------------------------------------------------------------*/
+    public String getFile()
     {
         return _file;
+    }
+    
+    /*-------------------------------------------------------------------*/
+    public String getWhere()
+    {
+        return _where;
     }
     
     /*-------------------------------------------------------------------*/

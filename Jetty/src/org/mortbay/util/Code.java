@@ -963,8 +963,8 @@ public class Code
                 int i = _debugPatterns.size();
                 for (;--i>=0;)
                 {
-                    if(frame._where.indexOf((String)_debugPatterns
-                                            .elementAt(i))>=0)
+                    if(frame.getWhere().indexOf((String)_debugPatterns
+                                                .elementAt(i))>=0)
                         return true;
                 }
             }

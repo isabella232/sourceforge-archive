@@ -478,7 +478,7 @@ public class OutputStreamLogSink
             // Log the stack depth.
             if (_logStackSize && frame != null)
             {
-                _buffer.write(((frame._depth>9)?"":"0")+frame._depth+"> ");
+                _buffer.write(((frame.getDepth()>9)?"":"0")+frame.getDepth()+"> ");
             }
             
             // Determine the indent string for the message and append it
@@ -514,7 +514,7 @@ public class OutputStreamLogSink
             if (_logStackTrace && frame != null)
             {
                 _buffer.write(nl);
-                _buffer.write(frame._stack);
+                _buffer.write(frame.getStack());
             }
             
             if (_flushOn || _buffer.length()>_bufferSize)
