@@ -1,6 +1,12 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.7 -
+ + Upgraded to JSSE 1.0.3_01 to fix security problem.
+ + Fixed proxy tunnel for non persistent connections.
+ + Relative sendRedirect handles trailing / correctly.
+ + Changed PathMap to conform to / getServletPath handling.
+
 Jetty-4.2.6 - 24 January 2004
  + Improved synchronization on AbstractSessionManager.
  + Allow AJP13 buffers to be resized.

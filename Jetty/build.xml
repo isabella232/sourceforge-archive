@@ -13,7 +13,7 @@
 
   <!-- ==================================================================== -->
   <property name="RELEASE.MAJOR"  value="4.2" />
-  <property name="RELEASE.MAJOR.MINOR"  value="4.2.6" />
+  <property name="RELEASE.MAJOR.MINOR"  value="4.2.7" />
 
   <!-- ==================================================================== -->
   <property name="build.compiler"            value="modern" />
@@ -166,7 +166,8 @@
     <delete file="${jetty1.2.jar}" quiet="true"/>
     <delete file="${jetty1.4.jar}" quiet="true"/>
     <delete file="${mortbay.jmx.jar}" quiet="true"/>
-    <delete file="${servlet.jar}" quiet="true"/>
+    <delete file="${servlet.jar}" quiet="true"/> 
+    <delete file="${start.jar}" quiet="true"/>
     <delete file="${etc}/demo.mlet" quiet="true"/>
     <delete file="${etc}/webdefault.xml" quiet="true"/>
     <delete file="${demo.webapps}/jetty/LICENSE.html" quiet="true"/>

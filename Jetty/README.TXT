@@ -187,11 +187,13 @@ to use is:
     $JETTY_HOME/ext/crimson.jar
 
 
-To use the default SSL you will also need to add the the jar below, 
+To use the default SSL you may also need to add the the jars below, 
 which is a merge of the jsse, jnet and jcert jars from the JSSE package
 (see $JETTY_HOME/demo/webapps/jetty/doc/JsseSSL.html for more details):
 
-    $JETTY_HOME/ext/com.sun.net.ssl.jar
+    $JETTY_HOME/ext/jnet.jar     (not required for JDK 1.4.1)
+    $JETTY_HOME/ext/jcert.jar
+    $JETTY_HOME/ext/jsse.jar
 
 
 To use JMX the classpath must also include:
