@@ -97,7 +97,7 @@
     </Call>
     <Call name="addServlet">
       <Arg>Session</Arg>
-      <Arg>/session</Arg>
+      <Arg>/session/*</Arg>
       <Arg>org.mortbay.servlet.SessionDump</Arg>
     </Call>
     <Call name="addServlet">

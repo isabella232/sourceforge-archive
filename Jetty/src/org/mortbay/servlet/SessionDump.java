@@ -84,7 +84,8 @@ public class SessionDump extends HttpServlet
         
         page.title("Session Dump Servlet");
         
-        HttpSession session = request.getSession(false);
+        
+        HttpSession session = request.getSession(request.getRequestURI().indexOf("new")>0);
         
         TableForm tf =
             new TableForm(response.encodeURL(request.getRequestURI()));
