@@ -23,11 +23,14 @@ import org.mortbay.io.Buffer;
  */
 public interface HttpContent
 {
-    public Buffer getType();
-    public Buffer getEncoding();
-    public int getLength();
-    public Buffer getContent();
-    public boolean isComplete();
+    public Buffer getContentType();
+    public Buffer getContentEncoding();
+    public int getContentLength();
     public long getLastModified();
-    public String getLastModifiedString();
+    public Buffer getLastModifiedBuffer();
+    public long getExpiry();
+    public Buffer getExpiryBuffer();
+    
+    public Buffer getContent();
+    public void generateContent(HttpBuilder builder);
 }

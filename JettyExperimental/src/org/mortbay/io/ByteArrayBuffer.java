@@ -101,5 +101,19 @@ public class ByteArrayBuffer extends AbstractBuffer
                 Portable.throwIllegalArgument("index>capacity(): " + index + ">" + capacity());
         _bytes[index] = b;
     }
+    
+    
+    public static class CaseInsensitive extends ByteArrayBuffer implements Buffer.CaseInsensitve
+    {
+        public CaseInsensitive(String s)
+        {
+            super(s);
+        }
+
+        public CaseInsensitive(byte[] b, int o, int l, int rw)
+        {
+            super(b,o,l,rw);
+        }
+    }
 
 }

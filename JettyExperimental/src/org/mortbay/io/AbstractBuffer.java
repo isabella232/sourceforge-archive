@@ -22,13 +22,15 @@ package org.mortbay.io;
 public abstract class AbstractBuffer implements Buffer
 {
 
-    protected final static String __IMMUTABLE = "IMMUTABLE", __READONLY = "READONLY",
-            __READWRITE = "READWRITE", __VOLATILE = "VOLATILE";
+    protected final static String 
+    __IMMUTABLE = "IMMUTABLE", 
+    __READONLY = "READONLY",
+    __READWRITE = "READWRITE", 
+    __VOLATILE = "VOLATILE";
 
     protected int _access;
     protected boolean _volatile;
 
-    private boolean _caseSensitive;
     private int _get;
     private int _hash;
     private int _mark;
@@ -64,19 +66,28 @@ public abstract class AbstractBuffer implements Buffer
         return bytes;
     }
 
+    public ByteArrayBuffer duplicate(int access)
+    {
+        Buffer b=this.buffer();
+        if (b instanceof Buffer.CaseInsensitve)
+            return new ByteArrayBuffer.CaseInsensitive(asArray(), 0, length(),access);
+        else
+            return new ByteArrayBuffer(asArray(), 0, length(), access);
+    }
+    
     /*
      * @see org.mortbay.io.Buffer#asNonVolatile()
      */
     public Buffer asNonVolatileBuffer()
     {
         if (!isVolatile()) return this;
-        return new ByteArrayBuffer(asArray(), 0, length(), _access, NON_VOLATILE);
+        return duplicate(_access);
     }
 
     public Buffer asImmutableBuffer()
     {
         if (isImmutable()) return this;
-        return new ByteArrayBuffer(asArray(), 0, length(), IMMUTABLE);
+        return duplicate(IMMUTABLE);
     }
 
     /*
@@ -94,7 +105,9 @@ public abstract class AbstractBuffer implements Buffer
         
         Buffer b=this.buffer();
         if (b.isReadOnly())
-            return new ByteArrayBuffer(asArray(), 0, length(), READWRITE);
+        {
+            return duplicate(READWRITE);
+        }
         return new View(b, markIndex(), getIndex(), putIndex(), _access);
     }
 
@@ -141,6 +154,9 @@ public abstract class AbstractBuffer implements Buffer
         if (obj == null || !(obj instanceof Buffer)) return false;
         Buffer b = (Buffer) obj;
 
+        if (this instanceof Buffer.CaseInsensitve ||  b instanceof Buffer.CaseInsensitve)
+            return equalsIgnoreCase(b);
+        
         // reject different lengths
         if (b.length() != length()) return false;
 
@@ -156,9 +172,30 @@ public abstract class AbstractBuffer implements Buffer
         {
             byte b1 = peek(getIndex() + i);
             byte b2 = b.peek(b.getIndex() + i);
+            if (b1 != b2) return false;
+        }
+        return true;
+    }
+
+    public boolean equalsIgnoreCase(Buffer b)
+    {
+        // reject different lengths
+        if (b.length() != length()) return false;
+
+        // reject AbstractBuffer with different hash value
+        if (_hash != 0 && b instanceof AbstractBuffer)
+        {
+            AbstractBuffer ab = (AbstractBuffer) b;
+            if (ab._hash != 0 && _hash != ab._hash) return false;
+        }
+
+        // Nothing for it but to do the hard grind.
+        for (int i = length(); i-- > 0;)
+        {
+            byte b1 = peek(getIndex() + i);
+            byte b2 = b.peek(b.getIndex() + i);
             if (b1 != b2)
             {
-                if (isCaseSensitive() && b.isCaseSensitive()) return false;
                 if ('a' <= b1 && b1 <= 'z') b1 = (byte) (b1 - 'a' + 'A');
                 if ('a' <= b2 && b2 <= 'z') b2 = (byte) (b2 - 'a' + 'A');
                 if (b1 != b2) return false;
@@ -207,7 +244,7 @@ public abstract class AbstractBuffer implements Buffer
         for (int i = putIndex(); i-- > getIndex();)
         {
             byte b = peek(i);
-            if (!isCaseSensitive() && 'a' >= b && b <= 'z') b = (byte) (b - 'a' + 'A');
+            if ('a' <= b && b <= 'z') b = (byte) (b - 'a' + 'A');
             hash = 31 * hash + b;
         }
         if (hash == 0) hash = -1;
@@ -219,11 +256,6 @@ public abstract class AbstractBuffer implements Buffer
         if (!isImmutable()) return hash();
         if (_hash == 0) _hash = hash();
         return _hash;
-    }
-
-    public boolean isCaseSensitive()
-    {
-        return _caseSensitive;
     }
 
     public boolean isImmutable()
@@ -396,10 +428,6 @@ public abstract class AbstractBuffer implements Buffer
         setMarkIndex(-1);
     }
 
-    public void setCaseSensitive(boolean c)
-    {
-        _caseSensitive = c;
-    }
 
     public void setGetIndex(int getIndex)
     {

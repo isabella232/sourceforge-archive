@@ -96,7 +96,7 @@ public class BufferCache
         return -1;
     }
     
-    public class CachedBuffer extends ByteArrayBuffer
+    public class CachedBuffer extends ByteArrayBuffer.CaseInsensitive
     {
         private int _ordinal;
         public CachedBuffer(String value, int ordinal)
@@ -109,5 +109,14 @@ public class BufferCache
         {
             return _ordinal;
         }
+    }
+    
+    public String toString()
+    {
+        return "CACHE["+
+        	"bufferMap="+_bufferMap+
+        	",stringMap="+_stringMap+
+        	",index="+_index+
+        	"]";
     }
 }

@@ -25,7 +25,7 @@ import junit.framework.TestCase;
  */
 public class BufferCacheTest extends TestCase
 { 
-	final static String [] S ={"S0","S1","S2","S3"};
+	final static String [] S ={"S0","S1","s2","s3"};
 	
 	BufferCache cache;
 	
@@ -63,7 +63,7 @@ public class BufferCacheTest extends TestCase
 	{
 		for (int i=0;i<S.length;i++)
 		{
-			String s = "S0S1S2S3";
+			String s = "S0S1s2s3";
 			ByteArrayBuffer buf=new ByteArrayBuffer(s.getBytes(),i*2,2);
 			BufferCache.CachedBuffer b=cache.get(buf);
 			int index=b==null?-1:b.getOrdinal();
@@ -80,7 +80,7 @@ public class BufferCacheTest extends TestCase
 	{
 		for (int i=0;i<S.length;i++)
 		{
-			String s = "S0S1S2S3";
+			String s = "S0S1s2s3";
 			ByteArrayBuffer buf=new ByteArrayBuffer(s.getBytes(),i*2,2);
 			Buffer b=cache.get(buf);
 			
@@ -96,7 +96,7 @@ public class BufferCacheTest extends TestCase
 	{
 		for (int i=0;i<S.length;i++)
 		{
-			String s = "S0S1S2S3";
+			String s = "S0S1s2s3";
 			ByteArrayBuffer buf=new ByteArrayBuffer(s.getBytes(),i*2,2);
 			Buffer b=cache.lookup(buf);
 			
@@ -111,12 +111,28 @@ public class BufferCacheTest extends TestCase
 		}
 	}
 	
+	public void testInsensitiveLookupBuffer()
+	{
+		for (int i=0;i<S.length;i++)
+		{
+			String s = "s0s1S2S3";
+			ByteArrayBuffer buf=new ByteArrayBuffer(s.getBytes(),i*2,2);
+			Buffer b=cache.lookup(buf);
+			
+			assertTrue("test"+i,S[i].equalsIgnoreCase(b.toString()));
+			if (i>0)
+				assertTrue("test"+i,S[i]==b.toString());
+			else
+                assertTrue("test"+i,S[i]!=b.toString());
+		}
+	}
+	
 
 	public void testToString()
 	{
 		for (int i=0;i<S.length;i++)
 		{
-			String s = "S0S1S2S3";
+			String s = "S0S1s2s3";
 			ByteArrayBuffer buf=new ByteArrayBuffer(s.getBytes(),i*2,2);
 			String b=cache.toString(buf);
 			

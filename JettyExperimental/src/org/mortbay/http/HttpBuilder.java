@@ -21,6 +21,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
+import org.mortbay.io.View;
 
 /**
  * @author gregw
@@ -34,7 +35,10 @@ public class HttpBuilder implements HttpTokens
     public final static int STATE_START=0;
     public final static int STATE_HEADER=1;
     public final static int STATE_CONTENT=2;
-    public final static int STATE_END=3;
+    public final static int STATE_FLUSHING=3;
+    public final static int STATE_END=4;
+    
+    public final static boolean LAST=true;
     
     private static byte[] CRLF_LAST_CHUNK={(byte)'\015',(byte)'\012',(byte)'0',(byte)'\015',(byte)'\012',(byte)'\015',(byte)'\012'};
     private static byte[] LAST_CHUNK={(byte)'0',(byte)'\015',(byte)'\012',(byte)'\015',(byte)'\012'};
@@ -67,9 +71,15 @@ public class HttpBuilder implements HttpTokens
         }
     }
 
-    private Buffer _buffer;
     private EndPoint _endp;
+    
     private int _bypass;
+    private Buffer _buffer;
+    private Buffer _direct;
+    private Buffer _content;
+    private View _view;
+    
+    
     private int _state=STATE_START;
     private int _version=0;
     private int _status=0;
@@ -80,6 +90,10 @@ public class HttpBuilder implements HttpTokens
     private boolean _contentLengthSet =false;
     private boolean _transferEncodingSet=false;
     private boolean _head=false;
+    private boolean _last=false;
+    private boolean _lastChunk=false;
+    private boolean _needCRLF=false;
+    
     
     /* ------------------------------------------------------------------------------- */
     /** Constructor. 
@@ -88,7 +102,7 @@ public class HttpBuilder implements HttpTokens
     {
         this._buffer=buffer;
         this._endp=io;
-        _bypass=2; // TODO configure  
+        _bypass=1024; // TODO configure  
     }
     
     public void reset()
@@ -103,6 +117,11 @@ public class HttpBuilder implements HttpTokens
         _contentLengthSet =false;
         _transferEncodingSet=false;
         _head=false;
+        if (_view!=null)
+            _view.clear();
+        _content=null;
+        _last=false;
+        _lastChunk=false;
     }
     
     public int getState()
@@ -144,6 +163,7 @@ public class HttpBuilder implements HttpTokens
     {
         return _head;
     }
+    
     /**
      * @param head The head to set.
      */
@@ -229,7 +249,7 @@ public class HttpBuilder implements HttpTokens
     }
     
     
-    public void header(Buffer name,Buffer value)
+    public void addHeader(Buffer name,Buffer value)
     {
         if (_state==STATE_START)
             Portable.throwIllegalState("STATE==START");
@@ -309,11 +329,9 @@ public class HttpBuilder implements HttpTokens
             if (_buffer.put(CRLF)<2)
                 Portable.throwIllegalState("Header>Buffer.capacity()");
         }
-        
-        
     }
     
-    public void header(Buffer name,int value)
+    public void addHeader(Buffer name,int value)
     {
         if (_state==STATE_START)
             Portable.throwIllegalState("STATE==START");
@@ -337,8 +355,10 @@ public class HttpBuilder implements HttpTokens
         }
     }
     
-    public int content(Buffer content,boolean last) throws IOException
+    public void addContent(Buffer content, boolean last) throws IOException
     {
+        _last=_last || last;
+        
         if (_state==STATE_HEADER)
         {
             if (last && (_contentLength==UNKNOWN_CONTENT || _contentLength==EOF_CONTENT || _contentLength==CHUNKED_CONTENT))
@@ -351,88 +371,21 @@ public class HttpBuilder implements HttpTokens
         if (_state!=STATE_CONTENT)
             Portable.throwIllegalState("STATE=="+_state);
         
-        if (_head)
+        if (_content!=null || _direct!=null)
         {
-            if (_endp!=null && _buffer.length()>0)	
-                _endp.flush(_buffer);
-            _contentWritten+=content.length();
-            return content.length();
+            flushBuffers();
+            if (_content!=null || _direct!=null)
+                Portable.throwIllegalState("FULL");
         }
         
-        int len=0;
-        switch(_contentLength)
-        {
-            case CHUNKED_CONTENT:
-                int space=_buffer.space();
-                if (content.length()+24<space)
-                {
-                    len=content.length();
-                    BufferUtil.putHexInt(_buffer, len);
-                    _buffer.put(CRLF);
-                    _buffer.put(content);
-                    _buffer.put(last?CRLF_LAST_CHUNK:CRLF);
-                }
-                else if (space>24)
-                {
-                    len = space-24;
-                    BufferUtil.putHexInt(_buffer, len);
-                    _buffer.put(CRLF);
-                    
-                    int pi=content.putIndex();
-                    content.setPutIndex(content.getIndex()+len);
-                    _buffer.put(content);
-                    content.setPutIndex(pi);
-                    _buffer.put(last?CRLF_LAST_CHUNK:CRLF);
-                }
-                break;
-                
-            case EOF_CONTENT:	
-            default: // CONTENT LENGTH CONTENT
-                
-                // Can we bypass the buffer?
-                if (_endp!=null && _bypass>0 && content.length()>_bypass)
-                {
-                    if (_buffer.length()>0)
-                        len=_endp.flush(_buffer,content,null);
-                    else
-                        len=_endp.flush(content);
-                }
-                else
-                    len=_buffer.put(content);
-            	break;
-        }
-
-        _contentWritten+=len;
+        _content=content;
         
-        // Handle the last buffer
-        if (last && len==_buffer.length())
-        {
-            if (_contentLength>0 && _contentWritten<_contentLength)
-            {
-                // TODO ???
-                _close=true;
-            }
-            _state=STATE_END;
-
-            if (_endp!=null)
-            {
-                if (_buffer.length()>0)	
-                    _endp.flush(_buffer);
-                
-                if (!isPersistent())
-                    _endp.close();
-            }
-        }
-        else
-        {
-            // TODO - need to handle when buffer is too small etc. not flush every time etc.
-            if (_buffer.length()>0 && _endp!=null && content.length()>=_buffer.space())	
-                _endp.flush(_buffer);
-        }
-        
-        return len;
+        prepareContent();
+        if (_direct!=null || _buffer!=null && _buffer.space()<_buffer.capacity()/8) // TODO configure flush levels
+            flushBuffers();
     }
     
+
     public void complete()
     	throws IOException
     {
@@ -446,46 +399,177 @@ public class HttpBuilder implements HttpTokens
             completeHeader();
         }
         
-        if (_state!=STATE_CONTENT)
-            Portable.throwIllegalState("STATE=="+_state);
-
-        if (_contentLength>0)
-        {
-            while(_contentWritten<_contentLength)
-            {
-                _buffer.put(SPACE);
-                _contentWritten++;
-            }
-        }
+        _last=true;
         
-        switch(_contentLength)
-        {
-            case NO_CONTENT:	
-                break;
-                
-            case CHUNKED_CONTENT:
-                _buffer.put(LAST_CHUNK);
-                break;
-                
-            case EOF_CONTENT:	
-                break;
-                
-            default:
-            	break;
-        }
+        if (_contentLength>0 && _contentWritten<_contentLength)
+           _close=true;
         
-        _state=STATE_END;
+        _state=STATE_FLUSHING;
         
         if (_endp!=null)
         {
-            if (_buffer.length()>0)	
-                _endp.flush(_buffer);
+            if (_content==null)
+            {
+                if (_buffer.length()>0)	
+                    _endp.flush(_buffer);
             
-            if (!isPersistent())
-                _endp.close();
+                if (_buffer.length()==0)
+                {
+                    if (!isPersistent())
+                        _endp.close();
+                }
+            }
         }
+        
+        flushBuffers();
     }
+    
+    private void prepareContent()
+    {
+        if (_content==null)
+            return;
+        
+        int len=0;   
+        if (_head)
+        {
+            len=_content.length();
+            _content.clear();
+        }
+        else
+        {
+            if (_needCRLF)
+                _buffer.put(CRLF);
+            _needCRLF=false;
+            
+            switch(_contentLength)
+            {
+                case CHUNKED_CONTENT:
+                    int space=_buffer.space();
+                    
+                    if (_endp!=null && _content.length()>_bypass && _bypass>0 && space>12)
+                    {
+                        // Write chunk to header to buffer, but make chunk itself direct
+                        len=_content.length();
+                        BufferUtil.putHexInt(_buffer, len);
+                        _buffer.put(CRLF);
+                        _direct=_content;
+                        _needCRLF=true;
+                    }
+                    else if (_content.length()+24<space)
+                    {
+                        // put whole content into buffer
+                        // TODO perhaps merge with previous chunk in the buffer?
+                        len=_content.length();
+                        BufferUtil.putHexInt(_buffer, len);
+                        _buffer.put(CRLF);
+                        _buffer.put(_content);
+                        _buffer.put(_last?CRLF_LAST_CHUNK:CRLF);
+                        _lastChunk=true;
+                    }
+                    else if (space>24)
+                    {
+                        // put partial content into buffer
+                        len = space-24;
+                        if (len>0)
+                        {
+                            BufferUtil.putHexInt(_buffer, len);
+                            _buffer.put(CRLF);
+                            
+                            int pi=_content.putIndex();
+                            _content.setPutIndex(_content.getIndex()+len);
+                            _buffer.put(_content);
+                            _content.setPutIndex(pi);
+                            _buffer.put(_last?CRLF_LAST_CHUNK:CRLF);
+                            _lastChunk=true;
+                        }
+                    }
+                    break;
+                    
+                case EOF_CONTENT:	
+                default: // CONTENT LENGTH CONTENT
+                    
+                    // Should we copy content to the buffer?
+                    if (_endp!=null && _bypass>0 && _content.length()>_bypass)
+                    {
+                        // Make content a direct buffer
+                        _direct=_content;
+                        len=_content.length();
+                    }
+                    else
+                    {
+                        // Copy content to buffer;
+                        len=_buffer.put(_content);
+                    }
+                break;
+            }
+        }
 
+        _contentWritten+=len;
+        if (_content.length()==0)
+            _content=null;
+    }
+    
+    
+    public void flushBuffers()
+    	throws IOException
+    {
+        if (_endp==null)
+            return;
+        
+        // Try to fill buffer if need be
+        if (_direct==null && _content!=null && _buffer!=null && _buffer.space()>_buffer.capacity()/8)
+        {
+            _buffer.compact();
+            prepareContent();
+        }
+        
+        // Keep flushing while there is something to flush (except break below)
+        while((_buffer!=null&&_buffer.length()>0)||_direct!=null||_content!=null)
+        {
+            int len=-1;
+        
+            if (_buffer!=null && _buffer.length()>0)
+            {
+                if (_direct!=null && _direct.length()>0)
+                {	
+                    len=_endp.flush(_buffer,_direct,null);
+                }
+                else
+                {
+                    len=_endp.flush(_buffer);
+                }
+            }
+            else if (_direct!=null && _direct.length()>0)
+            {
+                len=_endp.flush(_direct);
+            }
+            else
+            {
+                _direct=null;
+                prepareContent();
+                continue;
+            }
+        
+            if (_direct!=null && _direct.length()==0)
+                _direct=null;
+            
+            if (_last && _contentLength==CHUNKED_CONTENT &&
+                !_lastChunk && _direct==null && _content==null &&
+                _buffer.space()>12)
+            {
+                _buffer.put(_needCRLF?CRLF_LAST_CHUNK:LAST_CHUNK);
+                _lastChunk=true;
+            }
+        
+            // If we failed to flush anything, so break
+            if (len==0)
+                break;
+        }
+        
+        if (_state==STATE_FLUSHING && (_buffer==null||_buffer.length()==0) && _direct==null && _content==null)
+            _state=STATE_END;
+    }
+    
     private void completeHeader()
     {
         // From RFC 2616 4.4:
@@ -538,4 +622,44 @@ public class HttpBuilder implements HttpTokens
         _state=STATE_CONTENT;
         
     }
+    
+
+    
+    public void setContent(HttpContent content) throws IOException
+    {
+        Buffer v = content.getContentType();
+        if (v!=null)
+            addHeader(HttpHeaders.CONTENT_TYPE_BUFFER,v);
+        
+        v=content.getContentEncoding();
+        if (v!=null)
+            addHeader(HttpHeaders.CONTENT_ENCODING_BUFFER,v);
+        
+        int l = content.getContentLength();
+        if (l>=0)
+            addHeader(HttpHeaders.CONTENT_LENGTH_BUFFER,l);
+        
+        v=content.getLastModifiedBuffer();
+        if (v!=null)
+            addHeader(HttpHeaders.LAST_MODIFIED_BUFFER,v);
+        
+        v=content.getExpiryBuffer();
+        if (v!=null)
+            addHeader(HttpHeaders.EXPIRES_BUFFER,v);
+        
+        v=content.getContent();
+        if (v!=null)
+        {
+            if (_view==null)
+                _view=new View(v);
+            else
+                _view.update(v);
+            addContent(_view,LAST);
+            complete();
+        }
+        else
+            // TODO WRONG!!!!
+            content.generateContent(this);
+    }
+    
 }

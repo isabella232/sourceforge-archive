@@ -18,6 +18,7 @@ package org.mortbay.io;
 import junit.framework.TestCase;
 
 import org.mortbay.io.nio.NIOBuffer;
+import org.mortbay.util.StringUtil;
 
 /**
  * @author gregw
@@ -62,7 +63,6 @@ public class BufferTest extends TestCase
     {
         for (int i=0;i<buffer.length;i++)
         {
-            System.err.println(i);
             String t="t"+i;
             Buffer b = buffer[i];
             
@@ -97,10 +97,108 @@ public class BufferTest extends TestCase
             assertEquals(t,3,bg[2]);
             
             
-            
-            
-            
         }
+    }
+    
+    public void testHash()
+    	throws Exception
+    {
+        Buffer[] b=
+        {
+                new ByteArrayBuffer("Test1234 "),
+                new ByteArrayBuffer("tEST1234 "),
+                new NIOBuffer(4096,true),
+        };
+        b[2].put("TeSt1234 ".getBytes(StringUtil.__UTF8));
+        
+        for (int i=0;i<b.length;i++)
+            assertEquals("t"+i,b[0].hashCode(),b[i].hashCode()); 
+    }
+    
+    public void testInsensitive()
+    {
+        Buffer cs0 = new ByteArrayBuffer("Test 1234");
+        Buffer cs1 = new ByteArrayBuffer("Test 1234");
+        Buffer cs2 = new ByteArrayBuffer("tEst 1234");
+        Buffer cs3 = new ByteArrayBuffer("Other    ");
+        Buffer ci0 = new ByteArrayBuffer.CaseInsensitive("Test 1234");
+        Buffer ci1 = new ByteArrayBuffer.CaseInsensitive("Test 1234");
+        Buffer ci2 = new ByteArrayBuffer.CaseInsensitive("tEst 1234");
+        Buffer ci3 = new ByteArrayBuffer.CaseInsensitive("oTher    ");
+
+        assertTrue( cs0.equals(cs0));
+        assertTrue( cs0.equals(cs1));
+        assertTrue(!cs0.equals(cs2));
+        assertTrue(!cs0.equals(cs3));
+        assertTrue( cs0.equals(ci0));
+        assertTrue( cs0.equals(ci1));
+        assertTrue( cs0.equals(ci2));
+        assertTrue(!cs0.equals(ci3));
+        
+        assertTrue( cs1.equals(cs0));
+        assertTrue( cs1.equals(cs1));
+        assertTrue(!cs1.equals(cs2));
+        assertTrue(!cs1.equals(cs3));
+        assertTrue( cs1.equals(ci0));
+        assertTrue( cs1.equals(ci1));
+        assertTrue( cs1.equals(ci2));
+        assertTrue(!cs1.equals(ci3));
+        
+        assertTrue(!cs2.equals(cs0));
+        assertTrue(!cs2.equals(cs1));
+        assertTrue( cs2.equals(cs2));
+        assertTrue(!cs2.equals(cs3));
+        assertTrue( cs2.equals(ci0));
+        assertTrue( cs2.equals(ci1));
+        assertTrue( cs2.equals(ci2));
+        assertTrue(!cs2.equals(ci3));
+
+        assertTrue(!cs3.equals(cs0));
+        assertTrue(!cs3.equals(cs1));
+        assertTrue(!cs3.equals(cs2));
+        assertTrue( cs3.equals(cs3));
+        assertTrue(!cs3.equals(ci0));
+        assertTrue(!cs3.equals(ci1));
+        assertTrue(!cs3.equals(ci2));
+        assertTrue( cs3.equals(ci3));
+        
+        
+        assertTrue( ci0.equals(cs0));
+        assertTrue( ci0.equals(cs1));
+        assertTrue( ci0.equals(cs2));
+        assertTrue(!ci0.equals(cs3));
+        assertTrue( ci0.equals(ci0));
+        assertTrue( ci0.equals(ci1));
+        assertTrue( ci0.equals(ci2));
+        assertTrue(!ci0.equals(ci3));
+        
+        assertTrue( ci1.equals(cs0));
+        assertTrue( ci1.equals(cs1));
+        assertTrue( ci1.equals(cs2));
+        assertTrue(!ci1.equals(cs3));
+        assertTrue( ci1.equals(ci0));
+        assertTrue( ci1.equals(ci1));
+        assertTrue( ci1.equals(ci2));
+        assertTrue(!ci1.equals(ci3));
+        
+        assertTrue( ci2.equals(cs0));
+        assertTrue( ci2.equals(cs1));
+        assertTrue( ci2.equals(cs2));
+        assertTrue(!ci2.equals(cs3));
+        assertTrue( ci2.equals(ci0));
+        assertTrue( ci2.equals(ci1));
+        assertTrue( ci2.equals(ci2));
+        assertTrue(!ci2.equals(ci3));
+
+        assertTrue(!ci3.equals(cs0));
+        assertTrue(!ci3.equals(cs1));
+        assertTrue(!ci3.equals(cs2));
+        assertTrue( ci3.equals(cs3));
+        assertTrue(!ci3.equals(ci0));
+        assertTrue(!ci3.equals(ci1));
+        assertTrue(!ci3.equals(ci2));
+        assertTrue( ci3.equals(ci3));
+
     }
 
 }

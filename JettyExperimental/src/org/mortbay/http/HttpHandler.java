@@ -15,4 +15,8 @@
 
 package org.mortbay.http;
 
+public class HttpHandler
+{
+    
+}
 

@@ -52,7 +52,6 @@ public class HttpConnection extends HttpParser.Handler
     transient boolean _host = false;
     transient int _expect = UNKNOWN;
     transient int _connection = UNKNOWN;
-    transient View _view;
     
     // TODO hack!
     HashMap _cache = new HashMap();
@@ -82,16 +81,10 @@ public class HttpConnection extends HttpParser.Handler
 
             if (!_parser.isState(HttpParser.STATE_END)) _parser.parseAvailable();
 
-            // TODO more here???
-            if (_view!=null && _view.length()>0)
-            {
-                _builder.content(_view, true);
-                if (_view.length()==0)
-                {
-                    _builder.complete();
-                    _view=null;
-                }
-            }
+            // Do we have more writting to do?
+            if (_builder.isState(HttpBuilder.STATE_FLUSHING) || _builder.isState(HttpBuilder.STATE_CONTENT))
+                _builder.flushBuffers();
+            
         }
         finally
         {
@@ -166,7 +159,6 @@ public class HttpConnection extends HttpParser.Handler
                 // TODO comma list of connections !!!
                 _connection = HttpHeaderValues.CACHE.getOrdinal(value);
         }
-
     }
 
     /*
@@ -199,7 +191,7 @@ public class HttpConnection extends HttpParser.Handler
                 {
                     // TODO prebuilt response
                     _builder.buildResponse(_version, 400, null);
-                    _builder.header(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
+                    _builder.addHeader(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
                     _builder.complete();
                     return;
                 }
@@ -215,7 +207,7 @@ public class HttpConnection extends HttpParser.Handler
                     else
                     {
                         _builder.buildResponse(_version, 417, null);
-                        _builder.header(HttpHeaders.CONNECTION_BUFFER,
+                        _builder.addHeader(HttpHeaders.CONNECTION_BUFFER,
                                 HttpHeaderValues.CLOSE_BUFFER);
                         _builder.complete();
                         return;
@@ -248,10 +240,10 @@ public class HttpConnection extends HttpParser.Handler
             _builder.buildResponse(_version, 200, null);
 
             if (_connection >= 0)
-                    _builder.header(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CACHE
+                    _builder.addHeader(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CACHE
                             .get(_connection));
 
-            _builder.header(HttpHeaders.CONTENT_TYPE_BUFFER, HttpHeaderValues.TEXT_HTML_BUFFER);
+            _builder.addHeader(HttpHeaders.CONTENT_TYPE_BUFFER, HttpHeaderValues.TEXT_HTML_BUFFER);
 
             
             Buffer content = (Buffer) _cache.get(_url);
@@ -270,15 +262,8 @@ public class HttpConnection extends HttpParser.Handler
             if (content==null)
                 content = new ByteArrayBuffer("<h1>Hello World: "+_url+"</h1>\n" + "" + "");
             
-            _view = new View(content);
-            _builder.content(_view, true);
-
-        }
-        
-        if (_view.length()==0)
-        {
+            _builder.addContent(new View(content), true);
             _builder.complete();
-            _view=null;
         }
 
     }

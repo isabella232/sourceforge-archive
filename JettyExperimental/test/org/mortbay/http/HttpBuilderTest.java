@@ -117,7 +117,7 @@ public class HttpBuilderTest extends TestCase
             {
                 if (values[i]==null)	
                     continue;
-                hb.header(new ByteArrayBuffer(headers[i]),new ByteArrayBuffer(values[i]));
+                hb.addHeader(new ByteArrayBuffer(headers[i]),new ByteArrayBuffer(values[i]));
             }
             
             
@@ -130,11 +130,11 @@ public class HttpBuilderTest extends TestCase
                 {
                     view.setPutIndex(i*inc);
                     view.setGetIndex((i-1)*inc);
-                    hb.content(view, false);
+                    hb.addContent(view, false);
                 }
                 view.setPutIndex(buf.putIndex());
                 view.setGetIndex((chunks-1)*inc);
-                hb.content(view, true);
+                hb.addContent(view, true);
             }
             else
                 hb.complete();

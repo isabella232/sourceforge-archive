@@ -144,9 +144,9 @@ public interface Buffer extends Cloneable
     
     /**
      * 
-     * @return a <code>boolean</code> value true if comparisons on this buffer are case sensitive.
+     * @return a <code>boolean</code> value true if case sensitive comparison on this buffer
      */
-    boolean isCaseSensitive();
+    boolean equalsIgnoreCase(Buffer buffer);
 
 
     /**
@@ -340,5 +340,11 @@ public interface Buffer extends Cloneable
      */
     String toDetailString();
     
+    /* 
+     * Buffers implementing this interface should be compared with case insensitive equals
+     *
+     */
+    public interface CaseInsensitve
+    {}
     
 }
