@@ -264,7 +264,6 @@ public class CGI extends HttpServlet
             fields.read(li);
 
             String ContentStatus = "Status";
-            String location = fields.get(HttpFields.__ContentLocation);
             String redirect = fields.get(HttpFields.__Location);
             String status   = fields.get(ContentStatus);
 

@@ -39,7 +39,6 @@ public class TestCase
 {
     /*-------------------------------------------------------------------*/
     private static Vector tests = new Vector();
-    private static final String pass = "pass";
     private static final String fail = "FAIL";
     private static final char[] spaces = "                                                                                 ".toCharArray();
     
