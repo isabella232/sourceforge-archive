@@ -58,7 +58,7 @@ public class MarshallingInterceptor
     super(session, state);
   }
 
-  protected String
+  protected byte[]
     marshal(Object value)
     throws IOException
   {
@@ -69,17 +69,17 @@ public class MarshallingInterceptor
     ObjectOutputStream    oos =new ObjectOutputStream(baos);
     oos.writeObject(value);
     oos.flush();
-    return baos.toString();
+    return baos.toByteArray();
   }
 
   protected Object
-    demarshal(String buffer)
+    demarshal(byte[] buffer)
     throws IOException,ClassNotFoundException
   {
     if (buffer==null)
       return buffer;
 
-    ByteArrayInputStream bais=new ByteArrayInputStream(buffer.getBytes());
+    ByteArrayInputStream bais=new ByteArrayInputStream(buffer);
     ObjectInputStream    ois =new ObjectInputStream(bais);
     return ois.readObject();
   }
@@ -90,7 +90,7 @@ public class MarshallingInterceptor
   {
     try
     {
-      Object tmp=demarshal((String)super.getAttribute(name));
+      Object tmp=demarshal((byte[])super.getAttribute(name));
 //       if (tmp!=null && tmp instanceof HttpSessionActivationListener)
 // 	((HttpSessionActivationListener)tmp).sessionDidActivate(new HttpSessionEvent(_session));
 
@@ -116,7 +116,7 @@ public class MarshallingInterceptor
 // 	  ((HttpSessionActivationListener)tmp).sessionWillPassivate(new HttpSessionEvent(_session));
  	tmp=marshal(tmp);
       }
-      return demarshal((String)super.setAttribute(name, tmp));
+      return demarshal((byte[])super.setAttribute(name, tmp));
     }
     catch (Exception e)
     {
@@ -133,7 +133,7 @@ public class MarshallingInterceptor
     try
     {
       // should this be activated - probably
-      return demarshal((String)super.removeAttribute(name));
+      return demarshal((byte[])super.removeAttribute(name));
     }
     catch (Exception e)
     {
