@@ -108,7 +108,7 @@ public class ContextLoader extends URLClassLoader
                         // structure, but this will do for now.
                         // XXX - Need to do better with the temp dir
                         InputStream in =resource.getInputStream();
-                        File file=File.createTempFile("Jetty",".zip");
+                        File file=File.createTempFile("Jetty-",".jar");
                         file.deleteOnExit();
                         Code.debug("Extract ",resource," to ",file);
                         FileOutputStream out = new FileOutputStream(file);

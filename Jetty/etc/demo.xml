@@ -85,6 +85,7 @@ $Id$
     <Arg>/jetty/*</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/jetty.war</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
+    <Arg type="boolean">false</Arg> <!-- dont expand war -->
   </Call>
 
   <Call name="addContext">

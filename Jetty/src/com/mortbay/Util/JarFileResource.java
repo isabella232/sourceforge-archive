@@ -15,9 +15,8 @@ import java.util.Enumeration;
 import java.util.ArrayList;
 
 /* ------------------------------------------------------------ */
-class JarFileResource extends Resource
+class JarFileResource extends JarResource
 {
-    JarURLConnection _jarConnection;
     JarFile _jarFile;
     File _file;
     String[] _list;
@@ -29,41 +28,47 @@ class JarFileResource extends Resource
     /* -------------------------------------------------------- */
     JarFileResource(URL url)
     {
-        super(url,null);
+        super(url);
     }
 
     /* ------------------------------------------------------------ */
     protected boolean checkConnection()
     {
-        boolean check=super.checkConnection();
         try{
-            if (_jarConnection!=_connection)
+            super.checkConnection();
+        }
+        finally
+        {
+            if (_jarConnection==null)
             {
-                int sep = _urlString.indexOf("!/");
-                _jarUrl=_urlString.substring(0,sep+2);
-                _path=_urlString.substring(sep+2);
-                if (_path.length()==0)
-                    _path=null;
-                
                 _entry=null;
                 _file=null;
                 _jarFile=null;
-                _jarConnection=(JarURLConnection)_connection;
-                _jarFile=_jarConnection.getJarFile();
-                _file=new File(_jarFile.getName());
             }
         }
-        catch(IOException e)
-        {
-            Code.ignore(e);
-            _entry=null;
-            _file=null;
-            _jarFile=null;
-            _jarConnection=null;    
-        }
-        
         return _jarFile!=null;
     }
+
+
+    /* ------------------------------------------------------------ */
+    protected void newConnection()
+        throws IOException
+    {
+        super.newConnection();
+        
+        _entry=null;
+        _file=null;
+        _jarFile=null;
+        
+        int sep = _urlString.indexOf("!/");
+        _jarUrl=_urlString.substring(0,sep+2);
+        _path=_urlString.substring(sep+2);
+        if (_path.length()==0)
+            _path=null;        
+        _jarFile=_jarConnection.getJarFile();
+        _file=new File(_jarFile.getName());
+    }
+    
     
     /* ------------------------------------------------------------ */
     /**

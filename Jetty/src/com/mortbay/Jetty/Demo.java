@@ -61,9 +61,11 @@ public class Demo
             }
             
             // Configure handlers
-            server.addWebApplication(null,"/jetty/*",
+            server.addWebApplication(null,
+                                     "/jetty/*",
                                      "webapps/jetty.war",
-                                     "etc/webdefault.xml");
+                                     "etc/webdefault.xml",
+                                     false);
             
             context=server.getContext(null,"/demo/*");
             context.setResourceBase("docroot/");

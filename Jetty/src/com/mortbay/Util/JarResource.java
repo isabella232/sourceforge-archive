@@ -4,24 +4,27 @@
 // ---------------------------------------------------------------------------
 package com.mortbay.Util;
 
+import java.io.InputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.File;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.JarURLConnection;
-import java.util.jar.Manifest;
+import java.util.jar.JarInputStream;
+import java.util.jar.JarEntry;
+import java.util.Enumeration;
 
 
 /* ------------------------------------------------------------ */
-class JarResource extends Resource
+public class JarResource extends Resource
 {
-    JarURLConnection _jarConnection;
-    Manifest _manifest;
+    protected JarURLConnection _jarConnection;
     
     /* -------------------------------------------------------- */
     JarResource(URL url)
     {
         super(url,null);
-        Code.warning("Not completely implemented nor tested");
     }
 
     /* ------------------------------------------------------------ */
@@ -30,21 +33,22 @@ class JarResource extends Resource
         boolean check=super.checkConnection();
         try{
             if (_jarConnection!=_connection)
-            {
-                _manifest=null;
-                _jarConnection=(JarURLConnection)_connection;
-                _manifest=_jarConnection.getManifest();
-                
-                System.err.println("JarConnection="+_connection);
-                System.err.println("MANIFEST="+_manifest.getEntries().keySet());
-            }
+                newConnection();
         }
         catch(IOException e)
         {
             Code.ignore(e);
+            _jarConnection=null;
         }
         
-        return _manifest!=null;
+        return _jarConnection!=null;
+    }
+
+    /* ------------------------------------------------------------ */
+    protected void newConnection()
+        throws IOException
+    {
+        _jarConnection=(JarURLConnection)_connection;
     }
     
     /* ------------------------------------------------------------ */
@@ -57,7 +61,49 @@ class JarResource extends Resource
             return checkConnection();
         else
             return super.exists();
+    }    
+
+    /* ------------------------------------------------------------ */
+    public InputStream getInputStream()
+        throws java.io.IOException
+    {
+        if (!_urlString.endsWith("!/"))
+            return super.getInputStream();
+        
+        URL url = new URL(_urlString.substring(4,_urlString.length()-2));
+        return url.openStream();
     }
     
-    
+    /* ------------------------------------------------------------ */
+    public void extract(File directory, boolean deleteOnExit)
+        throws IOException
+    {
+        Code.debug("Extract ",this," to ",directory);
+        JarInputStream jin = new JarInputStream(getInputStream());
+        JarEntry entry=null;
+        while((entry=jin.getNextJarEntry())!=null)
+        {
+            File file=new File(directory,entry.getName());
+            if (entry.isDirectory())
+            {
+                // Make directory
+                if (!file.exists())
+                    file.mkdirs();
+            }
+            else
+            {
+                // make directory (some jars don't list dirs)
+                File dir = new File(file.getParent());
+                if (!dir.exists())
+                    dir.mkdirs();
+
+                // Make file
+                FileOutputStream fout = new FileOutputStream(file);
+                IO.copy(jin,fout);
+                fout.close();
+            }
+            if (deleteOnExit)
+                file.deleteOnExit();
+        }
+    }   
 }

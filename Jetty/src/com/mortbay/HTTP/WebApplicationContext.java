@@ -13,11 +13,14 @@ import com.mortbay.HTTP.Handler.Servlet.Context;
 import com.mortbay.HTTP.Handler.Servlet.ServletHandler;
 import com.mortbay.HTTP.Handler.Servlet.ServletHolder;
 import com.mortbay.Util.Code;
+import com.mortbay.Util.Log;
 import com.mortbay.Util.Resource;
+import com.mortbay.Util.JarResource;
 import com.mortbay.Util.XmlParser;
 import com.mortbay.Util.StringUtil;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.File;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
@@ -64,6 +67,29 @@ public class WebApplicationContext extends HandlerContext
                           String defaults)
         throws IOException
     {
+        this(httpServer,contextPathSpec,webApp,defaults,false);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param httpServer The HttpServer for this context
+     * @param contextPathSpec The context path spec. Which must be of
+     * the form / or /path/*
+     * @param webApp The Web application directory or WAR file.
+     * @param defaults The defaults xml filename or URL which is
+     * loaded before any in the web app. Must respect the web.dtd.
+     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
+     * @param extractWar If true, WAR files are extracted to a
+     * temporary directory.
+     * @exception IOException 
+     */
+    public WebApplicationContext(HttpServer httpServer,
+                                 String contextPathSpec,
+                                 String webApp,
+                                 String defaults,
+                                 boolean extractWar)
+        throws IOException
+    {
         super(httpServer,contextPathSpec);
 
         // Get parser
@@ -84,6 +110,20 @@ public class WebApplicationContext extends HandlerContext
         if (!_webApp.exists()) {
             Code.warning("Web application not found "+_webAppName);
             throw new java.io.FileNotFoundException(_webAppName);
+        }
+
+        // Expand
+        if (extractWar && _webApp instanceof JarResource)
+        {
+            File tempDir=File.createTempFile("Jetty-",".war");
+            if (tempDir.exists())
+                tempDir.delete();
+            tempDir.mkdir();
+            tempDir.deleteOnExit();
+            Log.event("Extract "+_webAppName+" to "+tempDir);
+            ((JarResource)_webApp).extract(tempDir,true);
+            _webApp=Resource.newResource(tempDir.getCanonicalPath());
+            _webAppName+="("+tempDir+")";
         }
 
         // add security handler first
@@ -220,8 +260,7 @@ public class WebApplicationContext extends HandlerContext
                 if ("display-name".equals(name))
                     initDisplayName(node);
                 else if ("description".equals(name))
-                {                   
-                }
+                {}
                 else if ("distributable".equals(name))
                 {
                     Code.warning("Not implemented: "+name);
@@ -559,7 +598,9 @@ public class WebApplicationContext extends HandlerContext
     {
         return _tagLibMap;
     }
-
+    
+    /* ------------------------------------------------------------ */
+    
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -577,5 +618,12 @@ public class WebApplicationContext extends HandlerContext
                 response.sendError(HttpResponse.__403_Forbidden);
             }
         }
-    } 
+
+        public String toString()
+        {
+            return "WebInfProtect";
+        }
+    }
+
+
 }

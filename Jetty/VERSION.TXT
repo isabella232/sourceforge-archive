@@ -1,10 +1,11 @@
 Jetty Versions
 --------------
  
-Jetty-3.0.0.rc9 - 14 Dec 2000
+Jetty-3.0.0 - 15 Dec 2000
  + Improved dtd resolution in XML parser.
  + Fixed taglib parsing
  + Fixed rel path handling in default configurations.
+ + Optional extract war files.
 
 Jetty-3.0.0.rc8 - 13 Dec 2000
  + Optional alias checking added to FileResource.  Turned on by default

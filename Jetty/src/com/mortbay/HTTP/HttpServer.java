@@ -463,7 +463,34 @@ public class HttpServer implements LifeCycle
         return addWebApplication(null,
                                  contextPathSpec,
                                  webApp,
-                                 defaults);
+                                 defaults,
+                                 false);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add Web Application.
+     * @param contextPathSpec The context path spec. Which must be of
+     * the form / or /path/*
+     * @param webApp The Web application directory or WAR file.
+     * @param defaults The defaults xml filename or URL which is
+     * loaded before any in the web app. Must respect the web.dtd.
+     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
+     * @param extractWar If true, WAR files are extracted to a
+     * temporary directory.
+     * @return The WebApplicationContext
+     * @exception IOException 
+     */
+    public WebApplicationContext addWebApplication(String contextPathSpec,
+                                                   String webApp,
+                                                   String defaults,
+                                                   boolean extractWar)
+        throws IOException
+    {
+        return addWebApplication(null,
+                                 contextPathSpec,
+                                 webApp,
+                                 defaults,
+                                 extractWar);
     }
     
     /* ------------------------------------------------------------ */
@@ -475,20 +502,24 @@ public class HttpServer implements LifeCycle
      * @param defaults The defaults xml filename or URL which is
      * loaded before any in the web app. Must respect the web.dtd.
      * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
+     * @param extractWar If true, WAR files are extracted to a
+     * temporary directory.
      * @return The WebApplicationContext
      * @exception IOException 
      */
     public WebApplicationContext addWebApplication(String host,
                                                    String contextPathSpec,
                                                    String webApp,
-                                                   String defaults)
+                                                   String defaults,
+                                                   boolean extractWar)
         throws IOException
     {
         WebApplicationContext appContext =
             new WebApplicationContext(this,
                                       contextPathSpec,
                                       webApp,
-                                      defaults);
+                                      defaults,
+                                      extractWar);
         addContext(host,appContext);
         Log.event("Web Application "+appContext+" added");
         return appContext;

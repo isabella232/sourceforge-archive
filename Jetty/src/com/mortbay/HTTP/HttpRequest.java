@@ -738,6 +738,7 @@ public class HttpRequest extends HttpMessage
                                                            0,
                                                            content_length,
                                                            StringUtil.__ISO_8859_1);
+                            Code.debug("Form content='",contentStr,"'");
                             UrlEncoded.decodeTo(contentStr,_parameters);
                         }
                         catch (IOException e)
