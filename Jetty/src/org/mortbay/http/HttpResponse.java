@@ -176,7 +176,7 @@ public class HttpResponse extends HttpMessage
     
     /* ------------------------------------------------------------ */
     /** Set the HttpContext handling this reponse.
-     * @param _context The HttpContext handling this reponse.
+     * @param context The HttpContext handling this reponse.
      */
     public void setHttpContext(HttpContext context)
     {

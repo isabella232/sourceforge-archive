@@ -524,7 +524,7 @@ public class ResourceHandler extends AbstractHttpHandler
         if (contextPath!=null && !newPath.startsWith(contextPath))
         {
             response.sendError(HttpResponse.__405_Method_Not_Allowed,
-                               "Not in _context");
+                               "Not in context");
             return;
         }
         

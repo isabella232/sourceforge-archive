@@ -31,7 +31,7 @@ import org.mortbay.xml.XmlParser;
  * 
  * The class searches for TLD descriptors found in web.xml, in WEB-INF/*.tld files of the web app
  * or *.tld files withing jars found in WEB-INF/lib of the webapp.   Any listeners defined in these
- * tld's are added to the _context.
+ * tld's are added to the context.
  * 
  * &lt;bile&gt;This is total rubbish special case for JSPs! If there was a general use-case for web app
  * frameworks to register listeners directly, then a generic mechanism could have been added to the servlet

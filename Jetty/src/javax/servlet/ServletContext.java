@@ -34,15 +34,15 @@ import java.util.Set;
  * servlet container, for example, to get the MIME type of a file, dispatch
  * requests, or write to a log file.
  *
- * <p>There is one _context per "web application" per Java Virtual Machine.  (A
+ * <p>There is one context per "web application" per Java Virtual Machine.  (A
  * "web application" is a collection of servlets and content installed under a
  * specific subset of the server's URL namespace such as <code>/catalog</code>
  * and possibly installed via a <code>.war</code> file.)
  *
  * <p>In the case of a web
  * application marked "distributed" in its deployment descriptor, there will
- * be one _context instance for each virtual machine.  In this situation, the
- * _context cannot be used as a location to share global information (because
+ * be one context instance for each virtual machine.  In this situation, the
+ * context cannot be used as a location to share global information (because
  * the information won't be truly global).  Use an external resource like
  * a database instead.
  *
@@ -53,7 +53,7 @@ import java.util.Set;
  * @see Servlet#getServletConfig
  * @see ServletConfig#getServletContext
  *
- * @version $Revision$ $Date$
+ * @version $Rev: 46019 $ $Date$
  */
 public interface ServletContext {
     /**
@@ -61,16 +61,16 @@ public interface ServletContext {
      * corresponds to a specified URL on the server.
      *
      * <p>This method allows servlets to gain
-     * access to the _context for various parts of the server, and as
-     * needed obtain {@link RequestDispatcher} objects from the _context.
+     * access to the context for various parts of the server, and as
+     * needed obtain {@link RequestDispatcher} objects from the context.
      * The given path must be begin with "/", is interpreted relative
-     * to the server's document root and is matched against the _context roots of
+     * to the server's document root and is matched against the context roots of
      * other web applications hosted on this container.
      *
      * <p>In a security conscious environment, the servlet container may
      * return <code>null</code> for a given URL.
      *
-     * @param uripath a <code>String</code> specifying the _context path of
+     * @param uripath a <code>String</code> specifying the context path of
      * another web application in the container.
      * @return the <code>ServletContext</code> object that
      * corresponds to the named URL, or null if either none exists or the
@@ -145,7 +145,7 @@ public interface ServletContext {
     /**
      * Returns a URL to the resource that is mapped to a specified
      * path. The path must begin with a "/" and is interpreted
-     * as relative to the current _context root.
+     * as relative to the current context root.
      *
      * <p>This method allows the servlet container to make a resource
      * available to servlets from any source. Resources
@@ -223,7 +223,7 @@ public interface ServletContext {
      * The resource can be dynamic or static.
      *
      * <p>The pathname must begin with a "/" and is interpreted as relative
-     * to the current _context root.  Use <code>getContext</code> to obtain
+     * to the current context root.  Use <code>getContext</code> to obtain
      * a <code>RequestDispatcher</code> for resources in foreign contexts.
      * This method returns <code>null</code> if the <code>ServletContext</code>
      * cannot return a <code>RequestDispatcher</code>.
@@ -286,7 +286,7 @@ public interface ServletContext {
      * @deprecated As of Java Servlet API 2.0, with no replacement.
      *
      * <p>This method was originally defined to return an <code>Enumeration</code>
-     * of all the servlets known to this servlet _context. In this
+     * of all the servlets known to this servlet context. In this
      * version, this method always returns an empty enumeration and
      * remains only to preserve binary compatibility. This method
      * will be permanently removed in a future version of the Java
@@ -299,7 +299,7 @@ public interface ServletContext {
      *
      * <p>This method was originally defined to return an
      * <code>Enumeration</code>
-     * of all the servlet names known to this _context. In this version,
+     * of all the servlet names known to this context. In this version,
      * this method always returns an empty <code>Enumeration</code> and
      * remains only to preserve binary compatibility. This method will
      * be permanently removed in a future version of the Java Servlet API.
@@ -346,7 +346,7 @@ public interface ServletContext {
      * for a given virtual path. For example, the path "/index.html"
      * returns the absolute file path on the server's filesystem would be
      * served by a request for "http://host/contextPath/index.html",
-     * where contextPath is the _context path of this ServletContext..
+     * where contextPath is the context path of this ServletContext..
      *
      * <p>The real path returned will be in a form
      * appropriate to the computer and operating system on
@@ -383,7 +383,7 @@ public interface ServletContext {
 
     /**
      * Returns a <code>String</code> containing the value of the named
-     * _context-wide initialization parameter, or <code>null</code> if the
+     * context-wide initialization parameter, or <code>null</code> if the
      * parameter does not exist.
      *
      * <p>This method can make available configuration information useful
@@ -402,13 +402,13 @@ public interface ServletContext {
     public String getInitParameter(String name);
 
     /**
-     * Returns the names of the _context's initialization parameters as an
+     * Returns the names of the context's initialization parameters as an
      * <code>Enumeration</code> of <code>String</code> objects, or an
-     * empty <code>Enumeration</code> if the _context has no initialization
+     * empty <code>Enumeration</code> if the context has no initialization
      * parameters.
      *
      * @return an <code>Enumeration</code> of <code>String</code>
-     * objects containing the names of the _context's initialization parameters
+     * objects containing the names of the context's initialization parameters
      *
      * @see ServletConfig#getInitParameter
      */
@@ -446,7 +446,7 @@ public interface ServletContext {
     /**
      * Returns an <code>Enumeration</code> containing the
      * attribute names available
-     * within this servlet _context. Use the
+     * within this servlet context. Use the
      * {@link #getAttribute} method with an attribute name
      * to get the value of an attribute.
      *
@@ -457,7 +457,7 @@ public interface ServletContext {
     public Enumeration getAttributeNames();
 
     /**
-     * Binds an object to a given attribute name in this servlet _context. If
+     * Binds an object to a given attribute name in this servlet context. If
      * the name specified is already used for an attribute, this
      * method will replace the attribute with the new to the new attribute.
      * <p>If listeners are configured on the <code>ServletContext</code> the
@@ -481,7 +481,7 @@ public interface ServletContext {
 
     /**
      * Removes the attribute with the given name from
-     * the servlet _context. After removal, subsequent calls to
+     * the servlet context. After removal, subsequent calls to
      * {@link #getAttribute} to retrieve the attribute's value
      * will return <code>null</code>.
      *

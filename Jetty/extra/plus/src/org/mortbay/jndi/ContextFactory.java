@@ -65,6 +65,7 @@ public class ContextFactory implements ObjectFactory
         throws Exception
     {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        if(log.isDebugEnabled()) log.debug("looking for context for "+loader);
         Context ctx = (Context)_contextMap.get(loader);
         
         //the map does not contain an entry for this classloader

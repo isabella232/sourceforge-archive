@@ -642,7 +642,7 @@ public class WebApplicationHandler extends ServletHandler
     /* ------------------------------------------------------------ */
     /** Cache filter chains.
      * If true, filter chains are cached by the URI path within the
-     * _context.  Caching should not be used if the webapp encodes
+     * context.  Caching should not be used if the webapp encodes
      * information in URLs. 
      * @param filterChainsCached The filterChainsCached to set.
      */

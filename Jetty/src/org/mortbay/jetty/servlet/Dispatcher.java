@@ -144,7 +144,7 @@ public class Dispatcher implements RequestDispatcher
         _servletHandler=servletHandler;
         _holder=_servletHandler.getServletHolder(name);
         if (_holder==null)
-            throw new IllegalStateException("No named servlet handler in _context");
+            throw new IllegalStateException("No named servlet handler in context");
     }
 
     /* ------------------------------------------------------------ */
@@ -345,7 +345,7 @@ public class Dispatcher implements RequestDispatcher
             _servletHttpRequest=servletHttpRequest;
             _filterType=filterType;
             
-            // Is this being dispatched to a different _context?
+            // Is this being dispatched to a different context?
             _xContext=
                 servletHttpRequest.getServletHandler()!=_servletHandler;
             if (_xContext)
@@ -356,7 +356,7 @@ public class Dispatcher implements RequestDispatcher
                     ?httpServletRequest.getRequestedSessionId()
                     :session.getId();
 
-                // Look for that session in new _context to access it.
+                // Look for that session in new context to access it.
                 if (session_id!=null)
                 {
                     _xSession=_servletHandler.getHttpSession(session_id);

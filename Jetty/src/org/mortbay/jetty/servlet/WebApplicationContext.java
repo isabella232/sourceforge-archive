@@ -52,7 +52,7 @@ import org.mortbay.util.Resource;
  * HttpContext.
  *
  * If a file named web-jetty.xml or jetty-web.xml is found in the
- * WEB-INF directory it is applied to the _context using the
+ * WEB-INF directory it is applied to the context using the
  * XmlConfiguration format.
  *
  * A single WebApplicationHandler instance is used to provide
@@ -283,8 +283,8 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
                     && work.isDirectory()
                     && work.getFile() != null
                     && work.getFile().canWrite()
-                    && getAttribute("javax.servlet._context.tempdir") == null)
-                    setAttribute("javax.servlet._context.tempdir", work.getFile());
+                    && getAttribute("javax.servlet.context.tempdir") == null)
+                    setAttribute("javax.servlet.context.tempdir", work.getFile());
             }
 
             // ResourcePath
@@ -302,9 +302,9 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the _context ServletHandler.
+    /** Get the context ServletHandler.
      * Conveniance method. If no ServletHandler exists, a new one is added to
-     * the _context.  This derivation of the method creates a
+     * the context.  This derivation of the method creates a
      * WebApplicationHandler extension of ServletHandler.
      * @return WebApplicationHandler
      */
@@ -440,7 +440,7 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
 
         setWelcomeFiles(null);
 
-        // save _context classloader
+        // save context classloader
         Thread thread= Thread.currentThread();
         ClassLoader lastContextLoader= thread.getContextClassLoader();
 
@@ -564,7 +564,7 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
 
         _contextListeners= null;
 
-        // Stop the _context
+        // Stop the context
         try
         {
             super.doStop();
@@ -730,7 +730,7 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
 
     /* ------------------------------------------------------------ */
     /** Set Resource Alias.
-     * Resource aliases map resource uri's within a _context.
+     * Resource aliases map resource uri's within a context.
      * They may optionally be used by a handler when looking for
      * a resource.  
      * @param alias 
@@ -810,7 +810,7 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
     /** get error page URI.
      * @param error A string representing an error code or a
      * exception classname
-     * @return URI within _context
+     * @return URI within context
      */
     public String getErrorPage(String error)
     {
@@ -841,21 +841,21 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
     public static interface Configuration extends Serializable
     {
         /* ------------------------------------------------------------------------------- */
-        /** Set up a _context on which to perform the configuration.
-         * @param _context
+        /** Set up a context on which to perform the configuration.
+         * @param context
          */
         public void setWebApplicationContext (WebApplicationContext context);
 
         /* ------------------------------------------------------------------------------- */
-        /** Get the _context on which the configuration is performed.
+        /** Get the context on which the configuration is performed.
          * @return
          */
         public WebApplicationContext getWebApplicationContext ();
         
         /* ------------------------------------------------------------------------------- */
         /** Configure ClassPath.
-         * This method is called before the _context ClassLoader is created.  
-         * Paths and libraries should be added to the _context using the setClassPath,
+         * This method is called before the context ClassLoader is created.  
+         * Paths and libraries should be added to the context using the setClassPath,
          * addClassPath and addClassPaths methods.  The default implementation looks
          * for WEB-INF/classes, WEB-INF/lib/*.zip and WEB-INF/lib/*.jar
          * @throws Exception
@@ -865,7 +865,7 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
 
         /* ------------------------------------------------------------------------------- */
         /** Configure Defaults.
-         * This method is called to intialize the _context to the containers default configuration.
+         * This method is called to intialize the context to the containers default configuration.
          * Typically this would mean application of the webdefault.xml file.  The default 
          * implementation does nothing.
          * @throws Exception

@@ -128,14 +128,14 @@ public interface Tag extends JspTag {
 
 
     /**
-     * Set the current page _context.
+     * Set the current page context.
      * This method is invoked by the JSP page implementation object
      * prior to doStartTag().
      * <p>
      * This value is *not* reset by doEndTag() and must be explicitly reset
      * by a page implementation if it changes between calls to doStartTag().
      *
-     * @param pc The page _context for this tag handler.
+     * @param pc The page context for this tag handler.
      */
 
     void setPageContext(PageContext pc);

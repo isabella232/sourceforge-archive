@@ -202,7 +202,7 @@ public class Server extends HttpServer
 
     /* ------------------------------------------------------------ */
     /** Add Web Application.
-     * @param contextPathSpec The _context path spec. Which must be of
+     * @param contextPathSpec The context path spec. Which must be of
      * the form / or /path/*
      * @param webApp The Web application directory or WAR file.
      * @return The WebApplicationContext
@@ -218,7 +218,7 @@ public class Server extends HttpServer
     /* ------------------------------------------------------------ */
     /** Add Web Application.
      * @param virtualHost Virtual host name or null
-     * @param contextPathSpec The _context path spec. Which must be of
+     * @param contextPathSpec The context path spec. Which must be of
      * the form / or /path/*
      * @param webApp The Web application directory or WAR file.
      * @return The WebApplicationContext
@@ -241,7 +241,7 @@ public class Server extends HttpServer
     /* ------------------------------------------------------------ */
     /**  Add Web Applications.
      * Add auto webapplications to the server.  The name of the
-     * webapp directory or war is used as the _context name. If a
+     * webapp directory or war is used as the context name. If a
      * webapp is called "root" it is added at "/".
      * @param webapps Directory file name or URL to look for auto webapplication.
      * @exception IOException 
@@ -255,8 +255,8 @@ public class Server extends HttpServer
     /* ------------------------------------------------------------ */
     /**  Add Web Applications.
      * Add auto webapplications to the server.  The name of the
-     * webapp directory or war is used as the _context name. If the
-     * webapp matches the rootWebApp it is added as the "/" _context.
+     * webapp directory or war is used as the context name. If the
+     * webapp matches the rootWebApp it is added as the "/" context.
      * @param host Virtual host name or null
      * @param webapps Directory file name or URL to look for auto webapplication.
      * @exception IOException 
@@ -271,8 +271,8 @@ public class Server extends HttpServer
     /* ------------------------------------------------------------ */
     /**  Add Web Applications.
      * Add auto webapplications to the server.  The name of the
-     * webapp directory or war is used as the _context name. If the
-     * webapp matches the rootWebApp it is added as the "/" _context.
+     * webapp directory or war is used as the context name. If the
+     * webapp matches the rootWebApp it is added as the "/" context.
      * @param host Virtual host name or null
      * @param webapps Directory file name or URL to look for auto
      * webapplication.
@@ -290,8 +290,8 @@ public class Server extends HttpServer
     /* ------------------------------------------------------------ */
     /**  Add Web Applications.
      * Add auto webapplications to the server.  The name of the
-     * webapp directory or war is used as the _context name. If the
-     * webapp matches the rootWebApp it is added as the "/" _context.
+     * webapp directory or war is used as the context name. If the
+     * webapp matches the rootWebApp it is added as the "/" context.
      * @param host Virtual host name or null
      * @param webapps Directory file name or URL to look for auto
      * webapplication.
@@ -314,8 +314,8 @@ public class Server extends HttpServer
     /* ------------------------------------------------------------ */
     /**  Add Web Applications.
      * Add auto webapplications to the server.  The name of the
-     * webapp directory or war is used as the _context name. If the
-     * webapp matches the rootWebApp it is added as the "/" _context.
+     * webapp directory or war is used as the context name. If the
+     * webapp matches the rootWebApp it is added as the "/" context.
      * @param host Virtual host name or null
      * @param webapps Directory file name or URL to look for auto
      * webapplication.

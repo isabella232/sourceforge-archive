@@ -44,7 +44,12 @@ public class ExServlet extends HttpServlet
         try
         {
             String except = info.substring(1);
-            if ("nestedSE".equals(except))
+            if (Character.isDigit(except.charAt(0)))
+            {
+                int sc = Integer.parseInt(except);
+                sres.sendError(sc);
+            }
+            else if ("nestedSE".equals(except))
             {
                 Exception ex = new Exception("InnerInner");
                 ServletException se0=new ServletException(ex);
@@ -71,7 +76,8 @@ public class ExServlet extends HttpServlet
             throw new ServletException(th);
         }   
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void doPost(HttpServletRequest sreq, HttpServletResponse sres) 
     throws ServletException, IOException
     {

@@ -107,8 +107,8 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
     
     /* ------------------------------------------------------------------------------- */
     /** Configure ClassPath.
-     * This method is called before the _context ClassLoader is created.  
-     * Paths and libraries should be added to the _context using the setClassPath,
+     * This method is called before the context ClassLoader is created.  
+     * Paths and libraries should be added to the context using the setClassPath,
      * addClassPath and addClassPaths methods.  The default implementation looks
      * for WEB-INF/classes, WEB-INF/lib/*.zip and WEB-INF/lib/*.jar
      * @throws Exception
@@ -116,7 +116,7 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
     public  void configureClassPath()
     throws Exception
     {
-        //cannot configure if the _context is already started
+        //cannot configure if the context is already started
         if (_context.isStarted())
         {
             if (log.isDebugEnabled()){log.debug("Cannot configure webapp after it is started");};
@@ -144,7 +144,7 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
     /* ------------------------------------------------------------------------------- */
     public void configureDefaults() throws Exception
     {
-        //cannot configure if the _context is already started
+        //cannot configure if the context is already started
         if (_context.isStarted())
         {
             if (log.isDebugEnabled()){log.debug("Cannot configure webapp after it is started");};
@@ -165,7 +165,7 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
     /* ------------------------------------------------------------------------------- */
     public void configureWebApp() throws Exception
     {
-        //cannot configure if the _context is already started
+        //cannot configure if the context is already started
         if (_context.isStarted())
         {
             if (log.isDebugEnabled()){log.debug("Cannot configure webapp after it is started");};

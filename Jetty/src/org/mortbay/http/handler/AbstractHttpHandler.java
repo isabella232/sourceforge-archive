@@ -73,14 +73,14 @@ abstract public class AbstractHttpHandler implements HttpHandler
     /* ------------------------------------------------------------ */
     /** Initialize with a HttpContext.
      * Called by addHandler methods of HttpContext.
-     * @param _context Must be the HttpContext of the handler
+     * @param context Must be the HttpContext of the handler
      */
     public void initialize(HttpContext context)
     {
         if (_context==null)
             _context=context;
         else if (_context!=context)
-            throw new IllegalStateException("Can't initialize handler for different _context");
+            throw new IllegalStateException("Can't initialize handler for different context");
     }
     
     /* ----------------------------------------------------------------- */
@@ -88,7 +88,7 @@ abstract public class AbstractHttpHandler implements HttpHandler
         throws Exception
     {
         if (_context==null)
-            throw new IllegalStateException("No _context for "+this);        
+            throw new IllegalStateException("No context for "+this);        
         _started=true;
         if(log.isDebugEnabled())log.debug("Started "+this);
     }

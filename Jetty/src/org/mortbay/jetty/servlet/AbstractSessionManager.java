@@ -131,7 +131,7 @@ public abstract class AbstractSessionManager implements SessionManager
     
     /* ------------------------------------------------------------ */
     /** 
-     * @return True if cross _context session IDs are first considered for new
+     * @return True if cross context session IDs are first considered for new
      * session IDs
      */
     public boolean getCrossContextSessionIDs()
@@ -142,10 +142,10 @@ public abstract class AbstractSessionManager implements SessionManager
     /* ------------------------------------------------------------ */
     /** Set Cross Context sessions IDs
      * This option activates a mode where a requested session ID can be used to create a 
-     * new session. This facilitates the sharing of session cookies when cross _context
+     * new session. This facilitates the sharing of session cookies when cross context
      * dispatches use sessions.   
      * 
-     * @param useRequestedId True if cross _context session ID are first considered for new
+     * @param useRequestedId True if cross context session ID are first considered for new
      * session IDs
      */
     public void setCrossContextSessionIDs(boolean useRequestedId)
@@ -206,8 +206,8 @@ public abstract class AbstractSessionManager implements SessionManager
         synchronized(__allSessions)
         {
             // A requested session ID can only be used if it is in the global map of
-            // ID but not in this contexts map.  Ie it is an ID in use by another _context
-            // in this server and thus we are doing a cross _context dispatch.
+            // ID but not in this contexts map.  Ie it is an ID in use by another context
+            // in this server and thus we are doing a cross context dispatch.
             if (_crossContextSessionIDs)
             {
                 String requested_id=(String)request.getAttribute(__NEW_SESSION_ID);
@@ -429,7 +429,7 @@ public abstract class AbstractSessionManager implements SessionManager
     /* ------------------------------------------------------------ */
     /**
      * @param global True if session invalidation should be global.
-     * ie Sessions in other contexts with the same ID (linked by cross _context dispatch
+     * ie Sessions in other contexts with the same ID (linked by cross context dispatch
      * or shared session cookie) are invalidated as a group.
      */
     public void setInvalidateGlobal(boolean global)
@@ -746,7 +746,7 @@ public abstract class AbstractSessionManager implements SessionManager
             }
             finally
             {
-                // Remove session from _context and global maps
+                // Remove session from context and global maps
                 synchronized (__allSessions)
                 {
                     synchronized (_sessions)

@@ -27,7 +27,7 @@ import java.util.EventListener;
 
 /**
  * Implementations of this interface recieve notifications about changes
- * to the servlet _context of the web application they are part of.
+ * to the servlet context of the web application they are part of.
  * To recieve notification events, the implementation class
  * must be configured in the deployment descriptor for the web application.
  *
@@ -35,21 +35,21 @@ import java.util.EventListener;
  *
  * @since Servlet 2.3
  *
- * @version $Revision$ $Date$
+ * @version $Rev: 46019 $ $Date$
  */
 public interface ServletContextListener extends EventListener {
     /**
      * Notification that the web application initialization
      * process is starting.
-     * All ServletContextListeners are notified of _context
+     * All ServletContextListeners are notified of context
      * initialisation before any filter or servlet in the web
      * application is initialized.
      */
     public void contextInitialized(ServletContextEvent sce);
 
     /**
-     * Notification that the servlet _context is about to be shut down. All servlets
-     * have been destroy()ed before any ServletContextListeners are notified of _context
+     * Notification that the servlet context is about to be shut down. All servlets
+     * have been destroy()ed before any ServletContextListeners are notified of context
      * destruction.
      */
     public void contextDestroyed(ServletContextEvent sce);

@@ -40,7 +40,7 @@ import org.mortbay.util.StringUtil;
 /** CGI Servlet.
  *
  * The cgi bin directory can be set with the cgibinResourceBase init
- * parameter or it will default to the resource base of the _context.
+ * parameter or it will default to the resource base of the context.
  *
  * The "commandPrefix" init parameter may be used to set a prefix to all
  * commands passed to exec. This can be used on systems that need assistance

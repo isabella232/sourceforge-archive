@@ -354,8 +354,8 @@ public class HttpServer extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Add a _context.
-     * @param _context 
+    /** Add a context.
+     * @param context 
      */
     public HttpContext addContext(HttpContext context)
     {
@@ -373,8 +373,8 @@ public class HttpServer extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Remove a _context or Web application.
-     * @exception IllegalStateException if _context not stopped
+    /** Remove a context or Web application.
+     * @exception IllegalStateException if context not stopped
      */
     public boolean removeContext(HttpContext context)
         throws IllegalStateException
@@ -392,11 +392,11 @@ public class HttpServer extends Container
     
 
     /* ------------------------------------------------------------ */
-    /** Add a _context.
+    /** Add a context.
      * As contexts cannot be publicly created, this may be used to
-     * alias an existing _context.
+     * alias an existing context.
      * @param virtualHost The virtual host or null for all hosts.
-     * @param _context 
+     * @param context 
      */
     public HttpContext addContext(String virtualHost,
                                   HttpContext context)
@@ -409,7 +409,7 @@ public class HttpServer extends Container
 
 
     /* ------------------------------------------------------------ */
-    /** Create and add a new _context.
+    /** Create and add a new context.
      * Note that multiple contexts can be created for the same
      * virtualHost and contextPath. Requests are offered to multiple
      * contexts in the order they where added to the HttpServer.
@@ -425,12 +425,12 @@ public class HttpServer extends Container
     }
     
     /* ------------------------------------------------------------ */
-    /** Create and add a new _context.
+    /** Create and add a new context.
      * Note that multiple contexts can be created for the same
      * virtualHost and contextPath. Requests are offered to multiple
      * contexts in the order they where added to the HttpServer.
      * @param virtualHost Virtual hostname or null for all hosts.
-     * @param contextPathSpec Path specification relative to the _context path.
+     * @param contextPathSpec Path specification relative to the context path.
      * @return A HttpContext instance created by a call to newHttpContext.
      */
     public HttpContext addContext(String virtualHost, String contextPathSpec)
@@ -447,9 +447,9 @@ public class HttpServer extends Container
     
     
     /* ------------------------------------------------------------ */
-    /** Get specific _context. 
+    /** Get specific context. 
      * @param virtualHost The virtual host or null for all hosts.
-     * @param contextPathSpec Path specification relative to the _context path.
+     * @param contextPathSpec Path specification relative to the context path.
      * @param i Index among contexts of same virtualHost and pathSpec.
      * @return The HttpContext or null.
      */
@@ -475,12 +475,12 @@ public class HttpServer extends Container
 
     
     /* ------------------------------------------------------------ */
-    /** Get or create _context. 
+    /** Get or create context. 
      * @param virtualHost The virtual host or null for all hosts.
      * @param contextPathSpec
      * @return HttpContext. If multiple contexts exist for the same
-     * virtualHost and pathSpec, the most recently added _context is returned.
-     * If no _context exists, a new _context is created by a call to newHttpContext.
+     * virtualHost and pathSpec, the most recently added context is returned.
+     * If no context exists, a new context is created by a call to newHttpContext.
      */
     public HttpContext getContext(String virtualHost, String contextPathSpec)
     { 
@@ -501,11 +501,11 @@ public class HttpServer extends Container
     }
     
     /* ------------------------------------------------------------ */
-    /** Get or create _context. 
-     * @param contextPathSpec Path specification relative to the _context path.
+    /** Get or create context. 
+     * @param contextPathSpec Path specification relative to the context path.
      * @return The HttpContext  If multiple contexts exist for the same
-     * pathSpec, the most recently added _context is returned.
-     * If no _context exists, a new _context is created by a call to newHttpContext.
+     * pathSpec, the most recently added context is returned.
+     * If no context exists, a new context is created by a call to newHttpContext.
      */
     public HttpContext getContext(String contextPathSpec)
     {
@@ -546,7 +546,7 @@ public class HttpServer extends Container
             contextMap.put(contextPathSpec,contextList);
         }
         
-        // Add the _context to the list
+        // Add the context to the list
         contextList.add(context);
             
         if(log.isDebugEnabled())log.debug("Added "+context+" for host "+(virtualHost==null?"*":virtualHost));
@@ -662,7 +662,7 @@ public class HttpServer extends Container
 
     /* ------------------------------------------------------------ */
     /** Set system classes.
-     * System classes cannot be overriden by _context classloaders.
+     * System classes cannot be overriden by context classloaders.
      * The global defaults set here may be overriden in HttpContext.
      * @param classes array of classname Strings.  Names ending with '.' are treated as package names. Names starting with '-' are treated as
      * negative matches and must be listed before any enclosing packages.
@@ -677,7 +677,7 @@ public class HttpServer extends Container
 
     /* ------------------------------------------------------------ */
     /** Get system classes.
-     * System classes cannot be overriden by _context classloaders.
+     * System classes cannot be overriden by context classloaders.
      * The global defaults set here may be overriden in HttpContext.
      * @return array of classname Strings.  Names ending with '.' are treated as package names. Names starting with '-' are treated as
      * negative matches and must be listed before any enclosing packages. Null if not set.
@@ -692,7 +692,7 @@ public class HttpServer extends Container
 
     /* ------------------------------------------------------------ */
     /** Set system classes.
-     * Servers classes cannot be seen by _context classloaders.
+     * Servers classes cannot be seen by context classloaders.
      * The global defaults set here may be overriden in HttpContext.
      * @param classes array of classname Strings.  Names ending with '.' are treated as package names. Names starting with '-' are treated as
      * negative matches and must be listed before any enclosing packages.
@@ -707,7 +707,7 @@ public class HttpServer extends Container
 
     /* ------------------------------------------------------------ */
     /** Get system classes.
-     * System classes cannot be seen by _context classloaders.
+     * System classes cannot be seen by context classloaders.
      * The global defaults set here may be overriden in HttpContext.
      * @return array of classname Strings.  Names ending with '.' are treated as package names. Names starting with '-' are treated as
      * negative matches and must be listed before any enclosing packages. Null if not set.
@@ -813,9 +813,9 @@ public class HttpServer extends Container
     
     /* ------------------------------------------------------------ */
     /** Stop all listeners then all contexts.
-     * @param graceful If true and statistics are on for a _context,
+     * @param graceful If true and statistics are on for a context,
      * then this method will wait for requestsActive to go to zero
-     * before stopping that _context.
+     * before stopping that context.
      */
     public synchronized void stop(boolean graceful)
         throws InterruptedException
@@ -909,7 +909,7 @@ public class HttpServer extends Container
      * Handle the request by passing it to the HttpHandler contained in
      * the mapped HttpContexts.
      * The requests host and path are used to select a list of
-     * HttpContexts. Each HttpHandler in these _context is offered
+     * HttpContexts. Each HttpHandler in these context is offered
      * the request in turn, until the request is handled.
      *
      * If no handler handles the request, 404 Not Found is returned.
@@ -1002,8 +1002,8 @@ public class HttpServer extends Container
     /* ------------------------------------------------------------ */
     /** Find handler.
      * Find a handler for a URI.  This method is provided for
-     * the servlet _context getContext method to search for another
-     * _context by URI.  A list of hosts may be passed to qualify the
+     * the servlet context getContext method to search for another
+     * context by URI.  A list of hosts may be passed to qualify the
      * search.
      * @param uri URI that must be satisfied by the servlet handler 
      * @param vhosts null or a list of virtual hosts names to search

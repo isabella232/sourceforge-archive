@@ -67,13 +67,13 @@ import javax.servlet.ServletContext;
  * <code>true</code>.
  *
  * <p>Session information is scoped only to the current web application
- * (<code>ServletContext</code>), so information stored in one _context
+ * (<code>ServletContext</code>), so information stored in one context
  * will not be directly visible in another.
  *
  * @see HttpSessionBindingListener
  * @see HttpSessionContext
  *
- * @version $Revision$ $Date$
+ * @version $Rev: 46019 $ $Date$
  */
 public interface HttpSession {
     /**

@@ -164,7 +164,7 @@ public class HttpContextMBean extends LifeCycleMBean
         String context=_httpContext.getContextPath();
         if (context.length()==0)
             context="/";
-        try{oName=new ObjectName(oName+",_context="+context);}
+        try{oName=new ObjectName(oName+",context="+context);}
         catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
         return oName;
     }

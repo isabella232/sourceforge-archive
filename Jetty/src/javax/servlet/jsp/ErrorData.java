@@ -26,7 +26,7 @@ package javax.servlet.jsp;
 /**
  * Contains information about an error, for error pages.
  * The information contained in this instance is meaningless if not used
- * in the _context of an error page.  To indicate a JSP is an error page,
+ * in the context of an error page.  To indicate a JSP is an error page,
  * the page author must set the isErrorPage attribute of the page directive
  * to "true".
  *

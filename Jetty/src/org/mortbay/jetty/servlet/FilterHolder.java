@@ -38,8 +38,6 @@ public class FilterHolder
     extends Holder
 {
     /* ------------------------------------------------------------ */
-    private PathMap _pathSpecs;
-    private Map _servlets;
 
     private transient Filter _filter;
     private transient Config _config;
@@ -59,87 +57,7 @@ public class FilterHolder
     }
 
 
-    /* ------------------------------------------------------------ */
-    /** Add a type that this filter applies to.
-     * @param type "REQUEST", "FORWARD", "INCLUDE" or "ERROR"
-     */
-    public void xaddDispatchesToServlet(String name, String type)
-    {
-        if (_servlets==null || !_servlets.containsKey(name))
-            throw new IllegalStateException();
-        _servlets.put(name,TypeUtil.newInteger(((Integer)_servlets.get(name)).intValue()|Dispatcher.type(type)));
-    }
     
-    /* ------------------------------------------------------------ */
-    /** Add a type that this filter applies to.
-     * @param type "REQUEST", "FORWARD", "INCLUDE" or "ERROR"
-     */
-    public void xaddDispatchesToPathSpec(String pathSpec, String type)
-    {
-        if (_pathSpecs==null || !_pathSpecs.containsKey(pathSpec))
-            throw new IllegalStateException();
-        _pathSpecs.put(pathSpec,TypeUtil.newInteger(((Integer)_pathSpecs.get(pathSpec)).intValue()|Dispatcher.type(type)));
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Add A servlet that this filter applies to.
-     * @param servlet 
-     */
-    public void xaddServlet(String servlet)
-    {
-        if (_servlets==null)
-            _servlets=new HashMap();
-        _servlets.put(servlet,new Integer(Dispatcher.__DEFAULT));
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Add A path spec that this filter applies to.
-     * @param pathSpec 
-     */
-    public void xaddPathSpec(String pathSpec)
-    {
-        if (_pathSpecs==null)
-            _pathSpecs=new PathMap(true);
-        _pathSpecs.put(pathSpec,TypeUtil.newInteger(Dispatcher.__DEFAULT));
-    }
-    
-    /* ------------------------------------------------------------ */
-    public boolean xisMappedToPath()
-    {
-        return _pathSpecs!=null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Check if this filter applies to a path.
-     * @param path The path to check.
-     * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE or __ERROR.
-     * @return True if this filter applies
-     */
-    public boolean xappliesToPath(String path, int type)
-    {
-        if (_pathSpecs==null)
-            return false;
-        Integer t=(Integer)_pathSpecs.match(path);
-        if (t==null)
-            return false;
-        return (t.intValue()==0 && type==Dispatcher.__REQUEST) || (t.intValue()&type)!=Dispatcher.__DEFAULT;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Check if this filter applies to a servlet.
-     * @param path The path to check.
-     * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE or __ERROR.
-     * @return True if this filter applies
-     */
-    public boolean xappliesToServlet(String name, int type)
-    {
-        if (_servlets==null)
-            return false;
-        Integer t=(Integer)_servlets.get(name);
-        if (t==null)
-            return false;
-        return (t.intValue()==0 && type==Dispatcher.__REQUEST) || (t.intValue()&type)!=0;
-    }
 
     /* ------------------------------------------------------------ */
     public void start()
@@ -176,52 +94,9 @@ public class FilterHolder
     }
 
     /* ------------------------------------------------------------ */
-    public String[] xgetPaths()
-    {
-        if (_pathSpecs==null)
-            return null;
-        int s = _pathSpecs.keySet().size();
-        return (String[]) _pathSpecs.keySet().toArray(new String[s]);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public String[] xgetServlets()
-    {
-        if (_servlets==null)
-            return null;
-        int s = LazyList.size(_servlets);
-        return (String[])LazyList.getList(_servlets).toArray(new String[s]);
-    }
-
-    /* ------------------------------------------------------------ */
     public String toString()
     {
         return getName();
-    }
-    
-    /* ------------------------------------------------------------ */
-    public String dump()
-    {
-        StringBuffer buf = new StringBuffer();
-        buf.append(getName());
-        buf.append('[');
-        buf.append(getClassName());
-        for (int i=0;i<LazyList.size(_servlets);i++)
-        {
-            buf.append(',');
-            buf.append(LazyList.get(_servlets,i));
-        }
-        if (_pathSpecs!=null)
-        {
-            Iterator iter = _pathSpecs.keySet().iterator();
-            while (iter.hasNext())
-            {
-                buf.append(',');
-                buf.append(iter.next());
-            }
-        }
-        buf.append(']');
-        return buf.toString();
     }
     
     /* ------------------------------------------------------------ */

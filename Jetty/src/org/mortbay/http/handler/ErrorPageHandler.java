@@ -26,7 +26,7 @@ import org.mortbay.util.StringUtil;
 /* ------------------------------------------------------------ */
 /** Handler for Error pages
  * A handler that is registered at the org.mortbay.http.ErrorHandler
- * _context attributed and called by the HttpResponse.sendError method to write a
+ * context attributed and called by the HttpResponse.sendError method to write a
  * error page.
  * 
  * @version $Id$

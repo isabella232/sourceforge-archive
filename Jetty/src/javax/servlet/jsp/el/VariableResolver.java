@@ -31,7 +31,7 @@ package javax.servlet.jsp.el;
  * An instance of this class should be passed when evaluating
  * an expression.</p>
  *
- * <p>An instance of this class includes the _context against which resolution
+ * <p>An instance of this class includes the context against which resolution
  * will happen</p>
  *
  * @since 2.0

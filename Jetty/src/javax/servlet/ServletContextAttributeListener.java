@@ -27,7 +27,7 @@ import java.util.EventListener;
 
 /**
  * Implementations of this interface recieve notifications of
- * changes to the attribute list on the servlet _context of a web application.
+ * changes to the attribute list on the servlet context of a web application.
  * To recieve notification events, the implementation class
  * must be configured in the deployment descriptor for the web application.
  *
@@ -35,23 +35,23 @@ import java.util.EventListener;
  *
  * @since Servlet 2.3
  *
- * @version $Revision$ $Date$
+ * @version $Rev: 46019 $ $Date$
  */
 public interface ServletContextAttributeListener extends EventListener {
     /**
-     * Notification that a new attribute was added to the servlet _context.
+     * Notification that a new attribute was added to the servlet context.
      * Called after the attribute is added.
      */
     public void attributeAdded(ServletContextAttributeEvent scab);
 
     /**
      * Notification that an existing attribute has been removed from the
-     * servlet _context. Called after the attribute is removed.
+     * servlet context. Called after the attribute is removed.
      */
     public void attributeRemoved(ServletContextAttributeEvent scab);
 
     /**
-     * Notification that an attribute on the servlet _context has been
+     * Notification that an attribute on the servlet context has been
      * replaced. Called after the attribute is replaced.
      */
     public void attributeReplaced(ServletContextAttributeEvent scab);

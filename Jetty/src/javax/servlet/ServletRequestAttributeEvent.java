@@ -31,14 +31,14 @@ package javax.servlet;
  *
  * @since Servlet 2.4
  *
- * @version $Revision$ $Date$
+ * @version $Rev: 46019 $ $Date$
  */
 public class ServletRequestAttributeEvent extends ServletRequestEvent {
     private String name;
     private Object value;
 
     /**
-     * Construct a ServletRequestAttributeEvent from the given _context for the
+     * Construct a ServletRequestAttributeEvent from the given context for the
      * given attribute name and attribute value.
      *
      * @param sc the ServletContext that is sending the event.

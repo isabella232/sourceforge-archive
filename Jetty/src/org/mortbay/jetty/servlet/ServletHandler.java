@@ -81,7 +81,7 @@ public class ServletHandler extends Container implements HttpHandler
 
     /* ------------------------------------------------------------ */
     public static final String __DEFAULT_SERVLET="default";
-    public static final String __J_S_CONTEXT_TEMPDIR="javax.servlet._context.tempdir";
+    public static final String __J_S_CONTEXT_TEMPDIR="javax.servlet.context.tempdir";
     public static final String __J_S_ERROR_EXCEPTION="javax.servlet.error.exception";
     public static final String __J_S_ERROR_EXCEPTION_TYPE="javax.servlet.error.exception_type";
     public static final String __J_S_ERROR_MESSAGE="javax.servlet.error.message";
@@ -151,7 +151,7 @@ public class ServletHandler extends Container implements HttpHandler
         
 
         if (_httpContext!=null&& _httpContext!=context)
-            throw new IllegalStateException("Can't initialize handler for different _context");
+            throw new IllegalStateException("Can't initialize handler for different context");
         _httpContext=context;
         
         sessionManager.initialize(this);
@@ -670,7 +670,7 @@ public class ServletHandler extends Container implements HttpHandler
     
     /* ------------------------------------------------------------ */
     /** ServletHolder matching path.
-     * @param pathInContext Path within _context.
+     * @param pathInContext Path within context.
      * @return PathMap Entries pathspec to ServletHolder
      */
     public Map.Entry getHolderEntry(String pathInContext)
@@ -912,7 +912,7 @@ public class ServletHandler extends Container implements HttpHandler
     }
     
     /* ------------------------------------------------------------ */
-    /** Get _context attribute.
+    /** Get context attribute.
      * Tries ServletHandler attributes and then delegated to HttpContext.
      * @param name attribute name.
      * @return attribute
@@ -936,7 +936,7 @@ public class ServletHandler extends Container implements HttpHandler
     }
 
     /* ------------------------------------------------------------ */
-    /** Get _context attribute names.
+    /** Get context attribute names.
      * Combines ServletHandler and HttpContext attributes.
      */
     protected Enumeration getContextAttributeNames()
@@ -951,7 +951,7 @@ public class ServletHandler extends Container implements HttpHandler
     }
 
     /* ------------------------------------------------------------ */
-    /* Set a Servlet _context attribute.
+    /* Set a Servlet context attribute.
      * Servlet Context attributes may hide HttpContext attributes.
      */
     protected void setContextAttribute(String name, Object value)
@@ -960,7 +960,7 @@ public class ServletHandler extends Container implements HttpHandler
     }
     
     /* ------------------------------------------------------------ */
-    /* Remove a Servlet _context attribute.
+    /* Remove a Servlet context attribute.
      * Servlet Context attributes may hide HttpContext attributes.
      */
     protected void removeContextAttribute(String name)
@@ -1126,7 +1126,7 @@ public class ServletHandler extends Container implements HttpHandler
         /* ------------------------------------------------------------ */
         /** Servlet Log.
          * Log message to servlet log. Use either the system log or a
-         * LogSinkset via the _context attribute
+         * LogSinkset via the context attribute
          * org.mortbay.jetty.servlet.Context.LogSink
          * @param msg 
          */
@@ -1160,7 +1160,7 @@ public class ServletHandler extends Container implements HttpHandler
 
 
         /* ------------------------------------------------------------ */
-        /** Get _context init parameter.
+        /** Get context init parameter.
          * Delegated to HttpContext.
          * @param param param name
          * @return param value or null
@@ -1171,7 +1171,7 @@ public class ServletHandler extends Container implements HttpHandler
         }
 
         /* ------------------------------------------------------------ */
-        /** Get _context init parameter names.
+        /** Get context init parameter names.
          * Delegated to HttpContext.
          * @return Enumeration of names
          */
@@ -1182,7 +1182,7 @@ public class ServletHandler extends Container implements HttpHandler
 
     
         /* ------------------------------------------------------------ */
-        /** Get _context attribute.
+        /** Get context attribute.
          * Tries ServletHandler attributes and then delegated to HttpContext.
          * @param name attribute name.
          * @return attribute
@@ -1193,7 +1193,7 @@ public class ServletHandler extends Container implements HttpHandler
         }
 
         /* ------------------------------------------------------------ */
-        /** Get _context attribute names.
+        /** Get context attribute names.
          * Combines ServletHandler and HttpContext attributes.
          */
         public Enumeration getAttributeNames()
@@ -1202,7 +1202,7 @@ public class ServletHandler extends Container implements HttpHandler
         }
 
         /* ------------------------------------------------------------ */
-        /** Set _context attribute names.
+        /** Set context attribute names.
          * Sets the ServletHandler attributes and may hide HttpContext attributes.
          * @param name attribute name.
          * @param value attribute value
@@ -1213,7 +1213,7 @@ public class ServletHandler extends Container implements HttpHandler
         }
 
         /* ------------------------------------------------------------ */
-        /** Remove _context attribute.
+        /** Remove context attribute.
          * Puts a null into the ServletHandler attributes and may hide a HttpContext attribute.
          * @param name attribute name.
          */
