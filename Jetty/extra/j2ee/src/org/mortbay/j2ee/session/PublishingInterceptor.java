@@ -61,7 +61,11 @@ public class PublishingInterceptor
       throws RemoteException
     {
       if (!AbstractReplicatedStore.getReplicating())
-	getStore().publish(getId(), method, args);
+      {
+      	AbstractReplicatedStore store = getStore();
+      	if (store != null)
+          store.publish(getId(), method, args);
+      }
 
       return null;
     }
@@ -73,11 +77,20 @@ public class PublishingInterceptor
     _publisher=createProxy();
   }
 
+  public void
+    stop()
+  {
+  	_publisher=null;
+  }
+  
   public State
     createProxy()
   {
+  	AbstractReplicatedStore store=getStore();
+  	if (store==null)
+  	  return null;
     InvocationHandler handler = new PublishingInvocationHandler();
-    return (State) Proxy.newProxyInstance(getStore().getLoader(), new Class[] { State.class }, handler);
+    return (State) Proxy.newProxyInstance(store.getLoader(), new Class[] { State.class }, handler);
   }
 
   protected State _publisher;
@@ -90,7 +103,7 @@ public class PublishingInterceptor
     setLastAccessedTime(long time)
     throws RemoteException
   {
-    _publisher.setLastAccessedTime(time);
+    if (_publisher!=null) _publisher.setLastAccessedTime(time);
     super.setLastAccessedTime(time);
   }
 
@@ -98,7 +111,7 @@ public class PublishingInterceptor
     setMaxInactiveInterval(int interval)
     throws RemoteException
   {
-    _publisher.setMaxInactiveInterval(interval);
+  	if (_publisher!=null) _publisher.setMaxInactiveInterval(interval);
     super.setMaxInactiveInterval(interval);
   }
 
@@ -106,7 +119,7 @@ public class PublishingInterceptor
     setAttribute(String name, Object value, boolean returnValue)
     throws RemoteException
   {
-    _publisher.setAttribute(name, value, returnValue);
+  	if (_publisher!=null) _publisher.setAttribute(name, value, returnValue);
     return super.setAttribute(name, value, returnValue);
   }
 
@@ -114,7 +127,7 @@ public class PublishingInterceptor
     setAttributes(Map attributes)
     throws RemoteException
   {
-    _publisher.setAttributes(attributes);
+  	if (_publisher!=null) _publisher.setAttributes(attributes);
     super.setAttributes(attributes);
   }
 
@@ -122,7 +135,7 @@ public class PublishingInterceptor
     removeAttribute(String name, boolean returnValue)
     throws RemoteException
   {
-    _publisher.removeAttribute(name, returnValue);
+  	if (_publisher!=null) _publisher.removeAttribute(name, returnValue);
     return super.removeAttribute(name, returnValue);
   }
 }

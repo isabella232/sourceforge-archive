@@ -134,7 +134,7 @@ public abstract class
       {
 	scavenge();
       }
-      catch (Exception e)
+      catch (Throwable e)
       {
 	_log.warn("could not scavenge distributed sessions", e);
       }

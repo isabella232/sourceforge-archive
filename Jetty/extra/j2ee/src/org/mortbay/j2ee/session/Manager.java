@@ -163,7 +163,22 @@ public class Manager
   Object  _startedLock=new Object();
   Timer   _scavenger;
 
-  class Scavenger extends TimerTask {public void run() {scavenge();}}
+  class Scavenger
+    extends TimerTask
+  {
+    public void
+      run()
+    {
+      try
+      {
+    scavenge();
+      }
+      catch (Throwable e)
+      {
+    _log.warn("could not scavenge local sessions", e);
+      }
+    }
+  }
 
   public void
     start()
@@ -449,7 +464,7 @@ public class Manager
 
     if (container==null)
     {
-      _log.warn("session - "+ container+" has already been destroyed");
+      _log.warn("session - "+id+" has already been destroyed");
       return;
     }
 
@@ -520,6 +535,11 @@ public class Manager
     }
   }
 
+  public int
+    getSessions()
+  {
+  	synchronized (_sessions) { return _sessions.size(); } 
+  }
 
   protected HttpSession
     findSession(String id,boolean create)
@@ -674,13 +694,21 @@ public class Manager
   protected void
     scavenge()
   {
-    _log.trace("starting local scavenge...");
+    _log.trace("starting local scavenging...");
+    try
+	{
+      // prevent session destruction (from scavenging)
+      // from being replicated to other members in the cluster.
+      // Let them scavenge locally instead.
+      AbstractReplicatedStore.setReplicating(true);
     //
     // take a quick copy...
     Collection copy;
     synchronized (_sessions) {copy=new ArrayList(_sessions.values());}
+      if (_log.isTraceEnabled()) _log.trace(copy.size()+" local sessions");
     //
     // iterate over it at our leisure...
+      int n=0;
     for (Iterator i=copy.iterator(); i.hasNext();)
     {
       // all we have to do is check if a session isValid() to force it
@@ -688,21 +716,27 @@ public class Manager
       // because it has a local cache of the necessary details, it
       // will only go to the Stored State if it really thinks that it
       // is invalid...
-      String id=null;
-      long t=System.currentTimeMillis();
+        StateAdaptor sa=null;
       try
       {
-	StateAdaptor sa=(StateAdaptor)i.next();
-	id=sa.getId();
+	      sa=(StateAdaptor)i.next();
 	// the ValidationInterceptor should pick this up and throw an IllegalStateException
 	long lat=sa.getLastAccessedTime();
       }
       catch (IllegalStateException ignore)
       {
-	if (_log.isTraceEnabled()) _log.trace("session ("+id+") must have been invalid - removing it");
-	synchronized (_sessions) {_sessions.remove(id);}
+	      if (_log.isDebugEnabled()) _log.debug("scavenging local session "+sa.getId());
+          destroySession(sa);
+          i.remove();
+	      ++n;
+        }
       }
+      if (_log.isTraceEnabled()) _log.trace("scavenged "+n+" local sessions");
+	}
+    finally
+	{
+      AbstractReplicatedStore.setReplicating(false);
     }
-    _log.trace("...finished local scavenge");
+    _log.trace("...finished local scavenging");
   }
 }

@@ -87,7 +87,7 @@ public class
       }
       catch (Exception e)
       {
-	//	_log.error("could not build distributed HttpSession container", e);
+		_log.error("could not build distributed HttpSession container", e);
       }
 
       adp.setState(last);

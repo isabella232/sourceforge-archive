@@ -58,6 +58,8 @@ public class SubscribingInterceptor
   {
     try
     {
+      AbstractReplicatedStore store = getStore();
+      if (store != null)
       getStore().subscribe(getId(), this);
     }
     catch (RemoteException e)
@@ -71,7 +73,9 @@ public class SubscribingInterceptor
   {
     try
     {
-      getStore().unsubscribe(getId());
+      AbstractReplicatedStore store = getStore();
+      if (store != null)
+        store.unsubscribe(getId());
     }
     catch (RemoteException e)
     {

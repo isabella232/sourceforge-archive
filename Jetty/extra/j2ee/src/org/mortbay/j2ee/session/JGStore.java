@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at 
+// You may obtain a copy of the License at
 // http://www.apache.org/licenses/LICENSE-2.0
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -73,19 +73,17 @@ public class
 
   // this should be XML in the dd...
   protected String _protocolStack=""+
-    "UDP(mcast_addr=228.8.8.8;mcast_port=45566;ip_ttl=32;" +
-    "ucast_recv_buf_size=16000;ucast_send_buf_size=16000;" +
-    "mcast_send_buf_size=32000;mcast_recv_buf_size=64000;loopback=true):"+
+    "UDP(mcast_addr=228.8.8.8;mcast_port=45566;ip_ttl=32;ucast_recv_buf_size=16000;ucast_send_buf_size=16000;mcast_send_buf_size=32000;mcast_recv_buf_size=64000;loopback=true):"+
     "PING(timeout=2000;num_initial_members=3):"+
     "MERGE2(min_interval=5000;max_interval=10000):"+
-    "FD_SOCK:"+
-    "VERIFY_SUSPECT(timeout=1500):"+
+    "FD_SOCK:VERIFY_SUSPECT(timeout=1500):"+
     "pbcast.STABLE(desired_avg_gossip=20000):"+
     "pbcast.NAKACK(gc_lag=50;retransmit_timeout=300,600,1200,2400,4800;max_xmit_size=8192):"+
     "UNICAST(timeout=2000):"+
     "FRAG(frag_size=8192;down_thread=false;up_thread=false):"+
     "pbcast.GMS(join_timeout=5000;join_retry_timeout=2000;shun=false;print_local_addr=true):"+
     "pbcast.STATE_TRANSFER";
+
   public String getProtocolStack() {return _protocolStack;}
   public void setProtocolStack(String protocolStack) {_protocolStack=protocolStack;}
 
@@ -145,6 +143,22 @@ public class
   protected Channel       _channel;
   protected RpcDispatcher _dispatcher;
   protected Vector        _members;
+
+  public String[]
+    getMembers()
+    {
+  	  Address[] addresses;
+  	  synchronized (_members)
+	  {
+  	  	addresses = (Address[]) _members.toArray(new Address[_members.size()]);
+	  }
+
+  	  String[] members = new String[1+addresses.length];
+  	  members[0] = _channel.getLocalAddress().toString();
+  	  for (int i = 0; i < addresses.length; ++i)
+  	  	members[1+i] = addresses[i].toString();
+  	  return members;
+    }
 
   //----------------------------------------
   // Store API - Store LifeCycle
@@ -231,6 +245,8 @@ public class
     throws Exception
     {
       _log.trace("starting...");
+      _log.info("starting JGroups "+org.jgroups.Version.version);
+
       super.start();
 
       init();
@@ -287,7 +303,6 @@ public class
   protected Set       _ids     =new HashSet();
   protected Timer     _timer   =new Timer();
   protected long      _period  =0;
-  protected TimerTask _task    =new TouchTimerTask();
 
   protected class TouchTimerTask extends TimerTask
   {
@@ -405,7 +420,7 @@ public class
 	}
       }
 
-      //      _log.info("dispatching: "+id+" - "+methodName);
+      //      _log.info("dispatching: "+id+" - "+_integerToMethod[method.intValue()]);
 
       // we should check the context name here, or not bother sending it...
 
@@ -506,8 +521,11 @@ public class
 	catch (Exception e)
 	{
 	  _log.error ("Unable to setState from JGroups: ", e);
+	  return;
 	}
 
+    try
+    {
 	AbstractReplicatedStore.setReplicating(true);
 
 	long remoteTime=((Long)data[0]).longValue();
@@ -525,6 +543,11 @@ public class
 	  getManager().getHttpSession(ls.getId()); // should cause creation of corresponding InterceptorStack
 	}
       }
+     finally
+     {
+        AbstractReplicatedStore.setReplicating(false);
+     }
+     }
     }
 
   //----------------------------------------

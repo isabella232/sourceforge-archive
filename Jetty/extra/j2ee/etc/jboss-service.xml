@@ -156,10 +156,10 @@
 
       <Set name="DistributableSessionManagerPrototype">
        <New class="org.mortbay.j2ee.session.Manager">
-        <Set name="scavengerPeriod">600</Set>        
+        <Set name="scavengerPeriod">600</Set>
         <Set name="idGenerator">
           <New class="org.mortbay.j2ee.session.DistributableAjpIdGenerator">
-            <!-- not needed if mod_jk supports JVMROUTE 
+            <!-- not needed if mod_jk supports JVMROUTE
             <Set name="workerName">node1</Set>
             -->
           </New>
@@ -177,7 +177,7 @@
           <Item><New class="org.mortbay.j2ee.session.SynchronizingInterceptor"/></Item>
          </Array>
         </Set>
-        <!-- 
+        <!--
           ************************************************
           ***************** CLUSTERING *******************
           ************************************************
@@ -197,17 +197,17 @@
           ************************************************
           ************************************************
           ************************************************ -->
-        <!-- 
+        <!--
             JGStore HTTP session replication scheme
             (i.e <distributable/> support)
-            See above for more information. Only run with 
-            JBoss "all" configuration!        
+            See above for more information. Only run with
+            JBoss "all" configuration!
         <Set name="store">
          <New class="org.mortbay.j2ee.session.JGStore">
           <Set name="actualMaxInactiveInterval">604800</Set>
           <Set name="scavengerPeriod">3600</Set>
           <Set name="scavengerExtraTime">900</Set>
-          <Set name="protocolStack">UDP(mcast_addr=228.8.8.8;mcast_port=45566;ip_ttl=32;ucast_recv_buf_size=16000;ucast_send_buf_size=16000;mcast_send_buf_size=32000;mcast_recv_buf_size=64000;loopback=true):PING(timeout=2000;num_initial_members=3):MERGE2(min_interval=5000;max_interval=10000):FD_SOCK:VERIFY_SUSPECT(timeout=1500):pbcast.STABLE(desired_avg_gossip=20000):pbcast.NAKACK(gc_lag=50;retransmit_timeout=300,600,1200,2400,4800;max_xmit_size=8192):UNICAST(timeout=2000):FRAG(frag_size=8192;down_thread=false;up_thread=false):pbcast.GMS(join_timeout=5000;join_retry_timeout=2000;shun=false;print_local_addr=true):pbcast.STATE_TRANSFER</Set>
+          <Set name="protocolStack">UDP(mcast_addr=228.8.8.8;mcast_port=45577;ip_ttl=32;ip_mcast=true;mcast_send_buf_size=800000;mcast_recv_buf_size=150000;ucast_send_buf_size=800000;ucast_recv_buf_size=150000;loopback=false):PING(timeout=2000;num_initial_members=3;up_thread=true;down_thread=true):MERGE2(min_interval=10000;max_interval=20000):FD(shun=true;up_thread=true;down_thread=true;timeout=2500;max_tries=5):VERIFY_SUSPECT(timeout=3000;num_msgs=3;up_thread=true;down_thread=true):pbcast.NAKACK(gc_lag=50;retransmit_timeout=300,600,1200,2400,4800;max_xmit_size=8192;up_thread=true;down_thread=true):UNICAST(timeout=300,600,1200,2400,4800;window_size=100;min_threshold=10;down_thread=true):pbcast.STABLE(desired_avg_gossip=20000;up_thread=true;down_thread=true):FRAG(frag_size=8192;down_thread=true;up_thread=true):pbcast.GMS(join_timeout=5000;join_retry_timeout=2000;shun=true;print_local_addr=true):pbcast.STATE_TRANSFER(up_thread=true;down_thread=true)</Set>
           <Set name="subClusterName">DefaultSubCluster</Set>
           <Set name="retrievalTimeOut">20000</Set>
           <Set name="distributionTimeOut">5000</Set>
@@ -215,7 +215,7 @@
          </New>
         </Set>
         -->
-        
+
        </New>
       </Set>
 

@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at 
+// You may obtain a copy of the License at
 // http://www.apache.org/licenses/LICENSE-2.0
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,8 @@ package org.mortbay.j2ee.session;
 //----------------------------------------
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -76,6 +78,12 @@ abstract public class
     }
 
   protected Map     _sessions=new HashMap();
+
+  public int
+    getSessions()
+    {
+      return _sessions.size();
+    }
 
   //----------------------------------------
   // Store API - Store LifeCycle
@@ -160,17 +168,30 @@ abstract public class
     scavenge()
     throws Exception
     {
-      _log.trace("starting distributed session scavenge...");
-      synchronized (_sessions)
+      _log.trace("starting distributed scavenging...");
+      Collection copy;
+      synchronized (_sessions) { copy=new ArrayList(_sessions.values()); }
+      if (_log.isTraceEnabled())
       {
-	for (Iterator i=_sessions.entrySet().iterator(); i.hasNext();)
- 	  if (!((LocalState)((Map.Entry)i.next()).getValue()).isValid(_scavengerExtraTime))
+        int n;
+      	synchronized (_subscribers) { n = _subscribers.size(); }
+      	_log.trace(copy.size()+" distributed sessions, "+n+" subscribers");
+      }
+      int n = 0;
+      for (Iterator i = copy.iterator(); i.hasNext(); )
+      {
+        LocalState state = (LocalState) i.next();
+        if (! state.isValid(_scavengerExtraTime))
 	  {
-	    //	    _log.trace("scavenging distributed session");
+            String id = state.getId();
+            if (_log.isDebugEnabled()) _log.debug("scavenging distributed session "+id);
+            destroySession(id);
 	    i.remove();
+            ++n;
 	  }
       }
-      _log.trace("...distributed session scavenge finished");
+     if (_log.isTraceEnabled()) _log.trace("scavenged "+n+" distributed sessions");
+     _log.trace("...finished distributed scavenging");
     }
 
   //----------------------------------------
@@ -317,7 +338,7 @@ abstract public class
     {
       if (_log.isTraceEnabled()) _log.trace("destroying replicated session: "+id);
       if(getManager().sessionExists(id))
-          getManager().destroyContainer(getManager().getHttpSession(id));
+          getManager().destroySession(getManager().getHttpSession(id));
       synchronized(_sessions) {_sessions.remove(id);}
     }
 
@@ -351,14 +372,14 @@ abstract public class
   public void
     subscribe(String id, Object o)
     {
-      //      _log.info("subscribing: "+id);
+      _log.trace("subscribing: "+id);
       synchronized (_subscribers) {_subscribers.put(id, o);}
     }
 
   public void
     unsubscribe(String id)
     {
-      //      _log.info("unsubscribing: "+id);
+      _log.trace("unsubscribing: "+id);
       synchronized (_subscribers) {_subscribers.remove(id);}
     }
 }
