@@ -73,6 +73,14 @@ public class Dump extends HttpServlet
                 throw new ServletException(th);
             }
         }
+
+        String redirect=sreq.getParameter("redirect");
+        if (redirect!=null && redirect.length()>0)
+        {
+            sres.sendRedirect(redirect);
+            return;
+        }
+        
         
         sres.setContentType("text/html");
 

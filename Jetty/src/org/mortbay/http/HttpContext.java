@@ -203,13 +203,9 @@ public class HttpContext implements LifeCycle,
     {
         return _httpServer;
     }
-    
-    /* ------------------------------------------------------------ */
-    public void setContextPath(String contextPathSpec)
+
+    public static String canonicalContextPathSpec(String contextPathSpec)
     {
-        if (_httpServer!=null)
-            _httpServer.removeMappings(this);
-        
         // check context path
         if (contextPathSpec==null ||
             contextPathSpec.indexOf(',')>=0 ||
@@ -219,23 +215,30 @@ public class HttpContext implements LifeCycle,
         if(!contextPathSpec.startsWith("/"))
 	    contextPathSpec='/'+contextPathSpec;
 
-        if (contextPathSpec.endsWith("/*"))
-            _contextPath=contextPathSpec
-                .substring(0,contextPathSpec.length()-2);
-        else if (contextPathSpec.length()>1)
+        if (contextPathSpec.length()>1)
         {
             if (contextPathSpec.endsWith("/"))
-                _contextPath=contextPathSpec
-                    .substring(0,contextPathSpec.length()-1);
-            else
-                _contextPath=contextPathSpec;
-
-            Code.debug("Fixing contextPathSpec ",contextPathSpec,
-                       ", Assuming: ",_contextPath+"/*");
+                contextPathSpec+="*";
+            else if (!contextPathSpec.endsWith("/*"))
+                contextPathSpec+="/*";
         }
+
+        return contextPathSpec;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setContextPath(String contextPathSpec)
+    {
+        if (_httpServer!=null)
+            _httpServer.removeMappings(this);
+
+        contextPathSpec=canonicalContextPathSpec(contextPathSpec);
+
+        if (contextPathSpec.length()>1)
+            _contextPath=contextPathSpec.substring(0,contextPathSpec.length()-2);
         else
             _contextPath="/";
-
+        
         _name=null;
 
         if (_httpServer!=null)

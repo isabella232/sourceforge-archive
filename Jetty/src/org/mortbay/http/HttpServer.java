@@ -410,6 +410,7 @@ public class HttpServer implements LifeCycle,
     public HttpContext getContext(String virtualHost, String contextPathSpec, int i)
     {
         HttpContext hc=null;
+        contextPathSpec=HttpContext.canonicalContextPathSpec(contextPathSpec);
 
         PathMap contextMap=(PathMap)_virtualHostMap.get(virtualHost);
         if (contextMap!=null)
@@ -430,25 +431,26 @@ public class HttpServer implements LifeCycle,
     /* ------------------------------------------------------------ */
     /** Get or create context. 
      * @param virtualHost The virtual host or null for all hosts.
-     * @param contextPath 
+     * @param contextPathSpec
      * @return HttpContext. If multiple contexts exist for the same
      * virtualHost and pathSpec, the most recently added context is returned.
      * If no context exists, a new context is created by a call to newHttpContext.
      */
-    public HttpContext getContext(String virtualHost, String contextPath)
+    public HttpContext getContext(String virtualHost, String contextPathSpec)
     { 
         HttpContext hc=null;
+        contextPathSpec=HttpContext.canonicalContextPathSpec(contextPathSpec);
 
         PathMap contextMap=(PathMap)_virtualHostMap.get(virtualHost);
         if (contextMap!=null)
         {
-            List contextList = (List)contextMap.get(contextPath);
+            List contextList = (List)contextMap.get(contextPathSpec);
             if (contextList!=null && contextList.size()>0)
                 hc=(HttpContext)contextList.get(contextList.size()-1);
             
         }
         if (hc==null)
-            hc=addContext(virtualHost,contextPath);
+            hc=addContext(virtualHost,contextPathSpec);
 
         return hc;
     }
@@ -489,9 +491,8 @@ public class HttpServer implements LifeCycle,
         }
         
         // Generalize contextPath
-        String contextPathSpec=context.getContextPath();
-        if (contextPathSpec.length()>1)
-            contextPathSpec+="/*";
+        String contextPathSpec=
+            HttpContext.canonicalContextPathSpec(context.getContextPath());
         
         // Get the list of contexts at this path
         List contextList = (List)contextMap.get(contextPathSpec);
