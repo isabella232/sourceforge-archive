@@ -2,7 +2,7 @@ Jetty Versions
 --------------
 
 
-Jetty-5.0.RC2
+Jetty-5.0.RC2 - 30 June 2004
  + Fixed DIGEST challenge delimiters
  + HTAccess calls UnixCrypt correctly
  + integrated jetty-jboss with jboss-3.2.4
