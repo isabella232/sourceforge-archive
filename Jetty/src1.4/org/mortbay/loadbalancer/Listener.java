@@ -153,6 +153,7 @@ public class Listener extends LifeCycleThread
                         ((ServerSocketChannel)channel).accept();
                     Code.debug("Accepted ",socket_channel);
                     socket_channel.configureBlocking(false);
+                    socket_channel.socket().setTcpNoDelay(true);
 
                     Connection connection=
                         new Connection(_bufferPool,

@@ -137,6 +137,7 @@ public class Server extends LifeCycleThread
                         {
                             Log.event("Connected "+socket_channel);
                             connection.connected(socket_channel,_selector);
+                            socket_channel.socket().setTcpNoDelay(true);
                             key.interestOps(key.interestOps()&~SelectionKey.OP_CONNECT
                                             |SelectionKey.OP_READ);
                         }
