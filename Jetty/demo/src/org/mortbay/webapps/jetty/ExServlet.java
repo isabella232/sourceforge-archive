@@ -27,8 +27,16 @@ public class ExServlet extends HttpServlet
         String info=sreq.getPathInfo();
         try
         {
-            throw (Throwable)(Loader.loadClass(this.getClass(),
-                                               info.substring(1)).newInstance());
+            String except = info.substring(1);
+            if ("nestedSE".equals(except))
+            {
+                Exception ex = new Exception("InnerInner");
+                ServletException se0=new ServletException(ex);
+                ServletException se1=new ServletException(se0);
+                throw se1;
+            }
+            else
+                throw (Throwable)(Loader.loadClass(this.getClass(),except).newInstance());
         }
         catch(ServletException e)
         {

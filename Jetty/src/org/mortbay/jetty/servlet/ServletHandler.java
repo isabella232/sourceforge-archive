@@ -529,17 +529,12 @@ public class ServletHandler extends AbstractHttpHandler
             log.debug(LogSupport.EXCEPTION,e);
             
             Throwable th=e;
-            if (e instanceof ServletException)
+            while (th instanceof ServletException)
             {
-                Throwable root=((ServletException)e).getRootCause();
-                while (root instanceof ServletException)
-                    root=((ServletException)e).getRootCause();
-                if (root instanceof HttpException ||
-                    root instanceof EOFException)
-                {
-                    if(log.isDebugEnabled())log.debug("Extracting root cause from ",e);
-                    th=root;
-                }
+                Throwable cause=((ServletException)th).getRootCause();
+                if (cause==th)
+                    break;
+                th=cause;
             }
             
             if (th instanceof HttpException)
