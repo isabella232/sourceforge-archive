@@ -55,15 +55,15 @@ public class ErrorPageHandler extends AbstractHttpHandler
         writer.write(Integer.toString(code));
         writer.write(' ');
         writer.write(message);
-        writer.write("</title>\n<BODY>\n<h2>HTTP ERROR: ");
+        writer.write("</title>\n<body>\n<h2>HTTP ERROR: ");
         writer.write(Integer.toString(code));
         writer.write(' ');
         writer.write(message);
         writer.write("</h2>\n");
-        writer.write("RequestURI=");
+        writer.write("<p>RequestURI=");
         writer.write(uri);
         writer.write(
-            "<p><i><small><a href=\"http://jetty.mortbay.org\">Powered by Jetty://</a></small></i></p>");
+            "</p>\n<p><i><small><a href=\"http://jetty.mortbay.org\">Powered by Jetty://</a></small></i></p>");
         for (int i= 0; i < 20; i++)
             writer.write("\n                                                ");
         writer.write("\n</body>\n</html>\n");
