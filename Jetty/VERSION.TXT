@@ -7,6 +7,7 @@ Jetty Versions
  + fixed deployment of ejb-link elements in web.xml with jboss
  + Update to jasper 5.0.27
  + Added parameters for acceptQueueSize and lowResources level.
+ + Changed default URI encoding to UTF-8
 
 Jetty-4.2.22 - 23 August
  + fixed jaas logout for jetty-jboss integration
