@@ -108,7 +108,6 @@ rem ===========================================================
 rem == set CLASSPATH
 rem ===========================================================
 set CP=%JETTY_HOME%\lib\javax.servlet.jar
-set CP=%CP%;%JETTY_HOME%\lib\javax.servlet.jar
 set CP=%CP%;%JETTY_HOME%\lib\org.mortbay.jetty.jar
 set CP=%CP%;%JETTY_HOME%\lib\org.apache.jasper.jar
 set CP=%CP%;%JETTY_HOME%\ext\javax.xml.jaxp.jar
