@@ -419,7 +419,9 @@ public class ServletHttpResponse implements HttpServletResponse
                 buf.append(URI.canonicalPath(url));
             else
             {
-                url=URI.canonicalPath(URI.addPaths(URI.parentPath(_servletHttpRequest.getRequestURI()),url));
+                String path=_servletHttpRequest.getRequestURI();
+                String parent=(path.endsWith("/"))?path:URI.parentPath(path);
+                url=URI.canonicalPath(URI.addPaths(parent,url));
                 if (!url.startsWith("/"))
                     buf.append('/');
                 buf.append(url);
