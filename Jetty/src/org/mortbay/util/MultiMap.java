@@ -234,7 +234,13 @@ public class MultiMap extends HashMap implements Cloneable
         Object ln=lo;
         int s=LazyList.size(lo);
         if (s>0)
+        {
             ln=LazyList.remove(lo,value);
+            if (ln==null)
+                super.remove(name);
+            else
+                super.put(name, ln);
+        }
         return LazyList.size(ln)!=s;
     }
     

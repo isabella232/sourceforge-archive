@@ -74,9 +74,10 @@ org.mortbay.jetty.servlet.WebApplicationContext objet
       </Set>
       -->
       <Call name="getSessionManager">
-	  <Set name="useRequestedId">true</Set> <!-- reuse sesssion ids ? -->
-	  <Set name="secureCookies">true</Set>   <!-- use secure cookies ? -->
-	  <Set name="httpOnly">true</Set>        <!-- use M$ http only cookies ? -->
+	  <Set name="useRequestedId">true</Set>   <!-- reuse sesssion ids ? -->
+	  <Set name="invalidateGlobal">true</Set> <!-- Invalidate reused session IDs together ? -->
+	  <Set name="secureCookies">true</Set>    <!-- use secure cookies ? -->
+	  <Set name="httpOnly">true</Set>         <!-- use M$ http only cookies ? -->
 
           <!-- uncomment to add a worker tag to the session manager
           <Set name="workerName">demo0</Set>

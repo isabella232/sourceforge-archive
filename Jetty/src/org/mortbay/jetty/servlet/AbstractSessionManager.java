@@ -21,12 +21,10 @@ import java.util.ConcurrentModificationException;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
@@ -42,10 +40,9 @@ import javax.servlet.http.HttpSessionListener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpOnlyCookie;
-import org.mortbay.http.UserRealm;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
-import org.mortbay.util.TypeUtil;
+import org.mortbay.util.MultiMap;
 
 
 /* ------------------------------------------------------------ */
@@ -70,6 +67,11 @@ public abstract class AbstractSessionManager implements SessionManager
     
     /* ------------------------------------------------------------ */
     public final static int __distantFuture = 60*60*24*7*52*20;
+
+    /* ------------------------------------------------------------ */
+    /* global Map of ID to session */
+    protected static MultiMap __allSessions=new MultiMap();  
+    
     
     /* ------------------------------------------------------------ */
     // Setting of max inactive interval for new sessions
@@ -87,7 +89,7 @@ public abstract class AbstractSessionManager implements SessionManager
     protected int _maxSessions = 0;
     protected boolean _secureCookies=false;
     protected boolean _httpOnly=false;
-    protected static Map _allIDs=new HashMap();  // Map of ID to session count
+    protected boolean _invalidateGlobal=true;
     
     private transient SessionScavenger _scavenger = null;
     
@@ -179,7 +181,7 @@ public abstract class AbstractSessionManager implements SessionManager
      */
     private String newSessionId(HttpServletRequest request,long created)
     {
-        synchronized(_sessions)
+        synchronized(__allSessions)
         {
             // A requested session ID can only be used if it is in the global map of
             // ID but not in this contexts map.  Ie it is an ID in use by another context
@@ -188,13 +190,13 @@ public abstract class AbstractSessionManager implements SessionManager
             {
                 String requested_id=request.getRequestedSessionId();
                 if (requested_id !=null && 
-                    requested_id!=null && _allIDs.containsKey(requested_id) && !_sessions.containsKey(requested_id))
+                    requested_id!=null && __allSessions.containsKey(requested_id) && !_sessions.containsKey(requested_id))
                 return requested_id;
             }
             
             // pick a new unique ID!
             String id=null;
-            while (id==null || id.length()==0 || _allIDs.containsKey(id))
+            while (id==null || id.length()==0 || __allSessions.containsKey(id))
             {
                 long r = _random.nextLong();
                 if (r<0)r=-r;
@@ -212,7 +214,7 @@ public abstract class AbstractSessionManager implements SessionManager
     /* ------------------------------------------------------------ */
     public HttpSession getHttpSession(String id)
     {
-        synchronized(_sessions)
+        synchronized(__allSessions)
         {
             return (HttpSession)_sessions.get(id);
         }
@@ -223,12 +225,10 @@ public abstract class AbstractSessionManager implements SessionManager
     {
         Session session = newSession(request);
         session.setMaxInactiveInterval(_dftMaxIdleSecs);
-        synchronized(_sessions)
+        synchronized(__allSessions)
         {
             _sessions.put(session.getId(),session);
-            Integer count=(Integer)_allIDs.get(session.getId());
-            count=TypeUtil.newInteger(count==null?1:count.intValue()+1);
-            _allIDs.put(session.getId(), count);
+            __allSessions.add(session.getId(), session);
             if (_sessions.size() > this._maxSessions)
                 this._maxSessions = _sessions.size ();
         }
@@ -389,6 +389,23 @@ public abstract class AbstractSessionManager implements SessionManager
     public void setSecureCookies(boolean secureCookies)
     {
         _secureCookies = secureCookies;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isInvalidateGlobal()
+    {
+        return _invalidateGlobal;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param global True if session invalidation should be global.
+     * ie Sessions in other contexts with the same ID (linked by cross context dispatch
+     * or shared session cookie) are invalidated as a group.
+     */
+    public void setInvalidateGlobal(boolean global)
+    {
+        _invalidateGlobal=global;
     }
     
     /* ------------------------------------------------------------ */
@@ -676,38 +693,42 @@ public abstract class AbstractSessionManager implements SessionManager
         }
         
         /* ------------------------------------------------------------- */
-        public synchronized void invalidate() throws IllegalStateException
+        public void invalidate() throws IllegalStateException
         {
-            if (_invalid)
-                throw new IllegalStateException();
-
+            if (log.isDebugEnabled()) log.debug("Invalidate session "+getId()+" in "+_handler.getHttpContext());
             try
             {
-
-                if (_sessionListeners!=null)
+                // Notify listeners and unbind values
+                synchronized (this)
                 {
-                    HttpSessionEvent event=new HttpSessionEvent(this);
-                    for (int i=0; i<_sessionListeners.size(); i++)
-                        ((HttpSessionListener)_sessionListeners.get(i)).sessionDestroyed(event);
-                }
+                    if (_invalid)
+                        throw new IllegalStateException();
 
-                if (_values!=null)
-                {
-                    Iterator iter=_values.keySet().iterator();
-                    while (iter.hasNext())
+                    if (_sessionListeners!=null)
                     {
-                        String key=(String)iter.next();
-                        Object value=_values.get(key);
-                        iter.remove();
-                        unbindValue(key,value);
+                        HttpSessionEvent event=new HttpSessionEvent(this);
+                        for (int i=0; i<_sessionListeners.size(); i++)
+                            ((HttpSessionListener)_sessionListeners.get(i)).sessionDestroyed(event);
+                    }
 
-                        if (_sessionAttributeListeners.size()>0)
+                    if (_values!=null)
+                    {
+                        Iterator iter=_values.keySet().iterator();
+                        while (iter.hasNext())
                         {
-                            HttpSessionBindingEvent event=new HttpSessionBindingEvent(this,key,value);
+                            String key=(String)iter.next();
+                            Object value=_values.get(key);
+                            iter.remove();
+                            unbindValue(key,value);
 
-                            for (int i=0; i<_sessionAttributeListeners.size(); i++)
+                            if (_sessionAttributeListeners.size()>0)
                             {
-                                ((HttpSessionAttributeListener)_sessionAttributeListeners.get(i)).attributeRemoved(event);
+                                HttpSessionBindingEvent event=new HttpSessionBindingEvent(this,key,value);
+
+                                for (int i=0; i<_sessionAttributeListeners.size(); i++)
+                                {
+                                    ((HttpSessionAttributeListener)_sessionAttributeListeners.get(i)).attributeRemoved(event);
+                                }
                             }
                         }
                     }
@@ -715,16 +736,22 @@ public abstract class AbstractSessionManager implements SessionManager
             }
             finally
             {
-                synchronized (AbstractSessionManager.this._sessions)
+                // Remove session from context and global maps
+                synchronized (__allSessions)
                 {
                     _invalid=true;
                     _sessions.remove(getId());
+                    __allSessions.removeValue(getId(), this);
                     
-                    Integer count=(Integer)_allIDs.get(getId());
-                    if (count.intValue()<=1)
-                        _allIDs.remove(getId());
-                    else
-                        _allIDs.put(getId(),TypeUtil.newInteger(count.intValue()-1));
+                    if (isInvalidateGlobal())
+                    {
+                        // Don't iterate as other sessions may also be globally invalidating
+                        while(__allSessions.containsKey(getId()))
+                        {
+                            Session session=(Session)__allSessions.getValue(getId(),0);
+                            session.invalidate();
+                        }
+                    }
                 }
             }
         }
