@@ -73,7 +73,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     /* ------------------------------------------------------------ */
     /** Get the raw stream.
      * A stream without filters or chunking is returned.
-     * @return Raw InputStream.
+     * @return Raw OutputStream.
      */
     public OutputStream getRawStream()
     {
@@ -426,6 +426,13 @@ public class ChunkableOutputStream extends FilterOutputStream
 
 
     /* ------------------------------------------------------------ */
+    public void write(InputStream in, int len)
+        throws IOException
+    {
+        IO.copy(in,this,len);
+    }
+    
+    /* ------------------------------------------------------------ */
     public void println()
         throws IOException
     {
@@ -433,17 +440,19 @@ public class ChunkableOutputStream extends FilterOutputStream
     }
     
     /* ------------------------------------------------------------ */
-    public void println(String s)
+    public void println(Object o)
         throws IOException
     {
-        write(s.getBytes());
+        if (o!=null)
+            write(o.toString().getBytes());
         write("\n".getBytes());
     }
     
     /* ------------------------------------------------------------ */
-    public void print(String s)
+    public void print(Object o)
         throws IOException
     {
-        write(s.getBytes());
+        if (o!=null)
+            write(o.toString().getBytes());
     }
 }

@@ -12,7 +12,7 @@ import java.net.*;
 import java.util.*;
 
 /* ------------------------------------------------------------ */
-/** XXX 
+/** XXX Place holder for something a bit better...
  *
  * @see
  * @version 1.0 Thu Oct  7 1999
@@ -20,6 +20,9 @@ import java.util.*;
  */
 public class HttpServer
 {
+    /* ------------------------------------------------------------ */
+    com.mortbay.HTTP.Handler.FileHandler _fileHandler;
+    
     /* ------------------------------------------------------------ */
     /** XXX 
      * @param request 
@@ -30,33 +33,81 @@ public class HttpServer
     public void service(HttpRequest request,HttpResponse response)
         throws IOException, HttpException
     {
-        // Just dump the request for now.
+        if (request.getQuery()!=null)
+        {
+            if (request.getQuery().indexOf("gzip")>=0)
+            {
+                response.setField(HttpFields.__TransferEncoding,"gzip");
+                response.addField(HttpFields.__TransferEncoding,"chunked");
+            }
+            if (request.getQuery().indexOf("deflate")>=0)
+            {
+                response.setField(HttpFields.__TransferEncoding,"deflate");
+                response.addField(HttpFields.__TransferEncoding,"chunked");
+            }
+        }
         
+
+        if (_fileHandler!=null)
+            _fileHandler.handle(request,response);
+        if (response.getState()==response.__MSG_EDITABLE)
+            dump(request,response);
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param request 
+     * @param response 
+     * @exception IOException 
+     * @exception HttpException 
+     */
+    public void dump(HttpRequest request,HttpResponse response)
+        throws IOException, HttpException
+    {
         response.setField(HttpFields.__ContentType,
                           HttpFields.__TextHtml);
         ChunkableOutputStream out = response.getOutputStream();
 
-        if (request.getPath().indexOf("gzip")>=0)
-        {
-            response.setField(HttpFields.__TransferEncoding,"gzip");
-            response.addField(HttpFields.__TransferEncoding,"chunked");
-        }
-        if (request.getPath().indexOf("deflate")>=0)
-        {
-            response.setField(HttpFields.__TransferEncoding,"deflate");
-            response.addField(HttpFields.__TransferEncoding,"chunked");
-        }
-        
         out.println("<HTML><H1>HTTP Request Dump</H1>");
-        out.println("<H3>Header</H3><PRE>");
+        out.println("<H3>Header:</H3><PRE>");
         out.print(request.toString());
-        out.println("</PRE><H3>Content</H3><PRE>");
+        out.println("</PRE><H3>Parameters:</H3><PRE>");
+        Set names=request.getParameterNames();
+        Iterator iter = names.iterator();
+        while(iter.hasNext())
+        {
+            String name=iter.next().toString();
+            List values=request.getParameterValues(name);
+            if (values==null || values.size()==0)
+            {
+                out.print(name);
+                out.println("=");
+            }
+            else if (values.size()==1)
+            {
+                out.print(name);
+                out.print("=");
+                out.println(values.get(0));
+            }
+            else
+            {
+                for (int i=0; i<values.size(); i++)
+                {
+                    out.print(name);
+                    out.print("["+i+"]=");
+                    out.println(values.get(i));
+                }
+            }
+        }
+            
+        out.println("</PRE><H3>Content:</H3><PRE>");
         byte[] buf= new byte[4096];
         int len;
         InputStream in=request.getInputStream();
         while((len=in.read(buf))>=0)
             out.write(buf,0,len);
-        out.println("</PRE><H3>Response</H3><PRE>");
+        out.println("</PRE><H3>Response:</H3><PRE>");
         out.print(response.toString());
         out.println("</PRE></HTML>");
 
@@ -161,11 +212,21 @@ public class HttpServer
     }
 
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param args 
+     */
     public static void main(String[] args)
     {
         try{
             InetAddrPort address = new InetAddrPort(8080);
             SocketListener listener = new SocketListener(address);
+            listener.getServer()._fileHandler =
+                new com.mortbay.HTTP.Handler.FileHandler("FileBase",
+                                                         "index.html",
+                                                         true,
+                                                         true,
+                                                         true);
             listener.start();
         }
         catch (Exception e)

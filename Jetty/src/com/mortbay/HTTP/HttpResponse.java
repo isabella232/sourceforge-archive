@@ -257,8 +257,8 @@ public class HttpResponse extends HttpMessage
             if (message!=null)
                 out.println(message);
             out.print("</BODY>\n</HTML>\n");
-            out.flush();
         }
+        commit();
     }
     
     /* ------------------------------------------------------------- */
@@ -266,27 +266,29 @@ public class HttpResponse extends HttpMessage
      * Sends an error response to the client using the specified status
      * code and detail message.
      * @param code the status code
-     * @param reason the detail message
+     * @param message the detail message
      * @exception IOException If an I/O error has occurred.
      */
-    public void sendError(int code,String reason) 
+    public void sendError(int code,String message) 
         throws IOException
     {
         _header.put(HttpFields.__ContentType,"text/html");
         setStatus(code);
+        String reason = (String)__statusMsg.get(new Integer(code));
         setReason(reason);
 
         ChunkableOutputStream out=getOutputStream();
         synchronized(out)
         {
             out.print("<HTML>\n<HEAD>\n<TITLE>Error ");
-            out.print((code+"</TITLE>\n"));
+            out.print(code+" "+reason+"</TITLE>\n");
             out.print("<BODY>\n<H2>HTTP ERROR: ");
-            out.print((code +" "));
-            out.print((reason + "</H2>\n"));       
+            out.println(code +" "+reason + "</H2>");
+            if (message!=null)
+                out.println(message);
             out.print("</BODY>\n</HTML>\n");
-            out.flush();
         }
+        commit();
     }
       
     /* ------------------------------------------------------------- */
@@ -299,11 +301,7 @@ public class HttpResponse extends HttpMessage
     public void sendError(int code) 
         throws IOException
     {
-        String msg = (String)__statusMsg.get(new Integer(code));
-        if (msg==null)
-            sendError(code,"UNKNOWN ERROR CODE");
-        else
-            sendError(code,msg);
+        sendError(code,null);
     }
     
     /* ------------------------------------------------------------- */
@@ -318,8 +316,9 @@ public class HttpResponse extends HttpMessage
     {
         _header.put(HttpFields.__Location,location);
         setStatus(__307_Temporary_Redirect);
+        commit();
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Destroy the header.
      * Help the garbage collector by null everything that we can.
@@ -329,7 +328,6 @@ public class HttpResponse extends HttpMessage
         _reason=null;
         super.destroy();
     }
-    
 };
 
 

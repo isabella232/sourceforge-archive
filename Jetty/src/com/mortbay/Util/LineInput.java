@@ -148,7 +148,10 @@ public class LineInput extends FilterInputStream
      */
     public int getByteLimit()
     {
-        return _byteLimit;
+        if (_byteLimit<0)
+            return _byteLimit;
+        
+        return _byteLimit+_avail-_pos;
     }
     
     
@@ -437,9 +440,8 @@ public class LineInput extends FilterInputStream
                 
                 if (n>0)
                     _byteLimit-=n;
-                else if (n==-1 && Code.debug())
-                    Code.warning("Premature EOF");
-                
+                else if (n==-1)
+                    throw new IOException("Premature EOF");
             }
         }
     }

@@ -226,7 +226,7 @@ public class TestRFC2616
 
             // output gzip
             offset=0;
-            byte[] rbytes=listener.getResponses(("GET /R1.gzip HTTP/1.1\n"+
+            byte[] rbytes=listener.getResponses(("GET /R1?gzip HTTP/1.1\n"+
                                                  "Host: localhost\n"+
                                                  "TE: gzip\n" +
                                                  "Connection: close\n"+
@@ -443,6 +443,7 @@ public class TestRFC2616
             String response;
             int offset=0;
 
+            
             // Expect Failure
             offset=0;
             response=listener.getResponses("GET /R1 HTTP/1.1\n"+
@@ -542,7 +543,7 @@ public class TestRFC2616
 
             // Gzip accepted
             offset=0;
-            response=listener.getResponses("GET /R1.gzip HTTP/1.1\n"+
+            response=listener.getResponses("GET /R1?gzip HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "TE: gzip;q=0.5\n"+
                                            "Connection: close\n"+
@@ -555,7 +556,7 @@ public class TestRFC2616
 
             // Gzip not accepted
             offset=0;
-            response=listener.getResponses("GET /R1.gzip HTTP/1.1\n"+
+            response=listener.getResponses("GET /R1?gzip HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "TE: deflate\n"+
                                            "Connection: close\n"+

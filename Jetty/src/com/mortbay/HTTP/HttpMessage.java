@@ -473,7 +473,7 @@ abstract public class HttpMessage
     /* ------------------------------------------------------------ */
     /** XXX 
      */
-    public synchronized void completeSend()
+    public synchronized void commit()
         throws IOException, IllegalStateException
     {
         ChunkableOutputStream out = getOutputStream();
@@ -496,3 +496,6 @@ abstract public class HttpMessage
         _state=__MSG_SENT;
     }
 }
+
+
+
