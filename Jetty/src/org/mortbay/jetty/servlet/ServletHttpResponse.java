@@ -28,6 +28,7 @@ import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.handler.NullHandler;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.WriterOutputStream;
 import org.mortbay.util.URI;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
@@ -598,7 +599,16 @@ public class ServletHttpResponse implements HttpServletResponse
         public InputStream getInputStream() throws IOException
         {throw new UnsupportedOperationException();}
         public OutputStream getOutputStream() throws IOException
-        {return getWrapper().getOutputStream();}
+        {
+            try{
+                return getWrapper().getOutputStream();
+            }
+            catch(IllegalStateException e)
+            {
+                Code.ignore(e);
+                return new WriterOutputStream(getWrapper().getWriter());
+            }
+        }
         
         
         public boolean containsField(String name)

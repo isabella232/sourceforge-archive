@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + WriterOutputStream so JSPs can include static resources.
  + Suppress error only for IOExceptions not derivitives.
  + HttpConnection always eats unused bodies
  + Merged HttpMessage and Message
