@@ -31,6 +31,16 @@ public class SecurityConstraint
     public final static String __CERT_AUTH="CLIENT_CERT";
     public final static String __CERT_AUTH2="CLIENT-CERT";
 
+    /* ------------------------------------------------------------ */
+    public final static int
+        DC_UNSET=-1,
+        DC_NONE=0,
+        DC_INTEGRAL=1,
+        DC_CONFIDENTIAL=2;
+    
+    /* ------------------------------------------------------------ */
+    public final static String NONE="NONE";
+    public final static String ANY_ROLE="*";
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -80,22 +90,12 @@ public class SecurityConstraint
 
     
     /* ------------------------------------------------------------ */
-    public final static int
-        DC_NONE=0,
-        DC_INTEGRAL=1,
-        DC_CONFIDENTIAL=2;
-    
-    /* ------------------------------------------------------------ */
-    public final static String NONE="NONE";
-    public final static String ANY_ROLE="*";
-    
-    /* ------------------------------------------------------------ */
     private String _name;
     private Object _methods;
     private List _umMethods;
     private Object _roles;
     private List _umRoles;
-    private int _dataConstraint=DC_NONE;
+    private int _dataConstraint=DC_UNSET;
     private boolean _anyRole=false;
     private boolean _authenticate=false;
 
@@ -221,7 +221,7 @@ public class SecurityConstraint
     /** 
      * @return True if the constraint requires request authentication
      */
-    public boolean isAuthenticate()
+    public boolean getAuthenticate()
     {
         return _authenticate;
     }
@@ -258,11 +258,11 @@ public class SecurityConstraint
 
     /* ------------------------------------------------------------ */
     /** 
-     * @return True if there is a data constraint.
+     * @return True if a data constraint has been set.
      */
     public boolean hasDataConstraint()
     {
-        return _dataConstraint>DC_NONE;
+        return _dataConstraint>=DC_NONE;
     }
     
     
@@ -301,187 +301,235 @@ public class SecurityConstraint
      * @param pathInContext 
      * @param request 
      * @param response 
-     * @return -1 for  failed, 0 for authentication in process, 1 for passed.
+     * @return false if the request has failed a security constraint or the authenticator has already sent a response.
      * @exception HttpException 
      * @exception IOException 
      */
-    public static int check(List constraints,
-                            Authenticator authenticator,
-                            UserRealm realm,
-                            String pathInContext,
-                            HttpRequest request,
-                            HttpResponse response)
+    public static boolean check(List constraints,
+                                Authenticator authenticator,
+                                UserRealm realm,
+                                String pathInContext,
+                                HttpRequest request,
+                                HttpResponse response)
         throws HttpException, IOException
-    {   
-        // for each constraint
+    {
+        // Combine data and auth constraints
+        int dataConstraint = DC_NONE;
+        Object roles = null;
+        boolean unauthenticated=false;
+        boolean forbidden=false;
+        
         for (int c=0;c<constraints.size();c++)
         {
             SecurityConstraint sc=(SecurityConstraint)constraints.get(c);
-
+            
             // Check the method applies
             if (!sc.forMethod(request.getMethod()))
                 continue;
                     
-            // Does this forbid everything?
-            if (sc.isForbidden())
+            // Combine data constraints.
+            if (dataConstraint>DC_UNSET && sc.hasDataConstraint())
             {
-                response.sendError(HttpResponse.__403_Forbidden);
-                return -1;
+                if (sc.getDataConstraint()>dataConstraint)
+                    dataConstraint=sc.getDataConstraint();
             }
-            
-            // To avoid revealing a request parameter, in the case of browsing
-            // to a CONFIDENTIAL resource with http: which also requires FORM authentication
-            // (each of which separately trigger a redirect), we MUST check for
-            // confidentiality first, doing that redirect to confidentialPort/Scheme first
-            // if necessary.  THEN we check for authentication.  This will preserve the
-            // confidentialPort/Scheme when FORM authentication pops back to the resource
-            // URL.
-                            
-            // Does it fail a data constraint
-            if (sc.hasDataConstraint())
+            else
+                dataConstraint=DC_UNSET; // ignore all other data constraints
+
+            // Combine auth constraints.
+            if (!unauthenticated && !forbidden)
             {
-                HttpConnection connection=request.getHttpConnection();
-                HttpListener listener = connection.getListener();
-                
-                switch(sc.getDataConstraint())
+                if (sc.getAuthenticate())
                 {
-                    case SecurityConstraint.DC_INTEGRAL:
-                        if (listener.isIntegral(connection))
-                            break;
-
-                        if (listener.getIntegralPort()>0)
-                        {
-                            String url=listener.getIntegralScheme()+
-                                "://"+request.getHost()+
-                                ":"+listener.getIntegralPort()+
-                                request.getPath();
-                            if (request.getQuery()!=null)
-                                url+="?"+request.getQuery();
-                            response.sendRedirect(url);
-                        }
+                    // XXX - this is as per spec - but it sucks!
+//                     if (roles!=ANY_ROLE)
+//                     {
+//                         if (sc.isAnyRole())
+//                             roles=ANY_ROLE;
+//                         else
+//                         {
+//                             List scr = sc.getRoles();
+//                             if (scr==null || scr.size()==0)
+//                                 forbidden=true;
+//                             else
+//                                 roles=LazyList.addCollection(roles,scr);
+//                         }
+//                     }
+                    
+                    if (sc.isAnyRole())
+                    {
+                        if (roles==null)
+                            roles=ANY_ROLE;
+                    }
+                    else
+                    {                        
+                        List scr = sc.getRoles();
+                        if (scr==null || scr.size()==0)
+                            forbidden=true;
+                        else if (roles==null || roles==ANY_ROLE)
+                            roles=LazyList.addCollection(null,scr);
                         else
-                            response.sendError(HttpResponse.__403_Forbidden);                   
-                        return -1;
-
-                    case SecurityConstraint.DC_CONFIDENTIAL:
-                        if (listener.isConfidential(connection))
-                            break;
-
-                        if (listener.getConfidentialPort()>0)
                         {
-                            String url=listener.getConfidentialScheme()+
-                                "://"+request.getHost()+
-                                ":"+listener.getConfidentialPort()+
-                                request.getPath();
-                            if (request.getQuery()!=null)
-                                url+="?"+request.getQuery();
-                            response.sendRedirect(url);
+                            for (int i=LazyList.size(roles);i-->0;)
+                            {
+                                Object r=LazyList.get(roles,i);
+                                if (!scr.contains(r))
+                                    roles=LazyList.remove(roles,i);
+                            }
                         }
-                        else
-                            response.sendError(HttpResponse.__403_Forbidden);
-                        return -1;
-                      
-                    default:
-                        response.sendError(HttpResponse.__403_Forbidden);
-                        return -1;
+                    }
                 }
+                else
+                    unauthenticated=true;
             }
-            
-            // Does it fail a role check?
-            if (sc.isAuthenticate())
-            {
-                if (realm==null)
-                {
-                    response.sendError(HttpResponse.__500_Internal_Server_Error,
-                                       "Realm Not Configured");
-                    return -1;
-                }
+        }
         
-                Principal user = null;
-                
-                // Handle pre-authenticated request
-                if (request.getAuthType()!=null &&
-                    request.getAuthUser()!=null)
-                {
-                    user=request.getUserPrincipal();
-                    if (user==null)
-                        user=realm.authenticate(request.getAuthUser(),
-                                                null,
-                                                request);
-                    if (user==null && authenticator!=null)
-                        user=authenticator.authenticate(realm,
-                                                        pathInContext,
-                                                        request,
-                                                        response,
-                                                        true);
-                }
-                else if (authenticator!=null)
-                {
-                    // User authenticator.
+        // Does this forbid everything?
+        if (forbidden)
+        {
+            response.sendError(HttpResponse.__403_Forbidden);
+            return false;
+        }
+                            
+        // Handle data constraint
+        if (dataConstraint>DC_NONE)
+        {
+            HttpConnection connection=request.getHttpConnection();
+            HttpListener listener = connection.getListener();
+            
+            switch(dataConstraint)
+            {
+                case SecurityConstraint.DC_INTEGRAL:
+                    if (listener.isIntegral(connection))
+                        break;
+                    
+                    if (listener.getIntegralPort()>0)
+                    {
+                        String url=listener.getIntegralScheme()+
+                            "://"+request.getHost()+
+                            ":"+listener.getIntegralPort()+
+                            request.getPath();
+                        if (request.getQuery()!=null)
+                            url+="?"+request.getQuery();
+                        response.sendRedirect(url);
+                    }
+                    else
+                        response.sendError(HttpResponse.__403_Forbidden);                   
+                    return false;
+                    
+                case SecurityConstraint.DC_CONFIDENTIAL:
+                    if (listener.isConfidential(connection))
+                        break;
+                    
+                    if (listener.getConfidentialPort()>0)
+                    {
+                        String url=listener.getConfidentialScheme()+
+                            "://"+request.getHost()+
+                            ":"+listener.getConfidentialPort()+
+                            request.getPath();
+                        if (request.getQuery()!=null)
+                            url+="?"+request.getQuery();
+                        response.sendRedirect(url);
+                    }
+                    else
+                        response.sendError(HttpResponse.__403_Forbidden);
+                    return false;
+                    
+                default:
+                    response.sendError(HttpResponse.__403_Forbidden);
+                    return false;
+            }
+        }
+        
+            
+        // Does it fail a role check?
+        if (!unauthenticated && roles!=null)
+        {
+            if (realm==null)
+            {
+                response.sendError(HttpResponse.__500_Internal_Server_Error,
+                                   "Realm Not Configured");
+                return false;
+            }
+            
+            Principal user = null;
+            
+            // Handle pre-authenticated request
+            if (request.getAuthType()!=null &&
+                request.getAuthUser()!=null)
+            {
+                user=request.getUserPrincipal();
+                if (user==null)
+                    user=realm.authenticate(request.getAuthUser(),
+                                            null,
+                                            request);
+                if (user==null && authenticator!=null)
                     user=authenticator.authenticate(realm,
                                                     pathInContext,
                                                     request,
                                                     response,
                                                     true);
-                }
-                else
-                {
-                    // don't know how authenticate
-                    Code.warning("Mis-configured Authenticator for "+request.getPath());
-                    response.sendError(HttpResponse.__500_Internal_Server_Error);
-                }
-                
-                // If we still did not get a user
-                if (user==null)
-                    return -1; // Auth challenge or redirection already sent
-                else if (user==__NOBODY)
-                    return 0; // The Nobody user indicates authentication in transit.
-                    
-                
-                if (!sc.isAnyRole())
-                {
-                    List roles=sc.getRoles();
-                    boolean inRole=false;
-                    for (int r=roles.size();r-->0;)
-                    {
-                        if (realm.isUserInRole(user,roles.get(r).toString()))
-                        {
-                            inRole=true;
-                            break;
-                        }
-                    }
-                    
-                    if (!inRole)
-                    {
-                        Code.warning("AUTH FAILURE: role for "+user.getName());
-                        if ("BASIC".equalsIgnoreCase(authenticator.getAuthMethod()))
-                            ((BasicAuthenticator)authenticator).sendChallenge(realm,response);
-                        else
-                            response.sendError(HttpResponse.__403_Forbidden,
-                                               "User not in required role");
-                        return -1; // role failed.
-                    }
-                }
             }
-            // identify requests
-            else if (request.getAuthType()==null &&
-                     request.getAuthUser()==null &&
-                     authenticator!=null)
+            else if (authenticator!=null)
             {
-                // Identify.
-                Principal user=authenticator.authenticate(realm,
-                                                          pathInContext,
-                                                          request,
-                                                          response,
-                                                          false);
+                // User authenticator.
+                user=authenticator.authenticate(realm,
+                                                pathInContext,
+                                                request,
+                                                response,
+                                                true);
             }
-            
-            // Matches a constraint that does not fail
-            // anything, so must be OK
-            return 1;
+            else
+            {
+                // don't know how authenticate
+                Code.warning("Mis-configured Authenticator for "+request.getPath());
+                response.sendError(HttpResponse.__500_Internal_Server_Error);
+            }
+                
+            // If we still did not get a user
+            if (user==null)
+                return false; // Auth challenge or redirection already sent
+            else if (user==__NOBODY)
+                return true;  // The Nobody user indicates authentication in transit.
+                    
+                
+            if (roles!=ANY_ROLE)
+            {
+                boolean inRole=false;
+                for (int r=LazyList.size(roles);r-->0;)
+                {
+                    if (realm.isUserInRole(user,(String)LazyList.get(roles,r)))
+                    {
+                        inRole=true;
+                        break;
+                    }
+                }
+                
+                if (!inRole)
+                {
+                    Code.warning("AUTH FAILURE: role for "+user.getName());
+                    if ("BASIC".equalsIgnoreCase(authenticator.getAuthMethod()))
+                        ((BasicAuthenticator)authenticator).sendChallenge(realm,response);
+                    else
+                        response.sendError(HttpResponse.__403_Forbidden,
+                                           "User not in required role");
+                    return false; // role failed.
+                }
+            }
         }
-
-        // Didn't actually match any constraint.
-        return 0;
+        // identify requests
+        else if (request.getAuthType()==null &&
+                 request.getAuthUser()==null &&
+                 authenticator!=null)
+        {
+            // Identify.
+            Principal user=authenticator.authenticate(realm,
+                                                      pathInContext,
+                                                      request,
+                                                      response,
+                                                      false);
+        }
+        
+        return true;
     }
 }

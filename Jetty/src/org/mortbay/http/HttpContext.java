@@ -30,6 +30,7 @@ import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.util.CachedResource;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.LifeCycle;
 import org.mortbay.util.Log;
 import org.mortbay.util.MultiException;
@@ -1419,26 +1420,6 @@ public class HttpContext implements LifeCycle,
     }
 
     /* ------------------------------------------------------------ */
-    public boolean isAuthConstrained()
-    {
-        Iterator i = _constraintMap.values().iterator();
-        while(i.hasNext())
-        {
-            Iterator j= ((ArrayList)i.next()).iterator();
-            while(j.hasNext())
-            {
-                SecurityConstraint sc = (SecurityConstraint)j.next();
-                if (sc.isAuthenticate())
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-
-    /* ------------------------------------------------------------ */
     public boolean checkSecurityConstraints(String pathInContext,
                                             HttpRequest request,
                                             HttpResponse response)
@@ -1448,33 +1429,24 @@ public class HttpContext implements LifeCycle,
 
         // Get all path matches
         List scss =_constraintMap.getMatches(pathInContext);
-        if (scss!=null)
+            
+        if (scss!=null && scss.size()>0)
         {
-            Code.debug("Security Constraint on ",pathInContext," against ",scss);
-
+            Object constraints=null;
             // for each path match
-            matches:
             for (int m=0;m<scss.size();m++)
             {
-                // Get all constraints
                 Map.Entry entry=(Map.Entry)scss.get(m);
-                if (Code.verbose())
-                    Code.debug("Check ",pathInContext," against ",entry);
-
                 List scs = (List)entry.getValue();
-
-                switch (SecurityConstraint.check(scs,
-                                                 _authenticator,
-                                                 realm,
-                                                 pathInContext,
-                                                 request,
-                                                 response))
-                {
-                  case -1: return false; // Auth failed.
-                  case 0: continue; // No constraints matched
-                  case 1: break matches; // Passed a constraint.
-                }
+                constraints=LazyList.addCollection(constraints,scs);
             }
+
+            return SecurityConstraint.check(LazyList.getList(constraints),
+                                            _authenticator,
+                                            realm,
+                                            pathInContext,
+                                            request,
+                                            response); 
         }
 
         return true;

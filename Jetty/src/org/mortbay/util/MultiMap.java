@@ -193,7 +193,7 @@ public class MultiMap extends HashMap
     public void addValues(Object name, List values) 
     {
         Object lo = super.get(name);
-        Object ln = LazyList.add(lo,values);
+        Object ln = LazyList.addCollection(lo,values);
         if (lo!=ln)
             super.put(name,ln);
     }
@@ -208,7 +208,7 @@ public class MultiMap extends HashMap
     public void addValues(Object name, String[] values) 
     {
         Object lo = super.get(name);
-        Object ln = LazyList.add(lo,Arrays.asList(values));
+        Object ln = LazyList.addCollection(lo,Arrays.asList(values));
         if (lo!=ln)
             super.put(name,ln);
     }

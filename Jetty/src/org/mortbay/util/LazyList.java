@@ -88,8 +88,23 @@ public class LazyList
      * @param list The list to add to or null if none yet created.
      * @param collection The Collection whose contents should be added.
      * @return The lazylist created or added to.
+     * @deprecated Use addCollection
      */
-    public static Object add(Object list, Collection collection)
+    protected Object add(Object list, Collection collection)
+    {
+        Iterator i=collection.iterator();
+        while(i.hasNext())
+            list=LazyList.add(list,i.next());
+        return list;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add the contents of a Collection to a LazyList
+     * @param list The list to add to or null if none yet created.
+     * @param collection The Collection whose contents should be added.
+     * @return The lazylist created or added to.
+     */
+    public static Object addCollection(Object list, Collection collection)
     {
         Iterator i=collection.iterator();
         while(i.hasNext())
@@ -145,8 +160,31 @@ public class LazyList
             return list;
         }
 
-        return null;
+        if (list.equals(o))
+            return null;
+        return list;
     }
+    
+    /* ------------------------------------------------------------ */
+    public static Object remove(Object list, int i)
+    {
+        if (list==null)
+            return null;
+
+        if (list instanceof List)
+        {
+            List l = (List)list;
+            l.remove(i);
+            if (l.size()==0)
+                return null;
+            return list;
+        }
+
+        if (i==0)
+            return null;
+        return list;
+    }
+    
     
     
     /* ------------------------------------------------------------ */
