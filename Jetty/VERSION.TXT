@@ -1,6 +1,10 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.1 - 18 November 2002
+ + Fixed bad optimization in UrlEncoding
+ + Re-enabled UrlEncoding test harnesses
+
 Jetty-4.2.0 - 16 November 2002
  + Fixed AJP13 buffer size.
  + Fixed remove listener bug.
