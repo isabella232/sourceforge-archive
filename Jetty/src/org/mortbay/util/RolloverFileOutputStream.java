@@ -275,7 +275,8 @@ public class RolloverFileOutputStream extends FilterOutputStream
                 }
                 catch(InterruptedException e)
                 {
-                    e.printStackTrace();
+                    if (!timeToStop)
+                        e.printStackTrace();
                 }
                     
                 synchronized(__rollovers)
@@ -299,7 +300,8 @@ public class RolloverFileOutputStream extends FilterOutputStream
                             }
                             catch(IOException e)
                             {
-                                e.printStackTrace();
+                                if (!timeToStop)
+                                    e.printStackTrace();
                             }
                         }
                     }
