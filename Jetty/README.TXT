@@ -20,7 +20,7 @@ base. The aims of the Jetty 3 developement include:
 Quick start on Unix
 ===================
 run:
-  $JETTY_HOME/bin/jetty.sh run demo
+  $JETTY_HOME/bin/jetty.sh run 
 
 Browse to:
   http://localhost:8080
@@ -35,7 +35,9 @@ Due to problems with the servlet security model (see below). It is vital
 that windows users use the exact case for drive letters, URLs and filenames. 
 
 run:
-  %JETTY_HOME%\bin\jetty.sh run demo.xml
+  set JETTY_HOME=<jetty install directory>
+  set JAVA_HOME=<java install directory>
+  %JETTY_HOME%\bin\jetty.bat
 
 Browse to:
   http://localhost:8080
@@ -74,17 +76,17 @@ Running the Demo Server
 A Demo server can be run on port 8080 with the commands:
 
   cd $JETTY_HOME
-  java org.mortbay.jetty.Demo
+  java org.mortbay.jetty.Server etc/admin.xml etc/demo.xml
+
 
 You can access this demo with at http://localhost:8080
 The demo also runs a simple admin servlet at http://localhost:8888,
 with user username=admin, password=admin.
 
-This demo is configured using the HttpServer API and is a good
-example of coded configuration. The same demo is configured by the
-xml files etc/admin.xml etc/demo.xml and can be run with the command:
+This demo is configured using XML files. The same demo is configured
+in code by the org.mortbay.jetty.Demo class and can be  run with the command:
 
-  java org.mortbay.jetty.Server etc/admin.xml etc/demo.xml
+  java org.mortbay.jetty.Demo
 
 
 There is also a Unix start/stop script bin/jetty.sh which can run
@@ -99,6 +101,10 @@ an /etc/init.d script and also looks for xml config files in
 
 Configuring the Server
 ======================
+
+The demo server contains a tutorial on Jetty and other documentation
+that should be read before trying to configure Jetty.
+
 The class org.mortbay.jetty.Server reads an xml configuration
 file and configures one or more instances of org.mortbay.http.HttpServer:
 

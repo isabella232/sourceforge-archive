@@ -8,13 +8,13 @@
 
 The <a href="/javadoc/org/mortbay/http/HttpServer.html">org.mortbay.http.HttpServer</a> class provides a connection between a collection of request listeners and collections of request handlers:
 <PRE>
-  HttpListener --&gt; HttpServlet --&gt; HandlerContext --&gt; HttpHandler
+  HttpListener --&gt; HttpServer --&gt; HandlerContext --&gt; HttpHandler
 </PRE>
 A simple example of this to have single SocketListener listening for normal HTTP requests and a ResourceHandler serving static content:
 
 <PRE>
-  SocketListener --&gt; HttpServlet --&gt; HandlerContext --&gt; ResourceHandler
-   port: 80                              "/"            "./docroot"
+  SocketListener --&gt; HttpServer --&gt; HandlerContext --&gt; ResourceHandler
+   port: 80                             "/"            "./docroot"
 </PRE>
 
 <FONT Size=+1><B>HTTP Listeners</B></FONT><BR>
@@ -23,8 +23,8 @@ Implementations of the <a href="/javadoc/org/mortbay/http/HttpListener.html">org
 Multiple listeners may be used to listen on different ports or specific IP addresses.  This is most frequently used for SSL or multi-hosting:
 
 <PRE>
-  SocketListener -+&gt; HttpServlet --&gt; HandlerContext --&gt; ResourceHandler
-   port: 80       |                      "/"            "./docroot"
+  SocketListener -+&gt; HttpServer --&gt; HandlerContext --&gt; ResourceHandler
+   port: 80       |                     "/"            "./docroot"
   JSSEListener   -+ 
    port: 443      |                      
   SocketListener -+ 
@@ -74,11 +74,11 @@ A <a href="/javadoc/org/mortbay/http/HandlerContext.html">org.mortbay.http.Handl
 <a href="/javadoc/org/mortbay/http/HttpHandler.html">org.mortbay.http.HttpHandler</a> implementations, which are tried in turn until a request is handled.  Typically a context might have a security, servlet and resource handler:
 
 <PRE>
-  SocketListener --&gt; HttpServlet --&gt; HandlerContext +-&gt; SecurityHandler
-   port: 80                              "/"        |
-                                                    +-&gt; ServletHandler
-                                                    |
-                                                    +-&gt; ResourceHandler
+  SocketListener --&gt; HttpServer --&gt; HandlerContext +-&gt; SecurityHandler
+   port: 80                             "/"        |
+                                                   +-&gt; ServletHandler
+                                                   |
+                                                   +-&gt; ResourceHandler
 </PRE>
 
 HttpHandlers within a HandlerContext share the following attributes:<UL>
@@ -88,7 +88,7 @@ HttpHandlers within a HandlerContext share the following attributes:<UL>
 <LI>A resource base for loading static resources (files).
 <LI>A ClassLoader and set of java Permissions.
 <LI>A request log.
-<LI>Statistics
+<LI>Statisticsy
 <LI>Error page mappings.
 <LI>MIME type suffix maps. 
 </UL>
@@ -96,32 +96,32 @@ HttpHandlers within a HandlerContext share the following attributes:<UL>
 Multiple contexts are typically used to server several applications from the same port(s) using URL mappings:
 
 <PRE>
-  SocketListener --&gt; HttpServlet +-&gt; HandlerContext --&gt; HttpHandler(s)
-   port: 80                      |       path: /contextpath1/*
-                                 +-&gt; HandlerContext --&gt; HttpHandler(s)
-                                         path: /contextpath2/*           
+  SocketListener --&gt; HttpServer +-&gt; HandlerContext --&gt; HttpHandler(s)
+   port: 80                     |       path: /contextpath1/*
+                                +-&gt; HandlerContext --&gt; HttpHandler(s)
+                                        path: /contextpath2/*           
 </PRE>
 
 Or virtual hosts:
 
 
 <PRE>
-  SocketListener --&gt; HttpServlet +-&gt; HandlerContext --&gt; HttpHandler(s)
-   port: 80                      |    host: www.acme.com
-                                 |    path: /
-                                 +-&gt; HandlerContext --&gt; HttpHandler(s)
-                                         host: www.myacme.org
-                                         path: /
+  SocketListener --&gt; HttpServer +-&gt; HandlerContext --&gt; HttpHandler(s)
+   port: 80                     |    host: www.acme.com
+                                |    path: /
+                                +-&gt; HandlerContext --&gt; HttpHandler(s)
+                                        host: www.myacme.org
+                                        path: /
 </PRE>
 If multiple contexts are to be served from the same port, but on different 
 IP addresses, then each context may be given its own HttpServer:
 
 <PRE>
-  SocketListener --&gt; HttpServlet --&gt; HandlerContext --&gt; HttpHandler(s)
-   host: www.acme.com                    path: /
+  SocketListener --&gt; HttpServer --&gt; HandlerContext --&gt; HttpHandler(s)
+   host: www.acme.com                   path: /
    port: 80  
-  SocketListener --&gt; HttpServlet --&gt; HandlerContext --&gt; HttpHandler(s)
-   host: www.myacme.org                  path: /
+  SocketListener --&gt; HttpServer --&gt; HandlerContext --&gt; HttpHandler(s)
+   host: www.myacme.org                 path: /
    port: 80                              
 </PRE>
 

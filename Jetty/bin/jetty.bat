@@ -1,335 +1,173 @@
 @echo off
+:: ===========================================================
+:: RunJetty.bat
+:: ===========================================================
+:: This batch file initializes the environment and runs the 
+:: Jetty web server under Windows NT. It uses Windows NT cmd
+:: extensions and does not work under Window 9x. 
 ::
-:: Startup script for jetty under *nix systems (it works under NT\cygwin too).
 ::
-:: Configuration files
+:: USAGE: 
+:: runjetty [configuration files]
+:: Example: jetty.bat etc\admin.xml etc\demo.xml
 ::
-:: %HOME%\.jettyrc
-::   If found, it is called at the start of batch file. It may perform
-::   any sequence of commands, like setting relevant environment variables.
+:: ENVIRONMENT VARIABLES:
+:: The following environment variables should be set to use this
+:: batch file. These can be set jettyenv.bat file which willed
+:: be called if found in the current working directory.
 ::
-:: %JETTY_HOME%\etc\jetty.conf (NOTE: !!! THIS IS NOT WORKING AT THE MOMENT !!!)
-::   If found, and no configurations were given on the command line,
-::   the file will be used as this script's configuration.
-::   Each line in the file may contain:
-::     - A comment denoted by the pound (#) sign as first non-blank character.
-::     - The path to a regular file, which will be passed to jetty as a
-::       config.xml file.
-::     - The path to a directory. Each *.xml file in the directory will be
-::       passed to jetty as a config.xml file.
+:: JAVA_HOME - this should be set to the directory that the 
+:: Java Developers Kit or JDK has been installed.
+:: Example: set JAVA_HOME=c:\jdk1.3
 ::
-::   The files will be checked for existence before being passed to jetty.
+:: JETTY_HOME - this should be set to the base installation directory
+:: where the Jetty server was installed.  The batch file will try to set
+:: this on its own by looking for the jetty.jar file in the lib
+:: subdirectory.
+:: Example: set JETTY_HOME=c:\Jetty-3.1.RC9
 ::
-:: Configuration variables
+:: JETTY_LOG - (Optional) this should be the full name of the subdirectory
+:: that should be used by Jetty for storing log files.  If it is not 
+:: provided then the logs directory below JETTY_HOME will be created 
+:: if needed and used.
 ::
-:: JAVA_HOME
-::   Home of Java installation. This needs to be set as this script
-::   will not look for it.
+:: JETTY_OPTIONS - (Optional) Any options to be passed to the JVM 
+::                 can be set in this variable.  It will have appended 
+::                 to it
+:: -Djetty.home=%JETTY_HOME% -Djetty.logs=%JETTY_LOG%
 ::
-:: JAVA
-::   Command to invoke Java. If not set, %JAVA_HOME%\bin\java will be
-::   used.
+:: NOTES: 
+:: -  etc\admin.xml file is always prepended to each set of arguments
 ::
-:: JETTY_HOME
-::   Where Jetty is installed. If not set, the script will try go
-::   guess it by first looking at the invocation path for the script,
-::   and then by looking in standard locations as %HOME%\opt\jetty
-::   and \opt\jetty. The java system property "jetty.home" will be
-::   set to this value for use by configure.xml files, f.e:
+:: -  The drive and directory are changed during execution of the batch file
+::    to make JETTY_HOME the current working directory.  The original drive
+::    and directory are restored when Jetty is stopped and the batch file 
+::    is completed.
 ::
-::    <Arg><SystemProperty name="jetty.home" default="."\>\webapps\jetty.war<\Arg>
-::
-:: JETTY_LOG
-::   Where jetty logs should be stored. The only effect of this
-::   variable is to set the "jetty.log" java system property so
-::   configure.xml files can use it, f.e.:
-::
-::     <Arg><SystemProperty name="jetty.log" default=".\logs"\>\yyyy_mm_dd.request.log<\Arg>
-::
-::   This variable will be tipically set to something like \var\log\jetty. If
-::   not set, it will default to %JETTY_HOME%\logs
-::
-:: JETTY_RUN
-::   Where temporary files should be stored. It defaults to %TMP%.
-::
-:: $Id$
-::
+:: Created by John T. Bell
+:: j_t_bell@yahoo.com
+:: September 14th, 2001
+:: ===========================================================
+rem ===========================================================
+rem == save environment variables
+rem ===========================================================
+setlocal
+set x_PATH=%path%
+set x_CP=%CP%
 
-rem setlocal
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Get the action & configs
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-set ACTION=%1
-set ARGS=%2 %3 %4 %5 %6 %7 %8 %9
-set CONFIGS=
+rem ===========================================================
+rem == save the current directory and drive
+rem ===========================================================
+for /F %%i in ('cd') do set x_PWD=%%i
+set x_DRIVE=%x_PWD:~0,2%
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Check for JAVA_HOME
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-if not x=="x%JAVA_HOME%" goto have_java_home
-  echo "** ERROR: JAVA_HOME variable not set. Sorry, can't find java command."
-  goto ERROR
-:have_java_home
+rem ===========================================================
+rem == Look for batch file to set environment variables
+rem ===========================================================
+IF EXIST jettyenv.bat CALL jettyenv.bat
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-:: See if there's a user-specific configuration file
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-if not exist %HOME%\.jettyrc  goto no_jettyrc
-  call "%HOME%\.jettyrc"
-:no_jettyrc
+rem ===========================================================
+rem == check for JAVA_HOME environment variable
+rem ===========================================================
+if NOT "%JAVA_HOME%"=="" goto got_java_home
+        echo The environment variable JAVA_HOME must be set.
+        goto done
+:got_java_home
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Jetty's hallmark
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-set JETTY_JAR=lib\org.mortbay.jetty.jar
+rem == if JETTY_HOME is not set
+if NOT "%JETTY_HOME%"=="" goto got_jetty_home
+rem ==   set JETTY_HOME to the current directory
 
+rem ===========================================================
+rem == try to set JETTY_HOME by looking for the jetty.jar file
+rem ===========================================================
+if EXIST .\lib\org.mortbay.jetty.jar goto found_jar
+cd ..
+if EXIST .\lib\org.mortbay.jetty.jar goto found_jar
+        echo The environment variable JETTY_HOME must be set!
+        goto done
+:found_jar
+        for /F %%i in ('cd') do set JETTY_HOME=%%i
+:endif1
 
-goto check_home_jetty
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-:: if no JETTY_HOME, search likely locations.
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-if not x=="x%JETTY_HOME%" goto check_home_jetty
-   ::@TODO Find a way to search for the jetty directory
-   if not exist .\%JETTY_JAR% goto check_parent_dir
-   set JETTY_HOME=.
-   :check_parent_dir
-   if not exist ..\%JETTY_JAR% goto check_home_jetty
-   set JETTY_HOME=..
-   :: add other likely locations here
+:got_jetty_home
+rem ===========================================================
+rem == get Drive information
+rem ===========================================================
+set JETTY_DRIVE=%JETTY_HOME:~0,2%
+echo JETTY_HOME is set to %JETTY_HOME%
+echo JETTY_DRIVE is set to %JETTY_DRIVE%
 
-:check_home_jetty
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-:: No JETTY_HOME yet? We're out of luck!
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-if not x=="x%JETTY_HOME%" goto check_jar_jetty
-    echo "** ERROR: JETTY_HOME not set correctly, you need to set it or install in a standard location"
-    goto ERROR
+rem ===========================================================
+rem == Change directory to the JETTY_HOME root directory.
+rem == JTB: I have had problems with Jetty working unJETTY_DRIVE%
+cd %JETTY_HOME%
 
-:check_jar_jetty
-if exist "%JETTY_HOME%\%JETTY_JAR%" goto have_home_jetty
-   echo "** ERROR: Oops! %JETTY_HOME%\%JETTY_JAR% is not readable!"
-   goto ERROR
-
-:have_home_jetty
-::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Get the list of config.xml files from the command line.
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if x==x%ARGS% goto no_args
-    set CONFIGS=%ARGS%
-:no_args
-
-::@TODO Find a way to parse jetty.conf
-goto no_conf_jetty
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Try to find this script's configuration file,
-:: but only if no configurations were given on the
-:: command line.
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-if x=="x%JETTY_CONF%" set JETTY_CONF=%JETTY_HOME%\etc\jetty.conf
-
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Read the configuration file if one exists
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-set CONFIG_LINES=
-if not x=="x%CONFIGS%" goto have_configs
-  if not exist "%JETTY_CONF%" goto no_conf_jetty
-     for /f %%L in (%JETTY_CONF%) do set CONFIG_LINES=%CONFIG_LINES% %%L
-
-
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Get the list of config.xml files from jetty.conf
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-if not x==x%CONFIG_LINES (
-  for /f %%C in (%CONFIG_LINES%) do (
-    if not exist "%%C" (
-      echo "** WARNING: Cannot read '%%C' specified in '%JETTY_CONF%'
-    ) else (
-    if not exist "%%C\*.xml" (
-      :: assume it's a configure.xml file
-      set CONFIGS=%CONFIGS% %%C
-    ) else (
-      :: assume it's a directory with configure.xml files
-      :: for example: /etc/jetty.d/
-      :: sort the files before adding them to the list of CONFIGS
-      for %%F in ("%%C\*.xml") do (
-         if exist "%%FILE" (
-            set CONFIGS=%CONFIGS% %%F
-         ) else (
-           echo ** WARNING: Cannot read '%%F' specified in '%JETTY_CONF%'
-         )
-      )
-    )
-  )
-)
-
-:no_conf_jetty
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Run the demo server if there's nothing else to run
-::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if not x=="x%CONFIGS%" goto have_configs
-  set CONFIGS=%JETTY_HOME%\etc\demo.xml %JETTY_HOME%\etc\admin.xml
-
-
-:have_configs
-echo CONFIGS=%CONFIGS%
-
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Check where logs should go.
-::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if x=="x%JETTY_LOG%" set JETTY_LOG=%JETTY_HOME%\logs
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Find a location for the pid file
-:::::::::::::::::::::::::::::::::::::::::::::::::::::
-if x==x%JETTY_RUN% set JETTY_RUN=%TEMP%
-
-
-
-
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Determine which JVM of version >1.2
-:: Try to use JAVA_HOME
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-if x==x%JAVA% (
-  if not x==x%JAVACMD% (
-     set JAVA="%JAVACMD%"
-  ) else (
-    if exist %JAVA_HOME%\bin\jre (
-      set JAVA=%JAVA_HOME%\bin\jre
-    ) else (
-       set JAVA=%JAVA_HOME%\bin\java
-    )
-  )
-)
-
-
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Build the classpath with Jetty's bundled libraries.
-::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
+rem ===========================================================
+rem == set CLASSPATH
+rem ===========================================================
 set CP=%JETTY_HOME%\lib\javax.servlet.jar
-
+set CP=%CP%;%JETTY_HOME%\lib\javax.servlet.jar
 set CP=%CP%;%JETTY_HOME%\lib\org.mortbay.jetty.jar
-set CP=%CP%;%JETTY_HOME%\lib\org.mortbay.http.jar
 set CP=%CP%;%JETTY_HOME%\lib\javax.xml.jaxp.jar
 set CP=%CP%;%JETTY_HOME%\lib\org.apache.crimson.jar
+set CP=%CP%;%JETTY_HOME%\lib\org.apache.jasper.jar
+set CP=%CP%;%JETTY_HOME%\lib\com.sun.net.ssl.jar
+set CP=%CP%;%JAVA_HOME%\lib\tools.jar
 
-if exist "%JETTY_HOME%\LIB\org.apache.jasper.jar"  set CP=%CP%;%JETTY_HOME%\lib\org.apache.jasper.jar
-if exist "%JETTY_HOME%\LIB\com.sun.net.ssl.jar"    set CP=%CP%;%JETTY_HOME%\lib\com.sun.net.ssl.jar
-if exist "%JAVA_HOME%\lib\tools.jar"               set CP=%CP%;%JAVA_HOME%\lib\tools.jar
+rem ===========================================================
+rem == check for and set command line args
+rem ===========================================================
 
+if "%1"=="" (
+    set ARGS="%JETTY_HOME%\etc\admin.xml" "%JETTY_HOME%\etc\demo.xml"
+) else (
+  set ARGS="%1"
+  shift
+)
+rem == append command line arguments on ARGS
+:setargs
+if NOT "%1"=="" (set ARGS=%ARGS% "%1" & shift & goto setargs)
+echo ARGS=%ARGS%
 
-::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Add jetty properties to Java VM options.
-::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set JAVA_OPTIONS=-Djetty.home="%JETTY_HOME%" -Djetty.log="%JETTY_LOG%" %JAVA_OPTIONS%
+rem ===========================================================
+rem == check for log directory
+rem ===========================================================
+if NOT "%JETTY_LOG%"=="" goto found_logs
+dir /b /ad | find /I "logs" >NUL
+if ERRORLEVEL 0 goto found_logs
+        mkdir logs
+        set JETTY_LOG=%JETTY_HOME%\logs
+:found_logs
 
+rem ===========================================================
+rem == build jvm options
+rem ===========================================================
+set OPTIONS=-Djetty.home="%JETTY_HOME%" -Djetty.log="%JETTY_LOG%"
+if DEFINED JETTY_OPTIONS set OPTIONS=%OPTIONS% %JETTY_OPTIONS%
 
+rem ===========================================================
+rem == build run commands
+rem ===========================================================
+set RUNJETTY=%JAVA_HOME%\bin\java -cp "%CP%" %OPTIONS% org.mortbay.jetty.Server %ARGS%
 
-::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: This is how the Jetty server will be started
-::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set RUN_CMD=%JAVA% -classpath "%CP%;%CLASSPATH%" %JAVA_OPTIONS% org.mortbay.jetty.Server %CONFIGS%
+rem ===========================================================
+rem == change to the correct directory and run jetty
+rem ===========================================================
 
+echo RUNJETTY=%RUNJETTY%
+%RUNJETTY%
 
-
-
-::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Comment these out after you're happy with what
-:: the script is doing.
-::::::::::::::::::::::::::::::::::::::::::::::::::::::
-echo JETTY_HOME     =  %JETTY_HOME%
-echo JETTY_CONF     =  %JETTY_CONF%
-echo JETTY_LOG      =  %JETTY_LOG%
-echo JETTY_RUN      =  %JETTY_RUN%
-echo CONFIGS        =  %CONFIGS%
-echo PATH_SEPARATOR =  %PATH_SEPARATOR%
-echo JAVA_OPTIONS   =  %JAVA_OPTIONS%
-echo JAVA           =  %JAVA%
-echo CLASSPATH      =  %CLASSPATH%
-echo RUN_CMD        =  %RUN_CMD%
-
-
-
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Do the action
-:::::::::::::::::::::::::::::::::::::::::::::::::::
-
-if not "%ACTION%"=="start" goto try_stop
-        echo "Starting Jetty: "
-        echo "STARTED %date%" >>%JETTY_LOG%\jetty.out 
-        echo "RUN_CMD %RUN_CMD%" >> %JETTY_LOG%\jetty.out
-        start %RUN_CMD% >> %JETTY_LOG%\jetty.out
-        goto END
-
-:try_stop
-if not "%ACTION%"=="stop" goto try_restart
-        echo "Shutting down Jetty: "
-
-        rem @TODO stop the server here
-        del /q /f %JETTY_RUN%\jetty.pid
-        echo "STOPPED `date`" >> %JETTY_LOG%\jetty.out
-        goto END
-
-:try_restart
-if not "%ACTION%"=="restart" goto try_run
-        %0 stop %*
-        sleep 5
-        %0 start %*
-        goto END
-
-:try_run
-if not "%ACTION%"=="run" goto try_service
-        echo "Running Jetty: "
-        echo "STARTED `date`" >>%JETTY_LOG%\jetty.out
-        %RUN_CMD%
-        goto END
-
-:try_service
-if not "%ACTION%"=="service" goto try_check
-        echo "Running Jetty as Service: "
-        echo "Made service `date`" >>%JETTY_LOG%\jetty.out
-        set JAVA_DLL_PATH=%JAVA_HOME%\jre\bin
-        set JVM_PATH=%JAVA_DLL_PATH%\hotspot
-        if exist %JVM_PATH%\jvm.dll goto run_service
-        set JVM_PATH=%JAVA_DLL_PATH%\classic
-        if exist %JVM_PATH%\jvm.dll goto run_service
-        set JVM_PATH=%JAVA_DLL_PATH%
-
-        :run_service
-        set PATH=%JVM_PATH%;%PATH%
-        copy %JETTY_HOME%\win32\service\jettysvc.exe %JVM_PATH%
-        set RUN_CMD=%JVM_PATH%\jettysvc.exe -i -Djava.class.path=%CLASSPATH% -Djetty.home=%JETTY_HOME% -Djetty.log=%JETTY_LOG% %CONFIGS% wrkdir=%JETTY_HOME%
-		  echo %RUN_CMD%
-        %RUN_CMD%
-        goto END
-
-:try_check
-if not "%ACTION%"=="check" goto no_action
-        echo "Checking arguments to Jetty: "
-        :: do nothing
-        goto END
-
-:no_action
-echo "Usage: %0 {start|stop|run|restart|service|check} [ CONFIGS ... ] "
-goto ERROR
-
-:ERROR
-
-:END
-set CP=
-set CONFIGS=
-set JAVA_OPTIONS=
-set JAVA=
-set RUN_CMD=
-rem endlocal
-
-
-
-
-
-
-
+:done
+@echo off
+rem ===========================================================
+rem == clean up our toys
+rem ===========================================================
+%x_DRIVE%
+cd %x_PWD%
+set PATH=%x_PATH%
+set CP=%x_CP%
+set ARGS=
+set OPTIONS=
+set RUNJETTY=
+endlocal

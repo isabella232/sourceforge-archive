@@ -306,13 +306,14 @@ public class ResourceHandler extends NullHandler
             {
                 cachedFile= (CachedFile)_cacheMap.get(resource.toString());
 
-                if (cachedFile!=null && cachedFile.isValid() &&
-                    !passConditionalHeaders(request,response,cachedFile.resource))
-                    return;
+                if (cachedFile!=null && !cachedFile.isValid())
+                    cachedFile=null;
             }
 
             if (cachedFile != null)
             {
+                if (!passConditionalHeaders(request,response,cachedFile.resource))
+                    return;
                 Code.debug("Cache hit: ",resource);
                 sendData(request, response, cachedFile);
                 return;

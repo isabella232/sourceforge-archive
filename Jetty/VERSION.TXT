@@ -4,6 +4,8 @@ Jetty3 Versions
  + Added HandlerContext.registerHost
  + Added long overdue Tutorial documentation.
  + Improved some documentation.
+ + New simplified jetty.bat
+ + Fix ResourceHandler cache invalidate.
  + Fix ServletResponse.setLocale()
  + Fix reuse of Resource
  + Fix Jetty.bat for spaces.
