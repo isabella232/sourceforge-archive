@@ -44,6 +44,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpResponse;
+import org.mortbay.http.PathMap;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
@@ -115,7 +116,9 @@ public class WebApplicationHandler extends ServletHandler
         return holder;
     }
 
-    public void addFilterHolder(FilterHolder holder) {
+    /* ------------------------------------------------------------ */
+    public void addFilterHolder(FilterHolder holder) 
+    {
         _filterMap.put(holder.getName(), holder);
         _filters.add(holder);
         addComponent(holder);
@@ -128,62 +131,47 @@ public class WebApplicationHandler extends ServletHandler
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     * Add a servlet filter
-     * @param servletName The name of the servlet to be filtered.
-     * @param filterName The name of the filter.
+    /** Add a mapping from a pathSpec to a Filter.
+     * @param pathSpec The path specification
+     * @param filterName The name of the filter (must already be added or defined)
+     * @param dispatches An integer formed by the logical OR of FilterHolder.__REQUEST,
+     *  FilterHolder.__FORWARD,FilterHolder.__INCLUDE and/or FilterHolder.__ERROR.
      * @return The holder of the filter instance.
      */
-    public FilterHolder mapServletToFilter(String servletName, String filterName)
+    public FilterHolder addFilterPathMapping(String pathSpec, String filterName, int dispatches)
+    {
+        FilterHolder holder = (FilterHolder)_filterMap.get(filterName);
+        if (holder==null)
+            throw new IllegalArgumentException("unknown filter: "+filterName);
+        
+        FilterMapping mapping = new FilterMapping(pathSpec,holder,dispatches);
+        _pathFilters.add(mapping);
+        return holder;
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Add a servlet filter mapping
+     * @param servletName The name of the servlet to be filtered.
+     * @param filterName The name of the filter.
+     * @param dispatches An integer formed by the logical OR of FilterHolder.__REQUEST,
+     *  FilterHolder.__FORWARD,FilterHolder.__INCLUDE and/or FilterHolder.__ERROR.
+     * @return The holder of the filter instance.
+     */
+    public FilterHolder addFilterServletMapping(String servletName, String filterName, int dispatches)
     {
         FilterHolder holder= (FilterHolder)_filterMap.get(filterName);
         if (holder == null)
             throw new IllegalArgumentException("Unknown filter :" + filterName);
-        if (log.isDebugEnabled())
-            log.debug("Filter servlet " + servletName + " --> " + filterName);
-        mapServletToFilter(servletName, holder);
-        holder.addServlet(servletName);
+        _servletFilterMap.add(servletName, new FilterMapping(null,holder,dispatches));
         return holder;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * Register that a Filter is applied to a Servlet. 
-     * @param servletName the name of the Servlet the filter applies to.
-     * @param holder the FilterHolder that will be applied to calls to the Servlet.
-     */
-    public void mapServletToFilter(String servletName, FilterHolder holder) 
-    {
-        _servletFilterMap.add(servletName, holder);
     }
 
     /* ------------------------------------------------------------ */
     public List getFilters()
     {
         return _filters;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Map path to Filter.
-     * @param pathSpec The pathSpec to map.
-     * @param filterName The name of the filter.
-     * @return The holder of the filter instance.
-     */
-    public FilterHolder mapPathToFilter(String pathSpec, String filterName)
-    {
-        FilterHolder holder= (FilterHolder)_filterMap.get(filterName);
-        if (holder == null)
-            throw new IllegalArgumentException("Unknown filter :" + filterName);
-
-        if (log.isDebugEnabled())
-            log.debug("Filter path " + pathSpec + " --> " + filterName);
-
-        if (!holder.isMappedToPath())
-            _pathFilters.add(holder);
-        
-        holder.addPathSpec(pathSpec);
-
-        return holder;
     }
 
 
@@ -494,9 +482,9 @@ public class WebApplicationHandler extends ServletHandler
             {
                 for (int i= 0; i < _pathFilters.size(); i++)
                 {
-                    FilterHolder holder= (FilterHolder)_pathFilters.get(i);
-                    if (holder.appliesToPath(pathInContext, requestType))
-                        filters= LazyList.add(filters, holder);
+                    FilterMapping mapping = (FilterMapping)_pathFilters.get(i);
+                    if (mapping.appliesTo(pathInContext, requestType))
+                        filters= LazyList.add(filters, mapping.getHolder());
                 }
             } 
             else if (jsr154Filter!=null)
@@ -510,24 +498,11 @@ public class WebApplicationHandler extends ServletHandler
             if (servletHolder != null && _servletFilterMap.size() > 0)
             {
                 Object o= _servletFilterMap.get(servletHolder.getName());
-                if (o != null)
+                for (int i=0; i<LazyList.size(o);i++)
                 {
-                    if (o instanceof List)
-                    {
-                        List list= (List)o;
-                        for (int i= 0; i < list.size(); i++)
-                        {
-                            FilterHolder holder= (FilterHolder)list.get(i);
-                            if (holder.appliesToServlet(servletHolder.getName(),requestType))
-                                filters=LazyList.add(filters, holder);
-                        }
-                    }
-                    else
-                    {
-                        FilterHolder holder= (FilterHolder)o;
-                        if (holder.appliesToServlet(servletHolder.getName(),requestType))
-                            filters=LazyList.add(filters, holder);
-                    }
+                    FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
+                    if (mapping.appliesTo(null,requestType))
+                        filters=LazyList.add(filters,mapping.getHolder());
                 }
             }
         
@@ -633,6 +608,43 @@ public class WebApplicationHandler extends ServletHandler
             removeComponent(sh);
         }
     }
+    
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private static class FilterMapping
+    {
+        private String _pathSpec;
+        private FilterHolder _holder;
+        private int _dispatches;
+
+        /* ------------------------------------------------------------ */
+        FilterMapping(String pathSpec,FilterHolder holder,int dispatches)
+        {
+            _pathSpec=pathSpec;
+            _holder=holder;
+            _dispatches=dispatches;
+        }
+
+        /* ------------------------------------------------------------ */
+        FilterHolder getHolder()
+        {
+            return _holder;
+        }
+        
+        /* ------------------------------------------------------------ */
+        /** Check if this filter applies to a path.
+         * @param path The path to check.
+         * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE or __ERROR.
+         * @return True if this filter applies
+         */
+        boolean appliesTo(String path, int type)
+        {
+            boolean b=((_dispatches&type)!=0 || (_dispatches==0 && type==FilterHolder.__REQUEST)) && (_pathSpec==null || PathMap.match(_pathSpec, path));
+           return b;
+        }
+    }
+    
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */

@@ -323,18 +323,17 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
         String filterName=node.getString("filter-name",false,true);
         String pathSpec=node.getString("url-pattern",false,true);
         String servletName=node.getString("servlet-name",false,true);
-        FilterHolder holder=(servletName!=null)
-                ?getWebApplicationHandler().mapServletToFilter(servletName,filterName)
-                :getWebApplicationHandler().mapPathToFilter(pathSpec,filterName);
+        int dispatcher=FilterHolder.__DEFAULT;
         Iterator iter=node.iterator("dispatcher");
         while(iter.hasNext())
         {
-            String dispatcher=((XmlParser.Node)iter.next()).toString(false,true);
-            if (servletName!=null)
-                holder.addDispatchesToServlet(servletName,dispatcher);
-            else
-                holder.addDispatchesToPathSpec(pathSpec, dispatcher);
+            String d=((XmlParser.Node)iter.next()).toString(false,true);
+            dispatcher|=FilterHolder.type(d);
         }
+            
+        FilterHolder holder=(servletName!=null)
+                ?getWebApplicationHandler().addFilterServletMapping(servletName, filterName, dispatcher)
+                :getWebApplicationHandler().addFilterPathMapping(pathSpec, filterName, dispatcher);
     }
 
     /* ------------------------------------------------------------ */

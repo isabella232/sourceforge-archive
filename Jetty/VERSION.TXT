@@ -1,8 +1,10 @@
 Jetty Versions
 --------------
 
+Jetty-5.1.1RC1 
  + Some minor findbugs code cleanups
  + Made more WebApplicationHandle configuration methods public.
+ + Fixed ordering of filters with multiple interleaved mappings.
 
 Jetty-5.1.1RC0 - 17 November 2004
  + fix for adding recognized EventListeners

@@ -86,7 +86,7 @@ public class FilterHolder
     /** Add a type that this filter applies to.
      * @param type "REQUEST", "FORWARD", "INCLUDE" or "ERROR"
      */
-    public void addDispatchesToServlet(String name, String type)
+    public void xaddDispatchesToServlet(String name, String type)
     {
         if (_servlets==null || !_servlets.containsKey(name))
             throw new IllegalStateException();
@@ -97,7 +97,7 @@ public class FilterHolder
     /** Add a type that this filter applies to.
      * @param type "REQUEST", "FORWARD", "INCLUDE" or "ERROR"
      */
-    public void addDispatchesToPathSpec(String pathSpec, String type)
+    public void xaddDispatchesToPathSpec(String pathSpec, String type)
     {
         if (_pathSpecs==null || !_pathSpecs.containsKey(pathSpec))
             throw new IllegalStateException();
@@ -108,7 +108,7 @@ public class FilterHolder
     /** Add A servlet that this filter applies to.
      * @param servlet 
      */
-    public void addServlet(String servlet)
+    public void xaddServlet(String servlet)
     {
         if (_servlets==null)
             _servlets=new HashMap();
@@ -119,7 +119,7 @@ public class FilterHolder
     /** Add A path spec that this filter applies to.
      * @param pathSpec 
      */
-    public void addPathSpec(String pathSpec)
+    public void xaddPathSpec(String pathSpec)
     {
         if (_pathSpecs==null)
             _pathSpecs=new PathMap(true);
@@ -127,7 +127,7 @@ public class FilterHolder
     }
     
     /* ------------------------------------------------------------ */
-    public boolean isMappedToPath()
+    public boolean xisMappedToPath()
     {
         return _pathSpecs!=null;
     }
@@ -138,7 +138,7 @@ public class FilterHolder
      * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE or __ERROR.
      * @return True if this filter applies
      */
-    public boolean appliesToPath(String path, int type)
+    public boolean xappliesToPath(String path, int type)
     {
         if (_pathSpecs==null)
             return false;
@@ -154,7 +154,7 @@ public class FilterHolder
      * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE or __ERROR.
      * @return True if this filter applies
      */
-    public boolean appliesToServlet(String name, int type)
+    public boolean xappliesToServlet(String name, int type)
     {
         if (_servlets==null)
             return false;
@@ -199,7 +199,7 @@ public class FilterHolder
     }
 
     /* ------------------------------------------------------------ */
-    public String[] getPaths()
+    public String[] xgetPaths()
     {
         if (_pathSpecs==null)
             return null;
@@ -208,7 +208,7 @@ public class FilterHolder
     }
     
     /* ------------------------------------------------------------ */
-    public String[] getServlets()
+    public String[] xgetServlets()
     {
         if (_servlets==null)
             return null;
