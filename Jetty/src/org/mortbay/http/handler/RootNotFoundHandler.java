@@ -60,21 +60,21 @@ public class RootNotFoundHandler extends NotFoundHandler
         writer.write("<HTML>\n<HEAD>\n<TITLE>Error 404 - Not Found");
         writer.write("</TITLE>\n<BODY>\n<H2>Error 404 - Not Found.</H2>\n");
         writer.write("No context on this server matched or handled this request.<BR>");
-        writer.write("Contexts known to this server are: <UL>");
+        writer.write("Contexts known to this server are: <ul>");
 
         HttpContext[] contexts = getHttpContext().getHttpServer().getContexts();
         
         for (int i=0;i<contexts.length;i++)
         {
             HttpContext context = contexts[i];
-            writer.write("<LI><A HREF=");
+            writer.write("<li><a href=\"");
             writer.write(context.getContextPath());
-            writer.write(">");
+            writer.write("/\">");
             writer.write(context.toString());
-            writer.write("</A><BR>\n");
+            writer.write("</a></li>\n");
         }
         
-        writer.write("</UL><small><I>The links above may not work if a virtual host is configured</I></small>");
+        writer.write("</ul><small><I>The links above may not work if a virtual host is configured</I></small>");
 
 	for (int i=0;i<10;i++)
 	    writer.write("\n<!-- Padding for IE                  -->");
