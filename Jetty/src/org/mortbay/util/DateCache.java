@@ -14,11 +14,14 @@ import java.util.TimeZone;
 /* ------------------------------------------------------------ */
 /**  Date Format Cache.
  * Computes String representations of Dates and caches
- * the results
- * so that subsequent requests within the same minute will be fast.
+ * the results so that subsequent requests within the same minute
+ * will be fast.
  *
  * Only format strings that contain either "ss" or "ss.SSS" are
  * handled.
+ *
+ * The timezone of the date may be included as an ID with the "zzz"
+ * format string or as an offset with the "ZZZ" format string.
  *
  * If consecutive calls are frequently very different, then this
  * may be a little slower than a normal DateFormat.
@@ -30,14 +33,17 @@ import java.util.TimeZone;
 
 public class DateCache  
 {
-    private String formatString;
-    private SimpleDateFormat minuteFormat;
-    private SimpleDateFormat format;
-    private boolean millis=false;
-    private long lastMinutes = -1;
-    private long lastSeconds = -1;
-    private String lastResult = null;
-        
+    private String _formatString;
+    private SimpleDateFormat _minuteFormat;
+    private SimpleDateFormat _format;
+    private boolean _millis=false;
+    private long _lastMinutes = -1;
+    private long _lastSeconds = -1;
+    private String _lastResult = null;
+
+    private Locale _locale	= null;
+    private DateFormatSymbols	_dfs	= null;
+
     /* ------------------------------------------------------------ */
     /** Constructor.
      * Make a DateCache that will use a default format. The default format
@@ -55,31 +61,72 @@ public class DateCache
      */
     public DateCache(String format)
     {
-        formatString=format;
-        this.minuteFormat=new SimpleDateFormat(mFormat(format));
+        _formatString=format;
+        this._minuteFormat=new SimpleDateFormat(mFormat(format,TimeZone.getDefault()));
     }
     
     /* ------------------------------------------------------------ */
     public DateCache(String format,Locale l)
     {
-        formatString=format;
-        this.minuteFormat=new SimpleDateFormat(mFormat(format),l);
+        _formatString=format;
+		_locale = l;
+        this._minuteFormat=new SimpleDateFormat(mFormat(format,TimeZone.getDefault()),l);
     }
     
     /* ------------------------------------------------------------ */
     public DateCache(String format,DateFormatSymbols s)
     {
-        formatString=format;
-        this.minuteFormat=new SimpleDateFormat(mFormat(format),s);
+        _formatString=format;
+		_dfs = s;
+        this._minuteFormat=new SimpleDateFormat(mFormat(format,TimeZone.getDefault()),s);
     }
 
     /* ------------------------------------------------------------ */
-    private String mFormat(String format)
+    private String getOffsetString( int msOffset )
     {
+        StringBuffer sb = new StringBuffer( "'" );
+        if( msOffset >= 0 )
+            sb.append( '+' );
+        else
+        {
+            msOffset *= -1;
+            sb.append( '-' );
+        }
+        
+        int raw = msOffset / (1000*60);		// Convert to seconds
+        int hr = raw / 60;
+        int min = raw % 60;
+        
+        if( hr < 10 )
+            sb.append( '0' );
+        
+        sb.append( hr );
+        sb.append( ':' );
+        
+        // Would this really ever happen?
+        if( min < 10 )
+            sb.append( '0' );
+        
+        sb.append( min );
+        sb.append( '\'' );
+        
+        return sb.toString();
+    }
+
+    /* ------------------------------------------------------------ */
+    private String mFormat( String format, TimeZone tz )
+    {
+        int zIndex = format.indexOf( "ZZZ" );
+        if( zIndex >= 0 ) {
+            String ss1 = format.substring( 0, zIndex );
+            String ss2 = format.substring( zIndex+3 );			// Add the length of ZZZ
+            format = ss1 + getOffsetString( tz.getRawOffset() ) + ss2;
+        }
+
         int i = format.indexOf("ss.SSS");
         int l = 6;
         if (i>=0)
-            millis=true;
+            _millis=true;
         else
         {
             l=2;
@@ -120,25 +167,25 @@ public class DateCache
         // Check if we are in the same second
         // and don't care about millis
         long seconds = inDate / 1000;
-        if (lastSeconds==seconds && !millis)
-            return lastResult;
+        if (_lastSeconds==seconds && !_millis)
+            return _lastResult;
 
         Date d = new Date(inDate);
         
         // Check if we need a new format string
         long minutes = seconds/60;
-        if (lastMinutes != minutes)
+        if (_lastMinutes != minutes)
         {
-            format=new SimpleDateFormat(minuteFormat.format(d)
+            _format=new SimpleDateFormat(_minuteFormat.format(d)
                                         .replace('@','\''));
-            lastMinutes = minutes;
+            _lastMinutes = minutes;
         }
 
         // Always format if we get here
-        lastSeconds = seconds;
-        lastResult = format.format(d);
+        _lastSeconds = seconds;
+        _lastResult = _format.format(d);
                 
-        return lastResult;
+        return _lastResult;
     }
 
     /* ------------------------------------------------------------ */
@@ -156,13 +203,13 @@ public class DateCache
      */
     public SimpleDateFormat getFormat()
     {
-        return minuteFormat;
+        return _minuteFormat;
     }
 
     /* ------------------------------------------------------------ */
     public String getFormatString()
     {
-        return formatString;
+        return _formatString;
     }
     
     /* ------------------------------------------------------------ */
@@ -171,10 +218,25 @@ public class DateCache
      */
     public void setTimeZone(TimeZone tz)
     {
-        minuteFormat.setTimeZone(tz);
-        if (format!=null)
-            format.setTimeZone(tz);
+        if( _locale != null ) 
+            _minuteFormat = new SimpleDateFormat( mFormat( _formatString, tz ), _locale );
+        else if( _dfs != null ) 
+            _minuteFormat = new SimpleDateFormat( mFormat( _formatString, tz ), _dfs );
+        else 
+            _minuteFormat = new SimpleDateFormat( mFormat( _formatString, tz ) );
+
+        _minuteFormat.setTimeZone(tz);
+        if (_format!=null)
+            _format.setTimeZone(tz);
     }
-}       
-
-
+    
+    /* ------------------------------------------------------------ */
+    /** Set the timezone.
+     * @param tz TimeZoneId the ID of the zone as used by TimeZone.getTimeZone(id)
+     */
+    public void setTimeZoneID(String timeZoneId)
+    {
+        setTimeZone(TimeZone.getTimeZone(timeZoneId));
+    }
+    
+}

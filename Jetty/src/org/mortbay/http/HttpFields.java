@@ -283,6 +283,8 @@ public class HttpFields
     public final static SimpleDateFormat __dateSend = 
         new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'",
                              Locale.US);
+
+    /* ------------------------------------------------------------ */
     private final static String __dateReceiveFmt[] =
     {
         "EEE, dd MMM yyyy HH:mm:ss zzz",

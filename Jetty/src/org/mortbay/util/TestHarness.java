@@ -77,7 +77,7 @@ public class TestHarness
     {
         Test t = new Test("org.mortbay.util.DateCache");
         //                            012345678901234567890123456789
-        DateCache dc = new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'",
+        DateCache dc = new DateCache("EEE, dd MMM yyyy HH:mm:ss zzz ZZZ",
                                      Locale.US);
         dc.setTimeZone(TimeZone.getTimeZone("GMT"));
         try
@@ -88,6 +88,7 @@ public class TestHarness
             {
                 Thread.sleep(100);
                 String date=dc.format(System.currentTimeMillis());
+                System.err.println(date);
                 t.checkEquals(last.substring(0,17),
                               date.substring(0,17),"Same Date");
 
