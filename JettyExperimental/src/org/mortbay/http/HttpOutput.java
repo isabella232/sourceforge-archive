@@ -50,36 +50,67 @@ public class HttpOutput
         _closing=true;
         flush(); 
     }
+    
+    public void sendContinue()
+        throws IOException
+    {
+        if (_outBuffer!=null)
+        {
+            _outBuffer.put(SEND_CONTINUE);
+            while(_outBuffer.length()>0)  // TODO - need to fix these busy loops!
+                _outBuffer.flush();  
+        }
+    }
+    
+    /**
+     * Set the output version.
+     * For responses, the version may differ from that indicated by the header.
+     * @param ordinal HttpVersions ordinal
+     */
+    public void setVersionOrdinal(int ordinal)
+    {
+        _version=ordinal;
+    }
 
     /**
      */
-    private void completeHeader(boolean closing)
+    private void completeHeader()
     {
         if (_contentLength!=UNKNOWN_CONTENT)
             return;
             
         // From RFC 2616  4.4:
         // 1. No body for 1xx, 204, 304 & HEAD response
-        // 2. If Transfer-Encoding!=identity && HTTP/1.1 && !Connection==close then chunk
-        // 3. Content-Length
-        // 4. multipart/byteranges
-        // 5. close
+        // 2. Force content-length?
+        // 3. If Transfer-Encoding!=identity && HTTP/1.1 && !Connection==close then chunk
+        // 4. Content-Length
+        // 5. multipart/byteranges
+        // 6. close
 
         // get common values
-        int version = _header.getVersionOrdinal();
         int status= _header.getStatus();
         Buffer connection = _header.get(HttpHeaders.CONNECTION_BUFFER);
         _close=HttpHeaderValues.CLOSE_BUFFER.equals(connection);
         Buffer transferEncoding = _header.get(HttpHeaders.TRANSFER_ENCODING_BUFFER);
         boolean identity=HttpHeaderValues.IDENTITY_BUFFER.equals(transferEncoding);
         _chunking=HttpHeaderValues.CHUNKED_BUFFER.equals(transferEncoding);
-        
+        _contentLength=_header.getIntField(HttpHeaders.CONTENT_LENGTH_BUFFER);
+              
+              
         // 1. check status
         if (status>=100 && status<=199 || status==204 || status==304)
             _contentLength=NO_CONTENT;
-            
-        // 2. check transfer encoding
-        else if (!identity && version>=HttpVersions.HTTP_1_1_ORDINAL && !_close)
+        
+        // 2. Force content-length
+        else if (!_close && _closing && _contentLength<0)
+        {
+            _contentLength=_buffer.length();
+            ByteArrayBuffer len = new ByteArrayBuffer(12);
+            BufferUtil.putDecInt(len, _contentLength);
+            _header.put(HttpHeaders.CONTENT_LENGTH_BUFFER,len);
+        }
+        // 3. check transfer encoding
+        else if (_contentLength<0 && !identity && _version>=HttpVersions.HTTP_1_1_ORDINAL && !_close)
         {
             _contentLength=CHUNKED_CONTENT;
             if (!_chunking)
@@ -87,44 +118,25 @@ public class HttpOutput
             _header.remove(HttpHeaders.CONTENT_LENGTH_BUFFER);
             _chunking=true;
         }
-        
-        // 3. check content-length
-        else
+        // 4. check content-length
+        else if (_contentLength<0)
         {
-            int content_length=_header.getIntField(HttpHeaders.CONTENT_LENGTH_BUFFER);
-            if (content_length>=0)
-                _contentLength=content_length;
-            else if (content_length<0 && closing)
-            {
-                // We can force the content length
-                _contentLength=_buffer.length();
-                ByteArrayBuffer len = new ByteArrayBuffer(12);
-                BufferUtil.putDecInt(len, _contentLength);
-                _header.put(HttpHeaders.CONTENT_LENGTH_BUFFER,len);
-            }
-            // 4. multipart/byteranges
+            // 5. multipart/byteranges
+            Buffer content_type=_header.get(HttpHeaders.CONTENT_TYPE_BUFFER);
+            if (HttpHeaderValues.MULTIPART_BYTERANGES_BUFFER.equals(content_type))
+                _contentLength=SELF_DEFINING_CONTENT;
+                    
+            // 6. EOF
             else
             {
-                Buffer content_type=_header.get(HttpHeaders.CONTENT_TYPE_BUFFER);
-                if (HttpHeaderValues.MULTIPART_BYTERANGES_BUFFER.equals(content_type))
-                    _contentLength=SELF_DEFINING_CONTENT;
-                    
-                // 5. EOF
-                else
+                _contentLength=EOF_CONTENT;
+                if (!_close)
                 {
-                    _contentLength=EOF_CONTENT;
-                    if (!_close)
-                    {
-                        _header.put(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
-                        _closed=true;
-                    }
+                    _header.put(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
+                    _close=true;
                 }
             }
         }
-        
-        // 1. HEAD response
-        if (_headResponse)
-            _contentLength=DISCARD_CONTENT;
     }
     
     /* 
@@ -138,12 +150,13 @@ public class HttpOutput
         if (!_committed)
         {
             // calculate how to terminate connection.
-            completeHeader(false);
+            completeHeader();
             
             // generate the header buffer.
             // TODO - maybe do this directly to real buffer?
             _headerBuffer.clear();
-            _header.put(_headerBuffer);
+            if (_version>HttpVersions.HTTP_0_9_ORDINAL)
+                _header.put(_headerBuffer);
             _committed=true;
         }
         
@@ -157,18 +170,27 @@ public class HttpOutput
         // handle chunking
         else if (!_flushing && _chunking)
         {  
-            BufferUtil.putHexInt(_headerBuffer,_buffer.length());
-            BufferUtil.putCRLF(_headerBuffer);
+            Buffer trailer=null;
             
-            Buffer trailer=_closing?LAST_CHUNK:CRLF;
+            if (_buffer.length()>0)
+            {
+                BufferUtil.putHexInt(_headerBuffer,_buffer.length());
+                BufferUtil.putCRLF(_headerBuffer);
+            
+                trailer=_closing?CRLF_LAST_CHUNK:CRLF;
+            } else if (_closing)
+                trailer=LAST_CHUNK;
             
             // If there is space, stuff the trailer to avoid
             // copy to trailerBuffer
-            if (_buffer.space()>=trailer.length())
-                _buffer.put(trailer);
-            else
-                _trailerBuffer.put(trailer);
-        }
+            if (trailer!=null)
+            {
+                if (_buffer.space()>=trailer.length())
+                    _buffer.put(trailer);
+                else
+                    _trailerBuffer.put(trailer);
+            } 
+        }  
             
         // Actually do the flush & perhaps close
         _flushing=true;
@@ -179,7 +201,7 @@ public class HttpOutput
                 _headerBuffer.hasContent() ||
                 _outBuffer.hasContent() ||
                 _trailerBuffer.hasContent();
-            
+
             if (!_flushing)
             {
                 if (_closing)
@@ -220,6 +242,11 @@ public class HttpOutput
         return _closed;
     }
     
+    public boolean isPersitent()
+    {
+        return (_outBuffer==null || !_outBuffer.isClosed());
+    }
+    
     public boolean isFlushing()
     {
         return _flushing;
@@ -236,9 +263,10 @@ public class HttpOutput
         _chunking=false;
         _committed=false;
         _flushing=false;
-        _closed=false;
         _close=false;
+        _closed=false;
         _header.clear();
+        _version=HttpVersions.HTTP_1_1_ORDINAL;
 
         _buffer.setPutIndex(_headerBuffer.capacity());
         _buffer.setGetIndex(_headerBuffer.capacity());
@@ -296,9 +324,9 @@ public class HttpOutput
     private Buffer _headerBuffer;
     private Buffer _trailerBuffer;
     private OutBuffer _outBuffer;
+    private int _version=HttpVersions.HTTP_1_1_ORDINAL; 
     
     public static final int 
-        DISCARD_CONTENT=HttpParser.UNKNOWN_CONTENT-2,
         SELF_DEFINING_CONTENT=HttpParser.UNKNOWN_CONTENT-1,
         UNKNOWN_CONTENT=HttpParser.UNKNOWN_CONTENT,
         NO_CONTENT=HttpParser.NO_CONTENT,
@@ -306,7 +334,9 @@ public class HttpOutput
         CHUNKED_CONTENT=HttpParser.CHUNKED_CONTENT;
         
     private static final int CHUNK_HEADER_SIZE=8;
-
-    private static Buffer LAST_CHUNK = new ByteArrayBuffer("\015\0120\015\012\015\012");
+    
     private static Buffer CRLF = new ByteArrayBuffer("\015\012");
+    private static Buffer LAST_CHUNK = new ByteArrayBuffer("0\015\012\015\012");
+    private static Buffer CRLF_LAST_CHUNK = new ByteArrayBuffer("\015\0120\015\012\015\012");
+    private static Buffer SEND_CONTINUE = new ByteArrayBuffer("HTTP/1.1 100 Continue\015\012\015\012");
 }

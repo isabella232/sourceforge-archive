@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -24,7 +25,9 @@ import org.mortbay.io.BufferUtil;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.Portable;
 import org.mortbay.util.DateCache;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.QuotedStringTokenizer;
+import org.mortbay.util.StringMap;
 import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
@@ -663,7 +666,7 @@ public class HttpHeader
         throws NumberFormatException
     {
         Field field = getField(name);
-        if (field!=null)
+        if (field!=null && field._revision==_revision)
             return BufferUtil.toInt(field._value);
         
         return -1;
@@ -680,7 +683,7 @@ public class HttpHeader
         throws NumberFormatException
     {
         Field field = getField(name);
-        if (field!=null)
+        if (field!=null && field._revision==_revision)
             return BufferUtil.toInt(field._value);
         return -1;
     }
@@ -928,6 +931,28 @@ public class HttpHeader
         _fields=null;
     }
     
+    
+    /* ------------------------------------------------------------ */
+    /** Add fields from another HttpFields instance.
+     * Single valued fields are replaced, while all others are added.
+     * @param fields 
+     */
+    public void add(HttpHeader fields)
+    {
+        if (fields==null)
+            return;
+
+        Enumeration enum = fields.getFieldNames();
+        while( enum.hasMoreElements() )
+        {
+            String name = (String)enum.nextElement();
+            Enumeration values = fields.getValues(name);
+            while(values.hasMoreElements())
+                add(name,(String)values.nextElement());
+        }
+    }
+
+
     /* ------------------------------------------------------------ */
     /** Get field value parameters.
      * Some field values can have parameters.  This method separates
@@ -971,25 +996,113 @@ public class HttpHeader
     }
 
     /* ------------------------------------------------------------ */
-    /** Add fields from another HttpFields instance.
-     * Single valued fields are replaced, while all others are added.
-     * @param fields 
-     */
-    public void add(HttpHeader fields)
+    private static Float __one = new Float("1.0");
+    private static Float __zero = new Float("0.0");
+    private static StringMap __qualities=new StringMap();
+    static
     {
-        if (fields==null)
-            return;
-
-        Enumeration enum = fields.getFieldNames();
-        while( enum.hasMoreElements() )
-        {
-            String name = (String)enum.nextElement();
-            Enumeration values = fields.getValues(name);
-            while(values.hasMoreElements())
-                add(name,(String)values.nextElement());
-        }
+        __qualities.put(null,__one);
+        __qualities.put("1.0",__one);
+        __qualities.put("1",__one);
+        __qualities.put("0.9",new Float("0.9"));
+        __qualities.put("0.8",new Float("0.8"));
+        __qualities.put("0.7",new Float("0.7"));
+        __qualities.put("0.66",new Float("0.66"));
+        __qualities.put("0.6",new Float("0.6"));
+        __qualities.put("0.5",new Float("0.5"));
+        __qualities.put("0.4",new Float("0.4"));
+        __qualities.put("0.33",new Float("0.33"));
+        __qualities.put("0.3",new Float("0.3"));
+        __qualities.put("0.2",new Float("0.2"));
+        __qualities.put("0.1",new Float("0.1"));
+        __qualities.put("0",__zero);
+        __qualities.put("0.0",__zero);
     }
 
+    /* ------------------------------------------------------------ */
+    public static Float getQuality(String value)
+    {
+        if (value==null)
+            return __zero;
+        
+        int qe=value.indexOf(";");
+        if (qe++<0 || qe==value.length())
+            return __one;
+        
+        if (value.charAt(qe++)=='q');
+        {
+            qe++;
+            Map.Entry entry=__qualities.getEntry(value,qe,value.length()-qe);
+            if (entry!=null)
+                return (Float)entry.getValue();
+        }
+        
+        HashMap params = new HashMap(3);
+        valueParameters(value,params);
+        String qs=(String)params.get("q");
+        Float q=(Float)__qualities.get(qs);
+        if (q==null)
+        {
+            try{q=new Float(qs);}
+            catch(Exception e){q=__one;}
+        }
+        return q;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** List values in quality order.
+     * @param enum Enumeration of values with quality parameters
+     * @return values in quality order.
+     */
+    public static List qualityList(Enumeration enum)
+    {
+        if(enum==null || !enum.hasMoreElements())
+            return Collections.EMPTY_LIST;
+
+        Object list=null;
+        Object qual=null;
+
+        // Assume list will be well ordered and just add nonzero
+        while(enum.hasMoreElements())
+        {
+            String v=enum.nextElement().toString();
+            Float q=getQuality(v);
+
+            if (q.floatValue()>=0.001)
+            {
+                list=LazyList.add(list,v);
+                qual=LazyList.add(qual,q);
+            }
+        }
+
+        List vl=LazyList.getList(list,false);
+        if (vl.size()<2)
+            return vl;
+
+        List ql=LazyList.getList(qual,false);
+
+        // sort list with swaps
+        Float last=__zero;
+        for (int i=vl.size();i-->0;)
+        {
+            Float q = (Float)ql.get(i);
+            if (last.compareTo(q)>0)
+            {
+                Object tmp=vl.get(i);
+                vl.set(i,vl.get(i+1));
+                vl.set(i+1,tmp);
+                ql.set(i,ql.get(i+1));
+                ql.set(i+1,q);
+                last=__zero;
+                i=vl.size();
+                continue;
+            }
+            last=q;
+        }
+        ql.clear();
+        return vl;
+    }
+    
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -1075,5 +1188,6 @@ public class HttpHeader
                 "]");
         }
     }
+
 
 }

@@ -26,6 +26,7 @@ public class HttpHeaderValues extends BufferCache
         KEEP_ALIVE="keep-alive",
         MULTIPART_BYTERANGES="multipart/byteranges",
         TEXT_HTML="text/html",
+        CONTINUE="100-continue",
         
         CLIENT0="ISO-8859-1,utf-8;q=0.7, *;q=0.7",
         CLIENT1="video/x-mng,image/png,image/jpeg,image/gif;q=0.2,*/*;q=0.1",
@@ -40,7 +41,8 @@ public class HttpHeaderValues extends BufferCache
         IDENTITY_ORDINAL=index++,
         KEEP_ALIVE_ORDINAL=index++,
         MULTIPART_BYTERANGES_ORDINAL=index++,
-        TEXT_HTML_ORDINAL=index++;
+        TEXT_HTML_ORDINAL=index++,
+        CONTINUE_ORDINAL=index++;
 
     public final static HttpHeaderValues CACHE= new HttpHeaderValues();
 
@@ -52,6 +54,7 @@ public class HttpHeaderValues extends BufferCache
         IDENTITY_BUFFER=CACHE.add(IDENTITY,IDENTITY_ORDINAL),
         KEEP_ALIVE_BUFFER=CACHE.add(KEEP_ALIVE,KEEP_ALIVE_ORDINAL),
         TEXT_HTML_BUFFER=CACHE.add(TEXT_HTML,TEXT_HTML_ORDINAL),
+        CONTINUE_BUFFER=CACHE.add(CONTINUE, CONTINUE_ORDINAL),
         MULTIPART_BYTERANGES_BUFFER=CACHE.add(MULTIPART_BYTERANGES,MULTIPART_BYTERANGES_ORDINAL);
         
     static

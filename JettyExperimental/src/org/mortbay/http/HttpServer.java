@@ -35,6 +35,7 @@ public class HttpServer
                     {
                         try
                         {
+                            System.out.println("Open connection: "+socket);
                             HttpConnection connection=
                             new HttpConnection(socket);
                             connection.run();
@@ -43,6 +44,18 @@ public class HttpServer
                         {
                             e.printStackTrace();
                         }
+                        finally
+                        {
+                            System.out.println("Close connection: "+socket);
+                            try
+                            {
+                                socket.close();
+                            }
+                            catch(IOException e)
+                            {
+                                e.printStackTrace();
+                            } 
+                        }  
                     }   
                 }).start();  
             }

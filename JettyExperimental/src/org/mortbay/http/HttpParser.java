@@ -340,9 +340,12 @@ public class HttpParser
                             switch (ho)
                             {
                                 case HttpHeaders.CONTENT_LENGTH_ORDINAL :
-                                    contentLength= BufferUtil.toInt(value);
-                                    if (contentLength <= 0)
-                                        contentLength= HttpParser.NO_CONTENT;
+                                    if (contentLength!=CHUNKED_CONTENT)
+                                    {
+                                        contentLength= BufferUtil.toInt(value);
+                                        if (contentLength <= 0)
+                                            contentLength= HttpParser.NO_CONTENT;
+                                    }
                                     break;
                                 case HttpHeaders.CONNECTION_ORDINAL :
                                     close= (HttpHeaderValues.CLOSE_ORDINAL == vo);
@@ -351,6 +354,14 @@ public class HttpParser
                                 case HttpHeaders.TRANSFER_ENCODING_ORDINAL :
                                     if (HttpHeaderValues.CHUNKED_ORDINAL == vo)
                                         contentLength= CHUNKED_CONTENT;
+                                    else
+                                    {
+                                        String c=value.toString();
+                                        if (c.endsWith(HttpHeaderValues.CHUNKED))
+                                            contentLength= CHUNKED_CONTENT;
+                                        else if (c.indexOf(HttpHeaderValues.CHUNKED)>=0)
+                                            throw new IOException("BAD REQUEST");
+                                    }
                                     break;
 
                                 case HttpHeaders.CONTENT_TYPE_ORDINAL :

@@ -32,6 +32,16 @@ public class HttpOutputStream extends OutputStream
         return _out.getBuffer();
     }
 
+    /**
+     * Set the output version.
+     * For responses, the version may differ from that indicated by the header.
+     * @param ordinal HttpVersions ordinal
+     */
+    public void setVersionOrdinal(int ordinal)
+    {
+        _out.setVersionOrdinal(ordinal);
+    }
+
     /* 
      * @see java.io.OutputStream#close()
      */
@@ -39,12 +49,12 @@ public class HttpOutputStream extends OutputStream
     {
         if (_out.isClosed())
             return;
+            
         _out.close();
         
         while(_out.isFlushing())
             _out.flush();
     }
-
     
     /* 
      * @see java.io.OutputStream#flush()
@@ -53,7 +63,6 @@ public class HttpOutputStream extends OutputStream
     {
         while(!_out.flush());
     }
-
 
     public HttpHeader getHttpHeader()
     {
@@ -68,6 +77,11 @@ public class HttpOutputStream extends OutputStream
         return _out.isCommitted();
     }
     
+    public boolean isPersistent()
+    {
+        return _out.isPersitent();
+    }
+    
     public void resetBuffer()
     {
         _out.resetBuffer();
@@ -76,6 +90,12 @@ public class HttpOutputStream extends OutputStream
     public void setHeadResponse(boolean h)
     {
         _out.setHeadResponse(h);
+    }
+    
+    public void sendContinue()
+        throws IOException
+    {
+        _out.sendContinue();
     }
     
     /* 
