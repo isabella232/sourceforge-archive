@@ -208,7 +208,7 @@ public class Default extends HttpServlet
                         buf.append(q);
                     }
                     response.setHeader(HttpFields.__Location, URI.addPaths(buf.toString(),"/"));
-                    response.setStatus(HttpResponse.__303_See_Other);
+                    response.setStatus(HttpResponse.__302_Moved_Temporarily);
                     response.flushBuffer();
                     return;
                 }

@@ -106,7 +106,7 @@ public class FormAuthenticator implements Authenticator
                     nuri=URI.addPaths(request.getContextPath(),_formErrorPage);
 
                 response.setHeader(HttpFields.__Location,nuri);
-                response.sendError(HttpResponse.__303_See_Other);
+                response.sendError(HttpResponse.__302_Moved_Temporarily);
             }
             else
             {
@@ -114,7 +114,7 @@ public class FormAuthenticator implements Authenticator
                 response.setHeader(HttpFields.__Location,
                                    URI.addPaths(request.getContextPath(),
                                                 _formErrorPage));
-                response.sendError(HttpResponse.__303_See_Other);
+                response.sendError(HttpResponse.__302_Moved_Temporarily);
             }
             
             // Security check is always false, only true after final redirection.
