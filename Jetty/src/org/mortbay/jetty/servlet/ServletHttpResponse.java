@@ -482,6 +482,17 @@ public class ServletHttpResponse implements HttpServletResponse
     }
 
     /* ------------------------------------------------------------ */
+    /**
+    * @deprecated As of version 2.1 of the Servlet spec.
+    * To set a status code 
+    * use <code>setStatus(int)</code>, to send an error with a description
+    * use <code>sendError(int, String)</code>.
+    *
+    * Sets the status code and message for this response.
+    * 
+    * @param status the status code
+    * @param message the status message
+    */
     public void setStatus(int status, String message) 
     {
         setStatus(status);

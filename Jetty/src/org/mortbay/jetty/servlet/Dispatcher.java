@@ -625,6 +625,18 @@ public class Dispatcher implements RequestDispatcher
         }
         
         /* ------------------------------------------------------------ */
+        /**
+        * The default behavior of this method is to call setStatus(int sc, String sm)
+        * on the wrapped response object.
+        * 
+        * @deprecated As of version 2.1 of the Servlet spec.
+        * To set a status code 
+        * use <code>setStatus(int)</code>, to send an error with a description
+        * use <code>sendError(int, String)</code>.
+        * 
+        * @param sc the status code
+        * @param sm the status message
+        */
         public void setStatus(int status, String message)
         {
             if (!_include) super.setStatus(status,message);
