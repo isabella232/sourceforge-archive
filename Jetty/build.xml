@@ -510,7 +510,7 @@
         <include name="etc/simplelog.properties"/>         
         <exclude name="**/CVS/**"/>
       </zipfileset>
-    </tar>
+    </zip>
 
     <zip destfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}-extra.zip" >
       <zipfileset 
@@ -525,7 +525,7 @@
         <exclude name="**/CVS/**"/>
         <exclude name="**/logs/*.log"/>
       </zipfileset>
-    </tar>
+    </zip>
 
     <zip destfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}-src.zip" >
       <zipfileset 
@@ -539,7 +539,7 @@
         <exclude name="**/CVS/**"/>
         <exclude name="**/logs/*.log"/>
       </zipfileset>
-    </tar>
+    </zip>
  
     <zip destfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}-all.zip">
       <zipfileset 
