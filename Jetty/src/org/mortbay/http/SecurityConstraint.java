@@ -25,7 +25,6 @@ public class SecurityConstraint
 {
     /* ------------------------------------------------------------ */
     public final static int
-        DC_NOT_SET=-1,
         DC_NONE=0,
         DC_INTEGRAL=1,
         DC_CONFIDENTIAL=2;
@@ -40,7 +39,7 @@ public class SecurityConstraint
     private List _umMethods;
     private LazyList _roles;
     private List _umRoles;
-    private int _dataConstraint=DC_NOT_SET;
+    private int _dataConstraint=DC_NONE;
     private boolean _anyRole=false;
     private boolean _authenticate=false;
 
@@ -205,7 +204,7 @@ public class SecurityConstraint
      */
     public boolean hasDataConstraint()
     {
-        return _dataConstraint>DC_NOT_SET;
+        return _dataConstraint>DC_NONE;
     }
     
     
@@ -232,7 +231,7 @@ public class SecurityConstraint
     {
         return "SC{"+_name+
             ","+_methods+
-            ","+_roles+
+            ","+(_anyRole?"*":_roles.toString())+
             ","+(_dataConstraint==DC_NONE
                  ?"NONE}"
                  :(_dataConstraint==DC_INTEGRAL?"INTEGRAL}":"CONFIDENTIAL}"));

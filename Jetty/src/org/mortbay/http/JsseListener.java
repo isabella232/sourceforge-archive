@@ -75,6 +75,7 @@ public abstract class JsseListener extends SocketListener
         throws IOException
     {
         super();
+        setDefaultScheme(HttpMessage.__SSL_SCHEME);
     }
 
     /* ------------------------------------------------------------ */
@@ -95,6 +96,7 @@ public abstract class JsseListener extends SocketListener
             p_address.setPort( 443 );
             setPort(443);
         }
+        setDefaultScheme(HttpMessage.__SSL_SCHEME);
     }
 
     /* ------------------------------------------------------------ */
@@ -106,15 +108,6 @@ public abstract class JsseListener extends SocketListener
     public void setNeedClientAuth(boolean needClientAuth)
     {
         _needClientAuth = needClientAuth;
-    }
-
-    /* --------------------------------------------------------------- */
-    /** Returns "https".
-     * @returns "https".
-     */
-    public String getDefaultScheme()
-    {
-        return "https";
     }
     
     /* ------------------------------------------------------------ */

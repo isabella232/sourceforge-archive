@@ -6,6 +6,7 @@
 package org.mortbay.xml;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -65,12 +66,26 @@ public class XmlConfiguration
             if (__parser==null)
             {
                 __parser = new XmlParser();
-                Resource config11Resource=Resource.newSystemResource
-                    ("org/mortbay/xml/configure_1_1.dtd");    
-
+                Resource config12Resource=Resource.newSystemResource
+                    ("org/mortbay/xml/configure_1_2.dtd");
+                Code.assertTrue(config12Resource.exists(),
+                                "org/mortbay/xml/configure_1_2.dtd");
                 __parser.redirectEntity
-                    ("configure.dtd",config11Resource);   
-
+                    ("configure.dtd",config12Resource);
+                __parser.redirectEntity
+                    ("configure_1_2.dtd",
+                     config12Resource);
+                __parser.redirectEntity
+                    ("http://jetty.mortbay.org/configure_1_2.dtd",
+                     config12Resource);
+                __parser.redirectEntity
+                    ("-//Mort Bay Consulting//DTD Configure 1.2//EN",
+                     config12Resource);
+                
+                Resource config11Resource=Resource.newSystemResource
+                    ("org/mortbay/xml/configure_1_1.dtd");
+                Code.assertTrue(config11Resource.exists(),
+                                "org/mortbay/xml/configure_1_1.dtd");
                 __parser.redirectEntity
                     ("configure_1_1.dtd",
                      config11Resource);
@@ -82,7 +97,9 @@ public class XmlConfiguration
                      config11Resource);
 
                 Resource config10Resource=Resource.newSystemResource
-                    ("org/mortbay/xml/configure_1_1.dtd");    
+                    ("org/mortbay/xml/configure_1_0.dtd");  
+                Code.assertTrue(config10Resource.exists(),
+                                "org/mortbay/xml/configure_1_0.dtd");  
                 __parser.redirectEntity
                     ("configure_1_0.dtd",
                      config10Resource);
@@ -526,6 +543,62 @@ public class XmlConfiguration
     
     
     /* ------------------------------------------------------------ */
+    /* Create a new value object.
+     *
+     * @param obj 
+     * @param node 
+     * @return 
+     * @exception NoSuchMethodException 
+     * @exception ClassNotFoundException 
+     * @exception InvocationTargetException 
+     */
+    private Object newArray(Object obj,XmlParser.Node node)
+        throws NoSuchMethodException,
+               ClassNotFoundException,
+               InvocationTargetException,
+               IllegalAccessException
+    {
+        // Get the type
+        Class aClass = java.lang.Object.class;
+        String type = node.getAttribute("type");
+        if (type!=null)
+        {
+            aClass=Primitive.fromName(type);
+            if (aClass==null)
+            {
+                if ("String".equals(type))
+                    aClass=java.lang.String.class;
+                else if ("URL".equals(type))
+                    aClass=java.net.URL.class;
+                else if ("InetAddress".equals(type))
+                    aClass=java.net.InetAddress.class;
+                else if ("InetAddrPort".equals(type))
+                    aClass=org.mortbay.util.InetAddrPort.class;
+                else
+                    aClass=Class.forName(type);
+            }
+        }
+
+        Object array = Array.newInstance(aClass,node.size());
+
+        for (int i=0;i<node.size();i++)
+        {
+            Object o = node.get(i);
+            if (o instanceof String)
+                continue;
+            XmlParser.Node item = (XmlParser.Node)o;
+            if (!item.getTag().equals("Item"))
+                throw new IllegalStateException("Not an Item");
+            Object v=value(obj,item);
+            if (v!=null)
+                Array.set(array,i,v);
+        }
+        
+        return array;
+    }
+    
+    
+    /* ------------------------------------------------------------ */
     /* Get the value of an element.
      * If no value type is specified, then white space is trimmed out of the
      * value. If it contains multiple value elements they are added as
@@ -685,6 +758,8 @@ public class XmlConfiguration
             return get(obj,node);
         if ("New".equals(tag))
             return newObj(obj,node);
+        if ("Array".equals(tag))
+            return newArray(obj,node);
         
         if ("SystemProperty".equals(tag))
         {

@@ -20,6 +20,8 @@ public class TestConfiguration extends HashMap
     public int testInt;
     public URL url;
     public static boolean called=false;
+    public Object[] oa;
+    public int[] ia;
     
     public void setTest(Object value)
     {
@@ -59,6 +61,15 @@ public class TestConfiguration extends HashMap
         called=true;
     }
     
+    public void call(Object[] oa)
+    {
+        this.oa=oa;
+    }
+    
+    public void call(int[] ia)
+    {
+        this.ia=ia;
+    }
 }
 
 

@@ -14,6 +14,7 @@ import java.util.HashMap;
 import org.mortbay.util.Code;
 import org.mortbay.util.Resource;
 import org.mortbay.util.TestCase;
+import org.mortbay.util.InetAddrPort;
 
 
 
@@ -61,21 +62,21 @@ public class TestHarness
             XmlParser parser = new XmlParser();
 
             
-            Resource config11Resource=Resource.newSystemResource
-                ("org/mortbay/xml/configure_1_1.dtd");    
+            Resource config12Resource=Resource.newSystemResource
+                ("org/mortbay/xml/configure_1_2.dtd");    
             
             parser.redirectEntity
-                ("configure.dtd",config11Resource);   
+                ("configure.dtd",config12Resource);   
             
             parser.redirectEntity
-                ("configure_1_1.dtd",
-                 config11Resource);
+                ("configure_1_2.dtd",
+                 config12Resource);
             parser.redirectEntity
-                ("http://jetty.mortbay.org/configure_1_1.dtd",
-                 config11Resource);
+                ("http://jetty.mortbay.org/configure_1_2.dtd",
+                 config12Resource);
             parser.redirectEntity
-                ("-//Mort Bay Consulting//DTD Configure 1.1//EN",
-                 config11Resource);
+                ("-//Mort Bay Consulting//DTD Configure 1.2//EN",
+                 config12Resource);
             
             String url = __userURL+"TestData/configure.xml";
             XmlParser.Node testDoc = parser.parse(url);
@@ -153,6 +154,15 @@ public class TestHarness
 
             t.check(tc.called,"Static called");
 
+            t.checkEquals(tc.oa[0],"Blah","oa[0]");
+            t.checkEquals(tc.oa[1],new InetAddrPort("1.2.3.4:5678"),"oa[1]");
+            t.checkEquals(tc.oa[2],new Double(1.2345),"oa[2]");
+            t.checkEquals(tc.oa[3],null,"oa[3]");
+            
+            t.checkEquals(tc.ia[0],1,"ia[0]");
+            t.checkEquals(tc.ia[1],2,"ia[1]");
+            t.checkEquals(tc.ia[2],3,"ia[2]");
+            t.checkEquals(tc.ia[3],0,"ia[3]");
             
             TestConfiguration tc2=tc.nested;
             t.check(tc2!=null,"Called(bool)");

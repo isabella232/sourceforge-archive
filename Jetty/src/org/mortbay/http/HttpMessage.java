@@ -46,6 +46,10 @@ abstract public class HttpMessage
     };
     
     /* ------------------------------------------------------------ */
+    public final static String __SCHEME ="http";
+    public final static String __SSL_SCHEME ="https";
+    
+    /* ------------------------------------------------------------ */
     public final static String __HTTP_0_9 ="HTTP/0.9";
     public final static String __HTTP_1_0 ="HTTP/1.0";
     public final static String __HTTP_1_1 ="HTTP/1.1";

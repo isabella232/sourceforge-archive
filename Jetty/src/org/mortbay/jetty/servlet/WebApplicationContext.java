@@ -1033,8 +1033,6 @@ public class WebApplicationContext extends ServletHttpContext
             {
                 String role=((XmlParser.Node)iter.next()).toString(false,true);
                 scBase.addRole(role);
-                if (SecurityConstraint.ANY_ROLE.equals(role))
-                    break; // * overrides all roles.
             }
         }
         

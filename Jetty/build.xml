@@ -91,7 +91,8 @@ Other targets:
     <mkdir dir="${etc}/dtd" />
     <copy file="${src}/org/mortbay/xml/configure_1_0.dtd" tofile="${etc}/dtd/configure_1_0.dtd" />
     <copy file="${src}/org/mortbay/xml/configure_1_1.dtd" tofile="${etc}/dtd/configure_1_1.dtd" />
-    <copy file="${src}/org/mortbay/xml/configure_1_1.dtd" tofile="${etc}/dtd/configure.dtd" />
+    <copy file="${src}/org/mortbay/xml/configure_1_2.dtd" tofile="${etc}/dtd/configure_1_2.dtd" />
+    <copy file="${src}/org/mortbay/xml/configure_1_2.dtd" tofile="${etc}/dtd/configure.dtd" />
     <copy file="${src}/javax/servlet/resources/web-app_2_2.dtd" tofile="${etc}/dtd/web-app_2_2.dtd" />
     <copy file="${src}/javax/servlet/resources/web-app_2_3.dtd" tofile="${etc}/dtd/web-app_2_3.dtd" />
     <copy file="${src}/javax/servlet/resources/web-app_2_3.dtd" tofile="${etc}/dtd/web.dtd" />
