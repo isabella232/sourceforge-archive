@@ -4,37 +4,95 @@ By Mort Bay Consulting Pty. Ltd.  http://www.mortbay.com
 
 INSTALLATION
 ============
+
 Jetty comes compiled and ready to go. Unpack the Jetty distribution 
-to a shared locations (/usr/local/Jetty is a good spot).   
+to a shared location and add the Jetty libraries to your CLASSPATH.
 
-The environment variable JETTY_HOME should be set to this directory. 
-For the rest of this README the unix convention of $JETTY_HOME refers 
-to the installed directory path (%JETTY_HOME% on dos/NT/windows).
+On Unix you might install Jetty as follows:
 
-   Unix:
 	cd /usr/local
-	gunzip < Jetty-X.X.X.tgz | tar xfv -
-	JETTY_HOME=/usr/local/Jetty
+	gunzip < Jetty-2.4.7.tgz | tar xfv -
+	JETTY_HOME=/usr/local/Jetty-2.4.7
 	export JETTY_HOME
 
-   Win95,NT:
-	c:
-	cd "\Program Files"
-        winzip Jetty-X.X.X.tgz
-	set JETTY_HOME="c:\Program files\Jetty"
+(Note that the version number will change for later releases).
 
+Then when you want to use the Jetty libraries:
 
-Make sure your CLASSPATH includes all the jar files in
-the $JETTY_HOME/lib directory  e.g.
-
-   Unix:
 	CLASSPATH=$CLASSPATH:$JETTY_HOME/lib/javax.servlet.jar
         CLASSPATH=$CLASSPATH:$JETTY_HOME/lib/com.mortbay.Jetty.jar
         CLASSPATH=$CLASSPATH:$JETTY_HOME/lib/gnujsp.jar
 
+On Windows the procedure is similar:
+
+	unzip -d c:\ Jetty-2.4.7.zip
+	set JETTY_HOME=c:\Jetty-2.4.7
+	
+and:
+
+	set CLASSPATH=%CLASSPATH%;%JETTY_HOME%\lib\javax.servlet.jar
+        set CLASSPATH=%CLASSPATH%;%JETTY_HOME%\lib\com.mortbay.Jetty.jar
+        set CLASSPATH=%CLASSPATH%;%JETTY_HOME%\lib\gnujsp.jar
+
+Note that Jetty itself does not use this (or any) environment variable.
 
 The jsse.jar, jnet.jar and jcert.jar are only required if you
 intend to run or compile the SSL classes.
+
+
+BUILDING JETTY
+==============
+
+If you obtained the Jetty source distribution you will need to build 
+first before you can run Jetty.
+
+
+Building Jetty on Win32
+-----------------------
+On Win32 (i.e. any of Windows 2000/NT/ME/98/95) you can build Jetty using 
+the "build-win32.mak" makefile.  You will need the Cygwin port of the GNU
+tools to perform the build (as stated in the makefile).
+
+To build a complete distribution:
+
+	make -f build-win32.mak
+	
+To build and run the demo (described above):
+
+	make -f build-win32.mak demo
+	
+To build a test "site" (for example to support testing in an IDE):
+
+	make -f build-win32.mak build-site
+	
+
+Building Jetty on Unix
+----------------------
+There are two ways to build Jetty on Unix.
+
+You can build Jetty using the "build-unix.mak" in *exactly* the same 
+manner as for Win32.  The required tools are stated in the makefile.
+
+To build a complete distribution:
+
+	make -f build-unix.mak
+	
+To build and run the demo (described above):
+
+	make -f build-unix.mak demo
+	
+To build a test "site" (for example to support testing in an IDE):
+
+	make -f build-unix.mak build-site
+
+This is probably fastest and easiest way to build Jetty.
+
+You can also build Jetty using the original recursive GNU makefiles.
+Help on the makefile setup can be obtained by with the command:
+
+	make help
+
+Note that some build rules use Unix commands which are not portable.  
 
 
 CONFIGURATION
@@ -104,7 +162,6 @@ included with the release:
   JettyFastestDump.prp
     A configuration for the Dump and dynamically loaded servlets
     with minimal features enabled.
-
 
 
 
@@ -305,7 +362,11 @@ Does Jetty support CGI?
 -----------------------
 There is a CGI servlet in the contrib/uk/org/gosnell/Servlet
 directory.  It is configured into the demo as part of the 
-dump demonstration.
+dump demonstration.  
+
+Note that on Win32 by default this hooks into Windows Scripting 
+Host (WSH) so this is one way to become intimate with Windows 
+without native code or overly polluting your Java code.
 
 
 MISCELLANEOUS
@@ -386,30 +447,6 @@ Virtual Hosts
 The handler com.mortbay.HTTP.Handler.VirtualHostHandler handles 
 virtual hosts by performing a path prefix translation. This is not
 a complete solution but works in many cases.
-
-
-Building Jetty
---------------
-Jetty is built using recursive GNU make files, which should be available
-on most platforms.  Help on the makefile setup can be obtained by with the
-command:
-  make help
-
-Not that some build rules use Unix commands which are not portable.  A 
-portable make file is in progress, but until that time the file 
-src/BuildJetty.java is generated with a link to all Jetty classes.
-Thus JDK's dependancy checking can be used to compile Jetty with the
-commands:
-
-  cd $JETTY_HOME/src
-  javac BuildJetty.java
-
-
-There is a similar BuildContrib.java file for the contributed source
-in the contrib directory.
-
-The build-win32.mak file is a GNU makefile for windows platforms that
-uses the cygnus utilities to build Jetty from BuildJetty.java.
 
 
 COMMON PROBLEMS
