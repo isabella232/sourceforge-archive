@@ -445,16 +445,6 @@ public class Main
                 boolean demo=false;
                 for (int i=0;i<args.length;i++)
                     demo|=args[i].indexOf("demo.xml")>=0;
-                
-                // for demo, try to invoke web browser on Windows
-                if (demo && System.getProperty("os.name").indexOf("Windows")!=-1)
-                {
-                    Process p = Runtime.getRuntime().exec( new String[] {"C:\\Program Files\\Internet Explorer\\iexplore.exe","http://localhost:8080/"});
-                    if (p==null)
-                    {
-                        System.err.println("ERROR: Failed to start browser.");
-                    }
-                }
             }
             catch (Exception e)
             {
