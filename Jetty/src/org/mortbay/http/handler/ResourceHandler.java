@@ -723,20 +723,19 @@ public class ResourceHandler extends AbstractHttpHandler
         if (data==null)
         {
             String base = URI.addPaths(request.getPath(),"/");
-            ByteArrayISO8859Writer dir = getHttpContext()
-                .getDirectoryListing(resource,base,parent);
+            String dir = resource.getListHTML(base,parent);
             if (dir==null)
             {
                 response.sendError(HttpResponse.__403_Forbidden,
                                    "No directory");
                 return;
             }
-            data=dir.getByteArray();
+            data=dir.getBytes("UTF8");
             if (resource instanceof CachedResource)
                 ((CachedResource)resource).setCachedData(data);
         }
         
-        response.setContentType("text/html");
+        response.setContentType("text/html; charset=UTF8");
         response.setContentLength(data.length);
         
         if (request.getMethod().equals(HttpRequest.__HEAD))

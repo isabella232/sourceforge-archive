@@ -7,14 +7,14 @@ package org.mortbay.http;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Permissions;
-import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -27,6 +27,7 @@ import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.http.handler.ResourceHandler;
 import org.mortbay.http.handler.SecurityHandler;
 import org.mortbay.util.ByteArrayISO8859Writer;
+import org.mortbay.util.ByteBufferOutputStream;
 import org.mortbay.util.CachedResource;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
@@ -760,8 +761,13 @@ public class HttpContext implements LifeCycle,
 
                 // Guess directory length.
                 if (resource.isDirectory())
-                    len=resource.list().length*100;
-              
+                {
+                    if (resource.list()!=null)
+                        len=resource.list().length*100;
+                    else
+                        len=0;
+                }
+                
                 // Is it cacheable?
                 if (len>0 && len<_maxCachedFileSize && len<_maxCacheSize)
                 {
@@ -797,64 +803,6 @@ public class HttpContext implements LifeCycle,
         }
 
         return null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public ByteArrayISO8859Writer getDirectoryListing(Resource resource,
-                                                      String base,
-                                                      boolean parent)
-        throws IOException
-    {
-        if (!resource.isDirectory())
-            return null;
-        
-        String[] ls = resource.list();
-        if (ls==null)
-            return null;
-        Arrays.sort(ls);
-        
-        String title = "Directory: "+base;
-        
-        ByteArrayISO8859Writer out = new ByteArrayISO8859Writer();
-        
-        out.write("<HTML><HEAD><TITLE>");
-        out.write(title);
-        out.write("</TITLE></HEAD><BODY>\n<H1>");
-        out.write(title);
-        out.write("</H1><TABLE BORDER=0>");
-        
-        if (parent)
-        {
-            out.write("<TR><TD><A HREF=");
-            out.write(URI.encodePath(URI.addPaths(base,"../")));
-            out.write(">Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
-        }
-        
-        DateFormat dfmt=DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
-                                                       DateFormat.MEDIUM);
-        for (int i=0 ; i< ls.length ; i++)
-        {
-            String encoded=URI.encodePath(ls[i]);
-            Resource item = resource.addPath(encoded);
-            
-            out.write("<TR><TD><A HREF=\"");
-            String path=URI.addPaths(base,encoded);
-            
-            if (item.isDirectory() && !path.endsWith("/"))
-                path=URI.addPaths(path,"/");
-            out.write(path);
-            out.write("\">");
-            out.write(StringUtil.replace(StringUtil.replace(ls[i],"<","&lt;"),">","&gt;"));
-            out.write("&nbsp;");
-            out.write("</TD><TD ALIGN=right>");
-            out.write(""+item.length());
-            out.write(" bytes&nbsp;</TD><TD>");
-            out.write(dfmt.format(new Date(item.lastModified())));
-            out.write("</TD></TR>\n");
-        }
-        out.write("</TABLE>\n");
-        out.flush();
-        return out;
     }
     
     

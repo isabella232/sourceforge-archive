@@ -13,6 +13,10 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.DateFormat;
+import java.util.Arrays;
+import java.util.Date;
+
 
 /* ------------------------------------------------------------ */
 /** Abstract resource class.
@@ -307,7 +311,68 @@ public abstract class Resource implements Serializable
     {
         return new CachedResource(this);
     }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the resource list as a HTML directory listing.
+     * @param base The base URL
+     * @param parent True if the parent directory should be included
+     * @return String of HTML
+     */
+    public String getListHTML(String base,
+                              boolean parent)
+        throws IOException
+    {
+        if (!isDirectory())
+            return null;
+        
+        String[] ls = list();
+        if (ls==null)
+            return null;
+        Arrays.sort(ls);
+        
+        String title = "Directory: "+base;
 
+        StringBuffer buf=new StringBuffer(4096);
+        buf.append("<HTML><HEAD><TITLE>");
+        buf.append(title);
+        buf.append("</TITLE></HEAD><BODY>\n<H1>");
+        buf.append(title);
+        buf.append("</H1><TABLE BORDER=0>");
+        
+        if (parent)
+        {
+            buf.append("<TR><TD><A HREF=");
+            buf.append(URI.encodePath(URI.addPaths(base,"../")));
+            buf.append(">Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
+        }
+        
+        DateFormat dfmt=DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
+                                                       DateFormat.MEDIUM);
+        for (int i=0 ; i< ls.length ; i++)
+        {
+            String encoded=URI.encodePath(ls[i]);
+            Resource item = addPath(encoded);
+            
+            buf.append("<TR><TD><A HREF=\"");
+            String path=URI.addPaths(base,encoded);
+            
+            if (item.isDirectory() && !path.endsWith("/"))
+                path=URI.addPaths(path,"/");
+            buf.append(path);
+            buf.append("\">");
+            buf.append(StringUtil.replace(StringUtil.replace(ls[i],"<","&lt;"),">","&gt;"));
+            buf.append("&nbsp;");
+            buf.append("</TD><TD ALIGN=right>");
+            buf.append(""+item.length());
+            buf.append(" bytes&nbsp;</TD><TD>");
+            buf.append(dfmt.format(new Date(item.lastModified())));
+            buf.append("</TD></TR>\n");
+        }
+        buf.append("</TABLE>\n");
+        
+        return buf.toString();
+    }
+    
     /* ------------------------------------------------------------ */
     /** 
      * @param out 

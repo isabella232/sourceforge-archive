@@ -775,10 +775,35 @@ public class HttpRequest extends HttpMessage
         _paramsExtracted=true;
 
         if (_parameters==null)
-            _parameters=new MultiMap(8);
+            _parameters=new MultiMap(16);
 
-        _uri.putParametersTo(_parameters);
-        
+        // Handle query string
+        String encoding=getCharacterEncoding();
+        if (encoding==null)
+        {
+            // No encoding, so use the existing characters.
+            encoding=StringUtil.__ISO_8859_1;
+            _uri.putParametersTo(_parameters);
+        }
+        else
+        {
+            // An encoding has been set, so reencode query string.
+            String query=_uri.getQuery();
+            if (query!=null)
+            {
+                try
+                {
+                    byte[]qbytes=query.getBytes(StringUtil.__ISO_8859_1);
+                    UrlEncoded.decodeTo(qbytes,_parameters,encoding);
+                }
+                catch(Exception e)
+                {
+                    _uri.putParametersTo(_parameters);
+                }
+            }
+        }
+
+        // handle any content.
         if (_state==__MSG_RECEIVED)
         {
             String content_type=getField(HttpFields.__ContentType);
@@ -808,9 +833,6 @@ public class HttpRequest extends HttpMessage
                             byte[] content=bout.getBuf();
 
                             // Add form params to query params
-                            String encoding=getCharacterEncoding();
-                            if (encoding==null)
-                                encoding=StringUtil.__ISO_8859_1;
                             UrlEncoded.decodeTo(content,_parameters,encoding);
                         }
                         catch (EOFException e)

@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.StringTokenizer;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
+import org.mortbay.util.Log;
 import org.mortbay.util.Resource;
 
 /* ------------------------------------------------------------ */
@@ -166,11 +167,11 @@ public class ContextLoader extends URLClassLoader
         {
             _fileClassPathWarning=false;
             if (_fileClassPath==null)
-                Code.warning("No File Classpath from URL path \""+
+                Log.event("No File Classpath derived from URL path \""+
                              _urlClassPath+"\"");
             else
-                Code.warning("File Classpath \""+ _fileClassPath+
-                             "\" incomplete from URL path \""+
+                Log.event("Incomplete File Classpath \""+ _fileClassPath+
+                             "\" derived from URL path \""+
                              _urlClassPath+"\"");
         }
         

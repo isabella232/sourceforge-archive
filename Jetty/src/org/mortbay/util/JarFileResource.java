@@ -100,7 +100,7 @@ class JarFileResource extends JarResource
         {
             // Then if it exists it is a directory
             _directory=check;
-            return _directory;
+            return true;
         }
         else 
         {
@@ -191,11 +191,29 @@ class JarFileResource extends JarResource
     /* ------------------------------------------------------------ */
     public synchronized String[] list()
     {
-        if(isDirectory() && _list==null && checkConnection())
+        if(isDirectory() && _list==null)
         {
-            Enumeration e=_jarFile.entries();
+            ArrayList list = new ArrayList(32);
+
+            checkConnection();
+            
+            JarFile jarFile=_jarFile;
+            if(jarFile==null)
+            {
+                try
+                {
+                    jarFile=((JarURLConnection)
+                             ((new URL(_jarUrl)).openConnection())).getJarFile();
+                }
+                catch(Exception e)
+                {
+                    if (Code.verbose(9999))
+                        Code.ignore(e);
+                }
+            }
+            
+            Enumeration e=jarFile.entries();
             String dir=_urlString.substring(_urlString.indexOf("!/")+2);
-            ArrayList list = new ArrayList(10);
             while(e.hasMoreElements())
             {
                 JarEntry entry = (JarEntry) e.nextElement();

@@ -5,7 +5,6 @@
 
 package org.mortbay.jetty.servlet;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -468,20 +467,19 @@ public class Default extends HttpServlet
         if (data==null)
         {
             String base = URI.addPaths(request.getRequestURI(),"/");
-            ByteArrayISO8859Writer dir = _httpContext
-                .getDirectoryListing(resource,base,parent);
+            String dir = resource.getListHTML(base,parent);
             if (dir==null)
             {
                 response.sendError(HttpResponse.__403_Forbidden,
                                    "No directory");
                 return;
             }
-            data=dir.getByteArray();
+            data=dir.getBytes("UTF8");
             if (resource instanceof CachedResource)
                 ((CachedResource)resource).setCachedData(data);
         }
         
-        response.setContentType("text/html");
+        response.setContentType("text/html; charset=UTF8");
         response.setContentLength(data.length);
         
         if (!request.getMethod().equals(HttpRequest.__HEAD))
