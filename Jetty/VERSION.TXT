@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Switched to mx4j
  + Improve combinations of Security Constraints
  + Implemented locale encoding mapping.
 

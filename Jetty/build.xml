@@ -291,10 +291,7 @@
   <target name="mortbay.jmx.jar" depends="classes">
     <copy file="${src}/org/mortbay/jetty/jmx/demo.mlet" tofile="${etc}/demo.mlet" />
     <jar jarfile="${mortbay.jmx.jar}">
-       <manifest>    
-         <attribute name="Main-Class" value="org.mortbay.util.jmx.Main"/>
-         <attribute name="Class-Path" value="org.mortbay.jetty.jar org.mortbay.jetty.jar ../ext/jmxri.jar ../ext/jmxtools.jar"/>
-       </manifest>    
+       <manifest/>    
        <fileset dir="${classes}">
          <include name="org/mortbay/**/jmx/**"/>
        </fileset>
