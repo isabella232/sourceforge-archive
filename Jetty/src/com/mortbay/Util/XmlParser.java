@@ -10,19 +10,21 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import org.xml.sax.AttributeList;
-import org.xml.sax.HandlerBase;
+import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.Parser;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.ParserFactory;
+import org.xml.sax.XMLReader;
 
-
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 /*--------------------------------------------------------------*/
 /** XML Parser wrapper.
- * This class wraps any standard sax parser with convieniant error and
+ * This class wraps any standard JAXP1.1 parser with convieniant error and
  * entity handlers and a mini dom-like document tree.
  *
  * @version $Id$
@@ -31,7 +33,7 @@ import org.xml.sax.helpers.ParserFactory;
 public class XmlParser 
 {
     private Map _redirectMap = new HashMap();
-    private Parser _parser;
+    private SAXParser _parser;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -41,9 +43,8 @@ public class XmlParser
     {
         try
         {
-            _parser =ParserFactory.makeParser
-                (System.getProperty("org.xml.sax.parser",
-                                    "com.microstar.xml.SAXDriver"));
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            _parser = factory.newSAXParser();
         }
         catch(Exception e)
         {
@@ -64,10 +65,11 @@ public class XmlParser
         throws IOException,SAXException
     {
         Handler handler= new Handler();
-        _parser.setDocumentHandler(handler);
-  	_parser.setErrorHandler(handler);
-  	_parser.setEntityResolver(handler);
-        _parser.parse(url);
+        XMLReader reader = _parser.getXMLReader();
+        reader.setContentHandler(handler);
+  	reader.setErrorHandler(handler);
+  	reader.setEntityResolver(handler);
+        _parser.parse(url, handler);
         if (handler._error!=null)
             throw handler._error;
         Node doc=(Node)handler._top.get(0);
@@ -99,10 +101,11 @@ public class XmlParser
         throws IOException,SAXException
     {
         Handler handler= new Handler();
-        _parser.setDocumentHandler(handler);
-  	_parser.setErrorHandler(handler);
-  	_parser.setEntityResolver(handler);
-        _parser.parse(new InputSource(in));
+        XMLReader reader = _parser.getXMLReader();
+        reader.setContentHandler(handler);
+  	reader.setErrorHandler(handler);
+  	reader.setEntityResolver(handler);
+        _parser.parse(new InputSource(in), handler);
         if (handler._error!=null)
             throw handler._error;
         Node doc=(Node)handler._top.get(0);
@@ -124,7 +127,7 @@ public class XmlParser
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private class Handler extends HandlerBase
+    private class Handler extends DefaultHandler
     {
         Node _top = new Node(null,null,null);
         SAXParseException _error;
@@ -139,16 +142,16 @@ public class XmlParser
         }
         
         /* ------------------------------------------------------------ */
-        public void startElement (String tag, AttributeList attrs)
+        public void startElement (String uri, String localName, String qName, Attributes attrs)
             throws SAXException
         {
-            Node node= new Node(_context,tag,attrs);
+            Node node= new Node(_context,uri==null?qName:localName,attrs);
             _context.add(node);
             _context=node;
         }
 
         /* ------------------------------------------------------------ */
-        public void endElement (String tag)
+        public void endElement (String uri, String localName, String qName)
             throws SAXException
         {
             _context=_context._parent;
@@ -272,7 +275,7 @@ public class XmlParser
         private boolean _lastString=false;
         
         /* ------------------------------------------------------------ */
-        Node(Node parent,String tag, AttributeList attrs)
+        Node(Node parent,String tag, Attributes attrs)
         {
             _parent=parent;
             _tag=tag;
@@ -281,7 +284,7 @@ public class XmlParser
             {
                 _attrs=new Attribute[attrs.getLength()];
                 for (int i = 0; i <attrs.getLength(); i++)
-                    _attrs[i]=new Attribute(attrs.getName(i),
+                    _attrs[i]=new Attribute(attrs.getLocalName(i),
                                             attrs.getValue(i));
             }
         }

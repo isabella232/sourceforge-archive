@@ -52,8 +52,9 @@ Development has been done in JDK1.2 and the following CLASSPATH is required
   CLASSPATH=\
     $JETTY_HOME/lib/com.mortbay.jetty.jar:\
     $JETTY_HOME/lib/javax.servlet.jar:\
+    $JETTY_HOME/lib/javax.xml.jaxp.jar:\
     $JETTY_HOME/lib/org.apache.jasper.jar:\
-    $JETTY_HOME/lib/com.microstar.xml.jar
+    $JETTY_HOME/lib/org.apache.crimson.jar
 
 To use SSL you will also need to add the the jar below, which is
 a merge of the jsse, jnet and jcert jars from the JSSE package
@@ -370,6 +371,13 @@ Specific access should be granted with constraints like:
   </security-constraint>
 
 
+XML Parsing
+-----------
+Jetty uses the reference implementation of JAXP1.1 for XML parsing.
+The jars have been renamed and trimmed of unused classes to reduce
+their size..
+
+
 JMX Management
 --------------
 Jetty is instrumented with an optional JMX managment layer.
@@ -379,3 +387,4 @@ This is contained in the Jetty3Extra release
 SASL Authentication
 -------------------
 A SASL listener is included in the Jetty3Extra release
+

@@ -48,10 +48,11 @@ release     - Cleanup for release
   <property name="jetty.jar"      value="${lib}/com.mortbay.jetty.jar"/>
   <property name="servlet.jar"    value="${lib}/javax.servlet.jar"/>
   <property name="jasper.jar"     value="${lib}/org.apache.jasper.jar"/>
-  <property name="xml.jar"        value="${lib}/com.microstar.xml.jar"/>
+  <property name="jaxp.jar"       value="${lib}/javax.xml.jaxp.jar"/>
+  <property name="xml.jar"        value="${lib}/org.apache.crimson.jar"/>
   <property name="jsse.jar"       value="${lib}/com.sun.net.ssl.jar"/>
 
-  <property name="classpath"      value="${xml.jar};${jsse.jar};${jasper.jar};${servlet.jar};${jetty.jar}"/>
+  <property name="classpath"      value="${jetty.jar};${jasper.jar};${servlet.jar};${jsse.jar};${jaxp.jar};${xml.jar}"/>
 
 
   <target name="prepare">
@@ -93,8 +94,8 @@ release     - Cleanup for release
     <javac srcdir="${src}"
            destdir="${classes}"
            classpath="${classpath}"
-           debug="off"
-           optimize="on"
+           debug="on"
+           optimize="off"
            deprecation="off"
            >
        <include name="**/*.java"/>
@@ -178,7 +179,7 @@ release     - Cleanup for release
   <target name="testUtil" depends="classes">
     <property name="classpath" value="${jetty.jar};${servlet.jar}" />
     <java classname="com.mortbay.Util.TestHarness"
-          classpath="${classes};${xml.jar}"
+          classpath="${classes};${xml.jar};${jaxp.jar}"
           fork="yes"
           failonerror="yes"
           />
