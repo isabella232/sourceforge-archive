@@ -80,6 +80,9 @@ public abstract class JsseListener extends SocketListener
     /** Set to true if we require client certificate authentication. */
     private boolean _needClientAuth = false;
 
+    /** The user agent substring for browsers that can't grok persistent SSL (msie 5) */
+    private String _nonPersistentUserAgent = "MSIE 5";
+
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
@@ -133,6 +136,18 @@ public abstract class JsseListener extends SocketListener
         return true;
     }
     
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return The user agent substring for browsers that can't grok persistent SSL (msie 5) 
+     */
+    public String getNonPersistentUserAgent() { return _nonPersistentUserAgent; }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param agent The user agent substring for browsers that can't grok persistent SSL (msie 5) 
+     */
+    public void setNonPersistentUserAgent(String agent) {_nonPersistentUserAgent=agent;}
+
     /* ------------------------------------------------------------ */
     protected abstract SSLServerSocketFactory createFactory()
         throws Exception;
@@ -234,9 +249,21 @@ public abstract class JsseListener extends SocketListener
      * @param request HttpRequest to be customised.
      */
     protected void customizeRequest(Socket socket,
-                                                        HttpRequest request)
+                                    HttpRequest request)
     {
         super.customizeRequest(socket,request);
+
+        String userAgent = request.getField(HttpFields.__UserAgent);
+        
+        // TODO - Temp solution for MSIE bug. Pluggable fix in Jetty 5
+        if(userAgent != null &&  
+           userAgent.indexOf(_nonPersistentUserAgent)>=0 &&
+           HttpRequest.__SSL_SCHEME.equalsIgnoreCase(request.getScheme()))
+        {
+            Code.debug("Force close");
+            request.getHttpResponse().setField(HttpFields.__Connection, HttpFields.__Close);
+            request.getHttpConnection().forceClose();
+        }
         
         if (!(socket instanceof javax.net.ssl.SSLSocket))
             return; // I'm tempted to let it throw an exception...
