@@ -66,14 +66,17 @@ public class Demo
             context=server.addContext(null,"/javadoc/*");
             context.setResourceBase("./javadoc/");
             context.setServingResources(true);
+
+            context=server.addContext(null,"/cgi-bin/*");
+            context.setResourceBase("./cgi-bin/");
+            context.addServlet("CGI","/","com.mortbay.Servlet.CGI")
+                .put("Path","/bin:/usr/bin:/usr/local/bin");
             
             context=server.addContext(null,"/");
-            context.addServlet("Forward",
-                               "/",
-                               "com.mortbay.Servlet.Forward")
+            context.addServlet("Forward","/","com.mortbay.Servlet.Forward")
                 .put("/","/jetty/index.html");
             context.addHandler(new NotFoundHandler());
-
+            
             // Realm
             HashUserRealm realm=
                 new HashUserRealm("Jetty Demo Realm",

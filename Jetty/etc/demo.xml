@@ -127,6 +127,17 @@ $ID: $
   </Call>
 
   <Call name="addContext">
+    <Arg>/cgi-bin/*</Arg>
+    <Set name="ResourceBase">./cgi-bin</Set>
+    <Call name="addServlet">
+      <Arg>Common Gateway Interface</Arg>
+      <Arg>/</Arg>
+      <Arg>com.mortbay.Servlet.CGI</Arg>
+     <Put name="Path">/bin:/usr/bin:/usr/local/bin</Put>
+    </Call>
+  </Call>
+
+  <Call name="addContext">
     <Arg>/</Arg>
     <Call name="addServlet">
       <Arg>Forward</Arg>
@@ -137,6 +148,15 @@ $ID: $
     <Call name="addHandler">
       <Arg><New class="com.mortbay.HTTP.Handler.NotFoundHandler"/></Arg>
     </Call>
+  </Call>
+
+  <Call name="addRealm">
+    <Arg>
+      <New class="com.mortbay.HTTP.HashUserRealm">
+        <Arg>Jetty Demo Realm</Arg>
+        <Arg>./etc/demoRealm.properties</Arg>
+      </New>
+    </Arg>
   </Call>
 
   <Set name="LogSink">

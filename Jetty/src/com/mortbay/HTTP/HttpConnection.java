@@ -798,8 +798,21 @@ public class HttpConnection
             {
                 _response.setIntField(HttpFields.__ContentLength,0);
                 if (_http1_0)
-                    _response.setField(HttpFields.__Connection,
-                                       HttpFields.__KeepAlive);
+                {
+                    // Netscape does not like empty responses with
+                    // keep-alive
+                    if (_response.getStatus()==200)
+                    {
+                        _close=true;
+                        _persistent=false;
+                        _response.setField(HttpFields.__Connection,
+                                           HttpFields.__Close);
+                    }
+                    else
+                        // Keep it alive
+                        _response.setField(HttpFields.__Connection,
+                                           HttpFields.__KeepAlive);
+                }
             }
             else
             {
@@ -810,4 +823,6 @@ public class HttpConnection
         }
     }
 }
+
+
 
