@@ -876,7 +876,8 @@ public class HttpServer implements LifeCycle,
                             
                             if(log.isDebugEnabled())log.debug("Try "+context+","+j);
 
-                            if (context.handle(request,response))
+                            context.handle(request,response);
+                            if (request.isHandled())
                                 return context;
                         }
                     }   
@@ -911,7 +912,9 @@ public class HttpServer implements LifeCycle,
                 addComponent(_notFoundContext);
                 try{_notFoundContext.start();}catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
             }
-            if (!_notFoundContext.handle(request,response))
+            
+            _notFoundContext.handle(request,response);
+            if (!request.isHandled())
                 response.sendError(HttpResponse.__404_Not_Found);
             return _notFoundContext;
         }
@@ -1001,14 +1004,6 @@ public class HttpServer implements LifeCycle,
         return (UserRealm)_realmMap.remove(realmName);
     }    
     
-    
-    /* ------------------------------------------------------------ */
-    /** Set Chunking Forced.
-     * @deprecated
-     */
-    public void setChunkingForced(boolean forced)
-    {
-    }
 
     /* ------------------------------------------------------------ */
     public Map getHostMap()

@@ -1430,19 +1430,6 @@ public class TestRFC2616
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 501","TE: coding not accepted")+1;
 
-            // trailer field
-            offset=0;
-            listener._server.setChunkingForced(true);
-            response=listener.getResponses("GET /R1 HTTP/1.1\n"+
-                                           "Host: localhost\n"+
-                                           "TE: trailer\n"+
-                                           "Connection: close\n"+
-                                           "\n");
-            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
-            offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 200","TE: trailer")+1;
-            offset=t.checkContains(response,offset,
-                                   "TestTrailer: Value","TE: trailer")+1;
         }
         catch(Exception e)
         {

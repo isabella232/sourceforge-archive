@@ -15,7 +15,6 @@ import javax.servlet.http.Cookie;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
@@ -299,28 +298,6 @@ public class HttpResponse extends HttpMessage
         _reason=reason;
     }
       
-    /* ------------------------------------------------------------ */
-    /* Which fields to set?
-     * Specialized HttpMessage.setFields to consult request TE field
-     * for a "trailer" token if state is SENDING.
-     * @return Header or Trailer fields
-     * @exception IllegalStateException Not editable or sending 1.1
-     *                                  with trailers
-     */
-    protected HttpFields setFields()
-        throws IllegalStateException
-    {
-        if (!_acceptTrailer &&
-            _state==__MSG_SENDING &&
-            _version.equals(__HTTP_1_1))
-        {
-            HttpRequest request=_connection.getRequest();
-            if (request!=null)
-                request.getAcceptableTransferCodings();
-        }
-
-        return super.setFields();
-    }
     
     /* ------------------------------------------------------------- */
     /** Send Error Response.

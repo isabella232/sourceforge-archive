@@ -172,12 +172,6 @@ public class DumpHandler extends AbstractHttpHandler
         // we don't want to commit the output to force trailers as
         // it makes test harness messy
         request.getAcceptableTransferCodings();
-        HttpFields trailer=null;
-        if (response.acceptTrailer())
-        {
-            trailer=response.getTrailer();
-            trailer.put("TestTrailer","Value");
-        }
         
         // commit now
         writer.flush();
@@ -189,11 +183,6 @@ public class DumpHandler extends AbstractHttpHandler
         buf.reset();
         writer.write("</PRE>\n<H3>Response:</H3>\n<PRE>");
         writer.write(response.toString());
-        if (trailer!=null)
-        {
-            writer.write("</PRE>\n<H3>Trailer:</H3>\n<PRE>");
-            writer.write(trailer.toString());
-        }
         writer.write("</PRE></HTML>");
         writer.flush();
         for (int pad=998-buf.size();pad-->0;)

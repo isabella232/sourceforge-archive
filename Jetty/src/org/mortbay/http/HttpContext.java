@@ -71,6 +71,7 @@ import org.mortbay.util.URI;
  * @author Greg Wilkins (gregw)
  */
 public class HttpContext implements LifeCycle,
+                                    HttpHandler,
                                     Serializable
 {
     private static Log log = LogFactory.getLog(HttpContext.class);
@@ -1626,12 +1627,12 @@ public class HttpContext implements LifeCycle,
      * @exception HttpException
      * @exception IOException
      */
-    public boolean handle(HttpRequest request,
-                          HttpResponse response)
+    public void handle(HttpRequest request,
+                       HttpResponse response)
         throws HttpException, IOException
     {
         if (!_started)
-            return false;
+            return;
 
         // reject requests by real host
         if (_hosts!=null && _hosts.size()>0)
@@ -1643,7 +1644,7 @@ public class HttpContext implements LifeCycle,
                 if (!_hosts.contains(s.getLocalAddress()))
                 {
                     if(log.isDebugEnabled())log.debug(s.getLocalAddress()+" not in "+_hosts);
-                    return false;
+                    return;
                 }
             }
         }
@@ -1684,7 +1685,7 @@ public class HttpContext implements LifeCycle,
                 log.debug(this+" consumed all of path "+
                              request.getPath()+
                              ", redirect to "+buf.toString());
-            return true;
+            return;
         }
 
         String pathParams=null;
@@ -1702,7 +1703,7 @@ public class HttpContext implements LifeCycle,
 
         try
         {
-            return handle(pathInContext,pathParams,request,response);
+            handle(pathInContext,pathParams,request,response);
         }
         finally
         {
@@ -1722,52 +1723,47 @@ public class HttpContext implements LifeCycle,
      * @exception HttpException
      * @exception IOException
      */
-    public boolean handle(String pathInContext,
-                          String pathParams,
-                          HttpRequest request,
-                          HttpResponse response)
+    public void handle(String pathInContext,
+                       String pathParams,
+                       HttpRequest request,
+                       HttpResponse response)
         throws HttpException, IOException
     {
-        Object old_scope=null;
+        Object old_scope= null;
         try
         {
-            old_scope=enterContextScope(request,response);
-            
-            HttpHandler[] handlers=getHandlers();
-            for (int k=0;k<handlers.length;k++)
+            old_scope= enterContextScope(request, response);
+            HttpHandler[] handlers= getHandlers();
+            for (int k= 0; k < handlers.length; k++)
             {
-                HttpHandler handler = handlers[k];
-		if (handler==null)
-		{
-		    handlers=getHandlers();
-		    k=-1;
-		    continue;
-		}
-
-                if (!handler.isStarted())
+                HttpHandler handler= handlers[k];
+                if (handler == null)
                 {
-                    if(log.isDebugEnabled())log.debug(handler+" not started in "+this);
+                    handlers= getHandlers();
+                    k= -1;
                     continue;
                 }
-
-                if(log.isDebugEnabled())log.debug("Handler "+handler);
-
-                handler.handle(pathInContext,
-                               pathParams,
-                               request,
-                               response);
-
+                if (!handler.isStarted())
+                {
+                    if (log.isDebugEnabled())
+                        log.debug(handler + " not started in " + this);
+                    continue;
+                }
+                if (log.isDebugEnabled())
+                    log.debug("Handler " + handler);
+                handler.handle(pathInContext, pathParams, request, response);
                 if (request.isHandled())
                 {
-                    if(log.isDebugEnabled())log.debug("Handled by "+handler);
-                    return true;
+                    if (log.isDebugEnabled())
+                        log.debug("Handled by " + handler);
+                    return;
                 }
             }
-            return false;
+            return;
         }
         finally
         {
-            leaveContextScope(request,response,old_scope);
+            leaveContextScope(request, response, old_scope);
         }
     }
 
@@ -2342,6 +2338,30 @@ public class HttpContext implements LifeCycle,
     {
         ClassLoader _classLoader;
         HttpContext _httpContext;
+    }
+
+    /* 
+     * @see org.mortbay.http.HttpHandler#getName()
+     */
+    public String getName()
+    {
+        return this.getContextPath();
+    }
+
+    /* 
+     * @see org.mortbay.http.HttpHandler#getHttpContext()
+     */
+    public HttpContext getHttpContext()
+    {
+        return this;
+    }
+
+    /* 
+     * @see org.mortbay.http.HttpHandler#initialize(org.mortbay.http.HttpContext)
+     */
+    public void initialize(HttpContext context)
+    {
+        throw new UnsupportedOperationException();
     }    
     
 }

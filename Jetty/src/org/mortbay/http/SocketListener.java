@@ -44,6 +44,7 @@ public class SocketListener
     private boolean _identifyListener=false;
     private int _bufferSize=8192;
     private int _bufferReserve=512;
+    private HttpHandler _handler;
 
     private transient HttpServer _server;
     private transient boolean _isLow=false;
@@ -59,6 +60,12 @@ public class SocketListener
     {
         super(address);
     }
+
+    /* ------------------------------------------------------------ */
+    public HttpServer getHttpServer()
+    {
+        return _server;
+    }
     
     /* ------------------------------------------------------------ */
     public void setHttpServer(HttpServer server)
@@ -69,9 +76,15 @@ public class SocketListener
     }
 
     /* ------------------------------------------------------------ */
-    public HttpServer getHttpServer()
+    public HttpHandler getHttpHandler()
     {
-        return _server;
+        return _handler;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setHttpHandler(HttpHandler handler)
+    {
+        _handler=handler;
     }
 
     /* ------------------------------------------------------------ */

@@ -968,6 +968,11 @@ public class HttpConnection
                 throw new HttpException(HttpResponse.__505_HTTP_Version_Not_Supported);
             
             if(LogSupport.isTraceEnabled(log))log.trace("IN is "+(_inputStream.isChunking()?"chunked":"not chunked")+" Content-Length="+_inputStream.getContentLength());
+
+
+            // handle HttpListener handlers
+            if (!_request.isHandled() && _listener.getHttpHandler()!=null)
+                _listener.getHttpHandler().handle("",null, _request, _response);
             
             // service the request
             if (!_request.isHandled())

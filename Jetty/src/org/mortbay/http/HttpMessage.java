@@ -81,8 +81,6 @@ public abstract class HttpMessage
     protected String _version;
     protected int _dotVersion;
     protected HttpFields _header=new HttpFields();
-    protected HttpFields _trailer;
-    protected boolean _acceptTrailer;
     protected HttpConnection _connection;
     protected String _characterEncoding;
     protected String _mimeType;
@@ -130,7 +128,6 @@ public abstract class HttpMessage
     {
         _state=__MSG_EDITABLE;
         _header=new HttpFields();
-        _trailer=null;
 
         // TODO - also need to cancel any encodings added to output stream!
     }
@@ -211,26 +208,7 @@ public abstract class HttpMessage
      */
     public Enumeration getFieldNames()
     {
-        if (_header!=null && _trailer==null)
-            return _header.getFieldNames();
-        final Enumeration e1=_header.getFieldNames();
-        final Enumeration e2=_trailer.getFieldNames();
-        return new Enumeration()
-            {
-                public boolean hasMoreElements()
-                {
-                    return (e1.hasMoreElements() ||
-                            e2.hasMoreElements());
-                }
-                   
-                public Object nextElement()
-                    throws NoSuchElementException
-                {
-                    if (e1.hasMoreElements())
-                        return e1.nextElement();
-                    return e2.nextElement();
-                }
-            };
+        return _header.getFieldNames();
     }
 
     /* ------------------------------------------------------------ */
@@ -240,10 +218,7 @@ public abstract class HttpMessage
      */
     public boolean containsField(String name)
     {
-        boolean contains = _header.containsKey(name);
-        if (!contains && _trailer!=null)
-            contains = _trailer.containsKey(name);
-        return contains;
+        return _header.containsKey(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -255,10 +230,7 @@ public abstract class HttpMessage
      */
     public String getField(String name)
     {
-        String field = _header.get(name);
-        if (field==null && _trailer!=null)
-            field=_trailer.get(name);
-        return field;
+        return _header.get(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -270,10 +242,7 @@ public abstract class HttpMessage
      */
     public Enumeration getFieldValues(String name)
     {
-        Enumeration enum = _header.getValues(name);
-        if (enum==null && _trailer!=null)
-            enum=_trailer.getValues(name);
-        return enum;
+        return _header.getValues(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -286,10 +255,7 @@ public abstract class HttpMessage
      */
     public Enumeration getFieldValues(String name,String separators)
     {
-        Enumeration enum = _header.getValues(name,separators);
-        if (enum==null && _trailer!=null)
-            enum=_trailer.getValues(name,separators);
-        return enum;
+        return _header.getValues(name,separators);
     }
 
     /* ------------------------------------------------------------ */
@@ -306,15 +272,6 @@ public abstract class HttpMessage
     {
         if (_state==__MSG_EDITABLE)
             return _header;
-
-        if (_acceptTrailer &&
-            _state==__MSG_SENDING &&
-            _version.equals(__HTTP_1_1))
-        {
-            if (_trailer==null)
-                _trailer=new HttpFields();
-            return _trailer;
-        }
         
         throw new IllegalStateException("Can't set fields in "+
                                         __state[_state]+
@@ -391,10 +348,7 @@ public abstract class HttpMessage
      */
     public int getIntField(String name)
     {
-        int v=_header.getIntField(name);
-        if (v==-1 && _trailer!=null)
-            v=_trailer.getIntField(name);
-        return v;
+        return _header.getIntField(name);
     }
     
     /* -------------------------------------------------------------- */
@@ -434,10 +388,7 @@ public abstract class HttpMessage
      */
     public long getDateField(String name)
     {
-        long d=_header.getDateField(name);
-        if (d<0 && _trailer!=null)
-            d=_trailer.getDateField(name);
-        return d;
+        return _header.getDateField(name);
     }
     
 
@@ -549,37 +500,6 @@ public abstract class HttpMessage
             throw new IllegalStateException("Can't get header in "+__state[_state]);
         
         return _header;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get the HTTP chunked trailer (also called trailer).
-     * @return Trailer or null
-     */
-    public HttpFields getTrailer()
-    {
-        if (_state!=__MSG_EDITABLE)
-            throw new IllegalStateException("Can't get trailer in "+__state[_state]);
-        
-        if (_acceptTrailer && _trailer==null)
-            _trailer=new HttpFields();
-        return _trailer;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Set if trailers are accepted.
-     * @param acceptTrailer  If true, setField() may use trailers.
-     */
-    public void setAcceptTrailer(boolean acceptTrailer)
-    {
-        _acceptTrailer=acceptTrailer;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Set if trailers are accepted.
-     */
-    public boolean acceptTrailer()
-    {
-        return _acceptTrailer;
     }
     
     
@@ -745,10 +665,6 @@ public abstract class HttpMessage
         _version=null;
         _dotVersion=0;
         _header.clear();
-        if (_trailer!=null)
-            _trailer.destroy();        
-        _trailer=null;
-        _acceptTrailer=false;
         _connection=connection;
         _characterEncoding=null;
         _mimeType=null;
@@ -766,7 +682,6 @@ public abstract class HttpMessage
         if (_header!=null)
             _header.destroy();
         _header=null;
-        _trailer=null;
     }
     
     /* ------------------------------------------------------------ */

@@ -192,6 +192,17 @@ public interface HttpListener extends LifeCycle, Serializable
      */
     public int    getConfidentialPort();
     
+    /* ------------------------------------------------------------ */
+    /** Get an optional HttpHandler for the listener.
+     * If Set, then HttpConnection will pass requests from this listener
+     * to this handler with an empty context path, before passing the
+     * request to the HttpServer.  This allows listener specific handling
+     * to be added or even a HttpContext (which is a HttpHandler) to be
+     * bound directly to HttpListener. 
+     */
+    public HttpHandler getHttpHandler();
+    
+    
 }
 
 

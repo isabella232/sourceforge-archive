@@ -13,6 +13,7 @@ import java.net.Socket;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpConnection;
+import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpListener;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
@@ -51,6 +52,7 @@ public class AJP13Listener
     private int _bufferSize=8192; 
     private int _bufferReserve=512;
     private String[] _remoteServers;
+    private HttpHandler _handler;
     
     /* ------------------------------------------------------------------- */
     public AJP13Listener()
@@ -347,4 +349,16 @@ public class AJP13Listener
     {
         _confidentialPort = confidentialPort;
     }    
+
+    /* ------------------------------------------------------------ */
+    public HttpHandler getHttpHandler()
+    {
+        return _handler;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setHttpHandler(HttpHandler handler)
+    {
+        _handler=handler;
+    }
 }

@@ -764,14 +764,7 @@ public class HttpRequest extends HttpMessage
                     String coding= StringUtil.asciiToLowerCase
                         (HttpFields.valueParameters(iter.next().toString(),null));
                     
-                    if ("trailer".equalsIgnoreCase(coding))
-                    {
-                        // Allow trailers in the response
-                        HttpResponse response=getHttpResponse();
-                        if (response!=null)
-                            response.setAcceptTrailer(true);
-                    }
-                    else if (!HttpFields.__Chunked.equalsIgnoreCase(coding))
+                    if (!HttpFields.__Chunked.equalsIgnoreCase(coding))
                     {
                         acceptable=LazyList.ensureSize(acceptable,size);
                         acceptable=LazyList.add(acceptable,coding);

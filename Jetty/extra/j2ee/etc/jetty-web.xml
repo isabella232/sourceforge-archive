@@ -22,15 +22,10 @@ session changes around a cluster partition. Your JBoss cluster MUST be
 set up using the JBoss clustering infrastructure. The whole session
 will be distributed upon any change to it.
 
-CMPStore - This expects jbossweb-ejb.jar to be deployed and uses an
-EJB therein to persist and thus distribute sessions around a group of
-machines which MUST be sharing either a common EJB server, or database
-(depending on your approach, you may want to mess with the EJB's
-commit option). Session changes are immediately distributed
-individually to the EJB container.
-
 LocalStore - No distribution occurs. This is useful for testing
 interceptors etc...
+
+CMPStore - This is no longer supported.
 
 Further stores are under consideration - probably using CMR, JMS
 etc...
@@ -123,44 +118,6 @@ Jules
 
 <!-- THESE ARE ALTERNATIVES - uncomment one and it will be used in place of the default -->
 
-<!-- this interceptor stack is for an EXTENDED session using JavaGroups & CMP EJB -->
-<!--
- <Set name="DistributableSessionManager">
--->
-
-<!--
-  <Get name="ServletHandler">
-  <Set name="SessionManager">
--->
-
-<!--
-  <New class="org.mortbay.j2ee.session.Manager">
-   <Set name="medium"><New class="org.mortbay.j2ee.session.JGMedium"/></Set>
-   <Set name="interceptorStack">
-    <Array type="org.mortbay.j2ee.session.StateInterceptor">
-     <Item><New class="org.mortbay.j2ee.session.DistributedCacheInterceptor"/></Item>
-     <Item><New class="org.mortbay.j2ee.session.TransactionInterceptor"/></Item>
-     <Item><New class="org.jboss.jetty.session.SecurityInterceptor"/></Item>
-     <Item><New class="org.mortbay.j2ee.session.ValidationInterceptor"/></Item>
-     <Item><New class="org.mortbay.j2ee.session.TypeCheckingInterceptor"/></Item>
-     <Item><New class="org.mortbay.j2ee.session.BindingInterceptor"/></Item>
-     <Item><New class="org.mortbay.j2ee.session.DebugInterceptor"/></Item>
-     <Item><New class="org.mortbay.j2ee.session.MarshallingInterceptor"/></Item>
-    </Array>
-   </Set>
-   <Set name="store">
-    <New class="org.mortbay.j2ee.session.CMPStore">
-    </New>
-   </Set>
-  </New>
-  </Set>
-  </Get>
--->
-
-<!--
- </Set>
--->
-
 <!-- this interceptor stack is for an EXTENDED session using JavaGroups -->
 <!--
  <Set name="DistributableSessionManager">
@@ -189,72 +146,6 @@ Jules
   </New>
  </Set>
 </Get>
-
-<!-- this interceptor stack is for an EXTENDED session using a CMR EJB currently broken -->
-<!--
- <Set name="DistributableHttpSessionStore">
- <New class="org.mortbay.j2ee.session.CMRStore">
-  <Set name="actualMaxInactiveInterval">604800</Set>
-  <Set name="scavengerPeriod">3600</Set>
-  <Set name="scavengerExtraTime">900</Set>
- </New>
-</Set>
- <Set name="DistributableHttpSessionInterceptorStack">
-  <Array type="org.mortbay.j2ee.session.StateInterceptor">
-   <Item><New class="org.mortbay.j2ee.session.TransactionInterceptor"/></Item>
-   <Item><New class="org.jboss.jetty.session.SecurityInterceptor"/></Item>
-   <Item><New class="org.mortbay.j2ee.session.ValidationInterceptor"/></Item>
-   <Item><New class="org.mortbay.j2ee.session.TypeCheckingInterceptor"/></Item>
-   <Item><New class="org.mortbay.j2ee.session.BindingInterceptor"/></Item>
-   <Item><New class="org.mortbay.j2ee.session.MarshallingInterceptor"/></Item>
-  </Array>
- </Set>
--->
-
-<!-- this interceptor stack is for an EXTENDED session using a CMP EJB -->
-<!--
- <Set name="DistributableHttpSessionStore">
- <New class="org.mortbay.j2ee.session.CMPStore">
-  <Set name="actualMaxInactiveInterval">604800</Set>
-  <Set name="scavengerPeriod">3600</Set>
-  <Set name="scavengerExtraTime">900</Set>
- </New>
-</Set>
- <Set name="DistributableHttpSessionInterceptorStack">
-  <Array type="org.mortbay.j2ee.session.StateInterceptor">
-   <Item><New class="org.mortbay.j2ee.session.TransactionInterceptor"/></Item>
-   <Item><New class="org.jboss.jetty.session.SecurityInterceptor"/></Item>
-   <Item><New class="org.mortbay.j2ee.session.ValidationInterceptor"/></Item>
-   <Item><New class="org.mortbay.j2ee.session.TypeCheckingInterceptor"/></Item>
-   <Item><New class="org.mortbay.j2ee.session.BindingInterceptor"/></Item>
-   <Item><New class="org.mortbay.j2ee.session.MarshallingInterceptor"/></Item>
-  </Array>
- </Set>
--->
-
-<!-- this interceptor stack is for a MIGRATABLE session using a CMP EJB currently broken -->
-<!--
- <Set name="DistributableHttpSessionStore">
- <New class="org.mortbay.j2ee.session.CMPStore">
-  <Set name="actualMaxInactiveInterval">604800</Set>
-  <Set name="scavengerPeriod">3600</Set>
-  <Set name="scavengerExtraTime">900</Set>
- </New>
-</Set>
- <Set name="DistributableHttpSessionInterceptorStack">
-  <Array type="org.mortbay.j2ee.session.StateInterceptor">
-   <Item><New class="org.mortbay.j2ee.session.ValidationInterceptor"/></Item>
-   <Item><New class="org.mortbay.j2ee.session.TypeCheckingInterceptor"/></Item>
-   <Item><New class="org.mortbay.j2ee.session.BindingInterceptor"/></Item>
-   <Item><New class="org.mortbay.j2ee.session.SynchronizationInterceptor"/></Item>
-   <Item><New class="org.mortbay.j2ee.session.MigrationInterceptor"/></Item>
-   <Item><New class="org.mortbay.j2ee.session.ActivationInterceptor"/></Item>
-   <Item><New class="org.mortbay.j2ee.session.MarshallingInterceptor"/></Item>
-   <Item><New class="org.jboss.jetty.session.SecurityInterceptor"/></Item>
-   <Item><New class="org.mortbay.j2ee.session.TransactionInterceptor"/></Item>
-  </Array>
- </Set>
--->
 
 <!-- this interceptor stack is for a LOCAL session - testing only...-->
 <!--

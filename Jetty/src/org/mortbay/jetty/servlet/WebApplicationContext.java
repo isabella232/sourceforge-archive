@@ -552,14 +552,14 @@ public class WebApplicationContext
     }
     
     /* ------------------------------------------------------------ */
-    public boolean handle(String pathInContext,
-                          String pathParams,
-                          HttpRequest httpRequest,
-                          HttpResponse httpResponse)
+    public void handle(String pathInContext,
+                       String pathParams,
+                       HttpRequest httpRequest,
+                       HttpResponse httpResponse)
         throws HttpException, IOException
     {
         if (!isStarted())
-            return false;
+            return;
         try
         {
             super.handle(pathInContext,pathParams,httpRequest,httpResponse);
@@ -572,7 +572,6 @@ public class WebApplicationContext
             if (!httpResponse.isCommitted())
                 httpResponse.commit();
         }
-        return true;
     }
     
     
