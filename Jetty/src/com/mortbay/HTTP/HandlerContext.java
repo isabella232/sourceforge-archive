@@ -200,7 +200,7 @@ public class HandlerContext implements LifeCycle
     
     final static String[] __encodings =
     {
-        "text/html",   "ISO-8859-1",
+        "text/html",   StringUtil.__ISO_8859_1,
         "text/plain",  "US-ASCII",
         "text/xml",    "UTF-8",
     };

@@ -13,8 +13,24 @@ package com.mortbay.Util;
  */
 public class StringUtil
 {
-    public static String __ISO_8859_1 =
-        System.getProperty("ISO_8859_1","ISO-8859-1");
+    public static String __ISO_8859_1;
+    static
+    {
+        String iso=System.getProperty("ISO_8859_1");
+        if (iso!=null)
+            __ISO_8859_1=iso;
+        else
+        {
+            try{
+                new String(new byte[]{(byte)20},"ISO-8859-1");
+                __ISO_8859_1="ISO-8859-1";
+            }
+            catch(java.io.UnsupportedEncodingException e)
+            {
+                __ISO_8859_1="ISO8859_1";
+            }        
+        }
+    }
     
     private static char[] lowercases = {
           '\000','\001','\002','\003','\004','\005','\006','\007',

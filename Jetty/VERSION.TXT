@@ -11,6 +11,7 @@ Jetty-3.0.2 -
  + Ignore included response updates rather than IllegalStateException
  + Removed classloading stats which were causing circular class loading problems.
  + Allow '+' in path portion of a URL.
+ + Try ISO8859_1 encoding if can't find ISO-8859-1
 
 Jetty-3.0.1 - 20 Dec 2000
  + Fixed value unbind notification for session invalidation. 
