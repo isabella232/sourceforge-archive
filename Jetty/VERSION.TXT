@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
  
-Jetty-3.0.0.rc5 - 11 Nov 2000
+Jetty-3.0.0.rc5 - 12 Nov 2000
  + Default writer encoding set by mime type if not explicitly set.
  + Relax webapp rules, accept no web.xml or no WEB-INF
  + Pass flush through ServletOut
