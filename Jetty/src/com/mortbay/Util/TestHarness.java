@@ -312,6 +312,7 @@ public class TestHarness
     {
         Test t = new Test("com.mortbay.Util.B64Code");
         try{
+	    // Perform basic reversibility tests
             t.checkEquals(B64Code.decode(B64Code.encode("")),"","decode(encode())");
             t.checkEquals(B64Code.decode(B64Code.encode("a")),"a","decode(encode(a))");
             t.checkEquals(B64Code.decode(B64Code.encode("ab")),"ab","decode(encode(ab))");
@@ -322,7 +323,22 @@ public class TestHarness
             t.checkEquals(B64Code.decode(B64Code.encode("ab\000")),"ab\000","decode(encode(ab^@))");
             t.checkEquals(B64Code.decode(B64Code.encode("abc\000")),"abc\000","decode(encode(abc^@))");
             t.checkEquals(B64Code.decode(B64Code.encode("abcd\000")),"abcd\000","decode(encode(abcd^@))");
-        }
+
+	    // Test the reversibility of the full range of 8 bit values
+	    byte[] allValues= new byte[256];
+	    for (int i=0; i<256; i++)
+		allValues[i] = (byte) i;
+	    String input = new String(allValues);
+	    t.checkEquals(B64Code.decode(B64Code.encode(input)),input,
+			  "decode(encode(ALL_256_ASCII_VALUES))");
+
+	    // Encoder compatibility tests
+	    t.checkEquals(B64Code.encode("abc"),"YWJj","encode(abc)");
+	    t.checkEquals(B64Code.encode("abcd"),"YWJjZA==","encode(abc)");
+	    t.checkEquals(B64Code.encode("abcde"),"YWJjZGU=","encode(abc)");
+	    t.checkEquals(B64Code.encode("abcdef"),"YWJjZGVm","encode(abc)");
+	    t.checkEquals(B64Code.encode("abcdefg"),"YWJjZGVmZw==","encode(abc)");
+	}
         catch(Exception e)
         {
             Code.warning(e);
