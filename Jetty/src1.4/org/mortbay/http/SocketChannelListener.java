@@ -12,6 +12,7 @@ import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.Log;
 import org.mortbay.util.ThreadPool;
+import org.mortbay.util.ChannelStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.InputStream;
@@ -441,7 +442,7 @@ public class SocketChannelListener
             super(SocketChannelListener.this,
                   socket.getInetAddress(),
                   Channels.newInputStream(sc),
-                  Channels.newOutputStream(sc),
+                  ChannelStream.newOutputStream(sc),
                   sc);
         }
 
