@@ -131,7 +131,6 @@
     <Array type="java.lang.String">
       <Item>org.mortbay.jetty.servlet.XMLConfiguration</Item>
       <Item>org.mortbay.jetty.servlet.JettyWebConfiguration</Item>
-      <Item>org.mortbay.jetty.servlet.jsr77.Configuration</Item>
     </Array>
   </Set>
   
