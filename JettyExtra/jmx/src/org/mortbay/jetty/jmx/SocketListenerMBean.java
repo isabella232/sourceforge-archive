@@ -56,4 +56,11 @@ public class SocketListenerMBean extends HttpListenerMBean
         defineAttribute("outOfResources");
     }
     
+    /* ------------------------------------------------------------ */
+    public void postDeregister()
+    {
+        _socketListener=null;
+        super.postDeregister();
+    }
+    
 }

@@ -1,9 +1,10 @@
 JettyExtra Versions
 --------------------
 
-  + Branched to support Jetty4 development
+  + postUnregister destroys mbean
   + Use Jetty4 eventlistener
-  + adjust to new API names.
+  + adjust to new API names.  
+  + Branched to support Jetty4 development
 
 JettyExtra-1.0.1
   + Changed repository name to JettyExtra

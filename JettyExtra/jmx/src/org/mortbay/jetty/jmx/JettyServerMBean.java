@@ -259,4 +259,17 @@ public class JettyServerMBean extends LifeCycleMBean
             }
         }
     }
+    
+    /* ------------------------------------------------------------ */
+    public void postDeregister()
+    {
+        _jettyServer.removeEventListener(this);
+        _jettyServer=null;
+        if (_mbeanMap!=null)
+            _mbeanMap.clear();
+        _mbeanMap=null;
+        _configuration=null;
+        
+        super.postDeregister();
+    }
 }

@@ -38,7 +38,6 @@ public class HttpContextMBean extends LifeCycleMBean
 {
     private HttpContext _httpContext;
     private JettyServerMBean _jettyServerMBean;
-    private ModelMBeanImpl _logMBean;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -126,6 +125,18 @@ public class HttpContextMBean extends LifeCycleMBean
                              ",context="+
                              _httpContext.getContextPath());
     }
+
+
+    
+    /* ------------------------------------------------------------ */
+    public void postDeregister()
+    {
+        _httpContext=null;
+        _jettyServerMBean=null;
+        super.postDeregister();
+    }
+    
+    
 }
 
 

@@ -899,10 +899,33 @@ public class ModelMBeanImpl
     }
     
     /* ------------------------------------------------------------ */
+    /** Post Deregister.
+     * This implementation destroys this MBean and it cannot be used again.
+     */
     public void postDeregister()
     {
+        _beanInfo=null;
         _mBeanServer=null;
+        _object=null;
         _objectName=null;
+        if (_getter!=null)
+            _getter.clear();
+        _getter=null;
+        if (_setter!=null)
+            _setter.clear();
+        _setter=null;
+        if (_method!=null)
+            _method.clear();
+        _method=null;
+        if (_attributes!=null)
+            _attributes.clear();
+        _attributes=null;
+        if (_operations!=null)
+            _operations.clear();
+        _operations=null;
+        if (_notifications!=null)
+            _notifications.clear();
+        _notifications=null;
     }
 
     /* ------------------------------------------------------------ */

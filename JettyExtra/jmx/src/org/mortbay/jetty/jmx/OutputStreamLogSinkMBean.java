@@ -32,7 +32,6 @@ public class OutputStreamLogSinkMBean extends LogSinkMBean
 {
     private LogSink _logSink;
     private boolean _formatOptions;
-    private String  _domain="org.mortbay";
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -94,6 +93,13 @@ public class OutputStreamLogSinkMBean extends LogSinkMBean
     protected String newObjectName(MBeanServer server)
     {
         return uniqueObjectName(server,getJettyDomain()+":name=Log");
+    }
+
+    /* ------------------------------------------------------------ */
+    public void postDeregister()
+    {
+        _logSink=null;
+        super.postDeregister();
     }
 }
 

@@ -58,4 +58,11 @@ public class LogSinkMBean extends LifeCycleMBean
     {
         return uniqueObjectName(server,getJettyDomain()+":name=Log");
     }
+    
+    /* ------------------------------------------------------------ */
+    public void postDeregister()
+    {
+        _logSink=null;
+        super.postDeregister();
+    }
 }

@@ -151,4 +151,14 @@ public class LogMBean extends ModelMBeanImpl
             }
         }
     }
+    
+    /* ------------------------------------------------------------ */
+    public void postDeregister()
+    {
+        _log=null;
+        if (_sinks!=null)
+            _sinks.clear();
+        _sinks=null;
+    }
+    
 }
