@@ -54,9 +54,9 @@
              <!-- set up a pool for the datasource -->
              <Arg>
                <New class="org.enhydra.jdbc.pool.StandardXAPoolDataSource">
-                 <Arg type="Integer">2</Arg>          <!-- initial size of pool -->                
+                 <Arg type="Integer">4</Arg>          <!-- initial size of pool -->                
                  <Set name="MinSize">1</Set>                
-                 <Set name="MaxSize">4</Set> 
+                 <Set name="MaxSize">2</Set> 
                  <!-- Uncomment to setup other pool params as required          -->
                  <!--
                  <Set name="SleepTime">10</Set>        
@@ -110,6 +110,16 @@
                  <Set name="Url">jdbc:hsqldb:extra/etc/tmtest</Set>
                  <Set name="User">sa</Set>
                  <Set name="Password"></Set>
+                <!-- bug work around only for StandardDataSource       -->
+                 <Set name="Logger">
+                   <New class="org.enhydra.jdbc.util.Logger">
+                     <Arg>
+                       <Call class="org.apache.commons.logging.LogFactory" name="getLog">
+                         <Arg>org.enhydra.jdbc.xapool</Arg>
+                       </Call>
+                     </Arg>
+                   </New>
+                 </Set>                 
                </New>
              </Arg>
          </Call>
@@ -128,6 +138,16 @@
                  <Set name="Url">jdbc:hsqldb:extra/etc/tmtest</Set>
                  <Set name="User">sa</Set>
                  <Set name="Password"></Set>
+                 <!-- workaround for XAPool bug                       -->
+                 <Set name="Logger">
+                   <New class="org.enhydra.jdbc.util.Logger">
+                     <Arg>
+                       <Call class="org.apache.commons.logging.LogFactory" name="getLog">
+                         <Arg>org.enhydra.jdbc.xapool</Arg>
+                       </Call>
+                     </Arg>
+                   </New>
+                 </Set>                              
              </New>
            </Arg>
            <!-- configure the pool                                   -->
@@ -206,9 +226,11 @@
   <!--                                                                 -->
   <!-- The jsr77 configuration is optional - if specified, jsr77       -->
   <!-- statistics will be enabled. You will also need to build the     -->
-  <!-- extra/jsr77 package, include the jsr77 jars and start Jetty with-->
-  <!-- jmx enabled. To make this easier, the JettyPlus start config    -->
-  <!-- file sets up the classpath correctly.                           -->
+  <!-- extra/jsr77 package, include the jsr77 jars and start Jetty with -->
+  <!-- jmx enabled. To make this easier, the JettyPlus start config     -->
+  <!-- file sets up the classpath correctly, so make sure you use       -->
+  <!-- -DSTART=extra/etc/start-plus.config and see the JettyPlus        -->
+  <!-- README.TXT file for instructions on how to run with JMX enabled. -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!--
   <Set name="WebApplicationConfigurationClassNames">
