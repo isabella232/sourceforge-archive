@@ -81,11 +81,30 @@ public class HttpHeader
     /**
      * Returns the value of a  header field, or null if not found.
      * The case of the header field name is ignored.
-     * @param keythe case-insensitive header field name
+     * @param key the case-insensitive header field name
      */
     public String getHeader(String key)
     {
 	return (String)keyMap.get(StringUtil.asciiToLowerCase(key));
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** 
+     * Returns the value of a  header field, or null if not found.
+     * The case of the header field name is ignored. Any parameters
+     * found in the header are stripped.
+     * @param key the case-insensitive header field name
+     */
+    String getHeaderNoParams(String key)
+    {
+	String val = getHeader(key);
+	if (val!=null)
+	{
+	    int sc=val.indexOf(';');
+	    if (sc>0)
+		val=val.substring(0,sc);
+	}
+	return val;
     }
     
     /* -------------------------------------------------------------- */
@@ -201,12 +220,9 @@ public class HttpHeader
      */
     public  int getIntHeader(String name)
     {
-	String val = getHeader(name);
+	String val = getHeaderNoParams(name);
 	if (val!=null)
 	{
-	    int sc=val.indexOf(';');
-	    if (sc>0)
-		val=val.substring(0,sc);
 	    return Integer.parseInt(val);
 	}
 	return -1;
@@ -220,12 +236,9 @@ public class HttpHeader
      */
     public long getDateHeader(String name)
     {
-	String val = getHeader(name);
+	String val = getHeaderNoParams(name);
 	if (val!=null)
 	{
-	    int sc=val.indexOf(';');
-	    if (sc>0)
-		val=val.substring(0,sc);
 	    for (int i=0;i<__dateReceive.length;i++)
 	    {
 		try{
@@ -261,5 +274,17 @@ public class HttpHeader
 	setHeader(name, __dateSend.format(new Date(date)));
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 

@@ -500,6 +500,20 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	String encoding = getHeader(ContentType);
 	if (encoding==null || encoding.length()==0)
 	    return "ISO-8859-1";
+	
+	int i=encoding.indexOf(';');
+	if (i<0)
+	    return "ISO-8859-1";
+	
+	i=encoding.indexOf("charset=",i);
+	if (i<0 || i+8>=encoding.length())
+	    return "ISO-8859-1";
+	    
+	encoding=encoding.substring(i+8);
+	i=encoding.indexOf(' ');
+	if (i>0)
+	    encoding=encoding.substring(0,i);
+	
 	return encoding;
     }
     

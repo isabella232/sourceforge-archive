@@ -1,9 +1,14 @@
+Release 2.0.5 - 15 December 1998
+  + Temp fix to getCharacterEncoding
+  + added getHeaderNoParams
+
 Release 2.0.4 - 10 December 1998
   + Use real release of JSDK2.0 (rather than beta).
   + Portability issues solved for Apple's
   + Improved error code returns
   + Removed MORTBAY_HOME support from Makefiles
   + Improved default Makefile behaviour
+  + Implement getCharacterEncoding
 
 Release 2.0.3 - 13 November 1998
   + Limit threads in ThreadedServer and low priority listener option 
