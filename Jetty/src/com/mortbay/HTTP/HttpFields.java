@@ -9,6 +9,7 @@ import com.mortbay.Util.Code;
 import com.mortbay.Util.DateCache;
 import com.mortbay.Util.LineInput;
 import com.mortbay.Util.QuotedStringTokenizer;
+import com.mortbay.Util.StringMap;
 import com.mortbay.Util.StringUtil;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -93,6 +94,7 @@ public class HttpFields
         __IfNoneMatch = "If-None-Match",
         __IfRange = "If-Range",
         __IfUnmodifiedSince = "If-Unmodified-Since",
+        __KeepAlive = "keep-alive",
         __MaxForwards = "Max-Forwards",
         __ProxyAuthentication = "Proxy-Authentication",
         __Range = "Range",
@@ -173,40 +175,64 @@ public class HttpFields
     }
 
     /* ------------------------------------------------------------ */
-    private static final HashMap __info = new HashMap();
+    private static final StringMap __info = new StringMap(true);
     
     /* ------------------------------------------------------------ */
     static
     {
         // Initialize FieldInfo's with special values.
+        // In order of most frequently used.
+        new FieldInfo(__Host,true,false);
+        
+        new FieldInfo(__KeepAlive,false,false);
+        new FieldInfo(__Connection,false,false);
+        
+        new FieldInfo(__Cookie,false,false);
+        
+        new FieldInfo(__Accept,false,false);
+        new FieldInfo(__AcceptLanguage,false,false);
+        new FieldInfo(__AcceptEncoding,false,false);
+        new FieldInfo(__AcceptCharset,false,false);
+        new FieldInfo(__CacheControl,false,false);
+        new FieldInfo(__SetCookie,false,false);
+        new FieldInfo(__SetCookie2,false,false);
+        
+        
         new FieldInfo(__Date,true,false);
         new FieldInfo(__TransferEncoding,false,true);
         new FieldInfo(__ContentEncoding,false,true);
         new FieldInfo(__ContentLength,true,false);
+        new FieldInfo(__Expires,true,false);
+        new FieldInfo(__Expect,true,false);
+        
+        new FieldInfo(__Referer,true,false);
+        new FieldInfo(__TE,false,false);
+        new FieldInfo(__UserAgent,true,false);
+        
+        new FieldInfo(__IfModifiedSince,true,false);
+        new FieldInfo(__IfRange,true,false);
+        new FieldInfo(__IfUnmodifiedSince,true,false);
+
+        new FieldInfo(__Location,true,false);
+        new FieldInfo(__Server,true,false);
+        new FieldInfo(__ServletEngine,false,false);
+        
+        new FieldInfo(__AcceptRanges,false,false);
+        new FieldInfo(__Range,true,false);
+        new FieldInfo(__RequestRange,true,false);
+        
         new FieldInfo(__ContentLocation,true,false);
         new FieldInfo(__ContentMD5,true,false);
         new FieldInfo(__ContentRange,true,false);
         new FieldInfo(__ContentType,true,false);
-        new FieldInfo(__Expires,true,false);
         new FieldInfo(__LastModified,true,false);
         new FieldInfo(__Authorization,true,false);
         new FieldInfo(__From,true,false);
-        new FieldInfo(__Host,true,false);
-        new FieldInfo(__IfModifiedSince,true,false);
-        new FieldInfo(__IfRange,true,false);
-        new FieldInfo(__IfUnmodifiedSince,true,false);
         new FieldInfo(__MaxForwards,true,false);
         new FieldInfo(__ProxyAuthentication,true,false);
-        new FieldInfo(__Range,true,false);
-        new FieldInfo(__RequestRange,true,false);
-        new FieldInfo(__Referer,true,false);
-        new FieldInfo(__TE,false,false);
-        new FieldInfo(__UserAgent,true,false);
         new FieldInfo(__Age,true,false);
         new FieldInfo(__ETag,true,false);
-        new FieldInfo(__Location,true,false);
         new FieldInfo(__RetryAfter,true,false);
-        new FieldInfo(__Server,true,false);
     };
     
     /* ------------------------------------------------------------ */
@@ -214,13 +240,18 @@ public class HttpFields
     {
         FieldInfo info = (FieldInfo)__info.get(name);
         if (info==null)
-            info = (FieldInfo)__info.get(StringUtil.asciiToLowerCase(name));
-        if (info!=null)
-            __info.put(name,info);
-        else
             info = new FieldInfo(name,false,false);
-        
         return info;
+    }
+    
+    /* ------------------------------------------------------------ */
+    private static FieldInfo getFieldInfo(char[] name,int offset,int length)
+    {
+        Map.Entry entry = __info.getEntry(name,offset,length);
+        if (entry==null)
+            return new FieldInfo(new String(name,offset,length),false,false);
+
+        return (FieldInfo) entry.getValue();
     }
     
     /* ------------------------------------------------------------ */
@@ -230,7 +261,6 @@ public class HttpFields
     public final static String __Close = "close";
     public final static String __TextHtml = "text/html";
     public final static String __MessageHttp = "message/http";
-    public final static String __KeepAlive = "keep-alive";
     public final static String __WwwFormUrlEncode =
         "application/x-www-form-urlencoded";
     public static final String __ExpectContinue="100-continue";
@@ -294,15 +324,13 @@ public class HttpFields
     /* ------------------------------------------------------------ */
     private static class Field
     {
-        String _name;
         FieldInfo _info;
         String _value;
         Field _next;
         Field _prev;
 
-        Field(String name, FieldInfo info, String value)
+        Field(FieldInfo info, String value)
         {
-            _name=name;
             _info=info;
             _value=value;
             _next=null;
@@ -316,7 +344,6 @@ public class HttpFields
 
         void clear()
         {
-            _name=null;
             _info=null;
             _value=null;
             _next=null;
@@ -332,7 +359,7 @@ public class HttpFields
             {
                 if (_prev!=null)
                     return;
-                writer.write(_name);
+                writer.write(_info._name);
                 writer.write(__COLON);
                 Field f=this;
                 while (true)
@@ -347,7 +374,7 @@ public class HttpFields
             }
             else
             {
-                writer.write(_name);
+                writer.write(_info._name);
                 writer.write(__COLON);
                 writer.write(_value);
                 writer.write(__CRLF);
@@ -356,9 +383,9 @@ public class HttpFields
 
         public String toString()
         {
-            return (_prev==null?"[":("["+_prev._name+"<- "))+
-                _name+__COLON+_value+
-                (_next==null?"]":(" ->"+_next._name)+"]");
+            return (_prev==null?"[":("["+_prev._info._name+"<- "))+
+                _info._name+__COLON+_value+
+                (_next==null?"]":(" ->"+_next._info._name)+"]");
         }
     }
     
@@ -416,7 +443,7 @@ public class HttpFields
                 {
                     if (f!=null || hasMoreElements())
                     {
-                        String n=f._name;
+                        String n=f._info._name;
                         f=null;
                         return n;
                     }
@@ -560,7 +587,7 @@ public class HttpFields
         }
         
         // new value;
-        Field field=new Field(name,info,value);
+        Field field=new Field(info,value);
         _index[info.hashCode()]=_fields.size();
         _fields.add(field);
         return null;
@@ -593,7 +620,7 @@ public class HttpFields
         Iterator iter = value.iterator();
         while (iter.hasNext())
         {
-            Field field=new Field(name,info,iter.next().toString());
+            Field field=new Field(info,iter.next().toString());
             if (last==null)
                 _index[info.hashCode()]=_fields.size();
             else
@@ -636,7 +663,7 @@ public class HttpFields
             _index[info.hashCode()]=_fields.size();
             
         // create the field
-        Field field=new Field(name,info,value);
+        Field field=new Field(info,value);
         _fields.add(field);
         
         // look for chain to add too
@@ -809,7 +836,8 @@ public class HttpFields
                 int state=0;
                 int i1=-1;
                 int i2=-1;
-                String name=null;
+                int name_i=-1;
+                int name_l=0;
                 
                 // loop for all chars in buffer
                 for (int i=0;i<line_buffer.size;i++)
@@ -833,7 +861,8 @@ public class HttpFields
                       case 1: // reading name
                           if (c==':')
                           {
-                              name=new String(buf,i1,i2-i1+1);
+                              name_i=i1;
+                              name_l=i2-i1+1;                              
                               state=2;
                               i1=i;i2=i-1;
                               continue;
@@ -857,7 +886,7 @@ public class HttpFields
                     continue;
                 }
                 
-                if (name==null || name.length()==0)
+                if (name_i<0 || name_l==0)
                 {
                     if (state>=2 && last!=null)
                         // Continuation line
@@ -866,8 +895,8 @@ public class HttpFields
                 }
 
                 // create the field.
-                FieldInfo info = getFieldInfo(name);
-                Field field=new Field(name,info,new String(buf,i1,i2-i1+1));
+                FieldInfo info = getFieldInfo(buf,name_i,name_l);
+                Field field=new Field(info,new String(buf,i1,i2-i1+1));
                 
                 if (_index[info.hashCode()]<0)
                     _index[info.hashCode()]=_fields.size();

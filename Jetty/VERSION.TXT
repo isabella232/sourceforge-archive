@@ -7,6 +7,7 @@ Jetty3 Versions
    * ISO8859 conversion
    * Buffer allocation
    * URI pathAdd
+   * StringMap
  + Separation of URL params in HttpHandler API.
  + Fixed handling of default mime types
  + Allow contextpaths without leading /

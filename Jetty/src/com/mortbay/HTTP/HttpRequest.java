@@ -10,6 +10,7 @@ import com.mortbay.Util.LineInput;
 import com.mortbay.Util.MultiMap;
 import com.mortbay.Util.QuotedStringTokenizer;
 import com.mortbay.Util.StringUtil;
+import com.mortbay.Util.StringMap;
 import com.mortbay.Util.URI;
 import com.mortbay.Util.UrlEncoded;
 import java.io.IOException;
@@ -51,16 +52,35 @@ public class HttpRequest extends HttpMessage
     /** Request METHODS.
      */
     public static final String
-        __OPTIONS="OPTIONS",
         __GET="GET",
-        __HEAD="HEAD",
         __POST="POST",
+        __HEAD="HEAD",
         __PUT="PUT",
+        __OPTIONS="OPTIONS",
         __DELETE="DELETE",
         __TRACE="TRACE",
         __CONNECT="CONNECT",
         __MOVE="MOVE";
 
+    public static final StringMap __methodCache = new StringMap(true);
+    public static final StringMap __versionCache = new StringMap(true);
+    static
+    {
+        __methodCache.put(__GET,null);
+        __methodCache.put(__POST,null);
+        __methodCache.put(__HEAD,null);
+        __methodCache.put(__PUT,null);
+        __methodCache.put(__OPTIONS,null);
+        __methodCache.put(__DELETE,null);
+        __methodCache.put(__TRACE,null);
+        __methodCache.put(__CONNECT,null);
+        __methodCache.put(__MOVE,null);
+
+        __versionCache.put(__HTTP_1_1,null);
+        __versionCache.put(__HTTP_1_0,null);
+        __versionCache.put(__HTTP_0_9,null);
+    }
+    
     public static final String
         __AuthType = "com.mortbay.HTTP.HttpRequest.AuthType",
         __AuthUser = "com.mortbay.HTTP.HttpRequest.AuthUser";
@@ -602,15 +622,25 @@ public class HttpRequest extends HttpMessage
             throw new IOException("Bad Request: "+new String(buf,0,len));
 
         // get method
-        _method=new String(buf,s1,s2-s1+1);
+        Map.Entry method = __methodCache.getEntry(buf,s1,s2-s1+1);
+        if (method!=null)
+            _method=(String)method.getKey();
+        else
+            _method=new String(buf,s1,s2-s1+1).toUpperCase();
         
         // get version as uppercase
         if (s2!=e3 || s3!=e2)
         {
-            for (int i=e2;i<=e1;i++)
-                if (buf[i]>='a'&&buf[i]<='z')
-                    buf[i]=(char)(buf[i]-'a'+'A');
-            _version=new String(buf,e2,e1-e2+1);
+            Map.Entry version = __versionCache.getEntry(buf,e2,e1-e2+1);
+            if (version!=null)
+                _version=(String)version.getKey();
+            else
+            {
+                for (int i=e2;i<=e1;i++)
+                    if (buf[i]>='a'&&buf[i]<='z')
+                        buf[i]=(char)(buf[i]-'a'+'A');
+                _version=new String(buf,e2,e1-e2+1);
+            }
         }
         else
         {
@@ -965,7 +995,6 @@ public class HttpRequest extends HttpMessage
             return Collections.EMPTY_LIST;
         return _attributes.keySet();
     }
-
 
     /* ------------------------------------------------------------ */
     /** Remove a request attribute.

@@ -1546,6 +1546,72 @@ public class TestHarness
         }
     }    
 
+    /* ------------------------------------------------------------ */
+    static void testStringMap()
+    {
+        Test t = new Test("com.mortbay.Util.StringMap");
+        
+        try
+        {
+            StringMap map = new StringMap();
+
+            map.put("K1","V1");
+            t.checkEquals(map.get("K1"),"V1","1V1");
+            map.put("K2","V2");
+            t.checkEquals(map.get("K1"),"V1","2V1");
+            t.checkEquals(map.get("K2"),"V2","2V2");
+            map.put("0","V0");
+            t.checkEquals(map.get("0"),"V0","3V0");
+            t.checkEquals(map.get("K1"),"V1","3V1");
+            t.checkEquals(map.get("K2"),"V2","3V2");
+            
+            map.put("K03","V3");
+            t.checkEquals(map.get("0"),"V0","4V0");
+            t.checkEquals(map.get("K1"),"V1","4V1");
+            t.checkEquals(map.get("K2"),"V2","4V2");
+            t.checkEquals(map.get("K03"),"V3","4V3");
+            t.checkEquals(map.get("???"),null,"4null");
+            
+            t.checkEquals(map.getEntry("x0x",1,1).getValue(),"V0","5V0");
+            t.checkEquals(map.getEntry("xK1x",1,2).getValue(),"V1","5V1");
+            t.checkEquals(map.getEntry("xK2x",1,2).getValue(),"V2","5V2");
+            t.checkEquals(map.getEntry("xK03x",1,3).getValue(),"V3","5V3");
+            t.checkEquals(map.getEntry("???",1,1),null,"5null");
+            
+            t.checkEquals(map.getEntry("xKx",1,1),null,"5K");
+            
+            t.checkEquals(map.getEntry("x0x".toCharArray(),1,1).getValue(),"V0","6V0");
+            t.checkEquals(map.getEntry("xK1x".toCharArray(),1,2).getValue(),"V1","6V1");
+            t.checkEquals(map.getEntry("xK2x".toCharArray(),1,2).getValue(),"V2","6V2");
+            t.checkEquals(map.getEntry("xK03x".toCharArray(),1,3).getValue(),"V3","6V3");
+            t.checkEquals(map.getEntry("???".toCharArray(),1,1),null,"6null");
+            
+            t.checkEquals(map.getEntry("x0x".getBytes(),1,1).getValue(),"V0","7V0");
+            t.checkEquals(map.getEntry("xK1x".getBytes(),1,2).getValue(),"V1","7V1");
+            t.checkEquals(map.getEntry("xK2x".getBytes(),1,2).getValue(),"V2","7V2");
+            t.checkEquals(map.getEntry("xK03x".getBytes(),1,3).getValue(),"V3","7V3");
+            t.checkEquals(map.getEntry("???".getBytes(),1,1),null,"7null");
+            
+            map.setIgnoreCase(false);
+            t.checkEquals(map.get("0"),"V0","8V0");
+            t.checkEquals(map.get("k1"),null,"8V1");
+            t.checkEquals(map.get("k2"),null,"8V2");
+            t.checkEquals(map.get("k03"),null,"8V3");
+            t.checkEquals(map.get("???"),null,"8null");
+            map.setIgnoreCase(true);
+            t.checkEquals(map.get("0"),"V0","9V0");
+            t.checkEquals(map.get("k1"),"V1","9V1");
+            t.checkEquals(map.get("k2"),"V2","9V2");
+            t.checkEquals(map.get("k03"),"V3","9V3");
+            t.checkEquals(map.get("???"),null,"9null");
+            
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
+        }
+    }    
     
     /* ------------------------------------------------------------ */
     static void testMultiMap()
@@ -1760,22 +1826,23 @@ public class TestHarness
     {
         try
         {
-   	    testTest();
-       	    testLog();
-       	    testFrame();
-       	    testCode();
-       	    testPassword();
+     	    testTest();
+            testLog();
+            testFrame();
+            testCode();
+            testPassword();
+            testStringMap();
             testMultiMap();
-       	    testQuotedStringTokenizer();            
-       	    testDateCache();
-       	    testBlockingQueue();
-       	    testIO();
-       	    testUrlEncoded();
-       	    testURI();
-       	    testLineInput();
-       	    testThreadPool();
-       	    testThreadedServer();
-       	    testB64();
+            testQuotedStringTokenizer();            
+            testDateCache();
+            testBlockingQueue();
+            testIO();
+            testUrlEncoded();
+            testURI();
+            testLineInput();
+            testThreadPool();
+            testThreadedServer();
+            testB64();
             testResource();
       	    //testJarURL();
         }
