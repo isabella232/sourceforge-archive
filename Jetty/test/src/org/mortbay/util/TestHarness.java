@@ -851,6 +851,7 @@ public class TestHarness
             t.check(!i.hasNext(),"normal LazyList.iterator().hasNext()");
             t.check(li.hasNext(),"normal LazyList.listIterator().hasNext()");
             t.check(li.hasPrevious(),"normal LazyList.listIterator().hasPrevious()");
+
             
         }
         catch(Exception e)

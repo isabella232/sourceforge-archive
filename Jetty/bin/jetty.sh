@@ -423,7 +423,7 @@ JAVA_VERSION=`expr "$($JAVA -version 2>&1 | head -1)" : '.*1\.\([0-9]\)'`
 #####################################################
 if [ "$JETTY_PORT" != "" ] 
 then
-  JAVA_OPTIONS="-Djetty.port=$JETTY_PORT $JAVA_OPTIONS"
+  JAVA_OPTIONS="$JAVA_OPTIONS -Djetty.port=$JETTY_PORT"
 fi
 
 
@@ -457,7 +457,7 @@ CLASSPATH="$CP"
 #####################################################
 # Add jetty properties to Java VM options.
 #####################################################
-JAVA_OPTIONS="-Djetty.home=$JETTY_HOME -Djetty.log=$JETTY_LOG $JAVA_OPTIONS"
+JAVA_OPTIONS="$JAVA_OPTIONS -Djetty.home=$JETTY_HOME -Djetty.log=$JETTY_LOG"
 
 #####################################################
 # This is how the Jetty server will be started

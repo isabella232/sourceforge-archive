@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Fixed forward query string handling
  + Fixed setCharacterEncoding to work with getReader
  + Fixed getContext to use canonical contextPathSpec
  + Improved the return codes for PUT

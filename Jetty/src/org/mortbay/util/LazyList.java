@@ -322,6 +322,24 @@ public class LazyList extends AbstractList
         public void remove(){throw new UnsupportedOperationException("LazyList.remove()");}
         public void set(Object o){throw new UnsupportedOperationException("LazyList.add()");}
     }
+
+
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        if (_list==null)
+            return "["+_first+"]";
+        return _list.toString();
+    }
+
+    /* ------------------------------------------------------------ */
+    public static String toString(LazyList list)
+    {
+        if (list==null)
+            return "[]";
+        return list.toString();
+    }
+
     
 }
 

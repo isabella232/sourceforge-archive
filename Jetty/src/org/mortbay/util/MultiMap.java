@@ -18,12 +18,11 @@ import java.util.Vector;
 /* ------------------------------------------------------------ */
 /** A multi valued Map.
  * This Map specializes HashMap and provides methods
- * that operate on multi valued items.  Multi valued items are Lists,
- * arrays of Strings and java.util.Vectors.
+ * that operate on multi valued items. 
+ * <P>
+ * Implemented as a map of LazyList values
  *
- * Multi-values items are always stored as a List.
- *
- * 
+ * @see LazyList
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
