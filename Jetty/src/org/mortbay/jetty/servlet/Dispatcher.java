@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.PathMap;
 import org.mortbay.util.Code;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.URI;
@@ -176,7 +177,13 @@ public class Dispatcher implements RequestDispatcher
                 if (parameters!=null)
                 {
                     UrlEncoded encoded = new UrlEncoded(oldQ);
-                    encoded.putAll(parameters);
+                    Iterator iter = parameters.entrySet().iterator();
+                    while(iter.hasNext())
+                    {
+                        Map.Entry entry=(Map.Entry)iter.next();
+                        encoded.addValues(entry.getKey(),
+                                          LazyList.getList((LazyList)entry.getValue(),true));
+                    }
                     query=encoded.encode();
                 }
                 else 
@@ -349,33 +356,46 @@ public class Dispatcher implements RequestDispatcher
         /* -------------------------------------------------------------- */
         public String[] getParameterValues(String name)
         {
+            String[] v0=super.getParameterValues(name);
             if (_parameters==null)
-                return super.getParameterValues(name);
-            List values=_parameters.getValues(name);
-            if (values!=null)
-            {
-                String[]a=new String[values.size()];
-                return (String[])values.toArray(a);
-            }
-            return super.getParameterValues(name);
+                return v0;
+            List v1=_parameters.getValues(name);
+
+            if (v0==null && v1==null)
+                return null;
+            
+            String[] a=new String[(v0==null?0:v0.length)+(v1==null?0:v1.size())];
+            if (v0==null || v0.length==0)
+                return (String[])v1.toArray(a);
+            if (v1==null || v1.size()==0)
+                return v0;
+            
+            for (int i=0;i<v0.length;i++)
+                a[i]=v0[i];
+            for (int i=0;i<v1.size();i++)
+                a[v0.length+i]=(String)v1.get(i);
+            return a;
         }
         
         /* -------------------------------------------------------------- */
         public Map getParameterMap()
-        {
+        {       
             if (_parameters==null)
                 return super.getParameterMap();
-            Map m0 = _parameters.toStringArrayMap();
-            Map m1 = super.getParameterMap();
             
-            Iterator i = m1.entrySet().iterator();
-            while(i.hasNext())
+            Map m0 = super.getParameterMap();
+            if (m0==null || m0.size()==0)
+                return _parameters.toStringArrayMap();
+
+            Enumeration p = getParameterNames();
+            Map m = new HashMap();
+            while(p.hasMoreElements())
             {
-                Map.Entry entry = (Map.Entry)i.next();
-                if (!m0.containsKey(entry.getKey()))
-                    m0.put(entry.getKey(),entry.getValue());
+                String name=(String)p.nextElement();
+                m.put(name,getParameterValues(name));
             }
-            return m0;
+            
+            return m;
         }
 
         /* ------------------------------------------------------------ */
