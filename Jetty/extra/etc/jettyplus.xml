@@ -162,6 +162,10 @@
   <Call name="addWebApplication">
     <Arg>/jettyplus</Arg>
     <Arg><SystemProperty name="jetty.home"/>/extra/plus/demo/webapps/jettyplus</Arg>
+    <Call name="addEnvEntry">
+      <Arg>my/trivial/name</Arg>
+      <Arg type="Integer">99</Arg>
+    </Call>
   </Call>
 
 

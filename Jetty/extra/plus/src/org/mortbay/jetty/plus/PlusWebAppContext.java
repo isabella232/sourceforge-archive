@@ -2,6 +2,9 @@ package org.mortbay.jetty.plus;
 
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.LinkRef;
@@ -25,6 +28,7 @@ public class PlusWebAppContext extends WebApplicationContext
 {
     private InitialContext _initialCtx = null;
     private ClassLoader _removeClassLoader=null;
+    private HashMap _envMap = null;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -47,6 +51,29 @@ public class PlusWebAppContext extends WebApplicationContext
     {
         super(webApp);
     }
+
+
+    /* ------------------------------------------------------------ */
+    /** Add a java:comp/env entry.
+     *
+     *  Values must be serializable to be stored!
+     * 
+     */
+    public void addEnvEntry (String name, Object value)
+    {
+        if (_envMap == null)
+            _envMap = new HashMap();
+				                                                                                                                     
+        if (name == null)
+           Log.event ("Name for java:comp/env is null. Ignoring.");
+        if (value == null)
+           Log.event ("Value for java:comp/env is null. Ignoring.");
+				                                                                                                                     
+        _envMap.put (name, value);
+     }
+
+
+
 
     /* ------------------------------------------------------------ */
     public void start()
@@ -138,6 +165,18 @@ public class PlusWebAppContext extends WebApplicationContext
         //bind UserTransaction
         compCtx.rebind ("UserTransaction", new LinkRef ("javax.transaction.UserTransaction"));
         Code.debug ("Bound ref to javax.transaction.UserTransaction to java:comp/UserTransaction");   
+       
+       //set up any env entries defined in config file
+        if (_envMap != null)
+        {
+           Iterator it = _envMap.entrySet().iterator();
+           while (it.hasNext())
+           {
+               Map.Entry entry = (Map.Entry)it.next();
+               Util.bind (envCtx, (String)entry.getKey(), entry.getValue());
+               Code.debug("Bound java:comp/env/"+entry.getKey()+" to "+entry.getValue());
+           }
+       }
     }
 
 

@@ -78,6 +78,11 @@ public class DBTest
                 Log.event("<<< Retrieving DataSource >>>");
                 datasource = (DataSource)context.lookup("java:comp/env/jdbc/myDB");
                 Log.event("<<< DataSource retrieved >>>");
+
+		//get test JNDI value
+		Log.event("<<< Retrieving JNDI test value >>>");
+		Log.event("java:comp/env/my/trivial/name="+(Integer)context.lookup("java:comp/env/my/trivial/name"));
+		Log.event("<<< Retrieved >>>");
             }
         }
         catch (Exception e)
