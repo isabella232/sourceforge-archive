@@ -57,6 +57,9 @@
 # JETTY_RUN
 #   Where the jetty.pid file should be stored. It defaults to the
 #   first available of /var/run, /usr/var/run, and /tmp if not set.
+#  
+# JETTY_PID
+#   The Jetty PID file, defaults to $JETTY_RUN/jetty.pid
 #   
 
 usage()
@@ -291,6 +294,14 @@ then
 fi
 
 #####################################################
+# Find a PID for the pid file
+#####################################################
+if [  -z "$JETTY_PID" ] 
+then
+  JETTY_PID="$JETTY_RUN/jetty.pid"
+fi
+
+#####################################################
 # Find a location for the jetty console
 #####################################################
 if [  -z "$JETTY_CONSOLE" ] 
@@ -418,6 +429,7 @@ esac
 #echo "JETTY_CONF     =  $JETTY_CONF"
 #echo "JETTY_LOG      =  $JETTY_LOG"
 #echo "JETTY_RUN      =  $JETTY_RUN"
+#echo "JETTY_PID      =  $JETTY_PID"
 #echo "JETTY_CONSOLE  =  $JETTY_CONSOLE"
 #echo "CONFIGS        =  $CONFIGS"
 #echo "PATH_SEPARATOR =  $PATH_SEPARATOR"
@@ -433,7 +445,7 @@ case "$ACTION" in
   start)
         echo "Starting Jetty: "
 
-        if [ -f $JETTY_RUN/jetty.pid ]
+        if [ -f $JETTY_PID ]
         then
             echo "Already Running!!"
             exit 1
@@ -442,17 +454,17 @@ case "$ACTION" in
         echo "STARTED Jetty `date`" >> $JETTY_CONSOLE
 
         nohup sh -c "exec $RUN_CMD >>$JETTY_CONSOLE 2>&1" >/dev/null &
-        echo $! > $JETTY_RUN/jetty.pid
-        echo "Jetty running pid="`cat $JETTY_RUN/jetty.pid`
+        echo $! > $JETTY_PID
+        echo "Jetty running pid="`cat $JETTY_PID`
         ;;
 
   stop)
-        PID=`cat $JETTY_RUN/jetty.pid 2>/dev/null`
+        PID=`cat $JETTY_PID 2>/dev/null`
         echo "Shutting down Jetty: $PID"
         kill $PID 2>/dev/null
         sleep 2
         kill -9 $PID 2>/dev/null
-        rm -f $JETTY_RUN/jetty.pid
+        rm -f $JETTY_PID
         echo "STOPPED `date`" >>$JETTY_CONSOLE
         ;;
 
@@ -465,7 +477,7 @@ case "$ACTION" in
   run)
         echo "Running Jetty: "
 
-        if [ -f $JETTY_RUN/jetty.pid ]
+        if [ -f $JETTY_PID ]
         then
             echo "Already Running!!"
             exit 1
@@ -480,6 +492,7 @@ case "$ACTION" in
         echo "JETTY_CONF     =  $JETTY_CONF"
         echo "JETTY_LOG      =  $JETTY_LOG"
         echo "JETTY_RUN      =  $JETTY_RUN"
+        echo "JETTY_PID      =  $JETTY_PID"
         echo "JETTY_CONSOLE  =  $JETTY_CONSOLE"
         echo "CONFIGS        =  $CONFIGS"
         echo "PATH_SEPARATOR =  $PATH_SEPARATOR"
