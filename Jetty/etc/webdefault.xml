@@ -3,6 +3,10 @@
 <!-- This file contains the default settings for webapplications -->
 
 <web-app>
+ <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
   <servlet>
     <servlet-name>JSP</servlet-name>
     <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
