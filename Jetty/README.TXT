@@ -371,8 +371,9 @@ Specific access should be granted with constraints like:
 XML Parsing
 -----------
 Jetty uses the reference implementation of JAXP1.1 for XML parsing.
-The jars have been renamed and trimmed of unused classes to reduce
-their size..
+The jars have been renamed with their main package name.
+Jetty does not use any of the DOM classes, so these jars can be
+trimmed significantly if you want to reduce size.
 
 
 JMX Management

@@ -6,6 +6,7 @@
   <servlet>
     <servlet-name>JSP</servlet-name>
     <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
+    <load-on-startup>0</load-on-startup>
   </servlet>
 
   <servlet-mapping>

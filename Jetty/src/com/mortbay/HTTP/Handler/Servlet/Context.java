@@ -526,12 +526,15 @@ public class Context implements ServletContext, HttpSessionContext
             // Set our priority high while we have the sessions locked
             int oldPriority = Thread.currentThread().getPriority();
             Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-            synchronized(this)
+            try
             {
-                staleSessions=null;
-                scavenge();
-                Thread.currentThread().setPriority(oldPriority);
+                synchronized(this)
+                {
+                    staleSessions=null;
+                    scavenge();
+                }
             }
+            finally {Thread.currentThread().setPriority(oldPriority);}
         }
 
         // Remove the stale sessions

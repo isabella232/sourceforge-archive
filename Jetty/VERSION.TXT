@@ -1,6 +1,12 @@
 Jetty Versions
 --------------
 
+Jetty-3.1.rc4 - 14 April 2001
+ + Include full versions of JAXP and Crimson
+ + Added idle thread getter to ThreadPool.
+ + Load-on-startup the JspServlet so that precompiled servlets work.
+ + Removed stray debug println from the Frame class.
+
 Jetty-3.1.rc3 - 9 April 2001
  + Implemented multi-part ranges so that acrobat is happy.
  + Simplified multipart response class.
@@ -8,11 +14,11 @@ Jetty-3.1.rc3 - 9 April 2001
  + Improved ThreadPool stop handling
  + Frame handles more JIT stacks.
  + Cleaned up handling of exceptions thrown by servlets.
- + Turned off range handling by default until bugs resolved
  + Handle zero length POSTs
  + Start session scavenger if needed.
  + Added ContentHandler Observer to XmlParser.
  + Allow webapp XmlParser to be observed for ejb-ref tags etc.
+ + Created better random session ID
 
 Jetty-3.1.rc2 - 30 Mar 2001
  + Lifecycle.start() may throw Exception

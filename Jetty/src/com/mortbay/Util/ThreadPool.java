@@ -211,6 +211,17 @@ public class ThreadPool
     }
     
     /* ------------------------------------------------------------ */
+    /** Get the number of threads in the pool.
+     * @return Number of threads
+     */
+    public int getIdleThreads()
+    {
+        if (_idleSet==null)
+            return 0;
+        return _idleSet.size();
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Get the minimum number of threads.
      * @return minimum number of threads.
      */
