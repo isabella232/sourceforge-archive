@@ -73,14 +73,13 @@ public class ResourceCache implements LifeCycle,
     
     
     
-    private int _maxCachedFileSize =100*1024;
-    private int _maxCacheSize =1024*1024;
+    private int _maxCachedFileSize =254*1024;
+    private int _maxCacheSize =4096*1024;
 
     /* ------------------------------------------------------------ */
     private Resource _resourceBase;
     private Map _mimeMap;
     private Map _encodingMap;
-
 
 
     /* ------------------------------------------------------------ */
@@ -212,6 +211,7 @@ public class ResourceCache implements LifeCycle,
     public Resource getResource(String pathInContext)
         throws IOException
     {
+        if(log.isTraceEnabled())log.trace("getResource "+pathInContext);
         if (_resourceBase==null)
             return null;
 
@@ -447,7 +447,6 @@ public class ResourceCache implements LifeCycle,
      */
     public ResourceMetaData getResourceMetaData(Resource resource)
     {
-        // TODO - not sure why this is needed?
         Object o=resource.getAssociate();
         if (o instanceof ResourceMetaData)
             return (ResourceMetaData)o;

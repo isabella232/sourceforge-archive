@@ -655,6 +655,7 @@ public class ServletHandler extends AbstractHttpHandler
         }
         catch(Exception e)
         {
+            e.printStackTrace();
             LogSupport.ignore(log,e);
         }
         
@@ -697,6 +698,14 @@ public class ServletHandler extends AbstractHttpHandler
     {
         try
         {
+            Resource resource = getHttpContext().getResource(uriInContext);
+            System.out.println("uri="+uriInContext+" "+resource);
+            if (resource!=null)
+            {
+                System.out.println(resource.getClass());
+                return resource.getInputStream();
+            }
+            
             uriInContext=URI.canonicalPath(uriInContext);
             URL url = getResource(uriInContext);
             if (url!=null)

@@ -301,7 +301,6 @@ public class TestResource extends junit.framework.TestCase
         w.write("Blah Blah Blah");
         w.flush();
         w.close();
-
         
         rlm=r.lastModified();
         assertEquals("last Modified3",clm,c.lastModified());
