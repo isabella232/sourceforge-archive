@@ -10,6 +10,8 @@ import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 import org.mortbay.util.Code;
+import org.mortbay.http.HttpHandler;
+import org.mortbay.http.PathMap;
 
 /* --------------------------------------------------------------------- */
 /** 
@@ -23,15 +25,39 @@ public class FilterHolder
     private Filter _filter;
     private Config _config;
     private ServletHandler _servletHandler;
+    private PathMap _pathSpecs;
     
     /* ---------------------------------------------------------------- */
-    public FilterHolder(ServletHandler servletHandler,
+    public FilterHolder(HttpHandler httpHandler,
                         String name,
                         String className)
     {
-        super(servletHandler,name,className);
+        super(httpHandler,name,className);
+    }
+
+    /* ------------------------------------------------------------ */
+    public void addPathSpec(String pathSpec)
+    {
+        if (_pathSpecs==null)
+            _pathSpecs=new PathMap();
+        _pathSpecs.put(pathSpec,pathSpec);
     }
     
+    /* ------------------------------------------------------------ */
+    public boolean isMappedToPath()
+    {
+        return _pathSpecs!=null;
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    public boolean appliesTo(String path)
+    {
+        return
+            _pathSpecs!=null &&
+            _pathSpecs.getMatch(path)!=null;
+    }
+
     /* ------------------------------------------------------------ */
     public void start()
         throws Exception
@@ -48,7 +74,9 @@ public class FilterHolder
 
         _filter=(Filter)newInstance();
         _config=new Config();
-        _filter.init(_config); 
+        _filter.init(_config);
+        _servletHandler=(ServletHandler)
+            getHttpHandler().getHttpContext().getHttpHandler(ServletHandler.class);
     }
 
     /* ------------------------------------------------------------ */

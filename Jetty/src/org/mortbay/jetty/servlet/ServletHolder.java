@@ -35,6 +35,7 @@ public class ServletHolder extends Holder
     implements Comparable
 {
     /* ---------------------------------------------------------------- */
+    private ServletHandler _servletHandler;
     private Stack _servlets;
     private Servlet _servlet;
     
@@ -47,9 +48,9 @@ public class ServletHolder extends Holder
     /* ---------------------------------------------------------------- */
     /** Constructor.
      */
-    public ServletHolder(ServletHandler handler,
-                         String name,
-                         String className)
+    ServletHolder(ServletHandler handler,
+                  String name,
+                  String className)
     {
         super(handler,name,className);
     }
@@ -57,13 +58,13 @@ public class ServletHolder extends Holder
     /* ---------------------------------------------------------------- */
     /** Constructor. 
      */
-    public ServletHolder(ServletHandler handler,
-                         String name,
-                         String className,
-                         String path)
+    ServletHolder(ServletHandler handler,
+                  String name,
+                  String className,
+                  String forcedPath)
     {
         this(handler,name,className);
-        _path=path;
+        _path=forcedPath;
     }
 
     /* ------------------------------------------------------------ */
@@ -131,8 +132,6 @@ public class ServletHolder extends Holder
     {
         return compareTo(o)==0;
     }
-    
-
 
     /* ---------------------------------------------------------------- */
     public ServletContext getServletContext()
@@ -171,6 +170,8 @@ public class ServletHolder extends Holder
     public void start()
         throws Exception
     {
+        _servletHandler=(ServletHandler)_httpHandler;
+            
         super.start();
         
         if (!javax.servlet.Servlet.class
@@ -207,9 +208,9 @@ public class ServletHolder extends Holder
             s.destroy();
         }
         _config=null;
-        super.stop();   
+        super.stop();
+        _servletHandler=null;
     }
-    
     
 
     /* ------------------------------------------------------------ */
@@ -256,8 +257,8 @@ public class ServletHolder extends Holder
     /* --------------------------------------------------------------- */
     /** Service a request with this servlet.
      */
-    public void handle(ServletRequest request,
-                       ServletResponse response)
+    public void handle(ServletHttpRequest request,
+                       ServletHttpResponse response)
         throws ServletException,
                UnavailableException,
                IOException

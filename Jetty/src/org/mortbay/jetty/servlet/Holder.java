@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import org.mortbay.http.HttpContext;
+import org.mortbay.http.HttpHandler;
 import org.mortbay.http.handler.NullHandler;
 import org.mortbay.util.Code;
 import org.mortbay.util.LifeCycle;
@@ -19,7 +20,6 @@ import org.mortbay.util.LifeCycle;
 
 /* --------------------------------------------------------------------- */
 /** 
- * @see org.mortbay.jetty.ServletHandler
  * @version $Id$
  * @author Greg Wilkins
  */
@@ -28,7 +28,7 @@ public class Holder
     implements LifeCycle                        
 {
     /* ---------------------------------------------------------------- */
-    protected ServletHandler _servletHandler;
+    protected HttpHandler _httpHandler;
     protected String _name;
     protected String _displayName;
     protected String _className;
@@ -36,7 +36,7 @@ public class Holder
     protected Map _initParams;
     
     /* ---------------------------------------------------------------- */
-    public Holder(ServletHandler servletHandler,
+    public Holder(HttpHandler httpHandler,
                   String name,
                   String className)
     {
@@ -46,7 +46,7 @@ public class Holder
         if (className==null || className.length()==0)
             throw new IllegalArgumentException("No classname");
         
-        _servletHandler=servletHandler;
+        _httpHandler=httpHandler;
         _className=className;
         _name=name;
         _displayName=name;
@@ -57,6 +57,12 @@ public class Holder
     public String getName()
     {
         return _name;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setDisplayName(String name)
+    {
+        _name=name;
     }
     
     /* ------------------------------------------------------------ */
@@ -72,11 +78,11 @@ public class Holder
     }
     
     /* ------------------------------------------------------------ */
-    public void setDisplayName(String name)
+    public HttpHandler getHttpHandler()
     {
-        _name=name;
+        return _httpHandler;
     }
-
+    
     /* ------------------------------------------------------------ */
     public void setInitParameter(String param,String value)
     {
@@ -143,7 +149,7 @@ public class Holder
     public void start()
         throws Exception
     {
-        _class=_servletHandler.getHttpContext().loadClass(_className);
+        _class=_httpHandler.getHttpContext().loadClass(_className);
         Code.debug("Started holder of ",_class);
     }
     

@@ -36,10 +36,10 @@ import org.mortbay.util.URI;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class ServletResponse implements HttpServletResponse
+public class ServletHttpResponse implements HttpServletResponse
 {
     private HttpResponse _httpResponse;
-    private ServletRequest _servletRequest;
+    private ServletHttpRequest _servletHttpRequest;
     private int _outputState=0;
     private ServletOut _out =null;
     private ServletWriter _writer=null;
@@ -95,10 +95,10 @@ public class ServletResponse implements HttpServletResponse
     
     
     /* ------------------------------------------------------------ */
-    ServletResponse(ServletRequest request,HttpResponse response)
+    ServletHttpResponse(ServletHttpRequest request,HttpResponse response)
     {
-        _servletRequest=request;
-        _servletRequest.setServletResponse(this);
+        _servletHttpRequest=request;
+        _servletHttpRequest.setServletHttpResponse(this);
         _httpResponse=response;
     }
 
@@ -290,15 +290,15 @@ public class ServletResponse implements HttpServletResponse
     public String encodeURL(String url) 
     {
         // should not encode if cookies in evidence
-        if (_servletRequest==null ||
-            _servletRequest.isRequestedSessionIdFromCookie() &&
-            _servletRequest.getServletHandler().isUsingCookies())
+        if (_servletHttpRequest==null ||
+            _servletHttpRequest.isRequestedSessionIdFromCookie() &&
+            _servletHttpRequest.getServletHandler().isUsingCookies())
             return url;        
         
         // get session;
         if (_session==null && !_noSession)
         {
-            _session=_servletRequest.getSession(false);
+            _session=_servletHttpRequest.getSession(false);
             _noSession=(_session==null);
         }
         
@@ -387,16 +387,16 @@ public class ServletResponse implements HttpServletResponse
         if (url.indexOf(":/")<0)
         {
             if (url.startsWith("/"))
-                url=_servletRequest.getScheme()+
-                    "://"+_servletRequest.getServerName()+
-                    ":"+_servletRequest.getServerPort()+
-                    // XXX URI.canonicalPath(URI.addPaths(_servletRequest.getContextPath(),url));
+                url=_servletHttpRequest.getScheme()+
+                    "://"+_servletHttpRequest.getServerName()+
+                    ":"+_servletHttpRequest.getServerPort()+
+                    // XXX URI.canonicalPath(URI.addPaths(_servletHttpRequest.getContextPath(),url));
                     URI.canonicalPath(url);
             else
-                url=_servletRequest.getScheme()+
-                    "://"+_servletRequest.getServerName()+
-                    ":"+_servletRequest.getServerPort()+
-                    URI.canonicalPath(URI.addPaths(URI.parentPath(_servletRequest.getRequestURI()),
+                url=_servletHttpRequest.getScheme()+
+                    "://"+_servletHttpRequest.getServerName()+
+                    ":"+_servletHttpRequest.getServerPort()+
+                    URI.canonicalPath(URI.addPaths(URI.parentPath(_servletHttpRequest.getRequestURI()),
                                  url));
         }
         
@@ -488,7 +488,7 @@ public class ServletResponse implements HttpServletResponse
         }
         
         if (_out==null)
-            _out = new ServletOut(_servletRequest.getHttpRequest()
+            _out = new ServletOut(_servletHttpRequest.getHttpRequest()
                                   .getOutputStream());  
         _outputState=1;
         return _out;
@@ -505,11 +505,11 @@ public class ServletResponse implements HttpServletResponse
         {
             /* get encoding from Content-Type header */
             String encoding = getCharacterEncoding();
-            if (encoding==null && _servletRequest!=null)
+            if (encoding==null && _servletHttpRequest!=null)
             {
                 /* implementation of educated defaults */
                 String mimeType = _httpResponse.getMimeType();                
-                encoding = _servletRequest.getServletHandler()
+                encoding = _servletHttpRequest.getServletHandler()
                     .getHttpContext().getEncodingByMimeType(mimeType);
             }
             if (encoding==null)

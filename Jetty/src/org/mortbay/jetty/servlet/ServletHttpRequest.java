@@ -56,7 +56,7 @@ import org.mortbay.util.URI;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class ServletRequest
+public class ServletHttpRequest
     implements HttpServletRequest
 {
     /* -------------------------------------------------------------- */
@@ -73,7 +73,7 @@ public class ServletRequest
 
     private ServletHandler _servletHandler;    
     private HttpRequest _httpRequest;
-    private ServletResponse _servletResponse;
+    private ServletHttpResponse _servletHttpResponse;
 
     private String _uri=null;
     private String _contextPath=null;
@@ -93,7 +93,7 @@ public class ServletRequest
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
-    ServletRequest(ServletHandler servletHandler,HttpRequest request)
+    ServletHttpRequest(ServletHandler servletHandler,HttpRequest request)
     {
         _servletHandler=servletHandler;
         _contextPath=_servletHandler.getHttpContext().getContextPath();
@@ -154,15 +154,15 @@ public class ServletRequest
     }
     
     /* ------------------------------------------------------------ */
-    public ServletResponse getServletResponse()
+    public ServletHttpResponse getServletHttpResponse()
     {
-        return _servletResponse;
+        return _servletHttpResponse;
     }
     
     /* ------------------------------------------------------------ */
-    void setServletResponse(ServletResponse response)
+    void setServletHttpResponse(ServletHttpResponse response)
     {
-        _servletResponse = response;
+        _servletHttpResponse = response;
     }
 
     /* ------------------------------------------------------------ */
@@ -489,9 +489,9 @@ public class ServletRequest
                 if (path==null || path.length()==0)
                     path="/";
                 cookie.setPath(path);
-                _servletResponse.getHttpResponse().addSetCookie(cookie,false);
+                _servletHttpResponse.getHttpResponse().addSetCookie(cookie,false);
                 cookie.setVersion(1);
-                _servletResponse.getHttpResponse().addSetCookie(cookie,true); 
+                _servletHttpResponse.getHttpResponse().addSetCookie(cookie,true); 
             }
         }
 

@@ -73,6 +73,7 @@ public class WebApplicationContext extends ServletHttpContext
     private String _name;
     private Resource _webApp;
     private Resource _webInf;
+    private FilterHandler _filterHandler;
     private ServletHandler _servletHandler;
     private SecurityHandler _securityHandler;
     private Map _tagLibMap=new HashMap(3);
@@ -82,7 +83,6 @@ public class WebApplicationContext extends ServletHttpContext
     private String _war;
     private boolean _extract;
     private XmlParser _xmlParser;
-    private ArrayList _filters;
     private ArrayList _contextListeners;
     private ArrayList _contextAttributeListeners;
     
@@ -249,6 +249,14 @@ public class WebApplicationContext extends ServletHttpContext
             addHandler(0,_securityHandler);
         }
         
+        // Add filter Handler
+        _filterHandler = (FilterHandler)getHandler(FilterHandler.class);
+        if (_filterHandler==null)
+        {
+            _filterHandler=new FilterHandler();
+            addHandler(_filterHandler);
+        }
+        
         // Add servlet Handler
         _servletHandler = (ServletHandler)getHandler(ServletHandler.class);
         if (_servletHandler==null)
@@ -257,6 +265,13 @@ public class WebApplicationContext extends ServletHttpContext
             addHandler(_servletHandler);
         }
         _servletHandler.setDynamicServletPathSpec("/servlet/*");
+
+        // Check order
+        if (getHandlerIndex(_servletHandler)<getHandlerIndex(_filterHandler))
+        {
+            removeHandler(_servletHandler);
+            addHandler(_servletHandler);
+        }
         
         // Resource Handler
         ResourceHandler rh = (ResourceHandler)getHandler(ResourceHandler.class);
@@ -371,11 +386,6 @@ public class WebApplicationContext extends ServletHttpContext
             }
         }
 
-        // Start filters
-        if (_filters!=null)
-            for (int i=0;i<_filters.size();i++)
-                ((FilterHolder)_filters.get(i)).start();
-
         // Start handlers
         super.start();
 
@@ -398,10 +408,6 @@ public class WebApplicationContext extends ServletHttpContext
     public void stop()
         throws  InterruptedException
     {
-        if (_filters!=null)
-            for (int i=0;i<_filters.size();i++)
-                ((FilterHolder)_filters.get(i)).stop();
-
         // Context listeners
         if (_contextListeners!=null && _servletHandler!=null)
         {
@@ -669,9 +675,7 @@ public class WebApplicationContext extends ServletHttpContext
         if (name==null)
             name=className;
         
-        FilterHolder holder =
-            new FilterHolder(_servletHandler,name,className);
-        
+        FilterHolder holder = _filterHandler.newFilterHolder(name,className);
         Iterator iter= node.iterator("init-param");
         while(iter.hasNext())
         {
@@ -680,33 +684,19 @@ public class WebApplicationContext extends ServletHttpContext
             String pvalue=paramNode.getString("param-value",false,true);
             holder.put(pname,pvalue);
         }
-
-        addFilterHolder(holder);
     }
     
     /* ------------------------------------------------------------ */
     private void initFilterMapping(XmlParser.Node node)
     {
-        String name=node.getString("filter-name",false,true);
+        String filterName=node.getString("filter-name",false,true);
         String pathSpec=node.getString("url-pattern",false,true);
-        String servletName=node.getString("url-pattern",false,true);
+        String servletName=node.getString("servlet-name",false,true);
         
-        FilterHolder filterHolder = getFilterHolder(name);
-        if (filterHolder==null)
-            Code.warning("No such filter: "+name);
+        if (servletName!=null)
+            _filterHandler.mapServletToFilter(servletName,filterName);
         else
-        {
-            if (servletName!=null)
-            {
-                ServletHolder holder =
-                    _servletHandler.getServletHolder(name);
-                System.err.println(filterHolder+" --> "+holder);
-            }
-            else
-            {
-                System.err.println(filterHolder+" --> "+pathSpec);
-            }
-        }
+            _filterHandler.mapPathToFilter(pathSpec,filterName);
     }
     
     /* ------------------------------------------------------------ */
@@ -732,8 +722,7 @@ public class WebApplicationContext extends ServletHttpContext
         if (name==null)
             name=className;
         
-        ServletHolder holder =
-            new ServletHolder(_servletHandler,name,className,jspFile);
+        ServletHolder holder = _servletHandler.newServletHolder(name,className,jspFile);
         
         Iterator iter= node.iterator("init-param");
         while(iter.hasNext())
@@ -782,16 +771,24 @@ public class WebApplicationContext extends ServletHttpContext
         // add default mappings
         String defaultPath="/servlet/"+name+"/*";
         Code.debug("ServletMapping: ",holder.getName(),"=",defaultPath);
-        _servletHandler.addHolder(defaultPath,holder);
+        _servletHandler.addServletHolder(defaultPath,holder);
         if (!className.equals(name))
         {
             defaultPath="/servlet/"+className+"/*";
             Code.debug("ServletMapping: ",holder.getName(),
                        "=",defaultPath);
-            _servletHandler.addHolder(defaultPath,holder);
+            _servletHandler.addServletHolder(defaultPath,holder);
         }
     }
     
+    /* ------------------------------------------------------------ */
+    private void initServletMapping(XmlParser.Node node)
+    {
+        String name=node.getString("servlet-name",false,true);
+        String pathSpec=node.getString("url-pattern",false,true);
+
+        _servletHandler.mapPathToServlet(pathSpec,name);
+    }
 
     /* ------------------------------------------------------------ */
     private void initListener(XmlParser.Node node)
@@ -835,21 +832,6 @@ public class WebApplicationContext extends ServletHttpContext
             Code.warning("Unknown: "+listener);
     }
     
-    /* ------------------------------------------------------------ */
-    private void initServletMapping(XmlParser.Node node)
-    {
-        String name=node.getString("servlet-name",false,true);
-        String pathSpec=node.getString("url-pattern",false,true);
-
-        ServletHolder holder = _servletHandler.getServletHolder(name);
-        if (holder==null)
-            Code.warning("No such servlet: "+name);
-        else
-        {
-            Code.debug("ServletMapping: ",name,"=",pathSpec);
-            _servletHandler.addHolder(pathSpec,holder);
-        }
-    }
     
     /* ------------------------------------------------------------ */
     private void initSessionConfig(XmlParser.Node node)
@@ -1046,28 +1028,6 @@ public class WebApplicationContext extends ServletHttpContext
         return _tagLibMap;
     }
     
-    /* ------------------------------------------------------------ */
-    public synchronized void addFilterHolder(FilterHolder filter)
-    {
-        if (_filters==null)
-            _filters=new ArrayList(3);
-        _filters.add(filter);
-        Code.debug("addFilterHolder "+filter);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public FilterHolder getFilterHolder(String name)
-    {
-        if (_filters==null)
-            return null;
-        for (int i=0;i<_filters.size();i++)
-        {
-            FilterHolder holder=(FilterHolder)_filters.get(i);
-            if (holder.getName().equals(name))
-                return holder;
-        }
-        return null;
-    }
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */

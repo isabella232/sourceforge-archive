@@ -201,6 +201,94 @@ public class ServletHandler
     {
         return _logSink;
     }
+
+    /* ------------------------------------------------------------ */
+    public ServletHolder newServletHolder(String name,
+                                          String servletClass,
+                                          String forcedPath)
+    {
+        if (_nameMap.containsKey(name))
+            throw new IllegalArgumentException("Named servlet already exists: "+name);
+        
+        ServletHolder holder = new ServletHolder(this,name,servletClass,forcedPath);
+        _nameMap.put(holder.getName(),holder);
+        return holder;
+    }
+
+    /* ------------------------------------------------------------ */
+    public ServletHolder newServletHolder(String name,
+                                          String servletClass)
+    {
+        return newServletHolder(name,servletClass,null);
+    }    
+    
+    /* ------------------------------------------------------------ */
+    public ServletHolder getServletHolder(String name)
+    {
+        return (ServletHolder)_nameMap.get(name);
+    }    
+
+    /* ------------------------------------------------------------ */
+    public ServletHolder mapPathToServlet(String pathSpec,
+                                          String servletName)
+    {
+        ServletHolder holder =(ServletHolder)_nameMap.get(servletName);
+        if (holder==null)
+            throw new IllegalArgumentException("Unknown servlet: "+servletName);
+        _servletMap.put(pathSpec,holder);
+        return holder;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public ServletHolder addServlet(String name,
+                                    String pathSpec,
+                                    String servletClass,
+                                    String forcedPath)
+    {
+        ServletHolder holder = getServletHolder(name);
+        if (holder==null)
+            holder = newServletHolder(name,servletClass,forcedPath);
+        mapPathToServlet(pathSpec,name);
+        return holder;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public ServletHolder addServlet(String name,
+                                    String pathSpec,
+                                    String servletClass)
+    {
+        return addServlet(name,pathSpec,servletClass,null);
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    public ServletHolder addServlet(String pathSpec,
+                                    String servletClass)
+    {
+        return addServlet(servletClass,pathSpec,servletClass,null);
+    }
+
+    /* ------------------------------------------------------------ */
+    void addServletHolder(String pathSpec, ServletHolder holder)
+    {
+        try
+        {
+            ServletHolder existing = (ServletHolder)
+                _nameMap.get(holder.getName());
+            if (existing==null)
+                _nameMap.put(holder.getName(),holder);
+            else if (existing!=holder)
+                throw new IllegalArgumentException("Holder already exists for name: "+holder.getName());
+            
+            if (isStarted() && !holder.isStarted())
+                holder.start();
+            _servletMap.put(pathSpec,holder);
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+        }
+    }
     
     /* ------------------------------------------------------------ */
     public synchronized void addEventListener(EventListener listener)
@@ -287,89 +375,29 @@ public class ServletHandler
     
     
     /* ------------------------------------------------------------ */
-    public ServletHolder addServlet(String name,
-                                    String pathSpec,
-                                    String servletClass,
-                                    String path)
-    {
-        try
-        {
-            ServletHolder holder = new ServletHolder(this,name,servletClass,null);
-            addHolder(pathSpec,holder);
-            return holder;
-        }
-        catch(Exception e)
-        {
-            Code.warning(e);
-            throw new IllegalArgumentException(e.toString());
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    public ServletHolder addServlet(String name,
-                                    String pathSpec,
-                                    String servletClass)
-    {
-        return addServlet(name,pathSpec,servletClass,null);
-    }
-
-    /* ------------------------------------------------------------ */
-    public ServletHolder addServlet(String pathSpec,
-                                    String servletClass)
-    {
-        return addServlet(servletClass,pathSpec,servletClass,null);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get servlet by name.
-     * @param name 
-     * @return 
-     */
-    public ServletHolder getServletHolder(String name)
-    {
-        return (ServletHolder)_nameMap.get(name);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void addHolder(String pathSpec, ServletHolder holder)
-    {
-        try
-        {
-            if (isStarted() && !holder.isStarted())
-                holder.start();
-            _servletMap.put(pathSpec,holder);
-            _nameMap.put(holder.getName(),holder);
-        }
-        catch(Exception e)
-        {
-            Code.warning(e);
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get or create a ServletRequest.
+    /** Get or create a ServletHttpRequest.
      * Create a new or retrieve a previously created servlet request
-     * that wraps the http request. Note that the ServletResponse is
-     * also created and can be retrieved from the ServletRequest.
+     * that wraps the http request. Note that the ServletHttpResponse is
+     * also created and can be retrieved from the ServletHttpRequest.
      * @param httpRequest 
-     * @return ServletRequest wrapping the passed HttpRequest.
+     * @return ServletHttpRequest wrapping the passed HttpRequest.
      */
-    public ServletRequest getServletRequest(HttpRequest httpRequest,
+    public ServletHttpRequest getServletHttpRequest(HttpRequest httpRequest,
                                             HttpResponse httpResponse)
     {
         // Look for a previously built servlet request.
-        ServletRequest servletRequest = (ServletRequest)
+        ServletHttpRequest servletHttpRequest = (ServletHttpRequest)
             httpRequest.getFacade();
         
-        if (servletRequest==null)
+        if (servletHttpRequest==null)
         {
-            servletRequest  = new ServletRequest(this,httpRequest);
-            httpRequest.setFacade(servletRequest);
-            ServletResponse servletResponse =
-                new ServletResponse(servletRequest,httpResponse);
-            httpResponse.setFacade(servletResponse);
+            servletHttpRequest  = new ServletHttpRequest(this,httpRequest);
+            httpRequest.setFacade(servletHttpRequest);
+            ServletHttpResponse servletHttpResponse =
+                new ServletHttpResponse(servletHttpRequest,httpResponse);
+            httpResponse.setFacade(servletHttpResponse);
         }
-        return servletRequest;
+        return servletHttpRequest;
     }
     
 
@@ -400,7 +428,7 @@ public class ServletHandler
      * @return The path in the context, stripped of any session ID.
      */
     public void setSessionId(String pathParams,
-                             ServletRequest request)
+                             ServletHttpRequest request)
     {
         request.setSessionId(pathParams);
         HttpSession session=request.getSession(false);
@@ -425,8 +453,8 @@ public class ServletHandler
     {
         try
         {
-            ServletRequest request=null;
-            ServletResponse response=null;
+            ServletHttpRequest request=null;
+            ServletHttpResponse response=null;
             
             // handle
             Code.debug("Looking for servlet at ",pathInContext);
@@ -435,8 +463,8 @@ public class ServletHandler
                 httpRequest.getAttribute(ServletHandler.__SERVLET_HOLDER);
             if (holder!=null)
             {
-                request = getServletRequest(httpRequest,httpResponse);
-                response = request.getServletResponse();
+                request = getServletHttpRequest(httpRequest,httpResponse);
+                response = request.getServletHttpResponse();
                 setSessionId(pathParams,request);
             }
             else
@@ -444,8 +472,8 @@ public class ServletHandler
                 Map.Entry entry=getHolderEntry(pathInContext);
                 if (entry!=null)
                 {
-                    request = getServletRequest(httpRequest,httpResponse);
-                    response = request.getServletResponse();
+                    request = getServletHttpRequest(httpRequest,httpResponse);
+                    response = request.getServletHttpResponse();
                     setSessionId(pathParams,request);
                     String servletPathSpec=(String)entry.getKey();
                     holder = (ServletHolder)entry.getValue();
@@ -597,8 +625,8 @@ public class ServletHandler
                     }
                 
                     Log.event("Dynamic load '"+servletClass+"' at "+path);
-                    addHolder(path+"/*",holder);
-                    addHolder(path+".class/*",holder);
+                    addServletHolder(path+"/*",holder);
+                    addServletHolder(path+".class/*",holder);
                     
                     entry=_servletMap.getMatch(pathInContext);
                 }
@@ -637,8 +665,8 @@ public class ServletHandler
                                      HttpResponse httpResponse)
         throws IOException
     {
-        ServletRequest request = getServletRequest(httpRequest,httpResponse);
-        ServletResponse response = request.getServletResponse();
+        ServletHttpRequest request = getServletHttpRequest(httpRequest,httpResponse);
+        ServletHttpResponse response = request.getServletHttpResponse();
 
         // Handle paths
         request.setSessionId(pathParams); 

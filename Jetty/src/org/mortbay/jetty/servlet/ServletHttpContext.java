@@ -124,7 +124,7 @@ public class ServletHttpContext extends HttpContext
                InstantiationException,
                IllegalAccessException
     {
-        return getServletHandler().addServlet(name,pathSpec,className);
+        return getServletHandler().addServlet(name,pathSpec,className,null);
     }
 
     /* ------------------------------------------------------------ */

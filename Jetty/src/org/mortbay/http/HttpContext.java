@@ -541,14 +541,31 @@ public class HttpContext implements LifeCycle
     /** Get all handlers.
      * @return 
      */
+    public List getHttpHandlers()
+    {
+        return _handlers;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @deprecated 
+     */
     public List getHandlers()
     {
         return _handlers;
     }
 
     /* ------------------------------------------------------------ */
-    /** Gent the number of handlers.
-     * @return 
+    /** 
+     */
+    public int getNumHandlers()
+    {
+        return _handlers.size();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @deprecated 
      */
     public int getHandlerSize()
     {
@@ -557,11 +574,31 @@ public class HttpContext implements LifeCycle
     
     
     /* ------------------------------------------------------------ */
+    /**
+     * @deprecated
+     */
+    public synchronized void addHandler(int i,HttpHandler handler)
+    {
+        _handlers.add(i,handler);
+        handler.initialize(this);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @deprecated
+     */
+    public synchronized void addHandler(HttpHandler handler)
+    {
+        addHandler(_handlers.size(),handler);
+    }
+
+
+    /* ------------------------------------------------------------ */
     /** Add a handler.
      * @param i The position in the handler list
      * @param handler The handler.
      */
-    public synchronized void addHandler(int i,HttpHandler handler)
+    public synchronized void addHttpHandler(int i,HttpHandler handler)
     {
         _handlers.add(i,handler);
         handler.initialize(this);
@@ -571,17 +608,78 @@ public class HttpContext implements LifeCycle
     /** Add a HttpHandler to the context.
      * @param handler 
      */
-    public synchronized void addHandler(HttpHandler handler)
+    public synchronized void addHttpHandler(HttpHandler handler)
     {
         addHandler(_handlers.size(),handler);
     }
 
+
+    
     /* ------------------------------------------------------------ */
-    /** Get handler by index.
-     * @param i 
-     * @return 
+    /**
+     * @deprecated
      */
     public HttpHandler getHandler(int i)
+    {
+        return (HttpHandler)_handlers.get(i);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @deprecated
+     */
+    public int getHandlerIndex(HttpHandler handler)
+    {
+        for (int h=0;h<_handlers.size();h++)
+        {
+            if ( handler == _handlers.get(h))
+                return h;
+        }
+        return -1;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @deprecated
+     */
+    public synchronized HttpHandler getHandler(Class handlerClass)
+    {
+        for (int h=0;h<_handlers.size();h++)
+        {
+            HttpHandler handler = (HttpHandler)_handlers.get(h);
+            if (handlerClass.isInstance(handler))
+                return handler;
+        }
+        return null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @deprecated
+     */
+    public synchronized HttpHandler removeHandler(int i)
+    {
+        HttpHandler handler = getHandler(i);
+        if (handler.isStarted())
+            throw new IllegalStateException("Handler is started");
+        return (HttpHandler)_handlers.remove(i);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @deprecated
+     */
+    public synchronized void removeHandler(HttpHandler handler)
+    {
+        if (handler.isStarted())
+            throw new IllegalStateException("Handler is started");
+        _handlers.remove(handler);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get handler by index.
+     */
+    public HttpHandler getHttpHandler(int i)
     {
         return (HttpHandler)_handlers.get(i);
     }
@@ -591,7 +689,7 @@ public class HttpContext implements LifeCycle
      * @param Handler instance 
      * @return Index of handler in context or -1 if not found.
      */
-    public int getHandlerIndex(HttpHandler handler)
+    public int getHttpHandlerIndex(HttpHandler handler)
     {
         for (int h=0;h<_handlers.size();h++)
         {
@@ -606,7 +704,7 @@ public class HttpContext implements LifeCycle
      * @param handlerClass 
      * @return The first handler that is an instance of the handlerClass
      */
-    public synchronized HttpHandler getHandler(Class handlerClass)
+    public synchronized HttpHandler getHttpHandler(Class handlerClass)
     {
         for (int h=0;h<_handlers.size();h++)
         {
@@ -622,7 +720,7 @@ public class HttpContext implements LifeCycle
      * The handler must be stopped before being removed.
      * @param i 
      */
-    public synchronized HttpHandler removeHandler(int i)
+    public synchronized HttpHandler removeHttpHandler(int i)
     {
         HttpHandler handler = getHandler(i);
         if (handler.isStarted())
@@ -634,7 +732,7 @@ public class HttpContext implements LifeCycle
     /** Remove a handler.
      * The handler must be stopped before being removed.
      */
-    public synchronized void removeHandler(HttpHandler handler)
+    public synchronized void removeHttpHandler(HttpHandler handler)
     {
         if (handler.isStarted())
             throw new IllegalStateException("Handler is started");

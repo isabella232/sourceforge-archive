@@ -14,6 +14,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import org.mortbay.http.ChunkableOutputStream;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpFields;
@@ -121,19 +123,19 @@ public class Dispatcher implements RequestDispatcher
      * @exception ServletException 
      * @exception IOException 
      */
-    public void forward(javax.servlet.ServletRequest request,
-                        javax.servlet.ServletResponse response)
+    public void forward(ServletRequest request,
+                        ServletResponse response)
         throws ServletException,IOException
     {
-        ServletRequest servletRequest=(ServletRequest)request;
-        HttpRequest httpRequest=servletRequest.getHttpRequest();
-        ServletResponse servletResponse=(ServletResponse)response;
-        HttpResponse httpResponse=servletResponse.getHttpResponse();
+        ServletHttpRequest servletHttpRequest=(ServletHttpRequest)request;
+        HttpRequest httpRequest=servletHttpRequest.getHttpRequest();
+        ServletHttpResponse servletHttpResponse=(ServletHttpResponse)response;
+        HttpResponse httpResponse=servletHttpResponse.getHttpResponse();
             
-        if (servletRequest.getHttpRequest().isCommitted())
+        if (servletHttpRequest.getHttpRequest().isCommitted())
             throw new IllegalStateException("Request is committed");
-        servletResponse.resetBuffer();
-        servletResponse.setOutputState(-1);
+        servletHttpResponse.resetBuffer();
+        servletHttpResponse.setOutputState(-1);
         
         // Remove any evidence of previous include
         httpRequest.removeAttribute(__REQUEST_URI);
@@ -147,9 +149,9 @@ public class Dispatcher implements RequestDispatcher
         {
             MultiMap parameters=new MultiMap();
             UrlEncoded.decodeTo(_query,parameters);
-            servletRequest.pushParameters(parameters);
+            servletHttpRequest.pushParameters(parameters);
             
-            String oldQ=servletRequest.getQueryString();
+            String oldQ=servletHttpRequest.getQueryString();
             if (oldQ!=null && oldQ.length()>0)
             {
                 UrlEncoded encoded = new UrlEncoded(oldQ);
@@ -166,7 +168,7 @@ public class Dispatcher implements RequestDispatcher
         if (_path==null)
         {
             // go direct to named servlet
-            _holder.handle(servletRequest,servletResponse);
+            _holder.handle(servletHttpRequest,servletHttpResponse);
         }
         else
         {
@@ -176,7 +178,7 @@ public class Dispatcher implements RequestDispatcher
             {
                 Code.debug("Forward request to ",_holder,
                            " at ",_pathSpec);
-                servletRequest.setForwardPaths(_servletHandler,
+                servletHttpRequest.setForwardPaths(_servletHandler,
                                                PathMap.pathMatch(_pathSpec,_path),
                                                PathMap.pathInfo(_pathSpec,_path),
                                                _query);
@@ -196,21 +198,21 @@ public class Dispatcher implements RequestDispatcher
      * @exception ServletException 
      * @exception IOException 
      */
-    public void include(javax.servlet.ServletRequest request,
-                        javax.servlet.ServletResponse response)
+    public void include(ServletRequest request,
+                        ServletResponse response)
         throws ServletException, IOException     
     {
-        ServletRequest servletRequest=(ServletRequest)request;
-        HttpRequest httpRequest=servletRequest.getHttpRequest();
-        ServletResponse servletResponse=(ServletResponse)response;
-        HttpResponse httpResponse=servletResponse.getHttpResponse();
-            
+        ServletHttpRequest servletHttpRequest=(ServletHttpRequest)request;
+        HttpRequest httpRequest=servletHttpRequest.getHttpRequest();
+        ServletHttpResponse servletHttpResponse=(ServletHttpResponse)response;
+        HttpResponse httpResponse=servletHttpResponse.getHttpResponse();
+           
         // Need to ensure that there is no change to the
         // response other than write
-        boolean old_locked = servletResponse.getLocked();
-        servletResponse.setLocked(true);
-        int old_output_state = servletResponse.getOutputState();
-        servletResponse.setOutputState(0);
+        boolean old_locked = servletHttpResponse.getLocked();
+        servletHttpResponse.setLocked(true);
+        int old_output_state = servletHttpResponse.getOutputState();
+        servletHttpResponse.setOutputState(0);
 
         // handle static resource
         if (_resource!=null)
@@ -227,8 +229,8 @@ public class Dispatcher implements RequestDispatcher
             finally
             {
                 try{in.close();}catch(IOException e){Code.ignore(e);}
-                servletResponse.setLocked(old_locked);
-                servletResponse.setOutputState(old_output_state);
+                servletHttpResponse.setLocked(old_locked);
+                servletHttpResponse.setOutputState(old_output_state);
             }
         }
         
@@ -239,13 +241,13 @@ public class Dispatcher implements RequestDispatcher
             // just call it with existing request/response
             try
             {
-                _holder.handle(servletRequest,servletResponse);
+                _holder.handle(servletHttpRequest,servletHttpResponse);
                 return;
             }
             finally
             {
-                servletResponse.setLocked(old_locked);
-                servletResponse.setOutputState(old_output_state);
+                servletHttpResponse.setLocked(old_locked);
+                servletHttpResponse.setOutputState(old_output_state);
             }
         }
         
@@ -254,7 +256,7 @@ public class Dispatcher implements RequestDispatcher
         {
             MultiMap parameters=new MultiMap();
             UrlEncoded.decodeTo(_query,parameters);
-            servletRequest.pushParameters(parameters);
+            servletHttpRequest.pushParameters(parameters);
         }
         
         // Request has all original path and info etc.
@@ -265,13 +267,13 @@ public class Dispatcher implements RequestDispatcher
         Object old_request_uri =
             request.getAttribute(__REQUEST_URI);
         httpRequest.setAttribute(__REQUEST_URI,
-                                 servletRequest.getRequestURI());
+                                 servletHttpRequest.getRequestURI());
         
         // javax.servlet.include.context_path
         Object old_context_path =
             request.getAttribute(__CONTEXT_PATH);
         httpRequest.setAttribute(__CONTEXT_PATH,
-                                 servletRequest.getContextPath());
+                                 servletHttpRequest.getContextPath());
         
         // javax.servlet.include.query_string
         Object old_query_string =
@@ -300,15 +302,15 @@ public class Dispatcher implements RequestDispatcher
                                  PathMap.pathInfo(_pathSpec,_path));
                 
             // try service request
-            _holder.handle(servletRequest,servletResponse);
+            _holder.handle(servletHttpRequest,servletHttpResponse);
         }
         finally
         {
             // revert request back to it's old self.
-            servletResponse.setLocked(old_locked);
-            servletResponse.setOutputState(old_output_state);
+            servletHttpResponse.setLocked(old_locked);
+            servletHttpResponse.setOutputState(old_output_state);
             if (_query!=null && _query.length()>0)
-                servletRequest.popParameters();
+                servletHttpRequest.popParameters();
             httpRequest.setAttribute(__REQUEST_URI,old_request_uri);
             httpRequest.setAttribute(__CONTEXT_PATH,old_context_path);
             httpRequest.setAttribute(__QUERY_STRING,old_query_string);

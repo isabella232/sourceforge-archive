@@ -82,7 +82,7 @@ abstract public class HttpMessage
     /** Set a facade object.
      * A Facade object is a wrapper object that is associated with
      * this message and presents it with an different interface. The
-     * primary example of a HttpRequest facade is ServletRequest.
+     * primary example of a HttpRequest facade is ServletHttpRequest.
      * A single facade object may be associated with the message with
      * this call and retrieved with the getFacade method.
      * @see getFacade
