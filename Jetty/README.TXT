@@ -6,13 +6,22 @@ This is an alpha release of the Jetty 3 project.  It is currently not
 usable as a WWW server, but is released now to keep the development open.
 
 Jetty 3 has started from a clean slate.  Classes are moved from Jetty 2
-on an as needed basis.  Development has been done in JDK1.1 with
-the 1.2 Collection classes.
+on an as needed basis.  
 
 Currently the release contains the Utils package (with about half a 
 cleanup done) and the HTTP package. Work to date in the HTTP package 
 has concentrated on RFC2616 compliance, performance and testing.  
 See the VERSION.TXT file for more detail.
+
+Environment
+===========
+
+Development has been done in JDK1.1 with the 1.2 Collection classes.
+The compiled classes are currently kept in the src directory, so
+the following CLASSPATH is required (or the non unix equivalent):
+
+  CLASSPATH=$JETTY3_HOME/src:$JETTY3_HOME/lib/collections.jar
+
 
 Test Harnesses
 ==============
