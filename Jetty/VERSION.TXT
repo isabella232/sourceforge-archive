@@ -2,6 +2,9 @@ Jetty3 Versions
 --------------
 
  + Fix ServletResponse.setLocale()
+ + Fix reuse of Resource
+ + Fix Jetty.bat for spaces.
+ + Fix .. handling in URI
 
 Jetty-3.1.rc9 - 02 Sep 2001
  + Added bin/orgPackage.sh script to change package names.

@@ -3,7 +3,7 @@
   <display-name>Jetty3 Demo</display-name>
   <context-param>
     <param-name>home</param-name>
-    <param-value>http://jetty.mortbay.com</param-value>
+    <param-value>http://jetty.mortbay.org</param-value>
   </context-param>
   <context-param>
     <param-name>admin</param-name>
@@ -11,7 +11,7 @@
   </context-param>
   <servlet>
     <servlet-name>dump</servlet-name>
-    <servlet-class>com.mortbay.Servlet.Dump</servlet-class>
+    <servlet-class>org.mortbay.servlet.Dump</servlet-class>
     <init-param>
       <param-name>param1</param-name>
       <param-value>value1</param-value>

@@ -66,7 +66,7 @@ set CONFIGS=
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check for JAVA_HOME
 :::::::::::::::::::::::::::::::::::::::::::::::::::
-if not x==x%JAVA_HOME% goto have_java_home
+if not x=="x%JAVA_HOME%" goto have_java_home
   echo "** ERROR: JAVA_HOME variable not set. Sorry, can't find java command."
   goto ERROR
 :have_java_home
@@ -78,7 +78,6 @@ if not exist %HOME%\.jettyrc  goto no_jettyrc
   call "%HOME%\.jettyrc"
 :no_jettyrc
 
-
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Jetty's hallmark
 :::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -89,7 +88,7 @@ goto check_home_jetty
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 :: if no JETTY_HOME, search likely locations.
 :::::::::::::::::::::::::::::::::::::::::::::::::::
-if not x==x%JETTY_HOME% goto check_home_jetty
+if not x=="x%JETTY_HOME%" goto check_home_jetty
    ::@TODO Find a way to search for the jetty directory
    if not exist .\%JETTY_JAR% goto check_parent_dir
    set JETTY_HOME=.
@@ -102,12 +101,12 @@ if not x==x%JETTY_HOME% goto check_home_jetty
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 :: No JETTY_HOME yet? We're out of luck!
 :::::::::::::::::::::::::::::::::::::::::::::::::::
-if not x==x%JETTY_HOME% goto check_jar_jetty
-    echo "** ERROR: JETTY_HOME not set, you need to set it or install in a standard location"
+if not x=="x%JETTY_HOME%" goto check_jar_jetty
+    echo "** ERROR: JETTY_HOME not set correctly, you need to set it or install in a standard location"
     goto ERROR
 
 :check_jar_jetty
-if exist %JETTY_HOME%\%JETTY_JAR% goto have_home_jetty
+if exist "%JETTY_HOME%\%JETTY_JAR%" goto have_home_jetty
    echo "** ERROR: Oops! %JETTY_HOME%\%JETTY_JAR% is not readable!"
    goto ERROR
 
@@ -126,13 +125,13 @@ goto no_conf_jetty
 :: but only if no configurations were given on the
 :: command line.
 :::::::::::::::::::::::::::::::::::::::::::::::::::
-if x==x%JETTY_CONF% set JETTY_CONF=%JETTY_HOME%\etc\jetty.conf
+if x=="x%JETTY_CONF%" set JETTY_CONF=%JETTY_HOME%\etc\jetty.conf
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Read the configuration file if one exists
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 set CONFIG_LINES=
-if not x==x%CONFIGS% goto have_configs
+if not x=="x%CONFIGS%" goto have_configs
   if not exist "%JETTY_CONF%" goto no_conf_jetty
      for /f %%L in (%JETTY_CONF%) do set CONFIG_LINES=%CONFIG_LINES% %%L
 
@@ -168,7 +167,7 @@ if not x==x%CONFIG_LINES (
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the demo server if there's nothing else to run
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if not x==x%CONFIGS% goto have_configs
+if not x=="x%CONFIGS%" goto have_configs
   set CONFIGS=%JETTY_HOME%\etc\demo.xml %JETTY_HOME%\etc\admin.xml
 
 
@@ -179,12 +178,15 @@ echo CONFIGS=%CONFIGS%
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check where logs should go.
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if x==x%JETTY_LOG% set JETTY_LOG=%JETTY_HOME%\logs
+if x=="x%JETTY_LOG%" set JETTY_LOG=%JETTY_HOME%\logs
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Find a location for the pid file
 :::::::::::::::::::::::::::::::::::::::::::::::::::::
 if x==x%JETTY_RUN% set JETTY_RUN=%TEMP%
+
+
+
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Determine which JVM of version >1.2
@@ -203,28 +205,36 @@ if x==x%JAVA% (
 )
 
 
+
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build the classpath with Jetty's bundled libraries.
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 set CP=%JETTY_HOME%\lib\javax.servlet.jar
+
 set CP=%CP%;%JETTY_HOME%\lib\org.mortbay.jetty.jar
 set CP=%CP%;%JETTY_HOME%\lib\org.mortbay.http.jar
 set CP=%CP%;%JETTY_HOME%\lib\javax.xml.jaxp.jar
 set CP=%CP%;%JETTY_HOME%\lib\org.apache.crimson.jar
+
 if exist "%JETTY_HOME%\LIB\org.apache.jasper.jar"  set CP=%CP%;%JETTY_HOME%\lib\org.apache.jasper.jar
 if exist "%JETTY_HOME%\LIB\com.sun.net.ssl.jar"    set CP=%CP%;%JETTY_HOME%\lib\com.sun.net.ssl.jar
 if exist "%JAVA_HOME%\lib\tools.jar"               set CP=%CP%;%JAVA_HOME%\lib\tools.jar
-set CLASSPATH=%CP%;%CLASSPATH%
+
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Add jetty properties to Java VM options.
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set JAVA_OPTIONS=-Djetty.home="%JETTY_HOME%" -Djetty.log="%JETTY_LOG%" %JAVA_OPTIONS%
 
+
+
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: This is how the Jetty server will be started
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set RUN_CMD=%JAVA% -classpath %CP%;%CLASSPATH% %JAVA_OPTIONS% org.mortbay.jetty.Server %CONFIGS%
+set RUN_CMD=%JAVA% -classpath "%CP%;%CLASSPATH%" %JAVA_OPTIONS% org.mortbay.jetty.Server %CONFIGS%
+
+
 
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::

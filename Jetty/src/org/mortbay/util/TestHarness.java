@@ -753,6 +753,7 @@ public class TestHarness
                 {"/aaa/./bbb/","/aaa/bbb/"},
                 {"/aaa/../bbb/","/bbb/"},
                 {"/aaa/./../bbb/","/bbb/"},
+                {"/aaa/bbb/ccc/../../ddd/","/aaa/ddd/"},
                 {"./bbb/","bbb/"},
                 {"./aaa/../bbb/","bbb/"},
                 {"./",""},

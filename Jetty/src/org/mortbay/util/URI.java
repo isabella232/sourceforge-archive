@@ -865,10 +865,12 @@ public class URI
             }            
 
             // Do the delete
-            if (delStart>=0)
+            if (skip<=0 && delStart>=0 && delStart>=0)
             {
                 buf.delete(delStart,delEnd);
                 delStart=delEnd=-1;
+                if (skip>0)
+                    delEnd=end;
             }
             
             end=start--;

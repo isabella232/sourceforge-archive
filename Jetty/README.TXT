@@ -170,9 +170,9 @@ Comments, contributions, feedback, bugs, testing, etc. please....
 
 The mailing lists are the best place to start:
 
-  http://www.egroups.com/group/jetty-announce/
-  http://www.egroups.com/group/jetty-discuss/
-  http://www.egroups.com/group/jetty-support/
+  http://www.yahoogroups.com/group/jetty-announce/
+  http://www.yahoogroups.com/group/jetty-discuss/
+  http://www.yahoogroups.com/group/jetty-support/
   http://sourceforge.net/mail/?group_id=7322
 
 

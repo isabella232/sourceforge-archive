@@ -50,10 +50,7 @@ a context without explicit creation of a Handler.
 
 This file configures:
  + A listener at port 8080 on all known interfaces
- + The default web applicaton at /default/* context
- + Dynamic servlet context at /servlet/*
- + A context at / with serving files from ./docroot and
-   the dump servlet at /dump.
+ + The default web applicaton at / context
 
 $Id$
 -->
@@ -73,35 +70,9 @@ $Id$
   </Call>
 
   <Call name="addWebApplication">
-    <Arg>/default/*</Arg>
+    <Arg>/</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/default/</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml/</Arg>
-  </Call>
-
-  <Set name="ChunkingForced" type="boolean">false</Set>
-
-  <Call name="addContext">
-    <Arg>/</Arg>
-    <Set name="ClassPath"><SystemProperty name="jetty.home" default="."/>/servlets/</Set>
-    <Set name="DynamicServletPathSpec">/servlet/*</Set>
-    <Call name="getServletHandler">
-      <Set name="ServeDynamicSystemServlets" type="boolean">FALSE</Set>
-    </Call>
-    <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/docroot/</Set>
-    <Set name="ServingResources">TRUE</Set>
-    <Call name="addServlet">
-      <Arg>Dump</Arg>
-      <Arg>/dump/*,/handler/Dump,/handler/Dump/*</Arg>
-      <Arg>org.mortbay.servlet.Dump</Arg>
-    </Call>
-    <Call name="addServlet">
-      <Arg>JSP</Arg>
-      <Arg>*.jsp,*.jsP,*.jSp,*.jSP,*.Jsp,*.JsP,*.JSp,*.JSP</Arg>
-      <Arg>org.apache.jasper.servlet.JspServlet</Arg>
-    </Call>
-    <Call name="getResourceHandler">
-      <Set name="AcceptRanges" type="boolean">true</Set>
-    </Call>
   </Call>
 
   <Set name="LogSink">
