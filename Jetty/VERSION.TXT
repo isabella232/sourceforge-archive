@@ -1,3 +1,9 @@
+
+   + addCookie takes an int maxAge rather than a expires date.
+   + Added LogSink extensible log architecture.
+   + Code.ignore only outputs when debug is verbose.
+   + Added Tenlet class for reverse telnet.
+
 Jetty-3.0.A7 - 15 Apr 2000
    + Include java 1.2 source hierarchy
    + removed excess ';' from source

@@ -42,13 +42,9 @@ run in the src directory and then compile using the class path:
   CLASSPATH=$JETTY3_HOME
 
 
-The current release also requires that the 2.1 servlet API is in the
-system CLASSPATH.  Eventually this will be included dynamically when the
-handler is specified.  To add this to your CLASSPATH do:
-
-  CLASSPATH=$CLASSPATH:$JETTY3_HOME/lib/javax.servlet2.1.jar
-
-
+In order to support multiple versions of the javax.servlet API, the 
+javax.servlet.jar is loaded as a resource as part of the particular
+ServletHandler used.
 
 
 Test Harnesses
@@ -82,8 +78,10 @@ The server can be configured by using the options:
   -f <path>=<dir>     - FileHandler at path
   -h <path>=<class>   - Map a handler at path
   -v <host>=<alias>   - Remaining options are for virtual host.
-  -s21 <path>=<classpath>
-                      - Add a 2.1 dynamic servlet handler.
+  -ds <path>=<classpath>
+                      - Add a dynamic servlet directory.
+  -s <path>=<class>
+                      - Add a servlet.
 
 
 The default is equivalent to

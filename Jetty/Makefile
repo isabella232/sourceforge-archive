@@ -21,7 +21,6 @@ rall:
 TESTS :=
 ROOTNAME := .
 SUBDIRS := \
-    servlet2.1/javax \
     src 
 
 include $(JETTY_HOME)/etc/Global.mk
