@@ -413,14 +413,11 @@ public class HttpConnection
     private void exception(Throwable e)
     {
         try{
-            if (Code.debug())
-                Code.warning(_request.toString(),e);
-            else if ( e instanceof IOException )
+            if ( !Code.debug() && e instanceof IOException )
                 // Assume it was the browser closing early
                 Code.ignore(e);
             else
-                Code.warning(e.toString());
-
+                Code.warning(_request.toString(),e);
             
             _persistent=false;
             if (!_response.isCommitted())
@@ -666,10 +663,16 @@ public class HttpConnection
             {
               case 1:
                   {
-                      _response.removeField(HttpFields.__ContentLength);
-                      _response.setField(HttpFields.__TransferEncoding,
+                      // if not closed and no length
+                      if ((!HttpFields.__Close.equals(_response.getField(HttpFields.__Connection)))&&
+                          (_response.getField(HttpFields.__ContentLength)==null))
+                      {
+                          // Chunk it!
+                          _response.removeField(HttpFields.__ContentLength);
+                          _response.setField(HttpFields.__TransferEncoding,
                                          HttpFields.__Chunked);
-                      _outputStream.setChunking();
+                          _outputStream.setChunking();
+                      }
                       break;
                   }
               case 0:

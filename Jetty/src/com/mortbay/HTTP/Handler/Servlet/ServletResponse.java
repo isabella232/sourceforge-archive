@@ -127,20 +127,20 @@ public class ServletResponse implements HttpServletResponse
         if (s<0)
         {
             _outputState=0;
-            if (_out!=null)
-                _out.disable();
-            _out=null;
             if (_writer!=null)
                 _writer.disable();
             _writer=null;
+            if (_out!=null)
+                _out.disable();
+            _out=null;
         }
         else
         {
             _outputState=s;
-            if (_out!=null)
-                _out.flush();
             if (_writer!=null)
                 _writer.flush();
+            if (_out!=null)
+                _out.flush();
         }
     }
     
@@ -191,11 +191,11 @@ public class ServletResponse implements HttpServletResponse
     public void flushBuffer()
         throws IOException
     {
+        if (_writer!=null)
+            _writer.flush();
         if (_out!=null)
             _out.flush();
-        else if (_writer!=null)
-            _writer.flush();
-        else
+        if (_writer==null && _out==null)
             _httpResponse.getOutputStream().flush();
         _httpResponse.commit();
     }
@@ -451,6 +451,14 @@ public class ServletResponse implements HttpServletResponse
     {
         if (_outputState!=0 && _outputState!=1)
             throw new IllegalStateException();
+        
+        if (_writer!=null)
+        {
+            _writer.flush();
+            _writer.disable();
+            _writer=null;
+        }
+        
         if (_out==null)
             _out = new ServletOut(_servletRequest.getHttpRequest()
                                   .getOutputStream());  

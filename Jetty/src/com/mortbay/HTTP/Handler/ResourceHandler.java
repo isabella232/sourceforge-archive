@@ -223,6 +223,10 @@ public class ResourceHandler extends NullHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
+        // Strip any path params
+        if (pathInContext!=null && pathInContext.indexOf(";")>0)
+            pathInContext=pathInContext.substring(0,pathInContext.indexOf(";"));
+        
         // Extract and check filename
         pathInContext=Resource.canonicalPath(pathInContext);
         if (pathInContext==null)
@@ -969,7 +973,7 @@ public class ResourceHandler extends NullHandler
             if (length != -1) 
                 response.setIntField(HttpFields.__ContentLength, (int) count);
             response.setDateField(HttpFields.__LastModified,resource.lastModified());
-            response.setField(HttpFields.__AcceptRanges,"bytes");
+            // response.setField(HttpFields.__AcceptRanges,"bytes");
         }
 
         public void requestDone()

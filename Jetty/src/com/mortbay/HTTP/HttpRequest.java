@@ -813,84 +813,88 @@ public class HttpRequest extends HttpMessage
 
         try
         {
-            String cookieStr = (String)_header.get(HttpFields.__Cookie);
-            if (cookieStr==null || cookieStr.length()==0)
+            List cookieStrs = _header.getValues(HttpFields.__Cookie);
+            
+            if (cookieStrs==null || cookieStrs.size()==0)
             {
                 _cookies=new Cookie[0];
                 return _cookies;
             }
             
             ArrayList cookies=new ArrayList(4);
-            int version=0;
-            Cookie cookie=null;
-            
-            QuotedStringTokenizer tok = new QuotedStringTokenizer(cookieStr,";");
-            while (tok.hasMoreTokens())
+            for (int i=0;cookieStrs!=null && i<cookieStrs.size();i++)
             {
-                String c = tok.nextToken();
-                int e = c.indexOf("=");
-                String n;
-                String v;
-                if (e>0)
+                String cookieStr = (String)cookieStrs.get(i);
+                int version=0;
+                Cookie cookie=null;
+                Code.debug("Cookies=",cookieStr);
+                QuotedStringTokenizer tok = new QuotedStringTokenizer(cookieStr,";");
+                while (tok.hasMoreTokens())
                 {
-                    n=c.substring(0,e).trim();
-                    v=c.substring(e+1).trim();
-                }
-                else
-                {
-                    n=c.trim();
-                    v="";
-                }
-
-                // Handle quoted values
-                if (version>0)
-                    v=StringUtil.unquote(v);
-                
-                // Ignore $ names
-                if (n.startsWith("$"))
-                {
-                    if ("$version".equalsIgnoreCase(n))
+                    String c = tok.nextToken();
+                    int e = c.indexOf("=");
+                    String n;
+                    String v;
+                    if (e>0)
                     {
-                        int coma=v.indexOf(",");
-                        if (coma>=0)
-                        {   
-                            version=Integer.parseInt
-                                (StringUtil.unquote(v.substring(0,coma)));
-                            v=v.substring(coma+1);
-                            e=v.indexOf("=");
-                            if (e>0)
-                            {
-                                n=v.substring(0,e).trim();
-                                v=v.substring(e+1).trim();
-                                v=StringUtil.unquote(v);
-                            }
-                            else
-                            {
-                                n=v.trim();
-                                v="";
-                            }
-                        }
-                        else
-                            continue;
+                        n=c.substring(0,e).trim();
+                        v=c.substring(e+1).trim();
                     }
                     else
                     {
-                        if ("$path".equalsIgnoreCase(n) && cookie!=null)
-                            cookie.setPath(v);
-                        else if ("$domain".equalsIgnoreCase(n)&&cookie!=null)
-                            cookie.setDomain(v);
-                        continue;
+                        n=c.trim();
+                        v="";
                     }
+                    
+                    // Handle quoted values
+                    if (version>0)
+                        v=StringUtil.unquote(v);
+                    
+                    // Ignore $ names
+                    if (n.startsWith("$"))
+                    {
+                        if ("$version".equalsIgnoreCase(n))
+                        {
+                            int coma=v.indexOf(",");
+                            if (coma>=0)
+                            {   
+                                version=Integer.parseInt
+                                    (StringUtil.unquote(v.substring(0,coma)));
+                                v=v.substring(coma+1);
+                                e=v.indexOf("=");
+                                if (e>0)
+                                {
+                                    n=v.substring(0,e).trim();
+                                    v=v.substring(e+1).trim();
+                                    v=StringUtil.unquote(v);
+                                }
+                                else
+                                {
+                                    n=v.trim();
+                                    v="";
+                                }
+                            }
+                            else
+                                continue;
+                        }
+                        else
+                        {
+                            if ("$path".equalsIgnoreCase(n) && cookie!=null)
+                                cookie.setPath(v);
+                            else if ("$domain".equalsIgnoreCase(n)&&cookie!=null)
+                                cookie.setDomain(v);
+                            continue;
+                        }
+                    }
+                    
+                    v=UrlEncoded.decodeString(v);
+                    cookie=new Cookie(n,v);
+                    if (version>0)
+                        cookie.setVersion(version);
+                    cookies.add(cookie);
                 }
-                
-                
-                v=UrlEncoded.decodeString(v);
-                cookie=new Cookie(n,v);
-                if (version>0)
-                    cookie.setVersion(version);
-                cookies.add(cookie);
             }
-
+            
             _cookies=new Cookie[cookies.size()];
             if (cookies.size()>0)
                 cookies.toArray(_cookies);

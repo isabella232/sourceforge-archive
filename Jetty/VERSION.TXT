@@ -1,10 +1,16 @@
 Jetty Versions
 --------------
 
-Jetty-3.0.5 - 
+Jetty-3.0.5 - 12 Apr 2001
  + Branched from 3.1 trunk to fix major errors
-
-
+ + Fixed LineInput bug EOF
+ + Improved flush ordering for forwarded requests.
+ + Turned off range handling by default until bugs resolved
+ + Don't chunk if content length is known.
+ + fixed getLocales handling of quality params
+ + Created better random session ID
+ + Resource handler strips URL params like JSESSION.
+ + Fixed session invalidation unbind notification to conform with spec
 
 Jetty-3.0.4 - 23 Feb 2001
  + Fixed LineInput bug with split CRLF.

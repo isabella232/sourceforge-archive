@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.ConcurrentModificationException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
@@ -445,7 +446,7 @@ public class Context implements ServletContext, HttpSessionContext
     }
 
     /* ------------------------------------------------------------ */
-    public HttpSession newSession()
+    public synchronized HttpSession newSession()
     {
         HttpSession session = new Session();
         session.setMaxInactiveInterval(_defaultMaxIdleTime);
@@ -469,7 +470,7 @@ public class Context implements ServletContext, HttpSessionContext
     /** Set the default session timeout.
      *  @param  default The timeout in minutes
      */
-    public void setSessionTimeout(int timeoutMinutes)
+    public synchronized void setSessionTimeout(int timeoutMinutes)
     {
         _defaultMaxIdleTime = timeoutMinutes*60;;
 
@@ -482,12 +483,8 @@ public class Context implements ServletContext, HttpSessionContext
     /** Find sessions that have timed out and invalidate them.
      *  This runs in the SessionScavenger thread.
      */
-    private synchronized void scavenge()
+    private void scavenge()
     {
-        // Set our priority high while we have the sessions locked
-        int oldPriority = Thread.currentThread().getPriority();
-        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-
         long now = System.currentTimeMillis();
 
         // Since Hashtable enumeration is not safe over deletes,
@@ -495,16 +492,37 @@ public class Context implements ServletContext, HttpSessionContext
         ArrayList staleSessions = null;
 
         // For each session
-        for (Iterator i = _sessions.values().iterator(); i.hasNext(); )
+        try
         {
-            Session session = (Session)i.next();
-            long idleTime = session.maxIdleTime;
-            if (idleTime > 0 && session.accessed + idleTime < now) {
-                // Found a stale session, add it to the list
-                if (staleSessions == null)
-                    staleSessions = new ArrayList(5);
-                staleSessions.add(session);
+            for (Iterator i = _sessions.values().iterator(); i.hasNext(); )
+            {
+                Session session = (Session)i.next();
+                long idleTime = session.maxIdleTime;
+                if (idleTime > 0 && session.accessed + idleTime < now) {
+                    // Found a stale session, add it to the list
+                    if (staleSessions == null)
+                        staleSessions = new ArrayList(5);
+                    staleSessions.add(session);
+                }
             }
+        }
+        catch(ConcurrentModificationException e)
+        {
+            Code.ignore(e);
+            // Oops something changed while we were looking.
+            // Lock the context and try again.
+            // Set our priority high while we have the sessions locked
+            int oldPriority = Thread.currentThread().getPriority();
+            Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+            try
+            {
+                synchronized(this)
+                {
+                    staleSessions=null;
+                    scavenge();
+                }
+            }
+            finally {Thread.currentThread().setPriority(oldPriority);}
         }
 
         // Remove the stale sessions
@@ -514,8 +532,6 @@ public class Context implements ServletContext, HttpSessionContext
                 ((Session)staleSessions.get(i)).invalidate();
             }
         }
-
-        Thread.currentThread().setPriority(oldPriority);
     }
 
     /* ------------------------------------------------------------ */
@@ -570,9 +586,16 @@ public class Context implements ServletContext, HttpSessionContext
         {
             synchronized(com.mortbay.HTTP.Handler.Servlet.Context.class)
             {
-                long idtmp = __nextSessionId;
-                __nextSessionId+=created%4096;
-                this.id=Long.toString(idtmp,30+(int)(created%7));
+                do
+                {
+                    // XXX This needs to be much better!
+                    long idtmp = __nextSessionId;
+                    __nextSessionId+=created%4096;
+                    long newId=idtmp ^(created<<8);
+                    if (newId<0)newId=-newId;
+                    this.id=Long.toString(newId,30+(int)(created%7));
+                }
+                while (_sessions.containsKey(this.id));
             }
             if (_defaultMaxIdleTime>=0)
                 maxIdleTime=_defaultMaxIdleTime*1000;
@@ -644,10 +667,13 @@ public class Context implements ServletContext, HttpSessionContext
             {
                 String key = (String)iter.next();
                 Object value = _values.get(key);
-                unbindValue(key, value);
                 iter.remove();
+                unbindValue(key, value);
             }
-            Context.this._sessions.remove(id);
+            synchronized (Context.this)
+            {
+                Context.this._sessions.remove(id);
+            }
             invalid=true;
         }
 

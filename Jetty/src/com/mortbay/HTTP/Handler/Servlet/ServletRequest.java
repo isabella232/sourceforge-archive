@@ -183,6 +183,7 @@ public class ServletRequest
         for (int i=0; i<acceptLanguage.size(); i++)
         {
             String language = (String)acceptLanguage.get(i);
+            language=HttpFields.valueParameters(language,null);
             String country = "";
             int dash = language.indexOf("-");
             if (dash > -1)
