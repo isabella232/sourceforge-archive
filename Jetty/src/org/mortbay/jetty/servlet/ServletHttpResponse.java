@@ -247,35 +247,23 @@ public class ServletHttpResponse implements HttpServletResponse
             // so lets assume default one
             type="application/octet-stream";
         }
-        else if (type.startsWith("text/") && _httpResponse.getCharacterEncoding()==null)
-            /* If there is already charset parameter in content-type,
-               we will leave it alone as it is already correct.
-               This allows for both setContentType() and setLocale() to be called.
-               It makes some sense for text/ MIME types to try to guess output encoding 
-               based on language code from locale when charset parameter is not present.
-               Guessing is not a problem because when encoding matters, setContentType()
-               should be called with charset parameter in MIME type.
-              
-               JH: I think guessing should be exterminated as it makes no sense.
-            */
+   
+        HttpContext httpContext=_servletHttpRequest.getServletHandler().getHttpContext();
+        if (httpContext instanceof ServletHttpContext)
         {
-            HttpContext httpContext=_servletHttpRequest.getServletHandler().getHttpContext();
-            if (httpContext instanceof ServletHttpContext)
+            String charset = ((ServletHttpContext)httpContext).getLocaleEncoding(locale);
+            if (charset != null && charset.length()>0)
             {
-                String charset = ((ServletHttpContext)httpContext).getLocaleEncoding(locale);
-                if (charset != null && charset.length()>0)
-                {
-                    int semi=type.indexOf(';');
-                    if (semi<0)
-                        type += "; charset="+charset;
-                    else
-                        type = type.substring(0,semi)+"; charset="+charset;
-                }
+                int semi=type.indexOf(';');
+                if (semi<0)
+                    type += "; charset="+charset;
+                else
+                    type = type.substring(0,semi)+"; charset="+charset;
+
+                setHeader(HttpFields.__ContentType,type);
             }
+                
         }
-        
-        /* lets put updated MIME type back */
-        setHeader(HttpFields.__ContentType,type);
     }
     
     /* ------------------------------------------------------------ */
