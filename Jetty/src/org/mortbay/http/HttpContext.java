@@ -115,7 +115,7 @@ public class HttpContext implements LifeCycle,
     private List _hosts=new ArrayList(2);
     private List _handlers=new ArrayList(3);
     private Map _attributes = new HashMap(3);
-    private boolean _redirectNullPath=false;
+    private boolean _redirectNullPath=true;
     private int _maxCachedFileSize =100*1024;
     private int _maxCacheSize =1024*1024;
     private boolean _statsOn=false;

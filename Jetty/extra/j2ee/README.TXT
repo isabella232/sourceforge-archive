@@ -13,6 +13,13 @@ share, should find it's home here.
 Initially this means the portable parts of the Jetty/JBoss integration
 - particularly those of my distributed HttpSession implementation.
 
+
+The Jetty 5 sar can only be deployed in Jboss 3.2 if 
+
+ + The xerces and xml-api jars are upgraded to a recent version
+ + The jasper jars are replaced with jasper from jetty 4
+
+
 Enjoy,
 
 

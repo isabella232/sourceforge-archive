@@ -297,6 +297,32 @@ public class Server extends HttpServer
                                                       boolean extract)
         throws IOException
     {
+        return addWebApplications(host,webapps,null,extract,true);
+    }
+
+    /* ------------------------------------------------------------ */
+    /**  Add Web Applications.
+     * Add auto webapplications to the server.  The name of the
+     * webapp directory or war is used as the context name. If the
+     * webapp matches the rootWebApp it is added as the "/" context.
+     * @param host Virtual host name or null
+     * @param webapps Directory file name or URL to look for auto
+     * webapplication.
+     * @param defaults The defaults xml filename or URL which is
+     * loaded before any in the web app. Must respect the web.dtd.
+     * If null the default defaults file is used. If the empty string, then
+     * no defaults file is used.
+     * @param extract If true, extract war files
+     * @param java2CompliantClassLoader True if java2 compliance is applied to all webapplications
+     * @exception IOException 
+     */
+    public WebApplicationContext[] addWebApplications(String host,
+                                                      String webapps,
+                                                      String defaults,
+                                                      boolean extract,
+						      boolean java2CompliantClassLoader)
+        throws IOException
+    {
         ArrayList wacs = new ArrayList();
         Resource r=Resource.newResource(webapps);
         if (!r.exists())
@@ -336,6 +362,7 @@ public class Server extends HttpServer
                                                          context,
                                                          app);
             wac.setExtractWAR(extract);
+	    wac.setClassLoaderJava2Compliant(java2CompliantClassLoader);
             if (defaults!=null)
             {
                 if (defaults.length()==0)

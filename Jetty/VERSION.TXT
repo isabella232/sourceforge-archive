@@ -1,13 +1,18 @@
 Jetty Versions
 --------------
 
+Jetty-5.0.beta0 
  + respect content length when decoding form content.
  + JBoss integration uses writer rather than stream for XML config handling
  + Expire pages that contain set-cookie as per RFC2109 recommendation
 
+Jetty-4.2.14
+ + respect content length when decoding form content.
+ + JBoss integration uses writer rather than stream for XML config handling
+ + Fixed NPE in SSO
+ + Expire pages that contain set-cookie as per RFC2109 recommendation
 
-
-Jetty-5.0.alpha3 -19 October 2003
+Jetty-5.0.alpha3 - 19 October 2003
  + Reworked Dispatcher to better support cross context sessions.
  + Use File.toURI().toURL() when jdk 1.2 alternative is available.
  + Priority added to ThreadPool
