@@ -38,7 +38,7 @@
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add a HTTPS SSL listener on port 8843                           -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- UNCOMMENT TO ACTIVATE -->
+  <!-- UNCOMMENT TO ACTIVATE 
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.SunJsseListener">
@@ -55,7 +55,7 @@
       </New>
     </Arg>
   </Call>
-  <!-- -->
+  -->
 
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -111,23 +111,10 @@
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add root context web applications.                              -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-<!--  <Call name="addWebApplication">
+  <Call name="addWebApplication">
     <Arg>/</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/root</Arg>
   </Call>
--->
- <Call name="addContext">
-    <Arg>/</Arg>
-    <Call name="addHandler">
-      <Arg>
-        <New class="org.mortbay.http.handler.ForwardHandler">
-          <Call name="addForward"><Arg>/JETTY/*</Arg><Arg>/jetty</Arg></Call>
-          <Set name="rootForward">/jetty/index.html</Set>
-        </New>
-      </Arg>
-    </Call>
-  </Call>
-
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add jetty demo web applications.                                -->
