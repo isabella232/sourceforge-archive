@@ -5,13 +5,13 @@
 # $Id$
 #
 
-rall:
-
 #JAVAOPTIONS := 
 #JAVACOPTIONS :=
 TESTS :=
 ROOTNAME := com
-SUBDIRS := Util HTTP HTML Servlet
-
 
 include $(JETTY_HOME)/etc/Global.mk
+
+install:
+	mkdir -p $(INSTALLROOT)/servlets/com/mortbay/Servlet
+	cp Dump.class $(INSTALLROOT)/servlets/com/mortbay/Servlet

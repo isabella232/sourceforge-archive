@@ -139,6 +139,44 @@ public class HttpResponse extends HttpMessage
 		 (out.isWritten() || out.isCommitted()));
     }
     
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return 
+     */
+    public boolean isCommitted()
+    {
+	ChunkableOutputStream out=getOutputStream();
+	return out.isCommitted();
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Reset the response.
+     * Clears any data that exists in the buffer as well as the status code and
+     * headers.  If the response has been committed, this method throws an 
+     * <code>IllegalStateException</code>.
+     *
+     * @exception IllegalStateException  if the response has already been
+     *                                   committed
+     */
+    public void reset()
+    {
+	if (isCommitted())
+	    throw new IllegalStateException("Already committed");
+
+	try
+	{
+	    getOutputStream().resetBuffer();
+	    _status= __200_OK;
+	    _reason=null;
+	    super.reset();
+	}
+	catch(Exception e)
+	{
+	    Code.warning(e);
+	    throw new IllegalStateException(e.toString());
+	}
+    }
+    
     
     /* ------------------------------------------------------------ */
     /** Get the HTTP Request.

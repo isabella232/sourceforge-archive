@@ -5,13 +5,17 @@
 # $Id$
 #
 
-rall:
 
 #JAVAOPTIONS := 
 #JAVACOPTIONS :=
-TESTS :=
+TESTS := 
+EXCLUDECLASSES := 
 ROOTNAME := com
-SUBDIRS := Util HTTP HTML Servlet
-
+BINFILES := 
+CFGFILES := 
+SUBDIRS := 
+EXCLUDE := 
 
 include $(JETTY_HOME)/etc/Global.mk
+
+

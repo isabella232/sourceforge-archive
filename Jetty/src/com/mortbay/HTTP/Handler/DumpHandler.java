@@ -36,13 +36,15 @@ public class DumpHandler extends NullHandler
     {
         if (!isStarted())
             return;
-
+	
         // Only handle GET, HEAD and POST
         if (!request.__GET.equals(request.getMethod()) &&
             !request.__HEAD.equals(request.getMethod()) &&
             !request.__POST.equals(request.getMethod()))
             return;
-        
+
+	Code.debug("Dump");
+	
         response.setField(HttpFields.__ContentType,
                           HttpFields.__TextHtml);
         ChunkableOutputStream out = response.getOutputStream();

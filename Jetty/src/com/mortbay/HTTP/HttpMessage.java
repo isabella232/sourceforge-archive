@@ -71,6 +71,17 @@ abstract public class HttpMessage
     }
 
     /* ------------------------------------------------------------ */
+    /** 
+     */
+    protected void reset()
+    {
+	_state=__MSG_EDITABLE;
+	_header=new HttpFields();
+	_trailer=null;
+	
+    }
+    
+    /* ------------------------------------------------------------ */
     /** XXX
      * @return 
      */
@@ -299,6 +310,20 @@ abstract public class HttpMessage
     }
     
     /* -------------------------------------------------------------- */
+    /** Adds the value of an integer field.
+     * Header or Trailer fields are set depending on message state.
+     * @param name the field name
+     * @param value the field integer value
+     * @exception IllegalStateException Not editable or sending 1.1
+     *                                  with trailers
+     */
+    public void addIntField(String name, int value)
+        throws IllegalStateException
+    {
+        setFields().add(name, Integer.toString(value));
+    }
+    
+    /* -------------------------------------------------------------- */
     /** Get a header as a date value.
      * Look in header and trailer fields.
      * Returns the value of a date field, or -1 if not found.
@@ -325,6 +350,19 @@ abstract public class HttpMessage
     public void setDateField(String name, Date date)
     {
         setFields().put(name,date);
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Adds the value of a date field.
+     * Header or Trailer fields are set depending on message state.
+     * @param name the field name
+     * @param value the field date value
+     * @exception IllegalStateException Not editable or sending 1.1
+     *                                  with trailers
+     */
+    public void addDateField(String name, Date date)
+    {
+        setFields().addDateField(name,date);
     }
     
     /* -------------------------------------------------------------- */
@@ -516,6 +554,10 @@ abstract public class HttpMessage
         }
         
         out.getRawStream().flush();
+
+
+	// XXX Maybe only goto SENDING here and goto SENT with a
+	// complete call?
         _state=__MSG_SENT;
     }
 }

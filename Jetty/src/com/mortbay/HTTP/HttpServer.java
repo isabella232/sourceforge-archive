@@ -11,6 +11,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import com.mortbay.HTTP.Handler.*;
+import com.mortbay.HTTP.Handler.Servlet.*;
 import java.lang.reflect.*;
 
 /* ------------------------------------------------------------ */
@@ -297,25 +298,7 @@ public class HttpServer implements LifeCycle
         }
         return set;
     }
-
     
-    
-    /* ------------------------------------------------------------ */
-    private String _defaultServletHandlerClass =
-	"com.mortbay.Servlet2_1.ServletHandler";
-    public String getDefaultServletHandlerClass()
-    {return _defaultServletHandlerClass;}
-    public void setDefaultServletHandlerClass(String className)
-    {clearDefaultContext();_defaultServletHandlerClass = className;}
-
-    /* ------------------------------------------------------------ */
-    private String _defaultDynamicServletHandlerClass =
-	"com.mortbay.Servlet2_1.DynamicHandler";
-    public String getDefaultDynamicServletHandler()
-    {return _defaultDynamicServletHandlerClass;}
-    public void setDefaultDynamicServletHandlerClass(String className)
-    {clearDefaultContext();_defaultDynamicServletHandlerClass = className;}
-
     /* ------------------------------------------------------------ */
     String _contextHost;
     public String getContextHost() {return _contextHost;}    
@@ -386,10 +369,7 @@ public class HttpServer implements LifeCycle
     {
 	if (_contextServletHandler==null)
 	{
-	    Class servletHandlerClass =
-		Class.forName(_defaultServletHandlerClass);
-	    _contextServletHandler=(ServletHandler)
-		servletHandlerClass.newInstance();
+	    _contextServletHandler=new ServletHandler();
 	    addHandler(_contextHost,_contextPath,_contextServletHandler);
 	}
 	return _contextServletHandler.addServlet(pathSpec,className);
@@ -404,23 +384,13 @@ public class HttpServer implements LifeCycle
     {
 	if (_contextDynamicServletHandler==null)
 	{
-	    Class servletHandlerClass =
-		Class.forName(_defaultDynamicServletHandlerClass);
-	    _contextDynamicServletHandler=(ServletHandler)
-		servletHandlerClass.newInstance();
+	    _contextDynamicServletHandler=
+		new DynamicHandler();
 	    addHandler(_contextHost,_contextPath,
 		       _contextDynamicServletHandler);
 	}
 	_contextDynamicServletHandler.setClassPath(classPath);
     }
-
-
-
-
-
-
-
-
 
     
     

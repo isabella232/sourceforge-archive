@@ -30,6 +30,7 @@ public class NotFoundHandler extends NullHandler
         if (!isStarted())
             return;
 
+	Code.debug("Not Found");
 
         // Not found GET request
         String method=request.getMethod();
