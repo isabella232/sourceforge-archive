@@ -121,7 +121,7 @@ public class RolloverFileOutputStream extends FilterOutputStream
         _filename=file.getCanonicalPath();
         file=new File(_filename);
         File dir= new File(file.getParent());
-        if (!dir.exists() && dir.canWrite())
+        if (!dir.isDirectory() || !dir.canWrite())
             throw new IOException("Cannot write log directory "+dir);
             
         Date now=new Date();
