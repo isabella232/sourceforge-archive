@@ -26,7 +26,9 @@ the first HttpListener within the HttpServer as follows:
 "jetty_" + listener.getHost() + "_" + listener.getPort() + "_" + virtualHost + "_" + contextPath
 <p>
 Directories created within the java.io.tempdir are marked as deleteOnExit and
-are not reused between invocations of the web application context.
+are not reused between invocations of the web application context.   Other directories,
+specifically the work directories, are not deleted by Jetty and may be available 
+between runs of the webapplication.
 <p>
 Once a tempory directory has been allocated, a File instance for it
 is set as the javax.servlet.context.tempdir attribute of the web

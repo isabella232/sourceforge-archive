@@ -1,0 +1,18 @@
+SECTION: 250-Configuration
+TITLE: xmlwebdefault
+QUESTION: What is webdefault.xml?
+
+<p>
+The webdefault.xml file is a specific instance of the standard 
+<a href="faq?s=250-Configuration&t=xmlweb">web.xml</a> deployment descriptor that is
+applied to all webapplications before their own web.xml.  It is used by Jetty to configure
+the standard mechanisms such as JSP, the default servlet and the Invoker.
+</p>
+<p>
+There is no fixed location (or name) for the webdefault.xml file and it may be specified 
+in code or in a 
+<a href="faq?s=250-Configuration&t=xmljetty">jetty.xml</a> file. The default jetty.xml configuration
+has the webdefault.xml file in $JETTY_HOME/etc/webdefault.xml.
+If no default descriptor is specified, then the version at org/mortbay/jetty/servlet/webdefault.xml
+within the org.mortbay.jetty.jar is used.
+</p>

@@ -1,5 +1,5 @@
 SECTION: 900-Content
-TITLE: Deploy JSPs
+TITLE: JSP
 QUESTION: How can I deploy JSPs?
 
 Problems deploying and/or shipping webapplications that include JSPs include:<UL>
