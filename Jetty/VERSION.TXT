@@ -7,6 +7,7 @@ Jetty-5.1.2pre0
  + Modified useRequestedID handling to only use IDs from other contexts
  + Added global invalidation to AbstractSessionManager
  + UnavailableException handling from handle
+ + Fixed suffix filters
 
 Jetty-4.2.23
  + LineInput handles readers with small internal buffer

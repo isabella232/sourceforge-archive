@@ -388,7 +388,7 @@ public class PathMap extends HashMap implements Externalizable
                 return true;
         }
         else if (c=='*')
-            return path.regionMatches(path.length()-pathSpec.length()-1,
+            return path.regionMatches(path.length()-pathSpec.length()+1,
                                       pathSpec,1,pathSpec.length()-1);
         return false;
     }

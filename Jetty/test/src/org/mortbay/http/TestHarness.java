@@ -541,6 +541,20 @@ public class TestHarness
             
             t.checkEquals(PathMap.pathMatch("/*","/xxx/zzz"),"","pathMatch /*");
             t.checkEquals(PathMap.pathInfo("/*","/xxx/zzz"),"/xxx/zzz","pathInfo /*");
+
+            t.check(PathMap.match("/","/anything"),"match /");
+            t.check(PathMap.match("/*","/anything"),"match /*");
+            t.check(PathMap.match("/foo","/foo"),"match /foo");
+            t.check(!PathMap.match("/foo","/bar"),"!match /foo");
+            t.check(PathMap.match("/foo/*","/foo"),"match /foo/*");
+            t.check(PathMap.match("/foo/*","/foo/"),"match /foo/*");
+            t.check(PathMap.match("/foo/*","/foo/anything"),"match /foo/*");
+            t.check(!PathMap.match("/foo/*","/bar"),"!match /foo/*");
+            t.check(!PathMap.match("/foo/*","/bar/"),"!match /foo/*");
+            t.check(!PathMap.match("/foo/*","/bar/anything"),"!match /foo/*");
+            t.check(PathMap.match("*.foo","anything.foo"),"match *.foo");
+            t.check(!PathMap.match("*.foo","anything.bar"),"!match *.foo");
+
         }
         catch(Exception e)
         {
