@@ -11,6 +11,7 @@ import java.util.*;
 
 public class TestHarness
 {
+    public final static String __CRLF = "\015\012";
     
     /* ------------------------------------------------------------ */
     /** 
@@ -37,6 +38,9 @@ public class TestHarness
         }
     }
     
+    /* ------------------------------------------------------------ */
+    /** 
+     */
     static void testTest()
     {
         Test t1 = new Test("Test all pass");
@@ -179,6 +183,7 @@ public class TestHarness
             t.check(true,"Assert");
         }
         t.check(true,"Output must be visually inspected");
+        Code.setDebug(false);
     }
     
     /* ------------------------------------------------------------ */
@@ -236,6 +241,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
+            Code.warning(e);
             t.check(false,"Exception: "+e);
         }
     }
@@ -325,31 +331,31 @@ public class TestHarness
             test.checkEquals(code.size(),0,"Empty");
 
             code.clear();
-            code.read("Name1=Value1");
+            code.decode("Name1=Value1");
             test.checkEquals(code.size(),1,"simple param size");
             test.checkEquals(code.encode(),"Name1=Value1","simple encode");
             test.checkEquals(code.get("Name1"),"Value1","simple get");
-
+            
             code.clear();
-            code.read("Name2=");
+            code.decode("Name2=");
             test.checkEquals(code.size(),1,"dangling param size");
             test.checkEquals(code.encode(),"Name2","dangling encode");
-            test.checkEquals(code.get("Name2"),UrlEncoded.noValue,"dangling get");
+            test.checkEquals(code.get("Name2"),null,"dangling get");
         
             code.clear();
-            code.read("Name3");
+            code.decode("Name3");
             test.checkEquals(code.size(),1,"noValue param size");
             test.checkEquals(code.encode(),"Name3","noValue encode");
-            test.checkEquals(code.get("Name3"),UrlEncoded.noValue,"noValue get");
+            test.checkEquals(code.get("Name3"),null,"noValue get");
         
             code.clear();
-            code.read("Name4=Value+4%21");
+            code.decode("Name4=Value+4%21");
             test.checkEquals(code.size(),1,"encoded param size");
             test.checkEquals(code.encode(),"Name4=Value+4%21","encoded encode");
             test.checkEquals(code.get("Name4"),"Value 4!","encoded get");
-
+            
             code.clear();
-            code.read("Name5=aaa&Name6=bbb");
+            code.decode("Name5=aaa&Name6=bbb");
             test.checkEquals(code.size(),2,"multi param size");
             test.check(code.encode().equals("Name5=aaa&Name6=bbb") ||
                        code.encode().equals("Name6=bbb&Name5=aaa"),
@@ -358,16 +364,17 @@ public class TestHarness
             test.checkEquals(code.get("Name6"),"bbb","multi get");
         
             code.clear();
-            code.read("Name7=aaa&Name7=b%2Cb&Name7=ccc");
+            code.decode("Name7=aaa&Name7=b%2Cb&Name7=ccc");
             test.checkEquals(code.encode(),
                              "Name7=aaa&Name7=b%2Cb&Name7=ccc",
                              "multi encode");
             test.checkEquals(code.get("Name7"),"aaa,b,b,ccc","list get all");
-            test.checkEquals(code.getValues("Name7")[0],"aaa","list get");
-            test.checkEquals(code.getValues("Name7")[1],"b,b","list get");
-            test.checkEquals(code.getValues("Name7")[2],"ccc","list get");
+            test.checkEquals(code.getValues("Name7").get(0),"aaa","list get");
+            test.checkEquals(code.getValues("Name7").get(1),"b,b","list get");
+            test.checkEquals(code.getValues("Name7").get(2),"ccc","list get");
         }
         catch(Exception e){
+            Code.warning(e);
             test.check(false,e.toString());
         }
     }
@@ -380,15 +387,79 @@ public class TestHarness
         {
             URI uri;
 
+            // No host
+            uri = new URI("/");
+            test.checkEquals(uri.getPath(),"/","root /");
+    
             uri = new URI("/Test/URI");
             test.checkEquals(uri.toString(),"/Test/URI","no params");
     
+            uri = new URI("/Test/URI?");
+            test.checkEquals(uri.toString(),"/Test/URI?","no params");
+            uri.getParameters();
+            test.checkEquals(uri.toString(),"/Test/URI","no params");
+            
             uri = new URI("/Test/URI?a=1");
             test.checkEquals(uri.toString(),"/Test/URI?a=1","one param");
         
             uri = new URI("/Test/URI");
             uri.put("b","2 !");
             test.checkEquals(uri.toString(),"/Test/URI?b=2+%21","add param");
+
+            // Host but no port
+            uri = new URI("http://host");
+            test.checkEquals(uri.getPath(),"/","root host");
+            test.checkEquals(uri.toString(),"http://host/","root host");
+            
+            uri = new URI("http://host/");
+            test.checkEquals(uri.getPath(),"/","root host/");
+            
+            uri = new URI("http://host/Test/URI");
+            test.checkEquals(uri.toString(),"http://host/Test/URI","no params");
+    
+            uri = new URI("http://host/Test/URI?");
+            test.checkEquals(uri.toString(),"http://host/Test/URI?","no params");
+            uri.getParameters();
+            test.checkEquals(uri.toString(),"http://host/Test/URI","no params");
+            
+            uri = new URI("http://host/Test/URI?a=1");
+            test.checkEquals(uri.toString(),"http://host/Test/URI?a=1","one param");
+        
+            uri = new URI("http://host/Test/URI");
+            uri.put("b","2 !");
+            test.checkEquals(uri.toString(),"http://host/Test/URI?b=2+%21","add param");
+        
+            // Host and port
+            uri = new URI("http://host:8080");
+            test.checkEquals(uri.getPath(),"/","root");
+            
+            uri = new URI("http://host:8080/");
+            test.checkEquals(uri.getPath(),"/","root");
+            
+            uri = new URI("http://host:8080/Test/URI");
+            test.checkEquals(uri.toString(),"http://host:8080/Test/URI","no params");
+    
+            uri = new URI("http://host:8080/Test/URI?");
+            test.checkEquals(uri.toString(),"http://host:8080/Test/URI?","no params");
+            uri.getParameters();
+            test.checkEquals(uri.toString(),"http://host:8080/Test/URI","no params");
+            
+            uri = new URI("http://host:8080/Test/URI?a=1");
+            test.checkEquals(uri.toString(),"http://host:8080/Test/URI?a=1","one param");
+        
+            uri = new URI("http://host:8080/Test/URI");
+            uri.put("b","2 !");
+            test.checkEquals(uri.toString(),"http://host:8080/Test/URI?b=2+%21","add param");
+        
+            test.checkEquals(uri.getProtocol(),"http","protocol");
+            test.checkEquals(uri.getHost(),"host","host");
+            test.checkEquals(uri.getPort(),8080,"port");
+
+            uri.setProtocol("ftp");
+            uri.setHost("fff");
+            uri.setPort(23);
+            test.checkEquals(uri.toString(),"ftp://fff:23/Test/URI?b=2+%21","add param");
+            
         
             uri = new URI("/Test/URI?c=1&d=2");
             uri.put("e","3");
@@ -400,12 +471,25 @@ public class TestHarness
 
             uri = new URI("/Test/URI?a=");
             test.checkEquals(uri.toString(),"/Test/URI?a=","null param");
-            uri.parameters();
+            uri.getParameters();
             test.checkEquals(uri.toString(),"/Test/URI?a","null param");
-            uri.encodeNulls(true);
+            uri.setEncodeNulls(true);
             test.checkEquals(uri.toString(),"/Test/URI?a=","null= param");
+            
+            uri = new URI("/Test/Nasty%26%3F+URI?c=%26&d=%3F");
+            test.checkEquals(uri.getPath(),"/Test/Nasty&? URI","nasty");
+            uri.setPath("/test/nasty&? URI");
+            uri.getParameters();
+            test.checkEquals(uri.toString(),
+                             "/test/nasty%26%3F+URI?c=%26&d=%3F","nasty");
+            uri=(URI)uri.clone();
+            test.checkEquals(uri.toString(),
+                             "/test/nasty%26%3F+URI?c=%26&d=%3F","clone");
+            
+            
         }
         catch(Exception e){
+            Code.warning(e);
             test.check(false,e.toString());
         }
     }
@@ -471,16 +555,92 @@ public class TestHarness
             test.checkEquals(tok.nextToken(","),"bbb","bbb");
             test.checkEquals(tok.nextToken(),"ccc;ddd","ccc;ddd");
             
-            test.checkEquals(tok.quote("a\"aa"," ,"),"a\"aa","no quote");
-            test.checkEquals(tok.quote("aa  a"," ,"),"'aa  a'","quote");
-            test.checkEquals(tok.quote("a'a"," ,"),"'a\\'a'","quote");
+            test.checkEquals(tok.quote("aaa"," "),"aaa","no quote");
+            test.checkEquals(tok.quote("a a"," "),"\"a a\"","quote");
+            test.checkEquals(tok.quote("a'a"," "),"\"a'a\"","quote");
+            test.checkEquals(tok.quote("a,a",","),"\"a,a\"","quote");
+            test.checkEquals(tok.quote("a\\a",""),"\"a\\\\a\"","quote");
             
         }
         catch(Exception e)
         {
+            Code.warning(e);
             test.check(false,e.toString());
         }
     }
+
+    static final void testLineInput()
+    {
+        Test test = new Test("com.mortbay.Util.LineInput");
+        try
+        {
+            String data=
+                "aaaa"+__CRLF+
+                "b"+__CRLF+
+                ""+__CRLF+
+                "cccc"+__CRLF;
+            
+            ByteArrayInputStream dataStream;
+            LineInput in;
+            dataStream=new ByteArrayInputStream(data.getBytes());
+            in = new LineInput(dataStream);
+
+            test.checkEquals(in.readLine(),"aaaa","read first line");
+            test.checkEquals(in.readLine(),"b","read line");
+            test.checkEquals(in.readLine(),"","blank line");
+            test.checkEquals(in.readLine(),"cccc","read last line");
+            test.checkEquals(in.readLine(),null,"read EOF");
+            test.checkEquals(in.readLine(),null,"read EOF again");
+            
+            dataStream=new ByteArrayInputStream(data.getBytes());
+            in = new LineInput(dataStream);
+            char[] b = new char[8];
+            test.checkEquals(in.readLine(b,0,8),4,"read first line");
+            test.checkEquals(in.readLine(b,0,8),1,"read line");
+            test.checkEquals(in.readLine(b,0,8),0,"blank line");
+            test.checkEquals(in.readLine(b,0,8),4,"read last line");
+            test.checkEquals(in.readLine(b,0,8),-1,"read EOF");
+            test.checkEquals(in.readLine(b,0,8),-1,"read EOF again");
+
+            dataStream=new ByteArrayInputStream(data.getBytes());
+            in = new LineInput(dataStream);
+            test.checkEquals(in.readLine(8).size,4,"read first line");
+            test.checkEquals(in.readLine(8).size,1,"read line");
+            test.checkEquals(in.readLine(8).size,0,"blank line");
+            test.checkEquals(in.readLine(8).size,4,"read last line");
+            test.checkEquals(in.readLine(8),null,"read EOF");
+            test.checkEquals(in.readLine(8),null,"read EOF again");
+            
+            dataStream=new ByteArrayInputStream(data.getBytes());
+            in = new LineInput(dataStream);
+            test.checkEquals(in.readLine(2).size,2,"read first line");
+            test.checkEquals(in.readLine(2).size,2,"read rest of first line");
+            test.checkEquals(in.readLine(2).size,0,"blank line");
+            test.checkEquals(in.readLine(2).size,1,"read line");
+            test.checkEquals(in.readLine(2).size,0,"blank line");
+            test.checkEquals(in.readLine(2).size,2,"read last line");
+            test.checkEquals(in.readLine(2).size,2,"read rest of last line");
+            test.checkEquals(in.readLine(2).size,0,"blank line");
+            test.checkEquals(in.readLine(2),null,"read EOF");
+            test.checkEquals(in.readLine(2),null,"read EOF again");
+            
+            dataStream=new ByteArrayInputStream(data.getBytes());
+            in = new LineInput(dataStream);
+            in.setByteLimit(7);
+            test.checkEquals(in.readLine(8).size,4,"read first line");
+            test.checkEquals(in.readLine(8).size,1,"read line");
+            test.checkEquals(in.readLine(8),null,"read EOF");
+            test.checkEquals(in.readLine(8),null,"read EOF again");
+            
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            test.check(false,e.toString());
+        }
+    }
+    
+    
     /* ------------------------------------------------------------ */
     /** main
      */
@@ -500,6 +660,7 @@ public class TestHarness
             testIO();
             testUrlEncoded();
             testURI();
+            testLineInput();
         }
         catch(Throwable th)
         {

@@ -58,18 +58,18 @@ public class TestHarness
             test.checkEquals(cin.read(buf),-1,"Read EOF");
             test.checkEquals(cin.read(buf),-1,"Read EOF again");
 
-            test.checkEquals(cin.getFooters().get("some-footer"),
+            test.checkEquals(cin.getFooter().get("some-footer"),
                              "some-value","Footer fields");
   
             fin= new FileInputStream("TestData/test.chunkIn");
             cin = new ChunkableInputStream(fin);
             cin.__maxLineLength=8;
-            test.checkEquals(cin.readRawLine().length(),8,
-                             "line length limited");
-            test.checkEquals(cin.readRawLine().length(),8,
-                             "line length limited");
-            test.checkEquals(cin.readRawLine().length(),4,
-                             "line length limited");
+//              test.checkEquals(cin.readLine().length(),8,
+//                               "line length limited");
+//              test.checkEquals(cin.readLine().length(),8,
+//                               "line length limited");
+//              test.checkEquals(cin.readLine().length(),4,
+//                               "line length limited");
             cin.__maxLineLength=8192;
         }
         catch(Exception e)
@@ -86,8 +86,11 @@ public class TestHarness
 
         try{
             FileOutputStream fout = new FileOutputStream("TestData/tmp.chunkOut");
-            ChunkableOutputStream cout = new ChunkableOutputStream(fout,null);
+            ChunkableOutputStream cout = new ChunkableOutputStream(fout);
             cout.setChunking(true);
+            
+            cout.write("Reset Output".getBytes());
+            cout.reset();
             
             cout.flush();
             cout.write('a');
@@ -105,7 +108,8 @@ public class TestHarness
             HttpFields footer=new HttpFields();
             footer.put("footer1","value1");
             footer.put("footer2","value2");
-            cout.close(footer);
+            cout.setFooter(footer);
+            cout.close();
             
             FileInputStream ftmp= new FileInputStream("TestData/tmp.chunkOut");
             ChunkableInputStream cin = new ChunkableInputStream(ftmp);
@@ -134,6 +138,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
+            Code.warning(e);
             test.check(false,e.toString());
         }
     }
@@ -167,7 +172,7 @@ public class TestHarness
             "D4: Mon Jan 1 2000 00:00:01" + CRLF +
             "D5: Tue Feb 29 2000 12:00:00" + CRLF +
             "C1: Continuation Value" + CRLF +
-            "L1: V1, V2, 'V,3'" + CRLF +
+            "L1: V1, V2, \"V,3\"" + CRLF +
             CRLF;
         
 
@@ -180,9 +185,11 @@ public class TestHarness
         {    
             HttpFields f = new HttpFields();
             f.read(cis);
-            
-            t.checkEquals(cis.readRawLine(),
-                          "Other Stuff","Read headers");
+
+            byte[] b = "xxxxxxxxxxxcl".getBytes();
+            t.checkEquals(cis.read(b),13,"Read other");
+            t.checkEquals(new String(b,0,11),
+                          "Other Stuff","Read other");
         
             t.checkEquals(f.get(HttpFields.ContentType),
                           "xyz","getHeader");
@@ -238,6 +245,66 @@ public class TestHarness
         }
     }
     
+    /* --------------------------------------------------------------- */
+    public static void httpRequest()
+    {
+        Test test = new Test("com.mortbay.HTTP.HttpRequest");
+
+        String[] rl =
+        {
+            "GET /xxx HTTP/1.0",          "GET", "/xxx",    "HTTP/1.0",
+            " GET /xxx HTTP/1.0 ",        "GET", "/xxx",    "HTTP/1.0",
+            "  PUT  /xxx  HTTP/1.1  ",    "PUT", "/xxx",    "HTTP/1.1",
+            "  GET  /xxx   ",             "GET", "/xxx",    "HTTP/1.0",
+            "GET  /xxx",                  "GET", "/xxx",    "HTTP/1.0",
+            "  GET  /xxx   ",             "GET", "/xxx",    "HTTP/1.0",
+            "GET / ",                     "GET", "/",       "HTTP/1.0",
+            "GET /",                      "GET", "/",       "HTTP/1.0",
+            "GET http://h:1/ HTTP/1.0",   "GET", "/",       "HTTP/1.0",
+            "GET http://h:1/xx HTTP/1.0", "GET", "/xx",     "HTTP/1.0",
+            "GET http HTTP/1.0",          "GET", "/http",   "HTTP/1.0",
+            "GET http://h:1/",            "GET", "/",       "HTTP/1.0",
+            "GET http://h:1/xxx",         "GET", "/xxx",    "HTTP/1.0",
+            "  GET     ",                 null,  null,      null,
+            "GET",                        null,  null,      null,
+            "",                           null,  null,      null,
+            "Option * http/1.1  ",        "OPTION", "*",    "HTTP/1.1",
+        };
+
+        HttpRequest r = new HttpRequest();
+        
+        try{
+            for (int i=0; i<rl.length ; i+=4)
+            {
+                try{
+                    r.decodeRequestLine(rl[i].toCharArray(),rl[i].length());
+                    test.checkEquals(r.getMethod(),rl[i+1],rl[i]);
+                    URI uri=r.getURI();
+                    test.checkEquals(uri!=null?uri.getPath():null,
+                                     rl[i+2],rl[i]);
+                    test.checkEquals(r.getVersion(),rl[i+3],rl[i]);
+                }
+                catch(IOException e)
+                {
+                    if (rl[i+1]!=null)
+                        Code.warning(e);
+                    test.check(rl[i+1]==null,rl[i]);
+                }
+                catch(IllegalArgumentException e)
+                {
+                    if (rl[i+1]!=null)
+                        Code.warning(e);
+                    test.check(rl[i+1]==null,rl[i]);
+                }
+            }
+        }
+        catch(Exception e)
+        {
+            test.check(false,e.toString());
+            Code.warning("failed",e);
+        }
+    }
+    
     /* ------------------------------------------------------------ */
     public static void main(String[] args)
     {
@@ -245,7 +312,7 @@ public class TestHarness
             chunkInTest();
             chunkOutTest();
             httpFields();
-            //httpRequest();
+            httpRequest();
             //pathMap();
         }
         catch(Throwable e)

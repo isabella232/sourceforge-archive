@@ -261,14 +261,25 @@ public class QuotedStringTokenizer
         boolean quote=false;
         synchronized(b)
         {
-            b.append("'");
+            b.append("\"");
             for (int i=0;i<s.length();i++)
             {
                 char c = s.charAt(i);
+                if (c=='"')
+                {   
+                      b.append("\\\"");
+                      quote=true;
+                      continue;
+                }
+                if (c=='\\')
+                {   
+                      b.append("\\\\");
+                      quote=true;
+                      continue;
+                }
                 if (c=='\'')
-                {
-                    
-                      b.append("\\'");
+                {   
+                      b.append('\'');
                       quote=true;
                       continue;
                 }
@@ -286,7 +297,7 @@ public class QuotedStringTokenizer
             }
             if (quote)
             {
-                b.append("'");
+                b.append("\"");
                 return b.toString();
             }
         }

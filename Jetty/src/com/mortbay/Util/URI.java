@@ -4,53 +4,250 @@
 // ========================================================================
 package com.mortbay.Util;
 
+import com.sun.java.util.collections.*;
 import java.io.*;
 import java.util.*;
 
 /* ------------------------------------------------------------ */
-/** URI wrapper
- * Wrapper for the results of
- * javax.servlet.http.HttpServletRequest.getRequestURI()
- * <p><h4>Notes</h4>
- *
- * @see javax.servlet.http.HTTPServletRequest.getRequestURI
+/** URI Holder.
+ * This class assists with the decoding and encoding or HTTP URI's.
+ * It differs from the java.net.URL class as it does not provide
+ * communications ability, but it does assist with query string
+ * formatting.
+ * @see UrlEncoded
  * @version 1.0 Sun Dec 14 1997
  * @author Greg Wilkins (gregw)
  */
 public class URI
+    implements Cloneable
 {
     /* ------------------------------------------------------------ */
-    private String path;
-    private String query;
-    private UrlEncoded parameters = new UrlEncoded();
-    private boolean modified=false;
-    private boolean encodeNulls=false;
+    private String _uri;
+    private String _protocol;
+    private String _host;
+    private int _port;
+    private String _path;
+    private String _query;
+    private UrlEncoded _parameters = new UrlEncoded();
+    private boolean _dirty;
+    private boolean _encodeNulls=false;
     
     /* ------------------------------------------------------------ */
-    /** Construct from a String can contain both a path and
-     * encoded query parameters.
-     * @param uri The uri path and optional encoded query parameters.
+    /** Copy Constructor .
+     * @param uri
+     */
+    public URI(URI uri)
+        throws IllegalArgumentException
+    {
+        _uri=uri.toString();
+        _protocol=uri._protocol;
+        _host=uri._host;
+        _port=uri._port;
+        _path=uri._path;
+        _query=uri._query;
+        _parameters=(UrlEncoded)uri._parameters.clone();
+        _dirty=false;
+        _encodeNulls=uri._encodeNulls;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Construct from a String.
+     * The string must contain a URI path, but optionaly may contain a
+     * protocol, host, port and query string.
+     * 
+     * @param uri [protocol://host[:port]]/path[?query]
      */
     public URI(String uri)
+        throws IllegalArgumentException
     {
-        path = uri;
-        int q;
-        if ((q=uri.indexOf('?'))>=0)
-        {
-            if ((q+1)<uri.length())
+        try
+        {    
+            _uri=uri;
+            
+            // Scan _uri for host, port, path & query
+            int maxi=uri.length()-1;
+            int mark=0;
+            int state=0;
+            for (int i=0;i<=maxi;i++)
             {
-                try{
-                    query=uri.substring(q+1);
-                    parameters.read(uri.substring(q+1));
-                    path=uri.substring(0,q);
-                }
-                catch(IOException e){
-                    Code.ignore(e);
+                char c=uri.charAt(i);
+                switch(state)
+                {
+                  case 0: // looking for protocol or path
+                      if (c==':' &&
+                          uri.charAt(i+1)=='/' &&
+                          uri.charAt(i+2)=='/')
+                      {
+                          // found end of protocol & start of host
+                          _protocol=uri.substring(mark,i);
+                          i+=2;
+                          mark=i+1;
+                          state=1;
+                      }
+                      else if (i==0 && c=='/')
+                      {
+                          // Found path
+                          state=3;
+                      }
+                      else if (i==0 && c=='*')
+                      {
+                          state=5;
+                          _path="*";
+                          break;
+                      }
+                      continue;
+
+                  case 1: // Get host & look for port or path
+                      if (c==':')
+                      {
+                          // found port
+                          _host=uri.substring(mark,i);
+                          mark=i+1;
+                          state=2;
+                      }
+                      else if (c=='/')
+                      {
+                          // found path
+                          _host=uri.substring(mark,i);
+                          mark=i;
+                          state=3;
+                      }
+                      continue;
+
+                  case 2: // Get port & look for path
+                      if (c=='/')
+                      {
+                          _port=Integer.parseInt(uri.substring(mark,i));
+                          mark=i;
+                          state=3;
+                      }
+                      continue;
+                      
+                  case 3: // Get path & look for query
+                      if (c=='?')
+                      {
+                          // Found query
+                          _path=UrlEncoded.decodeString(uri.substring(mark,i));
+                          mark=i+1;
+                          state=4;
+                          break;
+                      }
+                      continue;
                 }
             }
+
+            // complete last state
+            switch(state)
+            {
+              case 0:
+                  _dirty=true;
+                  _path="/"+_uri;
+                  break;
+                  
+              case 1:
+                  _dirty=true;
+                  _path="/";
+                  _host=uri.substring(mark);
+                  break;
+                  
+              case 2:
+                  _dirty=true;
+                  _path="/";
+                  _port=Integer.parseInt(uri.substring(mark));
+                  break;
+              case 3:
+                  _dirty=(mark==maxi);
+                  _path=UrlEncoded.decodeString(uri.substring(mark));
+                  break;
+                  
+              case 4:
+                  _dirty=false; 
+                  if (mark<=maxi)
+                      _query=uri.substring(mark);
+                  break;
+                  
+              case 5:
+                  _dirty=false; 
+            }
+            
+        
+            if (_query!=null && _query.length()>0)
+                _parameters.decode(_query);
             else
-                path=uri.substring(0,q);
+                _query=null;           
         }
+        catch (Exception e)
+        {
+            Code.ignore(e);
+            throw new IllegalArgumentException("Malformed URI: "+uri);
+        }        
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Is the URI an absolute URL? 
+     * @return True if the URI has a protocol or host
+     */
+    public boolean isAbsolute()
+    {
+        return _protocol!=null || _host!=null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the uri protocol
+     * @return the URI protocol
+     */
+    public String getProtocol()
+    {
+        return _protocol;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the uri protocol.
+     * @param protocol the uri protocol
+     */
+    public void setProtocol(String protocol)
+    {
+        _protocol=protocol;
+        _dirty=true;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the uri host
+     * @return the URI host
+     */
+    public String getHost()
+    {
+        return _host;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the uri host.
+     * @param host the uri host
+     */
+    public void setHost(String host)
+    {
+        _host=host;
+        _dirty=true;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the uri port
+     * @return the URI port
+     */
+    public int getPort()
+    {
+        return _port;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the uri port.
+     * A port of 0 implies use the default port.
+     * @param port the uri port
+     */
+    public void setPort(int port)
+    {
+        _port=port;
+        _dirty=true;
     }
     
     /* ------------------------------------------------------------ */
@@ -59,36 +256,17 @@ public class URI
      */
     public String getPath()
     {
-        return path;
+        return _path;
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the uri path
-     * @return the URI path
+    /** Set the uri path
+     * @param path the URI path
      */
     public void setPath(String path)
     {
-        this.path=path;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get the uri path
-     * @deprecated Use getPath
-     * @return the URI path
-     */
-    public String path()
-    {
-        return path;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get the uri path
-     * @deprecated Use setPath
-     * @return the URI path
-     */
-    public void path(String path)
-    {
-        this.path=path;
+        _path=path;
+        _dirty=true;
     }
     
     
@@ -98,133 +276,90 @@ public class URI
      */
     public String getQuery()
     {
-        if (modified)
-            query = parameters.encode(encodeNulls);
-        return query;
+        if (_dirty)
+            _query = _parameters.encode(_encodeNulls);
+        return _query;
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the uri query String
-     * @deprecated Use getQuery
-     * @return the URI query string
+    /** Set the uri query String
+     * @param query the URI query string
      */
-    public String query()
+    public void setQuery(String query)
     {
-        if (modified)
-            query = parameters.encode(encodeNulls);
-        return query;
+        _dirty=true;
+        _query=query;
+        _parameters.clear();
+        _parameters.decode(query);
     }
     
     /* ------------------------------------------------------------ */
     /** Set if this URI should encode nulls as an empty = clause
      * @param b If true then encode nulls
      */
-    public void encodeNulls(boolean b)
+    public void setEncodeNulls(boolean b)
     {
-        this.encodeNulls=b;
-    }
-    
-    
-    /* ------------------------------------------------------------ */
-    /** Get the uri query parameters
-     * @return the URI query parameters
-     * @deprecated use getParameters
-     */
-    public Dictionary queryContent()
-    {
-        return parameters;
+        _dirty=(_encodeNulls!=b);
+        _encodeNulls=b;
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the uri query parameters
-     * @return the URI query parameters
-     * @deprecated use getParameters
+    /** Get the uri query _parameters names
+     * @return the URI query _parameters names
      */
-    public Dictionary parameters()
+    public Set getParameterNames()
     {
-        modified=true;
-        return parameters;
+        return _parameters.keySet();
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the uri query parameters names
-     * @return the URI query parameters names
+    /** Get the uri query _parameters.
+     * @return the URI query _parameters
      */
-    public Enumeration getParameterNames()
+    public Map getParameters()
     {
-        return parameters.keys();
+        _dirty=true;
+        return _parameters;
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the uri query parameters
-     * @return the URI query parameters
-     */
-    public Dictionary getParameters()
-    {
-        modified=true;
-        return parameters;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Clear the URI parameters
+    /** Clear the URI _parameters
      */
     public void clearParameters()
     {
-        modified=true;
-        parameters.clear();
+        _dirty=true;
+        _parameters.clear();
     }
     
     /* ------------------------------------------------------------ */
-    /** Add encoded parameters
-     * @param encoded A HTTP encoded string of parameters: e.g.. "a=1&b=2"
+    /** Add encoded _parameters
+     * @param encoded A HTTP encoded string of _parameters: e.g.. "a=1&b=2"
      */
     public void put(String encoded)
     {
-        try{
-            UrlEncoded params = new UrlEncoded(encoded);
-            put(params);
-        }
-        catch(IOException e){
-            Code.ignore(e);
-        }
+        UrlEncoded params = new UrlEncoded(encoded);
+        put(params);
     }
     
     /* ------------------------------------------------------------ */
-    /** Add name value pair to the uri query parameters
+    /** Add name value pair to the uri query _parameters.
      * @param name name of value
-     * @param value value
+     * @param value The value, which may be a multi valued list or
+     * String array.
      */
-    public void put(String name, String value)
+    public Object put(Object name, Object value)
     {
-        modified=true;
-        if (name!=null && value!=null)
-            parameters.put(name,value);
+        _dirty=true;
+        return _parameters.put(name,value);
     }
     
     /* ------------------------------------------------------------ */
-    /** Add named multi values to the uri query parameters
-     * @param name name of value
-     * @param value value
+    /** Add dictionary to the uri query _parameters
      */
-    public void put(String name, String[] values)
+    public void put(Map values)
     {
-        modified=true;
-        if (name!=null && values!=null)
-            parameters.putValues(name,values);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Add dictionary to the uri query parameters
-     */
-    public void put(Dictionary values)
-    {
-        modified=true;
-        Enumeration keys= values.keys();
-        while(keys.hasMoreElements())
-        {
-            Object key = keys.nextElement();
-            parameters.put(key,values.get(key));
-        }
+        _dirty=true;
+        _parameters.putAll(values);
     }
 
     /* ------------------------------------------------------------ */
@@ -232,15 +367,15 @@ public class URI
      */
     public String get(String name)
     {
-        return (String)parameters.get(name);
+        return (String)_parameters.get(name);
     }
     
     /* ------------------------------------------------------------ */
     /** Get named multiple values
      */
-    public String[] getValues(String name)
+    public List getValues(String name)
     {
-        return parameters.getValues(name);
+        return _parameters.getValues(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -248,8 +383,8 @@ public class URI
      */
     public void remove(String name)
     {
-        modified=true;
-        parameters.remove(name);
+        _dirty=true;
+        _parameters.remove(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -257,20 +392,100 @@ public class URI
      */
     public String toString()
     {
-        String result = path;
-        if (modified)
-            query();
-        if (query!=null && query.length()>0)
-            result+="?"+query;
-        return result;
+        if (_dirty)
+        {
+            getQuery();
+            StringBuffer buf = new StringBuffer(_uri.length()*2);
+            synchronized(buf)
+            {
+                if (_protocol!=null)
+                {
+                    buf.append(_protocol);
+                    buf.append("://");
+                    buf.append(_host);
+                    if (_port>0)
+                    {
+                        buf.append(':');
+                        buf.append(_port);
+                    }
+                }
+                encodePath(buf,_path);
+
+                if (_query!=null && _query.length()>0)
+                {
+                    buf.append('?');
+                    buf.append(_query);
+                }
+                _uri=buf.toString();
+                _dirty=false;
+            }
+        }
+        return _uri;
     }
 
+    /* ------------------------------------------------------------ */
+    /* Encode a URI path.
+     * This is the same encoding offered by URLEncoder, except that
+     * the '/' character is not encoded.
+     * @param path The path the encode
+     * @return The encoded path
+     */
+    public static String encodePath(String path)
+    {
+        if (path==null || path.length()==0)
+            return path;
+        
+        StringBuffer buf = new StringBuffer(path.length()<<1);
+        encodePath(buf,path);
+        return buf.toString();
+    }
+        
+    /* ------------------------------------------------------------ */
+    /* Encode a URI path.
+     * This is the same encoding offered by URLEncoder, except that
+     * the '/' character is not encoded.
+     * @param path The path the encode
+     * @param buf StringBuffer to encode path into
+     */
+    public static void encodePath(StringBuffer buf, String path)
+    {
+        synchronized(buf)
+        {
+            for (int i=0;i<path.length();i++)
+            {
+                char c=path.charAt(i);
+                switch(c)
+                {
+                  case '%':
+                      buf.append("%25");
+                      continue;
+                  case '?':
+                      buf.append("%3F");
+                      continue;
+                  case '&':
+                      buf.append("%26");
+                      continue;
+                  case ' ':
+                      buf.append("+");
+                      continue;
+                  default:
+                      buf.append(c);
+                      continue;
+                }
+            }
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Clone URI
+     * @return cloned URI
+     */
+    public Object clone()
+    {
+        return new URI(this);
+    }
+    
 }
-
-
-
-
-
 
 
 

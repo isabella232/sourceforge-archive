@@ -168,6 +168,7 @@ public class HttpFields extends HashMap
     
     /* -------------------------------------------------------------- */
     private ArrayList _names= new ArrayList(15);
+    private List _readOnlyNames=null;
 
     /* -------------------------------------------------------------- */
     /** Get enumeration of header _names.
@@ -176,7 +177,9 @@ public class HttpFields extends HashMap
      */
     public List getFieldNames()
     {
-        return Collections.unmodifiableList(_names);
+        if (_readOnlyNames==null)
+            _readOnlyNames=Collections.unmodifiableList(_names);
+        return _readOnlyNames;
     }
     
     /* ------------------------------------------------------------ */
@@ -297,16 +300,22 @@ public class HttpFields extends HashMap
      * a coma separated list for the value.
      * The values are quoted if they contain comas or quote characters.
      * @param name the name of the field
-     * @param value the value of the field. 
+     * @param value the value of the field.
+     * @exception IllegalArgumentException If the name is a single
+     *            valued field
      */
     public void add(String name,String value)
+        throws IllegalArgumentException
     {
         if (value==null)
             return;
+        String lname = StringUtil.asciiToLowerCase(name);
+        if (__singleValuedSet.contains(lname))
+            throw new IllegalArgumentException("Cannot add single valued field: "+name);
         value=QuotedStringTokenizer.quote(value,", ");
-        String existing=get(name);
+        Object existing=super.get(lname);
         if(existing!=null)
-            put(name,existing+", "+value);
+            super.put(lname,existing+", "+value);
         else
             put(name, value);
     }
@@ -438,22 +447,29 @@ public class HttpFields extends HashMap
     /* -------------------------------------------------------------- */
     /** Read HttpHeaders from inputStream.
      */
-    public void read(ChunkableInputStream in)
+    public void read(InputStream in)
     throws IOException
     {
-        com.mortbay.HTTP.ChunkableInputStream$CharBuffer cbuf;
-        char[] lbuf=null;
+        ChunkableInputStream cin;
+        if (in instanceof ChunkableInputStream)
+            cin=(ChunkableInputStream)in;
+        else
+            cin=new ChunkableInputStream(in);
+        
         String last=null;
-        while ((cbuf=in.readRawBufferLine())!=null)
+        char[] buf=null;
+        int size=0;
+        char[] lbuf=null;
+        com.mortbay.Util.LineInput$LineBuffer line_buffer;
+        
+        while ((line_buffer=cin.readLine(cin.__maxLineLength))!=null)
         {
-            // check for empty line to end headers
-            int size=cbuf.size();
+            // check space in the lowercase buffer
+            buf=line_buffer.buffer;
+            size=line_buffer.size;
             if (size==0)
                 break;
-
-            // check space in the lowercase buffer
-            char[] buf = cbuf.buffer();
-            if (lbuf==null || lbuf.length<size)
+            if (lbuf==null || lbuf.length<line_buffer.size)
                 lbuf= new char[buf.length];
 
             // setup loop state machine
@@ -464,7 +480,7 @@ public class HttpFields extends HashMap
             String lname=null;
 
             // loop for all chars in buffer
-            for (int i=0;i<size;i++)
+            for (int i=0;i<line_buffer.size;i++)
             {
                 char c=buf[i];
 
@@ -524,7 +540,7 @@ public class HttpFields extends HashMap
                     String existing=(String)get(last);
                     StringBuffer sb = new StringBuffer(existing);
                     sb.append(' ');
-                    sb.append(buf,i1,i2-i1+1);
+                    sb.append(new String(buf,i1,i2-i1+1));
                     put(last,sb.toString());
                 }
                 continue;
@@ -538,15 +554,12 @@ public class HttpFields extends HashMap
                 {
                     Code.warning("Ignored duplicate single value header: "+
                                  name);
-                    
-                    // XXX Don't throw here as IE4 breaks the rules
-                    // throw new IOException("Duplicate single value headers");
                 }
                 else
                 {
                     StringBuffer sb = new StringBuffer(existing);
                     sb.append(", ");
-                    sb.append(buf,i1,i2-i1+1);
+                    sb.append(new String(buf,i1,i2-i1+1));
                     put(lname,sb.toString());
                 }
             }
@@ -595,10 +608,9 @@ public class HttpFields extends HashMap
     {
         clear();
         if (_names!=null)
-        {
             _names.clear();
-            _names=null;
-        }
+        _names=null;
+        _readOnlyNames=null;
     }
 
     
