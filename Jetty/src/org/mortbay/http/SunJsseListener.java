@@ -182,7 +182,7 @@ public class SunJsseListener extends JsseListener
                 Security.addProvider(myprovider);
             }
             Log.event(KEYSTORE_PROVIDER_CLASS_PROPERTY+"="+_keystore_provider_class);
-            ks = KeyStore.getInstance(_keystore_type,myprovider);
+            ks = KeyStore.getInstance(_keystore_type,myprovider.getName());
         } else if (_keystore_provider_name != null) {
             Log.event(KEYSTORE_PROVIDER_NAME_PROPERTY+"="+_keystore_provider_name);
             ks = KeyStore.getInstance(_keystore_type,_keystore_provider_name);
