@@ -1,3 +1,6 @@
+Release 2.1.2 - 
+  + Cascading style sheet HTML element added.
+
 Release 2.1.1 - 5 March 1999
   + Reduced number of calls to getRemoteHost for optimization
   + Faster version of HttpInputStream.readLine().
