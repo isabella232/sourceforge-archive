@@ -1,0 +1,8 @@
+SECTION: General
+TITLE: Load Balancing
+QUESTION: How can I perform load balancing with Jetty?
+
+A simple load balancer (Java 1.4 only) is included in the Jetty package:
+org.mortbay.loadbalancer.Balancer.  
+<P>
+Jetty can be used with the apache <A href="modjk.html">mod_jk</A> load balancer.

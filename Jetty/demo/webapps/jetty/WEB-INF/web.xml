@@ -72,6 +72,20 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
   </servlet>
 
   <servlet>
+    <servlet-name>Jetty Faq Generator</servlet-name>
+    <servlet-class id="yy">org.mortbay.webapps.jetty.FaqServlet</servlet-class>
+    <init-param>
+        <param-name>srcDir</param-name>
+	<param-value>faq/src</param-value>
+    </init-param>
+    <init-param>
+        <param-name>refreshMSec</param-name>
+	<param-value>120000</param-value>
+    </init-param>
+    <load-on-startup>0</load-on-startup>
+  </servlet>
+
+  <servlet>
     <servlet-name>JSP Snoop</servlet-name>
     <jsp-file>/snoop.jsp</jsp-file>
   </servlet>
@@ -105,6 +119,11 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
   <servlet-mapping>
     <servlet-name>Jetty Demo Page</servlet-name>
     <url-pattern>*.html</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>Jetty Faq Generator</servlet-name>
+    <url-pattern>/faq/*</url-pattern>
   </servlet-mapping>
 
   <servlet-mapping>
