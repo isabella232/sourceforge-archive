@@ -37,10 +37,11 @@ read Y
     cd Jetty
     rm -fr FileBase servlets doc docroot src/com webappsrc webapps/default webapps/examples webapps/jetty testdocs
     ant all tidy || exit 1
-
+    cp /usr/share/java/ant-1.5.jar ext
     cd ..
     mv Jetty Jetty-$VERSION
     tar cfz /usr/local/archive/Jetty-${VERSION}.tgz Jetty-$VERSION
+    jar cf  /usr/local/archive/Jetty-${VERSION}.zip Jetty-$VERSION
 
     export JETTY_HOME=$PWD/Jetty-$VERSION
     cd JettyExtra
@@ -48,6 +49,14 @@ read Y
     cd ..
     mv JettyExtra JettyExtra-$VERSION
     tar cfz /usr/local/archive/JettyExtra-${VERSION}.tgz JettyExtra-$VERSION
+    jar cf  /usr/local/archive/JettyExtra-${VERSION}.zip JettyExtra-$VERSION
+
+    cd Jetty-$VERSION
+    ant clean
+    rm -fr demo ext etc/demo* test
+    cd ..
+    tar cfz /usr/local/archive/Jetty-${VERSION}-src.tgz Jetty-$VERSION
+    jar cf  /usr/local/archive/Jetty-${VERSION}-src.zip Jetty-$VERSION
 
     cd /usr/local/java/jetty
     tar xfz /usr/local/archive/Jetty-${VERSION}.tgz
