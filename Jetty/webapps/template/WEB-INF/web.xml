@@ -23,11 +23,6 @@
     <load-on-startup>1</load-on-startup>
   </servlet>
 
-  <servlet>
-    <servlet-name>ExServlet</servlet-name>
-    <servlet-class>com.acme.ExServlet</servlet-class>
-  </servlet>
-
   <servlet-mapping>
     <servlet-name>Dump</servlet-name>
     <url-pattern>/dump/*</url-pattern>
@@ -38,24 +33,9 @@
     <url-pattern>*.dump</url-pattern>
   </servlet-mapping>
 
-  <servlet-mapping>
-    <servlet-name>ExServlet</servlet-name>
-    <url-pattern>/exception/*</url-pattern>
-  </servlet-mapping>
-
   <error-page>
     <error-code>404</error-code>
     <location>/dump/ERROR</location>
-  </error-page>
-
-  <error-page>
-    <error-code>501</error-code>
-    <location>/error501.html</location>
-  </error-page>
-
-  <error-page>
-    <exception-type>java.lang.IllegalAccessException</exception-type>
-    <location>/doesNotExist.html</location>
   </error-page>
 
 </web-app>

@@ -7,9 +7,40 @@
 <BODY>
 <A HREF="http://jetty.mortbay.org"><IMG SRC="jetty_banner.gif"></A>
 <P>
-This is a quick test of two TCK failures:
-<ul>
-<li><a href="exception/java.lang.IllegalAccessException">Throw IAE with a error page that does not exist. Expect 500 response NOT 404</a>
-</li><li>
-<a href="exception/501">sendError(501) with an error page. Expect 501 response NOT 200</a>
-</li></ul>
+This is a template web application context, which can be used as the
+basis of your own web application.  It contains some static content
+and a <a href="dump">Dump Servlet</a>.
+It's location is $JETTY_HOME/webapps/template.
+<p>
+If you want to see a full demonstration of Jetty, then you will need 
+to have either the Jetty-5.0.x-extra or Jetty-5.0.x-all package installed.
+You will then be able to run the demo with:<PRE>
+  java -jar start.jar etc/admin.xml etc/demo.xml
+</PRE>
+<p>
+For a standard installation of Jetty, the <a href="/javadoc">javadoc</a>
+will be available.
+<p>
+If this server was started with the etc/admin.xml configuration, then
+a <A href="http://localhost:8081">simple admin UI</a> may be
+available (default username/password is admin/admin).
+<p>
+If this server was started via JMX, then a 
+<A href="http://localhost:8082">JMX console UI</a> should be available.
+To start Jetty with JMX use:  <PRE>
+  java -Dstart.class=org.mortbay.util.jmx.Main -jar start.jar etc/jetty.mlet
+</PRE>
+
+To start a server using the jars and resource in the extra packages, use:
+<PRE>
+java -DSTART=extra/etc/start.config -jar start.jar
+</PRE>
+or
+<PRE>
+java -Dmain.class=org.mortbay.jetty.plus.Server -DSTART=extra/etc/start.config -jar start.jar
+</PRE>
+
+
+
+</BODY>
+</HTML>
