@@ -1,0 +1,9 @@
+1.localAddress:    8000
+1.remoteAddress:   localhost:8080
+1.local2remote:    com.mortbay.Util.DumpFilterOutputStream
+1.remote2local:    com.mortbay.Util.SummaryFilterOutputStream
+
+2.localAddress:    localhost:8001
+2.remoteAddress:   localhost:8081
+
+   
