@@ -158,6 +158,8 @@ public class AJP13Connection extends HttpConnection
                 packet = _ajpIn.nextPacket();
                 if (packet==null)
                     return false;
+                if (packet.getDataSize()==0)
+                    return true;
             }
             catch (IOException e)
             {
