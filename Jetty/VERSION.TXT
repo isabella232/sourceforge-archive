@@ -1,12 +1,14 @@
 Jetty Versions
 --------------
 
+Jetty-4.1.0RC6 - 14 September 2002
  + Don't URL encode FileURLS.
  + Improved HashUserRealm doco
  + FormAuthenticator uses normal redirections now.
  + Encode URLs of Authentication redirections.
  + Added logon.jsp for no cookie form authentication.
  + Extended Session API to pass request for jvmRoute handling
+ + Fixed problem with AJP 304 responses.
 
 Jetty-4.1.0RC5 - 8 September 2002
  + AJP13Listener caught up with HttpConnection changes.
