@@ -187,6 +187,9 @@ public class Dump extends HttpServlet
             table.addCell(initParams);            
                         
             table.newRow();
+            table.addHeading("getLocale:&nbsp;").cell().right();
+            table.addCell(""+sreq.getLocale());            
+            table.newRow();
             table.addHeading("getLocales:&nbsp;").cell().right();
             Enumeration locales = sreq.getLocales();
             table.newCell();

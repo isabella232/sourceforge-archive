@@ -129,8 +129,8 @@ public class HttpContext implements LifeCycle
             else
                 _contextPath=contextPathSpec;
 
-            Code.warning("Unsuitable contextPathSpec "+contextPathSpec+
-                         ", Assuming: "+_contextPath+"/*");
+            Code.debug("Fixing contextPathSpec ",contextPathSpec,
+                       ", Assuming: ",_contextPath+"/*");
         }
         else
             _contextPath="/";
