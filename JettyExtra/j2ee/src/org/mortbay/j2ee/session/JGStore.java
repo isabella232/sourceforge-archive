@@ -23,7 +23,6 @@ import org.javagroups.MergeView;
 import org.javagroups.Message;
 import org.javagroups.MessageListener; // we are notified of changes to other state
 import org.javagroups.View;
-import org.javagroups.View;
 import org.javagroups.blocks.GroupRequest;
 import org.javagroups.blocks.MessageDispatcher;
 import org.javagroups.blocks.MethodCall;
@@ -156,6 +155,41 @@ public class
 	MembershipListener membershipListener=this;
 	Object serverObject=this;
 	_dispatcher=new RpcDispatcher(_channel, messageListener, membershipListener, serverObject);
+	_dispatcher.setMarshaller(new RpcDispatcher.Marshaller() {
+	    public Object
+	      objectFromByteBuffer(byte[] buf)
+	    {
+	      ClassLoader oldLoader=Thread.currentThread().getContextClassLoader();
+	      try
+	      {
+		Thread.currentThread().setContextClassLoader(_loader);
+		return MarshallingInterceptor.demarshal(buf);
+	      }
+	      catch (Exception e)
+	      {
+		_log.error("could not demarshal incoming update", e);
+	      }
+	      finally
+	      {
+		Thread.currentThread().setContextClassLoader(oldLoader);
+	      }
+	      return null;
+	    }
+
+	    public byte[]
+	      objectToByteBuffer(Object obj)
+	    {
+	      try
+	      {
+		return MarshallingInterceptor.marshal(obj);
+	      }
+	      catch (Exception e)
+	      {
+		_log.error("could not marshal outgoing update", e);
+	      }
+	      return null;
+	    }
+	  });
 
 	_channel.setOpt(Channel.GET_STATE_EVENTS, Boolean.TRUE);
 

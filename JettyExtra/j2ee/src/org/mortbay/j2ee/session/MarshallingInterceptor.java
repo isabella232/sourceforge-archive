@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.rmi.RemoteException;
+import java.util.HashMap;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionEvent;
@@ -43,10 +44,39 @@ public class MarshallingInterceptor
       super(is);
     }
 
-    protected Class resolveClass(java.io.ObjectStreamClass desc)
+    private static final HashMap _primClasses = new HashMap(8, 1.0F);
+
+    static
+    {
+      _primClasses.put("boolean" , boolean.class);
+      _primClasses.put("byte"    , byte.class);
+      _primClasses.put("char"    , char.class);
+      _primClasses.put("short"   , short.class);
+      _primClasses.put("int"     , int.class);
+      _primClasses.put("long"    , long.class);
+      _primClasses.put("float"   , float.class);
+      _primClasses.put("double"  , double.class);
+      _primClasses.put("void"    , void.class);
+    }
+
+    // is this really necessary ?
+    protected Class
+      resolveClass(java.io.ObjectStreamClass desc)
       throws IOException, ClassNotFoundException
     {
-      return Class.forName(desc.getName(), false, Thread.currentThread().getContextClassLoader());
+      String name = desc.getName();
+      try
+      {
+	return Class.forName(name, false, Thread.currentThread().getContextClassLoader());
+      }
+      catch (ClassNotFoundException ex)
+      {
+	Class cl = (Class) _primClasses.get(name);
+	if (cl != null)
+	  return cl;
+	else
+	  throw ex;
+      }
     }
   }
 
