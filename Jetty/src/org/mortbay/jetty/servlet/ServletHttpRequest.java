@@ -503,46 +503,58 @@ public class ServletHttpRequest
 
         if (_session == null && create)
         {
-            _session = _servletHandler.newHttpSession(this);
-            if (_servletHandler.isUsingCookies())
-            {
-                Cookie cookie =
-                    new Cookie(SessionManager.__SessionCookie,_session.getId());
-                String path=
-                    _servletHandler.getServletContext()
-                    .getInitParameter(SessionManager.__SessionPath);
-                if (path==null)
-                    path=getContextPath();
-                if (path==null || path.length()==0)
-                    path="/";
-
-                String domain=
-                    _servletHandler.getServletContext()
-                    .getInitParameter(SessionManager.__SessionDomain);
-                if (domain!=null)
-                    cookie.setDomain(domain);
-
-                String maxAge=
-                    _servletHandler.getServletContext()
-                    .getInitParameter(SessionManager.__MaxAge);
-                if (maxAge!=null)
-                    cookie.setMaxAge(Integer.parseInt(maxAge));
-                else
-                    cookie.setMaxAge(-1);
-                
-                cookie.setPath(path);
-                _servletHttpResponse.getHttpResponse().addSetCookie(cookie,false);
-            }
+            _session=newSession();
         }
 
         return _session;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* Create a new HttpSession.
+     * If cookies are being used a set cookie is added to the response.
+     */
+    HttpSession newSession()
+    {
+        HttpSession session=_servletHandler.newHttpSession(this);
+
+        if (_servletHandler.isUsingCookies())
+        {
+            Cookie cookie =
+                new Cookie(SessionManager.__SessionCookie,session.getId());
+            String path=
+                _servletHandler.getServletContext()
+                .getInitParameter(SessionManager.__SessionPath);
+            if (path==null)
+                path=getContextPath();
+            if (path==null || path.length()==0)
+                path="/";
+            
+            String domain=
+                _servletHandler.getServletContext()
+                .getInitParameter(SessionManager.__SessionDomain);
+            if (domain!=null)
+                cookie.setDomain(domain);
+            
+            String maxAge=
+                _servletHandler.getServletContext()
+                .getInitParameter(SessionManager.__MaxAge);
+            if (maxAge!=null)
+                cookie.setMaxAge(Integer.parseInt(maxAge));
+            else
+                cookie.setMaxAge(-1);
+            
+            cookie.setPath(path);
+            _servletHttpResponse.getHttpResponse().addSetCookie(cookie,false);
+        }
+
+        return session;
     }
     
     /* ------------------------------------------------------------ */
     public HttpSession getSession()
     {
-        HttpSession session = getSession(false);
-        return (session == null) ? getSession(true) : session;
+        HttpSession session = getSession(true);
+        return session;
     }
     
     /* ------------------------------------------------------------ */
@@ -839,8 +851,6 @@ public class ServletHttpRequest
 
         return (ServletHttpRequest)request;
     }
-
-    
 }
 
 

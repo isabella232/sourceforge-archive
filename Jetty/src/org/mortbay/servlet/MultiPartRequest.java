@@ -15,7 +15,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.mortbay.http.HttpFields;
 import org.mortbay.util.Code;
 import org.mortbay.util.LineInput;
+import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringUtil;
+import java.util.List;
 
 /* ------------------------------------------------------------ */
 /** Multipart Form Data request.
@@ -42,7 +44,7 @@ public class MultiPartRequest
     LineInput _in;
     String _boundary;
     byte[] _byteBoundary;
-    Hashtable _partMap = new Hashtable(10);
+    MultiMap _partMap = new MultiMap(10);
     int _char=-2;
     boolean _lastPart=false;
     
@@ -101,13 +103,29 @@ public class MultiPartRequest
      */
     public String getString(String name)
     {
-        Part part = (Part)_partMap.get(name);
+        List part = (List)_partMap.getValues(name);
         if (part==null)
             return null;
-        return new String(part._data);
+        return new String(((Part)part.get(0))._data);
     }
     
-
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param name The part name 
+     * @return The parts data
+     */
+    public String[] getStrings(String name)
+    {
+        List parts = (List)_partMap.getValues(name);
+        if (parts==null)
+            return null;
+        String[] strings = new String[parts.size()];
+        for (int i=0; i<strings.length; i++) {
+            strings[i] = new String(((Part)parts.get(i))._data);
+        }
+        return strings;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Get the data of a part as a stream.
      * @param name The part name 
@@ -115,12 +133,24 @@ public class MultiPartRequest
      */
     public InputStream getInputStream(String name)
     {
-        Part part = (Part)_partMap.get(name);
+        List part = (List)_partMap.get(name);
         if (part==null)
             return null;
-        return new ByteArrayInputStream(part._data);
+        return new ByteArrayInputStream(((Part)part.get(0))._data);
     }
-    
+
+    public InputStream[] getInputStreams(String name) 
+    {
+        List parts = (List)_partMap.getValues(name);
+        if (parts==null)
+            return null;
+        InputStream[] streams = new InputStream[parts.size()];
+        for (int i=0; i<streams.length; i++) {
+            streams[i] = new ByteArrayInputStream(((Part)parts.get(i))._data);
+        }
+        return streams;
+    }
+
     /* ------------------------------------------------------------ */
     /** Get the MIME parameters associated with a part.
      * @param name The part name 
@@ -128,12 +158,24 @@ public class MultiPartRequest
      */
     public Hashtable getParams(String name)
     {
-        Part part = (Part)_partMap.get(name);
+        List part = (List)_partMap.getValues(name);
         if (part==null)
             return null;
-        return part._headers;
+        return ((Part)part.get(0))._headers;
     }
-    
+
+    public Hashtable[] getMultipleParams(String name) 
+    {
+        List parts = (List)_partMap.getValues(name);
+        if (parts==null)
+            return null;
+        Hashtable[] params = new Hashtable[parts.size()];
+        for (int i=0; i<params.length; i++) {
+            params[i] = ((Part)parts.get(i))._headers;
+        }
+        return params;
+    }
+
     /* ------------------------------------------------------------ */
     /** Get any file name associated with a part.
      * @param name The part name 
@@ -141,14 +183,24 @@ public class MultiPartRequest
      */
     public String getFilename(String name)
     {
-        Part part = (Part)_partMap.get(name);
+        List part = (List)_partMap.getValues(name);
         if (part==null)
             return null;
-        return part._filename;
+        return ((Part)part.get(0))._filename;
     }
-    
-        
-    
+
+    public String[] getFilenames(String name) 
+    {
+        List parts = (List)_partMap.getValues(name);
+        if (parts==null)
+            return null;
+        String[] filenames = new String[parts.size()];
+        for (int i=0; i<filenames.length; i++) {
+            filenames[i] = ((Part)parts.get(i))._filename;
+        }
+        return filenames;
+    }
+
     /* ------------------------------------------------------------ */
     private void loadAllParts()
         throws IOException
@@ -224,7 +276,7 @@ public class MultiPartRequest
             }
             Code.debug("name=",part._name);
             Code.debug("filename=",part._filename);
-            _partMap.put(part._name,part);
+            _partMap.add(part._name,part);
             part._data=readBytes();
         }       
     }

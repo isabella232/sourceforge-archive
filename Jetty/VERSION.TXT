@@ -6,6 +6,9 @@ Jetty Versions
  + Turn off validation without non-xerces errors
  + minor doco updates.
  + moved mailing lists to sourceforge.
+ + Put a semi busy loop into proxy tunnels for IE problems
+ + MultipartRequest supports multi value headers.
+ + XML entity resolution uses URLs not Resources
 
 Jetty-5.0.alpha1 - 12 August 2003
  + Switched to mx4j

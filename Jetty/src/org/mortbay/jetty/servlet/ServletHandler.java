@@ -1122,5 +1122,11 @@ public class ServletHandler extends AbstractHttpHandler
                 return ((WebApplicationContext)getHttpContext()).getDisplayName();
             return null;
         }
+
+        /* ------------------------------------------------------------ */
+        public String toString()
+        {
+            return "ServletContext["+getHttpContext()+"]";
+        }
     }    
 }

@@ -155,11 +155,9 @@ public class Dispatcher implements RequestDispatcher
 
         HttpConnection httpConnection=
             _servletHandler.getHttpContext().getHttpConnection();
-        ServletHttpRequest servletHttpRequest= (httpConnection!=null)
-            ?(ServletHttpRequest)httpConnection.getRequest().getWrapper()
-            :ServletHttpRequest.unwrap(servletRequest);
-
-
+        ServletHttpRequest servletHttpRequest=
+            (ServletHttpRequest)httpConnection.getRequest().getWrapper();
+        
         // wrap the request and response
         DispatcherRequest request = new DispatcherRequest(httpServletRequest,
                                                           servletHttpRequest,
@@ -181,15 +179,15 @@ public class Dispatcher implements RequestDispatcher
             request.addParameters(parameters);
         }
         
-        ClassLoader loader = null;
+        Object old_scope = null;
         try
         {
             if (request.crossContext())
             {
-                // Set the context classloader to the new contexts loader.
-                loader=Thread.currentThread().getContextClassLoader();
-                Thread.currentThread()
-                    .setContextClassLoader(_servletHandler.getHttpContext().getClassLoader());
+                // Setup new context
+                old_scope=
+                    _servletHandler.getHttpContext()
+                    .enterContextScope(httpConnection.getRequest(),httpConnection.getResponse());
             }
         
             if (isNamed())
@@ -226,9 +224,12 @@ public class Dispatcher implements RequestDispatcher
         }
         finally
         {
-            // restore loader
-            if (loader!=null)
-                Thread.currentThread().setContextClassLoader(loader);
+            // restore context
+            if (request.crossContext())
+                _servletHandler.getHttpContext()
+                    .leaveContextScope(httpConnection.getRequest(),
+                                       httpConnection.getResponse(),
+                                       old_scope);
         }   
     }
 
@@ -545,12 +546,14 @@ public class Dispatcher implements RequestDispatcher
                 {
                     Code.debug("Ctx dispatch session");
                     _xSession=_servletHandler.getHttpSession(getRequestedSessionId());
-                    if (create && _xSession==null)
-                        _xSession=_servletHandler.newHttpSession((HttpServletRequest)getRequest());
+                    if (create && ( _xSession==null ||
+                                    !((SessionManager.Session)_xSession).isValid()))
+                        _xSession=_servletHttpRequest.newSession();                    
                 }
                 return _xSession;
             }
-            return super.getSession(create);
+            else
+                return super.getSession(create);
         }
     
         /* ------------------------------------------------------------ */

@@ -1670,16 +1670,11 @@ public class HttpContext implements LifeCycle,
                           HttpResponse response)
         throws HttpException, IOException
     {
-        // Save the thread context loader
-        Thread thread = Thread.currentThread();
-        ClassLoader lastContextLoader=thread.getContextClassLoader();
-        HttpContext lastHttpContext=response.getHttpContext();
+        Object old_scope=null;
         try
         {
-            if (_loader!=null)
-                thread.setContextClassLoader(_loader);
-            response.setHttpContext(this);
-
+            old_scope=enterContextScope(request,response);
+            
             HttpHandler[] handlers=getHandlers();
             for (int k=0;k<handlers.length;k++)
             {
@@ -1708,10 +1703,60 @@ public class HttpContext implements LifeCycle,
         }
         finally
         {
-            thread.setContextClassLoader(lastContextLoader);
-            response.setHttpContext(lastHttpContext);
+            leaveContextScope(request,response,old_scope);
         }
     }
+
+    /* ------------------------------------------------------------ */
+    /** Enter the context scope.
+     * This method is called (by handle or servlet dispatchers) to indicate that
+     * request handling is entering the scope of this context.  The opaque scope object
+     * returned, should be passed to the leaveContextScope method.
+     */
+    public Object enterContextScope(HttpRequest request, HttpResponse response)
+    {
+        // Save the thread context loader
+        Thread thread = Thread.currentThread();
+        ClassLoader cl=thread.getContextClassLoader();
+        HttpContext c=response.getHttpContext();
+
+        Scope scope=null;
+        if (cl!=HttpContext.class.getClassLoader() || c!=null)
+        {
+            scope=new Scope();
+            scope._classLoader=cl;
+            scope._httpContext=c;
+        }
+        
+        if (_loader!=null)
+            thread.setContextClassLoader(_loader);
+        response.setHttpContext(this);
+            
+        return scope;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Leave the context scope.
+     * This method is called (by handle or servlet dispatchers) to indicate that
+     * request handling is leaveing the scope of this context.  The opaque scope object
+     * returned by enterContextScope should be passed in.
+     */
+    public void leaveContextScope(HttpRequest request, HttpResponse response,Object oldScope)
+    {
+        if (oldScope==null)
+        {
+            Thread.currentThread()
+                .setContextClassLoader(HttpContext.class.getClassLoader());
+            response.setHttpContext(null);
+        }
+        else
+        {
+            Scope old = (Scope)oldScope;
+            Thread.currentThread().setContextClassLoader(old._classLoader);
+            response.setHttpContext(old._httpContext);
+        }
+    }
+    
 
     /* ------------------------------------------------------------ */
     public String getHttpContextName()
@@ -2228,4 +2273,14 @@ public class HttpContext implements LifeCycle,
             _next=null;
         }
     }
+    
+    /* ------------------------------------------------------------ */
+    /* Class to save scope of nested context calls
+     */
+    private static class Scope 
+    {
+        ClassLoader _classLoader;
+        HttpContext _httpContext;
+    }    
+    
 }

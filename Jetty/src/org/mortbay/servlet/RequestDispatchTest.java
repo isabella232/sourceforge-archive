@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -141,11 +142,14 @@ public class RequestDispatchTest extends HttpServlet
 
             String cpath=info.substring(0,info.indexOf('/',1));
             info=info.substring(cpath.length());
- 
-            RequestDispatcher dispatch =
-                getServletContext().getContext(cpath).getRequestDispatcher(info);
+
+            ServletContext context=getServletContext().getContext(cpath);
+            RequestDispatcher dispatch =context.getRequestDispatcher(info);
+            
             if (dispatch!=null)
+            {
                 dispatch.forward(sreq,sres);
+            }
             else
             {
                 PrintWriter pout = sres.getWriter();
