@@ -472,6 +472,7 @@ public class ThreadPool
         public void run() 
         {
 	    Object job=null;
+	    ThreadPool pool=null;
             while (_pool!=null && _pool.isStarted())
             {
                 try
@@ -482,16 +483,17 @@ public class ThreadPool
                         if (job==null && _pool!=null && _pool.isStarted() && _job==null)
                             wait(_pool.getMaxIdleTimeMs());
 
-			if (_job!=null)
+			if (_job!=null && _threadPool!=null)
 			{
 			    job=_job;
+			    pool=_threadPool;
 			    _job=null;
 			}
                     }
                     
                     // handle
                     if (job!=null)
-                        _threadPool.handle(job);
+                        pool.handle(job);
                 }
                 catch (InterruptedException e)
                 {
