@@ -492,25 +492,28 @@ public class HttpRequest extends HttpHeader
     /* -------------------------------------------------------------- */
     /** Write the request header to an output stream
      */
-    public void write(OutputStream out)
+    public void write(OutputStream outstream)
         throws IOException
     {
-        out.write(method.getBytes());
+        OutputStreamWriter out = new
+            OutputStreamWriter(outstream,"ISO8859_1");
+        
+        out.write(method);
         out.write(' ');
 
         if (resourcePath!=null && resourcePath.length()>0)
         {
-            out.write(URI.encodePath(resourcePath).getBytes());
+            out.write(URI.encodePath(resourcePath));
             String qs = getQueryString();
             if (qs!=null && qs.length()>0)
-                out.write(("?"+qs).getBytes());
+                out.write(("?"+qs));
         }
         else
-            out.write(uri.toString().getBytes());
+            out.write(uri.toString());
         out.write(' ');
-        out.write(version.getBytes());
-        out.write(__CRLF);
-        super.write(out);
+        out.write(version);
+        out.write(CRLF);
+        super.write(out,null);
         out.flush();
     }
 
