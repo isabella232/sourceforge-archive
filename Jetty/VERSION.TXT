@@ -5,6 +5,8 @@ Jetty-4.2.20pre0
  + Worked around bad jboss URL handler in XMLParser
  + Forced close of connections over stop/start
  + HttpFields protected headers
+ + ProxiedFor field support added to NCSARequestLog
+ + Fixed Default servlet for non empty servlet paths
 
 Jetty-5.0.0RC0
  + ServletContext attributes wrap HttpContext attributes.
@@ -16,6 +18,11 @@ Jetty-5.0.0RC0
  + Fixed DOS problem
  + Worked around bad jboss URL handler in XMLParser
  + Forced close of connections over stop/start
+ + ProxiedFor field support added to NCSARequestLog
+ + Fixed Default servlet for non empty servlet paths
+ + Updated mx4j to V2
+
+ + Fixed Default servlet for non empty servlet paths
 
 Jetty-4.2.19 - 19 Mar 2004
  + Fixed DOS attack problem
