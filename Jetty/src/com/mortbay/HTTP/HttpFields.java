@@ -424,19 +424,17 @@ public class HttpFields
    
     /* -------------------------------------------------------------- */
     /** Get a header as an integer value.
-     * Returns the value of an integer field, or -1 if not found.
+     * Returns the value of an integer field or -1 if not found.
      * The case of the field name is ignored.
      * @param name the case-insensitive field name
+     * @exception NumberFormatException If bad integer found
      */
     public int getIntField(String name)
+        throws NumberFormatException
     {
         String val = valueParameters(get(name),null);
         if (val!=null)
-        {
-            try{return Integer.parseInt(val);}
-            catch(Exception e){Code.ignore(e);}
-        }
-        
+            return Integer.parseInt(val);
         return -1;
     }
     
@@ -686,7 +684,7 @@ public class HttpFields
                             String value = (String)values.get(i);
                             writer.write(name);
                             writer.write(__COLON);
-                            writer.write(QuotedStringTokenizer.quote(value,","));
+                            writer.write(value);
                             writer.write(__CRLF);
                         }
                     }

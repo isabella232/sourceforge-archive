@@ -599,9 +599,7 @@ public class HttpServer implements LifeCycle
     public ServletHandler findServletHandler(String uri,
                                              List hosts)
     {
-        
-
-        for (int h=0; h<=hosts.size() ; h++)
+        for (int h=0; h<hosts.size() ; h++)
         {
             String host = (String)hosts.get(h);
             

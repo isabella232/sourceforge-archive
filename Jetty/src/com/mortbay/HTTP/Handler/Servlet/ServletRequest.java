@@ -235,6 +235,7 @@ class ServletRequest
     
     /* ------------------------------------------------------------ */
     public int getIntHeader(String name)
+        throws NumberFormatException
     {
         return _httpRequest.getIntField(name);
     }

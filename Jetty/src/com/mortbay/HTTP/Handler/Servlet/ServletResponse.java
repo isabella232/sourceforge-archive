@@ -14,7 +14,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -36,8 +38,54 @@ public class ServletResponse implements HttpServletResponse
     private HttpSession _session=null;
     private boolean _noSession=false;
     private boolean _locked=false;
-    
+    private Locale _locale=null;
     private static String __lockedMsg = "Response locked by inclusion";
+
+    private static Map __charSetMap = new HashMap();
+    static
+    {
+        // list borrowed from tomcat 3.2B6 - thanks guys.
+        __charSetMap.put("ar", "ISO-8859-6");
+        __charSetMap.put("be", "ISO-8859-5");
+        __charSetMap.put("bg", "ISO-8859-5");
+        __charSetMap.put("ca", "ISO-8859-1");
+        __charSetMap.put("cs", "ISO-8859-2");
+        __charSetMap.put("da", "ISO-8859-1");
+        __charSetMap.put("de", "ISO-8859-1");
+        __charSetMap.put("el", "ISO-8859-7");
+        __charSetMap.put("en", "ISO-8859-1");
+        __charSetMap.put("es", "ISO-8859-1");
+        __charSetMap.put("et", "ISO-8859-1");
+        __charSetMap.put("fi", "ISO-8859-1");
+        __charSetMap.put("fr", "ISO-8859-1");
+        __charSetMap.put("hr", "ISO-8859-2");
+        __charSetMap.put("hu", "ISO-8859-2");
+        __charSetMap.put("is", "ISO-8859-1");
+        __charSetMap.put("it", "ISO-8859-1");
+        __charSetMap.put("iw", "ISO-8859-8");
+        __charSetMap.put("ja", "Shift__JIS");
+        __charSetMap.put("ko", "EUC-KR");     
+        __charSetMap.put("lt", "ISO-8859-2");
+        __charSetMap.put("lv", "ISO-8859-2");
+        __charSetMap.put("mk", "ISO-8859-5");
+        __charSetMap.put("nl", "ISO-8859-1");
+        __charSetMap.put("no", "ISO-8859-1");
+        __charSetMap.put("pl", "ISO-8859-2");
+        __charSetMap.put("pt", "ISO-8859-1");
+        __charSetMap.put("ro", "ISO-8859-2");
+        __charSetMap.put("ru", "ISO-8859-5");
+        __charSetMap.put("sh", "ISO-8859-5");
+        __charSetMap.put("sk", "ISO-8859-2");
+        __charSetMap.put("sl", "ISO-8859-2");
+        __charSetMap.put("sq", "ISO-8859-2");
+        __charSetMap.put("sr", "ISO-8859-5");
+        __charSetMap.put("sv", "ISO-8859-1");
+        __charSetMap.put("tr", "ISO-8859-9");
+        __charSetMap.put("uk", "ISO-8859-5");
+        __charSetMap.put("zh", "GB2312");
+        __charSetMap.put("zh_TW", "Big5");   
+    }
+    
     
     /* ------------------------------------------------------------ */
     ServletResponse(ServletRequest request,HttpResponse response)
@@ -150,24 +198,32 @@ public class ServletResponse implements HttpServletResponse
      * @see 		#getLocale
      *
      */
-
     public void setLocale(Locale locale)
     {
-        Code.notImplemented();
+        if (locale == null)
+            return; 
+
+        _locale = locale;
+        String lang = locale.getLanguage();
+        setHeader(HttpFields.__ContentLanguage, lang);
+
+        String type=_httpResponse.getField(HttpFields.__ContentType);
+        if (type==null)
+            type="application/octet-stream";
+        int semi = type.indexOf(";");if (semi != -1)
+            type = type.substring(0, semi);
+        
+        String charset = (String)__charSetMap.get(lang);
+        if (charset != null)
+            type = type + "; charset=" + charset;
+        setHeader(HttpFields.__ContentType,type);
     }
+
     
     /* ------------------------------------------------------------ */
-    /**
-     * Returns the locale assigned to the response.
-     * 
-     * 
-     * @see 		#setLocale
-     *
-     */
     public Locale getLocale()
     {
-        Code.notImplemented();
-        return null;
+        return _locale;
     }
     
     
@@ -362,7 +418,8 @@ public class ServletResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public String getCharacterEncoding() 
     {
-        return _httpResponse.getCharacterEncoding();
+        String encoding=_httpResponse.getCharacterEncoding();
+        return (encoding==null)?"ISO-8859-1":encoding;
     }
 
     /* ------------------------------------------------------------ */
@@ -406,6 +463,8 @@ public class ServletResponse implements HttpServletResponse
     public void setContentType(String contentType) 
     {
         setHeader(HttpFields.__ContentType,contentType);
+        if (_locale!=null)
+            setLocale(_locale);
     }
 }
 

@@ -481,12 +481,12 @@ abstract public class HttpMessage
     /* -------------------------------------------------------------- */
     /** Character Encoding.
      * Checks the Content-Type header for a charset parameter and return its
-     * value if found or ISO-8859-1 otherwise.
-     * @return Character Encoding.
+     * value if found or null otherwise.
+     * @return Character Encoding or null
      */
     public String getCharacterEncoding()
     {
-        String encoding="ISO-8859-1";
+        String encoding=null;
         String s = _header.get(HttpFields.__ContentType);
         if (s!=null)
         {
@@ -560,8 +560,6 @@ abstract public class HttpMessage
         ChunkableOutputStream out = getOutputStream();
         if (out==null)
             throw new IllegalStateException("No output stream");
-
-        if (Code.verbose(99))Code.debug("commitHeader");
         
         _connection.setupOutputStream();
         Writer writer = out.getRawWriter();

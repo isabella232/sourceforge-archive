@@ -1,6 +1,7 @@
 Stable 2.4.7
 Dev    3.0.B04
 
+ + Improved null returns to get almost clean watchdog test.
  + Cleaned up response committing and flushing
  + Handler RFC2109 cookies (like any browser handles them!)
  + Added default webapp servlet mapping /servlet/name/*

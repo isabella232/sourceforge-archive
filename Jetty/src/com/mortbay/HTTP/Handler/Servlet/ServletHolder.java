@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-import javax.servlet.GenericServlet;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -26,7 +25,7 @@ import javax.servlet.UnavailableException;
 
 /* --------------------------------------------------------------------- */
 /** Servlet Holder
- * Holds the name, params and some state of a javax.servlet.GenericServlet
+ * Holds the name, params and some state of a javax.servlet.Servlet
  * instance. It implements the ServletConfig interface.
  * This class will organise the loading of the servlet when needed or
  * requested.
@@ -45,7 +44,7 @@ public class ServletHolder
 
     private Class _servletClass=null;
     private Stack _servlets=new Stack();
-    private GenericServlet _servlet=null;
+    private Servlet _servlet=null;
     private String _name=null;
     private String _className ;
     private Map _initParams ;
@@ -142,10 +141,10 @@ public class ServletHolder
             else
                 _servletClass=loader.loadClass(getClassName());
             Code.debug("Servlet Class ",_servletClass);
-            if (!javax.servlet.GenericServlet.class
+            if (!javax.servlet.Servlet.class
                 .isAssignableFrom(_servletClass))
                 Code.fail("Servlet class "+getClassName()+
-                          " is not a javax.servlet.GenericServlet");
+                          " is not a javax.servlet.Servlet");
         }
         catch(ClassNotFoundException e)
         {
@@ -181,7 +180,7 @@ public class ServletHolder
      * SingleThreadModel
      * @return The servlet
      */
-    public GenericServlet getServlet()
+    public Servlet getServlet()
         throws UnavailableException
     {
         try{
@@ -190,8 +189,8 @@ public class ServletHolder
 
             if (_servlet==null)
             {
-                GenericServlet newServlet =
-                    newServlet = (GenericServlet)_servletClass.newInstance();
+                Servlet newServlet =
+                    newServlet = (Servlet)_servletClass.newInstance();
                 newServlet.init(_config);
                 synchronized (this)
                 {
@@ -288,7 +287,7 @@ public class ServletHolder
                UnavailableException,
                IOException
     {
-        GenericServlet useServlet=null;
+        Servlet useServlet=null;
 
         // reference pool to protect from reloads
         Stack pool=_servlets;
@@ -296,7 +295,7 @@ public class ServletHolder
         if (_singleThreadModel)
         {
             // try getting a servlet from the pool of servlets
-            try{useServlet = (GenericServlet)pool.pop();}
+            try{useServlet = (Servlet)pool.pop();}
             catch(EmptyStackException e)
             {
                 // Create a new one for the pool
@@ -306,7 +305,7 @@ public class ServletHolder
                         initializeClass();
 
                     useServlet =
-                            (GenericServlet) _servletClass.newInstance();
+                            (Servlet) _servletClass.newInstance();
                     useServlet.init(_config);
                 }
                 catch(Exception e2)
@@ -333,7 +332,7 @@ public class ServletHolder
                             if (_servletClass==null)
                                 initializeClass();
                             useServlet =
-                                (GenericServlet) _servletClass.newInstance();
+                                (Servlet) _servletClass.newInstance();
                             useServlet.init(_config);
                             _servlet = useServlet;
 

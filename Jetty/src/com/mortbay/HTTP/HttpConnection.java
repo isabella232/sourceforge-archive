@@ -683,8 +683,6 @@ public class HttpConnection
         if (_outputSetup)
             return;
         _outputSetup=true;
-
-        if (Code.verbose())Code.debug("setupOutputStream");
         
         // Determine how to limit content length and
         // enable output transfer encodings 
@@ -776,9 +774,7 @@ public class HttpConnection
      */
     synchronized void commitResponse()
         throws IOException
-    {
-        if (Code.verbose())Code.debug("commitResponse");
-            
+    {            
         _outputSetup=true;
         
         // Handler forced close

@@ -549,9 +549,9 @@ public class HandlerContext
         String ext;
 
         if (i<0 || i>=filename.length())
-            ext="default";
-        else
-            ext=StringUtil.asciiToLowerCase(filename.substring(i+1));
+            return null;
+        
+        ext=StringUtil.asciiToLowerCase(filename.substring(i+1));
         
         if (_mimeMap==null)
         {
@@ -692,9 +692,6 @@ public class HandlerContext
         }
         
         String type = (String)_mimeMap.get(ext);
-        if (type==null)
-            type = (String)_mimeMap.get("default");
-
         return type;
     }
 

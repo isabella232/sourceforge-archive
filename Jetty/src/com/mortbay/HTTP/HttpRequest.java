@@ -798,7 +798,10 @@ public class HttpRequest extends HttpMessage
         {
             String cookieStr = (String)_header.get(HttpFields.__Cookie);
             if (cookieStr==null || cookieStr.length()==0)
-                return null;
+            {
+                _cookies=new Cookie[0];
+                return _cookies;
+            }
             
             ArrayList cookies=new ArrayList(4);
             int version=0;
@@ -870,10 +873,10 @@ public class HttpRequest extends HttpMessage
                     cookie.setVersion(version);
                 cookies.add(cookie);
             }
-            if (cookies.size()==0)
-                return null;
+
             _cookies=new Cookie[cookies.size()];
-            cookies.toArray(_cookies);
+            if (cookies.size()>0)
+                cookies.toArray(_cookies);
         }
         catch(Exception e)
         {

@@ -257,7 +257,7 @@ public class TestHarness
             "C1: Continuation Value" + CRLF +
             "L1: V1" + CRLF +
             "L1: V2" + CRLF +
-            "L1: \"V,3\"" + CRLF +
+            "L1: V,3" + CRLF +
             "L2: V1, V2, 'V,3'" + CRLF +
             CRLF;
 

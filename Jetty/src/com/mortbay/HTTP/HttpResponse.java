@@ -486,7 +486,6 @@ public class HttpResponse extends HttpMessage
     public synchronized void commitHeader()
         throws IOException
     {
-        if (Code.verbose(99))Code.debug("response.commitHeader");
         _connection.commitResponse();
         super.commitHeader();
     }
@@ -501,7 +500,6 @@ public class HttpResponse extends HttpMessage
         if (isCommitted())
             return;
         
-        if (Code.verbose(99))Code.debug("response.commit");
         super.commit();
         HttpRequest request=getRequest();
         if (request!=null)

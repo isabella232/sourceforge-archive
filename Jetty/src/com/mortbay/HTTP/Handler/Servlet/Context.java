@@ -63,7 +63,7 @@ public class Context implements ServletContext, HttpSessionContext
 
     /* ------------------------------------------------------------ */
     public ServletContext getContext(String uri)
-    {
+    {        
         HandlerContext context=
             _handler.getHandlerContext();
 
@@ -135,6 +135,7 @@ public class Context implements ServletContext, HttpSessionContext
     /* ------------------------------------------------------------ */
     public RequestDispatcher getRequestDispatcher(String uriInContext)
     {
+        
         if (uriInContext == null || !uriInContext.startsWith("/"))
             return null;
 
@@ -175,26 +176,31 @@ public class Context implements ServletContext, HttpSessionContext
         }
     }
 
-
     /* ------------------------------------------------------------ */
+    /**
+     * @deprecated 
+     */
     public Servlet getServlet(String name)
     {
-        Code.warning("No longer supported");
         return null;
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * @deprecated 
+     */
     public Enumeration getServlets()
     {
-        Code.warning("No longer supported");
-        return null;
+        return Collections.enumeration(Collections.EMPTY_LIST);
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * @deprecated 
+     */
     public Enumeration getServletNames()
     {
-        Code.warning("No longer supported");
-        return null;
+        return Collections.enumeration(Collections.EMPTY_LIST);
     }
 
     /* ------------------------------------------------------------ */
