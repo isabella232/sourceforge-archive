@@ -416,10 +416,11 @@ public class LineInput extends FilterInputStream
         if (_byteLimit==0)
             _eof=true;
         // else loop until something is read.
-        else while (n==0 && _buf.length>_contents)
+        else while (!_eof && n==0 && _buf.length>_contents)
         {
             // try to read as much as will fit.
-            int space=_buf.length-_contents;            
+            int space=_buf.length-_contents;
+
             n=in.read(_buf,_contents,space);
             
             _eof=(n<0);

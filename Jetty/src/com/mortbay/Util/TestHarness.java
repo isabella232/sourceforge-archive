@@ -1295,6 +1295,7 @@ public class TestHarness
         try
         {
             TestThreadedServer server = new TestThreadedServer();
+            server.setMaxReadTimeMs(5000);
             test.check(true,"Constructed");
             server.start();
             System.err.print(".");System.err.flush();
@@ -1380,7 +1381,7 @@ public class TestHarness
             test.checkEquals(server._jobs,4,"max thread");
             test.checkEquals(server.getThreads(),4,"max thread");
 
-            server.destroy();
+            server.stop();
             server.join();
             test.check(!server.isStarted(),"Stopped");
             test.checkEquals(server.getThreads(),0,"No Threads");

@@ -447,7 +447,7 @@ abstract public class ThreadedServer extends ThreadPool
                 if (addr==null)
                     addr=InetAddress.getLocalHost();
                 new Socket(addr,_address.getPort());
-                Code.debug("Socket is still listening!!!");
+                Code.warning ("JVM cannot close accepting Socket");
             }
         }
         catch(Exception e)

@@ -301,7 +301,6 @@ public class ThreadPool
     /* ------------------------------------------------------------ */
     /** Stop the ThreadPool.
      * New jobs are no longer accepted, idle threads are interrupted
-     * and the pool is joined until all jobs are completed.
      */
     public void stop()
         throws InterruptedException
@@ -309,12 +308,11 @@ public class ThreadPool
         Code.debug("Stop Pool ",_name);
         _running=false;
         
-        while (_threadSet!=null && !_threadSet.isEmpty())
+        while (_idleSet!=null && !_idleSet.isEmpty())
         {
-            int size = _threadSet.size();
             synchronized(this)
             {
-                Object[] threads=_threadSet.toArray();
+                Object[] threads=_idleSet.toArray();
                 for(int t=0;t<threads.length;t++)
                 {
                     Thread thread=(Thread)threads[t];
@@ -325,11 +323,18 @@ public class ThreadPool
             // This section is here as some JVMs do not interrupt
             // in all situations that they should.
             Thread.yield();
-            if (_threadSet.size()>0)
+            if (_idleSet.size()>0)
             {
-                Thread.sleep(200);
-                if (_threadSet.size()==size)
+                Thread.sleep(100);
+                if (_idleSet.size()>0)
                     forceStop();
+                Thread.yield();
+                
+                if (_idleSet.size()>0)
+                {
+                    Code.warning("JVM cannot interrupt Idle Threads!");
+                    _idleSet.clear();
+                }
             }
         }
     }
@@ -355,6 +360,9 @@ public class ThreadPool
 
         if (_threadSet==null)
             return;
+
+        if (_threadSet.size()>0)
+            forceStop();
         
         _running=false;
         
@@ -430,7 +438,7 @@ public class ThreadPool
             synchronized(this)
             {
                 Iterator iter=_threadSet.iterator();
-                while(iter.hasNext())
+                if(iter.hasNext())
                     thread=(Thread)iter.next();
             }
             if (thread!=null)

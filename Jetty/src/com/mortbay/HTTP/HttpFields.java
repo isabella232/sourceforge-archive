@@ -293,9 +293,8 @@ public class HttpFields
             return null;
         if (o instanceof List)
             return (List)o;
-
-        List list = new ArrayList();
-        list.add(o.toString());
+        
+        List list=Collections.singletonList(o);
         
         return list;
     }

@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +63,8 @@ public class HttpRequest extends HttpMessage
     public static final String
         __AuthType = "com.mortbay.HTTP.HttpRequest.AuthType",
         __AuthUser = "com.mortbay.HTTP.HttpRequest.AuthUser";
+    
+    private static Cookie[] __noCookies = new Cookie[0];
     
     /* ------------------------------------------------------------ */
     private String _method=null;
@@ -819,23 +822,22 @@ public class HttpRequest extends HttpMessage
 
         try
         {
-            String cookieStr = (String)_header.get(HttpFields.__Cookie);
-            if (cookieStr==null || cookieStr.length()==0)
+            if(!_header.containsKey(HttpFields.__Cookie))
             {
-                _cookies=new Cookie[0];
+                _cookies=__noCookies;
                 return _cookies;
             }
             
             ArrayList cookies=new ArrayList(4);
             int version=0;
             Cookie cookie=null;
-            
-            QuotedStringTokenizer tok = new QuotedStringTokenizer(cookieStr,";");
-            while (tok.hasMoreTokens())
+
+            Iterator iter =_header.getValues(HttpFields.__Cookie,";").iterator();            
+            while (iter.hasNext())
             {
                 try
                 {
-                    String c = tok.nextToken();
+                    String c = iter.next().toString();
                     int e = c.indexOf("=");
                     String n;
                     String v;

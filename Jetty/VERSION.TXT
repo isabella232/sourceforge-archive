@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Improved ThreadPool stop handling
  + Implemented multi-part ranges so that acrobat is happy.
  + Simplified multipart response class.
  + Frame handles more JIT stacks.

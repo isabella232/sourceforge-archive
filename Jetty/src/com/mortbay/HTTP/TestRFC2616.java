@@ -1404,7 +1404,6 @@ public class TestRFC2616
 
             // trailer field
             offset=0;
-            System.err.println("TE <");
             listener._server.setChunkingForced(true);
             response=listener.getResponses("GET /R1 HTTP/1.1\n"+
                                            "Host: localhost\n"+
@@ -1416,8 +1415,6 @@ public class TestRFC2616
                                    "HTTP/1.1 200","TE: trailer")+1;
             offset=t.checkContains(response,offset,
                                    "TestTrailer: Value","TE: trailer")+1;
-
-            System.err.println("TE >");
         }
         catch(Exception e)
         {
