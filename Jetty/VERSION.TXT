@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Fixed noaccess auth demo.
+ + FORM auth caches UserPrincipal
  + Added isAuthenticated to UserPrincipal
 
 Jetty-4.0.D3 - 31 Dec 2001
