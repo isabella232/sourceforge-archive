@@ -81,9 +81,30 @@ CONTACTS
 ========
     jetty-support@mortbay.com     - for problems with Jetty
     mortbay@mortbay.com           - for general contact
-    jetty-list@mortbay.com        - for the Jetty mailing list
-    jetty-subscribe@mortbay.com   - join the mailing list
+    jetty-announce@mortbay.com    - for the Jetty mailing list
+                                    This is for announcements of interest
+                                    to all Jetty users. It is not for
+                                    support questions.
+    subscribe-jetty-announce@mortbay.com   
+                                  - join the mailing list
 
 
+SUPPORT
+=======
+Mort Bay provides informal support for Jetty via email, for non-licensed
+users.   If you are having a problem with Jetty, please supply the 
+following information when sending email to jetty-support.
 
+  Jetty version
+  Java version
+  Hardware platform.
+  Operating System and version.
+  Directory Jetty is installed in.
+  Value of MORTBAY_HOME environment variable.
+  Value of CLASSPATH environment variable.
+  Command line used to run the server.
+  Server properties file (if used and modified).
+
+
+And remember, it's spelled J-e-t-t-y, but it's pronounced "Jetty".
 
