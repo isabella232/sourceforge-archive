@@ -604,14 +604,13 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     }
     
     /* -------------------------------------------------------------- */
-    public java.io.PrintWriter getWriter()
+    public synchronized java.io.PrintWriter getWriter()
     {
 	if (outputState!=0 && outputState!=2)
 	    throw new IllegalStateException();
-	outputState=2;
-	
 	if (writer==null)
 	    writer=new PrintWriter(new OutputStreamWriter(getOutputStream()));
+	outputState=2;
 	return writer;
     }    
 

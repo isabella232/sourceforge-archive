@@ -78,7 +78,7 @@ public class ConfigDump extends HttpServlet
 	    }
 	}
 	
-	page.write(response.getOutputStream());
+	page.write(response.getWriter());
     }    
 }
 

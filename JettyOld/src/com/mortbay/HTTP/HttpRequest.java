@@ -1005,9 +1005,9 @@ public class HttpRequest extends HttpHeader
     {
 	if (inputState!=0 && inputState!=2)
 	    throw new IllegalStateException();
-	inputState=2;
 	if (reader==null)
 	    reader=new BufferedReader(new InputStreamReader(getInputStream()));
+	inputState=2;
 	return reader;
     }
 
