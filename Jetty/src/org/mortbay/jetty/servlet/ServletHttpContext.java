@@ -9,7 +9,7 @@ import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpServer;
 import javax.servlet.ServletContext;
-
+import org.mortbay.util.Code;
 
 /* ------------------------------------------------------------ */
 /** ServletHttpContext.
@@ -140,34 +140,11 @@ public class ServletHttpContext extends HttpContext
 
     /* ------------------------------------------------------------ */
     /** Setup context for serving dynamic servlets.
-     * Conveniance method.  A Dynamic servlet is one which is mapped from a
-     * URL containing the class name of the servlet - which is dynamcially
-     * loaded when the first request is received.
-     * @param pathSpecInContext The path within the context at which
-     * dynamic servlets are launched. eg /servlet/*
+     * @deprecated Use org.mortbay.jetty.servlet.Invoker
      */
     public synchronized void setDynamicServletPathSpec(String pathSpecInContext)
     {
-        ServletHandler handler = (ServletHandler)
-            getHandler(org.mortbay.jetty.servlet.ServletHandler.class);
-        if (pathSpecInContext!=null)
-        {
-            if (handler==null)
-                handler=getServletHandler();
-            handler.setDynamicServletPathSpec(pathSpecInContext);
-        }
-        else if (handler!=null)
-            removeHandler(handler);
-    }
-
-    /* ------------------------------------------------------------ */
-    public String getDynamicServletPathSpec()
-    {
-        ServletHandler handler = (ServletHandler)
-            getHandler(org.mortbay.jetty.servlet.ServletHandler.class);
-        if (handler!=null)
-            return handler.getDynamicServletPathSpec();
-        return null;
+        Code.warning("setDynamicServletPathSpec is deprecated.");
     }
 
     /* ------------------------------------------------------------ */
