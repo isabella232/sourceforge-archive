@@ -109,11 +109,6 @@ public class KeyPairTool
             
             System.exit(23);
         }
-        finally
-        {
-            keyStorePassword.zero();
-            keyPassword.zero();
-        }
     }
 
     /* ------------------------------------------------------------ */
@@ -153,7 +148,7 @@ public class KeyPairTool
         }
 
         // The load method can accept a null keyStoreStream.
-        keyStore.load(keyStoreStream, keyStorePassword.getCharArray());
+        keyStore.load(keyStoreStream, keyStorePassword.toString().toCharArray());
 
         if (keyStoreStream != null)
         {
@@ -164,13 +159,13 @@ public class KeyPairTool
         // Insert the new key pair
         keyStore.setKeyEntry(alias,
                              privateKey,
-                             keyPassword.getCharArray(),
+                             keyPassword.toString().toCharArray(),
                              certChain);
 
         // Save the KeyStore
         FileOutputStream keyStoreOut = new FileOutputStream(keyStoreFile);
         keyStore.store(keyStoreOut,
-                       keyStorePassword.getCharArray());
+                       keyStorePassword.toString().toCharArray());
         keyStoreOut.close();
 
         System.out.println("Keys have been written to keystore");
@@ -307,9 +302,9 @@ public class KeyPairTool
             usage();
         }
 
-        keyStorePassword = new Password("jetty.ssl.password");
-        keyPassword = new Password("jetty.ssl.keypassword",
-                                   null,
-                                   keyStorePassword.toString());
+        keyStorePassword = Password.getPassword("jetty.ssl.password",null,null);
+        keyPassword = Password.getPassword("jetty.ssl.keypassword",
+                                           null,
+                                           keyStorePassword.toString());
     }
 }

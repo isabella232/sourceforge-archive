@@ -1652,6 +1652,8 @@ public class HttpContext implements LifeCycle
             thread.setContextClassLoader(lastContextLoader);
             _started=true;
         }
+
+        Log.event("Started "+this);
     }
 
     /* ------------------------------------------------------------ */
@@ -1740,6 +1742,7 @@ public class HttpContext implements LifeCycle
             }
             _loader=null;
         }
+        Log.event("Stopped "+this);
     }
     
 

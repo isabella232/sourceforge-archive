@@ -9,6 +9,8 @@ import java.io.IOException;
 import org.mortbay.http.SecurityConstraint.Authenticator;
 import java.security.Principal;
 import org.mortbay.util.Code;
+import org.mortbay.util.StringUtil;
+import org.mortbay.util.B64Code;
 
 /* ------------------------------------------------------------ */
 /** BASIC authentication.
@@ -31,15 +33,59 @@ public class BasicAuthenticator implements Authenticator
                                        HttpResponse response)
         throws IOException
     {
-        UserPrincipal user=request.basicAuthenticated(realm);
+        if (realm==null)
+        {
+            response.sendError(HttpResponse.__500_Internal_Server_Error,
+                               "Realm Not Configured");
+            return null;
+        }
+
+        // Get the user if we can
+        UserPrincipal user=null;
+        String credentials = request.getField(HttpFields.__Authorization);
+        
+        if (credentials!=null )
+        {
+            Code.debug("Credentials: "+credentials);
+            credentials = credentials.substring(credentials.indexOf(' ')+1);
+            credentials = B64Code.decode(credentials,StringUtil.__ISO_8859_1);
+            int i = credentials.indexOf(':');
+            String username = credentials.substring(0,i);
+            String password = credentials.substring(i+1);
+
+            user = realm.authenticate(username,password,request);
+            if (user!=null)
+            {
+                request.setAuthType(SecurityConstraint.__BASIC_AUTH);
+                request.setAuthUser(username);
+                request.setUserPrincipal(user);                
+            }
+            else
+                Code.warning("AUTH FAILURE: user "+username);
+        }
+
+        // Challenge if we have no user
         if (user==null)
-            response.sendBasicAuthenticationChallenge(realm);
+            sendChallenge(realm,response);
+        
         return user;
     }
     
+    /* ------------------------------------------------------------ */
     public String getAuthMethod()
     {
         return SecurityConstraint.__BASIC_AUTH;
     }
+
+    /* ------------------------------------------------------------ */
+    public void sendChallenge(UserRealm realm,
+                              HttpResponse response)
+        throws IOException
+    {
+        response.setField(HttpFields.__WwwAuthenticate,
+                          "basic realm=\""+realm.getName()+'"');
+        response.sendError(HttpResponse.__401_Unauthorized);
+    }
+    
 }
     

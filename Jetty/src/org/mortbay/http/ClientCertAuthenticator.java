@@ -49,9 +49,8 @@ public class ClientCertAuthenticator implements Authenticator
         for (int i=0;i<certs.length;i++)
         {
             Principal principal = certs[i].getSubjectDN();
-            String cred = certs[i].toString();
             UserPrincipal user = realm.authenticate(principal.getName(),
-                                                    cred,
+                                                    certs[i],
                                                     request);
             if (user!=null)
                 return user;

@@ -21,6 +21,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import org.mortbay.util.Code;
+import org.mortbay.util.Credentials;
 import org.mortbay.util.Password;
 import org.mortbay.util.Resource;
 
@@ -33,7 +34,7 @@ import org.mortbay.util.Resource;
  */
 public class HashUserRealm extends HashMap implements UserRealm
 {
-    private String _name;
+    private String _realmName;
     protected HashMap _roles=new HashMap(7);
 
     /* ------------------------------------------------------------ */
@@ -42,7 +43,7 @@ public class HashUserRealm extends HashMap implements UserRealm
      */
     public HashUserRealm(String name)
     {
-        _name=name;
+        _realmName=name;
     }
     
     /* ------------------------------------------------------------ */
@@ -53,7 +54,7 @@ public class HashUserRealm extends HashMap implements UserRealm
     public HashUserRealm(String name, String config)
         throws IOException
     {
-        _name=name;
+        _realmName=name;
         load(config);
     }
 
@@ -105,12 +106,12 @@ public class HashUserRealm extends HashMap implements UserRealm
     /* ------------------------------------------------------------ */
     public String getName()
     {
-        return _name;
+        return _realmName;
     }
 
     /* ------------------------------------------------------------ */
     public UserPrincipal authenticate(String username,
-                                      String credentials,
+                                      Object credentials,
                                       HttpRequest request)
     {
         KnownUser user;
@@ -118,9 +119,12 @@ public class HashUserRealm extends HashMap implements UserRealm
         {
             user = (KnownUser)super.get(username);
         }
-        
-        if (user!=null && user.authenticate(credentials,request))
+        if (user==null)
+            return null;
+
+        if (user.authenticate(credentials,request))
             return user;
+        
         return null;
     }
     
@@ -157,14 +161,19 @@ public class HashUserRealm extends HashMap implements UserRealm
         if (credentials instanceof UserPrincipal)
             return super.put(name.toString(),
                              credentials);
+        
         if (credentials instanceof Password)
             return super.put(name,
                              new KnownUser(name.toString(),
                                           (Password)credentials));
         if (credentials != null)
-            return super.put(name,
-                             new KnownUser(name.toString(),
-                                          new Password(_name,credentials.toString())));
+            return super
+                .put(name,
+                     new KnownUser(name.toString(),
+                                   Credentials.getCredentials
+                                   (_realmName,
+                                    name.toString(),
+                                    credentials.toString())));
         return null;
     }
 
@@ -206,7 +215,7 @@ public class HashUserRealm extends HashMap implements UserRealm
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "Realm["+_name+"]";
+        return "Realm["+_realmName+"]";
     }
     
     /* ------------------------------------------------------------ */
@@ -231,7 +240,7 @@ public class HashUserRealm extends HashMap implements UserRealm
             return HashUserRealm.this;
         }
         
-        private boolean authenticate(String credentials, HttpRequest request)
+        private boolean authenticate(Object credentials, HttpRequest request)
         {
             return false;
         }
@@ -262,27 +271,26 @@ public class HashUserRealm extends HashMap implements UserRealm
     /* ------------------------------------------------------------ */
     private class KnownUser extends User
     {
-        private String _name;
-        private Password _pw;
+        private String _userName;
+        private Credentials _cred;
         
         /* -------------------------------------------------------- */
-        KnownUser(String name,Password password)
+        KnownUser(String name,Credentials credentials)
         {
-            _name=name;
-            _pw=password;
-            _pw.zero();
+            _userName=name;
+            _cred=credentials;
         }
         
         /* -------------------------------------------------------- */
-        private boolean authenticate(String password, HttpRequest request)
+        private boolean authenticate(Object credentials, HttpRequest request)
         {
-            return _pw!=null && _pw.check(password);
+            return _cred!=null && _cred.check(credentials);
         }
         
         /* ------------------------------------------------------------ */
         public String getName()
         {
-            return _name;
+            return _userName;
         }
         
         /* -------------------------------------------------------- */
@@ -296,7 +304,6 @@ public class HashUserRealm extends HashMap implements UserRealm
         {
             return HashUserRealm.this.isUserInRole(this,role);
         }
-
     }
 
     /* ------------------------------------------------------------ */

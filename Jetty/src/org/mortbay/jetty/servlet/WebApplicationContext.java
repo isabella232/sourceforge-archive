@@ -31,6 +31,7 @@ import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
 import org.mortbay.http.BasicAuthenticator;
 import org.mortbay.http.ClientCertAuthenticator;
+import org.mortbay.http.DigestAuthenticator;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpHandler;
@@ -333,7 +334,7 @@ public class WebApplicationContext extends ServletHttpContext
             {
                 try
                 {
-                    Log.event("Configure: "+jetty);
+                    Code.debug("Configure: "+jetty);
                     XmlConfiguration jetty_config=new
                         XmlConfiguration(jetty.getURL());
                     jetty_config.configure(this);
@@ -596,7 +597,7 @@ public class WebApplicationContext extends ServletHttpContext
     }
 
     /* ------------------------------------------------------------ */
-    private void initialize(XmlParser.Node config)
+    protected void initialize(XmlParser.Node config)
         throws ClassNotFoundException,UnavailableException
     {
         Iterator iter=config.iterator();
@@ -689,13 +690,13 @@ public class WebApplicationContext extends ServletHttpContext
     }
     
     /* ------------------------------------------------------------ */
-    private void initDisplayName(XmlParser.Node node)
+    protected void initDisplayName(XmlParser.Node node)
     {
         _name=node.toString(false,true);
     }
     
     /* ------------------------------------------------------------ */
-    private void initContextParam(XmlParser.Node node)
+    protected void initContextParam(XmlParser.Node node)
     {
         String name=node.getString("param-name",false,true);
         String value=node.getString("param-value",false,true);
@@ -705,7 +706,7 @@ public class WebApplicationContext extends ServletHttpContext
     }
 
     /* ------------------------------------------------------------ */
-    private void initFilter(XmlParser.Node node)
+    protected void initFilter(XmlParser.Node node)
         throws ClassNotFoundException, UnavailableException
     {
         String name=node.getString("filter-name",false,true);
@@ -732,7 +733,7 @@ public class WebApplicationContext extends ServletHttpContext
     }
     
     /* ------------------------------------------------------------ */
-    private void initFilterMapping(XmlParser.Node node)
+    protected void initFilterMapping(XmlParser.Node node)
     {
         String filterName=node.getString("filter-name",false,true);
         String pathSpec=node.getString("url-pattern",false,true);
@@ -745,7 +746,7 @@ public class WebApplicationContext extends ServletHttpContext
     }
     
     /* ------------------------------------------------------------ */
-    private void initServlet(XmlParser.Node node)
+    protected void initServlet(XmlParser.Node node)
         throws ClassNotFoundException,
                UnavailableException,
                IOException,
@@ -833,7 +834,7 @@ public class WebApplicationContext extends ServletHttpContext
     }
     
     /* ------------------------------------------------------------ */
-    private void initServletMapping(XmlParser.Node node)
+    protected void initServletMapping(XmlParser.Node node)
     {
         String name=node.getString("servlet-name",false,true);
         String pathSpec=node.getString("url-pattern",false,true);
@@ -842,7 +843,7 @@ public class WebApplicationContext extends ServletHttpContext
     }
 
     /* ------------------------------------------------------------ */
-    private void initListener(XmlParser.Node node)
+    protected void initListener(XmlParser.Node node)
     {
         String className=node.getString("listener-class",false,true);
         Object listener =null;
@@ -885,7 +886,7 @@ public class WebApplicationContext extends ServletHttpContext
     
     
     /* ------------------------------------------------------------ */
-    private void initSessionConfig(XmlParser.Node node)
+    protected void initSessionConfig(XmlParser.Node node)
     {
         XmlParser.Node tNode=node.get("session-timeout");
         if(tNode!=null)
@@ -896,7 +897,7 @@ public class WebApplicationContext extends ServletHttpContext
     }
     
     /* ------------------------------------------------------------ */
-    private void initMimeConfig(XmlParser.Node node)
+    protected void initMimeConfig(XmlParser.Node node)
     {
         String extension= node.getString("extension",false,true);
         if (extension!=null && extension.startsWith("."))
@@ -907,7 +908,7 @@ public class WebApplicationContext extends ServletHttpContext
     }
     
     /* ------------------------------------------------------------ */
-    private void initWelcomeFileList(XmlParser.Node node)
+    protected void initWelcomeFileList(XmlParser.Node node)
     {
         setWelcomeFiles(null);
         Iterator iter= node.iterator("welcome-file");
@@ -921,7 +922,7 @@ public class WebApplicationContext extends ServletHttpContext
     }
 
     /* ------------------------------------------------------------ */
-    private void initErrorPage(XmlParser.Node node)
+    protected void initErrorPage(XmlParser.Node node)
     {
         String error= node.getString("error-code",false,true);
         if (error==null || error.length()==0)
@@ -932,7 +933,7 @@ public class WebApplicationContext extends ServletHttpContext
     }
     
     /* ------------------------------------------------------------ */
-    private void initTagLib(XmlParser.Node node)
+    protected void initTagLib(XmlParser.Node node)
     {
         String uri= node.getString("taglib-uri",false,true);
         String location= node.getString("taglib-location",false,true);
@@ -941,7 +942,7 @@ public class WebApplicationContext extends ServletHttpContext
     }
     
     /* ------------------------------------------------------------ */
-    private void initSecurityConstraint(XmlParser.Node node)
+    protected void initSecurityConstraint(XmlParser.Node node)
     {
         SecurityConstraint scBase = new SecurityConstraint();
         
@@ -1001,7 +1002,7 @@ public class WebApplicationContext extends ServletHttpContext
     }
                                       
     /* ------------------------------------------------------------ */
-    private void initLoginConfig(XmlParser.Node node)
+    protected void initLoginConfig(XmlParser.Node node)
     {
         XmlParser.Node method=node.get("auth-method");
         if (method!=null)
@@ -1013,6 +1014,8 @@ public class WebApplicationContext extends ServletHttpContext
                 authenticator=_formAuthenticator=new FormAuthenticator();
             else if (SecurityConstraint.__BASIC_AUTH.equals(m))
                 authenticator=new BasicAuthenticator();
+            else if (SecurityConstraint.__DIGEST_AUTH.equals(m))
+                authenticator=new DigestAuthenticator();
             else if (SecurityConstraint.__CERT_AUTH.equals(m))
                 authenticator=new ClientCertAuthenticator();
             else
@@ -1043,14 +1046,8 @@ public class WebApplicationContext extends ServletHttpContext
     }
     
     /* ------------------------------------------------------------ */
-    private void initSecurityRole(XmlParser.Node node)
+    protected void initSecurityRole(XmlParser.Node node)
     {
-        // XXX - not sure what needs to be done here.
-        // Could check that the role is known to the security handler
-        // but it could be initialized later?
-        Log.event("Security role "+
-                  node.get("role-name").toString(false,true)+
-                  " defined");
     }
 
     /* ------------------------------------------------------------ */
@@ -1173,6 +1170,5 @@ public class WebApplicationContext extends ServletHttpContext
             throw ioe;
 
         return resource;
-    }
-    
+    }    
 }

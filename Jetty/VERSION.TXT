@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Restructured Password into Password and Credentials
+ + Added DigestAuthenticator
  + Added link to a Jetty page in Korean.
  + Added ExpiryHandler which can set a default Expires header.
 

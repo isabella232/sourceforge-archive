@@ -185,7 +185,7 @@ public class Server extends HttpServer
             new WebApplicationContext(webApp);
         appContext.setContextPath(contextPathSpec);
         addContext(virtualHost,appContext);
-        Log.event("Web Application "+appContext+" added");
+        Code.debug("Web Application ",appContext," added");
         return appContext;
     }
 
@@ -258,7 +258,6 @@ public class Server extends HttpServer
             if (context.equalsIgnoreCase("root")||
                 context.equalsIgnoreCase("root/"))
             {
-                Log.event("ROOT Context: "+app);
                 context="/";
             }
             else

@@ -161,6 +161,12 @@
 -->
 
   <login-config>
+    <auth-method>DIGEST</auth-method>
+    <realm-name>Jetty Demo Realm</realm-name>
+  </login-config>
+
+<!--
+  <login-config>
     <auth-method>FORM</auth-method>
     <realm-name>Jetty Demo Realm</realm-name>
     <form-login-config>
@@ -168,6 +174,7 @@
        <form-error-page>/logonError.html</form-error-page>
     </form-login-config>
   </login-config>
+-->
 
   <security-role>
       <role-name>roleName</role-name>

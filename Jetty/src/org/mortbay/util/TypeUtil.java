@@ -84,5 +84,33 @@ public class TypeUtil
         }
         return value;
     }
+
+    /* ------------------------------------------------------------ */
+    public static byte[] parseBytes(String s, int base)
+    {
+        byte[] bytes=new byte[s.length()/2];
+        for (int i=0;i<s.length();i+=2)
+            bytes[i/2]=(byte)TypeUtil.parseInt(s,i,2,base);
+        return bytes;
+    }
+
+    /* ------------------------------------------------------------ */
+    public static String toString(byte[] bytes, int base)
+    {
+        StringBuffer buf = new StringBuffer();
+        for (int i=0;i<bytes.length;i++)
+        {
+            int bi=0xff&bytes[i];
+            int c='0'+(bi/base)%base;
+            if (c>'9')
+                c= 'a'+(c-'0'-10);
+            buf.append((char)c);
+            c='0'+bi%base;
+            if (c>'9')
+                c= 'a'+(c-'0'-10);
+            buf.append((char)c);
+        }
+        return buf.toString();
+    }
     
 }

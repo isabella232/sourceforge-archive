@@ -517,22 +517,7 @@ public class HttpResponse extends HttpMessage
         HttpRequest request=getRequest();
         if (request!=null)
             request.setHandled(true);
-    }
-
-    /* ------------------------------------------------------------ */
-    public void sendBasicAuthenticationChallenge(UserRealm realm)
-        throws IOException
-    {
-        if (realm==null)
-            sendError(__500_Internal_Server_Error,"Realm Not Configured");
-        else
-        {
-            setField(HttpFields.__WwwAuthenticate,
-                     "basic realm=\""+realm.getName()+'"');
-            sendError(__401_Unauthorized);
-        }
-    }
-    
+    }    
 }
 
 

@@ -80,7 +80,6 @@ public class ResourceHandler extends NullHandler
     public synchronized void start()
         throws Exception
     {        
-        Log.event("ResourceHandler started in "+ getHttpContext().getBaseResource());
         super.start();
     }
  

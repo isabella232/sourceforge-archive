@@ -29,7 +29,7 @@ public interface UserRealm
      * until a UserRealm.deAuthenticate(UserPrincipal) call is made for this
      * UserPrincipal.
      * @param username The username. 
-     * @param credentials The user credentials, normally a password. 
+     * @param credentials The user credentials, normally a String password. 
      * @param request The request to be authenticated. Additional
      * parameters may be extracted or set on this request as needed
      * for the authentication mechanism (none required for BASIC and
@@ -37,7 +37,7 @@ public interface UserRealm
      * @return The authenticated UserPrincipal.
      */
     public UserPrincipal authenticate(String username,
-                                      String credentials,
+                                      Object credentials,
                                       HttpRequest request);
 
     /* ------------------------------------------------------------ */

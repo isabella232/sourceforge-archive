@@ -101,7 +101,7 @@ abstract public class NullHandler implements HttpHandler
         if (_context==null)
             throw new IllegalStateException("No context for "+this);        
         _started=true;
-        Log.event("Started "+this);
+        Code.debug("Started "+this);
     }
     
     /* ----------------------------------------------------------------- */
@@ -109,7 +109,7 @@ abstract public class NullHandler implements HttpHandler
         throws InterruptedException
     {
         _started=false;
-        Log.event("Stopped "+this);
+        Code.debug("Stopped "+this);
     }
 
     /* ----------------------------------------------------------------- */

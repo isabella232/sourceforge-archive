@@ -162,6 +162,18 @@ public class JDBCUserRealm extends HashUserRealm
     }
     
     /* ------------------------------------------------------------ */
+    public UserPrincipal authenticate(String username,
+                                      Object credentials,
+                                      HttpRequest request)
+    {
+        if (credentials==null)
+            return authenticate(username,null,request);
+        if (credentials instanceof String)
+            return authenticate(username,credentials,request);
+        return authenticate(username,credentials.toString(),request);
+    }
+    
+    /* ------------------------------------------------------------ */
     public synchronized UserPrincipal authenticate(String username,
                                                    String credentials,
                                                    HttpRequest request)

@@ -27,6 +27,7 @@ public class SecurityConstraint
     /* ------------------------------------------------------------ */
     public final static String __BASIC_AUTH="BASIC";
     public final static String __FORM_AUTH="FORM";
+    public final static String __DIGEST_AUTH="DIGEST";
     public final static String __CERT_AUTH="CLIENT-CERT";    
     
     /* ------------------------------------------------------------ */
@@ -336,11 +337,12 @@ public class SecurityConstraint
                             break;
                         }
                     }
+                    
                     if (!inRole)
                     {
                         Code.warning("AUTH FAILURE: role for "+user.getName());
                         if ("BASIC".equalsIgnoreCase(authenticator.getAuthMethod()))
-                            response.sendBasicAuthenticationChallenge(realm);
+                            ((BasicAuthenticator)authenticator).sendChallenge(realm,response);
                         else
                             response.sendError(HttpResponse.__403_Forbidden,
                                                "User not in required role");
