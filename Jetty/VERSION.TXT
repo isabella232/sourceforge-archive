@@ -11,6 +11,7 @@ Jetty-3.0.B04 - 12 Oct 2000
  + Implemented Context.getContext(uri)
  + Added webdefault.xml for web applications.
  + Redirect to index files, so index.jsp works.
+ + Filthy hack to teach jasper JspServer Jetty classpath
 
 Jetty-3.0.B03 - 9th Oct 2000
  + Expanded import package.*; lines

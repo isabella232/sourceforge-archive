@@ -1,0 +1,178 @@
+<!-- 
+========================================================================
+ Copyright (c) 1999 Mort Bay Consulting (Australia) Pty. Ltd.
+ $Id$
+======================================================================== 
+ This build file specifies how to build Jetty3 using ANT, the 
+ build tool from the Apache/Jakarta project. 
+
+  <http://jakarta.apache.org/ant/index.html>
+======================================================================== 
+-->
+
+<project name="Jetty3 Web, Servlet, and JSP server" 
+  default="webapp" 
+  basedir=".">
+  
+  <property name="app.name"       value="Jetty3" />
+  <property name="version"        value="3.0.B04" />
+
+  <property name="src.dir"        value="${basedir}/src" />
+  <property name="webapps"        value="${basedir}/webapps"/>
+  <property name="lib"            value="${basedir}/lib"/>
+  <property name="classes"        value="${basedir}/classes"/>
+  <property name="javadoc"        value="${basedir}/javadoc"/>
+
+  <property name="jetty.webapp"           value="${webapps}/jetty"/>
+  <property name="jetty.webapp.webinf"    value="${jetty.webapp}/WEB-INF"/>
+  <property name="jetty.webapp.classes"   value="${jetty.webapp.webinf}/classes"/>
+
+  <property name="jetty.jar"      value="${lib}/com.mortbay.jetty.jar"/>
+  <property name="servlet.jar"    value="${lib}/javax.servlet.jar"/>
+  <property name="jasper.jar"     value="${lib}/org.apache.jasper.jar"/>
+  <property name="aelfred.jar"    value="${lib}/aelfred.sax.jar"/>
+  <property name="jsse.jar"       value="${lib}/jsse.jar"/>
+  <property name="jnet.jar"       value="${lib}/jnet.jar"/>
+  <property name="jcert.jar"      value="${lib}/jcert.jar"/>
+  <property name="libs"           value="${aelfred.jar};${jsse.jar};${jnet.jar};${jcert.jar};${jasper.jar}"/>
+  
+  
+  <!-- property name="build.compiler" value="classic"/ -->
+  
+  <target name="prepare">
+    <mkdir dir="${jetty.webapp.classes}"/>
+    <mkdir dir="${javadoc}"/>
+    <mkdir dir="${classes}" />
+  </target>
+
+
+  <target name="clean">
+    <deltree dir="${jetty.webapp.classes}"/>
+    <deltree dir="${classes}"/>
+    <deltree dir="${javadoc}"/>
+    <delete  file="${jetty.jar}"/>
+    <delete  file="${servlet.jar}"/>
+    <delete  file="${jasper.jar}"/>
+  </target>
+
+
+  <target name="check_packages">
+    <!-- available property="prop.name" classname="com.some.Class" / -->
+  </target>
+
+  <target name="javax" depends="prepare">
+    <copydir src="${src.dir}" dest="${classes}">
+      <include name="javax/**/defaultManifest.mf" />
+      <include name="javax/**/*.properties" />
+    </copydir>
+    <javac srcdir="${src.dir}" 
+           destdir="${classes}"
+           classpath="${classpath}"
+           debug="on" optimize="on" 
+           deprecation="on"
+           >
+      <include name="javax/**/*.java"/> 
+    </javac>
+    <jar jarfile="${servlet.jar}"
+         basedir="${classes}" 
+         >
+       <include name="javax/**" />
+    </jar>
+  </target>
+
+  <target name="jetty" depends="prepare,javax">
+    <copydir src="${src.dir}" dest="${classes}">
+      <include name="com/mortbay/**/defaultManifest.mf" />
+      <include name="com/mortbay/**/*.dtd" />
+      <include name="com/mortbay/**/*.properties" />
+      <exclude name="com/mortbay/Jetty/JettyIndex*.properties" />
+    </copydir>
+    <javac srcdir="${src.dir}" 
+           destdir="${classes}"
+           classpath="${libs}"
+           debug="on" optimize="on" 
+           deprecation="on"
+           >
+      <include name="com/mortbay/**/*.java"/> 
+      <exclude name="com/mortbay/Jetty/JettyPage.java" />
+      <exclude name="com/mortbay/Jetty/JettyServlet.java" />
+      <exclude name="com/mortbay/Jetty/JettyIndex*.properties" />
+    </javac>
+    <jar jarfile="${jetty.jar}"
+         basedir="${classes}" 
+         >
+       <include name="com/mortbay/**"  />
+    </jar>
+  </target>
+
+  <target name="jasper" depends="prepare">
+    <copydir src="${src.dir}" dest="${classes}">
+      <include name="org/apache/jasper/**/defaultManifest.mf" />
+      <include name="org/apache/jasper/**/*.properties" />
+    </copydir>
+    <javac srcdir="${src.dir}" 
+           destdir="${classes}"
+           classpath="${classpath}"
+           debug="on" optimize="on" 
+           deprecation="on"
+           >
+      <include name="org/apache/jasper/**/*.java"/> 
+    </javac>
+    <jar jarfile="${jasper.jar}"
+         basedir="${classes}" 
+         >
+       <include name="org/apache/jasper/**"  />
+    </jar>
+  </target>
+
+ 
+  <target name="libs" depends="javax,jetty,jasper">
+  </target>
+
+  <target name="webapp" depends="libs">
+    <copydir src="${src.dir}" dest="${jetty.webapp.classes}">
+      <include name="com/mortbay/Jetty/defaultManifest.mf" />
+      <include name="com/mortbay/Jetty//*.properties" />
+    </copydir>
+    <javac srcdir="${src.dir}" 
+           destdir="${jetty.webapp.classes}"
+           classpath="${jetty.jar};${servlet.jar}"
+           debug="on" optimize="on" 
+           deprecation="on" 
+           >
+      <include name="com/mortbay/Jetty/JettyPage.java" />
+      <include name="com/mortbay/Jetty/JettyServlet.java" />
+    </javac>
+    <copyfile src="LICENSE.html" dest="${jetty.webapp}/LICENSE.html" />
+  </target>
+
+  <target name="javadoc" depends="libs">
+    <mkdir dir="${javadoc}"/>
+    <javadoc packagenames="com.mortbay.*,javax.servlet.*"
+             sourcepath="${src.dir}"
+             destdir="${javadoc}"
+             author="true"
+             version="true"
+             windowtitle="${Name} API"
+             doctitle="${Name}"
+             bottom="Copyright &#169; 2000 Mortbay Consulting Pty. Ltd. All Rights Reserved.">
+    </javadoc>
+  </target>
+
+
+  <target name="all" depends="prepare,libs,webapp,javadoc"/>
+
+  <target name="dist" depends="all" >
+    <property name="tarfile" value="Jetty-${version}.tar" />    
+    <delete  file="${tarfile}"/>
+    <tar tarfile="${tarfile}"
+         basedir="${basedir}">
+         <exclude name="**/CVS/*" />
+         <exclude name="classes/**/*" />
+    </tar>
+    <delete  file="${tarfile}.gz"/>
+    <gzip zipfile="${tarfile}.gz" src="${tarfile}" />
+    <delete  file="${tarfile}"/>
+</target>
+  
+</project>

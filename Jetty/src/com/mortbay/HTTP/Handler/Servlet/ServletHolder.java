@@ -65,6 +65,13 @@ public class ServletHolder
         _context=_handler.getContext();
         setServletName(className);
         _className=className;
+
+        
+        if (className.equals("org.apache.jasper.servlet.JspServlet"))
+        {
+            Code.debug("HACK FOR JASPER");
+            put("classpath",_handler.getHandlerContext().getClassPath());
+        }
     }
     
     /* ------------------------------------------------------------ */

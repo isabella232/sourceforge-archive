@@ -150,6 +150,8 @@ public class ServletHandler extends NullHandler
             ServletHolder holder =
                 newServletHolder(servletClass);
             addHolder(pathSpec,holder);
+
+            
             return holder;
         }
         catch(Exception e)

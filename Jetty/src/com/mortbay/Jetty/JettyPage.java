@@ -249,9 +249,12 @@ public class JettyPage extends Page
                 _section=_key.substring(0,c);
                 _subSection=_key.substring(c+1);
                 Font font=new Font(-1,true);
-                font.add(new Link(_uri.startsWith("/")
-                                  ?(context+_uri):_uri,
-                                  _subSection));
+                if (_uri.startsWith("///"))
+                    font.add(new Link(_uri.substring(2),_subSection));
+                else if (_uri.startsWith("/"))
+                    font.add(new Link(context+_uri,_subSection));
+                else
+                    font.add(new Link(_uri,_subSection));
                 _link=font.toString();
             }
             else
@@ -259,9 +262,12 @@ public class JettyPage extends Page
                 _section=_key;
                 _subSection=null;
                 Font font=new Font(1,true);
-                font.add(new Link(_uri.startsWith("/")
-                                  ?(context+_uri):_uri,
-                                  _section));
+                if (_uri.startsWith("///"))
+                    font.add(new Link(_uri.substring(2),_section));
+                else if (_uri.startsWith("/"))
+                    font.add(new Link(context+_uri,_section));
+                else
+                    font.add(new Link(_uri,_section));
                 _link=font.toString();
             }
         }

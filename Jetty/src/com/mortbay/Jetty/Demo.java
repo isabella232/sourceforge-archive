@@ -53,8 +53,8 @@ public class Demo
             context.addServlet("Dispatch",
                                "/Dispatch,/Dispatch/*",
                                "com.mortbay.Servlet.RequestDispatchTest");
-            context.addServlet("JSP","*.jsp",
-                               "org.apache.jasper.servlet.JspServlet");
+//              context.addServlet("JSP","*.jsp",
+//                                 "org.apache.jasper.servlet.JspServlet");
             context.setServingResources(true);
             context.addHandler(new DumpHandler());
             

@@ -40,12 +40,6 @@ you will have to configure jasper):
    $JDK_HOME/lib/tools.jar
 
 
-To compile the code, the following addition to the CLASSPATH should 
-be used:
-
-   $JETTY_HOME/src:
-
-
 Running the Demo Server
 =======================
 A Demo server can be run on port 8080 with the command:
@@ -57,7 +51,6 @@ example of coded configuration. The same demo is configured by the
 xml file $JETTY_HOME/etc/demo.xml and can be run with the command:
 
   java com.mortbay.Jetty.Server etc/demo.xml
-
 
 
 Configuring the Server
@@ -88,6 +81,24 @@ The DTDs used by jetty are resolved as resources from the system classpath,
 thus they are stored in com.mortbay.HTTP/web.dtd and 
 com.mortbay.Util.configure.dtd within the source tree and jar file.  Copies
 are also placed in etc for reference.
+
+
+Building from source
+====================
+To compile the code, the following addition to the CLASSPATH should 
+be used:
+
+   $JETTY_HOME/src:
+
+The code can be build with gnu make just by typing 'make'.  Other
+make options can be viewed with the command 'make help'.  An Ant
+build file is included in etc/build.xml.  Ant is available from
+
+    http://jakarta.apache.org/ant/index.html  
+
+And it can be run with:
+
+    ant -buildfile etc\build.xml 
 
 
 Test Harnesses
