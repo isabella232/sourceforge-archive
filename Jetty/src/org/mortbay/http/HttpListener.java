@@ -110,7 +110,7 @@ public interface HttpListener extends LifeCycle, Serializable
      * @param request The request to customize.
      */
     public void customizeRequest(HttpConnection connection,
-                                 HttpRequest request);
+                                                  HttpRequest request);
     
     /* ------------------------------------------------------------ */
     /** Prepare a connection for persistance.
@@ -191,6 +191,7 @@ public interface HttpListener extends LifeCycle, Serializable
      */
     public int    getConfidentialPort();
     
+
 }
 
 

@@ -36,7 +36,7 @@ import org.mortbay.util.Log;
  * @author Greg Wilkins (gregw@mortbay.com)
  * @author Court Demas (court@kiwiconsulting.com)
  * @author Forge Research Pty Ltd  ACN 003 491 576
- * @author Jan Hlavatý
+ * @author Jan Hlavat?
  **/
 public abstract class JsseListener extends SocketListener
 {
@@ -234,7 +234,7 @@ public abstract class JsseListener extends SocketListener
      * @param request HttpRequest to be customised.
      */
     protected void customizeRequest(Socket socket,
-                                    HttpRequest request)
+                                                        HttpRequest request)
     {
         super.customizeRequest(socket,request);
         
@@ -243,37 +243,30 @@ public abstract class JsseListener extends SocketListener
 
         try
         {
-            SSLSocket sslSocket = (SSLSocket) socket;
-            SSLSession sslSession = sslSocket.getSession();
-	    String cipherSuite = sslSession.getCipherSuite();
-	    Integer keySize;
-	    X509Certificate[] certs;
-
-	    CachedInfo cachedInfo
-		= (CachedInfo) sslSession.getValue(CACHED_INFO_ATTR);
-	    if (cachedInfo != null)
-	    {
-		keySize = cachedInfo.getKeySize();
-		certs = cachedInfo.getCerts();
-	    }
-	    else
-	    {
-		keySize = new Integer(ServletSSL.deduceKeyLength(cipherSuite));
-		certs = getCertChain(sslSession);
-		cachedInfo = new CachedInfo(keySize, certs);
-		sslSession.putValue(CACHED_INFO_ATTR, cachedInfo);
-	    }
-
-	    if (certs != null)
-		request.setAttribute("javax.servlet.request.X509Certificate",
-				     certs);
-	    else if (_needClientAuth) // Sanity check
-		throw new HttpException(HttpResponse.__403_Forbidden);
-		
-            request.setAttribute("javax.servlet.request.cipher_suite",
-				 cipherSuite);
-	    request.setAttribute("javax.servlet.request.key_size",
-				 keySize);
+            SSLSocket sslSocket= (SSLSocket)socket;
+            SSLSession sslSession= sslSocket.getSession();
+            String cipherSuite= sslSession.getCipherSuite();
+            Integer keySize;
+            X509Certificate[] certs;
+            CachedInfo cachedInfo= (CachedInfo)sslSession.getValue(CACHED_INFO_ATTR);
+            if (cachedInfo != null)
+            {
+                keySize= cachedInfo.getKeySize();
+                certs= cachedInfo.getCerts();
+            }
+            else
+            {
+                keySize= new Integer(ServletSSL.deduceKeyLength(cipherSuite));
+                certs= getCertChain(sslSession);
+                cachedInfo= new CachedInfo(keySize, certs);
+                sslSession.putValue(CACHED_INFO_ATTR, cachedInfo);
+            }
+            if (certs != null)
+                request.setAttribute("javax.servlet.request.X509Certificate", certs);
+            else if (_needClientAuth) // Sanity check
+                throw new HttpException(HttpResponse.__403_Forbidden);
+            request.setAttribute("javax.servlet.request.cipher_suite", cipherSuite);
+            request.setAttribute("javax.servlet.request.key_size", keySize);
         }
         catch (Exception e)
         {

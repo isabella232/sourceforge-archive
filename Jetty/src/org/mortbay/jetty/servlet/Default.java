@@ -259,7 +259,7 @@ public class Default extends HttpServlet
         Code.debug("handleGet ",resource);
 
         if (resource==null || !resource.exists())
-            _servletHandler.notFound(request,response);
+            response.sendError(HttpResponse.__404_Not_Found);
         else
         {
 
