@@ -186,10 +186,10 @@ public class UrlEncoded extends MultiMap
         for (int i=0;i<len;i++)
         {
             char c = characters[i];
-            if (c<0||c>0x7f)
-                throw new IllegalArgumentException("Not encoded");
+            if (c<0||c>0xff)
+                throw new IllegalArgumentException("Not decoded");
             
-            byte b = (byte)(0x7f & c);
+            byte b = (byte)(0xff & c);
             
             if (c=='+')
             {

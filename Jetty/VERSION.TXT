@@ -11,6 +11,8 @@ Jetty Versions
  + CGI servlet handles not found better.
  + WEB-INF protected by NotFoundServlet rather than security constraint.
  + PUT, MOVE disabled in WebApplication unless defaults file is passed.
+ + Conditionals apply to puts, dels and moves in ResourceHandler.
+ + URIs accept all characters < 0xff. 
  
 Jetty-3.0.0.rc6 - 20 Nov 2000
  + RequestDispatcher.forward() only resets buffer, not headers.

@@ -562,12 +562,18 @@ public class TestHarness
             uri.put("b","2 !");
             test.checkEquals(uri.toString(),"http://host/Test/URI?b=2+%21","add param");
         
-            // Host and port
+            // Host and port and path
             uri = new URI("http://host:8080");
             test.checkEquals(uri.getPath(),"/","root");
             
             uri = new URI("http://host:8080/");
             test.checkEquals(uri.getPath(),"/","root");
+            
+            uri = new URI("http://host:8080/xxx");
+            test.checkEquals(uri.getPath(),"/xxx","path");
+            
+            uri = new URI("http://host:8080/Añez");
+            test.checkEquals(uri.getPath(),"/Añez","root");            
             
             uri = new URI("http://host:8080/Test/URI");
             test.checkEquals(uri.toString(),"http://host:8080/Test/URI","no params");
