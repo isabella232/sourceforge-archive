@@ -950,7 +950,7 @@ public class HttpRequest extends HttpMessage
                         }
                     }
                 
-                    v=UrlEncoded.decodeString(v);
+                    v=URI.decodePath(v);
                     cookie=new Cookie(n,v);
                     if (version>0)
                         cookie.setVersion(version);

@@ -1296,7 +1296,7 @@ public class HttpFields
             buf.append(name);
             buf.append('=');
             if (value!=null && value.length()>0)
-                URI.encodeString(buf,value,"\"; +");
+                URI.encodeString(buf,value,"\"; ");
             
             if (version>0)
             {
