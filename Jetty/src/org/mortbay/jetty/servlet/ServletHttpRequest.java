@@ -496,6 +496,7 @@ public class ServletHttpRequest
     {        
         if (_session != null && ((SessionManager.Session)_session).isValid())
             return _session;
+        _session=null;
         
         String id = getRequestedSessionId();
         
@@ -506,7 +507,7 @@ public class ServletHttpRequest
                 return null;
         }
 
-        if (_session == null && create)
+        if (_session==null && create)
         {
             _session = _servletHandler.newHttpSession(this);
             if (_servletHandler.isUsingCookies())
