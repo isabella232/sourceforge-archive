@@ -16,7 +16,7 @@ Jetty-5.0.0RC0
  + Updated mx4j to V2
  + Updated jasper to 5.0.19
 
-Jetty-4.2.20pre0
+Jetty-4.2.20pre0 - 7 April 2004
  + Worked around bad jboss URL handler in XMLParser
  + Forced close of connections over stop/start
  + HttpFields protected headers
