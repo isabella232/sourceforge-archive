@@ -171,6 +171,12 @@ public class ServletHandler
     {
         _usingCookies=uc;
     }
+
+    /* ------------------------------------------------------------ */
+    public synchronized boolean isStarted()
+    {
+        return super.isStarted();
+    }
     
     /* ----------------------------------------------------------------- */
     public synchronized void start()
@@ -180,6 +186,10 @@ public class ServletHandler
         
         // Initialize classloader
         _loader=getHandlerContext().getClassLoader();
+
+        // start the handler - protected by synchronization until
+        // end of the call.
+        super.start();
         
         // Sort and Initialize servlets
         ServletHolder holders [] = (ServletHolder [])
@@ -202,9 +212,7 @@ public class ServletHandler
                     Code.warning(e);
                 }
             }
-        }
-        
-        super.start();
+        }        
     }   
     
     /* ----------------------------------------------------------------- */

@@ -66,6 +66,7 @@ public class Dispatcher implements RequestDispatcher
         _context = context;
         _handlerContext = _context.getHandler().getHandlerContext();
 
+        // look for a servlet
         for(int i=_handlerContext.getHandlerSize();i-->0;)
         {
             HttpHandler handler = _handlerContext.getHandler(i);
@@ -73,7 +74,7 @@ public class Dispatcher implements RequestDispatcher
             if (handler instanceof ServletHandler)
             {
                 // Look for path in servlet handlers
-                ServletHandler shandler=(ServletHandler)handler;                
+                ServletHandler shandler=(ServletHandler)handler;
                 if (!shandler.isStarted())
                     continue;
 
