@@ -500,17 +500,23 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     {
         setContentType("text/html");
         setStatus(code,msg);
-        writeHeaders();
 
+	byte[] buf =
+	    ("<HTML><HEAD><TITLE>Error "+code+
+	     "</TITLE><BODY><H2>HTTP ERROR: "+code+
+	     " " + msg +
+	     "</H2></BODY>\n</HTML>\n").getBytes("ISO-8859-1");
+	
         if (writer!=null)
             writer.flush();
+	else
+	    setContentLength(buf.length);
+        writeHeaders();
+	
         outputState=0;
-        PrintWriter out = getWriter();
-        out.println("<HTML><HEAD><TITLE>Error "+code+"</TITLE>");
-        out.println("<BODY><H2>HTTP ERROR: "+
-                    code +
-                    " " + msg + "</H2>");       
-        out.println("</BODY>\n</HTML>");
+        OutputStream out = getOutputStream();
+	
+        out.write(buf);
         out.flush();
     }
       
