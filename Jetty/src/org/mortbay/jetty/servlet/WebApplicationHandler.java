@@ -62,6 +62,7 @@ public class WebApplicationHandler extends ServletHandler
 {
     private Map _filterMap=new HashMap();
     private List _pathFilters=new ArrayList();
+    private List _filters=new ArrayList();
     private MultiMap _servletFilterMap=new MultiMap();
     private boolean _acceptRanges=true;
     
@@ -88,6 +89,7 @@ public class WebApplicationHandler extends ServletHandler
     {
         FilterHolder holder = new FilterHolder(this,name,className);
         _filterMap.put(holder.getName(),holder);
+        _filters.add(holder);
         return holder;
     }
     
@@ -149,7 +151,7 @@ public class WebApplicationHandler extends ServletHandler
     {
         // initialize Filters
         MultiException mex = new MultiException();
-        Iterator iter = _filterMap.values().iterator();
+        Iterator iter = _filters.iterator();
         while (iter.hasNext())
         {
             FilterHolder holder = (FilterHolder)iter.next();
@@ -174,10 +176,9 @@ public class WebApplicationHandler extends ServletHandler
             super.stop();
             
             // Stop filters
-            Iterator iter = _filterMap.values().iterator();
-            while (iter.hasNext())
+            for (int i=_filters.size();i-->0;)
             {
-                FilterHolder holder = (FilterHolder)iter.next();
+                FilterHolder holder = (FilterHolder)_filters.get(i);
                 holder.stop();
             }
         }

@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+ + Stop/Start filtesr in declaration order.
+ + Some AJP13 optimizations.
+
 Jetty-4.1.1 - 30 September 2002
  + Fixed client scripting vulnerability with jasper2.
  + Merged LimitedNCSARequestLog into NCSARequestLog
