@@ -29,6 +29,7 @@ public class PlusWebAppContext extends WebApplicationContext
     private InitialContext _initialCtx = null;
     private ClassLoader _removeClassLoader=null;
     private HashMap _envMap = null;
+    private boolean _webXmlEnvEntryOverride = true;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -53,6 +54,17 @@ public class PlusWebAppContext extends WebApplicationContext
     }
 
 
+
+    public void setWebXmlEnvEntryOverride (boolean value)
+    {
+        _webXmlEnvEntryOverride = value;
+    }
+    
+    public boolean getWebXmlEnvEntryOverride()
+    {
+        return _webXmlEnvEntryOverride;
+    }
+
     /* ------------------------------------------------------------ */
     /** Add a java:comp/env entry.
      *
@@ -73,6 +85,44 @@ public class PlusWebAppContext extends WebApplicationContext
      }
 
 
+    public Object getEnvEntry (String name)
+    {
+        if (_envMap == null)
+            return null;
+        
+        return _envMap.get(name);
+    }
+    
+    
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Get a mapping of java:comp/env bindings for this webapp context.
+     * @return flattened map of java:comp/env names to bound objects
+     * @throws NamingException
+     */
+    public Map getENC()
+    throws NamingException
+    {
+        // save context classloader
+        Thread thread= Thread.currentThread();
+        ClassLoader lastContextLoader= thread.getContextClassLoader();
+        
+        //set the classloader up as this webapp's loader
+        thread.setContextClassLoader(getClassLoader());
+        Map map = null;
+        try
+        {
+            map = Util.flattenBindings ((Context)_initialCtx.lookup("java:comp"), "env");
+        }
+        finally
+        {
+            //replace the classloader
+            thread.setContextClassLoader(lastContextLoader);
+        }
+        
+        return map;
+    }
 
 
     /* ------------------------------------------------------------ */
@@ -95,7 +145,22 @@ public class PlusWebAppContext extends WebApplicationContext
             String name=node.getString("env-entry-name",false,true);
             Object value= TypeUtil.valueOf(node.getString("env-entry-type",false,true),
                                            node.getString("env-entry-value",false,true));
-            Util.bind (envCtx, name, value);
+
+                
+            try
+            {
+                Object o = envCtx.lookup (name);
+                //an object must already exist, check if we should override with web xml env-entry
+                if (getWebXmlEnvEntryOverride())
+                {
+                    Util.bind (envCtx, name, value);
+                }                       
+            }
+            catch (NameNotFoundException e)
+            {
+                //bind it anyway
+                Util.bind (envCtx, name, value);
+            }
         }
         else if ("resource-ref".equals(element))
         {

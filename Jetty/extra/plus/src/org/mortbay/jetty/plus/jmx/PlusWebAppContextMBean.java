@@ -35,7 +35,7 @@ public class PlusWebAppContextMBean extends WebApplicationContextMBean
     {
                
         super.defineManagedResource();
-
+        defineAttribute ("ENC");
         defineOperation("addEnvEntry",
                 new String[] {STRING,OBJECT},
                 IMPACT_ACTION);
@@ -47,7 +47,11 @@ public class PlusWebAppContextMBean extends WebApplicationContextMBean
         _plusWebAppContext = (PlusWebAppContext)getManagedResource();
     }
     
-    
+    /* ------------------------------------------------------------ */
+    /** Method only on JMX bean to deal with String values
+     * @param name
+     * @param value
+     */
     public void addEnvEntry (String name, String value)
     {
         _plusWebAppContext.addEnvEntry(name, value);

@@ -1,7 +1,12 @@
 package org.mortbay.jndi;
 
+import java.util.HashMap;
+import java.util.Map;
+import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.Name;
+import javax.naming.NameParser;
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.NameNotFoundException;
 import org.mortbay.util.Code;
@@ -60,5 +65,43 @@ public class Util
 
         subCtx.rebind (name.get(name.size() - 1), obj);
         Code.debug ("Bound object to "+name.get(name.size() - 1));
+    }
+
+
+    
+    /**
+     * Do a deep listing of the bindings for a context.
+     * @param ctx the context containing the name for which to list the bindings
+     * @param name the name in the context to list
+     * @return map: key is fully qualified name, value is the bound object 
+     * @throws NamingException
+     */
+    public static Map flattenBindings (Context ctx, String name)
+    throws NamingException
+    {
+        HashMap map = new HashMap();
+
+        //the context representation of name arg
+        Context c = (Context)ctx.lookup (name);
+        NameParser parser = c.getNameParser("");
+        NamingEnumeration enum = ctx.listBindings(name);
+        while (enum.hasMore())
+        {
+            Binding b = (Binding)enum.next();
+
+            if (b.getObject() instanceof Context)
+            {
+                map.putAll(flattenBindings (c, b.getName()));
+            }
+            else
+            {
+                Name compoundName = parser.parse (c.getNameInNamespace());
+                compoundName.add(b.getName());
+                map.put (compoundName.toString(), b.getObject());
+            }
+            
+        }
+        
+        return map;
     }   
 }
