@@ -661,7 +661,7 @@ public class Default extends HttpServlet
         writeHeaders(response,resource,-1);
         ResourceCache.ResourceMetaData metaData =
             _httpContext.getResourceMetaData(resource);
-        String encoding = metaData.getEncoding();
+        String encoding = metaData.getMimeType();
         MultiPartResponse multi = new MultiPartResponse(response.getOutputStream());
         response.setStatus(HttpResponse.__206_Partial_Content);
         
@@ -726,7 +726,7 @@ public class Default extends HttpServlet
         ResourceCache.ResourceMetaData metaData =
             _httpContext.getResourceMetaData(resource);
         
-        response.setContentType(metaData.getEncoding());
+        response.setContentType(metaData.getMimeType());
         if (count != -1)
         {
             if (count==resource.length())

@@ -610,7 +610,7 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void setContentType(String contentType) 
     {
-        if (isCommitted())
+        if (isCommitted() || contentType==null)
             return;
         
         int semi=contentType.indexOf(';');

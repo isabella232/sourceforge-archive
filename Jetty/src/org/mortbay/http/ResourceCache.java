@@ -488,7 +488,7 @@ public class ResourceCache implements LifeCycle,
             return HttpFields.formatDate(_resource.lastModified(),false);
         }
 
-        public String getEncoding()
+        public String getMimeType()
         {
             return getMimeByExtension(_name);
         }
@@ -513,7 +513,7 @@ public class ResourceCache implements LifeCycle,
             _cached=resource;
             _length=super.getLength();
             _lastModified=super.getLastModified();
-            _encoding=super.getEncoding();
+            _encoding=super.getMimeType();
             _key=pathInContext;
 
             _next=_mostRecentlyUsed;
@@ -540,7 +540,7 @@ public class ResourceCache implements LifeCycle,
             return _lastModified;
         }
 
-        public String getEncoding()
+        public String getMimeType()
         {
             return _encoding;
         }

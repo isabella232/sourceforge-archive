@@ -577,7 +577,7 @@ public class ResourceHandler extends AbstractHttpHandler
         ResourceCache.ResourceMetaData metaData =
             (ResourceCache.ResourceMetaData)resource.getAssociate();
 
-        response.setContentType(metaData.getEncoding());
+        response.setContentType(metaData.getMimeType());
         if (count != -1)
         {
             if (count==resource.length())
@@ -688,7 +688,7 @@ public class ResourceHandler extends AbstractHttpHandler
         //
         ResourceCache.ResourceMetaData metaData =
             (ResourceCache.ResourceMetaData)resource.getAssociate();
-        String encoding = metaData.getEncoding();
+        String encoding = metaData.getMimeType();
         MultiPartResponse multi = new MultiPartResponse(response);
         response.setStatus(HttpResponse.__206_Partial_Content);
         response.setReason((String)HttpResponse.__statusMsg
