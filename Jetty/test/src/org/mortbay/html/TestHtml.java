@@ -69,9 +69,12 @@ class TestHtml
 
                 DefList dList=new DefList();
                 page.add(dList);
-                Composite word1= new Composite("Blah");
-                Composite word2= new Composite("Foo");
-                Composite word3= new Composite("Bah");
+                Composite word1= new Composite();
+                Composite word2= new Composite();
+                Composite word3= new Composite();
+                word1.add("Blah");
+                word2.add("Foo");
+                word3.add("Bah");
                 dList.add(word1,text1);
                 dList.add(word2,text2);
                 dList.add(word3,text3);
@@ -79,7 +82,9 @@ class TestHtml
                 page.flush(System.out);
 
                 page.add(rule);
-                page.add(new Link("test.html",new Composite("Test Link")));
+                Composite c = new Composite();
+                c.add("Test Link");
+                page.add(new Link("test.html",c));
 
                 page.add(rule);
                 Table table = new Table(2);
