@@ -14,7 +14,6 @@ import java.util.*;
 
 public class DataPort extends Thread
 {
-
     /* ------------------------------------------------------------------- */
     public static void main(String[] args)
     {
@@ -29,14 +28,18 @@ public class DataPort extends Thread
     /* ------------------------------------------------------------------- */
     private int port=0;
     private InetAddress addr=null;
-    ServerSocket listen = null;
+    private ServerSocket listen = null;
     private Socket connection=null;
     private InputStream in = null;
     private OutputStream out =null;
     private Ftp ftp=null;
-    protected boolean terminated = false;
+    private boolean terminated = false;
     
     /* ------------------------------------------------------------------- */
+    /** Passive Constructor. 
+     * @param ftp 
+     * @param in 
+     */
     DataPort(Ftp ftp,InputStream in)
     {
         super("FtpDataIn");
@@ -55,6 +58,10 @@ public class DataPort extends Thread
     }
     
     /* ------------------------------------------------------------------- */
+    /** Passive Constructor. 
+     * @param ftp 
+     * @param out 
+     */
     DataPort(Ftp ftp, OutputStream out)
     {
         super("FtpDataOut");
@@ -71,6 +78,55 @@ public class DataPort extends Thread
             }
         }
     }
+
+    
+    /*--------------------------------------------------------------*/
+    /** Active Constructor. 
+     * @param ftp 
+     * @param in 
+     */
+    DataPort(Ftp ftp,InputStream in, InetAddress addr, int port)
+    {
+        super("ActiveFtpDataIn");
+        synchronized(this){
+            this.in  = in;
+            this.ftp = ftp;
+	    this.addr=addr;
+	    this.port=port;
+            start();
+            try{
+                wait();
+                Code.debug("Connected to "+addr+" "+port);
+            }
+            catch(InterruptedException e){
+                Code.fail("Interrupted");
+            }
+        }
+    }
+    
+    /* ------------------------------------------------------------------- */
+    /** Active Constructor. 
+     * @param ftp 
+     * @param out 
+     */
+    DataPort(Ftp ftp, OutputStream out, InetAddress addr, int port)
+    {
+        super("ActiveFtpDataOut");
+        synchronized(this){
+            this.out = out;
+            this.ftp = ftp;
+	    this.addr=addr;
+	    this.port=port;
+            start();
+            try{
+                wait();
+                Code.debug("Connected to "+addr+" "+port);
+            }
+            catch(InterruptedException e){
+                Code.fail("Interrupted");
+            }
+        }
+    }
     
     /* ------------------------------------------------------------------- */
     final public void run() 
@@ -80,7 +136,14 @@ public class DataPort extends Thread
         {
             while (connection == null)
             {
-                listen();
+		if (addr==null)
+		    listen();
+		else
+		    connect();
+
+		// XXX Lets not loop here on failure 
+		terminated=(connection==null);
+		
                 if (terminated) 
                     return;
             }        
@@ -143,13 +206,14 @@ public class DataPort extends Thread
     }
     
     /* ------------------------------------------------------------------- */
-    public void listen()
+    private void listen()
          throws IOException
     {
         listen=null;
 
         // open the listen port
-        synchronized(this){
+        synchronized(this)
+	{
             try{
                 listen = new ServerSocket(0);
                 port = listen.getLocalPort();
@@ -165,10 +229,29 @@ public class DataPort extends Thread
         if (!terminated)
         {
             // wait for connection
-            Code.debug("Waiting for connection... "+listen);
+            Code.debug("Waiting for connection... ",listen);
             listen.setSoTimeout( SOCKET_LISTEN_TIMEOUT );
             connection = listen.accept();
-            Code.debug("Accepted "+connection);
+            Code.debug("Accepted ",connection);
+        }
+    }
+
+    /* ------------------------------------------------------------------- */
+    private void connect()
+         throws IOException
+    {
+        // open the listen port
+        synchronized(this)
+	{
+            try
+	    {
+		Code.debug("Making connection: ",addr,":"+port+"...");
+		connection = new Socket(addr,port);
+		Code.debug("Connected "+connection);
+            }
+            finally{
+                notify();
+            }
         }
     }
     

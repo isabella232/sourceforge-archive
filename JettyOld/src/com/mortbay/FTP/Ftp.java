@@ -325,7 +325,8 @@ public class Ftp
     {
     }   
     
-   
+
+    
     /* -------------------------------------------------------------------- */
     /** Start get file 
      * Start a file transfer remote file to local file.
@@ -427,6 +428,105 @@ public class Ftp
             transferDataPort=null;
             throw e;
         }       
+    }   
+    
+    /* -------------------------------------------------------------------- */
+    /** Start passive get file 
+     * Start a file transfer remote file to local file.
+     * Completion of the transfer can be monitored with the transferComplete() or
+     * waitUntilTransferComplete() methods.
+     * @param remoteName Remote file name
+     * @param localName Local file name
+     * @exception FtpException For local problems or negative server responses
+     */
+    public synchronized void startPasvGet(String remoteName, String localName)
+         throws FtpException,IOException
+    {
+        FileOutputStream file = new FileOutputStream(localName);
+        startPasvGet(remoteName,file);
+    }
+    
+    /* -------------------------------------------------------------------- */
+    public synchronized void startPasvGet(String remoteName,
+					  OutputStream destination)
+	throws FtpException,IOException
+    {
+        waitUntilTransferComplete();
+        transferException=null;
+        
+        // Put it into passive mode
+        cmd("PASV");
+        CmdReply reply = in.waitForCompleteOK();
+	
+	// Work out the dataport
+	String pasv=reply.text.substring(reply.text.lastIndexOf("(")+1,
+					 reply.text.lastIndexOf(")"));
+	int i1=pasv.indexOf(",");
+	i1=pasv.indexOf(",",i1+1);
+	i1=pasv.indexOf(",",i1+1);
+	i1=pasv.indexOf(",",i1+1);
+	int i2=pasv.indexOf(",",i1+1);
+	int dataPort =
+	    256*Integer.parseInt(pasv.substring(i1+1,i2))+
+	    Integer.parseInt(pasv.substring(i2+1));
+	
+	// Setup the dest server to send the file
+        cmd("RETR "+remoteName);
+	
+	// start the send
+        transferDataPort = new DataPort(this,
+					destination,
+					command.getInetAddress(),
+					dataPort);
+	in.waitForPreliminaryOK();
+    }
+    
+    /* -------------------------------------------------------------------- */
+    /** Start passive put file 
+     * Start a file transfer local file to input remote file.
+     * Completion of the transfer can be monitored with the transferComplete() or
+     * waitUntilTransferComplete() methods.
+     * @param remoteName Remote file name
+     * @param localName Local file name
+     * @exception FtpException For local problems or negative server responses
+     */
+    public synchronized void startPasvPut(String localName, String remoteName)
+         throws FtpException, IOException
+    {
+        FileInputStream file = new FileInputStream(localName);
+        startPasvPut(file,remoteName);
+    }
+   
+    /* -------------------------------------------------------------------- */
+    public synchronized void startPasvPut(InputStream source,
+					  String remoteName)
+	throws FtpException,IOException
+    {
+        waitUntilTransferComplete();
+        transferException=null;
+        
+        // Put it into passive mode
+        cmd("PASV");
+        CmdReply reply = in.waitForCompleteOK();
+
+	// Work out the dataport
+	String pasv=reply.text.substring(reply.text.lastIndexOf("(")+1,
+					 reply.text.lastIndexOf(")"));
+	int i1=pasv.indexOf(",");
+	i1=pasv.indexOf(",",i1+1);
+	i1=pasv.indexOf(",",i1+1);
+	i1=pasv.indexOf(",",i1+1);
+	int i2=pasv.indexOf(",",i1+1);
+	int dataPort =
+	    256*Integer.parseInt(pasv.substring(i1+1,i2))+
+	    Integer.parseInt(pasv.substring(i2+1));
+	
+	// Setup the dest server to store the file
+        cmd("STOR "+remoteName);
+	
+	// start the send
+        transferDataPort = new DataPort(this,source,command.getInetAddress(),dataPort);
+	in.waitForPreliminaryOK();
     }   
     
    
@@ -757,11 +857,13 @@ public class Ftp
                 !(args[3].equals("del") ||
                   args[3].equals("ren") ||
                   args[3].equals("get") ||
+                  args[3].equals("pget") ||
                   args[3].equals("snd") ||
                   args[3].equals("put") ||
+                  args[3].equals("pput") ||
                   args[3].equals("url"))))
             {
-                System.err.println("Usage: java com.mortbay.FTP.Ftp host user password [ del|get|put|ren|snd args... ]");
+                System.err.println("Usage: java com.mortbay.FTP.Ftp host user password [ del|[p]get|[p]put|ren|snd args... ]");
                 System.err.println("       java com.mortbay.FTP.Ftp ftp://user:pass@host:port/file/path");
                 System.exit(1);
             }
@@ -800,7 +902,16 @@ public class Ftp
                                 else
                                     ftp.startGet(args[file],args[++file]);
                             }
+                            else  if (args[3].equals("pget"))
+                            {
+                                if (file+1==args.length)
+                                    ftp.startPasvGet(args[file],System.out);
+                                else
+                                    ftp.startPasvGet(args[file],args[++file]);
+                            }
                             else if (args[3].equals("put")) 
+                                ftp.startPasvPut(args[file],args[++file]);
+                            else if (args[3].equals("pput")) 
                                 ftp.startPut(args[file],args[++file]);
                             else if (args[3].equals("snd"))
                                 ftp.sendFile(args[file],

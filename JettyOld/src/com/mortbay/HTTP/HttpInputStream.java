@@ -68,6 +68,16 @@ public class HttpInputStream extends ServletInputStream
     {
         contentLength=len;
     }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the content length.
+     * Only this number of bytes can be read before EOF is returned.
+     * @param len length.
+     */
+    int getContentLength()
+    {
+        return contentLength;
+    }
         
     /* ------------------------------------------------------------ */
     /** Read a line ended by CR or CRLF or LF.

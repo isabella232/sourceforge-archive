@@ -146,6 +146,22 @@ public class HttpListener extends ThreadedServer
                         Code.debug("Closing persistent connection");
                         break;
                     }
+
+		    // Read any remaining input.
+		    if (request.getContentLength()>0)
+		    {
+			HttpInputStream in=request.getHttpInputStream();
+			try{
+			    // Skip/read remaining input
+			    while(in.getContentLength()>0 &&
+				  (in.skip(4096)>0 || in.read()>=0));
+			    
+			}
+			catch(IOException e)
+			{
+			    Code.ignore(e);
+			}
+		    }
                 }
                 catch (HeadException e)
                 {

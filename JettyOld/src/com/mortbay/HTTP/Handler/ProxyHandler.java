@@ -112,7 +112,7 @@ public class ProxyHandler extends NullHandler
             request.translateAddress(request.getResourcePath(),
                                      newPath,true);
             request.setHeader(HttpHeader.Connection,null);
-            request.setHeader("Host",null);
+	    //request.setHeader("Host",url.getHost());
             request.setVersion(request.HTTP_1_0);
             OutputStream out = socket.getOutputStream();
             request.write(out);

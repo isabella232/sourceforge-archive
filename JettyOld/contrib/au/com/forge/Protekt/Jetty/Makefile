@@ -12,8 +12,3 @@ ROOTNAME := au
 
 include $(JETTY_HOME)/etc/Global.mk
 
-ProtektListener.class: ProtektListener.class.uu
-	uudecode ProtektListener.class.uu
-
-clean::
-	rm -f ProtektListener.class
