@@ -79,11 +79,14 @@ public class JDBCUserRealm extends HashUserRealm
      * @exception ClassNotFoundException 
      */
     public JDBCUserRealm(String name, String config)
-        throws IOException, ClassNotFoundException
+        throws IOException,
+               ClassNotFoundException,
+               InstantiationException,
+               IllegalAccessException
     {
         super(name);
         loadConfig(config);
-        Loader.loadClass(this.getClass(),_jdbcDriver);
+        Loader.loadClass(this.getClass(),_jdbcDriver).newInstance();
         connectDatabase();
     }
     

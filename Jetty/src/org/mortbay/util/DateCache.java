@@ -155,7 +155,7 @@ public class DateCache
                 sb.append( '+' );
             else
             {
-                tzOffset *= -1;
+                tzOffset = -tzOffset;
                 sb.append( '-' );
             }
             
@@ -165,14 +165,9 @@ public class DateCache
             
             if( hr < 10 )
                 sb.append( '0' );
-            
             sb.append( hr );
-            sb.append( ':' );
-            
-            // Would this really ever happen?
             if( min < 10 )
                 sb.append( '0' );
-            
             sb.append( min );
             sb.append( '\'' );
             
