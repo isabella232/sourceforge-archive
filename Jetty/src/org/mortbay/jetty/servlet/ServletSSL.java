@@ -46,6 +46,7 @@ public class ServletSSL
      */
     public static final int deduceKeyLength(String cipherSuite)
     {
+	
 	// Roughly ordered from most common to least common.
 	if (cipherSuite == null)
 	    return 0;
