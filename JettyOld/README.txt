@@ -241,8 +241,10 @@ FREQUENTLY ASKED QUESTIONS
 
 Does Jetty support SSL?
 -----------------------
-This is a high priority task for Jetty. The recent 2.2.x developments
-have included restructuring to allow for easier integration of SSL.
+The recent 2.2.0 developments have included restructuring to allow 
+for easier integration of SSL libraries by specialization of the
+HttpListener class.  The 2.2.0 release contains an SSL listener
+class for the Protekt SSL commercial product from www.forge.com.au.
 The intention is to use the standard crypto API to make an 
 SslHttpListener class that will work with most SSL implementations.
 This effort will probably start in August 1999 and we'd appreciate 
@@ -267,7 +269,6 @@ request the content from a URL. This works OK for accessing other
 servlets and files.
 
 
-
 Can I use Jetty Commercially?
 -----------------------------
 Yes. To paraphrase the Jetty Open Source license, you can commercially
@@ -278,7 +279,6 @@ use and distribute Jetty so long as you:
     full release in a public/visible area of the product.
   + Make other arrangements with the copyright holder(s). ie buy a 
     source license. 
-
 
 
 Why is Jetty Open Source?
@@ -311,9 +311,9 @@ Each servlet (and the classes it uses) is loaded in it's own ClassLoader
 instance. The class loader uses the following search strategy when 
 looking for classes:
 
- 1) If the class is in the java.* javax.* or com.mortbay.* package
-    hierarchy, it is loaded from the JVM loader. If it is not found,
-    then the search does not continue.
+ 1) If the class is in the java.* javax.*  package hierarchy, it is loaded 
+    from the JVM loader. If it is not found, then the search does not 
+    continue.
 
  2) The class path configured for the servlet is searched for the
     class. The path may contain directories or jar files.

@@ -22,14 +22,16 @@ Contributions, Testing & valuable feedback from:
   Brett Sealey <brett@ind.tansu.com.au>
   Norbert Renner <norbert.renner@innovations.de>
   Paul Mclachlan <pdm@acm.org>
+  David Taylor <dtaylor@forge.com.au>
   Plus a few more in the pipe line (tell me if your one of them...)
 
 Copyright holders:
-  Mort Bay Consulting Pty. Ltd. (Australia)
-  Mort Bay Consulting Limited (United Kingdom)
-  Optimus Solutions Pty. Ltd.
-  Intelligent Switched Systems, Sydney
-  Sun Microsystems, Inc.
+  Mort Bay Consulting Pty. Ltd. (Australia)    http://www.mortbay.com
+  Mort Bay Consulting Limited (United Kingdom) http://www.mortbay.com
+  Optimus Solutions Pty. Ltd.                  http://www.optimus.com.au
+  Intelligent Switched Systems, Sydney         http://www.isswitched.com
+  Sun Microsystems, Inc.                       http://www.sun.com
   Transparent Language, Inc.
   Free Software Foundation, Inc.
-  Vincent Partington <vincentp@xs4all.nl>
+  Vincent Partington                           <vincentp@xs4all.nl>
+  FORGE Information Technology Pty. Ltd.       http://www.forge.com.au

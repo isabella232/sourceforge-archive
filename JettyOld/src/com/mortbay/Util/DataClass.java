@@ -10,20 +10,12 @@ import com.mortbay.Base.Test;
 import java.lang.reflect.*;
 
 /* ------------------------------------------------------------ */
-/** Data class Helper
- * <p>
+/** Data class Helper.
  * This class provides static utility routines that assist
  * with the creation and output of hierarchies of aggregated
  * classes that contain public data members (what used to be
  * called structures :-).
  *
- * <p><h4>Usage</h4>
- * <pre>
- */
-/*
- * </pre>
- *
- * @see
  * @version 1.0 Fri Dec  5 1997
  * @author Greg Wilkins (gregw)
  */

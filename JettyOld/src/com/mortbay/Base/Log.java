@@ -10,9 +10,8 @@ import java.io.*;
 import java.text.*;
 
 /*-----------------------------------------------------------------------*/
-/** Log messages
-
- * <p>The Log log format is controlled by the LOG_OPTIONS property
+/** Log formatted and tagged messages.
+ * The Log log format is controlled by the LOG_OPTIONS property
  * supplied to the VM. 
  * <p>If LOG_OPTIONS is set, then the default output format is controlled
  * by the option characters in the string:

@@ -1,3 +1,10 @@
+Release 2.2.0 - 1 July 1999
+  + Improved feature description page.
+  + Added Protekt SSL HttpListener
+  + Moved GNUJSP and Protekt listener to a contrib hierarchy.
+  + ThreadedServer.stop() closes socket before interrupting threads.
+  + Exit servlet improved (a little).
+  + Fixed some of the javadoc formatting.
 
 Release 2.2.Beta4 - 29 June 1999
   + FileHandler flushes files from cache in DELETE method.

@@ -20,6 +20,7 @@ rall:
 #JAVACOPTIONS :=
 TESTS :=
 ROOTNAME := .
+SUBDIRS := src contrib/org/gjt/jsp contrib/au/com/forge/Protekt/Jetty
 
 include $(JETTY_HOME)/etc/Global.mk
 

@@ -320,6 +320,19 @@ abstract public class ThreadedServer
 	
 	_running=false;
 	
+	// Close the port
+	if (listen!=null)
+	{
+	    try
+	    {
+		listen.close();
+	    }
+	    catch(IOException e)
+	    {
+		Code.ignore(e);
+	    }
+	}
+	
 	// interrupt the threads
 	Enumeration enum=_threadSet.keys();
 	while(enum.hasMoreElements())
@@ -361,20 +374,7 @@ abstract public class ThreadedServer
 	
 	_threadSet.clear();
 	_threadSet=null;
-
-	// Close the port
-	if (listen!=null)
-	{
-	    try
-	    {
-		listen.close();
-	    }
-	    catch(IOException e)
-	    {
-		Code.debug("Ignored",e);
-	    }
-	    listen=null;
-	}
+	listen=null;
     }
     
   

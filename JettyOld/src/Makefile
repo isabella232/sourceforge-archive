@@ -12,7 +12,7 @@ rall:
 TESTS :=
 ROOTNAME := src
 
-SUBDIRS := javax com org
+SUBDIRS := javax com
 
 
 include $(JETTY_HOME)/etc/Global.mk

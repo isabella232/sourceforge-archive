@@ -8,7 +8,7 @@ package com.mortbay.Util;
 import com.mortbay.Base.Code;
 import java.util.Dictionary;
 
-/** Class to convert Dictionary's to complex object types
+/** Class to convert Dictionary's to complex object types.
  * This class tries to convert a Dictionary (Hashtable or Properties etc) to
  * a complex Object. This is done by iterating over all the public settable
  * bean Properties and fields of an Object and trying to set them from values

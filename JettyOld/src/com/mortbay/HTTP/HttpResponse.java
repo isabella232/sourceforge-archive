@@ -17,8 +17,8 @@ import java.net.URL;
 import java.net.MalformedURLException;
 
 /* ------------------------------------------------------------------ */
-/** Handling of a HTTP response
- * <p> Implements and extends the javax.servlet.http.HttpServletResponse
+/** Handling of a HTTP response.
+ * Implements and extends the javax.servlet.http.HttpServletResponse
  * interface.
  * The extensions are for HttpHandler instances that need to modify
  * the response or have better access to the IO.

@@ -9,12 +9,9 @@ import java.util.*;
 import java.io.*;
 
 /* ----------------------------------------------------------------------- */
-/** Coding Standards support
-* <p> Support for defensive programming
+/** Coding Standards support.
+* Support for defensive programming
 *
-* <p><h4>Notes</h4>
-*
-* <p><h4>Usage</h4>
 * Coding defensively as follows:
 * <pre>
 * {
@@ -49,7 +46,7 @@ import java.io.*;
 * use in controlling debug verbosity (see verbose(int))
 * <UL><p>
 * <h4>Usage</h4>
-<pre>
+* <pre>
 * java [-DDEBUG [-DDEBUG_PATTERNS="MyClass,my.package"] \\
 *               [-DDEBUG_OPTIONS=[S][W]] \\
 *               [-DDEBUG_VERBOSE=n] ] \\

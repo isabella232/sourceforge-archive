@@ -110,7 +110,7 @@ main.root.Default.CLASS			  : com.mortbay.HTTP.Handler.DefaultExceptionHandler
 # Define the  handler stack "files" in server "main"
 # ------------------------------------------------------------------------
 main.files.HOSTS			         :
-main.files.PATHS                                 : /javadoc%;/laf%
+main.files.PATHS                                 : /javadoc%;/laf%;/software%
 main.files.HANDLERS                              : File;NotFound
 main.files.File.CLASS			         : com.mortbay.HTTP.Handler.FileHandler
 main.files.File.PROPERTY.AllowPut		 : False
@@ -120,6 +120,8 @@ main.files.File.PROPERTY.FILES.Laf.PATHS         : /laf
 main.files.File.PROPERTY.FILES.Laf.DIRECTORY     : ./FileBase
 main.files.File.PROPERTY.FILES.Javadoc.PATHS     : /javadoc
 main.files.File.PROPERTY.FILES.Javadoc.DIRECTORY : ./javadoc
+main.files.File.PROPERTY.FILES.Software.PATHS    : /software
+main.files.File.PROPERTY.FILES.Software.DIRECTORY: .
 main.files.File.PROPERTY.FILES.Servlet.PATHS     : /javadoc/javax/servlet
 main.files.File.PROPERTY.FILES.Servlet.DIRECTORY : ./src/javax/servlet/javadoc
 main.files.NotFound.CLASS		         : com.mortbay.HTTP.Handler.NotFoundHandler

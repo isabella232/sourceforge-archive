@@ -15,8 +15,8 @@ import java.util.*;
 
 
 /* ------------------------------------------------------------------ */
-/** Contains a received HTTP request
- * <p> Implements and extends the javax.servlet.http.HttpServletRequest
+/** A received HTTP request.
+ * Implements and extends the javax.servlet.http.HttpServletRequest
  * interface.
  * The extensions are for HttpHandler instances that need to modify
  * the request or have better access to the IO.

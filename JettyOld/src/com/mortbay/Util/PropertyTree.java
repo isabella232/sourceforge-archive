@@ -22,7 +22,8 @@ import java.util.Vector;
 import java.util.StringTokenizer;
 
 /* ------------------------------------------------------------ */
-/** Extension of Properties to allow nesting of Properties and default values
+/** Property map with keys in tree hierarchy.
+ * Extension of Properties to allow nesting of Properties and default values
  * This class extends Properties and uses a "." separated notation to allow
  * nesting of property values. Property keys such as "a.b" and "a.c" cat be
  * retrieved (and set) as normal, but it is possible to retrieve a

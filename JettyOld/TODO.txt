@@ -1,7 +1,6 @@
-Things to do before final release of Jetty 2.2.0:
- + Better info and feature description pages
 
-Other things to do:
+ + Standard SSL listener
+ + Documentation
  + Portable make file
  + Reload servlets on demand
  + Virtual Hosts
@@ -13,7 +12,6 @@ Other things to do:
  + Graceful exit
  + Improve servlet log 
  + Dynamic Realms & Configuration
- + Test Resource URL methods for JSDK2.1
  + RPM packaging
  + Documentation
  + Use Java 1.2 features. (Mostly replace JDBC connection

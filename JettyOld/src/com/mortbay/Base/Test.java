@@ -8,10 +8,10 @@ package com.mortbay.Base;
 import java.util.*;
 import java.io.*;
 
-/** Test Harness
- * <p>Test Harness for production of standard test reports
+/*-------------------------------------------------------------------*/
+/** Test Harness and report.
+ * Test Harness for production of standard test reports:
  *
- * <p><h4>Usage</h4>
  * <pre>
  *	Test t1 = new Test("All_Pass");
  *	Test t2 = new Test("All_Fail");

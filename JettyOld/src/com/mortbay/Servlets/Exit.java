@@ -13,8 +13,9 @@ import java.util.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-/**
- * This is an example of a simple Servlet
+/** Exit the server.
+ * Need to move this servlet to Jetty package to avoid the	    
+ * cyclic dependency between packages.
  */
 public class Exit extends HttpServlet
 {
@@ -23,8 +24,16 @@ public class Exit extends HttpServlet
 	throws ServletException, IOException
     {
 	Code.warning("Exit requested");
-	// XXX - Need to move this servlet to Jetty package to avoid the
-	// cyclic dependency between packages.
-	com.mortbay.Jetty.Server.stopAll();
+
+	new Thread(new Runnable(){
+	    public void run(){
+		try{Thread.sleep(1000);}catch(Exception e){}
+		com.mortbay.Jetty.Server.stopAll();
+	    }
+	}).start();
+
+	sres.setContentType("text/html");
+	PrintWriter out = new PrintWriter(sres.getWriter());
+	out.println("<H1>HTTP Server exiting...</H1>");
     }    
 }
