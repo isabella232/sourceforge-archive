@@ -942,22 +942,23 @@ public class HttpConnection
                     ?-1:_response.getIntField(HttpFields.__ContentLength);
                 
                 // Complete the request
-                if (_persistent)
+                
+                try{
+                    // Read remaining input
+                    while(_inputStream.skip(4096)>0 ||
+                          _inputStream.read()>=0);
+                }
+                catch(IOException e)
                 {
-                    try{
-                        // Read remaining input
-                        while(_inputStream.skip(4096)>0 ||
-                              _inputStream.read()>=0);
-                    }
-                    catch(IOException e)
-                    {
-                        if (_inputStream.getContentLength()>0)
-                            _inputStream.setContentLength(0);
-                        _persistent=false;
-                        exception(new HttpException(_response.__400_Bad_Request,
-                                                    "Missing Content"));
-                    }
+                    if (_inputStream.getContentLength()>0)
+                        _inputStream.setContentLength(0);
+                    _persistent=false;
+                    exception(new HttpException(_response.__400_Bad_Request,
+                                                "Missing Content"));
+                }
                     
+                if (_persistent)
+                {   
                     // Check for no more content
                     if (_inputStream.getContentLength()>0)
                     {
