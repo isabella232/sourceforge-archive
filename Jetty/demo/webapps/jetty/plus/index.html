@@ -8,6 +8,7 @@
     <li>[13-Jun-2004] JettyPlus now <A href="#jmx">supports JMX</a></li>
     <li>[22-Aug-2004] JettyPlus supports <A href="#datasource">pluggable DataSources</A></li>
     <li>[22-Aug-2004] JettyPlus now updated to <a href="http://xapool.experlog.com">XAPool 1.3.3</a></li>
+    <li>[03-Mar-2005] <a href="#loginextra">JAAS enhancement</a> to retrieve extra fields from login forms</li>
   </ol>
 
 <h2>About these instructions</h2>
@@ -283,39 +284,41 @@ implement.
 <P>
 Some important classes are:
 
-<h4>org.mortbay.jaas.JAASUserRealm</h4>
-This bridges Jetty's realm concept to JAAS. This class must be
-configured as the realm for your webapp.
+<dl>
+ <dt><b>org.mortbay.jaas.JAASUserRealm</b></dt>
+ <dd> This bridges Jetty's realm concept to JAAS. This class must be
+configured as the realm for your webapp.</dd>
 
 
-<h4>org.mortbay.jaas.JAASPrincipal</h4>
-Implements the java.security.Principal interface. This class is
+  <dt><b>org.mortbay.jaas.JAASPrincipal</b></dt>
+ <dd> Implements the java.security.Principal interface. This class is
 used by the sample JDBCLoginModule, but the Jetty JAAS infrastructure
 is Principal agnostic, meaning you can use your own
-implementation of this class for your LoginModules if you wish.
+implementation of this class for your LoginModules if you wish.</dd>
 
-<h4>org.mortbay.jaas.JAASRole</h4>
-This is a Principal that represents a role possessed by a
-user.
+  <dt><b>org.mortbay.jaas.JAASRole</b></dt>
+  <dd>This is a Principal that represents a role possessed by a
+user.</dd>
 
-<h4>org.mortbay.jaas.JAASGroup</h4>
-An implementation of the java.security.acl.Group interface. It is
+  <dt><b>org.mortbay.jaas.JAASGroup</b></dt>
+  <dd>An implementation of the java.security.acl.Group interface. It is
 used only by the sample JDBCLoginModule to group all roles
-possessed by a user under a single Principal called "roles".
+possessed by a user under a single Principal called "roles".</dd>
 
-<h4>org.mortbay.jaas.spi.JDBCLoginModule</h4>
-An example implementation of a LoginModule that uses a database to store
+  <dt><b>org.mortbay.jaas.spi.JDBCLoginModule</b></dt>
+  <dd>An example implementation of a LoginModule that uses a database to store
 user names, passwords and roles. All database-related information
 is configurable, including:
-<ul>
- <li>the names and columns of the user table and role table
- <li>the database connection driver, URL, username and password.
-</ul>
+  <ul>
+   <li>the names and columns of the user table and role table
+   <li>the database connection driver, URL, username and password.
+  </ul>
+  </dd>
+</dl>
 
 
 <P>
-
-To use JAAS:
+<H4>Using JAAS</H4>
 <ul>
   <li><b>Step 1:</b>  Configure the realm for your webapp
   context in the Jetty xml configuration file:
@@ -414,3 +417,46 @@ constraints. It can also be used for authorization with a Java
 security manager and permission policy file. For information on
 how to accomplish this, build and run the JAAS demo in <code>extra/plus</code>
 as instructed in the <code>extra/plus/README.TXT</code> file in the source distribution.
+</P>
+
+<a name="loginextra">
+<H4>Extension for extra fields with FORM login</H4>
+</a>
+As all servlet containers intercept and process a form submission with action <code>j_security_check</code>, it is usually not possible to insert any extra input fields onto a login form with which to perform authentication: you may only pass <code>j_username</code> and <code>j_password</code>. For those rare occasions when this is not good enough, and you require more information from the user in order to authenticate them, you can use the (new) JAAS callback handler <a href="/javadoc/org/mortbay/jaas/callback/RequestParameterCallback">org.mortbay.jaas.callback.RequestParameterCallback</a>. This callback handler gives you access to all parameters that were passed in the form submission. To use it:
+
+<ul>
+  <li> Create a custom JAAS login module. Use the <a href="/javadoc/org/mortbay/jaas/spi/JDBCLoginModule">org.mortbay.jaas.spi.JDBCLoginModule</a> as an example.</li>
+  <li> In the <code>login()</code> method of your custom login module, add the <code>RequestParameterCallback</code> to the list of callback handlers the login module uses, tell it which params you are interested in, and then get the value of the parameter back:
+  <pre>
+     public boolean login()
+        throws LoginException
+     {
+        .
+        .
+        .
+        Callback[] callbacks = new Callback[3];
+        callbacks[0] = new NameCallback();
+        callbacks[1] = new ObjectCallback();
+
+        //as an example, look for a param named "extrainfo" in the request
+        //use one RequestParameterCallback() instance for each param you want to access
+        callbacks[2] = new RequestParameterCallback ();
+        ((RequestParameterCallback)callbacks[2]).setParameterName ("extrainfo");
+        .
+        .
+        .
+        callbackHandler.handle(callbacks);
+        String userName = ((NameCallback)callbacks[0]).getName();
+        Object pwd = ((ObjectCallback)callbacks[1]).getObject();
+        List paramValues = ((RequestParameterCallback)callbacks[2]).getParameterValues();
+
+        //use the userName, pwd and the value(s) of the parameter named "extrainfo" to
+        //authenticate the user
+        .
+        .
+        .
+     }
+  </pre>
+  </li>
+</ul>
+
