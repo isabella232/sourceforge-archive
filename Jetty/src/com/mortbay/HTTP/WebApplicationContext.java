@@ -107,6 +107,8 @@ public class WebApplicationContext extends HandlerContext
                 XmlParser.Node defaultConfig =
                     xmlParser.parse(dftResource.getURL().toString());
                 initialize(defaultConfig);
+                rh.setPutAllowed(true);
+                rh.setDelAllowed(true);
             }
         }
         catch(IOException e)
@@ -127,6 +129,9 @@ public class WebApplicationContext extends HandlerContext
             Code.warning("No WEB-INF in "+_webAppName+". Serving files only.");
         else
         {
+            // protect it with NotFoundServlet
+            _servletHandler.addServlet("/WEB-INF/*","com.mortbay.Servlet.NotFoundServlet");
+             
             // Look for classes directory
             Resource classes = _webApp.addPath("WEB-INF/classes/");
             String classPath="";

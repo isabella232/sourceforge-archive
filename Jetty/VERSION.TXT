@@ -8,6 +8,7 @@ Jetty Versions
  + Auto add a NotFoundHandler if needed.
  + Added NotFoundServlet
  + Added range handling to ResourceHandler.
+ + CGI servlet handles not found better.
  
 Jetty-3.0.0.rc6 - 20 Nov 2000
  + RequestDispatcher.forward() only resets buffer, not headers.
