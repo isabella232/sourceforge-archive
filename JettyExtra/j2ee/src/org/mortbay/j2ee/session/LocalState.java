@@ -63,8 +63,8 @@ public class
   // seem to force allocation of sessions and then never put anything
   // in them! - so it is a worthwhile saving in speed and footprint...
 
-  protected static Map         _emptyMap         =Collections.unmodifiableMap(new HashMap());
-  protected static Enumeration _emptyEnumeration =Collections.enumeration(_emptyMap.keySet());
+  protected static Map         _emptyMap         =Collections.EMPTY_MAP;
+  protected static Enumeration _emptyEnumeration =Collections.enumeration(Collections.EMPTY_LIST);
   protected static String[]    _emptyStringArray =new String[0]; // could this be changed by user ?
 
   protected void ensureAttributes() { if (_attributes==null) _attributes=new HashMap();}
@@ -79,19 +79,19 @@ public class
   public Map
     getAttributes()
     {
-      return _attributes==null?_emptyMap:Collections.unmodifiableMap(_attributes);
+      return (_attributes==null || _attributes.size()==0)?_emptyMap:Collections.unmodifiableMap(_attributes);
     }
 
   public Enumeration
     getAttributeNameEnumeration()
     {
-      return _attributes==null?_emptyEnumeration:Collections.enumeration(_attributes.keySet());
+      return (_attributes==null || _attributes.size()==0)?_emptyEnumeration:Collections.enumeration(_attributes.keySet());
     }
 
   public String[]
     getAttributeNameStringArray()
     {
-      return _attributes==null?_emptyStringArray:(String[])_attributes.keySet().toArray(new String[_attributes.size()]);
+      return (_attributes==null || _attributes.size()==0)?_emptyStringArray:(String[])_attributes.keySet().toArray(new String[_attributes.size()]);
     }
 
   public Object
