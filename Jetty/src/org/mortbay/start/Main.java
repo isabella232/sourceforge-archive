@@ -23,15 +23,45 @@ import java.io.InputStreamReader;
 
 
 /*-------------------------------------------*/
-/**
+/** Main start class.
+ * This class is intended to be the main class listed in the MANIFEST.MF  of
+ * the start.jar archive. It allows an application to be started with the
+ * command "java -jar start.jar".
+ *
+ * The behaviour of Main is controlled by the "org/mortbay/start/start.config"
+ * file obtained as a resource.  The format of each line is this file
+ * is:<PRE>
+ *  SUBJECT [ [!] CONDITION [AND|OR] ]*
+ * </PRE>
+ * where SUBJECT:<PRE> 
+ *   ends with ".class" is the Main class to run.
+ *   ends with ".xml" is a configuration file for the command line
+ *   ends with "/" is a directory from which add all jar and zip files from. 
+ *   ends with "/*" is a directory from which add all unconsidered jar and zip files from.
+ *   Containing = are used to assign system properties.
+ *   all other subjects are treated as files to be added to the classpath.
+ * </PRE>
+ * Subjects may include system properties with $(propertyname) syntax. 
+ * File subjects starting with "/" are considered absolute, all others are relative to
+ * the home directory.
+ * <P>
+ * CONDITION is one of:<PRE>
+ *   always
+ *   never
+ *   available package.class
+ *   java OPERATOR n.n
+ *   nargs OPERATOR n
+ *   OPERATOR := one of "<",">","<=",">=","==","!="
+ * </PRE>
+ * CONTITIONS can be combined with AND OR or !, with AND being the assume
+ * operator for a list of CONDITIONS.
+ * Classpath operations are evaluated on the fly, so once a class or jar is
+ * added to the classpath, subsequent available conditions will see that class.
+ *
+ *
  * @author Jan Hlavaty (hlavac@code.cz)
+ * @author Greg Wilkins
  * @version $Revision$
-
-  TODO:
-   - finish possible jetty.home locations
-   - use File.toURI.toURL() on JDK 1.4+
-   - better handling of errors (i.e. when jetty.home cannot be autodetected...)
-   - include entries from lib _when needed_
  */
  
 public class Main
@@ -41,7 +71,7 @@ public class Main
     private Classpath _classpath = new Classpath();
     private boolean _debug = System.getProperty("DEBUG",null)!=null;
     private ArrayList _xml = new ArrayList();
-        
+       
     public static void main(String[] args)
     {
         try

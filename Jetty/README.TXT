@@ -51,7 +51,10 @@ For example
 
 On some systems with graphical file browsers, it may be possible to start
 jetty by double clicking on this jar file. For more details see 
-$JETTY_HOME/launcher/README.txt
+$JETTY_HOME/src/org/mortbay/start/README.txt
+or
+http://jetty.mortbay.org/javadoc/org/mortbay/start/Main.html
+
 
 If JSPs do not work with this start method, you may want to clearly specify 
 the location of the JDK so the compiler can be accessed:
@@ -139,29 +142,11 @@ Other jetty.sh actions are:
 
 
 
+Windows and other Start Scripts
+===============================
 
-Win2000 Start Scripts
-=====================
-Due to problems with the servlet security model (see below).  It is vital
-that windows users use the exact case for drive letters, URLs and filenames.
-
-run:
-  set JETTY_HOME=<jetty install directory>
-  set JAVA_HOME=<java install directory>
-  %JETTY_HOME%\bin\jetty.bat
-
-Browse to:
-  http://localhost:8080
-
-If you still have problems:
-  - try installing in a path with no spaces in the directory name.
-
-  - Check that the case of JETTY_HOME is exactly the same as reported by
-    your system. Also read the section on alias checking in the web
-    application security section below.
-
-If this doesn't work - you can try the ant quick start below or you
-will need to read some more and setup the environment.
+There are various unmaintained start scripts in contrib/bin that
+may be of assistance writing your own start script.
 
 
 
