@@ -4,6 +4,7 @@
 // ========================================================================
 package com.mortbay.Util;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -128,7 +129,7 @@ public class URI
                       if (c=='?')
                       {
                           // Found query
-                          _path=UrlEncoded.decodeString(uri.substring(mark,i));
+                          _path=decodePath(uri.substring(mark,i));
                           mark=i+1;
                           state=4;
                           break;
@@ -158,7 +159,7 @@ public class URI
                   break;
               case 3:
                   _dirty=(mark==maxi);
-                  _path=UrlEncoded.decodeString(uri.substring(mark));
+                  _path=decodePath(uri.substring(mark));
                   break;
                   
               case 4:
@@ -458,8 +459,6 @@ public class URI
         
     /* ------------------------------------------------------------ */
     /* Encode a URI path.
-     * This is the same encoding offered by URLEncoder, except that
-     * the '/' character is not encoded.
      * @param path The path the encode
      * @param buf StringBuffer to encode path into
      */
@@ -478,17 +477,65 @@ public class URI
                   case '?':
                       buf.append("%3F");
                       continue;
-                  case '&':
-                      buf.append("%26");
+                  case ';':
+                      buf.append("%3B");
+                      continue;
+                  case '#':
+                      buf.append("%23");
                       continue;
                   case ' ':
-                      buf.append("+");
+                      buf.append("%20");
                       continue;
                   default:
                       buf.append(c);
                       continue;
                 }
             }
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* Decode a URI path.
+     * @param path The path the encode
+     * @param buf StringBuffer to encode path into
+     */
+    public static String decodePath(String path)
+    {
+        int len=path.length();
+        byte[] bytes=new byte[len];
+        char[] characters = path.toCharArray();
+        int n=0;
+        boolean noDecode=true;
+        
+        for (int i=0;i<len;i++)
+        {
+            char c = characters[i];
+            if (c<0||c>0xff)
+                throw new IllegalArgumentException("Not decoded");
+            
+            byte b = (byte)(0xff & c);
+
+            if (c=='%' && (i+2)<len)
+            {
+                noDecode=false;
+                b=(byte)(0xff&Integer.parseInt(path.substring(i+1,i+3),16));
+                i+=2;
+            }
+            
+            bytes[n++]=b;
+        }
+
+        if (noDecode)
+            return path;
+
+        try
+        {    
+            return new String(bytes,0,n,StringUtil.__ISO_8859_1);
+        }
+        catch(UnsupportedEncodingException e)
+        {
+            Code.warning(e);
+            return new String(bytes,0,n);
         }
     }
 

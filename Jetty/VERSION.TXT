@@ -3,10 +3,14 @@ Jetty Versions
 
 Jetty-3.0.2 - 
  + Greatly improved efficiency of ChunkableOutputStream
+ + Padded error bodies for IE bug.
+ + Improved HTML.Block efficiency
  + Improved jetty.bat
  + Improved jetty.sh 
  + Handle unknown status reasons in HttpResponse
  + Ignore included response updates rather than IllegalStateException
+ + Removed classloading stats which were causing circular class loading problems.
+ + Allow '+' in path portion of a URL.
 
 Jetty-3.0.1 - 20 Dec 2000
  + Fixed value unbind notification for session invalidation. 

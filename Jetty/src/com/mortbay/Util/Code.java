@@ -135,8 +135,7 @@ public class Code
     {
         Singleton.__instance=this;
         try{
-            boolean d = System.getProperty("DEBUG") != null;
-            setDebug(d);
+            _debugOn= System.getProperty("DEBUG") != null;
         
             String o = System.getProperty("DEBUG_OPTIONS");
             if (o!=null)

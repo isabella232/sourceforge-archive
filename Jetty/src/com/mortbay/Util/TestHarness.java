@@ -616,15 +616,15 @@ public class TestHarness
             uri.setEncodeNulls(true);
             test.checkEquals(uri.toString(),"/Test/URI?a=","null= param");
             
-            uri = new URI("/Test/Nasty%26%3F+URI?c=%26&d=%3F");
+            uri = new URI("/Test/Nasty%26%3F%20URI?c=%26&d=+%3F");
             test.checkEquals(uri.getPath(),"/Test/Nasty&? URI","nasty");
             uri.setPath("/test/nasty&? URI");
             uri.getParameters();
             test.checkEquals(uri.toString(),
-                             "/test/nasty%26%3F+URI?c=%26&d=%3F","nasty");
+                             "/test/nasty&%3F%20URI?c=%26&d=+%3F","nasty");
             uri=(URI)uri.clone();
             test.checkEquals(uri.toString(),
-                             "/test/nasty%26%3F+URI?c=%26&d=%3F","clone");
+                             "/test/nasty&%3F%20URI?c=%26&d=+%3F","clone");
             
             
         }

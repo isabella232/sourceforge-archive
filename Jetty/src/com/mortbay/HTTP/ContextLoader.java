@@ -29,8 +29,6 @@ public class ContextLoader extends URLClassLoader
     private static HashMap __infoMap = new HashMap(3);
     private PathInfo _info;
     private String _path;
-    private int _loadedServletsCount;
-    private int _loadedClassesCount;
     private static Class __servletClass = javax.servlet.http.HttpServlet.class;
     
     /* ------------------------------------------------------------ */
@@ -147,14 +145,7 @@ public class ContextLoader extends URLClassLoader
         if (Code.verbose())
             Code.debug("loadClass(",name,","+resolve,") from ",_path);
          
-         Class retClass = super.loadClass(name,resolve);
-         
-         // Don't account for javax.servlet.http.HttpServlet itself -- only subclasses.
-         if(retClass != __servletClass && __servletClass.isAssignableFrom(retClass))
-             _loadedServletsCount++;
-         _loadedClassesCount++;
-         
-         return retClass;        
+         return super.loadClass(name,resolve);   
     }
 
     /* ------------------------------------------------------------ */
@@ -170,19 +161,24 @@ public class ContextLoader extends URLClassLoader
     /* ------------------------------------------------------------ */
     /** Return number of servlets this classloader has loaded.
      * Any class which is a subclass of javax.servlet.http.HttpServlet
-     * will count. Does not include javax.servlet.http.HttpServlet itself.
+     * will count. Does not include javax.servlet.http.HttpServlet
+     * itself.
+     * @deprecated. Removed due to bizarre class loading bug
+     * associated with classes as local variables.
      */
     public int getLoadedServletsCount()
     {
-        return _loadedServletsCount;
+        return 0;
     }
     
      /* ------------------------------------------------------------ */
     /** Return total number of classes this classloader has loaded.
+     * @deprecated. Removed due to bizarre class loading bug
+     * associated with classes as local variables.
      */
     public int getLoadedClassesCount()
     {
-        return _loadedClassesCount;
+        return 0;
     }
     
     /* ------------------------------------------------------------ */

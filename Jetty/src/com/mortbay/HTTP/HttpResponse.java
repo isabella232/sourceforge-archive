@@ -236,11 +236,7 @@ public class HttpResponse extends HttpMessage
             _state=__MSG_BAD;
             synchronized(writer)
             {
-                writer.write(_version);
-                writer.write(' ');
-                writer.write(status);
-                writer.write(getReason());
-                writer.write(HttpFields.__CRLF);
+                writer.write(_version+' '+status+getReason()+HttpFields.__CRLF);
                 _header.write(writer);
             }
         }
@@ -320,9 +316,6 @@ public class HttpResponse extends HttpMessage
             if (_handlerContext!=null && error!=null)
                 errorPage=_handlerContext.getErrorPageResource(error);
 
-            // XXX temp
-            _header.put("Connection","close");
-
             if (errorPage!=null)
             {
                 _header.putIntField(HttpFields.__ContentLength,
@@ -331,13 +324,17 @@ public class HttpResponse extends HttpMessage
             }
             else
             {
-                byte[] buf =
-                    ("<HTML>\n<HEAD>\n<TITLE>Error "+code+
-                     " "+reason+
-                     "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
-                     " "+reason+
-                     "</H2>\n"+(message==null?"":message)+
-                     "\n</BODY>\n</HTML>\n").getBytes(StringUtil.__ISO_8859_1);
+                String body=
+                    "<HTML>\n<HEAD>\n<TITLE>Error "+code+
+                    " "+reason+
+                    "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
+                    " "+reason+
+                    "</H2>\n"+(message==null?"":message);
+                for (int i=0;i<10;i++)
+                    body+="<!-- Padding for IE                                                 -->";
+                body+="\n</BODY>\n</HTML>\n";
+                
+                byte[] buf=body.getBytes(StringUtil.__ISO_8859_1);
                 _header.putIntField(HttpFields.__ContentLength,buf.length);
                 out.write(buf);
             }
