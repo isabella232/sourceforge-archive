@@ -32,7 +32,7 @@ import java.util.Vector;
  * Changes in behaviour to section creation and adding, should be controlled
  * via page properties.
  * <p>
- * @see class Composite
+ * @see Cxomposite
  * @version $Id$
  * @author Greg Wilkins
  */

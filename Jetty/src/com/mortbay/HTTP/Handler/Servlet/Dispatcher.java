@@ -23,7 +23,7 @@ import javax.servlet.ServletException;
 /* ------------------------------------------------------------ */
 /**
  * 
- * @version 1.0 Mon Aug 21 2000
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class Dispatcher implements RequestDispatcher

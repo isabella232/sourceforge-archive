@@ -24,8 +24,8 @@ import java.util.Arrays;
  * Passwords that begin with OBF: are de obfiscated.
  * Passwords can be obfiscated by run com.mortbay.Util.Password as a
  * main class.
- * @see
- * @version 1.0 Thu Aug 17 2000
+ * 
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class Password

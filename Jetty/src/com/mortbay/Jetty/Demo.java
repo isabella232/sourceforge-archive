@@ -17,7 +17,7 @@ import com.mortbay.Util.RolloverFileLogSink;
 /* ------------------------------------------------------------ */
 /** 
  *
- * @see
+ * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

@@ -16,9 +16,12 @@ import java.util.List;
 
 
 /* ------------------------------------------------------------ */
-/** XXX
+/** HTTP Message base.
+ * This class forms the basis of HTTP requests and replies. It provides
+ * header fields, content and optional trailer fields, while managing the
+ * state of the message.
  *
- * @see
+ * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

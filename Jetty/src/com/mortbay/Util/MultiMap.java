@@ -23,7 +23,7 @@ import java.util.Vector;
  *
  * Multi-values items are always stored as a List.
  *
- * @see
+ * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

@@ -25,7 +25,7 @@ import java.net.URL;
  * <p>This Element includes another file.
  * This class expects that the HTTP directory separator '/' will be used.
  * This will be converted to the local directory separator.
- * @see class Element
+ * @see Element
  * @version $Id$
  * @author Greg Wilkins
 */

@@ -180,7 +180,7 @@ release     - Cleanup for release
   
   <target name="javadoc" depends="libs">
     <mkdir dir="${javadoc}"/>
-    <javadoc packagenames="com.mortbay.*,javax.servlet.*"
+    <javadoc packagenames="com.mortbay.*,javax.servlet.*,org.apache.jasper.*"
              sourcepath="${src.dir}"
              destdir="${javadoc}"
              author="true"

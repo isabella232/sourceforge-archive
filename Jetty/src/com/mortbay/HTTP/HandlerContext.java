@@ -48,8 +48,8 @@ public class HandlerContext
     private String _classPath;
     private Resource _resourceBase;
 
-    // XXX Need initparams as well as attributes 
     private Map _attributes = new HashMap(11);
+    private Map _initParams = new HashMap(11);
     private Map _mimeMap;
     
     private List _hosts=new ArrayList(2);
@@ -419,12 +419,44 @@ public class HandlerContext
         }
         sh.addUser(username,password);
     }
+
     
+    /* ------------------------------------------------------------ */
+    /** Set context init parameter.
+     * Init Parameters differ from attributes as they can only
+     * have string values, servlets cannot set them and they do
+     * not have a package scoped name space.
+     * @param param param name
+     * @param value param value or null
+     */
+    public void setInitParameter(String param, String value)
+    {
+        _initParams.put(param,value);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get context init parameter.
+     * @param param param name
+     * @return param value or null
+     */
+    public String getInitParameter(String param)
+    {
+        return (String)_initParams.get(param);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get context init parameter.
+     * @return Enumeration of names
+     */
+    public Enumeration getInitParameterNames()
+    {
+        return Collections.enumeration(_initParams.keySet());
+    }
     
     /* ------------------------------------------------------------ */
     /** 
-     * @param name 
-     * @return 
+     * @param name attribute name
+     * @return attribute value or null
      */
     public Object getAttribute(String name)
     {
@@ -433,7 +465,7 @@ public class HandlerContext
 
     /* ------------------------------------------------------------ */
     /** 
-     * @return 
+     * @return enumaration of names.
      */
     public Enumeration getAttributeNames()
     {
@@ -442,8 +474,8 @@ public class HandlerContext
 
     /* ------------------------------------------------------------ */
     /** 
-     * @param name 
-     * @param value 
+     * @param name attribute name
+     * @param value attribute value
      */
     public synchronized void setAttribute(String name, Object value)
     {
@@ -464,7 +496,7 @@ public class HandlerContext
     
     /* ------------------------------------------------------------ */
     /** 
-     * @param name 
+     * @param name attribute name
      */
     public synchronized void removeAttribute(String name)
     {

@@ -35,7 +35,7 @@ import javax.servlet.http.HttpSession;
 
 /* ------------------------------------------------------------ */
 /** Servlet Request Wrapper.
- * This class wraps a Jetty HTTP request as a 2.1 Servlet
+ * This class wraps a Jetty HTTP request as a 2.2 Servlet
  * request.
  *
  * @version $Id$
@@ -82,6 +82,12 @@ class ServletRequest
     }
 
     /* ------------------------------------------------------------ */
+    /** Set servletpath and pathInfo.
+     * Called by the Handler before passing a request to a particular
+     * holder to split the context path into a servlet path and path info.
+     * @param servletPath 
+     * @param pathInfo 
+     */
     void setPaths(String servletPath,String pathInfo)
     {
         _servletPath=servletPath;
@@ -89,6 +95,13 @@ class ServletRequest
     }
     
     /* ------------------------------------------------------------ */
+    /** Set the paths for a RequestDispatcher.forward().
+     *
+     * @param context 
+     * @param servletPath 
+     * @param pathInfo 
+     * @param query 
+     */
     void setForwardPaths(Context context,
                          String servletPath,
                          String pathInfo,
@@ -656,9 +669,6 @@ class ServletRequest
     }
 
     /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
     public String toString()
     {
         return _httpRequest.toString();

@@ -25,7 +25,7 @@ import org.xml.sax.helpers.ParserFactory;
  * This class wraps a sax parser with convieniant error and
  * entity handlers and a mini dom-like document tree.
  *
- * @see
+ * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

@@ -20,7 +20,8 @@ import java.util.Hashtable;
  * HTML Pages, HTML Composites and several other HTML Elements derivations.
  * Elements may also have attributes set, which are handled by the derived
  * Element.
- * @see class Page, class Composite
+ * @see Page
+ * @see Composite
  * @version $Id$
  * @author Greg Wilkins
 */

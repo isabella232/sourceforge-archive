@@ -8,7 +8,8 @@ package com.mortbay.HTML;
 /* -------------------------------------------------------------------- */
 /** HTML Form Input Tag
  * <p>
- * @see class Tag, class Form
+ * @see Tag
+ * @see Form
  * @version $Id$
  * @author Greg Wilkins
  */

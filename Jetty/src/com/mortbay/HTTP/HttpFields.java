@@ -34,7 +34,7 @@ import java.util.TimeZone;
  * A collection of HTTP header and or Trailer fields.
  * This class is not synchronized and needs to be protected from
  * concurrent access.
- * @see
+ * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

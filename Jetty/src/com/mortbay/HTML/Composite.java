@@ -23,7 +23,7 @@ import java.util.ArrayList;
  * <p>Notes<br>
  * Elements are added to the Composite either as HTML Elements or as
  * Strings.  Other objects added to the Composite are converted to Strings
- * @see class Element
+ * @see Element
  * @version $Id$
  * @author Greg Wilkins
 */

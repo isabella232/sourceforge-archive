@@ -17,7 +17,7 @@ import java.io.PrintWriter;
  * future implementations of file handling which is dated, rolling,
  * etc.
  *
- * @see
+ * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

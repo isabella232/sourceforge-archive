@@ -14,7 +14,7 @@ package com.mortbay.Util;
  * derived implementations may log to files, syslog, or other
  * logging APIs.
  *
- * @see
+ * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

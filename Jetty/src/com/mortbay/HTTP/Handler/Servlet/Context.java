@@ -34,7 +34,7 @@ import javax.servlet.http.HttpSessionContext;
 
 
 /* --------------------------------------------------------------------- */
-/** 
+/** Jetty Servlet Context.
  *
  * @version $Id$
  * @author Greg Wilkins
@@ -58,27 +58,6 @@ public class Context implements ServletContext, HttpSessionContext
     public String getContextPath()
     {
         return _handler.getHandlerContext().getContextPath();
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * Implemented by delegation to getAttribute.
-     */
-    public String getInitParameter(String param)
-    {
-        Object p = getAttribute(param);
-        if (p!=null)
-            return p.toString();
-        return null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * Implemented by delegation to getAttributeNames.
-     */
-    public Enumeration getInitParameterNames()
-    {
-        return getAttributeNames();
     }
     
     
@@ -264,6 +243,30 @@ public class Context implements ServletContext, HttpSessionContext
     public String getServerInfo()
     {
         return Version.__Version;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get context init parameter.
+     * Delegated to HandlerContext.
+     * Init Parameters differ from attributes as they can only
+     * have string values, servlets cannot set them and they do
+     * not have a package scoped name space.
+     * @param param param name
+     * @return param value or null
+     */
+    public String getInitParameter(String param)
+    {
+        return _handler.getHandlerContext().getInitParameter(param);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get context init parameter names.
+     * Delegated to HandlerContext.
+     * @return Enumeration of names
+     */
+    public Enumeration getInitParameterNames()
+    {
+        return _handler.getHandlerContext().getInitParameterNames();
     }
     
     /* ------------------------------------------------------------ */

@@ -82,7 +82,6 @@ abstract public class ThreadedServer extends ThreadPool
     /** Set the server InetAddress and port.
      * @param address The Address to listen on, or 0.0.0.0:port for
      * all interfaces.
-     * @exception IOException 
      */
     public synchronized void setAddress(InetAddrPort address) 
     {

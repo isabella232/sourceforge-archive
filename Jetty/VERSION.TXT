@@ -8,6 +8,7 @@ Dev    3.0.B04
  + Implemented war file support
  + Java2 style classloading
  + Improved default log format for clarity.
+ + Separated context attributes and initParams.
 
 Jetty-3.0.B04 - 12 Oct 2000
  + Restricted context mapping to simple model for servlets.

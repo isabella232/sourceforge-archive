@@ -12,7 +12,7 @@ import java.io.PrintStream;
 /* ------------------------------------------------------------ */
 /** Reverse Telnet class
  * 
- * @see
+ * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

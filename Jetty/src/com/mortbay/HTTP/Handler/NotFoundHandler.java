@@ -19,7 +19,7 @@ import java.io.Writer;
 /* ------------------------------------------------------------ */
 /** Handler for resources that were not found.
  * Implements OPTIONS and TRACE methods for the server.
- * @see
+ * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
