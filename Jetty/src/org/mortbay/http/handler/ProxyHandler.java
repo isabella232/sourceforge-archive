@@ -176,8 +176,7 @@ public class ProxyHandler extends AbstractHttpHandler
             if (url==null)
             {
                 if (isForbidden(uri))
-                    response.sendError(HttpResponse.__403_Forbidden,
-                                       "Forbidden for Proxy");
+                    sendForbid(request,response,uri);
                 return;
             }
             
@@ -344,7 +343,7 @@ public class ProxyHandler extends AbstractHttpHandler
                 _proxyHostsWhiteList!=null && !_proxyHostsWhiteList.contains(host) ||
                 _proxyHostsBlackList!=null && _proxyHostsBlackList.contains(host))
             {
-                response.sendError(HttpResponse.__403_Forbidden,"Forbidden for Proxy");
+                sendForbid(request,response,uri);
             }
             else
             {
@@ -352,6 +351,7 @@ public class ProxyHandler extends AbstractHttpHandler
                 request.getHttpConnection().setHttpTunnel(new HttpTunnel(socket));
                 response.setStatus(HttpResponse.__200_OK);
                 response.setContentLength(0);
+                request.setHandled(true);
             }
         }
         catch (Exception e)
@@ -359,10 +359,6 @@ public class ProxyHandler extends AbstractHttpHandler
             Code.ignore(e);
             response.sendError(HttpResponse.__500_Internal_Server_Error);
         }
-        finally
-        {
-            request.setHandled(true);
-        }    
     }
     
         
@@ -437,5 +433,16 @@ public class ProxyHandler extends AbstractHttpHandler
             return true;
 
         return false;
-    }    
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Send Forbidden.
+     * Method called to send forbidden response. Default implementation calls
+     * sendError(403)
+     */
+    protected void sendForbid(HttpRequest request, HttpResponse response, URI uri)
+        throws IOException
+    {
+        response.sendError(HttpResponse.__403_Forbidden,"Forbidden for Proxy");
+    }
 }
