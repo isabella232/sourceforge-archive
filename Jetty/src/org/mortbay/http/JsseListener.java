@@ -137,15 +137,37 @@ public abstract class JsseListener extends SocketListener
     }
 
     /* ------------------------------------------------------------ */
+    /**
+    * By default, we're integral, given we speak SSL. But, if
+    * we've been told about an integral port, and said port is not
+    * our port, then we're not. This allows separation of
+    * listeners providing INTEGRAL versus CONFIDENTIAL
+    * constraints, such as one SSL listener configured to require
+    * client certs providing CONFIDENTIAL, whereas another
+    * SSL listener not requiring client certs providing mere
+    * INTEGRAL constraints.
+    **/
     public boolean isIntegral(HttpConnection connection)
     {
-        return true;
+        final int integralPort = getIntegralPort();
+        return integralPort == 0 || integralPort == getPort();
     }
     
     /* ------------------------------------------------------------ */
+    /**
+    * By default, we're confidential, given we speak SSL. But, if
+    * we've been told about an confidential port, and said port is not
+    * our port, then we're not. This allows separation of
+    * listeners providing INTEGRAL versus CONFIDENTIAL
+    * constraints, such as one SSL listener configured to require
+    * client certs providing CONFIDENTIAL, whereas another
+    * SSL listener not requiring client certs providing mere
+    * INTEGRAL constraints.
+    **/
     public boolean isConfidential(HttpConnection connection)
     {
-        return true;
+        final int confidentialPort = getConfidentialPort();
+        return confidentialPort == 0 || confidentialPort == getPort();
     }
     
     /* ------------------------------------------------------------ */

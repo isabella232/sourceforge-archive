@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Allow JSSE listener to be just confidential or just integral.
+
 Jetty-5.1.RC0 - 11 October 2004
  + Fixed many minor issues from J2EE 1.4 TCK testing
    See sf.net bugs 1031520 - 1032205
