@@ -5,10 +5,13 @@
 
 package com.mortbay.Jetty.JMX;
 
+import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServer;
 import javax.management.MBeanException;
 import javax.management.MBeanOperationInfo;
+import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
@@ -18,6 +21,8 @@ import com.mortbay.HTTP.HandlerContext;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.Log;
 import com.mortbay.Util.LifeCycle;
+import com.mortbay.Util.LogSink;
+import com.mortbay.Util.WriterLogSink;
 
 import java.beans.beancontext.BeanContextMembershipListener;
 import java.beans.beancontext.BeanContextMembershipEvent;
@@ -34,7 +39,8 @@ public class HandlerContextMBean extends LifeCycleMBean
 {
     private HandlerContext _handlerContext;
     private HttpServerMBean _httpServerMBean;
-
+    private ModelMBeanImpl _logMBean;
+    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @exception MBeanException 
@@ -53,6 +59,7 @@ public class HandlerContextMBean extends LifeCycleMBean
     {
         super.defineManagedResource();
 
+        defineAttribute("logSink");
         defineAttribute("contextPath");
         defineAttribute("classPath");
         defineAttribute("classLoader");
@@ -62,6 +69,16 @@ public class HandlerContextMBean extends LifeCycleMBean
         defineAttribute("servingResources");
         defineAttribute("hosts");
         defineAttribute("handlers");
+        
+        defineAttribute("statsOn");
+        defineOperation("statsReset",IMPACT_ACTION);
+        defineAttribute("requests");
+        defineAttribute("responses1xx");
+        defineAttribute("responses2xx");
+        defineAttribute("responses3xx");
+        defineAttribute("responses4xx");
+        defineAttribute("responses5xx");
+        
         
         defineOperation("setInitParameter",
                         new String[] {STRING,STRING},
@@ -100,6 +117,7 @@ public class HandlerContextMBean extends LifeCycleMBean
                         new String[] {STRING,STRING},
                         IMPACT_ACTION);
     }
+    
     
     /* ------------------------------------------------------------ */
     protected String newObjectName(MBeanServer server)

@@ -136,6 +136,7 @@ public class HttpServerMBean extends LifeCycleMBean
         defineAttribute("connectionsDurationMax");
         defineAttribute("connectionsRequestsAve");
         defineAttribute("connectionsRequestsMax");
+        defineAttribute("errors");
         defineAttribute("requests");
         defineAttribute("requestsActive");
         defineAttribute("requestsActiveMax");
@@ -163,14 +164,32 @@ public class HttpServerMBean extends LifeCycleMBean
                     mbean= new HandlerContextMBean(this,(HandlerContext)o);
                 else if (o instanceof LogSink)
                 {
-                    mbean= (o instanceof WriterLogSink)
-                        ? new WriterLogSinkMBean((WriterLogSink)o,false)
-                        : new LogSinkMBean((LogSink)o);
-                    String className = o.getClass().getName();
+                    LogSink sink =(LogSink)o;
+                    mbean= (sink instanceof WriterLogSink)
+                        ? new WriterLogSinkMBean((WriterLogSink)sink,false)
+                        : new LogSinkMBean(sink);
+                    String className = sink.getClass().getName();
                     if (className.indexOf(".")>0)
                         className=className.substring(className.lastIndexOf(".")+1);
-                    oName=new ObjectName(getObjectName().toString()+
-                                         ",RequestLog="+className);                     
+
+                    String name=getObjectName().toString();
+                    if (sink!=_jettyServer.getLogSink())
+                    {
+                        Iterator ctxs = _jettyServer.getHandlerContexts().iterator();
+                        while (ctxs.hasNext())
+                        {
+                            HandlerContext c = (HandlerContext)ctxs.next();
+                            if (sink==c.getLogSink())
+                            {
+                                name+=",context="+c.getContextPath();
+                                break;
+                            }
+                        }
+                    }
+                    
+                    oName=new ObjectName(uniqueObjectName(getMBeanServer(),
+                                                          name+","+
+                                                          className+"="));
                 }
                 else if (o instanceof LifeCycle)
                     mbean = new LifeCycleMBean((LifeCycle)o);

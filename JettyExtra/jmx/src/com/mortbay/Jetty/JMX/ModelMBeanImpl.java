@@ -905,7 +905,6 @@ public class ModelMBeanImpl
         _objectName=null;
     }
 
-
     /* ------------------------------------------------------------ */
     /** Add an id clause to a JMX object name.
      * Used to make unique objectnames when there are no other
