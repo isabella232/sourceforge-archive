@@ -507,13 +507,19 @@ class ServletRequest
     /* -------------------------------------------------------------- */
     public void removeAttribute(String name)
     {
-	Code.notImplemented();
+	_httpRequest.removeAttribute(name);
     }
     
     /* -------------------------------------------------------------- */
     public Enumeration getAttributeNames()
     {
         return Collections.enumeration(_httpRequest.getAttributeNames());
+    }
+    
+    /* -------------------------------------------------------------- */
+    public void setAttribute(String name, Object value)
+    {
+        _httpRequest.setAttribute(name,value);
     }
     
     /* -------------------------------------------------------------- */
@@ -640,12 +646,6 @@ class ServletRequest
     }
 
     /* -------------------------------------------------------------- */
-    public void setAttribute(String name, Object value)
-    {
-        _httpRequest.setAttribute(name,value);
-    }
-    
-    /* -------------------------------------------------------------- */
     public String getRealPath(String path)
     {
 	_context.getRealPath(path);
@@ -686,8 +686,7 @@ class ServletRequest
     {
 	Code.notImplemented();
 	return null;
-    }
-    
+    }    
 }
 
 

@@ -778,6 +778,19 @@ public class HttpRequest extends HttpMessage
             return Collections.EMPTY_LIST;
         return _attributes.keySet();
     }
+
+
+    /* ------------------------------------------------------------ */
+    /** Remove a request attribute.
+     * @param name 
+     * @param attribute 
+     * @return 
+     */
+    public void removeAttribute(String name)
+    {
+        if (_attributes!=null)
+            _attributes.remove(name);
+    }
     
     /* ------------------------------------------------------------ */
     /** Destroy the request.
@@ -788,6 +801,8 @@ public class HttpRequest extends HttpMessage
         _method=null;
         _uri=null;
         _version=null;
+	if (_attributes!=null)
+	    _attributes.clear();
         super.destroy();
     }
 }
