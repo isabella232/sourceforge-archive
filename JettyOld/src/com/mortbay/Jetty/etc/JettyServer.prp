@@ -33,7 +33,7 @@ PROPERTY.DefaultPageType		  : com.mortbay.Jetty.JettyLaF
 # PROPERTIES          - File of properties for this server.
 #
 # Defined server properties are:
-# SessionMaxInactiveInterval - Max idle time Ms before session death
+# SessionMaxInactiveInterval - Max idle time in seconds before session death
 # MinListenerThreads	     - Min listener threads per listener
 # MaxListenerThreads	     - Max listener threads per listener
 # MaxListenerThreadIdleMs    - Max idle time Ms before listen thread

@@ -225,20 +225,17 @@ public class Test
         if (o1==o2 || ( o1!=null && o1.equals(o2)))
         {
             reportBuf.append(pass);
-            // Code.debug(check," OK"); instead:
-	    Log.message(Log.CODE_DEBUG, check + " OK", frame);
+            Code.debug(check," OK"); 
         }
         else
         {
-            //Frame frame = new Frame(2);
             passed=false;
             reportBuf.append(fail + " at " + frame);
             reportBuf.append('\n');
             reportBuf.append(spaces,0,testCase.length()+3);
             reportBuf.append(((o1!=null)?(o1.toString()):"null") + " != " +
                              ((o2!=null)?(o2.toString()):"null"));
-            //Code.debug(check," FAILED"); instead:
-	    Log.message(Log.CODE_DEBUG, check + " FAILED", frame);
+            Code.debug(check," FAILED"); 
         }
         reportBuf.append('\n');
     }

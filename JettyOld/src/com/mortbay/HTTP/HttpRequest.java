@@ -914,13 +914,18 @@ public class HttpRequest extends HttpHeader
     /** Get the full URI.
      * @return For the given example, this would return <PRE>
      * /Servlet/Path/Foo/Bar
+     * </PRE> 
+     * If the browser uses the abs_path URI, if it uses absoulteURI it will
+     return <PRE>
+     * http://localhost:1234/Servlet/Path/Foo/Bar
      * </PRE>
      */
     public  String getRequestURI()
     {
-        return uri.getPath();
+        if (protocolHostPort==null || protocolHostPort.length()==0)
+            return uri.getPath();
+        return protocolHostPort + uri.getPath();
     }
-
 
     /* -------------------------------------------------------------- */
     /** Get the URI sub path that matched to the servlet.
@@ -1278,7 +1283,7 @@ public class HttpRequest extends HttpHeader
                     {
                         if (buf[j]=='/')
                         {
-                            protocolHostPort=new String(buf,s3,j-s3+1);
+                            protocolHostPort=new String(buf,s3,j-s3);
                             uris=new String(buf,j,e3-j+1);
                             break;
                         }

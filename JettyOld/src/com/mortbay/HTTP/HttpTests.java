@@ -106,6 +106,7 @@ public class HttpTests
         Test test =null;
 
         try{
+
             test = new Test("com.mortbay.HTTP.PathMap$WildMap");
 
             com.mortbay.HTTP.PathMap$WildMap wm =
@@ -114,6 +115,8 @@ public class HttpTests
             wm.put(h1[5],h1[5]);wm.put(h1[6],h1[6]);wm.put(h1[1],h1[1]);
             wm.put(h1[7],h1[7]);wm.put(h1[0],h1[0]);wm.put(h1[3],h1[3]);
             wm.put(h1[2],h1[2]);wm.put(h1[8],h1[8]);wm.put(h1[4],h1[4]);
+            if (Code.debug())
+                System.err.println("XXXXXXXXXXXXXXXXXXXXXXXXXXX");
             test.checkEquals(wm.holders.size(),9,"9 Holders");
             wm.get("");
             for (int i=9;i-->0;)
@@ -259,11 +262,11 @@ public class HttpTests
             "  GET  /xxx   ",             "GET", "/xxx",    "HTTP/1.0",
             "GET / ",                     "GET", "/",       "HTTP/1.0",
             "GET /",                      "GET", "/",       "HTTP/1.0",
-            "GET http://h:p/ HTTP/1.0",   "GET", "/",       "HTTP/1.0",
-            "GET http://h:p/xx HTTP/1.0", "GET", "/xx",     "HTTP/1.0",
-            "GET http HTTP/1.0",          "GET", "http",    "HTTP/1.0",
-            "GET http://h:p/",            "GET", "/",       "HTTP/1.0",
-            "GET http://h:p/xxx",         "GET", "/xxx",    "HTTP/1.0",
+            "GET http://h:p/ HTTP/1.0",   "GET", "http://h:p/",   "HTTP/1.0",
+            "GET http://h:p/xx HTTP/1.0", "GET", "http://h:p/xx", "HTTP/1.0",
+            "GET http HTTP/1.0",          "GET", "http",          "HTTP/1.0",
+            "GET http://h:p/",            "GET", "http://h:p/",   "HTTP/1.0",
+            "GET http://h:p/xxx",         "GET", "http://h:p/xxx","HTTP/1.0",
             "  GET     ",                 null,  null,      null,
             "GET",                        null,  null,      null,
             "",                           null,  null,      null,
@@ -279,6 +282,10 @@ public class HttpTests
                     test.checkEquals(r.getMethod(),rl[i+1],rl[i]);
                     test.checkEquals(r.getRequestURI(),rl[i+2],rl[i]);
                     test.checkEquals(r.getVersion(),rl[i+3],rl[i]);
+                    test.checkEquals(r.getRequestLine(),
+                                     rl[i+1]+" "+rl[i+2]+" "+rl[i+3],
+                                     rl[i]);
+
                 }
                 catch(IOException e)
                 {
