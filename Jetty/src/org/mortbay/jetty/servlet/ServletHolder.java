@@ -362,7 +362,7 @@ public class ServletHolder extends Holder
                 ServletHttpRequest servletHttpRequest=
                     ServletHttpRequest.unwrap(request);
                 HttpRequest http_request=servletHttpRequest.getHttpRequest();
-                http_request.getUserPrincipal();
+                user=http_request.getUserPrincipal();
                 if (user==null)
                     http_request.setUserPrincipal(user=_realm.getAnonymous());
                 _realm.pushRole(user,_run_as);
