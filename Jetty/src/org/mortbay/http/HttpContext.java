@@ -1891,6 +1891,7 @@ public class HttpContext implements LifeCycle,
             _loader=null;
         }
         _cache.clear();
+	_constraintMap.clear();
         Log.event("Stopped "+this);
     }
     
