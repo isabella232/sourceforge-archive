@@ -378,6 +378,17 @@ public class HttpServer implements LifeCycle
     /** Add a context.
      * As contexts cannot be publicly created, this may be used to
      * alias an existing context.
+     * @param context 
+     */
+    public void addContext(HttpContext context)
+    {
+        addContext(null,context);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Add a context.
+     * As contexts cannot be publicly created, this may be used to
+     * alias an existing context.
      * @param virtualHost The virtual host or null for all hosts.
      * @param context 
      */

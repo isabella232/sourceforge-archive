@@ -1,4 +1,4 @@
-#!/bin/sh -x 
+#!/bin/sh  
 #
 # Startup script for jetty under *nix systems (it works under NT/cygwin too).
 #
