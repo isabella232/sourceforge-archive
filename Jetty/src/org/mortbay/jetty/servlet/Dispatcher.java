@@ -536,7 +536,7 @@ public class Dispatcher implements RequestDispatcher
                 if (name.equals(__INCLUDE_QUERY_STRING)) return null;
             }
 
-            if (_filterType!=FilterHolder.__INCLUDE)
+            if (_filterType!=FilterHolder.__INCLUDE && !isNamed())
             {
                 if (name.equals(__FORWARD_PATH_INFO))
                     return _servletHttpRequest.getPathInfo();
@@ -579,7 +579,7 @@ public class Dispatcher implements RequestDispatcher
                 set.remove(__INCLUDE_QUERY_STRING);
             }
 
-            if (_filterType!=FilterHolder.__INCLUDE)
+            if (_filterType!=FilterHolder.__INCLUDE && !isNamed())
             {
                 set.add(__FORWARD_PATH_INFO);
                 set.add(__FORWARD_REQUEST_URI);
