@@ -74,7 +74,8 @@ deployment descriptor and provides the default values for one or more webapplica
 structure.  Some mechanisms such as JSP compilation have difficulty working with un-expanded
 WAR files.
 </UL>
-
+Jetty also has a web application extension for jetty specific configuration.  If a file called
+"web-jetty.xml" is found in the WEB-INF directory, it is assumes to be a Jetty XmlConfigurarion file as is applied to the WebApplication instance.
 
 <FONT size=-1>
 <A href="HttpServer.html">Back</A>
