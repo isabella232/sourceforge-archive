@@ -103,9 +103,9 @@ public class HttpServerMBean extends LifeCycleMBean
     {
         super.defineManagedResource();
         
-        defineAttribute("configuration");
         defineAttribute("logSink");
         defineAttribute("logDateFormat");
+        defineAttribute("configuration");
         
         defineOperation("addListener",
                         new String[]{"java.lang.String"},
