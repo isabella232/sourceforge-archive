@@ -57,13 +57,13 @@ public abstract class AbstractSessionManager implements SessionManager
     private int _scavengePeriodMs = 30000;
     private String _workerName ;
     
-    private transient ArrayList _sessionListeners=new ArrayList();
-    private transient ArrayList _sessionAttributeListeners=new ArrayList();
-    private transient Map _sessions;
-    private transient Random _random;
-    private transient ServletHandler _handler;
+    protected transient ArrayList _sessionListeners=new ArrayList();
+    protected transient ArrayList _sessionAttributeListeners=new ArrayList();
+    protected transient Map _sessions;
+    protected transient Random _random;
+    protected transient ServletHandler _handler;
+    
     private transient SessionScavenger _scavenger = null;
-
     
     /* ------------------------------------------------------------ */
     public AbstractSessionManager()
@@ -81,6 +81,12 @@ public abstract class AbstractSessionManager implements SessionManager
     public void initialize(ServletHandler handler)
     {
         _handler=handler;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Map getSessionMap()
+    {
+        return Collections.unmodifiableMap(_sessions);
     }
     
     /* ------------------------------------------------------------ */
