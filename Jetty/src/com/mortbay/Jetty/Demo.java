@@ -38,28 +38,26 @@ public class Demo
             
             // Configure handlers
             HandlerContext context;
-            server.addWebApplication(null,
-                                     "/",
-                                     "./webapps/jetty");
+            server.addWebApplication(null,"/","./webapps/jetty");
             
-            context=server.getContext(null,"/handler/*");
-            context.setResourceBase("./FileBase/");
-            context.setServingResources(true);
-            context.addServlet("Dump","/dump,/dump/*","com.mortbay.Servlet.Dump");
-            context.addServlet("/session","com.mortbay.Servlet.SessionDump");
+            context=server.getContext(null,"/demo/*");
+            context.setResourceBase("./docroot/");
             context.addServlet("/Dispatch,/Dispatch/*",
                                "com.mortbay.Servlet.RequestDispatchTest");
+            context.addServlet("JSP","*.jsp",
+                               "org.apache.jasper.servlet.JspServlet");
+            context.setServingResources(true);
             context.addHandler(new DumpHandler());
             
-            context=server.getContext(null,"/servlet/*");
+            context=server.addContext(null,"/servlet/*");
             context.setClassPath("./servlets/");
             context.setServingDynamicServlets(true);
             
-            context=server.getContext(null,"/javadoc/*");
+            context=server.addContext(null,"/javadoc/*");
             context.setResourceBase("./javadoc/");
             context.setServingResources(true);
             
-            context=server.getContext(null,"/");
+            context=server.addContext(null,"/");
             context.addHandler(new NotFoundHandler());
 
             // Logger

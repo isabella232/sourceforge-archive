@@ -91,6 +91,28 @@ public class XmlParser
 
     /* ------------------------------------------------------------ */
     /** 
+     * @param url 
+     * @return 
+     * @exception IOException 
+     * @exception SAXException 
+     */
+    public synchronized Node parse(InputStream in)
+        throws IOException,SAXException
+    {
+        Handler handler= new Handler();
+        _parser.setDocumentHandler(handler);
+  	_parser.setErrorHandler(handler);
+  	_parser.setEntityResolver(handler);
+        _parser.parse(new InputSource(in));
+        if (handler._error!=null)
+            throw handler._error;
+        Node doc=(Node)handler._top.get(0);
+        handler.clear();
+        return doc;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
      * @param name 
      * @param local 
      */
@@ -279,8 +301,8 @@ public class XmlParser
         }
         
         /* ------------------------------------------------------------ */
-        /** Get a map of element attributes.
-         * @return Map of attributes or null.
+        /** Get an element attribute.
+         * @return attribute or null.
          */
  	public String getAttribute(String name)
         {
@@ -288,8 +310,8 @@ public class XmlParser
         }
         
         /* ------------------------------------------------------------ */
-        /** Get a map of element attributes.
-         * @return Map of attributes or null.
+        /** Get an element attribute.
+         * @return attribute or null.
          */
  	public String getAttribute(String name, String dft)
         {

@@ -13,6 +13,8 @@ import com.mortbay.HTTP.HttpResponse;
 import com.mortbay.HTTP.PathMap;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.Log;
+import com.mortbay.Util.Resource;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Collection;
@@ -105,7 +107,10 @@ public class ServletHandler extends NullHandler
     /* ----------------------------------------------------------------- */
     public void start()
     {
+        // Initialize classloader
         initializeLoader();
+        
+        // Initialize servlets
         Iterator i = _servletMap.values().iterator();
         while (i.hasNext())
         {
@@ -113,6 +118,7 @@ public class ServletHandler extends NullHandler
             if (holder.isInitOnStartup())
                 holder.initialize();
         }
+        
         Log.event("ServletHandler started: "+this);
         super.start();
     }

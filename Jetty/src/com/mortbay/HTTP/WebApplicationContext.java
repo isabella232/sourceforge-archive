@@ -95,7 +95,7 @@ public class WebApplicationContext extends HandlerContext
             _servletHandler = getServletHandler();
             _context=_servletHandler.getContext();
             
-            // FileBase and ResourcePath
+            // ResourcePath
             super.setResourceBase(_webAppName);
             setServingResources(true);
             ResourceHandler rh = getResourceHandler();

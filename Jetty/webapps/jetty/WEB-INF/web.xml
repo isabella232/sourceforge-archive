@@ -10,7 +10,7 @@
     <param-value>mortbay@mortbay.com</param-value>
   </context-param>
   <servlet>
-    <servlet-name>page</servlet-name>
+    <servlet-name>Jetty Demo Page</servlet-name>
     <servlet-class>com.mortbay.Jetty.JettyServlet</servlet-class>
   </servlet>
   <servlet>
@@ -20,16 +20,18 @@
       <param-name>param1</param-name>
       <param-value>value1</param-value>
     </init-param>
-    <load-on-startup>true</load-on-startup>
+    <load-on-startup>1</load-on-startup>
   </servlet>
   <servlet>
     <servlet-name>session</servlet-name>
     <servlet-class>com.mortbay.Servlet.SessionDump</servlet-class>
   </servlet>
+
   <servlet-mapping>
-    <servlet-name>page</servlet-name>
+    <servlet-name>Jetty Demo Page</servlet-name>
     <url-pattern>/</url-pattern>
   </servlet-mapping>
+
   <servlet-mapping>
     <servlet-name>dump</servlet-name>
     <url-pattern>/dump,/dump/*</url-pattern>

@@ -113,8 +113,6 @@ it is not yet configured into the release demo, nor is it documented.
 
 What's Missing:
 ---------------
-ResourceDispatching
 WebApplication as a war file support (almost there...)
 JSP
-
 

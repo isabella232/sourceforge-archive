@@ -281,6 +281,31 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public Object getAttribute(String name)
     {
+        if ("javax.servlet.context.tempdir".equals(name))
+        {
+            // Initialize temporary directory
+            File tempDir=(File)_handler.getHandlerContext()
+                .getAttribute("javax.servlet.context.tempdir");
+            if (tempDir==null)
+            {
+                try{
+                    tempDir=File.createTempFile("JettyContext",null);
+                    if (tempDir.exists())
+                        tempDir.delete();
+                    tempDir.mkdir();
+                    tempDir.deleteOnExit();
+                    _handler.getHandlerContext()
+                        .setAttribute("javax.servlet.context.tempdir",
+                                      tempDir);
+                }
+                catch(Exception e)
+                {
+                    Code.warning(e);
+                }
+            }
+            Code.debug("TempDir=",tempDir);
+        }
+        
         return _handler.getHandlerContext().getAttribute(name);
     }
     

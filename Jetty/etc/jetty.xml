@@ -50,7 +50,7 @@ This file configures:
  + A listener at port 8080 on all known interfaces
  + The default web applicaton at /default/* context
  + Dynamic servlet context at /servlet/*
- + A context at / with serving files from ./FileBase and
+ + A context at / with serving files from ./docroot and
    the dump servlet at /dump.
 
 $ID: $
@@ -81,7 +81,7 @@ $ID: $
 
   <Call name="addContext">
     <Arg>/</Arg>
-    <Set name="ResourceBase">./FileBase/</Set>
+    <Set name="ResourceBase">./docroot/</Set>
     <Set name="ServingResources">TRUE</Set>
     <Call name="addServlet">
       <Arg>Dump</Arg>

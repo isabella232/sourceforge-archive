@@ -5,6 +5,7 @@
 
 package com.mortbay.HTTP;
 
+import com.mortbay.HTTP.Handler.NotFoundHandler;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.DateCache;
 import com.mortbay.Util.InetAddrPort;
@@ -55,7 +56,6 @@ public class HttpServer implements LifeCycle
     public HttpServer()
     {}
 
-
     /* ------------------------------------------------------------ */
     /** 
      * @return 
@@ -74,15 +74,13 @@ public class HttpServer implements LifeCycle
     public void setHttpEncoding(HttpEncoding httpEncoding)
     {
         _httpEncoding = httpEncoding;
-    }    
-
+    }
     
     /* ------------------------------------------------------------ */
     public void initialize(Object config)
     {
         Code.notImplemented();
     }
-    
     
     /* ------------------------------------------------------------ */
     /** Start all handlers then listeners.
@@ -93,8 +91,7 @@ public class HttpServer implements LifeCycle
         {
             Code.debug("LISTENERS: ",_listeners);
             Code.debug("HANDLER: ",_hostMap);
-        }
-        
+        }   
         
         Iterator handlers = getHandlers().iterator();
         while(handlers.hasNext())
@@ -246,7 +243,8 @@ public class HttpServer implements LifeCycle
     /* ------------------------------------------------------------ */
     /** Add a HTTP Listener to the server.
      * @param listener The Listener.
-     * @exception IllegalArgumentException If the listener is not for this server. 
+     * @exception IllegalArgumentException If the listener is not for this
+     * server.
      */
     public void addListener(HttpListener listener)
         throws IllegalArgumentException
@@ -443,8 +441,7 @@ public class HttpServer implements LifeCycle
         Log.event("Web Application "+appContext+" added at "+
                   (host!=null?(host+":"+contextPathSpec):contextPathSpec));
         return appContext;
-    }
-    
+    }    
     
     
     /* ------------------------------------------------------------ */
@@ -462,7 +459,9 @@ public class HttpServer implements LifeCycle
      * @param contextPath 
      * @param handler 
      */
-    public void addHandler(String host,String contextPathSpec, HttpHandler handler)
+    public void addHandler(String host,
+                           String contextPathSpec,
+                           HttpHandler handler)
     {
         HandlerContext hc = getContext(host,contextPathSpec);
         hc.addHandler(handler);
@@ -529,6 +528,7 @@ public class HttpServer implements LifeCycle
     {
         _dateCache=new DateCache(format);
     }
+
         
     /* ------------------------------------------------------------ */
     /** Service a request.
@@ -655,60 +655,18 @@ public class HttpServer implements LifeCycle
     {
         if (args.length==0)
         {
-            String[] newArgs=
-            {
-                "-appContext","/=./webapps/default",
-                "-context","/",
-                "-classPath","./servlets",
-                "-dynamic",
-                "-resourceBase","./FileBase/",
-                "-resources",
-                "8080",
-            };
-            args=newArgs;
+            args= new String[] {"8080"};
         }
         else if (args.length==1 && args[0].startsWith("-"))
         {
             System.err.println
-                ("\nUsage - java com.mortbay.HTTP.HttpServer [ options .. ] [[<addr>:]<port> .. ]");
+                ("\nUsage - java com.mortbay.HTTP.HttpServer [[<addr>:]<port> .. ]");
             System.err.println
-                ("\n  [<addr>:]<port>               - Listen on [ address & ] port");
+                ("\n  Serves servlets from 'servlets' directory");
             System.err.println
-                ("  -appContext [<host>:]<pathSpec>=<directory>  ");
+                ("\n  Serves files from 'docroot' directory");
             System.err.println
-                ("                                - Define web application directory");
-            System.err.println
-                ("  -context [<host>:]<pathSpec>  - Define new context. Default=\"/\"");
-            System.err.println
-                ("  -alias <alias>                - Add Alias for current context host");
-            
-            System.err.println
-                ("  -classPath <paths>            - Set contexts classpath.");	
-            System.err.println
-                ("  -resourceBase <dir>           - Set contexts File Base");    
-
-            System.err.println
-                ("  -handler <class>              - Add a hander to the context");
-            
-            System.err.println
-                ("  -servlet <pathSpec>=<class>   - Add Servlet at path to context");
-            System.err.println
-                ("  -dynamic                      - Context serves dynamic servlets");
-            System.err.println
-                ("  -resources                    - Context serves resources as files");
-            System.err.println
-                ("  -dump                         - Add a Dump handler to context");
-            
-            System.err.println
-                ("\nDefault options:");
-            System.err.println
-                ("  -appContext /=./webapps/default\n"+
-                 "  -content /\n"+
-                 "  -classPath ./servlets\n"+
-                 "  -dynamic\n"+
-                 "  -resourceBase ./FileBase/\n"+
-                 "  -resources\n"+
-                 "  8080");
+                ("\n  Default port is 8080");
             System.exit(1);
         }
         
@@ -720,104 +678,21 @@ public class HttpServer implements LifeCycle
             String host=null;
             HandlerContext context = server.getContext(host,"/");	    
             
+            context.setResourceBase("./docroot/");
+            context.setServingResources(true);
+            context.addHandler(new NotFoundHandler());
+
+            context=server.addContext(null,"/servlet/*");
+            context.setClassPath("./servlets/");
+            context.setServingDynamicServlets(true);
+            
             // Parse arguments
             for (int i=0;i<args.length;i++)
             {
-                try
-                {
-                    // Look for dump handler
-                    if ("-appContext".equals(args[i]))
-                    {
-                        String appHost=null;
-                        String spec=args[++i];
-                        String dir=null;
-                        int c=spec.indexOf(":");
-                        int e=spec.indexOf("="); 
-
-                        
-                        if (c>0 && c<e)
-                        {
-                            appHost=spec.substring(0,c);
-                            dir=spec.substring(e+1);
-                            spec=spec.substring(c+1,e);
-                        }
-                        else if (e>0)
-                        {
-                            dir=spec.substring(e+1);
-                            spec=spec.substring(0,e);
-                        }
-                        server.addWebApplication(appHost,spec,dir);
-                    }
-                    // Look for context
-                    else if ("-context".equals(args[i]))
-                    {
-                        String spec=args[++i];
-                        host=null;
-                        int e=spec.indexOf(":");
-                        if (e>0)
-                        {
-                            host=spec.substring(0,e);
-                            spec=spec.substring(e+1);
-                        }
-                        context = server.getContext(host,spec);
-                    }
-                    else if ("-alias".equals(args[i]))
-                    {
-                        server.addHostAlias(host,args[++i]);
-                    }
-                    else if ("-classPath".equals(args[i]))
-                    {
-                        context.setClassPath(args[++i]);
-                    }
-                    else if ("-resourceBase".equals(args[i]))
-                    {
-                        context.setResourceBase(args[++i]);
-                    }
-                    else if ("-handler".equals(args[i]))
-                    {
-                        String className=args[++i];
-                        HttpHandler handler = (HttpHandler)
-                            Class.forName(className).newInstance();
-                        context.addHandler(handler);
-                    }
-                    else if ("-servlet".equals(args[i]))
-                    {
-                        String spec=args[++i];
-                        int e=spec.indexOf("=");
-                        if (e>0)
-                        {
-                            String pathSpec=spec.substring(0,e);
-                            String className=spec.substring(e+1);
-                            context.addServlet(pathSpec,className);
-                        }
-                    }
-                    else if ("-dynamic".equals(args[i]))
-                    {
-                        context.setServingDynamicServlets(true);
-                    }
-                    else if ("-resources".equals(args[i]))
-                    {
-                        context.setServingResources(true);
-                    }
-                    else if ("-dump".equals(args[i]))
-                    {
-                        String className="com.mortbay.HTTP.Handler.DumpHandler";
-                        HttpHandler handler = (HttpHandler)
-                            Class.forName(className).newInstance();
-                        context.addHandler(handler);
-                    }
-                    else
-                    {
-                        // Add listener.
-                        InetAddrPort address = new InetAddrPort(args[i]);
-                        server.addListener(address);
-                    }
-                }
-                catch (Exception e)
-                {
-                    Code.warning(e);
-                }
+                InetAddrPort address = new InetAddrPort(args[i]);
+                server.addListener(address);
             }
+            
             server.start();
         }
         catch (Exception e)

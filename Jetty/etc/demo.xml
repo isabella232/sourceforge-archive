@@ -86,7 +86,7 @@ $ID: $
 
   <Call name="addContext">
     <Arg>/handler/*</Arg>
-    <Set name="ResourceBase">./FileBase/</Set>
+    <Set name="ResourceBase">./docroot/</Set>
     <Set name="ServingResources">TRUE</Set>
     <Call name="addServlet">
       <Arg>Dump</Arg>
@@ -122,6 +122,12 @@ $ID: $
 
   <Call name="addContext">
     <Arg>/</Arg>
+    <Set name="ResourceBase">./docroot/</Set>
+    <Call name="addServlet">
+      <Arg>JSP</Arg>
+      <Arg>*.jsp</Arg>
+      <Arg>org.apache.jasper.servlet.JspServlet</Arg>
+    </Call>
     <Call name="addHandler">
       <Arg><New class="com.mortbay.HTTP.Handler.NotFoundHandler"/></Arg>
     </Call>
@@ -136,5 +142,10 @@ $ID: $
     </New>
   </Set>
 
+  <Set name="TempDir">./tmp</Set>
+  
+
 </Configure>
+
+
 

@@ -12,6 +12,6 @@ rall:
 TESTS :=
 ROOTNAME := src
 
-SUBDIRS := javax/servlet com 
+SUBDIRS := javax/servlet com org/apache/jasper
 
 include $(JETTY_HOME)/etc/Global.mk

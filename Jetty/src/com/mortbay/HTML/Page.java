@@ -68,7 +68,6 @@ public class Page extends Composite
         FgColour="FgColour",
         BgColour="BgColour",
         HighlightColour="HlColour",
-        FileBase="FileBase",
         PageType="PageType",
         NoTitle="No Title"
         ;

@@ -9,10 +9,10 @@ any Java application.
 <UL>
   <LI><A HREF="#Java">100% Java</A>
   <LI><A HREF="#Open">Open Source</A>
-  <LI><A HREF="#Servlets">Servlet API</A>
+  <LI><A HREF="#Servlets">Servlet API 2.2</A>
   <LI><A HREF="#HTTP11">HTTP/1.1 Protocol</A>
   <LI><A HREF="#Embeddable">Embeddable</A>
-  <LI><A HREF="#JSP">Java Server Pages</A>
+  <LI><A HREF="#JSP">Java Server Pages 1.1</A>
   <LI><A HREF="#SSL">SSL Support</A>
 </UL>
 </TD><TD VALIGN=top>
@@ -93,7 +93,6 @@ Key classes within Jetty are dynamicaly loaded so that they may be replaced
 with alternate or extended implementations. For example SSL handling is
 provided by extending the standard HttpListener class.
 
-
 <A NAME="Embeddable"></A>
 <BR>&nbsp;<H3>Embeddable</H3>
 For many applications, HTTP is just another interface protocol. Jetty can
@@ -103,10 +102,10 @@ is in a distributed system, where each process runs it's own Jetty server
 in order to present a managment and monitoring Web interface. 
 
 <A NAME="JSP"></A>
-<BR>&nbsp;<H3>GNU Java Server Pages</H3>
+<BR>&nbsp;<H3>Java Server Pages</H3>
 Jetty includes a JSP package, which implements Java Server Pages, a method
-for adding dynamic content to HTML pages.
-
+for adding dynamic content to HTML pages. Currently this is the Jasper JSP
+engine from apache.
 
 <A NAME="SSL"></A>
 <BR>&nbsp;<H3>SSL Support</H3>

@@ -50,6 +50,7 @@ public class HandlerContext
     private Map _attributes = new HashMap(11);
     private Map _mimeMap;
     private String _name;
+    private boolean _redirectNullPath=true;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -58,6 +59,7 @@ public class HandlerContext
     HandlerContext(HttpServer httpServer)
     {
         _httpServer=httpServer;
+
     }
     
     /* ------------------------------------------------------------ */
@@ -65,8 +67,10 @@ public class HandlerContext
     {
       if (_name==null)
         _name=name;
+      else if (_name.indexOf(":")>=0)
+          _name=_name+";"+name;
       else
-        _name=_name+" "+name;
+          _name=_name+","+name;
     }
 
     /* ------------------------------------------------------------ */
@@ -83,7 +87,10 @@ public class HandlerContext
     
     /* ------------------------------------------------------------ */
     /** Sets the class path for the context.
-     * Also sets the com.mortbay.HTTP.classPath context attribute
+     * Also sets the com.mortbay.HTTP.classPath context attribute.
+     * A class path is only required for a context if it uses classes
+     * that are not in the system class path, or if class reloading is
+     * to be performed.
      * @param fileBase 
      */
     public void setClassPath(String classPath)
@@ -214,8 +221,7 @@ public class HandlerContext
         {
             Code.warning(e);
         }
-    }
-    
+    }    
 
 
     /* ------------------------------------------------------------ */
@@ -610,6 +616,25 @@ public class HandlerContext
         _mimeMap.put(extension,type);
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if a /context request is redirected to /context/ if
+     * there is not path in the context.
+     */
+    public boolean isRedirectNullPath()
+    {
+        return _redirectNullPath;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set null path redirection.
+     * @param b if true a /context request will be redirected to
+     * /context/ if there is not path in the context.
+     */
+    public void setRedirectNullPath(boolean b)
+    {
+        _redirectNullPath=b;
+    }
 
     /* ------------------------------------------------------------ */
     /** 
@@ -632,7 +657,7 @@ public class HandlerContext
             pathInContext=PathMap.pathInfo(contextPathSpec,pathInContext);
         }
         
-        if (pathInContext==null)
+        if (_redirectNullPath && pathInContext==null)
         {
             // XXX optional and avoid //////
             StringBuffer buf=request.getRequestURL();
