@@ -24,10 +24,10 @@ import java.io.Serializable;
  */
 public class ThreadPool implements LifeCycle,Serializable
 {
+    static private int __pool=0;
     public static final String __DAEMON="org.mortbay.util.ThreadPool.daemon";
     public static final String __PRIORITY="org.mortbay.util.ThreadPool.priority";
     /* ------------------------------------------------------------------- */
-    private String _name;
     private Pool _pool;
     private Object _join="";
     private transient boolean _started;
@@ -38,12 +38,18 @@ public class ThreadPool implements LifeCycle,Serializable
      */
     public ThreadPool()
     {
+        String name=this.getClass().getName();
+        int ld = name.lastIndexOf('.');
+        if (ld>=0)
+            name=name.substring(ld+1);
+        synchronized(ThreadPool.class)
+        {
+            name+=__pool++;
+        }
+        
         _pool=new Pool();
         _pool.setPoolClass(ThreadPool.PoolThread.class);
-        _name=this.getClass().getName();
-        int dot=_name.lastIndexOf('.');
-        if(dot>=0)
-            _name=_name.substring(dot+1);
+        setName(name);
     }
 
     /* ------------------------------------------------------------ */
@@ -51,25 +57,6 @@ public class ThreadPool implements LifeCycle,Serializable
      * @return The name of the ThreadPool.
      */
     public String getName()
-    {
-        return _name;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param name Name of the ThreadPool to use when naming Threads.
-     */
-    public void setName(String name)
-    {
-        _name=name;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Name of the Pool instance this ThreadPool uses or null for an anonymous private
-     *                 pool.
-     */
-    public String getPoolName()
     {
         return _pool.getPoolName();
     }
@@ -84,7 +71,7 @@ public class ThreadPool implements LifeCycle,Serializable
      * @param name Name of the Pool instance this ThreadPool uses or null for an anonymous private
      *                  pool.
      */
-    public void setPoolName(String name)
+    public void setName(String name)
     {
         synchronized(Pool.class)
         {
@@ -94,20 +81,42 @@ public class ThreadPool implements LifeCycle,Serializable
                     throw new IllegalStateException("started");
                 return;
             }
+            
             if(name==null)
             {
                 if(_pool.getPoolName()!=null)
+                {               
                     _pool=new Pool();
+                    _pool.setPoolName(getName());
+                }
             }
-            else
+            else if (!name.equals(getName()))
             {
                 Pool pool=Pool.getPool(name);
                 if(pool==null)
                     _pool.setPoolName(name);
                 else
-                    _pool=pool;
+                    _pool=pool;       
             }
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @deprecated use getName()
+     */
+    public String getPoolName()
+    {
+        return getName();
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @deprecated use setName(String)
+     */
+    public void setPoolName(String name)
+    {
+        setName(name);
     }
 
     /* ------------------------------------------------------------ */
@@ -399,28 +408,31 @@ public class ThreadPool implements LifeCycle,Serializable
      */
     public static class PoolThread extends Thread implements Pool.PondLife
     {
-        ThreadPool _threadPool;
         Pool _pool;
+        ThreadPool _jobPool;
         Object _job;
-        Object _run;
         ThreadPool _runPool;
+        Object _run;
         int _id;
         String _name;
 
         /* ------------------------------------------------------------ */
         public void enterPool(Pool pool,int id)
         {
-            _pool=pool;
-            _id=id;
-            _name=_pool.getPoolName()==null?("PoolThread-"+id):(_pool.getPoolName()+"-"+id);
-            this.setName(_name);
-            this.setDaemon(pool.getAttribute(__DAEMON)!=null);
-            Object o=pool.getAttribute(__PRIORITY);
-            if(o!=null)
+            synchronized(this)
             {
-                this.setPriority(((Integer)o).intValue());
+                _pool=pool;
+                _id=id;
+                _name=_pool.getPoolName()+"-"+id;
+                this.setName(_name);
+                this.setDaemon(pool.getAttribute(__DAEMON)!=null);
+                Object o=pool.getAttribute(__PRIORITY);
+                if(o!=null)
+                {
+                    this.setPriority(((Integer)o).intValue());
+                }
+                this.start();
             }
-            this.start();
         }
 
         /* ------------------------------------------------------------ */
@@ -448,22 +460,21 @@ public class ThreadPool implements LifeCycle,Serializable
             synchronized(this)
             {
                 _pool=null;
-                if (_threadPool==null)
+                if(_jobPool==null&&_runPool==null)
                     notify();
-                else
+                if(_job!=null&&_jobPool!=null)
                 {
-                    if (_run!=null)
-                    {
-                        _threadPool.stopJob(this,_run);
-                        _run=null;
-                    }
+                    _jobPool.stopJob(this,_job);
+                    _job=null;
+                    _jobPool=null;
                 }
                 
-                if(_job!=null && _runPool!=null)
+                if(_run!=null&&_runPool!=null)
                 {
-                    _runPool.stopJob(this,_job);
-                    _job=null;
-                }          
+                    _runPool.stopJob(this,_run);
+                    _run=null;
+                    _runPool=null;
+                }
             }
         }
 
@@ -472,7 +483,7 @@ public class ThreadPool implements LifeCycle,Serializable
         {
             synchronized(this)
             {
-                _threadPool=pool;
+                _jobPool=pool;
                 _job=job;
                 notify();
             }
@@ -484,8 +495,8 @@ public class ThreadPool implements LifeCycle,Serializable
          */
         public void run()
         {
-            _run=null;
-            _runPool=null;
+            Object run=null;
+            ThreadPool runPool=null;
             while(_pool!=null&&_pool.isStarted())
             {
                 try
@@ -493,22 +504,20 @@ public class ThreadPool implements LifeCycle,Serializable
                     synchronized(this)
                     {
                         // Wait for a job.
-                        if(_run==null&&_pool!=null&&_pool.isStarted()&&_job==null)
+                        if(run==null&&_pool!=null&&_pool.isStarted()&&_job==null)
                             wait(_pool.getMaxIdleTimeMs());
-                        
                         if(_job!=null)
                         {
-                            // Copy to run members
-                            _run=_job;
+                            run=_run=_job;
                             _job=null;
-                            _runPool=_threadPool;
-                            _threadPool=null;
+                            runPool=_runPool=_jobPool;
+                            _jobPool=null;
                         }
                     }
                     
-                    // handle run members outside sync block
-                    if(_run!=null && _runPool!=null)
-                        _runPool.handle(_run);
+                    // handle outside of sync
+                    if(run!=null && runPool!=null)
+                        runPool.handle(run);
                 }
                 catch(InterruptedException e)
                 {
@@ -518,9 +527,9 @@ public class ThreadPool implements LifeCycle,Serializable
                 {
                     synchronized(this)
                     {
-                        boolean got=_run!=null;
-                        _run=null;
-                        _runPool=null;
+                        boolean got=run!=null;
+                        run=_run=null;
+                        runPool=_runPool=null;
                         try
                         {
                             if(got&&_pool!=null)

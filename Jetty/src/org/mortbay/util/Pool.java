@@ -81,14 +81,17 @@ public class Pool
     public void setPoolName(String name)
         throws IllegalStateException
     {
-        synchronized(Pool.class)
+        synchronized(this)
         {
-            if (_name!=null && !_name.equals(name))
-                __nameMap.remove(_name);
-            if (__nameMap.containsKey(name))
-                throw new IllegalStateException("Name already exists");
-            _name=name;
-            __nameMap.put(_name,this);
+            synchronized(Pool.class)
+            {
+                if (_name!=null && !_name.equals(name))
+                    __nameMap.remove(_name);
+                if (__nameMap.containsKey(name))
+                    throw new IllegalStateException("Name already exists");
+                _name=name;
+                __nameMap.put(_name,this);
+            }
         }
     }
     
@@ -101,14 +104,17 @@ public class Pool
     public void setPoolClass(Class poolClass)
         throws IllegalStateException
     {
-        if (_class!=poolClass)
+        synchronized(this)
         {
-            if (_running>0)
-                throw new IllegalStateException("Thread Pool Running");
-            if (!PondLife.class.isAssignableFrom(poolClass))
-                throw new IllegalArgumentException("Not PondLife: "+poolClass);
-            _class=poolClass;
-            _className=_class.getName();
+            if (_class!=poolClass)
+            {
+                if (_running>0)
+                    throw new IllegalStateException("Thread Pool Running");
+                if (!PondLife.class.isAssignableFrom(poolClass))
+                    throw new IllegalArgumentException("Not PondLife: "+poolClass);
+                _class=poolClass;
+                _className=_class.getName();
+            }
         }
     }
     

@@ -1,7 +1,21 @@
 Jetty Versions
 --------------
 
-Jetty-5.1.2 - 16 January 2005
+Jetty-5.1.3rc0
+ + Flush filter chain caches on servlet/filter change
+ + Fixed rollover filename format bug
+ + Fixed JSR154 error dispatch with explicit pass of type.
+ + Allow system and server classes to be configured for context loader.
+ + IOException if EOF read during chunk.
+ + Fixed HTAccess crypt salt handling.
+ + Added simple xpath support to XmlParser
+ + Added TagLibConfiguration to search for listeners in TLDs.
+ + Added SslListener for 1.4 JSSE API.
+
+Jetty-4.2.24rc0
+ + Back ported Jetty 5 ThreadedServer and ThreadPool
+
+Jetty-5.1.2 - 18 January 2005
  + Added id and ref support to XmlConfiguration
  + Cleaned up AbstractSessionManager synchronization.
  + Fixed potential concurrent login problem with JAAS
