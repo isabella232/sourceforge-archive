@@ -47,9 +47,9 @@ all         - everything
   <property name="classpath"      value="${jasper.jar};${jetty.jar};${xml.jar};${jaxp.jar};${jsse.jar};${servlet.jar};${jmxri.jar};${jmxtools.jar}"/>
 
   <target name="prepare">
-    <mkdir dir="${javadoc}" />
-    <mkdir dir="${classes}" />
-    <copy file="${src}/org/mortbay/jetty/jmx/jetty.mlet" tofile="${etc}/jetty.mlet" />
+    <mkdir quiet="true" dir="${javadoc}" />
+    <mkdir quiet="true" dir="${classes}" />
+    <copy  quiet="true" file="${src}/org/mortbay/jetty/jmx/jetty.mlet" tofile="${etc}/jetty.mlet" />
   </target>
 
   <target name="tidy" >
@@ -62,7 +62,7 @@ all         - everything
   </target>
 
   <target name="classes" depends="prepare">
-    <copy todir="${classes}">
+    <copy todir="${classes}" quiet="true" >
       <fileset dir="${src}">
         <include name="**/defaultManifest.mf" />
         <include name="**/*.properties" />
