@@ -28,6 +28,9 @@ BINFILES :=
 CFGFILES := 
 SUBDIRS = 
 
+INSTALLPATH := etc
+INSTALLFILES := \
+	web.dtd
 
 include $(JETTY_HOME)/etc/Global.mk
 

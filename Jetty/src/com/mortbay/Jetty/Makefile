@@ -13,6 +13,7 @@ EXCLUDECLASSES := JettyServlet.class JettyPage.class JettyPage$$Section.class
 
 include $(JETTY_HOME)/etc/Global.mk
 
+
 WEBAPP := jetty
 WEBAPPCLASSES := \
 	JettyServlet.class \
@@ -29,7 +30,7 @@ install: JettyServlet.class JettyPage.class
 	done
 	cp $(INSTALLROOT)/LICENSE.html $(INSTALLROOT)/webapps/$(WEBAPP)/LICENSE.html
 	cp $(INSTALLROOT)/VERSION.TXT $(INSTALLROOT)/webapps/$(WEBAPP)/versions.txt
-
+	cp jetty.dtd $(INSTALLROOT)/etc
 
 
 
