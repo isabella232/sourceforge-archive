@@ -602,4 +602,69 @@ public class Tests extends junit.framework.TestCase
     }
 
 
+    /* -------------------------------------------------------------- */
+    public void testUrlEncoded()
+    {
+          
+        UrlEncoded code = new UrlEncoded();
+        assertEquals("Empty", code.size(),0);
+
+        code.clear();
+        code.decode("Name1=Value1");
+        assertEquals("simple param size", code.size(),1);
+        assertEquals("simple encode", code.encode(),"Name1=Value1");
+        assertEquals("simple get", code.getString("Name1"),"Value1");
+        
+        code.clear();
+        code.decode("Name2=");
+        assertEquals("dangling param size", code.size(),1);
+        assertEquals("dangling encode", code.encode(),"Name2");
+        assertEquals("dangling get", code.getString("Name2"),"");
+    
+        code.clear();
+        code.decode("Name3");
+        assertEquals("noValue param size", code.size(),1);
+        assertEquals("noValue encode", code.encode(),"Name3");
+        assertEquals("noValue get", code.getString("Name3"),"");
+    
+        code.clear();
+        code.decode("Name4=Value+4%21");
+        assertEquals("encoded param size", code.size(),1);
+        assertEquals("encoded encode", code.encode(),"Name4=Value+4%21");
+        assertEquals("encoded get", code.getString("Name4"),"Value 4!");
+        
+        code.clear();
+        code.decode("Name4=Value+4%21%20%214");
+        assertEquals("encoded param size", code.size(),1);
+        assertEquals("encoded encode", code.encode(),"Name4=Value+4%21+%214");
+        assertEquals("encoded get", code.getString("Name4"),"Value 4! !4");
+
+        
+        code.clear();
+        code.decode("Name5=aaa&Name6=bbb");
+        assertEquals("multi param size", code.size(),2);
+        assertTrue("multi encode "+code.encode(),
+                   code.encode().equals("Name5=aaa&Name6=bbb") ||
+                   code.encode().equals("Name6=bbb&Name5=aaa")
+                   );
+        assertEquals("multi get", code.getString("Name5"),"aaa");
+        assertEquals("multi get", code.getString("Name6"),"bbb");
+    
+        code.clear();
+        code.decode("Name7=aaa&Name7=b%2Cb&Name7=ccc");
+        assertEquals("multi encode",
+                        code.encode(),
+                         "Name7=aaa&Name7=b%2Cb&Name7=ccc"
+                         );
+        assertEquals("list get all", code.getString("Name7"),"aaa,b,b,ccc");
+        assertEquals("list get", code.getValues("Name7").get(0),"aaa");
+        assertEquals("list get", code.getValues("Name7").get(1),"b,b");
+        assertEquals("list get", code.getValues("Name7").get(2),"ccc");
+
+        code.clear();
+        code.decode("Name8=xx%2C++yy++%2Czz");
+        assertEquals("encoded param size", code.size(),1);
+        assertEquals("encoded encode", code.encode(),"Name8=xx%2C++yy++%2Czz");
+        assertEquals("encoded get", code.getString("Name8"),"xx,  yy  ,zz");
+    }
 }

@@ -331,78 +331,6 @@ public class TestHarness
         System.err.println();
     }
     
-    /* -------------------------------------------------------------- */
-    public static void testUrlEncoded()
-    {
-        TestCase test = new TestCase("org.mortbay.util.UrlEncoded");
-
-        try{
-                
-            UrlEncoded code = new UrlEncoded();
-            test.checkEquals(code.size(),0,"Empty");
-
-            code.clear();
-            code.decode("Name1=Value1");
-            test.checkEquals(code.size(),1,"simple param size");
-            test.checkEquals(code.encode(),"Name1=Value1","simple encode");
-            test.checkEquals(code.getString("Name1"),"Value1","simple get");
-            
-            code.clear();
-            code.decode("Name2=");
-            test.checkEquals(code.size(),1,"dangling param size");
-            test.checkEquals(code.encode(),"Name2","dangling encode");
-            test.checkEquals(code.getString("Name2"),"","dangling get");
-        
-            code.clear();
-            code.decode("Name3");
-            test.checkEquals(code.size(),1,"noValue param size");
-            test.checkEquals(code.encode(),"Name3","noValue encode");
-            test.checkEquals(code.getString("Name3"),"","noValue get");
-        
-            code.clear();
-            code.decode("Name4=Value+4%21");
-            test.checkEquals(code.size(),1,"encoded param size");
-            test.checkEquals(code.encode(),"Name4=Value+4%21","encoded encode");
-            test.checkEquals(code.getString("Name4"),"Value 4!","encoded get");
-            
-            code.clear();
-            code.decode("Name4=Value+4%21%20%214");
-            test.checkEquals(code.size(),1,"encoded param size");
-            test.checkEquals(code.encode(),"Name4=Value+4%21+%214","encoded encode");
-            test.checkEquals(code.getString("Name4"),"Value 4! !4","encoded get");
-
-            
-            code.clear();
-            code.decode("Name5=aaa&Name6=bbb");
-            test.checkEquals(code.size(),2,"multi param size");
-            test.check(code.encode().equals("Name5=aaa&Name6=bbb") ||
-                       code.encode().equals("Name6=bbb&Name5=aaa"),
-                       "multi encode "+code.encode());
-            test.checkEquals(code.getString("Name5"),"aaa","multi get");
-            test.checkEquals(code.getString("Name6"),"bbb","multi get");
-        
-            code.clear();
-            code.decode("Name7=aaa&Name7=b%2Cb&Name7=ccc");
-            test.checkEquals(code.encode(),
-                             "Name7=aaa&Name7=b%2Cb&Name7=ccc",
-                             "multi encode");
-            test.checkEquals(code.getString("Name7"),"aaa,b,b,ccc","list get all");
-            test.checkEquals(code.getValues("Name7").get(0),"aaa","list get");
-            test.checkEquals(code.getValues("Name7").get(1),"b,b","list get");
-            test.checkEquals(code.getValues("Name7").get(2),"ccc","list get");
-
-            code.clear();
-            code.decode("Name8=xx%2C++yy++%2Czz");
-            test.checkEquals(code.size(),1,"encoded param size");
-            test.checkEquals(code.encode(),"Name8=xx%2C++yy++%2Czz","encoded encode");
-            test.checkEquals(code.getString("Name8"),"xx,  yy  ,zz","encoded get");
-       }
-        catch(Exception e){
-            Code.warning(e);
-            test.check(false,e.toString());
-        }
-    }
-    
     /* ------------------------------------------------------------ */
     // moved to JUnit testing
     // public static void testURI()
@@ -1603,7 +1531,7 @@ public class TestHarness
             //testDateCache();
             testBlockingQueue();
             //testIO();
-            testUrlEncoded();
+            //testUrlEncoded();
             //testURI();
             testLineInput();
             testThreadPool();
