@@ -30,7 +30,7 @@ import java.util.*;
 public class Row
 {
     /* ------------------------------------------------------------ */
-    final Table table;
+    Table table;
     Object[] values=null;
     boolean exists=false;   
 
@@ -53,7 +53,6 @@ public class Row
     Row(Table table)
     {
 	this(table,true);
-	this.table=table;
     }
     
     /* ------------------------------------------------------------ */
@@ -65,7 +64,6 @@ public class Row
 	 throws java.sql.SQLException
     {
         this(table,false);
-	this.table=table;
     
 	for (int i=0;i<values.length;i++)
 	{

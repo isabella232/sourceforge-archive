@@ -697,7 +697,21 @@ public class HttpRequest extends HttpHeader
 
     
     /* -------------------------------------------------------------- */
-    /** Get the HTTP method for this request
+    /** Returns the character set encoding for the input of this request.
+     * Checks the Content-Type header for a charset parameter and return its
+     * value if found or ISO-8859-1 otherwise.
+     * @return Character Encoding.
+     */
+    public String getCharacterEncoding ()
+    {
+	String encoding = getHeader(ContentType);
+	if (encoding==null || encoding.length()==0)
+	    return "ISO-8859-1";
+	return encoding;
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Get the HTTP method for this request.
      * Returns the method with which the request was made. The returned
      * value can be "GET", "HEAD", "POST", or an extension method. Same
      * as the CGI variable REQUEST_METHOD.
@@ -711,7 +725,7 @@ public class HttpRequest extends HttpHeader
     }
     
     /* -------------------------------------------------------------- */
-    /** Get the full URI 
+    /** Get the full URI.
      * @return For the given example, this would return <PRE>
      * /Servlet/Path/Foo/Bar?aaa=123&bbb=456
      * </PRE>
@@ -735,7 +749,8 @@ public class HttpRequest extends HttpHeader
     
 
     /* -------------------------------------------------------------- */
-    /** Get the URI segment that is more than the servlet path
+    /**
+     * Get the URI segment that is more than the servlet path
      * @return For the given example, this would return <PRE>
      * /Foo/Bar
      * </PRE>

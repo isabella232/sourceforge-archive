@@ -21,6 +21,7 @@ public class Frame
     private static StringWriter __stringWriter = new StringWriter();
     private static StringBuffer __writerBuffer = __stringWriter.getBuffer();
     private static PrintWriter __out = new PrintWriter(__stringWriter,false);
+    private static final String __lineSeparator = System.getProperty("line.separator");
     
     /*-------------------------------------------------------------------*/
     /** The full stack of where the Frame was created. */
@@ -102,11 +103,11 @@ public class Frame
     /* ------------------------------------------------------------ */
     protected void internalInit(int ignoreFrames, boolean partial){
 	// Extract stack components
-	_lineStart = _stack.indexOf("\n",_lineStart)+1;
+	_lineStart = _stack.indexOf(__lineSeparator,_lineStart)+1;
 	for (int i = 0; _lineStart > 0 && i < ignoreFrames; i++){
-	    _lineStart = _stack.indexOf("\n",_lineStart)+1;
+	    _lineStart = _stack.indexOf(__lineSeparator,_lineStart)+1;
 	}
-	_lineEnd = _stack.indexOf("\n",_lineStart);
+	_lineEnd = _stack.indexOf(__lineSeparator,_lineStart);
 	if (_lineEnd < _lineStart || _lineStart < 0){
 	    _where = null;
 	    _stack = null;
@@ -126,7 +127,7 @@ public class Frame
 	
 	// calculate stack depth
 	int i=0;
-	while ((i=_stack.indexOf("\n",i+1))>0)
+	while ((i=_stack.indexOf(__lineSeparator,i+1))>0)
 		_depth++;
 
 	// extract details

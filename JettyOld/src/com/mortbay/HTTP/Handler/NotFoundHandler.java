@@ -26,19 +26,10 @@ public class NotFoundHandler extends NullHandler
 {
     /* ----------------------------------------------------------------- */
     public void handle(HttpRequest request,
-			 HttpResponse response)
+		       HttpResponse response)
 	 throws Exception
     {
-	response.setContentType("text/html");
-	response.setStatus(response.SC_NOT_FOUND,"Not Found");
-	
-	PrintWriter out = new PrintWriter(response.getOutputStream());
-	out.println("<HTML>\n<HEAD><TITLE>Not Found</TITLE>");
-	out.println("<BODY>\n<H2>Error: "+
-			HttpResponse.SC_NOT_FOUND +
-			" Not Found</H2><br><br>");		
-	out.println("</BODY>\n</HTML>");
-	out.flush();
+	response.sendError(response.SC_NOT_FOUND);
     }    
 }
 

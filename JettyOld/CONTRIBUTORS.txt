@@ -3,6 +3,7 @@ Authors & Testers:
   Greg Wilkins <gregw@mortbay.com>
   Jan Bartel <janb@mortbay.com>
   Matt Watson <mattw@mortbay.com>
+  Kent Johnson <kjohnson@transparent.com>
   Thomas Pedersen <zeppelin@login.dknet.dk>
   Jesper Jørgensen <jesper@caput.com>
   Morten Seifert <ms@belle.dk>
@@ -14,4 +15,5 @@ Sponsors:
   Mort Bay Consulting.   http://www.mortbay.com
   Optimus http://www.optimus.com.au
   Intelligent Switched Systems http://www.iswitched.com
+
 

@@ -5,6 +5,15 @@
 # $Id$
 #
 
+ifndef JETTY_HOME
+    JETTY_HOME = $(shell pwd)
+    export JETTY_HOME
+endif
+ifndef INSTALLROOT
+    INSTALLROOT = $(shell pwd)
+    export INSTALLROOT
+endif
+
 rall:
 
 #JAVAOPTIONS := 
@@ -12,15 +21,8 @@ rall:
 TESTS :=
 ROOTNAME := .
 
-
-ifndef JETTY_HOME
-  ifdef MORTBAY_HOME
-    JETTY_HOME := $(MORTBAY_HOME)
-  else
-    JETTY_HOME := /usr/local/Jetty
-  endif
-endif
 include $(JETTY_HOME)/etc/Global.mk
+
 #help target  jetty-release    Make a release of Jetty
 jetty-release: jetty-jars javadoc cleansrc
 

@@ -34,8 +34,8 @@ public class HttpHeader
     
     /* -------------------------------------------------------------- */
     public final static String CRLF = "\015\012";
-    public final static byte[] __CRLF = {'\015','\012'};
-    public final static byte[] __COLON = {':',' '};
+    public final static byte[] __CRLF = {(byte)'\015',(byte)'\012'};
+    public final static byte[] __COLON = {(byte)':',(byte)' '};
     
     public final static String HTTP_1_0 ="HTTP/1.0"   ;
     public final static String HTTP_1_1 ="HTTP/1.1"   ;
@@ -89,7 +89,7 @@ public class HttpHeader
     }
     
     /* -------------------------------------------------------------- */
-    /** Set a header field
+    /** Set a header field.
      */
     public void setHeader(String key,String value)
     {
@@ -109,7 +109,7 @@ public class HttpHeader
     }
 
     /* -------------------------------------------------------------- */
-    /* Read HttpHeaders from inputStream
+    /** Read HttpHeaders from inputStream.
      */
     public void read(HttpInputStream in)
     throws IOException
@@ -142,7 +142,7 @@ public class HttpHeader
 
     
     /* -------------------------------------------------------------- */
-    /* Write Extra HTTP headers
+    /* Write Extra HTTP headers.
      */
     protected void write(OutputStream out, String extra)
     throws IOException
@@ -194,7 +194,7 @@ public class HttpHeader
     }
    
     /* -------------------------------------------------------------- */
-    /** Get a header as an integer value
+    /** Get a header as an integer value.
      * Returns the value of an integer header field, or -1 if not found.
      * The case of the header field name is ignored.
      * @param name the case-insensitive header field name
@@ -213,7 +213,7 @@ public class HttpHeader
     }
     
     /* -------------------------------------------------------------- */
-    /**Get a header as a date value
+    /** Get a header as a date value.
      * Returns the value of a date header field, or -1 if not found.
      * The case of the header field name is ignored.
      * @param name the case-insensitive header field name

@@ -1,6 +1,9 @@
 
  + Update this todo list 
 
+ + Use Java 1.2 features. (Mostly replace JDBC connection
+   cache with weak references).
+
  + Write an EJB container container with Jetty in it, so
    that it can report on all the other EJBs
 

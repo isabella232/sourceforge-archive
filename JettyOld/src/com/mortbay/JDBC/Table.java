@@ -74,13 +74,14 @@ public class Table extends ColumnGroup
 	{
 	    Column[] temp = new Column[primarys.size()];
 	    primarys.copyInto(temp);
+	    Key tempKey = null;
 	    try{
-		this.primaryKey = new Key ("primary", temp);
+		tempKey = new Key ("primary", temp);
 	    }
 	    catch(NonKeyException nke){
 		Code.ignore(nke);
-		this.primaryKey=null;
 	    }
+	    this.primaryKey = tempKey;
 	}
 	else
 	    this.primaryKey=null;

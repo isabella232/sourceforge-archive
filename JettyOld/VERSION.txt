@@ -1,3 +1,10 @@
+Release 2.0.4 - 10 December 1998
+  + Use real release of JSDK2.0 (rather than beta).
+  + Portability issues solved for Apple's
+  + Improved error code returns
+  + Removed MORTBAY_HOME support from Makefiles
+  + Improved default Makefile behaviour
+
 Release 2.0.3 - 13 November 1998
   + Limit threads in ThreadedServer and low priority listener option 
     greatly improve performance under worse case loads.
@@ -22,7 +29,6 @@ Release 2.0.0 - 25 October 1998
   + Removed Chat demo (too many netscape dependancies).
   + Fixed Code.formatObject handling of null objects.
   + Added multipart/form-data demo.
- 
 
 Release 2.0.Beta3 - 29 Sep 1998
   + Send 301 for directories without trailing / in FileHandler
@@ -33,11 +39,9 @@ Release 2.0.Beta3 - 29 Sep 1998
   + Fixed Log Handler again.
   + Added com.mortbay.HTTP.MultiPartRequest to handle file uploads
 
-
 Release 2.0Beta2 - July 1998
   + Fixed Log Handler for HTTP/1.1
   + Slight improvement in READMEs
-
 
 Release 2.0Beta1 - June 1998
   + Improved performance of Code.debug() calls, significantly
@@ -50,7 +54,6 @@ Release 2.0Beta1 - June 1998
   + Improved performance with special asciiToLowerCase
   + Warn if MSIE used for multi part MIME.
 
-
 Release 2.0Alpha2 - May 1998
   + JDK1.2 javax.servlet API
   + Added date format to Log
@@ -62,13 +65,11 @@ Release 2.0Alpha2 - May 1998
   + Use javax.servlet.http.HttpSession
   + Handle Single Threaded servlets with servlet pool
 
-
 Release 1.3.5 May 1998
   + Fixed socket inet bug in FTP
   + Debug triggers added to com.mortbay.Base.Code
   + Added date format to Log
   + Correct handling of multiple parameters 
-
 
 Release 2.0Alpha1 Wed 8 April 1998
   + Fixed forward bug with no port number 
@@ -89,7 +90,6 @@ Release 2.0Alpha1 Wed 8 April 1998
   + Send 100 Continue for HTTP/1.1 requests (concerned about push???)
   + persistent connections
 
-
 Release 1.3.4 - Sun 15 Mar 1998
   + Fixed handling of multiple parameters in query and form content.
     "?A=1%2C2&A=C%2CD" now returns two values ("1,2" & "C,D") rather
@@ -98,18 +98,15 @@ Release 1.3.4 - Sun 15 Mar 1998
     name which is used to set the translated path for pathInfo in
     servlet requests.
   + Dump servlet enhanced to excercise these changes.
- 
 
 Release 1.3.3
   + Fixed TableForm.addButtonArea bug.
   + TableForm.extendRow() uses existing cell
   + Closed exception window in HttpListener.java
 
-
 Release 1.3.2
   + Fixed proxy bug with no port number 
   + Added per Table cell composite factories
-
 
 Release 1.3.1
   + Minor fixes in SmtpMail
@@ -118,11 +115,9 @@ Release 1.3.1
   + Better handling of InvoicationTargetException in debug
   + Minor release adjustments for Tracker
 
-
 Release 1.3.0
   + Added DbAdaptor to JDBC wrappers
   + Beta release of Tracker
-
 
 Release 1.2.0
   + Reintroduced STF
@@ -131,20 +126,21 @@ Release 1.2.0
   + DebugServlet
   + Alternate look and feel for Jetty
 
-
 Release 1.1.1
   + Improved documentation
-
 
 Release 1.1 
   + Improved connection caching in java.mortbay.JDBC
   + Moved HttpCode to com.mortbay.Util
 
-
 Release 1.0.1
   + Bug fixes
-
 
 Release 1.0  
   + First release in com.mortbay package structure
   + Included Util, JDBC, HTML, HTTP, Jetty
+
+
+
+
+

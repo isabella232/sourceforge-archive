@@ -12,6 +12,7 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.*;
 import java.util.*;
+import java.lang.reflect.*;
 
 
 /* ------------------------------------------------------------------ */
@@ -43,6 +44,39 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     public final static String Server ="Server"   ;
     public final static String Expires ="Expires"   ;
     public final static String Location ="Location"   ;
+
+    /* -------------------------------------------------------------- */
+    public final static Hashtable __errorCodeMap = new Hashtable();
+    static
+    {
+	// Build error code map using reflection
+	try
+	{
+	    Field[] fields = javax.servlet.http.HttpServletResponse.class
+		.getDeclaredFields();
+	    for (int f=fields.length; f-->0 ;)
+	    {
+		int m = fields[f].getModifiers();
+		if (!Modifier.isFinal(m) || !Modifier.isStatic(m))
+		    continue;
+
+		if (!fields[f].getType().equals(Integer.TYPE))
+		    continue;
+
+		if (fields[f].getName().startsWith("SC_"))
+		{
+		    String error = fields[f].getName().substring(3);
+		    error = error.replace('_',' ');
+		    __errorCodeMap.put(fields[f].get(null),error);
+		}
+	    }
+	}
+	catch (Exception e)
+	{
+	    Code.warning(e);
+	}
+	Code.debug("__errorCodeMap = ",__errorCodeMap);
+    }
     
     /* -------------------------------------------------------------- */
     private String version;
@@ -382,8 +416,17 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     public void sendError(int code,String msg) 
 	throws IOException
     {
+	setContentType("text/html");
 	setStatus(code,msg);
 	writeHeaders();
+
+	PrintWriter out = getWriter();
+	out.println("<HTML><HEAD><TITLE>Error "+code+"</TITLE>");
+	out.println("<BODY><H2>HTTP ERROR: "+
+		    code +
+		    " " + msg + "</H2>");       
+	out.println("</BODY>\n</HTML>");
+	out.flush();
     }
       
     /* ------------------------------------------------------------- */
@@ -396,10 +439,12 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     public void sendError(int code) 
 	throws IOException
     {
-	setStatus(code);
-	writeHeaders();
-    }  
-    
+	String msg = (String)__errorCodeMap.get(new Integer(code));
+	if (msg==null)
+	    sendError(code,"UNKNOWN ERROR CODE");
+	else
+	    sendError(code,msg);
+    }
     
     /* ------------------------------------------------------------- */
     /**
@@ -445,19 +490,26 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     }
     
     /* -------------------------------------------------------------- */
+    /** Returns the character set encoding for the input of this request.
+     * Checks the Content-Type header for a charset parameter and return its
+     * value if found or ISO-8859-1 otherwise.
+     * @return Character Encoding.
+     */
+    public String getCharacterEncoding ()
+    {
+	String encoding = getHeader(ContentType);
+	if (encoding==null || encoding.length()==0)
+	    return "ISO-8859-1";
+	return encoding;
+    }
+    
+    /* -------------------------------------------------------------- */
     public java.io.PrintWriter getWriter()
     {
 	if (writer==null)
 	    writer=new PrintWriter(new OutputStreamWriter(getOutputStream()));
 	return writer;
-    }
-
-    /* -------------------------------------------------------------- */
-    public String getCharacterEncoding()
-    {
-	return "8859_1";
-    }
-    
+    }    
 
 }
 

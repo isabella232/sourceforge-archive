@@ -36,8 +36,9 @@ import java.io.*;
 public class HttpOutputStream extends ServletOutputStream
 {
     /* ------------------------------------------------------------ */
-    final static byte[] __CRLF={'\015','\12'};
-    final static byte[] __EOF ={'0',';','\015','\012','\015','\012'};
+    final static byte[] __CRLF={(byte)'\015',(byte)'\12'};
+    final static byte[] __EOF ={(byte)'0',(byte)';',(byte)'\015',
+				(byte)'\012',(byte)'\015',(byte)'\012'};
 
     /* ------------------------------------------------------------ */
     class SwitchOutputStream extends FilterOutputStream

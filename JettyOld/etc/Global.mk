@@ -243,7 +243,7 @@ endif
 # 		     or environment
 #help 
 #help var:	INSTALLROOT	Root directory where files should be
-#help     			installed to - defaults to $JETTY_HOME
+#help     			installed to - defaults to $CLASSROOT/..
 #help var:	BINFILES	Files to install in bin dir
 #help var:	LIBFILES	Files to install in lib dir : defaults to all
 #help     	        	native libraries.
@@ -263,7 +263,7 @@ endif
 ifndef INSTALLROOT
 # If INSTALLROOT not defined, install the files to the root of the src tree
 # and make them writeable.
-INSTALLROOT := $(JETTY_HOME)
+INSTALLROOT := $(CLASSROOT)/..
 endif
 define installFile
 	@if [ ! -d `dirname '$@'` ];\
