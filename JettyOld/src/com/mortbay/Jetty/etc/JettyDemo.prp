@@ -1,0 +1,140 @@
+# ========================================================================
+# Configuration file for com.mortbay.Jetty.Demo
+# ------------------------------------------------------------------------
+# All configurations lines are of the general format:
+#   <server>.<stack>.<option>[.<path>] : value
+# where
+#   <server> - The name of the server being configured (multiple servers
+#              can be configured in the same file).
+#   <stack>  - The path that the option is activated on.
+#              Within each server, options are handled by a stack of 
+#              handlers at a path specification. This allows the
+#              handling of each request to be optimized.  If you don't
+#              know what stack to use, just use "/".
+#   <option> - InetAddrPort | Servlet | Directory | Translate | Forward |
+#              Auth | Log | Filter | Proxy
+#   <path>   - The path that the options value applies to.
+#               
+# ------------------------------------------------------------------------
+# Define the ports the server will listen on:
+#   <server>.<stack>.InetAddrPort: <host>:<port>[,<host>:<port> ...]
+# where
+#   <host> - Host name of server
+#          | IP address of server
+#          | "0.0.0.0" Fore all local interfaces
+#   <port> - Port of server
+#
+# ------------------------------------------------------------------------
+# Declare a servlet:
+#   <server>.<stack>.Servlet.<path>:  <class>[?<paramFile>]
+# where
+#   <class>     - The class name of the servlet
+#   <paramFile> - Name of file containing servlet init params
+#
+# ------------------------------------------------------------------------
+# Declare a file server directory:
+#   <server>.<stack>.Directory.<path>: <filename>
+# where
+#   <filename> - The absolute or relative filename of the real directory
+#
+# ------------------------------------------------------------------------
+# Declare a log file
+#   <server>.<stack>.Log.<path>:  <filename>
+# where
+#   <filename> - Name of log file
+#              | 'out' for standard output
+#              | 'err' for standard error
+#
+# ------------------------------------------------------------------------
+# Declare a authenticaton realm 
+#   <server>.<stack>.Auth.<path>: <realmname>=<realmfile>
+# where
+#   <realmname> - Name of the realm
+#   <realmfile> - Name of the realm file
+#
+# ------------------------------------------------------------------------
+# Declare a Translation
+#   <server>.<stack>.Translate.<path>:  <newpath>
+# where
+#   <newpath> - The new path
+#
+# ------------------------------------------------------------------------
+# Declare a Filter
+#   <server>.<stack>.Filter.<path>:  <filterclass>
+# where
+#   <filterclass> - The class name of the filter
+#
+# ------------------------------------------------------------------------
+# Declare a Forward
+#   <server>.<stack>.Forward.<path>:  <URL>
+# where
+#   <URL> - The URL to forward to
+#
+# ------------------------------------------------------------------------
+# Declare a Proxy
+#   <server>.<stack>.Proxy
+#
+# ------------------------------------------------------------------------
+
+
+
+# ========================================================================
+# This is a full featured configuration
+# ------------------------------------------------------------------------
+ServerA./.InetAddrPort	   : 0.0.0.0:8080
+
+ServerA./.Log./		   : err
+
+ServerA./.Auth./Auth	   : Demo=./etc/RealmDemo.prp
+ServerA./.Auth./Chat$	   : Demo=./etc/RealmDemo.prp
+ServerA./.Auth./Auth	   : Other=./etc/RealmOther.prp
+
+ServerA./.Translate./$     : /Jetty
+ServerA./.Translate./Auth% : /
+ServerA./.Translate./Other%: /
+ServerA./.Translate./Translate%: /Dump/
+ServerA./.Translate./Proxy%: http://localhost:8080/
+
+ServerA./.Filter./	   : com.mortbay.HTTP.Filter.HtmlFilter
+
+ServerA./.Servlet./Dump%   : Dump=com.mortbay.Servlets.Dump?./etc/ParamDemo.prp
+ServerA./.Servlet./Session : Session=com.mortbay.Servlets.SessionDump
+ServerA./.Servlet./Config$ : Config=com.mortbay.Servlets.ConfigDump
+ServerA./.Servlet./Debug$  : Debug=com.mortbay.Servlets.DebugServlet
+ServerA./.Servlet./Hello   : Hello=HelloWorldServlet
+ServerA./.Servlet./Chat    : Chat=com.mortbay.Servlets.Chat
+ServerA./.Servlet./ChatNoAuth : Chat=com.mortbay.Servlets.Chat
+ServerA./.Servlet./Demo/push  : Multi=com.mortbay.Jetty.MultiPartCount
+ServerA./.Servlet./Demo/generate    : Gen=com.mortbay.Jetty.GenerateServlet
+ServerA./.Servlet./Demo/generateLaf : GenL=com.mortbay.Jetty.GenerateLafServlet
+ServerA./.Servlet./Jetty/Demo/    : Laf=com.mortbay.Servlets.LookAndFeelServlet
+ServerA./.Servlet./Jetty/Info/    : Laf=com.mortbay.Servlets.LookAndFeelServlet
+ServerA./.Servlet./Jetty/Config/  : Laf=com.mortbay.Servlets.LookAndFeelServlet
+ServerA./.Servlet./Jetty/Program/ : Laf=com.mortbay.Servlets.LookAndFeelServlet
+ServerA./.Servlet./Jetty|         : Index=com.mortbay.Jetty.DemoIndex
+ServerA./.Servlet./Jetty/Info|    : Index=com.mortbay.Jetty.DemoIndex
+ServerA./.Servlet./Jetty/Demo|    : Index=com.mortbay.Jetty.DemoIndex
+ServerA./.Servlet./Jetty/Program| : Index=com.mortbay.Jetty.DemoIndex
+ServerA./.Servlet./Jetty/Config|  : Index=com.mortbay.Jetty.DemoIndex
+
+ServerA./.Directory./      : ./FileBase
+
+ServerA./.Forward./Forward%: http://localhost:8080
+ServerA./.Forward.http     : http://localhost:8081
+
+ServerA./javadoc%.Directory./: .
+
+# ------------------------------------------------------------------------
+ServerP./.InetAddrPort	   : localhost:8081
+ServerP./.Log./		   : err
+ServerP./.Log.http	   : err
+ServerP./.Log.ftp	   : err
+ServerP./.Proxy
+ServerP.http.Proxy
+ServerP.ftp.Proxy
+
+
+
+
+
+
