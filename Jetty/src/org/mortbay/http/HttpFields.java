@@ -330,6 +330,8 @@ public class HttpFields
     }
 
     /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     private static class Field
     {
         FieldInfo _info;
@@ -337,6 +339,7 @@ public class HttpFields
         Field _next;
         Field _prev;
 
+        /* ------------------------------------------------------------ */
         Field(FieldInfo info, String value)
         {
             _info=info;
@@ -345,11 +348,13 @@ public class HttpFields
             _prev=null;
         }
         
+        /* ------------------------------------------------------------ */
         public boolean equals(Object o)
         {
             return (o instanceof Field) && ((Field)o)._info==_info;
         }
 
+        /* ------------------------------------------------------------ */
         void clear()
         {
             _info=null;
@@ -358,6 +363,7 @@ public class HttpFields
             _prev=null;
         }
 
+        /* ------------------------------------------------------------ */
         public void write(Writer writer)
             throws IOException
         {
@@ -389,6 +395,7 @@ public class HttpFields
             }
         }
 
+        /* ------------------------------------------------------------ */
         public String toString()
         {
             return (_prev==null?"[":("["+_prev._info._name+"<- "))+

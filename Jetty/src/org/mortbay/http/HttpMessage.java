@@ -164,7 +164,8 @@ abstract public class HttpMessage
         _state=state;
         return last;
     }
-    
+
+
     /* ------------------------------------------------------------ */
     /** Get the protocol version.
      * @return return the version.
@@ -536,6 +537,9 @@ abstract public class HttpMessage
      */
     public HttpFields getHeader()
     {
+        if (_state!=__MSG_EDITABLE)
+            throw new IllegalStateException("Can't get header in "+__state[_state]);
+        
         return _header;
     }
     
@@ -545,6 +549,9 @@ abstract public class HttpMessage
      */
     public HttpFields getTrailer()
     {
+        if (_state!=__MSG_EDITABLE)
+            throw new IllegalStateException("Can't get trailer in "+__state[_state]);
+        
         if (_acceptTrailer && _trailer==null)
             _trailer=new HttpFields();
         return _trailer;

@@ -84,6 +84,12 @@
     <Arg>/demo/*</Arg>
 
     <Call name="addHandler">
+      <Arg><New class="org.mortbay.http.handler.ProxyHandler">
+      </New>
+      </Arg>
+    </Call>
+
+    <Call name="addHandler">
       <Arg><New class="org.mortbay.http.handler.HTAccessHandler">
 	    <Set name="AccessFile">.htaccess</Set></New>
       </Arg>

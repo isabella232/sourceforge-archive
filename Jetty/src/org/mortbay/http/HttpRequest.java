@@ -366,11 +366,11 @@ public class HttpRequest extends HttpMessage
     
     /* -------------------------------------------------------------- */
     /** Get the full URI.
-     * @return A cloned copy of the request URI
+     * @return the request URI (not a clone).
      */
     public URI getURI()
     {
-        return (URI)_uri.clone();
+        return _uri;
     }
     
     /* ------------------------------------------------------------ */
