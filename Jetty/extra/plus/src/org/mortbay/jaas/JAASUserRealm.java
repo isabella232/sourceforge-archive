@@ -187,6 +187,7 @@ public class JAASUserRealm implements UserRealm
             //re-authentication has been requested, so flow that 
             //thru all the way to the login module mechanism and
             //remove their previously authenticated status
+            //TODO: ensure cache state and "logged in status" are synchronized
             if (info != null)
             {
                 userMap.remove (username);
