@@ -884,7 +884,7 @@ public class Code
     public static void ignore(Throwable ex)
     {
         Code code = instance();
-        if (code._debugOn)
+        if (code._debugOn && code._verbose>0)
         {
             Frame frame = new Frame(1,true);
             if (code.isDebugOnFor(frame))

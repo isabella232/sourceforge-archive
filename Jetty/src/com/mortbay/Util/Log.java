@@ -11,6 +11,9 @@ import java.text.*;
 
 /*-----------------------------------------------------------------------*/
 /** Log formatted and tagged messages.
+ * Multiple LogSinks instances can be configured, but by default a
+ * System.err sink is created.
+ * <p>
  * The Log log format is controlled by the LOG_OPTIONS property
  * supplied to the VM. 
  * <p>If LOG_OPTIONS is set, then the default output format is controlled
@@ -35,14 +38,6 @@ import java.text.*;
 public class Log 
 {
     /*-------------------------------------------------------------------*/
-    public static char TIMESTAMP = 't';
-    public static char LABEL = 'L';
-    public static char TAG = 'T';
-    public static char STACKSIZE = 's';
-    public static char STACKTRACE = 'S';
-    public static char ONELINE = 'O';
-
-    /*-------------------------------------------------------------------*/
     public final static String EVENT="LOG.EVENT";
     public final static String WARN="LOG.WARN";
     public final static String CODE_ASSERT="CODE.ASSERT";
@@ -51,25 +46,20 @@ public class Log
     public final static String CODE_DEBUG="CODE.DEBUG";
 
     /*-------------------------------------------------------------------*/
-    private static final String __lineSeparator = System.getProperty("line.separator");
-    private static final int __lineSeparatorLen = __lineSeparator.length();
+    public static char TIMESTAMP = 't';
+    public static char LABEL = 'L';
+    public static char TAG = 'T';
+    public static char STACKSIZE = 's';
+    public static char STACKTRACE = 'S';
+    public static char ONELINE = 'O';
+
     
     /*-------------------------------------------------------------------*/
+    public LogSink[] _sinks = null;
     public String _logOptions=null;
-    public boolean _logTimeStamps=true;
-    public boolean _logLabels=true;
-    public boolean _logTags=true;
-    public boolean _logStackSize=true;
-    public boolean _logStackTrace=false;
-    public boolean _logOneLine=false;
-    public PrintWriter _out = null;
-    public DateCache _dateFormat=null;
 
     /*-------------------------------------------------------------------*/
     private static Log __instance=null;
-
-    private static String __indent =
-        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
 
     /*-------------------------------------------------------------------*/
     /** Shared static instances, reduces object creation at expense
@@ -78,42 +68,60 @@ public class Log
     
     /*-------------------------------------------------------------------*/
     public static Log instance()
-    {   
+    {    
         if (__instance==null)
         {
             synchronized(com.mortbay.Util.Log.class)
             {
                 if (__instance==null)
-                    new Log();
+		{
+                    __instance = new Log();
+		    
+		    String logOptions = "tLTs";
+		    String logFile = null;
+		    String dateFormat = "yyyyMMdd HHmmss.SSS zzz ";
+		    String timezone = "GMT";
+		    try {
+			logOptions = System.getProperty("LOG_OPTIONS","tLTs");
+			logFile = System.getProperty("LOG_FILE");
+			dateFormat = System.getProperty("LOG_DATE_FORMAT",
+							"yyyyMMdd HHmmss.SSS zzz ");
+			timezone = System.getProperty("LOG_TIMEZONE","GMT");
+		    }
+		    catch (Exception ex){
+			System.err.println("Exception from getProperty - probably running in applet\nUse Log.initParamsFromApplet or Log.setOptions to control debug output.");
+		    }
+		    
+		    LogSink sink= null;
+		    try
+		    {
+			if(logFile==null)
+			    sink=new LogSink();
+			else
+			    sink=new FileLogSink(logFile);
+		    }
+		    catch(IOException e)
+		    {
+			e.printStackTrace();
+			sink=new LogSink();
+		    }
+		    
+		    sink.setOptions(dateFormat,timezone,
+				    (logOptions.indexOf(TIMESTAMP) >= 0),
+				    (logOptions.indexOf(LABEL) >= 0),
+				    (logOptions.indexOf(TAG) >= 0),
+				    (logOptions.indexOf(STACKSIZE) >= 0),
+				    (logOptions.indexOf(STACKTRACE) >= 0),
+				    (logOptions.indexOf(ONELINE) >= 0));
+		    
+		    __instance.add(sink);
+		}
             }
         }
         return __instance;
-    }    
-    
-    /*-------------------------------------------------------------------*/
-    /** Construct the shared instance of Log that decodes the
-     * options setup in the environments properties.
-     */
-    public Log()
-    {
-        __instance = this;
-        String logOptions = null;
-        String logFile = null;
-        String dateFormat = null;
-        String timezone = null;
-        try {
-            logOptions = System.getProperty("LOG_OPTIONS");
-            logFile = System.getProperty("LOG_FILE");
-            dateFormat = System.getProperty("LOG_DATE_FORMAT");
-            timezone = System.getProperty("LOG_TIMEZONE");
-        }
-        catch (Exception ex){
-            System.err.println("Exception from getProperty - probably running in applet\nUse Log.initParamsFromApplet or Log.setOptions to control debug output.");
-        }
-
-        setOptions(logOptions,logFile,dateFormat,timezone);
     }
 
+    
     /* ------------------------------------------------------------ */
     /** Initialize default behaviour from applet parameters
      *
@@ -123,105 +131,85 @@ public class Log
      */
     public static void initParamsFromApplet(java.applet.Applet appl)
     {
-        String lo = appl.getParameter("LOG_OPTIONS");
-        String lf = appl.getParameter("LOG_FILE");
-        String df = appl.getParameter("LOG_DATE_FORMAT");
-        String tz = appl.getParameter("LOG_TIMEZONE");
-        instance().setOptions(lo,lf,df,tz);
+	synchronized(com.mortbay.Util.Log.class)
+	{
+	    if (__instance==null)
+		__instance = new Log();
+		
+	    String logOptions = appl.getParameter("LOG_OPTIONS");
+	    String logFile = appl.getParameter("LOG_FILE");
+	    String dateFormat = appl.getParameter("LOG_DATE_FORMAT");
+	    String timezone = appl.getParameter("LOG_TIMEZONE");
+
+	    if (logOptions==null)
+		logOptions="tLTs";
+	    
+	    LogSink sink= null;
+	    try
+	    {
+		if(logFile==null)
+		    sink=new LogSink();
+		else
+		    sink=new FileLogSink(logFile);
+	    }
+	    catch(IOException e)
+	    {
+		e.printStackTrace();
+		sink=new LogSink();
+	    }
+	
+	    sink.setOptions((dateFormat!=null)
+			    ?dateFormat:"yyyyMMdd HHmmss.SSS zzz ",
+			    (timezone!=null)?timezone:"GMT",
+			    (logOptions.indexOf(TIMESTAMP) >= 0),
+			    (logOptions.indexOf(LABEL) >= 0),
+			    (logOptions.indexOf(TAG) >= 0),
+			    (logOptions.indexOf(STACKSIZE) >= 0),
+			    (logOptions.indexOf(STACKTRACE) >= 0),
+			    (logOptions.indexOf(ONELINE) >= 0));
+	    
+	    __instance.add(sink);
+	}
     }
+
+    /*-------------------------------------------------------------------*/
+    /** Construct the shared instance of Log that decodes the
+     * options setup in the environments properties.
+     */
+    private Log()
+    {}
 
     /* ------------------------------------------------------------ */
-    /**  Set the log options
-     * @param logOptions A string of characters as defined for the
-     * LOG_OPTIONS system parameter.
-     * @param logFile log file name. Null for stderr.
-     * @param dateFormat Simple date format string for timestamps
-     * @param timezone Time zone for timestamps
+    /** Add a Log Sink.
+     * @param logSink 
      */
-    public void setOptions(String logOptions,
-                           String logFile,
-                           String dateFormat,
-                           String timezone)
+    public synchronized void add(LogSink logSink)
     {
-        setOptions(logOptions);
-
-        if (dateFormat!=null && dateFormat.trim().length()>0)
-        {
-            dateFormat=dateFormat.replace('+',' ');
-            _dateFormat = new DateCache(dateFormat);
-            if (timezone==null || timezone.length()==0)
-                timezone="GMT";
-            _dateFormat.getFormat().setTimeZone(TimeZone.getTimeZone(timezone));
-        }
-        else
-            _dateFormat=new DateCache("yyyyMMdd HHmmss.SSS zzz ");
-        
-        try {
-            if (logFile==null)
-                _out=new PrintWriter(System.err);
-            else
-            {
-                try {
-                    FileOutputStream fos = new FileOutputStream(logFile);
-                    _out = new PrintWriter(fos, true);
-                } catch (Exception ex){
-                    Code.fail("Error writing to LOG_FILE:"+logFile, ex);
-                    System.exit(1);
-                }
-            }
-        } catch (Exception ex){
-            System.err.println("Log problem!");
-            ex.printStackTrace();
-        }
+	if (_sinks==null)
+	{
+	    _sinks=new LogSink[1];
+	    _sinks[0]=logSink;
+	}
+	else
+	{
+	    LogSink[] ns = new LogSink[_sinks.length+1];
+	    for (int i=_sinks.length;i-->0;)
+		ns[i]=_sinks[i];
+	    ns[_sinks.length]=logSink;
+	    _sinks=ns;
+	}
     }
 
-
+    
     /* ------------------------------------------------------------ */
     /** No logging.
-     * Logging is disabled with this call.
+     * All log sinks are removed.
      */
     public void disableLog()
     {
-        _out=null;
+        _sinks=null;
     }
-    
-    /*-------------------------------------------------------------------*/
-    /** Set the log options
-     *
-     * @param logOptions A string of characters as defined for the
-     * LOG_OPTIONS system parameter.
-     */
-    public void setOptions(String logOptions)
-    {
-        _logOptions = logOptions;
-        
-        if (logOptions != null)
-        {
-            _logTimeStamps      = (logOptions.indexOf(TIMESTAMP) >= 0);
-            _logLabels          = (logOptions.indexOf(LABEL) >= 0);
-            _logTags            = (logOptions.indexOf(TAG) >= 0);
-            _logStackSize       = (logOptions.indexOf(STACKSIZE) >= 0);
-            _logStackTrace      = (logOptions.indexOf(STACKTRACE) >= 0);
-            _logOneLine         = (logOptions.indexOf(ONELINE) >= 0);
-        } else {
-            _logTimeStamps      = true;
-            _logLabels          = true;
-            _logTags            = true;
-            _logStackSize       = true;
-            _logStackTrace      = false;
-            _logOneLine         = false;
-            _logOptions         = "tLTs";
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get the current log options
-     * @return the log options strings
-     */
-    public String getOptions()
-    {
-        return _logOptions;
-    }
+
     
     /*-------------------------------------------------------------------*/
     public static synchronized void message(String tag,
@@ -244,67 +232,10 @@ public class Log
                         Frame frame,
                         long time)
     {
-        if (_out==null)
-            return;
-        
-        // Lock static buffer
-        synchronized(__stringBuffer)
-        {
-            __stringBuffer.setLength(0);
-            
-            // Log the time stamp
-            if (_logTimeStamps)
-            {
-                if (_dateFormat!=null)
-                    __stringBuffer.append(_dateFormat.format(new Date(time)));
-                else
-                {
-                    String mSecs = "0000" + time%1000L;
-                    mSecs = mSecs.substring(mSecs.length() - 3);
-                    __stringBuffer.append(Long.toString(time / 1000L));
-                    __stringBuffer.append('.');
-                    __stringBuffer.append(mSecs);
-                }
-            }
-        
-            // Log the label
-            if (_logLabels)
-            {
-                __stringBuffer.append(frame.toString());
-                __stringBuffer.append(':');
-            }
-            
-            // Log the tag
-            if (_logTags)
-                __stringBuffer.append(tag);
-
-            
-            // Determine the indent string for the message
-            String indent = _logOneLine?"\\n ":"\n  ";
-            if (_logStackSize)
-                indent += __indent.substring(0,frame._depth)+" ";
-            __stringBuffer.append(indent);
-            
-            // Add stack frame to message
-            if (_logStackTrace)
-                msg = msg + "\n" + frame._stack;
-
-            // Log indented message
-            int i=0;
-            int last=0; 
-            while ((i=msg.indexOf(__lineSeparator,i))>=last)
-            {
-                __stringBuffer.append(msg.substring(last,i));
-                __stringBuffer.append(indent);
-                i+=__lineSeparatorLen;
-                last=i;
-            }
-            if (msg.length()>last)
-                __stringBuffer.append(msg.substring(last));
-
-            _out.println(__stringBuffer.toString());
-            _out.flush();
-        }
+	if (_sinks==null)
+	    return;
+	for (int s=_sinks.length;s-->0;)
+	    _sinks[s].log(tag,msg,frame,time);
     }
 
     /* ------------------------------------------------------------ */
