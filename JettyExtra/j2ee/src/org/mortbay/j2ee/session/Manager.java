@@ -73,8 +73,7 @@ public class Manager
   Category _log=Category.getInstance(getClass().getName());
 
 
-  final Map    _sessions     = new HashMap();
-  final Object _sessionsLock = new Object();
+  final Map _sessions = new HashMap();
 
   Store _store = null;
   public Store getStore() {return _store;}
@@ -191,7 +190,11 @@ public class Manager
   {
     synchronized (_startedLock)
     {
-      synchronized (_sessionsLock)
+
+      // I guess we will have to ask the store for a list of sessions
+      // to migrate... - TODO
+
+      synchronized (_sessions)
       {
 	List copy=new ArrayList(_sessions.values());
 	for (Iterator i=copy.iterator(); i.hasNext();)
@@ -435,11 +438,9 @@ public class Manager
       return null;		// BAD - TODO
     }
 
-    synchronized (_sessionsLock)
-    {
-      _log.debug("remembering session - "+id);
-      _sessions.put(id, session);
-    }
+    _log.debug("remembering session - "+id);
+
+    synchronized (_sessions) {_sessions.put(id, session);}
 
     notifySessionCreated(session);
 
@@ -467,19 +468,18 @@ public class Manager
   }
 
   protected void
-    destroySession(String id)
+    destroySession(HttpSession container)
   {
-    HttpSession session=null;
-    synchronized (_sessionsLock)
-    {
-      _log.debug("forgetting session - "+id);
-      session=(HttpSession)_sessions.remove(id);
-      _log.debug("forgetting session - "+ session);
-    }
+    String id=container.getId();
+    _log.debug("forgetting session - "+id);
+    Object tmp;
+    synchronized (_sessions) {tmp=_sessions.remove(id);}
+    container=(HttpSession)tmp;
+    _log.debug("forgetting session - "+ container);
 
-    if (session==null)
+    if (container==null)
     {
-      _log.warn("session - "+ session+" has already been destroyed");
+      _log.warn("session - "+ container+" has already been destroyed");
       return;
     }
 
@@ -494,13 +494,20 @@ public class Manager
     // registered... - TODO
 
     // This will do for the moment...
+
+
+    // LATER - TODO
+
     try
     {
-      State state=((StateAdaptor)session).getState();
+      State state=((StateAdaptor)container).getState();
 
       String[] names=state.getAttributeNameStringArray();
       for (int i=0; i<names.length; i++)
-	state.removeAttribute(names[i]);
+	state.removeAttribute(names[i], false);
+
+      // should just do this for attributes which are BindingListeners
+      // - then just clear() the rest... - TODO
     }
     catch(RemoteException e)
     {
@@ -508,10 +515,10 @@ public class Manager
     }
 
     _log.debug("notifying session - "+id);
-    notifySessionDestroyed(session);
+    notifySessionDestroyed(container);
 
     _log.debug("destroying container - "+id);
-    State state=destroyContainer(session);
+    State state=destroyContainer(container);
 
     try
     {
@@ -535,33 +542,40 @@ public class Manager
   {
     // check local cache
 
-    HttpSession s=null;
-    synchronized (_sessionsLock)
+    HttpSession container=null;
+
+    // the store might be distributed and it might need loading...
+    try
     {
-      s=(HttpSession)_sessions.get(id);
+      State state=_store.loadState(id);
 
-      if (s==null)
+      if (state!=null)
       {
-	// the store might be distributed and it might need loading...
-	try
-	{
-	  State tmp=_store.loadState(id);
 
-	  if (tmp!=null)
+	// this looks slow - but to be 100% safe we need to make sure
+	// that no-one can enter another container for the same id,
+	// whilst we are thinking about it...
+	Object tmp;
+	synchronized (_sessions)
+	{
+	  // do we have an existing container ?
+	  tmp=_sessions.get(id);
+
+	  if (tmp==null)
 	  {
-	    s=newContainer(id, tmp);
-	    _sessions.put(id, s);
-	    //	    _log.debug("found distributed session: "+id);
+	    tmp=newContainer(id, state);// we could lower contention by preconstructing containers... - TODO
+	    _sessions.put(id, tmp);
 	  }
 	}
-	catch (Exception ignore)
-	{
-	  _log.info("did not find distributed session: "+id);
-	}
+	container=(HttpSession)tmp;;
       }
     }
+    catch (Exception ignore)
+    {
+      _log.info("did not find distributed session: "+id);
+    }
 
-    return s;
+    return container;
   }
 
   //--------------------
@@ -673,14 +687,11 @@ public class Manager
     scavenge()
   {
     _log.debug("local scavenging...");
-
+    //
     // take a quick copy...
     Collection copy;
-    synchronized (_sessionsLock)
-    {
-      copy=new ArrayList(_sessions.values());
-    }
-
+    synchronized (_sessions) {copy=new ArrayList(_sessions.values());}
+    //
     // iterate over it at our leisure...
     for (Iterator i=copy.iterator(); i.hasNext();)
     {
@@ -691,7 +702,7 @@ public class Manager
       // is invalid...
       ((StateAdaptor)i.next()).isValid();
     }
-
+    //
     _log.debug("...local scavenging");
   }
 }

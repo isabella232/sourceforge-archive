@@ -193,7 +193,7 @@ public abstract class PushPopInterceptor
   }
 
   public Object
-    setAttribute(String name, Object value)
+    setAttribute(String name, Object value, boolean returnValue)
     throws RemoteException
   {
     Object tmp=null;
@@ -201,7 +201,7 @@ public abstract class PushPopInterceptor
     pushContext();
     try
     {
-      tmp=super.setAttribute(name, value);
+      tmp=super.setAttribute(name, value, returnValue);
     }
     finally
     {
@@ -212,7 +212,7 @@ public abstract class PushPopInterceptor
   }
 
   public Object
-    removeAttribute(String name)
+    removeAttribute(String name, boolean returnValue)
     throws RemoteException
   {
     Object tmp=null;
@@ -220,7 +220,7 @@ public abstract class PushPopInterceptor
     pushContext();
     try
     {
-      tmp=super.removeAttribute(name);
+      tmp=super.removeAttribute(name, returnValue);
     }
     finally
     {

@@ -36,7 +36,7 @@ import org.mortbay.j2ee.session.interfaces.CMPStatePK;
  *   @jboss:table-name "JETTY_HTTPSESSION_CMPState"
  *   @jboss:create-table create="true"
  *   @jboss:remove-table remove="true"
- *   @jboss:container-configuration name="Shared Standard CMP 2.x EntityBean"
+ *   @jboss:container-configuration name="Sharing Standard CMP 2.x EntityBean"
  *
  */
 
@@ -207,7 +207,7 @@ public abstract class CMPStateBean
    * @ejb:interface-method
    */
   public Object
-    setAttribute(String name, Object value)
+    setAttribute(String name, Object value, boolean returnValue)
   {
     Map attrs=getAttributes();
     Object tmp=attrs.put(name, value);
@@ -216,27 +216,27 @@ public abstract class CMPStateBean
 
     //    _log.info(getContext()+":"+getId()+": set attribute - "+name+":"+value);
 
-    return tmp;
+    return returnValue?tmp:null;
   }
 
   /**
    * @ejb:interface-method
    */
   public Object
-    removeAttribute(String name)
+    removeAttribute(String name, boolean returnValue)
   {
     Map attrs=getAttributes();
     Object tmp=attrs.remove(name);
 
     if (tmp!=null)
     {
-      setAttributes(null);
+      setAttributes(null);	// belt-n-braces - TODO
       setAttributes(attrs);
     }
 
     //    _log.info(getContext()+":"+getId()+": remove attribute - "+name);
 
-    return tmp;
+    return returnValue?tmp:null;
   }
 
   /**
@@ -293,3 +293,4 @@ public abstract class CMPStateBean
     return (String[])attrs.keySet().toArray(new String[attrs.size()]);
   }
 }
+

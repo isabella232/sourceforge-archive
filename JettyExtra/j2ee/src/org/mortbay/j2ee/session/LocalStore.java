@@ -5,11 +5,17 @@
 
 package org.mortbay.j2ee.session;
 
+import java.util.Map;
+import java.util.HashMap;
+import org.apache.log4j.Category;
+
 //----------------------------------------
 
 public class LocalStore
   implements Store
 {
+  Category _log=Category.getInstance(getClass().getName());
+  Map _sessions=new HashMap();
 
   public
     LocalStore(Manager manager)
@@ -42,20 +48,42 @@ public class LocalStore
   public State
     loadState(String id)
   {
-    // if it's not in the Container's cache - it's nowhere else !
-    return null;
+    synchronized (_sessions)
+    {
+      return (State)_sessions.get(id);
+    }
   }
 
   public void
     storeState(State state)
   {
-    // we don't store state - it's all in-VM and that's it.
+    try
+    {
+      synchronized (_sessions)
+      {
+	_sessions.put(state.getId(), state);
+      }
+    }
+    catch (Exception e)
+    {
+      _log.warn("could not store session");
+    }
   }
 
   public void
     removeState(State state)
   {
-    // There is no distributed store to remove it from...
+    try
+    {
+      synchronized (_sessions)
+      {
+	_sessions.remove(state.getId());
+      }
+    }
+    catch (Exception e)
+    {
+      _log.error("could not remove session", e);
+    }
   }
 
   protected GUIDGenerator _guidGenerator=new GUIDGenerator();
@@ -81,6 +109,7 @@ public class LocalStore
     scavenge(int extraTime, int actualMaxInactiveInterval)
   {
     // Java's GC will do it for us !
+    // NYI - TODO
   }
 
   public void
@@ -90,9 +119,8 @@ public class LocalStore
     sa.invalidate();
   }
 
-  // none of these need do anything - since there is no scavenger...
+  // TODO
   public void setScavengerPeriod(int secs) {}
   public void setScavengerExtraTime(int secs) {}
   public void setActualMaxInactiveInterval(int secs) {}
-
 }

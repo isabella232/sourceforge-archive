@@ -34,8 +34,8 @@ public class
   State _buffer;
   boolean _dirty=false;
 
-  State getRealState() { return _state;}
-  void setRealState(State state) { _state=state;}
+  State getRealState() { return getState();}
+  //  void setRealState(State state) { _state=state;} - TODO
 
   public
     ThrottleInterceptor(Manager manager, HttpSession session, State state)
@@ -57,7 +57,7 @@ public class
 
     try
     {
-      _buffer=new LocalState(_state.getId(), maxInactiveInterval);
+      _buffer=new LocalState(getState().getId(), maxInactiveInterval);
     }
     catch (RemoteException e)
     {
@@ -76,9 +76,9 @@ public class
     try
     {
       // copy contents of _buffer into _state...
-      _state.setMaxInactiveInterval(_buffer.getMaxInactiveInterval());
-      _state.setLastAccessedTime(_buffer.getLastAccessedTime());
-      _state.setAttributes(_buffer.getAttributes());
+      getState().setMaxInactiveInterval(_buffer.getMaxInactiveInterval());
+      getState().setLastAccessedTime(_buffer.getLastAccessedTime());
+      getState().setAttributes(_buffer.getAttributes());
     }
     catch (RemoteException e)
     {
@@ -126,14 +126,14 @@ public class
   }
 
   public Object
-    setAttribute(String name, Object value)
+    setAttribute(String name, Object value, boolean returnValue)
   {
     Object tmp=null;
     try
     {
       // can we do a deep comparison on the attributes ? - could be
       // expensive - room for extension here...
-      tmp=super.setAttribute(name, value);
+      tmp=super.setAttribute(name, value, returnValue);
       _dirty=true;
     }
     catch (RemoteException ignore)
@@ -144,12 +144,12 @@ public class
   }
 
   public Object
-    removeAttribute(String name)
+    removeAttribute(String name, boolean returnValue)
   {
     Object tmp=null;
     try
     {
-      tmp=super.removeAttribute(name);
+      tmp=super.removeAttribute(name, returnValue);
     }
     catch (RemoteException ignore)
     {

@@ -10,7 +10,9 @@ package org.mortbay.j2ee.session;
 import java.rmi.RemoteException;
 import java.util.Enumeration;
 import java.util.Map;
+import javax.servlet.http.HttpSessionBindingListener;
 import org.apache.log4j.Category;
+
 //----------------------------------------
 
 // Should this be some sort of interceptor ?
@@ -136,15 +138,15 @@ public class
     }
 
   public Object
-    setAttribute(String name, Object value)
+    setAttribute(String name, Object value, boolean returnValue)
     {
-      Class[] argClasses={String.class, String.class, String.class, Object.class};
-      Object[] argInstances={_context, _id, name, value};
+      Class[] argClasses={String.class, String.class, String.class, Object.class, Boolean.class};
+      Object[] argInstances={_context, _id, name, value, new Boolean(returnValue)}; // optimise - TODO
 
       Object oldValue=_state.getAttribute(name);
       _store.publish("setAttribute", argClasses, argInstances);
 
-      return oldValue;
+      return returnValue?oldValue:null;
     }
 
   public void
@@ -156,15 +158,15 @@ public class
     }
 
   public Object
-    removeAttribute(String name)
+    removeAttribute(String name, boolean returnValue)
     {
-      Class[] argClasses={String.class, String.class, String.class};
-      Object[] argInstances={_context, _id, name};
+      Class[] argClasses={String.class, String.class, String.class, Boolean.class};
+      Object[] argInstances={_context, _id, name, new Boolean(returnValue)};	// optimise - TODO
 
       Object oldValue=_state.getAttribute(name);
       _store.publish("removeAttribute", argClasses, argInstances);
 
-      return oldValue;
+      return returnValue?oldValue:null;
     }
 
   //----------------------------------------
@@ -200,9 +202,9 @@ public class
     }
 
   public Object
-    setAttribute(String context, String id, String name, Object value)
+    setAttribute(String context, String id, String name, Object value, Boolean returnValue)
     {
-      return _state.setAttribute(name, value);
+      return _state.setAttribute(name, value, returnValue.booleanValue());
     }
 
   public void
@@ -212,8 +214,8 @@ public class
     }
 
   public Object
-    removeAttribute(String context, String id, String name)
+    removeAttribute(String context, String id, String name, Boolean returnValue)
     {
-      return _state.removeAttribute(name);
+      return _state.removeAttribute(name, returnValue.booleanValue());
     }
 }

@@ -46,8 +46,8 @@ public class SynchronizationInterceptor
   public Object      getAttribute(String name)               throws RemoteException {synchronized(_attributesLock){return super.getAttribute(name);}}
   public Enumeration getAttributeNameEnumeration()           throws RemoteException {synchronized(_attributesLock){return super.getAttributeNameEnumeration();}}
   public String[]    getAttributeNameStringArray()           throws RemoteException {synchronized(_attributesLock){return super.getAttributeNameStringArray();}}
-  public Object      setAttribute(String name, Object value) throws RemoteException {synchronized(_attributesLock){return super.setAttribute(name, value);}}
-  public Object      removeAttribute(String name)            throws RemoteException {synchronized(_attributesLock){return super.removeAttribute(name);}}
+  public Object      setAttribute(String name, Object value, boolean returnValue) throws RemoteException {synchronized(_attributesLock){return super.setAttribute(name, value, returnValue);}}
+  public Object      removeAttribute(String name, boolean returnValue)            throws RemoteException {synchronized(_attributesLock){return super.removeAttribute(name, returnValue);}}
   public Map         getAttributes()                         throws RemoteException {synchronized(_attributesLock){return super.getAttributes();}}
   public void        setAttributes(Map attributes)           throws RemoteException {synchronized(_attributesLock){super.setAttributes(attributes);}}
 }

@@ -25,7 +25,7 @@ public class ActivationInterceptor
     ActivationInterceptor(Manager ignore, HttpSession session, State state)
   {
     super(session, state);
-    _event=new HttpSessionEvent(_session); // cache an event ready for use...
+    _event=new HttpSessionEvent(getSession()); // cache an event ready for use...
   }
 
   public Object
@@ -48,7 +48,7 @@ public class ActivationInterceptor
   }
 
   public Object
-    setAttribute(String name, Object value)
+    setAttribute(String name, Object value, boolean returnValue)
     throws IllegalArgumentException
   {
     try
@@ -57,7 +57,7 @@ public class ActivationInterceptor
       if (tmp!=null && tmp instanceof HttpSessionActivationListener)
 	((HttpSessionActivationListener)tmp).sessionWillPassivate(_event);
 
-      tmp=super.setAttribute(name, tmp);
+      tmp=super.setAttribute(name, tmp, returnValue);
 
       if (tmp!=null && tmp instanceof HttpSessionActivationListener)
 	((HttpSessionActivationListener)tmp).sessionDidActivate(_event);
@@ -73,12 +73,12 @@ public class ActivationInterceptor
 
   // should an attribute be activated before it is removed ? How do we deal with the bind/unbind events... - TODO
   public Object
-    removeAttribute(String name)
+    removeAttribute(String name, boolean returnValue)
     throws IllegalArgumentException
   {
     try
     {
-      Object tmp=super.removeAttribute(name);
+      Object tmp=super.removeAttribute(name, returnValue);
 
       if (tmp!=null && tmp instanceof HttpSessionActivationListener)
 	((HttpSessionActivationListener)tmp).sessionDidActivate(_event);

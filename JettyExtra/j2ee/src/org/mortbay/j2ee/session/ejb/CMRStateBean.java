@@ -55,7 +55,7 @@ import org.mortbay.j2ee.session.interfaces.CMRStatePK;
  *   @jboss:table-name "JETTY_HTTPSESSION_CMRState"
  *   @jboss:create-table create="true"
  *   @jboss:remove-table remove="true"
- *   @jboss:container-configuration name="Standard CMP 2.x EntityBean"
+ *   @jboss:container-configuration name="Sharing CMP 2.x EntityBean"
  *
  */
 
@@ -339,17 +339,11 @@ public abstract class CMRStateBean
     return (attr==null)?null:attr.getValue();
   }
 
-  protected boolean
-    isListener(Object o)
-  {
-    return (o instanceof javax.servlet.http.HttpSessionBindingListener);
-  }
-
   /**
    * @ejb:interface-method
    */
   public Object
-    setAttribute(String name, Object value)
+    setAttribute(String name, Object value, boolean returnValue)
   {
     Collection attributeBeans=getAttributeBeans();
     CMRAttributeLocal attr=findAttributeBean(attributeBeans, name);
@@ -359,7 +353,7 @@ public abstract class CMRStateBean
       // one already exists...
       Object tmp=attr.getValue();
       attr.setValue(value);
-      return isListener(tmp)?tmp:null;
+      return returnValue?tmp:null;
     }
     else
     {
@@ -381,7 +375,7 @@ public abstract class CMRStateBean
    * @ejb:interface-method
    */
   public Object
-    removeAttribute(String name)
+    removeAttribute(String name, boolean returnValue)
   {
     Collection attributeBeans=getAttributeBeans();
     CMRAttributeLocal attr=findAttributeBean(attributeBeans, name);
@@ -390,7 +384,7 @@ public abstract class CMRStateBean
     {
       Object tmp=attr.getValue();
       attributeBeans.remove(attr);
-      return isListener(tmp)?tmp:null;
+      return returnValue?tmp:null;
     }
     else
       return null;
@@ -426,6 +420,7 @@ public abstract class CMRStateBean
 
     return names;
   }
+
   //----------------------------------------
 
   /**

@@ -155,7 +155,13 @@ public class
 	method.addArg(methodName);
 	method.addArg(argClasses);
 	method.addArg(argInstances);
-	_dispatcher.callRemoteMethods(null,method,GroupRequest.GET_ALL,0); // synchronous
+
+	synchronized (_dispatcher)
+	{
+	  // why doesn't dispatcher do this for us ?
+	  // is it intended to be multi-threaded ?
+	  _dispatcher.callRemoteMethods(null,method,GroupRequest.GET_ALL,0); // synchronous
+	}
       }
       catch(Exception e)
       {
@@ -197,16 +203,19 @@ public class
 
       // this is a bit problematic - since we really need to freeze
       // every session before we can dump them... - TODO
+      LocalState[] state;
       synchronized (_sessions)
       {
 	_log.info("sending "+_sessions.size()+" sessions");
 
-	LocalState[] state=new LocalState[_sessions.size()];
+	state=new LocalState[_sessions.size()];
 	int j=0;
 	for (Iterator i=_sessions.values().iterator(); i.hasNext();)
 	  state[j++]=((ReplicatedState)i.next()).getLocalState();
-	return state;
       }
+
+      Object[] data={new Long(System.currentTimeMillis()), state};
+      return data;
     }
 
   /**
@@ -217,12 +226,18 @@ public class
   public void
     setState(Object tmp)
     {
-      _log.info("initialising our state from another Store: "+tmp);
-
       if (tmp!=null)
       {
-	LocalState[] state=(LocalState[])tmp;
+	_log.info("initialising our state from another Store");
 
+	Object[] data=(Object[])tmp;
+
+	long remoteTime=((Long)data[0]).longValue();
+	long localTime=System.currentTimeMillis();
+	long disparity=(localTime-remoteTime)/1000;
+	_log.info("time disparity: "+disparity+" secs");
+
+	LocalState[] state=(LocalState[])data[1];
 	_log.info("receiving "+state.length+" sessions...");
 
 	for (int i=0; i<state.length; i++)

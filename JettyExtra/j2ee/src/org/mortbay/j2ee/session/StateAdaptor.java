@@ -89,7 +89,7 @@ public class StateAdaptor
 	{
 	  //	  invalidate(); - watch out for this - you'll recurse to the bottom of the stack !
 	  _log.debug("isValid() - calling _manager.destroySession("+_id+")...");
-	  _manager.destroySession(_id);
+	  _manager.destroySession(this);
 	  return false;
 	}
       }
@@ -274,13 +274,13 @@ public class StateAdaptor
     try
     {
       if (value==null)
-	_state.removeAttribute(name);
+	_state.removeAttribute(name, false);
       else
       {
 	if (name==null)
 	  throw new IllegalArgumentException("invalid attribute name: "+name);
 
-	_state.setAttribute(name, value);
+	_state.setAttribute(name, value, false);
       }
     }
     catch (RemoteException e)
@@ -305,7 +305,7 @@ public class StateAdaptor
 
     try
     {
-      _state.setAttribute(name, value);
+      _state.setAttribute(name, value, false);
     }
     catch (RemoteException e)
     {
@@ -323,7 +323,7 @@ public class StateAdaptor
 
     try
     {
-      _state.removeAttribute(name);
+      _state.removeAttribute(name, false);
     }
     catch (RemoteException e)
     {
@@ -341,7 +341,7 @@ public class StateAdaptor
 
     try
     {
-      _state.removeAttribute(name);
+      _state.removeAttribute(name, false);
     }
     catch (RemoteException e)
     {
@@ -358,7 +358,7 @@ public class StateAdaptor
       throw new IllegalStateException("invalid session");
 
     _log.debug("user invalidated session: "+getId());
-    _manager.destroySession(_id);
+    _manager.destroySession(this);
   }
 
   /**

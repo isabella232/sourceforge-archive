@@ -31,9 +31,9 @@ public interface
   long        getLastAccessedTime()                   throws RemoteException;
   void        setMaxInactiveInterval(int interval)    throws RemoteException;
   int         getMaxInactiveInterval()                throws RemoteException;
-  Object      setAttribute(String name, Object value) throws RemoteException; // returns old binding
+  Object      setAttribute(String name, Object value, boolean returnValue) throws RemoteException; // returns old binding
   Object      getAttribute(String name)               throws RemoteException;
-  Object      removeAttribute(String name)            throws RemoteException; // returns old binding
+  Object      removeAttribute(String name, boolean returnValue)            throws RemoteException; // returns old binding
   Enumeration getAttributeNameEnumeration()           throws RemoteException;
   String[]    getAttributeNameStringArray()           throws RemoteException;
 

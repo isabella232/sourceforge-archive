@@ -104,7 +104,7 @@ public class MarshallingInterceptor
   }
 
   public Object
-    setAttribute(String name, Object value)
+    setAttribute(String name, Object value, boolean returnValue)
     throws IllegalArgumentException
   {
     try
@@ -116,7 +116,7 @@ public class MarshallingInterceptor
 // 	  ((HttpSessionActivationListener)tmp).sessionWillPassivate(new HttpSessionEvent(_session));
  	tmp=marshal(tmp);
       }
-      return demarshal((byte[])super.setAttribute(name, tmp));
+      return demarshal((byte[])super.setAttribute(name, tmp, returnValue));
     }
     catch (Exception e)
     {
@@ -127,13 +127,13 @@ public class MarshallingInterceptor
 
   // should an attribute be activated before it is removed ? How do we deal with the bind/unbind events... - TODO
   public Object
-    removeAttribute(String name)
+    removeAttribute(String name, boolean returnValue)
     throws IllegalArgumentException
   {
     try
     {
       // should this be activated - probably
-      return demarshal((byte[])super.removeAttribute(name));
+      return demarshal((byte[])super.removeAttribute(name, returnValue));
     }
     catch (Exception e)
     {

@@ -83,22 +83,6 @@ public class CMPStore
   }
 
   // State LifeCycle
-  public State
-    loadState(String id)
-  {
-    if (_home==null)
-      throw new IllegalStateException("invalid store");
-
-    try
-    {
-      return (CMPState)PortableRemoteObject.narrow(_home.findByPrimaryKey(new CMPStatePK(_manager.getContextPath(), id)), CMPState.class);
-    }
-    catch (Throwable e)
-    {
-      _log.warn("session "+id+" not found: "+e);
-      return null;
-    }
-  }
 
   public State
     newState(String id, int maxInactiveInterval)
@@ -112,10 +96,27 @@ public class CMPStore
     return state;
   }
 
+  public State
+    loadState(String id)
+  {
+    if (_home==null)
+      throw new IllegalStateException("invalid store");
+
+    try
+    {
+      return (CMPState)PortableRemoteObject.narrow(_home.findByPrimaryKey(new CMPStatePK(_manager.getContextPath(), id)), CMPState.class);
+    }
+    catch (Throwable e)
+    {
+      _log.debug("session "+id+" not found: "+e);
+      return null;
+    }
+  }
+
   public void
     storeState(State state)
   {
-    // TODO
+    // it's already stored...
   }
 
   public void

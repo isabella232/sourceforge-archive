@@ -55,12 +55,12 @@ public class BindingInterceptor
   protected Object
     notifyValueUnbound(String name, Object value)
   {
-    if (value instanceof HttpSessionBindingListener)
-    {
-      HttpSessionBindingEvent event=new HttpSessionBindingEvent(_session, name, value);
-      ((HttpSessionBindingListener)value).valueUnbound(event);
-      event=null;
-    }
+    if (!(value instanceof HttpSessionBindingListener))
+      return value;
+
+    HttpSessionBindingEvent event=new HttpSessionBindingEvent(getSession(), name, value);
+    ((HttpSessionBindingListener)value).valueUnbound(event);
+    event=null;
 
     return value;
   }
@@ -68,12 +68,12 @@ public class BindingInterceptor
   protected Object
     notifyValueBound(String name, Object value)
   {
-    if (value instanceof HttpSessionBindingListener)
-    {
-      HttpSessionBindingEvent event=new HttpSessionBindingEvent(_session, name, value);
-      ((HttpSessionBindingListener)value).valueBound(event);
-      event=null;
-    }
+    if (!(value instanceof HttpSessionBindingListener))
+      return value;
+
+    HttpSessionBindingEvent event=new HttpSessionBindingEvent(getSession(), name, value);
+    ((HttpSessionBindingListener)value).valueBound(event);
+    event=null;
 
     return value;
   }
@@ -100,7 +100,7 @@ public class BindingInterceptor
    * @exception RemoteException if an error occurs
    */
   public Object
-    setAttribute(String name, Object value)
+    setAttribute(String name, Object value, boolean returnValue)
     throws RemoteException
   {
     // assert(name!=null);
@@ -108,7 +108,8 @@ public class BindingInterceptor
 
     boolean needOldValue=true;
 
-    Object oldValue=super.setAttribute(name, value);
+    // we want the old binding back if it was an HttpSessionBindingListener
+    Object oldValue=super.setAttribute(name, value, true);
 
     // send binding notifications
 
@@ -121,9 +122,9 @@ public class BindingInterceptor
 
       // send attribute notifications
       if (oldValue!=null)
-	_manager.notifyAttributeReplaced(_session, name, oldValue);
+	_manager.notifyAttributeReplaced(getSession(), name, oldValue);
       else
-	_manager.notifyAttributeAdded(_session, name, value);
+	_manager.notifyAttributeAdded(getSession(), name, value);
     }
     catch (Throwable t)
     {
@@ -143,17 +144,18 @@ public class BindingInterceptor
    * @exception RemoteException if an error occurs
    */
   public Object
-    removeAttribute(String name)
+    removeAttribute(String name, boolean returnValue)
     throws RemoteException
   {
-    Object oldValue=super.removeAttribute(name);
+    // we want the old binding back if it was an HttpSessionBindingListener
+    Object oldValue=super.removeAttribute(name, true);
 
     if (oldValue!=null)
     {
       try
       {
 	notifyValueUnbound(name, oldValue);
-	_manager.notifyAttributeRemoved(_session, name, oldValue);
+	_manager.notifyAttributeRemoved(getSession(), name, oldValue);
       }
       catch (Throwable t)
       {

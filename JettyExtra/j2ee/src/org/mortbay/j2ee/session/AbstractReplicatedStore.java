@@ -101,16 +101,23 @@ abstract public class
       // pull it out of our cache - if it is not there, it doesn't
       // exist/hasn't been distributed...
 
-      synchronized (_sessions)
-      {
-	return (State) _sessions.get(id);
-      }
+      Object tmp;
+      synchronized (_sessions) {tmp=_sessions.get(id);}
+      return (State)tmp;
     }
 
   public void
     storeState(State state)
     {
-      // no need - it has already been distributed...
+      try
+      {
+	String id=state.getId();
+	synchronized (_sessions){_sessions.put(id, state);}
+      }
+      catch (Exception e)
+      {
+	_log.error("error storing session", e);
+      }
     }
 
   public void
@@ -120,6 +127,9 @@ abstract public class
       Class[]  argClasses   = {String.class, String.class};
       Object[] argInstances = {getContextPath(), state.getId()};
       publish("destroy", argClasses, argInstances);
+
+      String id=state.getId();
+      synchronized (_sessions){_sessions.remove(id);}
     }
 
   //----------------------------------------
@@ -191,17 +201,11 @@ abstract public class
 
 	State state=new ReplicatedState(this, id, creationTime, maxInactiveInterval);
 
-	synchronized(_sessions)
-	{
-	  _sessions.put(id, state);
-	}
+	synchronized(_sessions) {_sessions.put(id, state);}
       }
       else if (methodName.equals("destroy"))
       {
-	synchronized(_sessions)
-	{
-	  _sessions.remove(id);
-	}
+	synchronized(_sessions) {_sessions.remove(id);}
       }
       else
       {

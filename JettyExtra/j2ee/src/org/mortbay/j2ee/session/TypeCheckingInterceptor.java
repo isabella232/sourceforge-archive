@@ -36,7 +36,7 @@ public
   }
 
   public Object
-    setAttribute(String name, Object value)
+    setAttribute(String name, Object value, boolean returnValue)
     throws IllegalArgumentException, RemoteException
   {
     // SRV.7.7.2
@@ -65,7 +65,7 @@ public
     {
       try
       {
-	return super.setAttribute(name, tmp);
+	return super.setAttribute(name, tmp, returnValue);
       }
       catch (RemoteException e)
       {
