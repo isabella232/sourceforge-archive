@@ -183,6 +183,14 @@ public class HttpServer implements ServletContext
 		throw ioe;
 	    }
 	}
+	
+	Integer defaultSessionMaxIdleTime = 
+		(Integer)config.getAttribute(HttpConfiguration.DefaultSessionMaxIdleTime);
+	if (defaultSessionMaxIdleTime != null) {
+		int defaultIdle = defaultSessionMaxIdleTime.intValue();
+		if (defaultIdle > 0)
+			HttpRequest.setDefaultSessionMaxIdleTime(defaultIdle);
+    }
     }
 
     /* -------------------------------------------------------------------- */

@@ -16,7 +16,7 @@ Authors & Testers:
   Søren Hilmer <sh@itplus.dk> 
   Juancarlo Añez <juancarlo@modelistica.com>
   Nikos Anerousis <nikos@research.att.com>
-  GNUJSP <vincentp@xs4all.nl>
+  Donovan Kolbly <kolbly@mcc.com>
 
 Sponsors:
   Mort Bay Consulting.   http://www.mortbay.com

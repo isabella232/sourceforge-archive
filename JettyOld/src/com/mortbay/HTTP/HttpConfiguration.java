@@ -25,6 +25,10 @@ import java.util.*;
  */
 public interface HttpConfiguration 
 {
+    // The name of the default session max idle time attribute
+    public static final String DefaultSessionMaxIdleTime = 
+        "DefaultSessionMaxIdleTime";
+
     /* ------------------------------------------------------------ */
     /** The IP addresses and ports the HTTP server listens on
      */

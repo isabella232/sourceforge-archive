@@ -47,9 +47,8 @@ public class HttpRequest extends HttpHeader
 
     private static final SessionContext sessions =
 	new SessionContext();
-
     private static final Enumeration __NoAttributes = new Vector().elements();
-    
+
     /* -------------------------------------------------------------- */
     /** For decoding session ids etc. */
     public static final String SESSIONID_NOT_CHECKED = "not checked";
@@ -70,13 +69,13 @@ public class HttpRequest extends HttpHeader
 
     private Hashtable formParameters=null;
     private Hashtable cookieParameters=null;
+    private Hashtable attributes=null;
     private Cookie[] cookies=null;
     private String sessionId=null;
     private HttpSession session=null;
     private String sessionIdState=SESSIONID_NOT_CHECKED;
 
     private String requestLine=null;
-    private String requestURI=null;
     private String protocolHostPort=null;
     private String resourcePath=null;
     private String servletPath=null;
@@ -111,7 +110,6 @@ public class HttpRequest extends HttpHeader
 	decodeRequestLine(cb.chars,cb.size);
 	
 	// Build URI
-	uri = new URI(requestURI);
 	pathInfo=uri.getPath();
 
 	// Handle version
@@ -147,7 +145,6 @@ public class HttpRequest extends HttpHeader
     {
 	this.method  = method;
 	this.uri = new URI(uri);
-	this.requestURI=uri;
 	pathInfo=this.uri.getPath();
 	version=HttpHeader.HTTP_1_0;
     }
@@ -161,7 +158,6 @@ public class HttpRequest extends HttpHeader
     {
 	this.method  = method;
 	this.uri = uri;
-	this.requestURI=uri.toString();
 	pathInfo=this.uri.getPath();
 	version=HttpHeader.HTTP_1_0;
     }
@@ -695,20 +691,29 @@ public class HttpRequest extends HttpHeader
      */
     public Object getAttribute(String name)
     {
-	return null;
+	if (attributes == null)
+	    return null;
+	
+	return attributes.get( name );
     }
     
     /* -------------------------------------------------------------- */
     public Enumeration getAttributeNames()
     {
-	return __NoAttributes;
+	if (attributes == null)
+	    return __NoAttributes;
+	
+	return attributes.keys();
     }
     
     /* -------------------------------------------------------------- */
     public void setAttribute(String name, Object o)
     {
+	
+	if (attributes == null)
+	    attributes = new Hashtable();
+	attributes.put( name, o );
     }
-
 
     
     /* -------------------------------------------------------------- */
@@ -761,12 +766,12 @@ public class HttpRequest extends HttpHeader
     /* -------------------------------------------------------------- */
     /** Get the full URI.
      * @return For the given example, this would return <PRE>
-     * /Servlet/Path/Foo/Bar?aaa=123&bbb=456
+     * /Servlet/Path/Foo/Bar
      * </PRE>
      */
     public  String getRequestURI()
     {
-	return requestURI;
+	return uri.getPath();
     }
 
 
@@ -1042,8 +1047,8 @@ public class HttpRequest extends HttpHeader
 	rl.append(version);
 	requestLine=rl.toString();
 
-	// handle requestURI
-	requestURI=null;
+	// handle URI
+	String uris=null;
 	if (buf[s3]!='/')
 	{
 	    // look for //
@@ -1060,7 +1065,7 @@ public class HttpRequest extends HttpHeader
 			if (buf[j]=='/')
 			{
 			    protocolHostPort=new String(buf,s3,j-s3+1);
-			    requestURI=new String(buf,j,e3-j+1);
+			    uris=new String(buf,j,e3-j+1);
 			    break;
 			}
 		    }
@@ -1068,15 +1073,24 @@ public class HttpRequest extends HttpHeader
 		}
 	    }
 	}
-	if (requestURI==null)
+	if (uris==null)
 	{
 	    protocolHostPort="";
-	    requestURI = new String(buf,s3,e3-s3+1);
+	    uris = new String(buf,s3,e3-s3+1);
 	}
 	
+	uri = new URI(uris);
 	Code.debug(requestLine);
     }
     
+    /* -------------------------------------------------------------- */
+    /** Set the default session timeout.
+     *	@param	default	The default timeout in seconds
+     */
+    public static void setDefaultSessionMaxIdleTime(int defaultTime)
+    {
+    	sessions.setDefaultSessionMaxIdleTime(defaultTime);
+    }
 }
 
 	   

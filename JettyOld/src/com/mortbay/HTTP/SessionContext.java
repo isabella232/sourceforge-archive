@@ -29,6 +29,12 @@ public class SessionContext extends Hashtable
 
     static long nextSessionId = System.currentTimeMillis();
     
+    // Setting of max inactive interval for new sessions
+    // -1 means no timeout
+    private int defaultMaxIdleTime = -1;
+    
+    private SessionScavenger scavenger = null;
+    
     /* ------------------------------------------------------------ */
     class Session extends Hashtable
 	implements HttpSession
@@ -37,6 +43,7 @@ public class SessionContext extends Hashtable
 	boolean old=false;
 	long created=System.currentTimeMillis();
 	long accessed=created;
+	long maxIdleTime = -1;
 	String id=null;
 
 	/* ------------------------------------------------------------- */
@@ -90,8 +97,7 @@ public class SessionContext extends Hashtable
 	/* ------------------------------------------------------------- */
 	public int getMaxInactiveInterval()
 	{
-	    Code.warning("MaxInactiveInterval not implemented");
-	    return 0;
+	    return (int)(maxIdleTime / 1000);
 	}
 	
 	/* ------------------------------------------------------------- */
@@ -132,7 +138,7 @@ public class SessionContext extends Hashtable
 	/* ------------------------------------------------------------- */
 	public void setMaxInactiveInterval(int i)
 	{
-	    Code.warning("MaxInactiveInterval not implemented");
+	    maxIdleTime = (long)i * 1000;
 	}
 	
 	/* ------------------------------------------------------------- */
@@ -141,7 +147,16 @@ public class SessionContext extends Hashtable
 	{
 	    if (invalid) throw new IllegalStateException();
 	    invalid=true;
-	    SessionContext.this.remove(Session.this);
+	    
+	    // Call valueUnbound on all the HttpSessionBindingListeners
+	    // To avoid iterator problems, don't actually remove them
+		Enumeration e = keys();
+		while (e.hasMoreElements()) {
+		    String key = (String)e.nextElement();
+		    Object value = get(key);
+		    unbindValue(key, value);
+		   }
+	    SessionContext.this.remove(id);
 	}
 	
 	/* ------------------------------------------------------------- */
@@ -158,10 +173,14 @@ public class SessionContext extends Hashtable
 	    throws IllegalStateException
 	{
 	    if (invalid) throw new IllegalStateException();
-	    put(name,value);
-	    if (value !=null && value instanceof HttpSessionBindingListener)
-		((HttpSessionBindingListener)value)
-		    .valueBound(new HttpSessionBindingEvent(this,name));
+	    Object oldValue = put(name,value);
+
+		// Don't rebind if the value is unchanged
+		// XXX Is this right or should we always unbind & bind?
+	    if (value != oldValue) {
+	    	unbindValue(name, oldValue);
+	    	bindValue(name, value);
+		}
 	}
 	
 	/* ------------------------------------------------------------- */
@@ -170,11 +189,28 @@ public class SessionContext extends Hashtable
 	{
 	    if (invalid) throw new IllegalStateException();
 	    Object value=remove(name);
+	    unbindValue(name, value);
+	}
+
+	/* ------------------------------------------------------------- */
+	/** If value implements HttpSessionBindingListener, call valueBound() */
+	private void bindValue(java.lang.String name, Object value)
+	{
+	    if (value!=null && value instanceof HttpSessionBindingListener)
+		((HttpSessionBindingListener)value)
+		    .valueBound(new HttpSessionBindingEvent(this,name));
+	}
+
+	/* ------------------------------------------------------------- */
+	/** If value implements HttpSessionBindingListener, call valueUnbound() */
+	private void unbindValue(java.lang.String name, Object value)
+	{
 	    if (value!=null && value instanceof HttpSessionBindingListener)
 		((HttpSessionBindingListener)value)
 		    .valueUnbound(new HttpSessionBindingEvent(this,name));
 	}
-    };
+	
+    }	// Session
 
     /* ------------------------------------------------------------ */
     /**
@@ -198,6 +234,7 @@ public class SessionContext extends Hashtable
     public HttpSession newSession()
     {
 	HttpSession session = new Session();
+	session.setMaxInactiveInterval(defaultMaxIdleTime);
 	put(session.getId(),session);
 	return session;
     }
@@ -206,6 +243,7 @@ public class SessionContext extends Hashtable
     public HttpSession oldSession(String sessionId)
     {
 	HttpSession session = new Session(sessionId);
+	session.setMaxInactiveInterval(defaultMaxIdleTime);
 	put(sessionId,session);
 	return session;
     }
@@ -216,4 +254,84 @@ public class SessionContext extends Hashtable
 	((Session)session).accessed();
     }
     
-};
+    /* -------------------------------------------------------------- */
+    /** Set the default session timeout.
+     *	@param	default	The default timeout in seconds
+     */
+    public void setDefaultSessionMaxIdleTime(int defaultTime)
+    {
+    	defaultMaxIdleTime = defaultTime;
+    	
+    	// Start the session scavenger if we haven't already
+    	if (scavenger == null)
+	    scavenger = new SessionScavenger();
+    }
+
+    /* -------------------------------------------------------------- */
+    /** Find sessions that have timed out and invalidate them. 
+     *	This runs in the SessionScavenger thread.
+     */
+    private synchronized void scavenge()
+    {
+	// Set our priority high while we have the sessions locked
+	int oldPriority = Thread.currentThread().getPriority();
+	Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+		
+	long now = System.currentTimeMillis();
+		
+	// Since Hashtable enumeration is not safe over deletes,
+	// we build a list of stale sessions, then go back and invalidate them
+	Vector staleSessions = null;
+		
+	// For each session
+	for (Enumeration e = elements(); e.hasMoreElements(); )
+	{
+	    Session session = (Session)e.nextElement();
+	    long idleTime = session.maxIdleTime;
+	    if (idleTime > 0 && session.accessed + idleTime < now) {
+		// Found a stale session, add it to the list
+		if (staleSessions == null)
+		    staleSessions = new Vector();
+		staleSessions.addElement(session);
+	    }
+	}
+		
+	// Remove the stale sessions
+	if (staleSessions != null) {
+	    for (int i = staleSessions.size() - 1; i >= 0; --i) {
+		((Session)staleSessions.elementAt(i)).invalidate();
+	    }
+	}
+		
+	Thread.currentThread().setPriority(oldPriority);
+    }
+
+    final static int scavangeDelay = 60000;	
+    /** SessionScavenger is a background thread that kills off old sessions */
+
+    class SessionScavenger extends Thread
+    {
+	// how often to check
+
+	public void run() {
+	    while (true) {
+		try {
+		    sleep(scavangeDelay); 
+		} catch (InterruptedException ex) {}
+		SessionContext.this.scavenge();
+	    }
+	}
+
+	SessionScavenger() {
+	    super("SessionScavenger");
+	    setPriority(Thread.MIN_PRIORITY);
+	    setDaemon(true);
+	    this.start();
+	}
+	
+    }	// SessionScavenger
+
+}
+
+
+

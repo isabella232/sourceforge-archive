@@ -47,6 +47,7 @@ import java.util.*;
  * @version 1.0 Sat Sep 26 1998
  * @author Greg Wilkins (gregw)
  */
+
 public class Server extends BaseConfiguration
 {
     /* ------------------------------------------------------------ */
@@ -513,6 +514,19 @@ public class Server extends BaseConfiguration
 	    else if ("Proxy".equals(type))
 	    {
 		server.addProxy(stack);
+	    }
+	    else if (HttpConfiguration.DefaultSessionMaxIdleTime.equals(type))
+	    {
+		    // Maximum idle time for HttpSessions before they are timed out, in SECONDS
+		    int maxIdleTime = 0;
+		    try {
+		    	maxIdleTime = Integer.parseInt(value);
+		    } catch (NumberFormatException nfe) {
+		    	Code.warning(nfe);
+		    }
+		    if (maxIdleTime > 0) {
+		    	server.attributes.put(HttpConfiguration.DefaultSessionMaxIdleTime, new Integer(maxIdleTime));
+		    }
 	    }
 	    else
 		Code.warning("Unknown property: "+
