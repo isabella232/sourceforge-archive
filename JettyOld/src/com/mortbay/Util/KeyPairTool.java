@@ -1,3 +1,8 @@
+// ========================================================================
+// Copyright (c) 1998 Mort Bay Consulting (Australia) Pty. Ltd.
+// $Id$
+// ========================================================================
+
 package com.mortbay.Util;
 
 import com.mortbay.Base.Code;
@@ -14,6 +19,7 @@ import java.security.PrivateKey;
 import java.security.Security;
 import java.security.Provider;
 
+/* ------------------------------------------------------------ */
 /**
  * Perform simple private key management for keystores.
  *
@@ -25,6 +31,7 @@ import java.security.Provider;
  * <p> The inverse operation, exporting a keypair to an external format, has
  *     been left as an exercise for the reader... :-)
  *
+ * @version $Id$
  * @author Brett Sealey
  */
 public class KeyPairTool
@@ -33,8 +40,8 @@ public class KeyPairTool
     private File keyStoreFile
 	= new File(System.getProperty("user.home"), ".keystore");
     private String keyStoreType = KeyStore.getDefaultType();
-    private char[] keyStorePassword = null;
-    private char[] keyPassword = null;
+    private Password keyStorePassword = null;
+    private Password keyPassword = null;
     private String alias = "mykey";
     private File privateKeyFile = null;
     private File certFile = null;
@@ -53,9 +60,14 @@ public class KeyPairTool
 	+ " -storetype  STRING,   name/type of keystore,  ["
         +                                  keyStoreType + "]\n"
 	+ " -alias      NAME,     alias used to store key [mykey]\n"
-	+ " -provider   NAME,     name of provider class  [org.bouncycastle.jce.provider.BouncyCastleProvider]\n"
-	;
+	+ " -provider   NAME,     name of provider class [org.bouncycastle.jce.provider.BouncyCastleProvider]\n\n"
+	+ "The keystore and key passwords will be prompted for or can be\n"
+	+ "set with the following JVM system properties:\n"
+	+ "  jetty.ssl.password\n"
+	+ "  jetty.ssl.keypassword";
 
+    
+    /* ------------------------------------------------------------ */
     public static void main(String[] args)
     {
 	// Doit
@@ -63,6 +75,7 @@ public class KeyPairTool
 	tool.doit(args);
     }
 
+    /* ------------------------------------------------------------ */
     /**
      * Load parameters and perform the import command.
      * Catch any exceptions and clear the password arrays.
@@ -86,8 +99,8 @@ public class KeyPairTool
 	}
 	finally
 	{
-	    zero(keyStorePassword);
-	    zero(keyPassword);
+	    keyStorePassword.zero();
+	    keyPassword.zero();
 	}
     }
 
@@ -144,7 +157,7 @@ public class KeyPairTool
 	}
 
 	// The load method can accept a null keyStoreStream.
-	keyStore.load(keyStoreStream, keyStorePassword);
+	keyStore.load(keyStoreStream, keyStorePassword.getCharArray());
 
 	if (keyStoreStream != null)
 	{
@@ -153,27 +166,20 @@ public class KeyPairTool
 	}
 
 	// Insert the new key pair
-	keyStore.setKeyEntry(alias, privateKey, keyPassword, certChain);
+	keyStore.setKeyEntry(alias,
+			     privateKey,
+			     keyPassword.getCharArray(),
+			     certChain);
 
 	// To save the KeyStore to disk
 	FileOutputStream keyStoreOut = new FileOutputStream(keyStoreFile);
-	keyStore.store(keyStoreOut, keyStorePassword);
+	keyStore.store(keyStoreOut,
+		       keyStorePassword.getCharArray());
 	keyStoreOut.close();
 
 	System.out.println("Keys have been written to keystore");
     }
  
-    /**
-     * Zero the given char array.
-     *
-     * @param array the char array to zero
-     */
-    private void zero(char [] array)
-    {
-	if (array != null)
-	    Arrays.fill(array, '\0');
-    }
-
     /**
      * Show a usage message.
      */
@@ -198,10 +204,6 @@ public class KeyPairTool
 		privateKeyFile = new File(args[++i]);
 	    else if (parameterName.equalsIgnoreCase("-cert"))
 		certFile = new File(args[++i]);
-	    else if (parameterName.equalsIgnoreCase("-storepass"))
-		keyStorePassword = args[++i].toCharArray();
-	    else if (parameterName.equalsIgnoreCase("-keypass"))
-		keyPassword = args[++i].toCharArray();
  	    else if (parameterName.equalsIgnoreCase("-keystore"))
 		keyStoreFile = new File(args[++i]);
 	    else if (parameterName.equalsIgnoreCase("-storetype"))
@@ -217,47 +219,17 @@ public class KeyPairTool
 	    }
 	}
 
-	if (keyStorePassword==null)
-	{
-	    try
-	    {
-		System.out.print("Keystore password: ");
-		System.out.flush();
-		byte[] buf = new byte[512];
-		int len=System.in.read(buf);
-		String pw=new String(buf,0,len).trim();
-		keyStorePassword=pw.toCharArray();
-	    }
-	    catch(IOException e)
-	    {
-		Code.fail(e);
-	    }
-	}
-	
-	if (keyPassword==null)
-	{
-	    try
-	    {
-		System.out.print("Key password [dft keystore]: ");
-		System.out.flush();
-		byte[] buf = new byte[512];
-		int len=System.in.read(buf);
-		String pw=new String(buf,0,len).trim();
-		if (pw.length()>0)
-		    keyPassword=pw.toCharArray();
-	    }
-	    catch(IOException e)
-	    {
-		Code.fail(e);
-	    }
-	}
-
 	// Check that mandatory fields have been populated
-	if (privateKeyFile == null || certFile == null
-	    || keyStorePassword == null)
+	if (privateKeyFile == null || certFile == null)
 	{
 	    usage();
 	}
+
+	keyStorePassword = new Password("jetty.ssl.password");
+	keyPassword = new Password("jetty.ssl.keypassword",
+				   null,
+				   keyStorePassword.toString());
+	
 
 	// Dynamically install the Bouncy Castle provider for RSA support.
 	try

@@ -1,3 +1,8 @@
+// ========================================================================
+// Copyright (c) 2000 Mort Bay Consulting (Australia) Pty. Ltd.
+// $Id$
+// ========================================================================
+
 package com.mortbay.HTTP;
 
 import java.io.*;
@@ -21,6 +26,7 @@ import com.mortbay.HTTP.HttpServer;
  * This is heavily based on the work from Court Demas, which in
  * turn is based on the work from Forge Research.
  *
+ * @version $Id$
  * @author Greg Wilkins (gregw@mortbay.com)
  * @author Court Demas (court@kiwiconsulting.com)
  * @author Forge Research Pty Ltd  ACN 003 491 576
@@ -34,6 +40,8 @@ public abstract class JsseListener extends HttpListener
 
     // password for the keystore
     public static final String PASSWORD_PROPERTY = "jetty.ssl.password";
+    // password for the key password
+    public static final String KEYPASSWORD_PROPERTY = "jetty.ssl.keypassword";
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -71,7 +79,6 @@ public abstract class JsseListener extends HttpListener
 	    p_address.setPort( 80 );
 	    super.setAddress( p_address.getInetAddress(), p_address.getPort() );
 	}
-
     }
 
     

@@ -43,7 +43,8 @@ This is assuming that JSSE is the only additional provider you want
 installed.  Note that all Jetty Jsse classes manually install  this
 provider as needed, so it may be worthwhile removing this line after
 the certificate has been generated, as it can interfer with other
-providers (see loading OpenSSL keypair below).
+providers (see loading OpenSSL keypair below). 
+
 <p>
 The certificate can be generated and loaded with the keytool utility 
 with a command like:
@@ -136,14 +137,15 @@ eHL4df28CBXV6tva77g=
 <h2><a name="loadkeys">Step 2: Load the private key and cert into a Sun JKS keystore.</a></h2>
 
 If a sun provider key/certificate pair was generated, then they are already 
-loaded into the JKS keystore and this step can be skipped.
+loaded into the JKS keystore and this step can be 
+<a href="#usekeys">skipped</A>.
 
 <p>
 During this step you will be doing a few exposed things from a security 
 point of view, so only do this in a secure directory on a secure machine. 
 Remember to clean up properly.
 
-<p> 
+<P><B>Crypto Provider</B><BR>
 The JSSE provider is not able to handle openSSL key pairs, so another 
 provider is required. Get your hands on a copy of the Bouncy Castle 
 Crypto Package from <a href="http://www.bouncycastle.org/">The Legion of 
@@ -151,6 +153,22 @@ the Bouncy Castle</a>. Other JCE 1.2 providers may work too but at the
 moment this is the one that this is tested against. You will only need 
 it for the key loading stage so install it on your safe machine somewhere. 
 <p>
+To perform these step, you do not need to have any providers registered
+in the JRE java.security file. In fact having the JSSE reference
+provider registered can cause errors in the following step.
+To use the bouncy castle provider, their classes directory must be
+in your classpath, for example:
+<PRE>
+  export CLASSPATH=$CLASSPATH:/usr/local/java/bouncycastle/jce-jdk12-10b3/classes
+</PRE>
+You can test the bouncy castle installation by running the following
+test harnesses:
+<PRE>
+  java org.bouncycastle.crypto.test.RegressionTest
+  java org.bouncycastle.jce.provider.test.RegressionTest
+</PRE>
+
+<P><B>Extracting your Private Key</B><BR>
 Firstly you will need to decrypt the private key. Do this using openssl like this:
 <pre>
 <b>$</b> openssl rsa -in bee.hive.net.key -out bee.hive.net.clearkey -outform DER
@@ -162,21 +180,33 @@ If this fails, check that the sun security provider is not registered in
 the java.security file.  It only needs to be registered their if you are
 generating your keys with sun's keytool. Jetty registers the provider on
 an as need be basis. 
-<p> 
+<P>
+<B>REMEMBER TO DELETE YOU CLEAR KEY WHEN YOU COMPLETE THE NEXT STEP</B>
+
+
+<P>
+<hr>
+<B>Loading Private Key and Certificate into the keystore</B><BR>
 Next, load the key and the cert into a JKS keystore. The class 
 com.mortbay.Util.KeyPairTool is used to load the keys into the
 keystore. It has the following arguments:
 <pre>
+<b>$</b> java com.mortbay.Util.KeyPairTool
+Tool to insert a private key/certificate pair into a keystore.
+Parameters:
  -key        FILENAME, location of private key [MANDATORY]
  -cert       FILENAME, location of certificate [MANDATORY]
- -storepass  PASSWORD, keystore password       [OPTIONAL - RISKY]
- -keypass    PASSWORD, password for new entry  [=STOREPASS - RISKY]
  -keystore   FILENAME, location of keystore,   [~/.keystore]
  -storetype  STRING,   name/type of keystore,  [jks]
  -alias      NAME,     alias used to store key [mykey]
  -provider   NAME,     name of provider class  [org.bouncycastle.jce.provider.BouncyCastleProvider]
+
+The keystore and key passwords will be prompted for or can be
+set with the following JVM system properties:
+  jetty.ssl.password  
+  jetty.ssl.keypassword
 </pre>
-If passwords are not provided on the command line, they are prompted for.
+If passwords are not provided as properties, they are prompted for.
 While they still appear on the screen, this is a much safer option as they
 do not get saved in shell histories or process listings.
 <pre>
@@ -225,7 +255,7 @@ Certificate fingerprint (MD5): 1A:DA:C0:35:F0:A3:EC:AD:AB:D8:5F:48:78:A0:CB:90
 <h2><a name="usekeys">Step 3: Configure Jetty to use JSSE and the keystore.</a></h2>
 <p>Assuming you already have a functioning Jetty2 Server:
 
-<p> Add the SunJsseListener alongside the HttpListeners, e.g. you could change lines that look like:
+<p>Add the SunJsseListener alongside the HttpListeners, e.g. you could change lines that look like:
 <pre>
 main.LISTENER.all.CLASS : com.mortbay.HTTP.HttpListener
 main.LISTENER.all.ADDRS : 0.0.0.0:8080;127.0.0.1:8888
@@ -238,27 +268,35 @@ main.LISTENER.https.CLASS : com.mortbay.HTTP.SunJsseListener
 main.LISTENER.https.ADDRS : 0.0.0.0:8443
 </pre>
 
-<p> Remember that the default port for https is 443 not 80, so change 80 to 443 if you want to be able to use URL's without explicit port numbers. For a production site it normally makes sense to have a HttpListener on port 80 and a SunJsseListener on port 443.
+<p> 
+Remember that the default port for https is 443 not 80, so change 80 to 443 if you want to be able to use URL's without explicit port numbers. For a production site it normally makes sense to have a HttpListener on port 80 and a SunJsseListener on port 443.
 
-<p> Choose a private directory with restricted access to keep your keystore in. even though it has a password on it, the password is configured into the runtime environment so is vulnerable to theft.
+<p>
+Choose a private directory with restricted access to keep your keystore
+in. Even though it has a password on it, the password may be configured 
+into the runtime environment so is vulnerable to theft.
 
-<p> Change the way you start Jetty to:
+<p>
+Change the way you start Jetty to:
 <ul>
- <li> Include all three JSSE provided jar files in the classpath. </li>
- <li> Provide the path to the keystore file as a property </li>
- <li> Provide the keystore password, either as a property or typed at a
-      prompt.</li>
+ <li> Include all three JSSE provided jar files in the classpath:
+      jsse.jar, jnet.jar & jcert.jar. Remember you no longer need
+      bouncycastle in you classpath.</li>
+ <li> Provide the path to the keystore file as the jetty.ssl.keystore property </li>
+ <li> Provide the keystore and key passwords, either as the
+      jetty.ssl.password and jetty.ssl.keypassword properties or 
+      typed at a prompt.
+</li>
 </ul>
 
 For example:
 <pre>
-java -Djetty.ssl.password=testpasswd \
-     -Djetty.ssl.keystore=/home/jetty2/keystore \
-     com.mortbay.Jetty.Demo
-</pre>
+java -Djetty.ssl.keystore=/home/jetty/keystore  com.mortbay.Jetty.Demo
 
-Remember that putting your password on the command line is a security risk.
-If you leave it out, you will be prompted for it.
+jetty.ssl.password : testpasswd
+jetty.ssl.keypassword : testpasswd
+
+</pre>
 <p>
 You may then access the SSL port with a URL like:
 
@@ -267,16 +305,32 @@ You may then access the SSL port with a URL like:
 If you get an javax.net.ssl.SSLException, check that you have 
 remembered the s in https.
 
+<P>
+<hr>
+<B>Password Issues</B><BR>
+The passwords can also be set on the command line as properties, but
+remember that putting your password on the command line is a security risk.
+<P>
+If jetty is given a password that begins with &quot;EXEC:&quot;, then
+the rest of the password is treated as a command and run with
+java.lang.Runtime.exec.  The password name (eg. jetty.ssl.password) 
+is written to the input of the command and a line of output is read
+from the command and used as the password.
+<p>
+While this mechanism just exports the security problem for jetty,
+it does allow customized security arrangements to be configured.
+
+<p>
 <hr>
 <h1><a name="issues"> Outstanding Issues. </a></h1>
 <p> The following issues are outstanding:
 <ul>
- <li> Jetty3 has yet to be dealt with. </li>
  <li> Reading passwords from prompts should turn echo off.</li>
  <li> Better recommendations for keystore location and permissions. </li>
  <li> Jetty is not yet ready to insist on client certificates. </li>
 </ul>
 
+<p>
 <hr>
 <h1><a name="environment"> Environment and version information. </a></h1>
 <p> The environment this procedure was developed in was:
@@ -287,6 +341,7 @@ remembered the s in https.
  <li> Jetty-2.4.5 with pre-release JSSE patches including the KeyPairTool </li>
  <li> Sun JavaTM Secure Socket Extension (JSSE) 1.0.1 - Globally Exportable release (Non domestic US version) </li>
 </ul>
+<p>
 <hr>
 Written by Brett Sealey. 13th August 2000.<BR>
 Updated by Greg Wilkins. 14th August 2000. 
@@ -294,4 +349,6 @@ Updated by Greg Wilkins. 14th August 2000.
 I told you to clean up your private key - do it NOW!
 </body>
 </html>
+
+
 

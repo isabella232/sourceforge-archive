@@ -1,3 +1,8 @@
+// ========================================================================
+// Copyright (c) 2000 Mort Bay Consulting (Australia) Pty. Ltd.
+// $Id$
+// ========================================================================
+
 package com.mortbay.HTTP;
 
 import java.io.*;
@@ -6,7 +11,7 @@ import javax.net.ssl.*;
 import java.security.*;
 import com.sun.net.ssl.*;
 
-import com.mortbay.Util.InetAddrPort;
+import com.mortbay.Util.*;
 import com.mortbay.Base.*;
 import com.mortbay.HTTP.HttpListener;
 import com.mortbay.HTTP.HttpServer;
@@ -22,6 +27,7 @@ import com.mortbay.HTTP.HttpServer;
  * This is heavily based on the work from Court Demas, which in
  * turn is based on the work from Forge Research.
  *
+ * @version $Id$
  * @author Greg Wilkins (gregw@mortbay.com)
  * @author Court Demas (court@kiwiconsulting.com)
  * @author Forge Research Pty Ltd  ACN 003 491 576
@@ -75,49 +81,42 @@ public class SunJsseListener extends JsseListener
     protected SSLServerSocketFactory createFactory()
         throws Exception
     {
-	
         String keystore = System.getProperty( KEYSTORE_PROPERTY,
 					      DEFAULT_KEYSTORE );
 	Log.event(KEYSTORE_PROPERTY+"="+keystore);
+
 	
-        String password = System.getProperty( PASSWORD_PROPERTY,"");
-	if (password.length()==0)
+        Password password = new Password(PASSWORD_PROPERTY);
+	Log.event(PASSWORD_PROPERTY+"="+password.toStarString());
+        Password keypassword = new Password(KEYPASSWORD_PROPERTY,
+					    null,
+					    password.toString());
+	Log.event(KEYPASSWORD_PROPERTY+"="+keypassword.toStarString());
+
+	try
 	{
-	    try
-	    {
-		System.out.print("\nKeystore password: ");
-		System.out.flush();
-		byte[] buf = new byte[512];
-		int len=System.in.read(buf);
-		password=new String(buf,0,len).trim();
-	    }
-	    catch(IOException e)
-	    {
-		Code.fail(e);
-	    }
+	    KeyStore ks = KeyStore.getInstance( "JKS" );
+	    ks.load( new FileInputStream( new File( keystore ) ),
+		     password.getCharArray());
+	    
+	    KeyManagerFactory km = KeyManagerFactory.getInstance( "SunX509"); 
+	    km.init( ks, keypassword.getCharArray() );
+	    KeyManager[] kma = km.getKeyManagers();                        
+	    
+	    TrustManagerFactory tm = TrustManagerFactory.getInstance("SunX509" );
+	    tm.init( ks ); 
+	    TrustManager[] tma = tm.getTrustManagers(); 
+	    SSLContext sslc = SSLContext.getInstance( "SSL" ); 
+	    sslc.init( kma, tma, SecureRandom.getInstance( "SHA1PRNG" ) ); 
+	    SSLServerSocketFactory ssfc = sslc.getServerSocketFactory();
+	    Log.event("SSLServerSocketFactory="+ssfc);
+	    return ssfc;
 	}
-		  
-	Log.event(PASSWORD_PROPERTY+"="+"******************************************************************************".substring(0,password.length()));
-
-	char[] pwChars = password.toCharArray();
-
-
-
-	KeyStore ks = KeyStore.getInstance( "JKS" );
-        ks.load( new FileInputStream( new File( keystore ) ), pwChars );
-
-        KeyManagerFactory km = KeyManagerFactory.getInstance( "SunX509"); 
-        km.init( ks, pwChars );
-        KeyManager[] kma = km.getKeyManagers();                        
-           
-        TrustManagerFactory tm = TrustManagerFactory.getInstance("SunX509" );
-        tm.init( ks ); 
-        TrustManager[] tma = tm.getTrustManagers(); 
-        SSLContext sslc = SSLContext.getInstance( "SSL" ); 
-        sslc.init( kma, tma, SecureRandom.getInstance( "SHA1PRNG" ) ); 
-        SSLServerSocketFactory ssfc = sslc.getServerSocketFactory();
-	Log.event("SSLServerSocketFactory="+ssfc);
-        return ssfc;
+	finally
+	{
+	    password.zero();
+	    keypassword.zero();
+	}
     }
 }
 

@@ -37,7 +37,7 @@ import java.lang.reflect.*;
  * @see com.mortbay.Util.PropertyTree
  * @see com.mortbay.HTTP.HttpServer
  * @see com.mortbay.HTTP.PathMap
- * @version %I% (%E% %U%)
+ * @version $Id$
  * @author Greg Wilkins (wilkinsg)
  */
 public class Server extends BaseConfiguration
@@ -337,8 +337,8 @@ public class Server extends BaseConfiguration
      * @exception Exception 
      */
     public Server(String serverName,
-                  PropertyTree listeners,
-                  Properties properties)
+		  PropertyTree listeners,
+		  Properties properties)
         throws Exception
     {
         synchronized(com.mortbay.Jetty.Server.class)
