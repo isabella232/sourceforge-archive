@@ -73,7 +73,7 @@ Other targets:
 
   <property name="tools.jar"       value="${env.JAVA_HOME}/lib/tools.jar"/>
 
-  <property name="jvmarg"  value="-server -Djetty.home=${jetty.home} -Djetty.log=${jetty.home}/logs" />
+  <property name="jvmarg"  value="-Djetty.home=${jetty.home} -Djetty.log=${jetty.home}/logs" />
 
   <!-- ==================================================================== -->
   <path id="extpath">
