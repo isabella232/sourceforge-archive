@@ -29,6 +29,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionAttributeListener;
@@ -38,6 +39,8 @@ import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
 import org.jboss.logging.Logger;
+import org.mortbay.http.HttpOnlyCookie;
+import org.mortbay.jetty.servlet.SessionManager;
 import org.mortbay.jetty.servlet.WebApplicationContext;
 
 //----------------------------------------
@@ -106,6 +109,11 @@ public class Manager
   public void setMaxInactiveInterval(int seconds) {_maxInactiveInterval=seconds;}
   //----------------------------------------
   protected Store _store = null;
+
+  private boolean _secureCookies = false;
+  private boolean _httpOnly = false;
+  private boolean _crossContextSessionIDs  = false;
+
 
   public Store
     getStore()
@@ -535,11 +543,6 @@ public class Manager
     }
   }
 
-  public int
-    getSessions()
-  {
-  	synchronized (_sessions) { return _sessions.size(); } 
-  }
 
   protected HttpSession
     findSession(String id,boolean create)
@@ -739,4 +742,93 @@ public class Manager
     }
     _log.trace("...finished local scavenging");
   }
+      /* ------------------------------------------------------------ */
+      /**
+       * @return Returns the secureCookies.
+       *
+       * 
+       */
+      public boolean getSecureCookies()
+      {
+        return _secureCookies;
+      }
+                                                                                                                                
+      /* ------------------------------------------------------------ */
+      /**
+       * @param secureCookies The secureCookies to set.
+       */
+      public void setSecureCookies(boolean secureCookies)
+      {
+        _secureCookies = secureCookies;
+      }
+      /* ------------------------------------------------------------ */
+      /**
+       * @return Returns the httpOnly.
+       */
+      public boolean getHttpOnly()
+      {
+         return _httpOnly;
+      }
+                                                                                                                         
+     /* ------------------------------------------------------------ */
+     /**
+      * @param httpOnly The httpOnly to set.
+      */
+     public void setHttpOnly(boolean httpOnly)
+     {
+        _httpOnly = httpOnly;
+     }
+     
+     /** 
+      * @return True if cross context session IDs are first considered for new
+      * session IDs
+      */
+     public boolean getCrossContextSessionIDs()
+     {
+         return _crossContextSessionIDs;
+     }
+     
+     /* ------------------------------------------------------------ */
+     /** Set Cross Context sessions IDs
+      * This option activates a mode where a requested session ID can be used to create a 
+      * new session. This facilitates the sharing of session cookies when cross context
+      * dispatches use sessions.   
+      * 
+      * @param useRequestedId True if cross context session ID are first considered for new
+      * session IDs
+      */
+     public void setCrossContextSessionIDs(boolean useRequestedId)
+     {   
+         _crossContextSessionIDs = useRequestedId;
+     }
+
+     public Cookie getSessionCookie(HttpSession session,boolean requestIsSecure)
+     {
+         if (_handler.isUsingCookies())
+         {
+             Cookie cookie = _handler.getSessionManager().getHttpOnly()
+                 ?new HttpOnlyCookie(SessionManager.__SessionCookie,session.getId())
+                 :new Cookie(SessionManager.__SessionCookie,session.getId());    
+             String domain=_handler.getServletContext().getInitParameter(SessionManager.__SessionDomain);
+             String maxAge=_handler.getServletContext().getInitParameter(SessionManager.__MaxAge);
+             String path=_handler.getServletContext().getInitParameter(SessionManager.__SessionPath);
+             if (path==null)
+                 path=getCrossContextSessionIDs()?"/":_handler.getHttpContext().getContextPath();
+             if (path==null || path.length()==0)
+                 path="/";
+             
+             if (domain!=null)
+                 cookie.setDomain(domain);       
+             if (maxAge!=null)
+                 cookie.setMaxAge(Integer.parseInt(maxAge));
+             else
+                 cookie.setMaxAge(-1);
+             
+             cookie.setSecure(requestIsSecure && getSecureCookies());
+             cookie.setPath(path);
+             
+             return cookie;    
+         }
+         return null;
+     }
 }
