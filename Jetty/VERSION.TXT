@@ -1,6 +1,14 @@
-Jetty Versions
+Jetty3 Versions
 --------------
 
+ + Improved SSL debugging information.
+ + KeyPairTool can now load cert chains.
+ + KeyPairTool is more robust to provider setup.
+ + Fixed bug in B64Code. Optimised B64Code.
+ + Added Client authentication to the JsseListener
+ + Fixed a problem with Netscape and the acrobat plugin.
+ + Improved debug output for IOExceptions.
+ + Updated to JSSE-1.0.2, giving full strength crypto.
  + Win32 Service uses Jetty.Server instead of HttpServer.
  + Added getResource to HandleContext.
  + WebApps initialize resourceBase before start.
