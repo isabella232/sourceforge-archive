@@ -7,9 +7,11 @@ package com.mortbay.Servlets;
 
 import com.mortbay.Base.Code;
 import com.mortbay.Util.Converter;
+import com.mortbay.Util.ConvertFail;
 import com.mortbay.Util.ConverterSet;
-import com.mortbay.Util.DictionaryConverter;
+import com.mortbay.Util.ObjectConverter;
 import com.mortbay.Util.ArrayConverter;
+import com.mortbay.Util.ObjectConverter.ObjectConvertFail;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
@@ -97,6 +99,11 @@ import java.lang.reflect.Array;
  *     disp.initArgObject(args);
  *     // ...
  * }
+ * public void AltDelete(ServletDispatch disp,
+ *                       HttpServletResponse res, Args args)
+ * {
+ *     // ...
+ * }
  * public boolean defaultDispatch(String method,
  *                                ServletDispatch dispatch,
  *                                Object context,
@@ -126,7 +133,7 @@ public class ServletDispatch
         // The basic types
         cs.registerPrimitiveConverters();
         // For the complex objects
-        cs.register(new DictionaryConverter());
+        cs.register(new ObjectConverter());
         // And for multi-value params to arrays
         cs.register(new ArrayConverter(","));
         converter = cs;
@@ -154,7 +161,11 @@ public class ServletDispatch
                java.lang.IllegalAccessException,
                java.lang.InstantiationException
     {
-        if (path == null)
+        ServletDispatchErrorHandler errors = null;
+	if (obj instanceof ServletDispatchErrorHandler)
+	    errors = (ServletDispatchErrorHandler)obj;
+
+	if (path == null)
         {
             path = new Vector();
             String pathi = req.getPathInfo();
@@ -193,7 +204,23 @@ public class ServletDispatch
             } else {
                 // Handle an arbitrary param type
                 Object param = paramTypes[i].newInstance();
-                initArgObject(param);
+                if (errors != null){
+		    // The user wants to handle errors converting
+		    ObjectConvertFail errs = initArgObject(param, true);
+		    if (errs != null){
+			Hashtable ht = errs.getErrors();
+			String fields[] = new String[ht.size()];
+			int j = 0;
+			for (Enumeration enum = ht.keys();
+			     enum.hasMoreElements(); j++)
+			    fields[j] = enum.nextElement().toString();
+			return errors.argumentFormatError(funcName, this,
+							  context, req, res,
+							  fields);
+		    }
+		}
+		else
+		    initArgObject(param);
                 params[i] = param;
             }
         }
@@ -220,9 +247,11 @@ public class ServletDispatch
      * <p> E.g. <pre>
      * {
      *        int foo[];
-     *        foo = (int[])ServletDispatch(foo, "foo", req);
+     *        foo = (int[])ServletDispatch.parseArg(foo, "foo", req);
      *        //...
      * </pre>
+     * <br>This function does no checking that the parameter is actually set
+     * or has a valid value in it.
      * @param defaultValue The default value to give the object (must be the
      * same type as the object, since it is used to determine the type to
      * convert the parameter to...)
@@ -307,6 +336,17 @@ public class ServletDispatch
      * </pre>
      */
     public void initArgObject(Object toInit) {
+	initArgObject(toInit, false);
+    }
+    /* ------------------------------------------------------------ */
+    /** Initialise an arbitrary Object from the request parameters.
+     * @see #initArgObject(Object) - This version accepts a boolean param to
+     * indicate whether error checking should be done. If true and there are
+     * conversion/parse errors of the request parameters, an Object of type
+     * com.mortbay.Util.ObjectConverter.ObjectConvertFail will be returned.
+     */
+    public ObjectConvertFail initArgObject(Object toInit, boolean errors)
+    {
         if (paramsHT == null){
             paramsHT = new Hashtable();
             for (Enumeration enum = req.getParameterNames();
@@ -316,7 +356,8 @@ public class ServletDispatch
                 paramsHT.put(key, req.getParameter(key.toString()));
             }
         }
-        DictionaryConverter.fillObject(toInit, paramsHT, converter);
+	return ObjectConverter.fillObject(toInit, paramsHT,
+					  converter, !errors);
     }
     /* ------------------------------------------------------------ */
     private Object doDefaultDispatch(Object obj,
@@ -348,4 +389,4 @@ public class ServletDispatch
             return null;
     }
     /* ------------------------------------------------------------ */
-};
+}
