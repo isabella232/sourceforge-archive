@@ -11,6 +11,7 @@ Jetty Versions
  + Context Initparams to control session cookie domain, path and age.
  + ClientCertAuthenticator protected from null subjectDN
  + Added LimitedNCSARequestLog
+ + Use javac -target 1.2 for normal classes
 
 Jetty-4.1.0RC6 - 14 September 2002
  + Don't URL encode FileURLS.
