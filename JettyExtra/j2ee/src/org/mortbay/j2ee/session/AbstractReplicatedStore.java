@@ -179,7 +179,7 @@ abstract public class
 	tmp=tmp+argInstances[i]+((i<argInstances.length-1)?", ":"");
       tmp=tmp+")";
 
-      _log.info("dispatching call: "+methodName+tmp);
+      _log.info("dispatching call: "+argInstances[1]+"."+methodName+tmp);
 
       String id=(String)argInstances[1];
 
