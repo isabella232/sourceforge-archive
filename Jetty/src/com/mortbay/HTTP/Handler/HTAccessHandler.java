@@ -113,11 +113,16 @@ public class HTAccessHandler extends NullHandler
                 ht=new HTAccess(resource);
                 _htCache.put(resource,ht);
             }
-            
+
+            //first see if we need to handle based on method type
+            if( !ht.getMethods().containsKey(request.getMethod()) ) {
+                return; //Nothing to check
+            }
+
             // Check the accesss
             int satisfy = ht.getSatisfy();
 
-            // first check IP address
+            // second check IP address
             IPValid = ht.checkAccess("",request.getRemoteAddr());
             Code.debug("IPValid = "+IPValid);
 
@@ -269,6 +274,9 @@ public class HTAccessHandler extends NullHandler
                 Code.warning(e);
             }
         }
+
+        /* ------------------------------------------------------------ */
+        public HashMap getMethods() {return _methods;}
 
         /* ------------------------------------------------------------ */
         public long getLastModified() {return _lastModified;}

@@ -17,6 +17,7 @@ Jetty-3.1.rc7 -
  + Fixed redirect handling by the CGI Servlet.
  + Fixed request.getPort for redirections from 80
  + Added utility methods to ServletHandler for wrapping req/res pairs.
+ + Added method handling to HTAccessHandler.
 
 Jetty-3.1.rc6 - 10 Jul 2001
  + Avoid script vulnerability in error pages.
