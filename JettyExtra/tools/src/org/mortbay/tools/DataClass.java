@@ -253,7 +253,7 @@ public class DataClass
                                       final int indent)
     {
         Class objClass = object.getClass();
-        Code.assert(objClass.isArray(),"Must be an array");
+        Code.assertTrue(objClass.isArray(),"Must be an array");
 
         
         // calculate indents

@@ -22,7 +22,7 @@ public class FtpReplyException extends FtpException
     /* ------------------------------------------------------------------ */
     static String replyDescription(CmdReply reply)
     {
-        Code.assert(reply!=null,"Use FtpCmdStreamException for null reply");
+        Code.assertTrue(reply!=null,"Use FtpCmdStreamException for null reply");
         return reply.toString();
     }
 }

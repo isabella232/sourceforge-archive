@@ -67,7 +67,7 @@ public class DispatchServlet extends HttpServlet
         try {
             p = (Page)pageType.newInstance();
         } catch (Throwable t){
-            Code.assert(false, "NEVER!");
+            Code.assertTrue(false, "NEVER!");
         }
         p.properties().put(Page.Request, req);
         p.properties().put(Page.Response, res);

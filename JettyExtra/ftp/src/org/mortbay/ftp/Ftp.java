@@ -162,7 +162,7 @@ public class Ftp
                                   int port)
          throws FtpException, IOException
     {
-        Code.assert(command==null,"Ftp already opened");
+        Code.assertTrue(command==null,"Ftp already opened");
 
         if (port==0)
             port=defaultPort;
@@ -840,7 +840,7 @@ public class Ftp
     public void getUrl(String url, OutputStream out)
          throws FtpException,IOException
     {
-        Code.assert(url.startsWith("ftp://"),
+        Code.assertTrue(url.startsWith("ftp://"),
                     "url must be for the form: "+
                     "ftp://username:password@host:port/path/to/file");
 
