@@ -22,6 +22,9 @@ class JarFileResource extends Resource
     File _file;
     String[] _list;
     JarEntry _entry;
+    boolean _directory;
+    String _jarUrl;
+    String _path;
     
     /* -------------------------------------------------------- */
     JarFileResource(URL url)
@@ -36,6 +39,12 @@ class JarFileResource extends Resource
         try{
             if (_jarConnection!=_connection)
             {
+                int sep = _urlString.indexOf("!/");
+                _jarUrl=_urlString.substring(0,sep+2);
+                _path=_urlString.substring(sep+2);
+                if (_path.length()==0)
+                    _path=null;
+                
                 _entry=null;
                 _file=null;
                 _jarFile=null;
@@ -62,27 +71,79 @@ class JarFileResource extends Resource
      */
     public boolean exists()
     {
-        if (_urlString.endsWith("!/"))
-            return checkConnection();
-        else if (checkConnection())
+        boolean check=checkConnection();
+        
+        // Is this a root URL?
+        if (_jarUrl!=null && _path==null)
         {
-            if (_entry==null)
+            // Then if it exists it is a directory
+            _directory=check;
+            return _directory;
+        }
+        else 
+        {
+            // Can we find a file for it?
+            JarFile jarFile=null;
+            if (check)
+                // Yes
+                jarFile=_jarFile;
+            else
             {
-                Enumeration e=_jarFile.entries();
-                String path=_urlString.substring(_urlString.indexOf("!/")+2);
+                // No - so lets look if the root entry exists.
+                try
+                {
+                    jarFile=
+                        ((JarURLConnection)
+                         ((new URL(_jarUrl)).openConnection())).getJarFile();
+                }
+                catch(Exception e)
+                {
+                    if (Code.verbose(9999))
+                        Code.ignore(e);
+                }
+            }
+
+            // Do we need to look more closely?
+            if (jarFile!=null && _entry==null && !_directory)
+            {
+                // OK - we have a FarFile, lets look at the entries for our path
+                Enumeration e=jarFile.entries();
                 while(e.hasMoreElements())
                 {
                     JarEntry entry = (JarEntry) e.nextElement();
                     String name=entry.getName().replace('\\','/');
-                    if (name.equals(path))
+                    
+                    // Do we have a match
+                    if (name.equals(_path))
                     {
                         _entry=entry;
+                        // Is the match a directory
+                        _directory=_path.endsWith("/");
+                        break;
+                    }
+                    else if (_path.endsWith("/") && name.startsWith(_path))
+                    {
+                        // Our path is a directory prefix to the entry
+                        _directory=true;
                         break;
                     }
                 }
             }
-        }
-        return _entry!=null;
+        }    
+        
+        return _directory || _entry!=null;
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Returns true if the respresenetd resource is a container/directory.
+     * If the resource is not a file, resources ending with "/" are
+     * considered directories.
+     */
+    public boolean isDirectory()
+    {
+        return exists() && _directory;
     }
     
     /* ------------------------------------------------------------ */
@@ -91,7 +152,7 @@ class JarFileResource extends Resource
      */
     public long lastModified()
     {
-        if (checkConnection())
+        if (checkConnection() && _file!=null)
             return _file.lastModified();
         return -1;
     }
@@ -112,9 +173,13 @@ class JarFileResource extends Resource
                     continue;
                 String listName=name.substring(dir.length());
                 int dash=listName.indexOf('/');
-                if (dash>=0 && dash!=(listName.length()-1))
-                    continue;
-
+                if (dash>=0)
+                {
+                    listName=listName.substring(0,dash+1);
+                    if (list.contains(listName))
+                        continue;
+                }
+                
                 list.add(listName);
             }
 

@@ -1,10 +1,10 @@
 Stable 2.4.7
 Dev    3.0.B04
 
+ + Fixed JarFileResource to handle jar files without directories.
  + Implemented war file support
  + Java2 style classloading
  + Improved default log format for clarity.
-
 
 Jetty-3.0.B04 - 12 Oct 2000
  + Restricted context mapping to simple model for servlets.

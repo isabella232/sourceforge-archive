@@ -1285,9 +1285,8 @@ public class TestHarness
         Test t = new Test("com.mortbay.Util.Resource");
         try
         {
-              Resource r;
-            r =
-                Resource.newResource("file:"+
+            Resource r;
+            r = Resource.newResource("file:"+
                                      System.getProperty("user.dir")+
                                      "/TestHarness.java");
             t.check(r.exists(),"File URL exists");
