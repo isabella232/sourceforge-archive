@@ -1,9 +1,11 @@
-PENDING 2.4.5 ....
+Release 2.4.5 - 9th July 2000 
+  + Don't mark a session invalid until after values unbound.
+  + Formatted version in server info.
   + Added HtmlExpireFilter and removed response cache
     revention from HtmlFilter. 
   + Fixed transaction handling in JDBC wrappers
  
-Release 2.4.4 - 3rd June 2000 LATEST
+Release 2.4.4 - 3rd June 2000 
   + Many debug call optimizations
   + Added RolloverFileLogSink
   + Improved LogSink configuration

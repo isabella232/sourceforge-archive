@@ -28,6 +28,11 @@ import java.lang.reflect.*;
  */
 public class HtmlExpireFilter extends HtmlFilter
 {
+    public HtmlExpireFilter(HttpRequest request)
+    {
+	super(request);
+    }
+    
     protected void activate()
     {
         if(response!=null)

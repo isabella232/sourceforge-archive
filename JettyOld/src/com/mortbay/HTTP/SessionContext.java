@@ -138,11 +138,10 @@ public class SessionContext extends Hashtable
         }
         
         /* ------------------------------------------------------------- */
-        public void invalidate()
+        public synchronized void invalidate()
             throws IllegalStateException
         {
             if (invalid) throw new IllegalStateException();
-            invalid=true;
             
             // Call valueUnbound on all the HttpSessionBindingListeners
             // To avoid iterator problems, don't actually remove them
@@ -154,6 +153,7 @@ public class SessionContext extends Hashtable
                 unbindValue(key, value);
             }
             SessionContext.this.remove(id);
+            invalid=true;
         }
         
         /* ------------------------------------------------------------- */
