@@ -363,7 +363,7 @@ public class WebApplicationContext
                 if (dftResource==null)
                     dftResource= Resource.newResource(_defaultsDescriptor);
                 
-                // _defaultsDescriptor=dftResource.toString();
+                // XXX - don't know why? _defaultsDescriptor=dftResource.toString();
                 XmlParser.Node defaultConfig =
                     xmlParser.parse(dftResource.getURL().toString());
                 initialize(defaultConfig);
