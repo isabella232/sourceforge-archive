@@ -25,7 +25,7 @@
   <!-- =============================================================== -->
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- UNCOMMENT TO CONFIGURE OutputStreamLogSink   -->                  
+  <!-- UNCOMMENT TO CONFIGURE OutputStreamLogSink                   
   <Call name="instance" class="org.mortbay.util.Log">
     <Call name="disableLog"/>
     <Call name="add">
@@ -44,7 +44,8 @@
       </Arg>
     </Call>
   </Call>
-
+  -->
+ 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- UNCOMMENT TO CONFIGURE Log4jSink (in contrib directory)
   <Call name="instance" class="org.mortbay.util.Log">
