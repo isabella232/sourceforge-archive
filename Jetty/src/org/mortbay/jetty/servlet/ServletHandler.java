@@ -509,8 +509,6 @@ public class ServletHandler extends AbstractHttpHandler
             return;
         }
         
-        Code.debug("handle ",httpRequest);
-
         // Check if this is re-entrant
         ServletHttpRequest request = (ServletHttpRequest) httpRequest.getWrapper();
         ServletHttpResponse response = (ServletHttpResponse) httpResponse.getWrapper();

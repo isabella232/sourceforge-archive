@@ -48,6 +48,9 @@
   <!--                                                                      -->
   <!--   delAllowed       If true, the DELETE method is allowed             -->
   <!--                                                                      -->
+  <!--   redirectWelcome  If true, redirect welcome file requests           -->
+  <!--                    else use request dispatcher forwards              -->
+  <!--                                                                      -->
   <!-- The MOVE method is allowed if PUT and DELETE are allowed             -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <servlet>
@@ -67,6 +70,10 @@
     </init-param>
     <init-param>
       <param-name>delAllowed</param-name>
+      <param-value>false</param-value>
+    </init-param>
+    <init-param>
+      <param-name>redirectWelcome</param-name>
       <param-value>false</param-value>
     </init-param>
     <load-on-startup>0</load-on-startup>

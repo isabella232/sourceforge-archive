@@ -268,7 +268,6 @@ public class WebApplicationHandler extends ServletHandler
                 } 
             }
         }
-        Code.debug("filters=",filters);
         
         // Do the handling thang
         if (LazyList.size(filters)>0)

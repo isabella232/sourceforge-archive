@@ -53,6 +53,9 @@ import org.mortbay.util.ByteArrayISO8859Writer;
  *   putAllowed       If true, the PUT method is allowed                
  *                                                                      
  *   delAllowed       If true, the DELETE method is allowed
+ *
+ *   redirectWelcome  If true, welcome files are redirected rather than
+ *                    forwarded to.
  * </PRE>
  *                                                               
  * The MOVE method is allowed if PUT and DELETE are allowed             
@@ -70,6 +73,7 @@ public class Default extends HttpServlet
     private boolean _dirAllowed;
     private boolean _putAllowed;
     private boolean _delAllowed;
+    private boolean _redirectWelcomeFiles;
     
     /* ------------------------------------------------------------ */
     public void init()
@@ -82,6 +86,7 @@ public class Default extends HttpServlet
         _dirAllowed=getInitBoolean("dirAllowed");
         _putAllowed=getInitBoolean("putAllowed");
         _delAllowed=getInitBoolean("delAllowed");
+        _redirectWelcomeFiles=getInitBoolean("redirectWelcome");
 
         if (_putAllowed)
             _AllowString+=", PUT";
@@ -132,8 +137,7 @@ public class Default extends HttpServlet
         // Handle the request
         try
         {
-            Code.debug(method," PATH=",pathInContext,
-                       " RESOURCE=",resource);
+            if (Code.debug())Code.debug(method," PATH=",pathInContext," RESOURCE=",resource);
             
             // check filename
             if (method.equals(HttpRequest.__GET) ||
@@ -214,11 +218,19 @@ public class Default extends HttpServlet
                 // See if index file exists
                 String welcome=_httpContext.getWelcomeFile(resource);
                 if (welcome!=null)
-                {     
-                    // Forward to the index
+                {
                     String ipath=URI.addPaths(pathInContext,welcome);
-                    RequestDispatcher dispatcher=_servletHandler.getRequestDispatcher(ipath);
-                    dispatcher.forward(request,response);
+                    if (_redirectWelcomeFiles)
+                    {
+                        // Redirect to the index
+                        response.sendRedirect(URI.addPaths( _httpContext.getContextPath(),ipath));
+                    }
+                    else
+                    {
+                        // Forward to the index
+                        RequestDispatcher dispatcher=_servletHandler.getRequestDispatcher(ipath);
+                        dispatcher.forward(request,response);
+                    }
                     return;
                 }
 

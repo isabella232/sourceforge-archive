@@ -54,6 +54,7 @@ public class ResourceHandler extends AbstractHttpHandler
 {
     /* ----------------------------------------------------------------- */
     private boolean _acceptRanges=true;
+    private boolean _redirectWelcomeFiles ;
     private String[] _methods=null;
     private String _allowed;
     private StringMap _methodMap = new StringMap();
@@ -127,6 +128,25 @@ public class ResourceHandler extends AbstractHttpHandler
     public boolean isAcceptRanges()
     {
         return _acceptRanges;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if welcome files are redirected to. False if forward is used.
+     */
+    public boolean getRedirectWelcome()
+    {
+        return _redirectWelcomeFiles;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param redirectWelcome True if welcome files are redirected to. False
+     * if forward is used. 
+     */
+    public void setRedirectWelcome(boolean redirectWelcome)
+    {
+        _redirectWelcomeFiles = redirectWelcome;
     }
     
     /* ------------------------------------------------------------ */
@@ -247,9 +267,18 @@ public class ResourceHandler extends AbstractHttpHandler
                 {     
                     // Forward to the index
                     String ipath=URI.addPaths(pathInContext,welcome);
-                    URI uri=request.getURI();
-                    uri.setPath(URI.addPaths(uri.getPath(),welcome));
-                    getHttpContext().handle(ipath,pathParams,request,response);
+                    if (_redirectWelcomeFiles)
+                    {
+                        // Redirect to the index
+                        ipath=URI.addPaths(getHttpContext().getContextPath(),ipath);
+                        response.sendRedirect(ipath);
+                    }
+                    else
+                    {
+                        URI uri=request.getURI();
+                        uri.setPath(URI.addPaths(uri.getPath(),welcome));
+                        getHttpContext().handle(ipath,pathParams,request,response);
+                    }
                     return;
                 }
 

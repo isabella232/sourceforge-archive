@@ -176,17 +176,17 @@ public class ByteBufferOutputStream extends OutputStream
     {
         if (n>_start)
         {
-            Code.warning("Reserve: "+n+">"+_start);
+            if (Code.debug())Code.debug("Reserve: "+n+">"+_start);
             if ((_end+n)<_buf.length)
             {
-                Code.warning("Shift reserve: "+_end+"+"+n+"<"+_buf.length);
+                if (Code.debug())Code.debug("Shift reserve: "+_end+"+"+n+"<"+_buf.length);
                 System.arraycopy(_buf,_start,_buf,n,_end-_start);
                 _end=_end+n-_start;
                 _start=n;
             }
             else
             {    
-                Code.warning("New reserve: "+_end+"+"+n+">="+_buf.length);
+                if (Code.debug())Code.debug("New reserve: "+_end+"+"+n+">="+_buf.length);
                 byte[] buf = new byte[_buf.length+n-_start];
                 System.arraycopy(_buf,_start,buf,n,_end-_start);
                 _end=n+_end-_start;
@@ -203,8 +203,7 @@ public class ByteBufferOutputStream extends OutputStream
         {
             int bl = ((_end+n+1023)/1024)*1024;
             byte[] buf = new byte[bl];
-            Code.debug("New buf for ensure: "+_end+"+"+n+">"+_buf.length+
-                         " --> "+buf.length);
+            if (Code.debug())Code.debug("New buf for ensure: "+_end+"+"+n+">"+_buf.length+" --> "+buf.length);
             System.arraycopy(_buf,_start,buf,_start,_end-_start);
             if (!_resized)
                 ByteArrayPool.returnByteArray(_buf);

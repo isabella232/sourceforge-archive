@@ -322,10 +322,7 @@ public class ThreadPool
         throws Exception
     {   
         if (_running)
-        {
-            Code.debug("Already started");
             return;
-        }
         Code.debug("Start Pool ",_name);
 
         // Start the threads
@@ -374,7 +371,6 @@ public class ThreadPool
                     if (_idleSet.contains(thread))
                     {
                         // interrupt idle thread
-                        Code.debug("Interrupt idle ",thread);
                         thread.interrupt();
                     }
                     else 
@@ -419,7 +415,6 @@ public class ThreadPool
                     if (_idleSet.contains(thread))
                     {
                         // interrupt idle thread
-                        Code.debug("Interrupt idle ",thread);
                         thread.interrupt();
                     }
                     else

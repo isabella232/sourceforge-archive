@@ -191,7 +191,6 @@ public class ByteArrayISO8859Writer extends Writer
     {
         if (_bout==null)
         {
-            Code.debug("Using OutputStreamWriter for ",ca);
             _bout = new ByteArrayOutputStream2(2*length);
             _writer = new OutputStreamWriter(_bout,StringUtil.__ISO_8859_1);
         }

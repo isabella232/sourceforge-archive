@@ -533,7 +533,6 @@ public class LineInput extends FilterInputStream
                 // If we have a CR and no more characters are available
                 if (cr && in.available()==0 && !_seenCrLf)
                 {
-                    Code.debug("Missing LF");
                     _lastCr=true;
                     cr=true;
                     lf=true;
