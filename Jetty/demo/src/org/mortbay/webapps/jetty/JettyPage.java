@@ -305,11 +305,12 @@ public class JettyPage extends Page
                  menu.cell().add("<BR>");
              }
         }
+
+        _table.add("<FORM method=GET action=http://www.google.com/custom><small><A HREF=http://www.google.com/search><IMG SRC=http://www.google.com/logos/Logo_40wht.gif border=0 ALT=Google align=middle></A><BR><INPUT TYPE=text name=q size=14 maxlength=255 value=\"\"><BR><INPUT type=hidden name=cof VALUE=\"LW:468;L:http://jetty.mortbay.org/jetty/images/jetty_banner.gif;LH:60;AH:center;S:http://jetty.mortbay.org;AWFID:1e76608d706e7dfc;\"><input type=hidden name=domains value=\"mortbay.com;mortbay.org\"><input type=radio name=sitesearch value=\"mortbay.org\" checked> mortbay.org<br><input type=radio name=sitesearch value=\"mortbay.com\"> mortbay.com<br><INPUT type=submit name=sa VALUE=\"Google Search\"><BR></small></form>");
+        
         _table.newCell();
         _table.cell().top();
         _table.cell().left();
-        
-       
         
         if (path.endsWith(".txt"))
             _table.nest(new Block(Block.Pre));
@@ -334,6 +335,7 @@ public class JettyPage extends Page
         {
             _table.newCell();
             _table.cell().top();
+            _table.cell().center();
             
             _table.add("<A HREF=\"http://www.mortbay.com\"><IMG SRC=\""+_context+"/images/mbLogoBar.gif\" WIDTH=120 HEIGHT=75 BORDER=0 ALT=\"Mort Bay\"></A><P>\n");
             
