@@ -353,7 +353,6 @@ public class URI
      */
     public void setQuery(String query)
     {
-        _dirty=true;
         _query=query;
         
         if (_parameters!=null)
@@ -363,6 +362,8 @@ public class URI
         
         if (query!=null)
             _parameters.decode(query,__CHARSET);
+        
+        cleanURI();
     }
     
     /* ------------------------------------------------------------ */
@@ -491,35 +492,42 @@ public class URI
         if (_dirty)
         {
             getQuery();
-            StringBuffer buf = new StringBuffer(_uri.length()*2);
-            synchronized(buf)
-            {
-                if (_scheme!=null)
-                {
-                    buf.append(_scheme);
-                    buf.append("://");
-                    buf.append(_host);
-                    if (_port>0)
-                    {
-                        buf.append(':');
-                        buf.append(_port);
-                    }
-                }
-
-                buf.append(_encodedPath);
-
-                if (_query!=null && _query.length()>0)
-                {
-                    buf.append('?');
-                    buf.append(_query);
-                }
-                _uri=buf.toString();
-                _dirty=false;
-            }
+            cleanURI();
         }
         return _uri;
     }
 
+    /* ------------------------------------------------------------ */
+    private void cleanURI()
+    {
+        StringBuffer buf = new StringBuffer(_uri.length()*2);
+        synchronized(buf)
+        {
+            if (_scheme!=null)
+            {
+                buf.append(_scheme);
+                buf.append("://");
+                buf.append(_host);
+                if (_port>0)
+                {
+                    buf.append(':');
+                    buf.append(_port);
+                }
+            }
+
+            buf.append(_encodedPath);
+            
+            if (_query!=null && _query.length()>0)
+            {
+                buf.append('?');
+                buf.append(_query);
+            }
+            _uri=buf.toString();
+            _dirty=false;
+        }
+    }
+    
+                
     /* ------------------------------------------------------------ */
     /** Encode a URI path.
      * This is the same encoding offered by URLEncoder, except that
