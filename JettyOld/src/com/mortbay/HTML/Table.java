@@ -73,7 +73,7 @@ public class Table extends Block
 	nest(row = new Block("TR"));
 	if (_defaultRow!=null)
 	{
-	    row.attributes(_defaultRow.attributes());
+	    row.setAttributesFrom(_defaultRow);
 	    if (_defaultRow.size()>0)
 		row.add(_defaultRow.contents());
 	}
@@ -120,7 +120,7 @@ public class Table extends Block
 	newBlock("TD");
 	if (_defaultCell!=null)
 	{
-	    cell.attributes(_defaultCell.attributes());
+	    cell.setAttributesFrom(_defaultCell);
 	    if (_defaultCell.size()>0)
 		cell.add(_defaultCell.contents());
 	}
@@ -176,7 +176,7 @@ public class Table extends Block
 	newBlock("TH");
 	if (_defaultHead!=null)
 	{
-	    cell.attributes(_defaultHead.attributes());
+	    cell.setAttributesFrom(_defaultHead);
 	    if (_defaultHead.size()>0)
 		cell.add(_defaultHead.contents());
 	}

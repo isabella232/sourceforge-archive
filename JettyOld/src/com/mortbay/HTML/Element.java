@@ -157,9 +157,22 @@ public abstract class Element
 	    this.attributes += ' '+attributes;
 	return this;
     }
+
+    /* ------------------------------------------------------------ */
+    /** Set attributes from another Element
+     * @param e Element
+     * @return This Element
+     */
+    public Element setAttributesFrom(Element e)
+    {
+	attributes=e.attributes;
+	attributeMap=(Hashtable)e.attributeMap.clone();
+	return this;
+    }
+
     
     /* ----------------------------------------------------------------- */
-    /** Add element Attributes
+    /** Add element Attributes.
      * The attributes are added to the Element attributes (separated with
      * a space). The attributes are available to the derived class in the
      * protected member String <I>attributes</I>
@@ -169,11 +182,12 @@ public abstract class Element
      */
     public Element attribute(String attributes)
     {
-	if (Code.debug() && attributes.indexOf("=")>=0)
+	if (Code.debug() && attributes!=null && attributes.indexOf("=")>=0)
 	    Code.warning("Set attribute with old method: "+attributes+
 			 " on " + getClass().getName());
 	
-	if (this.attributes==null ||
+	if (attributes==null ||
+	    this.attributes==null ||
 	    this.attributes==noAttributes ||
 	    this.attributes.length()==0)
 	    this.attributes=attributes;
@@ -195,9 +209,7 @@ public abstract class Element
 	
 	if (value!=null)
 	{
-	    if (value instanceof String &&
-		((String)value).indexOf(' ')==-1 &&
-		((String)value).length()>0)
+	    if (value instanceof String && ((String)value).indexOf('"')!=-1)
 		attributeMap.put(attribute,value);
 	    else
 		attributeMap.put(attribute,"\""+value+'"');

@@ -1,8 +1,9 @@
-Release 2.2.8 - 13 Sep 1999
+Release 2.2.8 - 15 Sep 1999
   + Fixed bug in Element.attribute with empty string values.
   + Made translation of getRequestURI() optional.
   + Removed recursion from TranslationHandler
   + Added disableLog() to turn off logging.
+  + Allow default table attributes to be overriden.
 
 Release 2.2.7 - 9 Sep 1999
   + Reverted semantics of getRequestURI() to return untranslated URI.
