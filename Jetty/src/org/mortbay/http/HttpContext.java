@@ -1396,11 +1396,14 @@ public class HttpContext implements LifeCycle,
         UserRealm realm = getRealm();
 
         // Get all path matches
-        List scss =_constraintMap.getMatches(pathInContext);
-            
+        // TODO. May not need to build list - or at least break
+        // list at first non-matching pattern - ugh!
+        
+        List scss =_constraintMap.getMatches(pathInContext);    
         if (scss!=null && scss.size()>0)
         {
             Object constraints=null;
+            
             // for each path match
             for (int m=0;m<scss.size();m++)
             {

@@ -4,6 +4,7 @@ Jetty Versions
 Jetty-5.0.alpha2
  + Use commons logging.
  + Use log4j if extra is present.
+ + Improved JMX start.
  + Update jakarta examples
  + Correctly setup context classloader in cross context dispatch.
  + Turn off validation without non-xerces errors

@@ -7,29 +7,17 @@
 </MLET>
 
 <MLET 
- NAME="org.mortbay:service=Code"
- CODE="org.mortbay.util.jmx.CodeMBean"
- ARCHIVE="org.mortbay.jetty.jmx.jar" >
-</MLET>
-
-<MLET 
- NAME="org.mortbay:service=Log"
- CODE="org.mortbay.util.jmx.LogMBean"
- ARCHIVE="org.mortbay.jetty.jmx.jar" >
-</MLET>
-
-<MLET 
- NAME="org.mortbay:jetty=0"
+ NAME="org.mortbay:jetty=admin"
  CODE="org.mortbay.jetty.jmx.ServerMBean"
  ARCHIVE="org.mortbay.jetty.jar" >
  <ARG type="java.lang.String" value="etc/admin.xml">
 </MLET>
 
 <MLET 
- NAME="org.mortbay:jetty=1"
+ NAME="org.mortbay:jetty=default"
  CODE="org.mortbay.jetty.jmx.ServerMBean"
  ARCHIVE="org.mortbay.jetty.jmx.jar" >
- <ARG type="java.lang.String" value="etc/demo.xml">
+ <ARG type="java.lang.String" value="etc/jetty.xml">
 </MLET>
 
 

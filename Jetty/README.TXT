@@ -2,7 +2,7 @@
 $Id$
 ----------------------------------------------------------------------
 
-Jetty 4
+Jetty 5
 =======
 
 Jetty is an Open Source HTTP Servlet Server written in 100% Java.
@@ -11,84 +11,55 @@ extensible and flexible, thus making it an ideal platform for serving
 dynamic HTTP requests from any Java application.
 
 
+
 Downloading
 ============
 Jetty is can be downloaded in one of the following distribution files:
 
-  Jetty-X.X.X.tar.gz  -  This is the complete release containing source,
-  compiled jars, external jars and demos.  Installation is simply
-  untaring the tar.gz file in the directory required.
+  Jetty-5.0.X.tar.gz  -  This is the binary release for JDK 1.4
 
-  Jetty-X.X.X-no-ext.tar.gz  -  This is the complete release with the
-  external jars removed.  This release is good if you already have
-  the required external jars (see below).
+  Jetty-5.0.X-extra.tar.gz  -  Extra modules for Jetty, including:
+     Jetty demo
+     JettyPlus
+     jdk 1.2 & 1.3 support
+     log4j
+     ftp client
+     win32 and unix start scripts
 
-  Jetty-X.X.X-src.tar.gz  -  A source only distribution which needs
+  Jetty-5.0.X-src.tar.gz  -  A source only distribution which needs
   to be build using ant. This distribution also excludes the demo.
 
+  Jetty-5.0.X-all.tar.gz  -  Everything in one jar.
 
 
-Package contents
-================
-
-  src     - The source for the HTTP server and servlet container.
-  lib     - The jars of the compile jetty code.
-  ext     - The external jars needed for the main jetty server.
-  etc     - The config files and resources.
-  demo    - Demos of the HTTP server and servlet container.
-  test    - Test harnesses.
-  webapps - The default location for war files or webapps.
-  webapps/template
-          - A template webapp that can be used to base your own on.
-  extra   - Directory of optional extras
-            /plus          - Extended jetty with JNDI, transaction, JAAS & log4j
-            /ftp           - FTP client
-            /j2ee          - J2EE distributions and integration 
-            /jdk1.2        - Classes for JDK < 1.4
-            /loadbalancer  - A simple load balancer
 
 
 Quick Start
 ===========
 
-Unpack the full jetty release Jetty-X.X.X.tar.gz using an archive 
-tool such as tar or winzip.
-
-The demo server can be run with the commands
-
-   cd Jetty-X.X.X
-   java -jar start.jar etc/demo.xml
-
-Then point your browser at http://localhost:8080 to see the demo 
-web site.
+Unpack the jetty release Jetty-5.0.x.tar.gz or Jetty-5.0.x-all.tar.gz 
+using an archive tool such as tar or winzip.
 
 The default configuration file (etc/jetty.xml) can be run with:
 
+   cd Jetty-5.0.x
    java -jar start.jar
 
-There is a template webapplication in webapps/template that is
-run by the above command and can be accessed at http://localhost:8080/template
-This can be used as a base for your own webapplications.
+Then point your browser at http://localhost:8080 
 
 
-Starting Jetty
-==============
+The demo server (in the all or extra bundle ) can be run with the commands
 
-In order to start Jetty the following steps must be taken: 
-
- 1) Setting the classpath to the appropriate jars in $JETTY_HOME/lib 
- 
- 2) Adding to the classpath any jars from $JETTY_HOME/ext that your 
-    java environment does not provide.
- 
- 3) If using JSPs, add the tools.jar from your JRE lib and ant.jar from jakarta-ant-1.5
-    to the classpath.
- 
- 4) Running "java org.mortbay.jetty.Server <configfile>"
+   cd Jetty-5.0.x
+   java -jar start.jar etc/demo.xml
 
 
-Several different mechanisms have been provided to automate this process
-and you should pick the one that best suits your environment.
+The JMX variants may be started with 
+
+   java -Dstart.class=org.mortbay.util.jmx.Main -jar start.jar etc/jetty.mlet 
+or
+   java -Dstart.class=org.mortbay.util.jmx.Main -jar start.jar etc/demo.mlet 
+
 
 
 Jetty start.jar 
@@ -101,6 +72,7 @@ The start.jar file in the Jetty distribution may be run with
 For example
 
   java -jar start.jar etc/admin.xml etc/demo.xml
+
 
 On some systems with graphical file browsers, it may be possible to start
 jetty by double clicking on this jar file. For more details see 
@@ -127,10 +99,17 @@ property:
  
   java -Djetty.class.path=/usr/share/java -jar start.jar <configfile> ...
 
-
 If no configuration file is provided, start.jar will use etc/admin.xml and 
 etc/jetty.xml
 
+The system propoerty -DDEBUG can be set to see the workings of start.jar
+
+  java -DDEBUG -jar start.jar
+
+
+
+Jetty stop.jar 
+==============
 
 Programs started with the start.jar mechanism may be stopped with the
 stop.jar:
@@ -151,11 +130,8 @@ written to stdout. This key  must be passed to the stop.jar. eg
   [526] java -DSTOP.PORT=9999 -DSTOP.KEY=1rukbu7owi3uo -jar stop.jar 
 
 
-
-
-
-Starting with Ant
-=================
+Jetty with Ant
+==============
 
 If you have the ant java build tool ant installed, you may use that to
 start jetty.  The demo can be started with:
@@ -180,64 +156,6 @@ An alternative configuration file can be run with
 
   Unix:  ant -Djetty.run=acme.xml run
   Win32: ant.bat -Djetty.run=acme.xml run
-
-
-
-Unix Start Scripts
-==================
-
-On unix, you can use the supplied shell script to set the classpaths
-and run Jetty:
-
-  export JETTY_HOME=<jetty install directory>
-  export JAVA_HOME=<JRE install directory>
-  $JETTY_HOME/bin/jetty.sh demo
-
-This will start a demo Jetty server on port 8080. Point your browser at
-  http://localhost:8080
-
-This script is controlled by the following environment variables:
-
- JAVA       - executable JVM
- JAVA_HOME  - Home of java, specifically $JAVA_HOME/lib/tools.jar
- JETTY_HOME - Home of jetty
- JETTY_CONF - Location of the script's configuration file, set to
-              /etc/jetty.conf, or $JETTY_HOME/etc/jetty.conf by
-              default.
- JETTY_RUN  - Directory for jetty pid file
- JETTY_LOG  - Directory for jetty output log
-
-If any of these variables are not set, then frantic searches are made
-of likely locations to try and find them.
-
-The /etc/jetty.conf file may contain:
- - Coment lines starting with #
- - References to files, which are considered .xml server configurations, and
-   passed to jetty for serving.
- - References to directories (i.e. /etc/jetty.d). Each directory is scanned
-   for .xml files, and those found are passed to jetty for serving.
-
-Note: If .xml configuration files are given in the command line, jetty will
-not use /etc/jetty.conf. This is useful for running single servers while
-testing.
-
-Note: if you don't setup the /etc/jetty.conf file, then running
-"jetty.sh start" without a config specified may start multiple
-servers (demo, jetty, watchdog) on the same port - causing errors.
-
-Other jetty.sh actions are:
-   start -- To start the server.
-   stop  -- Stops a server started with "start".
-   run   -- Runs Jetty in foreground mode.
-   check -- Does nothing. Useful checking the configuration.
-
-
-
-Windows and other Start Scripts
-===============================
-
-There are various unmaintained start scripts in extra/win32 that
-may be of assistance writing your own start script.
 
 
 
@@ -333,6 +251,38 @@ There are additional ext jars that may be included in the extra/ext
 directory.  These are docuented elsewhere.
 
 
+DEBUGGING
+=========
+
+Since 5.0, Jetty has used jakarta commons logging.  This is a facade over
+other logging mechanism.  
+
+If the Jetty extra package is available, then log4j is used and is configured 
+in $JETTY_HOME/extra/resources/log4j.properties.
+
+If the extra package is not installed, then commons logging will probably
+use JDK1.4 logging or it's own simple log mechanism.
+
+
+
+Package contents
+================
+
+  src     - The source for the HTTP server and servlet container.
+  lib     - The jars of the compile jetty code.
+  ext     - The external jars needed for the main jetty server.
+  etc     - The config files and resources.
+  demo    - Demos of the HTTP server and servlet container.
+  test    - Test harnesses.
+  webapps - The default location for war files or webapps.
+  webapps/template
+          - A template webapp that can be used to base your own on.
+  extra   - Directory of optional extras
+            /plus          - Extended jetty with JNDI, transaction, JAAS & log4j
+            /ftp           - FTP client
+            /j2ee          - J2EE distributions and integration 
+            /jdk1.2        - Classes for JDK < 1.4
+            /loadbalancer  - A simple load balancer
 
 Support FAQ
 ===========
@@ -381,14 +331,6 @@ Support FAQ
 
  + If in doubt about if you should post or not - please post, we are pretty
    friendly and will tell you nicely if it is not appropriate.
-
-
-DEBUGGING
-=========
-
-Since 5.0, Jetty has used jakarta commons logging.  This is a facade over
-other logging mechanism.  If the Jetty extra package is available, then
-log4j is used and is configured in $JETTY_HOME/extra/resources
 
 
 

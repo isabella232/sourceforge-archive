@@ -7,6 +7,7 @@ package org.mortbay.util.jmx;
 
 import java.util.Iterator;
 import java.util.Set;
+import java.net.URL;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
@@ -17,6 +18,7 @@ import javax.management.loading.MLet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.LogSupport;
+import org.mortbay.util.Resource;
 
 /* ------------------------------------------------------------ */
 /** 
@@ -44,10 +46,8 @@ public class Main
             if(log.isDebugEnabled())log.debug("MBeanServer="+server);
             
             // Create and register the MLet
-            mlet = new MLet();
-            server.registerMBean(mlet,
-                                 new ObjectName(server.getDefaultDomain(),
-                                                "service", "MLet"));
+            mlet = new MLet(new URL[0],Thread.currentThread().getContextClassLoader());
+            server.registerMBean(mlet,new ObjectName(server.getDefaultDomain(),"service","MLet"));
             if(log.isDebugEnabled())log.debug("MLet="+mlet);
             
             // Set MLet as classloader for this app
@@ -58,7 +58,8 @@ public class Main
             for (int i=0;i<arg.length;i++)
             {
                 log.info("Load "+arg[i]);
-                Set beans=mlet.getMBeansFromURL(arg[i]);
+                Resource resource = Resource.newResource(arg[i]);
+                Set beans=mlet.getMBeansFromURL(resource.getURL().toString());
                 Iterator iter=beans.iterator();
                 while(iter.hasNext())
                 {

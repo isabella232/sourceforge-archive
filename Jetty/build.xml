@@ -134,7 +134,6 @@
     <delete file="${servlet.jar}" quiet="false"/> 
     <delete file="${start.jar}" quiet="false"/>
     <delete file="${stop.jar}" quiet="false"/>
-    <delete file="${etc}/demo.mlet" quiet="false"/>
     <delete file="${etc}/webdefault.xml" quiet="false"/>
     <delete file="${demo.webapps}/jetty/LICENSE.html" quiet="false"/>
     <delete file="${demo.webapps}/jetty/versions.txt" quiet="false"/>
@@ -291,7 +290,6 @@
 
   <!-- ==================================================================== -->
   <target name="mortbay.jmx.jar" depends="classes">
-    <copy file="${src}/org/mortbay/jetty/jmx/demo.mlet" tofile="${etc}/demo.mlet" />
     <jar jarfile="${mortbay.jmx.jar}">
        <manifest/>    
        <fileset dir="${classes}">
@@ -486,6 +484,7 @@
           description="Build the distribution archives">
     <mkdir dir="${dist}"/>
     
+
     <tar tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}.tar.gz" 
          compression="gzip"
          longfile="gnu">
@@ -496,11 +495,14 @@
         <include name="README.TXT"/>
         <include name="VERSION.TXT"/>
         <include name="*.jar"/>       
-        <include name="lib/**"/>      
+        <include name="lib/**"/>       
+        <include name="ext/**"/>       
         <include name="logs"/>         
         <include name="webapps/**"/>    
         <include name="etc/LICENSE*"/>   
-        <include name="etc/jetty.xml"/>  
+        <include name="etc/admin.xml"/>  
+        <include name="etc/jetty.xml"/>   
+        <include name="etc/jetty.mlet"/>  
         <include name="etc/webdefault.xml"/>         
         <exclude name="**/CVS/**"/>
       </tarfileset>
@@ -508,18 +510,19 @@
     
 
     <tar 
-     tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-demo.tar.gz" 
+     tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-extra.tar.gz" 
      compression="gzip"
      longfile="gnu"
     >
       <tarfileset 
        dir="${basedir}"
-       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">       
-        <include name="ext/**"/>    
-        <include name="demo/**"/>     
+       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">   
+        <include name="demo/**"/>   
+        <include name="extra/**"/>     
         <include name="etc/**"/> 
         <exclude name="etc/jetty.xml"/>  
         <exclude name="etc/webdefault.xml"/>  
+        <exclude name="extra/**/src/**"/>  
         <exclude name="**/CVS/**"/>
         <exclude name="**/logs/*.log"/>
       </tarfileset>
@@ -535,16 +538,12 @@
        dir="${basedir}"
        prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
         <include name="src/**"/>
-        <include name="test/**"/>
+        <include name="test/**"/> 
+        <include name="extra/**/src/**"/>  
         <include name="build.xml"/>
         <include name="ant.properties"/>
         <exclude name="**/CVS/**"/>
         <exclude name="**/logs/*.log"/>
-        <exclude name="**/ext/**"/>
-        <exclude name="**/javadoc/**"/>
-        <exclude name="**/lib/**"/>
-        <exclude name="**/classes/**"/>
-        <exclude name="**/demo/**"/>
       </tarfileset>
     </tar>
  

@@ -363,8 +363,12 @@ public class Main
                 else if (subject.toLowerCase().endsWith(".class"))
                 {
                     // Class
-                    _classname = subject.substring(0,subject.length()-6);
-                    if (_debug) System.err.println("  CLASS="+_classname);
+                    String cn = expand(subject.substring(0,subject.length()-6));
+                    if (cn!=null && cn.length()>0)
+                    {
+                        if (_debug) System.err.println("  CLASS="+cn);
+                        _classname=cn;
+                    }
                 }
                 else
                 {
