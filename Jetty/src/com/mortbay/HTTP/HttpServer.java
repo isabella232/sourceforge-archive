@@ -78,6 +78,13 @@ public class HttpServer implements LifeCycle
      */
     public synchronized void start()
     {
+	if (Code.verbose(99))
+	{
+	    Code.debug("LISTENERS: ",_listeners);
+	    Code.debug("HANDLER: ",_hostMap);
+	}
+	
+	
         Iterator handlers = getHandlers().iterator();
         while(handlers.hasNext())
         {
@@ -191,7 +198,7 @@ public class HttpServer implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    /** Add a SocketListener.
+    /** Create and add a SocketListener.
      * Conveniance method.
      * @param address
      * @return the HttpListener.
@@ -270,11 +277,24 @@ public class HttpServer implements LifeCycle
      * Note that multiple contexts can be created for the same
      * host and contextPathSpec. Requests are offered to multiple
      * contexts in the order they where added to the HttpServer.
+     * @param contextPathSpec
+     * @return 
+     */
+    public HandlerContext addContext(String contextPathSpec)
+    {
+	return addContext(null,contextPathSpec);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Create and add a new context.
+     * Note that multiple contexts can be created for the same
+     * host and contextPathSpec. Requests are offered to multiple
+     * contexts in the order they where added to the HttpServer.
      * @param host Virtual hostname or null for all hosts.
      * @param contextPathSpec
      * @return 
      */
-    public HandlerContext defineContext(String host, String contextPathSpec)
+    public HandlerContext addContext(String host, String contextPathSpec)
     {
 	HandlerContext hc = new HandlerContext(this);
 	addContext(host,contextPathSpec,hc);
@@ -329,7 +349,7 @@ public class HttpServer implements LifeCycle
 	    
 	}
 	if (hc==null)
-	    hc=defineContext(host,contextPathSpec);
+	    hc=addContext(host,contextPathSpec);
 
 	return hc;
     }
@@ -362,6 +382,20 @@ public class HttpServer implements LifeCycle
 
 	contextList.add(context);
     }
+
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param contextPathSpec 
+     * @param directory 
+     * @exception IOException 
+     */
+    public WebApplicationContext addWebApplication(String contextPathSpec,
+						   String directory)
+	throws IOException
+    {
+	return addWebApplication(null,contextPathSpec,directory);
+    }
     
     /* ------------------------------------------------------------ */
     /** 
@@ -383,6 +417,54 @@ public class HttpServer implements LifeCycle
 	return appContext;
     }
     
+    
+    
+    /* ------------------------------------------------------------ */
+    /** Add a handler to a path specification.
+     * Requests with paths matching the path specification are passed
+     * to the handle method of the handler. All matching handlers
+     * are offered the request, starting with the best match, until
+     * the request is handled.
+     *
+     * Multiple handlers can be mapped to the same contextPath and
+     * requests are passed to the handlers in the order they
+     * were registered.
+     *
+     * @param host Virtual host name or null.
+     * @param contextPath 
+     * @param handler 
+     */
+    public void addHandler(String host,String contextPathSpec, HttpHandler handler)
+    {
+	HandlerContext hc = getContext(host,contextPathSpec);
+	hc.addHandler(handler);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Collection of all handler.
+     */
+    public Set getHandlers()
+    {
+        HashSet set = new HashSet(33);
+        Iterator maps=_hostMap.values().iterator();
+        while (maps.hasNext())
+        {
+            PathMap pm=(PathMap)maps.next();
+            Iterator lists=pm.values().iterator();
+            while(lists.hasNext())
+            {
+                List list=(List)lists.next();
+                Iterator contexts=list.iterator();
+                while(contexts.hasNext())
+		{
+		    HandlerContext context = (HandlerContext) contexts.next();
+                    set.addAll(context.getHandlers());
+		}
+            }
+        }
+        return set;
+    }
     
 
     /* ------------------------------------------------------------ */
@@ -413,6 +495,10 @@ public class HttpServer implements LifeCycle
 		List contextLists =(List)contextMap.getMatches(request.getPath());
 		if(contextLists!=null)
 		{
+		    if (Code.verbose(99))
+			Code.debug("Contexts at ",request.getPath(),
+				   ": ",contextLists);
+		    
 		    for (int i=0;i<contextLists.size();i++)
 		    {
 			Map.Entry entry=
@@ -466,56 +552,6 @@ public class HttpServer implements LifeCycle
 
 	response.sendError(response.__404_Not_Found);
 	
-    }
-    
-    
-    /* ------------------------------------------------------------ */
-    /** Add a handler to a path specification.
-     * Requests with paths matching the path specification are passed
-     * to the handle method of the handler. All matching handlers
-     * are offered the request, starting with the best match, until
-     * the request is handled.
-     *
-     * Multiple handlers can be mapped to the same contextPath and
-     * requests are passed to the handlers in the order they
-     * were registered.
-     *
-     * @param host Virtual host name or null.
-     * @param contextPath 
-     * @param handler 
-     */
-    public void addHandler(String host,String contextPathSpec, HttpHandler handler)
-    {
-
-	HandlerContext hc = getContext(host,contextPathSpec);
-	hc.addHandler(handler);
-    }
-    
-
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return Collection of all handler.
-     */
-    public Set getHandlers()
-    {
-        HashSet set = new HashSet(33);
-        Iterator maps=_hostMap.values().iterator();
-        while (maps.hasNext())
-        {
-            PathMap pm=(PathMap)maps.next();
-            Iterator lists=pm.values().iterator();
-            while(lists.hasNext())
-            {
-                List list=(List)lists.next();
-                Iterator contexts=list.iterator();
-                while(contexts.hasNext())
-		{
-		    HandlerContext context = (HandlerContext) contexts.next();
-                    set.addAll(context.getHandlers());
-		}
-            }
-        }
-        return set;
     }
     
     /* ------------------------------------------------------------ */

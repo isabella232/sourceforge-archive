@@ -1,3 +1,4 @@
+
 // ========================================================================
 // Copyright (c) 2000 Mort Bay Consulting (Australia) Pty. Ltd.
 // $Id$
@@ -202,17 +203,40 @@ public class HandlerContext
     }
     
 
+
     /* ------------------------------------------------------------ */
     /** Add a servlet to the context.
      * If no ServletHandler is found in the context, a new one is added.
-     * @param pathSpec 
-     * @param className 
+     * @param name The name of the servlet.
+     * @param pathSpec The pathspec within the context
+     * @param className The classname of the servlet.
      * @return The ServletHolder.
      * @exception ClassNotFoundException 
      * @exception InstantiationException 
      * @exception IllegalAccessException 
      */
     public synchronized ServletHolder addServlet(String pathSpec,
+						 String className)
+	throws ClassNotFoundException,
+	       InstantiationException,
+	       IllegalAccessException
+    {
+	return addServlet(className,pathSpec,className);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add a servlet to the context.
+     * If no ServletHandler is found in the context, a new one is added.
+     * @param name The name of the servlet.
+     * @param pathSpec The pathspec within the context
+     * @param className The classname of the servlet.
+     * @return The ServletHolder.
+     * @exception ClassNotFoundException 
+     * @exception InstantiationException 
+     * @exception IllegalAccessException 
+     */
+    public synchronized ServletHolder addServlet(String name,
+						 String pathSpec,
 						 String className)
 	throws ClassNotFoundException,
 	       InstantiationException,
@@ -227,7 +251,7 @@ public class HandlerContext
 		addHandler(_servletHandler);
 	    }
 	}
-	return _servletHandler.addServlet(pathSpec,className);
+	return _servletHandler.addServlet(name,pathSpec,className);
     }
 
     /* ------------------------------------------------------------ */

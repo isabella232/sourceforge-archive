@@ -17,19 +17,37 @@ import org.xml.sax.*;
 import javax.xml.parsers.*;
 
 /* ------------------------------------------------------------ */
-/** Configure Objects from XML
+/** Configure Objects from XML.
+ * This class reads an XML file conforming to the configure.dtd DTD
+ * and uses it to configure and object by calling set, put or other
+ * methods on the object.
  *
- * @see
+ * @see configure.dtd
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class XmlConfiguration
 {
+    private static Class[] __primatives =
+    {
+	Boolean.TYPE, Character.TYPE, Byte.TYPE, Short.TYPE, Integer.TYPE,
+	Long.TYPE, Float.TYPE, Double.TYPE, Void.TYPE
+    };
+    
+    private static Class[] __primativeHolders =
+    {
+	Boolean.class, Character.class, Byte.class, Short.class, Integer.class,
+	Long.class, Float.class, Double.class, Void.class
+    };
+    
+    
+    /* ------------------------------------------------------------ */
     private static XmlParser __parser;
     XmlParser.Node _config;
     
     /* ------------------------------------------------------------ */
-    /** Constructor. 
+    /** Constructor.
+     * Reads the XML configuration file.
      * @param configuration 
      */
     public XmlConfiguration(URL configuration)
@@ -54,6 +72,14 @@ public class XmlConfiguration
 
 
     /* ------------------------------------------------------------ */
+    /** Configure an object.
+     * If the object is of the approprate class, the XML configuration
+     * script is applied to the object.
+     * @param obj The object to be configured.
+     * @exception ClassNotFoundException 
+     * @exception NoSuchMethodException 
+     * @exception InvocationTargetException 
+     */
     public void configure(Object obj)
 	throws ClassNotFoundException,
 	       NoSuchMethodException,
@@ -67,6 +93,15 @@ public class XmlConfiguration
     }
     
     /* ------------------------------------------------------------ */
+    /** Create a new object and configure it.
+     * A new object is created and configured.
+     * @return The newly created configured object.
+     * @exception ClassNotFoundException 
+     * @exception NoSuchMethodException 
+     * @exception InvocationTargetException 
+     * @exception InstantiationException 
+     * @exception IllegalAccessException 
+     */
     public Object newInstance()
 	throws ClassNotFoundException,
 	       NoSuchMethodException,
@@ -92,6 +127,16 @@ public class XmlConfiguration
     }
     
     /* ------------------------------------------------------------ */
+    /* Recursive configuration step.
+     * This method applies the remaining Set, Put and Call elements
+     * to the current object.
+     * @param obj 
+     * @param cfg 
+     * @param i 
+     * @exception ClassNotFoundException 
+     * @exception NoSuchMethodException 
+     * @exception InvocationTargetException 
+     */
     private void configure(Object obj,XmlParser.Node cfg,int i)
 	throws ClassNotFoundException,
 	       NoSuchMethodException,
@@ -113,7 +158,13 @@ public class XmlConfiguration
     }
     
     /* ------------------------------------------------------------ */
-    /* 
+    /* Call a set method.
+     * This method makes a best effort to find a matching set method.
+     * The type of the value is used to find a suitable set method by
+     * 1. Trying for a trivial type match.
+     * 2. Looking for a native type match.
+     * 3. Trying all correctly named methods for an auto conversion.
+     * 4. Attempting to construct a suitable value from original value.
      * @param obj 
      * @param node 
      */
@@ -138,9 +189,12 @@ public class XmlConfiguration
 	    set.invoke(obj,arg);
 	    return;
 	}
-	catch(IllegalArgumentException e){Code.ignore(e);}
-	catch(IllegalAccessException e){Code.ignore(e);}
-	catch(NoSuchMethodException e){Code.ignore(e);}
+	catch(IllegalArgumentException e)
+	{if(Code.verbose(999))Code.ignore(e);}
+	catch(IllegalAccessException e)
+	{if(Code.verbose(999))Code.ignore(e);}
+	catch(NoSuchMethodException e)
+	{if(Code.verbose(999))Code.ignore(e);}
 	
 	// Try for native match
 	try{
@@ -150,27 +204,64 @@ public class XmlConfiguration
 	    set.invoke(obj,arg);
 	    return;
 	}
-	catch(NoSuchFieldException e){Code.ignore(e);}
-	catch(IllegalArgumentException e){Code.ignore(e);}
-	catch(IllegalAccessException e){Code.ignore(e);}
-	catch(NoSuchMethodException e){Code.ignore(e);}
+	catch(NoSuchFieldException e)
+	{if(Code.verbose(999))Code.ignore(e);}
+	catch(IllegalArgumentException e)
+	{if(Code.verbose(999))Code.ignore(e);}
+	catch(IllegalAccessException e)
+	{if(Code.verbose(999))Code.ignore(e);}
+	catch(NoSuchMethodException e)
+	{if(Code.verbose(999))Code.ignore(e);}
 
 
-	// Search for a match
+	// Search for a match by trying all the set methods
 	Method[] sets = oClass.getMethods();
+	Method set=null;
 	for (int s=0;sets!=null && s<sets.length;s++)
 	{
-	    if (name.equals(sets[s].getName()))
+	    if (name.equals(sets[s].getName()) &&
+		sets[s].getParameterTypes().length==1)
 	    {
 		// lets try it
 		try
 		{
+		    set=sets[s];
 		    sets[s].invoke(obj,arg);
 		    return;
 		}
-		catch(IllegalArgumentException e){Code.ignore(e);}
-		catch(IllegalAccessException e){Code.ignore(e);}
+		catch(IllegalArgumentException e){if(Code.verbose(999))Code.ignore(e);}
+		catch(IllegalAccessException e){if(Code.verbose(999))Code.ignore(e);}
 	    }
+	}
+
+	// Try converting the arg to the last set found.
+	if (set!=null)
+	{
+	    try
+	    {
+		Class sClass=set.getParameterTypes()[0];
+		if (sClass.isPrimitive())
+		{
+		    for (int t=0;t<__primatives.length;t++)
+		    {
+			if (sClass.equals(__primatives[t]))
+			{
+			    sClass=__primativeHolders[t];
+			    break;
+			}
+		    }
+		}
+		Constructor cons = sClass.getConstructor(vClass);
+		arg[0]=cons.newInstance(arg);
+		set.invoke(obj,arg);
+		return;
+	    }
+	    catch(NoSuchMethodException e)
+	    {if(Code.verbose(999))Code.ignore(e);}
+	    catch(IllegalAccessException e)
+	    {if(Code.verbose(999))Code.ignore(e);}
+	    catch(InstantiationException e)
+	    {if(Code.verbose(999))Code.ignore(e);}
 	}
 
 	// No Joy
@@ -178,7 +269,8 @@ public class XmlConfiguration
     }
     
     /* ------------------------------------------------------------ */
-    /* 
+    /* Call a put method.
+     * 
      * @param obj 
      * @param node 
      */
@@ -201,6 +293,18 @@ public class XmlConfiguration
     
     
     /* ------------------------------------------------------------ */
+    /* Call a method.
+     * A method is selected by trying all methods with matching
+     * names and number of arguments.
+     * Any object returned from the call is passed to the configure
+     * method to consume the remaining elements.
+     * @param obj 
+     * @param node 
+     * @return 
+     * @exception NoSuchMethodException 
+     * @exception ClassNotFoundException 
+     * @exception InvocationTargetException 
+     */
     private Object call(Object obj,XmlParser.Node node)
 	throws NoSuchMethodException,
 	       ClassNotFoundException,
@@ -231,19 +335,33 @@ public class XmlConfiguration
 	    if (methods[c].getParameterTypes().length!=size)
 		continue;
 	    
-	    try{
-		Object n=methods[c].invoke(obj,arg);
+	    Object n=null;
+	    boolean called=false;
+	    try{n=methods[c].invoke(obj,arg);called=true;}
+	    catch(IllegalAccessException e)
+	    {if(Code.verbose(999))Code.ignore(e);}
+	    catch(IllegalArgumentException e)
+	    {if(Code.verbose(999))Code.ignore(e);}
+	    if (called)
+	    {
 		configure(n,node,size);
 		return n;
 	    }
-	    catch(IllegalAccessException e){Code.ignore(e);}
-	    catch(IllegalArgumentException e){Code.ignore(e);}
 	}
 
-	throw new IllegalStateException("No Method: "+node);
+	throw new IllegalStateException("No Method: "+node+" on "+obj);
     }
     
     /* ------------------------------------------------------------ */
+    /* Create a new value object.
+     *
+     * @param obj 
+     * @param node 
+     * @return 
+     * @exception NoSuchMethodException 
+     * @exception ClassNotFoundException 
+     * @exception InvocationTargetException 
+     */
     private Object newObj(Object obj,XmlParser.Node node)
 	throws NoSuchMethodException,
 	       ClassNotFoundException,
@@ -270,22 +388,35 @@ public class XmlConfiguration
 	{
 	    if (constructors[c].getParameterTypes().length!=size)
 		continue;
+
+	    Object n=null;
+	    boolean called=false;
 	    try{
-		Object n=constructors[c].newInstance(arg);
+		n=constructors[c].newInstance(arg);
+		called=true;
+	    }
+	    catch(IllegalAccessException e)
+	    {if(Code.verbose(999))Code.ignore(e);}
+	    catch(InstantiationException e)
+	    {if(Code.verbose(999))Code.ignore(e);}
+	    catch(IllegalArgumentException e)
+	    {if(Code.verbose(999))Code.ignore(e);}
+	    if(called)
+	    {
 		configure(n,node,size);
 		return n;
 	    }
-	    catch(IllegalAccessException e){Code.ignore(e);}
-	    catch(InstantiationException e){Code.ignore(e);}
-	    catch(IllegalArgumentException e){Code.ignore(e);}
 	}
 
-	throw new IllegalStateException("No Constructor: "+node);
+	throw new IllegalStateException("No Constructor: "+node+" on "+obj);
     }
     
     
     /* ------------------------------------------------------------ */
-    /* 
+    /* Get the value of an element.
+     * If no value type is specified, then white space is trimmed out of the
+     * value. If it contains multiple value elements they are added as
+     * strings before being converted to any specified type.
      * @param node 
      */
     private Object value(Object obj,XmlParser.Node node)
@@ -433,7 +564,7 @@ public class XmlConfiguration
     }
     
     /* ------------------------------------------------------------ */
-    /* 
+    /* Get the value of a single element.
      * @param obj 
      * @param item 
      * @return 
@@ -471,5 +602,16 @@ public class XmlConfiguration
     /* ------------------------------------------------------------ */
     public static void main(String[] arg)
     {
+	try
+	{
+	    for (int i=0;i<arg.length;i++)
+		new XmlConfiguration
+		    (Resource.newResource(arg[i]).getURL()).newInstance();
+	}
+	catch (Exception e)
+	{
+	    Code.warning(e);
+	}
     }
 }
+

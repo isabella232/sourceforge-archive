@@ -1367,17 +1367,19 @@ public class TestHarness
 	try
 	{
 	    XmlParser parser = new XmlParser();
-	    parser.redirectEntity("jetty.dtd",
-				  Resource.newSystemResource("com/mortbay/Jetty/jetty.dtd"));
+	    parser.redirectEntity
+		("configure.dtd",
+		 Resource.newSystemResource
+		 ("com/mortbay/Util/configure.dtd"));
 	    
 	    String url = "file:"+System.getProperty("user.dir")+
-		"/../../../../etc/jetty.xml";
+		"/Test/configure.xml";
 	    XmlParser.Node testDoc = parser.parse(url);
 	    String testDocStr = testDoc.toString().trim();
 	    Code.debug(testDocStr);
-
-	    t.check(testDocStr.startsWith("<Server>"),"Server");
-	    t.check(testDocStr.endsWith("</Server>"),"Server");
+	    
+	    t.check(testDocStr.startsWith("<Configure"),"Parsed");
+	    t.check(testDocStr.endsWith("</Configure>"),"Parsed");
 	}
 	catch(Exception e)
 	{
@@ -1477,25 +1479,25 @@ public class TestHarness
     {
         try
         {
-      	    testMultiMap();
-    	    testQuotedStringTokenizer();            
-    	    testDateCache();
-    	    testTest();
-    	    testLog();
-    	    testFrame();
-    	    testCode();
-    	    testDataHelper();
-    	    testBlockingQueue();
-    	    testIO();
-    	    testUrlEncoded();
-    	    testURI();
-    	    testLineInput();
-  	    testThreadPool();
-  	    testThreadedServer();
-    	    testB64();
-      	    testZipResource();
-    	    PropertyTreeTest.test();
-    	    resourceTest();
+       	    testMultiMap();
+      	    testQuotedStringTokenizer();            
+      	    testDateCache();
+      	    testTest();
+      	    testLog();
+      	    testFrame();
+      	    testCode();
+      	    testDataHelper();
+      	    testBlockingQueue();
+      	    testIO();
+      	    testUrlEncoded();
+      	    testURI();
+      	    testLineInput();
+    	    testThreadPool();
+    	    testThreadedServer();
+      	    testB64();
+       	    testZipResource();
+      	    PropertyTreeTest.test();
+      	    resourceTest();
     	    testXmlParser();
 	    testXmlConfiguration();
         }

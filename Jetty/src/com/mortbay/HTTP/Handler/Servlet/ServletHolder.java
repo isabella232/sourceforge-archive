@@ -26,7 +26,9 @@ import java.lang.reflect.*;
  * @version $Id$
  * @author Greg Wilkins
  */
-public class ServletHolder implements ServletConfig
+public class ServletHolder
+    extends AbstractMap
+    implements ServletConfig
 {   
     /* ---------------------------------------------------------------- */
     private ServletHandler _handler;
@@ -38,7 +40,7 @@ public class ServletHolder implements ServletConfig
     private GenericServlet _servlet=null;
     private String _name=null;    
     private String _className ;
-    private Map _properties ;
+    private Map _initParams ;
 
     /* ---------------------------------------------------------------- */
     /** Construct a Servlet property mostly from the servers config
@@ -84,18 +86,6 @@ public class ServletHolder implements ServletConfig
     }
 
     /* ------------------------------------------------------------ */
-    public Map getProperties()
-    {
-	return _properties;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setProperties(Map properties)
-    {
-	_properties = properties;
-    }
-
-    /* ------------------------------------------------------------ */
     public void initialize()
     {
 	try{
@@ -107,7 +97,6 @@ public class ServletHolder implements ServletConfig
 	    throw new IllegalStateException(e.toString());
 	}
     }
-    
 
     /* ------------------------------------------------------------ */
     private void initializeClass()
@@ -208,9 +197,7 @@ public class ServletHolder implements ServletConfig
     /* ------------------------------------------------------------ */
     public void setInitParameter(String param,String value)
     {
-	if (_properties==null)
-	    _properties=new HashMap(3);
-	_properties.put(param,value);
+	put(param,value);
     }
 
     /* ---------------------------------------------------------------- */
@@ -220,9 +207,9 @@ public class ServletHolder implements ServletConfig
      */
     public String getInitParameter(String param)
     {
-	if (_properties==null)
+	if (_initParams==null)
 	    return null;
-        Object obj = _properties.get(param);
+        Object obj = _initParams.get(param);
         if (obj == null)
             return null;
         return obj.toString();
@@ -231,9 +218,9 @@ public class ServletHolder implements ServletConfig
     /* ------------------------------------------------------------ */
     public Enumeration getInitParameterNames()
     {
-	if (_properties==null)
+	if (_initParams==null)
 	    return Collections.enumeration(Collections.EMPTY_LIST);
-	return Collections.enumeration(_properties.values());
+	return Collections.enumeration(_initParams.values());
     }
     
     /* --------------------------------------------------------------- */
@@ -336,6 +323,33 @@ public class ServletHolder implements ServletConfig
 	    if (_singleThreadModel && useServlet!=null)
 		pool.push(useServlet);
 	}
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Map method.
+     * ServletHolder implements the Map interface as a
+     * configuration conveniance. The methods are mapped to the
+     * servlet properties.
+     * @return The entrySet of the initParameter map
+     */
+    public Set entrySet()
+    {
+	if (_initParams==null)
+	    _initParams=new HashMap(3);
+	return _initParams.entrySet();
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Map method.
+     * ServletHolder implements the Map interface as a
+     * configuration conveniance. The methods are mapped to the
+     * servlet properties.
+     */
+    public Object put(Object name,Object value)
+    {
+	if (_initParams==null)
+	    _initParams=new HashMap(3);
+	return _initParams.put(name,value);
     }
     
     /* ------------------------------------------------------------ */

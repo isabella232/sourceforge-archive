@@ -19,15 +19,45 @@ the Jetty 2 code base. The aims of the Jetty 3 developement include:
 
 Environment
 ===========
-Development has been done in JDK1.2 using the collection classes.
-The compiled classes excluding test harnesses are put into lib/com.mortbay.jetty.jar,
-so the following CLASSPATH is required (or the non unix equivalent):
+Development has been done in JDK1.2 and the following CLASSPATH is required 
+(or the non unix equivalent):
 
-  CLASSPATH=$JETTY3_HOME/lib/com.mortbay.jetty.jar:$JETTY3_HOME/lib/jaxp.jar:$JETTY3_HOME/lib/parser.jar:$JETTY3_HOME/lib/javax.servlet.jar
+  CLASSPATH=$JETTY_HOME/lib/com.mortbay.jetty.jar:$JETTY_HOME/lib/jaxp.jar:$JETTY_HOME/lib/parser.jar:$JETTY_HOME/lib/javax.servlet.jar
 
-Most of Jetty can be built with JDK1.1 using the 1.1 collection jar,
-if the commented XXX-JDK1.1 and XXX-JDK1.2 commented imports are
-switched.
+
+To compile the code, the following CLASSPATH should be used:
+
+  CLASSPATH=$JETTY_HOME/src:$JETTY_HOME/lib/jaxp.jar:$JETTY_HOME/lib/parser.jar
+
+
+Configuring the Server
+======================
+The class com.mortbay.HTTP.HttpServer is the main class to be
+configured.  It has a configuratin API and a command line API and
+can be run with
+
+  java com.mortbay.HTTP.HttpServer [options | -?]
+
+
+The class com.mortbay.Jetty.Server reads and xml configuration
+file and configures 1 or more instances of com.mortbay.HTTP.HttpServer.
+
+  java com.mortbay.Jetty.Server [configuration.xml]
+
+
+Running the Demo Server
+=======================
+A Demo server can be run on port 8080 with the command:
+
+  java com.mortbay.Jetty.Demo
+
+This demo is configured using the HttpServer API and is a good
+example of coded configuration. The same demo is configured by the
+xml file $JETTY_HOME/etc/demo.xml and can be run with the command:
+
+  java com.mortbay.Jetty.Server etc/demo.xml
+
+
 
 Test Harnesses
 ==============
@@ -40,54 +70,6 @@ harnesses can be run with
 
 Note that the test harnesses are not in the jar file, so you will need
 to build all the source and run with the source hierarchy in the CLASSPATH.
-
-
-WWW Server
-==========
-
-A Demo server can be run on port 8080 for the web application in 
-$JETTY_HOME/webapps/jetty with the command:
-
-  java com.mortbay.Jetty.Demo
-
-
-A raw HTTP server can be run with the command
- 
-  java com.mortbay.HTTP.HttpServer
-
-By default it runs on port 8080 and serves files from "./FileBase" and 
-dynamic servlet from "./servlets" and the system class path. 
-It also runs the web application in $JETTY_HOME/webapps.default.
-
-The server can be configured by using command line options, which can 
-be displayed with 
-
-  java com.mortbay.HTTP.HttpServer -?
-
-
-Servers can also be configured in code. For example:
-
-   // Make server
-   HttpServer server = new HttpServer();
-
-   server.addListener(new InetAddrPort(8080));
-
-   // Configure handlers
-   HandlerContext context;
-   context=server.getContext(null,"/");
-   context.setFileBase(".");
-   context.addServlet("/dump,/dump/*","com.mortbay.Servlet.Dump");
-   context.setServingFiles(true);
-   context.addHandler(new NotFoundHandler());
-   
-   context=server.getContext(null,"/servlet/*");
-   context.setClassPath("./servlets");
-   context.setServingDynamicServlets(true);
-   context.addHandler(new NotFoundHandler());
-
-   // Start handlers and listener
-   server.start();
-
 
 
 
@@ -103,4 +85,3 @@ Jetty distributions and information is available from:
 How to Contribute
 =================
 Comments, contributions, feedback, bugs, testing, etc. please....
-

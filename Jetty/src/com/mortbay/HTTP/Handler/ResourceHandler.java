@@ -134,7 +134,7 @@ public class ResourceHandler extends NullHandler
 	{
 	    _resourceBase=getHandlerContext().getResourceBase();
 
-	    Log.event("FileHandler started in "+ _resourceBase);
+	    Log.event("ResourceHandler started in "+ _resourceBase);
 	    if (_maxCachedFiles>0 && _maxCachedFileSize>0 && _cache==null)
 	    {
 		_cache=new CachedFile[_maxCachedFiles];

@@ -96,6 +96,21 @@ public class ServletHandler extends NullHandler
     }
 	
     
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param path 
+     * @param servletClass 
+     */
+    public ServletHolder addServlet(String name,
+				    String pathSpec,
+				    String servletClass)
+    {
+	ServletHolder holder = addServlet(pathSpec,servletClass);
+	holder.setServletName(name);
+	return holder;
+    }
+    
     /* ------------------------------------------------------------ */
     /** 
      * @param path 

@@ -72,31 +72,6 @@ abstract public class ThreadedServer extends ThreadPool
         setAddress(address);
     }
     
-    /* ------------------------------------------------------------ */
-    /** Set the server InetAddress and port.
-     * @param address The InetAddress address or null for all interfaces.
-     * @param port The port.
-     * @exception IOException 
-     * @exception InterruptedException 
-     */
-    public synchronized void setAddress(InetAddress address,int port) 
-    {
-        setAddress(new InetAddrPort(address,port));
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Set the server InetAddress and port.
-     * @param host
-     * @param port The port.
-     * @exception IOException 
-     * @exception InterruptedException 
-     */
-    public synchronized void setAddress(String host,int port) 
-	throws UnknownHostException
-    {
-        setAddress(new InetAddrPort(host,port));
-    }
-    
     
     /* ------------------------------------------------------------ */
     /** Set the server InetAddress and port.
@@ -172,6 +147,15 @@ abstract public class ThreadedServer extends ThreadPool
     public InetAddress getInetAddress()
     {
         return _address.getInetAddress();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Host name
+     */
+    public String getHost()
+    {
+        return _address.getInetAddress().getHostName();
     }
     
     /* ------------------------------------------------------------ */

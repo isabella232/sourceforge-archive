@@ -13,7 +13,6 @@ import java.util.*;
 /* ------------------------------------------------------------ */
 /** Socket HTTP Listener.
  *
- * Temparary implementation, just to get the ball rolling.
  * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -26,12 +25,12 @@ public class SocketListener
     private HttpServer _server;
     
     /* ------------------------------------------------------------------- */
-    SocketListener()
+    public SocketListener()
         throws IOException
     {}
     
     /* ------------------------------------------------------------------- */
-    SocketListener(InetAddrPort address)
+    public SocketListener(InetAddrPort address)
         throws IOException
     {
         super(address);
@@ -55,18 +54,6 @@ public class SocketListener
     public String getDefaultScheme()
     {
         return "http";
-    }
-
-    /* --------------------------------------------------------------- */
-    public String getHost()
-    {
-        return super.getInetAddress().getHostName();
-    }
-    
-    /* --------------------------------------------------------------- */
-    public int getPort()
-    {
-        return super.getPort();
     }
 
     /* --------------------------------------------------------------- */

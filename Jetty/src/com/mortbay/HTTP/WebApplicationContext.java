@@ -215,23 +215,17 @@ public class WebApplicationContext extends HandlerContext
 	String name=node.get("servlet-name").toString(false);
 	String className=node.get("servlet-class").toString(false);
 
-	Map params=null;
+	ServletHolder holder = _servletHandler.newServletHolder(className);
+	holder.setServletName(name);
+	
 	Iterator iter= node.iterator("init-param");
 	while(iter.hasNext())
 	{
-	    if (params==null)
-		params=new HashMap(7);
 	    XmlParser.Node paramNode=(XmlParser.Node)iter.next();
 	    String pname=paramNode.get("param-name").toString(false);
 	    String pvalue=paramNode.get("param-value").toString(false);
-	    params.put(pname,pvalue);
+	    holder.put(pname,pvalue);
 	}
-	Code.debug(name,"=",className,": ",params);
-
-	ServletHolder holder = _servletHandler.newServletHolder(className);
-	holder.setServletName(name);
-	if(params!=null)
-	    holder.setProperties(params);
     }
 
     /* ------------------------------------------------------------ */

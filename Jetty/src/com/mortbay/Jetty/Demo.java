@@ -43,26 +43,24 @@ public class Demo
 	    server.addWebApplication(null,
 				     "/",
 				     "./webapps/jetty");
+	    
 	    context=server.getContext(null,"/handler/*");
 	    context.setResourceBase("./FileBase/");
+	    context.setServingResources(true);
 	    context.addServlet("/dump,/dump/*","com.mortbay.Servlet.Dump");
 	    context.addServlet("/session","com.mortbay.Servlet.SessionDump");
-	    context.setServingResources(true);
 	    context.addHandler(new DumpHandler());
-	    context.addHandler(new NotFoundHandler());
 	    
 	    context=server.getContext(null,"/servlet/*");
-	    context.setClassPath("./servlets");
+	    context.setClassPath("./servlets/");
 	    context.setServingDynamicServlets(true);
-	    context.addHandler(new NotFoundHandler());
 	    
 	    context=server.getContext(null,"/javadoc/*");
 	    context.setResourceBase("./javadoc/");
 	    context.setServingResources(true);
 	    
-//  	    context=server.getContext(null,"/jar/*");
-//  	    context.setResourceBase("jar:file:/home/gregw/Jetty3/test.jar!/");
-//  	    context.addHandler(new ResourceHandler());
+	    context=server.getContext(null,"/");
+	    context.addHandler(new NotFoundHandler());
 	    
 	    // Start handlers and listener
 	    server.start();

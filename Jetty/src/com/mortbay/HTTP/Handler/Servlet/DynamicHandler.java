@@ -28,14 +28,14 @@ public class DynamicHandler extends ServletHandler
     private Set _paths = new HashSet();
 	
     /* ------------------------------------------------------------ */
-    Map _properties ;
-    public Map getProperties()
+    Map _initParams ;
+    public Map getInitParams()
     {
-	return _properties;
+	return _initParams;
     }
-    public void setProperties(Map properties)
+    public void setInitParams(Map initParams)
     {
-	_properties = properties;
+	_initParams = initParams;
     }
     
     /* ----------------------------------------------------------------- */
@@ -56,6 +56,9 @@ public class DynamicHandler extends ServletHandler
                        HttpResponse httpResponse)
          throws IOException
     {
+	Code.setDebug(true); try{
+	    
+	
 	// Try a previously added servlet
 	super.handle(contextPathSpec,httpRequest,httpResponse);
 	
@@ -79,18 +82,23 @@ public class DynamicHandler extends ServletHandler
 		if (slash>=0)
 		    servletClass=servletClass.substring(0,slash);            
 		if (servletClass.endsWith(".class"))
-		servletClass=servletClass.substring(0,servletClass.length()-6);
+		    servletClass=servletClass.substring(0,servletClass.length()-6);
 		
 		path="/"+servletClass;
+		
+		Code.debug(path);
 		
 		ServletHolder holder=null;
 		try{
 		    holder=newServletHolder(servletClass);
-		    holder.setProperties(getProperties());
+		    Map params=getInitParams();
+		    if (params!=null)
+			holder.putAll(params);
 		    holder.getServlet();
 		}
 		catch(Exception e)
 		{
+   Code.debug(e);
 		    Code.ignore(e);
 		    return;
 		}
@@ -106,6 +114,9 @@ public class DynamicHandler extends ServletHandler
 	
 	// service request
 	super.handle(contextPathSpec,httpRequest,httpResponse);
+	}
+	finally{Code.setDebug(false);}
+	
     }   
 }
 
