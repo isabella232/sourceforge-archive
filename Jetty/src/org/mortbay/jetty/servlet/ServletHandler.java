@@ -134,7 +134,13 @@ public class ServletHandler
     /* ------------------------------------------------------------ */
     public void setSessionManager(SessionManager sm)
     {
+        if (isStarted())
+            throw new IllegalStateException("Started");
+        if (getHttpContext()!=null && _sessionManager!=null)
+            _sessionManager.initialize(null);
         _sessionManager=sm;
+        if (getHttpContext()!=null)
+            _sessionManager.initialize(this);
     }
     
     /* ------------------------------------------------------------ */
