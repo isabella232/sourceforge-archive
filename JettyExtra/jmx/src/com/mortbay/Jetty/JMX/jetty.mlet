@@ -1,0 +1,36 @@
+
+<!-- Jetty JMX mlet config 
+The __JETTY_JMX_HOME__ and __JETTY_HOME__ tags must be expanded
+-->
+
+<MLET 
+ CODE="com.sun.jdmk.comm.HtmlAdaptorServer"
+ ARCHIVE="jmxtools.jar"
+ CODEBASE="file:__JETTY_JMX_HOME__/lib" >
+</MLET>
+
+<MLET 
+ CODE="com.mortbay.Jetty.JMX.DebugMBean"
+ ARCHIVE="com.mortbay.jetty.jar"
+ CODEBASE="file:__JETTY_JMX_HOME__/lib">
+</MLET>
+
+<MLET 
+ CODE="com.mortbay.Jetty.JMX.LogMBean"
+ ARCHIVE="com.mortbay.jetty.jar"
+ CODEBASE="file:__JETTY_JMX_HOME__/lib">
+</MLET>
+
+<MLET 
+ CODE="com.mortbay.Jetty.JMX.HttpServerMBean"
+ ARCHIVE="com.mortbay.jetty.jar"
+ CODEBASE="file:__JETTY_JMX_HOME__/lib">
+<ARG type="java.lang.String" value="__JETTY_HOME__/etc/admin.xml">
+</MLET>
+
+<MLET 
+ CODE="com.mortbay.Jetty.JMX.HttpServerMBean"
+ ARCHIVE="com.mortbay.jetty.jmx.jar"
+ CODEBASE="file:__JETTY_JMX_HOME__/lib">
+<ARG type="java.lang.String" value="__JETTY_HOME__/etc/demo.xml">
+</MLET>
