@@ -125,7 +125,7 @@ public class Context implements ServletContext, HttpSessionContext
 	    return null;
 
 	try{
-	    Resource resource = resourceBase.relative(uri);
+	    Resource resource = resourceBase.addPath(uri);
 	    return resource.getURL();
 	}
 	catch(IOException e)

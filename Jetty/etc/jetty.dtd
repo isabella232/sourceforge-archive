@@ -1,47 +1,41 @@
 <?xml version="1.0" encoding="ISO8859_1"?>
 
-<!ENTITY % VALUE "(#PCDATA|SystemProperty)*">
+<!ENTITY % CONFIG "Set|Put|Call">
+<!ENTITY % TYPE "String|int|long|boolean">
+<!ENTITY % VALUE "#PCDATA|New|SystemProperty">
 
-<!ELEMENT Server (Listener+,Context+)>
 
-<!ELEMENT Listener 
-(Parameter*,Init*)>
-<!ATTLIST Listener
-    class  NMTOKEN "com.mortbay.HTTP.HttpListener"
-    interface NMTOKEN "0.0.0.0"
-    port NMTOKEN "80"
->
+<!ELEMENT Server (%CONFIG;)* >
+<!ATTLIST Server
+    class NMTOKEN #IMPLIED>
 
-<!ELEMENT Context (VirtualHost*,Path+,ResourceBase?,ClassPath*,Handler*)>
-<!ATTLIST Context
-    type (handler|application|other) "handler" 
-    class NMTOKEN ""
->
 
-<!ELEMENT Path %VALUE; >
-<!ELEMENT VirtualHost %VALUE; >
-<!ELEMENT ClassPath %VALUE; >
-<!ELEMENT ResourceBase %VALUE; >
+<!ELEMENT Set ( %VALUE; )* >
+<!ATTLIST Set
+   name NMTOKEN #REQUIRED
+   type (%TYPE;) "String">
 
-<!ELEMENT Application  (Parameter*,Init*)>
 
-<!ELEMENT Handler (Parameter*,Init*)>
-<!ATTLIST Handler
-    class  NMTOKEN
-"com.mortbay.HTTP.Handler.Servlet.ServletHandler"
->
+<!ELEMENT Put ( %VALUE; )* >
+<!ATTLIST Put
+   name NMTOKEN #REQUIRED
+   type (%TYPE;) "String">
 
-<!ELEMENT Parameter %VALUE; >
-<!ATTLIST Parameter
-   name NMTOKEN #REQUIRED>
 
-<!ELEMENT Init (Arg*)>
-<!ATTLIST Init
-   method NMTOKEN "init">
+<!ELEMENT Call (Arg*,(%CONFIG;)*)>
+<!ATTLIST Call
+   method NMTOKEN #REQUIRED>
 
-<!ELEMENT Arg %VALUE; >
+
+<!ELEMENT Arg ( %VALUE; )* >
 <!ATTLIST Arg
-    type (String|int|boolean) "String">
+    type (%TYPE;) "String">
+
+
+<!ELEMENT New (Arg*,(%CONFIG;)*)>
+<!ATTLIST New
+   class NMTOKEN #REQUIRED>
+
 
 <!ELEMENT SystemProperty EMPTY>
 <!ATTLIST SystemProperty

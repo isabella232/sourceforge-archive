@@ -1,47 +1,52 @@
-<?xml version="1.0"  encoding="ISO8859_1"?> 
+<?xml version="1.0"  encoding="ISO8859-1"?> 
 <!DOCTYPE Server SYSTEM "jetty.dtd"> 
 
 <Server>
-  <Listener port="8080"/>
-  <Listener class="com.mortbay.HTTP.JsseListener" port="8181">
-    <Parameter name="Password">Secret</Parameter>
-  </Listener>
 
-  <Context type="application">
-    <Path>/</Path>
-    <ResourceBase><SystemProperty name="user.dir"/>/webapps/jetty/</ResourceBase>
-  </Context>
+  <Call method="addListener">
+    <Arg>
+      <New class="com.mortbay.HTTP.SocketListener">
+        <Set name="Address">0.0.0.0:8080</Set>
+        <Set name="MinThreads">5</Set>
+        <Set name="MaxThreads">255</Set>
+        <Set name="MaxIdleTimeMs">50000</Set>
+      </New>
+    </Arg>
+  </Call>
 
-  <Context>
-    <Path>/handler/*</Path>
-    <ResourceBase>./FileBase/</ResourceBase>
-    <Handler class="com.mortbay.HTTP.Handler.Servlet.ServletHandler">
-      <Init method="addServlet">
-        <Arg>/dump,/dump/*</Arg>
-        <Arg>com.mortbay.Servlet.Dump</Arg>
-      </Init>
-      <Init method="addServlet">
-        <Arg>/session</Arg>
-        <Arg>com.mortbay.Servlet.SessionDump</Arg>
-      </Init>
-    </Handler>
-    <Handler class="com.mortbay.HTTP.Handler.FileHandler"/>
-    <Handler class="com.mortbay.HTTP.Handler.NotFoundHandler"/>
-  </Context>
 
-  <Context>
-    <Path>/servlet/*</Path>
-    <ClassPath>./servlets/</ClassPath>
-    <Handler class="com.mortbay.HTTP.Handler.Servlet.DynamicHandler"/>
-    <Handler class="com.mortbay.HTTP.Handler.NotFoundHandler"/>
-  </Context>
+  <Call method="addWebApplication">
+    <Arg></Arg>
+    <Arg>/</Arg>
+    <Arg><SystemProperty name="user.dir"/>/webapps/jetty/</Arg>
+  </Call>
 
-  <Context>
-    <Path>/javadoc/*</Path>
-    <ResourceBase>./javadoc/</ResourceBase>
-    <Handler class="com.mortbay.HTTP.Handler.FileHandler"/>
-    <Handler class="com.mortbay.HTTP.Handler.NotFoundHandler"/>
-  </Context>
+
+  <Call method="defineContext">
+    <Arg></Arg>
+    <Arg>/handler/*</Arg>
+
+    <Set name="ResourceBase">./FileBase/</Set>
+    <Call method="addHandler">
+      <Arg>
+        <New class="com.mortbay.HTTP.Handler.Servlet.ServletHandler">
+          <Call method="addServlet">
+            <Arg>/dump,/dump/*</Arg>
+            <Arg>com.mortbay.Servlet.Dump</Arg>
+  	    <Set name="ServletName">Dump</Set>
+	    <Put name="initParam">value</Put>
+          </Call>
+
+          <Call method="addServlet">
+            <Arg>/session</Arg>
+            <Arg>com.mortbay.Servlet.SessionDump</Arg>
+	    <Set name="ServletName">SessionDump</Set>
+          </Call>
+        </New>
+      </Arg>
+    </Call>
+  </Call>
+
 
 </Server>
 

@@ -205,6 +205,14 @@ public class ServletHolder implements ServletConfig
         return (javax.servlet.ServletContext)_context;
     }
 
+    /* ------------------------------------------------------------ */
+    public void setInitParameter(String param,String value)
+    {
+	if (_properties==null)
+	    _properties=new HashMap(3);
+	_properties.put(param,value);
+    }
+
     /* ---------------------------------------------------------------- */
     /**
      * Gets an initialization parameter of the servlet.

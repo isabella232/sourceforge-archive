@@ -42,6 +42,8 @@ public class Dump extends HttpServlet
         sres.setContentType("text/html");
         PrintWriter pout = sres.getWriter();
 
+	sres.setHeader("Location","foo");
+
         Page page=null;
 
         try{

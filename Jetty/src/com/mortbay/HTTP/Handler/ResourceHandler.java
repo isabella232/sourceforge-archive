@@ -180,7 +180,7 @@ public class ResourceHandler extends NullHandler
 	if (info==null)
 	    info=path;
 	
-	return resourceBase.relative(info);
+	return resourceBase.addPath(info);
     }
  
     /* ------------------------------------------------------------ */
@@ -303,7 +303,7 @@ public class ResourceHandler extends NullHandler
 		for (int i=_indexFiles.size();i-->0;)
 		{
 		    Resource index =
-			resource.relative((String)_indexFiles.get(i));
+			resource.addPath((String)_indexFiles.get(i));
       
 		    if (index.exists())
 		    {
@@ -502,7 +502,7 @@ public class ResourceHandler extends NullHandler
 	    String newInfo=PathMap.pathInfo(pathSpec,newPath);
 	    if (newInfo==null)
 		newInfo=newPath;
-	    Resource newFile = _resourceBase.relative(newInfo);
+	    Resource newFile = _resourceBase.addPath(newInfo);
      
 	    Code.debug("Moving "+resource+" to "+newFile);
 	    resource.renameTo(newFile);
@@ -668,7 +668,7 @@ public class ResourceHandler extends NullHandler
 							   DateFormat.MEDIUM);
 	    for (int i=0 ; i< ls.length ; i++)
 	    {
-		Resource item = file.relative(ls[i]);
+		Resource item = file.addPath(ls[i]);
   
 		out.print("<TR><TD><A HREF=\"");
 		String path=base+ls[i];

@@ -188,7 +188,7 @@ public class ThreadPool
     /** Get the number of threads in the pool.
      * @return Number of threads
      */
-    public int getSize()
+    public int getThreads()
     {
         if (_threadSet==null)
             return 0;
@@ -199,7 +199,7 @@ public class ThreadPool
     /** Get the minimum number of threads.
      * @return minimum number of threads.
      */
-    public int getMinSize()
+    public int getMinThreads()
     {
         return _minThreads;
     }
@@ -208,7 +208,7 @@ public class ThreadPool
     /** Set the minimum number of threads.
      * @param minThreads minimum number of threads
      */
-    public void setMinSize(int minThreads)
+    public void setMinThreads(int minThreads)
     {
         _minThreads=minThreads;
     }
@@ -217,7 +217,7 @@ public class ThreadPool
     /** Set the maximum number of threads.
      * @return maximum number of threads.
      */
-    public int getMaxSize()
+    public int getMaxThreads()
     {
         return _maxThreads;
     }
@@ -226,7 +226,7 @@ public class ThreadPool
     /** Set the maximum number of threads.
      * @param maxThreads maximum number of threads.
      */
-    public void setMaxSize(int maxThreads)
+    public void setMaxThreads(int maxThreads)
     {
         _maxThreads=maxThreads;
     }
@@ -599,4 +599,64 @@ public class ThreadPool
             }
         }
     }
+
+    
+    /* ------------------------------------------------------------ */
+    /** Get the number of threads in the pool.
+     * @return Number of threads
+     * @deprecated use getThreads
+     */
+    public int getSize()
+    {
+        if (_threadSet==null)
+            return 0;
+        return _threadSet.size();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the minimum number of threads.
+     * @return minimum number of threads.
+     * @deprecated use getMinThreads
+     */
+    public int getMinSize()
+    {
+        return _minThreads;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the minimum number of threads.
+     * @param minThreads minimum number of threads
+     * @deprecated use setMinThreads
+     */
+    public void setMinSize(int minThreads)
+    {
+        _minThreads=minThreads;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the maximum number of threads.
+     * @return maximum number of threads.
+     * @deprecated use getMaxThreads
+     */
+    public int getMaxSize()
+    {
+        return _maxThreads;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the maximum number of threads.
+     * @param maxThreads maximum number of threads.
+     * @deprecated use setMaxThreads
+     */
+    public void setMaxSize(int maxThreads)
+    {
+        _maxThreads=maxThreads;
+    }
+    
 }
+
+
+
+
+
+

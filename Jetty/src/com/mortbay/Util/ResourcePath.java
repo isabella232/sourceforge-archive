@@ -47,19 +47,53 @@ public class ResourcePath
 	while (tokenizer.hasMoreTokens())
 	{
 	    String token=tokenizer.nextToken();
-	    Resource resource = Resource.newResource(token);
-	    if( !resource.exists())
-                resource = Resource.newResource( token +"/");
-	    if( !resource.exists())
-		throw new FileNotFoundException(token);
-            // XXX More compressed format handled ?
-            if( token.endsWith( ".jar") || token.endsWith( ".war") || token.endsWith( ".zip"))
-                _paths.add( Resource.newCompressedResource( resource));
-            else
-	        _paths.add(resource);
+            try
+            {
+		Resource resource = Resource.newResource(token);
+		if( !resource.exists())
+		    resource = Resource.newResource( token +"/");
+		if( !resource.exists())
+		    throw new FileNotFoundException(token);
+
+		File file=resource.getFile();
+		if (file!=null)
+		{
+		    if (file.isDirectory())
+			_paths.add(file.getCanonicalPath());
+		    else
+		    {
+			// Assume it is a zip file
+			_paths.add(new ZipFile(file));
+			LoadedFile lc=new LoadedFile();
+			lc.resource=resource;
+			lc.lastModified=System.currentTimeMillis();
+			_loaded.add(lc);
+			if (Code.verbose(100))
+			    Code.debug("Jar ",file);
+		    }
+		}
+		else if (resource.isDirectory())
+		{
+		    _paths.add(resource);
+		}
+		else
+		{
+		    Set filenames = new HashSet();
+		    ZipInputStream zin =
+			new ZipInputStream(resource.getInputStream());
+		    Code.notImplemented();
+		}
+	    }
+	    catch(IOException e)
+	    {
+		if (quiet)
+		    Code.ignore(e);
+		else
+		    Code.warning("Problem with "+token,e);
+	    }    
 	}
     }
-
+    
     
     
     /* ------------------------------------------------------------ */
@@ -70,7 +104,7 @@ public class ResourcePath
 	if (Code.verbose()) Code.debug("get ",filename);
 	 
 	// XXX Maybe it should get here with / instead of \.
-	filename = filename.replace( '\\', '/');
+	filename = filename.replace( File.separatorChar, '/');
 	InputStream in=null;
 	int length=0;
 
@@ -80,24 +114,81 @@ public class ResourcePath
 	    Resource resource=null;
 	    try
 	    {
-		Resource resourceBase = (Resource)_paths.get(p);
-		resource = resourceBase.relative(filename);
-		if (resource.exists())
-		{
-		    if (Code.verbose(1000))
-			Code.debug("Look in dir ",resourceBase, " for ",filename);
+                Object source = _paths.get(p);
+                if (source instanceof java.util.zip.ZipFile)
+                {
+                    ZipFile zip = (ZipFile)source;
 
-		    in = resource.getInputStream();
-		    length=(int)resource.length();
-	 		 	
-		    LoadedFile lc=new LoadedFile();
-		    lc.resource=resource;
-		    lc.lastModified=resource.lastModified();
-		    lc.resource.release();
-		    if (lc.lastModified>0)
-			_loaded.add(lc);
-		    if (Code.verbose()) Code.debug("Found ",filename);
-		    break;
+		    if (Code.verbose(1000))
+			Code.debug("Look in jar ",zip,
+				   " for ",filename);
+		    
+                    ZipEntry entry = zip.getEntry(filename);
+                    if (entry==null)
+                    {
+                        // Try alternate file separator for jars prepared
+                        // on other architectures.
+                        String alt=null;
+                        if (File.separatorChar=='/')
+                            alt=filename.replace('/','\\');
+                        else
+                            alt=filename.replace(File.separatorChar,'/');
+                        entry = zip.getEntry(alt);
+                    }
+                    
+                    if (entry!=null)
+                    {
+                        in = zip.getInputStream(entry);
+                        length=(int)entry.getSize();
+                        if (Code.verbose()) Code.debug("Found ",entry," in ",zip.getName());
+                        break;
+                    }
+                }
+                else if (source instanceof File)
+                {
+                    String dir = (String)source;
+                    File file = new File(dir+File.separator+filename);
+                    if (file.exists())
+                    {
+			if (Code.verbose(1000))
+			    Code.debug("Look in dir ",file,
+				       " for ",filename);
+
+			
+                        in = new FileInputStream(file);
+                        length=(int)file.length();
+                        
+                        LoadedFile lc=new LoadedFile();
+                        lc.resource=
+			    Resource.newResource(file.toURL());//XXX yuck
+                        lc.lastModified=file.lastModified();
+                        _loaded.add(lc);
+                        if (Code.verbose()) Code.debug("Found ",filename);
+                        break;
+                    }
+                }
+		else
+		{   
+		    Resource resourceBase = (Resource)_paths.get(p);
+		    resource = resourceBase.addPath(filename);
+		    if (resource.exists())
+		    {
+			if (Code.verbose(1000))
+			    Code.debug("Look in dir ",resourceBase,
+				       " for ",filename);
+			
+			in = resource.getInputStream();
+			length=(int)resource.length();
+			
+			LoadedFile lc=new LoadedFile();
+			lc.resource=resource;
+			lc.lastModified=resource.lastModified();
+			lc.resource.release();
+			if (lc.lastModified>0)
+			    _loaded.add(lc);
+			if (Code.verbose()) Code.debug("Found ",filename);
+			break;
+		    }
 		}
 	    }
 	    catch(Exception e)

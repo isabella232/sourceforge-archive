@@ -1,3 +1,7 @@
+// ===========================================================================
+// Copyright (c) 1996 Mort Bay Consulting Pty. Ltd. All rights reserved.
+// $Id$
+// ---------------------------------------------------------------------------
 package com.mortbay.Util;
 
 import java.io.*;
@@ -71,35 +75,6 @@ public class Resource
 	}
 	
 	return newResource(url);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Construct a resource for extracting files from a compressed resource.
-     * Creates a temporary file for compressed files inside not file resources
-     * @param resource
-     * @return
-     */
-    public static Resource newCompressedResource( Resource resource)
-        throws IOException
-    {
-        if( resource.getFile() == null) {
-            InputStream is = resource.getInputStream();
-            File file = File.createTempFile( "uncompressed", ".jar");
-            FileOutputStream os = new FileOutputStream( file);
-            byte[] arr = new byte[1024];
-            int len;
-            while( (len = is.read( arr, 0, 1024)) > 0) {
-                os.write( arr, 0, len);
-            }
-            os.close();
-            URL url = new URL( "jar:" + file.toURL().toExternalForm() + "!/");
-            URLConnection connection = url.openConnection();
-            return new CompressedResource( url, connection, file);
-        } else {
-            URL url = new URL( "jar:" + resource.getURL().toExternalForm() + "!/");
-            URLConnection connection = url.openConnection();
-            return new Resource( url, connection);
-        }
     }
 
     
@@ -297,25 +272,27 @@ public class Resource
      * Returns the resource contained inside the current resource with the
      * given name
      */
-    public Resource relative(String name)
+    public Resource addPath(String path)
 	throws IOException,MalformedURLException
     {
-// XXX - it seems not to work with files, jar files, ...
-//	return newResource(new URL(_url,name));
+	// XXX - need to check for ../ which might take us
+	// out-side of resourcebase - or at least make sure we
+	// never see that here.
+	
         String resourceBase = _url.toExternalForm();
-        if( name.startsWith( "./"))
-            name = name.substring( 2);
+        if( path.startsWith( "./"))
+            path = path.substring( 2);
         if( resourceBase.endsWith( "/"))
-            if( name.startsWith( "/"))
-                name = resourceBase + name.substring( 1);
+            if( path.startsWith( "/"))
+                path = resourceBase + path.substring( 1);
             else
-                name = resourceBase + name;
+                path = resourceBase + path;
         else
-            if( name.startsWith( "/"))
-                name = resourceBase + name;
+            if( path.startsWith( "/"))
+                path = resourceBase + path;
             else
-                name = resourceBase + "/" + name;
-        return newResource(new URL(name));
+                path = resourceBase + "/" + path;
+        return newResource(new URL(path));
     }
 
     /* ------------------------------------------------------------ */
@@ -470,24 +447,6 @@ public class Resource
 	    return o instanceof FileResource &&
 		_file.equals(((FileResource)o)._file);
 	}
-    }
-
-    private static class CompressedResource extends Resource
-    {
-	File _file;
-	
-	/* -------------------------------------------------------- */
-	private CompressedResource(URL url, URLConnection connection, File file)
-	{
-	    super(url,connection);
-	    _file=file;
-	}
-
-        protected void finalize()
-        {
-    	    super.finalize();
-            _file.delete();
-        }
     }
 
 }

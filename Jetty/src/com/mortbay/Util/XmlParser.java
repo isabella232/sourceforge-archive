@@ -194,7 +194,24 @@ public class XmlParser
 	    return null;
 	}
     }
-
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /** XML Attribute
+     */
+    public static class Attribute
+    {
+	private String _name;
+	private String _value;
+	Attribute(String n,String v)
+	{
+	    _name=n;
+	    _value=v;
+	}
+	public String getName() {return _name;}
+	public String getValue() {return _value;}
+    }
+    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /** XML Node.
@@ -206,7 +223,7 @@ public class XmlParser
 	Node _parent;
 	private ArrayList _list;
 	private String _tag;
-	private Map _attrs;
+	private Attribute[] _attrs;
 	private boolean _lastString=false;
 	
 	/* ------------------------------------------------------------ */
@@ -217,9 +234,10 @@ public class XmlParser
 
 	    if (attrs!=null)
 	    {
-		_attrs=new HashMap(attrs.getLength()+3);
+		_attrs=new Attribute[attrs.getLength()];
 		for (int i = 0; i <attrs.getLength(); i++)
-		    _attrs.put(attrs.getName(i),attrs.getValue(i));
+		    _attrs[i]=new Attribute(attrs.getName(i),
+					    attrs.getValue(i));
 	    }
 	}
 	
@@ -236,13 +254,36 @@ public class XmlParser
 	} 
 
 	/* ------------------------------------------------------------ */
-	/** Get a map of element attributes.
-	 * @return Map of attributes or null.
+	/** Get an array of element attributes.
 	 */
- 	public Map getAttributes()
+ 	public Attribute[] getAttributes()
 	{
 	    return _attrs;
 	}
+	
+	/* ------------------------------------------------------------ */
+	/** Get a map of element attributes.
+	 * @return Map of attributes or null.
+	 */
+ 	public String getAttribute(String name)
+	{
+	    return getAttribute(name,null);
+	}
+	
+	/* ------------------------------------------------------------ */
+	/** Get a map of element attributes.
+	 * @return Map of attributes or null.
+	 */
+ 	public String getAttribute(String name, String dft)
+	{
+	    if (_attrs==null || name==null)
+		return dft;
+	    for (int i=0;i<_attrs.length;i++)
+		if (name.equals(_attrs[i].getName()))
+		    return _attrs[i].getValue();
+	    return dft;
+	}
+	
 	
 	/* ------------------------------------------------------------ */
 	/** Get the number of children nodes.
@@ -285,7 +326,6 @@ public class XmlParser
 		    }
 		}
 	    }
-	    
 	    return null;
 	}
 	
@@ -351,14 +391,12 @@ public class XmlParser
 	    
 	    if (_attrs!=null)
 	    {
-		Iterator i=_attrs.entrySet().iterator();
-		while(i.hasNext())
+		for (int i=0;i<_attrs.length;i++)
 		{
-		    Map.Entry entry = (Map.Entry)i.next();
 		    buf.append(' ');
-		    buf.append(entry.getKey());
+		    buf.append(_attrs[i].getName());
 		    buf.append("=\"");
-		    buf.append(entry.getValue());
+		    buf.append(_attrs[i].getValue());
 		    buf.append("\"");
 		}
 	    }

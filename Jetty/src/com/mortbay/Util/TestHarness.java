@@ -1305,22 +1305,46 @@ public class TestHarness
 	    t.check(r.exists(),"Rel File exists");
 	    t.check(!r.isDirectory(),"Rel URL not directory");
 	    
-	    r = Resource.newResource("file:"+
-				     System.getProperty("user.dir")+
-				     "/TestHarness.java");
-	    r = r.relative("Resource.java");
-	    t.check(r.exists(),"Relative resource exists");
-	    r = r.relative("UnknownFile");
-	    t.check(!r.exists(),"Relative resource ! exists");
+	    Resource b = Resource.newResource("file:"+
+					      System.getProperty("user.dir")+
+				     "/");
+	    r = b.addPath("Resource.java");
+	    t.check(r.exists(),"AddPath resource exists");
+	    r = b.addPath("UnknownFile");
+	    t.check(!r.exists(),"AddPath resource ! exists");
+	    r = b.addPath("/Resource.java");
+	    System.err.println(r);
+	    t.check(r.exists(),"AddPath resource exists");
+	    r = b.addPath("/UnknownFile");
+	    t.check(!r.exists(),"AddPath resource ! exists");
+	    
+	    b = Resource.newResource("file:"+
+				     System.getProperty("user.dir"));
+	    r = b.addPath("Resource.java");
+	    t.check(r.exists(),"AddPath resource exists");
+	    r = b.addPath("UnknownFile");
+	    t.check(!r.exists(),"AddPath resource ! exists");
+	    r = b.addPath("/Resource.java");
+	    t.check(r.exists(),"AddPath resource exists");
+	    r = b.addPath("/UnknownFile");
+	    t.check(!r.exists(),"AddPath resource ! exists");
 	    
 
 	    r = Resource.newResource("file:"+System.getProperty("user.dir"));
 	    t.check(r.exists(),"Dir URL exists");
 	    t.check(r.isDirectory(),"Dir URL directory");
-	    r = r.relative("Resource.java");
-	    t.check(r.exists(),"Relative resource exists");
-	    r = r.relative("UnknownFile");
-	    t.check(!r.exists(),"Relative resource ! exists");
+	    r = r.addPath("Resource.java");
+	    t.check(r.exists(),"AddPath resource exists");
+	    r = r.addPath("UnknownFile");
+	    t.check(!r.exists(),"AddPath resource ! exists");
+
+
+
+	    r = Resource.newResource("jar:file:/somejar.jar!/content/");
+	    t.checkEquals(r.getFile(),null,"no file for jar:");
+	    
+
+	    
 	}
         catch(Exception e)
         {
@@ -1337,24 +1361,24 @@ public class TestHarness
     {
         try
         {
-	    testMultiMap();
-            testQuotedStringTokenizer();            
-            testDateCache();
-            testTest();
-            testLog();
-            testFrame();
-            testCode();
-            testDataHelper();
-            testBlockingQueue();
-            testIO();
-            testUrlEncoded();
-            testURI();
-            testLineInput();
-            testThreadPool();
-            testThreadedServer();
-            testB64();
-	    testZipResource();
-            PropertyTreeTest.test();
+//  	    testMultiMap();
+//              testQuotedStringTokenizer();            
+//              testDateCache();
+//              testTest();
+//              testLog();
+//              testFrame();
+//              testCode();
+//              testDataHelper();
+//              testBlockingQueue();
+//              testIO();
+//              testUrlEncoded();
+//              testURI();
+//              testLineInput();
+//              testThreadPool();
+//              testThreadedServer();
+//              testB64();
+//  	    testZipResource();
+//              PropertyTreeTest.test();
 	    resourceTest();
 	    
         }
