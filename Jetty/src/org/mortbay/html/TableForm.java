@@ -45,8 +45,9 @@ public class TableForm extends Form
     public void addText(String label,
                         String value)
     {
-        Element e = new Text(value);
-        addField(label,e);
+        Composite c = new Composite();
+        c.add(value);
+        addField(label,c);
     }
 
     /* ----------------------------------------------------------- */

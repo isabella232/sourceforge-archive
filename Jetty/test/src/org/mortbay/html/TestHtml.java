@@ -32,9 +32,9 @@ class TestHtml
 
                 Composite composite1 = new Composite();
                 Composite composite2 = new Composite();
-                Text text1 = new Text();
-                Text text2 = new Text();
-                Text text3 = new Text();
+                Composite text1 = new Composite();
+                Composite text2 = new Composite();
+                Composite text3 = new Composite();
 
                 text1.add("How now");
                 text1.add("Brown cow");
@@ -69,9 +69,9 @@ class TestHtml
 
                 DefList dList=new DefList();
                 page.add(dList);
-                Text word1= new Text("Blah");
-                Text word2= new Text("Foo");
-                Text word3= new Text("Bah");
+                Composite word1= new Composite("Blah");
+                Composite word2= new Composite("Foo");
+                Composite word3= new Composite("Bah");
                 dList.add(word1,text1);
                 dList.add(word2,text2);
                 dList.add(word3,text3);
@@ -79,14 +79,14 @@ class TestHtml
                 page.flush(System.out);
 
                 page.add(rule);
-                page.add(new Link("test.html",new Text("Test Link")));
+                page.add(new Link("test.html",new Composite("Test Link")));
 
                 page.add(rule);
                 Table table = new Table(2);
                 table.newRow();
                 table.addHeading("Heading1");
-                table.addHeading(new Text("Heading2"));
-                table.addHeading(new Text("Heading3"));
+                table.addHeading("Heading2");
+                table.addHeading("Heading3");
                 table.newRow();
                 table.addCell("String1");
                 table.addCell(text2);
@@ -101,8 +101,8 @@ class TestHtml
                 table.defaultCell().add("<b>");
                 table.newRow();
                 table.addHeading("Heading1");
-                table.addHeading(new Text("Heading2"));
-                table.addHeading(new Text("Heading3"));
+                table.addHeading("Heading2");
+                table.addHeading("Heading3");
                 table.newRow();
                 table.addCell("String1");
                 table.addCell(text2);
