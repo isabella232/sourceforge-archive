@@ -55,8 +55,14 @@ public class XmlParser
         try
         {
             SAXParserFactory factory = SAXParserFactory.newInstance();
-            factory.setValidating(!Boolean.getBoolean("org.mortbay.xml.XmlParser.NotValidating"));
+            boolean notValidating = Boolean.getBoolean("org.mortbay.xml.XmlParser.NotValidating");
+            factory.setValidating(!notValidating);
             _parser = factory.newSAXParser();
+            
+            _parser.getXMLReader().setFeature ("http://apache.org/xml/features/validation/schema", !notValidating);
+            _parser.getXMLReader().setFeature ("http://xml.org/sax/features/validation", !notValidating);
+            _parser.getXMLReader().setFeature ("http://xml.org/sax/features/namespaces", !notValidating); 	
+            _parser.getXMLReader().setFeature ("http://xml.org/sax/features/namespace-prefixes", !notValidating);
         }
         catch(Exception e)
         {
@@ -75,6 +81,10 @@ public class XmlParser
             SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setValidating(validating);
             _parser = factory.newSAXParser();
+            _parser.getXMLReader().setFeature ("http://apache.org/xml/features/validation/schema", validating);            
+            _parser.getXMLReader().setFeature ("http://xml.org/sax/features/validation", validating );
+            _parser.getXMLReader().setFeature ("http://xml.org/sax/features/namespaces", validating);
+            _parser.getXMLReader().setFeature ("http://xml.org/sax/features/namespace-prefixes", validating);
         }
         catch(Exception e)
         {
@@ -279,9 +289,11 @@ public class XmlParser
         }
         
         /* ------------------------------------------------------------ */
-        public InputSource resolveEntity
-            (String pid, String sid)
+        public InputSource resolveEntity(String pid, String sid)
         {
+
+            Code.debug ("resolveEntity("+pid+", "+sid+")");
+
             Resource resource=null;
             if(pid!=null)
                 resource = (Resource)_redirectMap.get(pid);
@@ -289,20 +301,28 @@ public class XmlParser
                 resource = (Resource)_redirectMap.get(sid);
             if (resource==null)
             {
+               
                 String dtd = sid;
                 if (dtd.lastIndexOf('/')>=0)
                     dtd=dtd.substring(dtd.lastIndexOf('/')+1);
+
+                Code.debug("Can't exact match entity in redirect map, trying "+dtd);
                 resource = (Resource)_redirectMap.get(dtd);
             }
 
             if (resource!=null && resource.exists())
             {
+
+                Code.debug("Locally resolved entity");
+
                 try
                 {
                     InputStream in= resource.getInputStream();
                     Code.debug("Redirected entity ",
                                sid," --> ",resource);
-                    return new InputSource(in);
+                    InputSource is = new InputSource(in);
+                    is.setSystemId(sid);
+                    return is;
                 }
                 catch(IOException e){Code.ignore(e);}
             }
