@@ -68,6 +68,8 @@ public class HttpContextMBean extends LifeCycleMBean
         defineAttribute("resourceBase");
         defineAttribute("maxCachedFileSize");
         defineAttribute("maxCacheSize");
+        defineOperation("flushCache",
+                        IMPACT_ACTION);
         defineOperation("getResource",
                         new String[] {STRING},
                         IMPACT_ACTION);

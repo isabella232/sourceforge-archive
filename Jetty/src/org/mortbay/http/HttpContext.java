@@ -658,6 +658,13 @@ public class HttpContext implements LifeCycle,
     }
     
     /* ------------------------------------------------------------ */
+    public void flushCache()
+    {
+        _cache.clear();
+        System.gc();
+    }
+    
+    /* ------------------------------------------------------------ */
     public String[] getWelcomeFiles()
     {
         return _welcomes;

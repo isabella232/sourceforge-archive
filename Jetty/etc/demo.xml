@@ -200,7 +200,7 @@
     <Call name="addHandler">
       <Arg><New class="org.mortbay.http.handler.ForwardHandler">
         <Call name="addForward"><Arg>/forward/*</Arg><Arg>/dump</Arg></Call>
-        <Call name="setRootForward"><Arg>/dump/rootForward</Arg></Call>
+        <!-- <Set name="rootForward">/dump/rootForward</Set> -->
       </New></Arg>
     </Call>
 
