@@ -131,7 +131,9 @@ public class LogHandler extends NullHandler implements Observer
 		request.getMethod() +
 		" " +
 		referer +
-		" http/1.0 " +
+		" " +
+		request.getVersion() +
+		" " +
 		response.getStatus()+
 		" " +
 		bytes +

@@ -88,7 +88,10 @@ public class HttpRequest extends HttpHeader
 	this.address=address;
 
 	// Decode request header
-	requestLine=in.readLine().trim();
+	requestLine=in.readLine();
+	if (requestLine==null)
+	    throw new IOException("EOF");
+	requestLine.trim();
 	try{
 	    int s1=requestLine.indexOf(' ',0);
 	    method = requestLine.substring(0,s1);

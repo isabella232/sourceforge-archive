@@ -10,6 +10,11 @@ This is a combined release of Jetty and the MortBay utility packages:
      com/mortbay/Jetty
 
 
+Release 2.0Beta2
+  + Fixed Log Handler for HTTP/1.1
+  + Slight improvement in READMEs
+
+
 Release 2.0Beta1
   + Improved performance of Code.debug() calls, significantly
     in the case of non matching debug patterns.
