@@ -16,7 +16,7 @@ package org.jboss.jetty;
 
 //------------------------------------------------------------------------------
 
-import java.io.ByteArrayOutputStream;
+import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Hashtable;
@@ -211,15 +211,12 @@ public class Jetty
     {
       DOMSource source = new DOMSource(configElement);
 
-      ByteArrayOutputStream stream = new ByteArrayOutputStream();
-
-      StreamResult result = new StreamResult (stream);
-
+      CharArrayWriter writer = new CharArrayWriter();
+      StreamResult result = new StreamResult (writer);
       TransformerFactory factory = TransformerFactory.newInstance();
       Transformer transformer = factory.newTransformer();
       transformer.transform (source, result);
-
-      _xmlConfigString = stream.toString();
+      _xmlConfigString = writer.toString();
 
       // get rid of the first line, as this will be prepended by
       // the XmlConfiguration
