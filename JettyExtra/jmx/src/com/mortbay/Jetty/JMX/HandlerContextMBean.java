@@ -56,7 +56,6 @@ public class HandlerContextMBean extends LifeCycleMBean
         defineAttribute("contextPath");
         defineAttribute("classPath");
         defineAttribute("classLoader");
-        defineAttribute("dynamicServletPathSpec");
         defineAttribute("realm");
         defineAttribute("redirectNullPath");
         defineAttribute("resourceBase");
@@ -95,10 +94,6 @@ public class HandlerContextMBean extends LifeCycleMBean
                         IMPACT_INFO);
         defineOperation("removeHandler",
                         new String[] {INT},
-                        IMPACT_ACTION);
-
-        defineOperation("addServlet",
-                        new String[] {STRING,STRING,STRING},
                         IMPACT_ACTION);
         
         defineOperation("setMimeMapping",

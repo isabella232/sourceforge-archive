@@ -18,7 +18,7 @@ import com.mortbay.Jetty.Server;
 import com.mortbay.HTTP.HttpServer;
 import com.mortbay.HTTP.HttpListener;
 import com.mortbay.HTTP.HandlerContext;
-import com.mortbay.HTTP.WebApplicationContext;
+import com.mortbay.Jetty.Servlet.WebApplicationContext;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.Log;
 import com.mortbay.Util.LogSink;

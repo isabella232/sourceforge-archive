@@ -14,6 +14,7 @@ import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 import com.mortbay.HTTP.HttpServer;
+import com.mortbay.Jetty.Servlet.ServletHandlerContext;
 import com.mortbay.Jetty.Servlet.WebApplicationContext;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.Log;
@@ -32,14 +33,14 @@ import java.util.Iterator;
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
-public class WebApplicationMBean extends ServletHandlerContextMBean
+public class ServletHandlerContextMBean extends HandlerContextMBean
 {
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @exception MBeanException 
      * @exception InstanceNotFoundException 
      */
-    public WebApplicationMBean(HttpServerMBean server,WebApplicationContext context)
+    public ServletHandlerContextMBean(HttpServerMBean server,ServletHandlerContext context)
         throws MBeanException, InstanceNotFoundException
     {
         super(server,context);
@@ -50,11 +51,9 @@ public class WebApplicationMBean extends ServletHandlerContextMBean
     {
         super.defineManagedResource();
 
-        defineAttribute("displayName",false);
-        defineAttribute("defaultsDescriptor",true);
-        defineAttribute("deploymentDescriptor",false);
-        defineAttribute("WAR",true);
-        defineAttribute("extractWAR",true);
+        defineAttribute("dynamicServletPathSpec");
+        defineOperation("addServlet",
+                        new String[] {STRING,STRING,STRING},
+                        IMPACT_ACTION);
     }
-    
 }
