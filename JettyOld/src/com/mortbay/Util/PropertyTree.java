@@ -15,6 +15,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
+import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -288,7 +289,7 @@ public class PropertyTree extends Properties
     }
     /* ------------------------------------------------------------ */
     public Enumeration keys(){
-	return proertyNames();
+	return propertyNames();
     }
     /* ------------------------------------------------------------ */
     /** Retrurn a sub node of this PropertyTree
@@ -328,6 +329,11 @@ public class PropertyTree extends Properties
 		if (toConvert.getClass().equals(convertTo))
 		    // Already correct type!
 		    return toConvert;
+		try {
+		    if (!convertTo.equals(Class.forName(
+					"com.mortbay.Util.PropertyTree")))
+			return null;
+		} catch (Exception ex){}
 		// Make sure we have a dictionary
 		if (!(toConvert instanceof Dictionary))
 		    return null;
@@ -344,8 +350,9 @@ public class PropertyTree extends Properties
 			converter.convert(value, getClass(), converter);
 		    pt.put(key, converted == null ? value : converted);
 		}
+		return pt;
 	    }
-	}
+	};
     }
     /* ------------------------------------------------------------ */
 };
