@@ -39,16 +39,16 @@ a.selhdr
 a.menu
 {  
   text-decoration: none; 
-  font-weight: bold;
-  font-size: smaller;
+  font-weight: normal;
+  font-size: small;
   color: #3333ff; 
 }
 
 a.selmenu
 {
   text-decoration: none; 
-  font-weight: bold;
-  font-size: smaller;
+  font-weight: normal;
+  font-size: small;
   color: #ff6600;
 }
 
