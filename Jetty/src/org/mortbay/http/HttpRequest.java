@@ -114,7 +114,7 @@ public class HttpRequest extends HttpMessage
     private boolean _cookiesExtracted;
     private long _timeStamp;
     private String _timeStampStr;
-    private UserPrincipal _userPrincipal;
+    private Principal _userPrincipal;
     private String _authUser;
     private String _authType;
     
@@ -1106,8 +1106,8 @@ public class HttpRequest extends HttpMessage
     public boolean isUserInRole(String role)
     {
         Principal principal=getUserPrincipal();
-        if (principal!=null && principal instanceof UserPrincipal)
-            return ((UserPrincipal)principal).isUserInRole(role);
+        if (principal!=null)
+            getHttpResponse().getHttpContext().getRealm().isUserInRole(principal,role);
         return false;
     }
     
@@ -1136,13 +1136,13 @@ public class HttpRequest extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    public UserPrincipal getUserPrincipal()
+    public Principal getUserPrincipal()
     {
         return _userPrincipal;
     }
     
     /* ------------------------------------------------------------ */
-    public void setUserPrincipal(UserPrincipal principal)
+    public void setUserPrincipal(Principal principal)
     {
         _userPrincipal=principal;
     }

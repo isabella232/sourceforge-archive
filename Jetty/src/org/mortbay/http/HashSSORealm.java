@@ -5,12 +5,13 @@
 
 package org.mortbay.http;
 
-import java.util.HashMap;
+import java.security.Principal;
 import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.Random;
-import org.mortbay.util.Credential;
 import javax.servlet.http.Cookie;
 import org.mortbay.util.Code;
+import org.mortbay.util.Credential;
 
 
 public class HashSSORealm implements SSORealm
@@ -38,11 +39,11 @@ public class HashSSORealm implements SSORealm
         }
         Code.debug("get ssoID=",ssoID);
         
-        UserPrincipal principal=null;
+        Principal principal=null;
         Credential credential=null;
         synchronized(_ssoId2Principal)
         {
-            principal=(UserPrincipal)_ssoId2Principal.get(ssoID);
+            principal=(Principal)_ssoId2Principal.get(ssoID);
             credential=(Credential)_ssoPrincipal2Credential.get(principal);
         }
         
@@ -50,7 +51,7 @@ public class HashSSORealm implements SSORealm
         
         if (principal!=null && credential!=null)
         {
-            if (principal.isAuthenticated())
+            if (response.getHttpContext().getRealm().isAuthenticated(principal))
             {
                 request.setUserPrincipal(principal);
                 request.setAuthUser(principal.getName());
@@ -73,7 +74,7 @@ public class HashSSORealm implements SSORealm
     /* ------------------------------------------------------------ */
     public void setSingleSignOn(HttpRequest request,
                                 HttpResponse response,
-                                UserPrincipal principal,
+                                Principal principal,
                                 Credential credential)
     {
         

@@ -10,6 +10,7 @@ import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.util.B64Code;
 import org.mortbay.util.Code;
 import org.mortbay.util.StringUtil;
+import java.security.Principal;
 
 /* ------------------------------------------------------------ */
 /** BASIC authentication.
@@ -26,14 +27,14 @@ public class BasicAuthenticator implements Authenticator
      * the response as an auth challenge or redirect.
      * @exception IOException 
      */
-    public UserPrincipal authenticated(UserRealm realm,
-                                       String pathInContext,
-                                       HttpRequest request,
-                                       HttpResponse response)
+    public Principal authenticated(UserRealm realm,
+                                   String pathInContext,
+                                   HttpRequest request,
+                                   HttpResponse response)
         throws IOException
     {
         // Get the user if we can
-        UserPrincipal user=null;
+        Principal user=null;
         String credentials = request.getField(HttpFields.__Authorization);
         
         if (credentials!=null )

@@ -12,12 +12,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
+import java.security.Principal;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.SecurityConstraint;
 import org.mortbay.http.SecurityConstraint.Authenticator;
-import org.mortbay.http.UserPrincipal;
 import org.mortbay.http.UserRealm;
 import org.mortbay.http.SSORealm;
 import org.mortbay.util.Code;
@@ -102,10 +102,10 @@ public class FormAuthenticator implements Authenticator
      * Called from SecurityHandler.
      * @return UserPrincipal if authenticated else null.
      */
-    public UserPrincipal authenticated(UserRealm realm,
-                                       String pathInContext,
-                                       HttpRequest httpRequest,
-                                       HttpResponse httpResponse)
+    public Principal authenticated(UserRealm realm,
+                                   String pathInContext,
+                                   HttpRequest httpRequest,
+                                   HttpResponse httpResponse)
         throws IOException
     {
         HttpServletRequest request =(ServletHttpRequest)httpRequest.getWrapper();
@@ -209,7 +209,7 @@ public class FormAuthenticator implements Authenticator
             }
             
             // Check that it is still authenticated.
-            else if (!form_cred._userPrincipal.isAuthenticated())
+            else if (!realm.isAuthenticated(form_cred._userPrincipal))
                 form_cred._userPrincipal=null;
 
             // If this credential is still authenticated
@@ -232,7 +232,7 @@ public class FormAuthenticator implements Authenticator
             if (request.getUserPrincipal()!=null)
             {
                 form_cred=new FormCredential();
-                form_cred._userPrincipal=(UserPrincipal)request.getUserPrincipal();
+                form_cred._userPrincipal=request.getUserPrincipal();
                 form_cred._jUserName=form_cred._userPrincipal.toString();
                 if (cred!=null)
                     form_cred._jPassword=cred.toString();
@@ -270,7 +270,7 @@ public class FormAuthenticator implements Authenticator
     {
         private String _jUserName;
         private String _jPassword;
-        private transient UserPrincipal _userPrincipal;
+        private transient Principal _userPrincipal;
         
         public int hashCode()
         {
@@ -299,7 +299,7 @@ public class FormAuthenticator implements Authenticator
     {
         private String _username;
 
-        SSOSignoff(UserPrincipal principal){_username=principal.getName();}
+        SSOSignoff(Principal principal){_username=principal.getName();}
         
         public void valueBound(HttpSessionBindingEvent event) {}
         

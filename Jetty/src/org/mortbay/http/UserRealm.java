@@ -4,6 +4,7 @@
 // ---------------------------------------------------------------------------
 
 package org.mortbay.http;
+import java.security.Principal;
 
 /* ------------------------------------------------------------ */
 /** User Realm.
@@ -37,10 +38,30 @@ public interface UserRealm
      * FORM authentication).
      * @return The authenticated UserPrincipal.
      */
-    public UserPrincipal authenticate(String username,
-                                      Object credentials,
-                                      HttpRequest request);
+    public Principal authenticate(String username,
+                                  Object credentials,
+                                  HttpRequest request);
 
+    /* ------------------------------------------------------------ */
+    /** Check authentication status.
+     * 
+     * Implementations of this method may adorn the calling context to
+     * assoicate it with the authenticated principal (eg ThreadLocals). If
+     * such context associations are made, they should be considered valid
+     * until a UserRealm.deAuthenticate(UserPrincipal) call is made for this
+     * UserPrincipal.
+     *
+     * @return True if this user is still authenticated.
+     */
+    public boolean isAuthenticated(Principal user);
+    
+    /* ------------------------------------------------------------ */
+    /** Check if the user is in a role. 
+     * @param role A role name.
+     * @return True if the user can act in that role.
+     */
+    public boolean isUserInRole(Principal user, String role);
+    
     /* ------------------------------------------------------------ */
     /** Dissassociate the calling context with a Principal.
      * This method is called when the calling context is not longer
@@ -50,7 +71,7 @@ public interface UserRealm
      * associated with other contexts.
      * @param user A UserPrincipal allocated from this realm.
      */
-    public void disassociate(UserPrincipal user);
+    public void disassociate(Principal user);
     
     /* ------------------------------------------------------------ */
     /** Push role onto a Principal.
@@ -60,7 +81,7 @@ public interface UserRealm
      * @return A new UserPrincipal object that wraps the passed user, but
      * with the added role.
      */
-    public UserPrincipal pushRole(UserPrincipal user, String role);
+    public Principal pushRole(Principal user, String role);
 
 
     /* ------------------------------------------------------------ */
@@ -69,6 +90,6 @@ public interface UserRealm
      * @return The principal without the role.  Most often this will be the
      * original UserPrincipal passed.
      */
-    public UserPrincipal popRole(UserPrincipal user);
+    public Principal popRole(Principal user);
     
 }

@@ -4,8 +4,16 @@ Jetty Versions
 Jetty-5.x.x
  + Compiled against 2.4 servlet spec.
  + Implemented remote/local addr/port methods
+ + Updated authentication so that a normal Principal is used.
 
-
+Jetty-4.2.11 - 12 July 2003
+ + Fixed race in servlet initialization code.
+ + Cookie params all in lower case.
+ + Simplified AJP13 connection handling. 
+ + Prevent AJP13 from reordering query.
+ + Support separate Monitor class for start
+ + Branched for Jetty 5 development.
+ 
 Jetty-4.2.10 - 7 July 2003
  + Updates to JettyPlus documentation
  + Updates to Jetty tutorial for start.jar, jmx etc

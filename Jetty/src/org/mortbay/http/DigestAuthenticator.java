@@ -13,6 +13,7 @@ import org.mortbay.util.Credential;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
+import java.security.Principal;
 
 /* ------------------------------------------------------------ */
 /** DIGEST authentication.
@@ -29,10 +30,10 @@ public class DigestAuthenticator implements Authenticator
      * the response as an auth challenge or redirect.
      * @exception IOException 
      */
-    public UserPrincipal authenticated(UserRealm realm,
-                                       String pathInContext,
-                                       HttpRequest request,
-                                       HttpResponse response)
+    public Principal authenticated(UserRealm realm,
+                                   String pathInContext,
+                                   HttpRequest request,
+                                   HttpResponse response)
         throws IOException
     {
         
@@ -44,7 +45,7 @@ public class DigestAuthenticator implements Authenticator
         }
 
         // Get the user if we can
-        UserPrincipal user=null;
+        Principal user=null;
         String credentials = request.getField(HttpFields.__Authorization);
         
         if (credentials!=null )

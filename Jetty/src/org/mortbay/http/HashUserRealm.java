@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.security.Principal;
 import org.mortbay.util.Code;
 import org.mortbay.util.Credential;
 import org.mortbay.util.Password;
@@ -172,9 +173,9 @@ public class HashUserRealm
     }
 
     /* ------------------------------------------------------------ */
-    public UserPrincipal authenticate(String username,
-                                      Object credentials,
-                                      HttpRequest request)
+    public Principal authenticate(String username,
+                                  Object credentials,
+                                  HttpRequest request)
     {
         KnownUser user;
         synchronized (this)
@@ -191,12 +192,12 @@ public class HashUserRealm
     }
     
     /* ------------------------------------------------------------ */
-    public void disassociate(UserPrincipal user)
+    public void disassociate(Principal user)
     {
     }
     
     /* ------------------------------------------------------------ */
-    public UserPrincipal pushRole(UserPrincipal user, String role)
+    public Principal pushRole(Principal user, String role)
     {
         if (user==null)
             user=new User();
@@ -205,7 +206,7 @@ public class HashUserRealm
     }
 
     /* ------------------------------------------------------------ */
-    public UserPrincipal popRole(UserPrincipal user)
+    public Principal popRole(Principal user)
     {
         WrappedUser wu = (WrappedUser)user;
         return wu.getUserPrincipal();
@@ -220,7 +221,7 @@ public class HashUserRealm
      */
     public synchronized Object put(Object name, Object credentials)
     {
-        if (credentials instanceof UserPrincipal)
+        if (credentials instanceof Principal)
             return super.put(name.toString(),
                              credentials);
         
@@ -252,14 +253,23 @@ public class HashUserRealm
         userSet.add(userName);
     }
     
+    /* -------------------------------------------------------- */
+    public boolean isAuthenticated(Principal user)
+    {
+        return ((User)user).isAuthenticated();
+    }
+    
     /* ------------------------------------------------------------ */
     /** Check if a user is in a role.
      * @param user The user, which must be from this realm 
      * @param roleName 
      * @return True if the user can act in the role.
      */
-    public synchronized boolean isUserInRole(UserPrincipal user, String roleName)
+    public synchronized boolean isUserInRole(Principal user, String roleName)
     {
+        if (user instanceof WrappedUser)
+            return ((WrappedUser)user).isUserInRole(roleName);
+         
         if (user==null || ((User)user).getUserRealm()!=this)
             return false;
         
@@ -313,7 +323,7 @@ public class HashUserRealm
     /* ------------------------------------------------------------ */
     public void setSingleSignOn(HttpRequest request,
                                 HttpResponse response,
-                                UserPrincipal principal,
+                                Principal principal,
                                 Credential credential)
     {
         if (_ssoRealm!=null)
@@ -330,7 +340,7 @@ public class HashUserRealm
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private class User implements UserPrincipal
+    private class User implements Principal
     {
         List roles=null;
 
@@ -346,11 +356,6 @@ public class HashUserRealm
         }
                 
         public boolean isAuthenticated()
-        {
-            return false;
-        }
-        
-        public boolean isUserInRole(String role)
         {
             return false;
         }
@@ -393,12 +398,6 @@ public class HashUserRealm
         {
             return true;
         }
-    
-        /* -------------------------------------------------------- */
-        public boolean isUserInRole(String role)
-        {
-            return HashUserRealm.this.isUserInRole(this,role);
-        }
     }
 
     /* ------------------------------------------------------------ */
@@ -406,16 +405,16 @@ public class HashUserRealm
     /* ------------------------------------------------------------ */
     private class WrappedUser extends User
     {   
-        private UserPrincipal user;
+        private Principal user;
         private String role;
 
-        private WrappedUser(UserPrincipal user, String role)
+        private WrappedUser(Principal user, String role)
         {
             this.user=user;
             this.role=role;
         }
 
-        private UserPrincipal getUserPrincipal()
+        private Principal getUserPrincipal()
         {
             return user;    
         }

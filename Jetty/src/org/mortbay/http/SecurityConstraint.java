@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import org.mortbay.util.Code;
 import org.mortbay.util.LazyList;
+import java.security.Principal;
 
 
 
@@ -38,15 +39,15 @@ public class SecurityConstraint
     {
         /* ------------------------------------------------------------ */
         /** Authenticate.
-         * @return UserPrincipal if authenticated. Null if Authentication
+         * @return User Principal if authenticated. Null if Authentication
          * failed. If the SecurityConstraint.__NOBODY instance is returned,
          * the request is considered as part of the authentication process.
          * @exception IOException 
          */
-        public UserPrincipal authenticated(UserRealm realm,
-                                           String pathInContext,
-                                           HttpRequest request,
-                                           HttpResponse response)
+        public Principal authenticated(UserRealm realm,
+                                       String pathInContext,
+                                       HttpRequest request,
+                                       HttpResponse response)
         throws IOException;
 
         public String getAuthMethod();
@@ -63,11 +64,9 @@ public class SecurityConstraint
      * FormAuthenticator to allow access to logon and error pages within an
      * authenticated URI tree.
      */
-    public static class Nobody implements UserPrincipal
+    public static class Nobody implements Principal
     {
         public String getName() { return "Nobody";}
-        public boolean isAuthenticated() {return false;}
-        public boolean isUserInRole(String role) {return false;}
     }
     public final static Nobody __NOBODY=new Nobody();
 
@@ -338,122 +337,122 @@ public class SecurityConstraint
                 
                 switch(sc.getDataConstraint())
                 {
-                  case SecurityConstraint.DC_INTEGRAL:
-                      if (listener.isIntegral(connection))
-                          break;
+                    case SecurityConstraint.DC_INTEGRAL:
+                        if (listener.isIntegral(connection))
+                            break;
 
-                      if (listener.getIntegralPort()>0)
-                      {
-                          String url=listener.getIntegralScheme()+
-                              "://"+request.getHost()+
-                              ":"+listener.getIntegralPort()+
-                              request.getPath();
-                          if (request.getQuery()!=null)
-                              url+="?"+request.getQuery();
-                          response.sendRedirect(url);
-                      }
-                      else
-                          response.sendError(HttpResponse.__403_Forbidden);                   
-                      return -1;
+                        if (listener.getIntegralPort()>0)
+                        {
+                            String url=listener.getIntegralScheme()+
+                                "://"+request.getHost()+
+                                ":"+listener.getIntegralPort()+
+                                request.getPath();
+                            if (request.getQuery()!=null)
+                                url+="?"+request.getQuery();
+                            response.sendRedirect(url);
+                        }
+                        else
+                            response.sendError(HttpResponse.__403_Forbidden);                   
+                        return -1;
 
-                  case SecurityConstraint.DC_CONFIDENTIAL:
-                      if (listener.isConfidential(connection))
-                          break;
+                    case SecurityConstraint.DC_CONFIDENTIAL:
+                        if (listener.isConfidential(connection))
+                            break;
 
-                      if (listener.getConfidentialPort()>0)
-                      {
-                          String url=listener.getConfidentialScheme()+
-                              "://"+request.getHost()+
-                              ":"+listener.getConfidentialPort()+
-                              request.getPath();
-                          if (request.getQuery()!=null)
-                              url+="?"+request.getQuery();
-                          response.sendRedirect(url);
-                      }
-                      else
-                          response.sendError(HttpResponse.__403_Forbidden);
-                      return -1;
+                        if (listener.getConfidentialPort()>0)
+                        {
+                            String url=listener.getConfidentialScheme()+
+                                "://"+request.getHost()+
+                                ":"+listener.getConfidentialPort()+
+                                request.getPath();
+                            if (request.getQuery()!=null)
+                                url+="?"+request.getQuery();
+                            response.sendRedirect(url);
+                        }
+                        else
+                            response.sendError(HttpResponse.__403_Forbidden);
+                        return -1;
                       
-                  default:
-                      response.sendError(HttpResponse.__403_Forbidden);
-                      return -1;
+                    default:
+                        response.sendError(HttpResponse.__403_Forbidden);
+                        return -1;
                 }
             }
             
-			// Does it fail a role check?
-			if (sc.isAuthenticate())
-			{
-				if (realm==null)
-				{
-					response.sendError(HttpResponse.__500_Internal_Server_Error,
-									   "Realm Not Configured");
-					return -1;
-				}
+            // Does it fail a role check?
+            if (sc.isAuthenticate())
+            {
+                if (realm==null)
+                {
+                    response.sendError(HttpResponse.__500_Internal_Server_Error,
+                                       "Realm Not Configured");
+                    return -1;
+                }
         
-				UserPrincipal user = null;
+                Principal user = null;
                 
-				// Handle pre-authenticated request
-				if (request.getAuthType()!=null &&
-					request.getAuthUser()!=null)
-				{
-					user=request.getUserPrincipal();
-					if (user==null)
-						user=realm.authenticate(request.getAuthUser(),
-												null,
-												request);
-					if (user==null && authenticator!=null)
-						user=authenticator.authenticated(realm,
-														 pathInContext,
-														 request,
-														 response);
-				}
-				else if (authenticator!=null)
-				{
-					// User authenticator.
-					user=authenticator.authenticated(realm,
-													 pathInContext,
-													 request,
-													 response);
-				}
-				else
-				{
-					// don't know how authenticate
-					Code.warning("Mis-configured Authenticator for "+request.getPath());
-					response.sendError(HttpResponse.__500_Internal_Server_Error);
-				}
+                // Handle pre-authenticated request
+                if (request.getAuthType()!=null &&
+                    request.getAuthUser()!=null)
+                {
+                    user=request.getUserPrincipal();
+                    if (user==null)
+                        user=realm.authenticate(request.getAuthUser(),
+                                                null,
+                                                request);
+                    if (user==null && authenticator!=null)
+                        user=authenticator.authenticated(realm,
+                                                         pathInContext,
+                                                         request,
+                                                         response);
+                }
+                else if (authenticator!=null)
+                {
+                    // User authenticator.
+                    user=authenticator.authenticated(realm,
+                                                     pathInContext,
+                                                     request,
+                                                     response);
+                }
+                else
+                {
+                    // don't know how authenticate
+                    Code.warning("Mis-configured Authenticator for "+request.getPath());
+                    response.sendError(HttpResponse.__500_Internal_Server_Error);
+                }
                 
-				// If we still did not get a user
-				if (user==null)
-					return -1; // Auth challenge or redirection already sent
-				else if (user==__NOBODY)
-					return 0; // The Nobody user indicates authentication in transit.
+                // If we still did not get a user
+                if (user==null)
+                    return -1; // Auth challenge or redirection already sent
+                else if (user==__NOBODY)
+                    return 0; // The Nobody user indicates authentication in transit.
                     
                 
-				if (!sc.isAnyRole())
-				{
-					List roles=sc.getRoles();
-					boolean inRole=false;
-					for (int r=roles.size();r-->0;)
-					{
-						if (user.isUserInRole(roles.get(r).toString()))
-						{
-							inRole=true;
-							break;
-						}
-					}
+                if (!sc.isAnyRole())
+                {
+                    List roles=sc.getRoles();
+                    boolean inRole=false;
+                    for (int r=roles.size();r-->0;)
+                    {
+                        if (realm.isUserInRole(user,roles.get(r).toString()))
+                        {
+                            inRole=true;
+                            break;
+                        }
+                    }
                     
-					if (!inRole)
-					{
-						Code.warning("AUTH FAILURE: role for "+user.getName());
-						if ("BASIC".equalsIgnoreCase(authenticator.getAuthMethod()))
-							((BasicAuthenticator)authenticator).sendChallenge(realm,response);
-						else
-							response.sendError(HttpResponse.__403_Forbidden,
-											   "User not in required role");
-						return -1; // role failed.
-					}
-				}
-			}
+                    if (!inRole)
+                    {
+                        Code.warning("AUTH FAILURE: role for "+user.getName());
+                        if ("BASIC".equalsIgnoreCase(authenticator.getAuthMethod()))
+                            ((BasicAuthenticator)authenticator).sendChallenge(realm,response);
+                        else
+                            response.sendError(HttpResponse.__403_Forbidden,
+                                               "User not in required role");
+                        return -1; // role failed.
+                    }
+                }
+            }
 
             
             // Matches a constraint that does not fail

@@ -540,18 +540,17 @@ public abstract class HttpMessage
     {
         if (_state!=__MSG_EDITABLE)
             throw new IllegalStateException("Not EDITABLE");
-        version=version.toUpperCase();
-        if (version.equals(__HTTP_1_1))
+        if (version.equalsIgnoreCase(__HTTP_1_1))
         {
             _dotVersion=1;
             _version=__HTTP_1_1;
         }
-        else if (version.equals(__HTTP_1_0))
+        else if (version.equalsIgnoreCase(__HTTP_1_0))
         {
             _dotVersion=0;
             _version=__HTTP_1_0;
         }
-        else if (version.equals(__HTTP_0_9))
+        else if (version.equalsIgnoreCase(__HTTP_0_9))
         {
             _dotVersion=-1;
             _version=__HTTP_0_9;

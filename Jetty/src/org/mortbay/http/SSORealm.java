@@ -6,6 +6,7 @@
 package org.mortbay.http;
 
 import org.mortbay.util.Credential;
+import java.security.Principal;
 
 /* ------------------------------------------------------------ */
 /** Single Sign On Realm.
@@ -45,7 +46,7 @@ public interface SSORealm
     
     public void setSingleSignOn(HttpRequest request,
                                 HttpResponse response,
-                                UserPrincipal principal,
+                                Principal principal,
                                 Credential credential);
     
     /** Clear SSO for user.

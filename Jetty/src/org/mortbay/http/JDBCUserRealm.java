@@ -1,6 +1,7 @@
 package org.mortbay.http;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -156,9 +157,9 @@ public class JDBCUserRealm extends HashUserRealm
     }
     
     /* ------------------------------------------------------------ */
-    public UserPrincipal authenticate(String username,
-                                      Object credentials,
-                                      HttpRequest request)
+    public Principal authenticate(String username,
+                                  Object credentials,
+                                  HttpRequest request)
     {
         if (credentials==null)
             return authenticate(username,null,request);
@@ -168,9 +169,9 @@ public class JDBCUserRealm extends HashUserRealm
     }
     
     /* ------------------------------------------------------------ */
-    public synchronized UserPrincipal authenticate(String username,
-                                                   String credentials,
-                                                   HttpRequest request)
+    public synchronized Principal authenticate(String username,
+                                               String credentials,
+                                               HttpRequest request)
     {
         long now = System.currentTimeMillis();
         if (now - _lastHashPurge > _cacheTime || _cacheTime == 0)
@@ -179,11 +180,11 @@ public class JDBCUserRealm extends HashUserRealm
             _roles.clear();
             _lastHashPurge = now;
         }
-        UserPrincipal user = (UserPrincipal)super.get(username);
+        Principal user = (Principal)super.get(username);
         if (user == null)
         {
             loadUser(username);
-            user = (UserPrincipal)super.get(username);
+            user = (Principal)super.get(username);
         }
         return super.authenticate(username, credentials, request);
     }

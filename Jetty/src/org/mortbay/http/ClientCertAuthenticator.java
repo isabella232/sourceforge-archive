@@ -53,10 +53,10 @@ public class ClientCertAuthenticator implements Authenticator
      * the response as an auth challenge or redirect.
      * @exception IOException 
      */
-    public UserPrincipal authenticated(UserRealm realm,
-                                       String pathInContext,
-                                       HttpRequest request,
-                                       HttpResponse response)
+    public Principal authenticated(UserRealm realm,
+                                   String pathInContext,
+                                   HttpRequest request,
+                                   HttpResponse response)
         throws IOException
     {
         java.security.cert.X509Certificate[] certs =
@@ -99,7 +99,7 @@ public class ClientCertAuthenticator implements Authenticator
         Principal principal = certs[0].getSubjectDN();
         if (principal==null)
             principal=certs[0].getIssuerDN();
-        UserPrincipal user =
+        Principal user =
             realm.authenticate(principal==null?"clientcert":principal.getName(),
                                certs,request);
         

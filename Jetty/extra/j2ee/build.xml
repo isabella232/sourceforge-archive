@@ -1,137 +1,206 @@
 <!--
 ========================================================================
- Copyright (c) 2003 Mort Bay Consulting (Australia) Pty. Ltd.
+ Copyright (c) 1999 Mort Bay Consulting (Australia) Pty. Ltd.
  $Id$
 ========================================================================
-========================================================================
 
+targets:
+
+clean       - Remove all generated files.
+tidy        - Remove unneeded generated files.
+prepare     - Set up build directory structure.
+classes     - compile the classes
+j2ee.jar    - Builds the j2ee jar.
+demo        - Runs the demo web application.
+all         - everything
 
 -->
 
-<project name="LoadBalancer" default="jars" basedir=".">
+<!--
 
-  <property name="package"     value="jetty.j2ee" />
+ Currently only builds against JBoss - you will need to set
+ -Djboss.home on the command line...
+
+-->
+<project name="J2EE Integration" default="all" basedir=".">
+
   <property environment="env"/>
-  <property file="../../ant.properties" />
-  <property file="../build.package.properties" />
+
+  <property name="src"            value="${basedir}/src" />
+  <property name="lib"            value="${basedir}/lib"/>
+  <property name="etc"            value="${basedir}/etc"/>
+  <property name="classes"        value="${basedir}/classes"/>
+  <property name="javadoc"        value="${basedir}/javadoc"/>
+  <property name="logs"           value="${basedir}/logs"/>
+
+<!--
+ requirements: log4j, j2ee, javagroups,
+-->
+
+  <property name="build.compiler.emacs"	value="true"/>
+
+  <property name="jboss.home"     value="${env.JBOSS_HOME}"/>
+  <property name="jetty.home"     value="${env.JETTY_HOME}"/>
+  <property name="jetty.lib"      value="${jetty.home}/lib"/>
+  <property name="jetty.jar"      value="${jetty.lib}/org.mortbay.jetty-jdk1.2.jar"/>
+<!--
+  <property name="jetty.jar"      value="${jetty.lib}/org.mortbay.jetty.jar"/>
+-->
+  <property name="servlet.jar"    value="${jetty.lib}/javax.servlet.jar"/>
+  <property name="classpath"      value="${jetty.jar};${servlet.jar}"/>
+  <property name="jaxp.jar"       value="${jetty.lib}/javax.xml.jaxp.jar"/>
+  <property name="crimson.jar"    value="${jetty.lib}/org.apache.crimson.jar"/>
+  <property name="rtclasspath"    value="${jaxp.jar};${crimson.jar}"/>
+
+  <property name="mortbay.j2ee.jar" value="${lib}/org.mortbay.j2ee.jar"/>
 
 
-  <!-- ==================================================================== -->
-  <target name="is.jdk1.4.available">
-    <available property="jdk1.4.available" classname="java.util.logging.Handler" />
-    <echo message="JDK1.4 available=${jdk1.4.available}" level="info"/>
-  </target>
+<!--
+  <property name="build.compiler" value="modern"/>
+  <property name="build.compiler" value="jikes"/>
+  <property name="build.compiler" value="classic"/>
+-->
 
 
-  <!-- ==================================================================== -->
-  <!-- Classpath                                                            -->
-  <!-- ==================================================================== -->
-  <target name="classpath" depends="is.jdk1.4.available" if="jdk1.4.available">
-    <path id="extpath">
-      <fileset dir="${ext}">
-        <include name="*.jar"/>
-        <include name="*.JAR"/>
-        <include name="*.zip"/>
-        <include name="*.ZIP"/>
-       </fileset>
-       <fileset dir="${jetty.ext}">
-        <include name="*.jar"/>
-        <include name="*.JAR"/>
-        <include name="*.zip"/>
-        <include name="*.ZIP"/>
-       </fileset>
-    </path>
+<!--
+  <available file="${jboss.home}" type="dir" property="j2ee.available"/>
+  <available file="${jboss.home}" type="dir" property="j2ee.available"/>
+-->
 
-    <path id="classpath">
-      <pathelement location="${jetty.jar}" />
-      <pathelement location="${servlet.jar}" />
-      <path refid="extpath" />
-    </path>
+  <path id="jboss.classpath">
+    <pathelement location="${jboss.home}/client/jboss-j2ee.jar"/>
+    <pathelement location="${jboss.home}/client/log4j.jar"/>
+    <pathelement location="${jboss.home}/server/all/lib/javagroups-2.0.jar"/> <!-- jboss 3.2 -->
+    <pathelement location="${jboss.home}/thirdparty/javagroups/javagroups/lib/javagroups-2.0.jar"/>
+  </path>
 
-    <property name="expanded.classpath" refid="classpath"/>
-    <echo message="classpath=${expanded.classpath}" level="info"/>
-  </target>
+  <path id="jonas.classpath">
+    <!-- we need log4j and j2ee client classes -->
+  </path>
 
+  <!-- add other appserver integration classpaths here -->
 
-  <!-- ==================================================================== -->
-  <!-- Prepare                                                              -->
-  <!-- ==================================================================== -->
-  <target name="prepare" depends="classpath" description="Make build directories">
-    <mkdir dir="${classes}" />
+  <path id="j2ee.classpath"> <!-- clumsy but - should work - I hate ant -->
+    <pathelement location="${classes}"/>
+    <pathelement location="${servlet.jar}"/>
+    <pathelement location="${jetty.jar}"/>
+    <path refid="jboss.classpath"/>
+    <path refid="jonas.classpath"/>
+  </path>
+
+<!--=========================================================================-->
+
+<!--
+  <path id="xdoclet.classpath">
+    <path refid="j2ee.classpath"/>
+    <pathelement location="${xdoclet.home}/lib/xjavadoc.jar"/>
+    <pathelement location="${xdoclet.home}/lib/xdoclet-ejb-module.jar"/>
+    <pathelement location="${xdoclet.home}/lib/xdoclet-jboss-module.jar"/>
+    <pathelement location="${xdoclet.home}/lib/xdoclet-xdoclet-module.jar"/>
+    <pathelement location="${xdoclet.home}/lib/xdoclet.jar"/>
+  </path>
+
+  <taskdef name="ejbdoclet"
+    classpathref="xdoclet.classpath"
+    classname="xdoclet.ejb.EjbDocletTask"
+  />
+-->
+
+<!--=========================================================================-->
+
+  <target name="prepare">
     <mkdir dir="${lib}" />
+    <mkdir dir="${javadoc}" />
+    <mkdir dir="${classes}" />
   </target>
 
-
-  <!-- ==================================================================== -->
-  <!-- Tidy                                                                 -->
-  <!-- ==================================================================== -->
-  <target name="tidy" description="Remove classes">
-    <delete dir="${classes}" quiet="true"/>
+  <target name="tidy" >
+    <delete dir="${classes}"/>
   </target>
 
-
-  <!-- ==================================================================== -->
-  <!-- Clean                                                                -->
-  <!-- ==================================================================== -->
-  <target name="clean" depends="tidy" description="Remove generated files">
-    <delete file="${package.jar}"/>
+  <target name="clean" depends="tidy">
+    <delete dir="${lib}" />
+    <delete dir="${javadoc}"/>
+    <delete file="${mortbay.j2ee.jar}"/>
   </target>
 
-
-  <!-- ==================================================================== -->
-  <!-- Classes                                                              -->
-  <!-- ==================================================================== -->
-  <target name="classes" depends="prepare" description="Compile classes">
+  <target name="classes" depends="prepare">
+    <copy todir="${classes}">
+      <fileset dir="${src}">
+        <include name="**/defaultManifest.mf" />
+        <include name="**/*.properties" />
+        <include name="**/*.dtd" />
+      </fileset>
+    </copy>
     <javac srcdir="${src}"
            destdir="${classes}"
-           debug="true"
-           optimize="fale"
-           deprecation="${javac.deprecation}">
-       <classpath>
-         <path refid="classpath"/>
-       </classpath>
+           classpathref="j2ee.classpath"
+           debug="on"
+           optimize="off"
+           deprecation="off"
+           >
        <include name="**/*.java"/>
+       <exclude name="org/mortbay/j2ee/**/test/**"/>
+       <exclude name="org/mortbay/j2ee/session/**/CMP*.java"/>
+       <exclude name="org/mortbay/j2ee/session/**/CMR*.java"/>
     </javac>
   </target>
 
-
-  <!-- ==================================================================== -->
-  <!-- jars                                                                 -->
-  <!-- ==================================================================== -->
-  <target name="jars" 
-          depends="classes, build.package.jar" 
-	  description="Make jars">
-  </target>
-
-
-  <!-- ==================================================================== -->
-  <!-- build.package.jar                                                    -->
-  <!-- ==================================================================== -->
-  <target name="build.package.jar" description="Make the JettyPlus jar file">
-    <jar basedir="${classes}" destfile="${package.jar}">
+  <target name="j2ee.jar" depends="classes">
+    <jar jarfile="${mortbay.j2ee.jar}" basedir="${classes}" >
+       <include name="org/mortbay/**"  />
+       <exclude name="org/mortbay/**/test/**" />
     </jar>
   </target>
 
-
-  <!-- ==================================================================== -->
-  <!-- test                                                                 -->
-  <!-- ==================================================================== -->
-  <target name="check.tests" description="check to see if there are any tests">
-    <available property="tests.available" file="${test}/build.xml"/>
+  <target name="javadoc" depends="j2ee.jar">
+    <javadoc packagenames="org.mortbay.j2ee.*"
+             classpathref="j2ee.classpath"
+             destdir="${javadoc}"
+             author="true"
+             version="true"
+             public="true"
+             windowtitle="${ant.project.name}"
+             doctitle="${ant.project.name}"
+             bottom="Copyright &#169; 2001 Mortbay Consulting Pty. Ltd. All Rights Reserved.">
+      <fileset dir="${src}">
+       <exclude name="org/mortbay/j2ee/**/test/*" />
+       <exclude name="org/mortbay/j2ee/session/**/CMP*.java"/>
+       <exclude name="org/mortbay/j2ee/session/**/CMR*.java"/>
+       <exclude name="org/mortbay/j2ee/session/MigrationInterceptor.java"/>
+       <exclude name="**/MANIFEST.MF"/>
+      </fileset>
+    </javadoc>
   </target>
 
-  <!-- ==================================================================== -->
-  <target name="test" 
-          depends="check.tests" 
-          if="tests.available" 
-          description="run tests">
-    <ant antfile="${test}/build.xml" inheritAll="false" target="test"/>
+  <target name="test" depends="classes" >
+    <java classname="org.mortbay.j2ee.TestHarness"
+          classpath="${classes}:${classpath}"
+          fork="yes"
+          failonerror="yes"
+          >
+    </java>
+    <java classname="org.mortbay.servlets.packageindex.PackageVersionOrdererTest"
+          classpath="${classes}:${classpath}"
+          fork="yes"
+          failonerror="yes"
+          >
+      <!--jvmarg line="-DDEBUG"/-->
+    </java>
   </target>
 
-
-  <!-- ==================================================================== -->
-  <!-- all                                                                  -->
-  <!-- ==================================================================== -->
-  <target name="all" depends="clean, jars" description="default">
+  <target name="run" depends="classes" >
+    <java classname="org.mortbay.jetty.Server"
+          fork="yes"
+          failonerror="yes"
+          classpath="${classes}:${classpath};${rtclasspath}"
+          >
+      <!--jvmarg line="-DDEBUG_PATTERNS=HttpConnection.handle,i3sp,ServletHandler.handle -DDEBUG=yes -DDEBUG_VERBOSE=9999 -DLOG_OPTIONS=tsTL -Djetty.home=. -Djetty.log=." /-->
+      <jvmarg line="-DDEBUG=yes -DDEBUG_VERBOSE=9999 -DLOG_OPTIONS=tsTL -Djetty.home=. -Djetty.log=." />
+      <arg line="src/org/mortbay/servlets/packageindex/JettyServer.xml" />
+    </java>
   </target>
+  <target name="all" depends="j2ee.jar,javadoc"/>
+
 </project>
+

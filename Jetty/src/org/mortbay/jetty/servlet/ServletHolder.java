@@ -6,6 +6,7 @@
 package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +19,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 import org.mortbay.http.HttpRequest;
-import org.mortbay.http.UserPrincipal;
 import org.mortbay.http.UserRealm;
 import org.mortbay.util.Code;
 
@@ -271,15 +271,6 @@ public class ServletHolder extends Holder
         
         try
         {
-            if (_servlet==null)
-                _servlet=(Servlet)newInstance();
-        
-            if (_config==null)
-            {
-                _config=new Config();
-                _servlet.init(_config);
-            }
-            
             if (_servlets!=null)
             {
                 Servlet servlet=null;
@@ -292,6 +283,15 @@ public class ServletHolder extends Holder
                     servlet = (Servlet)_servlets.pop();
 
                 return servlet;
+            }
+            
+            if (_servlet==null)
+                _servlet=(Servlet)newInstance();
+        
+            if (_config==null)
+            {
+                _config=new Config();
+                _servlet.init(_config);
             }
 
             return _servlet;
@@ -328,17 +328,13 @@ public class ServletHolder extends Holder
         if (_class==null)
             throw new UnavailableException("Servlet Not Initialized");
         
-        Servlet servlet=_servlet;
-        if (servlet==null || _servlets!=null)
-            servlet=getServlet();
-        
-        // Check that we got one in the end
+        Servlet servlet=(!_initOnStartup||_servlets!=null)?getServlet():_servlet;
         if (servlet==null)
             throw new UnavailableException("Could not instantiate "+_class);
 
         // Service the request
         boolean servlet_error=true;
-        UserPrincipal user=null;
+        Principal user=null;
         HttpRequest http_request=null;
         try
         {

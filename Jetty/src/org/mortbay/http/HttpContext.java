@@ -15,6 +15,7 @@ import java.net.UnknownHostException;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Permissions;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1674,7 +1675,7 @@ public class HttpContext implements LifeCycle,
         }
         finally
         {
-            UserPrincipal user = request.getUserPrincipal();
+            Principal user = request.getUserPrincipal();
             if (_userRealm!=null)
                 _userRealm.disassociate(user);
         }
