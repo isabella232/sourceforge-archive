@@ -46,7 +46,7 @@ import org.apache.commons.logging.LogFactory;
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
-class FileResource extends URLResource
+public class FileResource extends URLResource
 {
 	private static Log log = LogFactory.getLog(Credential.class);
     private static boolean __checkAliases;

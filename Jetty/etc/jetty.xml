@@ -177,7 +177,7 @@
   <!-- =============================================================== -->
   <Set name="requestsPerGC">2000</Set>
   <Set name="statsOn">false</Set>
-
+  <Set class="org.mortbay.util.FileResource" name="checkAliases" type="boolean">true</Set>
 </Configure>
 
 

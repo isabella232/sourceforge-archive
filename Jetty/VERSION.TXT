@@ -1,7 +1,10 @@
 Jetty Versions
 --------------
 
-Jetty-5.0.RC3 - 28 August
+Jetty-5.0.RC4 - 5 September 2004
+ + Fixed configuration of URL alias checking
+
+Jetty-5.0.RC3 - 28 August 2004
  + DIGEST auth handles qop, stale and maxNonceAge.
  + Less verbose warning for non validating xml parser.
  + fixed jaas logout for jetty-jboss

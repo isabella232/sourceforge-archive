@@ -2,7 +2,8 @@ SECTION: 400-Security
 TITLE: Aliases
 QUESTION: Aliases and Symbolic Links
 <p>Jetty by defaults runs in a mode where all file accesses are checked for aliases, such as case
-insensitivity, short names and symbolic links.  If a resource is an alias, then it is treated as
+insensitivity, short names, symbolic links and extra characters (Eg %00).  
+If a resource is an alias, then it is treated as
 not found.
 </p>
 <p>
@@ -14,6 +15,7 @@ on a win32 system the following requests could retrieve files from that URL:
 <ul>
 <li>/MySeCrEtFoLdEr/secret.html</li>
 <li>/mysec~a0.dir/secret.html</li>
+<li>/mySecretFolder/secret.html%00</li>
 </ul>
 <p>
 File name aliases come in many forms including case insensitivity, VMS version numbers,
@@ -25,9 +27,10 @@ JVM reports these as different an alias is assumed and the resource treated as n
 </p>
 <p>
 Alias checking can be turned off by setting the  system parameter
-org.mortbay.util.FileResource.checkAliases to false.   If alias checking is not used, then
-greater care is needed when designing security constraints.  It is recomended that a
-restrictive contstraint be applied to a whole subtree of URL space and then selective
-constraints be applied to relax security only for specific URLs.
+org.mortbay.util.FileResource.checkAliases to false (see jetty.xml for an example of how
+to do this in XML configuration).
+If alias checking is not used, then greater care is needed when designing security constraints.  
+It is recomended that a restrictive constraint be applied to a whole subtree of URL space and 
+then selective constraints be applied to relax security only for specific URLs.
 </p>
 

@@ -305,13 +305,14 @@ Support FAQ
        http://groups.yahoo.com/group/jetty-support
 
  + Please also read the improving documentation at
-       http://jetty.mortbay.org/jetty/doc/index.html
+       http://jetty.mortbay.org/jetty/resources.html
+       
    Please read the tutorial, then read it again.
 
  + Jetty 4 configuration is based around the concept of contexts,
    which were introduced in the 2.2 servlet specification.  It is
    important to understand contexts when configuring Jetty and it may
-   be worth while reading the 2.3 servlet specification in addtion to
+   be worth while reading the 2.4 servlet specification in addtion to
    the Jetty documentation.
 
  + Before posting, try increasing the debug output of Jetty.  Debugging 
