@@ -10,11 +10,11 @@ public abstract class AbstractBuffer implements Buffer
 {
     protected final static boolean __MUTABLE= true;
 
-    private int _mark;
-    private int _offset;
-    private int _limit;
-    private boolean _mutable;
-    private String _string;
+    protected int _mark;
+    protected int _offset;
+    protected int _limit;
+	protected String _string;
+	protected boolean _mutable;
     private int _hash;
     private ByteArrayBuffer _subBuffer;
 
@@ -246,10 +246,10 @@ public abstract class AbstractBuffer implements Buffer
     	Buffer b = (Buffer)obj;
     	if (b.length()!=length())
     		return false;
-    	for (int i=offset()+length();i-->offset();)
+    	for (int i=length();i-->0;)
     	{
-    		byte b1=peek(i);
-    		byte b2=b.peek(i);
+    		byte b1=peek(offset()+i);
+    		byte b2=b.peek(b.offset()+i);
     		if (b1!=b2)
     		{
     			if ('a'<=b1&&b1<='z')

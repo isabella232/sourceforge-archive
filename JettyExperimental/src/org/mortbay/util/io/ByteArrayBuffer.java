@@ -15,10 +15,11 @@ public class ByteArrayBuffer extends AbstractBuffer
 
 	public ByteArrayBuffer(byte[] bytes, int offset, int length, boolean mutable)
 	{
-		super(mutable);
+		super(MUTABLE);
 		_bytes= bytes;
-		offset(offset);
 		limit(offset+length);
+		offset(offset);
+		_mutable=mutable;
 	}
 	
     public ByteArrayBuffer(byte[] bytes)
@@ -31,25 +32,23 @@ public class ByteArrayBuffer extends AbstractBuffer
     	this(bytes,offset,length,MUTABLE);
     }
 
-	/* ------------------------------------------------------------------------------- */
-	/** Constructor.
-	 * @param value
-	 */
 	public ByteArrayBuffer(String value)
 	{
-		super(!MUTABLE);
+		super(MUTABLE);
 		_bytes = Portable.getBytes(value);
 		offset(0);
 		limit(_bytes.length);
+		_string=value;
+		_mutable=!MUTABLE;
 	}
 
 	public void mimic(Buffer buffer)
 	{
 		offset(0);
 		_bytes=buffer.array();
-		limit(buffer.limit());
-		offset(buffer.offset());
-		mark(buffer.mark());
+		_limit=buffer.limit();
+		_offset=buffer.offset();
+		_mark=buffer.mark();
 	}
 
     /**
