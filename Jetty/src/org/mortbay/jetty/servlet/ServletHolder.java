@@ -299,10 +299,10 @@ public class ServletHolder
             if (_servletClass==null)
                 initializeClass();
 
+            Servlet newServlet =null;
             if (_servlet==null)
             {
-                Servlet newServlet =
-                    newServlet = (Servlet)_servletClass.newInstance();
+                newServlet = (Servlet)_servletClass.newInstance();
                 newServlet.init(_config);
                 _singleThreadModel =
                     newServlet instanceof
@@ -311,7 +311,7 @@ public class ServletHolder
                 if (_servlet==null && !_singleThreadModel)
                         _servlet=newServlet;
             }
-            return _servlet;
+            return _servlet==null?newServlet:_servlet;
         }
         catch(UnavailableException e)
         {
