@@ -1029,7 +1029,7 @@ public class HttpFields
             }
         }
 
-        throw new IllegalArgumentException("Cannot convert date: "+val);
+	return -1;
     }
     
     /* -------------------------------------------------------------- */
