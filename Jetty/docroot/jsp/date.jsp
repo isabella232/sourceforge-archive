@@ -8,6 +8,9 @@
 <H1>JSP date page</H1>
 
 The current date is <%= new Date() %>.
-
+<P>
+Include Hello World:<UL>
+<%@ include file="hello.jsp"%> 
+</UL>Included
 </BODY>
 </HTML>

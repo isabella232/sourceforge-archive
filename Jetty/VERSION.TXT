@@ -1,15 +1,18 @@
 Jetty Versions
 --------------
 
-Jetty-3.1.rc3 - 
- + Improved ThreadPool stop handling
+Jetty-3.1.rc3 - 9 April 2001
  + Implemented multi-part ranges so that acrobat is happy.
  + Simplified multipart response class.
+ + Improved flush ordering for forwarded requests.
+ + Improved ThreadPool stop handling
  + Frame handles more JIT stacks.
  + Cleaned up handling of exceptions thrown by servlets.
  + Turned off range handling by default until bugs resolved
  + Handle zero length POSTs
  + Start session scavenger if needed.
+ + Added ContentHandler Observer to XmlParser.
+ + Allow webapp XmlParser to be observed for ejb-ref tags etc.
 
 Jetty-3.1.rc2 - 30 Mar 2001
  + Lifecycle.start() may throw Exception

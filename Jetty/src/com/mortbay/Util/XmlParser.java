@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Stack;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.NoSuchElementException;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.Parser;
+import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -34,6 +36,8 @@ public class XmlParser
 {
     private Map _redirectMap = new HashMap();
     private SAXParser _parser;
+    private Map _observerMap;
+    private Stack _observers = new Stack();
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -52,10 +56,37 @@ public class XmlParser
             throw new Error(e.toString());
         }
     }
-    
 
     /* ------------------------------------------------------------ */
     /** 
+     * @param name 
+     * @param local 
+     */
+    public synchronized void redirectEntity(String name,Resource entity)
+    {
+        if (entity!=null)
+            _redirectMap.put(name,entity);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Add a ContentHandler.
+     * Add an additional content handler that is triggered on a tag
+     * name. SAX events are passed to the ContentHandler provided from
+     * a matching start element to the corresponding end element.
+     * Only a single content handler can be registered against each tag.
+     * @param trigger Tag local or q name.
+     * @param observer SAX ContentHandler
+     */
+    public synchronized void addContentHandler(String trigger,
+                                               ContentHandler observer)
+    {
+        if (_observerMap==null)
+            _observerMap=new HashMap();
+        _observerMap.put(trigger,observer);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Parse URL.
      * @param url 
      * @return 
      * @exception IOException 
@@ -78,7 +109,7 @@ public class XmlParser
     }
     
     /* ------------------------------------------------------------ */
-    /** 
+    /** Parse File. 
      * @param file 
      * @return 
      * @exception IOException 
@@ -91,7 +122,7 @@ public class XmlParser
     }
 
     /* ------------------------------------------------------------ */
-    /** 
+    /** Parse InputStream.
      * @param url 
      * @return 
      * @exception IOException 
@@ -113,17 +144,6 @@ public class XmlParser
         return doc;
     }
     
-    /* ------------------------------------------------------------ */
-    /** 
-     * @param name 
-     * @param local 
-     */
-    public synchronized void redirectEntity(String name,Resource entity)
-    {
-        if (entity!=null)
-            _redirectMap.put(name,entity);
-    }
-
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -145,9 +165,20 @@ public class XmlParser
         public void startElement (String uri, String localName, String qName, Attributes attrs)
             throws SAXException
         {
-            Node node= new Node(_context,uri==null?qName:localName,attrs);
+            String name=uri==null?qName:localName;
+            Node node= new Node(_context,name,attrs);
             _context.add(node);
             _context=node;
+            
+            ContentHandler observer=null;
+            if (_observerMap!=null)
+                 observer=(ContentHandler) _observerMap.get(name);
+            _observers.push(observer);
+
+            for(int i=0;i<_observers.size();i++)
+                if (_observers.get(i)!=null)
+                    ((ContentHandler)_observers.get(i))
+                        .startElement(uri,localName,qName,attrs);
         }
 
         /* ------------------------------------------------------------ */
@@ -155,6 +186,11 @@ public class XmlParser
             throws SAXException
         {
             _context=_context._parent;
+            for(int i=0;i<_observers.size();i++)
+                if (_observers.get(i)!=null)
+                    ((ContentHandler)_observers.get(i))
+                        .endElement(uri,localName,qName);
+            _observers.pop();
         }
 
         /* ------------------------------------------------------------ */
@@ -163,6 +199,11 @@ public class XmlParser
         {
             // XXX - for testing
             // characters(buf,offset,len);
+            
+            for(int i=0;i<_observers.size();i++)
+                if (_observers.get(i)!=null)
+                    ((ContentHandler)_observers.get(i))
+                        .ignorableWhitespace (buf,offset,len);
         }
 
         /* ------------------------------------------------------------ */
@@ -170,6 +211,10 @@ public class XmlParser
             throws SAXException
         {
             _context.add(new String(buf,offset,len));
+            for(int i=0;i<_observers.size();i++)
+                if (_observers.get(i)!=null)
+                    ((ContentHandler)_observers.get(i))
+                        . characters(buf,offset,len);
         }
         
         /* ------------------------------------------------------------ */

@@ -52,7 +52,26 @@ public class WebApplicationContext extends HandlerContext
     private String _deploymentDescriptor;
     private String _defaultsDescriptor;
     private String _war;
+    private XmlParser _xmlParser;
+
     
+    /* ------------------------------------------------------------ */
+    /** Constructor.
+     * This constructor should be used if the XmlParser needs to be
+     * customized before initialization of the web application.
+     * The XmlParser can be customized with the addition of observers
+     * for specific tag types (eg ejb-ref).
+     * @param httpServer The HttpServer for this context
+     * @param contextPathSpec The context path spec. Which must be of
+     * the form / or /path/*
+     */
+    public WebApplicationContext(HttpServer httpServer,
+                                 String contextPathSpec)
+    {
+        super(httpServer,contextPathSpec);
+        _xmlParser= new XmlParser();
+    }
+
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param httpServer The HttpServer for this context
@@ -70,7 +89,8 @@ public class WebApplicationContext extends HandlerContext
                           String defaults)
         throws IOException
     {
-        this(httpServer,contextPathSpec,webApp,defaults,false);
+        super(httpServer,contextPathSpec);
+        initialize(webApp,defaults,false);
     }
     
     /* ------------------------------------------------------------ */
@@ -94,9 +114,30 @@ public class WebApplicationContext extends HandlerContext
         throws IOException
     {
         super(httpServer,contextPathSpec);
-
+        initialize(webApp,defaults,extractWar);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Initialize.
+     * This method can be called directly if the null constructor was
+     * used. This style of construction allows the XmlParser to be
+     * configured with observers before initialization.
+     * @param webApp The Web application directory or WAR file.
+     * @param defaults The defaults xml filename or URL which is
+     * loaded before any in the web app. Must respect the web.dtd.
+     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
+     * @param extractWar If true, WAR files are extracted to a
+     * temporary directory.
+     * @exception IOException 
+     */
+    public void initialize(String webApp,
+                           String defaults,
+                           boolean extractWar)
+        throws IOException
+    {
         // Get parser
-        XmlParser xmlParser=new XmlParser();
+        XmlParser xmlParser=_xmlParser==null?(new XmlParser()):_xmlParser;
+        _xmlParser=null;
         Resource dtd=Resource.newSystemResource("com/mortbay/HTTP/web.dtd");
         xmlParser.redirectEntity("web.dtd",dtd);
         xmlParser.redirectEntity("web-app_2_2.dtd",dtd);
@@ -242,6 +283,12 @@ public class WebApplicationContext extends HandlerContext
                 }
             }
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    public XmlParser getXmlParser()
+    {
+        return _xmlParser;
     }
 
     /* ------------------------------------------------------------ */
