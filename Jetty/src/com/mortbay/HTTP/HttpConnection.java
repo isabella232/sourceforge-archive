@@ -484,12 +484,12 @@ public class HttpConnection
 		    "] \""+
 		    _request.getRequestLine()+
 		    "\" "+
-		    referer +
-		    " " +
 		    _response.getStatus()+
 		    " " +
 		    bytes +
-		    " - " +
+		    " " +
+		    referer +
+		    " " +
 		    agent;
 		System.out.println(log);
 	    }
