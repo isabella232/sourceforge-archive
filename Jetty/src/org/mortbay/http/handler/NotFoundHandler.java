@@ -66,8 +66,8 @@ public class NotFoundHandler extends NullHandler
                 // 9.2
                 facade.setIntField(HttpFields.__ContentLength,0);
                 facade.setField(HttpFields.__Allow,
-                                  "GET, HEAD, POST, PUT, DELETE, MOVE, OPTIONS, TRACE");
-                facade.sendError(response.__200_OK);
+                                "GET, HEAD, POST, PUT, DELETE, MOVE, OPTIONS, TRACE");
+                response.commit();
             }
             else
                 facade.sendError(response.__404_Not_Found);

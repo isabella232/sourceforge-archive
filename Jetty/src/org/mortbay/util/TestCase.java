@@ -128,9 +128,14 @@ public class TestCase
             reportBuf.append(fail + " at " + frame);
             reportBuf.append('\n');
             reportBuf.append(spaces,0,testCase.length()+3);
-            reportBuf.append('"' + subString + "\" not contained in \"" +
-                             string.substring(offset) + '"');
-            Code.debug(check," FAILED");
+            reportBuf.append('"' + subString + "\" not contained in \"" );
+            
+            if (offset>=string.length())
+                reportBuf.append(string.substring(offset));
+            else
+                reportBuf.append("string>offset");
+            reportBuf.append("\"");
+            Code.debug(check," FAILED: ",reportBuf.toString());
             reportBuf.append('\n');
         }
         return index;

@@ -46,6 +46,7 @@ import org.mortbay.util.Log;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.URI;
 import org.mortbay.xml.XmlConfiguration;
 import org.mortbay.xml.XmlParser;
 
@@ -256,8 +257,8 @@ public class WebApplicationContext extends ServletHttpContext
         if (_resourceHandler==null)
         {
             _resourceHandler=new ResourceHandler();
-            _resourceHandler.setPutAllowed(false);
-            _resourceHandler.setDelAllowed(false);
+            //_resourceHandler.setPutAllowed(false);
+            //_resourceHandler.setDelAllowed(false);
             addHandler(_resourceHandler);
         }
 
@@ -408,10 +409,10 @@ public class WebApplicationContext extends ServletHttpContext
         // If it actually started
         if (super.isStarted())
         {    
-            if (_resourceHandler.isPutAllowed())
-                Log.event("PUT allowed in "+this);
-            if (_resourceHandler.isDelAllowed())
-                Log.event("DEL allowed in "+this);
+//             if (_resourceHandler.isPutAllowed())
+//                 Log.event("PUT allowed in "+this);
+//             if (_resourceHandler.isDelAllowed())
+//                 Log.event("DEL allowed in "+this);
             
             // Context listeners
             if (_contextListeners!=null && _servletHandler!=null)
@@ -978,14 +979,14 @@ public class WebApplicationContext extends ServletHttpContext
     /* ------------------------------------------------------------ */
     private void initWelcomeFileList(XmlParser.Node node)
     {
-        _resourceHandler.setIndexFiles(null);
+        _resourceHandler.getResourceBase().setWelcomeFiles(null);
         Iterator iter= node.iterator("welcome-file");
         while(iter.hasNext())
         {
             XmlParser.Node indexNode=(XmlParser.Node)iter.next();
             String index=indexNode.toString(false,true);
             Code.debug("Index: ",index);
-            _resourceHandler.addIndexFile(index);
+            _resourceHandler.getResourceBase().addWelcomeFile(index);
         }
     }
 
@@ -1156,7 +1157,7 @@ public class WebApplicationContext extends ServletHttpContext
                            HttpResponse response)
             throws HttpException, IOException
         {
-            String path=Resource.canonicalPath(StringUtil.asciiToLowerCase(pathInContext));
+            String path=URI.canonicalPath(StringUtil.asciiToLowerCase(pathInContext));
             if(path.startsWith("/web-inf") || path.startsWith("/meta-inf" ))
             {
                 response.sendError(HttpResponse.__403_Forbidden);

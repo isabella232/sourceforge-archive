@@ -78,7 +78,7 @@ public class Dispatcher implements RequestDispatcher
         Code.debug("Dispatcher for ",servletHandler,",",pathInContext,",",query);
         
         _servletHandler=servletHandler;
-        _path=Resource.canonicalPath(pathInContext);
+        _path=URI.canonicalPath(pathInContext);
         _query=query;
 
         Map.Entry entry=_servletHandler.getHolderEntry(_path);

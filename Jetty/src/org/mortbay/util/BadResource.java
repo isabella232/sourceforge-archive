@@ -21,7 +21,7 @@ import java.net.URL;
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
-class BadResource extends Resource
+class BadResource extends URLResource
 {
     /* ------------------------------------------------------------ */
     private String _message=null;

@@ -9,14 +9,5 @@ org.mortbay.jetty.servlet.WebApplicationContext objet
 -->
 
 <Configure class="org.mortbay.jetty.servlet.WebApplicationContext">
-
-<!-- set stats example
-    <Set name="statsOn" type="boolean">false</Set>
--->
-
-   <Call name="getResourceHandler">
-      <Set name="putAllowed">false</Set>
-      <Set name="delAllowed">false</Set>
-   </Call>
-
+    <Set name="statsOn" type="boolean">true</Set>
 </Configure>

@@ -16,7 +16,7 @@ import java.util.zip.ZipEntry;
 
 
 /* ------------------------------------------------------------ */
-public class JarResource extends Resource
+public class JarResource extends URLResource
 {
     protected JarURLConnection _jarConnection;
     

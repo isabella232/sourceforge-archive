@@ -22,12 +22,9 @@ import java.lang.reflect.Method;
  * @author Nuno Preguiça
  * @author Greg Wilkins (gregw)
  */
-public class Resource
+public abstract class Resource
 {
-    protected URL _url;
-    protected String _urlString;
-    protected URLConnection _connection;
-    protected InputStream _in=null;
+    Object _associate;
     
     /* ------------------------------------------------------------ */
     public static Resource newResource(URL url)
@@ -67,7 +64,7 @@ public class Resource
             return new JarResource(url);
         }
 
-        return new Resource(url,null);
+        return new URLResource(url,null);
     }
 
     /* ------------------------------------------------------------ */
@@ -178,32 +175,6 @@ public class Resource
         return newResource(url);
     }
 
-
-    /* ------------------------------------------------------------ */
-    protected Resource(URL url, URLConnection connection)
-    {
-        _url = url;
-        _urlString=_url.toString();
-        _connection=connection;
-    }
-
-    /* ------------------------------------------------------------ */
-    protected synchronized boolean checkConnection()
-    {
-        if (_connection==null)
-        {
-            try{
-                _connection=_url.openConnection();
-            }
-            catch(IOException e)
-            {
-                e.printStackTrace();
-                Code.ignore(e);
-            }
-        }
-        return _connection!=null;
-    }
-
     /* ------------------------------------------------------------ */
     protected void finalize()
     {
@@ -213,43 +184,15 @@ public class Resource
     /* ------------------------------------------------------------ */
     /** Release any resources held by the resource.
      */
-    public synchronized void release()
-    {
-        if (_in!=null)
-        {
-            try{_in.close();}catch(IOException e){Code.ignore(e);}
-            _in=null;
-        }
-
-        if (_connection!=null)
-        {
-            _connection=null;
-        }
-    }
+    public abstract void release();
+    
 
     /* ------------------------------------------------------------ */
     /**
      * Returns true if the respresened resource exists.
      */
-    public boolean exists()
-    {
-        try
-        {
-            if (checkConnection() && _in==null )
-            {
-                synchronized(this)
-                {
-                    if ( _in==null )
-                        _in = _connection.getInputStream();
-                }
-            }
-        }
-        catch (IOException e)
-        {
-            Code.ignore(e);
-        }
-        return _in!=null;
-    }
+    public abstract boolean exists();
+    
 
     /* ------------------------------------------------------------ */
     /**
@@ -257,190 +200,106 @@ public class Resource
      * If the resource is not a file, resources ending with "/" are
      * considered directories.
      */
-    public boolean isDirectory()
-    {
-        return exists() && _url.toString().endsWith("/");
-    }
-
+    public abstract boolean isDirectory();
 
     /* ------------------------------------------------------------ */
     /**
      * Returns the last modified time
      */
-    public long lastModified()
-    {
-        if (checkConnection())
-            return _connection.getLastModified();
-        return -1;
-    }
+    public abstract long lastModified();
 
 
     /* ------------------------------------------------------------ */
     /**
      * Return the length of the resource
      */
-    public long length()
-    {
-        if (checkConnection())
-            return _connection.getContentLength();
-        return -1;
-    }
+    public abstract long length();
+    
 
     /* ------------------------------------------------------------ */
     /**
      * Returns an URL representing the given resource
      */
-    public URL getURL()
-    {
-        return _url;
-    }
+    public abstract URL getURL();
+    
 
     /* ------------------------------------------------------------ */
     /**
      * Returns an File representing the given resource or NULL if this
      * is not possible.
      */
-    public File getFile()
-        throws IOException
-    {
-        // Try the permission hack
-        if (checkConnection())
-        {
-            Permission perm = _connection.getPermission();
-            if (perm instanceof java.io.FilePermission)
-                return new File(perm.getName());
-        }
-
-        // Try the URL file arg
-        try {return new File(_url.getFile());}
-        catch(Exception e) {Code.ignore(e);}
-
-        // Don't know the file
-        return null;    
-    }
+    public abstract File getFile()
+        throws IOException;
+    
 
     /* ------------------------------------------------------------ */
     /**
      * Returns the name of the resource
      */
-    public String getName()
-    {
-        return _url.toExternalForm();
-    }
+    public abstract String getName();
+    
 
     /* ------------------------------------------------------------ */
     /**
      * Returns an input stream to the resource
      */
-    public InputStream getInputStream()
-        throws java.io.IOException
-    {
-        if (!checkConnection())
-            throw new IOException( "Invalid resource");
-
-        try
-        {    
-            if( _in != null)
-            {
-                InputStream in = _in;
-                _in=null;
-                return in;
-            }
-            return _connection.getInputStream();
-        }
-        finally
-        {
-            _connection=null;
-        }
-    }
-
+    public abstract InputStream getInputStream()
+        throws java.io.IOException;
 
     /* ------------------------------------------------------------ */
     /**
      * Returns an output stream to the resource
      */
-    public OutputStream getOutputStream()
-        throws java.io.IOException, SecurityException
-    {
-        throw new IOException( "Output not supported");
-    }
-
+    public abstract OutputStream getOutputStream()
+        throws java.io.IOException, SecurityException;
+    
     /* ------------------------------------------------------------ */
     /**
      * Deletes the given resource
      */
-    public boolean delete()
-        throws SecurityException
-    {
-        throw new SecurityException( "Delete not supported");
-    }
-
+    public abstract boolean delete()
+        throws SecurityException;
+    
     /* ------------------------------------------------------------ */
     /**
      * Rename the given resource
      */
-    public boolean renameTo( Resource dest)
-        throws SecurityException
-    {
-        throw new SecurityException( "RenameTo not supported");
-    }
-
-
+    public abstract boolean renameTo( Resource dest)
+        throws SecurityException;
+    
     /* ------------------------------------------------------------ */
     /**
      * Returns a list of resource names contained in the given resource
      */
-    public String[] list()
-    {
-        return null;
-    }
-
+    public abstract String[] list();
+    
 
     /* ------------------------------------------------------------ */
     /**
      * Returns the resource contained inside the current resource with the
      * given name
      */
-    public Resource addPath(String path)
-        throws IOException,MalformedURLException
+    public abstract Resource addPath(String path)
+        throws IOException,MalformedURLException;
+    
+
+    /* ------------------------------------------------------------ */
+    public Object getAssociate()
     {
-        if (path==null)
-            return null;
-
-        path = canonicalPath(path);
-
-        return newResource(URI.addPaths(_url.toExternalForm(),path));
+        return _associate;
     }
 
     /* ------------------------------------------------------------ */
-    public String toString()
+    public void setAssociate(Object o)
     {
-        return _urlString;
-    }
-
-    /* ------------------------------------------------------------ */
-    public int hashCode()
-    {
-        return _url.hashCode();
+        _associate=o;
     }
     
     /* ------------------------------------------------------------ */
-    public boolean equals( Object o)
+    public CachedResource cache()
+        throws IOException
     {
-        return o instanceof Resource &&
-            _url.equals(((Resource)o)._url);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Convert a path to a cananonical form.
-     * All instances of "//", "." and ".." are factored out.  Null is returned
-     * if the path tries to .. above it's root.
-     * @param path 
-     * @return path or null.
-     */
-    public static String canonicalPath(String path)
-    {
-        return URI.canonicalPath(path);
+        return new CachedResource(this);
     }
     
 }

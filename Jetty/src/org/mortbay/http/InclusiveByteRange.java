@@ -5,9 +5,10 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.StringTokenizer;
 import org.mortbay.util.Code;
+import org.mortbay.util.LazyList;
 
 /* ------------------------------------------------------------ */
-/** class for dealing with byte ranges.
+/** Byte range inclusive of end points.
  * <PRE>
  * 
  *   parses the following types of byte ranges:
@@ -48,23 +49,31 @@ public class InclusiveByteRange {
         return last;
     }    
 
-    public static List parseRangeHeaders(Enumeration rit)
+
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param header Enumeration of Range header fields.
+     * @param size Size of the resource.
+     * @return LazyList of satisfiable ranges
+     */
+    public static List satisfiableRanges(Enumeration headers,long size)
     {
-        List validRanges = new ArrayList();
-        List headerRanges = new ArrayList();
+        LazyList satRanges=null;
         
         // walk through all Range headers
     headers:
-        while (rit.hasMoreElements())
+        while (headers.hasMoreElements())
         {
-            String header = (String) rit.nextElement();
+            String header = (String) headers.nextElement();
             StringTokenizer tok = new StringTokenizer(header,"=,",false);
-            headerRanges.clear();
-            try{
+            String t=null;
+            try
+            {
                 // read all byte ranges for this header 
                 while (tok.hasMoreTokens())
                 {
-                    String t=tok.nextToken().trim();
+                    t=tok.nextToken().trim();
                     
                     long first = -1;
                     long last  = -1;
@@ -93,7 +102,7 @@ public class InclusiveByteRange {
                     }
                     else
                         first = Long.parseLong(t.substring(0,d).trim());
-                    
+
                     
                     if (first == -1 && last == -1)
                         continue headers;
@@ -101,18 +110,21 @@ public class InclusiveByteRange {
                     if (first != -1 && last != -1 && (first > last))
                         continue headers;
 
-                    InclusiveByteRange range = new
-                        InclusiveByteRange(first, last);
-                    headerRanges.add(range);
+                    if (first<size)
+                    {
+                        InclusiveByteRange range = new
+                            InclusiveByteRange(first, last);
+                        satRanges=LazyList.add(satRanges,range);
+                    }
                 }
-                validRanges.addAll(headerRanges);
             }
             catch(Exception e)
             {
+                Code.warning("Bad range format: "+t);
                 Code.ignore(e);
             }    
         }
-        return validRanges;
+        return LazyList.getList(satRanges,true);
     }
 
     /* ------------------------------------------------------------ */
@@ -179,6 +191,7 @@ public class InclusiveByteRange {
         return sb.toString();
     }
 
+    
 
 }
 

@@ -79,23 +79,6 @@ public class ServletHolder extends Holder
         _path=forcedPath;
     }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @deprecated Use getInitOrder()
-     */
-    public boolean isInitOnStartup()
-    {
-        return _initOrder!=0 || _initOnStartup;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** 
-     * @deprecated Use setInitOrder(int)
-     */
-    public void setInitOnStartup(boolean b)
-    {
-        _initOrder=b?0:-1;
-    }
     
     /* ------------------------------------------------------------ */
     public int getInitOrder()
@@ -216,7 +199,7 @@ public class ServletHolder extends Holder
             .isAssignableFrom(_class))
             _servlets=new Stack();
 
-        if (isInitOnStartup())
+        if (_initOnStartup)
         {
             _servlet=(Servlet)newInstance();
             _config=new Config();

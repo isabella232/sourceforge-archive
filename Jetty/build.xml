@@ -131,6 +131,7 @@ Other targets:
   <target name="clean.jetty" depends="tidy.jetty">
     <delete dir="${jetty.webapp.classes}" quiet="true"/>
     <delete dir="${javadoc}" quiet="true"/>
+    <delete dir="${logs}" quiet="true"/>
     <delete dir="${etc}/dtd" quiet="true"/>
     <delete file="${jetty.jar}" quiet="true"/>
     <delete file="${servlet.jar}" quiet="true"/>

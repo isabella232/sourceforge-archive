@@ -149,7 +149,7 @@ public class TestRFC2616
         context.addHandler(new RedirectHandler());
         ResourceHandler rh = new ResourceHandler();
         context.addHandler(rh);   // for testdocs
-        rh.setHandleGeneralOptionsQuery(false); // dont handle OPTIONS *
+        //        rh.setHandleGeneralOptionsQuery(false); // dont handle OPTIONS *
         context.addHandler(new DumpHandler());
         context.addHandler(new NotFoundHandler());
         _server.addListener(this);
@@ -855,7 +855,7 @@ public class TestRFC2616
     
     /* --------------------------------------------------------------- */
     public static void test9_2()
-    {        
+    {
         TestCase t = new TestCase("RFC2616 9.2 OPTIONS");
         try
         {
@@ -958,6 +958,8 @@ public class TestRFC2616
     {        
         TestCase t = new TestCase("RFC2616 10.2.7 206 Partial Content");
 
+        
+        
         try
         {
             TestRFC2616 listener = new TestRFC2616();
@@ -1167,6 +1169,7 @@ public class TestRFC2616
                                     "Connection: close\n"+
                                     "\n");
 
+            
             switch (expectedStatus) {
                 case 200 : {
                        offset=t.checkContains(response,offset,
@@ -1244,7 +1247,6 @@ public class TestRFC2616
                      "bytes=-",
                      "bytes=-1-",
                      "bytes=a-b,-1-1-1",
-                     "bytes=",
                      "doublehalfwords=1-2",
           };
 

@@ -894,7 +894,7 @@ public class ServletHandler
         public Set getResourcePaths(String uriInContext)
         {
             Resource baseResource=_httpContext.getBaseResource();
-            uriInContext=Resource.canonicalPath(uriInContext);
+            uriInContext=URI.canonicalPath(uriInContext);
             if (baseResource==null || uriInContext==null)
                 return Collections.EMPTY_SET;
 
@@ -929,7 +929,7 @@ public class ServletHandler
             throws MalformedURLException
         {
             Resource baseResource=_httpContext.getBaseResource();
-            uriInContext=Resource.canonicalPath(uriInContext);
+            uriInContext=URI.canonicalPath(uriInContext);
             if (baseResource==null || uriInContext==null)
                 return null;
         

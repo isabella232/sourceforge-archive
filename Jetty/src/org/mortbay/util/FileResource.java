@@ -29,7 +29,7 @@ import java.net.URLConnection;
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
-class FileResource extends Resource
+class FileResource extends URLResource
 {
     private static boolean __checkAliases;
     static
@@ -209,8 +209,5 @@ class FileResource extends Resource
         return o instanceof FileResource &&
             _file.equals(((FileResource)o)._file);
     }
-
-    
-
     
 }

@@ -1,5 +1,5 @@
 // ===========================================================================
-// Copyright (c) 1996 Mort Bay Consulting Pty. Ltd. All rights reserved.
+// Copyright (c) 1996-2002 Mort Bay Consulting Pty. Ltd. All rights reserved.
 // $Id$
 // ---------------------------------------------------------------------------
 
@@ -24,6 +24,7 @@ import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
+import org.mortbay.http.ResourceBase;
 import org.mortbay.http.InclusiveByteRange;
 import org.mortbay.http.MultiPartResponse;
 import org.mortbay.http.PathMap;
@@ -31,6 +32,7 @@ import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.Log;
+import org.mortbay.util.CachedResource;
 import org.mortbay.util.Resource;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URI;
@@ -50,59 +52,14 @@ import org.mortbay.util.URI;
 public class ResourceHandler extends NullHandler
 {
     /* ----------------------------------------------------------------- */
-    private String _allowHeader = null;
-    private CachedFile _mostRecentlyUsed=null;
-    private CachedFile _leastRecentlyUsed=null;
-    private Map _cacheMap=null;
-    private boolean _dirAllowed=true;
-    private boolean _putAllowed=false;
-    private boolean _delAllowed=false;
-    private int _maxCachedFiles=128;
-    private int _maxCachedFileSize =40960;
-    private Resource _baseResource=null;
-    private boolean _handleGeneralOptionsQuery=true;
     private boolean _acceptRanges=true;
     private int _welcomeRedirectionIndex=0;
-    
-    /* ------------------------------------------------------------ */
-    List _indexFiles =new ArrayList(4);
-    {
-        _indexFiles.add("index.html");
-        _indexFiles.add("index.htm");
-        _indexFiles.add("index.jsp");
-    }
- 
-    /* ------------------------------------------------------------ */
-    public boolean isDirAllowed()
-    {
-        return _dirAllowed;
-    }
-    /* ------------------------------------------------------------ */
-    public void setDirAllowed(boolean dirAllowed)
-    {
-        _dirAllowed = dirAllowed;
-    }
- 
-    /* ------------------------------------------------------------ */
-    public boolean isPutAllowed()
-    {
-        return _putAllowed;
-    }
-    /* ------------------------------------------------------------ */
-    public void setPutAllowed(boolean putAllowed)
-    {
-        _putAllowed = putAllowed;
-    }
+    private ResourceBase _base=new ResourceBase();
 
     /* ------------------------------------------------------------ */
-    public boolean isDelAllowed()
+    public ResourceBase getResourceBase()
     {
-        return _delAllowed;
-    }
-    /* ------------------------------------------------------------ */
-    public void setDelAllowed(boolean delAllowed)
-    {
-        _delAllowed = delAllowed;
+        return _base;
     }
 
     /* ------------------------------------------------------------ */
@@ -121,31 +78,6 @@ public class ResourceHandler extends NullHandler
         _acceptRanges=ar;
     }
     
-    /* ------------------------------------------------------------ */
-    public List getIndexFiles()
-    {
-        return _indexFiles;
-    }
- 
-    /* ------------------------------------------------------------ */
-    public void setIndexFiles(List indexFiles)
-    {
-        if (indexFiles==null)
-            _indexFiles=new ArrayList(5);
-        else
-            _indexFiles = indexFiles;
-    }
- 
-    /* ------------------------------------------------------------ */
-    public void addIndexFile(String indexFile)
-    {
-        if (indexFile.startsWith("/") ||
-            indexFile.startsWith(java.io.File.separator) ||
-            indexFile.endsWith("/") ||
-            indexFile.endsWith(java.io.File.separator))
-            Code.warning("Invalid index file: "+indexFile);
-        _indexFiles.add(indexFile);
-    }
 
     /* ------------------------------------------------------------ */
     /** Set WelcomeIndex.
@@ -157,42 +89,6 @@ public class ResourceHandler extends NullHandler
         _welcomeRedirectionIndex=i;
     }
     
-    /* ------------------------------------------------------------ */
-    public int getMaxCachedFiles()
-    {
-        return _maxCachedFiles;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setMaxCachedFiles(int maxCachedFiles_)
-    {
-        _maxCachedFiles = maxCachedFiles_;
-    }
- 
-    /* ------------------------------------------------------------ */
-    public int getMaxCachedFileSize()
-    {
-        return _maxCachedFileSize;
-    }
- 
-    /* ------------------------------------------------------------ */
-    public void setMaxCachedFileSize(int maxCachedFileSize)
-    {
-        _maxCachedFileSize = maxCachedFileSize;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean getHandleGeneralOptionsQuery()
-    {
-        return _handleGeneralOptionsQuery;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setHandleGeneralOptionsQuery(boolean b)
-    {
-        _handleGeneralOptionsQuery=b;
-    }
-
 
     /* ----------------------------------------------------------------- */
     /** Construct a ResourceHandler.
@@ -205,13 +101,9 @@ public class ResourceHandler extends NullHandler
     public synchronized void start()
         throws Exception
     {
-        _baseResource=getHttpContext().getBaseResource();
+        _base.setHttpContext(getHttpContext());
         
-        Log.event("ResourceHandler started in "+ _baseResource);
-        _mostRecentlyUsed=null;
-        _leastRecentlyUsed=null;
-        if (_maxCachedFiles>0 && _maxCachedFileSize>0)
-            _cacheMap=new HashMap();
+        Log.event("ResourceHandler started in "+ getHttpContext().getBaseResource());
         super.start();
     }
  
@@ -220,34 +112,8 @@ public class ResourceHandler extends NullHandler
         throws InterruptedException
     {
         super.stop();
-        synchronized(_cacheMap)
-        {
-            if( _cacheMap != null)
-                _cacheMap.clear();
-            _cacheMap=null;
-            _mostRecentlyUsed=null;
-            _leastRecentlyUsed=null;
-        }
     }
 
-    /* ------------------------------------------------------------ */
-    /** Translate path to a real file path.
-     * @param pathSpec 
-     * @param path 
-     * @return 
-     */
-    private Resource makeresource(String pathSpec,String path)
-        throws MalformedURLException,IOException
-    {
-        Resource baseResource=getHttpContext().getBaseResource();
-        if (baseResource==null)
-            return null;
-        String info=PathMap.pathInfo(pathSpec,path);
-        if (info==null)
-            info=path;
-        
-        return baseResource.addPath(info);
-    }
  
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,
@@ -257,20 +123,32 @@ public class ResourceHandler extends NullHandler
         throws HttpException, IOException
     {
         // Extract and check filename
-        pathInContext=Resource.canonicalPath(pathInContext);
+        pathInContext=URI.canonicalPath(pathInContext);
         if (pathInContext==null)
             throw new HttpException(HttpResponse.__403_Forbidden);
-        
-        Resource baseResource=getHttpContext().getBaseResource();
-        if (baseResource==null)
-            return;
-        
+            
         boolean endsWithSlash= pathInContext.endsWith("/");
-        Resource resource = null;
-        
+        Resource resource = _base.getResource(pathInContext);
+
+        if (resource==null)
+            return;
+
+
+        // Is the method allowed?
+        if (!_base.isMethodAllowed(request.getMethod()))
+        {
+            Code.debug("Method not allowed: ",request.getMethod());
+            if (resource.exists())
+            {
+                setAllowHeader(response);
+                response.sendError(response.__405_Method_Not_Allowed);
+            }
+            return;
+        }
+
+        // Handle the request
         try
         {
-            resource = baseResource.addPath(URI.encodePath(pathInContext));
             Code.debug("PATH=",pathInContext,
                        " RESOURCE=",resource);
             
@@ -307,7 +185,7 @@ public class ResourceHandler extends NullHandler
         }
         finally
         {
-            if (resource!=null)
+            if (resource!=null && !(resource instanceof CachedResource))
                 resource.release();
         }
     }
@@ -322,31 +200,9 @@ public class ResourceHandler extends NullHandler
         throws IOException
     {
         Code.debug("Looking for ",resource);
-  
-        // Try a cache lookup
-        if (_cacheMap!=null && !endsWithSlash)
-        {
-            CachedFile cachedFile = null;
-            synchronized(_cacheMap)
-            {
-                cachedFile= (CachedFile)_cacheMap.get(resource.toString());
-
-                if (cachedFile!=null && !cachedFile.isValid())
-                    cachedFile=null;
-            }
-
-            if (cachedFile != null)
-            {
-                if (!passConditionalHeaders(request,response,cachedFile.resource))
-                    return;
-                Code.debug("Cache hit: ",resource);
-                sendData(request, response, cachedFile, true);
-                return;
-            }
-        }  
  
         if (resource!=null && resource.exists())
-        {
+        {            
             // Check modified dates
             if (!passConditionalHeaders(request,response,resource))
                 return;
@@ -371,23 +227,16 @@ public class ResourceHandler extends NullHandler
                 }
   
                 // See if index file exists
-                for (int i=_indexFiles.size();i-->0;)
-                {
-                    Resource index =
-                        resource.addPath((String)_indexFiles.get(i));
-      
-                    if (index.exists())
-                    {
-                                           
-                        // Forward to the index
-                        String ipath=URI.addPaths(pathInContext,(String)_indexFiles.get(i));
-                        URI uri=request.getURI();
-                        uri.setPath(URI.addPaths(uri.getPath(),(String)_indexFiles.get(i)));
-
-                        getHttpContext().handle(_welcomeRedirectionIndex,
-                                                ipath,pathParams,request,response);
-                        return;
-                    }
+                String welcome=_base.getWelcomeFile(resource);
+                if (welcome!=null)
+                {     
+                    // Forward to the index
+                    String ipath=URI.addPaths(pathInContext,welcome);
+                    URI uri=request.getURI();
+                    uri.setPath(URI.addPaths(uri.getPath(),welcome));
+                    getHttpContext().handle(_welcomeRedirectionIndex,
+                                            ipath,pathParams,request,response);
+                    return;
                 }
 
                 // If we got here, no forward to index took place
@@ -451,9 +300,6 @@ public class ResourceHandler extends NullHandler
     {
         Code.debug("PUT ",pathInContext," in ",resource);
 
-        if (!_putAllowed)
-            return;
-
         if (resource.exists() &&
             !passConditionalHeaders(request,response,resource))
             return;
@@ -508,25 +354,10 @@ public class ResourceHandler extends NullHandler
             !passConditionalHeaders(request,response,resource))
             return;
  
-        if (!_delAllowed)
-        {
-            setAllowHeader(response);
-            response.sendError(response.__405_Method_Not_Allowed);
-            return;
-        }
- 
         try
         {
             // delete the file
             resource.delete();
-
-            // flush the cache
-            if (_cacheMap!=null)
-            {
-                CachedFile cachedFile=(CachedFile)_cacheMap.get(resource.toString());
-                if (cachedFile!=null)
-                    cachedFile.invalidate();
-            }
 
             // Send response
             request.setHandled(true);
@@ -550,14 +381,8 @@ public class ResourceHandler extends NullHandler
         if (!resource.exists() || !passConditionalHeaders(request,response,resource))
             return;
 
-        if (!_delAllowed || !_putAllowed)
-        {
-            setAllowHeader(response);
-            response.sendError(response.__405_Method_Not_Allowed);
-            return;
-        }
  
-        String newPath = Resource.canonicalPath(request.getHttpMessage().getField("New-uri"));
+        String newPath = URI.canonicalPath(request.getHttpMessage().getField("New-uri"));
         if (newPath==null)
         {
             response.sendError(response.__405_Method_Not_Allowed,
@@ -581,7 +406,7 @@ public class ResourceHandler extends NullHandler
             String newInfo=newPath;
             if (contextPath!=null)
                 newInfo=newInfo.substring(contextPath.length());
-            Resource newFile = _baseResource.addPath(newInfo);
+            Resource newFile = getHttpContext().getBaseResource().addPath(newInfo);
      
             Code.debug("Moving "+resource+" to "+newFile);
             resource.renameTo(newFile);
@@ -603,9 +428,8 @@ public class ResourceHandler extends NullHandler
     void handleOptions(HttpResponse response, String pathInContext)
         throws IOException
     {
-        if (!_handleGeneralOptionsQuery && pathInContext.equals("*")) 
+        if ("*".equals(pathInContext))
             return;
-
         setAllowHeader(response);
         response.commit();
     }
@@ -613,42 +437,55 @@ public class ResourceHandler extends NullHandler
     /* ------------------------------------------------------------ */
     void setAllowHeader(HttpResponse response)
     {
-        if (_allowHeader == null)
-        {
-            StringBuffer sb = new StringBuffer(128);
-            sb.append(HttpRequest.__GET);
-            sb.append(", ");
-            sb.append(HttpRequest.__HEAD);
-            if (_putAllowed){
-                sb.append(", ");
-                sb.append(HttpRequest.__PUT);
-            }
-            if (_delAllowed){
-                sb.append(", ");
-                sb.append(HttpRequest.__DELETE);
-            }
-            if (_putAllowed && _delAllowed)
-            {
-                sb.append(", ");
-                sb.append(HttpRequest.__MOVE);
-            }
-            sb.append(", ");
-            sb.append(HttpRequest.__OPTIONS);
-            _allowHeader = sb.toString();
-        }
-        response.getHttpMessage().setField(HttpFields.__Allow, _allowHeader);
+        response.getHttpMessage().setField(HttpFields.__Allow, _base.getAllowedString());
     }
- 
+    
+    /* ------------------------------------------------------------ */
+    void writeHeaders(HttpResponse response,Resource resource, long count)
+        throws IOException
+    {
+        ResourceBase.MetaData metaData = (ResourceBase.MetaData)resource.getAssociate();
 
+        response.setContentType(metaData.getEncoding());
+        if (count != -1)
+        {
+            if (count==resource.length())
+                response.setField(HttpFields.__ContentLength,metaData.getLength());
+            else
+                response.setContentLength((int)count);
+        }
+
+        response.setField(HttpFields.__LastModified,metaData.getLastModified());
+        
+        if (_acceptRanges && response.getHttpRequest().getDotVersion()>0)
+            response.setField(HttpFields.__AcceptRanges,"bytes");
+    }
+    
+    /* ------------------------------------------------------------ */
+    void writeResource(HttpResponse response,Resource resource, long start, long count)
+        throws IOException
+    {
+        OutputStream out = response.getHttpMessage().getOutputStream();
+
+        if (resource instanceof CachedResource)
+            ((CachedResource)resource).writeTo(out,start,count);
+        else
+        {
+            InputStream in = resource.getInputStream();
+            in.skip(start);
+            IO.copy(in,out,(int)count);
+        }
+    }
+    
 
     /* ------------------------------------------------------------ */
     void sendData(HttpRequest request,
                   HttpResponse response,
-                  SendableResource data,
+                  Resource resource,
                   boolean writeHeaders)
         throws IOException
     {
-        long resLength = data.getLength();
+        long resLength=resource.length();
         
         //  see if there are any range headers
         Enumeration reqRanges =
@@ -659,48 +496,32 @@ public class ResourceHandler extends NullHandler
         if (!writeHeaders || reqRanges == null || !reqRanges.hasMoreElements())
         {
             //  if there were no ranges, send entire entity
-            if (writeHeaders) data.writeHeaders(request,response, resLength);
-            data.writeBytes(response.getHttpMessage().getOutputStream(), 0, resLength);
+            if (writeHeaders)
+                writeHeaders(response,resource,resLength);
+            writeResource(response,resource,0,resLength);            
             request.setHandled(true);
             return;
         }
             
-        // Parse the ranges
-        List validRanges =InclusiveByteRange.parseRangeHeaders(reqRanges);
-        Code.debug("requested ranges: " + reqRanges + "=" + validRanges);
-
-        
-        //  run through the ranges and count satisfiable ranges;
-        ListIterator rit = validRanges.listIterator();
-        InclusiveByteRange singleSatisfiableRange = null;
-        while (rit.hasNext())
-        {
-            InclusiveByteRange ibr = (InclusiveByteRange) rit.next();
-
-            if (ibr.getFirst()>=resLength)
-            {
-                Code.debug("not satisfiable: ",ibr);
-                rit.remove();
-                continue;
-            }
-            
-            if (singleSatisfiableRange == null)
-                singleSatisfiableRange = ibr;
-        }
+        // Parse the satisfiable ranges
+        List ranges =InclusiveByteRange.satisfiableRanges(reqRanges,resLength);
+        if (Code.debug())
+            Code.debug("ranges: " + reqRanges + " == " + ranges);
         
         //  if there are no satisfiable ranges, send 416 response
-        if (singleSatisfiableRange == null )
+        if (ranges==null || ranges.size()==0)
         {
             Code.debug("no satisfiable ranges");
-            data.writeHeaders(request,response, resLength);
+            writeHeaders(response, resource, resLength);
             response.setStatus(response.__416_Requested_Range_Not_Satisfiable);
             response.setReason((String)response.__statusMsg
                                .get(new Integer(response.__416_Requested_Range_Not_Satisfiable)));
             response.getHttpMessage().setField(
                        HttpFields.__ContentRange, 
                        InclusiveByteRange.to416HeaderRangeString(resLength)
-            );
-            data.writeBytes(response.getHttpMessage().getOutputStream(), 0, resLength);
+                       );
+            
+            writeResource(response,resource,0,resLength);
             request.setHandled(true);
             return;
         }
@@ -708,28 +529,32 @@ public class ResourceHandler extends NullHandler
         
         //  if there is only a single valid range (must be satisfiable 
         //  since were here now), send that range with a 216 response
-        if ( validRanges.size()== 1)
+        if ( ranges.size()== 1)
         {
+            InclusiveByteRange singleSatisfiableRange =
+                (InclusiveByteRange)ranges.get(0);
             Code.debug("single satisfiable range: " + singleSatisfiableRange);
             long singleLength = singleSatisfiableRange.getSize(resLength);
-            data.writeHeaders(request,response, singleLength);
+            writeHeaders(response,resource,singleLength);
             response.setStatus(response.__206_Partial_Content);
             response.setReason((String)response.__statusMsg
                                .get(new Integer(response.__206_Partial_Content)));
             response.getHttpMessage().setField(HttpFields.__ContentRange, 
                               singleSatisfiableRange.toHeaderRangeString(resLength));
-            data.writeBytes(response.getHttpMessage().getOutputStream(), 
-                            singleSatisfiableRange.getFirst(resLength), 
-                            singleLength);
+            writeResource(response,resource,
+                          singleSatisfiableRange.getFirst(resLength), 
+                          singleLength);
             request.setHandled(true);
             return;
         }
 
+        
         //  multiple non-overlapping valid ranges cause a multipart
         //  216 response which does not require an overall 
         //  content-length header
         //
-        String encoding = data.getEncoding();
+        ResourceBase.MetaData metaData = (ResourceBase.MetaData)resource.getAssociate();
+        String encoding = metaData.getEncoding();
         MultiPartResponse multi = new MultiPartResponse(request, response);
         response.setStatus(response.__206_Partial_Content);
         response.setReason((String)response.__statusMsg
@@ -745,16 +570,45 @@ public class ResourceHandler extends NullHandler
 	    ctp = "multipart/byteranges; boundary=";
 	response.getHttpMessage().setContentType(ctp+multi.getBoundary());
 
-        rit = validRanges.listIterator();
-        while (rit.hasNext())
+        InputStream in=(resource instanceof CachedResource)
+            ?null:resource.getInputStream();
+        OutputStream out = response.getHttpMessage().getOutputStream();
+        long pos=0;
+            
+        for (int i=0;i<ranges.size();i++)
         {
-            InclusiveByteRange ibr = (InclusiveByteRange) rit.next();
+            InclusiveByteRange ibr = (InclusiveByteRange) ranges.get(i);
             String header=HttpFields.__ContentRange+": "+
                 ibr.toHeaderRangeString(resLength);
             Code.debug("multi range: ",encoding," ",header);
             multi.startPart(encoding,new String[]{header});
-            data.writeBytes(multi.getOut(), ibr.getFirst(resLength), ibr.getSize(resLength));
+
+            long start=ibr.getFirst(resLength);
+            long size=ibr.getSize(resLength);
+            if (in!=null)
+            {
+                // Handle non cached resource
+                if (start<pos)
+                {
+                    in.close();
+                    in=resource.getInputStream();
+                    pos=0;
+                }
+                if (pos<start)
+                {
+                    in.skip(start-pos);
+                    pos=start;
+                }
+                IO.copy(in,out,size);
+                pos+=size;
+            }
+            else
+                // Handle cached resource
+                ((CachedResource)resource).writeTo(out,start,size);
+            
         }
+        if (in!=null)
+            in.close();
         multi.close();
 
         request.setHandled(true);
@@ -771,408 +625,42 @@ public class ResourceHandler extends NullHandler
         throws IOException
     {
         Code.debug("sendFile: ",resource);
-
-        SendableResource data = null;
-
-        // Can the file be cached?
-        if (_cacheMap!=null && resource.length()>0 &&
-            resource.length()<_maxCachedFileSize)
-            data = new CachedFile(resource);
-        else
-            data = new UnCachedFile(resource);
-
-        try
-        {
-            sendData(request, response, data, writeHeaders);
-        }
-        finally
-        {
-            data.requestDone();
-        }
+        sendData(request, response, resource, writeHeaders);
     }
 
 
     /* ------------------------------------------------------------------- */
     void sendDirectory(HttpRequest request,
                        HttpResponse response,
-                       Resource file,
+                       Resource resource,
                        boolean parent)
         throws IOException
     {
-        if (_dirAllowed)
+        request.setHandled(true);
+        Code.debug("sendDirectory: "+resource);
+        String base = URI.addPaths(request.getPath(),"/");
+        ByteArrayISO8859Writer dir = _base.getDirectoryListing(resource,base,parent);
+        if (dir==null)
         {
-            String[] ls = file.list();
-            if (ls==null)
-            {
-                // Just send it as a file and hope that the URL
-                // formats the directory
-                try{
-                    sendFile(request,response,file,true);
-                }
-                catch(IOException e)
-                {
-                    Code.ignore(e);
-                    response.sendError(HttpResponse.__403_Forbidden,
-                                       "Invalid directory");
-                }
-                return;
-            }
-
-            Code.debug("sendDirectory: "+file);
-            String base = URI.addPaths(request.getPath(),"/");
-            response.getHttpMessage().setContentType("text/html");
-            if (request.getMethod().equals(HttpRequest.__HEAD))
-            {
-                // Bail out here otherwise we build the page fruitlessly and get
-                // hit with a HeadException when we try to write the page...
-                response.commit();
-                return;
-            }
-     
-            String title = "Directory: "+base;
-     
-            ByteArrayISO8859Writer out = new ByteArrayISO8859Writer();
-            
-            out.write("<HTML><HEAD><TITLE>");
-            out.write(title);
-            out.write("</TITLE></HEAD><BODY>\n<H1>");
-            out.write(title);
-            out.write("</H1><TABLE BORDER=0>");
-     
-            if (parent)
-            {
-                out.write("<TR><TD><A HREF=");
-                out.write(URI.encodePath(URI.addPaths(base,"../")));
-                out.write(">Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
-            }
-     
-            DateFormat dfmt=DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
-                                                           DateFormat.MEDIUM);
-            for (int i=0 ; i< ls.length ; i++)
-            {
-                String encoded=URI.encodePath(ls[i]);
-                Resource item = file.addPath(encoded);
-  
-                out.write("<TR><TD><A HREF=\"");
-                String path=URI.addPaths(base,encoded);
-                
-                if (item.isDirectory() && !path.endsWith("/"))
-                    path=URI.addPaths(path,"/");
-                out.write(path);
-                out.write("\">");
-                out.write(StringUtil.replace(StringUtil.replace(ls[i],"<","&lt;"),">","&gt;"));
-                out.write("&nbsp;");
-                out.write("</TD><TD ALIGN=right>");
-                out.write(""+item.length());
-                out.write(" bytes&nbsp;</TD><TD>");
-                out.write(dfmt.format(new Date(item.lastModified())));
-                out.write("</TD></TR>\n");
-            }
-            out.write("</TABLE>\n");
-            response.getHttpMessage().setContentLength(out.length());
-            out.writeTo(response.getHttpMessage().getOutputStream());
-            request.setHandled(true);
-        }
-        else
-        {
-            // directory request not allowed
             response.sendError(HttpResponse.__403_Forbidden,
-                               "Directory access not allowed");
+                               "No directory");
+            return;
         }
+        
+        response.getHttpMessage().setContentType("text/html");
+        response.getHttpMessage().setContentLength(dir.length());
+        
+        if (request.getMethod().equals(HttpRequest.__HEAD))
+        {
+            response.commit();
+            return;
+        }
+        
+        dir.writeTo(response.getHttpMessage().getOutputStream());
+        response.commit();
     }
 
  
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-
-    private interface SendableResource
-    {
-        long getLength();
-        String getEncoding();
-        void writeHeaders(HttpRequest request,HttpResponse response, long count)
-                                throws IOException; 
-        void writeBytes(OutputStream os, long startByte, long count) 
-                                throws IOException; 
-        void requestDone();
-    }
-
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /** Holds an uncached file.  
-     */
-    private class UnCachedFile implements SendableResource {
-
-        Resource resource;
-        InputStream ris = null;
-        String encoding;
-        long length = 0;
-        long pos = 0;
-
-
-        /* ------------------------------------------------------------ */
-        public String getEncoding()
-        {
-            return encoding;
-        }
-
-        /* ------------------------------------------------------------ */
-        public long getLength()
-        {
-            return length;
-        }
-
-        /* ------------------------------------------------------------ */
-        public UnCachedFile(Resource resource)
-        {
-            this.resource = resource;
-            encoding = getHttpContext().getMimeByExtension(resource.getName());
-            if (encoding==null)
-                encoding=getHttpContext().getMimeByExtension(".default");
-            length = resource.length();
-        }
-
-        /* ------------------------------------------------------------ */
-        public void writeBytes(OutputStream os, long start,long count)
-            throws IOException
-        {
-            if (ris == null || pos > start)
-            {
-                if (ris != null)
-                    ris.close();
-                ris = resource.getInputStream();
-                pos = 0;
-            }
-            
-            if (pos < start)
-            {
-                ris.skip(start - pos);
-                pos = start;
-            }
-            IO.copy(ris,os,(int)count);
-            pos+=count;
-        }
-
-        /* ------------------------------------------------------------ */
-        public void writeHeaders(HttpRequest request, HttpResponse response, long count)
-        {
-            HttpMessage facade = response.getHttpMessage();
-            facade.setContentType(encoding);
-            if (length != -1) 
-                facade.setContentLength((int)count);
-            facade.setDateField(HttpFields.__LastModified,resource.lastModified());
-            if (_acceptRanges && request.getDotVersion()>0)
-                facade.setField(HttpFields.__AcceptRanges,"bytes");
-        }
-
-        /* ------------------------------------------------------------ */
-        public void requestDone()
-        {
-            try
-            {
-                if (ris != null)
-                    ris.close();
-            }
-            catch (IOException ioe){Code.ignore(ioe);}
-        }
-
-    }    
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /** Holds a cached file.
-     * It is assumed that threads accessing CachedFile have
-     * the parents cacheMap locked. 
-     */
-    private class CachedFile implements SendableResource
-    {
-        Resource resource;
-        long lastModified;
-        String lastModifiedString;
-        String sizeString;
-        byte[] bytes;
-        String encoding;
-
-        CachedFile prev;
-        CachedFile next;
-
-        /* ------------------------------------------------------------ */
-        CachedFile(Resource resource)
-            throws IOException
-        {
-            synchronized(_cacheMap)
-            {
-                load(resource);
-                String r=resource.toString();
-                Object old=_cacheMap.get(r);                
-                if (old!=null)
-                    ((CachedFile)old).invalidate();
-                _cacheMap.put(r,this);
-                
-                next=_mostRecentlyUsed;
-                _mostRecentlyUsed=this;
-                if (next!=null)
-                    next.prev=this;
-                else
-                    _leastRecentlyUsed=this;
-
-                if (_cacheMap.size()>_maxCachedFiles)
-                    _leastRecentlyUsed.invalidate();
-            }
-        }
-        
-        
-        /* ------------------------------------------------------------ */
-        public String getEncoding()
-        {
-            return encoding;
-        }
-
-
-        /* ------------------------------------------------------------ */
-        public void writeBytes(OutputStream os, long startByte, long count) 
-            throws IOException
-        {
-             os.write(bytes, (int) startByte, (int) count);
-        }
-
-
-        /* ------------------------------------------------------------ */
-        boolean isValid()
-            throws IOException
-        {
-            if (resource==null || !resource.exists() ||
-                lastModified!=resource.lastModified())
-            {
-                // The cached file is no longer valid
-                invalidate();
-                return false;
-            }
-            else
-            {
-                // make it the most recently used
-                use();
-                return true;
-            }
-        }
-
-        /* ------------------------------------------------------------ */
-        public void invalidate()
-        {
-            synchronized(_cacheMap)
-            {
-                lastModified--;
-                lastModifiedString=null;
-                _cacheMap.remove(resource.toString());
-
-                if (prev==null)
-                    _mostRecentlyUsed=next;
-                else
-                    prev.next=next;
-                
-                if (next==null)
-                    _leastRecentlyUsed=prev;
-                else
-                    next.prev=prev;
-
-                prev=null;
-                next=null;
-            }
-        }
-        
-        /* ------------------------------------------------------------ */
-        public void use()
-        {
-            synchronized(_cacheMap)
-            {
-                if (_mostRecentlyUsed!=this)
-                {
-                    CachedFile tp = prev;
-                    CachedFile tn = next;
-                    
-                    next=_mostRecentlyUsed;
-                    _mostRecentlyUsed=this;
-                    if (next!=null)
-                        next.prev=this;
-                    prev=null;
-                    
-                    // delete it from where it was
-                    if (tp!=null)
-                        tp.next=tn;
-                    if (tn!=null)
-                        tn.prev=tp;
-                    
-                    if (_leastRecentlyUsed==this && tp!=null)
-                        _leastRecentlyUsed=tp;
-                }
-            }
-        }
-  
-        /* ------------------------------------------------------------ */
-        public void writeHeaders(HttpRequest request, HttpResponse response, long count)
-            throws IOException
-        {
-            Code.debug("HIT: ",resource);
-            HttpMessage facade = response.getHttpMessage();
-            facade.setContentType(encoding);
-            if (count != -1)
-            {
-                if (count==bytes.length)
-                    facade.setField(HttpFields.__ContentLength,sizeString);
-                else
-                    facade.setContentLength((int)count);
-            }
-            facade.setField(HttpFields.__LastModified,lastModifiedString);
-            
-            if (_acceptRanges && request.getDotVersion()>0)
-                facade.setField(HttpFields.__AcceptRanges,"bytes");
-        }
-
-        /* ------------------------------------------------------------ */
-        void load(Resource resource)
-            throws IOException
-        {
-            this.resource=resource;
-            lastModified=resource.lastModified();
-            lastModifiedString=HttpFields.__dateSend.format(new Date(lastModified));
-            bytes = new byte[(int)resource.length()];
-            sizeString=Integer.toString(bytes.length);
-            Code.debug("LOAD: ",resource);
-     
-            InputStream in=resource.getInputStream();
-            int read=0;
-            while (read<bytes.length)
-            {
-                int len=in.read(bytes,read,bytes.length-read);
-                if (len==-1)
-                    throw new IOException("Unexpected EOF: "+resource);
-                read+=len;
-            }
-            in.close();
-            encoding=getHttpContext().getMimeByExtension(resource.getName());
-            if (encoding==null)
-                encoding=getHttpContext().getMimeByExtension(".default");
-        }
-
-        /* ------------------------------------------------------------ */
-        public void requestDone()
-        {
-        }
-
-        /* ------------------------------------------------------------ */
-        public long getLength()
-        {
-            return bytes.length;
-        }
-
-        /* ------------------------------------------------------------ */
-        public String toString()
-        {
-            return resource.toString();
-        }
-    }
 }
 
 
