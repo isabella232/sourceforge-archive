@@ -23,16 +23,16 @@ public class HttpVersion extends BufferCache
 		HTTP_1_1 = "HTTP/1.1";
 		
 	public final static int
-		HTTP_0_9_INDEX=9,
-		HTTP_1_0_INDEX=10,
-		HTTP_1_1_INDEX=11;
+		__HTTP_0_9=9,
+		__HTTP_1_0=10,
+		__HTTP_1_1=11;
 	
 	public final static HttpVersion CACHE = new HttpVersion();
 	
 	private HttpVersion()
 	{
-		add(HTTP_0_9,HTTP_0_9_INDEX);
-		add(HTTP_1_0,HTTP_1_0_INDEX);
-		add(HTTP_1_1,HTTP_1_1_INDEX);
+		add(__HTTP_0_9,HTTP_0_9);
+		add(__HTTP_1_0,HTTP_1_0);
+		add(__HTTP_1_1,HTTP_1_1);
 	}
 }
