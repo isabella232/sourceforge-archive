@@ -8,10 +8,14 @@ package org.mortbay.http;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
+import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 import org.mortbay.util.Code;
@@ -23,20 +27,25 @@ import org.mortbay.util.Resource;
  * Specializes URLClassLoader with some utility and file mapping
  * methods.
  *
+ * This loader defaults to the 2.3 servlet spec behaviour where non
+ * system classes are loaded from the classpath in preference to the
+ * parent loader.  Java2 compliant loading, where the parent loader
+ * always has priority, can be selected with the setJava2Complient method.
+ *
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class ContextLoader extends URLClassLoader
 {
-    private static HashMap __infoMap = new HashMap(3);
-    private PathInfo _info;
-    private String _path;
+    private boolean _java2compliant=false;
+    private ClassLoader _parent;
     private PermissionCollection _permissions;
-    private boolean _jspWarned=false;
+    private String _urlClassPath;
+    private String _fileClassPath;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
-     * @param servletClassPath Coma separated path of filenames or URLs
+     * @param classPath Coma separated path of filenames or URLs
      * pointing to directories or jar files. Directories should end
      * with '/'.
      * @param quiet If true, non existant paths are not reported
@@ -45,144 +54,95 @@ public class ContextLoader extends URLClassLoader
     public ContextLoader(String classPath,
                          ClassLoader parent,
                          PermissionCollection permisions)
+        throws MalformedURLException, IOException
     {
-        super(decodePath(classPath),parent);
-        _info=(PathInfo)__infoMap.get(classPath);
-        _path=_info._classPath;
+        super(new URL[0],parent);
         _permissions=permisions;
+        _parent=parent;
+        if (_parent==null)
+            _parent=getSystemClassLoader();
+
+        StringTokenizer tokenizer = new StringTokenizer(classPath,",;");
+
+        int i=0;
+        while (tokenizer.hasMoreTokens())
+        {
+            Resource resource = Resource.newResource(tokenizer.nextToken());
+            Code.debug("Path resource=",resource);
+            
+            // Resolve file path if possible
+            File file=resource.getFile();
+            if (file!=null)
+            {
+                _fileClassPath=(_fileClassPath==null)
+                    ?file.getCanonicalPath()
+                    :(_fileClassPath+File.pathSeparator+file.getCanonicalPath());            
+            }
+            
+            // Add resource or expand jar/
+            if (!resource.isDirectory() && file!=null)
+            {
+                // XXX - this is a jar in a jar, so we must
+                // extract it - probably should be to an in memory
+                // structure, but this will do for now.
+                InputStream in =resource.getInputStream();
+                File jar=File.createTempFile("Jetty-"+file.getName()+"-",".jar");
+                file.deleteOnExit();
+                Code.debug("Extract ",resource," to ",jar);
+                FileOutputStream out = new FileOutputStream(jar);
+                IO.copy(in,out);
+                out.close();
+                URL url = jar.toURL();
+                addURL(url);
+                _urlClassPath=(_urlClassPath==null)
+                    ?url.toString()
+                    :(_urlClassPath+","+url.toString());
+            }
+            else
+            {
+                URL url = resource.getURL();
+                addURL(url);
+                _urlClassPath=(_urlClassPath==null)
+                    ?url.toString()
+                    :(_urlClassPath+","+url.toString());
+            }
+        }
         
-        Code.debug("ContextLoader: ",_path,",",parent,
-                   " == ",_info._fileClassPath);
-        Code.debug("Permissions=",_permissions);
+        if (Code.debug())
+        {
+            Code.debug("ClassPath=",_urlClassPath);
+            Code.debug("FileClassPath=",_fileClassPath);
+            Code.debug("Permissions=",_permissions);
+            Code.debug("URL=",Arrays.asList(getURLs()));
+        }
     }
 
     /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private static URL[] decodePath(String classPath)
+    /** Set Java2 compliant status.
+     * @param compliant 
+     */
+    public void setJava2Compliant(boolean compliant)
     {
-        synchronized(__infoMap)
-        {
-            PathInfo info=(PathInfo)__infoMap.get(classPath);
-            if (info!=null && info._urls!=null)
-                return info._urls;
+        _java2compliant=compliant;
+    }
 
-            info = new PathInfo();
-            
-            try{
-                StringTokenizer tokenizer =
-                    new StringTokenizer(classPath,",;");
-                info._urls = new URL[tokenizer.countTokens()];
-                int i=0;
-                while (tokenizer.hasMoreTokens())
-                {
-                    Resource resource =
-                        Resource.newResource(tokenizer.nextToken());
-
-                    info._classPath=(info._classPath==null)
-                        ?resource.toString()
-                        :(info._classPath+File.pathSeparator+resource.toString());
-                    
-                    // Resolve file path if possible
-                    File pfile=resource.getFile();
-                    if (pfile==null)
-                    {
-                        info._unresolved=true;
-                        info._fileClassPath=(info._fileClassPath==null)
-                            ?resource.toString()
-                            :(info._fileClassPath+
-                              File.pathSeparator+
-                              resource.toString());
-                    }
-                    else
-                    {
-                        info._fileClassPath=(info._fileClassPath==null)
-                            ?pfile.getCanonicalPath()
-                            :(info._fileClassPath+
-                              File.pathSeparator+
-                              pfile.getAbsolutePath());            
-                    }
-                    
-                    // Add resource or expand jar/
-                    if (resource.isDirectory() || pfile!=null)
-                        info._urls[i++]=resource.getURL();
-                    else
-                    {
-                        // XXX - this is a jar in a jar, so we must
-                        // extract it - probably should be to an in memory
-                        // structure, but this will do for now.
-                        // XXX - Need to do better with the temp dir
-                        InputStream in =resource.getInputStream();
-                        File file=File.createTempFile("Jetty-",".jar");
-                        file.deleteOnExit();
-                        Code.debug("Extract ",resource," to ",file);
-                        FileOutputStream out = new FileOutputStream(file);
-                        IO.copy(in,out);
-                        out.close();
-                        info._urls[i++]=file.toURL();
-                    }
-                }
-            }
-            catch(Exception e){Code.warning(e);info=null;}
-            catch(Error e){Code.warning(e);info=null;}
-            
-            if (info==null)
-                info=new PathInfo();
-            if (info._urls==null)
-                info._urls=new URL[0];
-            __infoMap.put(classPath,info);
-            
-            return info._urls;        
-        }
+    /* ------------------------------------------------------------ */
+    public boolean isJava2Compliant()
+    {
+        return _java2compliant;
     }
     
-    /* ------------------------------------------------------------ */
-    protected Class findClass(String name)
-        throws ClassNotFoundException
-    {
-        if (Code.verbose())
-            Code.debug("findClass(",name,") from ",_path);
-        try { return super.findClass(name);}
-        catch(RuntimeException e)
-        {
-            Code.warning("Could not find class : "+name,e);
-            throw e;
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    protected synchronized Class loadClass(String name, boolean resolve)
-        throws ClassNotFoundException
-    {
-        if (Code.verbose())
-            Code.debug("loadClass(",name,","+resolve,") from ",_path);
-
-        try { return super.loadClass(name,resolve);}
-        catch(RuntimeException e)
-        {
-            Code.warning("Could not load class : "+name,e);
-            throw e;
-        }
-    }
-
     /* ------------------------------------------------------------ */
     public String getFileClassPath()
     {
-        if (_info._unresolved && !_jspWarned)
-        {
-            _jspWarned=true;
-            Code.warning("Non file CLASSPATH "+_path+
-                         ". If JSP compiles are affected, try extracting WARs");
-        }
-        
-        return _info._fileClassPath;
+        return _fileClassPath;
     }
-    
     
     /* ------------------------------------------------------------ */
     public String toString()
     {
         return "org.mortbay.http.ContextLoader("+
-            _path+") / "+getParent();
+            _urlClassPath+") / "+_parent.toString();
     }
     
     /* ------------------------------------------------------------ */
@@ -195,16 +155,101 @@ public class ContextLoader extends URLClassLoader
     }
     
     /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private static class PathInfo
+    public synchronized Class loadClass(String name)
+        throws ClassNotFoundException
     {
-        URL[] _urls=null;
-        String _classPath=null;
-        String _fileClassPath=null;
-        boolean _unresolved=false;
+        return loadClass(name,false);
     }
     
+    /* ------------------------------------------------------------ */
+    protected synchronized Class loadClass(String name, boolean resolve)
+        throws ClassNotFoundException
+    {
+        Class c = findLoadedClass(name);
+        ClassNotFoundException ex=null;
+        boolean tried_parent=false;
+        if (c==null && _java2compliant||isSystemPath(name) )
+        {
+            if (Code.verbose()) Code.debug("try loadClass ",name," from ",_parent);
+            tried_parent=true;
+            try
+            {
+                c=_parent.loadClass(name);
+                if (Code.verbose()) Code.debug("loaded ",c);
+            }
+            catch(ClassNotFoundException e){ex=e;}
+        }
+        
+        if (c==null)    
+        {
+            if (Code.verbose()) Code.debug("try findClass ",name," from ",_urlClassPath);
+            try
+            {
+                c=this.findClass(name);
+                if (Code.verbose()) Code.debug("loaded ",c);
+            }
+            catch(ClassNotFoundException e){ex=e;}
+        }
+        
+        if (c==null && !tried_parent)
+        {
+            if (Code.verbose()) Code.debug("try loadClass ",name," from ",_parent);
+            c=_parent.loadClass(name);
+            if (Code.verbose()) Code.debug("loaded ",c);
+        }
+        
+        if (c==null)
+            throw ex;
+        
+        if (resolve)
+            resolveClass(c);
+        
+        return c;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public synchronized URL getResource(String name)
+    {
+        URL url = null;
+        boolean tried_parent=false;
+        if (_java2compliant||isSystemPath(name) )
+        {
+            if (Code.verbose()) Code.debug("try getResource ",name," from ",_parent);
+            tried_parent=true;
+            url=_parent.getResource(name);           
+        }
+        
+        if (url==null)    
+        {
+            if (Code.verbose()) Code.debug("try findResource ",name," from ",_urlClassPath);
+            url=this.findResource(name);
+        }
+        
+        if (url==null && !tried_parent)
+        {
+            if (Code.verbose()) Code.debug("try getResource ",name," from ",_parent);
+            url=_parent.getResource(name); 
+        }
+        
+        if (url!=null && Code.verbose())
+            Code.debug("found ",url);
+
+        return url;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isSystemPath(String name)
+    {
+        return (name.startsWith("java.") ||
+                name.startsWith("javax.servlet.") ||
+                name.startsWith("org.mortbay.") ||
+                name.startsWith("java/") ||
+                name.startsWith("javax/servlet/") ||
+                name.startsWith("org/mortbay/") ||
+                name.startsWith("/java/") ||
+                name.startsWith("/javax/servlet/") ||
+                name.startsWith("/org/mortbay/"));
+    }
 }
 
 
