@@ -150,16 +150,10 @@ public class Holder
 
     /* ------------------------------------------------------------ */
     public void start()
-        throws Exception
+        throws ClassNotFoundException
     {
-        ClassLoader loader=_handlerContext.getClassLoader();
-        Code.debug("start holder of ",_className," in ",loader);
-                
-        _class=(loader!=null)
-            ?loader.loadClass(_className)
-            :Class.forName(_className);
-        
-        Code.debug("Holder Class ",_class);
+        _class=_handlerContext.loadClass(_className);
+        Code.debug("Started holder of ",_class);
     }
     
     /* ------------------------------------------------------------ */

@@ -44,6 +44,7 @@ import java.util.StringTokenizer;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.EventListener;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
@@ -51,6 +52,13 @@ import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.RequestDispatcher;
 import java.security.Principal;
+
+import javax.servlet.ServletContextListener;
+import javax.servlet.ServletContextAttributeListener;
+import javax.servlet.http.HttpSessionActivationListener;
+import javax.servlet.http.HttpSessionAttributeListener;
+import javax.servlet.http.HttpSessionBindingListener;
+import javax.servlet.http.HttpSessionListener;
 
 
 /* --------------------------------------------------------------------- */
@@ -186,6 +194,41 @@ public class ServletHandler
     public LogSink getLogSink()
     {
         return _logSink;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void addEventListener(EventListener listener)
+        throws IllegalArgumentException
+    {
+        boolean known=false;
+        if ((listener instanceof ServletContextListener) ||
+            (listener instanceof ServletContextAttributeListener))
+        {
+            known=true;
+            Code.warning(listener.toString(),new Throwable());
+        }
+        
+        if ((listener instanceof HttpSessionActivationListener) ||
+            (listener instanceof HttpSessionAttributeListener) ||
+            (listener instanceof HttpSessionBindingListener) ||
+            (listener instanceof HttpSessionListener))
+            _sessionManager.addEventListener(listener);
+        else if (!known)
+            throw new IllegalArgumentException(listener.toString());
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void removeEventListener(EventListener listener)
+    {
+        if ((listener instanceof ServletContextListener) ||
+            (listener instanceof ServletContextAttributeListener))    
+            Code.notImplemented();
+
+        if ((listener instanceof HttpSessionActivationListener) ||
+            (listener instanceof HttpSessionAttributeListener) ||
+            (listener instanceof HttpSessionBindingListener) ||
+            (listener instanceof HttpSessionListener))
+            _sessionManager.removeEventListener(listener);
     }
     
     /* ------------------------------------------------------------ */
@@ -879,10 +922,8 @@ public class ServletHandler
          */
         public void log(String msg)
         {
-            // XXX logSink ????
-            LogSink logSink = null;
-            if (logSink!=null)
-                logSink.log(Log.EVENT,msg,new
+            if (_logSink!=null)
+                _logSink.log(Log.EVENT,msg,new
                     Frame(2),System.currentTimeMillis());
             else
                 Log.message(Log.EVENT,msg,new Frame(2));
@@ -998,7 +1039,7 @@ public class ServletHandler
         /* ------------------------------------------------------------ */
         /** Get context attribute names.
          * Delegated to HandlerContext.
-     */
+         */
         public Enumeration getAttributeNames()
         {
             return _handlerContext.getAttributeNames();

@@ -356,23 +356,34 @@ public class HandlerContext implements LifeCycle
     {
         return _loader;
     }
-    
-    /* ------------------------------------------------------------ */
-    /** Set the class loader.
-     * If a classpath is also set, this classloader is treated as
-     * a parent loader to a URLClassLoader initialized with the
-     * classpath.
-     * Also sets the org.mortbay.http.HandlerContext.classLoader
-     * attribute.
-     * @param loader 
-     */
-    public void setClassLoader(ClassLoader loader)
-    {
-        _parent=loader;
-        if (isStarted())
-            Code.warning("classpath set while started");
-    }
    
+    /* ------------------------------------------------------------ */
+    public synchronized Class loadClass(String className)
+        throws ClassNotFoundException
+    {
+        if (_loader==null)
+        {
+            // If no parent, then try this threads classes loader as parent
+            if (_parent==null)
+                _parent=Thread.currentThread().getContextClassLoader();
+            
+            // If no parent, then try this classes loader as parent
+            if (_parent==null)
+                _parent=this.getClass().getClassLoader();
+            
+            Code.debug("Init classloader from ",_classPath,
+                       ", ",_parent," for ",this);
+
+            if (_classPath!=null || _permissions!=null)
+                _loader=new ContextLoader(_classPath,_parent,_permissions);
+            else
+                _loader=_parent;
+        }
+        if (className==null)
+            return null;
+        
+        return _loader.loadClass(className);
+    }
     
     /* ------------------------------------------------------------ */
     /** Set the Resource Base.
@@ -1099,7 +1110,6 @@ public class HandlerContext implements LifeCycle
         // Prepare a multi exception
         MultiException mx = new MultiException();
 
-
         // start the context itself
         _started=true;
         getMimeMap();
@@ -1111,24 +1121,10 @@ public class HandlerContext implements LifeCycle
             removeAttribute("org.mortbay.http.HttpServer");
         
         // setup the context loader
-        _loader=null;
-        if (_parent!=null || _classPath!=null ||  this.getClass().getClassLoader()!=null)
+        loadClass(null);
+        
+        if (_loader==null)
         {
-            // If no parent, then try this threads classes loader as parent
-            if (_parent==null)
-                _parent=Thread.currentThread().getContextClassLoader();
-            
-            // If no parent, then try this classes loader as parent
-            if (_parent==null)
-                _parent=this.getClass().getClassLoader();
-
-            Code.debug("Init classloader from ",_classPath,
-                       ", ",_parent," for ",this);
-            
-            if (_classPath==null || _classPath.length()==0)
-                _loader=_parent;
-            else
-                _loader=new ContextLoader(_classPath,_parent,_permissions);
         }
         
         // Start the handlers

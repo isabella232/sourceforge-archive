@@ -24,6 +24,11 @@ import java.util.Set;
 import java.util.ConcurrentModificationException;
 import java.util.EventListener;
 
+import javax.servlet.http.HttpSessionListener;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionAttributeListener;
+import javax.servlet.http.HttpSessionBindingEvent;
+
 public class HashSessionManager implements SessionManager
 {
     /* ------------------------------------------------------------ */
@@ -39,6 +44,10 @@ public class HashSessionManager implements SessionManager
     private int _scavengeDelay = 30000;
     private ServletHandler _handler;
 
+    private ArrayList _sessionListeners=new ArrayList();
+    private ArrayList _sessionAttributeListeners=new ArrayList();
+    
+    
     /* ------------------------------------------------------------ */
     HashSessionManager(ServletHandler handler)
     {
@@ -59,9 +68,13 @@ public class HashSessionManager implements SessionManager
     /* ------------------------------------------------------------ */
     public synchronized HttpSession newHttpSession()
     {
-        HttpSession session = new Session();
+        Session session = new Session();
         session.setMaxInactiveInterval(_dftMaxIdleSecs);
         _sessions.put(session.getId(),session);
+
+        for(int i=0;i<_sessionListeners.size();i++)
+            ((HttpSessionListener)_sessionListeners.get(i))
+                .sessionCreated(session.getHttpSessionEvent());
         return session;
     }
 
@@ -83,10 +96,34 @@ public class HashSessionManager implements SessionManager
             _scavenger = new SessionScavenger();
     }
 
+    /* ------------------------------------------------------------ */
     public void addEventListener(EventListener listener)
+        throws IllegalArgumentException
     {
-        // XXX
-        Code.notImplemented();
+        boolean known =false;
+        if (listener instanceof HttpSessionAttributeListener)
+        {
+            _sessionAttributeListeners.add(listener);
+            known=true;
+        }
+        if (listener instanceof HttpSessionListener)
+        {
+            _sessionListeners.add(listener);
+            known=true;
+        }
+
+        if (!known)
+            throw new IllegalArgumentException("Unknown listener "+listener);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void removeEventListener(EventListener listener)
+    {
+        boolean known =false;
+        if (listener instanceof HttpSessionAttributeListener)
+            _sessionAttributeListeners.remove(listener);
+        if (listener instanceof HttpSessionListener)
+            _sessionListeners.remove(listener);
     }
     
     /* ------------------------------------------------------------ */
@@ -194,7 +231,7 @@ public class HashSessionManager implements SessionManager
             }
         }
     }
-
+    
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -225,7 +262,8 @@ public class HashSessionManager implements SessionManager
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    class Session implements SessionManager.Session
+    class Session
+        implements SessionManager.Session
     {
         HashMap _values = new HashMap(11);
         boolean _invalid=false;
@@ -233,7 +271,8 @@ public class HashSessionManager implements SessionManager
         long _created=System.currentTimeMillis();
         long _accessed=_created;
         long _maxIdleMs = -1;
-        String id=null;
+        String _id;
+        HttpSessionEvent _event;
 
         /* ------------------------------------------------------------- */
         Session()
@@ -245,14 +284,21 @@ public class HashSessionManager implements SessionManager
                     long newId = __nextSessionId;
                     __nextSessionId+=this.hashCode();
                     if (newId<0)newId=-newId;
-                    this.id=Long.toString(newId,30+(int)(_created%7));
+                    this._id=Long.toString(newId,30+(int)(_created%7));
                 }
-                while (_sessions.containsKey(this.id));
+                while (_sessions.containsKey(this._id));
             }
             if (_dftMaxIdleSecs>=0)
                 _maxIdleMs=_dftMaxIdleSecs*1000;
         }
 
+        /* ------------------------------------------------------------ */
+        HttpSessionEvent getHttpSessionEvent()
+        {
+            if (_event==null)
+                _event=new HttpSessionEvent(this);
+            return _event;
+        }
 
         /* ------------------------------------------------------------ */
         public void access()
@@ -277,8 +323,7 @@ public class HashSessionManager implements SessionManager
         public String getId()
             throws IllegalStateException
         {
-            if (_invalid) throw new IllegalStateException();
-            return id;
+            return _id;
         }
 
         /* ------------------------------------------------------------- */
@@ -346,12 +391,27 @@ public class HashSessionManager implements SessionManager
                 Object value = _values.get(key);
                 iter.remove();
                 unbindValue(key, value);
+
+                if (_sessionAttributeListeners.size()>0)
+                {
+                    HttpSessionBindingEvent event =
+                        new HttpSessionBindingEvent(this,key,value);
+                    
+                    for(int i=0;i<_sessionAttributeListeners.size();i++)
+                        ((HttpSessionAttributeListener)
+                         _sessionAttributeListeners.get(i))
+                            .attributeRemoved(event);
+                }
             }
             synchronized (HashSessionManager.this)
             {
-                _sessions.remove(id);
+                _invalid=true;
+                _sessions.remove(_id);
+                for(int i=0;i<_sessionListeners.size();i++)
+                    ((HttpSessionListener)_sessionListeners.get(i)).
+                        sessionDestroyed(getHttpSessionEvent());       
             }
-            _invalid=true;
+             
         }
 
         /* ------------------------------------------------------------- */
@@ -383,10 +443,29 @@ public class HashSessionManager implements SessionManager
             if (_invalid) throw new IllegalStateException();
             Object oldValue = _values.put(name,value);
 
-            if (value != oldValue)
+            if (value==null || !value.equals(oldValue))
             {
                 unbindValue(name, oldValue);
                 bindValue(name, value);
+                
+                if (_sessionAttributeListeners.size()>0)
+                {
+                    HttpSessionBindingEvent event =
+                        new HttpSessionBindingEvent(this,name,
+                                                    oldValue==null?value:oldValue);
+                    
+                    for(int i=0;i<_sessionAttributeListeners.size();i++)
+                    {
+                        HttpSessionAttributeListener l =
+                            (HttpSessionAttributeListener)
+                            _sessionAttributeListeners.get(i);
+                        
+                        if (oldValue==null)
+                            l.attributeAdded(event);
+                        else
+                            l.attributeReplaced(event);
+                    }
+                }
             }
         }
 
@@ -395,7 +474,23 @@ public class HashSessionManager implements SessionManager
         {
             if (_invalid) throw new IllegalStateException();
             Object value=_values.remove(name);
-            unbindValue(name, value);
+            if (value!=null)
+            {
+                unbindValue(name, value);
+                if (_sessionAttributeListeners.size()>0)
+                {
+                    HttpSessionBindingEvent event =
+                        new HttpSessionBindingEvent(this,name,value);
+                    
+                    for(int i=0;i<_sessionAttributeListeners.size();i++)
+                    {
+                        HttpSessionAttributeListener l =
+                            (HttpSessionAttributeListener)
+                            _sessionAttributeListeners.get(i);
+                        l.attributeRemoved(event);
+                    }
+                }
+            }
         }
 
         /* ------------------------------------------------------------- */
@@ -451,7 +546,7 @@ public class HashSessionManager implements SessionManager
         {
             if (value!=null && value instanceof HttpSessionBindingListener)
                 ((HttpSessionBindingListener)value)
-                    .valueBound(new HttpSessionBindingEvent(this,name));
+                    .valueBound(new HttpSessionBindingEvent(this,name));            
         }
 
         /* ------------------------------------------------------------- */

@@ -32,7 +32,14 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.EventListener;
 import javax.servlet.UnavailableException;
+import javax.servlet.ServletContextListener;
+import javax.servlet.ServletContextAttributeListener;
+import javax.servlet.http.HttpSessionActivationListener;
+import javax.servlet.http.HttpSessionAttributeListener;
+import javax.servlet.http.HttpSessionBindingListener;
+import javax.servlet.http.HttpSessionListener;
 
 
 /* ------------------------------------------------------------ */
@@ -305,8 +312,7 @@ public class WebApplicationContext extends ServletHandlerContext
             
             // Look for jars
             Resource lib = _webInf.addPath("lib/");
-            super.setClassPaths(lib,true);
-            
+            super.setClassPaths(lib,true);            
 
             // do web.xml file
             Resource web = _webInf.addPath("web.xml");
@@ -485,7 +491,7 @@ public class WebApplicationContext extends ServletHandlerContext
                 else if ("filter-mapping".equals(name))
                     Code.warning("Not implemented: "+node);
                 else if ("listener".equals(name))
-                    Code.warning("Not implemented: "+node);
+                    initListener(node);
                 else if ("ejb-ref".equals(name))
                     Code.debug("No implementation: ",node);
                 else if ("ejb-local-ref".equals(name))
@@ -604,6 +610,38 @@ public class WebApplicationContext extends ServletHandlerContext
     }
     
 
+    /* ------------------------------------------------------------ */
+    private void initListener(XmlParser.Node node)
+    {
+        String className=node.getString("listener-class",false,true);
+        Object listener =null;
+        try
+        {
+            Class listenerClass=loadClass(className);
+            listener=listenerClass.newInstance();
+        }
+        catch(Exception e)
+        {
+            Code.warning("Could not instantiate listener "+className,e);
+            return;
+        }
+
+        if (!(listener instanceof EventListener))
+        {
+            Code.warning("Not an EventListener: "+listener);
+            return;
+        }
+        if ((listener instanceof ServletContextListener) ||
+            (listener instanceof ServletContextAttributeListener) ||
+            (listener instanceof HttpSessionActivationListener) ||
+            (listener instanceof HttpSessionAttributeListener) ||
+            (listener instanceof HttpSessionBindingListener) ||
+            (listener instanceof HttpSessionListener))
+            _servletHandler.addEventListener((EventListener)listener);
+        else
+            Code.warning("Unknown EventListener: "+listener);
+    }
+    
     /* ------------------------------------------------------------ */
     private void initServletMapping(XmlParser.Node node)
     {
