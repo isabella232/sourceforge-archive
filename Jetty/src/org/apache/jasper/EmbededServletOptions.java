@@ -167,7 +167,7 @@ public final class EmbededServletOptions implements Options {
      * Java platform encoding to generate the JSP
      * page servlet.
      */
-    private String javaEncoding;
+    private String javaEncoding = "UTF8";
 
     public String getProperty(String name ) {
         return settings.getProperty( name );
@@ -425,7 +425,10 @@ public final class EmbededServletOptions implements Options {
                                   
         this.compiler = config.getInitParameter("compiler");
 
-        this.javaEncoding = config.getInitParameter("javaEncoding");
+        String javaEncoding = config.getInitParameter("javaEncoding");
+        if (javaEncoding != null) {
+            this.javaEncoding = javaEncoding;
+        }
 
 	// Setup the global Tag Libraries location cache for this
 	// web-application.

@@ -110,6 +110,7 @@ public class JspServletWrapper {
     private long available = 0L;
     private ServletConfig config;
     private Options options;
+    private boolean firstTime = true;
 
     JspServletWrapper(ServletConfig config, Options options, String jspUri,
                       boolean isErrorPage, JspRuntimeContext rctxt)
@@ -150,6 +151,7 @@ public class JspServletWrapper {
                     }
                     
                     theServlet.init(config);
+                    firstTime = false;
                 }
             }    
         }
@@ -177,7 +179,7 @@ public class JspServletWrapper {
                      Constants.getString("jsp.error.unavailable"));
             }
 
-            if (options.getDevelopment()) {
+            if (options.getDevelopment() || firstTime ) {
                 synchronized (this) {
                     ctxt.compile();
                 }
