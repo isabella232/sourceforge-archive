@@ -9,6 +9,8 @@ import java.io.IOException;
 import org.mortbay.http.SecurityConstraint.Authenticator;
 import java.security.Principal;
 import org.mortbay.util.Code;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.HandshakeCompletedListener;
 
 /* ------------------------------------------------------------ */
 /** Client Certificate Authenticator.
@@ -21,10 +23,28 @@ import org.mortbay.util.Code;
  */
 public class ClientCertAuthenticator implements Authenticator
 {
+    private int _maxHandShakeSeconds =60;
+    
     /* ------------------------------------------------------------ */
     public ClientCertAuthenticator()
     {
         Code.warning("Client Cert Authentication is EXPERIMENTAL");
+    }
+    
+    /* ------------------------------------------------------------ */
+    public int getMaxHandShakeSeconds()
+    {
+        return _maxHandShakeSeconds;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param maxHandShakeSeconds Maximum time to wait for SSL handshake if
+     * Client certification is required.
+     */
+    public void setMaxHandShakeSeconds(int maxHandShakeSeconds)
+    {
+        _maxHandShakeSeconds = maxHandShakeSeconds;
     }
     
     /* ------------------------------------------------------------ */
@@ -44,27 +64,52 @@ public class ClientCertAuthenticator implements Authenticator
             (java.security.cert.X509Certificate[])
             request.getAttribute("javax.servlet.request.X509Certificate");
         if (certs==null || certs.length==0 || certs[0]==null)
-            return null;
-
-        for (int i=0;i<certs.length;i++)
         {
-            Principal principal = certs[i].getSubjectDN();
-            if (principal==null)
-                principal=certs[i].getIssuerDN();
-            UserPrincipal user =
-                realm.authenticate(principal==null?"clientcert":principal.getName(),
-                                   certs[i],request);
-            if (user!=null)
-                return user;
+            // No certs available so lets try and force the issue
+            
+            // Get the SSLSocket
+            Object s = HttpConnection.getHttpConnection().getConnection();
+            if (!(s instanceof SSLSocket))
+                return null;
+            SSLSocket socket = (SSLSocket)s;
+            
+            if (!socket.getNeedClientAuth())
+            {
+                // Need to re-handshake
+                socket.setNeedClientAuth(true);
+                socket.startHandshake();
+
+                // Need to wait here - but not forever. The Handshake
+                // Listener API does not look like a good option to
+                // avoid waiting forever.  So we will take a slightly
+                // busy timelimited approach. For now:
+                for (int i=(_maxHandShakeSeconds*4);i-->0;)
+                {
+                    certs = (java.security.cert.X509Certificate[])
+                        request.getAttribute("javax.servlet.request.X509Certificate");
+                    if (certs!=null && certs.length>0 && certs[0]!=null)
+                        break;
+                    try{Thread.sleep(250);} catch (Exception e) {break;}
+                }
+            }
         }
 
-        return null;
+        if (certs==null || certs.length==0 || certs[0]==null)
+            return null;
+        
+        Principal principal = certs[0].getSubjectDN();
+        if (principal==null)
+            principal=certs[0].getIssuerDN();
+        UserPrincipal user =
+            realm.authenticate(principal==null?"clientcert":principal.getName(),
+                               certs,request);
+            
+        return user;
     }
     
     public String getAuthMethod()
     {
         return SecurityConstraint.__CERT_AUTH;
     }
-
 
 }
