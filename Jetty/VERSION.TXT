@@ -5,6 +5,8 @@ Jetty-5
  + LineInput handles readers with small internal buffer
  + Added LogStream to capture stderr and stdout to logging
  + Fixed many minor issues from J2EE 1.4 TCK testing
+   See sf.net bugs 1031520 - 1032205
+ + Refactored, simplified and optimized HttpOutputStream
 
 Jetty-4
  + LineInput handles readers with small internal buffer
