@@ -1,3 +1,5 @@
+   + Fixed getServletPath for default "/" 
+   + Handle spaces in file names in FileHandler.
 
 Jetty-3.0.A94 - 19 July 2000
    + Implemented Sessions.

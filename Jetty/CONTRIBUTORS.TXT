@@ -31,7 +31,7 @@ Contributions, Testing & valuable feedback from:
   Nicholas Christopher <Nicholas.Christopher@worldnet.att.net>
   Nikos Anerousis <nikos@research.att.com>
   Norbert Renner <norbert.renner@innovations.de>
-  Paul Mclachlan <pdm@acm.org>
+  Nuno Preguiça <nmp@di.fct.unl.pt>  Paul Mclachlan <pdm@acm.org>
   Petr Jiricka <petr.jiricka@netbeans.com>
   Preston L. Bannister <preston@home.com>
   Rafael Posse <rafael.posse@canaldeportivo.com>
