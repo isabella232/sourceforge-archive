@@ -28,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 
-import org.mortbay.util.IO;
-
 /*-------------------------------------------*/
 /**
  * Main start class. This class is intended to be the main class listed in the MANIFEST.MF of the
@@ -433,7 +431,8 @@ public class Main
         }
         finally
         {
-            IO.close(cpcfg);
+            try{cpcfg.close();}
+	    catch(Exception e){e.printStackTrace();}
         }
         // okay, classpath complete.
         System.setProperty("java.class.path",_classpath.toString());
