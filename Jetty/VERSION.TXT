@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
  
+Jetty-3.0.0.rc5 - 9 Nov 2000
+ + Relax webapp rules, accept no web.xml or no WEB-INF
  + Pass flush through ServletOut
  + Avoid jprobe race warnings in DateCache 
  + Allow null cookie values 

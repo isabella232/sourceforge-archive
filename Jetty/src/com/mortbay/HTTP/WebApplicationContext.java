@@ -62,25 +62,60 @@ public class WebApplicationContext extends HandlerContext
             ("web-app_2_2.dtd",
              Resource.newSystemResource("com/mortbay/HTTP/web.dtd"));
 
-        if (webApp.endsWith(".war"))
-        {
-            Resource warFile = Resource.newResource(webApp);
-            webApp="jar:"+warFile+"!/";
-        }
-        
+        // Set dir or WAR
         Resource _webApp = Resource.newResource(webApp);
-        Resource _webInf = _webApp.addPath("WEB-INF/");
-        if (!_webInf.exists() || !_webInf.isDirectory())
-            throw new IllegalArgumentException("No such directory: "+_webInf);
+        if (!_webApp.isDirectory())
+        {
+            webApp="jar:"+_webApp+"!/";
+            _webApp = Resource.newResource(webApp);
+        }
         _webAppName=_webApp.toString();
-        
 
-        // Check web.xml file
-        Resource web = _webApp.addPath("WEB-INF/web.xml");
-        if (!web.exists())
-            throw new IllegalArgumentException("No web file: "+web);
+        // add security handler first
+        _securityHandler=new SecurityHandler();
+        addHandler(_securityHandler);
+            
+        // Add servlet Handler
+        _servletHandler = getServletHandler();
+        _context=_servletHandler.getContext();
+            
+        // ResourcePath
+        super.setResourceBase(_webApp);
 
+        // Resource Handler
+        setServingResources(true);
+        ResourceHandler rh = getResourceHandler();
+        rh.setDirAllowed(true);
+        rh.setPutAllowed(false);
+        rh.setDelAllowed(false);
+
+        // Do the default configuration
         try
+        {
+            if (defaults!=null && defaults.length()>0)
+            {
+                Resource dftResource= Resource.newResource(defaults);
+                XmlParser.Node defaultConfig =
+                    xmlParser.parse(dftResource.getURL().toString());
+                initialize(defaultConfig);
+            }
+        }
+        catch(IOException e)
+        {
+            Code.warning("Parse error on "+_webAppName,e);
+            throw e;
+        }	
+        catch(Exception e)
+        {
+            Code.warning("Configuration error "+_webAppName,e);
+            throw new IOException("Parse error on "+_webAppName+
+                                  ": "+e.toString());
+        }
+
+        
+        // Do we have a WEB-INF
+        Resource _webInf = _webApp.addPath("WEB-INF/");
+        if (_webInf.exists() && _webInf.isDirectory())
         {
             // Look for classes directory
             Resource classes = _webApp.addPath("WEB-INF/classes/");
@@ -105,48 +140,31 @@ public class WebApplicationContext extends HandlerContext
                 }
             }
 
-            // add security handler first
-            _securityHandler=new SecurityHandler();
-            addHandler(_securityHandler);
-            
             // Set the classpath
             if (classPath.length()>0)
                 super.setClassPath(classPath);
-            
-            // Add servlet Handler
-            addHandler(new ServletHandler());
-            _servletHandler = getServletHandler();
-            _context=_servletHandler.getContext();
-            
-            // ResourcePath
-            super.setResourceBase(_webApp);
-            setServingResources(true);
-            ResourceHandler rh = getResourceHandler();
-            rh.setDirAllowed(true);
-            rh.setPutAllowed(true);
-            rh.setDelAllowed(true);
-            
-            if (defaults!=null && defaults.length()>0)
+
+            // do web.xml file
+            Resource web = _webApp.addPath("WEB-INF/web.xml");
+            if (web.exists())
             {
-                Resource dftResource= Resource.newResource(defaults);
-                XmlParser.Node defaultConfig =
-                    xmlParser.parse(dftResource.getURL().toString());
-                initialize(defaultConfig);
+                try
+                {
+                    XmlParser.Node config = xmlParser.parse(web.getURL().toString());
+                    initialize(config);
+                }
+                catch(IOException e)
+                {
+                    Code.warning("Parse error on "+_webAppName,e);
+                    throw e;
+                }	
+                catch(Exception e)
+                {
+                    Code.warning("Configuration error "+_webAppName,e);
+                    throw new IOException("Parse error on "+_webAppName+
+                                          ": "+e.toString());
+                }
             }
-            
-            XmlParser.Node config = xmlParser.parse(web.getURL().toString());
-            initialize(config);
-        }
-        catch(IOException e)
-        {
-            Code.warning("Parse error on "+_webAppName,e);
-            throw e;
-        }	
-        catch(Exception e)
-        {
-            Code.warning("Configuration error "+_webAppName,e);
-            throw new IOException("Parse error on "+_webAppName+
-                                  ": "+e.toString());
         }
     }
 
