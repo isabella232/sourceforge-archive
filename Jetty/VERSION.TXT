@@ -1,9 +1,11 @@
 Jetty Versions
 --------------
 
- + Cleaned up build.xml script
- + Moved JMX and SASL handling to Jetty3Extra
+Jetty-3.1.rc1 - 18 Mar 2001
+ + Moved JMX and SASL handling to Jetty3Extra release
  + Fixed problem with ServletContext.getContext(uri)
+ + Added Jetty documentation pages from JettyWiki
+ + Cleaned up build.xml script
  + Minimal handling of Servlet.log before initialization.
  + Various SSL cleanups
  + Resource handler strips URL params like JSESSION.
