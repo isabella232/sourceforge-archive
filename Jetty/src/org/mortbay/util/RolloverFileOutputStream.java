@@ -20,7 +20,8 @@ import java.util.ListIterator;
 import java.util.StringTokenizer;
 
 /* ------------------------------------------------------------ */
-/** 
+/** A File OutputStream that rolls overs.
+ * If the passed filename contains the string "yyyy_mm_dd" on daily intervals.
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -223,6 +224,13 @@ public class RolloverFileOutputStream extends FilterOutputStream
                 out=null;
                 _file=null;
             }
+
+            //  this will kill the thread when the last stream is removed.
+            if ( __rollovers.size() == 0 ) {
+                __rollover.timeToStop();
+                __rollover.interrupt();
+                __rollover = null;
+            }
         }
     }
     
@@ -232,15 +240,22 @@ public class RolloverFileOutputStream extends FilterOutputStream
     /* ------------------------------------------------------------ */
     private class Rollover extends Thread
     {
+        private boolean timeToStop = false;
+        
         Rollover()
         {
             setName("Rollover");
             setDaemon(true);
         }
         
+        synchronized void timeToStop()
+        {
+            timeToStop = true;
+        }
+
         public void run()
         {
-            while(true)
+            while(!timeToStop)
             {
                 try
                 {

@@ -34,7 +34,9 @@ public class FormAuthenticator implements Authenticator
     public final static String __J_PASSWORD="j_password";
 
     private String _formErrorPage;
+    private String _formErrorPath;
     private String _formLoginPage;
+    private String _formLoginPath;
     
     /* ------------------------------------------------------------ */
     public String getAuthMethod()
@@ -51,6 +53,9 @@ public class FormAuthenticator implements Authenticator
             path="/"+path;
         }
         _formLoginPage=path;
+        _formLoginPath=path;
+        if (_formLoginPath.indexOf('?')>0)
+            _formLoginPath=_formLoginPath.substring(0,_formLoginPath.indexOf('?'));
     }
 
     /* ------------------------------------------------------------ */
@@ -68,6 +73,9 @@ public class FormAuthenticator implements Authenticator
             path="/"+path;
         }
         _formErrorPage=path;
+        _formErrorPath=path;
+        if (_formErrorPath.indexOf('?')>0)
+            _formErrorPath=_formErrorPath.substring(0,_formErrorPath.indexOf('?'));
     }
 
     /* ------------------------------------------------------------ */
@@ -149,7 +157,7 @@ public class FormAuthenticator implements Authenticator
         
         // Don't authenticate authform or errorpage
         if (pathInContext!=null &&
-            pathInContext.equals(_formErrorPage) || pathInContext.equals(_formLoginPage))
+            pathInContext.equals(_formErrorPath) || pathInContext.equals(_formLoginPath))
             return SecurityConstraint.__NOBODY;
         
         // redirect to login page
