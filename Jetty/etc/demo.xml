@@ -76,7 +76,10 @@
     -->
   </Call>
   
-  
+  <!-- Uncomment to capture stderr and stdout to commons logging
+  <Set class="org.mortbay.log.LogStream" name="logStdErr">true</Set>
+  <Set class="org.mortbay.log.LogStream" name="logStdOut">false</Set>
+  -->
 
   <!-- =============================================================== -->
   <!-- Configure the Request Listeners                                 -->

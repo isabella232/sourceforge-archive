@@ -1,6 +1,14 @@
 Jetty Versions
 --------------
 
+Jetty-5
+ + LineInput handles readers with small internal buffer
+ + Added LogStream to capture stderr and stdout to logging
+
+Jetty-4
+ + LineInput handles readers with small internal buffer
+ + Added LogStream to capture stderr and stdout to logging
+
 Jetty-5.0.0 - 10 September 2004
 
 Jetty-5.0.RC4 - 5 September 2004
