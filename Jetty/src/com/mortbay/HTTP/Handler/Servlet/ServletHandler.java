@@ -173,8 +173,8 @@ public class ServletHandler extends NullHandler
 		String servletPathSpec=(String)entry.getKey();
 		ServletHolder holder = (ServletHolder)entry.getValue();
 		
-		Code.debug("Pass request to servlet at ",entry);	
-
+		Code.debug("Pass request to servlet at ",entry);
+		
 		// Build servlet request and response
 		ServletRequest request =
 		    new ServletRequest(contextPath,

@@ -63,6 +63,9 @@ class ServletRequest
 		   HttpRequest request,
 		   Context context)
     {
+	if (servletPath==null)
+	    throw new Error("null servletPath");
+	
 	_contextPath=contextPath;
         _servletPath=servletPath;
 	_pathInfo=pathInfo;

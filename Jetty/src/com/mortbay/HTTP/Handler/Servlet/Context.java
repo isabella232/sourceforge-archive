@@ -124,8 +124,9 @@ public class Context implements ServletContext, HttpSessionContext
 	String resourceBase=_handler.getHandlerContext().getResourceBase();
 	if (resourceBase==null)
 	    return null;
-	
-	return new URL(resourceBase+uri);
+
+	String url=resourceBase+uri;
+	return new URL(url);
     }
     
     /* ------------------------------------------------------------ */
