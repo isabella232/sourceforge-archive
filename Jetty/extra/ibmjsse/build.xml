@@ -8,9 +8,9 @@
 
 -->
 
-<project name="LoadBalancer" default="jars" basedir=".">
+<project name="ibmjsse" default="jars" basedir=".">
 
-  <property name="package"          value="loadbalancer" />
+  <property name="package"          value="ibmjsse" />
   <property environment="env"/>
   <property file="../../ant.properties" />
   <property file="../build.package.properties" />

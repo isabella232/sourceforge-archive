@@ -401,9 +401,9 @@
 
 
   <!-- ==================================================================== -->
-  <target name="tests" depends="javadoc,test"/>
+  <target name="tests" depends="test"/>
   <target name="test" 
-          depends="webapps"
+          depends="webapps,javadoc"
           description="Build and run the test harnesses">
     <ant antfile="${test}/build.xml" inheritAll="true" target="test"/>
   </target>

@@ -134,7 +134,8 @@ public class HttpFields
         __SetCookie = "Set-Cookie",
         __SetCookie2 = "Set-Cookie2",
         __MimeVersion ="MIME-Version",
-        __Identity ="identity";
+        __Identity ="identity",
+        __SoapAction ="SOAPAction";
 
     
     /* ------------------------------------------------------------ */
@@ -235,6 +236,8 @@ public class HttpFields
         new FieldInfo(__AcceptRanges,false);
         new FieldInfo(__Range,false);
         new FieldInfo(__RequestRange,false);
+
+        new FieldInfo(__SoapAction,false);
         
         new FieldInfo(__ContentLocation,false);
         new FieldInfo(__ContentMD5,false);
