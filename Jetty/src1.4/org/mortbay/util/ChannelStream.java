@@ -5,9 +5,12 @@
 
 package org.mortbay.util;
 
-import java.io.*;
-import java.nio.*;
-import java.nio.channels.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.IllegalBlockingModeException;
+import java.nio.channels.SelectableChannel;
+import java.nio.channels.WritableByteChannel;
 
 
 /**

@@ -5,8 +5,7 @@
 
 package org.mortbay.util;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+
 
 
 /*-----------------------------------------------------------------------*/

@@ -5,12 +5,14 @@
 
 package org.mortbay.loadbalancer;
 
-import org.mortbay.util.*;
-import java.net.*;
-import java.io.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.util.*;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
+import org.mortbay.util.ByteBufferPool;
+import org.mortbay.util.Code;
+import org.mortbay.util.NonBlockingQueue;
 
 /* ------------------------------------------------------------ */
 public class Connection 

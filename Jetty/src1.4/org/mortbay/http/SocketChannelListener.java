@@ -4,30 +4,22 @@
 // ========================================================================
 
 package org.mortbay.http;
-import org.mortbay.http.SocketListener;
-import org.mortbay.http.HttpRequest;
-import org.mortbay.http.HttpConnection;
-import org.mortbay.http.HttpInputStream;
-import org.mortbay.util.Code;
-import org.mortbay.util.InetAddrPort;
-import org.mortbay.util.Log;
-import org.mortbay.util.ThreadPool;
-import org.mortbay.util.ChannelStream;
 import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
-import java.net.ServerSocket;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.channels.Channels;
-import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
-import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
+import org.mortbay.util.ChannelStream;
+import org.mortbay.util.Code;
+import org.mortbay.util.Log;
+import org.mortbay.util.ThreadPool;
 
 /* ------------------------------------------------------------ */
 /** Non blocking Listener.
