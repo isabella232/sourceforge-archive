@@ -25,63 +25,83 @@ import com.mortbay.Base.Code;
 public class Transaction
 {
     Database database=null;
-    com.mortbay.JDBC.Connection connection = null;
+    java.sql.Connection connection = null;
 
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param db 
+     * @exception java.sql.SQLException 
+     */
     Transaction(Database db)
 	throws java.sql.SQLException
     {
-	connection = (com.mortbay.JDBC.Connection)db.getConnection();
-	connection.inTransaction=true;
+	connection = db.getConnection();
 	database = db;
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     */
     public void finalize()
     {
 	try{
 	    if (connection!=null)
 		connection.rollback();
 	}
-	catch(Exception e){
+	catch(Exception e)
+	{
 	    Code.debug(e);
 	}    
-	finally{
-	    connection.inTransaction=false;
-	    connection.recycle();
+	finally
+	{
 	    connection=null;
 	}
     }
     
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return 
+     */
     public java.sql.Connection getConnection()
     {
 	return connection;
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @exception java.sql.SQLException 
+     */
     public void commit()
 	 throws java.sql.SQLException
     {
 	try{
 	    connection.commit();
 	}
-	finally{
-	    connection.inTransaction=false;
-	    connection.recycle();
+	finally
+	{
+	    database.recycleConnection(connection);
 	    connection=null;
 	}
     }
     
+    /* ------------------------------------------------------------ */
+    /** 
+     * @exception java.sql.SQLException 
+     */
     public void rollback()
 	 throws java.sql.SQLException
     {
 	try{
 	    connection.rollback();
 	}
-	finally{
-	    connection.inTransaction=false;
-	    connection.recycle();
+	finally
+	{
+	    database.recycleConnection(connection);
 	    connection=null;
 	}
     }
 };
+
 
 
 

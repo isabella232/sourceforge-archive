@@ -18,8 +18,6 @@ public class TestHarness
 	    Class c;
 	    c=loader.loadClass("java.lang.String",true);
 	    test.checkEquals(c,java.lang.String.class,"System class");
-	    c=loader.loadClass("com.mortbay.Jetty.Server21",true);
-	    test.checkEquals(c,com.mortbay.Jetty.Server21.class,"MB System class");
 	    c=loader.loadClass("org.gjt.jsp.JSPClassLoader",true);
 	    try {
 		c=null;

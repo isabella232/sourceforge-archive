@@ -12,6 +12,10 @@ import java.util.*;
  */
 public class Heading extends Block
 {
+    private static final String[] headerTags = {
+	"H1", "H2", "H3", "H4", "H5", "H6"
+    };
+
     /* ----------------------------------------------------------------- */
     /* Construct a heading and add Element, String or Object
      * @param level The level of the heading
@@ -19,8 +23,8 @@ public class Heading extends Block
      */
     public Heading(int level,Object o)
     {
-	super("H"+level);
-	add(o);
+        super((level <= headerTags.length) ? headerTags[level-1] : "H"+level);
+        add(o);
     }
 }
 

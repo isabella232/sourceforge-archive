@@ -48,12 +48,21 @@ public class Database
     public Database()
     {
 	try{
-	    init("com.mortbay.JDBC.MsqlAdaptor",null);
+	    init("com.mortbay.JDBC.CloudscapeAdaptor",
+		 "jdbc:cloudscape:/TestDB");
 	}
-	catch(Exception e)
+	catch(Exception e1)
 	{
-	    Code.fail(e);
+	    try{
+		init("com.mortbay.JDBC.MsqlAdaptor",null);
+	    }
+	    catch(Exception e2)
+	    {
+		Code.warning(e1);
+		Code.fail(e2);
+	    }
 	}
+	
     }
     
     
@@ -257,19 +266,16 @@ public class Database
     public synchronized java.sql.Connection getConnection()
 	 throws SQLException
     {
-	com.mortbay.JDBC.Connection connection = null;
+	java.sql.Connection connection = null;
 	
 	if (connections.size()>0)
 	{
-	    connection = (com.mortbay.JDBC.Connection)connections.pop();
+	    connection = (java.sql.Connection)connections.pop();
 	    Code.debug("New Connection:"+connection);
 	}
 	else
 	{
-	    connection =
-		new com.mortbay.JDBC
-		.Connection(DriverManager.getConnection(url,properties),
-			    this);
+	    connection = DriverManager.getConnection(url,properties);
 	    Code.debug("Recycled Connection:"+connection);
 	}
 	return connection;
@@ -295,12 +301,7 @@ public class Database
 	}
 	
 	if (!closed)
-	{
-	    if (c instanceof com.mortbay.JDBC.Connection)
-		connections.push(c);
-	    else
-		connections.push(new com.mortbay.JDBC.Connection(c,this));
-	}
+	    connections.push(c);
     }
     
     /* ------------------------------------------------------------ */
@@ -328,20 +329,17 @@ public class Database
 						 String query)
 	 throws SQLException
     {
-	Code.debug("Query: "+query);
-	com.mortbay.JDBC.Connection connection = null;
+	Code.debug("Query: ",query);
+	java.sql.Connection connection = null;
 	if (tx==null)
-	    connection = (com.mortbay.JDBC.Connection)getConnection();
+	    connection = getConnection();
 	else
-	    connection = (com.mortbay.JDBC.Connection)tx.getConnection();
+	    connection = tx.getConnection();
 	
 	java.sql.Statement s = connection.createStatement();
 	java.sql.ResultSet rs= s.executeQuery(query);
 
-	com.mortbay.JDBC.ResultSet result =
-	    new com.mortbay.JDBC.ResultSet(rs,connection);
-	
-	return result;
+	return rs;
     }
     
 
@@ -369,16 +367,16 @@ public class Database
     {
 	Code.debug("Update: "+update);
 	
-	com.mortbay.JDBC.Connection connection = null;
+	java.sql.Connection connection = null;
 	if (tx==null)
-	    connection = (com.mortbay.JDBC.Connection)getConnection();
+	    connection = getConnection();
 	else
-	    connection = (com.mortbay.JDBC.Connection)tx.getConnection();
+	    connection = tx.getConnection();
 	Statement s = connection.createStatement();
 	int rows = s.executeUpdate(update);
 	Code.debug("Rows="+rows);
 	s.close();
-	connection.recycle();
+	recycleConnection(connection);
 	return rows;
     }
     

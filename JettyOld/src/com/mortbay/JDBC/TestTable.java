@@ -25,7 +25,7 @@ class TestTable extends Table
     public static final Column NameCol =
     new Column("name","User Name",Column.CHAR(20),Column.PRIMARY);
     public static final Column FullNameCol =
-    new Column("full","Full Name",Column.CHAR(40),Column.KEY);
+    new Column("fullName","Full Name",Column.CHAR(40),Column.KEY);
     public static final Column HeightCol =
     new Column("height","Height cm",Column.INT,Column.NONE);
     public static final Column WeightCol =
@@ -51,14 +51,11 @@ class TestTable extends Table
     }
     
     /* ------------------------------------------------------------ */
-    static void test()
+    static void test(Database db)
     {
 	Test t = new Test("com.mortbay.JDBC.TestTable");
-	Database db=null;
 	Table table=null;
 	try {	    
-	    db = new Database("com.mortbay.JDBC.MsqlAdaptor",
-			      "jdbc:msql://localhost:1114/TestDB");
 	    t.check(true,"Open DB");
 	    table = new TestTable(db);
 	    t.check(true,"New Table");
@@ -73,18 +70,9 @@ class TestTable extends Table
 	    java.sql.Connection con1 = db.getConnection();
 	    java.sql.Connection con2 = db.getConnection();
 	    t.check(con1!=con2,"Got different connections");
-	    java.sql.Connection c1 =
-		((com.mortbay.JDBC.Connection)con1).getDelegate();
-	    java.sql.Connection c2 =
-		((com.mortbay.JDBC.Connection)con2).getDelegate();
-	    t.check(c1!=c2,"Got different delegates");
-	    con1=null;
-	    Thread.sleep(1000);
-	    System.runFinalization();
+	    db.recycleConnection(con1);
 	    java.sql.Connection con3 = db.getConnection();
-	    java.sql.Connection c3 =
-		((com.mortbay.JDBC.Connection)con3).getDelegate();
-	    t.checkEquals(c1,c3,"Recycled Connection on finalize");
+	    t.checkEquals(con1,con3,"Recycled connection");
 	}
 	catch(Exception e){
 	    Code.warning("",e);
@@ -137,10 +125,10 @@ class TestTable extends Table
 	    t.check(row!=null,"Get row");
 	    if (row!=null)
 	    {
-		t.checkEquals(row.get(0).toString(),"mos","Get row value 0");
-		t.checkEquals(row.get(1).toString(),"Michael O'sillyman","Get row value 1");
-		t.checkEquals(row.get(2).toString(),"164","Get row value 2");
-		t.checkEquals(row.get("color").toString(),"GREEN","Get ENUM");
+		t.checkEquals(row.get(0).toString().trim(),"mos","Get row value 0");
+		t.checkEquals(row.get(1).toString().trim(),"Michael O'sillyman","Get row value 1");
+		t.checkEquals(row.get(2).toString().trim(),"164","Get row value 2");
+		t.checkEquals(row.get("color").toString().trim(),"GREEN","Get ENUM");
 		t.check(row.get("dateTime") instanceof java.util.Date,
 			"date is a Date");
 	    }
@@ -170,7 +158,7 @@ class TestTable extends Table
 	    t.check(false,"Duplicate");
 	}
 	catch(Exception e){
-	    t.checkContains(e.toString(),"Non unique","Duplicate");
+	    t.checkContains(e.toString(),"unique","Duplicate");
 	}
 
 	try {
@@ -195,7 +183,7 @@ class TestTable extends Table
 	    t.check(true,"Update called");
 
 	    row = table.getRow("mos");
-	    t.checkEquals(row.get(1).toString(),"Michael O'Sullivan","Get update value 1");
+	    t.checkEquals(row.get(1).toString().trim(),"Michael O'Sullivan","Get update value 1");
 	}
 	catch(Exception e){
 	    e.printStackTrace();
@@ -230,20 +218,6 @@ class TestTable extends Table
 	catch(Exception e){
 	    Code.debug("",e);
 	    t.checkContains(e.toString(),"mSQL","Rollback not supported");
-	}
-    }
-
-    /* ------------------------------------------------------------ */
-    public static void main(String[] args)
-    {
-	try{
-	    Database db = new Database("com.mortbay.JDBC.MsqlAdaptor",
-				       "jdbc:msql://localhost:4333/TestDB");
-	    Table table = new TestTable(db);
-	    System.out.println(table.create());
-	}
-	catch(Exception e){
-	    e.printStackTrace();
 	}
     }
 };

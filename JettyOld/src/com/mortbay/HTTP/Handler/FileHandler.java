@@ -31,7 +31,7 @@ public class FileHandler extends NullHandler
     Vector indexFiles=new Vector(2);
     boolean putAllowed;
     boolean deleteAllowed;
-    boolean dirAllowed;
+    boolean dirAllowed=true;
     String allowHeader = null;
 
     

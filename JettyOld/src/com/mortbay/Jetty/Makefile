@@ -7,7 +7,7 @@
 
 #JAVAOPTIONS := 
 #JAVACOPTIONS :=
-TESTS := Server.java
+TESTS := 
 ROOTNAME := com
 EXCLUDECLASSES := StressTester$$URLGetter.class  StressTester.class            
 

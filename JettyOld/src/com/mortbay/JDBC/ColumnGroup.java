@@ -177,7 +177,7 @@ public class ColumnGroup
 	    new Column("name","User Name",Column.CHAR(20),Column.PRIMARY);
 	NameCol.setAdaptor(db.getAdaptor());
 	Column FullNameCol =
-	    new Column("full","Full Name",Column.CHAR(40),Column.KEY);
+	    new Column("fullName","Full Name",Column.CHAR(40),Column.KEY);
 	FullNameCol.setAdaptor(db.getAdaptor());
 	Column HeightCol =
 	    new Column("height","Height cm",Column.INT,Column.NONE);
@@ -189,14 +189,14 @@ public class ColumnGroup
 
 	t.checkEquals(cg.getName(),"Test","Name constructed");
 	t.checkEquals(cg.columns.length,3,"Columns constructed");
-	t.checkEquals(cg.toString(),"name, full, height","toString()");
+	t.checkEquals(cg.toString(),"name, fullName, height","toString()");
 
 	Object[] values = new Object[3];
 	values[0] = "gregw";
 	values[1] = "Greg Wilkins";
 	values[2] = new Integer(184);
 	t.checkEquals(cg.toString(values),
-		      "name='gregw', full='Greg Wilkins', height=184",
+		      "name='gregw', fullName='Greg Wilkins', height=184",
 		      "toString(values)");
 
 	t.checkEquals(NameCol,cg.column(TestTable.NameCol.getName()),
@@ -204,7 +204,7 @@ public class ColumnGroup
 	t.checkEquals(FullNameCol,cg.column(TestTable.FullNameCol.getName()),
 		      "Get by name column 1");
 	t.checkEquals(cg.columns[0],cg.column("name"),"Get column 0");
-	t.checkEquals(cg.columns[1],cg.column("full"),"Get column 1");
+	t.checkEquals(cg.columns[1],cg.column("fullName"),"Get column 1");
 	t.checkEquals(cg.columns[2],cg.column("height"),"Get column 2");
     }
     

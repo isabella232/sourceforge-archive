@@ -239,7 +239,7 @@ public class Server extends BaseConfiguration
     }
     
     /* ------------------------------------------------------------ */
-    /** Start all configured servers.
+    /** Stop all configured servers.
      */
     public static void stopAll()
     {
@@ -537,7 +537,7 @@ public class Server extends BaseConfiguration
     public void stop()
     {
 	if (httpServer != null)
-	    httpServer.close();
+	    httpServer.stop();
     }
 
 

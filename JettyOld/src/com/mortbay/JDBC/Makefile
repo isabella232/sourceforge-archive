@@ -1,7 +1,9 @@
 ROOTNAME := com
-TESTS := Select.java TestHarness.java
+TESTS := TestHarness.java Select.java 
 JAVAOPTIONS := $(JAVAOPTIONS) -DMSQL2
 EXCLUDECLASSES := MultiTestTable.class TestHarness.class TestTable.class
+
+tests: TestDB
 
 include $(JETTY_HOME)/etc/Global.mk
 msql: all
@@ -15,3 +17,10 @@ ansi: all
 	JAVAOPTIONS=-DDbDriver=com.imaginary.sql.msql.MsqlDriver \
 	runjava -r com CreateTables com.mortbay.JDBC.DbAdaptor \
 	com.mortbay.JDBC.TestTable com.mortbay.JDBC.MultiTestTable
+
+cloudscape: all
+	rm -fr /tmp/TestDB
+	{ echo "connect '/tmp/TestDB;create=true';" ; java com.mortbay.JDBC.CreateTables com.mortbay.JDBC.CloudscapeAdaptor com.mortbay.JDBC.TestTable com.mortbay.JDBC.MultiTestTable ; } | ij
+
+
+TestDB: cloudscape

@@ -149,8 +149,7 @@ public class ServletHolder implements ServletConfig
      * @param name Servlet name
      * @param className Servlet class name (fully qualified)
      * @param initParams Hashtable of parameters
-     * @param initialize ignored
-     * @deprecated initialize not used anymore
+     * @param initialize Set Initialize
      */
     public ServletHolder(String name,
 			 String className,
@@ -160,6 +159,7 @@ public class ServletHolder implements ServletConfig
     {
 	this("com.mortbay.HTTP.Handler.FileJarServletLoader",
 	     name, className,"",initParams);
+	setInitialize(initialize);
     }
 
     /* ---------------------------------------------------------------- */
@@ -252,7 +252,7 @@ public class ServletHolder implements ServletConfig
      * called.
      * @param initialize Initialize at load time if true. 
      */
-    void setInitialize(boolean initialize)
+    public void setInitialize(boolean initialize)
     {
 	this.initializeWhenServerSet=initialize;
     }

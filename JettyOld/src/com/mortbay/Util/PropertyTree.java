@@ -297,6 +297,11 @@ public class PropertyTree extends Properties
     }
     
     /* ------------------------------------------------------------ */
+    /** Get Vector of values.
+     * @param key the Value(s) to get.
+     * @param separators String of separator charactors
+     * @return Vector of values.
+     */
     public Vector getVector(String key, String separators)
     {
 	String values=getProperty(key);

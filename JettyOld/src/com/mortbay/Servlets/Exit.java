@@ -28,7 +28,7 @@ public class Exit extends HttpServlet
 	new Thread(new Runnable(){
 	    public void run(){
 		try{Thread.sleep(1000);}catch(Exception e){}
-		com.mortbay.Jetty.Server.stopAll();
+		com.mortbay.HTTP.HttpServer.stopAll();
 	    }
 	}).start();
 

@@ -87,16 +87,16 @@ public class HtmlFilter extends HttpFilter
 	    switch(c)
 	    {
 	      case '<':
-		  state=(state==0)?1:0;
+		  state=(state==0)?1:state;
 		  break;
 	      case '!':
-		  state=(state==1)?2:0;
+		  state=(state==1)?2:state;
 		  break;
 	      case '=':
-		  state=(state==2)?3:0;
+		  state=(state==2)?3:state;
 		  break;
 	      case '>':
-		  state=(state==4)?5:0;
+		  state=(state==4)?5:state;
 		  break;
 	      default:
 		  state=(state==3||state==4)?4:0;
@@ -104,7 +104,7 @@ public class HtmlFilter extends HttpFilter
 
 	    switch(state)
 	    {
-	      case 0:
+	      case 0: // Normal text
 		  end=i;
 		  // If we are sitting on some tag chars which are not
 		  // in the buffer, write them out.
@@ -114,21 +114,21 @@ public class HtmlFilter extends HttpFilter
 		      out.write("<!".getBytes());
 		  break;
 		  
-	      case 1:
-	      case 2:
+	      case 1: // Got a  <
+	      case 2: // Got a !
 		  break;
 		  
-	      case 3:
-		  // write what we have got
+	      case 3: // Got a =
+		  // write what we have got before the tag
 		  if (end>=off)
 		      out.write(buf,off,end-off+1);
 		  break;
 		  
-	      case 4:
+	      case 4: // Tag text
 		  tagBuf.append(c);
 		  break;
 		  
-	      case 5:
+	      case 5: // End of tag
 		  off=i+1;
 		  tag=tagBuf.toString();
 		  tagBuf.setLength(0);

@@ -14,7 +14,7 @@ public class MultiTestTable  extends Table
      * Column definitions for the table of Tracker Users
      */
     public static final Column NameCol =
-    new Column("name","Full Name",Column.CHAR(40),Column.PRIMARY);
+    new Column("name","Name",Column.CHAR(40),Column.PRIMARY);
 
     public static final Column EmailCol =
     new Column("email","Email Address",Column.CHAR(40),Column.PRIMARY);
@@ -56,14 +56,11 @@ public class MultiTestTable  extends Table
     }
     
     /* ------------------------------------------------------------ */
-    static void test()
+    static void test(Database db)
     {
 	Test t = new Test("com.mortbay.JDBC.MultiTestTable");
-	Database db=null;
 	MultiTestTable table=null;
 	try {	    
-	    db = new Database("com.mortbay.JDBC.MsqlAdaptor",
-			      "jdbc:msql://localhost:1114/TestDB");
 	    t.check(true,"Open DB");
 	    table = new MultiTestTable(db);
 	    t.check(true,"New Table");
@@ -89,14 +86,15 @@ public class MultiTestTable  extends Table
 	    keyVal[1] = (Object)new String("peter@wolf.com");
 	    t.check(true,"make a new key value");
     
+	
 	    Row rr = table.getRow (keyVal);
 	    t.check(rr!=null,"retrieved a row");
 
 	    if (rr != null)
 	    {
-		t.checkEquals(rr.get(table.LoginCol.getName()).toString(),
+		t.checkEquals(rr.get(table.LoginCol.getName()).toString().trim(),
 			      "peer","Retrieved login column");
-		t.checkEquals(rr.get(table.PasswordCol.getName()).toString(),
+		t.checkEquals(rr.get(table.PasswordCol.getName()).toString().trim(),
 			      "gynt","Retrieved password column");
 	    }
 	    

@@ -62,6 +62,7 @@ public class DbAdaptor
      */
     public String quote(String s)
     {
+	Code.debug("QUOTE1: ",s);
 	boolean sq = s.indexOf("'")>=0;
 	boolean dq = s.indexOf('"')>=0;
 
@@ -75,6 +76,7 @@ public class DbAdaptor
 	else
 	    s = "'" + s + "'";
 
+	Code.debug("QUOTE2: ",s);
 	return s;    
     }
 
@@ -111,7 +113,7 @@ public class DbAdaptor
      *         to the underlying database (e.g. quoted string for VARCHAR).
      */
     public String formatColumnValue(Column column, Object value)
-    {	
+    {    
 	if (column.isChar() || column.isText())
 	    return quote(value.toString());
 
@@ -134,8 +136,9 @@ public class DbAdaptor
 
 	    return Long.toString(d.getTime()/1000);
 	}
-
+	
 	return value.toString();
+	
     }
     
     /* ------------------------------------------------------------ */

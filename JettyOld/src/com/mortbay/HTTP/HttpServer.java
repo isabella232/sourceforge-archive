@@ -71,14 +71,18 @@ import java.util.*;
 public class HttpServer implements ServletContext
 {
     /* -------------------------------------------------------------------- */
+    private static Vector __servers = new Vector();
+    
+    /* -------------------------------------------------------------------- */
     private HttpConfiguration config;
 
     private HttpListener[] listeners;
     private PathMap httpHandlersMap;
     private PathMap exceptionHandlersMap;
-    private Hashtable servletHandlerMap = new Hashtable(10);
+    private Hashtable servletHandlerMap = new Hashtable(11);
     private String resourceBase=null;
-	    	
+
+    
     /* -------------------------------------------------------------------- */
     /** Construct, must be configured later
      */
@@ -206,6 +210,8 @@ public class HttpServer implements ServletContext
 	resourceBase=p.getProperty(HttpConfiguration.ResourceBase);
 	if (resourceBase!=null && resourceBase.trim().length()==0)
 	    resourceBase=null;
+
+	__servers.addElement(this);
     }
 
     /* -------------------------------------------------------------------- */
@@ -218,9 +224,21 @@ public class HttpServer implements ServletContext
 	
     /* ------------------------------------------------------------------- */
     /** Close the HttpServer and all its listeners.
+     * @deprecated Use stop
      */
-    public synchronized void close()
+    public void close()
     {
+	stop();
+    }
+    
+    /* ------------------------------------------------------------------- */
+    /** Stop the HttpServer.
+     * Configuration is cleared and the server needs to be reconfigured
+     * to be restarted. This needs to be improved.
+     */
+    public synchronized void stop()
+    {
+	__servers.removeElement(this);
 	servletHandlerMap.clear();
 
 	if (listeners!=null)
@@ -234,6 +252,23 @@ public class HttpServer implements ServletContext
 
 	config=null;
     }
+
+    /* ------------------------------------------------------------------- */
+    /** Stop all instances of HttpServer.
+     */
+    public static void stopAll()
+    {
+	HttpServer[] servers=null;
+	synchronized(__servers)
+	{
+	    servers=new HttpServer[__servers.size()];
+	    __servers.copyInto(servers);
+	}
+
+	for(int i=0;i<servers.length;i++)
+	    servers[i].stop();
+    }
+    
     
     /* ------------------------------------------------------------------- */
     /** join the HttpServer and all its listeners.

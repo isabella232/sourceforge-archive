@@ -1,3 +1,11 @@
+  + Fixed parser bug in HtmlFilter
+  + Made setInitialize public in ServletHolder
+  + Improved performance of com.mortbay.HTML.Heading
+  + Added stop call to HttpServer, used by Exit Servlet.
+  + Simplified JDBC connection handling so that it works 
+    with Java1.2 - albeit less efficiently.
+  + FileHandler defaults to allowing directory access.
+  + JDBC tests modified to use cloudscape as DB.
 
 Release 2.2.2 - 22 July 1999
   + Fixed bug in HtmlFilter that prevented single char buffers

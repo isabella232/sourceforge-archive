@@ -172,10 +172,9 @@ public class Row
     public void update()
 	 throws SQLException
     {
-	Code.debug("Update");
-
 	String update = "";
 
+	Code.debug("Update: ",this);
 	if (exists)
 	{
 	    Code.assert(table.primaryKey!=null && table.otherCols!=null,
@@ -200,6 +199,7 @@ public class Row
 		"UPDATE " + table.getName() +
 		" SET " + table.otherCols.toString(nonKeyValues,", ") +
 		" WHERE " + table.primaryKey.toString(keyValues," AND ");
+	    Code.debug("Update Existing Row: ",update);
 	}
 	else
 	{
@@ -208,6 +208,7 @@ public class Row
 		" VALUES( " + table.toValuesString(values) +
 		" )";
 	    
+	    Code.debug("Update New Row: ",update);
 	    exists=true;
 	}
 	
