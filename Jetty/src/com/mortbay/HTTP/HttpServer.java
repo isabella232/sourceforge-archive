@@ -60,8 +60,6 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     private HashMap _listeners = new HashMap(3);
     private HttpEncoding _httpEncoding ;
     private LogSink _logSink;
-    private DateCache _dateCache=
-        new DateCache("dd/MMM/yyyy:HH:mm:ss");
     private HashMap _realmMap = new HashMap(3);
     
     // HttpServer[host->PathMap[contextPath->List[HanderContext]]]
@@ -115,7 +113,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             Code.debug("HANDLER: ",_hostMap);
         }   
 
-        if (_logSink!=null)
+        if (_logSink!=null && !_logSink.isStarted())
             try{_logSink.start();}catch(Exception e){mex.add(e);}
         
         
@@ -648,24 +646,6 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             
         _logSink=logSink;
     }
-    
-    /* ------------------------------------------------------------ */
-    /** Set the request log date format.
-     * @param format 
-     */
-    public synchronized void setLogDateFormat(String format)
-    {
-        _dateCache=new DateCache(format);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get the request log date format.
-     * @param format 
-     */
-    public synchronized String getLogDateFormat()
-    {
-        return _dateCache.getFormatString();
-    }
         
     /* ------------------------------------------------------------ */
     /** Service a request.
@@ -678,11 +658,12 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
      * If no handler handles the request, 404 Not Found is returned.
      *
      * @param request 
-     * @param response 
+     * @param response
+     * @return The HandlerContext that completed handling of the request or null.
      * @exception IOException 
      * @exception HttpException 
      */
-    public void service(HttpRequest request,HttpResponse response)
+    public HandlerContext service(HttpRequest request,HttpResponse response)
         throws IOException, HttpException
     {
         String host=request.getHost();
@@ -712,19 +693,17 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
                                 (HandlerContext)contextList.get(j);
                             
                             if (Code.debug())
-                                Code.debug("Try ",context,
-                                           ",",new Integer(j));
+                                Code.debug("Try ",context,",",new Integer(j));
 
-                            if (context.handle(request,
-                                               response))
-                                return;
+                            if (context.handle(request,response))
+                                return context;
                         }
                     }   
                 }
             }
             
             // try no host
-            if (request.isHandled() || host==null)
+            if (host==null)
                 break;
             host=null;
         }	
@@ -739,6 +718,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             }
             if (!_notFoundContext.handle(request,response))
                 response.sendError(response.__404_Not_Found);
+            return _notFoundContext;
         }
     }
     
@@ -792,70 +772,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
         }	
         return null;
     }
-
-    /* ------------------------------------------------------------ */
-    /** Log a request and response.
-     * The log is written in combined format.
-     * @param request 
-     * @param response 
-     */
-    public void log(HttpRequest request,
-                    HttpResponse response,
-                    int length)
-    {
-        // Log request - XXX should be in HttpHandler
-        if (_logSink!=null && request!=null && response!=null)
-        {
-            StringBuffer buf = new StringBuffer(256);
     
-            synchronized(buf)
-            {
-                buf.setLength(0);
-                buf.append(request.getRemoteAddr());
-                buf.append(" - ");
-                String user = (String)request.getAttribute(HttpRequest.__AuthUser);
-                buf.append((user==null)?"-":user);
-                buf.append(" [");
-                buf.append(_dateCache.format(System.currentTimeMillis()));
-                buf.append("] \"");
-                request.appendRequestLine(buf);
-                buf.append("\" ");
-                buf.append(response.getStatus());
-                if (length>=0)
-                {
-                    buf.append(' ');
-                    buf.append(length);
-                    buf.append(' ');
-                }
-                else
-                    buf.append(" - ");
-                
-                String referer = request.getField(HttpFields.__Referer);
-                if(referer==null)
-                    buf.append("- ");
-                else
-                {
-                    buf.append('"');
-                    buf.append(referer);
-                    buf.append("\" ");
-                }
-                
-                String agent = request.getField(HttpFields.__UserAgent);
-                    
-                if(agent==null)
-                    buf.append('-');
-                else
-                {
-                    buf.append('"');
-                    buf.append(agent);
-                    buf.append('"');
-                }
-                
-                _logSink.log(buf.toString());
-            }
-        }
-    }
-
     /* ------------------------------------------------------------ */
     public UserRealm addRealm(UserRealm realm)
     {
@@ -903,6 +820,193 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
         return _hostMap;
     }
 
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private boolean _statsOn=false;
+    private int _connections;
+    private int _connectionsOpen;
+    private int _connectionsOpenMax;
+    private long _connectionsDurationAve;
+    private long _connectionsDurationMax;
+    private int _connectionsRequestsAve;
+    private int _connectionsRequestsMax;
+
+    private int _requests;
+    private int _requestsActive;
+    private int _requestsActiveMax;
+    private long _requestsDurationAve;
+    private long _requestsDurationMax;    
+
+    /* ------------------------------------------------------------ */
+    /** Reset statistics.
+     */
+    public void statsReset()
+    {
+        _connections=0;
+        _connectionsOpen=0;
+        _connectionsOpenMax=0;
+        _connectionsDurationAve=0;
+        _connectionsDurationMax=0;
+        _connectionsRequestsAve=0;
+        _connectionsRequestsMax=0;
+        
+        _requests=0;
+        _requestsActive=0;
+        _requestsActiveMax=0;
+        _requestsDurationAve=0;
+        _requestsDurationMax=0;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setStatsOn(boolean on)
+    {
+        Log.event("Statistics on = "+on+" for "+this);
+        _statsOn=on;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if statistics collection is turned on.
+     */
+    public boolean getStatsOn()
+    {
+        return _statsOn;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Number of connections accepted by the server since
+     * statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getConnections() {return _connections;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Number of connections currently open that were opened
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getConnectionsOpen() {return _connectionsOpen;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Maximum number of connections opened simultaneously
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getConnectionsOpenMax() {return _connectionsOpenMax;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Sliding average duration in milliseconds of open connections
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public long getConnectionsDurationAve() {return _connectionsDurationAve/128;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Maximum duration in milliseconds of an open connection
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public long getConnectionsDurationMax() {return _connectionsDurationMax;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Sliding average number of requests per connection
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getConnectionsRequestsAve() {return _connectionsRequestsAve/16;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Maximum number of requests per connection
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getConnectionsRequestsMax() {return _connectionsRequestsMax;}
+
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Number of requests
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getRequests() {return _requests;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Number of requests currently active.
+     * Undefined if setStatsOn(false).
+     */
+    public int getRequestsActive() {return _requestsActive;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Maximum number of active requests
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getRequestsActiveMax() {return _requestsActiveMax;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Average duration of request handling in milliseconds 
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public long getRequestsDurationAve() {return _requestsDurationAve/128;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Get maximum duration in milliseconds of request handling
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public long getRequestsDurationMax() {return _requestsDurationMax;}
+    
+    /* ------------------------------------------------------------ */
+    synchronized void statsOpenConnection()
+    {
+        if (++_connectionsOpen > _connectionsOpenMax)
+            _connectionsOpenMax=_connectionsOpen;
+    }
+    
+    /* ------------------------------------------------------------ */
+    synchronized void statsGotRequest()
+    {
+        if (++_requestsActive > _requestsActiveMax)
+            _requestsActiveMax=_requestsActive;
+    }
+    
+    /* ------------------------------------------------------------ */
+    synchronized void statsEndRequest(long duration)
+    {
+        _requests++;
+        _requestsActive--;
+        if (_requestsActive<0)
+            _requestsActive=0;
+        if (duration>_requestsDurationMax)
+            _requestsDurationMax=duration;
+        if (_requestsDurationAve==0)
+            _requestsDurationAve=duration*128;
+        _requestsDurationAve=_requestsDurationAve-_requestsDurationAve/128+duration;
+    }
+    
+    /* ------------------------------------------------------------ */
+    synchronized void statsCloseConnection(long duration,int requests)
+    {
+        _connections++;
+        _connectionsOpen--;
+        if (_connectionsOpen<0)
+            _connectionsOpen=0;
+        if (duration>_connectionsDurationMax)
+            _connectionsDurationMax=duration;
+        if (_connectionsDurationAve==0)
+            _connectionsDurationAve=128*duration;
+        _connectionsDurationAve=_connectionsDurationAve-_connectionsDurationAve/128+duration;
+        if (requests>_connectionsRequestsMax)
+            _connectionsRequestsMax=requests;
+        if (_connectionsRequestsAve==0)
+            _connectionsRequestsAve=16;
+        _connectionsRequestsAve=_connectionsRequestsAve-_connectionsRequestsAve/16+requests;
+    }
+    
+    /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /** Construct server from command line arguments.
      * @param args 

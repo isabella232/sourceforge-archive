@@ -10,6 +10,7 @@ import com.mortbay.HTTP.Handler.SecurityHandler;
 import com.mortbay.HTTP.Handler.ForwardHandler;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.IO;
+import com.mortbay.Util.LogSink;
 import com.mortbay.Util.Resource;
 import com.mortbay.Util.StringUtil;
 import com.mortbay.Util.LifeCycle;
@@ -88,6 +89,7 @@ public class HandlerContext implements LifeCycle
     private ClassLoader _loader;
     private Resource _resourceBase;
     private boolean _started;
+    private LogSink _logSink;
 
     private Map _attributes = new HashMap(11);
     private Map _initParams = new HashMap(11);
@@ -1016,8 +1018,13 @@ public class HandlerContext implements LifeCycle
     {
         if (_httpServer==null)
             throw new IllegalStateException("No server for "+this);
-
+        
         MultiException mx = new MultiException();
+        
+        if (_logSink==null)
+            _logSink=_httpServer.getLogSink();
+        else if (!_logSink.isStarted())
+            try{_logSink.start();}catch(Exception e){mx.add(e);}    
         
         _started=true;
 
@@ -1107,12 +1114,16 @@ public class HandlerContext implements LifeCycle
                     catch(Exception e){Code.warning(e);}
                 }
             }
+            
+            if (_logSink!=null && _logSink!=_httpServer.getLogSink() && _logSink.isStarted())
+                _logSink.stop();
         }
         finally
         {
             thread.setContextClassLoader(lastContextLoader);
         }
         _loader=null;
+        
     }
     
     /* ------------------------------------------------------------ */
@@ -1140,6 +1151,9 @@ public class HandlerContext implements LifeCycle
                     catch(Exception e){Code.warning(e);}
                 }
             }
+        
+            if (_logSink!=null && _logSink!=_httpServer.getLogSink() && _logSink.isStarted())
+                setLogSink(null);
         }
         finally
         {
@@ -1170,5 +1184,90 @@ public class HandlerContext implements LifeCycle
     public synchronized boolean isDestroyed()
     {
         return _handlers==null;
-    }    
+    }
+
+
+    /* ------------------------------------------------------------ */
+    int _requests;
+    
+    /* ------------------------------------------------------------ */
+    public synchronized LogSink getLogSink()
+    {
+        return _logSink;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the request log for the context.
+     * Set the LogSink to be used for the request log for this
+     * context. The log is written in the combined format.
+     * @param logSink If null, the HttpServers logSink is used.
+     */
+    public synchronized void setLogSink(LogSink logSink)
+    {
+        _logSink=logSink;
+    }
+        
+    /* ------------------------------------------------------------ */
+    /** Log a request and response.
+     * The log is written in combined format.
+     * @param request 
+     * @param response 
+     */
+    void log(HttpRequest request,
+             HttpResponse response,
+             int length)
+    {
+        
+        if (_logSink!=null && request!=null && response!=null)
+        {
+            StringBuffer buf = new StringBuffer(256);
+    
+            synchronized(buf)
+            {
+                buf.setLength(0);
+                buf.append(request.getRemoteAddr());
+                buf.append(" - ");
+                String user = (String)request.getAttribute(HttpRequest.__AuthUser);
+                buf.append((user==null)?"-":user);
+                buf.append(" [");
+                buf.append(response.getField(HttpFields.__Date));
+                buf.append("] \"");
+                request.appendRequestLine(buf);
+                buf.append("\" ");
+                buf.append(response.getStatus());
+                if (length>=0)
+                {
+                    buf.append(' ');
+                    buf.append(length);
+                    buf.append(' ');
+                }
+                else
+                    buf.append(" - ");
+                
+                String referer = request.getField(HttpFields.__Referer);
+                if(referer==null)
+                    buf.append("- ");
+                else
+                {
+                    buf.append('"');
+                    buf.append(referer);
+                    buf.append("\" ");
+                }
+                
+                String agent = request.getField(HttpFields.__UserAgent);
+                    
+                if(agent==null)
+                    buf.append('-');
+                else
+                {
+                    buf.append('"');
+                    buf.append(agent);
+                    buf.append('"');
+                }
+                
+                _logSink.log(buf.toString());
+            }
+        }
+    }
+
 }
