@@ -724,14 +724,13 @@ public class HttpRequest extends HttpMessage
                             InputStream in = getInputStream();
                             int offset=0;
                             int len=0;
-                            do
+                            while ((content_length - offset) > 0)
                             {
                                  len=in.read(content,offset,content_length-offset);
                                  if (len <= 0)
-                                     throw new IOException("Premature EOF");
+                                     throw new IOException("Premature EOF reading params");
                                  offset+=len;
                             }
-                            while ((content_length - offset) > 0);
 
                             // Add form params to query params
                             String contentStr = new String(content,

@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Handle empty form content without exception.
  + Fixed pipelined request buffer bug.
  + Included new Jetty Logo
  + Implemented web.xml servlet mapping to a JSP
