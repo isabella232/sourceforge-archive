@@ -10,6 +10,7 @@ Jetty-3.0.B04 - 12 Oct 2000
  + Do not try multiple servlets for a request.
  + Implemented Context.getContext(uri)
  + Added webdefault.xml for web applications.
+ + Redirect to index files, so index.jsp works.
 
 Jetty-3.0.B03 - 9th Oct 2000
  + Expanded import package.*; lines

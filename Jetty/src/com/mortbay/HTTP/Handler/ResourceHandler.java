@@ -318,10 +318,10 @@ public class ResourceHandler extends NullHandler
       
                     if (index.exists())
                     {
-                        // Check modified dates
-                        if (!checkGetHeader(request,response,index))
-                            return;
-                        sendFile(request,response,index);
+                        // Redirect to the index
+                        StringBuffer url=request.getRequestURL();
+                        url.append(_indexFiles.get(i));
+                        response.sendRedirect(url.toString());
                         indexSent=true;
                         break;
                     }
@@ -331,7 +331,6 @@ public class ResourceHandler extends NullHandler
                     sendDirectory(request,response,resource,
                                   path.length()>1);
             }
-     
             // check if it is a file
             else if (resource.exists())
             {
