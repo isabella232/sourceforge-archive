@@ -19,6 +19,7 @@ import org.javagroups.Address;
 import org.javagroups.Channel;
 import org.javagroups.JChannel;
 import org.javagroups.MembershipListener; // we are notified of changes to membership list
+import org.javagroups.MergeView;
 import org.javagroups.Message;
 import org.javagroups.MessageListener; // we are notified of changes to other state
 import org.javagroups.View;
@@ -384,16 +385,19 @@ public class
 
   // Called when channel membership changes
   public void
-    viewAccepted(View new_view)
+    viewAccepted(View newView)
     {
-      _log.info("viewAccepted("+new_view+")");
+      _log.info("viewAccepted("+newView+")");
 
-      Vector new_mbrs=new_view.getMembers();
+      boolean isMerge=(newView instanceof MergeView);
+      _log.warn("merging... NYI");
 
-      if (new_mbrs != null)
+      Vector newMembers=newView.getMembers();
+
+      if (newMembers != null)
       {
  	_members.clear();
- 	_members.addAll(new_mbrs);
+ 	_members.addAll(newMembers);
 	_members.remove(_channel.getLocalAddress());
       }
     }
