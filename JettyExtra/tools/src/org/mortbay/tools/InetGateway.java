@@ -34,8 +34,8 @@ import java.util.Vector;
  *
  * <p><h4>Usage</h4>
  * <PRE>
- * java org.mortbay.util.InetGateway [-dump|-summary] [LocalHost:]LocalPort ForwardHost:ForwardPort
- * java org.mortbay.util.InetGateway propertyFile.prp
+ * java org.mortbay.tools.InetGateway [-dump|-summary] [LocalHost:]LocalPort ForwardHost:ForwardPort
+ * java org.mortbay.tools.InetGateway propertyFile.prp
  * </pre>
  *
  * @version $Id$
