@@ -199,11 +199,11 @@ public class HttpResponse extends HttpMessage
     public synchronized  void writeHeader(Writer writer) 
         throws IOException
     {
-        if (_state!=__MSG_EDITABLE && _state!=__MSG_SENDING)
+        if (_state!=__MSG_EDITABLE)
             throw new IllegalStateException(__state[_state]+
-                                            " is not EDITABLE || SENDING");
+                                            " is not EDITABLE");
         if (_header==null)
-            throw new IllegalStateException("Response is destroued");
+            throw new IllegalStateException("Response is destroyed");
         
         String status=_status+" ";
         if (Code.verbose())
@@ -482,7 +482,15 @@ public class HttpResponse extends HttpMessage
         super.destroy();
     }
 
-
+    /* ------------------------------------------------------------ */
+    public synchronized void commitHeader()
+        throws IOException
+    {
+        if (Code.verbose(99))Code.debug("response.commitHeader");
+        _connection.commitResponse();
+        super.commitHeader();
+    }
+    
     /* ------------------------------------------------------------ */
     /** 
      * @exception IOException 
@@ -493,11 +501,13 @@ public class HttpResponse extends HttpMessage
         if (isCommitted())
             return;
         
-        _connection.commitResponse();
+        if (Code.verbose(99))Code.debug("response.commit");
         super.commit();
         HttpRequest request=getRequest();
         if (request!=null)
             request.setHandled(true);
     }
 }
+
+
 

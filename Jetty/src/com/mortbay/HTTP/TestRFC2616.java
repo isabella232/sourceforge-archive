@@ -429,7 +429,7 @@ public class TestRFC2616
         {
             TestRFC2616 listener = new TestRFC2616();
             listener.getHttpServer().getContext("VirtualHost",
-                                                "/path")
+                                                "/path/*")
                 .addHandler(new DumpHandler());
             listener.getHttpServer().start();
             String response;
@@ -878,9 +878,6 @@ public class TestRFC2616
             t.checkContains(response,offset,
                             "Connection: close",
                             "closed");
-            t.checkContains(response,offset,
-                            "Transfer-Encoding: chunked",
-                            "chunked content length");
             
         }
         catch(Exception e)

@@ -302,6 +302,45 @@ public class QuotedStringTokenizer
         }
         return s;
     }
+
+
+    /* ------------------------------------------------------------ */
+    /** Unquote a string.
+     * @param s The string to unquote.
+     * @return quoted string
+     */
+    public static String unquote(String s)
+    {
+        if (s==null)
+            return null;
+        if (s.length()<2)
+            return s;
+
+        char first=s.charAt(0);
+        char last=s.charAt(s.length()-1);
+        if (first!=last || (first!='"' && first!='\''))
+            return s;
+        
+        StringBuffer b=new StringBuffer(s.length()-2);
+        synchronized(b)
+        {
+            boolean quote=false;
+            for (int i=1;i<s.length()-1;i++)
+            {
+                char c = s.charAt(i);
+
+                if (c=='\\' && !quote)
+                {
+                    quote=true;
+                    continue;
+                }
+                quote=false;
+                b.append(c);
+            }
+            
+            return b.toString();
+        }
+    }
 }
 
 

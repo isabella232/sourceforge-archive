@@ -361,7 +361,7 @@ abstract public class HttpMessage
      */
     public void setDateField(String name, Date date)
     {
-        setFields().put(name,date);
+        setFields().putDateField(name,date);
     }
     
     /* -------------------------------------------------------------- */
@@ -520,14 +520,6 @@ abstract public class HttpMessage
         _header=null;
         _trailer=null;
     }
-
-    /* ------------------------------------------------------------ */
-    /** Write the message header
-     * @param writer
-     */
-    abstract void writeHeader(Writer writer)
-        throws IOException;
-    
     /* ------------------------------------------------------------ */
     /** Convert to String.
      * The message header is converted to a String.
@@ -553,6 +545,31 @@ abstract public class HttpMessage
         return writer.toString();
     }
 
+
+    /* ------------------------------------------------------------ */
+    /** Write the message header
+     * @param writer
+     */
+    abstract void writeHeader(Writer writer)
+        throws IOException;
+
+    /* ------------------------------------------------------------ */
+    public synchronized void commitHeader()
+        throws IOException
+    {
+        ChunkableOutputStream out = getOutputStream();
+        if (out==null)
+            throw new IllegalStateException("No output stream");
+
+        if (Code.verbose(99))Code.debug("commitHeader");
+        
+        _connection.setupOutputStream();
+        Writer writer = out.getRawWriter();
+        writeHeader(writer);
+        _state=__MSG_SENDING;
+        out.writeRawWriter();
+    }
+    
     /* ------------------------------------------------------------ */
     /** Commit the message.
      * Take whatever actions possible to move the message to the SENDING state.
@@ -560,22 +577,18 @@ abstract public class HttpMessage
     public synchronized void commit()
         throws IOException, IllegalStateException
     {
-        if (Code.verbose(99))
-            Code.debug("Commit from "+__state[_state]);
+        if (isCommitted())
+            return;
         
-        int lastState=_state;
-        _state=__MSG_SENDING;
+        if (Code.verbose(99))
+            Code.debug("commit from "+__state[_state]);
         
         ChunkableOutputStream out = getOutputStream();
-        if (out==null)
-            throw new IllegalStateException("No output stream");
         
-        switch(lastState)
+        switch(_state)
         {
           case __MSG_EDITABLE:
-              Writer writer = out.getRawWriter();
-              writeHeader(writer);
-              out.writeRawWriter();
+              commitHeader();
               out.flush();
               break;
           case __MSG_BAD:
@@ -583,12 +596,24 @@ abstract public class HttpMessage
           case __MSG_RECEIVED:
               throw new IllegalStateException("RECEIVED");
           case __MSG_SENDING:
+              out.flush();
               break;
           case __MSG_SENT:
               break;
         }
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return 
+     */
+    public boolean isCommitted()
+    {
+        ChunkableOutputStream out=getOutputStream();
+        return out!=null && out.isCommitted() ||
+            _state==__MSG_SENDING ||
+            _state==__MSG_SENT;
+    }
     
     /* ------------------------------------------------------------ */
     /** 
@@ -603,16 +628,6 @@ abstract public class HttpMessage
                  (out.isWritten() || out.isCommitted()));
     }
     
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
-    public boolean isCommitted()
-    {
-        ChunkableOutputStream out=getOutputStream();
-        return out!=null && out.isCommitted() ||
-            _state==__MSG_SENT || _state==__MSG_SENDING;
-    }
 
     /* ------------------------------------------------------------ */
     public synchronized void complete()

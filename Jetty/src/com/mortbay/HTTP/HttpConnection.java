@@ -42,6 +42,7 @@ public class HttpConnection
     private String _version;
     private boolean _http1_1;
     private boolean _http1_0;
+    private boolean _outputSetup;
     private HttpRequest _request;
     private HttpResponse _response;
     private Thread _handlingThread;
@@ -69,6 +70,7 @@ public class HttpConnection
             throw new IllegalArgumentException("OutputStream is already chunkable");
         _outputStream=new ChunkableOutputStream(out);
         _outputStream.addObserver(this);
+        _outputSetup=false;
     }
 
     /* ------------------------------------------------------------ */
@@ -635,103 +637,24 @@ public class HttpConnection
     {
         if (_response==null)
             return;
-        
+
         switch(action)
         {
           case OutputObserver.__FIRST_WRITE:
               if(Code.verbose()) Code.debug("notify FIRST_WRITE ");
-              
-              // Determine how to limit content length and
-              // enable output transfer encodings 
-              List transfer_coding=_response.getFieldValues(HttpFields.__TransferEncoding);
-              if (transfer_coding==null || transfer_coding.size()==0)
-              {
-                  // Default to chunking for HTTP/1.1
-                  if (_http1_1)
-                  {
-                      _response.removeField(HttpFields.__ContentLength);
-                      _response.setField(HttpFields.__TransferEncoding,
-                                         HttpFields.__Chunked);
-                      _outputStream.setChunking();
-                  }
-                  else if (_http1_0)
-                  {
-                      // If we dont have a content length, we can't be persistent
-                      if (!_keepAlive || !_persistent ||
-                          _response.getIntField(HttpFields.__ContentLength)<0)
-                      {
-                          _persistent=false;
-                          _response.setField(HttpFields.__Connection,
-                                             HttpFields.__Close);
-                      }
-                      else if (_keepAlive)
-                          _response.setField(HttpFields.__Connection,
-                                             HttpFields.__KeepAlive);
-                  }
-              }
-              else if (_http1_0)
-              {
-                  // Error for transfer encoding to be set in HTTP/1.0
-                  _response.removeField(HttpFields.__TransferEncoding);
-                  throw new HttpException(_response.__501_Not_Implemented,
-                                          "Transfer-Encoding not supported in HTTP/1.0");
-              }
-              else
-              {
-                  // Examine and apply transfer encodings
-                  
-                  HashMap coding_params = new HashMap(7);
-                  for (int i=transfer_coding.size();i-->0;)
-                  {
-                      coding_params.clear();
-                      String coding =
-                          HttpFields.valueParameters(transfer_coding.get(i).toString(),
-                                                     coding_params);
-                      coding=StringUtil.asciiToLowerCase(coding);
-
-                      // Ignore identity coding
-                      if (HttpFields.__Identity.equals(coding))
-                          continue;
-                
-                      // Handle Chunking
-                      if (HttpFields.__Chunked.equals(coding))
-                      {
-                          // chunking must be last and have no parameters
-                          if (i+1!=transfer_coding.size() ||
-                              coding_params.size()>0)
-                              throw new HttpException(_response.__400_Bad_Request,
-                                                      "Missing or incorrect chunked transfer-encoding");
-                          out.setChunking();
-                      }
-                      else
-                      {
-                          // Check against any TE field
-                          List te = _request.getAcceptableTransferCodings();
-                          if (te==null || !te.contains(coding))
-                              throw new HttpException(_response.__501_Not_Implemented,
-                                                      "User agent does not accept "+
-                                                      coding+
-                                                      " transfer-encoding");
-
-                          // Set coding
-                          getHttpServer().getHttpEncoding()
-                              .enableEncoding(out,coding,coding_params);
-                      }
-                  }
-              }
-
-              // Nobble the OutputStream for HEAD requests
-              if (_request.__HEAD.equals(_request.getMethod()))
-                  _outputStream.nullOutput();
+              if (!_outputSetup)
+                  setupOutputStream();
               break;
               
           case OutputObserver.__RESET_BUFFER:
               if(Code.verbose()) Code.debug("notify RESET_BUFFER");
+              _outputSetup=false;
               break;
               
           case OutputObserver.__COMMITING:
               if(Code.verbose()) Code.debug("notify COMMITING");
-              _response.commit();
+              if (_response.getState()==HttpMessage.__MSG_EDITABLE)
+                  _response.commitHeader();
               break;
               
           case OutputObserver.__COMMITED:
@@ -750,10 +673,114 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
+    /** Setup the reponse output stream.
+     * Use the current state of the request and response, to set tranfer
+     * parameters such as chunking and content length.
+     */
+    public synchronized void setupOutputStream()
+        throws IOException
+    {
+        if (_outputSetup)
+            return;
+        _outputSetup=true;
+
+        if (Code.verbose())Code.debug("setupOutputStream");
+        
+        // Determine how to limit content length and
+        // enable output transfer encodings 
+        List transfer_coding=_response.getFieldValues(HttpFields.__TransferEncoding);
+        if (transfer_coding==null || transfer_coding.size()==0)
+        {
+            // Default to chunking for HTTP/1.1
+            if (_http1_1)
+            {
+                _response.removeField(HttpFields.__ContentLength);
+                _response.setField(HttpFields.__TransferEncoding,
+                                   HttpFields.__Chunked);
+                _outputStream.setChunking();
+            }
+            else if (_http1_0)
+            {
+                // If we dont have a content length, we can't be persistent
+                if (!_keepAlive || !_persistent ||
+                    _response.getIntField(HttpFields.__ContentLength)<0)
+                {
+                    _persistent=false;
+                    _response.setField(HttpFields.__Connection,
+                                       HttpFields.__Close);
+                }
+                else if (_keepAlive)
+                    _response.setField(HttpFields.__Connection,
+                                       HttpFields.__KeepAlive);
+            }
+        }
+        else if (_http1_0)
+        {
+            // Error for transfer encoding to be set in HTTP/1.0
+            _response.removeField(HttpFields.__TransferEncoding);
+            throw new HttpException(_response.__501_Not_Implemented,
+                                    "Transfer-Encoding not supported in HTTP/1.0");
+        }
+        else
+        {
+            // Examine and apply transfer encodings
+            
+            HashMap coding_params = new HashMap(7);
+            for (int i=transfer_coding.size();i-->0;)
+            {
+                coding_params.clear();
+                String coding =
+                    HttpFields.valueParameters(transfer_coding.get(i).toString(),
+                                               coding_params);
+                coding=StringUtil.asciiToLowerCase(coding);
+
+                // Ignore identity coding
+                if (HttpFields.__Identity.equals(coding))
+                    continue;
+                
+                // Handle Chunking
+                if (HttpFields.__Chunked.equals(coding))
+                {
+                    // chunking must be last and have no parameters
+                    if (i+1!=transfer_coding.size() ||
+                        coding_params.size()>0)
+                        throw new HttpException(_response.__400_Bad_Request,
+                                                "Missing or incorrect chunked transfer-encoding");
+                    _outputStream.setChunking();
+                }
+                else
+                {
+                    // Check against any TE field
+                    List te = _request.getAcceptableTransferCodings();
+                    if (te==null || !te.contains(coding))
+                        throw new HttpException(_response.__501_Not_Implemented,
+                                                "User agent does not accept "+
+                                                coding+
+                                                " transfer-encoding");
+
+                    // Set coding
+                    getHttpServer().getHttpEncoding()
+                        .enableEncoding(_outputStream,coding,coding_params);
+                }
+            }
+        }
+
+        // Nobble the OutputStream for HEAD requests
+        if (_request.__HEAD.equals(_request.getMethod()))
+            _outputStream.nullOutput();
+    }
+
+    
+    /* ------------------------------------------------------------ */
     /** 
      */
-    void commitResponse()
+    synchronized void commitResponse()
+        throws IOException
     {
+        if (Code.verbose())Code.debug("commitResponse");
+            
+        _outputSetup=true;
+        
         // Handler forced close
         _close=HttpFields.__Close.equals
             (_response.getField(HttpFields.__Connection));

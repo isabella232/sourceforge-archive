@@ -113,7 +113,11 @@ public class TestHarness
 
         try{
             File tmpFile=File.createTempFile("HTTP.TestHarness",".chunked");
-            tmpFile.deleteOnExit();
+
+            if (!Code.debug())
+                tmpFile.deleteOnExit();
+            else
+                Code.debug("Chunk out tmp = ",tmpFile);
             
             FileOutputStream fout = new FileOutputStream(tmpFile);
             ChunkableOutputStream cout = new ChunkableOutputStream(fout);
@@ -238,6 +242,7 @@ public class TestHarness
             "L1: V1  " + CRLF +
             "L1: V2  " + CRLF +
             "L1: 'V,3'  " + CRLF +
+            "L2: V1, V2, 'V,3'" + CRLF +
             CRLF +
             "Other Stuff"+ CRLF;
         
@@ -250,9 +255,11 @@ public class TestHarness
             "D4: Mon Jan 1 2000 00:00:01" + CRLF +
             "D5: Tue Feb 29 2000 12:00:00" + CRLF +
             "C1: Continuation Value" + CRLF +
-            "L1: V1, V2, \"V,3\"" + CRLF +
+            "L1: V1" + CRLF +
+            "L1: V2" + CRLF +
+            "L1: \"V,3\"" + CRLF +
+            "L2: V1, V2, 'V,3'" + CRLF +
             CRLF;
-        
 
         ByteArrayInputStream bais = new ByteArrayInputStream(h1.getBytes());
         LineInput lis = new LineInput(bais);
@@ -428,14 +435,14 @@ public class TestHarness
     public static void main(String[] args)
     {
         try{
-//              chunkInTest();
-//              chunkOutTest();
-//              filters();
-//              httpFields();
+            chunkInTest();
+            chunkOutTest();
+            filters();
+            httpFields();
             pathMap();
 
-//              TestRequest.test();
-//              TestRFC2616.test();
+            TestRequest.test();
+            TestRFC2616.test();
         }
         catch(Throwable e)
         {

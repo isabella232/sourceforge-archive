@@ -229,7 +229,7 @@ class ServletRequest
     {
         List list=_httpRequest.getFieldValues(s);
         if (list==null)
-            return null;
+            return Collections.enumeration(Collections.EMPTY_LIST);
         return Collections.enumeration(list);
     }
     

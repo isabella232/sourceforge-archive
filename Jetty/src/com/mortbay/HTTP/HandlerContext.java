@@ -83,7 +83,7 @@ public class HandlerContext
             else
                 _contextPath=contextPathSpec;
 
-            Code.warning("Insuitable contextPathSpec "+contextPathSpec+
+            Code.warning("Unsuitable contextPathSpec "+contextPathSpec+
                          ", Assuming: "+_contextPath+"/*");
         }
         else

@@ -38,7 +38,7 @@ import java.util.TimeZone;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HttpFields extends HashMap
+public class HttpFields
 {
     /* ------------------------------------------------------------ */
     /** General Fields
@@ -148,6 +148,21 @@ public class HttpFields extends HashMap
     }
     
     /* ------------------------------------------------------------ */
+    /** Inline Fields
+     */  
+    public final static String[] __inlineValues=
+    {
+        __TransferEncoding,__ContentEncoding,
+    };
+    public final static Set __inlineValuedSet=new HashSet(5);
+    static
+    {
+        for (int i=0;i<__inlineValues.length;i++)
+            __inlineValuedSet
+                .add(StringUtil.asciiToLowerCase(__inlineValues[i]));
+    }
+    
+    /* ------------------------------------------------------------ */
     public final static String __CRLF = "\015\012";
     public final static String __COLON = ": ";
 
@@ -201,6 +216,7 @@ public class HttpFields extends HashMap
     }
     
     /* -------------------------------------------------------------- */
+    private HashMap _map = new HashMap(23);
     private ArrayList _names= new ArrayList(15);
     private List _readOnlyNames=null;
 
@@ -208,17 +224,15 @@ public class HttpFields extends HashMap
     /** Constructor. 
      */
     public HttpFields()
-    {
-        super(23);
-    }
-    
+    {}
+
     /* ------------------------------------------------------------ */
-    /** Constructor. 
+    /** 
+     * @return 
      */
-    public HttpFields(HttpFields fields)
+    public int size()
     {
-        super(fields);
-        _names=(ArrayList)fields._names.clone();
+        return _map.size();
     }
     
     /* -------------------------------------------------------------- */
@@ -240,47 +254,43 @@ public class HttpFields extends HashMap
      */
     public boolean containsKey(Object name)
     {
-        return super.containsKey(StringUtil.asciiToLowerCase(name.toString()));
+        return _map.containsKey(StringUtil.asciiToLowerCase(name.toString()));
     }
     
     /* -------------------------------------------------------------- */
     /**
-     * Returns the value of a  field, or null if not found.
-     * The case of the field name is ignored.
-     * @param name the case-insensitive field name
-     */
-    public Object get(Object name)
-    {
-        return super.get(StringUtil.asciiToLowerCase(name.toString()));
-    }
-    
-    /* -------------------------------------------------------------- */
-    /**
-     * Returns the value of a  field, or null if not found.
+     * @return the value of a  field, or null if not found.
      * The case of the field name is ignored.
      * @param name the case-insensitive field name
      */
     public String get(String name)
     {
-        return (String)super.get(StringUtil.asciiToLowerCase(name));
+        Object o=_map.get(StringUtil.asciiToLowerCase(name));
+        if (o==null)
+            return null;
+        if (o instanceof List)
+            return listToString((List)o);
+        return o.toString();
     }
     
     /* -------------------------------------------------------------- */
     /**
-     * Returns multiple values of a field, or null if not found.
+     * @return multiple values of a field, or null if not found.
      * Non quoted multiple spaces are replaced with a single space
      * @param name the case-insensitive field name
      */
     public List getValues(String name)
     {
-        String v=get(name);
-        if (v==null)
+        Object o=_map.get(StringUtil.asciiToLowerCase(name));
+        if (o==null)
             return null;
+        if (o instanceof List)
+            return (List)o;
 
         List list = new ArrayList();
 
         QuotedStringTokenizer tok =
-            new QuotedStringTokenizer(v,", \t",true,false);
+            new QuotedStringTokenizer(o.toString(),", \t",true,false);
         String value=null;
         boolean space=false;
         while (tok.hasMoreTokens())
@@ -315,17 +325,6 @@ public class HttpFields extends HashMap
         return list;
     }
     
-    /* -------------------------------------------------------------- */
-    /** Set a field.
-     * @param name the name of the field
-     * @param value the value of the field. If null the field is cleared.
-     *              The value may have multiple values, such as a List or Array
-     *              of Strings.
-     */
-    public Object put(Object name,Object value)
-    {
-        return put(name.toString(),value.toString());
-    }
         
     /* -------------------------------------------------------------- */
     /** Set a field.
@@ -338,7 +337,7 @@ public class HttpFields extends HashMap
             return remove(name);
         
         String lname = StringUtil.asciiToLowerCase(name);
-        Object old=super.put(lname,value);
+        Object old=_map.put(lname,value);
         if (old==null)
         {
             _names.add(name);
@@ -347,6 +346,25 @@ public class HttpFields extends HashMap
         return old.toString();
     }
 
+    /* -------------------------------------------------------------- */
+    /** Set a multi value field.
+     * If the field is allowed to have multiple values.
+     * @param name the name of the field
+     * @param value the list of values of the field. If null the field is cleared.
+     */
+    public void put(String name,List value)
+    {
+        if (value==null)
+        {
+            remove(name);
+            return;
+        }
+        
+        String lname = StringUtil.asciiToLowerCase(name);
+        if (!_map.containsKey(lname))
+            _names.add(name);
+    }
+    
     /* -------------------------------------------------------------- */
     /** Add to or set a field.
      * If the field is allowed to have multiple values, add will build
@@ -363,23 +381,28 @@ public class HttpFields extends HashMap
         if (value==null)
             return;
         String lname = StringUtil.asciiToLowerCase(name);
-        if (__singleValuedSet.contains(lname))
-            throw new IllegalArgumentException("Cannot add single valued field: "+name);
-        value=QuotedStringTokenizer.quote(value,", ");
-        Object existing=super.get(lname);
-        if(existing!=null)
-            super.put(lname,existing+", "+value);
+        Object existing=_map.get(lname);
+        if (existing == null)
+        {
+            _map.put(lname,value);
+            _names.add(name);
+        }
         else
-            put(name, value);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Remove a field.
-     * @param name 
-     */
-    public Object remove(Object name)
-    {
-        return remove(name.toString());
+        {
+            if (__singleValuedSet.contains(lname))
+                throw new IllegalArgumentException("Cannot add single valued field: "+name);
+
+            List list;
+            if (existing instanceof List)
+                list=(List)existing;
+            else
+            {
+                list=new ArrayList(4);
+                list.add(QuotedStringTokenizer.unquote(existing.toString()));
+                _map.put(lname,list);
+            }
+            list.add(QuotedStringTokenizer.unquote(value));
+        }        
     }
     
     /* ------------------------------------------------------------ */
@@ -391,9 +414,11 @@ public class HttpFields extends HashMap
         String lname = StringUtil.asciiToLowerCase(name);
         _names.remove(name);
         _names.remove(lname);
-        Object old=super.remove(lname);
+        Object old=_map.remove(lname);
         if (old==null)
             return null;
+        if (old instanceof List)
+            return listToString((List)old);
         return old.toString();
     }
    
@@ -403,13 +428,15 @@ public class HttpFields extends HashMap
      * The case of the field name is ignored.
      * @param name the case-insensitive field name
      */
-    public  int getIntField(String name)
+    public int getIntField(String name)
     {
         String val = valueParameters(get(name),null);
         if (val!=null)
         {
-            return Integer.parseInt(val);
+            try{return Integer.parseInt(val);}
+            catch(Exception e){Code.ignore(e);}
         }
+        
         return -1;
     }
     
@@ -431,7 +458,7 @@ public class HttpFields extends HashMap
                     return date.getTime();
                 }
                 catch(java.lang.Exception e)
-                {}
+                {Code.ignore(e);}
             }
             if (val.endsWith(" GMT"))
             {
@@ -513,7 +540,7 @@ public class HttpFields extends HashMap
     /** Read HttpHeaders from inputStream.
      */
     public void read(LineInput in)
-    throws IOException
+        throws IOException
     {   
         String last=null;
         char[] buf=null;
@@ -606,8 +633,7 @@ public class HttpFields extends HashMap
             }
             
             // Handle repeated headers
-            String existing=(String)get(lname);
-            if (existing!=null)
+            if (_map.containsKey(lname))
             {
                 if (__singleValuedSet.contains(lname))
                 {
@@ -615,16 +641,11 @@ public class HttpFields extends HashMap
                                  name);
                 }
                 else
-                {
-                    StringBuffer sb = new StringBuffer(existing);
-                    sb.append(", ");
-                    sb.append(new String(buf,i1,i2-i1+1));
-                    put(lname,sb.toString());
-                }
+                    add(lname,new String(buf,i1,i2-i1+1));
             }
             else
             {
-                super.put(lname,new String(buf,i1,i2-i1+1));
+                _map.put(lname,new String(buf,i1,i2-i1+1));
                 _names.add(name);
                 last=lname;
             }
@@ -644,11 +665,39 @@ public class HttpFields extends HashMap
             for(int k=0;k<size;k++)
             {
                 String name = (String)_names.get(k);
-                String value = get(name);
-                writer.write(name);
-                writer.write(__COLON);
-                writer.write(value);
-                writer.write(__CRLF);
+                String lname = StringUtil.asciiToLowerCase(name);
+                Object o=_map.get(lname);
+                if (o==null)
+                    continue;
+                if (o instanceof List)
+                {
+                    if ( __inlineValuedSet.contains(lname))
+                    {
+                        writer.write(name);
+                        writer.write(__COLON);
+                        writer.write(listToString((List)o));
+                        writer.write(__CRLF);
+                    }
+                    else
+                    {
+                        List values = (List)o;
+                        for (int i=0;i<values.size();i++)
+                        {
+                            String value = (String)values.get(i);
+                            writer.write(name);
+                            writer.write(__COLON);
+                            writer.write(QuotedStringTokenizer.quote(value,","));
+                            writer.write(__CRLF);
+                        }
+                    }
+                }
+                else
+                {
+                    writer.write(name);
+                    writer.write(__COLON);
+                    writer.write(o.toString());
+                    writer.write(__CRLF);
+                }
             }
             writer.write(__CRLF);
         }
@@ -667,20 +716,41 @@ public class HttpFields extends HashMap
         {}
         return null;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Destroy the header.
      * Help the garbage collector by null everything that we can.
      */
     public void destroy()
     {
-        clear();
+        _map.clear();
         if (_names!=null)
             _names.clear();
         _names=null;
         _readOnlyNames=null;
     }
 
+    
+    /* ------------------------------------------------------------ */
+    /** Convert list of strings to coma separated quoted string
+     * @param list List of strings
+     * @return 
+     */
+    public static String listToString(List list)
+    {
+        StringBuffer buf = new StringBuffer();
+        synchronized(buf)
+        {
+            for (int i=0;i<list.size();i++)
+            {
+                if (i>0)
+                    buf.append(", ");
+                buf.append(QuotedStringTokenizer.quote((String)list.get(i),
+                                                       ", \t"));
+            }
+            return buf.toString();
+        }
+    }
     
     /* ------------------------------------------------------------ */
     /** Get field value parameters.

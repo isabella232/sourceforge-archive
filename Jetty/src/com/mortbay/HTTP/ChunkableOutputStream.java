@@ -143,7 +143,6 @@ public class ChunkableOutputStream extends FilterOutputStream
             Code.debug("RAW WRITE:\n",_rawWriterBuffer.toString());
         _rawWriterBuffer.reset();
     }
-
     
     /* ------------------------------------------------------------ */
     /** Has any data been written to the stream.
@@ -456,7 +455,8 @@ public class ChunkableOutputStream extends FilterOutputStream
         {
             if (!_committed)
             {
-                // this may recurse to flushh
+                // this may recurse to flush so set committed now
+                _committed=true;
                 notify(OutputObserver.__COMMITING);
                 // so check _buffer size to see??
                 if (_buffer.size()==0)
@@ -492,8 +492,6 @@ public class ChunkableOutputStream extends FilterOutputStream
                 notify(OutputObserver.__COMMITED);
             }
         }
-        _written=true;
-        _committed=true;
     }
 
     /* ------------------------------------------------------------ */
