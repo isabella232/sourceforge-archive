@@ -60,12 +60,37 @@ public class HandlerContext
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param httpServer 
+     * @param contextPathSpec 
      */
-    HandlerContext(HttpServer httpServer,String contextPath)
+    HandlerContext(HttpServer httpServer,String contextPathSpec)
     {
+        // check context path
+        if (contextPathSpec==null ||
+            contextPathSpec.indexOf(",")>=0 ||
+            contextPathSpec.startsWith("*") ||
+            !contextPathSpec.startsWith("/"))
+            new IllegalArgumentException
+                ("Illegal context spec:"+contextPathSpec);
+
+        if (contextPathSpec.endsWith("/*"))
+            _contextPath=contextPathSpec
+                .substring(0,contextPathSpec.length()-2);
+        else if (contextPathSpec.length()>1)
+        {
+            if (contextPathSpec.endsWith("/"))
+                _contextPath=contextPathSpec
+                    .substring(0,contextPathSpec.length()-1);
+            else
+                _contextPath=contextPathSpec;
+
+            Code.warning("Insuitable contextPathSpec "+contextPathSpec+
+                         ", Assuming: "+_contextPath+"/*");
+        }
+        else
+            _contextPath="/";
+
         _httpServer=httpServer;
-        _contextPath=contextPath;
-        _name=contextPath;
+        _name=_contextPath;
     }
     
     /* ------------------------------------------------------------ */

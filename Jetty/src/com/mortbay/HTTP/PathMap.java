@@ -143,6 +143,11 @@ public class PathMap extends HashMap
         if (entry!=null)
             return (Map.Entry) entry;
         
+        // try exact prefix prefix search
+        entry=_prefixMap.get(path);
+        if (entry!=null)
+            return (Map.Entry) entry;
+            
         // prefix search
         String prefix=path;
         int i;
@@ -224,6 +229,11 @@ public class PathMap extends HashMap
             if (entry!=null)
                 entries.add(entry);
         }
+        
+        // try exact prefix prefix search
+        entry=_prefixMap.get(path);
+        if (entry!=null)
+            entries.add(entry);
         
         // prefix search
         prefix=path;
@@ -330,7 +340,11 @@ public class PathMap extends HashMap
             
             if (pathSpec.endsWith("/*") &&
                 pathSpec.regionMatches(0,path,0,pathSpec.length()-2))
+            {
+                if (path.length()==pathSpec.length()-2)
+                    return null;
                 return path.substring(pathSpec.length()-2);
+            }
 
             if (path.startsWith(pathSpec) &&
                 (path.charAt(pathSpec.length())==';' ||

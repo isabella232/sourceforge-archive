@@ -34,7 +34,7 @@
       <url-pattern>/Auth/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
-      <role-name>com.mortbay.HTTP.HttpRequest.ANY_ROLE</role-name>
+      <role-name>com.mortbay.HTTP.UserPrinciple</role-name>
     </auth-constraint>
     <user-data-constraint>
       <transport-guarantee>NONE</transport-guarantee>

@@ -33,6 +33,10 @@ import java.util.Vector;
  * Wildcard nodes can be defined with "*" so that keys such as
  * "aa.*.cc", will match gets such as "aa.bb.cc", "aa.X.cc", etc. 
  *
+ * Values can contain tokens such as %name%, which are expanded
+ * as with the results of a call to System.getProperty("name");
+ * The % character may be included in a value with %%.
+ *
  * To aid in constructing and saving Properties files,
  * <code>getConverter</code> will convert Dictionaries into PropertyTrees
  * recursively.

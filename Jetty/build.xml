@@ -1,6 +1,6 @@
 <!-- 
 ========================================================================
- Copyright (c) 2000 Mort Bay Consulting (Australia) Pty. Ltd.
+ Copyright (c) 1999 Mort Bay Consulting (Australia) Pty. Ltd.
  $Id$
 ======================================================================== 
  This build file specifies how to build Jetty3 using ANT, the 
@@ -15,13 +15,13 @@ Other targets:
 
 clean       - Remove all generated files.
 prepare     - Set up build directory structure.
-servlet     - Builds the servlet library.
+servlet     - Buils lthe servlet library.
 jasper      - Builds the Jasper JSP engine library.
 jetty       - Builds the Jetty library.
 libs        - Builds all libraries.
 dist        - Constructs a distribution file with all the source.
 webapp      - Builds the demo web application.
-demo        - Runs the demo web application. 
+run.demo    - Runs the demo web application. 
 test        - Runs the Jetty test harness.
 release     - Cleanup for release
 
@@ -34,12 +34,12 @@ release     - Cleanup for release
   <property name="version"        value="3.0.B05" />
   
   <property name="src.dir"        value="${basedir}/src" />
-  <property name="etc"            value="${basedir}/etc"/>
   <property name="webapps"        value="${basedir}/webapps"/>
   <property name="lib"            value="${basedir}/lib"/>
   <property name="classes"        value="${basedir}/classes"/>
   <property name="javadoc"        value="${basedir}/javadoc"/>
-  <!-- property name="build.compiler" value="jikes"/ --> 
+  <property name="build.compiler" value="jikes"/> 
+  <!-- property name="build.compiler" value="classic"/ -->
   
   <property name="jetty.webapp"           value="${webapps}/jetty"/>
   <property name="jetty.war"              value="${webapps}/jetty.war"/>
@@ -53,8 +53,6 @@ release     - Cleanup for release
   <property name="jsse.jar"       value="${lib}/com.sun.net.ssl.jar"/>
   <property name="libs"           value="${xml.jar};${jsse.jar};${jasper.jar};${servlet.jar};${jetty.jar}"/>
   
-  
-  <!-- property name="build.compiler" value="classic"/ -->
   
   <target name="prepare">
     <mkdir dir="${jetty.webapp.classes}"/>
@@ -97,11 +95,12 @@ release     - Cleanup for release
     </jar>
   </target>
   
-  <target name="jetty.util" depends="servlet">
+  <target name="jetty" depends="prepare,servlet">
     <copydir src="${src.dir}" dest="${classes}">
-      <include name="com/mortbay/Util/**/defaultManifest.mf" />
-      <include name="com/mortbay/Util/**/*.properties" />
-      <include name="com/mortbay/Util/**/*.dtd" />
+      <include name="com/mortbay/**/defaultManifest.mf" />
+      <include name="com/mortbay/**/*.dtd" />
+      <include name="com/mortbay/**/*.properties" />
+      <exclude name="com/mortbay/Jetty/JettyIndex*.properties" />
     </copydir>
     <javac srcdir="${src.dir}" 
            destdir="${classes}"
@@ -110,66 +109,11 @@ release     - Cleanup for release
            optimize="on" 
            deprecation="off"
            >
-      <include name="com/mortbay/Util/**/*.java"/> 
+      <include name="com/mortbay/**/*.java"/> 
+      <exclude name="com/mortbay/Jetty/JettyPage.java" />
+      <exclude name="com/mortbay/Jetty/JettyServlet.java" />
+      <exclude name="com/mortbay/Jetty/JettyIndex*.properties" />
     </javac>
-  </target>
-
-  <target name="jetty.html" depends="jetty.util">
-    <javac srcdir="${src.dir}" 
-           destdir="${classes}"
-           classpath="${libs}"
-           debug="on" 
-           optimize="on" 
-           deprecation="off"
-           >
-      <include name="com/mortbay/HTML/**/*.java"/> 
-    </javac>
-  </target>
-
- <target name="jetty.http" depends="jetty.util,jetty.html">
-    <copydir src="${src.dir}" dest="${classes}">
-      <include name="com/mortbay/HTTP/**/defaultManifest.mf" />
-      <include name="com/mortbay/HTTP/**/*.dtd" />
-      <include name="com/mortbay/HTTP/**/*.properties" />
-    </copydir>
-    <javac srcdir="${src.dir}" 
-           destdir="${classes}"
-           classpath="${libs}"
-           debug="on" 
-           optimize="on" 
-           deprecation="off"
-           >
-      <include name="com/mortbay/HTTP/**/*.java"/> 
-    </javac>
-  </target>
-
- <target name="jetty.server" depends="jetty.http">
-    <javac srcdir="${src.dir}" 
-           destdir="${classes}"
-           classpath="${libs}"
-           debug="on" 
-           optimize="on" 
-           deprecation="off"
-           >
-      <include name="com/mortbay/Jetty/Server.java"/> 
-      <include name="com/mortbay/Jetty/Demo.java"/> 
-    </javac>
-  </target>
-
- <target name="jetty.servlets" depends="jetty.http">
-    <javac srcdir="${src.dir}" 
-           destdir="${classes}"
-           classpath="${libs}"
-           debug="on" 
-           optimize="on" 
-           deprecation="off"
-           >
-      <include name="com/mortbay/Servlet/**/*.java"/> 
-    </javac>
-  </target>
-
-  <target name="jetty" 
-          depends="jetty.util,jetty.html,jetty.http,jetty.server,jetty.servlets">
     <jar jarfile="${jetty.jar}"
          basedir="${classes}" 
     >
@@ -184,9 +128,6 @@ release     - Cleanup for release
        <exclude name="com/mortbay/HTTP/Http10TestClient.class" />
        <exclude name="com/mortbay/HTTP/Handler/TestTEHandler.class" />
        <exclude name="com/mortbay/HTML/TestHtml.class" />
-       <!-- make sure demo classes don't wind up in the jar -->
-       <exclude name="com/mortbay/Jetty/JettyPage.java" />
-       <exclude name="com/mortbay/Jetty/JettyServlet.java" />
     </jar>
   </target>
   
@@ -217,7 +158,7 @@ release     - Cleanup for release
   <target name="webapp" depends="libs">
     <copydir src="${src.dir}" dest="${jetty.webapp.classes}">
       <include name="com/mortbay/Jetty/defaultManifest.mf" />
-      <include name="com/mortbay/Jetty/*.properties" />
+      <include name="com/mortbay/Jetty//*.properties" />
     </copydir>
     <javac srcdir="${src.dir}" 
            destdir="${jetty.webapp.classes}"
@@ -236,26 +177,16 @@ release     - Cleanup for release
     </jar>
   </target>
   
-  <target name="javadoc" depends="libs" >
+  <target name="javadoc" depends="libs">
     <mkdir dir="${javadoc}"/>
-    <javadoc packagenames="com.mortbay.*,com.mortbay.*.*,com.mortbay.*.*.*,javax.servlet.*,javax.servlet.*.*,org.apache.jasper.*,org.apache.jasper.*.*"
+    <javadoc packagenames="com.mortbay.*,javax.servlet.*,org.apache.jasper.*"
              sourcepath="${src.dir}"
              destdir="${javadoc}"
-             classpath="${xml.jar};${jsse.jar}"
-             verbose="no"
-             protected="yes"
              author="true"
              version="true"
-             windowtitle="${app.name} API"
-             doctitle="${app.name}"
-             bottom="Copyright &#169; 2000 Mortbay Consulting Pty. Ltd. All Rights Reserved."
-             >
-       <group title="Servlet API" packages="javax.*" />
-       <group title="Jetty" packages="com.mortbay.*" />
-       <group title="Jasper Servlet Engine" packages="org.apache.*" />
-       <link offline="true" 
-             href="http://java.sun.com/products/jdk/1.2/docs/api/" 
-             packagelistLoc="${etc}"/>
+             windowtitle="${Name} API"
+             doctitle="${Name}"
+             bottom="Copyright &#169; 2000 Mortbay Consulting Pty. Ltd. All Rights Reserved.">
     </javadoc>
   </target>
 
@@ -277,7 +208,7 @@ release     - Cleanup for release
   
   <target name="demo" depends="webapp" >
     <java classname="com.mortbay.Jetty.Server"
-          args="${etc}/demo.xml"
+          args="etc/demo.xml"
           classpath="${libs}"
           fork="yes"
           failonerror="yes" 
@@ -298,10 +229,6 @@ release     - Cleanup for release
   </target>
 
 </project>
-
-
-
-
 
 
 

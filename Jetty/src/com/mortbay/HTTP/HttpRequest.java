@@ -877,21 +877,16 @@ public class HttpRequest extends HttpMessage
     /* ------------------------------------------------------------ */
     public boolean isUserInRole(String role)
     {
-        Code.debug("XXX - WARNING Temp implementation");
-
-        // This role is true for any authenticated user
-        if ("com.mortbay.HTTP.HttpRequest.ANY_ROLE".equals(role))
-        {
-            return getAttribute(HttpRequest.__AuthUser)!=null;
-        }
+        Principal principal=getUserPrincipal();
+        if (principal!=null && principal instanceof UserPrincipal)
+            return ((UserPrincipal)principal).isUserInRole(role);
         return false;
     }
     
     /* ------------------------------------------------------------ */
     public Principal getUserPrincipal()
     {
-        Code.warning("Not implemented");
-        return null;
+        return (Principal)getAttribute(UserPrincipal.__ATTRIBUTE_NAME);
     }
     
     /* ------------------------------------------------------------ */

@@ -43,6 +43,7 @@ public class SecurityHandler extends NullHandler
      */
     public String getAuthRealm()
     {
+        
         return _authRealm;
     }
     
@@ -118,7 +119,7 @@ public class SecurityHandler extends NullHandler
                     // Check roles
                     if (sc.isAuthenticated())
                     {
-                        if (!authenticated(request,response,sc.roles()))
+                        if (!authenticatedInRole(request,response,sc.roles()))
                             return;
                     }
 
@@ -138,9 +139,9 @@ public class SecurityHandler extends NullHandler
     /** 
      * @return 
      */
-    private boolean authenticated(HttpRequest request,
-                                  HttpResponse response,
-                                  Iterator roles)
+    private boolean authenticatedInRole(HttpRequest request,
+                                        HttpResponse response,
+                                        Iterator roles)
         throws IOException
     {
         boolean userAuth=false;
@@ -234,6 +235,6 @@ public class SecurityHandler extends NullHandler
         if (_authRealmMap==null)
             _authRealmMap=new HashMap();
         _authRealmMap.put(username,password);
-    }
-    
+    }    
 }
+

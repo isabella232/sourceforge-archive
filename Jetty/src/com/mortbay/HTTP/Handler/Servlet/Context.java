@@ -319,14 +319,8 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public void setAttribute(String name, Object value)
     {
-        if (name!=null &&
-            ( name.startsWith("com.mortbay.") ||
-              name.startsWith("java.") ||
-              name.startsWith("javax.")))
-            Code.warning("Servlet attempted to set com.mortbay.* attribute: "+
-                         name);
-        else
-            _handler.getHandlerContext().setAttribute(name,value);
+        checkAttributeName(name);
+        _handler.getHandlerContext().setAttribute(name,value);
     }
 
     /* ------------------------------------------------------------ */
@@ -336,16 +330,22 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public void removeAttribute(String name)
     {
+        checkAttributeName(name);
+        _handler.getHandlerContext().removeAttribute(name);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Check attribute name.
+     * Prevent servlet from setting restricted attribute names.
+     */
+    static void checkAttributeName(String name)
+    {   
         if (name!=null &&
             ( name.startsWith("com.mortbay.") ||
               name.startsWith("java.") ||
               name.startsWith("javax.")))
-            Code.warning("Servlet removing com.mortbay.* attribute: "+
-                         name);
-        else
-            _handler.getHandlerContext().removeAttribute(name);
+            throw new IllegalArgumentException("Cannot change attributes in java.*, javax.* or com.mortbay.*");
     }
-
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -464,15 +464,12 @@ public class Context implements ServletContext, HttpSessionContext
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     * @return
-     */
     public String toString()
     {
         return "Servlet"+_handler.getHandlerContext().toString();
     }
-
-
+    
+    /* ------------------------------------------------------------ */
     // how often to check - XXX - make this configurable
     final static int scavengeDelay = 30000;
 

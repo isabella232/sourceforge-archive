@@ -78,6 +78,8 @@ class ServletRequest
     {
         _context=context;
         _contextPath=context.getContextPath();
+        if (_contextPath.length()==1)
+            _contextPath="";
         _httpRequest=request;
     }
 
@@ -110,7 +112,7 @@ class ServletRequest
         _context=context;
         _contextPath=context.getContextPath();
         if (_contextPath.length()==1)
-            _contextPath=null;
+            _contextPath="";
         _servletPath=servletPath;
         _pathInfo=pathInfo;
         _query=query;
@@ -473,27 +475,29 @@ class ServletRequest
     }
     
     /* -------------------------------------------------------------- */
-    public Object getAttribute(String name)
-    {
-        return _httpRequest.getAttribute(name);
-    }
-    
-    /* -------------------------------------------------------------- */
-    public void removeAttribute(String name)
-    {
-        _httpRequest.removeAttribute(name);
-    }
-    
-    /* -------------------------------------------------------------- */
     public Enumeration getAttributeNames()
     {
         return Collections.enumeration(_httpRequest.getAttributeNames());
     }
     
     /* -------------------------------------------------------------- */
+    public Object getAttribute(String name)
+    {
+        return _httpRequest.getAttribute(name);
+    }
+    
+    /* -------------------------------------------------------------- */
     public void setAttribute(String name, Object value)
     {
+        Context.checkAttributeName(name);
         _httpRequest.setAttribute(name,value);
+    }
+    
+    /* -------------------------------------------------------------- */
+    public void removeAttribute(String name)
+    {
+        Context.checkAttributeName(name);
+        _httpRequest.removeAttribute(name);
     }
     
     /* -------------------------------------------------------------- */

@@ -69,7 +69,7 @@ $ID: $
   </Call>
 
   <Call name="addWebApplication">
-    <Arg>/default,/default/*</Arg>
+    <Arg>/default/*</Arg>
     <Arg><SystemProperty name="user.dir"/>/webapps/default/</Arg>
   </Call>
 

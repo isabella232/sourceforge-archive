@@ -304,7 +304,7 @@ public class TableForm extends Form
     public void addField(String label,Element field)
     {
         if (label==null)
-            label="&nbsp";
+            label="&nbsp;";
         else
             label="<FONT SIZE=+1><B>"+label+":</B></FONT>";
 

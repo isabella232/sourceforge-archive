@@ -33,6 +33,7 @@ public class WebApplicationContext extends HandlerContext
     private Resource _webApp;
     private String _webAppName;
     private ServletHandler _servletHandler;
+    private SecurityHandler _securityHandler;
     private Context _context;
     
     
@@ -44,12 +45,12 @@ public class WebApplicationContext extends HandlerContext
      * @exception IOException 
      */
     WebApplicationContext(HttpServer httpServer,
-                          String contextPath,
+                          String contextPathSpec,
                           String webApp,
                           String defaults)
         throws IOException
     {
-        super(httpServer,contextPath);
+        super(httpServer,contextPathSpec);
 
         // Get parser
         XmlParser xmlParser=new XmlParser();
@@ -101,7 +102,8 @@ public class WebApplicationContext extends HandlerContext
             }
 
             // add security handler first
-            addHandler(new SecurityHandler());
+            _securityHandler=new SecurityHandler();
+            addHandler(_securityHandler);
             
             // Set the classpath
             if (classPath.length()>0)
@@ -206,7 +208,7 @@ public class WebApplicationContext extends HandlerContext
             else if ("login-config".equals(name))
                 initLoginConfig(node);
             else if ("security-role".equals(name))
-                Code.warning("Not implemented: "+node);
+                initSecurityRole(node);
             else if ("env-entry".equals(name))
             {
                 Code.warning("Not implemented: "+name);
@@ -238,8 +240,7 @@ public class WebApplicationContext extends HandlerContext
         String value=node.get("param-value").toString(false);
         Code.debug("ContextParam: ",name,"=",value);
 
-        // XXX - This should not be in the attribute space
-        setAttribute(name,value); 
+        setInitParameter(name,value); 
     }
 
     /* ------------------------------------------------------------ */
@@ -289,8 +290,10 @@ public class WebApplicationContext extends HandlerContext
         XmlParser.Node securityRef = node.get("security-role-ref");
         if (securityRef!=null)
         {
-            // XXX - If you know what to do with this, please tell me
-            Code.warning("Not Implemented: "+securityRef+" in servlet "+name);
+            String roleName=securityRef.get("role-name").toString(false);
+            String roleLink=securityRef.get("role-link").toString(false);
+            Code.debug("link role ",roleName," to ",roleLink," for ",this);
+            holder.setUserRoleLink(roleName,roleLink);
         }
     }
 
@@ -404,11 +407,16 @@ public class WebApplicationContext extends HandlerContext
             sh.setAuthRealm(name.toString(false));
     }
     
+    /* ------------------------------------------------------------ */
+    private void initSecurityRole(XmlParser.Node node)
+    {
+        // XXX - not sure what needs to be done here.
+        // Could check that the role is known to the security handler
+        // but it could be initialized later?
+    }
+    
 
     /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
     public String toString()
     {
         if (_name!=null)
@@ -428,6 +436,5 @@ public class WebApplicationContext extends HandlerContext
     {
         Code.warning("ResourceBase should not be set for WebApplication");
         super.setResourceBase(resourceBase);
-    }
-    
+    }   
 }

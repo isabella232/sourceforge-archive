@@ -37,7 +37,6 @@ import javax.servlet.UnavailableException;
  */
 public class ServletHolder
     extends AbstractMap
-    implements ServletConfig
 {
     /* ---------------------------------------------------------------- */
     private ServletHandler _handler;
@@ -51,6 +50,8 @@ public class ServletHolder
     private String _className ;
     private Map _initParams ;
     private boolean _initOnStartup =false;
+    private Config _config;
+    private Map _roleMap;
 
     /* ---------------------------------------------------------------- */
     /** Construct a Servlet property mostly from the servers config
@@ -65,7 +66,7 @@ public class ServletHolder
         _context=_handler.getContext();
         setServletName(className);
         _className=className;
-
+        _config=new Config();
 
         // XXX - This is horrible - got to find a better way.
         if (className.equals("org.apache.jasper.servlet.JspServlet"))
@@ -191,7 +192,7 @@ public class ServletHolder
             {
                 GenericServlet newServlet =
                     newServlet = (GenericServlet)_servletClass.newInstance();
-                newServlet.init(this);
+                newServlet.init(_config);
                 synchronized (this)
                 {
                     _singleThreadModel =
@@ -217,9 +218,6 @@ public class ServletHolder
 
 
     /* ---------------------------------------------------------------- */
-    /**
-     * @return
-     */
     public javax.servlet.ServletContext getServletContext()
     {
         return (javax.servlet.ServletContext)_context;
@@ -254,6 +252,33 @@ public class ServletHolder
         return Collections.enumeration(_initParams.keySet());
     }
 
+    /* ------------------------------------------------------------ */
+    /** Link a user role.
+     * Translate the role name used by a servlet, to the link name
+     * used by the container.
+     * @param name The role name as used by the servlet
+     * @param link The role name as used by the container.
+     */
+    public synchronized void setUserRoleLink(String name,String link)
+    {
+        if (_roleMap==null)
+            _roleMap=new HashMap();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** get a user role link
+     * @param name The name of the role
+     * @return The name as translated by the link. If no link exists,
+     * the name is returned.
+     */
+    public String getUserRoleLink(String name)
+    {
+        if (_roleMap==null)
+            return name;
+        String link=(String)_roleMap.get(name);
+        return (link==null)?name:link;
+    }
+    
     /* --------------------------------------------------------------- */
     /** Service a request with this servlet.
      */
@@ -282,7 +307,7 @@ public class ServletHolder
 
                     useServlet =
                             (GenericServlet) _servletClass.newInstance();
-                    useServlet.init(this);
+                    useServlet.init(_config);
                 }
                 catch(Exception e2)
                 {
@@ -309,7 +334,7 @@ public class ServletHolder
                                 initializeClass();
                             useServlet =
                                 (GenericServlet) _servletClass.newInstance();
-                            useServlet.init(this);
+                            useServlet.init(_config);
                             _servlet = useServlet;
 
                             _singleThreadModel =
@@ -391,5 +416,43 @@ public class ServletHolder
     {
         return _name;
     }
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    class Config implements ServletConfig
+    {
+        /* -------------------------------------------------------- */
+        public String getServletName()
+        {
+            return ServletHolder.this.getServletName();
+        }
+        
+        /* -------------------------------------------------------- */
+        public javax.servlet.ServletContext getServletContext()
+        {
+            return (javax.servlet.ServletContext)_context;
+        }
 
+        /* -------------------------------------------------------- */
+        /**
+         * Gets an initialization parameter of the servlet.
+         * @param name the parameter name
+         */
+        public String getInitParameter(String param)
+        {
+            return ServletHolder.this.getInitParameter(param);
+        }
+    
+        /* -------------------------------------------------------- */
+        public Enumeration getInitParameterNames()
+        {
+            return ServletHolder.this.getInitParameterNames();
+        }
+    }
 }
+
+
+
+
+

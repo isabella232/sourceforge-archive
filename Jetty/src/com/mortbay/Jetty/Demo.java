@@ -38,31 +38,31 @@ public class Demo
             
             // Configure handlers
             HandlerContext context;
-            server.addWebApplication(null,"/jetty",
+            server.addWebApplication(null,"/jetty/*",
                                      "./webapps/jetty.war",
                                      "./etc/webdefault.xml");
             
-            context=server.getContext(null,"/demo");
+            context=server.getContext(null,"/demo/*");
             context.setResourceBase("./docroot/");
             context.addServlet("Dump",
-                               "/dump,/dump/*,*.DUMP",
+                               "/dump/*,*.DUMP",
                                "com.mortbay.Servlet.Dump");
             context.addServlet("Session",
                                "/session",
                                "com.mortbay.Servlet.SessionDump");
             context.addServlet("Dispatch",
-                               "/Dispatch,/Dispatch/*",
+                               "/Dispatch/*",
                                "com.mortbay.Servlet.RequestDispatchTest");
             context.addServlet("JSP","*.jsp",
                                "org.apache.jasper.servlet.JspServlet");
             context.setServingResources(true);
             context.addHandler(new DumpHandler());
             
-            context=server.addContext(null,"/servlet");
+            context=server.addContext(null,"/servlet/*");
             context.setClassPath("./servlets/");
             context.setServingDynamicServlets(true);
             
-            context=server.addContext(null,"/javadoc");
+            context=server.addContext(null,"/javadoc/*");
             context.setResourceBase("./javadoc/");
             context.setServingResources(true);
             
@@ -90,6 +90,3 @@ public class Demo
         }
     }
 }
-
-
-

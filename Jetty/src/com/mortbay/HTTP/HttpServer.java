@@ -315,31 +315,31 @@ public class HttpServer implements LifeCycle
      * host and contextPath. Requests are offered to multiple
      * contexts in the order they where added to the HttpServer.
      * @param host Virtual hostname or null for all hosts.
-     * @param contextPath
+     * @param contextPathSpec
      * @return 
      */
-    public HandlerContext addContext(String host, String contextPath)
+    public HandlerContext addContext(String host, String contextPathSpec)
     {
-        HandlerContext hc = new HandlerContext(this,contextPath);
-        addContext(host,contextPath,hc);
+        HandlerContext hc = new HandlerContext(this,contextPathSpec);
+        addContext(host,hc);
         return hc;
     }
 
     /* ------------------------------------------------------------ */
     /** 
      * @param host The virtual host or null for all hosts.
-     * @param contextPath
+     * @param contextPathSpec
      * @param i Index among contexts of same host and pathSpec.
      * @return The HandlerContext or null.
      */
-    public HandlerContext getContext(String host, String contextPath, int i)
+    public HandlerContext getContext(String host, String contextPathSpec, int i)
     {
         HandlerContext hc=null;
 
         PathMap contextMap=(PathMap)_hostMap.get(host);
         if (contextMap!=null)
         {
-            List contextList = (List)contextMap.get(contextPath);
+            List contextList = (List)contextMap.get(contextPathSpec);
             if (contextList!=null)
             {
                 if (i>=contextList.size())
@@ -383,24 +383,11 @@ public class HttpServer implements LifeCycle
      * As contexts cannot be publicly created, this may be used to
      * alias an existing context.
      * @param host The virtual host or null for all hosts.
-     * @param contextPath
-     * @return 
+     * @param context 
      */
     public void addContext(String host,
-                           String contextPath,
                            HandlerContext context)
     {
-        // check context path
-        if (contextPath==null ||
-            contextPath.length()==0 ||
-            contextPath.indexOf("*")>=0 ||
-            contextPath.indexOf(",")>=0 ||
-            !contextPath.startsWith("/"))
-            throw new
-                IllegalArgumentException("ContextPath must be simple prefix:"+
-                                         contextPath);
-        
-        
         PathMap contextMap=(PathMap)_hostMap.get(host);
         if (contextMap==null)
         {
@@ -408,56 +395,63 @@ public class HttpServer implements LifeCycle
             _hostMap.put(host,contextMap);
         }
 
-        List contextList = (List)contextMap.get(contextPath);
+        String contextPathSpec=context.getContextPath();
+        if (contextPathSpec.length()>1)
+            contextPathSpec+="/*";
+        
+        List contextList = (List)contextMap.get(contextPathSpec);
         if (contextList==null)
         {
             contextList=new ArrayList(1);
-            contextMap.put(contextPath,contextList);
-            if (contextPath.length()>1)
-                contextMap.put(contextPath+"/*",contextList);
+            contextMap.put(contextPathSpec,contextList);
         }
 
         contextList.add(context);
-        context.addHost(host);    
+        context.addHost(host);
+
+        Code.debug("Added ",context," for host ",host);
     }
 
     
     /* ------------------------------------------------------------ */
     /** 
-     * @param contextPath 
+     * @param contextPathSpec
      * @param directory 
      * @param defaultResource resource of default xml file or null.
      * @exception IOException 
      */
-    public WebApplicationContext addWebApplication(String contextPath,
+    public WebApplicationContext addWebApplication(String contextPathSpec,
                                                    String directory,
                                                    String defaultResource)
         throws IOException
     {
-        return addWebApplication(null,contextPath,directory,defaultResource);
+        return addWebApplication(null,
+                                 contextPathSpec,
+                                 directory,
+                                 defaultResource);
     }
     
     /* ------------------------------------------------------------ */
     /** 
      * @param host 
-     * @param contextPath 
+     * @param contextPathSpec 
      * @param directory 
      * @param defaultResource resource of default xml file or null.
      * @return 
      * @exception IOException 
      */
     public WebApplicationContext addWebApplication(String host,
-                                                   String contextPath,
+                                                   String contextPathSpec,
                                                    String directory,
                                                    String defaultResource)
         throws IOException
     {
         WebApplicationContext appContext =
             new WebApplicationContext(this,
-                                      contextPath,
+                                      contextPathSpec,
                                       directory,
                                       defaultResource);
-        addContext(host,contextPath,appContext);
+        addContext(host,appContext);
         Log.event("Web Application "+appContext+" added");
         return appContext;
     }

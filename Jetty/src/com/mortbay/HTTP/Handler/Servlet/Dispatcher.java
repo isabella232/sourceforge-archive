@@ -111,6 +111,7 @@ public class Dispatcher implements RequestDispatcher
         throws ServletException,IOException
     {
         ServletRequest servletRequest=(ServletRequest)request;
+        HttpRequest httpRequest=servletRequest.getHttpRequest();
         ServletResponse servletResponse=(ServletResponse)response;
             
         if (servletRequest.getHttpRequest().isCommitted())
@@ -118,12 +119,11 @@ public class Dispatcher implements RequestDispatcher
         servletResponse.reset();
 
         // Remove any evidence of previous include
-        request.removeAttribute( "javax.servlet.include.request_uri");
-        request.removeAttribute( "javax.servlet.include.servlet_path");
-        request.removeAttribute( "javax.servlet.include.context_path");
-        request.removeAttribute( "javax.servlet.include.query_string");
-        request.removeAttribute( "javax.servlet.include.path_info");
-
+        httpRequest.removeAttribute( "javax.servlet.include.request_uri");
+        httpRequest.removeAttribute( "javax.servlet.include.servlet_path");
+        httpRequest.removeAttribute( "javax.servlet.include.context_path");
+        httpRequest.removeAttribute( "javax.servlet.include.query_string");
+        httpRequest.removeAttribute( "javax.servlet.include.path_info");
 
         // handle named servlet
         if (_pathSpec==null)
@@ -171,6 +171,7 @@ public class Dispatcher implements RequestDispatcher
         throws ServletException, IOException     
     {
         ServletRequest servletRequest=(ServletRequest)request;
+        HttpRequest httpRequest=servletRequest.getHttpRequest();
         ServletResponse servletResponse=(ServletResponse)response;
             
         // Request has all original path and info etc.
@@ -213,20 +214,20 @@ public class Dispatcher implements RequestDispatcher
         // javax.servlet.include.request_uri
         Object old_request_uri =
             request.getAttribute("javax.servlet.include.request_uri");
-        request.setAttribute("javax.servlet.include.request_uri",
-                             servletRequest.getRequestURI());
+        httpRequest.setAttribute("javax.servlet.include.request_uri",
+                                    servletRequest.getRequestURI());
         
         // javax.servlet.include.context_path
         Object old_context_path =
             request.getAttribute("javax.servlet.include.context_path");
-        request.setAttribute("javax.servlet.include.context_path",
-                             servletRequest.getContextPath());
+        httpRequest.setAttribute("javax.servlet.include.context_path",
+                                    servletRequest.getContextPath());
         
         // javax.servlet.include.query_string
         Object old_query_string =
             request.getAttribute("javax.servlet.include.query_string");
-        request.setAttribute("javax.servlet.include.query_string",
-                             _query);
+        httpRequest.setAttribute("javax.servlet.include.query_string",
+                                    _query);
         
         // javax.servlet.include.servlet_path
         Object old_servlet_path =
@@ -243,9 +244,9 @@ public class Dispatcher implements RequestDispatcher
             // context must be the same, info is recalculate.
             Code.debug("Include request to ",_holder,
                        " at ",_pathSpec);
-            request.setAttribute("javax.servlet.include.servlet_path",
+            httpRequest.setAttribute("javax.servlet.include.servlet_path",
                                  PathMap.pathMatch(_pathSpec,_path));
-            request.setAttribute("javax.servlet.include.path_info",
+            httpRequest.setAttribute("javax.servlet.include.path_info",
                                  PathMap.pathInfo(_pathSpec,_path));
                 
             // try service request
@@ -258,15 +259,15 @@ public class Dispatcher implements RequestDispatcher
             servletResponse.setOutputState(old_output_state);
             if (_query!=null && _query.length()>0)
                 servletRequest.setParameters(old_parameters);
-            request.setAttribute("javax.servlet.include.request_uri",
+            httpRequest.setAttribute("javax.servlet.include.request_uri",
                                  old_request_uri);
-            request.setAttribute("javax.servlet.include.context_path",
+            httpRequest.setAttribute("javax.servlet.include.context_path",
                                  old_context_path);
-            request.setAttribute("javax.servlet.include.query_string",
+            httpRequest.setAttribute("javax.servlet.include.query_string",
                                  old_query_string);
-            request.setAttribute("javax.servlet.include.servlet_path",
+            httpRequest.setAttribute("javax.servlet.include.servlet_path",
                                  old_servlet_path);
-            request.setAttribute("javax.servlet.include.path_info",
+            httpRequest.setAttribute("javax.servlet.include.path_info",
                                  old_path_info);
         }
     }

@@ -21,7 +21,6 @@ import java.util.List;
 /* ------------------------------------------------------------ */
 /** 
  *
- * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -353,6 +352,10 @@ public class TestHarness
                           "Mismatch absolute path");
             t.checkEquals(p.getMatch("/abs/path/longer").getValue(),"2",
                           "Match longer absolute path");
+            t.checkEquals(p.getMatch("/abs/path/").getValue(),"8",
+                          "Not exact absolute path");
+            t.checkEquals(p.getMatch("/abs/path/xxx").getValue(),"8",
+                          "Not exact absolute path");
             
             t.checkEquals(p.getMatch("/animal/bird/eagle/bald").getValue(),"3",
                           "Match longest prefix");
@@ -360,7 +363,9 @@ public class TestHarness
                           "Match longest prefix");
             t.checkEquals(p.getMatch("/animal/insect/bug").getValue(),"5",
                           "Match longest prefix");
-            t.checkEquals(p.getMatch("/animal").getValue(),"8",
+            t.checkEquals(p.getMatch("/animal").getValue(),"5",
+                          "mismatch exact prefix");
+            t.checkEquals(p.getMatch("/animal/").getValue(),"5",
                           "mismatch exact prefix");
             
             t.checkEquals(p.getMatch("/suffix/path.tar.gz").getValue(),"6",
@@ -379,11 +384,15 @@ public class TestHarness
 
             t.checkEquals(p.pathMatch("/Foo/bar","/Foo/bar"),"/Foo/bar","pathInfo exact");
             t.checkEquals(p.pathMatch("/Foo/*","/Foo/bar"),"/Foo","pathInfo prefix");
+            t.checkEquals(p.pathMatch("/Foo/*","/Foo/"),"/Foo","pathInfo prefix");
+            t.checkEquals(p.pathMatch("/Foo/*","/Foo"),"/Foo","pathInfo prefix");
             t.checkEquals(p.pathMatch("*.ext","/Foo/bar.ext"),"/Foo/bar.ext","pathInfo suffix");
             t.checkEquals(p.pathMatch("/","/Foo/bar.ext"),"","pathMatch default");
             
             t.checkEquals(p.pathInfo("/Foo/bar","/Foo/bar"),null,"pathInfo exact");
             t.checkEquals(p.pathInfo("/Foo/*","/Foo/bar"),"/bar","pathInfo prefix");
+            t.checkEquals(p.pathInfo("/Foo/*","/Foo/"),"/","pathInfo prefix");
+            t.checkEquals(p.pathInfo("/Foo/*","/Foo"),null,"pathInfo prefix");
             t.checkEquals(p.pathInfo("*.ext","/Foo/bar.ext"),null,"pathInfo suffix");
             t.checkEquals(p.pathInfo("/","/Foo/bar.ext"),"/Foo/bar.ext","pathInfo default");
             t.checkEquals(p.getMatch("/XXX").getValue(),"9",
@@ -419,14 +428,14 @@ public class TestHarness
     public static void main(String[] args)
     {
         try{
-            chunkInTest();
-            chunkOutTest();
-            filters();
-            httpFields();
+//              chunkInTest();
+//              chunkOutTest();
+//              filters();
+//              httpFields();
             pathMap();
 
-            TestRequest.test();
-            TestRFC2616.test();
+//              TestRequest.test();
+//              TestRFC2616.test();
         }
         catch(Throwable e)
         {
