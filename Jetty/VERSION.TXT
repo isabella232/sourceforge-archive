@@ -1,8 +1,12 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.8 - 14 February 2004
  + Added a SetResponseHeadersHandler, can set P3P headers etc.
+ + ProxyHandler can handle multiple cookies.
+ + CGIServlet can handle multiple cookies.
  + Fixed AdminServlet to handle changed getServletPath better.
+ + Default servlet can have own resourceBase.
 
 Jetty-4.2.7 - 4 February 2003
  + Upgraded to JSSE 1.0.3_01 to fix security problem.
