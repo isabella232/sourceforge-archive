@@ -22,7 +22,6 @@ import org.mortbay.util.Code;
 import org.mortbay.util.Log;
 import org.mortbay.util.LifeCycle;
 import org.mortbay.util.LogSink;
-import org.mortbay.util.WriterLogSink;
 
 import java.beans.beancontext.BeanContextMembershipListener;
 import java.beans.beancontext.BeanContextMembershipEvent;
@@ -38,7 +37,7 @@ import java.util.Iterator;
 public class HttpContextMBean extends LifeCycleMBean
 {
     private HttpContext _httpContext;
-    private HttpServerMBean _httpServerMBean;
+    private JettyServerMBean _jettyServerMBean;
     private ModelMBeanImpl _logMBean;
     
     /* ------------------------------------------------------------ */
@@ -46,11 +45,11 @@ public class HttpContextMBean extends LifeCycleMBean
      * @exception MBeanException 
      * @exception InstanceNotFoundException 
      */
-    public HttpContextMBean(HttpServerMBean server,HttpContext context)
+    public HttpContextMBean(JettyServerMBean server,HttpContext context)
         throws MBeanException, InstanceNotFoundException
     {
         super(context);
-        _httpServerMBean=server;
+        _jettyServerMBean=server;
         _httpContext=context;
     }
 
@@ -123,7 +122,7 @@ public class HttpContextMBean extends LifeCycleMBean
     protected String newObjectName(MBeanServer server)
     {
         return
-            uniqueObjectName(server,_httpServerMBean.getObjectName().toString()+
+            uniqueObjectName(server,_jettyServerMBean.getObjectName().toString()+
                              ",context="+
                              _httpContext.getContextPath());
     }

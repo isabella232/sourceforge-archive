@@ -39,7 +39,7 @@ public class WebApplicationMBean extends ServletHttpContextMBean
      * @exception MBeanException 
      * @exception InstanceNotFoundException 
      */
-    public WebApplicationMBean(HttpServerMBean server,WebApplicationContext context)
+    public WebApplicationMBean(JettyServerMBean server,WebApplicationContext context)
         throws MBeanException, InstanceNotFoundException
     {
         super(server,context);

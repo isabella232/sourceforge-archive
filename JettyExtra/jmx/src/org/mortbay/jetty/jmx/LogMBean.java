@@ -19,7 +19,6 @@ import org.mortbay.util.Code;
 import org.mortbay.util.Log;
 import org.mortbay.util.LogSink;
 import org.mortbay.util.OutputStreamLogSink;
-import org.mortbay.util.WriterLogSink;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -116,8 +115,6 @@ public class LogMBean extends ModelMBeanImpl
                 {
                     if (sink instanceof OutputStreamLogSink)
                         bean=new OutputStreamLogSinkMBean(sink,true);
-                    else if (sink instanceof WriterLogSink)
-                        bean=new WriterLogSinkMBean(sink,true);
                     else
                         bean=new LogSinkMBean(sink);
                     getMBeanServer().registerMBean(bean,null);

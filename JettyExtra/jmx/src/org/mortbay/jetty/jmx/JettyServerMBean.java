@@ -16,6 +16,8 @@ import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 import org.mortbay.jetty.Server;
 import org.mortbay.http.HttpServer;
+import org.mortbay.http.HttpServer.ComponentEvent;
+import org.mortbay.http.HttpServer.ComponentEventListener;
 import org.mortbay.http.HttpListener;
 import org.mortbay.http.SocketListener;
 import org.mortbay.http.HttpContext;
@@ -25,7 +27,6 @@ import org.mortbay.util.Log;
 import org.mortbay.util.LogSink;
 import org.mortbay.util.LifeCycle;
 import org.mortbay.util.OutputStreamLogSink;
-import org.mortbay.util.WriterLogSink;
 
 import java.beans.beancontext.BeanContextMembershipListener;
 import java.beans.beancontext.BeanContextMembershipEvent;
@@ -36,7 +37,7 @@ import java.util.HashMap;
 import java.io.IOException;
 
 /* ------------------------------------------------------------ */
-/** HttpServer MBean.
+/** JettyServer MBean.
  * This Model MBean class provides the mapping for HttpServer
  * management methods. It also registers itself as a membership
  * listener of the HttpServer, so it can create and destroy MBean
@@ -45,8 +46,8 @@ import java.io.IOException;
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
-public class HttpServerMBean extends LifeCycleMBean
-    implements BeanContextMembershipListener
+public class JettyServerMBean extends LifeCycleMBean
+    implements HttpServer.ComponentEventListener
 {
     private Server _jettyServer;
     private HashMap _mbeanMap = new HashMap();
@@ -57,12 +58,12 @@ public class HttpServerMBean extends LifeCycleMBean
      * @exception MBeanException 
      * @exception InstanceNotFoundException 
      */
-    protected HttpServerMBean(Server jettyServer)
+    protected JettyServerMBean(Server jettyServer)
         throws MBeanException, InstanceNotFoundException
     {
         super(null);
         _jettyServer=jettyServer;
-        _jettyServer.addBeanContextMembershipListener(this);
+        _jettyServer.addEventListener(this);
         try{setManagedResource(_jettyServer,"objectReference");}
         catch(InvalidTargetObjectTypeException e){Code.warning(e);}
     }
@@ -72,7 +73,7 @@ public class HttpServerMBean extends LifeCycleMBean
      * @exception MBeanException 
      * @exception InstanceNotFoundException 
      */
-    public HttpServerMBean()
+    public JettyServerMBean()
         throws MBeanException, InstanceNotFoundException
     {
         this(new Server());
@@ -85,7 +86,7 @@ public class HttpServerMBean extends LifeCycleMBean
      * @exception MBeanException 
      * @exception InstanceNotFoundException 
      */
-    public HttpServerMBean(String configuration)
+    public JettyServerMBean(String configuration)
         throws IOException,MBeanException, InstanceNotFoundException
     {
         this();
@@ -144,99 +145,92 @@ public class HttpServerMBean extends LifeCycleMBean
         defineAttribute("requestsActiveMax");
         defineAttribute("requestsDurationAve");
         defineAttribute("requestsDurationMax");
+        defineOperation("destroy",IMPACT_ACTION);
     }
     
     /* ------------------------------------------------------------ */
-    public synchronized void childrenAdded(BeanContextMembershipEvent event)
+    public synchronized void addComponent(ComponentEvent event)
     {
-        Code.debug("Children added ",event);
-        Iterator iter = event.iterator();
-        while(iter.hasNext())
+        try
         {
-            try
+            Code.debug("Component added ",event);
+            Object o=event.getComponent();
+            ModelMBeanImpl mbean=null;
+            ObjectName oName=null;
+            if (o instanceof HttpListener)
             {
-                Object o=iter.next();
-                ModelMBeanImpl mbean=null;
-                ObjectName oName=null;
-                if (o instanceof HttpListener)
+            if (o instanceof SocketListener)
+                mbean= new SocketListenerMBean(this,(SocketListener)o);
+            else
+                mbean= new HttpListenerMBean(this,(HttpListener)o);
+            }
+            else if (o instanceof WebApplicationContext)
+                mbean= new WebApplicationMBean(this,(WebApplicationContext)o);
+            else if (o instanceof HttpContext)
+                mbean= new HttpContextMBean(this,(HttpContext)o);
+            else if (o instanceof LogSink)
+            {
+                LogSink sink =(LogSink)o;
+                if (sink instanceof OutputStreamLogSink)
+                mbean=new OutputStreamLogSinkMBean(sink,false);
+                else
+                    mbean= new LogSinkMBean(sink);
+                String className = sink.getClass().getName();
+                if (className.indexOf(".")>0)
+                    className=className.substring(className.lastIndexOf(".")+1);
+                
+                String name=getObjectName().toString();
+                if (sink!=_jettyServer.getLogSink())
                 {
-                    if (o instanceof SocketListener)
-                        mbean= new SocketListenerMBean(this,(SocketListener)o);
-                    else
-                        mbean= new HttpListenerMBean(this,(HttpListener)o);
-                }
-                else if (o instanceof WebApplicationContext)
-                    mbean= new WebApplicationMBean(this,(WebApplicationContext)o);
-                else if (o instanceof HttpContext)
-                    mbean= new HttpContextMBean(this,(HttpContext)o);
-                else if (o instanceof LogSink)
-                {
-                    LogSink sink =(LogSink)o;
-                    if (sink instanceof OutputStreamLogSink)
-                        mbean=new OutputStreamLogSinkMBean(sink,false);
-                    else if (sink instanceof WriterLogSink)
-                        mbean=new WriterLogSinkMBean(sink,false);
-                    else
-                        mbean= new LogSinkMBean(sink);
-                    String className = sink.getClass().getName();
-                    if (className.indexOf(".")>0)
-                        className=className.substring(className.lastIndexOf(".")+1);
-
-                    String name=getObjectName().toString();
-                    if (sink!=_jettyServer.getLogSink())
+                    Iterator ctxs = _jettyServer.getHttpContexts().iterator();
+                    while (ctxs.hasNext())
                     {
-                        Iterator ctxs = _jettyServer.getHttpContexts().iterator();
-                        while (ctxs.hasNext())
+                        HttpContext c = (HttpContext)ctxs.next();
+                        if (sink==c.getLogSink())
                         {
-                            HttpContext c = (HttpContext)ctxs.next();
-                            if (sink==c.getLogSink())
-                            {
-                                name+=",context="+c.getContextPath();
-                                break;
-                            }
+                            name+=",context="+c.getContextPath();
+                            break;
                         }
                     }
-                    
-                    oName=new ObjectName(uniqueObjectName(getMBeanServer(),
-                                                          name+","+
-                                                          className+"="));
                 }
-                else if (o instanceof LifeCycle)
-                    mbean = new LifeCycleMBean((LifeCycle)o);
-
-                if (mbean!=null)
-                {
-                    getMBeanServer().registerMBean(mbean,oName);
-                    _mbeanMap.put(o,mbean);
-                }
+                
+                oName=new ObjectName(uniqueObjectName(getMBeanServer(),
+                                                      name+","+
+                                                      className+"="));
             }
-            catch(Exception e)
+            else if (o instanceof LifeCycle)
+                mbean = new LifeCycleMBean((LifeCycle)o);
+            
+            if (mbean!=null)
             {
-                Code.warning(e);
+                getMBeanServer().registerMBean(mbean,oName);
+                _mbeanMap.put(o,mbean);
             }
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
         }
     }
     
     /* ------------------------------------------------------------ */
-    public synchronized void childrenRemoved(BeanContextMembershipEvent event)
+    public synchronized void removeComponent(ComponentEvent event)
     {
-        Code.debug("Children removed ",event);
+        Code.debug("Component removed ",event);
         
-        Iterator iter = event.iterator();
-        while(iter.hasNext())
+        try
         {
-            try
-            {
-                Object o=iter.next();
-                ModelMBeanImpl mbean =
-                    (ModelMBeanImpl)_mbeanMap.remove(o);
-                if (mbean!=null)
-                    mbean.getMBeanServer().unregisterMBean(mbean.getObjectName());
-            }
-            catch(Exception e)
-            {
-                Code.warning(e);
-            }
+            Object o=event.getComponent();
+            ModelMBeanImpl mbean =
+                (ModelMBeanImpl)_mbeanMap.remove(o);
+            if (mbean==null && o==_jettyServer)
+                mbean=this;
+            if (mbean!=null)
+                mbean.getMBeanServer().unregisterMBean(mbean.getObjectName());
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
         }
     }
 

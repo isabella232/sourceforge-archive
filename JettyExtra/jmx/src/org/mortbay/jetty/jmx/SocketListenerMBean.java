@@ -41,7 +41,7 @@ public class SocketListenerMBean extends HttpListenerMBean
      * @exception MBeanException 
      * @exception InstanceNotFoundException 
      */
-    public SocketListenerMBean(HttpServerMBean server,SocketListener listener)
+    public SocketListenerMBean(JettyServerMBean server,SocketListener listener)
         throws MBeanException, InstanceNotFoundException
     {
         super(server,(HttpListener)listener);

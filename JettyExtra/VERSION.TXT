@@ -1,6 +1,10 @@
 JettyExtra Versions
 --------------------
 
+  + Branched to support Jetty4 development
+  + Use Jetty4 eventlistener
+  + adjust to new API names.
+
 JettyExtra-1.0.1
   + Changed repository name to JettyExtra
   + Added ThreadPool maxStopTimeMs JMX support

@@ -34,18 +34,18 @@ import org.mortbay.util.ThreadPool;
 public class HttpListenerMBean extends ThreadedServerMBean
 {
     private HttpListener _httpListener;
-    protected HttpServerMBean _httpServerMBean;
+    protected JettyServerMBean _jettyServerMBean;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @exception MBeanException 
      * @exception InstanceNotFoundException 
      */
-    public HttpListenerMBean(HttpServerMBean server,HttpListener listener)
+    public HttpListenerMBean(JettyServerMBean server,HttpListener listener)
         throws MBeanException, InstanceNotFoundException
     {
         super((ThreadPool)listener);
-        _httpServerMBean=server;
+        _jettyServerMBean=server;
         _httpListener=listener;
     }
 
@@ -59,6 +59,6 @@ public class HttpListenerMBean extends ThreadedServerMBean
     /* ------------------------------------------------------------ */
     protected String newObjectName(MBeanServer server)
     {
-        return uniqueObjectName(server,_httpServerMBean.getObjectName().toString());
+        return uniqueObjectName(server,_jettyServerMBean.getObjectName().toString());
     }
 }

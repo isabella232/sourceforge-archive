@@ -40,7 +40,7 @@ public class ServletHttpContextMBean extends HttpContextMBean
      * @exception MBeanException 
      * @exception InstanceNotFoundException 
      */
-    public ServletHttpContextMBean(HttpServerMBean server,ServletHttpContext context)
+    public ServletHttpContextMBean(JettyServerMBean server,ServletHttpContext context)
         throws MBeanException, InstanceNotFoundException
     {
         super(server,context);
