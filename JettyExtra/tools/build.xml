@@ -69,8 +69,8 @@ all         - everything
     <javac srcdir="${src}"
            destdir="${classes}"
            classpath="${classpath}"
-           debug="off"
-           optimize="on"
+           debug="on"
+           optimize="off"
            deprecation="off"
            >
        <include name="**/*.java"/>

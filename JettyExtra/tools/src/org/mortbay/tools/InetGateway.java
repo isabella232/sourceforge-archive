@@ -10,6 +10,7 @@ import  org.mortbay.util.IO;
 import  org.mortbay.util.Code;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -172,6 +173,19 @@ public class InetGateway extends ThreadedServer
     }
     
     /* ------------------------------------------------------------------- */
+    protected void handleConnection(Socket connection)
+        throws IOException
+    {
+        connection.setSoTimeout(1000);
+        super.handleConnection(connection);
+        try{
+            Code.debug("close connection");
+            connection.close();
+        }
+        catch(Exception e) { Code.debug(e); }
+    }
+    
+    /* ------------------------------------------------------------------- */
     protected void handleConnection(InputStream in,OutputStream out)
     {
         System.err.println(Thread.currentThread().getName()+": New Connection ");
@@ -216,36 +230,53 @@ public class InetGateway extends ThreadedServer
             }
             final InputStream localIn=in;
             final OutputStream remoteOut=out;
-
+            final boolean[] complete= {false};
+            
             try
             {
                 // Create new thread to copy remote in to local out
-                new Thread(new Runnable(){
-                    public void run(){
-                        try { IO.copy(remoteIn,localOut); }
-                        catch(Exception e)
-                        { if (Code.verbose())Code.debug(e); }
-                        finally
-                        {
-                            Code.debug("Finished"); 
-                            try { localOut.close(); }
-                            catch(Exception e) { Code.ignore(e); }
-                        }       
+                Thread thread=
+                    new Thread(new Runnable(){
+                            public void run(){
+                                try { IO.copy(remoteIn,localOut); }
+                                catch(Exception e){ Code.debug(e); }
+                                finally
+                                {
+                                    Code.debug("Finished remoteIn to localOut");
+                                    complete[0]=true;
+                                }
+                            }
+                        },Thread.currentThread().getName()+"+");
+                thread.start();
+                
+                byte buffer[] = new byte[4096];
+                int len=4096;
+                while (!complete[0])
+                {
+                    try{
+                        Code.debug("localIn.read()");
+                        len=localIn.read(buffer,0,4096);
                     }
-                    },Thread.currentThread().getName()+"+").start();
-
-                // Use this thread to copy local in to remote out
-                IO.copy(localIn,remoteOut);
+                    catch(InterruptedIOException e)
+                    {
+                        Code.debug(e);
+                        continue;
+                    }
+                    
+                    if (len<0 )
+                        break;
+                    remoteOut.write(buffer,0,len);
+                }
+                Code.debug("Finished localIn to remoteOut");
             }
             catch(Exception e)
             {
-                if (Code.verbose())
-                    Code.ignore(e);
+                Code.debug(e);
             }
             finally
             {
                 try { remoteOut.close() ; }
-                catch(Exception e) { Code.ignore(e); }
+                catch(Exception e) { Code.debug(e); }
             }    
         }
         catch(Exception e)
