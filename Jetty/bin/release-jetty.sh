@@ -27,14 +27,14 @@ read Y
 {
     cd $HOME
     unset JETTY_HOME
-    [ -d Jetty3 ] && mv Jetty3 Jetty3.cvs
-    cvs $CVS_ARGS rtag -F Jetty_$TAG Jetty3
-    cvs $CVS_ARGS export -r Jetty_$TAG Jetty3
-    cd $HOME/Jetty3
+    [ -d Jetty ] && mv Jetty Jetty.cvs
+    cvs $CVS_ARGS rtag -F Jetty_$TAG Jetty
+    cvs $CVS_ARGS export -r Jetty_$TAG Jetty
+    cd $HOME/Jetty
     rm -fr src/com webappsrc/com
     ant all tidy || exit 1
     cd ..
-    mv Jetty3 Jetty-$VERSION
+    mv Jetty Jetty-$VERSION
     tar cfz /usr/local/archive/Jetty-${VERSION}.tgz --exclude Jetty-$VERSION/classes Jetty-$VERSION
     cd /usr/local/share/java/jetty
     tar xfz /usr/local/archive/Jetty-${VERSION}.tgz

@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -62,7 +63,9 @@ public class ServletRequest
 
     private static final Enumeration __emptyEnum =  
         Collections.enumeration(Collections.EMPTY_LIST);
-    
+    private static final Collection __defaultLocale =
+        Collections.singleton(Locale.getDefault());
+                          
     private HttpRequest _httpRequest;
     private ServletResponse _servletResponse;
 
@@ -159,26 +162,18 @@ public class ServletRequest
     /* ------------------------------------------------------------ */
     public Locale getLocale()
     {
-        return (Locale)getLocales().nextElement();
-    }
-    
-    /* ------------------------------------------------------------ */
-    public Enumeration getLocales()
-    {
         Enumeration enum =
             _httpRequest.getHeader().getValues(HttpFields.__AcceptLanguage,
                                                HttpFields.__separators);
 
         // handle no locale
         if (enum == null || !enum.hasMoreElements())
-            return Collections.enumeration(Collections.singleton(Locale.getDefault()));
+            return Locale.getDefault();
         
         // sort the list in quality order
         List acceptLanguage = HttpFields.qualityList(enum);
-        
         if (acceptLanguage.size()==0)
-            return
-                Collections.enumeration(Collections.singleton(Locale.getDefault()));
+            return  Locale.getDefault();
 
         LazyList langs = null;
         int size=acceptLanguage.size();
@@ -195,8 +190,54 @@ public class ServletRequest
                 country = language.substring(dash + 1).trim();
                 language = language.substring(0,dash).trim();
             }
-            LazyList.add(langs,size,new Locale(language, country));
+            return new Locale(language,country);
         }
+
+        return  Locale.getDefault();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Enumeration getLocales()
+    {
+        Enumeration enum =
+            _httpRequest.getHeader().getValues(HttpFields.__AcceptLanguage,
+                                               HttpFields.__separators);
+
+        // handle no locale
+        if (enum == null || !enum.hasMoreElements())
+            return Collections.enumeration(__defaultLocale);
+        
+        // sort the list in quality order
+        List acceptLanguage = HttpFields.qualityList(enum);
+
+        System.err.println("AC1="+acceptLanguage);
+        
+        if (acceptLanguage.size()==0)
+            return
+                Collections.enumeration(__defaultLocale);
+
+        LazyList langs = null;
+        int size=acceptLanguage.size();
+        
+        // convert to locals
+        for (int i=0; i<size; i++)
+        {
+            String language = (String)acceptLanguage.get(i);
+            language=HttpFields.valueParameters(language,null);
+            String country = "";
+            int dash = language.indexOf('-');
+            if (dash > -1)
+            {
+                country = language.substring(dash + 1).trim();
+                language = language.substring(0,dash).trim();
+            }
+            langs=LazyList.add(langs,size,
+                               new Locale(language,country));
+        }
+
+        if (LazyList.size(langs)==0)
+            return Collections.enumeration(__defaultLocale);
+            
         return Collections.enumeration(LazyList.getList(langs));
     }
     

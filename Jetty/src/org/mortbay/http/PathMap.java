@@ -7,6 +7,7 @@ package org.mortbay.http;
 
 import org.mortbay.util.StringMap;
 import org.mortbay.util.LazyList;
+import org.mortbay.util.SingletonList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -124,7 +125,8 @@ public class PathMap extends HashMap
                     else if (spec.equals("/"))
                     {    
                         _default=entry;
-                        _defaultSingletonList=Collections.singletonList(_default);
+                        _defaultSingletonList=
+                            SingletonList.newSingletonList(_default);
                     }
                     else
                         _exactMap.put(spec,entry);

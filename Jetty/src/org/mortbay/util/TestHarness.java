@@ -28,6 +28,8 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
 import java.util.zip.ZipEntry;
+import java.util.Iterator;
+import java.util.ListIterator;
 
 import java.util.Enumeration;
 import java.net.JarURLConnection;
@@ -1562,6 +1564,132 @@ public class TestHarness
     }    
 
     /* ------------------------------------------------------------ */
+    static void testSingletonList()
+    {
+        Test t = new Test("org.mortbay.util.SingletonList");
+        
+        try
+        {
+            Object o="X";
+            SingletonList sl = SingletonList.newSingletonList(o);
+            t.checkEquals(sl.size(),1,"SingletonList.size()");
+            t.checkEquals(sl.get(0),o,"SingletonList.get(0)");
+            Iterator i=sl.iterator();
+            ListIterator li=sl.listIterator();
+            t.check(i.hasNext(),"SingletonList.iterator().hasNext()");
+            t.check(li.hasNext(),"SingletonList.listIterator().hasNext()");
+            t.check(!li.hasPrevious(),"SingletonList.listIterator().hasPrevious()");
+
+            t.checkEquals(i.next(),o,"SingletonList.iterator().next()");
+            t.check(!i.hasNext(),"SingletonList.iterator().hasNext()");
+            t.check(li.hasNext(),"SingletonList.listIterator().hasNext()");
+            t.check(!li.hasPrevious(),"SingletonList.listIterator().hasPrevious()");
+            
+            t.checkEquals(li.next(),o,"SingletonList.listIterator().next()");
+            t.check(!i.hasNext(),"SingletonList.iterator().hasNext()");
+            t.check(!li.hasNext(),"SingletonList.listIterator().hasNext()");
+            t.check(li.hasPrevious(),"SingletonList.listIterator().hasPrevious()");
+            
+            t.checkEquals(li.previous(),o,"SingletonList.listIterator().previous()");
+            t.check(!i.hasNext(),"SingletonList.iterator().hasNext()");
+            t.check(li.hasNext(),"SingletonList.listIterator().hasNext()");
+            t.check(!li.hasPrevious(),"SingletonList.listIterator().hasPrevious()");
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    static void testLazyList()
+    {
+        Test t = new Test("org.mortbay.util.LazyList");
+        
+        try
+        {
+            LazyList list = null;
+            Object o1="X1";
+            Object o2="X2";
+
+            // empty list
+            List empty = LazyList.getList(list);
+            t.checkEquals(empty.size(),0,"empty LazyList");
+
+            // singleton list
+            list=LazyList.add(list,o1);
+            
+            t.checkEquals(list.size(),1,"singleton LazyList.size()");
+            t.checkEquals(list.get(0),o1,"singleton LazyList.get(0)");
+            Iterator i=list.iterator();
+            ListIterator li=list.listIterator();
+            t.check(i.hasNext(),"singleton LazyList.iterator().hasNext()");
+            t.check(li.hasNext(),"singleton LazyList.listIterator().hasNext()");
+            t.check(!li.hasPrevious(),"singleton LazyList.listIterator().hasPrevious()");
+
+            t.checkEquals(i.next(),o1,"singleton LazyList.iterator().next()");
+            t.check(!i.hasNext(),"singleton LazyList.iterator().hasNext()");
+            t.check(li.hasNext(),"singleton LazyList.listIterator().hasNext()");
+            t.check(!li.hasPrevious(),"singleton LazyList.listIterator().hasPrevious()");
+            
+            t.checkEquals(li.next(),o1,"singleton LazyList.listIterator().next()");
+            t.check(!i.hasNext(),"singleton LazyList.iterator().hasNext()");
+            t.check(!li.hasNext(),"singleton LazyList.listIterator().hasNext()");
+            t.check(li.hasPrevious(),"singleton LazyList.listIterator().hasPrevious()");
+            
+            t.checkEquals(li.previous(),o1,"singleton LazyList.listIterator().previous()");
+            t.check(!i.hasNext(),"singleton LazyList.iterator().hasNext()");
+            t.check(li.hasNext(),"singleton LazyList.listIterator().hasNext()");
+            t.check(!li.hasPrevious(),"singleton LazyList.listIterator().hasPrevious()");
+
+
+            // normal list
+            list=LazyList.add(list,o2);
+            
+            t.checkEquals(list.size(),2,"normal LazyList.size()");
+            t.checkEquals(list.get(0),o1,"normal LazyList.get(0)");
+            t.checkEquals(list.get(1),o2,"normal LazyList.get(0)");
+            i=list.iterator();
+            li=list.listIterator();
+            t.check(i.hasNext(),"normal LazyList.iterator().hasNext()");
+            t.check(li.hasNext(),"normal LazyList.listIterator().hasNext()");
+            t.check(!li.hasPrevious(),"normal LazyList.listIterator().hasPrevious()");
+
+            t.checkEquals(i.next(),o1,"normal LazyList.iterator().next()");
+            t.check(i.hasNext(),"normal LazyList.iterator().hasNext()");
+            t.check(li.hasNext(),"normal LazyList.listIterator().hasNext()");
+            t.check(!li.hasPrevious(),"normal LazyList.listIterator().hasPrevious()");
+            
+            t.checkEquals(li.next(),o1,"normal LazyList.listIterator().next()");
+            t.check(i.hasNext(),"normal LazyList.iterator().hasNext()");
+            t.check(li.hasNext(),"normal LazyList.listIterator().hasNext()");
+            t.check(li.hasPrevious(),"normal LazyList.listIterator().hasPrevious()");
+
+            t.checkEquals(i.next(),o2,"normal LazyList.iterator().next()");
+            t.check(!i.hasNext(),"normal LazyList.iterator().hasNext()");
+            t.check(li.hasNext(),"normal LazyList.listIterator().hasNext()");
+            t.check(li.hasPrevious(),"normal LazyList.listIterator().hasPrevious()");
+            
+            t.checkEquals(li.next(),o2,"normal LazyList.listIterator().next()");
+            t.check(!i.hasNext(),"normal LazyList.iterator().hasNext()");
+            t.check(!li.hasNext(),"normal LazyList.listIterator().hasNext()");
+            t.check(li.hasPrevious(),"normal LazyList.listIterator().hasPrevious()");
+            
+            t.checkEquals(li.previous(),o2,"normal LazyList.listIterator().previous()");
+            t.check(!i.hasNext(),"normal LazyList.iterator().hasNext()");
+            t.check(li.hasNext(),"normal LazyList.listIterator().hasNext()");
+            t.check(li.hasPrevious(),"normal LazyList.listIterator().hasPrevious()");
+            
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
     static void testStringMap()
     {
         Test t = new Test("org.mortbay.util.StringMap");
@@ -1872,6 +2000,8 @@ public class TestHarness
             testCode();
             testPassword();
             testStringMap();
+            testSingletonList();
+            testLazyList();
             testMultiMap();
             testQuotedStringTokenizer();            
             testDateCache();

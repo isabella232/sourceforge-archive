@@ -11,6 +11,7 @@ import org.mortbay.util.LineInput;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.SingletonList;
 import org.mortbay.util.UrlEncoded;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -1099,7 +1100,7 @@ public class HttpFields
 
         // Do we have only 1 value?
         if (list==null)
-            return Collections.singletonList(value);
+            return SingletonList.newSingletonList(value);
 
         // Add remaining values
         while(enum.hasMoreElements())

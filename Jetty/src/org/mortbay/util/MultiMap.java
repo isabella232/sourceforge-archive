@@ -87,7 +87,7 @@ public class MultiMap extends HashMap
             return null;
         if (o instanceof List)
             return Collections.unmodifiableList((List)o);
-        return Collections.singletonList(o);
+        return SingletonList.newSingletonList(o);
     }
     
     /* ------------------------------------------------------------ */

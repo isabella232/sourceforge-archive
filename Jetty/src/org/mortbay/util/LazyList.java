@@ -4,9 +4,14 @@
 // ========================================================================
 
 package org.mortbay.util;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Iterator;
+import java.util.ListIterator;
 import java.util.Collections;
+import java.util.NoSuchElementException;
+import java.util.ConcurrentModificationException;
 
 /* ------------------------------------------------------------ */
 /** Lazy List creation.
@@ -35,7 +40,7 @@ import java.util.Collections;
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
-public class LazyList
+public class LazyList extends AbstractList
 {
     private Object _first;
     private List _list;
@@ -120,7 +125,7 @@ public class LazyList
         if (list==null)
             return nullForEmpty?null:Collections.EMPTY_LIST;
         if (list._list==null)
-            return Collections.singletonList(list._first);
+            return list;
         return list._list;
     }
 
@@ -158,6 +163,84 @@ public class LazyList
         }
             
         return list._list.get(i);
+    }
+
+
+
+    /* ------------------------------------------------------------ */
+    public Object get(int i)
+    {
+        if (_list!=null)
+            return _list.get(i);
+        if (i!=0)
+            throw new IndexOutOfBoundsException("index "+i);
+        return _first;
+    }
+
+    /* ------------------------------------------------------------ */
+    public int size()
+    {
+        if (_list!=null)
+            return _list.size();
+        return 1;
+    }
+
+    /* ------------------------------------------------------------ */
+    public ListIterator listIterator()
+    {
+        if (_list!=null)
+            return _list.listIterator();
+        return new SIterator();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public ListIterator listIterator(int i)
+    {
+        if (_list!=null)
+            return _list.listIterator(i);
+        return new SIterator(i);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Iterator iterator()
+    {
+        if (_list!=null)
+            return _list.iterator();
+        return new SIterator();
+    }
+
+    /* ------------------------------------------------------------ */
+    private class SIterator implements ListIterator
+    {
+        int i;
+        
+        SIterator(){i=0;}
+        
+        SIterator(int i)
+        {
+            if (i<0||i>1)
+                throw new IndexOutOfBoundsException("index "+i);
+            this.i=i;
+        }
+        
+        public void add(Object o){throw new UnsupportedOperationException("LazyList.add()");}
+        public boolean hasNext() {return i==0;}
+        public boolean hasPrevious() {return i==1;}
+        public Object next() {
+            if (i!=0) throw new NoSuchElementException();
+            if (_list!=null) throw new ConcurrentModificationException();
+            i++;
+            return _first;
+        }
+        public int nextIndex() {return i;}
+        public Object previous() {
+            if (i!=1) throw new NoSuchElementException();i--;
+            if (_list!=null) throw new ConcurrentModificationException();
+            return _first;
+        }
+        public int previousIndex() {return i-1;}
+        public void remove(){throw new UnsupportedOperationException("LazyList.remove()");}
+        public void set(Object o){throw new UnsupportedOperationException("LazyList.add()");}
     }
     
 }
