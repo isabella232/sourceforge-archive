@@ -268,6 +268,8 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public Locale getLocale()
     {
+        if (_locale==null)
+            return Locale.getDefault();
         return _locale;
     }
     
