@@ -989,8 +989,6 @@ public class TestRFC2616
             offset=0;
             response=listener.getResponses("GET /redirect HTTP/1.0\n"+
                                            "Connection: Keep-Alive\n"+
-                                           "\n"+
-                                           "GET /redirect HTTP/1.0\n"+
                                            "\n"
                                            );
             Code.debug("RESPONSE: ",response);
@@ -1000,21 +998,9 @@ public class TestRFC2616
                             "Location: /dump",
                             "redirected");
             t.checkContains(response,offset,
-                            "Content-Length: 0",
-                            "content length");
-            t.checkContains(response,offset,
-                            "Connection: keep-alive",
-                            "keep-alive");
-            
-            offset=t.checkContains(response,offset,
-                                   "HTTP/1.0 302","302")+1;
-            t.checkContains(response,offset,
-                            "Location: /dump",
-                            "redirected");
-            t.checkContains(response,offset,
                             "Connection: close",
-                            "closed");
-
+                            "connection close");
+            
             
             // HTTP/1.1
             offset=0;
