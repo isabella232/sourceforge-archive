@@ -590,7 +590,7 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void setCharacterEncoding(String encoding)
     {
-        _httpResponse.setCharacterEncoding(encoding);
+        _httpResponse.setCharacterEncoding(encoding,true);
     }
     
     /* ------------------------------------------------------------ */

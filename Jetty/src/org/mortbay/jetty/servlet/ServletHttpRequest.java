@@ -86,7 +86,6 @@ public class ServletHttpRequest
     private int _inputState=0;
     private ServletHolder _servletHolder;
     private String _pathInContext;
-    private String _characterEncoding;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -120,7 +119,6 @@ public class ServletHttpRequest
         _reader=null;
         _inputState=0;
         _servletHolder=null;
-        _characterEncoding=null;
 
         if (servletHandler!=null)
             _contextPath=_servletHandler.getHttpContext().getContextPath();
@@ -621,14 +619,12 @@ public class ServletHttpRequest
         if (_inputState!=0)
             throw new IllegalStateException("getReader() or getInputStream() called");
         "".getBytes(encoding);
-        _characterEncoding=encoding;
+        _httpRequest.setCharacterEncoding(encoding,false);
     }
     
     /* -------------------------------------------------------------- */
     public String getCharacterEncoding()
     {
-        if (_characterEncoding!=null)
-            return _characterEncoding;
         return _httpRequest.getCharacterEncoding();
     }
     
@@ -764,7 +760,7 @@ public class ServletHttpRequest
         {
             try
             {
-                String encoding=_characterEncoding!=null?_characterEncoding:getCharacterEncoding();
+                String encoding=getCharacterEncoding();
                 if (encoding==null)
                     encoding=StringUtil.__ISO_8859_1;
                 _reader=new BufferedReader(new InputStreamReader(getInputStream(),encoding));

@@ -531,7 +531,7 @@ public abstract class HttpMessage
      * @param encoding An encoding that can override the encoding set
      * from the ContentType field.
      */
-    public void setCharacterEncoding(String encoding)
+    public void setCharacterEncoding(String encoding,boolean setField)
     {
         if (encoding==null)
         {
@@ -539,18 +539,19 @@ public abstract class HttpMessage
             if (_characterEncoding!=null)
             {
                 _characterEncoding=null;
-                setFields().put(HttpFields.__ContentType,_mimeType);
+                if (setField)
+                    setFields().put(HttpFields.__ContentType,_mimeType);
             }
         }
         else
         {
             // No, so just add this one to the mimetype
             _characterEncoding=encoding;
-            if (_mimeType!=null)
+            if (setField && _mimeType!=null)
             {
-                setFields().put(HttpFields.__ContentType,
-                                _mimeType+";charset="+
-                                QuotedStringTokenizer.quote(_characterEncoding,";= "));
+                    setFields().put(HttpFields.__ContentType,
+                            _mimeType+";charset="+
+                             QuotedStringTokenizer.quote(_characterEncoding,";= "));
             }
         }
     }
