@@ -32,6 +32,16 @@ class JarFileResource extends JarResource
     }
 
     /* ------------------------------------------------------------ */
+    public synchronized void release()
+    {
+        _list=null;
+        _entry=null;
+        _file=null;
+        _jarFile=null;
+        super.release();
+    }
+    
+    /* ------------------------------------------------------------ */
     protected boolean checkConnection()
     {
         try{
@@ -44,6 +54,7 @@ class JarFileResource extends JarResource
                 _entry=null;
                 _file=null;
                 _jarFile=null;
+                _list=null;
             }
         }
         return _jarFile!=null;
@@ -59,6 +70,7 @@ class JarFileResource extends JarResource
         _entry=null;
         _file=null;
         _jarFile=null;
+        _list=null;
         
         int sep = _urlString.indexOf("!/");
         _jarUrl=_urlString.substring(0,sep+2);

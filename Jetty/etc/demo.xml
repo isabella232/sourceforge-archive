@@ -1,5 +1,5 @@
 <?xml version="1.0"  encoding="ISO-8859-1"?>
-<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.0//EN" "http://jetty.mortbay.com/configure_1_0.dtd">
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.1//EN" "http://jetty.mortbay.com/configure_1_1.dtd">
 
 <!--
 This is a Jetty HTTP server configuration file.  This configuration
@@ -162,6 +162,8 @@ $Id$
     <Call name="getServletHandler">
       <Set name="ServeDynamicSystemServlets" type="boolean">FALSE</Set>
     </Call>
+    <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/etc/dtd/</Set>
+    <Set name="ServingResources">TRUE</Set>
   </Call>
 
   <Call name="addRealm">

@@ -93,7 +93,7 @@ abstract public class HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    public HttpConnection getConnection()
+    public HttpConnection getHttpConnection()
     {
         return _connection;
     }

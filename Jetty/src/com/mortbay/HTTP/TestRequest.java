@@ -146,7 +146,7 @@ public class TestRequest
             Code.debug("Request: ",request);
             t.checkEquals(request.getParameterNames().size(),2,"Query parameters");
             t.checkEquals(request.getParameter("A"),"1,2,3","Single Query");
-            t.checkEquals(request.getParameter("B"),"4,5,6","Multi as Single");
+            t.checkEquals(request.getParameter("B"),"4","Multi as Single");
             t.checkEquals(request.getParameterValues("A").size(),1,"Single as Multi");
             t.checkEquals(request.getParameterValues("A").get(0),"1,2,3",
                           "Single as Multi");
@@ -201,7 +201,7 @@ public class TestRequest
             t.checkEquals(request.getInputStream().available(),0,"Form read");
 
             t.checkEquals(request.getParameter("A"),"1,2,3","Single Query");
-            t.checkEquals(request.getParameter("B"),"4,5,6,7","Merge as Single");
+            t.checkEquals(request.getParameter("B"),"4","Merge as Single");
             t.checkEquals(request.getParameterValues("B").get(0),"4",
                           "Merged multi");
             t.checkEquals(request.getParameterValues("B").get(1),"5",

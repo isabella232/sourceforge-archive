@@ -502,7 +502,7 @@ public class HttpRequest extends HttpMessage
     /* ------------------------------------------------------------ */
     public String getRemoteAddr()
     {
-        HttpConnection connection = getConnection();
+        HttpConnection connection = getHttpConnection();
         if (connection!=null)
         {
             InetAddress addr = connection.getRemoteAddr();
@@ -785,7 +785,7 @@ public class HttpRequest extends HttpMessage
     {
         if (!_paramsExtracted)
             extractParameters();
-        return _parameters.getString(name);
+        return (String)_parameters.getValue(name,0);
     }
     
     /* ------------------------------------------------------------ */

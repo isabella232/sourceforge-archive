@@ -28,6 +28,13 @@ public class JarResource extends Resource
     }
 
     /* ------------------------------------------------------------ */
+    public synchronized void release()
+    {
+        _jarConnection=null;
+        super.release();
+    }
+    
+    /* ------------------------------------------------------------ */
     protected boolean checkConnection()
     {
         boolean check=super.checkConnection();

@@ -59,8 +59,11 @@ release     - Cleanup for release
     <mkdir dir="${javadoc}" />
     <mkdir dir="${classes}" />
     <mkdir dir="${logs}" />
-    <copy file="${src}/com/mortbay/Util/configure.dtd" tofile="${etc}/configure.dtd" />
-    <copy file="${src}/com/mortbay/HTTP/web.dtd" tofile="${etc}/web.dtd" />
+    <mkdir dir="${etc}/dtd" />
+    <copy file="${src}/com/mortbay/Util/configure.dtd" tofile="${etc}/dtd/configure.dtd" />
+    <copy file="${src}/com/mortbay/Util/configure_1_0.dtd" tofile="${etc}/dtd/configure_1_0.dtd" />
+    <copy file="${src}/com/mortbay/Util/configure_1_1.dtd" tofile="${etc}/dtd/configure_1_1.dtd" />
+    <copy file="${src}/com/mortbay/HTTP/web.dtd" tofile="${etc}/dtd/web.dtd" />
   </target>
 
 
@@ -72,6 +75,7 @@ release     - Cleanup for release
   <target name="clean" depends="tidy">
     <delete dir="${jetty.webapp.classes}"/>
     <delete dir="${javadoc}"/>
+    <delete dir="${etc}/dtd" />
     <delete file="${jetty.jar}"/>
     <delete file="${servlet.jar}"/>
     <delete file="${jasper.jar}"/>

@@ -92,6 +92,31 @@ public class MultiMap extends HashMap
     }
     
     /* ------------------------------------------------------------ */
+    /** Get a value from a multiple value.
+     * If the value is not a multivalue, then index 0 retrieves the value.
+     * @param name The entry key.
+     * @param i Index of element to get.
+     * @return Unmodifieable List of values.
+     */
+    public Object getValue(Object name,int i)
+    {
+        Object o=get(name);
+        if (o==null)
+            return null;
+        if (o instanceof List)
+        {
+            List list = (List)o;
+            if (i>=list.size())
+                return null;
+            return list.get(i);
+        }
+
+        if (i==0)
+            return o;
+        return null;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Get value as String.
      * Single valued items are converted to a String with the toString()
      * Object method. Multi valued entries are converted to a coma separated

@@ -164,7 +164,7 @@ public class ServletRequest
     public Enumeration getLocales()
     {
         List acceptLanguage =
-            _httpRequest.getHeader().getValues("Accept-Language");
+            _httpRequest.getHeader().getValues(HttpFields.__AcceptLanguage);
 
         // handle no locale
         if (acceptLanguage == null || acceptLanguage.size()==0)
@@ -183,6 +183,7 @@ public class ServletRequest
         for (int i=0; i<acceptLanguage.size(); i++)
         {
             String language = (String)acceptLanguage.get(i);
+            language=HttpFields.valueParameters(language,null);
             String country = "";
             int dash = language.indexOf("-");
             if (dash > -1)
@@ -673,7 +674,7 @@ public class ServletRequest
     public String getRemoteHost()
     {
         String remoteHost=null;
-        HttpConnection connection = _httpRequest.getConnection();
+        HttpConnection connection = _httpRequest.getHttpConnection();
         if (connection!=null)
         {
             InetAddress addr = connection.getRemoteAddr();

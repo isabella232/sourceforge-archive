@@ -1,7 +1,13 @@
 Jetty Versions
 --------------
 
-Jetty-3.1.rc1 - 18 Mar 2001
+ + Version 1.1 of configuration dtd supports New objects.
+ + Improved handling of Primitive classes in XmlConfig
+ + Renamed getConnection to getHttpConnection
+ + fixed getLocales handling of quality params
+ + fixed getParameter(name) handling for multiple values.
+
+Jetty-3.1.rc1 - 18 Mar 2001y
  + Moved JMX and SASL handling to Jetty3Extra release
  + Fixed problem with ServletContext.getContext(uri)
  + Added Jetty documentation pages from JettyWiki

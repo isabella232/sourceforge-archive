@@ -104,8 +104,8 @@ public class Demo
             context.setClassPath("servlets/");
             context.setDynamicServletPathSpec("/servlet/*");
             context.getServletHandler().setServeDynamicSystemServlets(false);
-            context.addServlet("Admin","/admin/*","com.mortbay.HTTP.AdminServlet");
-            
+            context.setResourceBase("etc/dtd");
+            context.setServingResources(true);
             
             // Logger
             WriterLogSink log = new WriterLogSink("logs/yyyy_mm_dd.request.log");

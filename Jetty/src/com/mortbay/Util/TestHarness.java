@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.FilePermission;
+import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
@@ -18,6 +19,8 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -26,6 +29,11 @@ import java.util.TimeZone;
 import java.util.Vector;
 import java.util.zip.ZipEntry;
 
+import java.util.Enumeration;
+import java.net.JarURLConnection;
+import java.util.jar.JarInputStream;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /* ------------------------------------------------------------ */
 /** Util meta TestHarness.
@@ -1476,8 +1484,7 @@ public class TestHarness
             r = b.addPath("/Resource.java");
             t.check(r.exists(),"AddPath resource exists");
             r = b.addPath("/UnknownFile");
-            t.check(!r.exists(),"AddPath resource ! exists");
-            
+            t.check(!r.exists(),"AddPath resource ! exists");            
 
             r = Resource.newResource(us);
             t.check(r.exists(),"Dir URL exists");
@@ -1544,7 +1551,6 @@ public class TestHarness
             data=IO.toString(in);
             t.checkContains(data,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","Fetched file");
 
-
             t.checkEquals(Resource.canonicalPath("foo"),"foo","canonicalPath");
             t.checkEquals(Resource.canonicalPath("/"),"/","canonicalPath");
             t.checkEquals(Resource.canonicalPath("/foo/bar"),"/foo/bar","canonicalPath");
@@ -1568,7 +1574,47 @@ public class TestHarness
             t.checkEquals(Resource.canonicalPath("./"),"/","canonicalPath");
             t.checkEquals(Resource.canonicalPath("/foo/."),"/foo","canonicalPath");
             t.checkEquals(Resource.canonicalPath("/foo/./"),"/foo/","canonicalPath");
+  
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    public static void testJarURL()
+    {
+        Test t = new Test("com.mortbay.Util.Zip");
+        try
+        {
+            // Test jar update
+            File tmpJar = File.createTempFile("test",".jar");
+            tmpJar.deleteOnExit();
             
+            URL jar1 = new URL(__userURL+"TestData/test.zip");
+            System.err.println(jar1);
+            IO.copy(jar1.openStream(),new FileOutputStream(tmpJar));
+            URL url1 = new URL("jar:"+tmpJar.toURL()+"!/");
+            JarURLConnection jc1 = (JarURLConnection)url1.openConnection();
+            JarFile j1=jc1.getJarFile();
+            System.err.println("T1:");
+            Enumeration e = j1.entries();
+            while(e.hasMoreElements())
+                System.err.println(e.nextElement());
+            
+            
+            URL jar2 = new URL(__userURL+"TestData/alt.zip");
+            System.err.println(jar2);
+            IO.copy(jar2.openStream(),new FileOutputStream(tmpJar));
+            URL url2 = new URL("jar:"+tmpJar.toURL()+"!/");
+            JarURLConnection jc2 = (JarURLConnection)url2.openConnection();
+            JarFile j2=jc2.getJarFile();
+            System.err.println("T2:");
+            e = j2.entries();
+            while(e.hasMoreElements())
+                System.err.println(e.nextElement());
             
         }
         catch(Exception e)
@@ -1585,10 +1631,23 @@ public class TestHarness
         try
         {
             XmlParser parser = new XmlParser();
+
+            
+            Resource config11Resource=Resource.newSystemResource
+                ("com/mortbay/Util/configure_1_1.dtd");    
+            
             parser.redirectEntity
-                ("configure.dtd",
-                 Resource.newSystemResource
-                 ("com/mortbay/Util/configure.dtd"));
+                ("configure.dtd",config11Resource);   
+            
+            parser.redirectEntity
+                ("configure_1_1.dtd",
+                 config11Resource);
+            parser.redirectEntity
+                ("http://jetty.mortbay.com/configure_1_1.dtd",
+                 config11Resource);
+            parser.redirectEntity
+                ("-//Mort Bay Consulting//DTD Configure 1.1//EN",
+                 config11Resource);
             
             String url = __userURL+"TestData/configure.xml";
             XmlParser.Node testDoc = parser.parse(url);
@@ -1711,7 +1770,8 @@ public class TestHarness
        	    testThreadPool();
        	    testThreadedServer();
        	    testB64();
-      	    testResource();
+            testResource();
+      	    //testJarURL();
        	    testXmlParser();
        	    testXmlConfiguration();
         }

@@ -60,18 +60,33 @@ public class XmlConfiguration
             if (__parser==null)
             {
                 __parser = new XmlParser();
-                Resource configResource=Resource.newSystemResource
-                    ("com/mortbay/Util/configure.dtd");    
+                Resource config11Resource=Resource.newSystemResource
+                    ("com/mortbay/Util/configure_1_1.dtd");    
+
                 __parser.redirectEntity
-                    ("configure.dtd",configResource);   
+                    ("configure.dtd",config11Resource);   
+
                 __parser.redirectEntity
-                    ("configure_1_0.dtd",configResource);
+                    ("configure_1_1.dtd",
+                     config11Resource);
+                __parser.redirectEntity
+                    ("http://jetty.mortbay.com/configure_1_1.dtd",
+                     config11Resource);
+                __parser.redirectEntity
+                    ("-//Mort Bay Consulting//DTD Configure 1.1//EN",
+                     config11Resource);
+
+                Resource config10Resource=Resource.newSystemResource
+                    ("com/mortbay/Util/configure_1_1.dtd");    
+                __parser.redirectEntity
+                    ("configure_1_0.dtd",
+                     config10Resource);
                 __parser.redirectEntity
                     ("http://jetty.mortbay.com/configure_1_0.dtd",
-                     configResource);
+                     config10Resource);
                 __parser.redirectEntity
                     ("-//Mort Bay Consulting//DTD Configure 1.0//EN",
-                     configResource);
+                     config10Resource);
             }
         }
         _config = __parser.parse(configuration.toString());	

@@ -31,6 +31,7 @@ public class Primitive
         name2Class.put("long",java.lang.Long.TYPE);
         name2Class.put("short",java.lang.Short.TYPE);
         name2Class.put("void",java.lang.Void.TYPE);
+        
         name2Class.put("java.lang.Boolean.TYPE",java.lang.Boolean.TYPE);
         name2Class.put("java.lang.Byte.TYPE",java.lang.Byte.TYPE);
         name2Class.put("java.lang.Character.TYPE",java.lang.Character.TYPE);
@@ -40,6 +41,25 @@ public class Primitive
         name2Class.put("java.lang.Long.TYPE",java.lang.Long.TYPE);
         name2Class.put("java.lang.Short.TYPE",java.lang.Short.TYPE);
         name2Class.put("java.lang.Void.TYPE",java.lang.Void.TYPE);
+
+        name2Class.put("java.lang.Boolean",java.lang.Boolean.class);
+        name2Class.put("java.lang.Byte",java.lang.Byte.class);
+        name2Class.put("java.lang.Character",java.lang.Character.class);
+        name2Class.put("java.lang.Double",java.lang.Double.class);
+        name2Class.put("java.lang.Float",java.lang.Float.class);
+        name2Class.put("java.lang.Integer",java.lang.Integer.class);
+        name2Class.put("java.lang.Long",java.lang.Long.class);
+        name2Class.put("java.lang.Short",java.lang.Short.class);
+
+        name2Class.put("Boolean",java.lang.Boolean.class);
+        name2Class.put("Byte",java.lang.Byte.class);
+        name2Class.put("Character",java.lang.Character.class);
+        name2Class.put("Double",java.lang.Double.class);
+        name2Class.put("Float",java.lang.Float.class);
+        name2Class.put("Integer",java.lang.Integer.class);
+        name2Class.put("Long",java.lang.Long.class);
+        name2Class.put("Short",java.lang.Short.class);
+
         name2Class.put(null,java.lang.Void.TYPE);
         name2Class.put("string",java.lang.String.class);
         name2Class.put("String",java.lang.String.class);
@@ -59,6 +79,16 @@ public class Primitive
         class2Name.put(java.lang.Long.TYPE,"long");
         class2Name.put(java.lang.Short.TYPE,"short");
         class2Name.put(java.lang.Void.TYPE,"void");
+
+        class2Name.put(java.lang.Boolean.class,"java.lang.Boolean");
+        class2Name.put(java.lang.Byte.class,"java.lang.Byte");
+        class2Name.put(java.lang.Character.class,"java.lang.Character");
+        class2Name.put(java.lang.Double.class,"java.lang.Double");
+        class2Name.put(java.lang.Float.class,"java.lang.Float");
+        class2Name.put(java.lang.Integer.class,"java.lang.Integer");
+        class2Name.put(java.lang.Long.class,"java.lang.Long");
+        class2Name.put(java.lang.Short.class,"java.lang.Short");
+        
         class2Name.put(null,"void");
         name2Class.put(java.lang.String.class,"java.lang.String");
     }
@@ -85,6 +115,21 @@ public class Primitive
                            java.lang.Long.class.getMethod("valueOf",s));
             class2Value.put(java.lang.Short.TYPE,
                            java.lang.Short.class.getMethod("valueOf",s));
+
+            class2Value.put(java.lang.Boolean.class,
+                           java.lang.Boolean.class.getMethod("valueOf",s));
+            class2Value.put(java.lang.Byte.class,
+                           java.lang.Byte.class.getMethod("valueOf",s));
+            class2Value.put(java.lang.Double.class,
+                           java.lang.Double.class.getMethod("valueOf",s));
+            class2Value.put(java.lang.Float.class,
+                           java.lang.Float.class.getMethod("valueOf",s));
+            class2Value.put(java.lang.Integer.class,
+                           java.lang.Integer.class.getMethod("valueOf",s));
+            class2Value.put(java.lang.Long.class,
+                           java.lang.Long.class.getMethod("valueOf",s));
+            class2Value.put(java.lang.Short.class,
+                           java.lang.Short.class.getMethod("valueOf",s));
         }
         catch(Exception e)
         {
@@ -109,15 +154,16 @@ public class Primitive
     {
         try
         {
-            if (type.equals(java.lang.Character.TYPE))
-                return new Character(value.charAt(0));
-            
             if (type.equals(java.lang.String.class))
                 return value;
-
+            
             Method m = (Method)class2Value.get(type);
             if (m!=null)
                 return m.invoke(null,new Object[] {value});
+
+            if (type.equals(java.lang.Character.TYPE) ||
+                type.equals(java.lang.Character.class))
+                return new Character(value.charAt(0));
         }
         catch(IllegalAccessException e)
         {
@@ -137,10 +183,6 @@ public class Primitive
     {
         return valueOf(fromName(type),value);
     }
-
-
-    
-
 }
 
         
