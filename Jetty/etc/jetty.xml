@@ -107,12 +107,17 @@
 
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- Add a all web application within the webapps directory          -->
+  <!-- Add a all web application within the webapps directory.         -->
+  <!-- + No virtual host specified                                     -->
+  <!-- + Look in the webapps directory relative to jetty.home or .     -->
+  <!-- + Use the webdefault.xml resource for the defaults descriptor   -->
+  <!-- + Upack the war file                                            -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Call name="addWebApplications">
     <Arg></Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/</Arg>
-    <Arg type="boolean">true</Arg> <!-- Unpack WAR files -->
+    <Arg>org/mortbay/jetty/servlet/webdefault.xml</Arg>
+    <Arg type="boolean">true</Arg>
   </Call>
 
 

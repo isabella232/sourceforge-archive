@@ -205,7 +205,7 @@ public class Server extends HttpServer
     public WebApplicationContext[] addWebApplications(String webapps)
         throws IOException
     {
-        return addWebApplications(null,webapps,false);
+        return addWebApplications(null,webapps,null,false);
     }
     
     /* ------------------------------------------------------------ */
@@ -217,10 +217,11 @@ public class Server extends HttpServer
      * @param webapps Directory file name or URL to look for auto webapplication.
      * @exception IOException 
      */
-    public WebApplicationContext[] addWebApplications(String host,String webapps)
+    public WebApplicationContext[] addWebApplications(String host,
+                                                      String webapps)
         throws IOException
     {
-        return addWebApplications(host,webapps,false);
+        return addWebApplications(host,webapps,null,false);
     }
         
     /* ------------------------------------------------------------ */
@@ -234,7 +235,33 @@ public class Server extends HttpServer
      * @param extract If true, extract war files
      * @exception IOException 
      */
-    public WebApplicationContext[] addWebApplications(String host,String webapps, boolean extract)
+    public WebApplicationContext[] addWebApplications(String host,
+                                                      String webapps,
+                                                      boolean extract)
+        throws IOException
+    {
+        return addWebApplications(host,webapps,null,extract);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**  Add Web Applications.
+     * Add auto webapplications to the server.  The name of the
+     * webapp directory or war is used as the context name. If a
+     * webapp is called "root" it is added at "/".
+     * @param host Virtual host name or null
+     * @param webapps Directory file name or URL to look for auto
+     * webapplication.
+     * @param defaults The defaults xml filename or URL which is
+     * loaded before any in the web app. Must respect the web.dtd.
+     * If null the default defaults file is used. If the empty string, then
+     * no defaults file is used.
+     * @param extract If true, extract war files
+     * @exception IOException 
+     */
+    public WebApplicationContext[] addWebApplications(String host,
+                                                      String webapps,
+                                                      String defaults,
+                                                      boolean extract)
         throws IOException
     {
         ArrayList wacs = new ArrayList();
@@ -271,6 +298,13 @@ public class Server extends HttpServer
                                                          context,
                                                          app);
             wac.setExtractWAR(extract);
+            if (defaults!=null)
+            {
+                if (defaults.length()==0)
+                    wac.setDefaultsDescriptor(null);
+                else
+                    wac.setDefaultsDescriptor(defaults);
+            }
             wacs.add(wac);
         }
 
