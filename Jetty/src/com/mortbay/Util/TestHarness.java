@@ -1258,12 +1258,39 @@ public class TestHarness
     }
     
     /* ------------------------------------------------------------ */
+    static void testMultiMap()
+    {
+        Test t = new Test("com.mortbay.Util.MultiMap");
+        
+        try
+        {
+	    MultiMap mm = new MultiMap();
+
+	    mm.put("K1","V1");
+	    t.checkEquals(mm.get("K1"),"V1","as Map");
+	    t.checkEquals(mm.getValues("K1").get(0),"V1","as List");
+	    mm.add("K1","V2");
+	    t.checkEquals(mm.getValues("K1").get(0),"V1","add List");
+	    t.checkEquals(mm.getValues("K1").get(1),"V2","add List");
+
+	    mm.put("K2",new Integer(2));
+	    t.checkEquals(mm.getValues("K2").get(0),new Integer(2),"as Object");
+	    
+	}
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
+        }
+    }
+    /* ------------------------------------------------------------ */
     /** main
      */
     public static void main(String[] args)
     {
         try
         {
+	    testMultiMap();
             testQuotedStringTokenizer();            
             testDateCache();
             testTest();
@@ -1281,6 +1308,7 @@ public class TestHarness
             testB64();
 	    testZipResource();
             PropertyTreeTest.test();
+	    
         }
         catch(Throwable th)
         {

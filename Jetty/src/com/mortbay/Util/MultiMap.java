@@ -60,8 +60,8 @@ public class MultiMap extends HashMap
             return null;
         if (o instanceof List)
             return Collections.unmodifiableList((List)o);
-        String[] a = {o.toString()};
-        return Collections.unmodifiableList(Arrays.asList(a));
+        Object[] oa = {o};
+        return Arrays.asList(oa);
     }
     
     /* ------------------------------------------------------------ */
@@ -204,8 +204,20 @@ public class MultiMap extends HashMap
         if (o==null)
             putValues(name,values);
         else if (o instanceof List)
-            ((List)o).addAll(values);
-        else
+	{
+	    try
+	    {
+		((List)o).addAll(values);
+	    }
+	    catch(UnsupportedOperationException e)
+	    {
+		List l=new ArrayList(((List)o).size()+
+				     values.size());
+		l.addAll((List)o);
+		l.addAll(values);
+	    }
+        }
+	else
         {
             List l=new ArrayList(8+values.size());
             l.add(o);
