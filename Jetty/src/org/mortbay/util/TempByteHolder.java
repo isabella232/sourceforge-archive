@@ -1,7 +1,7 @@
-/*
- * $Id$
- */
-
+// ========================================================================
+// Copyright (c) 2002 Mort Bay Consulting, Sydney
+// $Id$
+// ========================================================================
 package org.mortbay.util;
 
 import java.io.IOException;
@@ -25,7 +25,7 @@ import java.io.RandomAccessFile;
  * <br>
  * Overall usage strategy: You first write data to the buffer using OutputStream 
  * returned by getOutputStream(), then examine data size using getLength() 
- * and isSmallEnough() and either call getBytes() to get byte[],
+ * and isLarge() and either call getBytes() to get byte[],
  * getString() to get data as String or getInputStream() to read data using stream.
  * Instance of TempByteHolder can be safely and efficiently reused by calling clear().
  * When TempByteHolder is no longer needed you must call close() to ensure underlying
@@ -36,36 +36,36 @@ import java.io.RandomAccessFile;
  * This class can hold up to 2GB of data.
  * <br><br>
  * <i>SECURITY NOTE:</i> As data may be written to disk, don't use this for sensitive information.
- * @author  Jan Hlavatý <hlavac@code.cz>
+ * @author  Jan Hlavatý &lt;hlavac AT code.cz&gt;
  */
 public class TempByteHolder {
     
-    byte[] memory_buffer = null;    /** buffer to use */
+    byte[] _memory_buffer = null;    /** buffer to use */
     
-    boolean file_mode = false;  /** false: memory buffer mode (small data)
+    boolean _file_mode = false;  /** false: memory buffer mode (small data)
                                     true: temp file mode (large data) */
 
-    int window_size = 0;    /** size of memory buffer */
-    int window_low = 0;     /** offset of first byte in memory buffer */
-    int window_high = 0;    /** offset of first byte after memory buffer */
-    int file_high = 0;      /** offset of fist byte not yet written to temp file */
-    int write_pos = 0;      /** offset of next byte to be writen; number of bytes written */
-    int read_pos = 0;       /** offset of fist byte to be read */
-    int file_pos = -1;      /** current temp file seek offset; -1 = unknown */
-    int mark_pos = 0;       /** mark */
+    int _window_size = 0;    /** size of memory buffer */
+    int _window_low = 0;     /** offset of first byte in memory buffer */
+    int _window_high = 0;    /** offset of first byte after memory buffer */
+    int _file_high = 0;      /** offset of fist byte not yet written to temp file */
+    int _write_pos = 0;      /** offset of next byte to be writen; number of bytes written */
+    int _read_pos = 0;       /** offset of fist byte to be read */
+    int _file_pos = -1;      /** current temp file seek offset; -1 = unknown */
+    int _mark_pos = 0;       /** mark */
     
 
     /** Instance of OutputStream is cached and reused. */
-    TempByteHolder.OutputStream output_stream = new TempByteHolder.OutputStream();
+    TempByteHolder.OutputStream _output_stream = new TempByteHolder.OutputStream();
     /** Instance of InputStream is cached and reused. */
-    TempByteHolder.InputStream input_stream = new TempByteHolder.InputStream();
+    TempByteHolder.InputStream _input_stream = null; //input_stream = new TempByteHolder.InputStream();
     
     /** Temporary directory to be used, or null for system default */
-    File temp_directory = null;
+    File _temp_directory = null;
     /** File object representing temporary file. */
-    File tempfilef = null;
+    File _tempfilef = null;
     /** Temporary file or null when none is used yet */
-    RandomAccessFile tempfile = null;
+    RandomAccessFile _tempfile = null;
 
     
     //----- constructors -------
@@ -77,7 +77,7 @@ public class TempByteHolder {
      * @param in_memory_capacity Size in bytes of memory buffer to allocate.
      */
     public TempByteHolder(int in_memory_capacity) {
-        this(new byte[in_memory_capacity]);
+        this(new byte[in_memory_capacity],0,0);
     }
     
     /**
@@ -85,10 +85,25 @@ public class TempByteHolder {
      * @param byte_array byte array to be used as memory buffer.
      */
     public TempByteHolder(byte[] byte_array) {
+        this(byte_array,0,0);
+    }
+
+    /**
+     * Creates a new instance of TempByteHolder using passed byte[] which
+     * contains prefilled data as memory buffer.
+     * @param byte_array byte array to be used as memory buffer.
+     * @param offset offset of prefilled data in buffer.
+     * @param prefilled_data_size number of bytes that contain valid data.
+     */
+    public TempByteHolder(byte[] byte_array, int offset, int prefilled_data_size) {
         if (byte_array == null) throw new NullPointerException();
-        memory_buffer = byte_array;
-        window_size = memory_buffer.length;
-        window_high = window_size;
+        _window_size = byte_array.length;
+        if ((offset < 0) || (offset > _window_size)) throw new IllegalArgumentException("Bad prefilled data offset");
+        if ((offset+prefilled_data_size > _window_size)||(prefilled_data_size < 0)) throw new IllegalArgumentException("Bad prefilled data size");
+        _memory_buffer = byte_array;
+        _write_pos = prefilled_data_size;
+        _window_low = -offset;
+        _window_high = _window_size-offset;
     }
     
     public void finalize() {
@@ -103,13 +118,13 @@ public class TempByteHolder {
      * If temporary file was used, it is not closed/deleted yet as it may be needed again.
      */
     public void clear() {
-        file_mode = false;
-        write_pos = 0;
-        read_pos = 0;
-        window_low = 0;
-        window_high = window_size;
-        file_high = 0;
-        mark_pos = 0;
+        _file_mode = false;
+        _write_pos = 0;
+        _read_pos = 0;
+        _window_low = 0;
+        _window_high = _window_size;
+        _file_high = 0;
+        _mark_pos = 0;
     }
     
     /**
@@ -118,11 +133,11 @@ public class TempByteHolder {
      */
     public void close() throws IOException {
         clear();
-        if (tempfile != null) {
-            tempfile.close();
-            tempfile = null;
-            tempfilef.delete();
-            tempfilef = null;
+        if (_tempfile != null) {
+            _tempfile.close();
+            _tempfile = null;
+            _tempfilef.delete();
+            _tempfilef = null;
         }
     }
 
@@ -131,8 +146,8 @@ public class TempByteHolder {
      * @throws IOException when something goes wrong.
      */
     public void seek(int offset) throws IOException {
-        if ((offset <= write_pos)&&(offset>=0)) {
-            read_pos = offset;
+        if ((offset <= _write_pos)&&(offset>=0)) {
+            _read_pos = offset;
         } else throw new IOException("bad seek offset");
     }
     
@@ -142,12 +157,12 @@ public class TempByteHolder {
      * If current read offset or mark is past the new end of data, it is moved at the new end.
      */
     public void truncate(int offset) throws IOException {
-        if ((offset < 0)||(offset > write_pos)) throw new IOException("bad truncate offset");
-        if (read_pos > offset) read_pos = offset;
-        if (mark_pos > offset) mark_pos = offset;
-        write_pos = offset;
-        if (file_high > offset) file_high = offset;
-        moveWindow(write_pos);
+        if ((offset < 0)||(offset > _write_pos)) throw new IOException("bad truncate offset");
+        if (_read_pos > offset) _read_pos = offset;
+        if (_mark_pos > offset) _mark_pos = offset;
+        _write_pos = offset;
+        if (_file_high > offset) _file_high = offset;
+        moveWindow(_write_pos);
     }
     
 
@@ -162,7 +177,7 @@ public class TempByteHolder {
     public void setTempDirectory(File dir) throws IOException {
         File td = dir.getCanonicalFile();
         if (td.isDirectory()) {
-            temp_directory = td;
+            _temp_directory = td;
         }
     }
     
@@ -174,18 +189,19 @@ public class TempByteHolder {
      * to be read, use InputStream.available() .
      */
     public int getLength() {
-        return write_pos;
+        return _write_pos;
     }
     
     /**
      * Tells whether buffered data is small enough to fit in memory buffer
-     * so that it can be returned as byte[]. Data is considered small enough
-     * when it will fit into backing memory buffer.
-     * @return true when data is small and can be returned as byte[],
-     * false when data will not fit in byte[] and has to be read using InputStream.
+     * so that it can be returned as byte[]. Data is considered large 
+     * when it will not fit into backing memory buffer.
+     * @return true when data is only accessible through InputStream interface;
+     * false when data can be also retrieved directly as byte[] or String.
+     * @see getBytes(), getString(String)
      */
-    public boolean isSmallEngough() {
-        return !file_mode;
+    public boolean isLarge() {
+        return _file_mode;
     }
     
 
@@ -193,25 +209,27 @@ public class TempByteHolder {
      * Returns byte[] that holds all buffered data in its first getLength() bytes.
      * If this instance was created using (byte[]) constructor, this is the same
      * array that has been passed to the constructor. If buffered data don't fit into
-     * memory buffer, null is returned and data have to be read through InputStream
-     * returned by getInputStream().
-     * @return byte[] with data as its first getLength() bytes or null when data
-     * is too big to be passed this way.
+     * memory buffer, IllegalStateException is thrown.
+     * @return byte[] with data as its first getLength() bytes.
+     * @throws IllegalStateException when data is too big to be read this way.
+     * @see isLarge(), getLength(), getString(String), getInputStream()
      */
     public byte[] getBytes() {
-        if (file_mode) return null;
-        return memory_buffer;
+        if (_file_mode) throw new IllegalStateException("data too large");
+        return _memory_buffer;
     }
 
     /**
      * Returns buffered data as String using given character encoding.
      * @param character_encoding Name of character encoding to use for
      * converting bytes to String.
-     * @return Buffered data as String of null when data is too big.
+     * @return Buffered data as String.
+     * @throws IllegalStateException when data is too large to be read this way.
+     * @throws java.io.UnsupportedEncodingException when this encoding is not supported.
      */
     public String getString(String character_encoding) throws java.io.UnsupportedEncodingException {
-        if (file_mode) return null;
-        return new String(memory_buffer,0,write_pos,character_encoding);
+        if (_file_mode) throw new IllegalStateException("data too large");
+        return new String(_memory_buffer,0,_write_pos,character_encoding);
     }
     
     /**
@@ -220,7 +238,7 @@ public class TempByteHolder {
      */
     
     public java.io.OutputStream getOutputStream() {
-        return output_stream;
+        return _output_stream;
     }
     
     
@@ -229,7 +247,10 @@ public class TempByteHolder {
      * @return InputSream for reading buffered data.
      */    
     public java.io.InputStream getInputStream() {
-        return input_stream;
+        if (_input_stream == null) {
+            _input_stream = new TempByteHolder.InputStream();
+        }
+        return _input_stream;
     }
 
     
@@ -239,9 +260,9 @@ public class TempByteHolder {
      * Create tempfile if it does not already exist
      */
     private void createTempFile() throws IOException {
-        tempfilef = File.createTempFile("org.mortbay.util.TempByteHolder-",".tmp",temp_directory).getCanonicalFile();
-        tempfilef.deleteOnExit();
-        tempfile = new RandomAccessFile(tempfilef,"rw");
+        _tempfilef = File.createTempFile("org.mortbay.util.TempByteHolder-",".tmp",_temp_directory).getCanonicalFile();
+        _tempfilef.deleteOnExit();
+        _tempfile = new RandomAccessFile(_tempfilef,"rw");
     }
 
     /**
@@ -250,28 +271,28 @@ public class TempByteHolder {
      * Updates high water mark on tempfile content.
      */
     private void writeToTempFile(int at_offset, byte[] data, int offset, int len) throws IOException {
-        if (tempfile == null) {
+        if (_tempfile == null) {
             createTempFile();
-            file_pos = -1;
+            _file_pos = -1;
         }
-        file_mode = true;
-        if (at_offset != file_pos) {
-            tempfile.seek((long)at_offset);
+        _file_mode = true;
+        if (at_offset != _file_pos) {
+            _tempfile.seek((long)at_offset);
         }
-        tempfile.write(data,offset,len);
-        file_pos = at_offset + len;
-        file_high = max(file_high,file_pos);
+        _tempfile.write(data,offset,len);
+        _file_pos = at_offset + len;
+        _file_high = max(_file_high,_file_pos);
     }
     
     /**
      * Read chunk of data from specified offset in tempfile
      */
     private void readFromTempFile(int at_offset, byte[] data, int offset, int len) throws IOException {
-        if (file_pos != at_offset) {
-            tempfile.seek((long)at_offset);
+        if (_file_pos != at_offset) {
+            _tempfile.seek((long)at_offset);
         }
-        tempfile.readFully(data,offset,len);
-        file_pos = at_offset+len;
+        _tempfile.readFully(data,offset,len);
+        _file_pos = at_offset+len;
     }
     
     
@@ -281,29 +302,29 @@ public class TempByteHolder {
      * This one was nightmare to write :-)
      */
     private void moveWindow(int start_offset) throws IOException {
-        if (start_offset != window_low) { // only when we have to move
+        if (start_offset != _window_low) { // only when we have to move
 
-            int end_offset = start_offset + window_size;
+            int end_offset = start_offset + _window_size;
             // new window low/high = start_offset/end_offset
-            int dirty_low = file_high;
-            int dirty_high = write_pos;
-            int dirty_len = write_pos - file_high;
+            int dirty_low = _file_high;
+            int dirty_high = _write_pos;
+            int dirty_len = _write_pos - _file_high;
             if (dirty_len > 0) {   // we need to be concerned at all about dirty data.
                 // will any part of dirty data be moved out of window?
                 if ( (dirty_low < start_offset) || (dirty_high > end_offset) ) {
                     // yes, dirty data need to be saved.
-                    writeToTempFile(dirty_low, memory_buffer, dirty_low - window_low, dirty_len);
+                    writeToTempFile(dirty_low, _memory_buffer, dirty_low - _window_low, dirty_len);
                 }
             }
             
             // reposition any data from old window that will be also in new window:
             
-            int stay_low = max(start_offset,window_low);
-            int stay_high = min(write_pos, window_high, end_offset);
+            int stay_low = max(start_offset,_window_low);
+            int stay_high = min(_write_pos, _window_high, end_offset);
             // is there anything to preserve?
             int stay_size = stay_high - stay_low;
             if (stay_size > 0) {
-                System.arraycopy(memory_buffer, stay_low-window_low, memory_buffer, stay_low-start_offset, stay_size);
+                System.arraycopy(_memory_buffer, stay_low-_window_low, _memory_buffer, stay_low-start_offset, stay_size);
             }
             
             // read in available data that were not in old window:
@@ -313,20 +334,20 @@ public class TempByteHolder {
                 int toread_high = min(stay_low,end_offset);
                 int toread_size = toread_high - toread_low;
                 if (toread_size > 0) {
-                    readFromTempFile(toread_low, memory_buffer, toread_low-start_offset, toread_size);
+                    readFromTempFile(toread_low, _memory_buffer, toread_low-start_offset, toread_size);
                 }
             }
             if (stay_high < end_offset) {
                 // read at end of buffer
                 int toread_low = max(stay_high,start_offset);
-                int toread_high = min(end_offset,file_high);
+                int toread_high = min(end_offset,_file_high);
                 int toread_size = toread_high-toread_low;
                 if (toread_size > 0) {
-                    readFromTempFile(toread_low, memory_buffer, toread_low-start_offset, toread_size);
+                    readFromTempFile(toread_low, _memory_buffer, toread_low-start_offset, toread_size);
                 }
             }
-            window_low = start_offset;
-            window_high = end_offset;
+            _window_low = start_offset;
+            _window_high = end_offset;
         }
     }
 
@@ -385,65 +406,65 @@ public class TempByteHolder {
          * @throws IOException when something goes wrong.
          */        
         public void write(byte[] data, int off, int len) throws IOException {
-            int new_write_pos = write_pos + len;
-            boolean write_pos_in_window = (write_pos >= window_low)&&(write_pos < window_high);
+            int new_write_pos = _write_pos + len;
+            boolean write_pos_in_window = (_write_pos >= _window_low)&&(_write_pos < _window_high);
             
             if (!write_pos_in_window) {
-                // either current window is full of dirty data or is somewhere low
-                moveWindow(write_pos);  // flush buffer if necessary, move window at end
+                // either current window is full of dirty data or it is somewhere low
+                moveWindow(_write_pos);  // flush buffer if necessary, move window at end
             }
             
-            boolean end_of_data_in_window = (new_write_pos <= window_high);
+            boolean end_of_data_in_window = (new_write_pos <= _window_high);
             
             if ( end_of_data_in_window ) {
                 // if there is space in window for all data, just put it in buffer.
                 // 0 writes, window unchanged
-                System.arraycopy(data, off, memory_buffer, write_pos-window_low, len);
-                write_pos = new_write_pos;
+                System.arraycopy(data, off, _memory_buffer, _write_pos-_window_low, len);
+                _write_pos = new_write_pos;
             } else {
-                int out_of_window = new_write_pos - window_high;
-                if (out_of_window < window_size) {
+                int out_of_window = new_write_pos - _window_high;
+                if (out_of_window < _window_size) {
                     // start of data in window, rest will fit in a new window:
                     // 1 write, window moved at window_high, filled with rest of data
                     
                     // fill in rest of the current window with first part of data
-                    int part1_len = window_high - write_pos;
+                    int part1_len = _window_high - _write_pos;
                     int part2_len = len - part1_len;
                     
-                    System.arraycopy(data, off, memory_buffer, write_pos-window_low, part1_len);
-                    write_pos = window_high;
+                    System.arraycopy(data, off, _memory_buffer, _write_pos-_window_low, part1_len);
+                    _write_pos = _window_high;
                     
-                    moveWindow(write_pos);  // flush data to file
+                    moveWindow(_write_pos);  // flush data to file
                     
-                    System.arraycopy(data, off+part1_len, memory_buffer, 0, part2_len);
-                    write_pos = new_write_pos;
+                    System.arraycopy(data, off+part1_len, _memory_buffer, 0, part2_len);
+                    _write_pos = new_write_pos;
                     
                 } else {
                     // start of data in window, rest will not fit in window (and leave some space):
                     // 2 writes; window moved at end, empty
                     
-                    int part1_size = window_high - write_pos;
+                    int part1_size = _window_high - _write_pos;
                     int part2_size = len - part1_size;
                     
-                    if (part1_size == window_size) {
+                    if (part1_size == _window_size) {
                         // buffer was empty - no sense in splitting the write
                         // write data directly to file in one chunk
-                        writeToTempFile(write_pos, data, off, len);
-                        write_pos = new_write_pos;
-                        moveWindow(write_pos);
+                        writeToTempFile(_write_pos, data, off, len);
+                        _write_pos = new_write_pos;
+                        moveWindow(_write_pos);
                         
                     } else {
                         // copy part 1 to window
                         if (part1_size > 0) {
-                            System.arraycopy(data, off, memory_buffer, write_pos-window_low, part1_size);
-                            write_pos += part1_size;
-                            moveWindow(write_pos);  // flush buffer
+                            System.arraycopy(data, off, _memory_buffer, _write_pos-_window_low, part1_size);
+                            _write_pos += part1_size;
+                            moveWindow(_write_pos);  // flush buffer
                         }
                         // flush window to file
                         // write part 2 directly to file
-                        writeToTempFile(write_pos, data, off+part1_size, part2_size);
-                        write_pos = new_write_pos;
-                        moveWindow(write_pos);
+                        writeToTempFile(_write_pos, data, off+part1_size, part2_size);
+                        _write_pos = new_write_pos;
+                        moveWindow(_write_pos);
                     }
                 }
             }
@@ -455,16 +476,16 @@ public class TempByteHolder {
          * @throws IOException
          */        
         public void write(int b) throws IOException {
-            if ((write_pos >= window_high) || (write_pos < window_low)) {
-                moveWindow(write_pos);
+            if ((_write_pos >= _window_high) || (_write_pos < _window_low)) {
+                moveWindow(_write_pos);
             }
             // we now have space for one byte in window.
-            memory_buffer[write_pos - window_low] = (byte)(b &0xFF);
-            write_pos++;
+            _memory_buffer[_write_pos - _window_low] = (byte)(b &0xFF);
+            _write_pos++;
         }
         
         public void flush() throws IOException {
-            moveWindow(write_pos); // or no-op? not needed
+            moveWindow(_write_pos); // or no-op? not needed
         }
         
         public void close() throws IOException {
@@ -484,13 +505,12 @@ public class TempByteHolder {
         public int read() throws IOException {
             int ret = -1;
             // if window does not contain read position, move it there
-            //if ((read_pos < window_low)||(read_pos>= window_high)) {
-            if (!contained(read_pos,read_pos+1, window_low, window_high)) {
-                moveWindow(read_pos);
+            if (!contained(_read_pos,_read_pos+1, _window_low, _window_high)) {
+                moveWindow(_read_pos);
             }
-            if (write_pos > read_pos) {
-                ret = (memory_buffer[read_pos - window_low])&0xFF;
-                read_pos++;
+            if (_write_pos > _read_pos) {
+                ret = (_memory_buffer[_read_pos - _window_low])&0xFF;
+                _read_pos++;
             }
             return ret;
         }
@@ -501,22 +521,22 @@ public class TempByteHolder {
         
         public int read(byte[] buff, int off, int len) throws IOException {
             // clip read to available data:
-            int read_size = min(len,write_pos-read_pos);
+            int read_size = min(len,_write_pos-_read_pos);
             if (read_size > 0) {
-                if (read_size >= window_size) {
+                if (read_size >= _window_size) {
                     // big chunk: read directly from file
-                    moveWindow(write_pos);
-                    readFromTempFile(read_pos, buff, off, read_size);
+                    moveWindow(_write_pos);
+                    readFromTempFile(_read_pos, buff, off, read_size);
                 } else {
                     // small chunk:
-                    int read_low = read_pos;
+                    int read_low = _read_pos;
                     int read_high = read_low + read_size;
                     // if we got all data in current window, read it from there
-                    if (!contained(read_low,read_high, window_low,window_high)) {
-                        moveWindow(read_pos);
+                    if (!contained(read_low,read_high, _window_low, _window_high)) {
+                        moveWindow(_read_pos);
                     }
-                    System.arraycopy(memory_buffer, read_pos - window_low, buff, off, read_size);
-                    read_pos += read_size;
+                    System.arraycopy(_memory_buffer, _read_pos - _window_low, buff, off, read_size);
+                    _read_pos += read_size;
                         
                 }
             }
@@ -526,24 +546,24 @@ public class TempByteHolder {
         public long skip(long bytes) throws IOException {
             if (bytes < 0 || bytes > Integer.MAX_VALUE) throw new IllegalArgumentException();
             int len = (int)bytes;
-            if ( (len+read_pos) > write_pos ) len = write_pos - read_pos;
-            read_pos+=len;
-            moveWindow(write_pos);  // invalidate window without reading data by moving it at the end
+            if ( (len+_read_pos) > _write_pos ) len = _write_pos - _read_pos;
+            _read_pos+=len;
+            moveWindow(_write_pos);  // invalidate window without reading data by moving it at the end
             return (long)len;
         }
         
         public int available() throws IOException {
-            return write_pos - read_pos;
+            return _write_pos - _read_pos;
         }
         
         
         public void mark(int readlimit) {
             // readlimit is ignored, we store all the data anyway
-            mark_pos = read_pos;
+            _mark_pos = _read_pos;
         }
         
         public void reset() throws IOException {
-            read_pos = mark_pos;
+            _read_pos = _mark_pos;
         }
         
         public boolean markSupported() {
