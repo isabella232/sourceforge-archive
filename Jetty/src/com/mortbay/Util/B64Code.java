@@ -38,7 +38,6 @@ public class B64Code
 
     // ------------------------------------------------------------------
     static public String encode(String s)
-        throws UnsupportedEncodingException
     {
         try
         {
@@ -98,15 +97,10 @@ public class B64Code
         switch(n++)
         {
           case 0:
-              encode[e++]=pad;
-              encode[e++]=pad;
-              encode[e++]=pad;
-              encode[e++]=pad;
               break;
                 
           case 1:
               encode[e++]=nibble2code[nibble];
-              encode[e++]=pad;
               encode[e++]=pad;
               encode[e++]=pad;
               break;
