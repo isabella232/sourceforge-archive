@@ -178,8 +178,8 @@ public class AJP13Connection extends HttpConnection
                         case 7: // SSL cert
                             request.setAttribute("javax.servlet.request.X509Certificate",value);
                             break;
-                        case 6: // JVM Route?
-                            Code.warning("not implemented: route="+value);
+                        case 6: // JVM Route
+                            request.setAttribute("org.mortbay.http.ajp.JVMRoute",value);
                             break;
                         case 5: // Query String
                             request.setQuery(value);

@@ -498,7 +498,7 @@ public class ServletHttpRequest
 
         if (_session == null && create)
         {
-            _session = _servletHandler.newHttpSession();
+            _session = _servletHandler.newHttpSession(this);
             if (_servletHandler.isUsingCookies())
             {
                 Cookie cookie =

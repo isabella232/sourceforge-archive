@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingEvent;
@@ -52,9 +53,9 @@ public class HashSessionManager extends AbstractSessionManager
     }
 
     /* ------------------------------------------------------------ */
-    protected AbstractSessionManager.Session newSession()
+    protected AbstractSessionManager.Session newSession(HttpServletRequest request)
     {
-        return new Session();
+        return new Session(request);
     }
     
     /* ------------------------------------------------------------ */
@@ -63,9 +64,9 @@ public class HashSessionManager extends AbstractSessionManager
     protected class Session extends AbstractSessionManager.Session
     {
         /* ------------------------------------------------------------- */
-        protected Session()
+        protected Session(HttpServletRequest request)
         {
-            super();
+            super(request);
         }
         
         /* ------------------------------------------------------------ */

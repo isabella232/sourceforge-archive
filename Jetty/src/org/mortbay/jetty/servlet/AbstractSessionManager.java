@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingEvent;
@@ -83,7 +84,16 @@ public abstract class AbstractSessionManager implements SessionManager
     }
     
     /* ------------------------------------------------------------ */
-    private synchronized String newSessionId(long created)
+    /* new Session ID.
+     * The session ID is created as a unique random long, represented as in a
+     * base between 30 and 36, selected by timestamp.
+     * If the request has a jvmRoute attribute, that is appended as a
+     * worker tag, else any worker tag set on the manager is appended.
+     * @param request 
+     * @param created 
+     * @return Session ID.
+     */
+    private synchronized String newSessionId(HttpServletRequest request,long created)
     {
         String id=null;
         do
@@ -91,8 +101,13 @@ public abstract class AbstractSessionManager implements SessionManager
             long r = _random.nextLong();
             if (r<0)r=-r;
             id=Long.toString(r,30+(int)(created%7));
-            if (_workerName!=null)
+            String worker = (String)request.getAttribute("org.mortbay.http.ajp.JVMRoute");
+            System.err.println("jvmRoute="+worker);
+            if (worker!=null)
+                id+="."+worker;
+            else if (_workerName!=null)
                 id+="."+_workerName;
+            System.err.println("id="+id);
         }
         while (_sessions.containsKey(id));
         return id;
@@ -106,9 +121,9 @@ public abstract class AbstractSessionManager implements SessionManager
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized HttpSession newHttpSession()
+    public synchronized HttpSession newHttpSession(HttpServletRequest request)
     {
-        Session session = newSession();
+        Session session = newSession(request);
         session.setMaxInactiveInterval(_dftMaxIdleSecs);
         _sessions.put(session.getId(),session);
         HttpSessionEvent event=new HttpSessionEvent(session);
@@ -120,7 +135,7 @@ public abstract class AbstractSessionManager implements SessionManager
     }
 
     /* ------------------------------------------------------------ */
-    protected abstract Session newSession();
+    protected abstract Session newSession(HttpServletRequest request);
     
     /* ------------------------------------------------------------ */
     /** Get the workname.
@@ -384,9 +399,9 @@ public abstract class AbstractSessionManager implements SessionManager
         String _id;
 
         /* ------------------------------------------------------------- */
-        protected Session()
+        protected Session(HttpServletRequest request)
         {
-            _id=newSessionId(_created);
+            _id=newSessionId(request,_created);
             if (_dftMaxIdleSecs>=0)
                 _maxIdleMs=_dftMaxIdleSecs*1000;
         }

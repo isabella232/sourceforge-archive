@@ -474,9 +474,9 @@ public class ServletHandler extends AbstractHttpHandler
     }
     
     /* ------------------------------------------------------------ */
-    HttpSession newHttpSession()
+    HttpSession newHttpSession(HttpServletRequest request)
     {
-        return _sessionManager.newHttpSession();
+        return _sessionManager.newHttpSession(request);
     }
 
     /* ------------------------------------------------------------ */

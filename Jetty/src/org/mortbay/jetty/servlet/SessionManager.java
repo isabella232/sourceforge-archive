@@ -7,6 +7,7 @@ package org.mortbay.jetty.servlet;
 
 import java.io.Serializable;
 import java.util.EventListener;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.mortbay.util.LifeCycle;
 
@@ -30,7 +31,7 @@ public interface SessionManager extends LifeCycle, Serializable
     public HttpSession getHttpSession(String id);
     
     /* ------------------------------------------------------------ */
-    public HttpSession newHttpSession();
+    public HttpSession newHttpSession(HttpServletRequest request);
 
     /* ------------------------------------------------------------ */
     public void setMaxInactiveInterval(int seconds);

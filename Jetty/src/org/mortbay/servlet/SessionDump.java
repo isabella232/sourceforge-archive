@@ -92,10 +92,10 @@ public class SessionDump extends HttpServlet
                       HttpServletResponse response) 
         throws ServletException, IOException
     {
+        response.setContentType("text/html");
         Page page= new Page();
         
-        page.title("Session Dump Servlet");
-        
+        page.title("Session Dump Servlet");        
         
         HttpSession session = request.getSession(request.getRequestURI().indexOf("new")>0);
         
