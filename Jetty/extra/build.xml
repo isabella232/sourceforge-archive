@@ -18,7 +18,7 @@ Other targets:
   <property environment="env"/>
   <property name="plus"           value="${basedir}/plus"/>
   <property name="jboss"          value="${basedir}/jboss"/>
-
+  <property name="loadbalancer"  value="${basedir}/loadbalancer"/>
 
 
   <!-- ==================================================================== -->
@@ -27,7 +27,7 @@ Other targets:
   <target name="clean" depends="check.available, clean.available">
   </target>
 
-  <target name="clean.available" depends="clean.plus, clean.jboss">
+  <target name="clean.available" depends="clean.plus, clean.jboss, clean.loadbalancer">
   </target>
 
   <target name="clean.plus" if="plus.available"
@@ -37,6 +37,10 @@ Other targets:
 
   <target name="clean.jboss" if="jboss.available">
     <ant antfile="${jboss.available}" inheritAll="false" target="clean"/>
+  </target>
+
+  <target name="clean.loadbalancer" if="loadbalancer.available">
+    <ant antfile="${loadbalancer.available}" inheritAll="false" target="clean"/>
   </target>
 
 
@@ -52,10 +56,11 @@ Other targets:
   <target name="check.available">
     <available property="plus.available" value="${plus}/build.xml" file="${plus}/build.xml"/>
     <available property="jboss.available" value="${jboss}/build.xml" file="${jboss}/build.xml"/>
+    <available property="loadbalancer.available" value="${loadbalancer}/build.xml" file="${loadbalancer}/build.xml"/>
     <!-- add other subdir checks here                       -->
   </target>
 
-  <target name="build.available" depends="do.plus, do.jboss">
+  <target name="build.available" depends="do.plus, do.jboss, do.loadbalancer">
   </target>
 
   <target name="do.plus" if="plus.available">
@@ -64,6 +69,10 @@ Other targets:
 
   <target name="do.jboss" if="jboss.available">
     <ant antfile="${jboss.available}" inheritAll="false"/>
+  </target>
+
+  <target name="do.loadbalancer" if="loadbalancer.available">
+    <ant antfile="${loadbalancer.available}" inheritAll="false"/>
   </target>
 
  </project>

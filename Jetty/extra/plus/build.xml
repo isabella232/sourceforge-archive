@@ -17,110 +17,29 @@ Other targets:
 
 <project name="JettyPlus" default="all" basedir=".">
 
-
   <!-- ==================================================================== -->
-  <property name="build.compiler"            value="modern" />
-  <property name="build.compiler.emacs"      value="true" />
-  <property name="build.compiler.fulldepend" value="false" />
-  <property name="build.compiler.pedantic"   value="false" />
-  <property name="javac.debug"               value="on" />
-  <property name="javac.optimize"            value="off" />
-  <property name="javac.deprecation"         value="off" />
-
-  <!-- ==================================================================== -->
+  <property name="package"          value="jetty.plus" />
   <property environment="env"/>
-  <property name="plus"           value="${basedir}"/>
-  <property name="extra"          value="${basedir}/.."/>
-  <property name="src"            value="${plus}/src" />
-  <property name="etc"            value="${extra}/etc" />
-  <property name="lib"            value="${extra}/lib"/>
-  <property name="ext"            value="${extra}/ext"/>
-  <property name="logs"            value="${extra}/logs"/>
-  <property name="classes"        value="${plus}/classes"/>
-  <property name="javadoc"        value="${extra}/javadoc"/>
-  <property name="demo.webapps"   value="${plus}/demo/webapps"/>
-  <property name="demo.src"       value="${plus}/demo/src"/>
-  <property name="test"           value="${plus}/test"/>
-  <property name="jetty.home"     value="${extra}/.." />
-  <property name="jetty.lib"      value="${jetty.home}/lib"/>
-  <property name="jetty.etc"      value="${jetty.home}/etc"/>
-  <property name="jetty.ext"      value="${jetty.home}/ext"/>
-  <property name="jetty1.2.jar"   value="${jetty.lib}/org.mortbay.jetty-jdk1.2.jar"/>
-  <property name="jetty1.4.jar"   value="${jetty.lib}/org.mortbay.jetty.jar"/>
-  <property name="servlet.jar"    value="${jetty.lib}/javax.servlet.jar"/>
-  <property name="mortbay.jmx.jar" value="${jetty.lib}/org.mortbay.jmx.jar"/>
-  <property name="jasper-runtime.jar"     value="${ext}/jasper-runtime.jar"/>
-  <property name="jasper-compiler.jar"    value="${ext}/jasper-compiler.jar"/>
+  <property file="../build.package.properties" />
+
+  <!-- ==================================================================== -->
   <property name="jaas.webapp"           value="${demo.webapps}/jaas"/>
   <property name="jaas.webapp.webinf"    value="${jaas.webapp}/WEB-INF"/>
   <property name="jaas.webapp.classes"   value="${jaas.webapp.webinf}/classes"/>
-  <property name="jaas.jar"              value="${lib}/jaas.jar"/>
-  <property name="jettyplus.jar"         value="${lib}/jettyplus.jar"/>
+  <property name="jaas.jar"              value="${lib}/org.mortbay.jaas.jar"/>
   <property name="policy.file"           value="${etc}/jaas.policy"/>
 
 
-
   <!-- ==================================================================== -->
-  <!-- javadoc                                                              -->
-  <!-- ==================================================================== -->
-  <target name="javadoc" depends="jars"
-   description="Build the javadoc">
-    <mkdir dir="${javadoc}"/>
-    <javadoc packagenames="org.mortbay.*"
-             sourcepath="${src}"
-             destdir="${javadoc}"
-             author="true"
-             version="true"
-             public="true"
-             windowtitle="${ant.project.name} API"
-             doctitle="${ant.project.name}"
-             bottom="Copyright &#169; 2003 Mortbay Consulting Pty. Ltd. All Rights Reserved.">
-       <classpath refid="classpath" />
-    </javadoc>
-  </target>
-
-  <!-- ==================================================================== -->
-  <!-- Classpath                                                            -->
-  <!-- ==================================================================== -->
-  <target name="classpath" depends="is.jdk1.4.available,classpath1.2,classpath1.4"/>
-
   <target name="is.jdk1.4.available">
     <available property="jdk1.4.available" classname="java.util.logging.Handler" />
     <echo message="JDK1.4 available=${jdk1.4.available}" level="info"/>
   </target>
 
-
   <!-- ==================================================================== -->
-  <!--  Classpath1.2                                                        -->
+  <!-- Classpath                                                            -->
   <!-- ==================================================================== -->
-  <target name="classpath1.2" unless="jdk1.4.available">
-    <path id="extpath">
-      <fileset dir="${ext}">
-        <include name="*.jar"/>
-        <include name="*.JAR"/>
-        <include name="*.zip"/>
-        <include name="*.ZIP"/>
-       </fileset>
-       <fileset dir="${jetty.ext}">
-        <include name="*.jar"/>
-        <include name="*.JAR"/>
-        <include name="*.zip"/>
-        <include name="*.ZIP"/>
-       </fileset>
-    </path>
-    <path id="classpath">
-      <pathelement location="${jetty1.2.jar}" />
-      <pathelement location="${servlet.jar}" />
-      <path refid="extpath" />
-    </path>
-    <property name="expanded.classpath" refid="classpath"/>
-    <echo message="classpath=${expanded.classpath}" level="info"/>
-  </target>
-
-  <!-- ==================================================================== -->
-  <!-- Classpath1.4                                                         -->
-  <!-- ==================================================================== -->
-  <target name="classpath1.4" if="jdk1.4.available">
+  <target name="classpath" depends="is.jdk1.4.available" if="jdk1.4.available">
     <path id="extpath">
       <fileset dir="${ext}">
         <include name="*.jar"/>
@@ -137,10 +56,11 @@ Other targets:
     </path>
 
     <path id="classpath">
-      <pathelement location="${jetty1.4.jar}" />
+      <pathelement location="${jetty.jar}" />
       <pathelement location="${servlet.jar}" />
       <path refid="extpath" />
     </path>
+
     <property name="expanded.classpath" refid="classpath"/>
     <echo message="classpath=${expanded.classpath}" level="info"/>
   </target>
@@ -150,7 +70,6 @@ Other targets:
   <!-- Prepare                                                              -->
   <!-- ==================================================================== -->
   <target name="prepare" depends="classpath" description="Make build directories">
-    <mkdir dir="${javadoc}" />
     <mkdir dir="${classes}" />
     <mkdir dir="${lib}" />
     <mkdir dir="${logs}" />
@@ -179,6 +98,8 @@ Other targets:
         <include name="**/*.log"/>
       </fileset>
     </delete>
+    <delete file="${jaas.jar}"/>
+    <delete file="${package.jar}"/>
     <ant antfile="${test}/build.xml" inheritAll="false" target="clean"/>
   </target>
 
@@ -204,28 +125,21 @@ Other targets:
   <!-- jars                                                                 -->
   <!-- ==================================================================== -->
   <target name="jars" 
-          depends="classes, build.jettyplus.jar, build.jaas.jar" 
-	  description="Make jettyplus.jar and jaas.jar">
+          depends="classes, build.jaas.jar, build.package.jar" 
+	  description="Make jars">
   </target>
 
 
-  <!-- ==================================================================== -->
-  <!-- build.plus.jar                                                       -->
-  <!-- ==================================================================== -->
-  <target name="check.jettyplus.available" depends="classes">
-    <property name="jettyplus.available" value=""/>
-    <echo message="jettyplus available:${jettyplus.available}"/>
-  </target>
 
-  <target name="build.jettyplus.jar" 
-          depends="classes, check.jettyplus.available" if="jettyplus.available" 
-          description="Make the JettyPlus jar file">
+  <!-- ==================================================================== -->
+  <!-- build.package.jar                                                    -->
+  <!-- ==================================================================== -->
+  <target name="build.package.jar" description="Make the JettyPlus jar file">
     <jar basedir="${classes}" 
-         destfile="${lib}/jettyplus.jar"
+         destfile="${package.jar}"
 	 excludes="**/jaas/**">
     </jar>
   </target>
-
 
   <!-- ==================================================================== -->
   <!-- build.jaas.jar                                                       -->
@@ -240,7 +154,7 @@ Other targets:
 	  if="jaas.available"
 	  description="Make the jaas jar file">
     <jar basedir="${classes}"
-         destfile="${lib}/jaas.jar"
+         destfile="${jaas.jar}"
 	 includes="**/jaas/**">
     </jar>
   </target>
@@ -360,10 +274,13 @@ Other targets:
     <available property="tests.available" file="${test}/build.xml"/>
   </target>
 
-  <target name="test" depends="check.tests" if="tests.available" description="run all jettyplus tests">
+  <!-- ==================================================================== -->
+  <target name="test" 
+          depends="check.tests" 
+          if="tests.available" 
+          description="run tests">
     <ant antfile="${test}/build.xml" inheritAll="false" target="test"/>
   </target>
-
 
 
   <!-- ==================================================================== -->
