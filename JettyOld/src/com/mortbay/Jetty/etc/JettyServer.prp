@@ -109,8 +109,17 @@ main.root.Servlet.PROPERTY.SERVLET.Dump.CLASS	     : com.mortbay.Servlets.Dump
 main.root.Servlet.PROPERTY.SERVLET.Dump.PATHS	     : /
 main.root.Servlet.PROPERTY.SERVLET.Dump.CHUNK	     : True
 
-main.root.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
+# JSP servlet configuration
+main.root.Servlet.PROPERTY.SERVLET.gnujsp.PATHS		     : *.jsp
+main.root.Servlet.PROPERTY.SERVLET.gnujsp.CLASS		     : org.gjt.jsp.JspServlet
+main.root.Servlet.PROPERTY.SERVLET.gnujsp.CLASSPATH          : ./lib/gnujsp.jar
+main.root.Servlet.PROPERTY.SERVLET.gnujsp.ResourceBase       : file:./FileBase/
+main.root.Servlet.PROPERTY.SERVLET.gnujsp.PROPERTY.scratchdir: ./etc/jsp     
+main.root.Servlet.PROPERTY.SERVLET.gnujsp.PROPERTY.debug     : true
+main.root.Servlet.PROPERTY.SERVLET.gnujsp.PROPERTY.checkclass: true
+main.root.Servlet.PROPERTY.SERVLET.gnujsp.PROPERTY.compiler  : builtin-javac -classpath %classpath%:%scratchdir%:lib/gnujsp.jar -d %scratchdir% -deprecation %source% 
 
+main.root.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
 
 # ======================================================================== 
 # Exception handler stacks 'default' and 'terse' for server 'main'

@@ -53,7 +53,7 @@ public class Dispatch extends HttpServlet
 	{
 	    info=info.substring(8);
             if (info.indexOf('?')<0)
-                info+="?Dispatch=Demo";
+                info+="?Dispatch=Demo1&Dispatch=Demo2";
 	    PrintWriter pout = sres.getWriter();
 	    pout.write("<H1>Include: "+info+"</H1><HL>");
 	    pout.flush();
@@ -67,7 +67,7 @@ public class Dispatch extends HttpServlet
 	{
 	    info=info.substring(8);
             if (info.indexOf('?')<0)
-                info+="?Dispatch=Demo";
+                info+="?Dispatch=Demo1&Dispatch=Demo2";
 	    OutputStream out = sres.getOutputStream();
 	    PrintWriter pout = new PrintWriter(out);
 	    pout.write("<H1>Include: "+info+"</H1><HL>");

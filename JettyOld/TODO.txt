@@ -2,29 +2,5 @@
  + Standard SSL listener
  + Documentation
  + Portable make file
- + Reload servlets on demand
- + Virtual Hosts
- + Handle + to space in request paths
- + Update this todo list 
- + Documentation
- + Adaption module for SSL
- + Documentation
- + Graceful exit
- + Improve servlet log 
- + Dynamic Realms & Configuration
  + RPM packaging
- + Documentation
- + Use Java 1.2 features. (Mostly replace JDBC connection
-   cache with weak references).
- + Standard format server-side includes
- + Documentation
- + HTTP Meta tags in HTML
- + HTTP/1.1:
-     - RFC2616 (Why is this not HTTP/1.2 ????)
-     - Timeout connection
-     - Handle termination of multipart mime server push.
- + Implement encrypted password realm storage
- + Include a CGI servlet
- + HTTP-DAV?
- + Documentation
 

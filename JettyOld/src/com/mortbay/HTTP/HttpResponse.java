@@ -727,21 +727,27 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     }
     
     /* ------------------------------------------------------------ */
-    boolean preDispatchHandled=false;
+    java.util.Stack handledStack = new java.util.Stack();
     void preDispatch()
     {
-	preDispatchHandled=handled;
-	handled=false;
-	if (writer!=null)
-	    writer.flush();
-	outputState=0;
+        handledStack.push(new Boolean(handled));
+        handled=false;
+        if (writer!=null)  
+            writer.flush();
+        outputState=0;
     }
     
     /* ------------------------------------------------------------ */
-    void postDispatch()
+    void postDispatchInclude()
     {
-	handled=preDispatchHandled;
-	if (writer!=null)
-	    outputState=2;
+        handled=((Boolean) handledStack.pop()).booleanValue();
+        if (writer!=null)
+            outputState=2;
+    }
+
+    /* ------------------------------------------------------------ */
+    void postDispatchForward()
+    {
+      handledStack.pop();              
     }
 }

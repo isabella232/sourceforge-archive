@@ -425,7 +425,8 @@ class JavaEmitter extends Emitter
 	w.write ("             out.clearBuffer ();\n");
 	w.write ("             pageContext.handlePageException (e);\n");
 	w.write ("        } finally {\n");
-	w.write ("             out.close ();\n");
+	w.write ("             out.flush();\n");
+	//	w.write ("             out.close ();\n");
 	w.write ("             factory.releasePageContext (pageContext);\n");
 	w.write ("        }\n");
 	w.write ("\n");

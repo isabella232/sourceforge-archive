@@ -1,4 +1,12 @@
-Release 2.4.1 - 9th April 2000 LATEST STABLE
+
+Release 2.4.2 - 23rd April 2000 LATEST
+  + Added LogSink and FileLogSink classes to allow extensible
+    Log handling.
+  + Handle nested RequestDispatcher includes.
+  + Modified GNUJSP to prevent close in nested requests. 
+  + Added GNUJSP to JettyServer.prp file.
+
+Release 2.4.1 - 9th April 2000 STABLE
   + Removed debug println from ServletHolder.
   + Set encoding before exception in FileHandler.
   + Fixed bug in HtmlFilter for tags split between writes.

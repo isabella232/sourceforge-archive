@@ -96,7 +96,7 @@ public class HttpRequest extends HttpHeader
     private BufferedReader reader=null;
     private int inputState=0;
 
-    private Dictionary redirectParams = null;
+    private URI redirectParams = null;
     
     /* -------------------------------------------------------------- */
     /** Construct received request.
@@ -235,14 +235,24 @@ public class HttpRequest extends HttpHeader
     /* -------------------------------------------------------------- */
     /** Set the URI path and redirect params
      */
-    public void setRequestPath(String path, Dictionary params)
+    public void setRequestPath(String path)
     {
         if (uri!=null && path!=null)
             uri.setPath(path);
         servletPath=null;
         pathInfo=path;
-
-	redirectParams=params;
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Set the URI path and redirect params
+     */
+    void setRequestPath(URI newuri)
+    {
+        if (uri!=null)
+            uri.setPath(newuri.getPath());
+        servletPath=null;
+        pathInfo=newuri.getPath();
+	redirectParams=newuri;
     }
     
     /* ------------------------------------------------------------ */
@@ -274,10 +284,33 @@ public class HttpRequest extends HttpHeader
      * the requestPath unmodified when calling a new resource for content.
      * @param path 
      */
-    public void setResourcePath(String path, Dictionary params)
+    public void setResourcePath(String path)
     {
-        resourcePath=path;
-	redirectParams=params;
+	resourcePath=path;
+	redirectParams=null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the resource path.
+     * The resource path is the path used by Jetty Handlers
+     * to locate the resource that will handle the request.
+     * A resource path is required
+     * to implement the RequestDispatcher.include method, which leaves
+     * the requestPath unmodified when calling a new resource for content.
+     * @param path 
+     */
+    public void setResourcePath(URI newuri)
+    {
+	if (newuri==null)
+	{
+	    resourcePath=null;
+	    redirectParams=null;
+	}
+	else
+	{
+	    resourcePath=newuri.getPath();
+	    redirectParams=newuri;
+	}
     }
     
     /* -------------------------------------------------------------- */
@@ -385,7 +418,7 @@ public class HttpRequest extends HttpHeader
         
         servletPath=null;
         pathInfo=path;
-        setResourcePath(path,null);
+        setResourcePath(path);
         if (translateURI)
             uri.setPath(getResourcePath());
     }
@@ -771,7 +804,12 @@ public class HttpRequest extends HttpHeader
      */
     public String[] getParameterValues(String name)
     {
-        Object values=uri.getValues(name);
+        Object values=null;
+
+	if (redirectParams!=null)
+	    values = redirectParams.getValues(name);
+	if (values==null)
+	    values = uri.getValues(name);
         if (values==null && formParameters!=null)
             values = formParameters.getValues(name);
         if (values==null && cookieParameters!=null)
@@ -822,7 +860,7 @@ public class HttpRequest extends HttpHeader
         if (redirectParams!=null)
         {
             // XXX - This could cause duplicates.
-            e =redirectParams.keys();
+            e =redirectParams.getParameterNames();
             while (e.hasMoreElements())
                 names.addElement(e.nextElement());
         }
@@ -1070,9 +1108,9 @@ public class HttpRequest extends HttpHeader
                             <path.length())
                             setRequestPath(path.substring(0,prefix)+
                                            path.substring(suffix+
-                                                          SessionContext.SessionUrlSuffix.length()),null);
+                                                          SessionContext.SessionUrlSuffix.length()));
                         else
-                            setRequestPath(path.substring(0,prefix),null);
+                            setRequestPath(path.substring(0,prefix));
                         
                         Code.debug(getRequestPath());
                     }

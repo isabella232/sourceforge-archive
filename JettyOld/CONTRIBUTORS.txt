@@ -40,6 +40,8 @@ Contributions, Testing & valuable feedback from:
   heinrich abele <abel-@zdv.uni-tuebingen.de>
   Cris Perdue <cris@perdues.com>
   Marko P. O. Nippula <mnippula@cc.hut.fi>
+  Rafael Posse <rafael.posse@canaldeportivo.com>
+
 
   Plus a few more in the pipe line (tell me if your one of them...)
 

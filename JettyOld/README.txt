@@ -72,7 +72,7 @@ resource files. A number of sample configuration files are
 included with the release:
 
   JettyServer.prp 
-    A  template file for configuration files.
+    A simple configuration file for files, servlets and JSP.JSJSP
 
   JettyDemo.prp
     The configuration files for the Jetty demonstration.
