@@ -781,7 +781,8 @@ public class HttpOutputStream extends OutputStream
             {
                 HttpOutputStream.this._disableFlush=true;
                 _writer.write(ca,offset,length);
-                _writer.flush();
+                if (HttpOutputStream.this._contentLength>=0)
+                    _writer.flush();
             }
             finally
             {
