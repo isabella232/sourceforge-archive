@@ -242,7 +242,8 @@ public class SecurityHandler extends NullHandler
         {          
             Code.debug("Security Constraint on ",pathInContext," against ",scss);
   
-            // for each path match 
+            // for each path match
+        matches:
             for (int m=0;m<scss.size();m++)
             {
                 // Get all constraints
@@ -259,7 +260,7 @@ public class SecurityHandler extends NullHandler
                     // Check the method applies
                     if (!sc.forMethod(request.getMethod()))
                         continue;
-
+                    
                     // Does this forbid everything?
                     if (!sc.isAuthenticated() &&!sc.hasDataConstraint())
                     {
@@ -284,7 +285,7 @@ public class SecurityHandler extends NullHandler
                     
                     // Matches a constraint that does not fail
                     // anything, so must be OK
-                    break;    
+                    break matches;    
                 }
             }
         }

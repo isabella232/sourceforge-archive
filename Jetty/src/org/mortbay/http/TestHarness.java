@@ -401,6 +401,19 @@ public class TestHarness
             t.checkEquals(p.getMatches("/animal/bird/path.tar.gz").toString(),
                           "[/animal/bird/*=3, /animal/*=5, *.tar.gz=6, *.gz=7, /=8]",
                           "all matches");
+            
+            t.checkEquals(p.getMatches("/animal/fish/").toString(),
+                          "[/animal/fish/*=4, /animal/*=5, /=8]",
+                          "Dir matches");
+            t.checkEquals(p.getMatches("/animal/fish").toString(),
+                          "[/animal/fish/*=4, /animal/*=5, /=8]",
+                          "Dir matches");
+            t.checkEquals(p.getMatches("/").toString(),
+                          "[/=8]",
+                          "Dir matches");
+            t.checkEquals(p.getMatches("").toString(),
+                          "[/=8]",
+                          "Dir matches");
 
             t.checkEquals(p.pathMatch("/Foo/bar","/Foo/bar"),"/Foo/bar","pathMatch exact");
             t.checkEquals(p.pathMatch("/Foo/*","/Foo/bar"),"/Foo","pathMatch prefix");

@@ -734,13 +734,12 @@ public class WebApplicationContext extends ServletHandlerContext
     /* ------------------------------------------------------------ */
     private void initSecurityRole(XmlParser.Node node)
     {
-        Code.warning("Security role "+
-                     node.get("role-name").toString(false,true)+
-                     " not handled");
-        Code.debug("Not Implemented "+node);
         // XXX - not sure what needs to be done here.
         // Could check that the role is known to the security handler
         // but it could be initialized later?
+        Log.event("Security role "+
+                  node.get("role-name").toString(false,true)+
+                  " defined");
     }
 
     /* ------------------------------------------------------------ */

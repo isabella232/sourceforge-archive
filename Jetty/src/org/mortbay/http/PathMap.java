@@ -208,7 +208,7 @@ public class PathMap extends HashMap
             entries=LazyList.add(entries,entry.getValue());
         
         // prefix search
-        int i=path.length();
+        int i=path.length()-1;
         while((i=path.lastIndexOf('/',i-1))>=0)
         {
             entry=_prefixMap.getEntry(path,0,i);

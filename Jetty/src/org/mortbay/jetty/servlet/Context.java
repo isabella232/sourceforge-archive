@@ -411,7 +411,7 @@ public class Context implements ServletContext, HttpSessionContext
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public final static String __SessionId  = "JSESSIONID";
+    public final static String __SessionId  = "jsessionid";
     public final static String __SessionUrlPrefix = ";"+__SessionId+"=";
     public final static int __distantFuture = 60*60*24*7*52*20;
     private static long __nextSessionId = System.currentTimeMillis();

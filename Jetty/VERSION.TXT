@@ -1,6 +1,11 @@
 Jetty3 Versions
 --------------
 
+ - Stats on sessions
+
+ + Fixed double entry on PathMap.getMatches
+ + Fixed FORM Authentication username.
+ + Change JSESSIONID to jsessionid
  + Fix attr handling in XmlPArser.toString
 
 Jetty-3.1.1 - 27 Sep 2001

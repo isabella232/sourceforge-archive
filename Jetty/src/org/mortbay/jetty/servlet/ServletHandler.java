@@ -622,14 +622,14 @@ public class ServletHandler
             String password = request.getParameter(__J_PASSWORD);
             
             UserPrincipal user =
-                shandler.getUserRealm().getUser(username,request.getHttpRequest());
+                shandler.getUserRealm().getUser(username,httpRequest);
             if (user!=null && user.authenticate(password))
             {
                 Code.debug("Form authentication OK for ",username);
                 httpRequest.setAttribute(HttpRequest.__AuthType,"FORM");
                 httpRequest.setAttribute(HttpRequest.__AuthUser,username);
                 httpRequest.setAttribute(UserPrincipal.__ATTR,user);
-                session.setAttribute(__J_AUTHENTICATED,__J_AUTHENTICATED);
+                session.setAttribute(__J_AUTHENTICATED,username);
                 String nuri=(String)session.getAttribute(__J_URI);
                 if (nuri==null)
                     response.sendRedirect(URI.addPaths(request.getContextPath(),
@@ -650,9 +650,17 @@ public class ServletHandler
 
         // Check if the session is already authenticated.
         if (session.getAttribute(__J_AUTHENTICATED) != null)
-          if (session.getAttribute(__J_AUTHENTICATED).equals(__J_AUTHENTICATED))
-              return true;
-
+        {
+            String username=(String)session.getAttribute(__J_AUTHENTICATED);
+            UserPrincipal user =
+                shandler.getUserRealm().getUser(username,httpRequest);
+            Code.debug("FORM Authenticated for ",username);
+            httpRequest.setAttribute(HttpRequest.__AuthType,"FORM");
+            httpRequest.setAttribute(HttpRequest.__AuthUser,username);
+            httpRequest.setAttribute(UserPrincipal.__ATTR,user);
+            return true;
+        }
+        
         // redirect to login page
         session.setAttribute(__J_URI, URI.addPaths(request.getContextPath(),uri));
         response.sendRedirect(URI.addPaths(request.getContextPath(),

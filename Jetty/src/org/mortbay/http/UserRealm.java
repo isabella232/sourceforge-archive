@@ -8,6 +8,9 @@ package org.mortbay.http;
 /* ------------------------------------------------------------ */
 /** User Realm.
  *
+ * This interface should be specialized to provide specific user
+ * lookup and authentication using arbitrary methods.
+ *
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
