@@ -6,6 +6,7 @@ Jetty Versions
  + Improved Log defaults
  + Don't start HttpServer log sink on add.
  + Admin servlet uses unique links for IE.
+ + Added Win32 service support
 
 Jetty-3.0.0.rc5 - 12 Nov 2000
  + Default writer encoding set by mime type if not explicitly set.

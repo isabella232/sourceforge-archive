@@ -247,3 +247,8 @@ Note if you don't setup the etc/jetty directory then running
 servers (demo, jetty, watchdog) on the same port - causing errors.
     
 
+Win32 Service
+-------------
+The win32 directory contains instructions of how to start Jetty as
+a win32 service.
+

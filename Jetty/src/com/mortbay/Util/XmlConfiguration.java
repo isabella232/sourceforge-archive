@@ -55,6 +55,7 @@ public class XmlConfiguration
     public XmlConfiguration(URL configuration)
         throws SAXException, IOException
     {
+        xxx
         if (__parser==null)
         {
             synchronized(this.getClass())
