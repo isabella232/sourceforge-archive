@@ -229,7 +229,12 @@ public class CGI extends HttpServlet
         // via PATH_INFO ?  if we are, they should be decoded and passed
         // into exec here...
 
-        String execCmd=(_cmdPrefix!=null)?_cmdPrefix+" "+path:path;
+        String execCmd=path;
+        if (execCmd.indexOf(" ")>=0)
+            execCmd="\""+execCmd+"\"";
+        if (_cmdPrefix!=null)
+            execCmd=_cmdPrefix+" "+execCmd;
+        
         Process p=dir==null
             ?Runtime.getRuntime().exec(execCmd, env.getEnvArray())
             :Runtime.getRuntime().exec(execCmd, env.getEnvArray(),dir);
