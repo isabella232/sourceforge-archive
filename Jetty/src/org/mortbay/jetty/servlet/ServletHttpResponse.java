@@ -600,17 +600,14 @@ public class ServletHttpResponse implements HttpServletResponse
         {throw new UnsupportedOperationException();}
         public OutputStream getOutputStream() throws IOException
         {
-            try{
-                return getWrapper().getOutputStream();
-            }
+            try{return getWrapper().getOutputStream();}
             catch(IllegalStateException e)
             {
                 Code.ignore(e);
-                return new WriterOutputStream(getWrapper().getWriter());
+                return new WriterOutputStream(getWrapper().getWriter(),
+                                              getCharacterEncoding());
             }
         }
-        
-        
         public boolean containsField(String name)
         {throw new UnsupportedOperationException();}
         public Enumeration getFieldNames()
@@ -649,7 +646,7 @@ public class ServletHttpResponse implements HttpServletResponse
         public void setContentType(String type){getWrapper().setContentType(type);}
         public int getContentLength(){throw new UnsupportedOperationException();}
         public void setContentLength(int len){getWrapper().setContentLength(len);}
-        public String getCharacterEncoding(){throw new UnsupportedOperationException();}
+        public String getCharacterEncoding(){return getWrapper().getCharacterEncoding();}
         public void setCharacterEncoding(String encoding){throw new UnsupportedOperationException();}
         
         public Object getAttribute(String name){throw new UnsupportedOperationException();}
