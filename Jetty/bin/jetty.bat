@@ -31,6 +31,13 @@
 :: provided then the logs directory below JETTY_HOME will be created 
 :: if needed and used.
 ::
+:: JETTY_PORT
+::   Default port for Jetty servers. The default value is 8080. The java 
+::   system property "jetty.port" will be set to this value for use in 
+::   configure.xml files, f.e:
+::
+::     <Arg><SystemProperty name="jetty.port" default="80"/></Arg>
+::
 :: JETTY_OPTIONS - (Optional) Any options to be passed to the JVM 
 :: can be set in this variable.  It will have appended to it:
 ::     -Djetty.home=%JETTY_HOME% -Djetty.logs=%JETTY_LOG%
@@ -138,10 +145,15 @@ if ERRORLEVEL 0 goto found_logs
 	set JETTY_LOG=%JETTY_HOME%\logs
 :logs_set
 
+
+if NOT "%JETTY_PORT%"=="" goto jetty_port_set
+  set JETTY_PORT=8080
+:jetty_port_set
+
 rem ===========================================================
 rem == build jvm options
 rem ===========================================================
-set OPTIONS=-Djetty.home="%JETTY_HOME%" -Djetty.log="%JETTY_LOG%"
+set OPTIONS=-Djetty.home="%JETTY_HOME%" -Djetty.log="%JETTY_LOG%" -Djetty.port=%JETTY_PORT%
 if DEFINED JETTY_OPTIONS set OPTIONS=%OPTIONS% %JETTY_OPTIONS%
 
 rem ===========================================================
@@ -157,6 +169,7 @@ echo JAVA_HOME=%JAVA_HOME%
 echo JETTY_HOME=%JETTY_HOME%
 echo JETTY_DRIVE=%JETTY_DRIVE%
 echo JETTY_LOG=%JETTY_LOG%
+echo JETTY_PORT=%JETTY_PORT%
 echo OPTIONS=%OPTIONS%
 echo ARGS=%args%
 echo RUNME=%RUNME%
