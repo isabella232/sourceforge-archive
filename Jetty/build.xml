@@ -60,6 +60,7 @@ Other targets:
   <property name="jaxp.jar"       value="${lib}/javax.xml.jaxp.jar"/>
   <property name="xml.jar"        value="${lib}/org.apache.crimson.jar"/>
   <property name="jsse.jar"       value="${lib}/com.sun.net.ssl.jar"/>
+  <property name="junit.jar"      value="${lib}/junit-3.7.jar"/>
 
   <path id="classpath">
     <pathelement path="${jetty.jar}" />
@@ -284,6 +285,18 @@ Other targets:
           fork="yes"
           failonerror="yes"
           />
+  </target>
+
+  <!-- ==================================================================== -->
+  <target name="testUtil_JUnit" depends="jars">
+    <junit fork="no" haltonerror="yes" haltonfailure="yes" >
+      <formatter type="brief" usefile="false" />                  
+      <classpath> 
+         <path refid="classpath" />
+         <pathelement path="${junit.jar}" />     
+      </classpath>        
+      <test name="org.mortbay.util.JUnitTestHarness"  />
+    </junit>
   </target>
 
   <!-- ==================================================================== -->
