@@ -44,6 +44,12 @@ import org.mortbay.util.WriterOutputStream;
  */
 public class Dispatcher implements RequestDispatcher
 {
+    // XXX
+    static
+    {
+        System.err.println("XXX forward attributes not implemented");
+    }
+    
     public final static String __REQUEST_URI= "javax.servlet.include.request_uri";
     public final static String __CONTEXT_PATH= "javax.servlet.include.context_path";
     public final static String __SERVLET_PATH= "javax.servlet.include.servlet_path";

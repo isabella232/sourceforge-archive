@@ -49,6 +49,7 @@ public class HttpResponse extends HttpMessage
           __300_Multiple_Choices = 300,
           __301_Moved_Permanently = 301,
           __302_Moved_Temporarily = 302,
+          __302_Found = 302,
           __303_See_Other = 303,
           __304_Not_Modified = 304,
           __305_Use_Proxy = 305,

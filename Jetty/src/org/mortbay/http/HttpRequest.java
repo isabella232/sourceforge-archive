@@ -235,7 +235,7 @@ public class HttpRequest extends HttpMessage
             _dotVersion=1;
             _version=__HTTP_1_1;
             _header.read(in);
-            setMimeAndEncoding(_header.get(HttpFields.__ContentType));
+            updateMimeType();
         }
         else if (__HTTP_0_9.equals(_version))
         {
@@ -247,7 +247,7 @@ public class HttpRequest extends HttpMessage
             _dotVersion=0;
             _version=__HTTP_1_0;
             _header.read(in);
-            setMimeAndEncoding(_header.get(HttpFields.__ContentType));
+            updateMimeType();
         }
 
         _handled=false;

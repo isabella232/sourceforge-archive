@@ -499,12 +499,6 @@ public class ServletHttpResponse implements HttpServletResponse
         _httpResponse.setReason(message);
     }
 
-    /* ------------------------------------------------------------ */
-    public String getCharacterEncoding() 
-    {
-        String encoding=_httpResponse.getCharacterEncoding();
-        return (encoding==null)?StringUtil.__ISO_8859_1:encoding;
-    }
 
     /* ------------------------------------------------------------ */
     public ServletOutputStream getOutputStream() 
@@ -577,13 +571,32 @@ public class ServletHttpResponse implements HttpServletResponse
     }
     
     /* ------------------------------------------------------------ */
+    public String getContentType()
+    {
+        return _httpResponse.getContentType();
+    }
+    
+    /* ------------------------------------------------------------ */
     public void setContentType(String contentType) 
     {
-        setHeader(HttpFields.__ContentType,contentType);
+        _httpResponse.setContentType(contentType);
         if (_locale!=null)
             setLocale(_locale);
     }
 
+    /* ------------------------------------------------------------ */
+    public void setCharacterEncoding(String encoding)
+    {
+        _httpResponse.setCharacterEncoding(encoding);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getCharacterEncoding() 
+    {
+        String encoding=_httpResponse.getCharacterEncoding();
+        return (encoding==null)?StringUtil.__ISO_8859_1:encoding;
+    }
+    
     /* ------------------------------------------------------------ */
     public String toString()
     {
@@ -618,17 +631,6 @@ public class ServletHttpResponse implements HttpServletResponse
     }
 
 
-    // XXX
-    public String getContentType()
-    {
-        return null;
-    }
-
-    // XXX
-    public void setCharacterEncoding(String encoding)
-    {
-    }
-    
 }
 
 

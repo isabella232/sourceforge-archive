@@ -334,39 +334,14 @@ public abstract class HttpMessage
         HttpFields fields=setFields();
 
         if (HttpFields.__ContentType.equalsIgnoreCase(name))
-            setMimeAndEncoding(value);
+        {
+            String old=fields.get(name);
+            setContentType(value);
+            return old;
+        }
 
         return fields.put(name,value);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Set the mimeType and CharacterEncodings.
-     * Normally called from setField("Content-Type",type);
-     * @param contentType A mimetype with optional char encoding param.
-     */
-    protected void setMimeAndEncoding(String contentType)
-    {
-        _characterEncoding=null;
-        _mimeType=contentType;
-        if (contentType!=null)
-        {
-            int i0=contentType.indexOf(';');
-            if (i0>=0)
-            {
-                _mimeType=contentType.substring(0,i0).trim();
-                int i1 = contentType.indexOf("charset=",i0);
-                if (i1>=0)
-                {
-                    i1+=8;
-                    int i2 = contentType.indexOf(' ',i1);
-                    _characterEncoding = (0 < i2)
-                        ? contentType.substring(i1,i2) : contentType.substring(i1);
-                    _characterEncoding = QuotedStringTokenizer.unquote(_characterEncoding);
-                }
-            }
-        }
-    }
-    
+    }    
     
     /* ------------------------------------------------------------ */
     /** Set a multi-value field value.
@@ -602,6 +577,19 @@ public abstract class HttpMessage
         return _acceptTrailer;
     }
     
+    
+    /* -------------------------------------------------------------- */
+    public int getContentLength()
+    {
+        return getIntField(HttpFields.__ContentLength);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setContentLength(int len) 
+    {
+        setIntField(HttpFields.__ContentLength,len);
+    }
+    
     /* -------------------------------------------------------------- */
     /** Character Encoding.
      * The character encoding is extracted from the ContentType field
@@ -620,19 +608,26 @@ public abstract class HttpMessage
      */
     public void setCharacterEncoding(String encoding)
     {
-        _characterEncoding=encoding;
-    }
-    
-    /* -------------------------------------------------------------- */
-    public int getContentLength()
-    {
-        return getIntField(HttpFields.__ContentLength);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void setContentLength(int len) 
-    {
-        setIntField(HttpFields.__ContentLength,len);
+        if (encoding==null)
+        {
+            // Clear any encoding.
+            if (_characterEncoding!=null)
+            {
+                _characterEncoding=null;
+                setFields().put(HttpFields.__ContentType,_mimeType);
+            }
+        }
+        else
+        {
+            // No, so just add this one to the mimetype
+            _characterEncoding=encoding;
+            if (_mimeType!=null)
+            {
+                setFields().put(HttpFields.__ContentType,
+                                _mimeType+";charset="+
+                                QuotedStringTokenizer.quote(_characterEncoding,";= "));
+            }
+        }
     }
     
     /* -------------------------------------------------------------- */
@@ -644,7 +639,86 @@ public abstract class HttpMessage
     /* ------------------------------------------------------------ */
     public void setContentType(String contentType) 
     {
-        setField(HttpFields.__ContentType,contentType);
+        if (contentType==null)
+        {
+            _mimeType=null;
+            setFields().remove(HttpFields.__ContentType);
+        }
+        else
+        {
+            // Look for encoding in contentType
+            int i0=contentType.indexOf(';');
+            
+            if (i0>0)
+            {
+                // Strip params off mimetype
+                _mimeType=contentType.substring(0,i0).trim();
+
+                // Look for charset
+                int i1=contentType.indexOf("charset=",i0);
+                if (i1>=0)
+                {
+                    i1+=8;
+                    int i2 = contentType.indexOf(' ',i1);
+                    _characterEncoding = (0<i2)
+                        ? contentType.substring(i1,i2)
+                        : contentType.substring(i1);
+                    _characterEncoding = QuotedStringTokenizer.unquote(_characterEncoding);
+                }
+                else // No encoding in the params.
+                 {
+                     if (_characterEncoding!=null)
+                         // Add any previously set encoding.
+                         contentType+=";charset="+
+                             QuotedStringTokenizer.quote(_characterEncoding,";= ");
+                 }
+            }
+            else // No encoding and no other params
+            {
+                _mimeType=contentType;
+                // Add any previously set encoding.
+                if (_characterEncoding!=null)
+                    contentType+=";charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
+            }
+            
+            setFields().put(HttpFields.__ContentType,contentType);
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void updateMimeType() 
+    {
+        _mimeType=null;
+        _characterEncoding=null;
+            
+        String contentType= _header.get(HttpFields.__ContentType);
+        if (contentType!=null)
+        {
+            // Look for encoding in contentType
+            int i0=contentType.indexOf(';');
+            
+            if (i0>0)
+            {
+                // Strip params off mimetype
+                _mimeType=contentType.substring(0,i0).trim();
+
+                // Look for charset
+                int i1=contentType.indexOf("charset=",i0);
+                if (i1>=0)
+                {
+                    i1+=8;
+                    int i2 = contentType.indexOf(' ',i1);
+                    _characterEncoding = (0<i2)
+                        ? contentType.substring(i1,i2)
+                        : contentType.substring(i1);
+                    _characterEncoding = QuotedStringTokenizer.unquote(_characterEncoding);
+                }
+            }
+            else 
+            {
+                _mimeType=contentType;
+            }
+        }
     }
     
     /* -------------------------------------------------------------- */
