@@ -4,7 +4,7 @@
 ###################################################################
 
 ifndef MKFILEPATH
-MKFILEPATH := $(MORTBAY_HOME)/etc
+MKFILEPATH := $(JETTY_HOME)/etc
 endif
 
 ifndef JAVA_PACKAGES
@@ -243,7 +243,7 @@ endif
 # 		     or environment
 #help 
 #help var:	INSTALLROOT	Root directory where files should be
-#help     			installed to - defaults to $MORTBAY_HOME
+#help     			installed to - defaults to $JETTY_HOME
 #help var:	BINFILES	Files to install in bin dir
 #help var:	LIBFILES	Files to install in lib dir : defaults to all
 #help     	        	native libraries.
@@ -263,7 +263,7 @@ endif
 ifndef INSTALLROOT
 # If INSTALLROOT not defined, install the files to the root of the src tree
 # and make them writeable.
-INSTALLROOT := $(MORTBAY_HOME)
+INSTALLROOT := $(JETTY_HOME)
 endif
 define installFile
 	@if [ ! -d `dirname '$@'` ];\

@@ -147,23 +147,27 @@ public class HttpHeader
     protected void write(OutputStream out, String extra)
     throws IOException
     {
-	int size=keys.size();
-	for(int k=0;k<size;k++)
+	ByteArrayOutputStream buf= new ByteArrayOutputStream();
+	synchronized(buf)
 	{
-	    String key = (String)keys.elementAt(k);
-	    String value = getHeader(key);
-	    out.write(key.getBytes());
-	    out.write(__COLON);
-	    out.write(value.getBytes());
-	    out.write(__CRLF);
+	    int size=keys.size();
+	    for(int k=0;k<size;k++)
+	    {
+		String key = (String)keys.elementAt(k);
+		String value = getHeader(key);
+		buf.write(key.getBytes());
+		buf.write(__COLON);
+		buf.write(value.getBytes());
+		buf.write(__CRLF);
+	    }
+	    if (extra!=null&&extra.length()>0)
+	    {
+		buf.write(extra.getBytes());
+		buf.write(__CRLF);
+	    }
+	    buf.write(__CRLF);
+	    buf.writeTo(out);
 	}
-	if (extra!=null&&extra.length()>0)
-	{
-	    out.write(extra.getBytes());
-	    out.write(__CRLF);
-	}
-	
-	out.write(__CRLF);
 	
 	out.flush();
     }

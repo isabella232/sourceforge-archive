@@ -1,3 +1,10 @@
+Release 2.0.2 - 1 November 1998
+  + Use JETTY_HOME rather than MORTBAY_HOME for build environment
+  + Add thread pool to threaded server for significant
+    performance improvement.
+  + Buffer files during configuration
+  + Buffer HTTP Response headers.
+
 Release 2.0.1 - 27 October 1998
   + Released under an Open Source license.
 

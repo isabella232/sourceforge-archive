@@ -12,11 +12,15 @@ rall:
 TESTS :=
 ROOTNAME := .
 
-ifndef MORTBAY_HOME
-MORTBAY_HOME := ${PWD}
-endif
-include $(MORTBAY_HOME)/etc/Global.mk
 
+ifndef JETTY_HOME
+  ifdef MORTBAY_HOME
+    JETTY_HOME := $(MORTBAY_HOME)
+  else
+    JETTY_HOME := /usr/local/Jetty
+  endif
+endif
+include $(JETTY_HOME)/etc/Global.mk
 #help target  jetty-release    Make a release of Jetty
 jetty-release: jetty-jars javadoc cleansrc
 

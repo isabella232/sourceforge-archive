@@ -155,7 +155,8 @@ public class Server extends BaseConfiguration
 	{
 	    Properties params = new Properties();
 	    if (paramFile!=null)
-		params.load(new FileInputStream(paramFile));
+		params.load(new BufferedInputStream(
+				new FileInputStream(paramFile)));
 	    holder=new ServletHolder(name,servlet,params);
 	    servletHolders.put(name,holder);
 	}
@@ -497,7 +498,7 @@ public class Server extends BaseConfiguration
 
 	    // load property file
 	    Properties props = new Properties();
-	    props.load(new FileInputStream(filename));
+	    props.load(new BufferedInputStream(new FileInputStream(filename)));
 	    Hashtable server_map = buildServers(props);
 
 	    Code.debug(server_map);

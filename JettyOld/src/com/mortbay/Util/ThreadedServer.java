@@ -7,7 +7,7 @@ package com.mortbay.Util;
 import com.mortbay.Base.*;
 import java.io.*;
 import java.net.*;
-import java.util.Vector;
+import java.util.*;
 import java.lang.InterruptedException;
 
 
@@ -182,42 +182,91 @@ abstract public class ThreadedServer implements Runnable
 	    try 
 	    {
 		Socket connection = listen.accept( );
-		// System.out.println( "Connection: " + connection );
-
-		ConnectionThread thread;
-		thread = new ConnectionThread(this,connection);
-		thread.start();
-
-		thread=null;
-		connection=null;
+		Code.debug( "Connection: ",connection );
+		ConnectionThread.handle(this,connection);
 	    } 
 	    catch ( Exception e ){
 		Code.warning("Listen problem",e);
 	    }
 	}
     }
+    
+    
 }
-
-
 
 // =======================================================================
 class ConnectionThread extends Thread
 {
-    Socket connection = null;
-    ThreadedServer server = null;
+    /* ------------------------------------------------------------ */
+    static final Stack __threads = new Stack();
 
-    /* ------------------------------------------------------------------- */
-    ConnectionThread(ThreadedServer server, Socket connection)
+	/* ------------------------------------------------------------ */
+    static void handle(ThreadedServer server,Socket connection)
     {
-	this.connection = connection;
+	ConnectionThread c=null;
+	try{
+	    c=(ConnectionThread)__threads.pop();
+	}
+	catch(EmptyStackException e)
+	{
+	    Code.ignore(e);
+	    c=new ConnectionThread(server);
+	}
+	c.handle(connection);
+    }
+	
+    /* ------------------------------------------------------------ */
+    final ThreadedServer server;
+    Socket connection = null;
+
+	/* ------------------------------------------------------------ */
+	/** Constructor. 
+	 * @param server 
+	 */
+    ConnectionThread(ThreadedServer server)
+    {
 	this.server = server;
+	start();
     }
 
-    /* ------------------------------------------------------------------- */
+    /* ------------------------------------------------------------ */
+    synchronized void handle(Socket connection)
+    {
+	this.connection=connection;
+	this.notify();
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Loop and wait for connections to handle by calling back to
+     * the ThreadedServer
+     */
     final public void run() 
     {
-	server.handleConnection(connection);
+	try
+	{
+	    while (true)
+	    {
+		synchronized(this)
+		{
+		    while (connection==null)
+		    {
+			Code.debug("Thread ",this," Waiting...");
+			wait();
+		    }
+		    Code.debug("Thread: ",this," Handling ",connection);
+		    server.handleConnection(connection);
+		    connection=null;
+		    __threads.push(this);
+		}
+	    }
+	}
+	catch(InterruptedException e)
+	{
+	    Code.debug(e);
+	}
     }
 }
+
+
 
  

@@ -6,36 +6,36 @@ INSTALLATION
 Jetty comes compiled and ready to go. Unpack the Jetty distribution 
 to a shared locations (/usr/local/Jetty is a good spot).   
 
-The environment variable MORTBAY_HOME should be set to this directory. 
-For the rest of this README the unix convention of $MORTBAY_HOME refers 
-to the installed directory path (%MORTBAY_HOME% on dos/NT/windows).
+The environment variable JETTY_HOME should be set to this directory. 
+For the rest of this README the unix convention of $JETTY_HOME refers 
+to the installed directory path (%JETTY_HOME% on dos/NT/windows).
 
    Unix:
 	cd /usr/local
 	gunzip < Jetty-X.X.X.tgz | tar xfv -
-	MORTBAY_HOME=/usr/local/Jetty
-	export MORTBAY_HOME
+	JETTY_HOME=/usr/local/Jetty
+	export JETTY_HOME
 
    Win95,NT:
 	c:
 	cd "\Program Files"
         winzip Jetty-X.X.X.tgz
-	set MORTBAY_HOME="c:\Program files\Jetty"
+	set JETTY_HOME="c:\Program files\Jetty"
 
 
 Make sure your CLASSPATH includes all the jar files in
-the $MORTBAY_HOME/lib directory  eg.
+the $JETTY_HOME/lib directory  eg.
 
    Unix:
-	CLASSPATH=$CLASSPATH:$MORTBAY_HOME/lib/javax.servlet.jar
-        CLASSPATH=$CLASSPATH:$MORTBAY_HOME/lib/com.mortbay.Jetty.jar
+	CLASSPATH=$CLASSPATH:$JETTY_HOME/lib/javax.servlet.jar
+        CLASSPATH=$CLASSPATH:$JETTY_HOME/lib/com.mortbay.Jetty.jar
 
 
 RUNNING JETTY
 =============
 The demo server can be run with the following command:
 
-    cd $MORTBAY_HOME
+    cd $JETTY_HOME
     java [-DDEBUG] com.mortbay.Jetty.Demo
 
 Use a browser to access the Jetty site at:
@@ -48,7 +48,7 @@ The Jetty server may be run in the other modes as follows:
   + To run as a config file driven WWW server, configure
     the file JettyServer.prp and then run:
 
-        cd $MORTBAY_HOME
+        cd $JETTY_HOME
 	java com.mortbay.HTTP.Server [configFile]
 
   + To run a HTTP file server, in the current directory:
@@ -96,7 +96,7 @@ following information when sending email to jetty-support.
   Hardware platform.
   Operating System and version.
   Directory Jetty is installed in.
-  Value of MORTBAY_HOME environment variable.
+  Value of JETTY_HOME environment variable.
   Value of CLASSPATH environment variable.
   Command line used to run the server.
   Server properties file (if used and modified).

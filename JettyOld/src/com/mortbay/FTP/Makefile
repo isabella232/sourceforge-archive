@@ -15,7 +15,11 @@ TESTS := TestFtp.java
 
 all: 
 
-ifndef MORTBAY_HOME
-MORTBAY_HOME := /usr/local/MortBay
+ifndef JETTY_HOME
+  ifdef MORTBAY_HOME
+    JETTY_HOME := $(MORTBAY_HOME)
+  else
+    JETTY_HOME := /usr/local/Jetty
+  endif
 endif
-include $(MORTBAY_HOME)/etc/Global.mk
+include $(JETTY_HOME)/etc/Global.mk
