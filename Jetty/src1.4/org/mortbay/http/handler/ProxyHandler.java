@@ -322,8 +322,13 @@ public class ProxyHandler extends AbstractHttpHandler
             InetAddrPort addrPort=new InetAddrPort(uri.toString());
             
             Integer port = new Integer(addrPort.getPort());
-            if (!_allowedConnectPorts.contains(port))
-                response.setStatus(HttpResponse.__403_Forbidden);
+            String host=addrPort.getHost();
+            if (!_allowedConnectPorts.contains(port) ||
+                _proxyHostsWhiteList!=null && !_proxyHostsWhiteList.contains(host) ||
+                _proxyHostsBlackList!=null && _proxyHostsBlackList.contains(host))
+            {
+                response.setStatus(HttpResponse.__404_Not_Found);
+            }
             else
             {
                 Socket socket = new Socket(addrPort.getInetAddress(),addrPort.getPort());

@@ -80,8 +80,20 @@
     <Arg>/</Arg>
 
     <Call name="addHandler">
-      <Arg><New class="org.mortbay.http.handler.ProxyHandler"></New></Arg>
+      <Arg><New class="org.mortbay.http.handler.ProxyHandler">
+        <Set name="proxyHostsBlackList">
+          <Array type="java.lang.String">
+            <Item>www.microsoft.com</Item>
+            <Item>www.saddam.net</Item>
+          </Array>
+        </Set>
+      </New></Arg>
     </Call>
+
+    <Call name="addHandler">
+      <Arg><New class="org.mortbay.http.handler.NotFoundHandler"/></Arg>
+    </Call>
+
   </Call>
 
 
