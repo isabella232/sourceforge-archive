@@ -1,4 +1,4 @@
-Jetty-3.0.A97 - in progress
+Jetty-3.0.A97 - 13 July 2000
    + Tempory request log implementation
    + Less verbose debug
    + Better tuned SocketListener parameters
