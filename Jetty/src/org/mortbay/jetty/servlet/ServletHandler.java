@@ -1087,9 +1087,7 @@ public class ServletHandler
                 Resource resource = baseResource.addPath(path);
                 File file = resource.getFile();
 
-                return (file==null)
-                    ?"null"
-                    :(file.getAbsolutePath());
+                return (file==null)?null:(file.getAbsolutePath());
             }
             catch(IOException e)
             {

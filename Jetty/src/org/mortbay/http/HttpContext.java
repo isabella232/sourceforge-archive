@@ -119,8 +119,8 @@ public class HttpContext implements LifeCycle
         if (contextPathSpec==null ||
             contextPathSpec.indexOf(',')>=0 ||
             contextPathSpec.startsWith("*"))
-            new IllegalArgumentException
-                ("Illegal context spec:"+contextPathSpec);
+            throw new IllegalArgumentException ("Illegal context spec:"+contextPathSpec);
+
         if(!contextPathSpec.startsWith("/"))
 	    contextPathSpec='/'+contextPathSpec;
 
