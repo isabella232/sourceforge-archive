@@ -161,7 +161,7 @@ public class KeyPairTool
           = certificateFactory.generateCertificates(certInputStream);
         Certificate[] certChain = (Certificate[])collection.toArray();
 
-        System.out.println("Loaded the public key...");
+        System.out.println("Loaded the cert chain... " + certChain.length);
 
         //--------------------------------------------------
         // Dynamically deinstall the RSA provider
