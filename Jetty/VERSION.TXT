@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-4.2.0pre0 - 13 October 2002
+Jetty-4.2.0beta0 - 13 October 2002
  + New ThreadPool implementation.
  + New Buffering implementation.
  + New AJP13 implementation.
@@ -18,6 +18,7 @@ Jetty-4.2.0pre0 - 13 October 2002
  + FORM authentication sets 403 error page
  + Allow %3B encoded ; in URLs
  + Allow anonymous realm
+ + Update jasper to 4.1.12 tag
 
 Jetty-4.1.2 - 13 October 2002
  + Some AJP13 optimizations.
@@ -33,7 +34,6 @@ Jetty-4.1.2 - 13 October 2002
  + FORM authentication sets 403 error page
  + Allow %3B encoded ; in URLs
  + Allow anonymous realm
- + Update jasper to 4.1.12 tag
 
 Jetty-4.1.1 - 30 September 2002
  + Fixed client scripting vulnerability with jasper2.
