@@ -329,9 +329,9 @@ public class NCSARequestLog implements RequestLog
             buf.append(request.getVersion());
             buf.append("\" ");
             int status=response.getStatus();    
-            buf.append('0'+((status/100)%10));
-            buf.append('0'+((status/10)%10));
-            buf.append('0'+(status%10));
+            buf.append((char)('0'+((status/100)%10)));
+            buf.append((char)('0'+((status/10)%10)));
+            buf.append((char)('0'+(status%10)));
             if (responseLength>=0)
             {
                 buf.append(' ');
@@ -340,14 +340,14 @@ public class NCSARequestLog implements RequestLog
                 else
                 {
                     if (responseLength>9999) 
-                        buf.append('0'+((responseLength/10000)%10));
+                        buf.append((char)('0'+((responseLength/10000)%10)));
                     if (responseLength>999) 
-                        buf.append('0'+((responseLength/1000)%10));
+                        buf.append((char)('0'+((responseLength/1000)%10)));
                     if (responseLength>99) 
-                        buf.append('0'+((responseLength/100)%10));
+                        buf.append((char)('0'+((responseLength/100)%10)));
                     if (responseLength>9) 
-                        buf.append('0'+((responseLength/10)%10));
-                    buf.append('0'+(responseLength%10));
+                        buf.append((char)('0'+((responseLength/10)%10)));
+                    buf.append((char)('0'+(responseLength%10)));
                 }
                 buf.append(' ');
             }
@@ -362,8 +362,6 @@ public class NCSARequestLog implements RequestLog
                     logExtended(request,response,_writer);
                 _writer.write(StringUtil.__LINE_SEPARATOR);
             }
-            
-
         }
         catch(IOException e)
         {

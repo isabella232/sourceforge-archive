@@ -295,6 +295,14 @@ public class HttpOutputStream
     }
     
     /* ------------------------------------------------------------ */
+    /** Reset the observers.
+     */
+    public void resetObservers()
+    {
+        _observers=null;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Null the output.
      * All output written is discarded until the stream is reset. Used
      * for HEAD requests.

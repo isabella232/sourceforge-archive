@@ -14,10 +14,12 @@ import java.net.URLConnection;
 import java.net.HttpURLConnection;
 import java.net.Socket;
 import java.util.Enumeration;
+import java.util.HashSet;
 import org.mortbay.http.HttpOutputStream;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
+import org.mortbay.http.HttpTunnel;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
@@ -28,43 +30,64 @@ import org.mortbay.util.URI;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.StringMap;
+import org.mortbay.util.InetAddrPort;
 
 /* ------------------------------------------------------------ */
 /** Proxy request handler.
- * Skeleton of a HTTP/1.1 Proxy
+ * A HTTP/1.1 Proxy.  This implementation uses the JVMs URL implementation to
+ * make proxy requests.
+ * <P>The HttpTunnel mechanism is also used to implement the CONNECT method.
+ *
  * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class ProxyHandler extends AbstractHttpHandler
 {
-    private static final StringMap __DontProxyHeaders = new StringMap();
-    static
+    /* ------------------------------------------------------------ */
+    /** Map of leg by leg headers (not end to end).
+     * Should be a set, but more efficient string map is used instead.
+     */
+    protected StringMap _DontProxyHeaders = new StringMap();
     {
         Object o = new Object();
-        __DontProxyHeaders.setIgnoreCase(true);
-        __DontProxyHeaders.put("Proxy-Connection",o);
-        __DontProxyHeaders.put(HttpFields.__Connection,o);
-        __DontProxyHeaders.put(HttpFields.__KeepAlive,o);
-        __DontProxyHeaders.put(HttpFields.__TransferEncoding,o);
-        __DontProxyHeaders.put(HttpFields.__TE,o);
-        __DontProxyHeaders.put(HttpFields.__Trailer,o);
-        __DontProxyHeaders.put(HttpFields.__ProxyAuthorization,o);
-        __DontProxyHeaders.put(HttpFields.__ProxyAuthenticate,o);
-        __DontProxyHeaders.put(HttpFields.__Upgrade,o);
-    }
-    
-    private static final StringMap __ProxySchemes = new StringMap();
-    static
-    {
-        Object o = new Object();
-        __ProxySchemes.setIgnoreCase(true);
-        __ProxySchemes.put(HttpMessage.__SCHEME,o);
-        __ProxySchemes.put(HttpMessage.__SSL_SCHEME,o);
-        __ProxySchemes.put("ftp",o);
+        _DontProxyHeaders.setIgnoreCase(true);
+        _DontProxyHeaders.put("Proxy-Connection",o);
+        _DontProxyHeaders.put(HttpFields.__Connection,o);
+        _DontProxyHeaders.put(HttpFields.__KeepAlive,o);
+        _DontProxyHeaders.put(HttpFields.__TransferEncoding,o);
+        _DontProxyHeaders.put(HttpFields.__TE,o);
+        _DontProxyHeaders.put(HttpFields.__Trailer,o);
+        _DontProxyHeaders.put(HttpFields.__ProxyAuthorization,o);
+        _DontProxyHeaders.put(HttpFields.__ProxyAuthenticate,o);
+        _DontProxyHeaders.put(HttpFields.__Upgrade,o);
     }
     
     /* ------------------------------------------------------------ */
+    /**  Map of allows schemes to proxy
+     * Should be a set, but more efficient string map is used instead.
+     */
+    protected StringMap _ProxySchemes = new StringMap();
+    {
+        Object o = new Object();
+        _ProxySchemes.setIgnoreCase(true);
+        _ProxySchemes.put(HttpMessage.__SCHEME,o);
+        _ProxySchemes.put(HttpMessage.__SSL_SCHEME,o);
+        _ProxySchemes.put("ftp",o);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set of allowed CONNECT ports.
+     */
+    protected HashSet _allowedConnectPorts = new HashSet();
+    {
+        _allowedConnectPorts.add(new Integer(80));
+        _allowedConnectPorts.add(new Integer(8000));
+        _allowedConnectPorts.add(new Integer(8080));
+        _allowedConnectPorts.add(new Integer(8888));
+        _allowedConnectPorts.add(new Integer(443));
+        _allowedConnectPorts.add(new Integer(8443));
+    }
     
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,
@@ -73,11 +96,44 @@ public class ProxyHandler extends AbstractHttpHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
-        // Is this a proxy request?
-        
         URI uri = request.getURI();
+        
+        // Is this a CONNECT request?
+        if (HttpRequest.__CONNECT.equalsIgnoreCase(request.getMethod()))
+        {
+            try
+            {
+                Code.debug("CONNECT: ",uri);
+                InetAddrPort addrPort=new InetAddrPort(uri.toString());
+
+                Integer port = new Integer(addrPort.getPort());
+                if (!_allowedConnectPorts.contains(port))
+                    response.setStatus(HttpResponse.__403_Forbidden);
+                else
+                {
+                    Socket socket = new Socket(addrPort.getInetAddress(),addrPort.getPort());
+                    request.getHttpConnection().setHttpTunnel(new HttpTunnel(socket));
+                    response.setStatus(HttpResponse.__200_OK);
+                }
+            }
+            catch (Exception e)
+            {
+                Code.ignore(e);
+                response.setStatus(HttpResponse.__405_Method_Not_Allowed);
+            }
+            finally
+            {
+                response.setContentLength(0);
+                request.setHandled(true);
+            }
+            
+            return;
+        }
+        
+        
+        // Is this a proxy request?
         String scheme=uri.getScheme();
-        if (scheme==null || !__ProxySchemes.containsKey(scheme))
+        if (scheme==null || !_ProxySchemes.containsKey(scheme))
             return;
 
         // Do we proxy this?
@@ -113,7 +169,7 @@ public class ProxyHandler extends AbstractHttpHandler
             {
                 // XXX could be better than this!
                 String hdr=(String)enum.nextElement();
-                if (__DontProxyHeaders.containsKey(hdr))
+                if (_DontProxyHeaders.containsKey(hdr))
                     continue;
                 if (connectionHdr!=null && connectionHdr.indexOf(hdr)>=0)
                     continue;
@@ -158,10 +214,8 @@ public class ProxyHandler extends AbstractHttpHandler
                 int code=500;
                 
                 code=http.getResponseCode();
-                System.err.println("code="+code);
                 response.setStatus(code);
                 response.setReason(http.getResponseMessage());
-                System.err.println("reason");
             }
             
             if (proxy_in==null)
@@ -173,7 +227,6 @@ public class ProxyHandler extends AbstractHttpHandler
                     proxy_in = http.getErrorStream();
                 }
             }
-            System.err.println("in");
             
             // set response headers
             int h=0;
@@ -182,7 +235,7 @@ public class ProxyHandler extends AbstractHttpHandler
             
             while(hdr!=null || val!=null)
             {
-                if (hdr!=null && val!=null && !__DontProxyHeaders.containsKey(hdr))
+                if (hdr!=null && val!=null && !_DontProxyHeaders.containsKey(hdr))
                     response.setField(hdr,val);
                 h++;
                 hdr=connection.getHeaderFieldKey(h);

@@ -74,6 +74,7 @@ public class HttpConnection
     private long _reqTime;
     private int _requests;
     private Object _object;
+    private HttpTunnel _tunnel ;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -334,6 +335,28 @@ public class HttpConnection
         _object=o;
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return The HttpTunnel set for the connection or null.
+     */
+    public HttpTunnel getHttpTunnel()
+    {
+        return _tunnel;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set a HttpTunnel for the connection.
+     * A HTTP tunnel is used if the connection is to be taken over for
+     * non-HTTP communications. An example of this is the CONNECT method
+     * in proxy handling.  If a HttpTunnel is set on a connection, then it's
+     * handle method is called bu the next call to handleNext().
+     * @param tunnel The HttpTunnel set for the connection or null.
+     */
+    public void setHttpTunnel(HttpTunnel tunnel)
+    {
+        _tunnel = tunnel;
+    }
+    
     /* ------------------------------------------------------------ */
     /* Verify HTTP/1.0 request
      * @exception HttpException problem with the request. 
@@ -791,6 +814,9 @@ public class HttpConnection
      * If the thread is a PoolThread, the thread is set as inactive
      * when waiting for a request. 
      * <P>
+     * If a HttpTunnel has been set on this connection, it's handle method is
+     * called and when that completes, false is return from this method.
+     * <P>
      * The Connection is set as a ThreadLocal of the calling thread and is
      * available via the getHttpConnection() method.
      * @return true if the connection is still open and may provide
@@ -798,6 +824,17 @@ public class HttpConnection
      */
     public boolean handleNext()
     {
+        // Handle a HTTP tunnel
+        if (_tunnel!=null)
+        {
+            Code.debug("Tunnel: ",_tunnel);
+            _outputStream.resetObservers();
+            _tunnel.handle(_inputStream.getInputStream(),
+                           _outputStream.getOutputStream());
+            return false;
+        }
+
+        // Normal handling.
         HttpContext context=null;
         try
         {   
