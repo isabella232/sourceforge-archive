@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+ + Fixed formatting of redirect URLs.
+ + Removed ForwardHandler.
+ + Removed Demo.java (until updated).
  + Made the root context a webapplication.
  + Moved demo docroot/servlets to demo directory
  + added addWebApplications auto discovery

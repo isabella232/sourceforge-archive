@@ -24,6 +24,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.servlet.http.Cookie;
 import org.mortbay.util.Code;
+import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.MultiMap;
@@ -300,23 +301,20 @@ public class HttpRequest extends HttpMessage
     /**
      * Reconstructs the URL the client used to make the request.
      * The returned URL contains a protocol, server name, port
-     * number, and server path, but it does not include query
-     * string parameters.
-     * 
-     * <p>Because this method returns a <code>StringBuffer</code>,
+     * number, and, but it does not include a path.
+     * <p>
+     * Because this method returns a <code>StringBuffer</code>,
      * not a string, you can modify the URL easily, for example,
      * to append query parameters.
      *
-     * <p>This method is useful for creating redirect messages
+     * This method is useful for creating redirect messages
      * and for reporting errors.
      *
-     * @return		a <code>StringBuffer</code> object containing
-     *			the reconstructed URL
-     *
+     * @return "scheme://host:port"
      */
-    public StringBuffer getRequestURL()
+    public StringBuffer getRootURL()
     {
-        StringBuffer url = new StringBuffer ();
+        StringBuffer url = new StringBuffer (48);
         synchronized(url)
         {
             String scheme = getScheme();
@@ -336,9 +334,33 @@ public class HttpRequest extends HttpMessage
                     url.append (port);
                 }
             }
-            url.append(getPath());
             return url;
         }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Reconstructs the URL the client used to make the request.
+     * The returned URL contains a protocol, server name, port
+     * number, and server path, but it does not include query
+     * string parameters.
+     * 
+     * <p>Because this method returns a <code>StringBuffer</code>,
+     * not a string, you can modify the URL easily, for example,
+     * to append query parameters.
+     *
+     * <p>This method is useful for creating redirect messages
+     * and for reporting errors.
+     *
+     * @return		a <code>StringBuffer</code> object containing
+     *			the reconstructed URL
+     *
+     */
+    public StringBuffer getRequestURL()
+    {
+        StringBuffer buf = getRootURL();
+        buf.append(getPath());
+        return buf;
     }
 
     
@@ -413,11 +435,12 @@ public class HttpRequest extends HttpMessage
         {
             _host=_connection.getHost();
             _port=_connection.getPort();
-            return _host;
+            if (_host!=null && !InetAddrPort.__0_0_0_0.equals(_host))
+                return _host;
         }
 
         // Return the local host
-        try {_host=InetAddress.getLocalHost().getHostName();}
+        try {_host=InetAddress.getLocalHost().getHostAddress();}
         catch(java.net.UnknownHostException e){Code.ignore(e);}
         return _host;
     }

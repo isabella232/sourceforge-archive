@@ -107,12 +107,6 @@ You can access this demo with at http://localhost:8080
 The demo also runs a simple admin servlet at http://localhost:8888,
 with user username=admin, password=admin.
 
-This demo is configured using XML files. The same demo is configured
-in code by the org.mortbay.jetty.Demo class and can be  run with the command:
-
-  java org.mortbay.jetty.Demo
-
-
 There is also a Unix start/stop script bin/jetty.sh which can run
 the demo with:
 

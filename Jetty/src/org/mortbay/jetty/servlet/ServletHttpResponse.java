@@ -375,17 +375,13 @@ public class ServletHttpResponse implements HttpServletResponse
 
         if (url.indexOf(":/")<0)
         {
+            StringBuffer buf = _servletHttpRequest.getHttpRequest().getRootURL();
+            
             if (url.startsWith("/"))
-                url=_servletHttpRequest.getScheme()+
-                    "://"+_servletHttpRequest.getServerName()+
-                    ":"+_servletHttpRequest.getServerPort()+
-                    URI.canonicalPath(url);
+                buf.append(URI.canonicalPath(url));
             else
-                url=_servletHttpRequest.getScheme()+
-                    "://"+_servletHttpRequest.getServerName()+
-                    ":"+_servletHttpRequest.getServerPort()+
-                    URI.canonicalPath(URI.addPaths(URI.parentPath(_servletHttpRequest.getRequestURI()),
-                                 url));
+                buf.append(URI.canonicalPath(URI.addPaths(URI.parentPath(_servletHttpRequest.getRequestURI()),url)));
+            url=buf.toString();
         }
         
         _httpResponse.sendRedirect(url);

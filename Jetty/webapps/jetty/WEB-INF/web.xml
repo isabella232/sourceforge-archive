@@ -62,7 +62,6 @@
   </error-page>
 
   <security-constraint>
-    <display-name>Default contraint for /auth/*</display-name>
     <web-resource-collection>
       <web-resource-name>Any Role</web-resource-name>
       <url-pattern>/auth/*</url-pattern>
@@ -76,7 +75,6 @@
   </security-constraint>
 
   <security-constraint>
-    <display-name>relax contraints for /auth/relax/*</display-name>
     <web-resource-collection>
       <web-resource-name>relax</web-resource-name>
       <url-pattern>/auth/relax/*</url-pattern>
@@ -90,7 +88,6 @@
   </security-constraint>
 
   <security-constraint>
-    <display-name>Admin role for /auth/admin/*</display-name>
     <web-resource-collection>
       <web-resource-name>Admin Role</web-resource-name>
       <url-pattern>/auth/admin/*</url-pattern>
@@ -101,7 +98,6 @@
   </security-constraint>
 
   <security-constraint>
-    <display-name>No access for /auth/noaccess/*</display-name>
     <web-resource-collection>
       <web-resource-name>No Access</web-resource-name>
       <url-pattern>/auth/noaccess/*</url-pattern>
