@@ -102,10 +102,7 @@ public class Listener extends LifeCycleThread
         // create a selector;
         _selector=Selector.open();
         
-	// Register accepts on the server socket with the selector. This
-	// step tells the selector that the socket wants to be put on the
-	// ready list when accept operations occur, so allowing multiplexed
-	// non-blocking I/O to take place.
+	// Register accepts on the server socket with the selector.
         _acceptChannel.register(_selector,SelectionKey.OP_ACCEPT);
 
         System.err.println("Selector "+_selector);
@@ -113,7 +110,16 @@ public class Listener extends LifeCycleThread
         super.start();
         
     }
-
+    
+    /* ------------------------------------------------------------ */
+    public void stop()
+        throws InterruptedException
+    {
+        super.stop();
+        try{_selector.close();}catch(Exception e){Code.warning(e);}
+        try{_acceptChannel.close();}catch(Exception e){Code.warning(e);}
+    }
+    
     /* ------------------------------------------------------------ */
     public void loop()
         throws Exception

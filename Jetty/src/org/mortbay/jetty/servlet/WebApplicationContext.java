@@ -156,7 +156,10 @@ public class WebApplicationContext extends ServletHttpContext
 
             
             // If we should extract or the URL is still not usable
-            if (_webApp.exists() && (_extract  || !_webApp.isDirectory()))
+            if (_webApp.exists() &&
+                (!_webApp.isDirectory() || 
+                 ( _extract && _webApp.getFile()==null) ||
+                 ( _extract && _webApp.getFile()!=null && !_webApp.getFile().isDirectory())))
             {
                 // Then extract it.
                 File tempDir=new File(getTempDirectory(),"webapp");

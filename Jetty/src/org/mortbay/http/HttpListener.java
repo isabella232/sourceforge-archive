@@ -27,7 +27,6 @@ public interface HttpListener extends LifeCycle
     public abstract int getPort();
 
     public abstract String getDefaultScheme();
-    public abstract ServerSocket getServerSocket();
     
     public abstract void customizeRequest(HttpConnection connection,
                                           HttpRequest request);

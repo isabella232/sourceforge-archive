@@ -120,14 +120,11 @@ public class HttpConnection
      */
     public String getRemoteHost()
     {
-        System.err.println("_remoteHost="+_remoteHost);
         if (_remoteHost==null)
         {
             if (_remoteAddr==null)
                 return "localhost";
-            System.err.println("_remoteAddr="+_remoteAddr);
             _remoteHost=_remoteAddr.getHostName();
-            System.err.println("_remoteHost="+_remoteHost);
         }
         return _remoteHost;
     }
@@ -1037,7 +1034,7 @@ public class HttpConnection
 
     /* ------------------------------------------------------------ */
     /** Destroy the connection.
-     * called when handleNext returns false.
+     * called by handleNext when handleNext returns false.
      */
     private void destroy()
     {

@@ -269,7 +269,7 @@ public class HttpServer implements LifeCycle
         if (_requestLog!=null && _requestLog.isStarted())
         {
             _requestLog.stop();
-            Log.event("Stoped "+_requestLog);
+            Log.event("Stopped "+_requestLog);
         }
         
         Log.event("Stopped "+this);

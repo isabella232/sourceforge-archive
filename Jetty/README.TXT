@@ -214,6 +214,9 @@ Furthermore, the new features of JDK1.4 are now being supported in a src1.4
 hierarchy.  If Jetty is built and the 1.4 classes are available, the source
 in $JETTY_HOME/src1.4 is used to replace or enhance the standard classes.
 
+The SocketChannelListener class uses non blocking IO for idle connections to
+greatly reduce the threads needed by Jetty.
+
 Jetty releases are currently built using 1.3
 
 

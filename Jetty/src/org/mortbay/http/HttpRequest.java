@@ -196,7 +196,7 @@ public class HttpRequest extends HttpMessage.Implementation
         
         if (line_buffer.size==in.__maxLineLength)
             throw new HttpException(HttpResponse.__414_Request_URI_Too_Large);
-        decodeRequestLine(line_buffer.buffer,line_buffer.size);
+        decodeRequestLine(line_buffer.buffer,line_buffer.size);        
         
         // Handle version - replace with fast compare
         if (__HTTP_1_1.equals(_version))

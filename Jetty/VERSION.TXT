@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+Jetty-4.0.RC2 - wait for it....
+ + Added experimental nio SocketChannelListener
+ + Added skeleton load balancer
  + Fixed column name in JDBCUserRealm
  + Remove last of the Class.forName calls.
  + Removed redundant sessionID check.
