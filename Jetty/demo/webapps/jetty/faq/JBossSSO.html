@@ -1,0 +1,22 @@
+SECTION: 650-JBoss
+TITLE: JBoss
+QUESTION: Does Jetty/JBoss support single sign on?
+
+Yes, Jetty/JBoss supports single sign on. Single sign on, or &quot;sso&quot; as it is frequently referred to, allows a user who is authenticated by one web application to be automatically accepted as authenticated by others.
+<p>
+To use sso, each participating web application must have a <code>WEB-INF/jetty-web.xml</code> file.  Each file must specify the same name for the shared single sign on realm. The following is an example of the contents of a <code>WEB-INF/jetty-web.xml</code> file that enables sso:
+<p>
+<pre>
+<code>
+        &lt;?xml version="1.0"  encoding="ISO-8859-1"?&gt;
+
+        &lt;!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.2//EN" "http://jetty.mortbay.org/configure_1_2.dtd"&gt;
+
+        &lt;Configure class="org.mortbay.jetty.servlet.WebApplicationContext"&gt;
+          &lt;Get name="UserRealm"&gt;
+             &lt;Set name="SSORealmName"&gt;MY-SSO-REALM-NAME&lt;/Set&gt;
+          &lt;/Get&gt;
+
+        &lt;/Configure&gt;
+</code>
+</pre>

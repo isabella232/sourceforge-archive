@@ -4,9 +4,14 @@
 
 <!--
 
-This jetty-web.xml demonstrates current distributable HttpSession
-technology.
+This jetty-web.xml file demonstrates:
 
+  1. distributable HttpSessions
+  2. single sign on
+
+
+1. Distributable HttpSessions
+-----------------------------
 Distributable HttpSessions live in a container, much like JBoss EJBs,
 comprising a stack of interceptors which are used to aggregate the
 necessary functionality at deploy time. This is slower, but simpler
@@ -36,10 +41,22 @@ changes will NOT be distributed, because you placed a COPY of your
 object into the session. To update it you MUST place a fresh copy over
 it. This new value will then be distributed.
 
+
+2. Single Sign On
+-----------------
+To enable single sign on for a collection of web applications, use a
+jetty-web.xml file per webapp to specify a common name for the sso realm. 
+That is, each webapp wishing to participate in single
+sign on must have a jetty-web.xml file, and all files must specify the
+same sso realm name. See the example below.
+
 -->
 
 <Configure class="org.mortbay.jetty.servlet.WebApplicationContext">
 
+  <!-- ================================================================== -->
+  <!-- Enable HttpSessions                                                -->  
+  <!-- ================================================================== -->
   <!-- this interceptor stack is for an EXTENDED session using JavaGroups -->
   <Get name="ServletHandler">
   <Set name="SessionManager">
@@ -61,6 +78,15 @@ it. This new value will then be distributed.
    </Set>
   </New>
   </Set>
+  </Get>
+
+  <!-- ================================================================== -->
+  <!-- Enable SSO                                                         -->
+  <!--                                                                    -->
+  <!-- Change MY-SSO-REALM-NAME to the name of your sso realm.            --> 
+  <!-- ================================================================== -->
+  <Get name="UserRealm">
+    <Set name="SSORealmName">MY-SSO-REALM-NAME</Set>
   </Get>
 
 </Configure>
