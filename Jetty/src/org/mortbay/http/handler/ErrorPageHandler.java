@@ -5,6 +5,7 @@
 package org.mortbay.http.handler;
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URLDecoder;
 
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
@@ -46,6 +47,7 @@ public class ErrorPageHandler extends AbstractHttpHandler
     {
         if (message != null)
         {
+            message=URLDecoder.decode(message,"UTF-8");
             message= StringUtil.replace(message, "<", "&lt;");
             message= StringUtil.replace(message, ">", "&gt;");
         }
@@ -58,9 +60,9 @@ public class ErrorPageHandler extends AbstractHttpHandler
         writer.write(message);
         writer.write("</title>\n</head>\n<body>\n<h2>HTTP ERROR: ");
         writer.write(Integer.toString(code));
-        writer.write(' ');
+        writer.write("</h2><pre>");
         writer.write(message);
-        writer.write("</h2>\n");
+        writer.write("</pre>\n");
         writer.write("<p>RequestURI=");
         writer.write(uri);
         writer.write(
