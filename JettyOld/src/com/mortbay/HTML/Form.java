@@ -4,6 +4,7 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTML;
+import com.mortbay.HTTP.HttpHeader;
 import java.io.*;
 import java.util.*;
 
@@ -14,8 +15,9 @@ import java.util.*;
  */
 public class Form extends Block
 {
+    public static final String encodingWWWURL = HttpHeader.WwwFormUrlEncode;
+    public static final String encodingMultipartForm = "multipart/form-data";
     private String method="POST";
-
     /* ----------------------------------------------------------------- */
     /** Constructor
      */
@@ -62,6 +64,13 @@ public class Form extends Block
 	return this;
     }
     
+    /* ------------------------------------------------------------ */
+    /** Set the form encoding type
+     */
+    public Form encoding(String encoding){
+	attribute("ENCTYPE", encoding);
+	return this;
+    }
     /* ----------------------------------------------------------------- */
     public void write(Writer out)
 	 throws IOException
