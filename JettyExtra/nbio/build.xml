@@ -100,6 +100,17 @@ demo        - Runs the demo web application.
     </javadoc>
   </target>
 
+  <target name="demo" depends="nbio.jar" >
+    <java classname="org.mortbay.jetty.Server"
+          classpath="${jetty.nbio.jar}:${classpath}"
+          fork="yes"
+          failonerror="yes"
+          >
+       <jvmarg line="-Djetty.home=${jetty} -Djetty.log=${jetty}/logs" />
+       <arg line="${etc}/nbio.xml" />
+    </java>
+  </target>
+
   <target name="all" depends="nbio.jar,javadoc"/>
 
 </project>

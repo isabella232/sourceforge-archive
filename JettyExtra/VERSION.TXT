@@ -1,8 +1,10 @@
 Jetty3Extra Versions
 --------------------
 
+Jetty3Extra-0.0.7 - 03 Sep 2001
   + Convert to org.mortbay packages
   + Support SocketListener low resource handling
+  + Added nbio non blocking support.
 
 Jetty3Extra-0.0.6 - 22 Aug 2001
   + Jetty statistics support
