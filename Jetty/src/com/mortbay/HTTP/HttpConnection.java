@@ -213,7 +213,21 @@ public class HttpConnection
         try
         {       
             Code.debug("Wait for request header...");
-            _request.readHeader(getInputStream());
+
+            try
+            {
+                _request.readHeader(getInputStream());
+            }
+            catch(HttpException e)
+            {
+                throw e;
+            }
+            catch(IOException e)
+            {
+                Code.ignore(e);
+                return false;
+            }
+            
             if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
                 throw new HttpException(_response.__400_Bad_Request);
             if (Code.debug())

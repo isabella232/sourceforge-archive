@@ -13,13 +13,14 @@ cleanup done) and the HTTP package. Work to date in the HTTP package
 has concentrated on RFC2616 compliance, performance and testing.  
 See the VERSION.TXT file for more detail.
 
+
 Environment
 ===========
 Development has been done in JDK1.1 with the 1.2 Collection classes.
-The compiled classes are currently kept in the src directory, so
-the following CLASSPATH is required (or the non unix equivalent):
+The compiled classes excluding test harnesses are put into lib/jetty3.jar,
+so the following CLASSPATH is required (or the non unix equivalent):
 
-  CLASSPATH=$JETTY3_HOME/src:$JETTY3_HOME/lib/collections.jar
+  CLASSPATH=$JETTY3_HOME/lib/jetty3.jar:$JETTY3_HOME/lib/collections.jar
 
 
 Test Harnesses
@@ -30,6 +31,12 @@ harnesses can be run with
 
   java com.mortbay.Util.TestHarness
   java com.mortbay.HTTP.TestHarness
+
+Note that the test harnesses are not in the jar file, so you will need
+to build all the source and run with the following classpath(or the non 
+unix equivalent):
+
+  CLASSPATH=$JETTY3_HOME/src:$JETTY3_HOME/lib/collections.jar
 
 
 WWW Server

@@ -12,7 +12,7 @@ rall: all
 #JAVAOPTIONS := 
 #JAVACOPTIONS :=
 TESTS := 
-EXCLUDECLASSES := 
+EXCLUDECLASSES := TestTEHandler.class 
 ROOTNAME := com
 BINFILES := 
 CFGFILES := 
