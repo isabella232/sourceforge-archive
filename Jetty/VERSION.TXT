@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-5.0.beta0 
  + Removed support for HTTP trailers
  + PathMap uses own Map.Entry impl for IBM JVMs 
  + Use ${jetty.home}/work or WEB-INF/work for temp directories if present
@@ -9,12 +10,20 @@ Jetty Versions
  + Fixed init race in HttpFields cache
  + Allow per listener handlers
  + Added MsieSslHandler to handle browsers that don't grok persistent SSL (msie 5)
-
-Jetty-5.0.beta0 
- + respect content length when decoding form content.
+ + Respect content length when decoding form content.
  + JBoss integration uses writer rather than stream for XML config handling
  + Expire pages that contain set-cookie as per RFC2109 recommendation
  + Updated jasper to 5.0.14beta
+ + Removed the CMR/CMP distributed session implementation
+
+Jetty-4.2.15rc0
+ + PathMap uses own Map.Entry impl for IBM JVMs 
+ + Race in HttpFields cache
+ + Use ${jetty.home}/work or WEB-INF/work for temp directories if present
+ + Protect ThreadPool.run() from interrupted exceptions
+ + Added org.mortbay.http.ErrorHandler for error pages.
+ + JsseListener checks UserAgent for browsers that can't grok persistent SSL (msie5)
+ + Removed the CMR/CMP distributed session implementation
 
 Jetty-4.2.14 - 04 November 2003
  + respect content length when decoding form content.
