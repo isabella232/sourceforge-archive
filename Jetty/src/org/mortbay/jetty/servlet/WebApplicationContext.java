@@ -193,15 +193,14 @@ public class WebApplicationContext extends ServletHttpContext
         if (_webAppHandler==null)
         {
             _webAppHandler=(WebApplicationHandler)getHandler(WebApplicationHandler.class);
-
             if (_webAppHandler==null)
             {
                 if (getHandler(ServletHandler.class)!=null)
                     throw new IllegalStateException("Cannot have ServletHandler in WebApplicationContext");
                 _webAppHandler=new WebApplicationHandler();
                 addHandler(_webAppHandler);
-                setServletHandler(_webAppHandler);
             }
+            setServletHandler(_webAppHandler);
         }
         return _webAppHandler;
     }

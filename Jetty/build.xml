@@ -163,6 +163,10 @@ Other targets:
     <delete file="${servlet.jar}" quiet="true"/>
     <delete file="${jasper.jar}" quiet="true"/>
     <delete file="${etc}/demo.mlet" quiet="true"/>
+    <delete file="${etc}/webdefault.xml" quiet="true"/>
+    <delete file="${demo.webapps}/jetty/LICENSE.html" quiet="true"/>
+    <delete file="${demo.webapps}/jetty/versions.txt" quiet="true"/>
+
     <delete quiet="true">
       <fileset dir="${logs}">
         <include name="**/*.log"/>
