@@ -22,6 +22,8 @@ Jetty-4.2.4rc0
  + Character encoding handling for GET requests.
  + Removed container transfer encoding handling.
  + Improved ProxyHandler to the point is works well for non SSL.
+ + Improved setBufferSize handling
+
 
 Jetty-4.2.3 - 2 December 2002
  + Removed aggressive threadpool shrinkage to avoid deadlock on SMP machines. 
