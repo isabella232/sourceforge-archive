@@ -85,3 +85,21 @@ A
         font-weight: none;
         text-decoration: none;
 }
+
+P.study
+{
+        font-family: sans-serif;
+        color: black;
+        text-align: left;
+        border-style: dotted;
+        border-bottom-width: 3px;
+        border-top-width: 3px;
+        border-left-width: 3px;
+        border-right-width: 3px;
+        border-color: blue;
+	padding-top: 6px;
+	padding-bottom: 6px;
+	padding-left: 6px;
+	padding-right: 6px;
+}
+

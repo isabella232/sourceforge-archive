@@ -357,7 +357,7 @@ public class JettyPage extends Page
         
         unnest();
         
-        add("&nbsp;<P>&nbsp;<P><Center><font size=-4 color=\"#606CC0\">Copyright 2003 Mort Bay Consulting.</FONT></Center>");
+        add("&nbsp;<P>&nbsp;<P><Center><font size=-4 color=\"#606CC0\">Copyright 2004 Mort Bay Consulting.</FONT></Center>");
     }
 
     /* ------------------------------------------------------------ */
