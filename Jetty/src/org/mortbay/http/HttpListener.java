@@ -37,11 +37,11 @@ public interface HttpListener extends LifeCycle
 
     public abstract boolean isIntegral(HttpConnection connection);
     public abstract String getIntegralScheme();
-    public abstract int getIntegralPort();
+    public abstract int    getIntegralPort();
     
-    public abstract boolean isConfifidential(HttpConnection connection);
+    public abstract boolean isConfidential(HttpConnection connection);
     public abstract String getConfidentialScheme();
-    public abstract int getConfidentialPort();
+    public abstract int    getConfidentialPort();
     
 }
 

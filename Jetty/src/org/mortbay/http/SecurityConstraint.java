@@ -347,7 +347,7 @@ public class SecurityConstraint
                       return -1;
 
                   case SecurityConstraint.DC_CONFIDENTIAL:
-                      if (listener.isConfifidential(connection))
+                      if (listener.isConfidential(connection))
                           break;
 
                       if (listener.getConfidentialPort()>0)

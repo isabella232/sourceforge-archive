@@ -117,7 +117,7 @@ public abstract class JsseListener extends SocketListener
     }
     
     /* ------------------------------------------------------------ */
-    public boolean isConfifidential(HttpConnection connection)
+    public boolean isConfidential(HttpConnection connection)
     {
         return true;
     }

@@ -266,7 +266,7 @@ public class SocketListener
     }
     
     /* ------------------------------------------------------------ */
-    public boolean isConfifidential(HttpConnection connection)
+    public boolean isConfidential(HttpConnection connection)
     {
         return false;
     }
@@ -314,15 +314,9 @@ public class SocketListener
     }
 
     /* ------------------------------------------------------------ */
-    public void setConfidentialPort(int confientialPort)
+    public void setConfidentialPort(int confidentialPort)
     {
-        _confidentialPort = confientialPort;
+        _confidentialPort = confidentialPort;
     }
     
 }
-
-
-
-
-
-
