@@ -43,8 +43,6 @@ public class SessionDump extends HttpServlet
 	String action = request.getParameter("Action");
 	String name =  request.getParameter("Name");
 	String value =  request.getParameter("Value");
-
-	Code.warning(action+" : "+name+" == "+value);
 	
 	if (action.equals("New Session"))
 	    session = request.getSession(true);

@@ -42,9 +42,7 @@ public class Dump extends HttpServlet
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest sreq, HttpServletResponse sres) 
 	throws ServletException, IOException
-    {
-	getServletContext().log("Dump "+sreq.getRequestURI());
-	
+    {	
         sres.setContentType("text/html");
         OutputStream out = sres.getOutputStream();
 	PrintWriter pout = new PrintWriter(out);

@@ -15,6 +15,7 @@ Release 2.1.Beta0 - 30 May 1999
     servlet to be initialized when loaded.
   + LogHandler changed to support only a single outfile and optional
     append.
+  + Included contributed com.mortbay.Jetty.StressTester class
 
 Release 2.1.Alpha1 - 7 May 1999
   + ServletHolder can auto reload servlets

@@ -2,13 +2,11 @@ Things to do before final release of Jetty 2.2.0:
 
  + Portable make file
  + Jrun configuratin support
- + Open log files in append mode.
  + Handle spaces in request paths
  + Virtual Hosts
  + Reload servlets on demand
  + Comments in config files
  + Minimal demo config file
- + Fast,faster & fastest example config files
  + Better info and feature description pages
  + Documentation
 

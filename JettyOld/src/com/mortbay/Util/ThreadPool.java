@@ -99,11 +99,14 @@ public class ThreadPool
      */
     class PoolThread extends Thread
     {
+	String _nameN;
+	
 	/* ------------------------------------------------------------ */
 	public PoolThread()
 	{
 	    super();
-	    super.setName(_name+"-"+_nThreads);
+	    _nameN=_name+"-"+_nThreads+"/";
+	    super.setName(_nameN);
 	    Code.debug("New ",this);
 	    setDaemon(true);
 	    this.start();
@@ -121,7 +124,8 @@ public class ThreadPool
 		    Code.debug("Starting PoolThread: ",this);
 		    _nThreads++;
 		}
-		
+
+		int runs=0;
 		while(true)
 		{
 		    Runnable job =(_maxIdleTimeMs>0)
@@ -130,6 +134,7 @@ public class ThreadPool
 		    if (job == null)
 			break;
 		    
+		    super.setName(_nameN+runs++);
 		    if (Code.verbose())
 			Code.debug("Thread: ",this," Handling ",job);
 		    job.run();

@@ -17,6 +17,7 @@ UUFILES := \
 INSTALLPATH := .
 INSTALLFILES := \
 	$(wildcard etc/*.prp) \
+	$(wildcard etc/*.url) \
         $(wildcard servlets/*.class) \
 	$(wildcard FileBase/Images/*.gif) \
 	$(wildcard FileBase/*.txt) \

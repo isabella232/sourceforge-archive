@@ -77,6 +77,7 @@ included with the release:
 
   JettyServer.prp 
     A template file for configuration files
+    [ Not updated yet, still a 2.1 file ]
 
   JettyDemo.prp
     The configuration files for the Jetty demonstration.
@@ -91,6 +92,7 @@ included with the release:
     This configuration file has the same semantic content as the
     the collection of JettyDemo.prp files, but uses the wildcard
     facilities of PropertyTree to abbriviate to a minimal file.
+    [ Not included yet ]
 
   JettyFastDump.prp
     A configuration for the Dump and dynamically loaded servlets 
