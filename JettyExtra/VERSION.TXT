@@ -1,6 +1,8 @@
 JettyExtra Versions
 --------------------
 
+  + Merged HttpContext
+
 JettyExtra-4.1.D0
   + Handle other ModelMBean implementations better.
   + JSSE listener MBeans

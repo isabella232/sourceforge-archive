@@ -56,7 +56,6 @@ public class HttpContextMBean extends LifeCycleMBean
 
         defineAttribute("virtualHosts");
         defineAttribute("contextPath");
-        defineAttribute("mimeMap");
         
         defineAttribute("handlers",false);
 
@@ -65,10 +64,27 @@ public class HttpContextMBean extends LifeCycleMBean
         
         defineAttribute("realm");
         defineAttribute("realmName");
+        
         defineAttribute("redirectNullPath");
         defineAttribute("resourceBase");
-        defineAttribute("servingResources");
+        defineAttribute("maxCachedFileSize");
+        defineAttribute("maxCacheSize");
+        defineAttribute("dirAllowed");
+        defineOperation("getResource",
+                        new String[] {STRING},
+                        IMPACT_ACTION);
         
+        defineAttribute("welcomeFiles");
+        defineOperation("addWelcomeFile",
+                        new String[] {STRING},
+                        IMPACT_INFO);
+        defineOperation("removeWelcomeFile",
+                        new String[] {STRING},
+                        IMPACT_INFO);
+        
+        defineAttribute("mimeMap");
+        defineOperation("setMimeMapping",new String[] {STRING,STRING},IMPACT_ACTION);
+
         defineAttribute("statsOn");
         defineAttribute("statsOnMs");
         defineOperation("statsReset",IMPACT_ACTION);
@@ -104,7 +120,6 @@ public class HttpContextMBean extends LifeCycleMBean
         defineOperation("addHandler",new String[] {INT,"org.mortbay.http.HttpHandler"},IMPACT_ACTION);
         defineOperation("removeHandler",new String[] {INT},IMPACT_ACTION);
         
-        defineOperation("setMimeMapping",new String[] {STRING,STRING},IMPACT_ACTION);
 
         _httpContext=(HttpContext)getManagedResource();
     }
