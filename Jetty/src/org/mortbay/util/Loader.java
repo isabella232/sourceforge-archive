@@ -38,12 +38,44 @@ public class Loader
     public static Class loadClass(Class loadClass,String name)
         throws ClassNotFoundException
     {
+        ClassNotFoundException cnfe=null;
         ClassLoader loader=Thread.currentThread().getContextClassLoader();
-        if (loader==null)
-            loader=loadClass.getClassLoader();
-        if (loader==null)
+        if (loader!=null)
+        {
+            try
+            {
+               return loader.loadClass(name);
+            }
+            catch (ClassNotFoundException e)
+            {
+               cnfe=e;
+            }
+        }
+
+        loader=loadClass.getClassLoader();
+        if (loader!=null)
+        {
+            try
+            {
+               return loader.loadClass(name);
+            }
+            catch (ClassNotFoundException e)
+            {
+               if(cnfe==null)cnfe=e;
+            }
+        }
+
+
+       try
+       {
             return Class.forName(name);
-        return loader.loadClass(name);
+       }
+       catch (ClassNotFoundException e)
+       {
+            if(cnfe==null)cnfe=e;
+	    throw cnfe;
+       }
+
     }
 }
 
