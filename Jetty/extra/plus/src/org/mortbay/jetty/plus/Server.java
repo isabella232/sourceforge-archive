@@ -1,4 +1,4 @@
-// ========================================================================
+/// ========================================================================
 // Copyright (c) 2002 Mort Bay Consulting (Australia) Pty. Ltd.
 // $Id$
 // ========================================================================
@@ -107,24 +107,27 @@ public class Server extends org.mortbay.jetty.Server
     public synchronized void start()
         throws MultiException
     {
-       MultiException mex = new MultiException();
-
-       //iterate over all the services and start them in order
-       Iterator itor = _serviceList.iterator();
-       while (itor.hasNext())
-       {
-           try
-           {
-               ((Service)itor.next()).start();
-           }
-           catch (Exception e)
-           {
-               mex.add(e);
-           }
-       }
-
-       mex.ifExceptionThrowMulti();
-
+        
+        if (_serviceList != null)
+        {
+            MultiException mex = new MultiException();
+            
+            //iterate over all the services and start them in order
+            Iterator itor = _serviceList.iterator();
+            while (itor.hasNext())
+            {
+                try
+                {
+                    ((Service)itor.next()).start();
+                }
+                catch (Exception e)
+                {
+                    mex.add(e);
+                }
+            }
+            
+            mex.ifExceptionThrowMulti();
+        }
 
 
        // Now start the rest of Jetty
