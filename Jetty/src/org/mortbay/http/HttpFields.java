@@ -423,7 +423,7 @@ public class HttpFields
         public String toString()
         {
             return (_prev==null?"[":("["+_prev.getDisplayName()+"<- "))+
-                getDisplayName()+__COLON+_value+
+                getDisplayName()+": "+_value+
                 (_next==null?"]":(" ->"+_next.getDisplayName())+"]");
         }
     }

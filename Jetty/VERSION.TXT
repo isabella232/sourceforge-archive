@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Allow WebApplicationHandler to be used with other handlers.
+
 Jetty-4.1.0RC2 - 20 August 2002
  + Conveninace setClassLoaderJava2Compliant method.
  + Clear interrupted status in ThreadPool
