@@ -502,7 +502,8 @@ public abstract class AbstractSessionManager implements SessionManager
         public Enumeration getAttributeNames()
         {
             if (_invalid) throw new IllegalStateException();
-            return Collections.enumeration(_values.keySet());
+	    ArrayList names = new ArrayList(_values.keySet());
+	    return Collections.enumeration(names);
         }
 
         /* ------------------------------------------------------------ */

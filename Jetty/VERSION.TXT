@@ -3,6 +3,7 @@ Jetty Versions
 
  + Force security disassociation.
  + Better recycling of HttpRequests.
+ + Protect session.getAttributeNames from concurrent modifications.
 
 Jetty-4.0.2 - 6 June 2002
  + Fixed web.dtd references.
