@@ -411,7 +411,7 @@ fi
 #####################################################
 # Are we running on Windows? Could be, with Cygwin/NT.
 #####################################################
-case "'uname'" in
+case "`uname`" in
 CYGWIN*) PATH_SEPARATOR=";";;
 *) PATH_SEPARATOR=":";;
 esac
