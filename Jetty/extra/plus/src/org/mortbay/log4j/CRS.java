@@ -29,23 +29,25 @@ import org.apache.log4j.spi.RootCategory;
 public class CRS implements RepositorySelector 
 {
     private static Hashtable __repositoryMap = new Hashtable();
-
+    
     public synchronized LoggerRepository getLoggerRepository() 
     {
-	ClassLoader cl = Thread.currentThread().getContextClassLoader();
-	Hierarchy hierarchy = (Hierarchy) __repositoryMap.get(cl);
-	if(hierarchy == null) 
-	{
-	    hierarchy = new Hierarchy(new RootCategory((Level) Level.DEBUG));
-	    __repositoryMap.put(cl, hierarchy);
-	} 
-	return hierarchy;
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        
+        Hierarchy hierarchy = (Hierarchy) __repositoryMap.get(cl);
+        if(hierarchy == null) 
+        {
+            
+            hierarchy = new Hierarchy(new RootCategory((Level) Level.DEBUG));
+            __repositoryMap.put(cl, hierarchy);
+        } 
+        return hierarchy;
     }
-
+    
     public static void remove(ClassLoader cl) 
     {
-	if (cl!=null)
-	    __repositoryMap.remove(cl); 
+        if (cl!=null)
+            __repositoryMap.remove(cl); 
     } 
 }
 
