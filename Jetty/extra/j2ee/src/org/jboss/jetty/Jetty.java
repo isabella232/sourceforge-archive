@@ -364,6 +364,7 @@ public class Jetty extends org.mortbay.jetty.Server
             {
                 app.stop(app.getStopGracefully());
                 removeContext(app);
+		app.destroy();
                 app = null;
 
                 _log.info("Successfully undeployed " + warUrl);
@@ -372,9 +373,12 @@ public class Jetty extends org.mortbay.jetty.Server
             {
                 throw new DeploymentException(e);
             }
+	    finally
+	    {
+	       _deployed.remove(warUrl);
+	    }
         }
 
-        _deployed.remove(warUrl);
     }
 
     public boolean isDeployed(String warUrl)
