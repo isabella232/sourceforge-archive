@@ -302,9 +302,13 @@ public class JettyPage extends Page
                  }
                  
                  menu.cell().add("<BR>");
+                 
              }
         }
 
+        if (__realSite)
+            _table.add("<A HREF=\"http://www.inetu.net\"><IMG SRC=\""+_context+"/images/inetu.gif\" WIDTH=121 HEIGHT=52 BORDER=0 ALT=\"InetU\"><br/>Managed Hosting by INetU</A><P>\n");
+       
         _table.newCell();
         _table.cell().top();
         _table.cell().left();
@@ -341,9 +345,6 @@ public class JettyPage extends Page
 
             
             _table.add("<A HREF=\"http://www.coredevelopers.net\"><IMG SRC=\""+_context+"/images/coredev.gif\" WIDTH=81 HEIGHT=81 BORDER=0 ALT=\"CoreDev\"></A><P>\n");
-            _table.add("<A HREF=\"http://sourceforge.net/projects/jboss/\"><IMG SRC=\""+_context+"/images/jboss.gif\" WIDTH=134 HEIGHT=60 BORDER=0 ALT=\"JBoss\"></A><P>\n");
-            
-            _table.add("<A HREF=\"http://www.inetu.net\"><IMG SRC=\""+_context+"/images/inetu.gif\" WIDTH=121 HEIGHT=52 BORDER=0 ALT=\"InetU\"></A><P>\n");
             _table.add("<A HREF=\"http://sourceforge.net/projects/jetty/\">");
             if (__realSite)
                 _table.add("<IMG src=\"http://sourceforge.net/sflogo.php?group_id=7322\" width=\"88\" height=\"31\" border=\"0\" alt=\"SourceForge\">");
