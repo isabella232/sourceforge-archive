@@ -1,6 +1,9 @@
 JettyExtra Versions
 --------------------
 
+JettyExtra-4.0.1
+  + Updated HttpListenerMBean for SSL redirection
+
 JettyExtra-4.0.0
   + Fixed tidy target
   
