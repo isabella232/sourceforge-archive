@@ -27,6 +27,13 @@ public class
 {
   protected static final Logger _log=Logger.getLogger(J2EEWebApplicationContext.class);
 
+  //----------------------------------------------------------------------------
+  // DistributedHttpSession support
+  //----------------------------------------------------------------------------
+  protected boolean _distributable=false;
+  protected Manager _distributableSessionManager;
+
+  //----------------------------------------------------------------------------
   public J2EEWebApplicationContext(String warUrl)
     throws IOException
     {
@@ -34,24 +41,20 @@ public class
     }
 
   //----------------------------------------------------------------------------
-  // DistributedHttpSession support
-  //----------------------------------------------------------------------------
-
-  protected boolean _distributable=false;
-
   public boolean getDistributable()
     {
       return _distributable;
     }
 
+  //----------------------------------------------------------------------------
   public void setDistributable(boolean distributable)
     {
       if (_log.isDebugEnabled()) _log.debug("setDistributable "+distributable);
       _distributable=distributable;
     }
 
-  protected Manager _distributableSessionManager;
 
+  //----------------------------------------------------------------------------
   public void setDistributableSessionManager(Manager manager)
     {
       //      _log.info("setDistributableSessionManager "+manager);
@@ -59,6 +62,7 @@ public class
       _distributableSessionManager.setContext(this);
     }
 
+  //----------------------------------------------------------------------------
   public Manager getDistributableSessionManager()
     {
       return _distributableSessionManager;
@@ -72,5 +76,12 @@ public class
 	setStatsOn(true);
 
       super.doStart();
+  }
+
+  //----------------------------------------------------------------------------
+  public void destroy()
+  {
+      super.destroy();
+      _distributableSessionManager=null;
   }
 }

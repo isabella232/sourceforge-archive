@@ -174,7 +174,6 @@ public class ServletHttpContext extends HttpContext
     {
         return "Servlet"+super.toString(); 
     }
-    
 
     /* ------------------------------------------------------------ */
     /* send servlet response error
@@ -188,5 +187,14 @@ public class ServletHttpContext extends HttpContext
             ((HttpServletResponse)wrapper).sendError(code,msg);
         else
             super.sendError(response,code,msg);
+    }
+
+    /* ------------------------------------------------------------ */
+    public void destroy()
+    {
+        super.destroy();
+        if (_localeEncodingMap!=null)
+            _localeEncodingMap.clear();
+        _localeEncodingMap=null;
     }
 }

@@ -568,9 +568,30 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
             _errorPages.clear();
         _errorPages= null;
 
-        _webApp= null;
+        _webApp=null;
+        _webInf=null;
         
         _configurations=null;
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    public void destroy()
+    {
+        super.destroy();
+        if (isStarted())
+            throw new IllegalStateException();
+
+        _defaultsDescriptor=null;
+        _war=null;
+        _configurationClassNames=null;
+        if (_resourceAliases!=null)
+            _resourceAliases.clear();
+        _resourceAliases=null;
+        _contextListeners=null;
+        if (_errorPages!=null)
+            _errorPages.clear();
+        _errorPages=null;
     }
 
     /* ------------------------------------------------------------ */

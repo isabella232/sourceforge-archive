@@ -91,11 +91,11 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
     /* ------------------------------------------------------------ */
     public void destroy()
     {
+	super.destroy();
 	_jetty=null;
 	_descriptorParser=null;
 	_webApp=null;
 	_subjAttrName=null;
-	super.destroy();
     }
 
     /* ------------------------------------------------------------ */
