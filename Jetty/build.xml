@@ -488,7 +488,7 @@
           description="Build the distribution archives">
     <mkdir dir="${dist}"/>
     
-    <zip destfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}.tar.gz" >
+    <zip destfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}.zip" >
       <zipfileset 
        dir="${basedir}"
        prefix="jetty-${RELEASE.MAJOR.MINOR}/"> 
