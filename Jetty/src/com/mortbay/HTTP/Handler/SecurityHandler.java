@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Collection;
+import java.util.Iterator;
 
 
 /* ------------------------------------------------------------ */
@@ -35,13 +37,16 @@ import java.util.Map;
 public class SecurityHandler extends NullHandler
 {
     public final static String __BASIC_AUTH="BASIC";
-    
+    public final static String __FORM_AUTH="FORM";
+
     PathMap _constraintMap=new PathMap();
     String _authMethod=__BASIC_AUTH;
     Map _authRealmMap;
     String _realmName ;
     UserRealm _realm ;
-    
+    String _formLoginPage;
+    String _formErrorPage;
+
     /* ------------------------------------------------------------ */
     public UserRealm getUserRealm()
     {        
@@ -69,11 +74,39 @@ public class SecurityHandler extends NullHandler
     /* ------------------------------------------------------------ */
     public void setAuthMethod(String method)
     {
-        if (!__BASIC_AUTH.equals(method))
+        if (!__BASIC_AUTH.equals(method) && !__FORM_AUTH.equals(method))
             throw new IllegalArgumentException("Not supported: "+method);
         _authMethod = method;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public String getLoginPage()
+    {
+      return _formLoginPage;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setLoginPage(String page)
+    {
+      if ( ! page.startsWith("/") )
+        page = "/" + page;
+      _formLoginPage = page;
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getErrorPage()
+    {
+      return _formErrorPage;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setErrorPage(String page)
+    {
+      if ( ! page.startsWith("/") )
+        page = "/" + page;
+      _formErrorPage = page;
+    }
+
     /* ------------------------------------------------------------ */
     public void addSecurityConstraint(String pathSpec,
                                       SecurityConstraint sc)
@@ -190,6 +223,8 @@ public class SecurityHandler extends NullHandler
         
         if (__BASIC_AUTH.equals(_authMethod))
             userAuth=basicAuthenticated(request,response);
+        else if (__FORM_AUTH.equals(_authMethod))
+            userAuth=formAuthenticated(request, response);
         else
         {
             response.setField(HttpFields.__WwwAuthenticate,
@@ -222,6 +257,10 @@ public class SecurityHandler extends NullHandler
                 response.setField(HttpFields.__WwwAuthenticate,
                                   "basic realm=\""+_realmName+'"');
                 response.sendError(HttpResponse.__401_Unauthorized);
+            }
+            else if (__FORM_AUTH.equals(_authMethod))
+            {
+              response.sendRedirect(_formErrorPage);
             }
             else
                 response.sendError(HttpResponse.__403_Forbidden);
@@ -274,6 +313,65 @@ public class SecurityHandler extends NullHandler
         response.sendError(HttpResponse.__401_Unauthorized);
         return false;
     }
+
+     /* ------------------------------------------------------------ */
+     /**
+     * @return
+     */
+    private boolean formAuthenticated(HttpRequest request,
+                                       HttpResponse response)
+        throws IOException
+    {
+        /* Check the session object for login info. If user is
+         * already logged in then just return true;
+         */
+
+        String uri = request.getURI().toString();
+        /*** STORE ORIGINAL REQUEST URI SOMEWHERE... *******/
+
+        if ( uri.substring(uri.lastIndexOf("/")+1).equals("j_security_check") )
+        {
+          String username = request.getParameter("j_username");
+          String password = request.getParameter("j_password");
+
+          if (_realm!=null)
+          {
+                  UserPrincipal user = _realm.getUser(username,request);
+                  if (user!=null && user.authenticate(password))
+                  {
+                      request.setAttribute(HttpRequest.__AuthType,"FORM");
+                      request.setAttribute(HttpRequest.__AuthUser,username);
+                      request.setAttribute(UserPrincipal.__ATTR,user);
+
+                      // Store user login info in session object
+
+                      // response.sendRedirect( /**** WHERE IS THE OLD URI STORED? **********/);
+
+                      return true;
+                  }
+
+                  Code.warning("AUTH FAILURE: user "+username);
+          }
+        }
+
+        Code.debug("Unauthorized in "+_realmName);
+
+        // Make sure that we have both login and error page set
+        // before handling any form login requests
+        if ( _formLoginPage == null || _formLoginPage.equals("")
+            || _formErrorPage == null || _formErrorPage.equals("") )
+        {
+          response.sendError(HttpResponse.__404_Not_Found);
+          Code.debug("Form login and/or error page not set correctly");
+        }
+
+        // OK, user has not logged in. Send login page.
+        response.sendRedirect(_formLoginPage);
+
+        return false;
+    }
+
+
 
     /* ------------------------------------------------------------ */
     /** 

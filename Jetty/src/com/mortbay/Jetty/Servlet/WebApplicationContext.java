@@ -709,6 +709,17 @@ public class WebApplicationContext extends ServletHandlerContext
         XmlParser.Node name=node.get("realm-name");
         if (name!=null)
             sh.setRealmName(name.toString(false,true));
+
+        XmlParser.Node formConfig = node.get("form-login-config");
+        if(formConfig != null)
+        {
+          XmlParser.Node loginPage = formConfig.get("form-login-page");
+          if (loginPage != null)
+            sh.setLoginPage(loginPage.toString(false,true));
+          XmlParser.Node errorPage = formConfig.get("form-error-page");
+          if (errorPage != null)
+            sh.setErrorPage(errorPage.toString(false,true));
+        }
     }
     
     /* ------------------------------------------------------------ */
