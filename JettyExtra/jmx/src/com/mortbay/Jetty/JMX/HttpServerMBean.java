@@ -188,7 +188,7 @@ public class HttpServerMBean extends LifeCycleMBean
                 ModelMBeanImpl mbean =
                     (ModelMBeanImpl)_mbeanMap.remove(o);
                 if (mbean!=null)
-                    getMBeanServer().unregisterMBean(mbean.getObjectName());
+                    mbean.getMBeanServer().unregisterMBean(mbean.getObjectName());
             }
             catch(Exception e)
             {
