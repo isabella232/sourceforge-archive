@@ -430,7 +430,11 @@ public class HttpContext implements LifeCycle
                 Log.event("Created temp dir "+_tmpDir+" for "+this);
             }
             else if (!_tmpDir.isDirectory() || !_tmpDir.canWrite())
+	    {
                 _tmpDir=null;
+		Code.warning(this+" will use a default temp dir because "+
+			     _tmpDir+" is not a writeable directory.");
+	    }	
             else
             {
                 _tmpDir.deleteOnExit();
