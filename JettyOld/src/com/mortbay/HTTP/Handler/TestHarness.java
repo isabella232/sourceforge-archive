@@ -18,7 +18,7 @@ public class TestHarness
             Class c;
             c=loader.loadClass("java.lang.String",true);
             test.checkEquals(c,java.lang.String.class,"System class");
-            c=loader.loadClass("org.gjt.jsp.JSPClassLoader",true);
+            c=loader.loadClass("org.gjt.jsp.JspClassLoader",true);
             try {
                 c=null;
                 c=loader.loadClass("other.path.fubar",true);
