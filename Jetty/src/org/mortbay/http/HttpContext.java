@@ -106,7 +106,7 @@ public class HttpContext implements LifeCycle
     private Map _resourceAliases;
     private Map _errorPages;
     private UserRealm _userRealm;
-    private PermissionCollection _permissions;    
+    private PermissionCollection _permissions;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -214,7 +214,7 @@ public class HttpContext implements LifeCycle
     {
         _attributes.remove(name);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Register a host mapping for this context.
      * This method is a shorthand for
@@ -1275,6 +1275,17 @@ public class HttpContext implements LifeCycle
         if (!_started)
             return false;
         
+        if (_statsOn)
+        {
+            synchronized(this)
+            {
+                _requests++;
+                _requestsActive++;
+                if (_requestsActive>_requestsActiveMax)
+                    _requestsActiveMax=_requestsActive;
+            }
+        }
+        
         String pathInContext = request.getPath();
         
         String contextPath=null;
@@ -1409,11 +1420,14 @@ public class HttpContext implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    /** Start all handlers then listeners.
-     */
     public synchronized void start()
         throws Exception
     {
+        if (isStarted())
+            return;
+
+        statsReset();
+        
         if (_httpServer==null)
             throw new IllegalStateException("No server for "+this);
 
@@ -1468,45 +1482,69 @@ public class HttpContext implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    /** Start all handlers then listeners.
-     */
     public synchronized boolean isStarted()
     {
         return _started;
     }
     
     /* ------------------------------------------------------------ */
-    /** Stop all listeners then handlers.
-     * @exception InterruptedException If interrupted, stop may not have
-     * been called on everything.
+    /** Stop the context.
+     * @param graceful If true and statistics are on, then this method will wait
+     * for requestsActive to go to zero before calling stop()
      */
-    public synchronized void stop()
+    public void stop(boolean graceful)
         throws InterruptedException
     {
         _started=false;
-        Thread thread = Thread.currentThread();
-        ClassLoader lastContextLoader=thread.getContextClassLoader();
-        try
+        
+        // wait for all requests to complete.
+        while (graceful && _statsOn && _requestsActive>0 && _httpServer!=null)
+            try {Thread.sleep(100);}
+            catch (InterruptedException e){throw e;}
+            catch (Exception e){Code.ignore(e);}
+
+        stop();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Stop the context.
+     */
+    public void stop()
+        throws InterruptedException
+    {
+        _started=false;
+
+        if (_httpServer==null)
+            throw new InterruptedException("Destroy called");
+
+        synchronized(this)
         {
-            if (_loader!=null)
-                thread.setContextClassLoader(_loader);
-            Iterator handlers = _handlers.iterator();
-            while(handlers.hasNext())
+            // Notify the container for the stop
+            Thread thread = Thread.currentThread();
+            ClassLoader lastContextLoader=thread.getContextClassLoader();
+            try
             {
-                HttpHandler handler=(HttpHandler)handlers.next();
-                if (handler.isStarted())
+                if (_loader!=null)
+                    thread.setContextClassLoader(_loader);
+                Iterator handlers = _handlers.iterator();
+                while(handlers.hasNext())
                 {
-                    try{handler.stop();}
-                    catch(Exception e){Code.warning(e);}
+                    HttpHandler handler=(HttpHandler)handlers.next();
+                    if (handler.isStarted())
+                    {
+                        try{handler.stop();}
+                        catch(Exception e){Code.warning(e);}
+                    }
                 }
             }
+            finally
+            {
+                thread.setContextClassLoader(lastContextLoader);
+            }
+            _loader=null;
         }
-        finally
-        {
-            thread.setContextClassLoader(lastContextLoader);
-        }
-        _loader=null;
     }
+    
 
     /* ------------------------------------------------------------ */
     /** Destroy a context.
@@ -1555,6 +1593,8 @@ public class HttpContext implements LifeCycle
     /* ------------------------------------------------------------ */
     private boolean _statsOn=false;
     int _requests;
+    int _requestsActive;
+    int _requestsActiveMax;
     int _responses1xx; // Informal
     int _responses2xx; // Success
     int _responses3xx; // Redirection
@@ -1569,6 +1609,7 @@ public class HttpContext implements LifeCycle
     {
         Log.event("setStatsOn "+on+" for "+this);
         _statsOn=on;
+        statsReset();
     }
 
     /* ------------------------------------------------------------ */
@@ -1578,6 +1619,8 @@ public class HttpContext implements LifeCycle
     public synchronized void statsReset()
     {
          _requests=0;
+         _requestsActive=0;
+         _requestsActiveMax=0;
          _responses1xx=0;
          _responses2xx=0;
          _responses3xx=0;
@@ -1593,6 +1636,20 @@ public class HttpContext implements LifeCycle
      * is undefined. 
      */
     public int getRequests() {return _requests;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Number of requests currently active.
+     * Undefined if setStatsOn(false).
+     */
+    public int getRequestsActive() {return _requestsActive;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Maximum number of active requests
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getRequestsActiveMax() {return _requestsActiveMax;}
 
     /* ------------------------------------------------------------ */
     /** 
@@ -1657,6 +1714,7 @@ public class HttpContext implements LifeCycle
         
     /* ------------------------------------------------------------ */
     /** Log a request and response.
+     * Statistics are also collected by this method.
      * @param request 
      * @param response 
      */
@@ -1668,7 +1726,9 @@ public class HttpContext implements LifeCycle
         {
             synchronized(this)
             {
-                _requests++;
+                if (--_requestsActive<0)
+                    _requestsActive=0;
+                
                 if (response!=null)
                 {
                     switch(response.getStatus()/100)

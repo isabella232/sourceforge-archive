@@ -179,6 +179,9 @@ public class PathMap extends HashMap
     {
         Map.Entry entry;
 
+        if (path==null)
+            return null;
+        
         int l=path.indexOf(';');
         if (l<0)
         {
@@ -228,6 +231,9 @@ public class PathMap extends HashMap
     {        
         Map.Entry entry;
         LazyList entries=null;
+
+        if (path==null)
+            return LazyList.getList(entries);
         
         int l=path.indexOf(';');
         if (l<0)

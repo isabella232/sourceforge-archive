@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Support graceful stopping of context and server.
  + Fixed "null" return from getRealPath
  + OutputStreamLogSink config improvements
  + Updated jasper to 16 May snapshot

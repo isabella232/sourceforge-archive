@@ -163,6 +163,8 @@ public class HttpServer implements LifeCycle
     {
         Log.event("Starting "+Version.__VersionImpl);
         MultiException mex = new MultiException();
+
+        statsReset();
         
         if (Code.verbose(99))
         {
@@ -228,10 +230,22 @@ public class HttpServer implements LifeCycle
     
     /* ------------------------------------------------------------ */
     /** Stop all listeners then handlers.
+     * Equivalent to stop(false);
      * @exception InterruptedException If interrupted, stop may not have
      * been called on everything.
      */
     public synchronized void stop()
+        throws InterruptedException
+    {
+        stop(false);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Stop all listeners then handlers.
+     * @param graceful If true and statistics are on, then this method will wait
+     * for requestsActive to go to zero before calling stop()
+     */
+    public synchronized void stop(boolean graceful)
         throws InterruptedException
     {
         Iterator listeners = getListeners().iterator();
@@ -255,8 +269,7 @@ public class HttpServer implements LifeCycle
         while(contexts.hasNext())
         {
             HttpContext context=(HttpContext)contexts.next();
-            if (context.isStarted())
-                context.stop();
+            context.stop(graceful);
         }
 
         if (_notFoundContext!=null)
@@ -1029,8 +1042,7 @@ public class HttpServer implements LifeCycle
         _requests++;
         if (!ok)
             _errors++;
-        _requestsActive--;
-        if (_requestsActive<0)
+        if (--_requestsActive<0)
             _requestsActive=0;
         if (duration>_requestsDurationMax)
             _requestsDurationMax=duration;

@@ -118,11 +118,6 @@ public class WebApplicationContext extends ServletHttpContext
     }
     
     /* ------------------------------------------------------------ */
-    private void extractWAR()
-    {
-    }
-    
-    /* ------------------------------------------------------------ */
     private void resolveWebApp()
         throws IOException
     {
@@ -204,6 +199,9 @@ public class WebApplicationContext extends ServletHttpContext
     public void start()
         throws Exception
     {
+        if (isStarted())
+            return;
+        
         // Get parser
         XmlParser xmlParser=new XmlParser();
         
