@@ -3,6 +3,7 @@ Jetty Versions
 
 Jetty-5.0.RC4 - 5 September 2004
  + Fixed configuration of URL alias checking
+ + JettyJBoss: Use realm-name from web.xml if present, otherwise use security-domain from jboss-web.xml
 
 Jetty-5.0.RC3 - 28 August 2004
  + DIGEST auth handles qop, stale and maxNonceAge.
