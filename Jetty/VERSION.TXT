@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+ + Work around URLClassloader not handling leading /
+ + Dump servlet can load resources for testing now.
+
 Jetty-4.2.8_01 - 18 February 2004
  + Patched first release of 4.2.8 with correct version number
  + Fixed CGI servlet to handle multiple headers.
