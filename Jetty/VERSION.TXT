@@ -1,6 +1,11 @@
 Jetty Versions
 --------------
 
+ + Simplified ThreadedServer
+ + Use ThreadLocals for ByteArrayPool to avoid synchronization.
+ + Use Version to reset HttpFields
+ + Cheap clear for HttpFields
+
 Jetty-4.2.3 - 2 December 2002
  + Removed aggressive threadpool shrinkage to avoid deadlock on SMP machines. 
  + Fixed some typos
