@@ -294,17 +294,20 @@ public class ChunkableOutputStream extends FilterOutputStream
 	    flush();
 	    
 	    notify(OutputObserver.__CLOSING);
-        
-	    // send last chunk and revert to normal output
-	    Writer writer = getRawWriter();
-	    writer.write(__CHUNK_EOF);
-	
-	    if (_trailer!=null)
-		_trailer.write(writer);
-	    else
-		writer.write(__CRLF);
-	    writeRawWriter();
-	    _realOut.flush();
+
+	    if (!_nulled)
+	    {
+		// send last chunk and revert to normal output
+		Writer writer = getRawWriter();
+		writer.write(__CHUNK_EOF);
+		
+		if (_trailer!=null)
+		    _trailer.write(writer);
+		else
+		    writer.write(__CRLF);
+		writeRawWriter();
+		_realOut.flush();
+	    }
         }
 	finally
 	{
@@ -444,8 +447,14 @@ public class ChunkableOutputStream extends FilterOutputStream
         if (_buffer.size()>0)
         {
             if (!_committed)
-                notify(OutputObserver.__COMMITING);
-
+	    {
+		// this may recurse to flushh
+		notify(OutputObserver.__COMMITING);
+		// so check _buffer size to see??
+		if (_buffer.size()==0)
+		    return;
+	    }
+	    
 	    try
 	    {
 		// If output has not been nulled by HEAD

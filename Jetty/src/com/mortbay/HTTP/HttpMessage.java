@@ -471,15 +471,23 @@ abstract public class HttpMessage
      */
     public String getCharacterEncoding()
     {
+	String encoding="ISO-8859-1";
         String s = _header.get(HttpFields.__ContentType);
-        try {
-            int i1 = s.indexOf("charset=",s.indexOf(';')) + 8;
-            int i2 = s.indexOf(' ',i1);
-            return (0 < i2) ? s.substring(i1,i2) : s.substring(i1);
-        }
-        catch (Exception e) {
-            return "ISO-8859-1";
-        }
+	if (s!=null)
+	{
+	    int i0=s.indexOf(';');
+	    if (i0>=0)
+	    {
+		int i1 = s.indexOf("charset=",i0);
+		if (i1>=0)
+		{
+		    i1+=8;
+		    int i2 = s.indexOf(' ',i1);
+		    encoding = (0 < i2) ? s.substring(i1,i2) : s.substring(i1);
+		}
+	    }
+	}
+	return encoding;
     }
     
     /* ------------------------------------------------------------ */
