@@ -76,10 +76,17 @@ class FileResource extends URLResource
             return super.addPath(path);
 
         path = URI.canonicalPath(path);
+        
+        // treat all paths being added as relative
+        if (path.startsWith("/"))
+            path = path.substring(1);
+
         File newFile = new File(_file,path);
-        return new FileResource(newFile.toURL(),
-                                null,
-                                newFile);
+
+        if (path.length()>0 && !path.endsWith("/") && newFile.isDirectory())
+            path+="/";
+
+        return new FileResource(new URL(_url,path),null,newFile);
     }
     
     
