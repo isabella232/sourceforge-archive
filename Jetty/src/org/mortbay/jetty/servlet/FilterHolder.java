@@ -85,7 +85,7 @@ public class FilterHolder
     
     /* ------------------------------------------------------------ */
     /** Add A servlet that this filter applies to.
-     * @param pathSpec 
+     * @param servlet 
      */
     public void addServlet(String servlet)
     {

@@ -242,7 +242,7 @@ public class ServletHttpResponse implements HttpServletResponse
      * is the default locale for the server.
      * 
      * @see   #getLocale
-     * @param loc the locale of the response
+     * @param locale the Locale of the response
      */
     public void setLocale(Locale locale)
     {

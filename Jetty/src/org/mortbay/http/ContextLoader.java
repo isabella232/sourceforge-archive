@@ -45,10 +45,9 @@ public class ContextLoader extends URLClassLoader
     
     /* ------------------------------------------------------------ */
     /** Constructor.
-     * @param classPath Coma separated path of filenames or URLs
+     * @param classPath Comma separated path of filenames or URLs
      * pointing to directories or jar files. Directories should end
      * with '/'.
-     * @param quiet If true, non existant paths are not reported
      * @exception IOException
      */
     public ContextLoader(HttpContext context,

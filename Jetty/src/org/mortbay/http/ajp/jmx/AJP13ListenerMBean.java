@@ -20,7 +20,6 @@ public class AJP13ListenerMBean extends HttpListenerMBean
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @exception MBeanException 
-     * @exception InstanceNotFoundException 
      */
     public AJP13ListenerMBean()
         throws MBeanException

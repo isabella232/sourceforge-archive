@@ -19,7 +19,6 @@ public class SunJsseListenerMBean extends JsseListenerMBean
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @exception MBeanException 
-     * @exception InstanceNotFoundException 
      */
     public SunJsseListenerMBean()
         throws MBeanException

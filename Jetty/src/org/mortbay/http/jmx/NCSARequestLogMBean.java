@@ -19,9 +19,7 @@ public class NCSARequestLogMBean extends LifeCycleMBean
 {
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @param sink 
-     * @exception MBeanException 
-     * @exception InstanceNotFoundException 
+     * @exception MBeanException
      */
     public NCSARequestLogMBean()
         throws MBeanException

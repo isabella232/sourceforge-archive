@@ -142,7 +142,6 @@ public class SunJsseListener extends JsseListener
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @exception IOException 
      */
     public SunJsseListener()
     {
@@ -152,8 +151,6 @@ public class SunJsseListener extends JsseListener
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param p_address 
-     * @param p_server 
-     * @exception IOException 
      */
     public SunJsseListener(InetAddrPort p_address)
     {

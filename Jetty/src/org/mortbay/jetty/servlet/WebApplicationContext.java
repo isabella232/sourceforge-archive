@@ -88,7 +88,6 @@ public class WebApplicationContext
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @exception IOException 
      */
     public WebApplicationContext()
     {}
@@ -96,7 +95,6 @@ public class WebApplicationContext
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param webApp The Web application directory or WAR file.
-     * @exception IOException 
      */
     public WebApplicationContext(String webApp)
     {

@@ -65,7 +65,6 @@ import java.util.StringTokenizer;
 public class Main
 {
     private String _classname = null;
-    private File _home_dir = null;
     private Classpath _classpath = new Classpath();
     private boolean _debug = System.getProperty("DEBUG",null)!=null;
     private ArrayList _xml = new ArrayList();

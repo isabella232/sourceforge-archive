@@ -70,9 +70,9 @@ public class Dispatcher implements RequestDispatcher
     /** Constructor. 
     /** Constructor. 
      * @param servletHandler 
-     * @param resourceHandler 
-     * @param uriInContext Encoded pathInContext
-     * @param query 
+     * @param uriInContext Encoded uriInContext
+     * @param pathInContext Encoded pathInContext
+     * @param query
      * @exception IllegalStateException 
      */
     Dispatcher(ServletHandler servletHandler,
@@ -94,8 +94,8 @@ public class Dispatcher implements RequestDispatcher
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @param server 
-     * @param URL 
+     * @param servletHandler
+     * @param name
      */
     Dispatcher(ServletHandler servletHandler,String name)
         throws IllegalStateException
@@ -632,8 +632,8 @@ public class Dispatcher implements RequestDispatcher
         * use <code>setStatus(int)</code>, to send an error with a description
         * use <code>sendError(int, String)</code>.
         * 
-        * @param sc the status code
-        * @param sm the status message
+        * @param status the status code
+        * @param message the status message
         */
         public void setStatus(int status, String message)
         {

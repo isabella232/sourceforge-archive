@@ -265,7 +265,7 @@ public abstract class Element
     /* ----------------------------------------------------------------- */
     /** Convert Element to String.
      * Uses write() to convert the HTML Element to a string.
-     * @param String of the HTML element
+     * @return String of the HTML element
      */
     public String toString()
     {

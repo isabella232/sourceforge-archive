@@ -266,7 +266,6 @@ public class TableForm extends Form
 
     /* ----------------------------------------------------------- */
     /** Add a reset button.
-     * @param tag The form name of the element
      * @param label The label for the element in the table.
      */
     public void addReset(String label)

@@ -19,7 +19,6 @@ public class JsseListenerMBean extends SocketListenerMBean
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @exception MBeanException 
-     * @exception InstanceNotFoundException 
      */
     public JsseListenerMBean()
         throws MBeanException

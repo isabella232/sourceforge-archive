@@ -103,11 +103,11 @@ public class Include extends Element
     
     /* ------------------------------------------------------------ */
     /** Constructor.
-     * Include InputStream.
+     * Include contents of a URL.
      * Byte to character transformation is done assuming the default
      * local character set.  What this means is that on EBCDIC systems
      * the included file is assumed to be in EBCDIC.
-     * @param in stream
+     * @param url the URL to read from.
      * @exception IOException
      */
     public Include(URL url)

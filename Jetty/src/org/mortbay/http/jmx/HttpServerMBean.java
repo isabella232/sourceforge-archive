@@ -33,7 +33,6 @@ public class HttpServerMBean extends LifeCycleMBean
 {
     private HttpServer _httpServer;
     private HashMap _mbeanMap = new HashMap();
-    private String _configuration;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 

@@ -272,8 +272,8 @@ public class HttpContext implements LifeCycle,
 
     /* ------------------------------------------------------------ */
     /** Add a virtual host alias to this context.
-     * @see setVirtualHosts
-     * @param host A hostname. A null host name means any hostname is
+     * @see #setVirtualHosts
+     * @param hostname A hostname. A null host name means any hostname is
      * acceptable. Host names may String representation of IP addresses.
      */
     public void addVirtualHost(String hostname)
@@ -296,8 +296,8 @@ public class HttpContext implements LifeCycle,
 
     /* ------------------------------------------------------------ */
     /** remove a virtual host alias to this context.
-     * @see setVirtualHosts
-     * @param host A hostname. A null host name means any hostname is
+     * @see #setVirtualHosts
+     * @param hostname A hostname. A null host name means any hostname is
      * acceptable. Host names may String representation of IP addresses.
      */
     public void removeVirtualHost(String hostname)
@@ -472,7 +472,7 @@ public class HttpContext implements LifeCycle,
 
     /* ------------------------------------------------------------ */
     /** Get handler index.
-     * @param Handler instance
+     * @param handler instance
      * @return Index of handler in context or -1 if not found.
      */
     public int getHandlerIndex(HttpHandler handler)
@@ -971,7 +971,7 @@ public class HttpContext implements LifeCycle,
     /** Sets the class path for the context.
      * A class path is only required for a context if it uses classes
      * that are not in the system class path.
-     * @param filePath a comma or ';' separated list of class
+     * @param classPath a comma or ';' separated list of class
      * resources. These may be jar files, directories or URLs to jars
      * or directories.
      */

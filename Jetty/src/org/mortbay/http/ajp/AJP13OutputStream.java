@@ -28,7 +28,6 @@ public class AJP13OutputStream extends BufferedOutputStream
     private boolean _complete;
     private boolean _completed;
     private boolean _persistent=true;
-    private byte[] _byte={(byte)0};
     private AJP13Packet _ajpResponse;
 
     /* ------------------------------------------------------------ */
@@ -135,7 +134,6 @@ public class AJP13OutputStream extends BufferedOutputStream
         _packet=null;
         if (_ajpResponse!=null)_ajpResponse.destroy();
         _ajpResponse=null;
-        _byte=null;
         _out=null;
     }
     

@@ -24,8 +24,6 @@ public class SecurityHandler extends AbstractHttpHandler
 {   
     /* ------------------------------------------------------------ */
     private String _authMethod=SecurityConstraint.__BASIC_AUTH;
-    private String _realmName ;
-    private boolean _realmForced=false;
 
     /* ------------------------------------------------------------ */
     public String getAuthMethod()

@@ -128,7 +128,6 @@ public class MultiPartResponse
         
     /* ------------------------------------------------------------ */
     /** End the current part.
-     * @param lastPart True if this is the last part
      * @exception IOException IOException
      */
     public void close()

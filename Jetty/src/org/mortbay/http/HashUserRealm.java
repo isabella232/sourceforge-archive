@@ -170,7 +170,7 @@ public class HashUserRealm extends HashMap implements UserRealm, Externalizable
         if (user==null)
             return null;
 
-        if (user.authenticate(credentials,request))
+        if (user.authenticate(credentials))
             return user;
         
         return null;
@@ -285,11 +285,6 @@ public class HashUserRealm extends HashMap implements UserRealm, Externalizable
             return HashUserRealm.this;
         }
         
-        private boolean authenticate(Object credentials, HttpRequest request)
-        {
-            return false;
-        }
-        
         public String getName()
         {
             return "Anonymous";
@@ -327,7 +322,7 @@ public class HashUserRealm extends HashMap implements UserRealm, Externalizable
         }
         
         /* -------------------------------------------------------- */
-        private boolean authenticate(Object credentials, HttpRequest request)
+        private boolean authenticate(Object credentials)
         {
             return _cred!=null && _cred.check(credentials);
         }

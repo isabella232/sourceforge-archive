@@ -31,7 +31,6 @@ public class BufferedOutputStream
     /** Constructor. 
      * @param out the OutputStream to buffer to.
      * @param capacity Buffer capacity.
-     * @param fullAt The size of the buffer.
      * @param headerReserve The reserve of bytes for prepending to be used
      * for the first buffer after reset
      * @param preReserve The reserve of bytes for prepending

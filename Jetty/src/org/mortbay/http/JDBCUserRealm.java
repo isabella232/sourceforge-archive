@@ -140,8 +140,6 @@ public class JDBCUserRealm extends HashUserRealm
     
     /* ------------------------------------------------------------ */
     /** (re)Connect to database with parameters setup by loadConfig()
-     *
-     * @exception Exception
      */
     public void connectDatabase()
     {

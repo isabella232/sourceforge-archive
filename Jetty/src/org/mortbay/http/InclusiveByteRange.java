@@ -52,7 +52,7 @@ public class InclusiveByteRange {
     
     /* ------------------------------------------------------------ */
     /** 
-     * @param header Enumeration of Range header fields.
+     * @param headers Enumeration of Range header fields.
      * @param size Size of the resource.
      * @return LazyList of satisfiable ranges
      */

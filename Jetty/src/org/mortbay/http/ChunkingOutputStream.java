@@ -59,8 +59,6 @@ public class ChunkingOutputStream
     
     /* ------------------------------------------------------------ */
     /** Flush.
-     * @param complete If true, filters are closed, chunking ended and
-     * trailers written. 
      * @exception IOException 
      */
     public void flush()

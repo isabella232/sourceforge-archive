@@ -159,7 +159,7 @@ public class Listener extends LifeCycleThread
                     key.cancel();
                 else if (channel instanceof ServerSocketChannel)
                 {
-                    SocketChannel socket_channel =(SocketChannel)
+                    SocketChannel socket_channel =
                         ((ServerSocketChannel)channel).accept();
                     socket_channel.configureBlocking(false);
                     socket_channel.socket().setTcpNoDelay(true);

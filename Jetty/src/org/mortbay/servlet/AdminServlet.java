@@ -65,9 +65,8 @@ public class AdminServlet extends HttpServlet
     }
     
     /* ------------------------------------------------------------ */
-    private String doAction(HttpServletRequest request,
-                            HttpServletResponse response) 
-        throws ServletException, IOException
+    private String doAction(HttpServletRequest request)
+        throws IOException
     {
         String action=request.getParameter("A");
         if ("exit all servers".equalsIgnoreCase(action))
@@ -186,7 +185,7 @@ public class AdminServlet extends HttpServlet
         if (request.getQueryString()!=null &&
             request.getQueryString().length()>0)
         {
-            String target=doAction(request,response);
+            String target=doAction(request);
             response.sendRedirect(request.getContextPath()+
                                   request.getServletPath()+
                                   (request.getPathInfo()!=null

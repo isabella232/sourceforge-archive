@@ -165,9 +165,7 @@ public class HttpRequest extends HttpMessage
      */
     public HttpResponse getResponse()
     {
-        if (_connection==null)
-            return null;
-        return _connection.getResponse();
+        return getHttpResponse();
     }
 
     /* ------------------------------------------------------------ */
@@ -763,7 +761,7 @@ public class HttpRequest extends HttpMessage
                     if ("trailer".equalsIgnoreCase(coding))
                     {
                         // Allow trailers in the response
-                        HttpResponse response=getResponse();
+                        HttpResponse response=getHttpResponse();
                         if (response!=null)
                             response.setAcceptTrailer(true);
                     }

@@ -164,7 +164,7 @@ public class AJP13Listener
     /* ------------------------------------------------------------ */
     /** Handle Job.
      * Implementation of ThreadPool.handle(), calls handleConnection.
-     * @param job A Connection.
+     * @param socket A Connection.
      */
     public void handleConnection(Socket socket)
         throws IOException
@@ -235,7 +235,7 @@ public class AJP13Listener
 
     /* ------------------------------------------------------------ */
     /** Persist the connection.
-     * @param connection.
+     * @param connection
      */
     public void persistConnection(HttpConnection connection)
     {

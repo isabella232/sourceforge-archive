@@ -725,7 +725,7 @@ public class ResourceHandler extends AbstractHttpHandler
             }
             else
                 // Handle cached resource
-                ((CachedResource)resource).writeTo(out,start,size);
+                resource.writeTo(out,start,size);
             
         }
         if (in!=null)

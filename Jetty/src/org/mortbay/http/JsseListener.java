@@ -82,9 +82,6 @@ public abstract class JsseListener extends SocketListener
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @param p_address 
-     * @param p_server 
-     * @exception IOException 
      */
     public JsseListener()
     {
@@ -95,11 +92,6 @@ public abstract class JsseListener extends SocketListener
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param p_address 
-     * @param p_server 
-     * @param p_minThreads 
-     * @param p_maxThreads 
-     * @param p_maxIdleTimeMs 
-     * @exception IOException 
      */
     public JsseListener( InetAddrPort p_address)
     {
@@ -207,7 +199,7 @@ public abstract class JsseListener extends SocketListener
             if (getMaxIdleTimeMs()>0)
                 s.setSoTimeout(getMaxIdleTimeMs());
             s.startHandshake();  // block until SSL handshaking is done
-            return (Socket) s;
+            return s;
         }
         catch( SSLException e )
         {

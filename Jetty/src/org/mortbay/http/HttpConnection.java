@@ -52,7 +52,6 @@ public class HttpConnection
     private boolean _persistent;
     private boolean _close;
     private boolean _keepAlive;
-    private String _version;
     private int _dotVersion;
     private boolean _firstWrite;
     private Thread _handlingThread;
@@ -378,8 +377,7 @@ public class HttpConnection
      * @exception IOException problem with the connection.
      */
     private void verifyHTTP_1_0()
-        throws HttpException, IOException
-    {     
+    {
         // Set content length
         int content_length=
             _request.getIntField(HttpFields.__ContentLength);
@@ -819,7 +817,7 @@ public class HttpConnection
         throws IOException
     {
         Code.debug("readRequest() ...");
-        _request.readHeader((LineInput)((HttpInputStream)_inputStream)
+        _request.readHeader((LineInput)(_inputStream)
                             .getInputStream());
     }
     
@@ -877,13 +875,11 @@ public class HttpConnection
                 Code.debug("REQUEST:\n",_request);
             }
             
-            // Pick response version
-            _version=_request.getVersion();
+            // Pick response version, we assume that _request.getVersion() == 1
             _dotVersion=_request.getDotVersion();
             
             if (_dotVersion>1)
             {
-                _version=HttpMessage.__HTTP_1_1;
                 _dotVersion=1;
             }
             

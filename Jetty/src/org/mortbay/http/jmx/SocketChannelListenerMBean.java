@@ -20,7 +20,6 @@ public class SocketChannelListenerMBean extends ThreadPoolMBean
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @exception MBeanException 
-     * @exception InstanceNotFoundException 
      */
     public SocketChannelListenerMBean()
         throws MBeanException

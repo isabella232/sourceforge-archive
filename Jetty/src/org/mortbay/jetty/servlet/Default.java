@@ -679,7 +679,7 @@ public class Default extends HttpServlet
             }
             else
                 // Handle cached resource
-                ((CachedResource)resource).writeTo(out,start,size);
+                (resource).writeTo(out,start,size);
             
         }
         if (in!=null)

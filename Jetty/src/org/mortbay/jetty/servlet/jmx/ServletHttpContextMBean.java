@@ -23,7 +23,6 @@ public class ServletHttpContextMBean extends HttpContextMBean
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @exception MBeanException 
-     * @exception InstanceNotFoundException 
      */
     public ServletHttpContextMBean()
         throws MBeanException

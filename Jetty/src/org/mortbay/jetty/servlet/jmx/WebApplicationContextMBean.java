@@ -20,7 +20,6 @@ public class WebApplicationContextMBean extends ServletHttpContextMBean
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @exception MBeanException 
-     * @exception InstanceNotFoundException 
      */
     public WebApplicationContextMBean()
         throws MBeanException

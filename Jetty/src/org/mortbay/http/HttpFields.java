@@ -804,14 +804,12 @@ public class HttpFields
         FieldInfo info=getFieldInfo(name);
         Field field=getField(info,false);
         Field last=null;
-        int values=-1;
         if (field!=null)
         {
             while(field!=null && field._version==_version)
             {
                 last=field;
                 field=field._next;
-                values++;
             }
         }
 

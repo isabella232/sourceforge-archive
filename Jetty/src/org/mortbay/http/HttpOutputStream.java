@@ -170,7 +170,7 @@ public class HttpOutputStream
      * filters may perform their own buffering and are likely to change
      * the size of the output. Also the pre and post reserve buffers may be
      * allocated within the buffer for headers and chunking.
-     * @param capacity Minimum buffer size in bytes
+     * @param size Minimum buffer size in bytes
      * @exception IllegalStateException If output has been written.
      */
     public void setBufferSize(int size)

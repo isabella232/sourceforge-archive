@@ -325,7 +325,7 @@ public class HttpResponse extends HttpMessage
         Integer code_integer=TypeUtil.newInteger(code);
         if (message == null)
             message = (String)__statusMsg.get(code_integer);
-        HttpRequest request=getRequest();
+        HttpRequest request=getHttpRequest();
         Class exClass=(Class)request.getAttribute("javax.servlet.error.exception_type");
              
         // Generate normal error page.
@@ -423,7 +423,7 @@ public class HttpResponse extends HttpMessage
             message=StringUtil.replace(message,"<","&lt;");
             message=StringUtil.replace(message,">","&gt;");
         }
-        String uri=getRequest().getPath();
+        String uri=getHttpRequest().getPath();
         uri=StringUtil.replace(uri,"<","&lt;");
         uri=StringUtil.replace(uri,">","&gt;");
         

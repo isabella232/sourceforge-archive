@@ -49,7 +49,6 @@ public class XmlParser
     
     /* ------------------------------------------------------------ */
     /** Construct
-     * @exception ParserConfigurationException 
      */
     public XmlParser()
     {
@@ -68,7 +67,6 @@ public class XmlParser
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @exception ParserConfigurationException 
      */
     public XmlParser(boolean validating)
     {
@@ -88,7 +86,7 @@ public class XmlParser
     /* ------------------------------------------------------------ */
     /** 
      * @param name 
-     * @param local 
+     * @param entity
      */
     public synchronized void redirectEntity(String name,Resource entity)
     {
@@ -492,7 +490,7 @@ public class XmlParser
          */
         public String getString(String tag, boolean tags, boolean trim)
         {
-            Node node=(Node)get(tag);
+            Node node=get(tag);
             if (node==null)
                 return null;
             String s =node.toString(tags);

@@ -122,7 +122,7 @@ public class Select extends Block
       * select are the indexes into the array of the strings, which are used
       * as the labels on the selector.
       * @param arr The array of strings for labels
-      * @param index The index of the selected label, -1 for default
+      * @param selected The index of the selected label, -1 for default
       */
     public Select add(String arr[], String selected)
     {

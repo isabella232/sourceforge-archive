@@ -18,7 +18,6 @@ public class SocketListenerMBean extends HttpListenerMBean
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @exception MBeanException 
-     * @exception InstanceNotFoundException 
      */
     public SocketListenerMBean()
         throws MBeanException
