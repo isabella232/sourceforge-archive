@@ -109,7 +109,7 @@ public class HttpContext implements LifeCycle,
     private boolean _classLoaderJava2Compliant;
 
     /* ------------------------------------------------------------ */
-    private String _name;
+    private String _contextName;
     private String _classPath;
     private Map _initParams = new HashMap(11);
     private Map _errorPages;
@@ -202,7 +202,7 @@ public class HttpContext implements LifeCycle,
     void setHttpServer(HttpServer httpServer)
     {
         _httpServer=httpServer;
-        _name=null;
+        _contextName=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -211,6 +211,7 @@ public class HttpContext implements LifeCycle,
         return _httpServer;
     }
 
+    /* ------------------------------------------------------------ */
     public static String canonicalContextPathSpec(String contextPathSpec)
     {
         // check context path
@@ -246,7 +247,7 @@ public class HttpContext implements LifeCycle,
         else
             _contextPath="/";
         
-        _name=null;
+        _contextName=null;
 
         if (_httpServer!=null)
             _httpServer.addMappings(this);
@@ -274,7 +275,7 @@ public class HttpContext implements LifeCycle,
         if (!_hosts.contains(hostname))
         {
             _hosts.add(hostname);
-            _name=null;
+            _contextName=null;
 
             if (_httpServer!=null)
             {
@@ -296,7 +297,7 @@ public class HttpContext implements LifeCycle,
         // Note that null hosts are also added.
         if (_hosts.remove(hostname))
         {
-            _name=null;
+            _contextName=null;
             if (_httpServer!=null)
             {
                 _httpServer.removeMapping(hostname,this);
@@ -1706,11 +1707,11 @@ public class HttpContext implements LifeCycle,
     }
     
     /* ------------------------------------------------------------ */
-    protected String getHttpContextName()
+    public String getHttpContextName()
     {
-        if (_name==null)
-            _name = (_hosts.size()>1?(_hosts.toString()+":"):"")+_contextPath;
-        return _name;
+        if (_contextName==null)
+            _contextName = (_hosts.size()>1?(_hosts.toString()+":"):"")+_contextPath;
+        return _contextName;
     }
     
     /* ------------------------------------------------------------ */

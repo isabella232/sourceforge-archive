@@ -41,7 +41,7 @@ public class ThreadPool
     /* ------------------------------------------------------------------- */
     private String _name;
     private Pool _pool;
-    private Object _join=new Object();
+    private Object _join="";
 
     private transient int _threadId=0;
     private transient boolean _started;
