@@ -612,7 +612,6 @@ public class ResourceHandler extends NullHandler
             Code.debug("requested ranges: " + reqRanges + "=" + validRanges);
         }
 
-
         // 
         //  if there were no valid ranges, send entire entity
         //
@@ -797,11 +796,11 @@ public class ResourceHandler extends NullHandler
 
             data = cachedFile;
         }
-        else {
+        else
             data = new UnCachedFile(resource);
-        }
 
-        try {
+        try
+        {
             sendData(request, response, data);
         }
         finally {
@@ -970,22 +969,23 @@ public class ResourceHandler extends NullHandler
              os.write(ris, (int) count);
         }
 
-        public void writeHeaders(HttpResponse response, long count) {
+        public void writeHeaders(HttpResponse response, long count)
+        {
             response.setField(HttpFields.__ContentType,encoding);
-            if (length != -1) {
+            if (length != -1) 
                  response.setIntField(HttpFields.__ContentLength, (int) count);
-            }
             response.setDateField(HttpFields.__LastModified,resource.lastModified());
+            response.setField(HttpFields.__AcceptRanges,"bytes");
         }
 
-        public void requestDone() {
-            if (ris != null) {
-                try {
+        public void requestDone()
+        {
+            try
+            {
+                if (ris != null)
                     ris.close();
-                }
-                catch (IOException ioe) {
-                }
             }
+            catch (IOException ioe){Code.ignore(ioe);}
         }
 
     }
@@ -1055,10 +1055,10 @@ public class ResourceHandler extends NullHandler
         {
             Code.debug("HIT: ",resource);
             response.setField(HttpFields.__ContentType,encoding);
-            if (count != -1) {
+            if (count != -1)
                  response.setIntField(HttpFields.__ContentLength, (int) count);
-            }
             response.setDateField(HttpFields.__LastModified,lastModified);
+            response.setField(HttpFields.__AcceptRanges,"bytes");
         }
 
         /* ------------------------------------------------------------ */
@@ -1095,11 +1095,13 @@ public class ResourceHandler extends NullHandler
         }
 
         /* ------------------------------------------------------------ */
-        public void requestDone() {
+        public void requestDone()
+        {
         }
 
         /* ------------------------------------------------------------ */
-        public long getLength() {
+        public long getLength()
+        {
             return bytes.length;
         }
 

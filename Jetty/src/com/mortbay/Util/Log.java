@@ -54,24 +54,16 @@ import java.util.StringTokenizer;
 public class Log 
 {
     /*-------------------------------------------------------------------*/
-    public final static String DEBUG= "DEBUG    ";
-    public final static String EVENT= "EVENT    ";
-    public final static String WARN=  "WARN!!!! ";
-    public final static String ASSERT="ASSERT!! ";
-    public final static String FAIL=  "FAIL!!!! ";
+    public final static String DEBUG= "DEBUG  ";
+    public final static String EVENT= "EVENT  ";
+    public final static String WARN=  "WARN!! ";
+    public final static String ASSERT="ASSERT ";
+    public final static String FAIL=  "FAIL!! ";
 
-    /*-------------------------------------------------------------------*/
-    public static char TIMESTAMP = 't';
-    public static char LABEL = 'L';
-    public static char TAG = 'T';
-    public static char STACKSIZE = 's';
-    public static char STACKTRACE = 'S';
-    public static char ONELINE = 'O';
-    
     /*-------------------------------------------------------------------*/
     public LogSink[] _sinks = null;
     public String _logOptions=null;
-    private boolean _needInit = true;
+    private boolean _initialized = false;
 
     /*-------------------------------------------------------------------*/
     private static Log __instance = null;
@@ -80,13 +72,14 @@ public class Log
     /*-------------------------------------------------------------------*/
     public static Log instance()
     {   
-        if (__instance==null || __instanceChecks<2)
+        if (__instance==null || __instanceChecks<ThreadPool.__nullLockChecks)
         {
-            synchronized(WARN)
+            synchronized(Log.class)
             {
                 if (__instance==null)
                     __instance=new Log();
-                __instanceChecks++;
+                if(__instanceChecks<Integer.MAX_VALUE)
+                    __instanceChecks++;
             }
         }
         return __instance;
@@ -99,25 +92,9 @@ public class Log
      */
     private synchronized void defaultInit() 
     {
-        if (_needInit)
+        if (!_initialized)
         {
-            _needInit = false;
-                    
-            String logOptions="tLTs";
-            String logFile;
-            String dateFormat = "yyyyMMddHHmmssSSSzzz ";
-            String timezone = "GMT";
-            try {
-                logOptions = System.getProperty("LOG_OPTIONS","tLTs");
-                dateFormat = System.getProperty("LOG_DATE_FORMAT",
-                                                "yyyyMMddHHmmssSSSzzz ");
-                timezone = System.getProperty("LOG_TIMEZONE","GMT");
-            }
-            catch (Throwable ex)
-            {
-                System.err.println("Exception from getProperty - probably running in applet\nUse Log.initParamsFromApplet or Log.setOptions to control debug output.");
-            }
-                    
+            _logOptions=System.getProperty("LOG_OPTIONS","tTO");
             String sinkClasses = System.getProperty("LOG_CLASSES", "com.mortbay.Util.WriterLogSink");
             StringTokenizer sinkTokens = new StringTokenizer(sinkClasses, ";");
                     
@@ -126,81 +103,26 @@ public class Log
             {
                 String sinkClassName = sinkTokens.nextToken();
                     	
-                try{
+                try
+                {
                     Class sinkClass = Class.forName(sinkClassName);
                     if (com.mortbay.Util.LogSink.class.isAssignableFrom(sinkClass)) {
                         sink = (LogSink)sinkClass.newInstance();
-                                            
-                        sink.setOptions(dateFormat,timezone,
-                                        (logOptions.indexOf(TIMESTAMP) >= 0),
-                                        (logOptions.indexOf(LABEL) >= 0),
-                                        (logOptions.indexOf(TAG) >= 0),
-                                        (logOptions.indexOf(STACKSIZE) >= 0),
-                                        (logOptions.indexOf(STACKTRACE) >= 0),
-                                        (logOptions.indexOf(ONELINE) >= 0));
-                                            
+                        sink.setOptions(_logOptions);
                         __instance.add(sink);
+                        sink.start();
                     }
-                    else {
+                    else
                         // Can't use Code.fail here, that's what we're setting up
                         System.err.println(sinkClass+" is not a com.mortbay.Util.LogSink");
-                    }
                 }
                 catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-        }
-    }    
-    
-
-    /* ------------------------------------------------------------ */
-    /** Initialize default behaviour from applet parameters.
-     *
-     * Initializes the default instance from  applet parameters of the
-     * same name as the system properties used to config Log
-     * @param appl Applet
-     */
-    public static void initParamsFromApplet(java.applet.Applet appl)
-    {
-        synchronized(com.mortbay.Util.Log.class)
-        {
-            String logOptions = appl.getParameter("LOG_OPTIONS");
-            String logFile = appl.getParameter("LOG_FILE");
-            String dateFormat = appl.getParameter("LOG_DATE_FORMAT");
-            String timezone = appl.getParameter("LOG_TIMEZONE");
-
-            if (logOptions==null)
-                logOptions="tLTs";
-            
-            LogSink sink= null;
-            try
-            {
-                if(logFile==null)
-                    sink=new WriterLogSink();
-                else
-                    sink=new FileLogSink(logFile);
-            }
-            catch(IOException e)
-            {
-                e.printStackTrace();
-                sink=new WriterLogSink();
-            }
-        
-            sink.setOptions((dateFormat!=null)
-                            ?dateFormat:"yyyyMMdd HHmmss.SSS zzz ",
-                            (timezone!=null)?timezone:"GMT",
-                            (logOptions.indexOf(TIMESTAMP) >= 0),
-                            (logOptions.indexOf(LABEL) >= 0),
-                            (logOptions.indexOf(TAG) >= 0),
-                            (logOptions.indexOf(STACKSIZE) >= 0),
-                            (logOptions.indexOf(STACKTRACE) >= 0),
-                            (logOptions.indexOf(ONELINE) >= 0));
-            
-            __instance.add(sink);
+            _initialized = true;
         }
     }
-    
     
     /*-------------------------------------------------------------------*/
     /** Construct the shared instance of Log that decodes the
@@ -229,7 +151,7 @@ public class Log
             ns[_sinks.length]=logSink;
             _sinks=ns;
         }
-        _needInit = false;
+        _initialized = true;
     }
     
     /* ------------------------------------------------------------ */
@@ -239,6 +161,23 @@ public class Log
     public LogSink[] getLogSinks()
     {
         return _sinks;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     */
+    public synchronized void deleteStoppedLogSinks()
+    {
+        if (_sinks!=null)
+        {
+            for (int s=_sinks.length;s-->0;)
+            {
+                if (_sinks[s]==null)
+                    continue;
+                if (!_sinks[s].isStarted())
+                    _sinks[s]=null;
+            }
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -274,32 +213,6 @@ public class Log
     }
     
     /* ------------------------------------------------------------ */
-    /** Log a message.
-     * @param tag Tag for type of log
-     * @param msg The message
-     * @param frame The frame that generated the message.
-     * @param time The time stamp of the message.
-     */
-    public synchronized void message(String tag,
-                                     Object msg,
-                                     Frame frame,
-                                     long time)
-    {
-        if (_needInit)
-            defaultInit();
-        if (_sinks==null)
-            return;
-        for (int s=_sinks.length;s-->0;)
-        {
-            if (_sinks[s]==null)
-                continue;
-            if (!_sinks[s].isStarted())
-                _sinks[s].start();
-            _sinks[s].log(tag,msg,frame,time);
-        }
-    }
-
-    /* ------------------------------------------------------------ */
     /** Log an event.
      */
     public static void event(Object message, int stackDepth)
@@ -330,34 +243,52 @@ public class Log
     {
         Log.message(Log.WARN,message,new Frame(1));
     }
-
-
-    
-    /*-------------------------------------------------------------------*/
-    /** 
-     * @deprecated.
-     */
-    public void setOptions(String logOptions,
-                           String logFile,
-                           String dateFormat,
-                           String timezone)
-    {}
-    
-    /*-------------------------------------------------------------------*/
-    /** 
-     * @deprecated.
-     */
-    public void setOptions(String logOptions)
-    {}
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @return null;
-     * @deprecated.
+    /** Log a message.
+     * @param tag Tag for type of log
+     * @param msg The message
+     * @param frame The frame that generated the message.
+     * @param time The time stamp of the message.
      */
+    public synchronized void message(String tag,
+                                     Object msg,
+                                     Frame frame,
+                                     long time)
+    {
+        if (!_initialized)
+            defaultInit();
+        
+        if (_sinks==null)
+            return;
+        for (int s=_sinks.length;s-->0;)
+        {
+            if (_sinks[s]==null)
+                continue;
+            
+            if (_sinks[s].isStarted())
+                _sinks[s].log(tag,msg,frame,time);
+        }
+    }
+
+    
+    /*-------------------------------------------------------------------*/
+    public synchronized void setOptions(String logOptions)
+    {
+        _logOptions=logOptions;
+        
+        for (int s=_sinks.length;s-->0;)
+        {
+            if (_sinks[s]==null)
+                continue;
+            _sinks[s].setOptions(logOptions);
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
     public String getOptions()
     {
-        return null;
+        return _logOptions;
     }
 }
 

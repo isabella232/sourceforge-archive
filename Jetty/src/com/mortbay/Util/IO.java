@@ -26,13 +26,14 @@ public class IO extends ThreadPool
     
     public static IO instance()
     {
-        if (__instance==null || __instanceChecks<2)
+        if (__instance==null || __instanceChecks<ThreadPool.__nullLockChecks)
         {
             synchronized(com.mortbay.Util.IO.class)
             {
                 if (__instance==null)
                     __instance=new IO();
-                __instanceChecks++;
+                if(__instanceChecks<Integer.MAX_VALUE)
+                    __instanceChecks++;
             }
         }
         return __instance;

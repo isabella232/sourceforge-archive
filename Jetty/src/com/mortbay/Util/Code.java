@@ -80,13 +80,14 @@ public class Code
     /*-------------------------------------------------------------------*/
     static Code instance()
     {   
-        if (__instance==null || __instanceChecks<2)
+        if (__instance==null || __instanceChecks<ThreadPool.__nullLockChecks)
         {
             synchronized(__lock)
             {
                 if (__instance==null)
                     new Code();
-                __instanceChecks++;
+                if(__instanceChecks<Integer.MAX_VALUE)
+                    __instanceChecks++;
             }
         }
         return __instance;

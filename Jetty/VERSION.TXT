@@ -1,8 +1,7 @@
 Jetty Versions
 --------------
-
- + Extended security constraints (see README and Wiki)
  + Fixed security problem with lowercase WEB-INF uris on windows.
+ + Extended security constraints (see README and WebApp Demo).
  + Set thread context classloader during handler start/stop calls.
  + Don't set MIME-Version in response.
  + Allow dynamic servlets to be served from /
@@ -15,6 +14,13 @@ Jetty Versions
  + PUT, MOVE disabled in WebApplication unless defaults file is passed.
  + Conditionals apply to puts, dels and moves in ResourceHandler.
  + URIs accept all characters < 0xff. 
+ + Set the AcceptRanges header.
+ + Depreciated RollOverLogSink and moved functionality to an
+   improved WriterLogSink.
+ + Changed log options to less verbose defaults.
+ + ThreadedServer.forceStop() now makes a connection to itself to handle non-premptive close.
+ + Double null lock checks use ThreadPool.__nullLockChecks.
+ + Split Debug servlet out of Admin Servlet
  
 Jetty-3.0.0.rc6 - 20 Nov 2000
  + RequestDispatcher.forward() only resets buffer, not headers.

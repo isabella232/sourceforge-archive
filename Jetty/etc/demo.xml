@@ -156,10 +156,9 @@ $Id$
   </Call>
 
   <Set name="LogSink">
-    <New class="com.mortbay.Util.RolloverFileLogSink">
-      <Set name="LogDir">logs</Set>
+    <New class="com.mortbay.Util.WriterLogSink">
+      <Arg>logs/yyyy_mm_dd.request.log</Arg>
       <Set name="RetainDays">90</Set>
-      <Set name="MultiDay">false</Set>
       <Set name="Append">true</Set>
     </New>
   </Set>

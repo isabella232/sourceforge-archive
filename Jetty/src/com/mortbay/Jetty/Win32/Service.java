@@ -167,22 +167,10 @@ public class Service
     {
         try
         {
-	    String logOptions = System.getProperty("LOG_OPTIONS","tLTs");
-            String dateFormat = System.getProperty("LOG_DATE_FORMAT",
-                                                   "yyyyMMddHHmmssSSSzzz ");
-            String timezone = System.getProperty("LOG_TIMEZONE","GMT");
-
             if (Code.debug())
                 Log.instance().add(new WriterLogSink());
                              
 	    FileLogSink sink= new FileLogSink(serviceLogFile);
-	    sink.setOptions(dateFormat,timezone,
-                            (logOptions.indexOf(Log.TIMESTAMP) >= 0),
-                            (logOptions.indexOf(Log.LABEL) >= 0),
-                            (logOptions.indexOf(Log.TAG) >= 0),
-                            (logOptions.indexOf(Log.STACKSIZE) >= 0),
-                            (logOptions.indexOf(Log.STACKTRACE) >= 0),
-                            (logOptions.indexOf(Log.ONELINE) >= 0));
             Log.instance().add(sink);
         }
         catch(Exception e)

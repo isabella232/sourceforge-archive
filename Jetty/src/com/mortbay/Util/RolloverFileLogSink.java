@@ -28,6 +28,7 @@ package com.mortbay.Util;
  * ROLLOVER_LOG_APPEND          If true and not multi-day, append to existing
  *                              log files.
  *
+ * @deprecated Use WriterLogSink
  * @version $Id$
  * @author V. Lipovetsky
  * @author Kent Johnson
@@ -54,6 +55,7 @@ public class RolloverFileLogSink
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
+     * @deprecated Use WriterLogSink
      * @exception java.io.IOException 
      */
     public RolloverFileLogSink()
@@ -92,6 +94,7 @@ public class RolloverFileLogSink
      * @param newThreadStopTimeout 
      * @param newTimerInterval 
      * @exception java.io.IOException 
+     * @deprecated Use WriterLogSink
      */
     public RolloverFileLogSink(String newLogDir,
                                int newRetainDays , 
@@ -116,6 +119,7 @@ public class RolloverFileLogSink
      * @param newTimerInterval 
      * @param multiDay 
      * @exception java.io.IOException 
+     * @deprecated Use WriterLogSink
      */
     public RolloverFileLogSink(String newLogDir)
         throws java.io.IOException
@@ -130,7 +134,9 @@ public class RolloverFileLogSink
      */
     public void start()
     {
-        try{
+        Code.warning("RolloverLogSink is deprecated. Use WriterLogSink");
+        try
+        {
             // Set new log file to name of current date
             setLogNameToDate(new java.util.Date());
             clearOldLogFiles(new java.util.Date());
@@ -153,7 +159,6 @@ public class RolloverFileLogSink
     	cleanup();
         super.stop();
     }
-
 
     /* ------------------------------------------------------------ */
     /* 

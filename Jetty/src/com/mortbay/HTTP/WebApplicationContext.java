@@ -112,8 +112,6 @@ public class WebApplicationContext extends HandlerContext
                 XmlParser.Node defaultConfig =
                     xmlParser.parse(dftResource.getURL().toString());
                 initialize(defaultConfig);
-                rh.setPutAllowed(true);
-                rh.setDelAllowed(true);
             }
         }
         catch(IOException e)
@@ -131,7 +129,9 @@ public class WebApplicationContext extends HandlerContext
         // Do we have a WEB-INF
         Resource _webInf = _webApp.addPath("WEB-INF/");
         if (!_webInf.exists() || !_webInf.isDirectory())
+        {
             Code.warning("No WEB-INF in "+_webAppName+". Serving files only.");
+        }
         else
         {
             // Look for classes directory
@@ -164,13 +164,20 @@ public class WebApplicationContext extends HandlerContext
             // do web.xml file
             Resource web = _webApp.addPath("WEB-INF/web.xml");
             if (!web.exists())
+            {
                 Code.warning("No WEB-INF/web.xml in "+_webAppName+". Serving files and default/dynamic servlets only");
+            }
             else
             {
                 try
                 {
                     XmlParser.Node config = xmlParser.parse(web.getURL().toString());
                     initialize(config);
+                    if (defaults!=null && defaults.length()>0)
+                    {
+                        rh.setPutAllowed(true);
+                        rh.setDelAllowed(true);
+                    }
                 }
                 catch(IOException e)
                 {

@@ -62,7 +62,9 @@
   <security-constraint>
     <web-resource-collection>
       <url-pattern>/auth/relax/*</url-pattern>
+      <url-pattern>/auth/other/*</url-pattern>
       <http-method>GET</http-method>
+      <http-method>HEAD</http-method>
     </web-resource-collection>
     <auth-constraint>
       <role-name>NONE</role-name>

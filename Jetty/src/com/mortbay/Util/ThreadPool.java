@@ -46,6 +46,12 @@ public class ThreadPool
         Integer.getInteger("THREADPOOL_STOP_WAIT",5000).intValue();
 
     /* ------------------------------------------------------------ */
+    /** The number of times a null lock check should synchronize.
+     */
+    public static int __nullLockChecks =
+        Integer.getInteger("THREADPOOL_NULL_LOCK_CHECKS",2).intValue();
+
+    /* ------------------------------------------------------------ */
     String __threadClass =
         System.getProperty("THREADPOOL_THREAD_CLASS",
                            "java.lang.Thread");
@@ -309,6 +315,9 @@ public class ThreadPool
                     thread.interrupt();
                 }
             }
+
+            // This section is here as some JVMs do not interrupt
+            // in all situations that they should.
             Thread.yield();
             if (_threadSet.size()>0)
             {

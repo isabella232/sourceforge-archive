@@ -169,11 +169,6 @@ public class AdminServlet extends HttpServlet
 
         page.add(new Block(Block.Bold).add(new Font(3,true).add(getServletInfo())));
         page.add(Break.rule);
-        page.add(new Link(request.getServletPath()+"/#Components","Components"));
-        page.add(Break.line);
-        page.add(new Link(request.getServletPath()+"/#Debug","Debug"));
-        page.add(Break.rule);
-        page.add(new Target("Components"));
         page.add(new Heading(3,"Components:"));
 
         List sList=new List(List.Ordered);
@@ -269,35 +264,6 @@ public class AdminServlet extends HttpServlet
         }
 
 
-        page.add(Break.rule);
-        page.add(new Target("Debug"));
-        page.add(new Heading(3,"Debug:"));
-
-        Log log = Log.instance();
-        boolean logStackTrace=false;
-        boolean logOneLine=false;
-        LogSink[] sinks = log.getLogSinks();
-        for (int s=0;sinks!=null && s<sinks.length;s++)
-        {
-            if (sinks[s]==null || !(sinks[s] instanceof WriterLogSink))
-                continue;
-            logStackTrace=logStackTrace||((WriterLogSink)sinks[s]).isLogStackTrace();
-            logOneLine=logOneLine||((WriterLogSink)sinks[s]).isLogOneLine();
-        }
-        
-        TableForm tf = new TableForm(request.getRequestURI());
-        page.add(tf);
-        
-        tf.addCheckbox("D","Debug On",Code.getDebug());
-        tf.addTextField("V","Verbosity Level",6,""+Code.getVerbose());
-        tf.addTextField("P","Debug Patterns",40,Code.getDebugPatterns());
-        tf.addTextField("T","Debug Triggers",40,Code.getDebugTriggers());
-        tf.addCheckbox("LS","Log Stack",logStackTrace);
-        tf.addCheckbox("OL","Log One Line",logOneLine);
-        tf.addCheckbox("W","Suppress Warnings",Code.getSuppressWarnings());
-        tf.addCheckbox("S","Suppress Stacks",Code.getSuppressStack());
-        tf.addButton("Action","Set Debug Options");
-        
         response.setContentType("text/html");
         response.setHeader("Pragma", "no-cache");
         response.setHeader("Cache-Control", "no-cache,no-store");
@@ -312,35 +278,6 @@ public class AdminServlet extends HttpServlet
         throws ServletException, IOException
     {
         String target=null;
-        if ("Set Debug Options".equals(request.getParameter("Action")))
-        {
-            Code.setDebug("on".equals(request.getParameter("D")));
-            Code.setSuppressWarnings("on".equals(request.getParameter("W")));
-            Code.setSuppressStack("on".equals(request.getParameter("S")));
-            String v=request.getParameter("V");
-            if (v!=null && v.length()>0)
-                Code.setVerbose(Integer.parseInt(v));
-            else
-                Code.setVerbose(0);
-            Code.setDebugPatterns(request.getParameter("P"));
-            Code.setDebugTriggers(request.getParameter("T"));
-
-            Log log = Log.instance();
-            LogSink[] sinks = log.getLogSinks();
-            boolean logStackTrace="on".equals(request.getParameter("LS"));
-            boolean logOneLine="on".equals(request.getParameter("OL"));
-            for (int s=0;sinks!=null && s<sinks.length;s++)
-            {
-                if (sinks[s]==null || ! (sinks[s] instanceof WriterLogSink))
-                    continue;
-                ((WriterLogSink)sinks[s]).setLogStackTrace(logStackTrace);
-                ((WriterLogSink)sinks[s]).setLogOneLine(logOneLine);
-            }
-
-            
-            target="Debug";
-        }
-
         response.sendRedirect(request.getContextPath()+
                               request.getServletPath()+"/"+
                               Long.toString(System.currentTimeMillis(),36)+

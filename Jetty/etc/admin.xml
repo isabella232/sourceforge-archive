@@ -46,8 +46,10 @@ $Id$
       <Arg>/</Arg>
       <Arg>com.mortbay.HTTP.AdminServlet</Arg>
     </Call>
-    <Call name="addHandler">
-      <Arg><New class="com.mortbay.HTTP.Handler.NotFoundHandler"/></Arg>
+    <Call name="addServlet">
+      <Arg>Debug</Arg>
+      <Arg>/Debug/*</Arg>
+      <Arg>com.mortbay.Servlet.Debug</Arg>
     </Call>
   </Call>
 

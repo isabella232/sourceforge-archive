@@ -620,39 +620,30 @@ public class HttpConnection
         if (_response==null)
             return;
 
-        if (Code.verbose(9999))
-            Code.debug("Notify from ",new Throwable());
-        
         switch(action)
         {
           case OutputObserver.__FIRST_WRITE:
-              if(Code.verbose()) Code.debug("notify FIRST_WRITE ");
               if (!_outputSetup)
                   setupOutputStream();
               break;
               
           case OutputObserver.__RESET_BUFFER:
-              if(Code.verbose()) Code.debug("notify RESET_BUFFER");
               _outputSetup=false;
               break;
               
           case OutputObserver.__COMMITING:
-              if(Code.verbose()) Code.debug("notify COMMITING");
               if (_response.getState()==HttpMessage.__MSG_EDITABLE)
                   _response.commitHeader();
               break;
               
           case OutputObserver.__COMMITED:
-              if(Code.verbose()) Code.debug("notify COMMITED");
               break;
               
           case OutputObserver.__CLOSING:
-              if(Code.verbose()) Code.debug("notify CLOSING");
               _response.complete();
               break;
               
           case OutputObserver.__CLOSED:
-              if(Code.verbose()) Code.debug("notify CLOSED");
               break;
         }
     }

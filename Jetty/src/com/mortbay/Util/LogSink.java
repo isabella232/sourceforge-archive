@@ -26,14 +26,10 @@ public interface LogSink extends LifeCycle
      * @param logOptions A string of characters as defined for the
      * LOG_OPTIONS system parameter.
      */
-    public void setOptions(String dateFormat,
-                           String timezone,
-                           boolean logTimeStamps,
-                           boolean logLabels,
-                           boolean logTags,
-                           boolean logStackSize,
-                           boolean logStackTrace,
-                           boolean logOneLine);
+    public void setOptions(String options);
+    
+    /* ------------------------------------------------------------ */
+    public String getOptions();
     
     /* ------------------------------------------------------------ */
     /** Log a message.

@@ -12,12 +12,7 @@ import java.io.PrintWriter;
 
 /* ------------------------------------------------------------ */
 /** File Log Sink.
- * This implementation of Log Sink writes logs to a file. Currently
- * it is a trivial implementation and represents a place holder for
- * future implementations of file handling which is dated, rolling,
- * etc.
- *
- * 
+ * @deprecated Use WriterLogSink
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -27,25 +22,25 @@ public class FileLogSink extends WriterLogSink
     private String _fileName=null;
     
     /* ------------------------------------------------------------ */
+    /** Constructor.
+     * @deprecated Use WriterLogSink
+     */
     public FileLogSink()
         throws IOException
     {
-    	this(System.getProperty("LOG_FILE","log.txt"));
+    	super(System.getProperty("LOG_FILE","log.txt"));
     }
     
     /* ------------------------------------------------------------ */
+    /** Constructor.
+     * @deprecated Use WriterLogSink
+     */
     public FileLogSink(String filename)
         throws IOException
     {
-        super(new PrintWriter(new FileWriter(filename)));
-        _fileName=filename;
+        super(filename);
     }
     
-    /* ------------------------------------------------------------ */
-    public void stop()
-    {
-        _out.close();
-    }
 }
 
 

@@ -251,3 +251,51 @@ Win32 Service
 The win32 directory contains instructions of how to start Jetty as
 a win32 service.
 
+
+Web Application Security
+------------------------
+Jetty has made a few extensions to the security mechanism "described" in the servlet
+specifiction.  The default security model is that all access is allowed unless a 
+particular security constraint prevents access. This is vulnerable to alias attacks
+where alternate case or names can be used to get to a resource.
+
+ Jetty makes the following interpretations:
+
+ + Methods PUT, DELETE and GET are disabled unless both a web.xml and a default
+   config file are provided.
+
+ + If multiple security constraints are defined, the most specific applies to a
+   request.
+
+ + A security constraint with no data or auth constraint prevents all access.
+
+ + A security constraint with an auth constraint of NONE grants access.
+
+It is strongly recommended that secure WebApplications take following 
+approach.  All access should be denied by default with 
+
+  <security-constraint>
+    <web-resource-collection>
+      <url-pattern>/</url-pattern>
+    </web-resource-collection>
+  </security-constraint>
+
+Specific access should be granted with constraints like:
+
+  <security-constraint>
+    <web-resource-collection>
+      <url-pattern>/public/*</url-pattern>
+      <url-pattern>/images/*</url-pattern>
+      <http-method>GET</http-method>
+      <http-method>HEAD</http-method>
+    </web-resource-collection>
+    <web-resource-collection>
+      <url-pattern>/servlet/*</url-pattern>
+      <http-method>GET</http-method>
+      <http-method>HEAD</http-method>
+      <http-method>POST</http-method>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>NONE</role-name>
+    </auth-constraint>
+  </security-constraint>

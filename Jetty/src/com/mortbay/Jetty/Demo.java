@@ -13,7 +13,7 @@ import com.mortbay.HTTP.SecurityConstraint;
 import com.mortbay.HTTP.SocketListener;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.InetAddrPort;
-import com.mortbay.Util.RolloverFileLogSink;
+import com.mortbay.Util.WriterLogSink;
 
 
 /* ------------------------------------------------------------ */
@@ -102,16 +102,13 @@ public class Demo
             
             
             // Logger
-            RolloverFileLogSink log = new RolloverFileLogSink();
-            log.setLogDir("logs");
+            WriterLogSink log = new WriterLogSink("logs/yyyy_mm_dd.request.log");
             log.setRetainDays(90);
-            log.setMultiDay(false);
             log.setAppend(true);
             server.setLogSink(log);
                               
             // Start handlers and listener
             server.start();
-
             
             // Admin server
             HttpServer admin = new HttpServer();
@@ -127,6 +124,7 @@ public class Demo
                  new SecurityConstraint("admin",
                                         "content-administrator"));
             context.addServlet("Admin","/","com.mortbay.HTTP.AdminServlet");
+            context.addServlet("Debug","/Debug/*","com.mortbay.Servlet.Debug");
             admin.start();
         }
         catch(Exception e)

@@ -391,13 +391,26 @@ abstract public class ThreadedServer extends ThreadPool
     }
     
     /* ------------------------------------------------------------ */
-    /** Force a stop by closing the socket.
+    /** Force a stop.
+     * Close the socket, then make a connection to.
      * called from stop if interrupt is not enough
      */
     protected void forceStop()
     {
-        try{if (_listen!=null) _listen.close();}
-        catch(IOException e){Code.warning(e);}
+        try{
+            if (_listen!=null)
+                _listen.close();
+            if (_address!=null)
+            {
+                InetAddress addr=_address.getInetAddress();
+                if (addr==null)
+                    addr=InetAddress.getLocalHost();
+                new Socket(addr,_address.getPort());
+                Code.debug("Socket is still listening!!!");
+            }
+        }
+        catch(Exception e)
+        {Code.debug(e);}
     }
     
     /* --------------------------------------------------------------- */

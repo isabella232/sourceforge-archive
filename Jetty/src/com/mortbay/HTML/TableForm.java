@@ -306,7 +306,7 @@ public class TableForm extends Form
         if (label==null)
             label="&nbsp;";
         else
-            label="<FONT SIZE=+1><B>"+label+":</B></FONT>";
+            label="<B>"+label+":</B>";
 
         if (extendRow)
         {
