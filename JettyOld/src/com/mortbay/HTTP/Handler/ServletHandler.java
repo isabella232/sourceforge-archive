@@ -168,7 +168,8 @@ public class ServletHandler extends NullHandler
 	    String servletClass=PathMap.pathInfo(pathSpec,address);
 	    int slash=servletClass.indexOf("/");
 	    if (slash>=0)
-		servletClass=servletClass.substring(slash+1);
+		servletClass=servletClass.substring(0,slash);
+	    pathSpec=PathMap.match(pathSpec,address)+servletClass+"%";
 	    
 	    if (servletClass.endsWith(".class"))
 		servletClass=servletClass.substring(0,servletClass.length()-6);
@@ -181,8 +182,7 @@ public class ServletHandler extends NullHandler
 						    null);
 	    holder.setServer(httpServer);
 	    holder.setAutoReload(autoReloadDynamicServlets);
-	    servletMap.put(PathMap.match(pathSpec,address)+servletClass+"%",
-			   holder);
+	    servletMap.put(pathSpec,holder);
 	    
 	    // service request
 	    request.setServletPath(pathSpec);

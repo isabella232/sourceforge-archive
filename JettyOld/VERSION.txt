@@ -1,11 +1,12 @@
 
-Release 2.2.Beta2 - 11 June 1999
+Release 2.2.Beta2 - 12 June 1999
   + Added all write mehtods to HttpOutputStream$SwitchOutputStream
   + Added com.mortbay.Jetty.Server.shutdown() for gentler shutdown
     of server. Called from Exit servlet
   + HttpRequest.getParameterNames() no longer alters the order
     returned by getQueryString().
-  + Handle / in path info of dynamic loading of servlets.
+  + Handle  path info of a dynamic loaded servlets and
+    correctly set the servlet path.
   + Standardized date format in persistent cookies.
 
 Release 2.2.Beta1 - 7 June 1999
