@@ -9,7 +9,7 @@
 #JAVACOPTIONS :=
 TESTS := TestHarness.java
 ROOTNAME := com
-SUBDIRS := STF Gateway
+SUBDIRS := STF
 INSTALLPATH := etc
 INSTALLFILES := InetGateway.prp
 
