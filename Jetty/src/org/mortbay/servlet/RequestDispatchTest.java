@@ -17,6 +17,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponseWrapper;
 import org.mortbay.util.Code;
 
 
@@ -49,6 +51,9 @@ public class RequestDispatchTest extends HttpServlet
     public void doGet(HttpServletRequest sreq, HttpServletResponse sres) 
         throws ServletException, IOException
     {
+        sreq=new HttpServletRequestWrapper(sreq);
+        sres=new HttpServletResponseWrapper(sres);
+        
         String prefix = sreq.getContextPath()!=null
             ? sreq.getContextPath()+sreq.getServletPath()
             : sreq.getServletPath();

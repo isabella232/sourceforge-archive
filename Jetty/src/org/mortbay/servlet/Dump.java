@@ -121,13 +121,6 @@ public class Dump extends HttpServlet
             Table table = new Table(0).cellPadding(0).cellSpacing(0);
             page.add(table);
             table.newRow();
-            table.newHeading()
-                .cell().nest(new Font(2,true))
-                .add("Interface javax.servlet.* Request Methods")
-                .attribute("COLSPAN","2")
-                .left();
-
-            table.newRow();
             table.addHeading("getMethod:&nbsp;").cell().right();
             table.addCell(""+sreq.getMethod());
             table.newRow();
