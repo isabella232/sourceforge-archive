@@ -196,6 +196,9 @@ public class Pool
             if (_running>1)
                 return;
 
+	    if (_min >= _max || _max<1)
+		throw new IllegalStateException("!(0<=min<max)");
+
             // Start the threads
             _pondLife=new PondLife[_max];
             _index=new int[_max];
