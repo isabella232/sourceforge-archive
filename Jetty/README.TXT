@@ -5,9 +5,6 @@ $Id$
 Jetty 4
 =======
 
-THIS IS A DEVELOPMENT RELEASE OF JETTY4.
-This is a work in progress to move to the 2.3 Servlet API
-
 Jetty is an Open Source HTTP Servlet Server written in 100% Java.
 It is designed to be light weight, high performance, embeddable,
 extensible and flexible, thus making it an ideal platform for serving
