@@ -49,15 +49,16 @@
   <property name="jetty.webapp.webinf"    value="${jetty.webapp}/WEB-INF"/>
   <property name="jetty.webapp.classes"   value="${jetty.webapp.webinf}/classes"/>
 
-  <property name="start.jar"       value="${basedir}/start.jar"/>
-  <property name="jetty1.2.jar"    value="${lib}/org.mortbay.jetty-jdk1.2.jar"/>
-  <property name="jetty1.4.jar"    value="${lib}/org.mortbay.jetty.jar"/>
-  <property name="mortbay.jmx.jar" value="${lib}/org.mortbay.jmx.jar"/>
-  <property name="mini.http.jar"   value="${lib}/org.mortbay.http.jar"/>
-  <property name="servlet.jar"     value="${lib}/javax.servlet.jar"/>
-  <property name="jasper.jar"      value="${lib}/org.apache.jasper.jar"/>
+  <property name="start.jar"              value="${basedir}/start.jar"/>
+  <property name="jetty1.2.jar"           value="${lib}/org.mortbay.jetty-jdk1.2.jar"/>
+  <property name="jetty1.4.jar"           value="${lib}/org.mortbay.jetty.jar"/>
+  <property name="mortbay.jmx.jar"        value="${lib}/org.mortbay.jmx.jar"/>
+  <property name="mini.http.jar"          value="${lib}/org.mortbay.http.jar"/>
+  <property name="servlet.jar"            value="${lib}/javax.servlet.jar"/>
+  <property name="jasper-runtime.jar"     value="${ext}/jasper-runtime.jar"/>
+  <property name="jasper-compiler.jar"    value="${ext}/jasper-compiler.jar"/>
 
-  <property name="jetty.run"       value="${etc}/admin.xml ${etc}/jetty.xml"/>
+  <property name="jetty.run"              value="${etc}/admin.xml ${etc}/jetty.xml"/>
 
   <property name="jvmarg"  value="-Djetty.home=${jetty.home}" />
 
@@ -92,8 +93,9 @@
     </path>
     <path id="classpath">
       <pathelement location="${jetty1.2.jar}" />
-      <pathelement location="${jasper.jar}" />
       <pathelement location="${servlet.jar}" />
+      <pathelement location="${jasper-runtime.jar}" />
+      <pathelement location="${jasper-compiler.jar}" />
       <path refid="extpath" />
     </path>
     <property name="expanded.classpath" refid="classpath"/>
@@ -115,8 +117,9 @@
    
     <path id="classpath">
       <pathelement location="${jetty1.4.jar}" />
-      <pathelement location="${jasper.jar}" />
       <pathelement location="${servlet.jar}" />
+      <pathelement location="${jasper-runtime.jar}" />
+      <pathelement location="${jasper-compiler.jar}" />
       <path refid="extpath" />
     </path>
     <property name="expanded.classpath" refid="classpath"/>
@@ -165,7 +168,6 @@
     <delete file="${jetty1.4.jar}" quiet="true"/>
     <delete file="${mortbay.jmx.jar}" quiet="true"/>
     <delete file="${servlet.jar}" quiet="true"/>
-    <delete file="${jasper.jar}" quiet="true"/>
     <delete file="${etc}/demo.mlet" quiet="true"/>
     <delete file="${etc}/webdefault.xml" quiet="true"/>
     <delete file="${demo.webapps}/jetty/LICENSE.html" quiet="true"/>
@@ -345,15 +347,7 @@
 
 
   <!-- ==================================================================== -->
-  <target name="jasper.jar" depends="classes">
-    <jar jarfile="${jasper.jar}"
-         basedir="${classes}"  >
-       <include name="org/apache/jasper/**"  />
-    </jar>
-  </target>
-
-  <!-- ==================================================================== -->
-  <target name="jars" depends="start.jar,servlet.jar,jetty1.2.jar,jetty1.4.jar,jasper.jar,mortbay.jmx.jar"
+  <target name="jars" depends="start.jar,servlet.jar,jetty1.2.jar,jetty1.4.jar,mortbay.jmx.jar"
    description="Build the jar files" >
   </target>
 
