@@ -3,23 +3,15 @@
 The __JETTY_JMX_HOME__ and __JETTY_HOME__ tags must be expanded
 -->
 
-<MLET 
- CODE="com.sun.jdmk.comm.HtmlAdaptorServer"
- ARCHIVE="jmxtools.jar"
- CODEBASE="file:__JETTY_JMX_HOME__/lib" >
+
+<MLET
+ NAME="org.mortbay:adaptor=http"
+ CODE="org.mortbay.util.jmx.MX4JHttpAdaptor"
+ ARCHIVE="mx4j-tools.jar" >
+ <ARG type="int" value="8082">
 </MLET>
 
-<MLET 
- CODE="org.mortbay.util.jmx.CodeMBean"
- ARCHIVE="org.mortbay.jetty.jmx.jar"
- CODEBASE="file:__JETTY_JMX_HOME__/lib">
-</MLET>
 
-<MLET 
- CODE="org.mortbay.util.jmx.LogMBean"
- ARCHIVE="org.mortbay.jetty.jmx.jar"
- CODEBASE="file:__JETTY_JMX_HOME__/lib">
-</MLET>
 
 <MLET 
  CODE="org.mortbay.jetty.jmx.ServerMBean"

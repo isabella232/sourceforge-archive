@@ -89,6 +89,8 @@ public class ServerMBean extends org.mortbay.jetty.jmx.ServerMBean
     {
         super.defineManagedResource();
         
+        defineOperation ("addService", new String[] {"org.mortbay.jetty.plus.Service"}, IMPACT_ACTION);
+        
         _jettyServer=(org.mortbay.jetty.plus.Server)getManagedResource();
     }
     

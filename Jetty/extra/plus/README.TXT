@@ -75,3 +75,17 @@ Demonstration webapps are available for both JAAS and JettyPlus:
       + $jetty.home/extra/resources/log4j.properties
          Log4j config file
 
+
+Running
+-------
+
+First, to start JettyPlus, you need to create an xml configuration file similar to the Jetty xml configuration file. More details and examples are available from http://jetty.mortbay.org/jetty/plus, and of course there are examples in $jetty.home/extra/etc.
+
+To run it:
+   java -DSTART=extra/etc/start-plus.config -jar start.jar config.xml
+
+
+JMX
+---
+JettyPlus supports JMX for management. To enable JMX support, you need to create an mlet JMX boot file (see $jetty.home/extra/etc/jettyplus.mlet for an example), then start JettyPlus:
+  java -Dstart.class=org.mortbay.util.jmx.Main -DSTART=extra/etc/start-plus.config -jar start.jar extra/etc/jettyplus.mlet

@@ -124,6 +124,7 @@ public class MailService extends AbstractService implements Map
     public void setUser (String user)
     {
         _user = user;
+        _sessionProperties.put("User", user);
     }
 
     public String getUser ()
@@ -134,6 +135,7 @@ public class MailService extends AbstractService implements Map
     public void setPassword (String pwd)
     {
         _password = pwd;
+        _sessionProperties.put("Password", pwd);
     }
     
     protected String getPassword ()
