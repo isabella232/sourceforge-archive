@@ -3,24 +3,36 @@
 // $Id$
 // ========================================================================
 
+/*
+ * JBoss, the OpenSource J2EE webOS
+ *
+ * Distributable under LGPL license.
+ * See terms of license at gnu.org.
+ */
+
 package org.mortbay.j2ee.session;
 
-// shamelessly distilled from ClusteredHTTPSessionService.java
+// shamelessly distilled from
+// org.jboss.ha.httpsession.server.ClusteredHTTPSessionService
+// written by : sacha.labourey@cogito-info.ch
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;
-import org.apache.log4j.Category;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.log4j.Logger;
 
 public class
   GUIDGenerator
+  //  implements IdGenerator
 {
-  Category _log=Category.getInstance(getClass().getName());
+  protected static final Logger _log=Logger.getLogger(GUIDGenerator.class);
 
   protected final static int SESSION_ID_BYTES = 16; // We want 16 Bytes for the session-id
   protected final static String SESSION_ID_HASH_ALGORITHM = "MD5";
   protected final static String SESSION_ID_RANDOM_ALGORITHM = "SHA1PRNG";
+  protected final static String SESSION_ID_RANDOM_ALGORITHM_ALT = "IBMSecureRandom";
 
   protected MessageDigest _digest=null;
   protected Random        _random=null;
@@ -29,7 +41,7 @@ public class
      Generate a session-id that is not guessable
      @return generated session-id
   */
-  public synchronized String generateSessionId()
+  public synchronized String nextId(HttpServletRequest request)
     {
       if (_digest==null) {
 	_digest=getDigest();
@@ -108,9 +120,19 @@ public class
 
       try {
 	random=SecureRandom.getInstance(SESSION_ID_RANDOM_ALGORITHM);
-      } catch (NoSuchAlgorithmException e) {
-	_log.error("Could not generate SecureRandom for session-id randomness",e);
-	return null;
+      }
+      catch (NoSuchAlgorithmException e)
+      {
+ 	try
+ 	{
+ 	  random=SecureRandom.getInstance(SESSION_ID_RANDOM_ALGORITHM_ALT);
+ 	}
+ 	catch (NoSuchAlgorithmException e_alt)
+ 	{
+	  _log.error("Could not generate SecureRandom for session-id randomness",e);
+	  _log.error("Could not generate SecureRandom for session-id randomness",e_alt);
+	  return null;
+	}
       }
 
       // set the generated seed for this PRNG
@@ -137,4 +159,17 @@ public class
       return digest;
     }
 
+  public synchronized Object
+    clone()
+    {
+      try
+      {
+	return super.clone();
+      }
+      catch (CloneNotSupportedException e)
+      {
+	_log.warn("could not clone IdGenerator",e);
+	return null;
+      }
+    }
 }
