@@ -31,6 +31,7 @@ import org.mortbay.util.LogSupport;
 public class ChunkingInputStream extends InputStream
 {
     private static Log log = LogFactory.getLog(ChunkingInputStream.class);
+    private static final String __UNEXPECTED_EOF="Unexpected EOF while chunking";
 
     /* ------------------------------------------------------------ */
     int _chunkSize=0;
@@ -60,7 +61,12 @@ public class ChunkingInputStream extends InputStream
         if (_chunkSize<=0 && getChunkSize()<=0)
             return -1;
         b=_in.read();
-        _chunkSize=(b<0)?-1:(_chunkSize-1);
+        if (b<0)
+        {
+            _chunkSize=-1;
+            throw new IOException(__UNEXPECTED_EOF);
+        }
+        _chunkSize--;
         return b;
     }
     
@@ -73,7 +79,12 @@ public class ChunkingInputStream extends InputStream
         if (len > _chunkSize)
             len=_chunkSize;
         len=_in.read(b,0,len);
-        _chunkSize=(len<0)?-1:(_chunkSize-len);
+        if (len<0)
+        {
+            _chunkSize=-1;
+            throw new IOException(__UNEXPECTED_EOF);
+        }
+        _chunkSize=_chunkSize-len;
         return len;
     }
     
@@ -85,7 +96,12 @@ public class ChunkingInputStream extends InputStream
         if (len > _chunkSize)
             len=_chunkSize;
         len=_in.read(b,off,len);
-        _chunkSize=(len<0)?-1:(_chunkSize-len);
+        if (len<0)
+        {
+            _chunkSize=-1;
+            throw new IOException(__UNEXPECTED_EOF);
+        }
+        _chunkSize=_chunkSize-len;
         return len;
     }
     
@@ -97,7 +113,12 @@ public class ChunkingInputStream extends InputStream
         if (len > _chunkSize)
             len=_chunkSize;
         len=_in.skip(len);
-        _chunkSize=(len<0)?-1:(_chunkSize-(int)len);
+        if (len<0)
+        {
+            _chunkSize=-1;
+            throw new IOException(__UNEXPECTED_EOF);
+        }
+        _chunkSize=_chunkSize-(int)len;
         return len;
     }
     
@@ -166,10 +187,8 @@ public class ChunkingInputStream extends InputStream
         
         // Handle early EOF or error in format
         if (line_buffer==null)
-        {
-            log.warn("EOF");
-            return -1;
-        }
+            throw new IOException("Unexpected EOF");
+        
         String line= new String(line_buffer.buffer,0,line_buffer.size);
         
         
@@ -186,6 +205,7 @@ public class ChunkingInputStream extends InputStream
             _chunkSize=-1;
             log.warn("Bad Chunk:"+line);
             log.debug(LogSupport.EXCEPTION,e);
+            throw new IOException("Bad chunk size");
         }
                  
         // check for EOF

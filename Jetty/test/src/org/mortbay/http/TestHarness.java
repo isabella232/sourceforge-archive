@@ -20,12 +20,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilePermission;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.tools.ant.filters.StringInputStream;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.TestCase;
@@ -129,6 +131,50 @@ public class TestHarness
                              "567890abcdef","2 Read to EOF");
             test.checkEquals(cin.read(buf),-1,"2 Read EOF");
             test.checkEquals(cin.read(buf),-1,"2 Read EOF again");
+            
+            
+            // Bad EOF in chunking;
+            ByteArrayInputStream bin = new ByteArrayInputStream
+            (
+                    ("8;\n"+
+                    "01234567\n").getBytes()
+            );
+            cin = new HttpInputStream(fin);
+            cin.setChunking();
+            try
+            {
+                for(int i=0;i<100;i++)
+                    if (cin.read(new byte[100])<0)
+                        break;
+                test.check(false, "no unexpected EOF");
+            }
+            catch(IOException e)
+            {
+                test.check(true, "no unexpected EOF");
+            }
+            
+            // Bad EOF in mid chunking;
+            bin = new ByteArrayInputStream
+            (
+                    ("8;\n"+
+                    "01234567\n" +
+                    "8;\n" +
+                    "1234").getBytes()
+            );
+            cin = new HttpInputStream(fin);
+            cin.setChunking();
+            try
+            {
+                for(int i=0;i<100;i++)
+                    if (cin.read(new byte[100])<0)
+                        break;
+                test.check(false, "no unexpected EOF");
+            }
+            catch(IOException e)
+            {
+                test.check(true, "no unexpected EOF");
+            }
+            
         }
         catch(Exception e)
         {
