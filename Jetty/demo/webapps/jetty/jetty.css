@@ -58,10 +58,10 @@ a.menu:visited { color: #3333ff }
 a.menu:hover { color:  #ff6600}
 a.menu:active {color: #3333ff }
 
-a.selmenu:link {color: #c0c0c0 }
-a.selmenu:visited { color: #c0c0c0 }
-a.selmenu:hover  { color:  #c0c0c0}
-a.selmenu:active {color: #c0c0c0 }
+a.selmenu:link {color: #ff6600 }
+a.selmenu:visited { color: #ff6600 }
+a.selmenu:hover  { color:  #ff6600}
+a.selmenu:active {color: #ff6600 }
 
 a.hdr:link {color: #ffffff }
 a.hdr:visited {color: #ffffff }
@@ -69,10 +69,10 @@ a.hdr:hover  { color:  #ff6600 }
 a.hdr:active {color: #ffffff }
 
 
-a.selhdr:link {color: #c0c0c0 }
-a.selhdr:visited { color: #c0c0c0 }
-a.selhdr:hover  { color:  #c0c0c0 }
-a.selhdr:active {color: #c0c0c0 }
+a.selhdr:link {color: #ff6600 }
+a.selhdr:visited { color: #ff6600 }
+a.selhdr:hover  { color:  #ff6600 }
+a.selhdr:active {color: #ff6600 }
 
 A:link { color: #3333ff }
 A:visited { color: #3333ff }

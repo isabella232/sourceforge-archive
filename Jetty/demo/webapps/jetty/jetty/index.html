@@ -1,4 +1,42 @@
 <P>
-<H1>Jetty Core Project</H1>
+<H1>Jetty Project</H1>
 
+The Jetty Projects primary focus is on providing a high quality 100% java
+HTTP Server and Servlet container.  While Jetty can be used stand-alone, the
+project is not attempting to provide a full application server.
+Instead our approach is to develop Jetty as a component that can be used
+within other project/products to provide HTTP and/or servlets.
+<P>
+This component focus allows us to stay on target with the development of the
+following packages:
+<UL>
+<TABLE border=0>
 
+<TR>
+<TD><B><A HREF="/javadoc/org/mortbay/jetty/servlet/package-summary.html">org.mortbay.jetty.serlet</A></B></TD>
+<TD>-</TD><TD>The J2EE Servlet container</TD>
+
+<TR>
+<TD><B><A HREF="/javadoc/org/mortbay/http/package-summary.html">org.mortbay.http</A></B></TD>
+<TD>-</TD><TD>The HTTP/1.1 protocol stack</TD>
+
+<TR>
+<TD><B><A HREF="/javadoc/org/mortbay/util/package-summary.html">org.mortbay.util</A></B></TD>
+<TD>-</TD><TD>Utilities for the above.</TD>
+
+</TABLE>
+</UL>
+The way these packages interact is documented in the 
+<A href="/jetty/tut/index.html">Jetty Tutorial</A> and 
+<A href="/jetty/doc/index.html">FAQ</A>.
+JSP is not part of the
+Jetty project and the Jasper JSP engine from <a
+href="http://jakarta.apache.org">Jakarta</a> is used.
+<p>
+In the Jetty distribution, the main source tree ( <code>$JETTY_HOME/src</code> ) contains
+the code for the core Jetty project. The extensions to Jetty that are
+included with the distribution are found in the extra tree (
+<code>$JETTY_HOME/extra</code>) and are briefly described on the <A
+href="../projects.html">project page</a>.  Many of the projects and products
+that extend the core Jetty functionality are listed on the <A
+href="http://www.mortbay.com/mortbay/powered.html">Jetty Powered</A> page.
