@@ -109,7 +109,8 @@ public class ProxyHandler extends NullHandler
 
 	try{
 	    String newPath = new URI(url.getFile()).getPath();
-	    request.translateAddress(request.getResourcePath(),newPath);
+	    request.translateAddress(request.getResourcePath(),
+				     newPath,true);
 	    request.setHeader(HttpHeader.Connection,null);
 	    request.setHeader("Host",null);
 	    request.setVersion(request.HTTP_1_0);

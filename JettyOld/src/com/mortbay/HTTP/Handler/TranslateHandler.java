@@ -22,6 +22,8 @@ import javax.servlet.*;
  * old path to the new path. Translations are applied, longest match
  * first, until no more translations match.
  *
+ * If the PathMap key "TranslateURI" is set to a value of true, then
+ * translations are reflected in the requests URI.
  * @see Interface.HttpHandler
  * @version $Id$
  * @author Greg Wilkins
@@ -30,6 +32,7 @@ public class TranslateHandler extends NullHandler
 {
     /* ----------------------------------------------------------------- */
     PathMap translations;
+    boolean _translateURI=false;
     
     /* ----------------------------------------------------------------- */
     /** Construct basic auth handler.
@@ -60,8 +63,10 @@ public class TranslateHandler extends NullHandler
 	    tree = (PropertyTree)properties;
 	else
 	    tree = new PropertyTree(properties);
-
+	
+	_translateURI=tree.getBoolean("TranslateURI");
 	translations=new PathMap(tree);
+	translations.remove("TranslateURI");
 	Code.debug(translations);
     }
     
@@ -69,20 +74,20 @@ public class TranslateHandler extends NullHandler
     public void handle(HttpRequest request,
 		       HttpResponse response)
 	 throws Exception
-    {
+    {	
 	String address = request.getResourcePath();
 	
 	String path=translations.matchSpec(address);
-	if (path != null)
+	while (path != null)
 	{
 	    String translation = (String)translations.get(path);
 	    Code.debug("Translation from "+path+
 		       " to "+translation);
 		
-	    request.translateAddress(path,translation);
+	    request.translateAddress(path,translation,_translateURI);
 
-	    // recurse for more translations
-	    handle(request,response);
+	    address = request.getResourcePath();
+	    path=translations.matchSpec(address);
 	}
     }
     
@@ -90,20 +95,20 @@ public class TranslateHandler extends NullHandler
     public String translate(String address)
     {
 	String path=translations.matchSpec(address);
-	if (path != null)
+	while (path != null)
 	{
 	    String translation = (String)translations.get(path);
 	    Code.debug("Translation from "+path+
 		       " to "+translation);
 
 	    address = PathMap.translate(address,path,translation);
-	    
-	    // recurse for more translations
-	    address = translate(address);
+	    path=translations.matchSpec(address);
 	}
 	return address;
     }
 }
+
+
 
 
 

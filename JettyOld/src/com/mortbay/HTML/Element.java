@@ -138,10 +138,16 @@ public abstract class Element
      */
     public Element attributes(String attributes)
     {
-	if (Code.debug() && attributes.indexOf("=")>=0)
+	if (Code.debug() && attributes!=null && attributes.indexOf("=")>=0)
 	    Code.warning("Set attribute with old method: "+attributes+
 			 " on " + getClass().getName());
 
+	if (attributes==null)
+	{
+	    this.attributes=null;
+	    return this;
+	}
+	
 	if (attributes==noAttributes)
 	    return this;
 	
@@ -158,6 +164,7 @@ public abstract class Element
      * a space). The attributes are available to the derived class in the
      * protected member String <I>attributes</I>
      * @param attributes String of HTML attributes to add to the element.
+     * A null attribute clears the current attributes.
      * @return This Element so calls can be chained.
      */
     public Element attribute(String attributes)
@@ -189,7 +196,8 @@ public abstract class Element
 	if (value!=null)
 	{
 	    if (value instanceof String &&
-		((String)value).indexOf(' ')==-1)
+		((String)value).indexOf(' ')==-1 &&
+		((String)value).length()>0)
 		attributeMap.put(attribute,value);
 	    else
 		attributeMap.put(attribute,"\""+value+'"');

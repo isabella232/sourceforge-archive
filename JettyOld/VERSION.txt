@@ -1,3 +1,8 @@
+Release 2.2.8 - 13 Sep 1999
+  + Fixed bug in Element.attribute with empty string values.
+  + Made translation of getRequestURI() optional.
+  + Removed recursion from TranslationHandler
+
 Release 2.2.7 - 9 Sep 1999
   + Reverted semantics of getRequestURI() to return untranslated URI.
   + Added GzipFilter for content encoding.

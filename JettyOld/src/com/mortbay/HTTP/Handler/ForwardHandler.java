@@ -160,13 +160,17 @@ public class ForwardHandler extends NullHandler
 		    int port = url.getPort() ;
 		    socket= new Socket(url.getHost(),port<0?80:port);
 		    if (match.startsWith("/"))
-			request.translateAddress(requestPath,url.getFile());
+			request.translateAddress(requestPath,
+						 url.getFile(),
+						 true);
 		}
 		else
 		{
 		    socket= new Socket(proxy.getInetAddress(),
 				       proxy.getPort());
-		    request.translateAddress(requestPath,url.toString());
+		    request.translateAddress(requestPath,
+					     url.toString(),
+					     true);
 		}
 
 		try{

@@ -45,6 +45,9 @@ public class Dump extends HttpServlet
     {	
         sres.setContentType("text/html");
         OutputStream out = sres.getOutputStream();
+
+	out.write("<H1>This is a Ü</H1>".getBytes());
+	
 	PrintWriter pout = new PrintWriter(out);
 
 	Page page=null;

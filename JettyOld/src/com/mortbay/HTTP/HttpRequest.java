@@ -364,8 +364,12 @@ public class HttpRequest extends HttpHeader
      * @param pathSpec The path segment to be translated. This may end
      * with the special characters defined in PathMap.
      * @param newPath The path segment to replace path with.
+     * @param translateURI If true, the URI of the request is translated,
+     * otherwise only the resource path is affected.
      */
-    public void translateAddress(String pathSpec,String newPath)
+    public void translateAddress(String pathSpec,
+				 String newPath,
+				 boolean translateURI)
     {
 	String path=getResourcePath();
 	path=PathMap.translate(path,pathSpec,newPath);
@@ -373,6 +377,8 @@ public class HttpRequest extends HttpHeader
 	servletPath=null;
 	pathInfo=path;
 	setResourcePath(path);
+	if (translateURI)
+	    uri.setPath(getResourcePath());
     }
     
     /* -------------------------------------------------------------- */
