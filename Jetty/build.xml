@@ -32,7 +32,7 @@ Other targets:
 <project name="Jetty HTTP Server" default="webapps" basedir=".">
 
   <property name="RELEASE.MAJOR"  value="4.1" />
-  <property name="RELEASE.MAJOR.MINOR"  value="4.1.B1" />
+  <property name="RELEASE.MAJOR.MINOR"  value="4.1.0RC0" />
 
   <property environment="env"/>
   <property name="src"            value="${basedir}/src" />

@@ -1,12 +1,18 @@
 Jetty Versions
 --------------
 
+Jetty-4.1.0RC0 - 31 July 2002
  + Fixed getRealPath for packed war files.
  + Changed URI default charset back to ISO_8859_1
  + Restructured Password into Password and Credentials
  + Added DigestAuthenticator
  + Added link to a Jetty page in Korean.
  + Added ExpiryHandler which can set a default Expires header.
+
+Jetty-4.0.5 - 31 July 2002
+ + Fixed getRealPath for packed war files.
+ + Reversed order of ServletContextListener.contextDestroyed calls
+ + Fixed getRequestURI for RD.forward to return new URI.
 
 Jetty-4.1.B1 - 19 July 2002
  + Updated mini.http.jar target
