@@ -268,6 +268,10 @@ public class Server extends HttpServer
                                 try{servers[i].stop();}
                                 catch(Exception e){Code.warning(e);}
                             }
+                            
+                            // Try to avoid JVM crash
+                            try{Thread.sleep(200);}
+                            catch(Exception e){Code.warning(e);}
                         }
                     };
             shutdownHook.invoke(Runtime.getRuntime(),

@@ -6,15 +6,6 @@ It is designed to be light weight, high performance, embeddable,
 extensible and flexible, thus making it an ideal platform for serving  
 dynamic HTTP requests from any Java application.
 
-This release of Jetty 3 is a significant revision of the Jetty 2 code 
-base. The aims of the Jetty 3 developement include:
-
-  + Fully RFC2616 compliant implementation of HTTP/1.1.
-  + Decouple HTTP server from specific Servlet container.
-  + Implement Servlet 2.2 Container.
-  + Remain efficient, embedable & extensible.
-  + Utilize java collection classes for improved performance.
-  + Improved coding standards and increasing test coverage.
 
 
 Quick start on Unix
@@ -25,8 +16,10 @@ run:
 Browse to:
   http://localhost:8080
 
-If this doesn't work - you will need to read some more and setup the
-environment.
+
+If this doesn't work - you can try the ant quick start below or you will need to 
+read some more and setup the environment.
+
 
 
 Quick start on Windows
@@ -42,8 +35,30 @@ run:
 Browse to:
   http://localhost:8080
 
-If this doesn't work - you will need to read some more and setup the
-environment.
+If this doesn't work - you can try the ant quick start below or you will need to 
+read some more and setup the environment.
+
+If you still have problems - try installing in a path with no spaces in the
+directory name.  Also read the section on alias checking in the web application
+security section below.
+
+
+
+Ant Quick Start
+===============
+
+If you have the ant java build tool ant installed, you may use that to start
+jetty.  The demo can be started with:
+
+  Unix:  ant -buildfile $JETTY_HOME/build.xml demo
+  Win32: ant.bat -buildfile %JETTY_HOME%\build.xml demo
+
+The default jetty.xml configuration can be started with:
+
+  Unix:  ant -buildfile $JETTY_HOME/build.xml run
+  Win32: ant.bat -buildfile %JETTY_HOME%\build.xml run
+
+
 
 
 Environment
@@ -69,6 +84,7 @@ jar containing the JDK compiler (if you wish to use another compiler
 you will have to configure jasper):
 
    $JDK_HOME/lib/tools.jar
+
 
 
 Running the Demo Server
@@ -130,6 +146,7 @@ There is also a Jetty extension configuration mechanism for web applications.
 If a file WEB-INF/web-jetty.xml is found, it is treated as a Jetty XmlConfiguration
 file and applied to the WebApplicationContext object when the context
 is started.
+
 
 Building from source
 ====================
