@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 1996- Mort Bay Consulting Pty. Ltd. <mortbay@mortbay.com>
+# Copyright (c) 1996- Mort Bay Consulting Pty. Ltd. <mortbay@ozemail.com.au>
 # Released under GPL 2.0
 # $Id$
 
@@ -158,7 +158,7 @@ applyToRCSFiles()
 
                 find $i -name RCS -type l -print -prune | while read RCS
                 do  
-	            F=`find $RCS -follow \( -name REMOVED -prune \) -o -name '*,v' -print | sed -e's/RCS.//' -e's/,v$//'`
+	            F=`find $RCS -follow \( -name REMOVED -prune \) -o \( -name '*,v' -o -name '.*,v' \) -print | sed -e's/RCS.//' -e's/,v$//'`
 	            [ "$F" != "" ] && eval $* $OPTIONS $F
                 done
 
@@ -382,7 +382,7 @@ case $OP in
     find . -name RCS -type l -print -prune | sed 's|^./||' |while read RCS
     do   
 	DIR=` dirname $RCS `
-	FILES=`find $RCS -follow \( -name REMOVED -prune \) -o -name '*,v' -print | sed -e's/RCS.//' -e's/,v$//'`
+	FILES=`find $RCS -follow \( -name REMOVED -prune \) -o \( -name '*,v' -o -name '.*,v' \) -print | sed -e's/RCS.//' -e's/,v$//'`
 	[ "$FILES" != "" ] && for file in $FILES
 	do
 	    STATUS=`$CMD rlog -h $file | sed \
@@ -424,7 +424,7 @@ case $OP in
 
   # -------------------------------------------------------------------
   ls )
-    find . -follow -name '*,v' -print | egrep ',v' | sed -e's/,v//' -e's/RCS.//'
+    find . -follow \( -name '*,v' -o -name '.*,v' \) -print | egrep ',v' | sed -e's/,v//' -e's/RCS.//'
     ;;
 
   # -------------------------------------------------------------------
