@@ -107,10 +107,11 @@ public abstract class AbstractSessionManager implements SessionManager
         Session session = newSession();
         session.setMaxInactiveInterval(_dftMaxIdleSecs);
         _sessions.put(session.getId(),session);
-
+        HttpSessionEvent event=new HttpSessionEvent(session);
+        
         for(int i=0;i<_sessionListeners.size();i++)
             ((HttpSessionListener)_sessionListeners.get(i))
-                .sessionCreated(session.getHttpSessionEvent());
+                .sessionCreated(event);
         return session;
     }
 
@@ -355,7 +356,6 @@ public abstract class AbstractSessionManager implements SessionManager
         long _accessed=_created;
         long _maxIdleMs = _dftMaxIdleSecs*1000;
         String _id;
-        HttpSessionEvent _event;
 
         /* ------------------------------------------------------------- */
         protected Session()
@@ -367,14 +367,6 @@ public abstract class AbstractSessionManager implements SessionManager
 
         /* ------------------------------------------------------------ */
         protected abstract Map newAttributeMap();
-
-        /* ------------------------------------------------------------ */
-        HttpSessionEvent getHttpSessionEvent()
-        {
-            if (_event==null)
-                _event=new HttpSessionEvent(this);
-            return _event;
-        }
 
         /* ------------------------------------------------------------ */
         public void access()
@@ -479,9 +471,10 @@ public abstract class AbstractSessionManager implements SessionManager
             {
                 _invalid=true;
                 _sessions.remove(_id);
+                HttpSessionEvent event = new HttpSessionEvent(this);
                 for(int i=0;i<_sessionListeners.size();i++)
                     ((HttpSessionListener)_sessionListeners.get(i)).
-                        sessionDestroyed(getHttpSessionEvent());       
+                        sessionDestroyed(event);       
             }
              
         }
