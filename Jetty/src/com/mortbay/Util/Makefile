@@ -11,7 +11,7 @@ TESTS := TestHarness.java
 ROOTNAME := com
 SUBDIRS := DataClassTest
 INSTALLPATH := etc
-INSTALLFILES := InetGateway.prp
+INSTALLFILES := 
 EXCLUDECLASSES := \
 	TestHarness.class \
 	PropertyTreeTest.class \
