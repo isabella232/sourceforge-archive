@@ -283,7 +283,7 @@ public class Code
 
     /* ------------------------------------------------------------ */
     /** Set debug triggers.
-     * @param triggers coma separated string of triggers 
+     * @param triggers comma separated string of triggers 
      */
     public static void setDebugTriggers(String triggers)
     {
