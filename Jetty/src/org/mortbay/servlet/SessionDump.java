@@ -80,8 +80,10 @@ public class SessionDump extends HttpServlet
             else if (action.equals("Remove"))
                 session.removeAttribute(name);
         }
+
+        String encodedUrl=response.encodeRedirectURL(nextUrl);
+        response.sendRedirect(encodedUrl);
         
-        response.sendRedirect(response.encodeRedirectURL(nextUrl));
     }
     
         

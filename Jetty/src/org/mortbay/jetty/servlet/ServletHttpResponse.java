@@ -304,7 +304,7 @@ public class ServletHttpResponse implements HttpServletResponse
 
     /* ------------------------------------------------------------ */
     public String encodeURL(String url) 
-    {
+    {        
         // should not encode if cookies in evidence
         if (_servletHttpRequest==null ||
             _servletHttpRequest.isRequestedSessionIdFromCookie() &&
