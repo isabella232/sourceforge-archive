@@ -288,7 +288,13 @@ public class Server extends HttpServer
             String app = r.addPath(r.encode(files[f])).toString();
             if (context.toLowerCase().endsWith(".war") ||
                 context.toLowerCase().endsWith(".jar"))
+            {
                 context=context.substring(0,context.length()-4);
+                Resource unpacked=r.addPath(context);
+                if (unpacked!=null && unpacked.exists() && unpacked.isDirectory())
+                    continue;
+            }
+            
             if (context.equalsIgnoreCase("root")||
                 context.equalsIgnoreCase("root/"))
             {

@@ -25,6 +25,7 @@ class JarFileResource extends JarResource
     transient boolean _directory;
     transient String _jarUrl;
     transient String _path;
+    transient boolean _exists;
     
     /* -------------------------------------------------------- */
     JarFileResource(URL url)
@@ -89,6 +90,9 @@ class JarFileResource extends JarResource
      */
     public boolean exists()
     {
+        if (_exists)
+            return true;
+        
         boolean check=checkConnection();
         
         // Is this a root URL?
@@ -139,9 +143,16 @@ class JarFileResource extends JarResource
                         _directory=_path.endsWith("/");
                         break;
                     }
-                    else if (_path.endsWith("/") && name.startsWith(_path))
+                    else if (_path.endsWith("/"))
                     {
-                        // Our path is a directory prefix to the entry
+                        if (name.startsWith(_path))
+                        {
+                            _directory=true;
+                            break;
+                        }
+                    }
+                    else if (name.startsWith(_path) && name.length()>_path.length() && name.charAt(_path.length())=='/')
+                    {
                         _directory=true;
                         break;
                     }
@@ -149,8 +160,10 @@ class JarFileResource extends JarResource
             }
         }    
         
-        return _directory || _entry!=null;
+        _exists= ( _directory || _entry!=null);
+        return _exists;
     }
+    
 
 
     /* ------------------------------------------------------------ */
