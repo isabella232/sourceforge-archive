@@ -721,7 +721,7 @@ public class HttpContext implements LifeCycle,
             }
 
             // Make the resource
-            resource=_resourceBase.addPath(pathInContext);
+            resource=_resourceBase.addPath(_resourceBase.encode(pathInContext));
             if (Code.verbose()) Code.debug("CACHE MISS: ",resource);
             if (resource==null)
                 return null;
