@@ -28,7 +28,6 @@ import javax.servlet.http.HttpSession;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.PathMap;
 import org.mortbay.util.Code;
-import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.URI;
@@ -39,6 +38,9 @@ import org.mortbay.util.WriterOutputStream;
 /* ------------------------------------------------------------ */
 /** Servlet RequestDispatcher.
  * 
+ * If the request attribute "org.mortbay.jetty.servlet.Dispatcher.shared_session" is set, then 
+ * sessions are shared in cross context dispatch.  Watch out for class loading issues!
+ *
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -506,11 +508,17 @@ public class Dispatcher implements RequestDispatcher
                 if (_xSession==null)
                 {
                     Code.debug("Ctx dispatch session");
-                    if (_requestedSessionId==null)
-                        _requestedSessionId=super.getSession(true).getId();
-                    _xSession=_servletHandler.getHttpSession(_requestedSessionId);
-                    if (create && _xSession==null)
-                        _xSession=_servletHandler.newHttpSession(this);
+                    
+                    if (getAttribute("org.mortbay.jetty.servlet.Dispatcher.shared_session") != null)
+                    	_xSession= super.getSession(create);
+                    else
+                    {
+                        if (_requestedSessionId==null)
+                            _requestedSessionId=super.getSession(true).getId();
+                        _xSession=_servletHandler.getHttpSession(_requestedSessionId);
+                        if (create && _xSession==null)
+                            _xSession=_servletHandler.newHttpSession(this);
+                    }
                 }
                 return _xSession;
             }
