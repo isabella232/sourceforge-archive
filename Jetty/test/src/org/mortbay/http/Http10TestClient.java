@@ -193,7 +193,7 @@ public class Http10TestClient extends Thread
         {
             if (args.length!=3)
             {
-                System.err.println("Usage - java c.m.H.Http10TestClient <url> <threads> <requests>");
+                System.err.println("Usage - java org.mortbay.http.Http10TestClient <url> <threads> <requests>");
                 System.exit(1);
             }
             int threads=Integer.parseInt(args[1]);
