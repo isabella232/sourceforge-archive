@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.0rc0 - 24 October 2002
+ + Greg's birthday release!
+ + Added embedded iso8859 writer to HttpOutputStream.
  + Fixed RolloverFileOutputStream without date.
  + Fixed SessionManager initialization
  + Added authenticator to admin.xml
