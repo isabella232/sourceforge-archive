@@ -19,9 +19,11 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.jboss.deployment.DeploymentException;
+import org.jboss.deployment.DeploymentInfo;
 import org.jboss.logging.Logger;
 import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
 import org.jboss.web.AbstractWebContainer;
+import org.jboss.web.AbstractWebDeployer;
 import org.jboss.web.WebApplication;
 import org.mortbay.util.MultiException;
 import org.w3c.dom.Element;
@@ -359,4 +361,46 @@ public class JettyService
   }
 
   //----------------------------------------------------------------------------
+  // Hackery to integrate with recent changes to AbstractWebContainer...
+
+  public class
+    JettyDeployer
+    extends AbstractWebDeployer
+  {
+    protected DeploymentInfo _deploymentInfo;
+
+    public
+      JettyDeployer(DeploymentInfo di)
+    {
+      _deploymentInfo=di;
+    }
+
+    public void
+      init(Object containerConfig)
+      throws Exception
+    {
+      // what should we do here ? :-)
+    }
+
+    public void
+    performDeploy(WebApplication webApp, String warUrl, WebDescriptorParser parser)
+    throws DeploymentException
+    {
+      JettyService.this.performDeploy(webApp, warUrl, parser);
+    }
+
+    public void
+      performUndeploy(String warUrl, WebApplication wa)
+      throws DeploymentException
+    {
+      JettyService.this.performUndeploy(warUrl);
+    }
+  }
+
+  public AbstractWebDeployer
+    getDeployer(DeploymentInfo di)
+    throws Exception
+  {
+    return new JettyDeployer(di);
+  }
 }
