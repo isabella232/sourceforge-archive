@@ -780,6 +780,7 @@ public class HttpRequest extends HttpHeader
     }   
 
 
+    /* -------------------------------------------------------------- */
     public javax.servlet.http.Cookie getCookies()[]
     {
 	return cookies;
