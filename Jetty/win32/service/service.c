@@ -269,7 +269,7 @@ VOID AddToMessageLog(LPTSTR lpszMsg)
 {
     TCHAR   szMsg[256];
     HANDLE  hEventSource;
-    LPTSTR  lpszStrings[2];
+    LPCTSTR lpszStrings[2];
 
     if (!bConsole)
     {
@@ -469,7 +469,7 @@ void printUsage()
 }
 
 
-void _CRTAPI1 main(int argc, char **argv)
+int _CRTAPI1 main(int argc, char **argv)
 {
     // The StartServiceCtrlDispatcher requires this table to specify
     // the ServiceMain function to run in the calling process. The first
