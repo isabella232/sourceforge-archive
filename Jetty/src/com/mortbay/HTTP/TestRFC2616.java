@@ -1171,7 +1171,7 @@ public class TestRFC2616
 
     public static void test14_16()
     {        
-        Test t = new Test("RFC2616 14.16 Conent-Range");
+        Test t = new Test("RFC2616 14.16 Content-Range");
         try {
           TestRFC2616 listener = new TestRFC2616();
 
