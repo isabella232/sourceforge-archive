@@ -1,0 +1,137 @@
+<!--
+========================================================================
+ Copyright (c) 2003 Mort Bay Consulting (Australia) Pty. Ltd.
+ $Id$
+========================================================================
+========================================================================
+
+
+-->
+
+<project name="LoadBalancer" default="jars" basedir=".">
+
+  <property name="package"     value="jetty.j2ee" />
+  <property environment="env"/>
+  <property file="../../ant.properties" />
+  <property file="../build.package.properties" />
+
+
+  <!-- ==================================================================== -->
+  <target name="is.jdk1.4.available">
+    <available property="jdk1.4.available" classname="java.util.logging.Handler" />
+    <echo message="JDK1.4 available=${jdk1.4.available}" level="info"/>
+  </target>
+
+
+  <!-- ==================================================================== -->
+  <!-- Classpath                                                            -->
+  <!-- ==================================================================== -->
+  <target name="classpath" depends="is.jdk1.4.available" if="jdk1.4.available">
+    <path id="extpath">
+      <fileset dir="${ext}">
+        <include name="*.jar"/>
+        <include name="*.JAR"/>
+        <include name="*.zip"/>
+        <include name="*.ZIP"/>
+       </fileset>
+       <fileset dir="${jetty.ext}">
+        <include name="*.jar"/>
+        <include name="*.JAR"/>
+        <include name="*.zip"/>
+        <include name="*.ZIP"/>
+       </fileset>
+    </path>
+
+    <path id="classpath">
+      <pathelement location="${jetty.jar}" />
+      <pathelement location="${servlet.jar}" />
+      <path refid="extpath" />
+    </path>
+
+    <property name="expanded.classpath" refid="classpath"/>
+    <echo message="classpath=${expanded.classpath}" level="info"/>
+  </target>
+
+
+  <!-- ==================================================================== -->
+  <!-- Prepare                                                              -->
+  <!-- ==================================================================== -->
+  <target name="prepare" depends="classpath" description="Make build directories">
+    <mkdir dir="${classes}" />
+    <mkdir dir="${lib}" />
+  </target>
+
+
+  <!-- ==================================================================== -->
+  <!-- Tidy                                                                 -->
+  <!-- ==================================================================== -->
+  <target name="tidy" description="Remove classes">
+    <delete dir="${classes}" quiet="true"/>
+  </target>
+
+
+  <!-- ==================================================================== -->
+  <!-- Clean                                                                -->
+  <!-- ==================================================================== -->
+  <target name="clean" depends="tidy" description="Remove generated files">
+    <delete file="${package.jar}"/>
+  </target>
+
+
+  <!-- ==================================================================== -->
+  <!-- Classes                                                              -->
+  <!-- ==================================================================== -->
+  <target name="classes" depends="prepare" description="Compile classes">
+    <javac srcdir="${src}"
+           destdir="${classes}"
+           debug="true"
+           optimize="fale"
+           deprecation="${javac.deprecation}">
+       <classpath>
+         <path refid="classpath"/>
+       </classpath>
+       <include name="**/*.java"/>
+    </javac>
+  </target>
+
+
+  <!-- ==================================================================== -->
+  <!-- jars                                                                 -->
+  <!-- ==================================================================== -->
+  <target name="jars" 
+          depends="classes, build.package.jar" 
+	  description="Make jars">
+  </target>
+
+
+  <!-- ==================================================================== -->
+  <!-- build.package.jar                                                    -->
+  <!-- ==================================================================== -->
+  <target name="build.package.jar" description="Make the JettyPlus jar file">
+    <jar basedir="${classes}" destfile="${package.jar}">
+    </jar>
+  </target>
+
+
+  <!-- ==================================================================== -->
+  <!-- test                                                                 -->
+  <!-- ==================================================================== -->
+  <target name="check.tests" description="check to see if there are any tests">
+    <available property="tests.available" file="${test}/build.xml"/>
+  </target>
+
+  <!-- ==================================================================== -->
+  <target name="test" 
+          depends="check.tests" 
+          if="tests.available" 
+          description="run tests">
+    <ant antfile="${test}/build.xml" inheritAll="false" target="test"/>
+  </target>
+
+
+  <!-- ==================================================================== -->
+  <!-- all                                                                  -->
+  <!-- ==================================================================== -->
+  <target name="all" depends="clean, jars" description="default">
+  </target>
+</project>
