@@ -8,8 +8,9 @@
 // ========================================================================
 
 package org.mortbay.http.handler;
-import java.io.DataInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -256,10 +257,11 @@ public class HTAccessHandler extends AbstractHttpHandler
         /* ------------------------------------------------------------ */
         public HTAccess(Resource resource)
         {
-            DataInputStream htin;
+            BufferedReader htin =null;
             try
             {
-                htin = new DataInputStream(resource.getInputStream());
+                htin=new BufferedReader(new InputStreamReader(
+                        _userResource.getInputStream()));
                 parse(htin);
                 _lastModified=resource.lastModified();
 
@@ -408,14 +410,14 @@ public class HTAccessHandler extends AbstractHttpHandler
             if(_requireName == null)
                 return true;
             
- 	    // Authenticate with realm  
- 	    if (context.getRealm().authenticate(user, pass, request)==null)
+            // Authenticate with realm  
+            if (context.getRealm().authenticate(user, pass, request)==null)
             {  
                 // Have to authenticate the user with the password file  
- 	        String code=getUserCode(user);  
-     	        if (code==null ||  
-         	    (code.equals("") && !pass.equals("")) ||  
-             	    (!code.equals(UnixCrypt.crypt(pass, code))))  
+                String code=getUserCode(user);  
+                if (code==null ||  
+                    (code.equals("") && !pass.equals("")) ||  
+                    (!code.equals(UnixCrypt.crypt(pass, code))))  
                     return false;  
             };                    
             
@@ -466,10 +468,10 @@ public class HTAccessHandler extends AbstractHttpHandler
             {
                 Code.debug("LOAD ",_userResource);
                 _users=new HashMap();
-                DataInputStream ufin =null;
+                BufferedReader ufin =null;
                 try
                 {
-                    ufin = new DataInputStream(_userResource.getInputStream());
+                    ufin=new BufferedReader(new InputStreamReader(_userResource.getInputStream()));
                     _userModified=_userResource.lastModified();
                     String line;
                     while ((line = ufin.readLine()) != null) 
@@ -506,10 +508,11 @@ public class HTAccessHandler extends AbstractHttpHandler
                 Code.debug("LOAD ",_groupResource);
                 
                 _groups=new HashMap();
-                DataInputStream ufin = null;
+                BufferedReader ufin =null;
                 try
                 {
-                    ufin = new DataInputStream(_groupResource.getInputStream());
+                    ufin=new BufferedReader(new InputStreamReader(
+                            _userResource.getInputStream()));
                     _groupModified=_groupResource.lastModified();
                     String line;
                     while ((line = ufin.readLine()) != null) 
@@ -585,7 +588,7 @@ public class HTAccessHandler extends AbstractHttpHandler
         }
  
         /* ------------------------------------------------------------ */
-        public void parse(DataInputStream htin)
+        private void parse(BufferedReader htin)
             throws IOException
         {
             String line;
