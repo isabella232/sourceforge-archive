@@ -25,7 +25,7 @@ Then when you want to use the Jetty libraries:
 
 On Windows the procedure is similar:
 
-	unzip -d c:\ Jetty-2.4.7.zip
+	unzip -d c:\  Jetty-2.4.7.zip
 	set JETTY_HOME=c:\Jetty-2.4.7
 	
 and:
@@ -34,7 +34,7 @@ and:
         set CLASSPATH=%CLASSPATH%;%JETTY_HOME%\lib\com.mortbay.Jetty.jar
         set CLASSPATH=%CLASSPATH%;%JETTY_HOME%\lib\gnujsp.jar
 
-Note that Jetty itself does not use this (or any) environment variable.
+Note that Jetty does not use JETTY_HOME (or any) environment variable.
 
 The jsse.jar, jnet.jar and jcert.jar are only required if you
 intend to run or compile the SSL classes.
@@ -77,7 +77,7 @@ To build a complete distribution:
 
 	make -f build-unix.mak
 	
-To build and run the demo (described above):
+To build and run the demo (described below):
 
 	make -f build-unix.mak demo
 	
