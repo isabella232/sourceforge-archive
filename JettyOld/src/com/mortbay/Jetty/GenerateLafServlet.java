@@ -1,10 +1,11 @@
 package com.mortbay.Jetty;
 import com.mortbay.HTML.*;
 import javax.servlet.*;
+import javax.servlet.http.*;
 
-public class GenerateLafServlet extends GenericServlet
+public class GenerateLafServlet extends HttpServlet
 {
-    public void service(ServletRequest request, ServletResponse response)
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
 	 throws java.io.IOException
     {
 	Page page = Page.getPage(Page.getDefaultPageType(),request);

@@ -534,6 +534,8 @@ public class Server extends BaseConfiguration
 	    String filename = "JettyServer.prp";
 	    if (args.length==1)
 		filename = args[0];
+	    else if ( ! new File(filename).exists())
+		filename = "etc/JettyServer.prp";
 
 	    // load property file
 	    Properties props = new Properties();
