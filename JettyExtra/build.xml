@@ -51,6 +51,8 @@ clean       - Remove generated files
   <target name="all" depends="jmx,ftp,tools,sasl"/>
   <target name="clean" depends="jmxclean,ftpclean,toolsclean,saslclean"/>
 
+  <target name="tidy" depends="clean" />
+
 </project>
 
 

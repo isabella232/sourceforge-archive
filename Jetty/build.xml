@@ -43,7 +43,8 @@ Other targets:
   <property name="test"           value="${basedir}/test"/>
   <property name="test.lib"       value="${test}/lib"/>
   <property name="test.src"       value="${test}/src"/>
-  <property name="test.classes"   value="${test}/classes"/>
+  <property name="test.classes"   value="${test}/classes" />
+  <property name="extra"          value="${basedir}/extra" />
   <property name="build.compiler" value="jikes"/>
   <!-- property name="build.compiler" value="classic"/ -->
   <!-- property name="build.compiler" value="modern" / -->
@@ -99,19 +100,29 @@ Other targets:
         <include name="*.dtd"/>
       </fileset>
     </copy>
+    <available property="extra.available" 
+            file="${extra}" />
   </target>
 
   <!-- ==================================================================== -->
-  <target name="tidy">
+  <target name="tidy" depends="tidy_jetty,tidy_extra" />
+  
+  <target name="tidy_jetty">
     <delete dir="${classes}" quiet="true"/>
     <delete dir="${test.classes}" quiet="true"/>
     <delete file="${mini.http.jar}" quiet="true"/>
     <ant antfile="${test}/build.xml" inheritAll="true" target="tidy"/>
   </target>
+  
+  <target name="tidy_extra" if="extra.available" >
+    <ant antfile="${extra}/build.xml" inheritAll="true" target="tidy" />
+  </target>
 
 
   <!-- ==================================================================== -->
-  <target name="clean" depends="tidy">
+  <target name="clean" depends="tidy,clean_jetty,clean_extra" />
+        
+  <target name="clean_jetty" depends="tidy_jetty">
     <delete dir="${jetty.webapp.classes}" quiet="true"/>
     <delete dir="${javadoc}" quiet="true"/>
     <delete dir="${etc}/dtd" quiet="true"/>
@@ -129,6 +140,11 @@ Other targets:
       </fileset>
     </delete>
     <ant antfile="${test}/build.xml" inheritAll="true" target="clean"/>
+  </target>
+
+
+  <target name="clean_extra" depends="tidy_extra" if="extra.available" >
+    <ant basedir="${extra}" target="clean"/>
   </target>
 
 
@@ -281,7 +297,11 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="all" depends="prepare,jars,webapps,javadoc,test"/>
+  <target name="all" depends="prepare,jars,webapps,javadoc,test,extra"/>
+
+  <target name="extra" depends="prepare"  if="extra.available" >
+    <ant dir="${extra}" inheritAll="false" target="all" />
+  </target>
 
   <!-- ==================================================================== -->
   <target name="demo" >
