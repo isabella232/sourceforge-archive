@@ -408,22 +408,30 @@ below.
     jetty@mortbay.com          - For jetty support questions that are
                                  not stored in the public archive.
 
-    jetty-announce@mortbay.com - For Jetty related announcements
+    jetty-announce@egroups.com - For Jetty related announcements
                                  This is for announcements of interest
                                  to all Jetty users. It is not for
                                  support questions.
 		               - Archives at
                                  http://www.egroups.com/group/jetty-announce
-    subscribe-jetty-announce@mortbay.com   
+    jetty-announce-subscribe@egroups.com   
                                - join the announce mailing list
 
-    jetty-discuss@mortbay.com  - For Jetty related discussions
+    jetty-discuss@egroups.com  - For Jetty related discussions
                                  This is for announcements of interest
                                  to Jetty developers. 
 		               - Archives at
                                  http://www.egroups.com/group/jetty-discuss
-    subscribe-jetty-discuss@mortbay.com   
+    jetty-discuss-subscribe@egroups.com   
                                - join the discuss mailing list
+
+    jetty3-discuss@egroups.com - For discussions about the Jetty3/Jakarta 
+                                 project.  This is for announcements of 
+                                 interest to Jetty developers. 
+		               - Archives at
+                                 http://www.egroups.com/group/jetty3-discuss
+    jetty3-discuss-subscribe@egroups.com   
+                               - join the discuss 3 mailing list
 
 
 
