@@ -64,7 +64,7 @@ Other targets:
   <property name="jetty.webapp.webinf"    value="${jetty.webapp}/WEB-INF"/>
   <property name="jetty.webapp.classes"   value="${jetty.webapp.webinf}/classes"/>
 
-  <property name="jetty.jar"       value="${lib}/org.mortbay.jetty-jdk1.2.jar"/>
+  <property name="jetty1.2.jar"    value="${lib}/org.mortbay.jetty-jdk1.2.jar"/>
   <property name="jetty1.4.jar"    value="${lib}/org.mortbay.jetty.jar"/>
   <property name="mortbay.jmx.jar" value="${lib}/org.mortbay.jmx.jar"/>
   <property name="mini.http.jar"   value="${lib}/org.mortbay.http.jar"/>
@@ -89,7 +89,7 @@ Other targets:
   <target name="classpath">
     <available property="jdk1.4.available" classname="java.util.logging.Handler" />
     <path id="classpath">
-      <pathelement location="${jetty.jar}" />
+      <pathelement location="${jetty1.2.jar}" />
       <pathelement location="${jasper.jar}" />
       <pathelement location="${servlet.jar}" />
       <path refid="extpath" />
@@ -126,19 +126,14 @@ Other targets:
     <mkdir dir="${lib}" />
     <mkdir dir="${logs}" />
     <mkdir dir="${etc}/dtd" />
-    <copy file="${src}/org/mortbay/xml/configure_1_0.dtd" tofile="${etc}/dtd/configure_1_0.dtd" />
-    <copy file="${src}/org/mortbay/xml/configure_1_1.dtd" tofile="${etc}/dtd/configure_1_1.dtd" />
-    <copy file="${src}/org/mortbay/xml/configure_1_2.dtd" tofile="${etc}/dtd/configure_1_2.dtd" />
-    <copy file="${src}/org/mortbay/xml/configure_1_2.dtd" tofile="${etc}/dtd/configure.dtd" />
-    <copy file="${src}/javax/servlet/resources/web-app_2_2.dtd" tofile="${etc}/dtd/web-app_2_2.dtd" />
-    <copy file="${src}/javax/servlet/resources/web-app_2_3.dtd" tofile="${etc}/dtd/web-app_2_3.dtd" />
-    <copy file="${src}/javax/servlet/resources/web-app_2_3.dtd" tofile="${etc}/dtd/web.dtd" />
-    <copy file="LICENSE.html" tofile="${classes}/org/mortbay/LICENSE.html" />
+    <copy todir="${etc}/dtd">
+      <fileset dir="${src}/org/mortbay/xml/" includes="*.dtd"/>
+      <fileset dir="${src}/javax/servlet/resources/" includes="*.dtd"/>
+    </copy>  
     <copy todir="${demo.webapps}/root">
-      <fileset dir="${etc}/dtd">
-        <include name="*.dtd"/>
-      </fileset>
+      <fileset dir="${etc}/dtd" includes="*.dtd"/>
     </copy>
+    <copy file="LICENSE.html" tofile="${classes}/org/mortbay/LICENSE.html" />
     <copy file="${src}/org/mortbay/jetty/servlet/webdefault.xml" tofile="${etc}/webdefault.xml" />
   </target>
   
@@ -146,6 +141,7 @@ Other targets:
   <!-- ==================================================================== -->
   <target name="tidy" description="Remove generated files not needed for running">
     <delete dir="${classes}" quiet="true"/>
+    <delete dir="${classes1.2}" quiet="true"/>
     <delete dir="${classes1.4}" quiet="true"/>
     <delete dir="${test.classes}" quiet="true"/>
     <delete file="${mini.http.jar}" quiet="true"/>
@@ -159,7 +155,7 @@ Other targets:
     <delete dir="${jetty.webapp.classes}" quiet="true"/>
     <delete dir="${javadoc}" quiet="true"/>
     <delete dir="${etc}/dtd" quiet="true"/>
-    <delete file="${jetty.jar}" quiet="true"/>
+    <delete file="${jetty1.2.jar}" quiet="true"/>
     <delete file="${jetty1.4.jar}" quiet="true"/>
     <delete file="${mortbay.jmx.jar}" quiet="true"/>
     <delete file="${servlet.jar}" quiet="true"/>
@@ -257,8 +253,8 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="jetty.jar" depends="classes,servlet.jar,manifest">
-    <jar jarfile="${jetty.jar}" basedir="${classes}" 
+  <target name="jetty1.2.jar" depends="classes,servlet.jar,manifest">
+    <jar jarfile="${jetty1.2.jar}" basedir="${classes}" 
      manifest="${classes}/org/mortbay/jetty/MANIFEST.MF" >
        <include name="org/mortbay/**"  />
        <include name="org/jboss/**"  />
@@ -330,7 +326,7 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="jars" depends="servlet.jar,jetty.jar,jetty1.4.jar,jasper.jar,mortbay.jmx.jar"
+  <target name="jars" depends="servlet.jar,jetty1.2.jar,jetty1.4.jar,jasper.jar,mortbay.jmx.jar"
    description="Build the jar files" >
   </target>
 
@@ -359,7 +355,7 @@ Other targets:
            >
       <classpath>
         <pathelement path="${servlet.jar}" />
-        <pathelement path="${jetty.jar}"   />
+        <pathelement path="${jetty1.2.jar}"   />
       </classpath>
       <include name="**/*.java" />
     </javac>
@@ -379,7 +375,7 @@ Other targets:
            >
       <classpath>
         <pathelement path="${servlet.jar}" />
-        <pathelement path="${jetty.jar}"   />
+        <pathelement path="${jetty1.2.jar}"   />
       </classpath>
       <include name="**/*.java" />
     </javac>
@@ -391,7 +387,7 @@ Other targets:
            >
       <classpath>
         <pathelement path="${servlet.jar}" />
-        <pathelement path="${jetty.jar}"   />
+        <pathelement path="${jetty1.2.jar}"   />
       </classpath>
       <include name="**/*.java" />
     </javac>

@@ -272,7 +272,7 @@ public class ServletHandler extends AbstractHttpHandler
 
         if (!pathSpec.startsWith("/") && !pathSpec.startsWith("*"))
         {
-            Code.warning("pathSpec must start with '/' or '*' : "+pathSpec);
+            Code.warning("pathSpec should start with '/' or '*' : "+pathSpec);
             pathSpec="/"+pathSpec;
         }
         

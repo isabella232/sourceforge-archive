@@ -111,8 +111,8 @@ public class AJP13Listener
     {
         super.start();
         Log.event("Started AJP13Listener on "+getInetAddrPort());
-        Log.warning("AJP13 is not a secure protocol. Please protect the port "+
-                    getInetAddrPort());
+        Log.event("NOTICE: AJP13 is not a secure protocol. Please protect the port "+
+                  getInetAddrPort());
     }
 
     /* --------------------------------------------------------------- */
