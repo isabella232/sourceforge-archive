@@ -452,7 +452,7 @@ public class HttpServer implements LifeCycle
     }
 
     /* ------------------------------------------------------------ */    
-    void addMapping(String virtualHost, HttpContext context)
+    synchronized void addMapping(String virtualHost, HttpContext context)
     {
         // Get the map of contexts
         PathMap contextMap=(PathMap)_virtualHostMap.get(virtualHost);
@@ -477,14 +477,17 @@ public class HttpServer implements LifeCycle
         
         // Add the context to the list
         contextList.add(context);
-        
+            
         Code.debug("Added ",context," for host ",(virtualHost==null?"*":virtualHost));
     }
     
 
     /* ------------------------------------------------------------ */
-    void addMappings(HttpContext context)
+    synchronized void addMappings(HttpContext context)
     {
+        if (context==_notFoundContext)
+            return;
+        
         String[] hosts=context.getVirtualHosts();
         if (hosts==null || hosts.length==0)
             hosts = __noVirtualHost;
@@ -499,7 +502,7 @@ public class HttpServer implements LifeCycle
 
 
     /* ------------------------------------------------------------ */
-    boolean removeMapping(String virtualHost, HttpContext context)
+    synchronized boolean removeMapping(String virtualHost, HttpContext context)
     {
         boolean existing=false;
         if (_virtualHostMap!=null)
@@ -520,7 +523,7 @@ public class HttpServer implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    boolean removeMappings(HttpContext context)
+    synchronized boolean removeMappings(HttpContext context)
     {
         boolean existing=false;
         
@@ -801,7 +804,9 @@ public class HttpServer implements LifeCycle
         {
             if (_notFoundContext==null)
             {
-                _notFoundContext=new HttpContext(this,"/");
+                _notFoundContext=new HttpContext();
+                _notFoundContext.setContextPath("/");
+                _notFoundContext.setHttpServer(this);
                 _notFoundContext.addHandler(new NotFoundHandler());
                 addComponent(_notFoundContext);
                 try{_notFoundContext.start();}catch(Exception e){Code.warning(e);}
