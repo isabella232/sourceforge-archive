@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-4.2.9
+Jetty-4.2.9rc1 - 6 March 2003
  + Work around URLClassloader not handling leading /
  + Dump servlet can load resources for testing now.
  + Added trust manager support to SunJsseListener.
@@ -17,7 +17,7 @@ Jetty-4.2.9
  + Allow delegated creation of WebApplication derivations.
  + Check Data contraints before Auth constraints
 
-Jetty-4.2.8_01 - 18 February 2004
+Jetty-4.2.8_01 - 18 February 2003
  + Patched first release of 4.2.8 with correct version number
  + Fixed CGI servlet to handle multiple headers.
  + Added a SetResponseHeadersHandler, can set P3P headers etc.
