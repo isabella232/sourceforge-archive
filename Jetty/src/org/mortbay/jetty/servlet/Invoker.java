@@ -64,11 +64,11 @@ public class Invoker extends HttpServlet
             String lvalue=value.toLowerCase();
             if ("nonContextServlets".equals(param))
             {
-                _nonContextServlets=value.length()>0 && value.startsWith("t");
+                _nonContextServlets=value.length()>0 && lvalue.startsWith("t");
             }
             if ("verbose".equals(param))
             {
-                _verbose=value.length()>0 && value.startsWith("t");
+                _verbose=value.length()>0 && lvalue.startsWith("t");
             }
             else
             {
