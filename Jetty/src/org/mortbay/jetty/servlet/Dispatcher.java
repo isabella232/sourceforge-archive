@@ -140,12 +140,20 @@ public class Dispatcher implements RequestDispatcher
         throws ServletException, IOException     
     {
         _include=true;
-        forward(servletRequest,servletResponse);
+        dispatch(servletRequest,servletResponse);
     }
     
     /* ------------------------------------------------------------ */
     public void forward(ServletRequest servletRequest,
                         ServletResponse servletResponse)
+        throws ServletException,IOException
+    {
+        dispatch(servletRequest,servletResponse);
+    }
+    
+    /* ------------------------------------------------------------ */
+    void dispatch(ServletRequest servletRequest,
+                  ServletResponse servletResponse)
         throws ServletException,IOException
     {
         HttpServletRequest httpServletRequest=(HttpServletRequest)servletRequest;

@@ -588,6 +588,7 @@ public class ServletHttpRequest
     {
         if (_inputState!=0)
             throw new IllegalStateException("getReader() or getInputStream() called");
+        "".getBytes(encoding);
         _httpRequest.setCharacterEncoding(encoding);
     }
     
