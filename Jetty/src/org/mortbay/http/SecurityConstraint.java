@@ -287,6 +287,17 @@ public class SecurityConstraint
 
 
     /* ------------------------------------------------------------ */
+    /** Check security contraints
+     * @param constraints 
+     * @param authenticator 
+     * @param realm 
+     * @param pathInContext 
+     * @param request 
+     * @param response 
+     * @return -1 for  failed, 0 for authentication in process, 1 for passed.
+     * @exception HttpException 
+     * @exception IOException 
+     */
     public static int check(List constraints,
                             Authenticator authenticator,
                             UserRealm realm,
@@ -314,6 +325,13 @@ public class SecurityConstraint
             // Does it fail a role check?
             if (sc.isAuthenticate())
             {
+                if (realm==null)
+                {
+                    response.sendError(HttpResponse.__500_Internal_Server_Error,
+                                       "Realm Not Configured");
+                    return -1;
+                }
+        
                 UserPrincipal user = null;
                 
                 // Handle pre-authenticated request

@@ -33,13 +33,6 @@ public class BasicAuthenticator implements Authenticator
                                        HttpResponse response)
         throws IOException
     {
-        if (realm==null)
-        {
-            response.sendError(HttpResponse.__500_Internal_Server_Error,
-                               "Realm Not Configured");
-            return null;
-        }
-
         // Get the user if we can
         UserPrincipal user=null;
         String credentials = request.getField(HttpFields.__Authorization);
