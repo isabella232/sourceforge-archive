@@ -189,7 +189,7 @@
 
   <!-- ==================================================================== -->
   <target name="extra" depends="jars">
-    <ant antfile="${extra}/build.xml" inheritAll="false"/>
+    <ant dir="${extra}" antfile="${extra}/build.xml" inheritAll="false"/>
   </target>
 
 

@@ -36,31 +36,31 @@ Other targets:
   </target>
 
   <target name="do.plus">
-    <ant antfile="${plus}/build.xml" inheritAll="false"/>
+    <ant dir="${plus}" antfile="${plus}/build.xml" inheritAll="false"/>
   </target>
 
   <target name="do.loadbalancer">
-    <ant antfile="${loadbalancer}/build.xml" inheritAll="false"/>
+    <ant dir="${loadbalancer}" antfile="${loadbalancer}/build.xml" inheritAll="false"/>
   </target>
 
   <target name="do.ftp">
-    <ant antfile="${ftp}/build.xml" inheritAll="false"/>
+    <ant dir="${ftp}" antfile="${ftp}/build.xml" inheritAll="false"/>
   </target>
 
   <target name="do.jdk1.2">
-    <ant antfile="${jdk1.2}/build.xml" inheritAll="false"/>
+    <ant dir="${jdk1.2}" antfile="${jdk1.2}/build.xml" inheritAll="false"/>
   </target>
 
   <target name="do.ibmjsse">
-    <ant antfile="${ibmjsse}/build.xml" inheritAll="false"/>
+    <ant dir="${ibmjsse}" antfile="${ibmjsse}/build.xml" inheritAll="false"/>
   </target>
 
   <target name="do.j2ee">
-    <ant antfile="${j2ee}/build.xml" inheritAll="false"/>
+    <ant dir="${j2ee}" antfile="${j2ee}/build.xml" inheritAll="false"/>
   </target>
 
   <target name="do.jsr77">
-    <ant antfile="${jsr77}/build.xml" inheritAll="false"/>
+    <ant dir="${jsr77}" antfile="${jsr77}/build.xml" inheritAll="false"/>
   </target>
 
 
@@ -71,27 +71,27 @@ Other targets:
   </target>
 
   <target name="test.plus">
-    <ant antfile="${plus}/build.xml" inheritAll="false" target="test"/>
+    <ant dir="${plus}" antfile="${plus}/build.xml" inheritAll="false" target="test"/>
   </target>
 
   <target name="test.loadbalancer">
-    <ant antfile="${loadbalancer}/build.xml" inheritAll="false" target="test"/>
+    <ant dir="${loadbalancer}" antfile="${loadbalancer}/build.xml" inheritAll="false" target="test"/>
   </target>
 
   <target name="test.ftp">
-    <ant antfile="${ftp}/build.xml" inheritAll="false" target="test"/>
+    <ant dir="${ftp}" antfile="${ftp}/build.xml" inheritAll="false" target="test"/>
   </target>
 
   <target name="test.jdk1.2">
-    <ant antfile="${jdk1.2}/build.xml" inheritAll="false" target="test"/>
+    <ant dir="${jdk1.2}" antfile="${jdk1.2}/build.xml" inheritAll="false" target="test"/>
   </target>
 
   <target name="test.ibmjsse">
-    <ant antfile="${ibmjsse}/build.xml" inheritAll="false" target="test"/>
+    <ant dir="${ibmjsse}" antfile="${ibmjsse}/build.xml" inheritAll="false" target="test"/>
   </target>
 
   <target name="test.jsr77">
-    <ant antfile="${jsr77}/build.xml" inheritAll="false" target="test"/>
+    <ant dir="${jsr77}" antfile="${jsr77}/build.xml" inheritAll="false" target="test"/>
   </target>
 
 
@@ -102,31 +102,31 @@ Other targets:
   </target>
 
   <target name="tidy.plus">
-    <ant antfile="${plus}/build.xml" inheritAll="false" target="tidy"/>
+    <ant dir="${plus}" antfile="${plus}/build.xml" inheritAll="false" target="tidy"/>
   </target>
 
   <target name="tidy.loadbalancer">
-    <ant antfile="${loadbalancer}/build.xml" inheritAll="false" target="tidy"/>
+    <ant dir="${loadbalancer}" antfile="${loadbalancer}/build.xml" inheritAll="false" target="tidy"/>
   </target>
 
   <target name="tidy.ftp">
-    <ant antfile="${ftp}/build.xml" inheritAll="false" target="tidy"/>
+    <ant dir="${ftp}" antfile="${ftp}/build.xml" inheritAll="false" target="tidy"/>
   </target>
 
   <target name="tidy.jdk1.2">
-    <ant antfile="${jdk1.2}/build.xml" inheritAll="false" target="tidy"/>
+    <ant dir="${jdk1.2}" antfile="${jdk1.2}/build.xml" inheritAll="false" target="tidy"/>
   </target>
 
   <target name="tidy.ibmjsse">
-    <ant antfile="${ibmjsse}/build.xml" inheritAll="false" target="tidy"/>
+    <ant dir="${ibmjsse}" antfile="${ibmjsse}/build.xml" inheritAll="false" target="tidy"/>
   </target>
 
   <target name="tidy.j2ee">
-    <ant antfile="${j2ee}/build.xml" inheritAll="false" target="tidy"/>
+    <ant dir="${j2ee}" antfile="${j2ee}/build.xml" inheritAll="false" target="tidy"/>
   </target>
 
   <target name="tidy.jsr77">
-    <ant antfile="${jsr77}/build.xml" inheritAll="false" target="tidy"/>
+    <ant dir="${jsr77}" antfile="${jsr77}/build.xml" inheritAll="false" target="tidy"/>
   </target>
 
   <!-- ==================================================================== -->
@@ -137,30 +137,30 @@ Other targets:
   </target>
 
   <target name="clean.plus">
-    <ant antfile="${plus}/build.xml" inheritAll="false" target="clean"/>
+    <ant dir="${plus}" antfile="${plus}/build.xml" inheritAll="false" target="clean"/>
   </target>
 
   <target name="clean.loadbalancer">
-    <ant antfile="${loadbalancer}/build.xml" inheritAll="false" target="clean"/>
+    <ant dir="${loadbalancer}" antfile="${loadbalancer}/build.xml" inheritAll="false" target="clean"/>
   </target>
 
   <target name="clean.ftp">
-    <ant antfile="${ftp}/build.xml" inheritAll="false" target="clean"/>
+    <ant dir="${ftp}" antfile="${ftp}/build.xml" inheritAll="false" target="clean"/>
   </target>
 
   <target name="clean.jdk1.2">
-    <ant antfile="${jdk1.2}/build.xml" inheritAll="false" target="clean"/>
+    <ant dir="${jdk1.2}" antfile="${jdk1.2}/build.xml" inheritAll="false" target="clean"/>
   </target>
 
   <target name="clean.ibmjsse">
-    <ant antfile="${ibmjsse}/build.xml" inheritAll="false" target="clean"/>
+    <ant dir="${ibmjsse}" antfile="${ibmjsse}/build.xml" inheritAll="false" target="clean"/>
   </target>
 
   <target name="clean.j2ee">
-    <ant antfile="${j2ee}/build.xml" inheritAll="false" target="clean"/>
+    <ant dir="${j2ee}" antfile="${j2ee}/build.xml" inheritAll="false" target="clean"/>
   </target>
 
   <target name="clean.jsr77">
-    <ant antfile="${jsr77}/build.xml" inheritAll="false" target="clean"/>
+    <ant dir="${jsr77}" antfile="${jsr77}/build.xml" inheritAll="false" target="clean"/>
   </target>
 </project>

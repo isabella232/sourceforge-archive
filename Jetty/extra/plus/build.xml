@@ -103,7 +103,7 @@ Other targets:
     <delete includeEmptyDirs="true">
       <fileset dir="${demo.webapps}" includes="**/classes/**"/>
     </delete>
-    <ant antfile="${test}/build.xml" inheritAll="false" target="tidy"/>
+    <ant dir="${test}" antfile="${test}/build.xml" inheritAll="true" target="tidy"/>
   </target>
 
 
@@ -119,7 +119,7 @@ Other targets:
     </delete>
     <delete file="${jaas.jar}"/>
     <delete file="${package.jar}"/>
-    <ant antfile="${test}/build.xml" inheritAll="false" target="clean"/>
+    <ant dir="${test}" antfile="${test}/build.xml" inheritAll="false" target="clean"/>
   </target>
 
 
@@ -335,7 +335,7 @@ Other targets:
           depends="check.tests" 
           if="tests.available" 
           description="run tests">
-    <ant antfile="${test}/build.xml" inheritAll="false" target="test"/>
+    <ant dir="${test}" antfile="${test}/build.xml" inheritAll="false" target="test"/>
   </target>
 
 
