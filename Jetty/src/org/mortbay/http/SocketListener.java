@@ -44,6 +44,7 @@ public class SocketListener
     private int _integralPort=0;
     private int _confidentialPort=0;
     private boolean _identifyListener=false;
+    private int _bufferSize=4096;
     
     /* ------------------------------------------------------------------- */
     public SocketListener()
@@ -70,6 +71,18 @@ public class SocketListener
         return _server;
     }
 
+    /* ------------------------------------------------------------ */
+    public int getBufferSize()
+    {
+        return _bufferSize;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setBufferSize(int size)
+    {
+        _bufferSize=size;
+    }
+        
     /* ------------------------------------------------------------ */
     public boolean getIdentifyListener()
     {

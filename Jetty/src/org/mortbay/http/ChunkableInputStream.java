@@ -35,8 +35,6 @@ import org.mortbay.util.StringUtil;
 public class ChunkableInputStream extends FilterInputStream
 {
     /* ------------------------------------------------------------ */
-    /** Limit max line length */
-    public static int __maxLineLength=4096;    
     private static ClosedStream __closedStream=new ClosedStream();
     
     /* ------------------------------------------------------------ */
@@ -49,9 +47,17 @@ public class ChunkableInputStream extends FilterInputStream
      */
     public ChunkableInputStream( InputStream in)
     {
+        this(in,4096);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor.
+     */
+    public ChunkableInputStream(InputStream in, int bufferSize)
+    {
         super(null);
         try {
-            _realIn= new LineInput(in,0,StringUtil.__ISO_8859_1);
+            _realIn= new LineInput(in,bufferSize,StringUtil.__ISO_8859_1);
         }
         catch(UnsupportedEncodingException e)
         {

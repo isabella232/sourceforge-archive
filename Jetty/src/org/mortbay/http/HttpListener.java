@@ -28,6 +28,8 @@ public interface HttpListener extends LifeCycle
     public abstract void setPort(int port);
     public abstract int getPort();
 
+    public abstract int getBufferSize();
+    
     public abstract String getDefaultScheme();
     
     public abstract void customizeRequest(HttpConnection connection,

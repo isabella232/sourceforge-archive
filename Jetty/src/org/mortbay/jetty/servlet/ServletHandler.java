@@ -634,6 +634,11 @@ public class ServletHandler
             else
                 Code.debug("Response already committed for handling ",e);
         }
+        finally
+        {
+            httpRequest.setWrapper(null);
+            httpResponse.setWrapper(null);
+        }
     }
 
     

@@ -59,15 +59,6 @@ public class ServletHttpResponse implements HttpServletResponse
     private static ServletOut __nullServletOut =
             new ServletOut(IO.getNullStream());
     
-    private HttpResponse _httpResponse;
-    private ServletHttpRequest _servletHttpRequest;
-    private int _outputState=NO_OUT;
-    private ServletOut _out =null;
-    private ServletWriter _writer=null;
-    private HttpSession _session=null;
-    private boolean _noSession=false;
-    private Locale _locale=null;
-
     private static Map __charSetMap = new HashMap();
     static
     {
@@ -113,6 +104,16 @@ public class ServletHttpResponse implements HttpServletResponse
         __charSetMap.put("zh_TW", "Big5");    
     }
     
+    /* ------------------------------------------------------------ */
+    private HttpResponse _httpResponse;
+    private ServletHttpRequest _servletHttpRequest;
+    private int _outputState=NO_OUT;
+    private ServletOut _out =null;
+    private ServletWriter _writer=null;
+    private HttpSession _session=null;
+    private boolean _noSession=false;
+    private Locale _locale=null;
+
     
     /* ------------------------------------------------------------ */
     ServletHttpResponse(ServletHttpRequest request,HttpResponse response)
@@ -122,6 +123,16 @@ public class ServletHttpResponse implements HttpServletResponse
         _httpResponse=response;
     }
 
+    /* ------------------------------------------------------------ */
+    void recycle()
+    {
+        _outputState=NO_OUT;
+        _out=null;
+        _writer=null;
+        _session=null;
+        _noSession=false;
+        _locale=null;
+    }
     
     /* ------------------------------------------------------------ */
     int getOutputState()

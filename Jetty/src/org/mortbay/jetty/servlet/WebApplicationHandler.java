@@ -213,82 +213,87 @@ public class WebApplicationHandler extends ServletHandler
             reentrant=false;
             // Build the request and response.
             request = new ServletHttpRequest(this,pathInContext,httpRequest);
-            httpRequest.setWrapper(request);
             response = new ServletHttpResponse(request,httpResponse);
+            httpRequest.setWrapper(request);
             httpResponse.setWrapper(response);
         }
-        
-        // protect web-inf and meta-inf
-        String pathParamsLC=URI.canonicalPath(StringUtil.asciiToLowerCase(pathInContext));
-        if(pathParamsLC.startsWith("/web-inf") || pathParamsLC.startsWith("/meta-inf" ))
+        else if (request.getPathInContext()==null)
         {
-            response.sendError(HttpResponse.__403_Forbidden);
-            return;
+            // Recycled request
+            reentrant=false;
+            request.recycle(this,pathInContext);
         }
-        
-        // Look for the servlet and/or resource
-        Map.Entry servlet=getHolderEntry(pathInContext);
-        Resource resource=null;
-        if (servlet==null)
-            resource=_base.getResource(pathInContext);
-        
-        Code.debug("servlet=",servlet,"  resource=",resource);
-
-        
-        // Build list of filters
-        LazyList filters = null;
-
-        // Do the first time through stuff.
-        if (!reentrant)
-        {
-            // Adjust request paths
-            if (servlet!=null)
-            {
-                String servletPathSpec=(String)servlet.getKey(); 
-                request.setServletPaths(PathMap.pathMatch(servletPathSpec,pathInContext),
-                                        PathMap.pathInfo(servletPathSpec,pathInContext),
-                                        (ServletHolder)servlet.getValue());
-            }
-            
-            // Handle the session ID
-            request.setSessionId(pathParams);
-            HttpSession session=request.getSession(false);
-            if (session!=null)
-                ((SessionManager.Session)session).access();
-            
-            Code.debug("session=",session);
-
-            // Security Check
-            if (!_security.check(pathInContext,pathParams,httpRequest,httpResponse))
-                return;
-            
-            // Path filters
-            for (int i=0;i<_pathFilters.size();i++)
-            {
-                FilterHolder holder=(FilterHolder)_pathFilters.get(i);
-                if (holder.appliesTo(pathInContext))
-                    filters=LazyList.add(filters,holder);
-            }
-            
-            // Servlet filters
-            if (servlet!=null && _servletFilterMap.size()>0)
-            {
-                Object o=_servletFilterMap
-                    .get(((ServletHolder)servlet.getValue()).getName());
-                if (o!=null)
-                {
-                    if (o instanceof List)
-                        filters=LazyList.add(filters,(List)o);
-                    else
-                        filters=LazyList.add(filters,o);
-                }    
-            }
-            Code.debug("filters=",filters);
-        }
-        
 
         try
         {
+            // protect web-inf and meta-inf
+            String pathParamsLC=URI.canonicalPath(StringUtil.asciiToLowerCase(pathInContext));
+            if(pathParamsLC.startsWith("/web-inf") || pathParamsLC.startsWith("/meta-inf" ))
+            {
+                response.sendError(HttpResponse.__403_Forbidden);
+                return;
+            }
+            
+            // Look for the servlet and/or resource
+            Map.Entry servlet=getHolderEntry(pathInContext);
+            Resource resource=null;
+            if (servlet==null)
+                resource=_base.getResource(pathInContext);
+            
+            Code.debug("servlet=",servlet,"  resource=",resource);
+            
+            
+            // Build list of filters
+            LazyList filters = null;
+            
+            // Do the first time through stuff.
+            if (!reentrant)
+            {
+                // Adjust request paths
+                if (servlet!=null)
+                {
+                    String servletPathSpec=(String)servlet.getKey(); 
+                    request.setServletPaths(PathMap.pathMatch(servletPathSpec,pathInContext),
+                                            PathMap.pathInfo(servletPathSpec,pathInContext),
+                                            (ServletHolder)servlet.getValue());
+                }
+                
+                // Handle the session ID
+                request.setSessionId(pathParams);
+                HttpSession session=request.getSession(false);
+                if (session!=null)
+                    ((SessionManager.Session)session).access();
+                
+                Code.debug("session=",session);
+                
+                // Security Check
+                if (!_security.check(pathInContext,pathParams,httpRequest,httpResponse))
+                return;
+                
+                // Path filters
+                for (int i=0;i<_pathFilters.size();i++)
+                {
+                    FilterHolder holder=(FilterHolder)_pathFilters.get(i);
+                    if (holder.appliesTo(pathInContext))
+                        filters=LazyList.add(filters,holder);
+                }
+                
+                // Servlet filters
+                if (servlet!=null && _servletFilterMap.size()>0)
+                {
+                    Object o=_servletFilterMap
+                        .get(((ServletHolder)servlet.getValue()).getName());
+                    if (o!=null)
+                    {
+                        if (o instanceof List)
+                        filters=LazyList.add(filters,(List)o);
+                        else
+                            filters=LazyList.add(filters,o);
+                    }    
+                }
+                Code.debug("filters=",filters);
+            }
+            
             // Do the handling thang
             if (LazyList.size(filters)>0)
             {
@@ -373,7 +378,9 @@ public class WebApplicationHandler extends ServletHandler
             response.flushBuffer();
             response.setOutputState(ServletHttpResponse.NO_OUT);
             if (!httpResponse.isCommitted())
-            httpResponse.commit();
+                httpResponse.commit();
+            request.recycle(null,null);
+            response.recycle();
         }
     }
 

@@ -144,7 +144,7 @@ public class TestHarness
                 Code.debug("Chunk out tmp = ",tmpFile);
             
             FileOutputStream fout = new FileOutputStream(tmpFile);
-            ChunkableOutputStream cout = new ChunkableOutputStream(fout,4030);
+            ChunkableOutputStream cout = new ChunkableOutputStream(fout,4020);
             cout.setChunking();
             
             cout.write("Reset Output".getBytes());

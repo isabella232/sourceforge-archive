@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
 Jetty-4.1.D1 - 
+ + Recycle servlet requests and responses
  + Reworked output buffering to keep constant sized buffers.
  + Don't chunk 30x empty responses.
  + Fixed "" contextPaths in Dispatcher.

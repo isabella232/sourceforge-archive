@@ -63,7 +63,8 @@ public class HttpRequest extends HttpMessage
         __TRACE="TRACE",
         __CONNECT="CONNECT",
         __MOVE="MOVE";
-
+    
+    public static int __maxLineLength=2048;
     public static final StringMap __methodCache = new StringMap(true);
     public static final StringMap __versionCache = new StringMap(true);
     static
@@ -196,7 +197,7 @@ public class HttpRequest extends HttpMessage
         }
         while(line_buffer.size==0);
         
-        if (line_buffer.size==in.__maxLineLength)
+        if (line_buffer.size==__maxLineLength)
             throw new HttpException(HttpResponse.__414_Request_URI_Too_Large);
         decodeRequestLine(line_buffer.buffer,line_buffer.size);        
         

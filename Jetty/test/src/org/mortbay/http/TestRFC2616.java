@@ -203,6 +203,12 @@ public class TestRFC2616
     }
 
     /* ------------------------------------------------------------ */
+    public int getBufferSize()
+    {
+        return 4096;
+    }
+    
+    /* ------------------------------------------------------------ */
     public boolean isLowOnResources()
     {
         return false;

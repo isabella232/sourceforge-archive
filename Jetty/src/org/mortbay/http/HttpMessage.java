@@ -670,7 +670,6 @@ public abstract class HttpMessage
         _connection=connection;
         _characterEncoding=null;
         _mimeType=null;
-        _wrapper=null;  // XXX could do better here????
     }
     
     /* ------------------------------------------------------------ */
