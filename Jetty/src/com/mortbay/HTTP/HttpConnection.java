@@ -744,10 +744,12 @@ public class HttpConnection
                   }
               case 0:
                   {
-                      // If we dont have a content length, we can't be
-                      // persistent 
+                      // If we dont have a content length, 
+		      // or we have been requested to close
+		      // then we can't be persistent 
                       if (!_keepAlive || !_persistent ||
-                          _response.getIntField(HttpFields.__ContentLength)<0)
+                          _response.getField(HttpFields.__ContentLength)==null ||
+                          HttpFields.__Close.equals(_response.getField(HttpFields.__Connection)))
                       {
                           _persistent=false;
                           if (_keepAlive)
