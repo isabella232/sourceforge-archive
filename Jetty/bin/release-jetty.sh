@@ -31,6 +31,7 @@ read Y
     cvs $CVS_ARGS rtag -F Jetty_$TAG Jetty3
     cvs $CVS_ARGS export -r Jetty_$TAG Jetty3
     cd $HOME/Jetty3
+    rm -fr src/com webappsrc/com
     ant all tidy || exit 1
     cd ..
     mv Jetty3 Jetty-$VERSION

@@ -1,8 +1,7 @@
 Jetty3 Versions
 --------------
 
- - writeInputStream. 
-
+Jetty-3.1.rc9 - 02 Sep 2001
  + Changed to org.mortbay domain names.
  + Form auth login and error pages relative to context path.
  + Fixed handling of rel form authentication URLs
