@@ -150,12 +150,16 @@ public class Server extends org.mortbay.jetty.Server
        super.stop(graceful);
 
        // now stop all the services, in the reverse order to starting
-       ListIterator listItor = _serviceList.listIterator (_serviceList.size());
-       while (listItor.hasPrevious())
+       if (_serviceList!=null && _serviceList.size()>0)
        {
-           ((Service)listItor.previous()).stop();
+           ListIterator listItor = _serviceList.listIterator (_serviceList.size());
+           while (listItor.hasPrevious())
+           {
+               Service s = (Service)listItor.previous();
+               if (s!=null)
+                   s.stop();
+           }
        }
-
     }
 
     /* ------------------------------------------------------------ */
