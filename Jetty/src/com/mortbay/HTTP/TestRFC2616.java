@@ -29,7 +29,10 @@ public class TestRFC2616
     public TestRFC2616()
         throws IOException
     {
-        super("Test",1,10,30000);
+	setName("Test");
+	setMinThreads(1);
+	setMaxThreads(10);
+	setMaxIdleTimeMs(30000);
         _server=new HttpServer();
         _server.addHandler(null,"/",new TestTEHandler());
         _server.addHandler(null,"/",new RedirectHandler());
@@ -40,8 +43,14 @@ public class TestRFC2616
         
     }
 
+    /* --------------------------------------------------------------- */
+    public void setHttpServer(HttpServer s)
+    {
+        Code.notImplemented();
+    }
+    
     /* ------------------------------------------------------------ */
-    public HttpServer getServer()
+    public HttpServer getHttpServer()
     {
         return _server;
     }
@@ -53,9 +62,21 @@ public class TestRFC2616
     }
 
     /* --------------------------------------------------------------- */
+    public void setHost(String h)
+    {
+        Code.notImplemented();
+    }
+    
+    /* --------------------------------------------------------------- */
     public String getHost()
     {
         return "localhost";
+    }
+    
+    /* --------------------------------------------------------------- */
+    public void setPort(int p)
+    {
+        Code.notImplemented();
     }
     
     /* --------------------------------------------------------------- */
@@ -399,10 +420,10 @@ public class TestRFC2616
         try
         {
             TestRFC2616 listener = new TestRFC2616();
-            listener.getServer().addHandler("VirtualHost",
-                                            "/path/*",
+            listener.getHttpServer().addHandler("VirtualHost",
+						"/path/*",
                                             new DumpHandler());
-            listener.getServer().start();
+            listener.getHttpServer().start();
             String response;
             int offset=0;
 

@@ -42,6 +42,20 @@ public class InetAddrPort
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
+     * @param addr 
+     * @param port 
+     */
+    public InetAddrPort(String host, int port)
+        throws java.net.UnknownHostException
+    {
+	if (host!=null)
+	    _addr=InetAddress.getByName(host);
+	
+        _port=port;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
      * @param inetAddrPort String of the form "addr:port"
      */
     public InetAddrPort(String inetAddrPort)
@@ -68,6 +82,27 @@ public class InetAddrPort
     {
         _addr=address._addr;
         _port=address._port;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the Host
+     * @return The IP address
+     */
+    public String getHost()
+    {
+        return _addr.toString();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the Host
+     * @param host 
+     * @exception java.net.UnknownHostException 
+     */
+    public void setHost(String host)
+        throws java.net.UnknownHostException
+    {
+	if (host!=null)
+	    _addr=InetAddress.getByName(host);
     }
     
     /* ------------------------------------------------------------ */

@@ -873,7 +873,10 @@ public class TestHarness
         TestThreadPool()
             throws Exception
         {
-            super("TestPool",2,4,500);
+            setName("TestPool");
+	    setMinThreads(2);
+	    setMaxThreads(4);
+	    setMaxIdleTimeMs(500);
         }
         
         /* -------------------------------------------------------- */
@@ -1062,7 +1065,11 @@ public class TestHarness
         TestThreadedServer()
             throws Exception
         {
-            super(new InetAddrPort(8765),2,4,500, 60000);
+            super(new InetAddrPort(8765));
+	    setMinThreads(2);
+	    setMaxThreads(4);
+	    setMaxIdleTimeMs(500);
+	    setMaxIdleTimeMs(60000);
         }
         
         /* -------------------------------------------------------- */

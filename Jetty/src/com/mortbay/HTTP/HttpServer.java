@@ -90,6 +90,7 @@ public class HttpServer implements LifeCycle
         while(listeners.hasNext())
         {
             HttpListener listener =(HttpListener)listeners.next();
+	    listener.setHttpServer(this);
             if (!listener.isStarted())
                 listener.start();
         }
@@ -202,7 +203,8 @@ public class HttpServer implements LifeCycle
         HttpListener listener = (HttpListener)_listeners.get(address);
         if (listener==null)
         {
-            listener=new SocketListener(this,address);
+            listener=new SocketListener(address);
+	    listener.setHttpServer(this);
             _listeners.put(address,listener);
         }
 
@@ -217,9 +219,7 @@ public class HttpServer implements LifeCycle
     public void addListener(HttpListener listener)
         throws IllegalArgumentException
     {
-        if (listener.getServer()!=this)
-            throw new IllegalArgumentException("Listener is not for this server");
-        
+	listener.setHttpServer(this);        
         _listeners.put(listener,listener);
     }
     

@@ -143,12 +143,12 @@ public class HttpConnection
 
     /* ------------------------------------------------------------ */
     /** Get the listeners HttpServer .
-     * Conveniance method equivalent to getListener().getServer().
+     * Conveniance method equivalent to getListener().getHttpServer().
      * @return HttpServer.
      */
-    public HttpServer getServer()
+    public HttpServer getHttpServer()
     {
-        return _listener.getServer();
+        return _listener.getHttpServer();
     }
 
     /* ------------------------------------------------------------ */
@@ -234,9 +234,10 @@ public class HttpConnection
     protected void service(HttpRequest request, HttpResponse response)
         throws HttpException, IOException
     {
-        if (getServer()==null)
+	HttpServer server= getHttpServer();
+        if (server==null)
                 throw new HttpException(response.__503_Service_Unavailable);
-        getServer().service(request,response);
+        server.service(request,response);
     }
     
     /* ------------------------------------------------------------ */
@@ -577,7 +578,7 @@ public class HttpConnection
                     _inputStream.setChunking();
                 }
                 else
-                    getServer().getHttpEncoding()
+                    getHttpServer().getHttpEncoding()
 			.enableEncoding(_inputStream,coding,coding_params);
             }
         }
@@ -734,7 +735,7 @@ public class HttpConnection
                                                       " transfer-encoding");
 
                           // Set coding
-                          getServer().getHttpEncoding()
+                          getHttpServer().getHttpEncoding()
 			      .enableEncoding(out,coding,coding_params);
                       }
                   }

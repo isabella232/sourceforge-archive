@@ -19,31 +19,24 @@ import java.util.*;
  */
 public interface HttpListener extends LifeCycle
 {
-    public abstract HttpServer getServer();
-    public abstract String getDefaultScheme();
+    public abstract void setHttpServer(HttpServer server);
+    public abstract HttpServer getHttpServer();
+    public abstract void setHost(String host)
+	throws UnknownHostException;
     public abstract String getHost();
+    public abstract void setPort(int port);
     public abstract int getPort();
     
-
-    /* ------------------------------------------------------------ */
-    /** Start the listener.
-     * All requests are ignored until start is called.
-     */
-    public abstract void start();
-    
-    /* ------------------------------------------------------------ */
-    /** Stop the listener.
-     * New requests are refused and the handler may attempt to wait
-     * for existing requests to complete. The caller may interrupt
-     * the stop call is waiting is taking too long.
-     */
-    public abstract void stop()
-        throws InterruptedException;
-    
-    /* ------------------------------------------------------------ */
-    /** Destroy the handler.
-     * New requests are refused and all current requests are immediately
-     * terminated.
-     */
-    public abstract void destroy();
+    public abstract String getDefaultScheme();
 }
+
+
+
+
+
+
+
+
+
+
+

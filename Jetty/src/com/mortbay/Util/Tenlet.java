@@ -23,7 +23,8 @@ public class Tenlet extends ThreadedServer
     public Tenlet(InetAddrPort addr)
 	throws IOException
     {
-	super("Tenlet",addr);
+	super(addr);
+	setName("Tenlet");
     }
     
     /* ------------------------------------------------------------ */

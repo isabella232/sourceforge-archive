@@ -37,29 +37,19 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public ThreadedServer() 
     {}
-    
-    /* ------------------------------------------------------------------- */
-    /* Construct
-     */
-    public ThreadedServer(String name) 
-    {
-        super(name);
-    }
 
     /* ------------------------------------------------------------------- */
     /** Construct for specific port
      */
     public ThreadedServer(int port)
-        throws IOException
     {
-        setAddress(new InetAddrPort(null,port));
+        setAddress(new InetAddrPort(port));
     }
     
     /* ------------------------------------------------------------------- */
     /** Construct for specific address and port
      */
     public ThreadedServer(InetAddress address, int port) 
-         throws IOException
     {
         setAddress(new InetAddrPort(address,port));
     }
@@ -67,43 +57,130 @@ abstract public class ThreadedServer extends ThreadPool
     /* ------------------------------------------------------------------- */
     /** Construct for specific address and port
      */
-    public ThreadedServer(InetAddrPort address) 
-         throws IOException
+    public ThreadedServer(String host, int port) 
+	throws UnknownHostException
     {
-        setAddress(address);
+        setAddress(new InetAddrPort(host,port));
     }
     
     /* ------------------------------------------------------------------- */
     /** Construct for specific address and port
      */
-    public ThreadedServer(String name,InetAddrPort address) 
-         throws IOException
+    public ThreadedServer(InetAddrPort address) 
     {
-        super(name);
         setAddress(address);
     }
     
     /* ------------------------------------------------------------ */
-    /** Constructor. 
-     * @param address The address to listen on
-     * @param minThreads Minimum number of handler threads.
-     * @param maxThreads Maximum number of handler threads.
-     * @param maxThreadIdleTimeMs Idle time in milliseconds before a handler thread dies.
-     * @param maxReadTimeMs Set socket SoTimeout
-     * @exception java.io.IOException Problem listening to the socket.
+    /** Set the server InetAddress and port.
+     * @param address The InetAddress address or null for all interfaces.
+     * @param port The port.
+     * @exception IOException 
+     * @exception InterruptedException 
      */
-    public ThreadedServer(InetAddrPort address,
-                          int minThreads, 
-                          int maxThreads,
-                          int maxThreadIdleTimeMs,
-                          int maxReadTimeMs) 
-         throws IOException
+    public synchronized void setAddress(InetAddress address,int port) 
     {
-        super(address.toString(),minThreads,maxThreads,maxThreadIdleTimeMs);
-        _maxReadTimeMs=maxReadTimeMs;
-        setAddress(address);
+        setAddress(new InetAddrPort(address,port));
     }
     
+    /* ------------------------------------------------------------ */
+    /** Set the server InetAddress and port.
+     * @param host
+     * @param port The port.
+     * @exception IOException 
+     * @exception InterruptedException 
+     */
+    public synchronized void setAddress(String host,int port) 
+	throws UnknownHostException
+    {
+        setAddress(new InetAddrPort(host,port));
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /** Set the server InetAddress and port.
+     * @param address The Address to listen on, or 0.0.0.0:port for
+     * all interfaces.
+     * @exception IOException 
+     */
+    public synchronized void setAddress(InetAddrPort address) 
+    {
+        _address = address;
+        if (isStarted())
+        {
+            Code.debug( "Restart for ", address );
+            destroy();
+            start();
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param host 
+     */
+    public synchronized void setHost(String host)
+	throws UnknownHostException
+    {
+	setAddress(new InetAddrPort(host,_address==null?0:_address.getPort()));
+        
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param addr 
+     */
+    public synchronized void setInetAddress(InetAddress addr)
+    {
+	setAddress(new InetAddrPort(addr,_address==null?0:_address.getPort()));
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param port 
+     */
+    public synchronized void setPort(int port)
+    {
+	setAddress(_address==null?new InetAddrPort(port)
+	    :new InetAddrPort(_address.getInetAddress(),port));
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param ms 
+     */
+    public void setMaxReadTimeMs(int ms)
+    {
+	_maxReadTimeMs=ms;
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return IP Address and port in a new Instance of InetAddrPort.
+     */
+    public InetAddrPort getInetAddrPort()
+    {
+        return new InetAddrPort(_address);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return IP Address
+     */
+    public InetAddress getInetAddress()
+    {
+        return _address.getInetAddress();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return port number
+     */
+    public int getPort()
+    {
+        return _address.getPort();
+    }
     
     /* ------------------------------------------------------------------- */
     /** Handle new connection
@@ -159,66 +236,7 @@ abstract public class ThreadedServer extends ThreadPool
         handleConnection(connection);
     }
     
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return IP Address and port in a new Instance of InetAddrPort.
-     */
-    public InetAddrPort getInetAddrPort()
-    {
-        return new InetAddrPort(_address);
-    }
     
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return IP Address
-     */
-    public InetAddress getInetAddress()
-    {
-        return _address.getInetAddress();
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return port number
-     */
-    public int getPort()
-    {
-        return _address.getPort();
-    }
-
-    
-    /* ------------------------------------------------------------ */
-    /** Set the server InetAddress and port.
-     * @param address The InetAddress address or null for all interfaces.
-     * @param port The port.
-     * @exception IOException 
-     * @exception InterruptedException 
-     */
-    public synchronized void setAddress(InetAddress address,
-                                        int port) 
-        throws IOException,InterruptedException
-    {
-        setAddress(new InetAddrPort(address,port));
-    }
-    
-    
-    /* ------------------------------------------------------------ */
-    /** Set the server InetAddress and port.
-     * @param address The Address to listen on, or 0.0.0.0:port for
-     * all interfaces.
-     * @exception IOException 
-     */
-    public synchronized void setAddress(InetAddrPort address) 
-        throws IOException
-    {
-        _address = address;
-        if (isStarted())
-        {
-            Code.debug( "Restart for ", address );
-            destroy();
-            start();
-        }
-    }
     
     /* ------------------------------------------------------------ */
     /** New server socket.

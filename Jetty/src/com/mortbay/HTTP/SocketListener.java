@@ -26,16 +26,27 @@ public class SocketListener
     private HttpServer _server;
     
     /* ------------------------------------------------------------------- */
-    SocketListener(HttpServer server, InetAddrPort address)
+    SocketListener()
+        throws IOException
+    {}
+    
+    /* ------------------------------------------------------------------- */
+    SocketListener(InetAddrPort address)
         throws IOException
     {
-	// XXX NEED TO CONFIGURE THREAD LIMITS AND TIMEOUTS
-        super(address,3,255,30000,5000);
-        _server=server;
+        super(address);
     }
 
     /* ------------------------------------------------------------ */
-    public HttpServer getServer()
+    public void setHttpServer(HttpServer server)
+    {
+	Code.assert(_server==null || _server==server,
+		    "Cannot share listeners");
+        _server=server;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public HttpServer getHttpServer()
     {
         return _server;
     }

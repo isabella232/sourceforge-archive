@@ -93,24 +93,23 @@ public class ThreadPool
         _name=name;
     }
 
-    
+
     /* ------------------------------------------------------------ */
-    /** Constructor. 
-     * @param name Pool name
-     * @param minThreads Minimum number of handler threads.
-     * @param maxThreads Maximum number of handler threads.
-     * @param maxIdleTime Idle time in milliseconds before a handler thread dies.
+    /** 
+     * @return 
      */
-    public ThreadPool(String name,
-                      int minThreads, 
-                      int maxThreads,
-                      int maxIdleTime) 
+    public String getName()
     {
-        this();
-        _name=name;
-        _minThreads=minThreads==0?1:minThreads;
-        _maxThreads=maxThreads==0?__maxThreads:maxThreads;
-        _maxIdleTimeMs=maxIdleTime;
+	return _name;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param name 
+     */
+    public void setName(String name)
+    {
+	_name=name;
     }
     
     /* ------------------------------------------------------------ */
