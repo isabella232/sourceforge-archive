@@ -8,6 +8,7 @@ package com.mortbay.Jetty.JMX;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MBeanOperationInfo;
+import javax.management.MBeanServer;
 import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
@@ -54,7 +55,7 @@ public class DebugMBean extends ModelMBeanImpl
     }
     
     /* ------------------------------------------------------------ */
-    protected String newObjectName()
+    protected String newObjectName(MBeanServer server)
     {
         return getJettyDomain()+":name=Debug";
     }

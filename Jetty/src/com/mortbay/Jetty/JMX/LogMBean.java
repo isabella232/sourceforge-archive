@@ -9,6 +9,7 @@ import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MBeanOperationInfo;
+import javax.management.MBeanServer;
 import javax.management.ReflectionException;
 import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
@@ -62,7 +63,7 @@ public class LogMBean extends ModelMBeanImpl
     }
     
     /* ------------------------------------------------------------ */
-    protected String newObjectName()
+    protected String newObjectName(MBeanServer server)
     {
         return getJettyDomain()+":name=Log";
     }
