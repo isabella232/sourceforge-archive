@@ -122,7 +122,11 @@ public class SocketListener
     }
 
     /* ------------------------------------------------------------ */
-    /** 
+    /** Set the low resource persistace time.
+     * When the listener is low on resources, this timeout is used for idle
+     * persistent connections.  It is desirable to have this set to a short
+     * period of time so that idle persistent connections do not consume
+     * resources on a busy server.
      * @param ms time in ms that connections will persist if listener is
      * low on resources. 
      */
@@ -229,7 +233,9 @@ public class SocketListener
 
     /* ------------------------------------------------------------ */
     /** Persist the connection.
-     * If the listener is low on resources, the connection read
+     * This method is called by the HttpConnection in order to prepare a
+     * connection to be persisted. For this implementation,
+     * if the listener is low on resources, the connection read
      * timeout is set to lowResourcePersistTimeMs.  The
      * customizeRequest method is used to reset this to the normal
      * value after a request has been read.
@@ -258,7 +264,9 @@ public class SocketListener
     }
 
     /* ------------------------------------------------------------ */
-    /** 
+    /** Get the lowOnResource state of the listener.
+     * A SocketListener is considered low on resources if the total number of
+     * threads is maxThreads and the number of idle threads is less than minThreads.
      * @return True if low on idle threads. 
      */
     public boolean isLowOnResources()
@@ -278,7 +286,9 @@ public class SocketListener
     }
 
     /* ------------------------------------------------------------ */
-    /** 
+    /**  Get the outOfResource state of the listener.
+     * A SocketListener is considered out of resources if the total number of
+     * threads is maxThreads and the number of idle threads is zero.
      * @return True if out of resources. 
      */
     public boolean isOutOfResources()

@@ -1,5 +1,5 @@
 // ========================================================================
-// Copyright (c) 1999 Mort Bay Consulting (Australia) Pty. Ltd.
+// Copyright (c) 1999,2002 Mort Bay Consulting (Australia) Pty. Ltd.
 // $Id$
 // ========================================================================
 
@@ -26,6 +26,9 @@ import org.mortbay.util.LifeCycle;
 public interface HttpHandler extends LifeCycle
 {
     /* ------------------------------------------------------------ */
+    /** Get the name of the handler.
+     * @return The name of the handler used for logging and reporting.
+     */
     public String getName();
     
     /* ------------------------------------------------------------ */
@@ -33,28 +36,6 @@ public interface HttpHandler extends LifeCycle
 
     /* ------------------------------------------------------------ */
     public void initialize(HttpContext context);
-    
-    /* ------------------------------------------------------------ */
-    /** Start the handler.
-     * All requests are ignored until start is called.
-     */
-    public void start() throws Exception;
-    
-    
-    /* ------------------------------------------------------------ */
-    /** Stop the handler.
-     * New requests are refused and the handler may attempt to wait
-     * for existing requests to complete. The caller may interrupt
-     * the stop call is waiting is taking too long.
-     */
-    public void stop()
-        throws InterruptedException;
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return True if the handler has been started. 
-     */
-    public boolean isStarted();
     
     /* ------------------------------------------------------------ */
     /** Handle a request.
