@@ -456,22 +456,13 @@ public class ServletHttpRequest
                 pathParams.substring(SessionManager.__SessionId.length()+1);
             Code.debug("Got Session ",id," from URL");
             
-            try
+            if (_sessionId==null)
             {
-                Long.parseLong(id,36);
-                if (_sessionId==null)
-                {
-                    _sessionId=id;
-                    _sessionIdState = __SESSIONID_URL;
-                }
-                else if (!id.equals(_sessionId))
-                    Code.warning("Mismatched session IDs");
-                
+                _sessionId=id;
+                _sessionIdState = __SESSIONID_URL;
             }
-            catch(NumberFormatException e)
-            {
-                Code.ignore(e);
-            }
+            else if (!id.equals(_sessionId))
+                Code.warning("Mismatched session IDs");
         }
         
         if (_sessionId == null)

@@ -22,7 +22,8 @@ import java.util.zip.CRC32;
  *  + A program is run to get the password.
  * </pre>
  * Passwords that begin with EXEC: are interpreted as a command, whose
- * output is read.
+ * output is read. This is only enabled if the property 
+ * org.mortbay.util.Password.EXEC is true.
  * <p>
  * Passwords that begin with OBF: are de obfuscated.
  * Passwords can be obfuscated by run org.mortbay.util.Password as a
@@ -54,6 +55,7 @@ public class Password
     private String _pw;
     private char[] _pwc;
     private String _cs;
+    private static boolean __exec = Boolean.getBoolean("org.mortbay.util.Password.EXEC");
     
     /* ------------------------------------------------------------ */
     public Password()
@@ -155,6 +157,11 @@ public class Password
      */
     private String expand(String realm, String pass)
     {
+	if (!__exec)
+	{
+	    Code.warning("org.mortbay.util.Password.EXEC==false");
+	    throw new IllegalArgumentException("org.mortbay.util.Password.EXEC==false");
+	}
         Process process=null;
         try{
             process = Runtime.getRuntime().exec(pass);

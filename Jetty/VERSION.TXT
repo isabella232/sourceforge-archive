@@ -2,6 +2,8 @@ Jetty Versions
 --------------
 
  + Remove last of the Class.forName calls.
+ + Removed redundant sessionID check.
+ + Disabled the Password EXEC mechanism by default
 
 Jetty-4.0.RC1 - 06 March 2002
  + Added ContentEncodingHandler for compression.
