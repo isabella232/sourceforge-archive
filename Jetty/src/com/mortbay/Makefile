@@ -11,7 +11,7 @@ rall:
 #JAVACOPTIONS :=
 TESTS :=
 ROOTNAME := com
-SUBDIRS := Base Util HTTP
+SUBDIRS := Util HTTP
 
 
 include $(JETTY_HOME)/etc/Global.mk
