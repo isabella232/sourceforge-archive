@@ -163,7 +163,7 @@ public class JettyPage extends Page
         _table.cell().top();
         _table.cell().center();
 
-        _table.add("<A HREF=http://jetty.mortbay.com><IMG SRC=\""+context+"/images/powered.png\" BORDER=0></A>\n");
+        _table.add("<A HREF=http://jetty.mortbay.com><IMG SRC=\""+context+"/images/powered.png\" WIDTH=140 HEIGHT=58 BORDER=0></A>\n");
 
         boolean para=true;
         // navigation
@@ -203,9 +203,9 @@ public class JettyPage extends Page
         _table.add("&nbsp;<P>");
 
         // home logos
-        _table.add("<A HREF=\"http://www.mortbay.com\"><IMG SRC=\""+context+"/images/mbLogoBar.png\" BORDER=0></A><P>\n");
-        _table.add("<A HREF=\"http://www.inetu.com\"><IMG SRC=\""+context+"/images/inetu.png\" BORDER=0></A><P>\n");
-        _table.add("<A HREF=\"http://sourceforge.net/projects/jetty\"><IMG SRC=\""+context+"/images/sourceforge.png\" BORDER=0></A><P>\n");
+        _table.add("<A HREF=\"http://www.mortbay.com\"><IMG SRC=\""+context+"/images/mbLogoBar.png\" WIDTH=120 HEIGHT=75 BORDER=0></A><P>\n");
+        _table.add("<A HREF=\"http://www.inetu.com\"><IMG SRC=\""+context+"/images/inetu.png\" WIDTH=121 HEIGHT=52 BORDER=0></A><P>\n");
+        _table.add("<A HREF=\"http://sourceforge.net/projects/jetty\"><IMG SRC=\""+context+"/images/sourceforge.png\" WIDTH=88 HEIGHT=31 BORDER=0></A><P>\n");
         _table.add("&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P><font size=-4 color=\"#606CC0\">Copyright 2001<BR>Mort Bay Consulting.</FONT>");
         
         _table.newCell();

@@ -465,16 +465,12 @@ public class LineInput extends FilterInputStream
                 if (_pos==_avail)
                     fill();
             }
-            
-//  	    String buffer=new String(_buf,_pos,_avail-_pos);
-//  	    buffer=StringUtil.replace(buffer,"\r","<CR>");
-//  	    buffer=StringUtil.replace(buffer,"\n","<LF>");
-//  	    System.err.println("FILL: "+_pos+
-//  			       " "+_lastCr+
-//  			       "\n'"+
-//  			       buffer+
-//  			       "'");
         }
+        
+//          String buffer=new String(_buf,_pos,_contents-_pos);
+//          buffer=StringUtil.replace(buffer,"\r","<");
+//          buffer=StringUtil.replace(buffer,"\n","|");
+//          System.err.println("FILL: ["+buffer+"]");
     }
 
     
