@@ -13,8 +13,8 @@ import java.lang.InterruptedException;
 
 /* ======================================================================= */
 /** Threaded socket server.
- * This class listens at a socket and spawns a new thread for each
- * request that connects.
+ * This class listens at a socket and gives the connections received
+ * to a pool of Threads
  * <P>
  * The class is abstract and derived classes must provide the handling
  * for the connections.
@@ -23,8 +23,8 @@ import java.lang.InterruptedException;
  * runs at a lower priority, so that new connections are only accepted if
  * spare CPU is available.
  * <P>
- * The property THREADED_SERVER_MAX_THREADS can be set to limit the
- * number of threads created.
+ * The properties THREADED_SERVER_MIN_THREADS and THREADED_SERVER_MAX_THREADS
+ * can be set to control the number of threads created.
  * <P>
  * Currently these settings effect all threaded servers in the same JVM
  * and cannot be individually altered.
@@ -32,7 +32,9 @@ import java.lang.InterruptedException;
  * @version $Id$
  * @author Greg Wilkins
  */
-abstract public class ThreadedServer implements Runnable 
+abstract public class ThreadedServer
+    extends ThreadPool
+    implements Runnable 
 {    
     /* ------------------------------------------------------------------- */
     private static boolean __lowPrio =
@@ -51,14 +53,13 @@ abstract public class ThreadedServer implements Runnable
     private InetAddress address = null;
     private int port=0;
     ServerSocket listen = null;
-    ThreadPool _threadPool;
   
     /* ------------------------------------------------------------------- */
     /* Construct on any free port.
      */
     public ThreadedServer() 
     {
-	_threadPool=new ThreadPool(__minThreads,__maxThreads,null,0);
+	super(__minThreads,__maxThreads,null,0);
     }
     
     /* ------------------------------------------------------------------- */
@@ -66,7 +67,7 @@ abstract public class ThreadedServer implements Runnable
      */
     public ThreadedServer(String name) 
     {
-	_threadPool=new ThreadPool(__minThreads,__maxThreads,name,0);
+	super(__minThreads,__maxThreads,name,0);
     }
 
     /* ------------------------------------------------------------------- */
@@ -75,8 +76,7 @@ abstract public class ThreadedServer implements Runnable
     public ThreadedServer(int port)
 	 throws java.io.IOException
     {
-	String name="Port:"+port;
-	_threadPool=new ThreadPool(__minThreads,__maxThreads,name,0);
+	super(__minThreads,__maxThreads,"Port:"+port,0);
 	setAddress(null,port);
     }
     
@@ -86,8 +86,8 @@ abstract public class ThreadedServer implements Runnable
     public ThreadedServer(InetAddress address, int port) 
 	 throws java.io.IOException
     {
-	String name=((address==null)?"Port:":(address.toString()+":"))+port;
-	_threadPool=new ThreadPool(__minThreads,__maxThreads,name,0);
+	super(__minThreads,__maxThreads,
+	      ((address==null)?"Port:":(address.toString()+":"))+port,0);
 	setAddress(address,port);
     }
     
@@ -97,13 +97,17 @@ abstract public class ThreadedServer implements Runnable
     public ThreadedServer(InetAddrPort address) 
 	 throws java.io.IOException
     {
-	String name=address.toString();
-	_threadPool=new ThreadPool(__minThreads,__maxThreads,name,0);
+	super(__minThreads,__maxThreads,address.toString(),0);
 	setAddress(address.getInetAddress(),address.getPort());
     }
     
-    /* ------------------------------------------------------------------- */
-    /** Construct for specific address, port and ThreadPool size
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param address The address to listen on
+     * @param minThreads Minimum number of handler threads.
+     * @param maxThreads Maximum number of handler threads.
+     * @param maxIdleTime Idle time in Msecs before a handler thread dies.
+     * @exception java.io.IOException Problem listening to the socket.
      */
     public ThreadedServer(InetAddrPort address,
 			  int minThreads, 
@@ -111,9 +115,27 @@ abstract public class ThreadedServer implements Runnable
 			  int maxIdleTime) 
 	 throws java.io.IOException
     {
-	String name=address.toString();
-	_threadPool = new ThreadPool(minThreads,maxThreads,name,maxIdleTime);
+	super(minThreads,maxThreads,address.toString(),maxIdleTime);
 	setAddress(address.getInetAddress(),address.getPort());
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Handle a job.
+     * Implementation of ThreadPool handle method.
+     * @param job 
+     */
+    final protected void handle(Object job)
+    {
+	Socket s=(Socket)job;
+	try
+	{
+	    handleConnection(s);
+	    s.close();
+	}
+	catch(java.io.IOException e)
+	{
+	    Code.ignore(e);
+	}
     }
     
     /* ------------------------------------------------------------------- */
@@ -275,10 +297,10 @@ abstract public class ThreadedServer implements Runnable
 	    Code.debug( "Listening at lower priority");
 	    serverThread.setPriority(serverThread.getPriority()-1);
 	}
-	if (_threadPool.getSize()>0)
+	if (getSize()>0)
 	{
-	    Code.debug( "Min Threads = " + _threadPool.getMinSize() );
-	    Code.debug( "Max Threads = " + _threadPool.getMaxSize() );
+	    Code.debug( "Min Threads = " + getMinSize() );
+	    Code.debug( "Max Threads = " + getMaxSize() );
 	}
 	
 	// While the thread is running . . .
@@ -290,16 +312,7 @@ abstract public class ThreadedServer implements Runnable
 		{
 		    final Socket connection = listen.accept();
 		    Code.debug( "Connection: ",connection );
-		    Runnable handler = new Runnable()
-		    {
-			public void run()
-			{
-			    handleConnection(connection);
-			}
-		    };
-		    
-		    _threadPool.run(handler);
-
+		    run(connection);
 		}
 		catch ( Exception e )
 		{

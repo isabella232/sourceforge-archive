@@ -5,9 +5,7 @@ Release 2.2.Beta1 -  June 1999
   + Implemented all HttpServer attribute methods by mapping to the
     HttpConfiguration properties.  Dynamic reconfiguratin is NOT
     supported by these methods (but we are thinking about it).
-  + Close files after use to avoid "file leak" under heavy load and
-    slow GC. There still appears to be a file leak, but we are hunting
-    for it.
+  + Close files after use to avoid "file leak" under heavy load.
   + Fixed missing copyright messages from some contributions
   + Fixed incorrect version numbers in a few places.
   + Improved ThreadPool synchronization and added minThreads.
@@ -18,6 +16,9 @@ Release 2.2.Beta1 -  June 1999
   + Limit the job queue only grow to the max number of threads.
   + Included GNUJSP 0.9.9
   + Optional use of DateCache in log file format
+  + Fixed cache in FileJarServletLoader
+  + Destroy requests and responses to help garbage collector.
+  + Restructure ThreadedServer to reduce object creation.
 
 Release 2.2.Beta0 - 31 May 1999
   + Servlet loader handles jar files with different files separator.

@@ -369,6 +369,25 @@ public class HttpHeader
     {
 	setHeader(name, __dateSend.format(date));
     }
+
+
+    /* ------------------------------------------------------------ */
+    /** Destroy the header.
+     * Help the garbage collector by null everything that we can.
+     */
+    public void destroy()
+    {
+	if (keyMap!=null)
+	{
+	    keyMap.clear();
+	    keyMap=null;
+	}
+	if (keys!=null)
+	{
+	    keys.removeAllElements();
+	    keys=null;
+	}
+    }
 }
 
 

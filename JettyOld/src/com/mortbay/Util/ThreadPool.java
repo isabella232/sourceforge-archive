@@ -39,10 +39,15 @@ public class ThreadPool
     private int _maxIdleTimeMs=0;
     
     /* ------------------------------------------------------------ */
+    /** Constructor. 
+     */
     public ThreadPool()
     {}
     
     /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param maxThreads Maximum number of handler threads.
+     */
     public ThreadPool(int maxThreads)
     {
 	_minThreads=0;
@@ -51,6 +56,10 @@ public class ThreadPool
     }
     
     /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param maxThreads Maximum number of handler threads.
+     * @param name Name of the thread.
+     */
     public ThreadPool(int maxThreads, String name)
     {
 	_minThreads=0;
@@ -60,6 +69,11 @@ public class ThreadPool
     }
     
     /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param maxThreads Maximum number of handler threads.
+     * @param name  Name of the thread.
+     * @param maxIdleTimeMs Idle time in Msecs before a handler thread dies.
+     */
     public ThreadPool(int maxThreads, String name, int maxIdleTimeMs)
     {
 	_minThreads=0;
@@ -71,6 +85,12 @@ public class ThreadPool
     }
     
     /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param minThreads  Minimum number of handler threads.
+     * @param maxThreads Maximum number of handler threads.
+     * @param name Name of the thread
+     * @param maxIdleTimeMs Idle time in Msecs before a handler thread dies.
+     */
     public ThreadPool(int minThreads,
 		      int maxThreads,
 		      String name,
@@ -109,13 +129,15 @@ public class ThreadPool
     
     /* ------------------------------------------------------------ */
     /** Run job 
-     * @param runnable 
+     * @param job.  If the job is derived from Runnable, the run method
+     * is called, otherwise it is passed as the argument to the handle
+     * method.
      */
-    public void run(Runnable runnable)
+    public void run(Object job)
 	throws InterruptedException
     {
 	// Place job on job queue
-	jobs.put(runnable);
+	jobs.put(job);
 
 	// Give the pool a chance to consume the job
 	Thread.yield();
@@ -133,6 +155,17 @@ public class ThreadPool
 		}
 	    }
 	}
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Handle a job.
+     * This method must be specialized by a derived class if non
+     * Runnable jobs are given to the threads in the pool.
+     * @param job 
+     */
+    protected void handle(Object job)
+    {
+	throw new Error("handle must be overridden");
     }
     
     
@@ -166,9 +199,10 @@ public class ThreadPool
 		int runs=0;
 		while(true)
 		{
-		    Runnable job =(_maxIdleTimeMs>0)
-			?((Runnable) jobs.get(_maxIdleTimeMs))
-			:((Runnable) jobs.get());
+		    Object job =(_maxIdleTimeMs>0)
+			?jobs.get(_maxIdleTimeMs)
+			:jobs.get();
+		    
 		    if (job == null)
 		    {
 			if (_nThreads>_minThreads)
@@ -182,7 +216,11 @@ public class ThreadPool
 			if (Code.verbose())
 			    Code.debug("Thread: ",this," Handling ",job);
 		    }
-		    job.run();
+
+		    if (job instanceof Runnable)
+			((Runnable)job).run();
+		    else
+			ThreadPool.this.handle(job);
 		}
 	    }
 	    catch(InterruptedException e)

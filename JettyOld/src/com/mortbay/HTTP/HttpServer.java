@@ -16,15 +16,13 @@ import java.util.*;
 
 
 /* ------------------------------------------------------------------------ */
-/** HTTP Server
- * This is the core class for the Jetty HTTP server (formerly called
- * MBServler).
+/** HTTP Server.
+ * This is the core class for the Jetty HTTP server.
  * The server takes it's configuration from an instance of a class
  * derived from HttpConfiguration. It then creates a HttpListener for
  * each host and port described in the configuration.
  * Requests received on those ports are converted into HttpRequests
- * and a HttpResponse is instantiated. These are extensions of 
- * javax.servlet.HttpServletRequest and javax.servlet.HttpServletResponse.
+ * and a HttpResponse is instantiated.
  *
  * The request path and server configuration are used to select a
  * handler stack (actually an array of HttpHandler instances). The request
@@ -106,24 +104,25 @@ public class HttpServer implements ServletContext
 	close();
 	
 	this.config=config;
-
-	httpHandlersMap=config.httpHandlersMap();
 	exceptionHandlersMap=config.exceptionHandlersMap();
+	httpHandlersMap=config.httpHandlersMap();
 
 	Hashtable handlerSet = new Hashtable(20);
-	Enumeration e = httpHandlersMap.keys();
 
 	// for all handler stacks
+	Enumeration e = httpHandlersMap.keys();
 	while (e.hasMoreElements())
 	{
 	    String handlersPath = (String) e.nextElement();
 	    Code.debug("Check configured handlers for path "+handlersPath);
 	    HttpHandler[] httpHandlers = null;
-	    try {
+	    try
+	    {
 		httpHandlers =
 		    (HttpHandler[]) httpHandlersMap.get(handlersPath);
 	    }
-	    catch (ClassCastException cce){
+	    catch (ClassCastException cce)
+	    {
 		Code.fail("httpHandlersMap does not map to HttpHandlers[] for "+
 			  handlersPath,
 			  cce);
@@ -160,7 +159,7 @@ public class HttpServer implements ServletContext
 
 	Code.assert(httpHandlersMap.get("/")!=null,
 		    "No mapping for / in httpHandlersMap");
-
+	
 	Code.assert(exceptionHandlersMap.get("/")!=null,
 		    "No mapping for / in exceptionHandlersMap");
 
@@ -628,6 +627,13 @@ public class HttpServer implements ServletContext
 	}
     }   
 }
+
+
+
+
+
+
+
 
 
 

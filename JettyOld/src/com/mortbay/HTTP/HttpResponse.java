@@ -647,4 +647,27 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	return writer;
     }    
 
+    /* ------------------------------------------------------------ */
+    /** Destroy the header.
+     * Help the garbage collector by null everything that we can.
+     */
+    public void destroy()
+    {
+	version=null;
+	status=null;
+	reason=null;
+	httpOut=null;
+	out=null;
+	writer=null;
+	cookies=null;
+	if (filters!=null)
+	{
+	    filters.removeAllElements();
+	    filters=null;
+	}
+	request=null;
+	observable=null;
+	super.destroy();
+    }
+    
 }

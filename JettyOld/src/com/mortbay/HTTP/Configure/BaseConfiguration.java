@@ -153,6 +153,8 @@ public class BaseConfiguration implements HttpConfiguration
      */
     public Properties getProperties()
     {
+	if (properties==null)
+	    properties=new Properties();
 	return properties;
     }
     

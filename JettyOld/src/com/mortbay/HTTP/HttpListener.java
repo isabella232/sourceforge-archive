@@ -98,21 +98,23 @@ public class HttpListener extends ThreadedServer
      */
     public void handleConnection(Socket connection)
     {
-	HttpResponse response = null;
 
 	try
 	{
 	    while(true)
 	    {
+		HttpRequest request = null;
+		HttpResponse response = null;
+		
 		try
 		{	
 		    Code.debug("Waiting for request...");
-		    HttpRequest request = new HttpRequest(server,connection,address);
+		    request = new HttpRequest(server,connection,address);
 
 		    if (Code.debug())
-			Code.debug("Received HTTP request:"+
-				   request.getMethod() +
-				   " " +
+			Code.debug("Received HTTP request:",
+				   request.getMethod(),
+				   " ",
 				   request.getRequestURI());
 	    
 		    response=new HttpResponse(connection.getOutputStream(),
@@ -134,6 +136,13 @@ public class HttpListener extends ThreadedServer
 		catch (HeadException e)
 		{
 		    Code.ignore(e);
+		}
+		finally
+		{
+		    if (request!=null)
+			request.destroy();
+		    if (response!=null)
+			response.destroy();
 		}
 	    }
 	}

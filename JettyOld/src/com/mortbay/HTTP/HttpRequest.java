@@ -95,9 +95,11 @@ public class HttpRequest extends HttpHeader
     private int inputState=0;
     
     /* -------------------------------------------------------------- */
-    /** Construct received request
+    /** Construct received request.
+     * @param httpServer The server for this request.
      * @param connection The socket the request was received over.
      * @param address the IP address that was listened on for the reqest.
+     * @exception IOException Problem reading the request header
      */
     public HttpRequest(HttpServer httpServer,
 		       Socket connection,
@@ -1163,6 +1165,55 @@ public class HttpRequest extends HttpHeader
 	uri = new URI(uris);
 	Code.debug(requestLine);
     }
+
+
+    /* ------------------------------------------------------------ */
+    /** Destroy the request.
+     * Help the garbage collector by null everything that we can.
+     */
+    public void destroy()
+    {
+	method=null;
+	uri=null;
+	version=null;
+	httpServer=null;
+	connection=null;
+	in=null;
+	address=null;
+	if (formParameters!=null)
+	{
+	    formParameters.clear();
+	    formParameters=null;
+	}
+	if (cookieParameters!=null)
+	{
+	    cookieParameters.clear();
+	    cookieParameters=null;
+	}
+	if (attributes!=null)
+	{
+	    attributes.clear();
+	    attributes=null;
+	}
+	cookies=null;
+	sessionId=null;
+	session=null;
+	sessionIdState=null;
+	requestLine=null;
+	protocolHostPort=null;
+	resourcePath=null;
+	servletPath=null;
+	pathInfo=null;
+	remoteUser=null;
+	authType=null;
+	byteContent=null;
+	pathTranslated=null;
+	serverName=null;
+	response=null;
+	reader=null;
+	super.destroy();
+    }
+    
     
     /* -------------------------------------------------------------- */
     /** Set the default session timeout.
