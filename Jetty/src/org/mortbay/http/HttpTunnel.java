@@ -52,6 +52,7 @@ public class HttpTunnel
     public HttpTunnel(Socket socket, int timeoutMs)
     {
         _socket= socket;
+        _timeoutMs=timeoutMs;
     }
 
     /* ------------------------------------------------------------ */
