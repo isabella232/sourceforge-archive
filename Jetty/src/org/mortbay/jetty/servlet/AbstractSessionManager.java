@@ -237,48 +237,61 @@ public abstract class AbstractSessionManager implements SessionManager
      */
     private void scavenge()
     {
-        long now = System.currentTimeMillis();
-
-        // Since Hashtable enumeration is not safe over deletes,
-        // we build a list of stale sessions, then go back and invalidate them
-        LazyList stale=null;
-
-        // For each session
+        Thread thread = Thread.currentThread();
+        ClassLoader old_loader = thread.getContextClassLoader();
         try
         {
-            for (Iterator i = _sessions.values().iterator(); i.hasNext(); )
-            {
-                Session session = (Session)i.next();
-                long idleTime = session._maxIdleMs;
-                if (idleTime > 0 && session._accessed + idleTime < now) {
-                    // Found a stale session, add it to the list
-                    stale=LazyList.add(stale,session);
-                }
-            }
-        }
-        catch(ConcurrentModificationException e)
-        {
-            Code.ignore(e);
-            // Oops something changed while we were looking.
-            // Lock the context and try again.
-            // Set our priority high while we have the sessions locked
-            int oldPriority = Thread.currentThread().getPriority();
-            Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+            ClassLoader loader = _handler.getClassLoader();
+            if (loader!=null)
+                thread.setContextClassLoader(loader);
+            
+            long now = System.currentTimeMillis();
+            
+            // Since Hashtable enumeration is not safe over deletes,
+            // we build a list of stale sessions, then go back and invalidate them
+            LazyList stale=null;
+            
+            // For each session
             try
             {
-                synchronized(this)
+                for (Iterator i = _sessions.values().iterator(); i.hasNext(); )
                 {
-                    stale=null;
-                    scavenge();
+                    Session session = (Session)i.next();
+                    long idleTime = session._maxIdleMs;
+                    if (idleTime > 0 && session._accessed + idleTime < now) {
+                        // Found a stale session, add it to the list
+                        stale=LazyList.add(stale,session);
+                    }
                 }
             }
-            finally {Thread.currentThread().setPriority(oldPriority);}
-        }
+            catch(ConcurrentModificationException e)
+            {
+                Code.ignore(e);
+                // Oops something changed while we were looking.
+                // Lock the context and try again.
+                // Set our priority high while we have the sessions locked
+                int oldPriority = Thread.currentThread().getPriority();
+                Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+                try
+                {
+                    synchronized(this)
+                    {
+                        stale=null;
+                        scavenge();
+                    }
+                }
+                finally {Thread.currentThread().setPriority(oldPriority);}
+            }
 
-        // Remove the stale sessions
-        for (int i = LazyList.size(stale); i-->0;)
+            // Remove the stale sessions
+            for (int i = LazyList.size(stale); i-->0;)
+            {
+                ((Session)LazyList.get(stale,i)).invalidate();
+            }
+        }
+        finally
         {
-            ((Session)LazyList.get(stale,i)).invalidate();
+            thread.setContextClassLoader(old_loader);
         }
     }
     
