@@ -561,10 +561,16 @@ public class ServletHandler extends AbstractHttpHandler
             {
                 request.setAttribute(ServletHandler.__J_S_ERROR_EXCEPTION_TYPE,th.getClass());
                 request.setAttribute(ServletHandler.__J_S_ERROR_EXCEPTION,th);
-                response.sendError(th instanceof UnavailableException
-                                   ?HttpResponse.__503_Service_Unavailable
-                                   :HttpResponse.__500_Internal_Server_Error,
-                                   e.getMessage());
+                if (th instanceof UnavailableException)
+                {
+                    UnavailableException ue = (UnavailableException)th;
+                    if (ue.isPermanent())
+                        response.sendError(HttpResponse.__404_Not_Found,e.getMessage());
+                    else
+                        response.sendError(HttpResponse.__503_Service_Unavailable,e.getMessage());
+                }
+                else
+                    response.sendError(HttpResponse.__500_Internal_Server_Error,e.getMessage());
             }
             else
                 if(log.isDebugEnabled())log.debug("Response already committed for handling "+th);
