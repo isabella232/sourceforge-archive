@@ -1,6 +1,7 @@
 Jetty3 Versions
 --------------
 
+ + Form auth login and error pages relative to context path.
  + Fixed handling of rel form authentication URLs
  + Added support for Nonblocking listener.
  + Added lowResourcePersistTimeMs for more graceful degradation when

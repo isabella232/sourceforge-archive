@@ -622,12 +622,17 @@ public class ServletHandler
                 request.setAttribute(UserPrincipal.__ATTR,user);
                 session.setAttribute(__J_AUTHENTICATED,__J_AUTHENTICATED);
                 String nuri=(String)session.getAttribute(__J_URI);
-                response.sendRedirect(nuri==null?shandler.getErrorPage():nuri);
+                if (nuri==null)
+                    response.sendRedirect(URI.addPaths(request.getContextPath(),
+                                                       shandler.getErrorPage()));
+                else
+                    response.sendRedirect(nuri);
             }
             else
             {
                 Code.debug("Form authentication FAILED for ",username);
-                response.sendRedirect(shandler.getErrorPage());
+                response.sendRedirect(URI.addPaths(request.getContextPath(),
+                                                   shandler.getErrorPage()));
             }
             
             // Security check is always false, only true after final redirection.
@@ -641,7 +646,8 @@ public class ServletHandler
 
         // redirect to login page
         session.setAttribute(__J_URI, URI.addPaths(request.getContextPath(),uri));
-        response.sendRedirect(shandler.getLoginPage());
+        response.sendRedirect(URI.addPaths(request.getContextPath(),
+                                           shandler.getLoginPage()));
         return false;
     }
 }

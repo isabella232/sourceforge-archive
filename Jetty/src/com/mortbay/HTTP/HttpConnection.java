@@ -609,7 +609,7 @@ public class HttpConnection
         _close=
             HttpFields.__Close.equals(_response.getField(HttpFields.__Connection)) 
             ||
-            _listener.isLowOnResources();
+            _listener.isOutOfResources();
         
         if (_close)
             _persistent=false;

@@ -21,6 +21,8 @@ import java.net.Socket;
  * MaxThread     - Maximum thread that will service requests.
  * MaxIdleTimeMs - Time for an idle thread to wait for a request.
  * MaxReadTimeMs - Time that a read on a request can block.
+ * LowResourcePersistTimeMs - time in ms that connections will persist if listener is
+ *                            low on resources. 
  * </PRE>
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -33,6 +35,8 @@ public class SocketListener
     private HttpServer _server;
     private int _lowResourcePersistTimeMs=2000;
     private int _throttled=0;
+    private boolean _lastLow=false;
+    private boolean _lastOut=false;
     
     /* ------------------------------------------------------------------- */
     public SocketListener()
@@ -126,6 +130,19 @@ public class SocketListener
                                socket.getInputStream(),
                                socket.getOutputStream(),
                                socket);
+        
+        if (_lowResourcePersistTimeMs>0 && isLowOnResources())
+        {
+            try
+            {
+                _throttled++;
+                socket.setSoTimeout(_lowResourcePersistTimeMs);
+            }
+            catch(Exception e)
+            {
+                Code.warning(e);
+            }
+        }
         connection.handle();
     }
 
@@ -180,7 +197,7 @@ public class SocketListener
      */
     public void persistConnection(HttpConnection connection)
     {
-        if (isLowOnResources())
+        if (_lowResourcePersistTimeMs>0 && isLowOnResources())
         {
             try
             {
@@ -201,10 +218,30 @@ public class SocketListener
      */
     public boolean isLowOnResources()
     {
-        return
+        boolean low =
             getThreads()==getMaxThreads() &&
             getIdleThreads()<getMinThreads();
+        if (low && !_lastLow)
+            Log.event("LOW ON RESOURCES: "+this);
+        _lastLow=low;
+        return low;
     }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if out of resources. 
+     */
+    public boolean isOutOfResources()
+    {
+        boolean out =
+            getThreads()==getMaxThreads() &&
+            getIdleThreads()==0;
+        if (out && !_lastOut)
+            Code.warning("OUT OF RESOURCES: "+this);
+        _lastOut=out;
+        return out;
+    }
+    
 }
 
 

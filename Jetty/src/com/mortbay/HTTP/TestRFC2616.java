@@ -208,6 +208,12 @@ public class TestRFC2616
     }
     
     /* ------------------------------------------------------------ */
+    public boolean isOutOfResources()
+    {
+        return false;
+    }
+    
+    /* ------------------------------------------------------------ */
     public void  persistConnection(HttpConnection connection)
     {
     }

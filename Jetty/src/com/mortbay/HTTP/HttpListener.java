@@ -26,13 +26,15 @@ public interface HttpListener extends LifeCycle
     public abstract void setPort(int port);
     public abstract int getPort();
 
-    public abstract void customizeRequest(HttpConnection connection,
-                                          HttpRequest request);
     public abstract String getDefaultScheme();
     public abstract ServerSocket getServerSocket();
     
-    public abstract boolean isLowOnResources();
+    public abstract void customizeRequest(HttpConnection connection,
+                                          HttpRequest request);
     public abstract void persistConnection(HttpConnection connection);
+    
+    public abstract boolean isLowOnResources();
+    public abstract boolean isOutOfResources();
 }
 
 
