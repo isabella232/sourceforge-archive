@@ -20,10 +20,13 @@ Jetty Versions
  + Webapps serve dynamics servlets by default.
  + Warn for missing WEB-INF or web.xml
  + Sessions try version 1 cookies in set-cookie2 header. 
+ + Session cookies are given context path
  + Put extra server and servlet info in header.
  + Version details in header can be suppressed with System property
    java.com.mortbay.HTTP.Version.paranoid
  + Prevent reloading dynamic servlets at different paths.
+ + Implemented resource aliases in HandlerContext - used by Servlet Context
+ + Map tablib configuration to resource aliases.
 
 Jetty-3.0.0.rc5 - 12 Nov 2000
  + Default writer encoding set by mime type if not explicitly set.

@@ -267,17 +267,11 @@ public class PathMap extends HashMap
      */
     public static boolean match(String pathSpec, String path)
         throws IllegalArgumentException
-    {  
-        if (pathSpec.equals("/"))
-            return true;
-        
-        if (pathSpec.startsWith("*."))
-            return path.regionMatches(path.length()-pathSpec.length()-2,
-                                      pathSpec,2,pathSpec.length()-2);
-        
-        if (pathSpec.startsWith("/"))
+    {
+        char c = pathSpec.charAt(0);
+        if (c=='/')
         {
-            if (pathSpec.equals(path))
+            if (pathSpec.length()==1 || pathSpec.equals(path))
                 return true;
             
             if (pathSpec.endsWith("/*") &&
@@ -287,6 +281,9 @@ public class PathMap extends HashMap
             if (path.startsWith(pathSpec) && path.charAt(pathSpec.length())==';')
                 return true;
         }
+        else if (c=='*')
+            return path.regionMatches(path.length()-pathSpec.length()-1,
+                                      pathSpec,1,pathSpec.length()-1);
         return false;
     }
     
@@ -295,17 +292,14 @@ public class PathMap extends HashMap
      * @return null if no match at all.
      */
     public static String pathMatch(String pathSpec, String path)
-        throws IllegalArgumentException
     {  
-        if (pathSpec==null ||
-            pathSpec.startsWith("*."))
-            return path;
-
-        if (pathSpec.equals("/"))
-            return "";
+        char c = pathSpec.charAt(0);
         
-        if (pathSpec.startsWith("/"))
+        if (c=='/')
         {
+            if (pathSpec.length()==1)
+                return "";
+        
             if (pathSpec.equals(path))
                 return path;
             
@@ -315,11 +309,14 @@ public class PathMap extends HashMap
             
             if (path.startsWith(pathSpec) && path.charAt(pathSpec.length())==';')
                 return path;
-            
-            throw new IllegalArgumentException("PathSpec does not match path");
         }
-
-        throw new IllegalArgumentException("Invalid PathSpec");
+        else if (c=='*')
+        {
+            if (path.regionMatches(path.length()-(pathSpec.length()-1),
+                                   pathSpec,1,pathSpec.length()-1))
+                return path;
+        }
+        return null;
     }
     
     /* --------------------------------------------------------------- */
@@ -327,17 +324,14 @@ public class PathMap extends HashMap
      * @return The path info string
      */
     public static String pathInfo(String pathSpec, String path)
-        throws IllegalArgumentException
     {
-        if (pathSpec==null ||
-            pathSpec.startsWith("*."))
-            return null;
-
-        if (pathSpec.equals("/"))
-            return path;
+        char c = pathSpec.charAt(0);
         
-        if (pathSpec.startsWith("/"))
+        if (c=='/')
         {
+            if (pathSpec.length()==1)
+                return path;
+            
             if (pathSpec.equals(path))
                 return null;
             
@@ -348,14 +342,8 @@ public class PathMap extends HashMap
                     return null;
                 return path.substring(pathSpec.length()-2);
             }
-
-            if (path.startsWith(pathSpec) && path.charAt(pathSpec.length())==';')
-                return null;
-                
-            throw new IllegalArgumentException("PathSpec does not match path");
-        }
-
-        throw new IllegalArgumentException("Invalid PathSpec");
+        } 
+        return null;
     }
 
 

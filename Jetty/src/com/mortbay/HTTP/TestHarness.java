@@ -389,11 +389,11 @@ public class TestHarness
                           "[/animal/bird/*=3, /animal/*=5, *.tar.gz=6, *.gz=7, /=8]",
                           "all matches");
 
-            t.checkEquals(p.pathMatch("/Foo/bar","/Foo/bar"),"/Foo/bar","pathInfo exact");
-            t.checkEquals(p.pathMatch("/Foo/*","/Foo/bar"),"/Foo","pathInfo prefix");
-            t.checkEquals(p.pathMatch("/Foo/*","/Foo/"),"/Foo","pathInfo prefix");
-            t.checkEquals(p.pathMatch("/Foo/*","/Foo"),"/Foo","pathInfo prefix");
-            t.checkEquals(p.pathMatch("*.ext","/Foo/bar.ext"),"/Foo/bar.ext","pathInfo suffix");
+            t.checkEquals(p.pathMatch("/Foo/bar","/Foo/bar"),"/Foo/bar","pathMatch exact");
+            t.checkEquals(p.pathMatch("/Foo/*","/Foo/bar"),"/Foo","pathMatch prefix");
+            t.checkEquals(p.pathMatch("/Foo/*","/Foo/"),"/Foo","pathMatch prefix");
+            t.checkEquals(p.pathMatch("/Foo/*","/Foo"),"/Foo","pathMatch prefix");
+            t.checkEquals(p.pathMatch("*.ext","/Foo/bar.ext"),"/Foo/bar.ext","pathMatch suffix");
             t.checkEquals(p.pathMatch("/","/Foo/bar.ext"),"","pathMatch default");
             
             t.checkEquals(p.pathInfo("/Foo/bar","/Foo/bar"),null,"pathInfo exact");

@@ -221,7 +221,8 @@ public class HandlerContext implements LifeCycle
     
     private Map _mimeMap;
     private Map _encodingMap;
-    
+    private Map _resourceAliases;
+
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param httpServer 
@@ -454,6 +455,38 @@ public class HandlerContext implements LifeCycle
             Code.debug(e);
             throw new IllegalArgumentException(resourceBase+":"+e.toString());
         }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set Resource Alias.
+     * Resource aliases map resource uri's within a context.
+     * They may optionally be used by a handler when looking for
+     * a resource.  The only known user is
+     * #com.mortbay.HTTP.Handler.Servlet.Context.
+     * @param alias 
+     * @param uri 
+     */
+    public void setResourceAlias(String alias,String uri)
+    {
+        if (_resourceAliases==null)
+            _resourceAliases=new HashMap(5);
+        _resourceAliases.put(alias,uri);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getResourceAlias(String alias)
+    {
+        if (_resourceAliases==null)
+            return null;
+       return (String) _resourceAliases.get(alias);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String removeResourceAlias(String alias)
+    {
+        if (_resourceAliases==null)
+            return null;
+       return (String) _resourceAliases.remove(alias);
     }
     
     /* ------------------------------------------------------------ */

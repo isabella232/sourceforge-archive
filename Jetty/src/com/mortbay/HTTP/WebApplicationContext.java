@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.HashMap;
 import javax.servlet.UnavailableException;
 
 
@@ -39,7 +41,7 @@ public class WebApplicationContext extends HandlerContext
     private ServletHandler _servletHandler;
     private SecurityHandler _securityHandler;
     private Context _context;
-    
+    private Map _tagLibMap=new HashMap(3);
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -222,10 +224,7 @@ public class WebApplicationContext extends HandlerContext
                     System.err.println(node);
                 }
                 else if ("taglib".equals(name))
-                {
-                    Code.warning("Not implemented: "+name);
-                    System.err.println(node);
-                }
+                    initTagLib(node);
                 else if ("resource-ref".equals(name))
                 {
                     Code.warning("Not implemented: "+name);
@@ -407,6 +406,15 @@ public class WebApplicationContext extends HandlerContext
     }
 
     /* ------------------------------------------------------------ */
+    private void initTagLib(XmlParser.Node node)
+    {
+        String uri= node.getString("taglib-uri",false,true);
+        String location= node.getString("taglib-location",false,true);
+        _tagLibMap.put(uri,location);
+        setResourceAlias(uri,location);
+    }
+    
+    /* ------------------------------------------------------------ */
     private void initSecurityConstraint(XmlParser.Node node)
     {
         SecurityConstraint scBase = new SecurityConstraint();
@@ -503,5 +511,15 @@ public class WebApplicationContext extends HandlerContext
     {
         Code.warning("ResourceBase should not be set for WebApplication");
         super.setResourceBase(resourceBase);
-    }   
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get the taglib map. 
+     * @return A map of uri to location for tag libraries.
+     */
+    public Map getTagLibMap()
+    {
+        return _tagLibMap;
+    }
+    
 }

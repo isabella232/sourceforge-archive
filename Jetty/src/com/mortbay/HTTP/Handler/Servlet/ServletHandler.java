@@ -57,8 +57,8 @@ public class ServletHandler extends NullHandler
     private String _dynamicServletPathSpec;
     private Map _dynamicInitParams ;
 
-    /* ----------------------------------------------------------------- */
-    /** Construct basic auth handler.
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
      */
     public ServletHandler()
     {
@@ -146,6 +146,8 @@ public class ServletHandler extends NullHandler
     /* ----------------------------------------------------------------- */
     public synchronized void start()
     {        
+        _context.setHandlerContext(getHandlerContext());
+        
         // Initialize classloader
         _loader=getHandlerContext().getClassLoader();
         
@@ -230,6 +232,7 @@ public class ServletHandler extends NullHandler
         _servletMap.put(pathSpec,holder);
     }
     
+    
     /* ----------------------------------------------------------------- */
     /**
      * @param contextPath 
@@ -310,10 +313,9 @@ public class ServletHandler extends NullHandler
     public Map.Entry getHolderEntry(String pathInContext)
     {
         Map.Entry entry =_servletMap.getMatch(pathInContext);
-    
+
         String servletClass=null;
-        if (_dynamicServletPathSpec!=null &&
-            PathMap.match(_dynamicServletPathSpec,pathInContext))
+        if (_dynamicServletPathSpec!=null)
             servletClass=PathMap.pathInfo(_dynamicServletPathSpec,pathInContext);
         
         // Do we have a match and no chance of a new

@@ -43,7 +43,12 @@ public class Context implements ServletContext, HttpSessionContext
 {
     /* ------------------------------------------------------------ */
     private ServletHandler _handler;
+    private HandlerContext _handlerContext;
+
+    /* ------------------------------------------------------------ */
     ServletHandler getHandler(){return _handler;}
+    HandlerContext getHandlerContext(){return _handlerContext;}
+    void setHandlerContext(HandlerContext hc){_handlerContext=hc;}
 
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -52,6 +57,7 @@ public class Context implements ServletContext, HttpSessionContext
     Context(ServletHandler handler)
     {
         _handler=handler;
+        _handlerContext=_handler.getHandlerContext();
     }
 
     /* ------------------------------------------------------------ */
@@ -59,18 +65,18 @@ public class Context implements ServletContext, HttpSessionContext
     {
         return _handler;
     }
-    
+
     /* ------------------------------------------------------------ */
     public String getContextPath()
     {
-        return _handler.getHandlerContext().getContextPath();
+        return _handlerContext.getContextPath();
     }
 
     /* ------------------------------------------------------------ */
     public ServletContext getContext(String uri)
     {        
         HandlerContext context=
-            _handler.getHandlerContext();
+            _handlerContext;
 
         ServletHandler handler=context.getHttpServer()
             .findServletHandler(uri,context.getHosts());
@@ -95,14 +101,20 @@ public class Context implements ServletContext, HttpSessionContext
     /* ------------------------------------------------------------ */
     public String getMimeType(String file)
     {
-        return _handler.getHandlerContext().getMimeByExtension(file);
+        return _handlerContext.getMimeByExtension(file);
     }
 
     /* ------------------------------------------------------------ */
+    /** Get a Resource.
+     * If no resource is found, resource aliases are tried.
+     * @param uriInContext 
+     * @return 
+     * @exception MalformedURLException 
+     */
     public URL getResource(String uriInContext)
         throws MalformedURLException
     {
-        Resource resourceBase=_handler.getHandlerContext().getResourceBase();
+        Resource resourceBase=_handlerContext.getResourceBase();
         if (resourceBase==null)
             return null;
 
@@ -110,6 +122,10 @@ public class Context implements ServletContext, HttpSessionContext
             Resource resource = resourceBase.addPath(uriInContext);
             if (resource.exists())
                 return resource.getURL();
+
+            String aliasedUri=_handlerContext.getResourceAlias(uriInContext);
+            if (aliasedUri!=null)
+                return getResource(aliasedUri);
         }
         catch(MalformedURLException e)
         {
@@ -237,7 +253,7 @@ public class Context implements ServletContext, HttpSessionContext
         if(Code.debug())
             Code.debug("getRealPath of ",path," in ",this);
 
-        Resource resourceBase=_handler.getHandlerContext().getResourceBase();
+        Resource resourceBase=_handlerContext.getResourceBase();
         if (resourceBase==null )
             return null;
 
@@ -273,7 +289,7 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public String getInitParameter(String param)
     {
-        return _handler.getHandlerContext().getInitParameter(param);
+        return _handlerContext.getInitParameter(param);
     }
 
     /* ------------------------------------------------------------ */
@@ -283,7 +299,7 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public Enumeration getInitParameterNames()
     {
-        return _handler.getHandlerContext().getInitParameterNames();
+        return _handlerContext.getInitParameterNames();
     }
 
     /* ------------------------------------------------------------ */
@@ -297,7 +313,7 @@ public class Context implements ServletContext, HttpSessionContext
         if ("javax.servlet.context.tempdir".equals(name))
         {
             // Initialize temporary directory
-            File tempDir=(File)_handler.getHandlerContext()
+            File tempDir=(File)_handlerContext
                 .getAttribute("javax.servlet.context.tempdir");
             if (tempDir==null)
             {
@@ -307,7 +323,7 @@ public class Context implements ServletContext, HttpSessionContext
                         tempDir.delete();
                     tempDir.mkdir();
                     tempDir.deleteOnExit();
-                    _handler.getHandlerContext()
+                    _handlerContext
                         .setAttribute("javax.servlet.context.tempdir",
                                       tempDir);
                 }
@@ -319,7 +335,7 @@ public class Context implements ServletContext, HttpSessionContext
             Code.debug("TempDir=",tempDir);
         }
 
-        return _handler.getHandlerContext().getAttribute(name);
+        return _handlerContext.getAttribute(name);
     }
 
     /* ------------------------------------------------------------ */
@@ -328,7 +344,7 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public Enumeration getAttributeNames()
     {
-        return _handler.getHandlerContext().getAttributeNames();
+        return _handlerContext.getAttributeNames();
     }
 
     /* ------------------------------------------------------------ */
@@ -344,7 +360,7 @@ public class Context implements ServletContext, HttpSessionContext
             Code.warning("Servlet attempted update of "+name);
             return;
         }
-        _handler.getHandlerContext().setAttribute(name,value);
+        _handlerContext.setAttribute(name,value);
     }
 
     /* ------------------------------------------------------------ */
@@ -359,7 +375,7 @@ public class Context implements ServletContext, HttpSessionContext
             Code.warning("Servlet attempted update of "+name);
             return;
         }
-        _handler.getHandlerContext().removeAttribute(name);
+        _handlerContext.removeAttribute(name);
     }
 
     /* ------------------------------------------------------------ */
@@ -481,7 +497,7 @@ public class Context implements ServletContext, HttpSessionContext
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "Servlet"+_handler.getHandlerContext().toString();
+        return "Servlet"+_handlerContext.toString();
     }
     
     /* ------------------------------------------------------------ */
