@@ -93,11 +93,12 @@ public class JAASUserRealm implements UserRealm
         {
             JAASUserPrincipal userPrincipal = (JAASUserPrincipal)userMap.get(username);
 
+            //user has been previously authenticated, but
+            //re-authentication has been requested, so remove them
             if (userPrincipal != null)
-                return userPrincipal;
-            
+                userMap.remove(userPrincipal);
                 
-            //user has not been authenticated
+            
             if (callbackHandler == null)
             {
                 Log.warning ("No CallbackHandler configured: using DefaultCallbackHandler");
@@ -134,8 +135,9 @@ public class JAASUserRealm implements UserRealm
     /* ------------------------------------------------------------ */
     public boolean isAuthenticated(Principal user)
     {
-        // XXX This is not correct if auth can expire!
-        return user instanceof JAASUserPrincipal;
+        // XXX This is not correct if auth can expire! We need to
+        // get the user out of the cache
+        return (userMap.get(user.getName()) != null);
     }
     
     /* ------------------------------------------------------------ */
