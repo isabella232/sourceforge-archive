@@ -1,7 +1,10 @@
 Jetty Versions
 --------------
 
-Jetty-4.2.0 - 15 November 2002
+Jetty-4.2.0 - 16 November 2002
+ + Fixed AJP13 buffer size.
+ + Fixed remove listener bug.
+ + Fixed include of Invoker servlet.
  + Restrict 304 responses to seconds time resolution.
  + Use IE date formatting for speed.
  + Removed jasper source and just include jars from 4.1.12
@@ -9,11 +12,9 @@ Jetty-4.2.0 - 15 November 2002
  + Lowercase jsessionid for URLs only.
  + Made NCSARequestLog easier to extend.
  + Added definitions for RFC2518 WebDav response codes.
- + removed remaining non portable getBytes() calls 
- + fixed remove listener bug.
- + fixed AJP13 buffer size.
- + added upload demo to dump servlet.
- + many more optimizations.
+ + Removed remaining non portable getBytes() calls 
+ + Added upload demo to dump servlet.
+ + Many more optimizations.
 
 Jetty-4.2.0rc1 - 2 November 2002
  + Support default mime mapping defined by *
