@@ -131,8 +131,9 @@ public class SimpleTagSupport
     }
     
     /**
-     * Stores the provided JSP context in the protected 
-     * jspContext field.
+     * Stores the provided JSP context in the private jspContext field.
+     * Subclasses can access the <code>JspContext</code> via 
+     * <code>getJspContext()</code>.
      * 
      * @param pc the page context for this invocation
      * @see SimpleTag#setJspContext

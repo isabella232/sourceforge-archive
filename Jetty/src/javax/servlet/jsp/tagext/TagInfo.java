@@ -92,7 +92,7 @@ public class TagInfo {
     public static final String BODY_CONTENT_SCRIPTLESS = "SCRIPTLESS";
 
     /**
-     * Constructor for TagInfo from data in the JSP 2.0 format for TLD.
+     * Constructor for TagInfo from data in the JSP 1.1 format for TLD.
      * This class is to be instantiated only from the TagLibrary code
      * under request from some JSP code that is parsing a
      * TLD (Tag Library Descriptor).

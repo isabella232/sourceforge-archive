@@ -153,8 +153,9 @@ public interface SimpleTag extends JspTag {
     public JspTag getParent();
     
     /**
-     * Stores the provided JSP context in the protected 
-     * jspContext field.
+     * Called by the container to provide this tag handler with
+     * the <code>JspContext</code> for this invocation.
+     * An implementation should save this value.
      * 
      * @param pc the page context for this invocation
      * @see Tag#setPageContext

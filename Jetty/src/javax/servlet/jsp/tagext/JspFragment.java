@@ -55,6 +55,10 @@
  
 package javax.servlet.jsp.tagext;
 
+import java.io.IOException;
+import java.io.Writer;
+import javax.servlet.jsp.*;
+
 /**
  * Encapsulates a portion of JSP code in an object that 
  * can be invoked as many times as needed.  JSP Fragments are defined 
@@ -66,7 +70,7 @@ package javax.servlet.jsp.tagext;
  * The definition of the JSP fragment must only contain template 
  * text and JSP action elements.  In other words, it must not contain
  * scriptlets or scriptlet expressions.  At translation time, the 
- * container generates an implementation of the JspFragment interface
+ * container generates an implementation of the JspFragment abstract class
  * capable of executing the defined fragment.
  * <p>
  * A tag handler can invoke the fragment zero or more times, or 
@@ -85,7 +89,7 @@ package javax.servlet.jsp.tagext;
  *
  * @since 2.0
  */
-public interface JspFragment {
+public abstract class JspFragment {
 
     /**
      * Executes the fragment and directs all output to the given Writer,
@@ -104,7 +108,14 @@ public interface JspFragment {
      * @throws java.io.IOException If there was an error writing to the 
      *     stream.
      */
-    public void invoke( java.io.Writer out )
-        throws javax.servlet.jsp.JspException, java.io.IOException;
+    public abstract void invoke( Writer out )
+        throws JspException, IOException;
+
+    /**
+     * Returns the JspContext that is bound to this JspFragment.
+     *
+     * @return The JspContext used by this fragment at invocation time.
+     */
+    public abstract JspContext getJspContext();
 
 }
