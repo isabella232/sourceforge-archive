@@ -6,6 +6,7 @@ import com.mortbay.Util.*;
 import java.util.*;
 import java.text.*;
 import java.io.*;
+import java.net.*;
 
 /* ------------------------------------------------------------ */
 /** Resource Handler
@@ -169,25 +170,17 @@ public class ResourceHandler extends NullHandler
      * @param path 
      * @return 
      */
-    public String realPath(String pathSpec,String path)
-	throws IllegalArgumentException
+    private Resource resource(String pathSpec,String path)
+	throws MalformedURLException,IOException
     {
-	String fileBase=getHandlerContext().getResourceFileBase();
-	if (fileBase==null)
+	Resource resourceBase=getHandlerContext().getResourceBase();
+	if (resourceBase==null)
 	    return null;
- 
-	if (pathSpec.startsWith("*."))
-	{
-	    fileBase+=path;
-	}
-	else
-	{
-	    String info=PathMap.pathInfo(pathSpec,path);
-	    if (info!=null)
-		fileBase+=info;
-	}
-  
-	return fileBase;
+	String info=PathMap.pathInfo(pathSpec,path);
+	if (info==null)
+	    info=path;
+	
+	return resourceBase.relative(info);
     }
  
     /* ------------------------------------------------------------ */
@@ -198,39 +191,38 @@ public class ResourceHandler extends NullHandler
     {
 	if (!isStarted())
 	    return;
-  
+	
 	// Extract and check filename
 	String path = request.getPath();
 	if (path.indexOf("..")>=0)
 	    throw new HttpException(HttpResponse.__403_Forbidden);
-	String filename = realPath(pathSpec,path);
-  
-	Code.debug("FILE=",filename,
-		   "\nMETHOD=",request.getMethod());
+	
+	Resource resource = resource(pathSpec,path);
+	Code.debug("PATHSPEC=",pathSpec,
+		   "\nPATH=",path,
+		   "\nRESOURCE=",resource);
   
 	// check filename
-	boolean endsWithSlash= filename.endsWith("/");
-	if (endsWithSlash)
-	    filename = filename.substring(0,filename.length()-1);
+	boolean endsWithSlash= resource.toString().endsWith("/");
 
 	String method=request.getMethod();
 	if (method.equals(HttpRequest.__GET) ||
 	    method.equals(HttpRequest.__HEAD))
-	    handleGet(request, response, path, filename, endsWithSlash);  
+	    handleGet(request, response, path, resource, endsWithSlash);  
 	else if (method.equals(HttpRequest.__PUT))
-	    handlePut(request, response, path, filename);
+	    handlePut(request, response, path, resource);
 	else if (method.equals(HttpRequest.__DELETE))
-	    handleDelete(request, response, path, filename);
+	    handleDelete(request, response, path, resource);
 	else if (method.equals(HttpRequest.__OPTIONS))
 	    handleOptions(response);
 	else if (method.equals(HttpRequest.__MOVE))
-	    handleMove(request, response, pathSpec, path, filename);
+	    handleMove(request, response, pathSpec, path, resource);
 	else
 	{
 	    Code.debug("Unknown action:"+method);
 	    // anything else...
 	    try{
-		if (_resourceBase.relative(filename).exists())
+		if (resource.exists())
 		    response.sendError(response.__501_Not_Implemented);
 	    }
 	    catch(Exception e) {Code.ignore(e);}
@@ -238,12 +230,14 @@ public class ResourceHandler extends NullHandler
     }
 
     /* ------------------------------------------------------------------- */
-    void handleGet(HttpRequest request, HttpResponse response,
-		   String path, String filename,
+    void handleGet(HttpRequest request,
+		   HttpResponse response,
+		   String path,
+		   Resource resource,
 		   boolean endsWithSlash)
 	throws IOException
     {
-	Code.debug("Looking for ",filename);
+	Code.debug("Looking for ",resource);
   
 	// Try a cache lookup
 	if (_cache!=null && !endsWithSlash)
@@ -252,17 +246,17 @@ public class ResourceHandler extends NullHandler
 	    synchronized(_cacheMap)
 	    {
 		CachedFile cachedFile=
-		    (CachedFile)_cacheMap.get(filename);
+		    (CachedFile)_cacheMap.get(resource.toString());
 		if (cachedFile!=null &&cachedFile.isValid())
 		{
-		    if (!checkGetHeader(request,response,cachedFile.file))
+		    if (!checkGetHeader(request,response,cachedFile.resource))
 			return;
 		    bytes=cachedFile.prepare(response);
 		}
 	    }
 	    if (bytes!=null)
 	    {
-		Code.debug("Cache hit: "+filename);
+		Code.debug("Cache hit: "+resource);
 		OutputStream out = response.getOutputStream();
 		out.write(bytes);
 		out.flush();
@@ -270,22 +264,19 @@ public class ResourceHandler extends NullHandler
 	    }
 	}
   
-	// Look for  it normally
-	Resource file = _resourceBase.relative(filename);
  
-	if (file.exists())
+	if (resource!=null && resource.exists())
 	{
 	    // Check modified dates
-	    if (!checkGetHeader(request,response,file))
+	    if (!checkGetHeader(request,response,resource))
 		return;
      
 	    // check if directory
-	    if (file.isDirectory())
+	    if (resource.isDirectory())
 	    {
 		if (!endsWithSlash && !path.equals("/"))
 		{
 		    Code.debug("Redirect to directory/");
-      
 		    int port=request.getPort();
 		    String q=request.getQuery();
 		    if (q!=null&&q.length()==0)
@@ -304,28 +295,30 @@ public class ResourceHandler extends NullHandler
 		boolean indexSent=false;
 		for (int i=_indexFiles.size();i-->0;)
 		{
-		    Resource index = file.relative((String)_indexFiles.get(i));
+		    Resource index =
+			resource.relative((String)_indexFiles.get(i));
       
 		    if (index.exists())
 		    {
 			// Check modified dates
 			if (!checkGetHeader(request,response,index))
 			    return;
-			sendFile(request,response,filename,index);
+			sendFile(request,response,index);
 			indexSent=true;
 			break;
 		    }
 		}
   
 		if (!indexSent)
-		    sendDirectory(request,response,file,!("/".equals(path)));
+		    sendDirectory(request,response,resource,
+				  path.length()>1);
 	    }
      
 	    // check if it is a file
-	    else if (file.exists())
+	    else if (resource.exists())
 	    {
 		if (!endsWithSlash)
-		    sendFile(request,response,filename,file);
+		    sendFile(request,response,resource);
 	    }
 	    else
 		// don't know what it is
@@ -369,11 +362,13 @@ public class ResourceHandler extends NullHandler
  
  
     /* ------------------------------------------------------------ */
-    void handlePut(HttpRequest request, HttpResponse response,
-		   String path, String filename)
+    void handlePut(HttpRequest request,
+		   HttpResponse response,
+		   String path,
+		   Resource resource)
 	throws IOException
     {
-	Code.debug("PUT ",path," in ",filename);
+	Code.debug("PUT ",path," in ",resource);
 
 	if (!_putAllowed)
 	    return;
@@ -382,9 +377,8 @@ public class ResourceHandler extends NullHandler
 	{
 	    int toRead = request.getIntField(HttpFields.__ContentLength);
 	    InputStream in = request.getInputStream();
-	    Resource file = _resourceBase.relative(filename);
      
-	    OutputStream fos = file.getOutputStream();
+	    OutputStream fos = resource.getOutputStream();
 	    final int bufSize = 1024;
 	    byte bytes[] = new byte[bufSize];
 	    int read;
@@ -416,15 +410,16 @@ public class ResourceHandler extends NullHandler
     }
 
     /* ------------------------------------------------------------ */
-    void handleDelete(HttpRequest request, HttpResponse response,
-		      String path, String filename)
+    void handleDelete(HttpRequest request,
+		      HttpResponse response,
+		      String path,
+		      Resource resource)
 	throws IOException
     {
-	Code.debug("DELETE ",path," from ",filename);  
+	Code.debug("DELETE ",path," from ",resource);  
   
-	Resource file = _resourceBase.relative(filename);
  
-	if (!file.exists())
+	if (!resource.exists())
 	    return;
  
 	if (!_delAllowed)
@@ -437,12 +432,12 @@ public class ResourceHandler extends NullHandler
 	try
 	{
 	    // delete the file
-	    file.delete();
+	    resource.delete();
 
 	    // flush the cache
 	    if (_cacheMap!=null)
 	    {
-		CachedFile cachedFile=(CachedFile)_cacheMap.get(filename);
+		CachedFile cachedFile=(CachedFile)_cacheMap.get(resource.toString());
 		if (cachedFile!=null)
 		    cachedFile.flush();
 	    }
@@ -460,16 +455,18 @@ public class ResourceHandler extends NullHandler
 
  
     /* ------------------------------------------------------------ */
-    void handleMove(HttpRequest request, HttpResponse response,
-		    String pathSpec, String path, String filename)
+    void handleMove(HttpRequest request,
+		    HttpResponse response,
+		    String pathSpec,
+		    String path,
+		    Resource resource)
 	throws IOException
     {
 	if (!_delAllowed || !_putAllowed)
 	    return;
   
-	Resource file = _resourceBase.relative(filename);
  
-	if (!file.exists())
+	if (!resource.exists())
 	{
 	    if (_delAllowed && _putAllowed)
 		response.sendError(response.__404_Not_Found);
@@ -493,12 +490,15 @@ public class ResourceHandler extends NullHandler
 
 	// Find path
 	try
-	{  
-	    String newFilename = realPath(pathSpec,newPath);
-	    Resource newFile = _resourceBase.relative(newFilename);
+	{
+	    // XXX - THIS IS PROBABLY WRONG!!!!!!!!!!!!!!!!!!!!!!!
+	    String newInfo=PathMap.pathInfo(pathSpec,newPath);
+	    if (newInfo==null)
+		newInfo=newPath;
+	    Resource newFile = _resourceBase.relative(newInfo);
      
-	    Code.debug("Moving "+filename+" to "+newFilename);
-	    file.renameTo(newFile);
+	    Code.debug("Moving "+resource+" to "+newFile);
+	    resource.renameTo(newFile);
     
 	    request.setHandled(true);
 	    response.sendError(response.__204_No_Content);
@@ -553,14 +553,13 @@ public class ResourceHandler extends NullHandler
     /* ------------------------------------------------------------ */
     void sendFile(HttpRequest request,
 		  HttpResponse response,
-		  String filename,
-		  Resource file)
+		  Resource resource)
 	throws IOException
     {
-	Code.debug("sendFile: ",file);
+	Code.debug("sendFile: ",resource);
 
 	// Can the file be cached?
-	if (_cache!=null && file.length()<_maxCachedFileSize)
+	if (_cache!=null && resource.length()<_maxCachedFileSize)
 	{
 	    byte[] bytes=null;
 	    synchronized (_cacheMap)
@@ -570,8 +569,8 @@ public class ResourceHandler extends NullHandler
 		    cachedFile=_cache[_nextIn]=new CachedFile();
 		_nextIn=(_nextIn+1)%_cache.length;
 		cachedFile.flush();
-		cachedFile.load(filename,file);
-		_cacheMap.put(filename,cachedFile);
+		cachedFile.load(resource);
+		_cacheMap.put(resource.toString(),cachedFile);
 		bytes=cachedFile.prepare(response);
 	    }
 	    if (bytes!=null)
@@ -586,14 +585,14 @@ public class ResourceHandler extends NullHandler
 	{
 	    InputStream in=null;
 	    int len=0;
-	    String encoding=getHandlerContext().getMimeByExtension(file.getName());
+	    String encoding=getHandlerContext().getMimeByExtension(resource.getName());
 	    response.setField(HttpFields.__ContentType,encoding);
-	    len = (int)file.length();
+	    len = (int)resource.length();
 	    response.setIntField(HttpFields.__ContentLength,len);
      
 	    response.setDateField(HttpFields.__LastModified,
-				  file.lastModified());
-	    in = file.getInputStream();
+				  resource.lastModified());
+	    in = resource.getInputStream();
      
 	    try
 	    {
@@ -622,7 +621,7 @@ public class ResourceHandler extends NullHandler
 	    {
 		// Just send it as a file and hope that the URL
 		// formats the directory
-		sendFile(request,response,file.getName(),file);
+		sendFile(request,response,file);
 		return;
 	    }
 
@@ -712,8 +711,7 @@ public class ResourceHandler extends NullHandler
      */
     private class CachedFile
     {
-	String filename;
-	Resource file;
+	Resource resource;
 	long lastModified;
 	byte[] bytes;
 	String encoding;
@@ -722,29 +720,28 @@ public class ResourceHandler extends NullHandler
 	boolean isValid()
 	    throws IOException
 	{
-	    if (file==null)
+	    if (resource==null)
 		return false;
 
-
 	    // check if the file is still there
-	    if (!file.exists())
+	    if (!resource.exists())
 	    {
 		flush();
 		return false;
 	    }
 
 	    // check if the file has changed
-	    if(lastModified!=file.lastModified())
+	    if(lastModified!=resource.lastModified())
 	    {
 		// If it is too big
-		if (file.length()>_maxCachedFileSize)
+		if (resource.length()>_maxCachedFileSize)
 		{
 		    flush();
 		    return false;
 		}
 
 		// reload the changed file
-		load(filename,file);
+		load(resource);
 	    }
  
 	    return true;
@@ -754,7 +751,7 @@ public class ResourceHandler extends NullHandler
 	byte[] prepare(HttpResponse response)
 	    throws IOException
 	{
-	    Code.debug("HIT: ",filename);
+	    Code.debug("HIT: ",resource);
 	    response.setField(HttpFields.__ContentType,encoding);
 	    response.setIntField(HttpFields.__ContentLength,bytes.length);
 	    response.setDateField(HttpFields.__LastModified,lastModified);
@@ -762,40 +759,39 @@ public class ResourceHandler extends NullHandler
 	}
 
 	/* ------------------------------------------------------------ */
-	void load(String filename,Resource file)
+	void load(Resource resource)
 	    throws IOException
 	{
-	    this.filename=filename;
-	    this.file=file;
-	    lastModified=file.lastModified();
-	    bytes = new byte[(int)file.length()];
-	    Code.debug("LOAD: ",filename);
+	    this.resource=resource;
+	    lastModified=resource.lastModified();
+	    bytes = new byte[(int)resource.length()];
+	    Code.debug("LOAD: ",resource);
      
-	    InputStream in=file.getInputStream();
+	    InputStream in=resource.getInputStream();
 	    int read=0;
 	    while (read<bytes.length)
 	    {
 		int len=in.read(bytes,read,bytes.length-read);
 		if (len==-1)
-		    throw new IOException("Unexpected EOF: "+file);
+		    throw new IOException("Unexpected EOF: "+resource);
 		read+=len;
 	    }
 	    in.close();
-	    encoding=getHandlerContext().getMimeByExtension(file.getName());
+	    encoding=getHandlerContext().getMimeByExtension(resource.getName());
 	}
   
 	/* ------------------------------------------------------------ */
 	void flush()
 	{
-	    if (file!=null)
+	    if (resource!=null)
 	    {
-		Code.debug("FLUSH: ",filename);
-		_cacheMap.remove(filename);
-		filename=null;
-		file=null;
+		Code.debug("FLUSH: ",resource);
+		_cacheMap.remove(resource.toString());
+		resource=null;
 	    }
 	}
     }
 }
+
 
 

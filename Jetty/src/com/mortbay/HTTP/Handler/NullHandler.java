@@ -90,12 +90,6 @@ public class NullHandler implements HttpHandler
         return _destroyed;
     }
     
-    /* ----------------------------------------------------------------- */
-    public String realPath(String pathSpec, String path)
-    {
-        return null;
-    }
-    
     /* ------------------------------------------------------------ */
     public void handle(String contextPathSpec,
                        HttpRequest request,

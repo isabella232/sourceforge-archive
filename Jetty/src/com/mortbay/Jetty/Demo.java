@@ -59,7 +59,7 @@ public class Demo
 	    context=server.getContext(null,"/javadoc/*");
 	    context.setResourceBase("./javadoc/");
 	    context.setServingResources(true);
-
+	    
 	    // Start handlers and listener
 	    server.start();
 	}

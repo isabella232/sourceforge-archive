@@ -340,5 +340,36 @@ public class PathMap extends HashMap
 
         throw new IllegalArgumentException("Invalid PathSpec");
     }
+
+
+    /* ------------------------------------------------------------ */
+    /** Relative path.
+     * @param base The base the path is relative to.
+     * @param pathSpec The spec of the path segment to ignore.
+     * @param path the additional path
+     * @return base plus path with pathspec removed 
+     */
+    public static String relativePath(String base,
+				      String pathSpec,
+				      String path )
+    {
+	String info=pathInfo(pathSpec,path);
+	if (info==null)
+	    info=path;
+
+	if( info.startsWith( "./"))
+	    info = info.substring( 2);
+	if( base.endsWith( "/"))
+	    if( info.startsWith( "/"))
+		path = base + info.substring(1);
+	    else
+		path = base + info;
+	else
+	    if( info.startsWith( "/"))
+		path = base + info;
+	    else
+		path = base + "/" + info;
+	return path;
+    }
     
 }

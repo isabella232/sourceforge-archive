@@ -1,4 +1,4 @@
-package com.mortbay.HTTP;
+package com.mortbay.Util;
 
 import java.io.*;
 import java.util.*;
@@ -34,13 +34,16 @@ public class Resource
 	    return null;
 	
 	URLConnection connection=url.openConnection();
-	Permission perm = connection.getPermission();
-	if (perm instanceof java.io.FilePermission)
+	if( url.toExternalForm().startsWith( "file:"))
 	{
-	    File file =new File(perm.getName());
-	    if (file.isDirectory() && !url.getFile().endsWith("/"))
-		url=new URL(url.toString()+"/");
-	    return new FileResource(url,connection,file);
+	    Permission perm = connection.getPermission();
+	    if (perm instanceof java.io.FilePermission)
+	    {
+		File file =new File(perm.getName());
+		if (file.isDirectory() && !url.getFile().endsWith("/"))
+		    url=new URL(url.toString()+"/");
+		return new FileResource(url,connection,file);
+	    }
 	}
 	return new Resource(url,connection);
     }
@@ -58,11 +61,12 @@ public class Resource
 	URL url=null;
 	try
 	{
-	    // Does this format as a URL?
+	    // Try to format as a URL?
 	    url = new URL(resource);
 	}
 	catch(MalformedURLException e)
 	{
+	    // Nope - try it as a file
 	    url = new File(resource).toURL();
 	}
 	
@@ -204,14 +208,14 @@ public class Resource
     public synchronized java.io.InputStream getInputStream()
 	throws java.io.IOException
     {
-	if (checkConnection())  
+	if (!checkConnection())  
 	    throw new IOException( "Invalid resource");
 
 	if( _in != null)
 	{
 	    InputStream in = _in;
 	    _in=null;
-	    return _in;
+	    return in;
 	}
 
 	return _connection.getInputStream();
@@ -257,6 +261,29 @@ public class Resource
     {
 	return null;
     }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param resourceBase 
+     * @param name 
+     * @return 
+     */
+    public static String relative(String resourceBase,String name)
+    {
+	if( name.startsWith( "./"))
+	    name = name.substring( 2);
+	if( resourceBase.endsWith( "/"))
+	    if( name.startsWith( "/"))
+		name = resourceBase + name.substring( 1);
+	    else
+		name = resourceBase + name;
+	else
+	    if( name.startsWith( "/"))
+		name = resourceBase + name;
+	    else
+		name = resourceBase + "/" + name;
+	return name;
+    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -266,7 +293,9 @@ public class Resource
     public Resource relative(String name)
 	throws IOException,MalformedURLException
     {
-	return newResource(new URL(_url,name));
+	String resourceBase = _url.toExternalForm();
+	name=relative(resourceBase,name);
+	return newResource(new URL(name));
     }
 
     /* ------------------------------------------------------------ */
@@ -423,6 +452,11 @@ public class Resource
 	}
     }
 }
+
+
+
+
+
 
 
 

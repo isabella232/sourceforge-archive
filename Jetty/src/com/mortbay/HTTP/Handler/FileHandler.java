@@ -163,25 +163,13 @@ public class FileHandler extends NullHandler
      * @param path 
      * @return 
      */
-    public String realPath(String pathSpec, String path)
+    private String realPath(String pathSpec, String path)
         throws IllegalArgumentException
     {
 	String fileBase=getHandlerContext().getResourceFileBase();
 	if(fileBase==null)
 	    return null;
-	
-        if (pathSpec.startsWith("*."))
-        {
-            fileBase+=path;
-        }
-        else
-        {
-            String info=PathMap.pathInfo(pathSpec,path);
-            if (info!=null)
-                fileBase+=info;
-        }
-        
-        return fileBase;
+	return PathMap.relativePath(fileBase,pathSpec,path);
     }
     
     /* ------------------------------------------------------------ */
@@ -201,7 +189,7 @@ public class FileHandler extends NullHandler
         
         Code.debug("FILE=",filename,
                    "\nMETHOD=",request.getMethod());
-        
+	
         // check filename
         boolean endsWithSlash= filename.endsWith("/");
         if (endsWithSlash)

@@ -368,49 +368,6 @@ public class TestHarness
     }
     
     
-    /* --------------------------------------------------------------- */
-    public static void resourceTest()
-    {
-        Test t = new Test("com.mortbay.HTTP.Resource");
-        try
-        {
-	    Resource r =
-		Resource.newResource("file:"+
-				     System.getProperty("user.dir")+
-				     "/TestHarness.java");
-	    t.check(r.exists(),"File URL exists");
-	    t.check(!r.isDirectory(),"File URL not directory");
-	    r = Resource.newResource(System.getProperty("user.dir")+
-				     "/TestHarness.java");
-	    t.check(r.exists(),"Abs File exists");
-	    t.check(!r.isDirectory(),"Abs URL not directory");
-	    r = Resource.newResource("TestHarness.java");
-	    t.check(r.exists(),"Rel File exists");
-	    t.check(!r.isDirectory(),"Rel URL not directory");
-	    
-	    r = Resource.newResource("file:"+
-				     System.getProperty("user.dir")+
-				     "/TestHarness.java");
-	    r = r.relative("Resource.java");
-	    t.check(r.exists(),"Relative resource exists");
-	    r = r.relative("UnknownFile");
-	    t.check(!r.exists(),"Relative resource ! exists");
-	    
-
-	    r = Resource.newResource("file:"+System.getProperty("user.dir"));
-	    t.check(r.exists(),"Dir URL exists");
-	    t.check(r.isDirectory(),"Dir URL directory");
-	    r = r.relative("Resource.java");
-	    t.check(r.exists(),"Relative resource exists");
-	    r = r.relative("UnknownFile");
-	    t.check(!r.exists(),"Relative resource ! exists");
-	}
-        catch(Exception e)
-        {
-            Code.warning(e);
-            t.check(false,e.toString());
-        }
-    }
     
     /* ------------------------------------------------------------ */
     public static void main(String[] args)
@@ -421,7 +378,6 @@ public class TestHarness
             filters();
             httpFields();
             pathMap();
-	    resourceTest();
 
             TestRequest.test();
             TestRFC2616.test();
