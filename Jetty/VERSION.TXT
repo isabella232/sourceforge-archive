@@ -2,7 +2,7 @@ Stable 2.4.5
 Dev    3.0.A99
 
 Jetty-3.0.A99 - 10 Aug 2000
-   + Iplemented jetty.xml configuration
+   + Implemented jetty.xml configuration
    + Added Xmlconfiguration utility
    + ServletLoader simplied and uses ResourcePath
    + Replaced FileHandler with ResourceHandler
