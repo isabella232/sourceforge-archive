@@ -173,7 +173,7 @@ public class Main
     
     
     /* ------------------------------------------------------------ */
-    void configure(InputStream config,String[] args)
+    void configure(InputStream config,int nargs)
         throws Exception
     {
         BufferedReader cfg = new BufferedReader(new InputStreamReader(config,"ISO-8859-1"));
@@ -274,14 +274,14 @@ public class Main
                         String operator = st.nextToken();
                         int number = Integer.parseInt(st.nextToken());
                         eval=
-                            (operator.equals("<") && args.length<number) ||
-                            (operator.equals(">") && args.length>number) ||
-                            (operator.equals("<=") && args.length<=number) ||
-                            (operator.equals("=<") && args.length<=number) ||
-                            (operator.equals("=>") && args.length>=number) ||
-                            (operator.equals(">=") && args.length>=number) ||
-                            (operator.equals("==") && args.length==number) ||
-                            (operator.equals("!=") && args.length!=number);
+                            (operator.equals("<") && nargs<number) ||
+                            (operator.equals(">") && nargs>number) ||
+                            (operator.equals("<=") && nargs<=number) ||
+                            (operator.equals("=<") && nargs<=number) ||
+                            (operator.equals("=>") && nargs>=number) ||
+                            (operator.equals(">=") && nargs>=number) ||
+                            (operator.equals("==") && nargs==number) ||
+                            (operator.equals("!=") && nargs!=number);
                     }
                     else
                     {
@@ -400,7 +400,23 @@ public class Main
     
     /* ------------------------------------------------------------ */
     public void start(String[] args)
-    {    
+    {
+        ArrayList al=new ArrayList();
+        for (int i=0;i<args.length;i++)
+        {
+            if (args[i]==null)
+                continue;
+            if (args[i].startsWith("-"))
+            {
+                    System.err.println("Usage: java [-DDEBUG] -jar start.jar [--help] [config ...]");
+                    System.exit(1);
+            }
+            else
+                al.add(args[i]);
+        }
+        args=(String[])al.toArray(new String[al.size()]);
+        
+            
         // set up classpath:
         try
         {
@@ -410,7 +426,7 @@ public class Main
             if (cpcfg==null)
                 cpcfg=new FileInputStream(_config);
             
-            configure(cpcfg,args);
+            configure(cpcfg,args.length);
             cpcfg.close();
             
             File file = new File (System.getProperty("jetty.home"));
@@ -451,21 +467,15 @@ public class Main
 
         try
         {
-            if (_xml.size()>0)
+            for (int i=0;i<args.length;i++)
             {
-                for (int i=0;i<args.length;i++)
-                {
-                    if (args[i]==null)
-                        continue;
-                    if (args[i].startsWith("-"))
-                        System.err.println("Usage: java [-DDEBUG] -jar start.jar [--help] [config ...]");
-                    else
-                        _xml.add(args[i]);
-                }
-                args=(String[])_xml.toArray(args);
+                if (args[i]==null)
+                    continue;
+                _xml.add(args[i]);
             }
-
-	    //check for override of start class
+            args=(String[])_xml.toArray(args);
+            
+            //check for override of start class
 	    String serverOverride = System.getProperty("jetty.server");
 	    if (_debug) System.err.println ("server.override="+serverOverride);
 
@@ -478,6 +488,4 @@ public class Main
             e.printStackTrace();
         } 
     }
-
-
 }
