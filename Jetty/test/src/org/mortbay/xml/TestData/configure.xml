@@ -120,6 +120,10 @@
     </Array></Arg>
   </Call>
 
+  <Set name="testField1"><Get class="org.mortbay.xml.TestConfiguration" name="VALUE"/></Set>
+  <Set name="testField2"><Get name="testInt"/></Set>
+  <Set name="VALUE" type="int">42</Set>
+
 </Configure>
 
 

@@ -254,8 +254,7 @@ public class XmlConfiguration
                IllegalAccessException
     {
         String attr=node.getAttribute("name");
-        attr=attr.substring(0,1).toUpperCase()+attr.substring(1);
-        String name = "set"+attr;
+        String name = "set"+attr.substring(0,1).toUpperCase()+attr.substring(1);
         Object value= value(obj,node);
         Object[] arg={value};
         
@@ -301,6 +300,19 @@ public class XmlConfiguration
         catch(NoSuchMethodException e)
         {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
 
+
+        // Try a field
+        try
+        {
+            Field field=oClass.getField(attr);
+            if (Modifier.isPublic(field.getModifiers()))
+            {
+                field.set(obj,value);
+                return;
+            }
+        }
+        catch (NoSuchFieldException e)
+        {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
 
         // Search for a match by trying all the set methods
         Method[] sets = oClass.getMethods();
@@ -405,15 +417,32 @@ public class XmlConfiguration
             oClass = obj.getClass();        
         
         String name=node.getAttribute("name");
-        name="get"+name.substring(0,1).toUpperCase()+name.substring(1);
-        Code.debug("call ",name);
+        Code.debug("get ",name);
         
-        Method method = oClass.getMethod(name,null);
-
-        Object n=null;
-        n=method.invoke(obj,null);
-        configure(n,node,0);
-        return n;
+        try
+        {
+            // try calling a getXxx method.
+            Method method = oClass.getMethod("get"+
+                                             name.substring(0,1).toUpperCase()+
+                                             name.substring(1),
+                                             null);
+            obj=method.invoke(obj,null);
+            configure(obj,node,0);
+        }
+        catch (NoSuchMethodException nsme)
+        {
+            try
+            {
+                Field field = oClass.getField(name);
+                obj=field.get(obj);
+                configure(obj,node,0);
+            }
+            catch(NoSuchFieldException nsfe)
+            {
+                throw nsme;
+            }
+        }
+        return obj;
     }
     
     /* ------------------------------------------------------------ */

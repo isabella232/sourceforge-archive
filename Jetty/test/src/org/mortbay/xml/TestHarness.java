@@ -179,6 +179,10 @@ public class TestHarness
             configuration.configure(tc3);
             t.checkEquals(tc3.testObject,"SetValue","Set String 3");
             t.checkEquals(tc3.testInt,2,"Set Type 3");
+
+            t.checkEquals(77,tc.testField1,"static to field");
+            t.checkEquals(2,tc.testField2,"field to field");
+            t.checkEquals(42,tc.VALUE,"literal to static");
         }
         catch(Exception e)
         {

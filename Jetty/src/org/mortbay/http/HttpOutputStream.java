@@ -44,9 +44,9 @@ public class HttpOutputStream
 {
     /* ------------------------------------------------------------ */
     final static String
-        __CRLF      = "\015\012";
+        __CRLF      = IO.CRLF;
     final static byte[]
-        __CRLF_B    = {(byte)'\015',(byte)'\012'};
+        __CRLF_B    = IO.CRLF_BYTES;
     final static byte[]
         __CHUNK_EOF_B ={(byte)'0',(byte)'\015',(byte)'\012'};
 

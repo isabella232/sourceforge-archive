@@ -20,7 +20,7 @@ $Id$
 -->
 
 <!ENTITY % CONFIG "Get|Set|Put|Call|New">
-<!ENTITY % VALUE "#PCDATA|Call|New|SystemProperty|Array">
+<!ENTITY % VALUE "#PCDATA|Call|New|Get|SystemProperty|Array">
 
 <!ENTITY % TYPEATTR "type CDATA #IMPLIED " > <!-- String|Character|Short|Byte|Integer|Long|Boolean|Float|Double|char|short|byte|int|long|boolean|float|double|URL|InetAddress|InetAddrPort| #classname -->
 <!ENTITY % IMPLIEDCLASSATTR "class NMTOKEN #IMPLIED" >
@@ -44,7 +44,8 @@ A Configure element can contain Set, Put or Call elements.
 Set Element.
 This element maps to a call to a set method on the current object.
 The name and optional type attributes are used to select the set 
-method.
+method. If the name given is xxx, then a setXxx method is used, or
+the xxx field is used of setXxx cannot be found. 
 A Set element can contain value text and/or the value elements Call,
 New and SystemProperty. If no value type is specified, then white
 space is trimmed out of the value. If it contains multiple value
@@ -59,12 +60,14 @@ A Set with a class attribute is treated as a static set method invocation.
 
 <!--
 Get Element.
-This element maps to a call to a get method on the current object.
+This element maps to a call to a get method or field on the current object.
 The name attribute is used to select the get method.
+If the name given is xxx, then a getXxx method is used, or
+the xxx field is used of setXxx cannot be found. 
 A Get element can contain Set, Put and/or Call elements which act on the object
 returned by the get call.
 
-A Get with a class attribute is treated as a static get method invocation.
+A Get with a class attribute is treated as a static get method or field.
 -->
 <!ELEMENT Get (%CONFIG;)*>
 <!ATTLIST Get %NAMEATTR; %IMPLIEDCLASSATTR; >

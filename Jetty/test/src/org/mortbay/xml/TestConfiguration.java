@@ -15,6 +15,8 @@ import java.util.HashMap;
  */
 public class TestConfiguration extends HashMap
 {
+    public static int VALUE=77;
+
     public TestConfiguration nested;
     public Object testObject;
     public int testInt;
@@ -22,6 +24,9 @@ public class TestConfiguration extends HashMap
     public static boolean called=false;
     public Object[] oa;
     public int[] ia;
+    private int test;
+    public int testField1;
+    public int testField2;
     
     public void setTest(Object value)
     {
