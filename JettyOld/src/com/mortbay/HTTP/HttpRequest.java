@@ -71,7 +71,7 @@ public class HttpRequest extends HttpHeader
     private HttpInputStream in;
     private InetAddrPort address;
 
-    private Hashtable formParameters=null;
+    private UrlEncoded formParameters=null;
     private Hashtable cookieParameters=null;
     private Hashtable attributes=null;
     private Cookie[] cookies=null;
@@ -405,22 +405,34 @@ public class HttpRequest extends HttpHeader
     public void decodeFormParameters()
          throws IOException
     {
-        if (formParameters!=null)
-            return;
-        
-        String contentType = getContentType();
-        if (contentType!=null &&
-            contentType.equals(HttpHeader.WwwFormUrlEncode))
-        {
-            int contentLength = getContentLength();
-            if (contentLength<0)
-                Code.warning("No contentLength for "+
-                             HttpHeader.WwwFormUrlEncode);
-            else
-                formParameters =
-                    javax.servlet.http.HttpUtils
-                    .parsePostData(contentLength,getInputStream());
-        }
+         if (formParameters!=null)
+             return;
+ 
+         String contentType = getContentType();
+         if (contentType!=null &&
+             contentType.equals(HttpHeader.WwwFormUrlEncode))
+         {
+             int contentLength = getContentLength();
+             if (contentLength<0)
+                 Code.warning("No contentLength for "+
+                              HttpHeader.WwwFormUrlEncode);
+             else {
+                 // Read all the post data
+                 InputStream in = getInputStream();
+                 byte[] postBytes = new byte[contentLength];
+                 int n = 0;
+                 while (n < contentLength) {
+                     int count = in.read(postBytes, n, contentLength - n);
+                     if (count < 0)
+                         throw new EOFException();
+                     n += count;
+                 }
+ 
+                 // Convert it to a hash table
+                 String content = new String(postBytes,"ISO8859_1");
+                 formParameters = new UrlEncoded(content);
+             }
+         }
     }
     
     /* -------------------------------------------------------------- */
@@ -733,35 +745,9 @@ public class HttpRequest extends HttpHeader
             value = formParameters.get(name);
         if (value==null && cookieParameters!=null)
             value = cookieParameters.get(name);
-
-        if (value!=null)
-        {
-            if (value instanceof String[])
-            {
-                String[] a = (String[]) value;
-                switch(a.length)
-                {
-                  case 0:
-                      return null;
-                  case 1:
-                      return a[0];
-                  default:
-                      {
-                          StringBuffer buf = new StringBuffer(128);
-                          for (int i=0;i<a.length;i++)
-                          {
-                              if (i!=0)
-                                  buf.append(',');
-                              buf.append(a[i]);
-                          }
-                          return buf.toString();
-                      }
-                }
-            }
-            
-            return value.toString();
-        }
-        return null;
+        if (value==null)
+            return null;
+        return value.toString();
     }
     
     /* -------------------------------------------------------------- */
@@ -772,7 +758,7 @@ public class HttpRequest extends HttpHeader
     {
         Object values=uri.getValues(name);
         if (values==null && formParameters!=null)
-            values = formParameters.get(name);
+            values = formParameters.getValues(name);
         if (values==null && cookieParameters!=null)
             values = cookieParameters.get(name);
         
@@ -1144,7 +1130,7 @@ public class HttpRequest extends HttpHeader
         {
             try
             {
-                reader=new BufferedReader(new InputStreamReader(getInputStream(),"UTF8"));
+                reader=new BufferedReader(new InputStreamReader(getInputStream(),"ISO8859_1"));
             }
             catch(UnsupportedEncodingException e)
             {

@@ -1,4 +1,8 @@
-Release 2.3.2 - 17th October 1999 LATEST STABLE
+Release 2.3.3 - 19th October 1999 LATEST STABLE
+  + Replaced UTF8 encoding with ISO8859_1 for headers.
+  + Use UrlEncoded for form parameters.
+
+Release 2.3.2 - 17th October 1999 
   + Fixed getReader bug with HttpRequest.
   + Updated UrlEncoded with Jetty3 version.
 

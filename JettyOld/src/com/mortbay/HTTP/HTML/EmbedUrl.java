@@ -110,7 +110,8 @@ public class EmbedUrl extends  Element
         try
         {
             skipHeader();
-            IO.copy(new InputStreamReader(replyStream,"UTF8"),out);
+            // XXX should extract content encoding....
+            IO.copy(new InputStreamReader(replyStream,"ISO8859_1"),out);
             out.flush();
         }
         finally

@@ -207,6 +207,16 @@ public class Composite extends Element
     void flush(OutputStream out)
          throws IOException
     {
-        flush(new OutputStreamWriter(out,"UTF8"));
+        flush(new OutputStreamWriter(out));
+    }
+    
+    /* ----------------------------------------------------------------- */
+    /* Flush is a package method used by Page.flush() to locate the
+     * most nested composite, write out and empty its contents.
+     */
+    void flush(OutputStream out, String encoding)
+         throws IOException
+    {
+        flush(new OutputStreamWriter(out,encoding));
     }
 }

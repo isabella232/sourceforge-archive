@@ -21,7 +21,7 @@ public class UploadServlet extends HttpServlet
         {
             String filename = mpr.getFilename("TF");
             LineNumberReader in = new LineNumberReader(
-                new InputStreamReader(mpr.getInputStream("TF"),"UTF8"));
+                new InputStreamReader(mpr.getInputStream("TF"),"ISO8859_1"));
             int lines=0;
             while (in.readLine()!=null)
                 lines++;

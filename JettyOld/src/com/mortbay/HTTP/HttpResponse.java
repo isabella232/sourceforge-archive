@@ -315,7 +315,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
         Code.debug("Write Headers");
         headersWritten=true;
         handled=true;
-        OutputStreamWriter writer = new OutputStreamWriter(out,"UTF8");
+        OutputStreamWriter writer = new OutputStreamWriter(out,"ISO8859_1");
         synchronized(writer)
         {
             writer.write(version);

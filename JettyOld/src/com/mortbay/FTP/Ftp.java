@@ -155,7 +155,7 @@ public class Ftp
             port=defaultPort;
         command = new Socket(hostAddr,port);
         in = new CmdReplyStream(command.getInputStream());
-        out= new OutputStreamWriter(command.getOutputStream(),"UTF8");
+        out= new OutputStreamWriter(command.getOutputStream(),"ISO8859_1");
         in.waitForCompleteOK();
         Code.debug("Command Port Opened");
     }

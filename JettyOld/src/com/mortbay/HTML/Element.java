@@ -89,7 +89,22 @@ public abstract class Element
     public void write(OutputStream out)
          throws IOException
     {
-        Writer writer = new OutputStreamWriter(out,"UTF8");
+        Writer writer = new OutputStreamWriter(out);
+        write(writer);
+        writer.flush();
+    }
+    
+    /* ----------------------------------------------------------------- */
+    /** Write Element to an OutputStream
+     * Calls print(Writer) and checks errors
+     * Elements that override this method should also override
+     * write(Writer) to avoid infinite recursion.
+     * @param out OutputStream to write the element to.
+     */
+    public void write(OutputStream out, String encoding)
+         throws IOException
+    {
+        Writer writer = new OutputStreamWriter(out,encoding);
         write(writer);
         writer.flush();
     }
