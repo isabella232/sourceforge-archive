@@ -622,7 +622,7 @@ public class HttpContext implements LifeCycle
      * Resource aliases map resource uri's within a context.
      * They may optionally be used by a handler when looking for
      * a resource.  The only known user is
-     * org.mortbay.http.handler.Servlet.Context.
+     * org.mortbay.jetty.servlet.WebApplicationContext
      * @param alias 
      * @param uri 
      */
