@@ -465,26 +465,39 @@ public class HttpConnection
     private void exception(Throwable e)
     {
 	try{
-            if ( !Code.debug() && e instanceof IOException )
-                // Assume it was the browser closing early
-                Code.ignore(e);
-            else
-                Code.warning(_request.toString(),e);
+	    String reqString
+		= (_request == null) ? null : _request.toString();
 
-            _persistent=false;
-            if (_response != null && !_response.isCommitted())
-            {
-                _response.reset();
-                _response.removeField(HttpFields.__TransferEncoding);
-                _response.setField(HttpFields.__Connection,
-                                   HttpFields.__Close);
-                
-                _response.sendError(HttpResponse.__500_Internal_Server_Error,e);
-            }
-        }
-        catch(IOException ex)
+	    boolean pendingIOException = false;
+	    if (e instanceof IOException)
+	    {
+                // Assume it was the browser closing early
+		if (Code.debug())
+		    Code.debug(reqString,e);
+		else
+		    pendingIOException = true;
+	    }
+	    else
+                Code.warning(reqString,e);
+
+	    _persistent=false;
+	    if (_response != null && !_response.isCommitted())
+	    {
+		_response.reset();
+		_response.removeField(HttpFields.__TransferEncoding);
+		_response.setField(HttpFields.__Connection,
+				   HttpFields.__Close);
+		
+		_response.sendError(HttpResponse.__500_Internal_Server_Error,e);
+		
+		if (pendingIOException)
+		    // Not a browser disconnect if we reach here.
+		    Code.warning(reqString,e);
+	    }
+	}
+        catch(Exception ex)
         {
-            Code.warning(ex);
+            Code.ignore(ex);
         }
     }
     
