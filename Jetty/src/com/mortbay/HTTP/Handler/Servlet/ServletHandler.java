@@ -50,12 +50,11 @@ public class ServletHandler extends NullHandler
 {    
     /* ----------------------------------------------------------------- */
     private PathMap _servletMap=new PathMap();
+    
     private Map _nameMap=new HashMap();
     private Context _context;
-    private ClassLoader _loader;    
-
+    private ClassLoader _loader;
     private String _dynamicServletPathSpec;
-    private Set _dynamicPaths = new HashSet();
     private Map _dynamicInitParams ;
 
     /* ----------------------------------------------------------------- */
@@ -310,31 +309,30 @@ public class ServletHandler extends NullHandler
      */
     public Map.Entry getHolderEntry(String pathInContext)
     {
-        Map.Entry entry=null;
+        Map.Entry entry =_servletMap.getMatch(pathInContext);
     
-        // Do we have a static match already
-        if (_dynamicServletPathSpec==null)
+        String servletClass=null;
+        if (_dynamicServletPathSpec!=null &&
+            PathMap.match(_dynamicServletPathSpec,pathInContext))
+            servletClass=PathMap.pathInfo(_dynamicServletPathSpec,pathInContext);
+        
+        // Do we have a match and no chance of a new
+        // dynamci servlet
+        if (entry!=null && servletClass==null)
+            return entry;
+        
+        // If it could be a dynamic servlet
+        if (servletClass!=null && servletClass.length()>2 &&
+            (entry==null||!PathMap.match(_dynamicServletPathSpec,(String)entry.getKey())))
         {
-            entry =_servletMap.getMatch(pathInContext);
-            if (entry!=null)
-                return entry;
-        }
-        // else if we have not looked at this path before
-        else if (!_dynamicPaths.contains(pathInContext))
-        {
-            _dynamicPaths.add(pathInContext);
-            
             try
             {
                 // OK lets look for a dynamic servlet.
                 String path=pathInContext;
-                Code.debug("looking for ", path," in ",
+                Code.debug("looking for ",servletClass," in ",
                            getHandlerContext().getClassPath());
                 
                 // remove prefix
-                String servletClass=PathMap.pathInfo(_dynamicServletPathSpec,path);
-                if (servletClass==null || servletClass.length()<2)
-                    return null;
                 servletClass=servletClass.substring(1);
                 
                 // remove suffix
@@ -360,10 +358,10 @@ public class ServletHandler extends NullHandler
                 holder.getServlet();
                 
                 Log.event("Dynamic load '"+servletClass+"' at "+path);
-                addHolder(path,holder);
-                addHolder(path+".class",holder);
                 addHolder(path+"/*",holder);
                 addHolder(path+".class/*",holder);
+
+                entry=_servletMap.getMatch(pathInContext);
             }
             catch(Exception e)
             {
@@ -371,7 +369,8 @@ public class ServletHandler extends NullHandler
             }
         }
         
-        return _servletMap.getMatch(pathInContext);
+        return entry;
+    
     }
     
 

@@ -23,6 +23,7 @@ Jetty Versions
  + Put extra server and servlet info in header.
  + Version details in header can be suppressed with System property
    java.com.mortbay.HTTP.Version.paranoid
+ + Prevent reloading dynamic servlets at different paths.
 
 Jetty-3.0.0.rc5 - 12 Nov 2000
  + Default writer encoding set by mime type if not explicitly set.

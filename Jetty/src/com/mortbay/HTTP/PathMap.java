@@ -260,6 +260,36 @@ public class PathMap extends HashMap
     }
 
     
+    
+    /* --------------------------------------------------------------- */
+    /**
+     * @return true if match.
+     */
+    public static boolean match(String pathSpec, String path)
+        throws IllegalArgumentException
+    {  
+        if (pathSpec.equals("/"))
+            return true;
+        
+        if (pathSpec.startsWith("*."))
+            return path.regionMatches(path.length()-pathSpec.length()-2,
+                                      pathSpec,2,pathSpec.length()-2);
+        
+        if (pathSpec.startsWith("/"))
+        {
+            if (pathSpec.equals(path))
+                return true;
+            
+            if (pathSpec.endsWith("/*") &&
+                pathSpec.regionMatches(0,path,0,pathSpec.length()-2))
+                return true;
+            
+            if (path.startsWith(pathSpec) && path.charAt(pathSpec.length())==';')
+                return true;
+        }
+        return false;
+    }
+    
     /* --------------------------------------------------------------- */
     /** Return the portion of a path that matches a path spec.
      * @return null if no match at all.
