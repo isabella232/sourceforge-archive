@@ -120,6 +120,10 @@ The DTDs used by jetty are resolved as resources from the system classpath,
 thus they are stored in com.mortbay.HTTP/web.dtd and com.mortbay.Util.configure.dtd 
 within the source tree and jar file.  Copies are also placed in etc for reference.
 
+There is also a Jetty extension configuration mechanism for web applications.
+If a file WEB-INF/web-jetty.xml is found, it is treated as a Jetty XmlConfiguration
+file and applied to the WebApplicationContext object when the context
+is started.
 
 Building from source
 ====================

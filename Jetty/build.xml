@@ -38,7 +38,7 @@ mini.jetty.jar - Build a minimal HTTP server jar.
   <property name="webappsrc"      value="${basedir}/webappsrc"/>
   <property name="build.compiler" value="jikes"/>
   <!-- property name="build.compiler" value="classic"/ -->
-  <!-- property name="build.compiler" value="modern"/ -->
+  <!-- property name="build.compiler" value="modern" -->
 
   <property name="jetty.webapp"           value="${webapps}/jetty"/>
   <property name="jetty.war"              value="${webapps}/jetty.war"/>

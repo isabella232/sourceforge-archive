@@ -549,7 +549,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
  
     /* ------------------------------------------------------------ */
     /** 
-     * @return Collection of all handler.
+     * @return Collection of all handler from all contexts
      */
     public synchronized Set getHandlers()
     {
@@ -611,40 +611,16 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
      */
     public synchronized void setLogSink(LogSink logSink)
     {
-        if (_logSink!=null)
-        {
-            add(logSink);
-            if(isStarted())
-            {
-                try
-                {
-                    _logSink.start();
-                }
-                catch(Exception e)
-                {
-                    Code.warning(e);
-                    return;
-                }
-            }
-        }
+        if (isStarted())
+            throw new IllegalStateException("Started");
         
         if (_logSink!=null)
-        {
-            try{
-                remove(_logSink);
-                _logSink.stop();
-            }
-            catch(InterruptedException e)
-            {
-                Code.ignore(e);
-            }
-            finally
-            {
-                _logSink.destroy();
-            }
-        }	
-            
+            remove(_logSink);
+
         _logSink=logSink;
+        
+        if (_logSink!=null)
+            add(_logSink);
     }
         
     /* ------------------------------------------------------------ */
@@ -832,6 +808,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     private int _connectionsRequestsAve;
     private int _connectionsRequestsMax;
 
+    private int _errors;
     private int _requests;
     private int _requestsActive;
     private int _requestsActiveMax;
@@ -851,6 +828,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
         _connectionsRequestsAve=0;
         _connectionsRequestsMax=0;
         
+        _errors=0;
         _requests=0;
         _requestsActive=0;
         _requestsActiveMax=0;
@@ -926,6 +904,13 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
 
     /* ------------------------------------------------------------ */
     /** 
+     * @return Number of errors generated while handling requests.
+     * since statsReset() called. Undefined if setStatsOn(false).
+     */
+    public int getErrors() {return _errors;}
+
+    /* ------------------------------------------------------------ */
+    /** 
      * @return Number of requests
      * since statsReset() called. Undefined if setStatsOn(false).
      */
@@ -974,9 +959,11 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    synchronized void statsEndRequest(long duration)
+    synchronized void statsEndRequest(long duration,boolean ok)
     {
         _requests++;
+        if (!ok)
+            _errors++;
         _requestsActive--;
         if (_requestsActive<0)
             _requestsActive=0;

@@ -3,7 +3,7 @@
 
 <!--
 This is a Jetty HTTP server configuration file.  This configuration
-uses the generic com.mortbay.Util.XmlConfiguration class to call
+uses the generic com.mortbay.XML.XmlConfiguration class to call
 the normal com.mortbay.HTTP.HttpServer configuration API from
 within an XML script.
 
@@ -112,6 +112,7 @@ $Id$
     <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
     <Arg type="boolean">false</Arg> <!-- dont expand war -->
   </Call>
+
 
   <Call name="addContext">
     <Arg>/demo/*</Arg>

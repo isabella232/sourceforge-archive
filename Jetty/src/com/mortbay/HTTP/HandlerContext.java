@@ -9,6 +9,7 @@ import com.mortbay.HTTP.Handler.ResourceHandler;
 import com.mortbay.HTTP.Handler.SecurityHandler;
 import com.mortbay.HTTP.Handler.ForwardHandler;
 import com.mortbay.Util.Code;
+import com.mortbay.Util.Log;
 import com.mortbay.Util.IO;
 import com.mortbay.Util.LogSink;
 import com.mortbay.Util.Resource;
@@ -90,6 +91,7 @@ public class HandlerContext implements LifeCycle
     private Resource _resourceBase;
     private boolean _started;
     private LogSink _logSink;
+    private LogSink _useLogSink;
 
     private Map _attributes = new HashMap(11);
     private Map _initParams = new HashMap(11);
@@ -1020,12 +1022,18 @@ public class HandlerContext implements LifeCycle
             throw new IllegalStateException("No server for "+this);
         
         MultiException mx = new MultiException();
-        
+
         if (_logSink==null)
-            _logSink=_httpServer.getLogSink();
-        else if (!_logSink.isStarted())
-            try{_logSink.start();}catch(Exception e){mx.add(e);}    
-        
+            _useLogSink=_httpServer.getLogSink();
+        else
+        {
+            _useLogSink=_logSink;
+            if (!_logSink.isStarted())
+            {
+                try{_logSink.start();}
+                catch(Exception e){mx.add(e);}
+            }
+        }
         _started=true;
 
         getMimeMap();
@@ -1114,8 +1122,9 @@ public class HandlerContext implements LifeCycle
                     catch(Exception e){Code.warning(e);}
                 }
             }
-            
-            if (_logSink!=null && _logSink!=_httpServer.getLogSink() && _logSink.isStarted())
+
+            _useLogSink=null;
+            if (_logSink!=null)
                 _logSink.stop();
         }
         finally
@@ -1151,9 +1160,9 @@ public class HandlerContext implements LifeCycle
                     catch(Exception e){Code.warning(e);}
                 }
             }
-        
-            if (_logSink!=null && _logSink!=_httpServer.getLogSink() && _logSink.isStarted())
-                setLogSink(null);
+            
+            if (_httpServer!=null && _logSink!=null)
+                _httpServer.remove(_logSink);
         }
         finally
         {
@@ -1178,6 +1187,7 @@ public class HandlerContext implements LifeCycle
         _contextPath=null;
         _name=null;
         _redirectNullPath=false;
+        _logSink=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -1186,9 +1196,87 @@ public class HandlerContext implements LifeCycle
         return _handlers==null;
     }
 
+    /* ------------------------------------------------------------ */
+    private boolean _statsOn=false;
+    int _requests;
+    int _responses1xx; // Informal
+    int _responses2xx; // Success
+    int _responses3xx; // Redirection
+    int _responses4xx; // Client Error
+    int _responses5xx; // Server Error
 
     /* ------------------------------------------------------------ */
-    int _requests;
+    /** True set statistics recording on for this context.
+     * @param on If true, statistics will be recorded for this context.
+     */
+    public void setStatsOn(boolean on)
+    {
+        Log.event("setStatsOn "+on+" for "+this);
+        _statsOn=on;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean getStatsOn() {return _statsOn;}
+    
+    /* ------------------------------------------------------------ */
+    public synchronized void statsReset()
+    {
+         _requests=0;
+         _responses1xx=0;
+         _responses2xx=0;
+         _responses3xx=0;
+         _responses4xx=0;
+         _responses5xx=0;
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Get the number of requests handled by this context
+     * since last call of statsReset(). If setStatsOn(false) then this
+     * is undefined. 
+     */
+    public int getRequests() {return _requests;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Get the number of responses with a 2xx status returned
+     * by this context since last call of statsReset(). Undefined if
+     * if setStatsOn(false). 
+     */
+    public int getResponses1xx() {return _responses1xx;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Get the number of responses with a 100 status returned
+     * by this context since last call of statsReset(). Undefined if
+     * if setStatsOn(false). 
+     */
+    public int getResponses2xx() {return _responses2xx;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Get the number of responses with a 3xx status returned
+     * by this context since last call of statsReset(). Undefined if
+     * if setStatsOn(false). 
+     */
+    public int getResponses3xx() {return _responses3xx;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Get the number of responses with a 4xx status returned
+     * by this context since last call of statsReset(). Undefined if
+     * if setStatsOn(false). 
+     */
+    public int getResponses4xx() {return _responses4xx;}
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Get the number of responses with a 5xx status returned
+     * by this context since last call of statsReset(). Undefined if
+     * if setStatsOn(false). 
+     */
+    public int getResponses5xx() {return _responses5xx;}
     
     /* ------------------------------------------------------------ */
     public synchronized LogSink getLogSink()
@@ -1204,7 +1292,14 @@ public class HandlerContext implements LifeCycle
      */
     public synchronized void setLogSink(LogSink logSink)
     {
+        if (isStarted())
+            throw new IllegalStateException("Started");
+
+        if (_httpServer!=null && _logSink!=null)
+            _httpServer.remove(_logSink);
         _logSink=logSink;
+        if (_httpServer!=null && _logSink!=null)
+            _httpServer.add(_logSink);
     }
         
     /* ------------------------------------------------------------ */
@@ -1217,8 +1312,26 @@ public class HandlerContext implements LifeCycle
              HttpResponse response,
              int length)
     {
+        if (_statsOn)
+        {
+            synchronized(this)
+            {
+                _requests++;
+                if (response!=null)
+                {
+                    switch(response.getStatus()/100)
+                    {
+                      case 1: _responses1xx++;break;
+                      case 2: _responses2xx++;break;
+                      case 3: _responses3xx++;break;
+                      case 4: _responses4xx++;break;
+                      case 5: _responses5xx++;break;
+                    }
+                }
+            }
+        }
         
-        if (_logSink!=null && request!=null && response!=null)
+        if (_useLogSink!=null && request!=null && response!=null)
         {
             StringBuffer buf = new StringBuffer(256);
     
@@ -1265,9 +1378,8 @@ public class HandlerContext implements LifeCycle
                     buf.append('"');
                 }
                 
-                _logSink.log(buf.toString());
+                _useLogSink.log(buf.toString());
             }
         }
     }
-
 }

@@ -25,6 +25,7 @@ import com.mortbay.Util.Resource;
 import com.mortbay.Util.JarResource;
 import com.mortbay.Util.StringUtil;
 import com.mortbay.XML.XmlParser;
+import com.mortbay.XML.XmlConfiguration;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.File;
@@ -184,8 +185,8 @@ public class WebApplicationContext extends ServletHandlerContext
                 ((JarResource)_webApp).extract(tempDir,true);
                 _webApp=Resource.newResource(tempDir.getCanonicalPath());
             }
-            
-            Resource _webInf = _webApp.addPath("WEB-INF/");
+
+            _webInf = _webApp.addPath("WEB-INF/");
             if (!_webInf.exists() || !_webInf.isDirectory())
                 _webInf=null;
             
@@ -261,21 +262,20 @@ public class WebApplicationContext extends ServletHandlerContext
         }
         
         // Do we have a WEB-INF
-        Resource _webInf = _webApp.addPath("WEB-INF/");
-        if (_webInf==null)
+        if (_webInf==null || !_webInf.isDirectory())
         {
             Code.warning("No WEB-INF in "+_war+". Serving files only.");
         }
         else
         {
             // Look for classes directory
-            Resource classes = _webApp.addPath("WEB-INF/classes/");
+            Resource classes = _webInf.addPath("classes/");
             String classPath="";
             if (classes.exists())
                 classPath=classes.toString();
 
             // Look for jars
-            Resource lib = _webApp.addPath("WEB-INF/lib/");
+            Resource lib = _webInf.addPath("lib/");
             if (lib.exists() && lib.isDirectory())
             {
                 String[] files=lib.list();
@@ -296,7 +296,7 @@ public class WebApplicationContext extends ServletHandlerContext
                 super.setClassPath(classPath);
 
             // do web.xml file
-            Resource web = _webApp.addPath("WEB-INF/web.xml");
+            Resource web = _webInf.addPath("web.xml");
             if (!web.exists())
             {
                 Code.warning("No WEB-INF/web.xml in "+_war+". Serving files and default/dynamic servlets only");
@@ -313,6 +313,30 @@ public class WebApplicationContext extends ServletHandlerContext
                         rh.setPutAllowed(true);
                         rh.setDelAllowed(true);
                     }
+                }
+                catch(IOException e)
+                {
+                    Code.warning("Parse error on "+_war,e);
+                    throw e;
+                }	
+                catch(Exception e)
+                {
+                    Code.warning("Configuration error "+_war,e);
+                    throw new IOException("Parse error on "+_war+
+                                          ": "+e.toString());
+                }
+            }
+
+            // do jetty.xml file
+            Resource jetty = _webInf.addPath("web-jetty.xml");
+            if (jetty.exists())
+            {
+                try
+                {
+                    Log.event("Configure: "+jetty);
+                    XmlConfiguration jetty_config=new
+                        XmlConfiguration(jetty.getURL());
+                    jetty_config.configure(this);
                 }
                 catch(IOException e)
                 {
@@ -795,6 +819,3 @@ public class WebApplicationContext extends ServletHandlerContext
         }
     }
 }
-
-
-

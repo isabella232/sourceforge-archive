@@ -1,6 +1,8 @@
 Jetty3 Versions
 --------------
 
+ + Support WEB-INF/web-jetty.xml configuration extension for webapps
+ + Allow per context log files.
  + Updated sponsors page
  + Added HttpServer statistics
  + Don't add notfound context.

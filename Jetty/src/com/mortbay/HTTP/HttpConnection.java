@@ -715,7 +715,8 @@ public class HttpConnection
     {
         _handlingThread=Thread.currentThread();
         boolean stats_on=_httpServer!=null && _httpServer.getStatsOn();
-        
+
+        long now;
         long open_time=0;
         long req_time=0;
         int requests=0;
@@ -723,7 +724,8 @@ public class HttpConnection
         {    
             if (stats_on)
             {
-                open_time=System.currentTimeMillis();
+                now=System.currentTimeMillis();
+                open_time=now;
                 _httpServer.statsOpenConnection();
             }
             
@@ -788,7 +790,8 @@ public class HttpConnection
                     if (stats_on)
                     {
                         requests++;
-                        req_time = System.currentTimeMillis();
+                        now=System.currentTimeMillis();
+                        req_time=now;
                         _httpServer.statsGotRequest();
                     }
                     if (Code.debug())
@@ -945,13 +948,18 @@ public class HttpConnection
 
                     // stats & logging
                     if (stats_on && req_time>0)
-                        _httpServer.statsEndRequest(System.currentTimeMillis()-req_time);
+                    {
+                        _httpServer.statsEndRequest(System.currentTimeMillis()-req_time,
+                                                    (_response!=null));
+                        req_time=0;
+                    }
                     if (context!=null)
                         context.log(_request,_response,bytes_written);
                 }
             }
             while(_persistent);
-        
+
+            
             // Destroy request and response
             if (_request!=null)
                 _request.destroy();
@@ -969,9 +977,11 @@ public class HttpConnection
         {
             if (stats_on)
             {
-                _httpServer.statsCloseConnection(System.currentTimeMillis()-open_time,requests);
+                now=System.currentTimeMillis();
+                if (req_time>0)
+                    _httpServer.statsEndRequest(now-req_time,false);
+                _httpServer.statsCloseConnection(now-open_time,requests);
             }
         }
-    }
-    
+    }    
 }
