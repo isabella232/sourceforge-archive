@@ -5,8 +5,11 @@ Jetty Versions
  + Use ThreadLocals for ByteArrayPool to avoid synchronization.
  + Use Version to reset HttpFields
  + Cheap clear for HttpFields
- + fixed setBufferSize NPE.
+ + Fixed setBufferSize NPE.
  + Cleaned up some unused listener throws.
+ + Handle chunked form data.
+ + Allow empty host header.
+ + Avoid optional 100 continues.
 
 Jetty-4.2.3 - 2 December 2002
  + Removed aggressive threadpool shrinkage to avoid deadlock on SMP machines. 

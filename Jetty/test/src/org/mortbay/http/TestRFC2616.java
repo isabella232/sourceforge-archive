@@ -264,6 +264,7 @@ public class TestRFC2616
   	test10_2_7();	/* 206 Partial Content                         */
         test10_3();     /* Redirection 3XX                             */
         test14_16();    /* Content-Range                               */
+        test14_23();    /* Host header                                 */
         test14_35();    /* Byte Ranges                                 */
         test14_39();    /* TE                                          */
         test19_6();     /* Compatibility with Previous Versions        */
@@ -415,6 +416,7 @@ public class TestRFC2616
                                            "Connection: close\n"+
                                            "\n");
             Code.debug("RESPONSE: ",response);
+            t.checkNotContained(response, "HTTP/1.1 100", "3.6.1 Chunking");
             offset = t.checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking");
             offset = t.checkContains(response,offset,"12345","3.6.1 Chunking");
             offset = t.checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking");
@@ -1373,8 +1375,62 @@ public class TestRFC2616
             Code.warning(e);
             t.check(false,e.toString());
         }
-      } 
+    } 
 
+    /* --------------------------------------------------------------- */
+    public static void test14_23()
+    {        
+        TestCase t = new TestCase("RFC2616 14.23 host");
+        try
+        {
+            TestRFC2616 listener = new TestRFC2616();
+            String response;
+            int offset=0;
+
+            // HTTP/1.0 OK with no host
+            offset=0;
+            response=listener.getResponses("GET /R1 HTTP/1.0\n"+
+                                           "\n"
+                                           );
+            Code.debug("RESPONSE: ",response);
+            offset=t.checkContains(response,offset,
+                                   "HTTP/1.1 200","200")+1;
+
+            
+            offset=0;
+            response=listener.getResponses("GET /R1 HTTP/1.1\n"+
+                                           "\n"
+                                           );
+            Code.debug("RESPONSE: ",response);
+            offset=t.checkContains(response,offset,
+                                   "HTTP/1.1 400","400")+1;
+            
+            offset=0;
+            response=listener.getResponses("GET /R1 HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "\n"
+                                           );
+            Code.debug("RESPONSE: ",response);
+            offset=t.checkContains(response,offset,
+                                   "HTTP/1.1 200","200")+1;
+            
+            offset=0;
+            response=listener.getResponses("GET /R1 HTTP/1.1\n"+
+                                           "Host:\n"+
+                                           "\n"
+                                           );
+            Code.debug("RESPONSE: ",response);
+            offset=t.checkContains(response,offset,
+                                   "HTTP/1.1 200","200")+1;
+            
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
+        }
+    }
+    
 
     /* --------------------------------------------------------------- */
     public static void test14_35()
