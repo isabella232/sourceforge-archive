@@ -504,7 +504,9 @@
         <include name="etc/admin.xml"/>  
         <include name="etc/jetty.xml"/>   
         <include name="etc/jetty.mlet"/>  
-        <include name="etc/webdefault.xml"/>         
+        <include name="etc/webdefault.xml"/>   
+        <include name="etc/commons-logging.properties"/> 
+        <include name="etc/simplelog.properties"/>         
         <exclude name="**/CVS/**"/>
       </tarfileset>
     </tar>
