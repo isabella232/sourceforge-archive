@@ -950,7 +950,8 @@ public class HttpConnection
                            _inputStream.getContentLength());
             
             // service the request
-            context=service(_request,_response);
+            if (!_request.isHandled())
+                context=service(_request,_response);
         } 
         catch (InterruptedIOException e)
         {

@@ -1,8 +1,10 @@
 Jetty Versions
 --------------
 
+ + close rather than disable stream after forward
  + Allow filter init to access servlet context methods.
  + Keep notFoundContext out of context mapping lists.
+ + mod_jk FAQ
 
 Jetty-4.1.D2 - 24 June 2002
  + Support trusted external authenticators.

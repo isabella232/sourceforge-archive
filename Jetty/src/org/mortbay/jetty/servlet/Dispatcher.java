@@ -280,11 +280,7 @@ public class Dispatcher implements RequestDispatcher
                 _holder.handle(request,response);
                 
                 if (forward)
-                {
-                    response.flushBuffer();
                     response.close();
-                    servletHttpResponse.setOutputState(ServletHttpResponse.DISABLED);
-                }
                 else if (response.isFlushNeeded())
                     response.flushBuffer();
             }
