@@ -127,16 +127,16 @@ public class BlockingQueue
     /* ------------------------------------------------------------ */
     /** Get from queue.
      * Block for timeout if there are no objects to get.
-     * @param timeout the time to wait for a job
+     * @param timeoutMs the time to wait for a job
      * @return The next object in the queue, or null if timedout.
      */
-    public Object get(long timeout)
+    public Object get(int timeoutMs)
         throws InterruptedException
-    {   
+    {
         synchronized(elements)
         {
             if (size==0)
-                elements.wait(timeout);
+                elements.wait((long)timeoutMs);
             
             if (size==0)
                 return null;

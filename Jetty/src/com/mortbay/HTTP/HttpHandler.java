@@ -4,6 +4,7 @@
 // ========================================================================
 
 package com.mortbay.HTTP;
+import com.mortbay.Util.LifeCycle;
 import java.io.*;
 
 
@@ -13,7 +14,7 @@ import java.io.*;
  * @version 1.0 Tue Oct 12 1999
  * @author Greg Wilkins (gregw)
  */
-public interface HttpHandler
+public interface HttpHandler extends LifeCycle
 {
     /* ------------------------------------------------------------ */
     /** Start the handler.

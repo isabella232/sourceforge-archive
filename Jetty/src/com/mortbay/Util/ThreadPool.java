@@ -31,6 +31,7 @@ import java.lang.reflect.Constructor;
  * @author Greg Wilkins <gregw@mortbay.com>
  */
 public class ThreadPool
+    implements LifeCycle
 {
     /* ------------------------------------------------------------ */
     static int __maxThreads =
@@ -53,7 +54,7 @@ public class ThreadPool
     private HashSet _threadSet;
     private int _maxThreads = __maxThreads;
     private int _minThreads = __minThreads;
-    private long _maxIdleTimeMs=0;
+    private int _maxIdleTimeMs=0;
     private String _name="ThreadPool";
     private int _threadId=0;
     private HashSet _idleSet=new HashSet();
@@ -169,9 +170,18 @@ public class ThreadPool
     /** Is the pool running jobs.
      * @return True if start() has been called.
      */
-    public boolean isRunning()
+    public boolean isStarted()
     {
         return _running && _threadSet!=null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return False - always started or stopped. 
+     */
+    public boolean isDestroyed()
+    {
+        return false;
     }
     
     /* ------------------------------------------------------------ */
@@ -225,7 +235,7 @@ public class ThreadPool
     /** Get the maximum thread idle time
      * @return Max idle time in ms.
      */
-    public long getMaxIdleTimeMs()
+    public int getMaxIdleTimeMs()
     {
         return _maxIdleTimeMs;
     }
@@ -234,9 +244,19 @@ public class ThreadPool
     /** Set the maximum thread idle time.
      * @param maxIdleTimeMs Max idle time in ms.
      */
-    public void setMaxIdleTimeMs(long maxIdleTimeMs)
+    public void setMaxIdleTimeMs(int maxIdleTimeMs)
     {
         _maxIdleTimeMs=maxIdleTimeMs;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Not required.
+     * Calls destroy().
+     * @param o ignored.
+     */
+    synchronized public void initialize(Object o)
+    {
+        destroy();
     }
     
     /* ------------------------------------------------------------ */
@@ -413,7 +433,7 @@ public class ThreadPool
      * @exception InterruptedException 
      * @exception InterruptedIOException 
      */
-    protected Object getJob(long idleTimeoutMs)
+    protected Object getJob(int idleTimeoutMs)
         throws InterruptedException, InterruptedIOException
     {
         if (_queue==null)

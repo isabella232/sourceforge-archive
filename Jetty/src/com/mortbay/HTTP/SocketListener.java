@@ -29,7 +29,7 @@ public class SocketListener
     SocketListener(HttpServer server, InetAddrPort address)
         throws IOException
     {
-        super(address,1,5,300000);
+        super(address,1,5,300000,300000);
         _server=server;
     }
 

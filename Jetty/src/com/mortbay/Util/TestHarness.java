@@ -886,7 +886,7 @@ public class TestHarness
             test.check(true,"Constructed");
             pool.start();
             Thread.sleep(100);
-            test.check(pool.isRunning(),"Started");
+            test.check(pool.isStarted(),"Started");
             test.checkEquals(pool.getSize(),2,"Minimum Threads");
             test.checkEquals(pool._calls,0,"Minimum Threads");
             test.checkEquals(pool._waiting,0,"Minimum Threads");
@@ -1039,7 +1039,7 @@ public class TestHarness
         TestThreadedServer()
             throws Exception
         {
-            super(new InetAddrPort(8765),2,4,500);
+            super(new InetAddrPort(8765),2,4,500, 60000);
         }
         
         /* -------------------------------------------------------- */
@@ -1107,13 +1107,13 @@ public class TestHarness
             server.start();
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
-            test.check(server.isRunning(),"Started");
+            test.check(server.isStarted(),"Started");
             test.checkEquals(server._connections,0,"Minimum Threads");
             test.checkEquals(server._jobs,0,"Minimum Threads");
             test.checkEquals(server.getSize(),2,"Minimum Threads");
             System.err.print(".");System.err.flush();
             Thread.sleep(550);
-            test.check(server.isRunning(),"Started");
+            test.check(server.isStarted(),"Started");
             test.checkEquals(server._connections,0,"Minimum Threads");
             test.checkEquals(server._jobs,0,"Minimum Threads");
             test.checkEquals(server.getSize(),2,"Minimum Threads");
@@ -1186,7 +1186,7 @@ public class TestHarness
 
             server.destroy();
             server.join();
-            test.check(!server.isRunning(),"Stopped");
+            test.check(!server.isStarted(),"Stopped");
             test.checkEquals(server.getSize(),0,"No Threads");
         }
         catch(Exception e)

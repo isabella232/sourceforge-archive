@@ -170,48 +170,53 @@ public class UrlEncoded extends MultiMap
      */
     public static String decodeString(String encoded)
     {
-        encoded = encoded.replace('+',' ');
-        int index = 0;
-        int marker = 0;   
+         encoded = encoded.replace('+',' ');
+         int index = 0;
+         int marker = encoded.indexOf('%', 0);
 
-        // there is at least one encoding
-        boolean decoded=false;
-        StringBuffer result=new StringBuffer(encoded.length());
-        synchronized(result)
-        {
-            while (((marker = encoded.indexOf('%', index)) != -1)
-                   &&(index < encoded.length()))
-            {
-                decoded=true;
-                result.append(encoded.substring (index, marker));
-                
-                try
-                {
-                    // convert the 2 hex chars following the % into a byte,
-                    // which will be a character
-                    result.append((char)(Integer.parseInt
-                                         (encoded.substring(marker+1,marker+3),16)));
-                    index = marker+3;  
-                }
-                catch (Exception e)
-                {
-                    //conversion failed so ignore this %
-                    if (Code.verbose()) Code.warning(e);
-                    result.append ('%');
-                    index = marker+1;
-                }
-            }
+         // if no encoded characters return the original
+         if (marker == -1)
+             return encoded;
 
-            // if no encoded characters return the original
-            if (!decoded)
-                return encoded;
+         String result = encoded;
+         try {
+             int encodedLength = encoded.length();
+             ByteArrayOutputStream out=new ByteArrayOutputStream(encodedLength);
+             synchronized(out)
+             {
+                 do
+                 {
+                     // Write the part before the %
+                     out.write(encoded.substring(index,marker).getBytes("ISO8859_1"));
+                     
+                     try
+                     {
+                         // convert the 2 hex chars following the % into a byte
+                         out.write((byte)(Integer.parseInt(encoded.substring(marker+1,marker+3),16)));
+                         index = marker+3;
+                     }
+                     catch (NumberFormatException e)
+                     {
+                         //conversion failed so pass through this %
+                         if (Code.verbose()) Code.warning(e);
+                         out.write('%');
+                         index = marker+1;
+                     }
+                 }
+                 while (((marker = encoded.indexOf('%', index)) != -1));
 
-            // if there is some at the end then copy it in
-            if (index < encoded.length())
-                result.append(encoded.substring(index, encoded.length()));
-        }
-        
-        return result.toString();
+                 // if there is some at the end then copy it in
+                 if (index < encodedLength)
+                     out.write(encoded.substring(index,encodedLength).getBytes("ISO8859_1"));
+                 
+                 result = out.toString();
+             }
+         }
+         catch (Exception e) {
+             Code.warning(e);
+         }
+         
+         return result;
     }
     
     /* ------------------------------------------------------------ */

@@ -32,6 +32,9 @@ Contributions, Testing & valuable feedback from:
   klaus spd <klausspd@hotmail.com>
   Nicholas Christopher <Nicholas.Christopher@worldnet.att.net>
   Hans Maerki <hans@maerki.com>
+  Shiraz Kanga <skanga@bigfoot.com>
+  Adam Klatzkin <Adam.Klatzkin@bentley.com>
+
   Plus a few more in the pipe line (tell me if your one of them...)
 
 Copyright holders:

@@ -19,11 +19,21 @@ import java.io.*;
  * @version 1.0 Mon Oct 11 1999
  * @author Greg Wilkins (gregw)
  */
-abstract public class NullHandler implements HttpHandler
+public class NullHandler implements HttpHandler
 {
     /* ----------------------------------------------------------------- */
     protected boolean _started=false;
     protected boolean _destroyed=true;
+    protected Object _configuration;
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param configuration 
+     */
+    public void initialize(Object configuration)
+    {
+        _configuration=configuration;
+    }
     
     /* ----------------------------------------------------------------- */
     public void start()

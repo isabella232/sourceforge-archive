@@ -32,46 +32,47 @@ public class HttpServer
     /** Constructor. 
      */
     public HttpServer()
-    {}
+    {
+        _hostMap.put(null,_handlerMap);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Add a HTTP Listener to the server.
+     * @param listener The Listener.
+     * @exception IllegalArgumentException If the listener is not for this server. 
+     */
+    public void addListener(HttpListener listener)
+        throws IllegalArgumentException
+    {
+        if (listener.getServer()!=this)
+            throw new IllegalArgumentException("Listener is not for this server");
+        
+        _listeners.put(listener,listener);
+    }
     
     /* ------------------------------------------------------------ */
-    public void startListener(InetAddrPort address)
-        throws IOException
+    /** Remove a HTTP Listener
+     * @param listener 
+     */
+    public void removeListener(HttpListener listener)
     {
-        HttpListener listener = (HttpListener)_listeners.get(address);
-        if (listener==null)
+        Iterator iterator = _listeners.entrySet().iterator();
+        while(iterator.hasNext())
         {
-            listener=new SocketListener(this,address);
-            _listeners.put(address,listener);
+            com.sun.java.util.collections.Map$Entry entry=
+                (com.sun.java.util.collections.Map$Entry) iterator.next();
+            if (entry.getValue()==listener)
+                iterator.remove();
         }
-
-        listener.start();
     }
     
-    /* ------------------------------------------------------------ */
-    public void stopListener(InetAddrPort address)
-        throws InterruptedException
-    {
-        HttpListener listener = (HttpListener)_listeners.get(address);
-        if (listener!=null)
-            listener.stop();
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void destroyListener(InetAddrPort address)
-    {
-        HttpListener listener = (HttpListener)_listeners.remove(address);
-        if (listener!=null)
-            listener.destroy();
-    }
-
     /* ------------------------------------------------------------ */
     /** 
-     * @return Collection of all listeners.
+     * @return Set of all listeners.
      */
-    public Collection getListeners()
+    public Set getListeners()
     {
-        return _listeners.values();
+        return new HashSet(_listeners.values());
     }
     
     /* ------------------------------------------------------------ */
@@ -148,7 +149,78 @@ public class HttpServer
     }
 
     /* ------------------------------------------------------------ */
-    /** Converniance method for adding FileHandlers.
+    /** 
+     * @return Collection of all listeners.
+     */
+    public Set getHandlers()
+    {
+        HashSet set = new HashSet(33);
+        Iterator maps=_hostMap.values().iterator();
+        while (maps.hasNext())
+        {
+            PathMap pm=(PathMap)maps.next();
+            Iterator handlerStacks=pm.values().iterator();
+            while(handlerStacks.hasNext())
+            {
+                List stack=(List)handlerStacks.next();
+                Iterator handlers=stack.iterator();
+                while(handlers.hasNext())
+                    set.add(handlers.next());
+            }
+        }
+        return set;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add and start a SocketListener.
+     * Conveniance method.
+     * @param address
+     * @return the HttpListener.
+     * @exception IOException 
+     */
+    public HttpListener startListener(InetAddrPort address)
+        throws IOException
+    {
+        HttpListener listener = (HttpListener)_listeners.get(address);
+        if (listener==null)
+        {
+            listener=new SocketListener(this,address);
+            _listeners.put(address,listener);
+        }
+
+        listener.start();
+        return listener;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Stop a SocketListener.
+     * Conveniance method.
+     * @param address 
+     * @exception InterruptedException 
+     */
+    public void stopListener(InetAddrPort address)
+        throws InterruptedException
+    {
+        HttpListener listener = (HttpListener)_listeners.get(address);
+        if (listener!=null)
+            listener.stop();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Destroy a SocketListener
+     * Conveniance method.
+     * @param address 
+     */
+    public void destroyListener(InetAddrPort address)
+    {
+        HttpListener listener = (HttpListener)_listeners.remove(address);
+        if (listener!=null)
+            listener.destroy();
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /** Conveniance method for adding FileHandlers.
      * A single FileHandler instance is maintained for each
      * mapped filename and can be mapped to multiple path specifications.
      * @param host Virtual host name or null.
@@ -176,12 +248,78 @@ public class HttpServer
         return fileHandler;
     }
 
+    
     /* ------------------------------------------------------------ */
-    /** XXX
+    /** Start all handlers then listeners.
      */
-    public void startAllHandler()
+    public synchronized void startAll()
     {
-        Code.notImplemented();
+        Iterator handlers = getHandlers().iterator();
+        while(handlers.hasNext())
+        {
+            HttpHandler handler=(HttpHandler)handlers.next();
+            if (!handler.isStarted())
+                handler.start();
+        }
+        
+        Iterator listeners = getListeners().iterator();
+        while(listeners.hasNext())
+        {
+            HttpListener listener =(HttpListener)listeners.next();
+            if (!listener.isStarted())
+                listener.start();
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Stop all listeners then handlers.
+     * @exception InterruptedException If interrupted, stop may not have
+     * been called on everything.
+     */
+    public synchronized void stopAll()
+        throws InterruptedException
+    {
+        Iterator listeners = getListeners().iterator();
+        while(listeners.hasNext())
+        {
+            HttpListener listener =(HttpListener)listeners.next();
+            if (listener.isStarted())
+                listener.stop();
+        }
+        
+        Iterator handlers = getHandlers().iterator();
+        while(handlers.hasNext())
+        {
+            HttpHandler handler=(HttpHandler)handlers.next();
+            if (handler.isStarted())
+                handler.stop();
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Stop all listeners then handlers.
+     * All the handlers are unmapped and the listeners removed.
+     */
+    public synchronized void destroyAll()
+    {
+        Iterator listeners = getListeners().iterator();
+        while(listeners.hasNext())
+        {
+            HttpListener listener =(HttpListener)listeners.next();
+            listener.destroy();
+        }
+        
+        Iterator handlers = getHandlers().iterator();
+        while(handlers.hasNext())
+        {
+            HttpHandler handler=(HttpHandler)handlers.next();
+            handler.destroy();
+        }
+
+        _hostMap.clear();
+        _handlerMap.clear();
+        _listeners.clear();
+        _hostMap.put(null,_handlerMap);
     }
     
     /* ------------------------------------------------------------ */

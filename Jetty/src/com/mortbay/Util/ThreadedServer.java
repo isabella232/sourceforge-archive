@@ -30,6 +30,7 @@ abstract public class ThreadedServer extends ThreadPool
     /* ------------------------------------------------------------------- */
     private InetAddrPort _address = null;    
     ServerSocket _listen = null;
+    int _maxReadTimeMs=-1;
     
     /* ------------------------------------------------------------------- */
     /* Construct
@@ -77,16 +78,19 @@ abstract public class ThreadedServer extends ThreadPool
      * @param address The address to listen on
      * @param minThreads Minimum number of handler threads.
      * @param maxThreads Maximum number of handler threads.
-     * @param maxIdleTime Idle time in milliseconds before a handler thread dies.
+     * @param maxThreadIdleTimeMs Idle time in milliseconds before a handler thread dies.
+     * @param maxReadTimeMs Set socket SoTimeout
      * @exception java.io.IOException Problem listening to the socket.
      */
     public ThreadedServer(InetAddrPort address,
                           int minThreads, 
                           int maxThreads,
-                          int maxIdleTime) 
+                          int maxThreadIdleTimeMs,
+                          int maxReadTimeMs) 
          throws IOException
     {
-        super(address.toString(),minThreads,maxThreads,maxIdleTime);
+        super(address.toString(),minThreads,maxThreads,maxThreadIdleTimeMs);
+        _maxReadTimeMs=maxReadTimeMs;
         setAddress(address);
     }
     
@@ -198,7 +202,7 @@ abstract public class ThreadedServer extends ThreadPool
         throws IOException
     {
         _address = address;
-        if (isRunning())
+        if (isStarted())
         {
             Code.debug( "Restart for ", address );
             destroy();
@@ -239,6 +243,8 @@ abstract public class ThreadedServer extends ThreadPool
         try
         {
             Socket s=_listen.accept();
+            if (_maxReadTimeMs>0)
+                s.setSoTimeout(_maxReadTimeMs);
             return s;
         }
         catch ( java.net.SocketException e )
@@ -268,7 +274,7 @@ abstract public class ThreadedServer extends ThreadPool
      *                  socket.
      * @return An accepted connection.
      */
-    protected final Object getJob(long timeoutMs)
+    protected final Object getJob(int timeoutMs)
     {
         return acceptSocket(_listen);
     }
@@ -278,7 +284,7 @@ abstract public class ThreadedServer extends ThreadPool
      */
     synchronized public void start()
     {
-        if (isRunning())
+        if (isStarted())
         {
             Code.warning("Already started on "+_address);
             return;

@@ -17,7 +17,7 @@ import java.util.*;
  * @version 1.0 Sat Oct  2 1999
  * @author Greg Wilkins (gregw)
  */
-public interface HttpListener 
+public interface HttpListener extends LifeCycle
 {
     public abstract HttpServer getServer();
     public abstract String getDefaultScheme();

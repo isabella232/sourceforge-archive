@@ -31,16 +31,12 @@ public class TestRFC2616
     {
         super("Test",1,10,30000);
         _server=new HttpServer();
-        HttpHandler teHandler=new TestTEHandler();
-        HttpHandler dumpHandler=new DumpHandler();
-        HttpHandler notFoundHandler=new NotFoundHandler();
-        _server.mapHandler(null,"/",teHandler);
-        _server.mapHandler(null,"/",dumpHandler);
-        _server.mapHandler(null,"/",notFoundHandler);
-        _server.mapHandler("VirtualHost","/path/*",dumpHandler);
-        teHandler.start();
-        dumpHandler.start();
-        notFoundHandler.start();
+        _server.mapHandler(null,"/",new TestTEHandler());
+        _server.mapHandler(null,"/",new DumpHandler());
+        _server.mapHandler(null,"/",new NotFoundHandler());
+        _server.addListener(this);
+        _server.startAll();
+        
     }
 
     /* ------------------------------------------------------------ */
@@ -401,6 +397,10 @@ public class TestRFC2616
         try
         {
             TestRFC2616 listener = new TestRFC2616();
+            listener.getServer().mapHandler("VirtualHost",
+                                            "/path/*",
+                                            new DumpHandler());
+            listener.getServer().startAll();
             String response;
             int offset=0;
 
