@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
 Jetty-4.0.1RC1 - 29 April 2002
+ + Improved flushing of chunked responses
  + Better handling if no realm configured.
  + Expand ByteBuffer full limit with capacity.
  + Fixed double filtering of welcome files.

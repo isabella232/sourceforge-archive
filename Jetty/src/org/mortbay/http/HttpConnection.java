@@ -459,7 +459,6 @@ public class HttpConnection
               break;
               
           case OutputObserver.__CLOSING:
-              _response.complete();
               break;
               
           case OutputObserver.__CLOSED:

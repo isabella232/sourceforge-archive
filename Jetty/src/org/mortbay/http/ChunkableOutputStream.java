@@ -418,7 +418,6 @@ public class ChunkableOutputStream extends FilterOutputStream
             }
         }
         
-        
         // Save non-raw size
         int size=_buffer.size();
         

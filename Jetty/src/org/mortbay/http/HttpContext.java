@@ -1362,7 +1362,6 @@ public class HttpContext implements LifeCycle
                 if (request.isHandled())
                 {
                     Code.debug("Handled by ",handler);
-                    response.complete();
                     return true;
                 }
             }

@@ -886,27 +886,6 @@ public interface HttpMessage
                      (out.isWritten() || out.isCommitted()));
         }
     
-
-        /* ------------------------------------------------------------ */
-        public synchronized void complete()
-            throws IOException
-        {
-            if (!isCommitted())
-                commit();
-        
-            ChunkableOutputStream out=(ChunkableOutputStream)getOutputStream();
-            if (out!=null)
-            {
-                if (_trailer!=null && _trailer.size()>0)
-                {
-                    if (out!=null && out.isChunking())
-                        out.setTrailer(_trailer);
-                }
-            }
-            _state=__MSG_SENT;
-        }
-
-    
         /* ------------------------------------------------------------ */
         /** Get a request attribute.
          * @param name Attribute name
