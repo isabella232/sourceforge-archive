@@ -1,0 +1,17 @@
+
+Authors & Testers:
+  Greg Wilkins <gregw@mortbay.com>
+  Jan Bartel <janb@mortbay.com>
+  Matt Watson <mattw@mortbay.com>
+  Thomas Pedersen <zeppelin@login.dknet.dk>
+  Jesper Jørgensen <jesper@caput.com>
+  Morten Seifert <ms@belle.dk>
+  Simon Ritchie <sritchie@amo.com>
+  Thomas Beyer <Thomas.Beyer@mch.sni.de>
+  Tobias Miller <millert@informatik.tu-muenchen.de>
+  
+Sponsors:
+  Mort Bay Consulting.   http://www.mortbay.com
+  Optimus http://www.optimus.com.au
+  Intelligent Switched Systems http://www.iswitched.com
+
