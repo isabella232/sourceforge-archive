@@ -3,7 +3,7 @@
 
  + Fix fileupload 
 
- + Resource URL methods for JSDK2.1
+ + Test Resource URL methods for JSDK2.1
 
  + Cleanup sessions for JSDK2.1
 
