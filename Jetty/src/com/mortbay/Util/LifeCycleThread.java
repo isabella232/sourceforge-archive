@@ -17,19 +17,6 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
     
     /* ------------------------------------------------------------ */
     /** 
-     * @param o 
-     * @exception InterruptedException 
-     */
-    public void initialize(Object o)
-        throws InterruptedException
-    {
-        if (_running)
-            stop();
-        _configuration=o;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** 
      * @return 
      */
     public boolean isDaemon()
@@ -44,15 +31,6 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
     public void setDaemon(boolean d)
     {
         _daemon = d;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
-    public Object getConfiguration()
-    {
-        return _configuration;
     }
     
     /* ------------------------------------------------------------ */

@@ -3,9 +3,7 @@
 // $Id$
 // ========================================================================
 
-package com.mortbay.Util;
-
-/* ------------------------------------------------------------ */
+package com.mortbay.Util;/* ------------------------------------------------------------ */
 /** A component LifeCycle.
  * Represents the life cycle interface for an abstract
  * software component. Implementations should respect
@@ -64,3 +62,4 @@ public interface LifeCycle
     public boolean isDestroyed();
     
 }
+

@@ -1,6 +1,7 @@
 Jetty3 Versions
 --------------
 
+Jetty-3.1.rc6 - 10 Jul 2001
  + Avoid script vulnerability in error pages.
  + Close persistent HTTP/1.0 connections on missing Content-Length
  + Use exec for jetty.sh run
@@ -22,6 +23,7 @@ Jetty3 Versions
  + Moved mime types and encodings to property bundles.
  + RequestDispatch.forward() uses normal HandlerContext.handle() path if possible.
  + Cleaned up destroy handling of listeners and contexts.
+ + Removed getConfiguration from LifeCycleThread to avoid JMX clash.
 
 Jetty-3.1.rc5 - 1 May 2001
  + Added build target for mini.jetty.jar - see README.
