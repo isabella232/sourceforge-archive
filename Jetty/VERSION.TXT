@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+Jetty-3.0.4 - 23 Feb 2001
+ + Fixed LineInput bug with split CRLF.
+
 Jetty-3.0.3 - 3 Feb 2001
  + Fixed pipelined request buffer bug.
  + Handle empty form content without exception.
