@@ -69,10 +69,10 @@
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add a HTTPS SSL listener on port 8443                           -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- UNCOMMENT TO ACTIVATE
+  <!-- UNCOMMENT TO ACTIVATE -->
   <Call name="addListener">
     <Arg>
-      <New class="org.mortbay.http.SunJsseListener">
+      <New class="org.mortbay.http.SslListener">
         <Set name="Port">8443</Set>
 	<Set name="PoolName">P1</Set>
         <Set name="MaxIdleTimeMs">30000</Set>
@@ -90,7 +90,6 @@
       </New>
     </Arg>
   </Call>
-  -->
 
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

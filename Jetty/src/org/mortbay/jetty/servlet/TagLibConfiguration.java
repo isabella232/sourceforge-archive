@@ -180,8 +180,6 @@ public class TagLibConfiguration implements Configuration
                 
                 XmlParser.Node root = parser.parse(tld.getURL());
                 
-                System.err.println(root);
-                
                 for (int i=0;i<root.size();i++)
                 {
                     Object o=root.get(i);
