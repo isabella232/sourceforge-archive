@@ -43,9 +43,7 @@ public class ProxyConfig extends BaseConfiguration
 	int h=0;
 
 	// handlers
-	PathMap logMap = new PathMap();
-	logMap.put("",new OutputStreamWriter(System.out));
-	httpHandlers[h++] = new LogHandler(logMap,true, true);
+	httpHandlers[h++] = new LogHandler(true, true);
 	httpHandlers[h++] = new ProxyHandler();
 	httpHandlers[h++] = new NotFoundHandler();	
     }
