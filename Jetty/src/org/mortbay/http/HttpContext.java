@@ -1869,6 +1869,7 @@ public class HttpContext implements LifeCycle,
         {
             thread.setContextClassLoader(lastContextLoader);
             _started=true;
+	    getHandlers();
         }
 
         log.info("Started "+this);
