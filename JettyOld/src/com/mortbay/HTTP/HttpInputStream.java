@@ -70,9 +70,9 @@ public class HttpInputStream extends ServletInputStream
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the content length.
+    /** Get the content length.
      * Only this number of bytes can be read before EOF is returned.
-     * @param len length.
+     * @return int number of bytes can be read before EOF is returned.
      */
     int getContentLength()
     {
