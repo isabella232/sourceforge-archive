@@ -32,6 +32,8 @@ public class ChunkableOutputStream extends FilterOutputStream
         __CRLF_B      ={(byte)'\015',(byte)'\012'},
         __CHUNK_EOF_B ={(byte)'0',(byte)';',(byte)'\015',(byte)'\012'};
 
+    public final static Class[] __filterArg = {java.io.OutputStream.class};
+        
     /* ------------------------------------------------------------ */
     /** Buffer class.
      */
@@ -68,6 +70,24 @@ public class ChunkableOutputStream extends FilterOutputStream
         _noWrite=false;
     }
 
+    /* ------------------------------------------------------------ */
+    /** Has any data been written to the stream.
+     * @return True if write has been called.
+     */
+    public synchronized boolean isWritten()
+    {
+        return !_noWrite;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Has any data been sent from this stream.
+     * @return True if buffer has been flushed to destination.
+     */
+    public synchronized boolean isCommitted()
+    {
+        return _committed;
+    }
+        
     /* ------------------------------------------------------------ */
     /** Get the output buffer capacity
      * @return Buffer capacity in bytes.
@@ -265,7 +285,8 @@ public class ChunkableOutputStream extends FilterOutputStream
     /* ------------------------------------------------------------ */
     public synchronized void flush() throws IOException
     {
-        out.flush();
+        if (out!=null)
+            out.flush();
         if (_buffer.size()>0)
         {
             notify(OutputObserver.COMMITING);
@@ -311,6 +332,9 @@ public class ChunkableOutputStream extends FilterOutputStream
 
             // close filters
             out.close();
+            out=null;
+            flush();
+            out=_buffer;
             
             // If chunking
             if (_chunkSize!=null)
@@ -326,7 +350,6 @@ public class ChunkableOutputStream extends FilterOutputStream
                 _footer=null;
                 _committed=false;
                 _buffer.reset();
-                out=_buffer;
                 if (_filters!=null)
                     _filters.clear();
             }

@@ -8,6 +8,7 @@ import com.mortbay.Util.DataClassTest.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import com.sun.java.util.collections.*;
 
 public class TestHarness
 {
@@ -125,7 +126,7 @@ public class TestHarness
         Code.debug("message",new Throwable());
         Code.debug("object",new Throwable(),"\n",code);
         
-        code._debugPatterns = new Vector();
+        code._debugPatterns = new java.util.Vector();
         code._debugPatterns.addElement("ZZZZZ");
         Code.debug("YOU SHOULD NOT SEE THIS");
         Code.debug("YOU SHOULD"," NOT SEE ","THIS");
@@ -569,6 +570,9 @@ public class TestHarness
         }
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     */
     static final void testLineInput()
     {
         Test test = new Test("com.mortbay.Util.LineInput");
@@ -639,6 +643,362 @@ public class TestHarness
             test.check(false,e.toString());
         }
     }
+
+    /* ------------------------------------------------------------ */
+    static class TestThreadPool extends ThreadPool
+    {
+        /* -------------------------------------------------------- */
+        int _calls=0;
+        int _waiting=0;
+        String _lock="lock";
+        
+        /* -------------------------------------------------------- */
+        TestThreadPool()
+            throws Exception
+        {
+            super("TestPool",2,4,500);
+        }
+        
+        /* -------------------------------------------------------- */
+        protected void handle(Object job)
+            throws InterruptedException
+        {
+            synchronized(_lock)
+            {
+                _calls++;
+                _waiting++;
+            }
+            synchronized(job)
+            {
+                Code.debug("JOB wait: ",job);
+                job.wait();
+                Code.debug("JOB wake: ",job);
+            }
+            synchronized(_lock)
+            {
+                _waiting--;
+            }
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    static void testThreadPool()
+    {
+        Test test = new Test("com.mortbay.Util.ThreadPool");
+        try
+        {
+            TestThreadPool pool = new TestThreadPool();
+            test.check(true,"Constructed");
+            pool.start();
+            Thread.sleep(100);
+            test.check(pool.isRunning(),"Started");
+            test.checkEquals(pool.getSize(),2,"Minimum Threads");
+            test.checkEquals(pool._calls,0,"Minimum Threads");
+            test.checkEquals(pool._waiting,0,"Minimum Threads");
+            
+            System.err.print(".");System.err.flush();
+            Thread.sleep(550);
+            test.checkEquals(pool.getSize(),2,"Minimum Threads");
+            test.checkEquals(pool._calls,0,"Minimum Threads");
+            test.checkEquals(pool._waiting,0,"Minimum Threads");
+
+            String j1="Job1";
+            String j2="Job2";
+            String j3="Job3";
+            String j4="Job4";
+            String j5="Job5";
+
+            pool.run(j1);
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(pool.getSize(),2,"Job1");
+            test.checkEquals(pool._calls,1,"Job1");
+            test.checkEquals(pool._waiting,1,"Job1");
+            
+            pool.run(j2);
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(pool.getSize(),3,"Job2");
+            test.checkEquals(pool._calls,2,"Job2");
+            test.checkEquals(pool._waiting,2,"Job2");
+
+            pool.run(j3);
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(pool.getSize(),4,"Job3");
+            test.checkEquals(pool._calls,3,"Job3");
+            test.checkEquals(pool._waiting,3,"Job3");
+            
+            pool.run(j4);
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(pool.getSize(),4,"Job4");
+            test.checkEquals(pool._calls,4,"Job4");
+            test.checkEquals(pool._waiting,4,"Job4");
+            
+            pool.run(j5);
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(pool.getSize(),4,"Job5");
+            test.checkEquals(pool._calls,4,"Job5");
+            test.checkEquals(pool._waiting,4,"Job5");
+            
+            synchronized(j1){j1.notify();}
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(pool.getSize(),4,"max threads");
+            test.checkEquals(pool._calls,5,"max threads");
+            test.checkEquals(pool._waiting,4,"max threads");
+            
+            synchronized(j2){j2.notify();}
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(pool.getSize(),4,"idle job");
+            test.checkEquals(pool._calls,5,"idle job");
+            test.checkEquals(pool._waiting,3,"idle job");
+            System.err.print(".");System.err.flush();
+            Thread.sleep(1000);
+            test.checkEquals(pool.getSize(),4,"idle wait");
+            test.checkEquals(pool._calls,5,"idle wait");
+            test.checkEquals(pool._waiting,3,"idle wait");
+            
+            synchronized(j3){j3.notify();}
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(pool.getSize(),4,"idle job");
+            test.checkEquals(pool._calls,5,"idle job");
+            test.checkEquals(pool._waiting,2,"idle job");
+            System.err.print(".");System.err.flush();
+            Thread.sleep(550);
+            test.checkEquals(pool.getSize(),3,"idle death");
+            test.checkEquals(pool._calls,5,"idle death");
+            test.checkEquals(pool._waiting,2,"idle death");
+
+            synchronized(j4){j4.notify();}
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(pool.getSize(),3,"idle job");
+            test.checkEquals(pool._calls,5,"idle job");
+            test.checkEquals(pool._waiting,1,"idle job");
+            System.err.print(".");System.err.flush();
+            Thread.sleep(550);
+            test.checkEquals(pool.getSize(),2,"idle death");
+            test.checkEquals(pool._calls,5,"idle death");
+            test.checkEquals(pool._waiting,1,"idle death");
+            
+            synchronized(j5){j5.notify();}
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(pool.getSize(),2,"idle job");
+            test.checkEquals(pool._calls,5,"idle job");
+            test.checkEquals(pool._waiting,0,"idle job");
+            System.err.print(".");System.err.flush();
+            Thread.sleep(550);
+            test.checkEquals(pool.getSize(),2,"min idle");
+            test.checkEquals(pool._calls,5,"min idle");
+            test.checkEquals(pool._waiting,0,"min idle");
+            
+            pool.run(j1);
+            pool.run(j2);
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(pool.getSize(),3,"steady state");
+            test.checkEquals(pool._calls,7,"steady state");
+            test.checkEquals(pool._waiting,2,"steady state");
+            synchronized(j2){j2.notify();}
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            pool.run(j2);
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(pool.getSize(),3,"steady state");
+            test.checkEquals(pool._calls,8,"steady state");
+            test.checkEquals(pool._waiting,2,"steady state");
+            synchronized(j1){j1.notify();}
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            pool.run(j2);
+            System.err.println(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(pool.getSize(),3,"steady state");
+            test.checkEquals(pool._calls,9,"steady state");
+            test.checkEquals(pool._waiting,2,"steady state");
+            
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            test.check(false,e.toString());
+        }
+    }
+        
+
+    /* ------------------------------------------------------------ */
+    static class TestThreadedServer extends ThreadedServer
+    {
+        int _jobs=0;
+        int _connections=0;
+        HashSet _sockets=new HashSet();
+        
+        /* -------------------------------------------------------- */
+        TestThreadedServer()
+            throws Exception
+        {
+            super(new InetAddrPort(8765),2,4,500);
+        }
+        
+        /* -------------------------------------------------------- */
+        protected void handleConnection(InputStream in,OutputStream out)
+        {
+            try
+            {
+                synchronized(this.getClass())
+                {
+                    Code.debug("Connection ",in);
+                    _jobs++;
+                    _connections++;
+                }
+                
+                String line=null;
+                LineInput lin= new LineInput(in);
+                while((line=lin.readLine())!=null)
+                {
+                    Code.debug("Line ",line);
+                    if ("Exit".equals(line))
+                        return;
+                }
+            }
+            catch(Error e)
+            {
+                Code.ignore(e);
+            }
+            catch(Exception e)
+            {
+                Code.ignore(e);
+            }
+            finally
+            {    
+                synchronized(this.getClass())
+                {
+                    _jobs--;
+                    Code.debug("Disconnect: ",in);
+                }
+            }
+        }
+
+        /* -------------------------------------------------------- */
+        PrintWriter stream()
+            throws Exception
+        {
+            InetAddrPort addr = new InetAddrPort();
+            addr.setInetAddress(InetAddress.getByName("127.0.0.1"));
+            addr.setPort(8765);
+            Socket s = new Socket(addr.getInetAddress(),addr.getPort());
+            _sockets.add(s);
+            Code.debug("Socket ",s);
+            return new PrintWriter(new OutputStreamWriter(s.getOutputStream()));
+        }    
+    };
+    
+    /* ------------------------------------------------------------ */
+    static void testThreadedServer()
+    {
+        Test test = new Test("com.mortbay.Util.ThreadedServer");
+        try
+        {
+            TestThreadedServer server = new TestThreadedServer();
+            test.check(true,"Constructed");
+            server.start();
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            test.check(server.isRunning(),"Started");
+            test.checkEquals(server._connections,0,"Minimum Threads");
+            test.checkEquals(server._jobs,0,"Minimum Threads");
+            test.checkEquals(server.getSize(),2,"Minimum Threads");
+            System.err.print(".");System.err.flush();
+            Thread.sleep(550);
+            test.check(server.isRunning(),"Started");
+            test.checkEquals(server._connections,0,"Minimum Threads");
+            test.checkEquals(server._jobs,0,"Minimum Threads");
+            test.checkEquals(server.getSize(),2,"Minimum Threads");
+            
+            PrintWriter p1 = server.stream();
+            System.err.print(".");System.err.flush();
+            Thread.sleep(200);
+            test.checkEquals(server._connections,1,"New connection");
+            test.checkEquals(server._jobs,1,"New connection");
+            test.checkEquals(server.getSize(),2,"New connection");
+            
+            PrintWriter p2 = server.stream();
+            System.err.print(".");System.err.flush();
+            Thread.sleep(200);
+            test.checkEquals(server._connections,2,"New thread");
+            test.checkEquals(server._jobs,2,"New thread");
+            test.checkEquals(server.getSize(),3,"New thread");
+            System.err.print(".");System.err.flush();
+            Thread.sleep(550);
+            test.checkEquals(server._connections,2,"Steady State");
+            test.checkEquals(server._jobs,2,"Steady State");
+            test.checkEquals(server.getSize(),3,"Steady State");
+            
+            p1.println("Exit");
+            p1.flush();
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(server._connections,2,"exit job");
+            test.checkEquals(server._jobs,1,"exit job");
+            test.checkEquals(server.getSize(),3,"exit job");
+            p1 = server.stream();
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(server._connections,3,"reuse thread");
+            test.checkEquals(server._jobs,2,"reuse thread");
+            test.checkEquals(server.getSize(),3,"reuse thread");
+            System.err.print(".");System.err.flush();
+            Thread.sleep(550);
+            test.checkEquals(server._connections,3,"1 idle");
+            test.checkEquals(server._jobs,2,"1 idle");
+            test.checkEquals(server.getSize(),3,"1 idle");
+
+            p1.println("Exit");
+            p1.flush();
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(server._connections,3,"idle thread");
+            test.checkEquals(server._jobs,1,"idle thread");
+            test.checkEquals(server.getSize(),3,"idle thread");
+            System.err.print(".");System.err.flush();
+            Thread.sleep(800);
+            test.checkEquals(server._connections,3,"idle death");
+            test.checkEquals(server._jobs,1,"idle death");
+            test.checkEquals(server.getSize(),2,"idle death");
+            
+            p1 = server.stream();
+            System.err.print(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(server._connections,4,"restart thread");
+            test.checkEquals(server._jobs,2,"restart thread");
+            test.checkEquals(server.getSize(),3,"restart thread");
+            
+            PrintWriter p3 = server.stream();
+            PrintWriter p4 = server.stream();
+            System.err.println(".");System.err.flush();
+            Thread.sleep(100);
+            test.checkEquals(server._connections,6,"max thread");
+            test.checkEquals(server._jobs,4,"max thread");
+            test.checkEquals(server.getSize(),4,"max thread");
+
+            server.stop();
+            server.join();
+            test.check(!server.isRunning(),"Stopped");
+            test.checkEquals(server.getSize(),0,"No Threads");
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            test.check(false,e.toString());
+        }
+    }
     
     
     /* ------------------------------------------------------------ */
@@ -661,6 +1021,12 @@ public class TestHarness
             testUrlEncoded();
             testURI();
             testLineInput();
+            testThreadPool();
+            testThreadedServer();
+
+            PropertyTreeTest.test();
+            DictionaryConverterTest.test();
+            
         }
         catch(Throwable th)
         {

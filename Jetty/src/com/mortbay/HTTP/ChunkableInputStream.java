@@ -8,6 +8,7 @@ import com.mortbay.Util.*;
 import com.sun.java.util.collections.*;
 
 import java.io.*;
+import java.lang.reflect.*;
 
 /* ------------------------------------------------------------ */
 /** HTTP Chunking InputStream. 
@@ -23,6 +24,8 @@ public class ChunkableInputStream extends FilterInputStream
     /* ------------------------------------------------------------ */
     /** Limit max line length */
     public static int __maxLineLength=4096;
+    
+    public final static Class[] __filterArg = {java.io.InputStream.class};
     
     /* ------------------------------------------------------------ */
     private DeChunker _deChunker;
@@ -65,12 +68,40 @@ public class ChunkableInputStream extends FilterInputStream
         {
             if (_deChunker._chunkSize>0)
                 throw new IllegalStateException("Within Chunk");
+            in=_realIn;
+            _filters=0;
         }
         
         _chunking=on;
         if (_deChunker!=null)
             _deChunker._footer=null;
     }
+
+    
+    /* ------------------------------------------------------------ */
+    /** Insert FilterInputStream.
+     * Place a Filtering InputStream into this stream, after the
+     * chunking stream.  
+     * @param filter The Filter constructor.  It must take an InputStream
+     *             as the first arguement.
+     * @param arg  Optional argument array to pass to filter constructor.
+     *             The first element of the array is replaced with the
+     *             current input stream.
+     */
+    public synchronized void insertFilter(Constructor filter,
+                                          Object[] args)
+        throws InstantiationException,
+               InvocationTargetException,
+               IllegalAccessException
+    {
+        if (args==null || args.length<1)
+            args=new Object[1];
+        
+        args[0]=in;
+        in=(InputStream)filter.newInstance(args);
+        _filters++;
+    }
+    
     
     /* ------------------------------------------------------------ */
     /** Set the content length.

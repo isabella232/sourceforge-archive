@@ -11,6 +11,7 @@ import java.net.*;
 /** InetAddress and Port
  */
 public class InetAddrPort
+    implements Cloneable
 {
     private InetAddress _addr=null;
     private int _port=0;
@@ -60,6 +61,16 @@ public class InetAddrPort
     }
     
     /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param inetAddrPort String of the form "addr:port"
+     */
+    public InetAddrPort(InetAddrPort address)
+    {
+        _addr=address._addr;
+        _port=address._port;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Get the IP address
      * @return The IP address
      */
@@ -102,6 +113,15 @@ public class InetAddrPort
         if (_addr==null)
             return "0.0.0.0:"+_port;
         return _addr.toString()+':'+_port;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Clone the InetAddrPort
+     * @return A new instance.
+     */
+    public Object clone()
+    {
+        return new InetAddrPort(this);
     }
 }
 

@@ -11,7 +11,7 @@ import java.util.*;
 public class PropertyTreeTest
 {
     /* ------------------------------------------------------------ */
-    public static void main(String argv[])
+    public static void test()
     {
         Test test = new Test("PropertyTree");
         try
@@ -178,10 +178,6 @@ public class PropertyTreeTest
         {
             Code.warning(e);
             test.check(false,e.toString());
-        }
-        finally
-        {
-            test.report();
         }
     }
     

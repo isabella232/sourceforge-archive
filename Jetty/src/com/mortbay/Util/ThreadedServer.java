@@ -25,79 +25,32 @@ import java.lang.reflect.Constructor;
  * @version $Id$
  * @author Greg Wilkins
  */
-abstract public class ThreadedServer
-    implements Runnable 
+abstract public class ThreadedServer extends ThreadPool
 {    
-    /* ------------------------------------------------------------ */
-    static int __maxThreads =
-        Integer.getInteger("THREADED_SERVER_MAX_THREADS",255).intValue();
-    
-    /* ------------------------------------------------------------ */
-    static int __minThreads =
-        Integer.getInteger("THREADED_SERVER_MIN_THREADS",1).intValue();
-
-    /* ------------------------------------------------------------ */
-    String __threadClass =
-        System.getProperty("THREADED_SERVER_THREAD_CLASS",
-                           "java.lang.Thread");
-    
     /* ------------------------------------------------------------------- */
-    private InetAddrPort address = null;    
-    ServerSocket listen = null;
-
-    private Hashtable _threadSet;
-    private int _maxThreads = __maxThreads;
-    private int _minThreads = __minThreads;
-    private int _maxIdleTimeMs=0;
-    private String _name="ThreadedServer";
-    private int _threadId=0;
-    private int _accepting=0;
-    private boolean _running=false;
+    private InetAddrPort _address = null;    
+    ServerSocket _listen = null;
     
-    /**
-     *  P.Mclachlan: Allow the class of thread used
-     *  to change (to any subclass of 'java.lang.Thread').  This
-     *  can be useful in certain embedded webserver circumstances.
-     */
-    private Class _threadClass;
-    private Constructor _constructThread;
-    private Object[] _constructThis;
-
     /* ------------------------------------------------------------------- */
     /* Construct
      */
     public ThreadedServer() 
-    {
-        try
-        {
-            _threadClass = Class.forName( __threadClass );
-            Code.debug("Using thread class '", _threadClass.getName(),"'");
-        }
-        catch( Exception e )
-        {
-            Code.warning( "Invalid thread class (ignored) ",e );
-            _threadClass = java.lang.Thread.class;
-        }
-
-        setThreadClass(_threadClass);
-    }
+    {}
     
     /* ------------------------------------------------------------------- */
     /* Construct
      */
     public ThreadedServer(String name) 
     {
-        this();
-        _name=name;
+        super(name);
     }
 
     /* ------------------------------------------------------------------- */
     /** Construct for specific port
      */
     public ThreadedServer(int port)
-         throws java.io.IOException
+        throws IOException
     {
-        this();
         setAddress(new InetAddrPort(null,port));
     }
     
@@ -105,9 +58,8 @@ abstract public class ThreadedServer
     /** Construct for specific address and port
      */
     public ThreadedServer(InetAddress address, int port) 
-         throws java.io.IOException
+         throws IOException
     {
-        this();
         setAddress(new InetAddrPort(address,port));
     }
     
@@ -115,9 +67,8 @@ abstract public class ThreadedServer
     /** Construct for specific address and port
      */
     public ThreadedServer(InetAddrPort address) 
-         throws java.io.IOException
+         throws IOException
     {
-        this();
         setAddress(address);
     }
     
@@ -133,46 +84,12 @@ abstract public class ThreadedServer
                           int minThreads, 
                           int maxThreads,
                           int maxIdleTime) 
-         throws java.io.IOException
+         throws IOException, InterruptedException
     {
-        this();
-        _minThreads=minThreads==0?1:minThreads;
-        _maxThreads=maxThreads==0?__maxThreads:maxThreads;
-        _maxIdleTimeMs=maxIdleTime;
+        super(address.toString(),minThreads,maxThreads,maxIdleTime);
         setAddress(address);
     }
     
-    /* ------------------------------------------------------------ */
-    /** Set the Thread class.
-     * Sets the class used for threads in the thread pool. The class
-     * must have a constractor taking a Runnable.
-     * @param threadClass 
-     */
-    public void setThreadClass(Class threadClass) 
-    {
-        _threadClass=threadClass;
-                
-        if( _threadClass == null || !Thread.class.isAssignableFrom( _threadClass ) )
-        {
-            Code.warning( "Invalid thread class (ignored) "+
-                          _threadClass.getName() );
-            _threadClass = java.lang.Thread.class;
-        }
-
-        try
-        {
-            Class[] args ={java.lang.Runnable.class};
-            _constructThread = _threadClass.getConstructor(args);
-        }
-        catch(Exception e)
-        {
-            Code.warning("Invalid thread class (ignored)",e);
-            setThreadClass(java.lang.Thread.class);
-        }
-
-        Object[] args = {this};
-        _constructThis=args;
-    }
     
     /* ------------------------------------------------------------------- */
     /** Handle new connection
@@ -192,10 +109,11 @@ abstract public class ThreadedServer
      * The default implementation of this just calls
      * handleConnection(InputStream in,OutputStream out).
      */
-    protected  void handleConnection(Socket connection)
+    protected void handleConnection(Socket connection)
     {
         try
         {
+            Code.debug("Handle ",connection);
             InputStream in  = connection.getInputStream();
             OutputStream out = connection.getOutputStream();
 
@@ -215,24 +133,25 @@ abstract public class ThreadedServer
             connection=null;
         }
     }
-  
+    
     /* ------------------------------------------------------------ */
-    /** 
-     * @return IP Address and port
+    /** Handle Job.
+     * Implementation of ThreadPool.handle(), calls handleConnection.
+     * @param job A Connection.
      */
-    public InetAddrPort getInetAddrPort()
+    public final void handle(Object job)
     {
-        return address;
+        Socket connection =(Socket)job;
+        handleConnection(connection);
     }
     
     /* ------------------------------------------------------------ */
     /** 
-     * @return IP Address
-     * @deprecated Use getInetAddress()
+     * @return IP Address and port in a new Instance of InetAddrPort.
      */
-    public InetAddress address()
+    public InetAddrPort getInetAddrPort()
     {
-        return address.getInetAddress();
+        return new InetAddrPort(_address);
     }
     
     /* ------------------------------------------------------------ */
@@ -241,17 +160,7 @@ abstract public class ThreadedServer
      */
     public InetAddress getInetAddress()
     {
-        return address.getInetAddress();
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return port number
-     * @deprecated Use getPort()
-     */
-    public int port()
-    {
-        return address.getPort();
+        return _address.getInetAddress();
     }
     
     /* ------------------------------------------------------------ */
@@ -260,49 +169,42 @@ abstract public class ThreadedServer
      */
     public int getPort()
     {
-        return address.getPort();
+        return _address.getPort();
     }
 
-    /* ------------------------------------------------------------ */
-    public int getSize()
-    {
-        return _threadSet.size();
-    }
     
     /* ------------------------------------------------------------ */
-    public int getMinSize()
-    {
-        return _minThreads;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public int getMaxSize()
-    {
-        return _maxThreads;
-    }
-    
-    /* ------------------------------------------------------------------- */
+    /** Set the server InetAddress and port.
+     * @param address The InetAddress address or null for all interfaces.
+     * @param port The port.
+     * @exception IOException 
+     * @exception InterruptedException 
+     */
     public synchronized void setAddress(InetAddress address,
                                         int port) 
-         throws java.io.IOException
+        throws IOException,InterruptedException
     {
         setAddress(new InetAddrPort(address,port));
     }
     
     
-    /* ------------------------------------------------------------------- */
+    /* ------------------------------------------------------------ */
+    /** Set the server InetAddress and port.
+     * @param address The Address to listen on, or 0.0.0.0:port for
+     * all interfaces.
+     * @exception IOException 
+     */
     public synchronized void setAddress(InetAddrPort address) 
-         throws java.io.IOException
+        throws IOException
     {
-        this.address = address;
-        if (_threadSet!=null && _running)
+        _address = address;
+        if (isRunning())
         {
             Code.debug( "Restart for ", address );
             stop();
             start();
         }
     }
-
     
     /* ------------------------------------------------------------ */
     /** New server socket.
@@ -331,249 +233,85 @@ abstract public class ThreadedServer
      * to create specialist serversockets (eg SSL).
      * @param serverSocket
      * @return Accepted Socket
-     * @exception java.io.IOException 
      */
-    protected Socket accept(ServerSocket serverSocket)
-         throws java.io.IOException
+    protected Socket acceptSocket(ServerSocket serverSocket)
     {
-        return serverSocket.accept();
+        try
+        {
+            Socket s=_listen.accept();
+            return s;
+        }
+        catch ( java.net.SocketException e )
+        {
+            // XXX - this is caught and ignored due strange
+            // exception from linux java1.2.v1a
+            Code.ignore(e);
+        }
+        catch(InterruptedIOException e)
+        {
+            Code.ignore(e);
+        }
+        catch(IOException e)
+        {
+            Code.warning(e);
+        }
+        return null;
     }
     
+        
+    /* ------------------------------------------------------------ */
+    /** Get a job.
+     * Implementation of ThreadPool.getJob that calls acceptSocket
+     * @param timeoutMs Time to wait for a Job.  This is ignored as the
+     *                  accept timeout has already been set on the server
+     *                  socket.
+     * @return An accepted connection.
+     */
+    protected final Object getJob(long timeoutMs)
+    {
+        return acceptSocket(_listen);
+    }
     
     /* ------------------------------------------------------------------- */
     /* Start the ThreadedServer listening
      */
     synchronized public void start()
-         throws java.io.IOException
     {
-        if (listen!=null)
+        if (isRunning())
         {
-            Code.debug("Already started on ",address);
+            Code.warning("Already started on "+_address);
             return;
         }
-        
-        Code.debug( "Start Listener for ", address );
 
-        listen=newServerSocket(address,_maxThreads>0?(_maxThreads+1):__maxThreads);
-        address=new InetAddrPort(listen.getInetAddress(),
-                                 listen.getLocalPort());
-        
-        // Set any idle timeout
-        if (_maxIdleTimeMs>0)
-            listen.setSoTimeout(_maxIdleTimeMs);
-        _accepting=0;
-
-        // Start the threads
-        _running=true;
-        _threadSet=new Hashtable(_maxThreads+_maxThreads/2+13);
-        for (int i=0;i<_minThreads;i++)
-            newThread();
-    }
-
-    /* ------------------------------------------------------------------- */
-    private synchronized void newThread()
-    {
         try
         {
-            Thread thread=
-                (Thread)_constructThread.newInstance(_constructThis);
-            thread.setName(_name+"-"+(_threadId++));
-            _threadSet.put(thread,thread);
-            thread.start();
+            _listen=newServerSocket(_address,
+                                    getMaxSize()>0?(getMaxSize()+1):50);
+            _address=new InetAddrPort(_listen.getInetAddress(),
+                                      _listen.getLocalPort());
+            
+            if (getMaxIdleTimeMs()>0)
+                _listen.setSoTimeout((int)getMaxIdleTimeMs());
+            
+            super.start();
         }
-        catch( java.lang.reflect.InvocationTargetException e )
-        {
-            Code.fail(e);
-        }
-        catch( IllegalAccessException e )
-        {
-            Code.fail(e);
-        }
-        catch( InstantiationException e )
-        {
-            Code.fail(e);
-        }
-    }
-    
-    /* ------------------------------------------------------------------- */
-    synchronized public void stop() 
-    {
-        Code.debug("Stop listening on ",listen);
-
-        if (_threadSet==null)
-            return;
-        
-        _running=false;
-        
-        // Close the port
-        if (listen!=null)
-        {
-            try
-            {
-                listen.close();
-            }
-            catch(IOException e)
-            {
-                Code.ignore(e);
-            }
-        }
-        
-        // interrupt the threads
-        Enumeration enum=_threadSet.keys();
-        while(enum.hasMoreElements())
-        {
-            Thread thread=(Thread)enum.nextElement();
-            thread.interrupt();
-        }
-
-        
-        // wait a while for all threads to die
-        try{
-            long end_wait=System.currentTimeMillis()+5000;
-            while (_threadSet.size()>0 && end_wait>System.currentTimeMillis())
-                wait(5000);
-
-            // Stop any still running
-            if (_threadSet.size()>0)
-            {
-                enum=_threadSet.keys();
-                while(enum.hasMoreElements())
-                {
-                    Thread thread=(Thread)enum.nextElement();
-                    if (thread.isAlive())
-                        thread.stop( );
-                }
-                
-                // wait until all threads are dead.
-                while(_threadSet.size()>0)
-                {
-                    Code.debug("waiting for threads to stop...");
-                    wait(5000);
-                }
-            }
-        }
-        catch(InterruptedException e)
+        catch(IOException e)
         {
             Code.warning(e);
-        }
-        
-        _threadSet.clear();
-        _threadSet=null;
-        listen=null;
+            stop();
+            throw new Error(e.toString());
+        }        
     }
-    
-  
-    /* ------------------------------------------------------------------- */
-    final public void join() 
-        throws java.lang.InterruptedException
-    {
-        while(_threadSet!=null && _threadSet.size()>0)
-        {
-            Thread thread=null;
-            synchronized(this)
-            {
-                Enumeration enum=_threadSet.keys();
-                if(enum.hasMoreElements())
-                    thread=(Thread)enum.nextElement();
-            }
-            if (thread!=null)
-                thread.join();
-        }
-    }
-  
-  
-    /* ------------------------------------------------------------------- */
-    final public void run( ) 
-    {
-        Thread thread=Thread.currentThread();
-        String name=thread.getName();
-        int runs=0;
-        
-        Code.debug( "Listen on ", listen );
-        try{
-            while(_running) 
-            {
-                Socket connection=null;
-                // Accept an incoming connection
-                try 
-                {
-                    // increment accepting count
-                    synchronized(this){_accepting++;}               
-                    
-                    // wait for a connection
-                    connection=accept(listen);
-                }
-                catch ( InterruptedIOException e )
-                {
-                    synchronized(this)
-                    {
-                        // If we are still running, interrupt was due to accept timeout
-                        if (_running && _threadSet.size()>_minThreads)
-                        {
-                            // Kill thread if it is in excess of the minimum.
-                            Code.debug("Idle death: "+thread);
-                            _threadSet.remove(thread);
-                            break;
-                        }
-                    }
-                }
-                catch ( java.net.SocketException e )
-                {
-                    // XXX - this is caught and ignored due strange
-                    // exception from linux java1.2.v1a
-                    Code.ignore(e);
-                }
-                catch ( IOException e )
-                {
-                    Code.ignore(e);
-                }
-                finally
-                {
-                    // If not more threads accepting - start one
-                    synchronized(this)
-                    {
-                        if (--_accepting==0 &&
-                            _running &&
-                            _threadSet.size()<_maxThreads)
-                            newThread();
-                    }
-                }
 
-                // handle the connection
-                if (connection!=null)
-                {
-                    try
-                    {
-                        if (Code.debug())
-                        {
-                            thread.setName(name+"/"+runs++);
-                            if (Code.verbose())
-                                Code.debug("Handling ",connection);
-                        }
-                        handleConnection(connection);
-                        connection.close();
-                    }
-                    catch ( Exception e )
-                    {
-                        Code.warning(e);
-                    }
-                    finally
-                    {
-                        connection=null;
-                    }
-                }
-            }
-        }
-        finally
-        {
-            synchronized(this)
-            {
-                if (_threadSet!=null)
-                    _threadSet.remove(Thread.currentThread());
-                notify();
-            }
-            Code.debug("Stopped listening on " + listen);
-        }
+
+    /* ------------------------------------------------------------ */
+    /** Disabled.
+     * This ThreadPool method is not applicable to the ThreadedServer.
+     * @param job 
+     */
+    public final void run(Object job)
+    {
+        throw new IllegalStateException("Can't run jobs on ThreadedServer");
     }
 }
 

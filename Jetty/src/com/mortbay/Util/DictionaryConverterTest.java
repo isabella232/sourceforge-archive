@@ -37,7 +37,7 @@ public class DictionaryConverterTest
         }
     };
     /* ------------------------------------------------------------ */
-    public static void main(String argv[])
+    public static void test()
     {
         Test test = new Test("DictionaryConverter");
         try
@@ -64,8 +64,6 @@ public class DictionaryConverterTest
             Code.warning(e);
             test.check(false,e.toString());
         }
-        
-        test.report();
     }
     /* ------------------------------------------------------------ */
 };

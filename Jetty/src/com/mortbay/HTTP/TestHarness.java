@@ -142,6 +142,49 @@ public class TestHarness
             test.check(false,e.toString());
         }
     }
+
+    /* --------------------------------------------------------------- */
+    public static void filters()
+    {
+        Test t = new Test("com.mortbay.HTTP.ChunkableXxxputStream");
+        try
+        {
+            FileOutputStream fout =
+                new FileOutputStream("TestData/tmp.gzip");
+            ChunkableOutputStream cout = new ChunkableOutputStream(fout);
+            cout.setChunking(true);
+            
+            cout.insertFilter(java.util.zip.GZIPOutputStream.class
+                              .getConstructor(cout.__filterArg),null);
+            
+            byte[] data =
+                "ABCDEFGHIJKlmnopqrstuvwxyz;:#$0123456789\n".getBytes();
+            for (int i=0;i<400;i++)
+                cout.write(data,0,data.length);
+            
+            cout.close();
+            
+            FileInputStream fin= new FileInputStream("TestData/tmp.gzip");
+            ChunkableInputStream cin = new ChunkableInputStream(fin);
+            cin.setChunking(true);
+            cin.insertFilter(java.util.zip.GZIPInputStream.class
+                              .getConstructor(cin.__filterArg),null);
+            
+            for (int i=0;i<400;i++)
+            {
+                for (int j=0;j<data.length;j++)
+                    if (cin.read()!=data[j])
+                        t.check(false,"Data in differs at "+i+","+j);
+            }
+            t.checkEquals(cin.read(),-1,"EOF from gzip");
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
+        }
+    }
+    
     
     /* --------------------------------------------------------------- */
     public static void httpFields()
@@ -311,6 +354,7 @@ public class TestHarness
         try{
             chunkInTest();
             chunkOutTest();
+            filters();
             httpFields();
             httpRequest();
             //pathMap();
