@@ -139,7 +139,10 @@ public class HttpServer implements LifeCycle
         {
             HttpListener listener =(HttpListener)listeners.next();
             if (listener.isStarted())
-                listener.stop();
+	    {
+		try{listener.stop();}
+		catch(Exception e){Code.warning(e);}
+	    }
         }
         
         Iterator handlers = getHandlers().iterator();
@@ -147,7 +150,10 @@ public class HttpServer implements LifeCycle
         {
             HttpHandler handler=(HttpHandler)handlers.next();
             if (handler.isStarted())
-                handler.stop();
+	    {
+		try{handler.stop();}
+		catch(Exception e){Code.warning(e);}
+	    }
         }
     }
 
@@ -162,14 +168,20 @@ public class HttpServer implements LifeCycle
         while(listeners.hasNext())
         {
             HttpListener listener =(HttpListener)listeners.next();
-            listener.destroy();
+	    {
+		try{listener.destroy();}
+		catch(Exception e){Code.warning(e);}
+	    }
         }
         
         Iterator handlers = getHandlers().iterator();
         while(handlers.hasNext())
         {
             HttpHandler handler=(HttpHandler)handlers.next();
-            handler.destroy();
+	    {
+		try{handler.destroy();}
+		catch(Exception e){Code.warning(e);}
+	    }
         }
 
         _hostMap.clear();

@@ -5,20 +5,20 @@ BODY
 
 P, BODY, TD, OL, UL, MENU, BLOCKQUOTE, DIV
 {
-        font-family: Lucida,Verdana,Helvetica,Arial;
+        font-family: Helvetica,Arial,Lucida;
         color: #000000;
 }
 
 TH, H1
 {
-        font-family: Lucida,Verdana,Helvetica,Arial;
+        font-family: Helvetica,Arial,Lucida;
         font-weight: bold;
         text-decoration: none;
 }
 
 A
 {
-        font-family: Lucida,Verdana,Helvetica,Arial;
+        font-family: Helvetica,Arial,Lucida;
         color: #606CC0;
         font-weight: bold;
         text-decoration: none;

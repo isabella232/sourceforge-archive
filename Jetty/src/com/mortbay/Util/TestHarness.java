@@ -1490,27 +1490,27 @@ public class TestHarness
     {
         try
         {
-//  	    testMultiMap();
-//         	    testQuotedStringTokenizer();            
-//         	    testDateCache();
-//         	    testTest();
-//         	    testLog();
-//         	    testFrame();
-//         	    testCode();
-//         	    testDataHelper();
-//         	    testBlockingQueue();
-//         	    testIO();
-//         	    testUrlEncoded();
-//         	    testURI();
+	    testMultiMap();
+       	    testQuotedStringTokenizer();            
+       	    testDateCache();
+       	    testTest();
+       	    testLog();
+       	    testFrame();
+       	    testCode();
+       	    testDataHelper();
+       	    testBlockingQueue();
+       	    testIO();
+       	    testUrlEncoded();
+       	    testURI();
        	    testLineInput();
-//       	    testThreadPool();
+     	    testThreadPool();
        	    testThreadedServer();
-//         	    testB64();
-//         	    testZipResource();
-//         	    PropertyTreeTest.test();
-//        	    resourceTest();
-//       	    testXmlParser();
-//   	    testXmlConfiguration();
+       	    testB64();
+       	    testZipResource();
+       	    PropertyTreeTest.test();
+      	    resourceTest();
+     	    testXmlParser();
+     	    testXmlConfiguration();
         }
         catch(Throwable th)
         {

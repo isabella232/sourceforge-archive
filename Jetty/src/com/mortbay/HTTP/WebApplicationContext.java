@@ -85,7 +85,7 @@ public class WebApplicationContext extends HandlerContext
 
 	    // Set the classpath
 	    if (classPath.length()>0)
-		setClassPath(classPath);
+		super.setClassPath(classPath);
 	    
 	    // Add servlet Handler
 	    addHandler(new ServletHandler());
@@ -93,7 +93,7 @@ public class WebApplicationContext extends HandlerContext
 	    _context=_servletHandler.getContext();
 	    
 	    // FileBase and ResourcePath
-	    setResourceBase(_webAppName);
+	    super.setResourceBase(_webAppName);
 	    setServingResources(true);
 	    ResourceHandler rh = getResourceHandler();
 	    rh.setDirAllowed(true);
@@ -132,7 +132,11 @@ public class WebApplicationContext extends HandlerContext
 	Iterator iter=config.iterator();
 	while (iter.hasNext())
 	{
-	    XmlParser.Node node=(XmlParser.Node)iter.next();
+	    Object o = iter.next();
+	    if (!(o instanceof XmlParser.Node))
+		continue;
+	    
+	    XmlParser.Node node=(XmlParser.Node)o;
 	    String name=node.getTag();
 
 	    if ("display-name".equals(name))
@@ -369,4 +373,19 @@ public class WebApplicationContext extends HandlerContext
 	    return "'"+_name+"' @ "+_webAppName;
 	return _webAppName;
     }
+    
+    /* ------------------------------------------------------------ */
+    public void setClassPath(String classPath)
+    {
+	Code.warning("ClassPath should not be set for WebApplication");
+	super.setClassPath(classPath);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setResourceBase(Resource resourceBase)
+    {
+	Code.warning("ResourceBase should not be set for WebApplication");
+	super.setResourceBase(resourceBase);
+    }
+    
 }

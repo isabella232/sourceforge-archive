@@ -142,8 +142,12 @@ public class XmlConfiguration
 	       InvocationTargetException
     {
 	for(;i<cfg.size();i++)
-	{
-	    XmlParser.Node node = (XmlParser.Node)cfg.get(i);
+	{  
+	    Object o = cfg.get(i);
+	    if (o instanceof String)
+		continue;
+	    XmlParser.Node node = (XmlParser.Node)o;
+	    
 	    String tag=node.getTag();
 	    if("Set".equals(tag))
 		set(obj,node);
@@ -311,17 +315,29 @@ public class XmlConfiguration
     {
 	Class oClass = obj.getClass();
 	int size=0;
+	int argi=node.size();
 	for (int i=0;i<node.size();i++)
 	{
-	    if(!((XmlParser.Node)node.get(i)).getTag().equals("Arg"))
+	    Object o = node.get(i);
+	    if (o instanceof String)
+		continue;
+	    if(!((XmlParser.Node)o).getTag().equals("Arg"))
+	    {
+		argi=i;
 		break;
+	    }
 	    size++;
 	}
 
 	Object[] arg = new Object[size];
-	for (int i=0;i<size;i++)
-	    arg[i]=value(obj,(XmlParser.Node)node.get(i));
-
+	for (int i=0,j=0;j<size;i++)
+	{
+	    Object o = node.get(i);
+	    if (o instanceof String)
+		continue;
+	    arg[j++]=value(obj,(XmlParser.Node)o);
+	}
+	
 	String method=node.getAttribute("name");
 	Code.debug("call ",method);
 	
@@ -343,7 +359,7 @@ public class XmlConfiguration
 	    {if(Code.verbose(999))Code.ignore(e);}
 	    if (called)
 	    {
-		configure(n,node,size);
+		configure(n,node,argi);
 		return n;
 	    }
 	}
@@ -368,16 +384,28 @@ public class XmlConfiguration
     {
 	Class oClass = nodeClass(node);
 	int size=0;
+	int argi=node.size();
 	for (int i=0;i<node.size();i++)
 	{
-	    if(!((XmlParser.Node)node.get(i)).getTag().equals("Arg"))
+	    Object o = node.get(i);
+	    if (o instanceof String)
+		continue;
+	    if(!((XmlParser.Node)o).getTag().equals("Arg"))
+	    {
+		argi=i;
 		break;
+	    }
 	    size++;
 	}
 
 	Object[] arg = new Object[size];
-	for (int i=0;i<size;i++)
-	    arg[i]=value(obj,(XmlParser.Node)node.get(i));
+	for (int i=0,j=0;j<size;i++)
+	{
+	    Object o = node.get(i);
+	    if (o instanceof String)
+		continue;
+	    arg[j++]=value(obj,(XmlParser.Node)o);
+	}
 
 	Code.debug("new ",oClass);
 	
@@ -402,7 +430,7 @@ public class XmlConfiguration
 	    {if(Code.verbose(999))Code.ignore(e);}
 	    if(called)
 	    {
-		configure(n,node,size);
+		configure(n,node,argi);
 		return n;
 	    }
 	}

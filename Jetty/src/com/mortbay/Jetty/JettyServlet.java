@@ -28,11 +28,16 @@ public class JettyServlet extends HttpServlet
 
 	File file=(File)
 	    request.getAttribute("JettyFile");
-	if (file==null)
+	if (file==null && "/".equals(pathInfo))
 	{
-	    if ("/".equals(pathInfo))
-		pathInfo="/index.html";
-	    
+	    pathInfo="/index.html";
+	    String index=getServletContext().getRealPath("/index.html");
+	    if (index!=null)
+		file=new File(index);
+	}
+	
+	if (file==null)
+	{    
 	    if (!pathInfo.endsWith(".html") && !pathInfo.endsWith(".txt") )
 		return;
 	    
@@ -41,6 +46,8 @@ public class JettyServlet extends HttpServlet
 
 	if (file==null || !file.exists())
 	    return;
+	
+	Code.debug("FILE="+file);
 	
 	JettyPage page = new JettyPage(pathInfo);
 	if (page.getSection()==null)

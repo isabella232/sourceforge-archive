@@ -225,7 +225,29 @@ class ServletRequest
         if (_pathInfo==null || _pathInfo.length()==0)
             return null;
         if (_pathTranslated==null)
-            _pathTranslated=_context.getRealPathInfo(_pathInfo);
+	{
+	    Resource resource =
+		_context.getHandler()
+		.getHandlerContext()
+		.getResourceBase();
+
+	    if (resource==null)
+		return null;
+
+	    try
+	    {
+		resource=resource.addPath(_pathInfo);
+		File file = resource.getFile();
+		if (file==null)
+		    return null;
+		_pathTranslated=file.getAbsolutePath();
+	    }
+	    catch(Exception e)
+	    {
+		Code.debug(e);
+	    }
+	}
+	
         return _pathTranslated;
     }
     

@@ -7,6 +7,7 @@
 ** www.fuib.com 
 ** E-mail: vit@fuib.com, lipov99@yahoo.com
 ** Modified for use with Jetty by Kent Johnson <KJohnson@transparent.com>
+** Multiple log file modification by Jonathon Parker, jparker@transparent.com
 */
 
 package com.mortbay.Util;
@@ -23,6 +24,9 @@ package com.mortbay.Util;
  * ROLLOVER_LOG_EXTENSION	The file extension for log files
  * ROLLOVER_LOG_STOP_TIMEOUT How long to wait to kill the cleanup thread
  * ROLLOVER_LOG_TIMER_INTERVAL How long the cleanup thread sleeps
+ * ROLLOVER_LOG_MULT_DAY If true, Jetty will keep multiple log files for same day,
+ *                       if server is halted and restored.  Useful for debugging 
+ *                       server crashes.
  *
  * @version $Id$
  * @author V. Lipovetsky
@@ -124,11 +128,20 @@ public class RolloverFileLogSink
 
 	//** If new name eq old do nothing
 	if (newLogFile.equals(logFile)) return;
-			
-	// Make sure we start fresh
-	if (newLogFile.exists())
+            
+	// Make sure we start fresh if multDay option not set
+	if (!multDay && newLogFile.exists()){
 	    newLogFile.delete();
-
+	}
+	// Make additional files appended with _num2, _num3, etc.
+	else{
+	    int num = 1;
+	    while (newLogFile.exists()){
+		num++;
+		newLogFile = new java.io.File(logDir, 
+					      fileDateFormat.format(curDate) + "_num" + num + logExt);
+	    }
+	}
 	logFile = newLogFile;
 
 	//** Open new log file
@@ -401,6 +414,7 @@ public class RolloverFileLogSink
     private ThreadEvent threadEvent = new ThreadEvent();
     private java.text.SimpleDateFormat fileDateFormat = 
 	new java.text.SimpleDateFormat("yyyy_MM_dd");
+    private boolean multDay;
 
 
     /* ------------------------------------------------------------ */

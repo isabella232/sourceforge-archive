@@ -539,10 +539,12 @@ public class HttpConnection
             _inputStream.setContentLength(content_length);
         else if (content_length<0)
         {
+	    // XXX - can't do this check because IE does this after
+	    // a redirect.
             // Can't have content without a content length
-            String content_type=_request.getField(HttpFields.__ContentType);
-            if (content_type!=null && content_type.length()>0)
-                throw new HttpException(_response.__411_Length_Required);
+//              String content_type=_request.getField(HttpFields.__ContentType);
+//              if (content_type!=null && content_type.length()>0)
+//                  throw new HttpException(_response.__411_Length_Required);
             _inputStream.setContentLength(0);
         }
 
@@ -618,7 +620,12 @@ public class HttpConnection
                 _inputStream.setContentLength(0);
             // else we need a content length
             else
-                throw new HttpException(_response.__411_Length_Required);
+	    {
+		// XXX - can't do this check as IE stuff up on
+		// a redirect.
+	        // throw new HttpException(_response.__411_Length_Required);
+		_inputStream.setContentLength(0);
+	    }
         }
 
         // Handle Continue Expectations

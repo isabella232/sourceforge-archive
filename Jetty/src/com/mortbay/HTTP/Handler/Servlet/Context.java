@@ -60,16 +60,6 @@ public class Context implements ServletContext, HttpSessionContext
     
     
     /* ------------------------------------------------------------ */
-    String getRealPathInfo(String pathInfo)
-    {
-	String fileBase=_handler.getHandlerContext().getResourceFileBase();
-	if (fileBase==null)
-	    return null;
-	return
-	    (fileBase+pathInfo).replace('/',File.separatorChar);
-    }
-    
-    /* ------------------------------------------------------------ */
     /**
      * Returns a <code>ServletContext</code> object that 
      * corresponds to a specified URL on the server.
@@ -236,33 +226,27 @@ public class Context implements ServletContext, HttpSessionContext
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * Returns a <code>String</code> containing the real path 
-     * for a given virtual path. For example, the virtual path "/index.html"
-     * has a real path of whatever file on the server's filesystem would be
-     * served by a request for "/index.html".
-     *
-     * <p>The real path returned will be in a form
-     * appropriate to the computer and operating system on
-     * which the servlet container is running, including the
-     * proper path separators. This method returns <code>null</code>
-     * if the servlet container cannot translate the virtual path
-     * to a real path for any reason (such as when the content is
-     * being made available from a <code>.war</code> archive).
-     *
-     *
-     * @param path 	a <code>String</code> specifying a virtual path
-     *
-     *
-     * @return 		a <code>String</code> specifying the real path,
-     *                  or null if the translation cannot be performed
-     *			
-     *
-     */
     public String getRealPath(String path)
     {
-	Code.notImplemented();
-	return null;
+	Resource resourceBase=_handler.getHandlerContext().getResourceBase();
+	if (resourceBase==null )
+	    return null;
+
+	// XXX - May need to strip some leading components off the the path
+	// but i can't tell from the comments. 
+	
+	try{
+	    Resource resource = resourceBase.addPath(path);
+	    File file = resource.getFile();
+	    if (file==null)
+		return null;
+	    return file.getAbsolutePath();
+	}
+	catch(IOException e)
+	{
+	    Code.warning(e);
+	    return null;
+	}
     }
     
     /* ------------------------------------------------------------ */

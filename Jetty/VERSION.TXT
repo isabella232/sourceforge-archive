@@ -1,6 +1,14 @@
 Stable 2.4.6
 Dev    3.0.B02
 
+ + Improved Log rollover.
+ + Simplified path translation and real path calculation.
+ + Catch stop and destroy exceptions in HttpServer.stop()
+ + Handle ignorable spaces in XmlConfiguration
+ + Handle ignorable spaces in WebApplication
+ + Warn about explicit sets of WebApplication
+ + Remove 411 checks as IE breaks this rule after redirect.
+
 Jetty-3.0.B02 - 24st Aug 2000
  + Fixed LineInput bug with SSL giving CR pause LF.
  + Fixed HTTP/1.0 input close bug

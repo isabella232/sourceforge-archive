@@ -276,29 +276,34 @@ public class HttpResponse extends HttpMessage
         throws IOException
     {
         _header.put(HttpFields.__ContentType,HttpFields.__TextHtml);
-        String message=exception.getMessage();
-        String reason=exception.getReason();
-
+	
         int code=exception.getCode();
+        String message=exception.getMessage();
+	if (message==null)
+	    message="";
+        String reason=exception.getReason();
+	if (reason==null)
+	    reason="";
+	
         setStatus(code);
         setReason(reason);
 
         if (code!=204 && code!=304 && code>=200)
         {
             _header.put(HttpFields.__ContentType,"text/html");
+
+	    byte[] buf =
+		("<HTML>\n<HEAD>\n<TITLE>Error "+code+
+		 " "+reason+
+		 "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
+		 " "+reason+
+		 "</H2>\n"+message+
+		 "\n</BODY>\n</HTML>\n").getBytes("ISO-8859-1");
+	    
+	    _header.putIntField(HttpFields.__ContentLength,buf.length);
             ChunkableOutputStream out=getOutputStream();
-            Writer writer= new OutputStreamWriter(out,"ISO-8859-1");
-            synchronized(writer)
-            {
-                writer.write("<HTML>\n<HEAD>\n<TITLE>Error ");
-                writer.write(exception.getCode()+" "+reason+"</TITLE>\n");
-                writer.write("<BODY>\n<H2>HTTP ERROR: ");
-                writer.write(exception.getCode() +" "+reason + "</H2>\n");
-                if (message!=null)
-                    writer.write(message);
-                writer.write("\n</BODY>\n</HTML>\n");
-                writer.flush();
-            }
+	    out.write(buf);
+	    out.flush();
         }
         else
         {
@@ -326,19 +331,19 @@ public class HttpResponse extends HttpMessage
         if (code!=204 && code!=304 && code>=200)
         {
             _header.put(HttpFields.__ContentType,"text/html");
+
+	    byte[] buf =
+		("<HTML>\n<HEAD>\n<TITLE>Error "+code+
+		 " "+reason+
+		 "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
+		 " "+reason+
+		 "</H2>\n"+message+
+		 "\n</BODY>\n</HTML>\n").getBytes("ISO-8859-1");
+	    
+	    _header.putIntField(HttpFields.__ContentLength,buf.length);
             ChunkableOutputStream out=getOutputStream();
-            Writer writer=new OutputStreamWriter(out,"ISO-8859-1");
-            synchronized(writer)
-            {
-                writer.write("<HTML>\n<HEAD>\n<TITLE>Error ");
-                writer.write(code+" "+reason+"</TITLE>\n");
-                writer.write("<BODY>\n<H2>HTTP ERROR: ");
-                writer.write(code +" "+reason + "</H2>");
-                if (message!=null)
-                    writer.write(message);
-                writer.write("</BODY>\n</HTML>\n");
-                writer.flush();
-            }
+	    out.write(buf);
+	    out.flush();
         }
         else
         {

@@ -296,6 +296,10 @@ public class Resource
 	// XXX - need to check for ../ which might take us
 	// out-side of resourcebase - or at least make sure we
 	// never see that here.
+	while (path.indexOf("..")>=0)
+	{
+	    Code.notImplemented();
+	}
 	
         String resourceBase = _url.toExternalForm();
         if( path.startsWith( "./"))

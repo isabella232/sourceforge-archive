@@ -81,16 +81,6 @@ public class HandlerContext
 	return _resourceBase;
     }
 
-    /* ------------------------------------------------------------ */
-    public String getResourceFileBase()
-    {
-	if(_resourceBase==null)
-	    return null;
-	File fileBase = _resourceBase.getFile();
-	if (fileBase==null)
-	    return null;
-	return fileBase.getAbsolutePath();
-    }
     
     /* ------------------------------------------------------------ */
     public void setResourceBase(Resource resourceBase)

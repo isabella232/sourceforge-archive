@@ -126,12 +126,22 @@ public class XmlParser
 	}
 
 	/* ------------------------------------------------------------ */
+	public void ignorableWhitespace (char buf [], int offset, int len)
+	    throws SAXException
+	{
+	    // XXX - for testing
+	    characters(buf,offset,len);
+	}
+
+	/* ------------------------------------------------------------ */
 	public void characters (char buf [], int offset, int len)
 	    throws SAXException
 	{
 	    _context.add(new String(buf,offset,len));
 	}
 
+	
+	
 	/* ------------------------------------------------------------ */
 	public void warning(SAXParseException ex)
 	{
