@@ -108,7 +108,7 @@ public class LogSink
      * @param time The time stamp of the message.
      */
     public void log(String tag,
-		    String msg,
+		    Object msg,
 		    Frame frame,
 		    long time)
     {
@@ -165,16 +165,20 @@ public class LogSink
 
             // Log indented message
             int i=0;
-            int last=0; 
-            while ((i=msg.indexOf(__lineSeparator,i))>=last)
+            int last=0;
+	    String smsg=(msg==null)
+		?"null"
+		:((msg instanceof String)?((String)msg):(msg.toString()));
+	    
+            while ((i=smsg.indexOf(__lineSeparator,i))>=last)
             {
-                __stringBuffer.append(msg.substring(last,i));
+                __stringBuffer.append(smsg.substring(last,i));
                 __stringBuffer.append(indent);
                 i+=__lineSeparatorLen;
                 last=i;
             }
-            if (msg.length()>last)
-                __stringBuffer.append(msg.substring(last));
+            if (smsg.length()>last)
+                __stringBuffer.append(smsg.substring(last));
 
 	    log(__stringBuffer.toString());
 	}
