@@ -37,18 +37,25 @@ abstract public class ThreadedServer implements Runnable
     /* ------------------------------------------------------------------- */
     private static boolean __lowPrio =
 	(System.getProperty("THREADED_SERVER_LOW_PRIO")!=null);
+    
+    /* ------------------------------------------------------------ */
+    static int __maxThreads =
+	Integer.getInteger("THREADED_SERVER_MAX_THREADS",0).intValue();
 
     /* ------------------------------------------------------------------- */
     private Thread serverThread = null;
     private InetAddress address = null;
     private int port=0;
-    ServerSocket listen = null; 
+    ServerSocket listen = null;
+    ThreadPool _threadPool;
   
     /* ------------------------------------------------------------------- */
     /* Construct on any free port.
      */
     public ThreadedServer() 
-    {}
+    {
+	_threadPool=new ThreadPool(__maxThreads);
+    }
 
     /* ------------------------------------------------------------------- */
     /** Construct for specific port
@@ -56,6 +63,7 @@ abstract public class ThreadedServer implements Runnable
     public ThreadedServer(int port)
 	 throws java.io.IOException
     {
+	_threadPool=new ThreadPool(__maxThreads);
 	setAddress(null,port);
     }
     
@@ -65,6 +73,7 @@ abstract public class ThreadedServer implements Runnable
     public ThreadedServer(InetAddress address, int port) 
 	 throws java.io.IOException
     {
+	_threadPool=new ThreadPool(__maxThreads);
 	setAddress(address,port);
     }
     
@@ -74,6 +83,18 @@ abstract public class ThreadedServer implements Runnable
     public ThreadedServer(InetAddrPort address) 
 	 throws java.io.IOException
     {
+	_threadPool=new ThreadPool(__maxThreads);
+	setAddress(address.getInetAddress(),address.getPort());
+    }
+    
+    /* ------------------------------------------------------------------- */
+    /** Construct for specific address, port and ThreadPool size
+     */
+    public ThreadedServer(InetAddrPort address,
+			  int threadPoolSize) 
+	 throws java.io.IOException
+    {
+	_threadPool = new ThreadPool(threadPoolSize);
 	setAddress(address.getInetAddress(),address.getPort());
     }
     
@@ -228,8 +249,8 @@ abstract public class ThreadedServer implements Runnable
 	    Code.debug( "Listening at lower priority");
 	    serverThread.setPriority(serverThread.getPriority()-1);
 	}
-	if (ConnectionThread.__maxThreads>0)    
-	    Code.debug( "Max Threads = " + ConnectionThread.__maxThreads );
+	if (_threadPool.getSize()>0)    
+	    Code.debug( "Max Threads = " + _threadPool.getSize() );
 	
 	// While the thread is running . . .
 	try{
@@ -238,9 +259,16 @@ abstract public class ThreadedServer implements Runnable
 		// Accept an incoming connection
 		try 
 		{
-		    Socket connection = listen.accept( );
+		    final Socket connection = listen.accept();
 		    Code.debug( "Connection: ",connection );
-		    ConnectionThread.handle(this,connection);
+		    Runnable handler = new Runnable()
+		    {
+			public void run()
+			{
+			    handleConnection(connection);
+			}
+		    };
+		    _threadPool.run(handler);
 		} 
 		catch ( Exception e )
 		{
@@ -254,125 +282,3 @@ abstract public class ThreadedServer implements Runnable
 	}
     }
 }
-
-// =======================================================================
-class ConnectionThread extends Thread
-{
-    /* ------------------------------------------------------------ */
-    static int __maxThreads =
-	Integer.getInteger("THREADED_SERVER_MAX_THREADS",0).intValue();
-
-    /* ------------------------------------------------------------ */
-    static final Stack __threads = new Stack();
-    static int __nthreads=0;
-    
-    /* ------------------------------------------------------------ */
-    static void handle(ThreadedServer server,Socket connection)
-    {
-	ConnectionThread c=null;
-	synchronized(__threads)
-	{
-	    try
-	    {
-		while (c==null)
-		{
-		    try {
-			if (!__threads.empty())
-			{
-			    // use free thread
-			    c=(ConnectionThread)__threads.pop();
-			}
-			else if(__maxThreads<=0 || __nthreads<__maxThreads)
-			{
-			    // new thread
-			    c=new ConnectionThread(server);
-			}
-			else
-			{
-			    // wait for thread
-			    __threads.wait();
-			}
-		    }
-		    catch (EmptyStackException e1) {Code.ignore(e1);}
-		}
-	    }
-	    catch (InterruptedException e2) {Code.ignore(e2);}
-	}
-	c.handle(connection);
-    }
-    
-    /* ------------------------------------------------------------ */
-    final ThreadedServer server;
-    Socket connection = null;
-
-	/* ------------------------------------------------------------ */
-	/** Constructor. 
-	 * @param server 
-	 */
-    ConnectionThread(ThreadedServer server)
-    {
-	this.server = server;
-	start();
-    }
-
-    /* ------------------------------------------------------------ */
-    synchronized void handle(Socket connection)
-    {
-	this.connection=connection;
-	this.notify();
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Loop and wait for connections to handle by calling back to
-     * the ThreadedServer
-     */
-    final public void run() 
-    {
-	try
-	{
-	    synchronized(__threads)
-	    {
-		__nthreads++;
-	    }
-	    synchronized(this)
-	    {
-		while (true)
-		{
-		    while (connection==null)
-		    {
-			Code.debug("Thread ",this," Waiting...");
-			wait();
-		    }
-		    Code.debug("Thread: ",this," Handling ",connection);
-		    server.handleConnection(connection);
-		    connection=null;
-		    synchronized(__threads)
-		    {
-			__threads.push(this);
-			__threads.notify();
-		    }
-		}
-	    }
-	}
-	catch(InterruptedException e)
-	{
-	    Code.warning(e);
-	}
-	catch(Throwable e)
-	{
-	    Code.warning(e);
-	}
-	finally
-	{
-	    synchronized(__threads)
-	    {
-		__nthreads--;
-		__threads.notify();
-	    } 
-	}
-    }
-}
-
-
-
- 

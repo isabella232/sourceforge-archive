@@ -1,4 +1,9 @@
-
+Release 2.1.0 - 21 February 1999
+  + Session URL Encoding
+  + PropertyTrees
+  + image/jpg -> image/jpeg
+  + Deprecated com.mortbay.Util.STF
+  
 Release 2.1.B1 - 13 February 1999
   + Fixed bug with if-modified-since in FileHandler
   + Added video/quicktime to default MIME types.

@@ -42,28 +42,49 @@ public class ServletNode
 	this.address = (Vector)address.clone();
 	urlPath = null;
     }
+    
     /* ------------------------------------------------------------ */
-    public String getUrlPath(HttpServletRequest req){
+    public String getPath()
+    {
+	if (urlPath == null)
+	    urlPath = (address != null) ? getRelativeUrlPath(0) : "";
+	return urlPath;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getUrlPath(HttpServletRequest req)
+    {
 	if (urlPath == null)
 	    urlPath = (address != null) ? getRelativeUrlPath(0) : "";
 	return req.getServletPath() + urlPath;
     }
+    
     /* ------------------------------------------------------------ */
-    public String getParentUrlPath(HttpServletRequest req, int level){
+    public String getParentUrlPath(HttpServletRequest req, int level)
+    {
 	return req.getServletPath() + getRelativeUrlPath(level);
     }
+    
     /* ------------------------------------------------------------ */
-    private String getRelativeUrlPath(int level){
+    public String getBaseName()
+    {
+	if (address==null || address.size()==0)
+	    return null;
+	return address.lastElement().toString();
+    }
+    
+    /* ------------------------------------------------------------ */
+    private String getRelativeUrlPath(int level)
+    {
 	StringBuffer sb = new StringBuffer();
 	int depth = address.size() - level;
-	int i = 0;
-	for (Enumeration enum = address.elements();
-	     i < depth && enum.hasMoreElements(); i++)
+	for (int i=0;i<depth;i++)
 	{
 	    sb.append("/");
-	    sb.append(enum.nextElement());
+	    sb.append(address.elementAt(i));
 	}
 	return sb.toString();
     }
+    
     /* ------------------------------------------------------------ */
 };

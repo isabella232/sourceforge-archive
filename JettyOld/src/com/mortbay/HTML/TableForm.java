@@ -362,7 +362,7 @@ public class TableForm extends Form
 	if (bottomButtons!=null)
 	{
 	    table.newRow();
-	    table.addCell(bottomButtons).center().attribute("COLSPAN",columns);
+	    table.addCell(bottomButtons).attribute("COLSPAN",columns);
 	}
 	super.write(out);
     } 

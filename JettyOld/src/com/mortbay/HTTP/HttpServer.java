@@ -352,11 +352,7 @@ public class HttpServer implements ServletContext
      */
     public Servlet getServlet(String name)
     {
-	HttpHandler handler = (HttpHandler)servletHandlerMap.get(name);
-	if (handler==null)
-	    return null;
-	
-	return (Servlet) handler.servlet(name);
+	return null;
     }
 
     /* ---------------------------------------------------------------- */
@@ -368,16 +364,7 @@ public class HttpServer implements ServletContext
      */
     public Enumeration getServlets()
     {
-	Vector servlets = new Vector();
-	Enumeration n = servletHandlerMap.keys();
-	while (n.hasMoreElements())
-	{
-	    String name = (String)n.nextElement();
-	    servlets.addElement(((HttpHandler)servletHandlerMap.get(name))
-				.servlet(name));
-	}
-	
-	return servlets.elements();
+	return null;
     }
     
     /* ---------------------------------------------------------------- */
@@ -386,7 +373,7 @@ public class HttpServer implements ServletContext
      */
     public Enumeration getServletNames()
     {
-	return servletHandlerMap.keys();
+	return null;
     }
 
     /* ---------------------------------------------------------------- */

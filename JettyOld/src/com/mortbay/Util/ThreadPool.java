@@ -13,7 +13,10 @@ import com.mortbay.Base.Code;
  * <p>
  * Avoids the expense of thread creation by pooling threads after
  * their run methods exit for reuse.
- *
+ * <p>
+ * If the maximum pool size is reached, jobs wait for a free thread.
+ * By default there is no maximum pool size.
+ * <p>
  * <p><h4>Usage</h4>
  * Works well with inner classes:
  * <pre>

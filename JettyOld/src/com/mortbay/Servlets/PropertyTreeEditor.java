@@ -6,37 +6,20 @@
 package com.mortbay.Servlets;
 
 import com.mortbay.Base.Code;
+import javax.servlet.http.*;
+import javax.servlet.*;
+import java.io.*;
+import java.util.*;
+import com.mortbay.HTML.*;
 import com.mortbay.Util.PropertyTree;
 import com.mortbay.HTTP.MultiPartRequest;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Hashtable;
-import java.util.Enumeration;
-import java.util.Vector;
-import com.mortbay.HTML.Page;
-import com.mortbay.HTML.Heading;
-import com.mortbay.HTML.Composite;
-import com.mortbay.HTML.Table;
-import com.mortbay.HTML.Block;
-import com.mortbay.HTML.Form;
-import com.mortbay.HTML.List;
-import com.mortbay.HTML.Link;
-import com.mortbay.HTML.Input;
-import com.mortbay.HTML.Select;
 
 /** Servlet to handle navigation and editing of a PropertyTree
  * <p> This servlet uses the ServletDispatch class to carry out navigation
  * over a tree of HTTP handlers that mirror the structure of my model, in this
  * case being a PropertyTree. Each node in the HTTP handling tree is a
  * ServletNode (to aid in generation of URL's) and the standard operations on
- * tree nodes (Add, Remove, Save, Load) are defined on this object as methods
+ * tree nodes (Set, Remove, Save, Load) are defined on this object as methods
  * for the Dispatcher to call. The defaultDispatch method handles navigation
  * down to sub-nodes.
  *
@@ -51,8 +34,296 @@ public class PropertyTreeEditor
     extends HttpServlet
 {
     /* ------------------------------------------------------------ */
-    protected String lookAndFeelName;
-    protected TreeNode node = new TreeNode(new PropertyTree(), null, null);
+    private String lookAndFeelName;
+    private final PropertyTree tree = new PropertyTree();
+    private EditorDispatcher editorDispatcher = new EditorDispatcher();
+
+
+    /* ------------------------------------------------------------ */
+    public static class Context
+    {
+	public ServletNode path=new ServletNode();
+	public Page page;
+	public PropertyTree subtree;
+	public String key=null;
+	public String value=null;
+	
+	public Context(Page page, PropertyTree subtree)
+	{
+	    this.page=page;
+	    this.subtree=subtree;
+	}
+    }
+	
+    /* ------------------------------------------------------------ */
+    public static class EditArgs
+    {
+	public String key = null;
+	public String value = null;
+	public String action = null;
+    };
+    
+    /* -------------------------------------------------------- */
+    public static class PruneArgs
+    {
+	public String keys[] = null;
+    };
+    
+    /* ------------------------------------------------------------ */
+    public class EditorDispatcher
+	implements ServletDispatchHandler
+    {
+	String dftKey=null;
+	String dftValue=null;
+	
+	/* -------------------------------------------------------- */
+	public void edit(Context context,
+			 EditArgs args,
+			 HttpServletRequest req)
+	{
+	    addHeader(context, req, true);
+	    
+	    if (args.key != null)
+	    {
+		boolean set = "Set".equals(args.action);
+		boolean get = "Get".equals(args.action);
+		boolean remove = "Remove".equals(args.action);
+
+		if (set)
+		{
+		    context.key=args.key;
+		    context.value=args.value;
+		    context.subtree.put(args.key,
+					set?(Object)args.value:
+					(Object)new PropertyTree());
+		}
+		else if (get)
+		{
+		    context.key = req.getParameter("key");
+		    context.value = (String)context.subtree.get(context.key);
+		}
+		else if (remove)
+		{
+		    context.key=args.key;
+		    context.value=null;
+		    context.subtree.remove(args.key);
+		}
+	    }
+	    
+	    fillPage(context, req);
+	}
+	
+	/* -------------------------------------------------------- */
+	public void prune(Context context,
+			  PruneArgs args,
+			  HttpServletRequest req)
+	{
+	    addHeader(context, req, true);
+	    
+	    if (args.keys != null)
+	    {
+		for (int i=args.keys.length; i-->0 ;)
+		    context.subtree.removeTree(args.keys[i]);
+	    }
+	    fillPage(context, req);
+	}
+	
+	/* ------------------------------------------------------------ */
+	public void save(Context context,
+			 HttpServletRequest req,
+			 HttpServletResponse res)
+	    throws Exception
+	{
+	    String filename = req.getPathInfo();
+	    filename=filename.substring(context.path.getPath().length());
+	    if (filename.startsWith("/Save/"))
+		filename=filename.substring(6);
+	    else if (filename.startsWith("/"))
+		filename=filename.substring(1);
+
+	    Code.warning("Filename="+filename);
+	    
+	    res.setContentType("application/x-java-properties; filename="+
+			       filename);
+	    
+	    OutputStream out = res.getOutputStream();
+	    PrintWriter pout = new PrintWriter(out);
+	    pout.print(context.subtree);
+	    pout.flush();
+	    context.page=null;
+	}
+	
+	/* ------------------------------------------------------------ */
+	public void load(Context context, HttpServletRequest req)
+	    throws Exception
+	{
+	    addHeader(context, req, true);
+	    
+	    MultiPartRequest mpr = new MultiPartRequest(req);
+	    if (mpr.contains("file"))
+	    {
+		String filename = mpr.getFilename("file");
+		context.subtree.load(mpr.getInputStream("file"));
+	    }
+	    
+	    fillPage(context, req);
+	}
+	
+	
+	/* ------------------------------------------------------------ */
+	private void addHeader(Context context,
+			       HttpServletRequest req,
+			       boolean last)
+	{
+	    String name = context.path.getBaseName();
+	    if (name!=null)
+		context.page.add("&nbsp;.&nbsp;");
+	    context.page.add(new Link(context.path.getUrlPath(req),
+			      name == null ? "ROOT" : name));
+	    if (last)
+		context.page
+		    .add("&nbsp;:</H2></TD><TD></TD></TR><TR VALIGN=TOP><TD>");
+	}
+	
+	/* ------------------------------------------------------------ */
+	private void fillPage(Context context, HttpServletRequest req)
+	{
+	    Page page = context.page;
+	    String myUrl = context.path.getUrlPath(req);
+	    String name = context.path.getBaseName();
+	    
+	    try{
+		Table table = new Table(1);
+		page.add(table);
+		table.cellPadding(2);
+		table.newRow();
+		table.addHeading("KEY");
+		table.addHeading("VALUE");
+		
+		LineNumberReader in =
+		    new LineNumberReader(new StringReader(context.subtree.toString()));
+		String line=null;
+		while((line=in.readLine())!=null)
+		{
+		    table.newRow();
+		    table.newCell();
+		    
+		    int i=line.indexOf(':');
+		    if (i<0)
+			i=line.indexOf('=');
+		    Code.assert(i>=1,"Bad format of Tree");
+
+		    String key=line.substring(0,i);
+		    String value=line.substring(i+1);
+
+		    StringTokenizer tok = new StringTokenizer(key,".");
+		    String path="";
+		    while (tok.hasMoreTokens())
+		    {
+			String t = tok.nextToken();
+			path += "/"+t;
+			if (tok.hasMoreTokens())
+			{
+			    table.add(new Link(myUrl+path,t));
+			    table.add(" . ");
+			}
+			else
+			    table.add(new Link(myUrl+"/edit?action=Get&key="+
+					       path.replace('/','.')
+					       .substring(1),t));
+		    }
+		    table.addCell(value);
+		}
+	    }
+	    catch(IOException e)
+	    {
+		Code.warning(e);
+	    }
+	    page.add("</TD><TD WIDTH=25>&nbsp;</TD><TD>");
+	    
+	    TableForm form;
+	    
+	    // Edit
+	    page.add("<HR>");
+	    form = new TableForm(myUrl+"/edit");
+	    form.addTextField("key","Key",30,context.key);
+	    form.addTextField("value","Value",30,context.value);
+	    form.addButtonArea("Action");
+	    form.addButton("action", "Set");
+	    form.addButton("action", "Get");
+	    form.addButton("action", "Remove");
+	    page.add(form);
+	    
+	    // Remove
+	    page.add("<HR>");
+	    form = new TableForm(myUrl+"/prune");
+	    Select select = form.addSelect("keys","Prune",true,3);
+	    Enumeration enum = context.subtree.keys();
+	    while (enum.hasMoreElements())
+		select.add(enum.nextElement());
+	    
+	    form.addButtonArea("Action");
+	    form.addButton("go", "Prune");
+	    page.add(form);
+	    
+	    // Load & Save ...
+	    page.add("<HR>");
+	    page.add(new Heading(3, "Load Properties File"));
+	    form = new TableForm(myUrl+"/load");
+	    form.left();
+	    form.encoding(Form.encodingMultipartForm);
+	    form.addField("File",new Input(Input.File, "file"));
+	    form.addButtonArea("Action");
+	    form.addButton("load", "Load");
+	    page.add(form);
+	    page.add(new Link(myUrl+"/save.prp",
+			      new Heading(3, "Save Tree to Disk")));
+	    page.add("</TD></TR></TABLE>");
+	}
+
+	
+	/* -------------------------------------------------------- */
+	public Object defaultDispatch(String method,
+				      ServletDispatch dispatch,
+				      Object contextObj,
+				      HttpServletRequest req,
+				      HttpServletResponse res)
+	    throws Exception
+	{
+	    Context context = (Context)contextObj;
+	    
+	    if (method != null)
+	    {
+		PropertyTree pt = context.subtree.getTree(method);
+		if (pt != null)
+		{
+		    addHeader(context, req, false);
+		    context.path.addAddressElement(method);
+		    context.subtree=pt;
+		    return dispatch.dispatch(this, context);
+		}
+		
+		addHeader(context, req, false);
+		
+		// Unknown node...
+		context.page = Page.getPage(lookAndFeelName, req);
+		context.page.title("Property Tree Editor");
+		context.page.add(new Heading(1, "Node "+
+					     req.getPathInfo()+
+					     " not found"));
+		context.page.add(new Heading(3,new Link(req.getServletPath(),
+							"Goto root")));
+		return null;
+	    }
+	    else
+		addHeader(context, req, true);
+	    
+	    fillPage(context, req);
+	    
+	    return null;
+	}
+    }
+    
     /* ------------------------------------------------------------ */
     public void init(ServletConfig config)
 	 throws ServletException
@@ -62,279 +333,58 @@ public class PropertyTreeEditor
 	lookAndFeelName = getInitParameter(Page.PageType);
 	if (lookAndFeelName == null)
 	    lookAndFeelName = Page.getDefaultPageType();
+
+	tree.put("*","unknown");
+	tree.put("animal.*.legs","4");
+	tree.put("animal.insect.*.legs","6");
+	tree.put("animal.spider.*.legs","8");
+	tree.put("animal.bird.*.legs","2");
+	tree.put("animal.fish.*.legs","0");
+	tree.put("animal.*.roots","none");
+	tree.put("*.spine","false");
+	tree.put("animal.*.spine","true");
+	tree.put("animal.insect.*.spine","false");
+	tree.put("animal.mammal.mouse.furry","true");
+	tree.put("animal.mammal.horse.furry","true");
+	tree.put("animal.mammal.human.furry","some");
+	tree.put("animal.mammal.human.legs","2");
+	tree.put("animal.reptile.*.fur","false");
+	tree.put("animal.reptile.snake.legs","0");
+	tree.put("plant.*.legs","0");
+	tree.put("plant.*.roots","true");
+	tree.put("plant.*.furry","true");
+	tree.put("plant.tree.oak.roots","deep");
+	tree.put("plant.tree.willow.roots","shallow");
+	
     }
-    /* ------------------------------------------------------------ */
-    public static class TreeNode
-	extends ServletNode
-	implements ServletDispatchHandler
-    {
-	/* ------------------------------------------------------------ */
-	public TreeNode(PropertyTree pt, String name, Vector parentAddress){
-	    if (parentAddress != null) setAddress(parentAddress);
-	    if (name != null) addAddressElement(name); // in ServletNode
-	    this.name = name;
-	    tree = pt;
-	}
-	/* -------------------------------------------------------- */
-	private String name;
-	// This is our cache of TreeNodes that handle servlet requests on the
-	// corresponding PropertyTree. Their PropertyTree is updated by their
-	// parent on every request for consistency.
-	private Hashtable nodes = new Hashtable();
-	private PropertyTree tree;
-	/* ------------------------------------------------------------ */
-	public static class AddArgs {
-	    public String key = null;
-	    public String value = null;
-	    public String add = null;
-	};
-	public static class RemoveArgs {
-	    public String keys[] = null;
-	};
-	/* -------------------------------------------------------- */
-	public Page Add(Page page, AddArgs args, HttpServletRequest req){
-	    addHeader(page, req);
-	    page.unnest();
-	    if (args.key != null){
-		boolean value = args.add.equals("New Value");
-		if (!value){
-		    PropertyTree pt = new PropertyTree();
-		    tree.put(args.key, pt);
-		} else {
-		    tree.put(args.key, args.value);
-		}
-		page.add(new Heading(3, (value ? "Value " : "Node ")
-				     + args.key + " added..."));
-		if ("*".equals(name) && args.key.equals("*")){
-		    Heading head = new Heading(3, "default value set on ");
-		    head.add(new Link(getParentUrlPath(req, 1), "parent"));
-		    page.add(head);
-		}
-	    }
-	    return fillPage(page, req);
-	}
-	/* -------------------------------------------------------- */
-	public Page Remove(Page page, RemoveArgs args, HttpServletRequest req){
-	    addHeader(page, req);
-	    page.unnest();
-	    if (args.keys != null){
-		page.add(new Heading(3, "Removing Keys"));
-		List list = new List(List.Unordered);
-		for (int i = 0; i < args.keys.length; i++){
-		    Object val = tree.remove(args.keys[i]);
-		    Composite comp = new Composite();
-		    comp.add(args.keys[i]);
-		    comp.add(": ");
-		    Block bl = new Block(Block.Pre);
-		    comp.add(bl);
-		    bl.add(val);
-		    list.add(comp);
-		    // clean up the TreeNodes as well
-		    this.nodes.remove(args.keys[i]);
-		}
-		page.add(list);
-	    }
-	    return fillPage(page, req);
-	}
-	/* ------------------------------------------------------------ */
-	public void Save(HttpServletResponse res)
-	    throws Exception
-	{
-	    res.setContentType("application/x-java-properties; filename=save.prp");
-	    OutputStream out = res.getOutputStream();
-	    PrintWriter pout = new PrintWriter(out);
-	    pout.print(tree);
-	    pout.flush();
-	}
-	/* ------------------------------------------------------------ */
-	public Page Load(Page page, HttpServletRequest req)
-	    throws Exception
-	{
-	    addHeader(page, req);
-	    page.unnest();
-	    MultiPartRequest mpr = new MultiPartRequest(req);
-	    if (mpr.contains("file"))
-	    {
-		String filename = mpr.getFilename("file");
-		tree.load(mpr.getInputStream("file"));
-		page.add(new Heading(3, "Loaded file: " + filename));
-	    }
-	    return fillPage(page, req);
-	}
-	/* -------------------------------------------------------- */
-	public Page Get(Page page, HttpServletRequest req){
-	    addHeader(page, req);
-	    page.unnest();
-	    page.add(new Heading(3, "Get Value"));
-	    Table table = new Table(1);
-	    table.addHeading("Key");
-	    table.addHeading("Value");
-	    table.newRow();
-	    String key = req.getParameter("key");
-	    table.addCell(key);
-	    table.addCell(tree.get(key));
-	    page.add(table);
-	    return fillPage(page, req);
-	}
-	/* -------------------------------------------------------- */
-	private void setPropertyTree(PropertyTree pt){
-	    tree = pt;
-	}
-	/* ------------------------------------------------------------ */
-	private void addHeader(Page page, HttpServletRequest req){
-	    page.add(new Link(getUrlPath(req), name == null ? "root" : name));
-	    page.add("&nbsp;");
-	}
-	/* ------------------------------------------------------------ */
-	private Page fillPage(Page page, HttpServletRequest req){
-	    // Get out of the Location header
-	    page.unnest();
-	    // The Tree:
-	    page.add(new Heading(2, "Tree Values"));
-	    Block bl = new Block(Block.Pre);
-	    bl.add(tree);
-	    page.add(bl);
-	    // Sub-nodes
-	    page.add(new Heading(3, "Sub-Nodes of this PropertyTree:"));
-	    String myUrl = getUrlPath(req);
-	    List list = new List(List.Unordered);
-	    for (Enumeration enum = tree.nodeNames(); enum.hasMoreElements();){
-		String node = enum.nextElement().toString();
-		list.add(new Link(myUrl+"/"+node, node));
-	    }
-	    if (!"*".equals(name))
-		list.add(new Link(myUrl+"/*", "default values (*)"));
-	    page.add(list);
-	    // Add
-	    page.add(new Heading(3, "Add Values"));
-	    Form form = new Form(myUrl+"/Add");
-	    Table table = new Table(0);
-	    form.add(table);
-	    table.newRow();
-	    table.addHeading("Name");
-	    table.addCell(new Input(Input.Text, "key"));
-	    table.addCell(new Input(Input.Submit, "add", "New Sub-Node"));
-	    table.addHeading("Value");
-	    table.addCell(new Input(Input.Text, "value"));
-	    table.add(new Input(Input.Submit, "add", "New Value"));
-	    page.add(form);
-	    // Remove
-	    page.add(new Heading(3, "Remove Values"));
-	    page.add("Note: Removing keys that are both node names and value s will remove both...");
-	    form = new Form(myUrl+"/Remove");
-	    table = new Table(0);
-	    form.add(table);
-	    table.addHeading("Nodes");
-	    Select sel = new Select("keys", true);
-	    sel.size(4);
-	    sel.add(tree.nodeNames());
-	    sel.add("*");
-	    table.addCell(sel);
-	    table.addHeading("Values");
-	    sel = new Select("keys", true);
-	    sel.size(4);
-	    sel.add(tree.valueNames());
-	    sel.add("*");
-	    table.addCell(sel);
-	    table.newRow();
-	    table.addCell(new Input(Input.Submit, "go", "Remove"))
-		.cell().attributes("COLSPAN=4").center();
-	    page.add(form);
-	    // Get...
-	    page.add(new Heading(3, "Get Value"));
-	    form = new Form(myUrl+"/Get");
-	    table = new Table(0);
-	    form.add(table);
-	    table.addHeading("Key");
-	    table.addCell(new Input(Input.Text, "key"));
-	    table.addCell(new Input(Input.Submit, "go", "Get"));
-	    page.add(form);
-	    // Save ...
-	    page.add(new Link(myUrl+"/Save",
-			      new Heading(3, "Save Tree to Disk")));
-	    // Load ...
-	    page.add(new Heading(3, "Load Properties File"));
-	    form = new Form(myUrl+"/Load");
-	    form.encoding(Form.encodingMultipartForm);
-	    table = new Table(0);
-	    form.add(table);
-	    table.newRow();
-	    table.addHeading("Select File");
-	    table.addCell(new Input(Input.File, "file"));
-	    table.addCell(new Input(Input.Submit, "load", "Load"));
-	    page.add(form);
-	    return page;
-	}
-	/* -------------------------------------------------------- */
-	public Object defaultDispatch(String method,
-				      ServletDispatch dispatch,
-				      Object context,
-				      HttpServletRequest req,
-				      HttpServletResponse res)
-	    throws Exception
-	{
-	    if (method != null){
-		PropertyTree pt = tree.getNode(method);
-		if (pt != null){
-		    addHeader((Page)context, req);
-		    // get the tree node...
-		    TreeNode tn = (TreeNode)nodes.get(method);
-		    if (tn == null){
-			nodes.put(method,
-				  new TreeNode(pt, method, getAddress()));
-			tn = (TreeNode)nodes.get(method);
-		    }
-		    tn.setPropertyTree(pt);
-		    return dispatch.dispatch(tn, context);
-		}
-		addHeader((Page)context, req);
-		// Unknown node...
-		((Page)context).add(new Heading(3, "Node "+method+" not found"));
-	    } else
-		addHeader((Page)context, req);
-	    return fillPage((Page)context, req);
-	}
-	/* -------------------------------------------------------- */
-    }
+    
     /* ------------------------------------------------------------ */
     public void service(HttpServletRequest req, HttpServletResponse res) 
 	throws ServletException, IOException
     {
-	Page page = Page.getPage(lookAndFeelName, req);
-	page.title("Property Tree Editor");
-	page.add(new Heading(1, "Property Tree Editor").center());
-	Block bl = new Block(Block.Center);
-	bl.nest(new Heading(3, ""));
-	page.nest(bl);
-	page.add("Location:&nbsp;");
-	try {
-	    try {
-		ServletDispatch disp = new ServletDispatch(req, res);
-		page = (Page)disp.dispatch(node, page);
-	    } catch (java.lang.reflect.InvocationTargetException ex){
-		Throwable t = ex;
-		while (t instanceof
-		       java.lang.reflect.InvocationTargetException){
-		    t = ((java.lang.reflect.InvocationTargetException)t)
-			.getTargetException();
-		}
-		throw t;
-	    }
-	} catch (Throwable e) {
-	    Code.debug(e);
-	    page = Page.getPage(lookAndFeelName, req);
-	    page.title("Exception Occurred...");
-	    page.nest(new Block(Block.Pre));
-	    StringWriter sw = new StringWriter();
-	    PrintWriter pw = new PrintWriter(sw);
-	    e.printStackTrace(pw);
-	    page.add(sw.toString());
+	Context context = new Context(Page.getPage(lookAndFeelName, req),
+				      tree);
+	context.page.unnest();
+	
+	context.page.title("Property Tree Editor");
+	context.page.add("<TABLE><TR><TD><H1>Property Tree&nbsp;@&nbsp;");
+	
+	try
+	{
+	    ServletDispatch disp = new ServletDispatch(req, res);
+	    disp.dispatch(editorDispatcher, context);
 	}
-	if (page != null){
+	catch (Exception e)
+	{
+	    Code.warning("Matt will fix this",e);
+	    throw new ServletException(e.toString());
+	}
+	if (context.page != null)
+	{
 	    res.setContentType("text/html");
 	    OutputStream out = res.getOutputStream();
 	    PrintWriter pout = new PrintWriter(out);
-	    page.write(pout);
+	    context.page.write(pout);
 	    pout.flush();
 	}
     }
