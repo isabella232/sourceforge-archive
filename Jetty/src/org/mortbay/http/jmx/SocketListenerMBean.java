@@ -5,7 +5,6 @@
 
 package org.mortbay.http.jmx;
 
-import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 
 /* ------------------------------------------------------------ */

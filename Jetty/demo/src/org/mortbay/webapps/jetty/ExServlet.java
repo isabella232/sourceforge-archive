@@ -4,18 +4,15 @@
 // ---------------------------------------------------------------------------
 
 package org.mortbay.webapps.jetty;
-import org.mortbay.http.HttpException;
-import org.mortbay.util.Code;
-import org.mortbay.util.Loader;
+
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Enumeration;
-import javax.servlet.UnavailableException;
-import javax.servlet.ServletConfig;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.mortbay.util.Loader;
 
 /* ------------------------------------------------------------ */
 /** Dump Servlet Request.

@@ -5,7 +5,6 @@
 
 package org.mortbay.jetty.servlet.jmx;
 
-import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 
 /* ------------------------------------------------------------ */

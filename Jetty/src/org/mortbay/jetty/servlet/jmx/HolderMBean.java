@@ -7,12 +7,11 @@ package org.mortbay.jetty.servlet.jmx;
 
 import javax.management.MBeanException;
 import javax.management.MBeanServer;
-import org.mortbay.util.jmx.LifeCycleMBean;
-import org.mortbay.jetty.servlet.Holder;
-import java.util.Iterator;
-import java.util.Map;
 import javax.management.ObjectName;
+
+import org.mortbay.jetty.servlet.Holder;
 import org.mortbay.util.Code;
+import org.mortbay.util.jmx.LifeCycleMBean;
 
 
 /* ------------------------------------------------------------ */

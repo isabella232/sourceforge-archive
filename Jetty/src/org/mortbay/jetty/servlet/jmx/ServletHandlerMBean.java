@@ -6,14 +6,11 @@
 package org.mortbay.jetty.servlet.jmx;
 
 import javax.management.MBeanException;
+import javax.management.ObjectName;
+
 import org.mortbay.http.jmx.HttpHandlerMBean;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.SessionManager;
-import org.mortbay.http.PathMap;
-import java.util.Iterator;
-import java.util.Map;
-import javax.management.ObjectName;
-
 
 /* ------------------------------------------------------------ */
 /** 

@@ -4,21 +4,18 @@
 // ---------------------------------------------------------------------------
 
 package org.mortbay.webapps.jetty;
-import org.mortbay.html.Include;
-import org.mortbay.util.Code;
-import org.mortbay.util.IO;
-import org.mortbay.util.Resource;
-import org.mortbay.util.StringUtil;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URL;
-import javax.servlet.GenericServlet;
-import javax.servlet.ServletContext;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.mortbay.html.Include;
+import org.mortbay.util.Code;
+import org.mortbay.util.IO;
+import org.mortbay.util.Resource;
 
 /* ------------------------------------------------------------ */
 /** Jetty Demo site servlet.
