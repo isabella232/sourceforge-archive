@@ -288,6 +288,12 @@ public abstract class AJP13Packet
             _pos+=len+1;
             return s;
         }
+        catch (IndexOutOfBoundsException e)
+        {
+            // Bad request!!!
+            LogSupport.ignore(log,e);
+            return null;
+        }
         catch (UnsupportedEncodingException e)
         {
             log.fatal(e); System.exit(1);
