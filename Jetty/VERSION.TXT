@@ -1,9 +1,20 @@
 Jetty Versions
 --------------
 
+Jetty-4.0.2 - 6 June 2002
  + Fixed web.dtd references.
  + Fixed handler/context start order.
  + Added OptimizeIt plug
+ + Fixed /foo/../bar// bug in canonical path.
+ + Don't chunk 30x empty responses.
+ + Fixed "" contextPaths in Dispatcher.
+ + Removed race for the starting of session scavaging
+
+Jetty-3.1.8 - 6 June 2002
+ + Made SecurityConstraint.addRole() require authentication.
+ + Fixed singled threaded dynamic servlets
+ + Fixed no slash context redirection.
+ + Fixed /foo/../bar// bug in canonical path.
 
 Jetty-4.0.1 - 22 May 2002
  + Fixed contextclassloader on ServletContextEvents.

@@ -70,6 +70,7 @@ public class DumpHandler extends NullHandler
         writer.write("<PRE>\npath="+request.getPath()+
                     "\ncontextPath="+getHttpContext().getContextPath()+
                     "\npathInContext="+pathInContext+
+		    "\nmethod="+request.getMethod()+
                     "\n</PRE>\n");
         writer.write("<H3>Header:</H3><PRE>");
         writer.write(request.toString());

@@ -702,7 +702,8 @@ public class URI
             return path;
 
         int end=path.length();
-        int start=path.lastIndexOf('/',end);
+        int queryIdx=path.indexOf('?');
+        int start = path.lastIndexOf('/', (queryIdx > 0 ? queryIdx : end));
 
     search:
         while (end>=0)
@@ -760,7 +761,7 @@ public class URI
               case 2: // possible single dot
                   if (buf.charAt(start+1)!='.')
                   {
-                      if (--skip==0)
+                      if (skip>0 && --skip==0)
                           delStart=start>=0?start:0;
                       break;
                   }
@@ -783,7 +784,7 @@ public class URI
               case 3: // possible double dot
                   if (buf.charAt(start+1)!='.' || buf.charAt(start+2)!='.')
                   {
-                      if (--skip==0)
+                      if (skip>0 && --skip==0)
                           delStart=start>=0?start:0;
                       break;
                   }
@@ -800,7 +801,7 @@ public class URI
                   continue;
 
               default:
-                  if (--skip==0)
+                  if (skip>0 && --skip==0)
                       delStart=start>=0?start:0;
             }            
 

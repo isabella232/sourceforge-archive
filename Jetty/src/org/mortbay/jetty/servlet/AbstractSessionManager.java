@@ -145,7 +145,10 @@ public abstract class AbstractSessionManager implements SessionManager
         
         // Start the session scavenger if we haven't already
         if (_scavenger == null && period>0)
+        {
             _scavenger = new SessionScavenger();
+            _scavenger.start();
+        }
         
         if (period!=old_period)
         {
@@ -209,7 +212,10 @@ public abstract class AbstractSessionManager implements SessionManager
         
         // Start the session scavenger if we haven't already
         if (_scavenger == null)
+        {
             _scavenger = new SessionScavenger();
+            _scavenger.start();
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -325,6 +331,7 @@ public abstract class AbstractSessionManager implements SessionManager
             finally
             {
                 AbstractSessionManager.this._scavenger=null;
+                Log.event("Session scavanger exited");
             }
         }
 
@@ -332,7 +339,6 @@ public abstract class AbstractSessionManager implements SessionManager
         {
             super("SessionScavenger");
             setDaemon(true);
-            this.start();
         }
 
     }   // SessionScavenger

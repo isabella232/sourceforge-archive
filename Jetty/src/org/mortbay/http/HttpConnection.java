@@ -616,39 +616,45 @@ public class HttpConnection
         // if we have no content or encoding,
         // and no content length
         int status = _response.getStatus();
-        if (!_outputStream.isWritten() &&
-            !_response.containsField(HttpFields.__TransferEncoding) &&
+        if (status!=HttpResponse.__304_Not_Modified &&
+            status!=HttpResponse.__204_No_Content &&
+            !_outputStream.isWritten() &&
             !_response.containsField(HttpFields.__ContentLength) &&
-            status!=HttpResponse.__304_Not_Modified &&
-            status!=HttpResponse.__204_No_Content)
+            !_response.containsField(HttpFields.__TransferEncoding))
         {
-            // Persist only if idle threads are available.
             if(_persistent)
             {
-                switch (_dotVersion)
+                if (status>=300 && status<400)
                 {
-                  case 0:
-                      {
-			  _close=true;
-			  _persistent=false;
-			  _response.setField(HttpFields.__Connection,
-					     HttpFields.__Close);
-                      }
-                      break;
-                  case 1:
-                      {
-                          // force chunking on.
-                          _response.setField(HttpFields.__TransferEncoding,
-                                             HttpFields.__Chunked);
-                          _outputStream.setChunking();
-                      }
-                      break;
-                      
-                  default:
-                      _close=true;
-                      _response.setField(HttpFields.__Connection,
-                                         HttpFields.__Close);
-                      break;
+                    _response.setField(HttpFields.__ContentLength,"0");
+                }
+                else
+                {    
+                    switch (_dotVersion)
+                    {
+                      case 0:
+                          {
+                              _close=true;
+                              _persistent=false;
+                              _response.setField(HttpFields.__Connection,
+                                                 HttpFields.__Close);
+                          }
+                          break;
+                      case 1:
+                          {
+                              // force chunking on.
+                              _response.setField(HttpFields.__TransferEncoding,
+                                                 HttpFields.__Chunked);
+                              _outputStream.setChunking();
+                          }
+                          break;
+                          
+                      default:
+                          _close=true;
+                          _response.setField(HttpFields.__Connection,
+                                             HttpFields.__Close);
+                          break;
+                    }
                 }
             }
             else
