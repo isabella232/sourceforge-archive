@@ -16,7 +16,7 @@ UUFILES := \
 
 INSTALLPATH := .
 INSTALLFILES := \
-	JettyServer.prp \
+	etc/JettyServer.prp \
 	etc/RealmDemo.prp \
 	etc/RealmOther.prp \
 	etc/ParamDemo.prp \
