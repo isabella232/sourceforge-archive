@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
@@ -118,6 +119,26 @@ class FileResource extends URLResource
         }
     }
     
+    /* -------------------------------------------------------- */
+    public Resource addPath(String path)
+        throws IOException,MalformedURLException
+    {
+        if (!isDirectory())
+            return super.addPath(path);
+
+        path = org.mortbay.util.URI.canonicalPath(path);
+        
+        // treat all paths being added as relative
+        if (path.startsWith("/"))
+            path = path.substring(1);
+
+        File newFile = new File(_file,path);
+
+        if (path.length()>0 && !path.endsWith("/") && newFile.isDirectory())
+            path+="/";
+
+        return new FileResource(new URL(_url,path),null,newFile);
+    }
     
     /* ------------------------------------------------------------ */
     /** Get an Alias BadResource if one was created.

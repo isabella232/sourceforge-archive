@@ -36,12 +36,10 @@ the Ant optional tasks from:
   <!-- ==================================================================== -->
   <property environment="env"/>
   <property name="src"            value="${basedir}/src" />
-  <property name="src1.4"         value="${basedir}/src1.4" />
   <property name="etc"            value="${basedir}/etc" />
   <property name="lib"            value="${basedir}/lib"/>
   <property name="ext"            value="${basedir}/ext"/>
   <property name="classes"        value="${basedir}/classes"/>
-  <property name="classes1.4"     value="${basedir}/classes1.4"/>
   <property name="javadoc"        value="${basedir}/javadoc"/>
   <property name="logs"           value="${basedir}/logs"/>
   <property name="webapps"        value="${basedir}/webapps"/>
@@ -63,35 +61,9 @@ the Ant optional tasks from:
   <property name="mortbay.jmx.jar" value="${lib}/org.mortbay.jmx.jar"/>
   <property name="servlet.jar"    value="${lib}/javax.servlet.jar"/>
 
-  <!-- ==================================================================== -->
-  <target name="classpath" depends="is.jdk1.4.available,classpath1.2,classpath1.4"/>
-  <target name="is.jdk1.4.available">
-    <available property="jdk1.4.available" classname="java.util.logging.Handler" />
-  </target>
 
   <!-- ==================================================================== -->
-  <target name="classpath1.2" unless="jdk1.4.available">
-    <path id="extpath">
-      <fileset dir="${ext}">
-        <include name="*.jar"/>
-        <include name="*.JAR"/>
-        <include name="*.zip"/>
-        <include name="*.ZIP"/>
-       </fileset>
-    </path>
-
-    <path id="classpath">
-      <pathelement path="${classes}" />
-      <path refid="extpath" />
-    </path>
-
-    <property name="expanded.classpath" refid="classpath"/>
-    <echo message="classpath=${expanded.classpath}" level="info"/>
-
-  </target>
-
-  <!-- ==================================================================== -->
-  <target name="classpath1.4" if="jdk1.4.available">
+  <target name="classpath">
 
     <path id="extpath">
       <fileset dir="${ext}">
