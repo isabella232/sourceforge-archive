@@ -326,13 +326,13 @@ public class HttpResponse extends HttpMessage
         {
             // Find  error page.
             String error_page = null;
-            while (error_page==null && exClass!=null)
+            while (error_page==null && exClass!=null && _httpContext!=null)
             {
                 error_page = _httpContext.getErrorPage(exClass.getName());
                 exClass=exClass.getSuperclass();
             }
             
-            if (error_page==null)
+            if (error_page==null && _httpContext!=null)
                 error_page = _httpContext.getErrorPage(""+code);
 
             // Handle error page
