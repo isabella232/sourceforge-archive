@@ -1,7 +1,10 @@
 Jetty Versions
 --------------
 
-Jetty-4.0.RC1 - ???????
+Jetty-4.0.RC1 - wait for it....
+ + Warn if jdk 1.4 classes used on JVM <1.4
+ + WebApplication will use ContextLoader even without WEB-INF directory.
+ + FileResource depends less on FilePermissions.
  + Call response.flushBuffer after service to flush wrappers.
  + Empty suffix for temp directory.
  + Contributors list as an image to prevent SPAM!

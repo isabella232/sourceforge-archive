@@ -374,7 +374,7 @@ public class WebApplicationContext extends ServletHttpContext
         }
 
         // initialize the classloader (if it has not been so already)
-        initClassLoader();
+        initClassLoader(true);
         
         // Set classpath for Jasper.
         if (_servletHandler!=null)
@@ -798,7 +798,7 @@ public class WebApplicationContext extends ServletHttpContext
         // handle JSP classpath
         if (jspFile!=null)
         {
-            initClassLoader();
+            initClassLoader(true);
             holder.setInitParameter("classpath",getFileClassPath());
         }
         

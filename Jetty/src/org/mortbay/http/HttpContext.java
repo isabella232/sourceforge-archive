@@ -579,8 +579,10 @@ public class HttpContext implements LifeCycle
      * Initialize the context classloader with the current parameters.
      * Any attempts to change the classpath after this call will
      * result in a IllegalStateException
+     * @param forceContextLoader If true, a ContextLoader is always if
+     * no loader has been set.
      */
-    protected void initClassLoader()
+    protected void initClassLoader(boolean forceContextLoader)
         throws MalformedURLException, IOException
     {
         if (_loader==null)
@@ -596,7 +598,7 @@ public class HttpContext implements LifeCycle
             Code.debug("Init classloader from ",_classPath,
                        ", ",_parent," for ",this);
 
-            if (_classPath!=null || _permissions!=null)
+            if (forceContextLoader || _classPath!=null || _permissions!=null)
                 _loader=new ContextLoader(this,_classPath,_parent,_permissions);
             else
                 _loader=_parent;
@@ -609,7 +611,7 @@ public class HttpContext implements LifeCycle
     {
         if (_loader==null)
         {
-            try{initClassLoader();}
+            try{initClassLoader(false);}
             catch(Exception e)
             {
                 Code.warning(e);
@@ -1407,7 +1409,7 @@ public class HttpContext implements LifeCycle
 
         
         // setup the context loader
-        initClassLoader();
+        initClassLoader(false);
         
         // Start the handlers
         Thread thread = Thread.currentThread();

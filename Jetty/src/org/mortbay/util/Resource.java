@@ -43,15 +43,14 @@ public class Resource
             {
                 URLConnection connection=url.openConnection();
                 Permission perm = connection.getPermission();
-                if (perm instanceof java.io.FilePermission)
-                {
-                    File file =new File(perm.getName());
-                    FileResource fileResource= new FileResource(url,connection,file);
-                    if (fileResource.getAlias()!=null)
-                        return fileResource.getAlias();
-                    return fileResource;
-                }
-                Code.warning("File resource without FilePermission:"+url);
+                if (!(perm instanceof java.io.FilePermission) && Code.debug())
+                    Code.warning("Caution: File resource without FilePermission:"+url);
+                
+                File file =new File(perm.getName());
+                FileResource fileResource= new FileResource(url,connection,file);
+                if (fileResource.getAlias()!=null)
+                    return fileResource.getAlias();
+                return fileResource;
             }
             catch(Exception e)
             {
@@ -302,8 +301,22 @@ public class Resource
      * is not possible.
      */
     public File getFile()
+        throws IOException
     {
-        return null;
+        // Try the permission hack
+        if (checkConnection())
+        {
+            Permission perm = _connection.getPermission();
+            if (perm instanceof java.io.FilePermission)
+                return new File(perm.getName());
+        }
+
+        // Try the URL file arg
+        try {return new File(_url.getFile());}
+        catch(Exception e) {Code.ignore(e);}
+
+        // Don't know the file
+        return null;    
     }
 
     /* ------------------------------------------------------------ */

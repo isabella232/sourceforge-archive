@@ -1280,7 +1280,6 @@ public class TestHarness
             j = Resource.newResource("jar:"+__userURL+
                                      "TestData/test.zip!/");
             t.check(j instanceof JarFileResource,"Jar Resource");
-            t.checkEquals(j.getFile(),null,"no file for jar:");
             t.checkContains(j.getName(),"jar:file:","jar name");
             t.checkContains(j.getName(),"/TestData/test.zip!/","jar name");
             t.check(j.exists(),"jar exists");

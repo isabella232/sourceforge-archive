@@ -64,67 +64,74 @@ public class ContextLoader extends URLClassLoader
         if (_parent==null)
             _parent=getSystemClassLoader();
 
-        StringTokenizer tokenizer = new StringTokenizer(classPath,",;");
-
-        int i=0;
-        while (tokenizer.hasMoreTokens())
+        if (classPath==null)
         {
-            Resource resource = Resource.newResource(tokenizer.nextToken());
-            Code.debug("Path resource=",resource);
-
+            _urlClassPath="";
+            _fileClassPath="";
+        }
+        else
+        {
+            StringTokenizer tokenizer = new StringTokenizer(classPath,",;");
             
-            // Resolve file path if possible
-            File file=resource.getFile();
-            
-            if (file!=null)
+            int i=0;
+            while (tokenizer.hasMoreTokens())
             {
-                _fileClassPath=(_fileClassPath==null)
-                    ?file.getCanonicalPath()
-                    :(_fileClassPath+File.pathSeparator+file.getCanonicalPath());    
-                URL url = resource.getURL();
-                addURL(url);
-                _urlClassPath=(_urlClassPath==null)
-                    ?url.toString()
-                    :(_urlClassPath+","+url.toString());        
-            }
-            else
-            {
-                _fileClassPathWarning=true;
+                Resource resource = Resource.newResource(tokenizer.nextToken());
+                Code.debug("Path resource=",resource);
                 
-                // Add resource or expand jar/
-                if (!resource.isDirectory() && file==null)
+                // Resolve file path if possible
+                File file=resource.getFile();
+                
+                if (file!=null)
                 {
-                    InputStream in =resource.getInputStream();
-                    File lib=new File(context.getTempDirectory(),"lib");
-                    if (!lib.exists())
-                    {
-                        lib.mkdir();
-                        lib.deleteOnExit();
-                    }
-                    File jar=File.createTempFile("Jetty-",".jar",lib);
-                    System.err.println("LIB="+jar);
-                    
-                    jar.deleteOnExit();
-                    Code.debug("Extract ",resource," to ",jar);
-                    FileOutputStream out = new FileOutputStream(jar);
-                    IO.copy(in,out);
-                    out.close();
                     _fileClassPath=(_fileClassPath==null)
-                        ?jar.getCanonicalPath()
-                        :(_fileClassPath+File.pathSeparator+jar.getCanonicalPath());
-                    URL url = jar.toURL();
-                    addURL(url);
-                    _urlClassPath=(_urlClassPath==null)
-                        ?url.toString()
-                        :(_urlClassPath+","+url.toString());
-                }
-                else
-                {
+                        ?file.getCanonicalPath()
+                        :(_fileClassPath+File.pathSeparator+file.getCanonicalPath());    
                     URL url = resource.getURL();
                     addURL(url);
                     _urlClassPath=(_urlClassPath==null)
                         ?url.toString()
-                        :(_urlClassPath+","+url.toString());
+                        :(_urlClassPath+","+url.toString());        
+                }
+                else
+                {
+                    _fileClassPathWarning=true;
+                    
+                    // Add resource or expand jar/
+                    if (!resource.isDirectory() && file==null)
+                    {
+                        InputStream in =resource.getInputStream();
+                        File lib=new File(context.getTempDirectory(),"lib");
+                        if (!lib.exists())
+                        {
+                            lib.mkdir();
+                            lib.deleteOnExit();
+                        }
+                        File jar=File.createTempFile("Jetty-",".jar",lib);
+                        System.err.println("LIB="+jar);
+                        
+                        jar.deleteOnExit();
+                        Code.debug("Extract ",resource," to ",jar);
+                        FileOutputStream out = new FileOutputStream(jar);
+                        IO.copy(in,out);
+                        out.close();
+                        _fileClassPath=(_fileClassPath==null)
+                        ?jar.getCanonicalPath()
+                            :(_fileClassPath+File.pathSeparator+jar.getCanonicalPath());
+                        URL url = jar.toURL();
+                        addURL(url);
+                        _urlClassPath=(_urlClassPath==null)
+                            ?url.toString()
+                            :(_urlClassPath+","+url.toString());
+                    }
+                    else
+                    {
+                        URL url = resource.getURL();
+                        addURL(url);
+                        _urlClassPath=(_urlClassPath==null)
+                            ?url.toString()
+                            :(_urlClassPath+","+url.toString());
+                    }
                 }
             }
         }
