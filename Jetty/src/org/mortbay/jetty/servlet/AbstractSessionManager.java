@@ -65,7 +65,9 @@ public abstract class AbstractSessionManager implements SessionManager
     protected transient Map _sessions;
     protected transient Random _random;
     protected transient ServletHandler _handler;
-    
+    protected int _minSessions = 0;
+    protected int _maxSessions = 0;
+
     private transient SessionScavenger _scavenger = null;
     
     /* ------------------------------------------------------------ */
@@ -112,12 +114,31 @@ public abstract class AbstractSessionManager implements SessionManager
         return Collections.unmodifiableMap(_sessions);
     }
 
-    /* ------------------------------------------------------------ */
-    public int getSessions()
-    {
-        return _sessions.size();
-    }
-    
+   /* ------------------------------------------------------------ */
+   public int getSessions ()
+   {
+      return _sessions.size ();
+   }
+
+   /* ------------------------------------------------------------ */
+   public int getMinSessions ()
+   {
+      return _minSessions;
+   }
+
+   /* ------------------------------------------------------------ */
+   public int getMaxSessions ()
+   {
+      return _maxSessions;
+   }
+
+   /* ------------------------------------------------------------ */
+   public void resetStats ()
+   {
+      _minSessions =  _sessions.size ();
+      _maxSessions = _sessions.size ();
+   }
+
     /* ------------------------------------------------------------ */
     /* new Session ID.
      * If the request has a requestedSessionID which is unique, that is used.
@@ -166,6 +187,8 @@ public abstract class AbstractSessionManager implements SessionManager
         synchronized(_sessions)
         {
             _sessions.put(session.getId(),session);
+            if (_sessions.size () > this._maxSessions)
+               this._maxSessions = _sessions.size ();
         }
         
         HttpSessionEvent event=new HttpSessionEvent(session);
@@ -398,6 +421,9 @@ public abstract class AbstractSessionManager implements SessionManager
             for (int i = LazyList.size(stale); i-->0;)
             {
                 ((Session)LazyList.get(stale,i)).invalidate();
+               int nbsess = this._sessions.size();
+               if (nbsess < this._minSessions)
+                  this._minSessions = nbsess;
             }
         }
         finally

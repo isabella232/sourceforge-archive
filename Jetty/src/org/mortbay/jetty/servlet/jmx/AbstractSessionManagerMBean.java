@@ -39,6 +39,9 @@ public class AbstractSessionManagerMBean extends SessionManagerMBean
         defineAttribute("useRequestedId"); 
         defineAttribute("workerName");  
         defineAttribute("sessions"); 
+        defineAttribute ("minSessions");
+        defineAttribute ("maxSessions");
+        defineOperation ("resetStats",IMPACT_ACTION);
     }
 
 }

@@ -9,6 +9,7 @@ Jetty Versions
  + Fixed cookie handling for old cookies and safari
  + Restricted ports in ProxyHandler.
  + URI always encodes %
+ + Session statistics
 
 Jetty-4.2.10pre1 - 2 June 2003
  + Fixed JSP code visibility problem introduced in Jetty-4.2.10pre0
