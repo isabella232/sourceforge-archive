@@ -20,6 +20,7 @@ import java.util.HashMap;
 import org.mortbay.util.Code;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.TestCase;
+import javax.servlet.http.Cookie;
 
 /* ------------------------------------------------------------ */
 /** Top level test harness.
@@ -359,6 +360,7 @@ public class TestHarness
             t.checkEquals(params.get("p3"),null,"p3=null");
             t.check(params.containsKey("p3"),"p3");
             t.checkEquals(params.get("p4"),"v4=;","p4=v4=;");
+
         }
         catch(Exception e)
         {

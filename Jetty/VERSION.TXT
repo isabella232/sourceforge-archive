@@ -1,9 +1,11 @@
 Jetty Versions
 --------------
 
+ + Fixed HttpFields remove bug
+ + Implemented 2.3 security constraint semantics
+   PLEASE REVIEW YOUR SECURITY CONSTRAINTS (see README).
  + Added Array element to XMLConfiguration
  + Allow listener schemes to be set.
- + Implemented 2.3 security constraint semantics
  + Added index links to tutorial
  + Renamed getHttpServers and added setAnonymous
  + Updated crimson to 1.1.3

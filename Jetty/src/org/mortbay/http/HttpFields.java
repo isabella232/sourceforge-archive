@@ -395,12 +395,17 @@ public class HttpFields
             }
         }
 
+        public String getDisplayName()
+        {
+            return _info==null?"NULLED":_info._name;
+        }
+        
         /* ------------------------------------------------------------ */
         public String toString()
         {
-            return (_prev==null?"[":("["+_prev._info._name+"<- "))+
-                _info._name+__COLON+_value+
-                (_next==null?"]":(" ->"+_next._info._name)+"]");
+            return (_prev==null?"[":("["+_prev.getDisplayName()+"<- "))+
+                getDisplayName()+__COLON+_value+
+                (_next==null?"]":(" ->"+_next.getDisplayName())+"]");
         }
     }
     
@@ -444,7 +449,7 @@ public class HttpFields
                     while (i<_fields.size())
                     {
                         Field t=(Field)_fields.get(i++);
-                        if (t!=null && t._prev==null)
+                        if (t!=null && t._info!=null && t._prev==null)
                         {
                             f=t;
                             return true;
