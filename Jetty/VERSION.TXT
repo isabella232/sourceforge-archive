@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Added OptimizeIt plug
+
 Jetty-4.0.1 - 22 May 2002
  + Fixed contextclassloader on ServletContextEvents.
  + Support graceful stopping of context and server.

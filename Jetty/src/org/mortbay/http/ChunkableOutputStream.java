@@ -343,6 +343,9 @@ public class ChunkableOutputStream extends FilterOutputStream
     /* ------------------------------------------------------------ */
     public void write(int b) throws IOException
     {
+	if (out==null)
+	    return;
+
         if (!_written)
         {
             _written=true;
@@ -358,6 +361,9 @@ public class ChunkableOutputStream extends FilterOutputStream
     /* ------------------------------------------------------------ */
     public void write(byte b[]) throws IOException
     {
+	if (out==null)
+	    return;
+
         if (!_written)
         {
             _written=true;
@@ -372,6 +378,9 @@ public class ChunkableOutputStream extends FilterOutputStream
     /* ------------------------------------------------------------ */
     public void write(byte b[], int off, int len) throws IOException
     {          
+	if (out==null)
+	    return;
+
         if (!_written)
         {
             _written=true;

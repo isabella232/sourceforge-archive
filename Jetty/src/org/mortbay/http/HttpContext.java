@@ -1438,7 +1438,6 @@ public class HttpContext implements LifeCycle
             throw new IllegalStateException("No server for "+this);
 
         // start the context itself
-        _started=true;
         getMimeMap();
         getEncodingMap();
         
@@ -1459,8 +1458,8 @@ public class HttpContext implements LifeCycle
         {
             _userRealm=getUserRealm();
             thread.setContextClassLoader(lastContextLoader);
+	    _started=true;
         }
-
     }
 
     /* ------------------------------------------------------------ */

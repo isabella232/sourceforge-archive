@@ -99,8 +99,6 @@ abstract public class NullHandler implements HttpHandler
     {
         if (_context==null)
             throw new IllegalStateException("No context for "+this);        
-        if (!_context.isStarted())
-            Code.warning("Handler Context not started for "+this);
         
         _started=true;
         Log.event("Started "+this);
