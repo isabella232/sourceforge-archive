@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import org.mortbay.util.Code;
 import org.mortbay.util.TypeUtil;
+import org.mortbay.util.QuotedStringTokenizer;
 
 
 /* ------------------------------------------------------------ */
@@ -355,6 +356,7 @@ public abstract class HttpMessage
                     int i2 = contentType.indexOf(' ',i1);
                     _characterEncoding = (0 < i2)
                         ? contentType.substring(i1,i2) : contentType.substring(i1);
+                    _characterEncoding = QuotedStringTokenizer.unquote(_characterEncoding);
                 }
             }
         }
