@@ -653,7 +653,9 @@ public class HttpRequest extends HttpMessage
             return _te;
         
         // Decode any TE field
-        List te = getFieldValues(HttpFields.__TE);
+        List te = getFieldValues(HttpFields.__TE,
+                                 HttpFields.__separators);
+        
         if (te!=null && te.size()>0)
         {
             // Sort the list

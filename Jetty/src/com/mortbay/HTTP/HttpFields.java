@@ -151,7 +151,10 @@ public class HttpFields
             __singleValuedSet
                 .add(StringUtil.asciiToLowerCase(__SingleValued[i]));
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public final static String __separators = ", \t";
+        
     /* ------------------------------------------------------------ */
     /** Inline Fields.
      */  
@@ -279,9 +282,8 @@ public class HttpFields
     }
     
     /* -------------------------------------------------------------- */
-    /**
+    /** Get multi headers
      * @return multiple values of a field, or null if not found.
-     * Non quoted multiple spaces are replaced with a single space
      * @param name the case-insensitive field name
      */
     public List getValues(String name)
@@ -293,41 +295,76 @@ public class HttpFields
             return (List)o;
 
         List list = new ArrayList();
-
-        QuotedStringTokenizer tok =
-            new QuotedStringTokenizer(o.toString(),", \t",true,false);
-        String value=null;
-        boolean space=false;
-        while (tok.hasMoreTokens())
-        {
-            String token=tok.nextToken();
-            if (",".equals(token))
-            {
-                if (value!=null)
-                    list.add(value);
-                value=null;
-            }
-            else if (" ".equals(token) || "\t".equals(token))
-            {
-                space=(value!=null);
-            }
-            else if (value==null)
-            {
-                value=token;
-                space=false;
-            }
-            else if (space)
-            {
-                value+=" "+token;
-                space=false;
-            }
-            else
-                value+=token;
-        }
-        if(value!=null)
-            list.add(value);
-            
+        list.add(o.toString());
+        
         return list;
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Get multi fields 
+     * @param name the case-insensitive field name
+     * @param separators String of separators.
+     * @return multiple values of a field(s), or null if not found.
+     */
+    public List getValues(String name,String separators)
+    {
+        Object o=_map.get(StringUtil.asciiToLowerCase(name));
+        if (o==null)
+            return null;
+
+        List source=null;
+        String header=null;
+        List values=null;
+        if (o instanceof List)
+        {
+            source=(List)o;
+            values=new ArrayList(source.size());
+        }
+        else
+        {
+            header=o.toString();
+            values=new ArrayList(5);
+        }
+
+        for (int i=0;header!=null || source!=null && i<source.size(); i++)
+        {
+            if (header==null)
+                header=source.get(i).toString();
+            
+            QuotedStringTokenizer tok =
+                new QuotedStringTokenizer(header,separators,true,false);
+            header=null;
+            
+            String value=null;
+            boolean space=false;
+            while (tok.hasMoreTokens())
+            {
+                String token=tok.nextToken();
+                if (",".equals(token))
+                {
+                    if (value!=null)
+                        values.add(QuotedStringTokenizer.unquote(value));
+                    value=null;
+                }
+                else if (" ".equals(token) || "\t".equals(token))
+                    space=(value!=null);
+                else if (value==null)
+                {
+                    value=token;
+                    space=false;
+                }
+                else if (space)
+                {
+                    value+=" "+token;
+                    space=false;
+                }
+                else
+                    value+=token;
+            }   
+            if(value!=null)
+                values.add(QuotedStringTokenizer.unquote(value));
+        }
+        return values;
     }
     
         
@@ -403,10 +440,10 @@ public class HttpFields
             else
             {
                 list=new ArrayList(4);
-                list.add(QuotedStringTokenizer.unquote(existing.toString()));
+                list.add(existing);
                 _map.put(lname,list);
             }
-            list.add(QuotedStringTokenizer.unquote(value));
+            list.add(value);
         }        
     }
     

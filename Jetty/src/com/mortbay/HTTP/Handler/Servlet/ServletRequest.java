@@ -164,7 +164,8 @@ public class ServletRequest
     public Enumeration getLocales()
     {
         List acceptLanguage =
-            _httpRequest.getHeader().getValues(HttpFields.__AcceptLanguage);
+            _httpRequest.getHeader().getValues(HttpFields.__AcceptLanguage,
+                                               HttpFields.__separators);
 
         // handle no locale
         if (acceptLanguage == null || acceptLanguage.size()==0)

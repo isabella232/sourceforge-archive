@@ -645,11 +645,11 @@ public class ResourceHandler extends NullHandler
         {
             InclusiveByteRange ibr = (InclusiveByteRange) rit.next();
 
-            if (ibr.getFirst()>=resLength || (ibr.getLast()>=0 && ibr.getLast()>=resLength))
+            if (ibr.getFirst()>=resLength)
             {
                 Code.warning("not satisfiable: "+ibr);
-                singleSatisfiableRange=null;
-                break;
+                rit.remove();
+                continue;
             }
             
             if (singleSatisfiableRange == null)
@@ -687,7 +687,7 @@ public class ResourceHandler extends NullHandler
             response.setField(HttpFields.__ContentRange, 
                               singleSatisfiableRange.toHeaderRangeString(resLength));
             data.writeBytes(response.getOutputStream(), 
-                            singleSatisfiableRange.getFirst(), 
+                            singleSatisfiableRange.getFirst(resLength), 
                             singleLength);
             request.setHandled(true);
             return;
@@ -712,7 +712,7 @@ public class ResourceHandler extends NullHandler
                 ibr.toHeaderRangeString(resLength);
             Code.debug("multi range: ",encoding," ",header);
             multi.startPart(encoding,new String[]{header});
-            data.writeBytes(multi.getOut(), ibr.getFirst(), ibr.getSize(resLength));
+            data.writeBytes(multi.getOut(), ibr.getFirst(resLength), ibr.getSize(resLength));
         }
         multi.close();
 

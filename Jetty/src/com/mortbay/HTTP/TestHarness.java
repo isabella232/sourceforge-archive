@@ -302,7 +302,7 @@ public class TestHarness
             t.checkEquals(f.get("D1"),f.get("D2"),
                           "setDateHeader12");
 
-            List l = f.getValues("L1");
+            List l = f.getValues("L1",", \t");
             t.checkEquals(l.get(0),"V1","getValues");
             t.checkEquals(l.get(1),"V2","getValues");
             t.checkEquals(l.get(2),"V,3","getValues");

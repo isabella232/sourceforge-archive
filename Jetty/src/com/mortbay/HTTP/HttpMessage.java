@@ -216,6 +216,22 @@ abstract public class HttpMessage
             field=_trailer.getValues(name);
         return field;
     }
+    
+    /* ------------------------------------------------------------ */
+    /** Get a multi valued message field.
+     * Get a field from a message header. If no header field is found,
+     * trailer fields are searched.
+     * @param name The field name
+     * @param separators String of separators.
+     * @return field value or null
+     */
+    public List getFieldValues(String name,String separators)
+    {
+        List field = _header.getValues(name,separators);
+        if (field==null && _trailer!=null)
+            field=_trailer.getValues(name,separators);
+        return field;
+    }
 
     /* ------------------------------------------------------------ */
     /* Which fields to set?

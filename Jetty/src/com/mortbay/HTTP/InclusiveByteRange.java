@@ -54,34 +54,40 @@ public class InclusiveByteRange {
     {
         ListIterator rit = reqRangeHeaders.listIterator();
         List validRanges = new ArrayList();
-
+        List headerRanges = new ArrayList();
         
         // walk through all Range headers
+    headers:
         while (rit.hasNext())
         {
             String header = (String) rit.next();
             StringTokenizer tok = new StringTokenizer(header,"=,",false);
-
-            // read all byte ranges for this header 
-            while (tok.hasMoreTokens())
-            {
-                try{
+            headerRanges.clear();
+            try{
+                // read all byte ranges for this header 
+                while (tok.hasMoreTokens())
+                {
                     String t=tok.nextToken().trim();
                     
-                    long first = 0;
+                    long first = -1;
                     long last  = -1;
                     int d=t.indexOf("-");
-                    if (d<0)
+                    if (d<0 || t.indexOf("-",d+1)>=0)
                     {           
                         if ("bytes".equals(t))
                             continue;
                         Code.warning("Bad range format: "+t+" in "+reqRangeHeaders);
-                        continue;
+                        continue headers;
                     }
                     else if (d==0)
                     {
                         if (d+1<t.length())
-                        last = Long.parseLong(t.substring(d+1).trim());
+                            last = Long.parseLong(t.substring(d+1).trim());
+                        else
+                        {
+                            Code.warning("Bad range format: "+t+" in "+reqRangeHeaders);
+                            continue headers;
+                        }
                     }
                     else if (d+1<t.length())
                     {
@@ -93,30 +99,53 @@ public class InclusiveByteRange {
                     
                     
                     if (first == -1 && last == -1)
-                        continue;
+                        continue headers;
                     
                     if (first != -1 && last != -1 && (first > last))
-                        continue;
-                    
-                    validRanges.add(new InclusiveByteRange(first, last));
+                        continue headers;
+
+                    InclusiveByteRange range = new
+                        InclusiveByteRange(first, last);
+                    headerRanges.add(range);
                 }
-                catch(Exception e)
-                {
-                    Code.ignore(e);
-                }
+                validRanges.addAll(headerRanges);
             }
+            catch(Exception e)
+            {
+                Code.ignore(e);
+            }    
         }
         return validRanges;
     }
 
     /* ------------------------------------------------------------ */
+    public long getFirst(long size)
+    {
+        if (first<0)
+        {
+            long tf=size-last;
+            if (tf<0)
+                tf=0;
+            return tf;
+        }
+        return first;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public long getLast(long size)
+    {
+        if (first<0)
+            return size-1;
+        
+        if (last<0 ||last>=size)
+            return size-1;
+        return last;
+    }
+    
+    /* ------------------------------------------------------------ */
     public long getSize(long size)
     {
-        if (last<0)
-            return size;
-        if (last>=size)
-            throw new IllegalArgumentException("invalid size "+size+" for "+this);
-        return last-first+1;
+        return getLast(size)-getFirst(size)+1;
     }
 
 
@@ -125,14 +154,11 @@ public class InclusiveByteRange {
     {
         StringBuffer sb = new StringBuffer(40);
         sb.append("bytes ");
-        sb.append(getFirst());
+        sb.append(getFirst(size));
         sb.append('-');
-        if (getLast()<0)
-            sb.append(size-1);
-        else
-            sb.append(getLast());
+        sb.append(getLast(size));
         sb.append("/");
-        sb.append(getSize(size));
+        sb.append(size);
         return sb.toString();
     }
 
@@ -151,27 +177,11 @@ public class InclusiveByteRange {
     {
         StringBuffer sb = new StringBuffer(60);
         sb.append(Long.toString(first));
-        sb.append("-");
+        sb.append(":");
         sb.append(Long.toString(last));
         return sb.toString();
     }
 
-
-    /* ------------------------------------------------------------ */
-    public static void main(String [] args)
-    {
-        ArrayList al = new ArrayList(args.length);
-        for (int i = 0; i < args.length; i++) {
-             al.add(args[i]);
-        }
-        List parsed = parseRangeHeaders(al);
-        System.out.println(parsed);
-        ListIterator ali = parsed.listIterator();
-        while (ali.hasNext()) {
-            InclusiveByteRange ibr = (InclusiveByteRange) ali.next();
-            System.out.println(ibr.toHeaderRangeString(1000));
-        }
-    }
 
 }
 

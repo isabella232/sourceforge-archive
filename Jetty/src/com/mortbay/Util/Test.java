@@ -96,7 +96,7 @@ public class Test
      */
     public int checkContains(String string, String subString, String check)
     {
-        return checkContains(string,0,subString,check);
+        return realCheckContains(string,0,subString,check);
     }
     
     /*-------------------------------------------------------------------*/
@@ -106,6 +106,17 @@ public class Test
     public int checkContains(String string,
                              int offset,
                              String subString, String check)
+    {
+        return realCheckContains(string,offset,subString,check);
+    }
+    
+    /*-------------------------------------------------------------------*/
+    /** Check that string contains a substring.
+     *  @return Index of substring
+     */
+    public int realCheckContains(String string,
+                                 int offset,
+                                 String subString, String check)
     {
         int index=-1;
         reportBuf.append(testCase+" : "+check+" - ");
@@ -118,7 +129,7 @@ public class Test
         }
         else
         {
-            Frame frame = new Frame(1);
+            Frame frame = new Frame(2);
             passed=false;
             reportBuf.append(fail + " at " + frame);
             reportBuf.append('\n');

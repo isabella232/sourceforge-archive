@@ -176,7 +176,7 @@ release     - Cleanup for release
     </javadoc>
   </target>
 
-  <target name="testUtil" depends="classes">
+  <target name="testUtil" depends="jars">
     <property name="classpath" value="${jetty.jar};${servlet.jar}" />
     <java classname="com.mortbay.Util.TestHarness"
           classpath="${classes};${xml.jar};${jaxp.jar}"
@@ -185,7 +185,7 @@ release     - Cleanup for release
           />
   </target>
 
-  <target name="testHTTP" depends="classes">
+  <target name="testHTTP" depends="jars">
     <property name="classpath" value="${jetty.jar};${servlet.jar}" />
     <java classname="com.mortbay.HTTP.TestHarness"
           classpath="${classes};${xml.jar}"

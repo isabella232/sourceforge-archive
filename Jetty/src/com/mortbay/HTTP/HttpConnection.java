@@ -301,7 +301,8 @@ public class HttpConnection
             
                 // Handle Connection header field
                 List connectionValues =
-                    _request.getFieldValues(HttpFields.__Connection);
+                    _request.getFieldValues(HttpFields.__Connection,
+                                            HttpFields.__separators);
                 if (connectionValues!=null)
                 {
                     Iterator iter = connectionValues.iterator();
@@ -527,7 +528,8 @@ public class HttpConnection
         
         // check and enable requests transfer encodings.
         boolean _inputEncodings=false;
-        List transfer_coding=_request.getFieldValues(HttpFields.__TransferEncoding);
+        List transfer_coding=_request.getFieldValues(HttpFields.__TransferEncoding,
+                                                     HttpFields.__separators);
         if (transfer_coding!=null)
         {
             HashMap coding_params = new HashMap(7);
@@ -682,19 +684,20 @@ public class HttpConnection
         
         // Determine how to limit content length and
         // enable output transfer encodings 
-        List transfer_coding=_response.getFieldValues(HttpFields.__TransferEncoding);
+        List transfer_coding=_response.getFieldValues(HttpFields.__TransferEncoding,
+                                                      HttpFields.__separators);
         if (transfer_coding==null || transfer_coding.size()==0)
         {
             switch(_dotVersion)
             {
               case 1:
                   {
-                      if (HttpFields.__Close.equals(_response.getField(HttpFields.__Connection)))
-                          break;
-                      
-                      if (_response.getField(HttpFields.__ContentLength)==null ||
-                           _listener.getHttpServer().isChunkingForced())
+                      // if forced or (not closed and no length)
+                      if (_listener.getHttpServer().isChunkingForced() ||
+                          (!HttpFields.__Close.equals(_response.getField(HttpFields.__Connection)))&&
+                          (_response.getField(HttpFields.__ContentLength)==null))
                       {
+                          // Chunk it!
                           _response.removeField(HttpFields.__ContentLength);
                           _response.setField(HttpFields.__TransferEncoding,
                                          HttpFields.__Chunked);
