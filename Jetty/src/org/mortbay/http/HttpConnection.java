@@ -1084,12 +1084,11 @@ public class HttpConnection
             if (_response!=null)
             {
                 if(log.isDebugEnabled())log.debug("RESPONSE:\n"+_response);
-                if (_persistent &&
-                    content_length>=0 && bytes_written>0 && content_length!=bytes_written)
+                if (_persistent && content_length>=0 && bytes_written>0 && content_length!=bytes_written)
                 {
                     log.warn("Invalid length: Content-Length="+content_length+
-                                 " written="+bytes_written+
-                                 " for "+_request.getRequestURL());
+                             " written="+bytes_written+
+                             " for "+_request.getRequestURL());
                     _persistent=false;
                     try{_outputStream.close();}
                     catch(IOException e) {log.warn(LogSupport.EXCEPTION,e);}
