@@ -28,7 +28,6 @@ $Id$
 <!ENTITY % NAMEATTR "name NMTOKEN #REQUIRED" >
 <!ENTITY % DEFAULTATTR "default CDATA #IMPLIED" >
 <!ENTITY % IDATTR "id NMTOKEN #IMPLIED" >
-<!ENTITY % REFATTR "ref NMTOKEN #IMPLIED" >
 <!--
 Configure Element.
 This is the root element that specifies the class of object that
@@ -152,9 +151,6 @@ This is equivalent to:
 -->
 <!ELEMENT New (Arg*,(%CONFIG;)*)>
 <!ATTLIST New %CLASSATTR; %IDATTR;>
-
-<!ELEMENT Ref ((%CONFIG;)*)>
-<!ATTLIST Ref %IDATTR;>
 
 <!--
 Array Element.
