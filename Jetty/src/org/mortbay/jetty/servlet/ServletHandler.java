@@ -80,18 +80,20 @@ public class ServletHandler extends AbstractHttpHandler
     private static String __AllowString="GET, HEAD, POST, OPTION, TRACE";
     
     /* ------------------------------------------------------------ */
-    private PathMap _servletMap=new PathMap();
-    private Map _nameMap=new HashMap();
     private boolean _usingCookies=true;
     private LogSink _logSink;
     private SessionManager _sessionManager;
     private boolean _autoInitializeServlets=true;
-    private String _formLoginPage;
-    private String _formErrorPage;
+    
+    /* ------------------------------------------------------------ */
+    protected PathMap _servletMap=new PathMap();
+    protected Map _nameMap=new HashMap();
+    protected String _formLoginPage;
+    protected String _formErrorPage;
 
-    private transient List _sessionListeners;
-    private transient Context _context;
-    private transient ClassLoader _loader;
+    protected transient List _sessionListeners;
+    protected transient Context _context;
+    protected transient ClassLoader _loader;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 

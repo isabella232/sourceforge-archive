@@ -56,7 +56,7 @@ public class ServletHolder extends Holder
     /* ---------------------------------------------------------------- */
     /** Constructor for Serialization.
      */
-    ServletHolder()
+    public ServletHolder()
     {}
     
 
@@ -66,7 +66,7 @@ public class ServletHolder extends Holder
      * @param name The name of the servlet.
      * @param className The class name of the servlet.
      */
-    ServletHolder(ServletHandler handler,
+    public ServletHolder(ServletHandler handler,
                   String name,
                   String className)
     {
@@ -82,10 +82,10 @@ public class ServletHolder extends Holder
      * javax.servlet.include.servlet_path will be set to this path before
      * service is called.
      */
-    ServletHolder(ServletHandler handler,
-                  String name,
-                  String className,
-                  String forcedPath)
+    public ServletHolder(ServletHandler handler,
+                         String name,
+                         String className,
+                         String forcedPath)
     {
         this(handler,(name==null)?className:name,className);
         _forcedPath=forcedPath;

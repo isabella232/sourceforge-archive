@@ -54,7 +54,7 @@ public class FilterHolder
     /* ---------------------------------------------------------------- */
     /** Constructor for Serialization.
      */
-    FilterHolder()
+    public FilterHolder()
     {}
     
     /* ---------------------------------------------------------------- */

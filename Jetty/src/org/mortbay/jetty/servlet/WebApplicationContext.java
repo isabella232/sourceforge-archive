@@ -91,7 +91,6 @@ public class WebApplicationContext
      * @exception IOException 
      */
     public WebApplicationContext()
-        throws IOException
     {}
     
     /* ------------------------------------------------------------ */
@@ -100,7 +99,6 @@ public class WebApplicationContext
      * @exception IOException 
      */
     public WebApplicationContext(String webApp)
-        throws IOException
     {
         _war=webApp;
     }

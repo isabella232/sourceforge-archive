@@ -39,13 +39,13 @@ public class Holder
     /* ---------------------------------------------------------------- */
     /** Constructor for Serialization.
      */
-    Holder()
+    protected Holder()
     {}
     
     /* ---------------------------------------------------------------- */
-    public Holder(HttpHandler httpHandler,
-                  String name,
-                  String className)
+    protected Holder(HttpHandler httpHandler,
+                     String name,
+                     String className)
     {
         if (name==null || name.length()==0)
             throw new IllegalArgumentException("No name for "+className);
