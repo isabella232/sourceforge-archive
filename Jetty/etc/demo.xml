@@ -83,7 +83,6 @@
   <Call name="addWebApplication">
     <Arg>/examples/*</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/examples</Arg>
-    <Set name="extractWAR">false</Set>
   </Call>
 
   <Call name="addContext">

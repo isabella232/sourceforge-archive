@@ -94,11 +94,16 @@ public class ContextLoader extends URLClassLoader
                 // Add resource or expand jar/
                 if (!resource.isDirectory() && file==null)
                 {
-                    // XXX - this is a jar in a jar, so we must
-                    // extract it - probably should be to an in memory
-                    // structure, but this will do for now.
                     InputStream in =resource.getInputStream();
-                    File jar=File.createTempFile("Jetty-",".jar",context.getTempDirectory());
+                    File lib=new File(context.getTempDirectory(),"lib");
+                    if (!lib.exists())
+                    {
+                        lib.mkdir();
+                        lib.deleteOnExit();
+                    }
+                    File jar=File.createTempFile("Jetty-",".jar",lib);
+                    System.err.println("LIB="+jar);
+                    
                     jar.deleteOnExit();
                     Code.debug("Extract ",resource," to ",jar);
                     FileOutputStream out = new FileOutputStream(jar);
