@@ -170,6 +170,8 @@ public class RolloverFileOutputStream extends FilterOutputStream
             File dir = new File(file.getParent());
             String fn=file.getName();
             int s=fn.toLowerCase().indexOf(YYYY_MM_DD);
+            if (s<0)
+                return;
             String prefix=fn.substring(0,s);
             String suffix=fn.substring(s+YYYY_MM_DD.length());
 
