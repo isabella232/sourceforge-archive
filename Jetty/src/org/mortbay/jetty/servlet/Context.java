@@ -502,6 +502,15 @@ public class Context implements ServletContext, HttpSessionContext
     /* ------------------------------------------------------------ */
     public void stop()
     {
+        // Invalidate all sessions to cause unbind events
+        ArrayList sessions = new ArrayList(_sessions.values());
+        for (Iterator i = sessions.iterator(); i.hasNext(); )
+        {
+            Session session = (Session)i.next();
+            session.invalidate();
+        }
+        
+        // stop the scavenger
         if (_scavenger!=null)
             _scavenger.interrupt();
         _scavenger=null;

@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Generate session unbind events on a context.stop()
  + Default PathMap separator changed to ":,"
  + PathMap now ignores paths after ; or ? characters.
 
