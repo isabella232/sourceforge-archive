@@ -83,7 +83,6 @@ public class AJP13Connection extends HttpConnection
         _remoteHost=null;
         _remoteAddr=null;
         _serverName=null;
-        
     }
     
     /* ------------------------------------------------------------ */
@@ -148,7 +147,8 @@ public class AJP13Connection extends HttpConnection
         HttpResponse response = getResponse();
         HttpContext context = null;
         boolean gotRequest=false;
-        boolean persistent=false;
+        _persistent=true;
+        _keepAlive=true;
         
         try
         {
@@ -185,11 +185,22 @@ public class AJP13Connection extends HttpConnection
                   _serverName=packet.getString();
                   _serverPort=packet.getInt();
                   _isSSL=packet.getBoolean();
+
+                  // Check keep alive
+                  _keepAlive=request.getDotVersion()>=1;
                   
                   // Headers
                   int h=packet.getInt();
                   for (int i=0;i<h;i++)
-                      request.setField(packet.getHeader(),packet.getString());
+                  {
+                      String hdr=packet.getHeader();
+                      String val=packet.getString();
+                      request.setField(hdr,val);
+                      if (!_keepAlive && hdr.equalsIgnoreCase(HttpFields.__Connection) &&
+                          val.equalsIgnoreCase(HttpFields.__KeepAlive))
+                          _keepAlive=true;
+                  }
+                  
                   
                   // Handler other attributes
                   byte attr=packet.getByte();
@@ -236,7 +247,7 @@ public class AJP13Connection extends HttpConnection
                       
                       attr=packet.getByte();
                   }
-
+        
                   _listener.customizeRequest(this,request);
                   
                   gotRequest=true;
@@ -255,26 +266,27 @@ public class AJP13Connection extends HttpConnection
                   response.setField(HttpFields.__Server,Version.__VersionDetail);
                   
                   // Service request
-                  Code.debug("REQUEST: ",request);
+                  Code.debug("REQUEST:\n",request);
                   context=service(request,response);
-                  Code.debug("RESPONSE: ",response);
+                  Code.debug("RESPONSE:\n",response);
 
                   break;
                   
               default:
                   Code.debug("Ignored: "+packet);
-                  persistent=false;
+                  _persistent=false;
             }
-
-            persistent=true;   
+  
         }
         catch (SocketException e)
         {
             Code.ignore(e);
+            _persistent=false; 
         }
         catch (Exception e)
         {
             Code.warning(e);
+            _persistent=false; 
             try{
                 if (gotRequest)
                     _ajpOut.close();
@@ -294,7 +306,7 @@ public class AJP13Connection extends HttpConnection
 
                 // end response
                 getOutputStream().close();
-                if (!persistent)
+                if (!_persistent)
                     _ajpOut.end();
 
                 // Close the outout
@@ -310,7 +322,7 @@ public class AJP13Connection extends HttpConnection
             catch (Exception e)
             {
                 Code.debug(e);
-                persistent=false;
+                _persistent=false;
             }
             finally
             {
@@ -319,10 +331,26 @@ public class AJP13Connection extends HttpConnection
                     context.log(request,response,-1);
             }
         }
-        return persistent;
+        return _persistent;
     }
 
 
+    /* ------------------------------------------------------------ */
+    protected void firstWrite()
+        throws IOException
+    {
+        Code.debug("ajp13 firstWrite()");
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected void commit()
+        throws IOException
+    {
+        Code.debug("ajp13 commit()");
+        _request.setHandled(true);
+        getOutputStream().writeHeader(_response);
+    }
+    
 
     /* ------------------------------------------------------------ */
     protected void setupOutputStream()

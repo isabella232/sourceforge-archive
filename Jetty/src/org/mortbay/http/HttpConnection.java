@@ -45,13 +45,13 @@ public class HttpConnection
     /* ------------------------------------------------------------ */
     protected HttpRequest _request;
     protected HttpResponse _response;
+    protected boolean _persistent;
+    protected boolean _keepAlive;
 
     private HttpListener _listener;
     private HttpInputStream _inputStream;
     private HttpOutputStream _outputStream;
-    private boolean _persistent;
     private boolean _close;
-    private boolean _keepAlive;
     private int _dotVersion;
     private boolean _firstWrite;
     private Thread _handlingThread;
@@ -509,7 +509,10 @@ public class HttpConnection
         {
           case OutputObserver.__FIRST_WRITE:
               if (!_firstWrite)
+              {
                   firstWrite();
+                  _firstWrite=true;
+              }
               break;
               
           case OutputObserver.__RESET_BUFFER:
@@ -540,9 +543,6 @@ public class HttpConnection
     protected void firstWrite()
         throws IOException
     {
-        if (_firstWrite)
-            return;
-        _firstWrite=true;
         if (_response.isCommitted())
             return;
         
@@ -635,7 +635,7 @@ public class HttpConnection
     /* ------------------------------------------------------------ */
     protected void commit()
         throws IOException
-    {
+    {        
         if (_response.isCommitted())
             return;
 

@@ -2,9 +2,10 @@ Jetty Versions
 --------------
 
  + prevent AJP13 from reordering query.
- + Branched for Jetty 5 development
- + Fixed race in servlet initialization code
- + Cookie params all in lower case
+ + Branched for Jetty 5 development.
+ + Fixed race in servlet initialization code.
+ + Cookie params all in lower case.
+ + Simplified AJP13 connection handling. 
  
 Jetty-4.2.10 - 7 July 2003
  + Updates to JettyPlus documentation
