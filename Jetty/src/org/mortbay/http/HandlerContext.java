@@ -733,17 +733,34 @@ public class HandlerContext implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the SecurityHandler realm.
+    /** Set the SecurityHandler realm name.
      * Conveniance method.
      * If a SecurityHandler is not in the context, one is created
      * as the 0th handler.
-     * @param realmName 
+     * @param realmName The name to use to retrieve the actual realm
+     * from the HttpServer
      */
     public void setRealm(String realmName)
     {
         SecurityHandler sh=getSecurityHandler();
         sh.setRealmName(realmName);
     }
+
+    /* ------------------------------------------------------------ */
+    /** Set the SecurityHandler realm.
+     * Conveniance method.
+     * If a SecurityHandler is not in the context, one is created
+     * as the 0th handler.
+     * @param realmName The name of the realm
+     * @param realm The realm instance to use, instead of one
+     * retrieved from the HttpServer.
+     */
+    public void setRealm(String realmName, UserRealm realm)
+    {
+        SecurityHandler sh=getSecurityHandler();
+        sh.setRealm(realmName,realm);
+    }
+
     
     /* ------------------------------------------------------------ */
     public String getRealm()

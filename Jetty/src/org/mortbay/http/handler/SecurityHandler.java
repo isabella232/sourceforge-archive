@@ -49,7 +49,7 @@ public class SecurityHandler extends NullHandler
     Map _authRealmMap;
     String _realmName ;
     UserRealm _realm ;
-
+    boolean _realmForced=false;
     
     /* ------------------------------------------------------------ */
     public interface FormAuthenticator
@@ -96,6 +96,17 @@ public class SecurityHandler extends NullHandler
         if (isStarted())
             throw new IllegalStateException("Handler started");
         _realmName=realmName;
+        _realmForced=false;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setRealm(String realmName, UserRealm realm)
+    {
+        if (isStarted())
+            throw new IllegalStateException("Handler started");
+        _realmName=realmName;
+        _realm=realm;
+        _realmForced=realm!=null;
     }
     
     /* ------------------------------------------------------------ */
@@ -164,8 +175,10 @@ public class SecurityHandler extends NullHandler
         // Check there is a realm
         if (_realmName!=null && _realmName.length()>0)
         {
-            _realm = getHandlerContext().getHttpServer()
-                .getRealm(_realmName);
+            
+            if (!_realmForced)
+                _realm = getHandlerContext().getHttpServer()
+                    .getRealm(_realmName);
             super.start();
             if (_realm==null)
                 Code.warning("Unknown realm: "+_realmName+" for "+this);
