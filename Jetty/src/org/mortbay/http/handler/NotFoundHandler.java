@@ -9,7 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import org.mortbay.http.ChunkableOutputStream;
+import org.mortbay.http.HttpOutputStream;
 import org.mortbay.util.Code;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;

@@ -32,20 +32,20 @@ import org.mortbay.util.StringUtil;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class ChunkableInputStream extends FilterInputStream
+public class HttpInputStream extends FilterInputStream
 {
     /* ------------------------------------------------------------ */
     private static ClosedStream __closedStream=new ClosedStream();
     
     /* ------------------------------------------------------------ */
-    private DeChunker _deChunker;
+    private ChunkingInputStream _deChunker;
     private LineInput _realIn;
     private boolean _chunking;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
      */
-    public ChunkableInputStream( InputStream in)
+    public HttpInputStream( InputStream in)
     {
         this(in,4096);
     }
@@ -53,7 +53,7 @@ public class ChunkableInputStream extends FilterInputStream
     /* ------------------------------------------------------------ */
     /** Constructor.
      */
-    public ChunkableInputStream(InputStream in, int bufferSize)
+    public HttpInputStream(InputStream in, int bufferSize)
     {
         super(null);
         try {
@@ -72,7 +72,7 @@ public class ChunkableInputStream extends FilterInputStream
      * may still be buffered and uprocessed bytes may be in the buffer.
      * @return Raw InputStream.
      */
-    public InputStream getRawStream()
+    public InputStream getInputStream()
     {
         return _realIn;
     }
@@ -117,7 +117,7 @@ public class ChunkableInputStream extends FilterInputStream
         if (_realIn.getByteLimit()>=0)
             throw new IllegalStateException("Has Content-Length");
         if (_deChunker==null)
-            _deChunker=new DeChunker();
+            _deChunker=new ChunkingInputStream(_realIn);
         in=_deChunker;
         
         _chunking=true;
@@ -202,169 +202,5 @@ public class ChunkableInputStream extends FilterInputStream
         {
             return -1;
         }
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Dechunk input.
-     * Or limit content length.
-     */
-    private class DeChunker extends InputStream
-    {
-        /* ------------------------------------------------------------ */
-        int _chunkSize=0;
-        HttpFields _trailer=null;
-
-        /* ------------------------------------------------------------ */
-        /** Constructor.
-         */
-        public DeChunker()
-        {}
-
-
-        /* ------------------------------------------------------------ */
-        public void resetStream()
-        {
-            _chunkSize=0;
-            _deChunker._trailer=null;
-        }
-
-        /* ------------------------------------------------------------ */
-        public int read()
-            throws IOException
-        {
-            int b=-1;
-            if (_chunkSize<=0 && getChunkSize()<=0)
-                return -1;
-            b=_realIn.read();
-            _chunkSize=(b<0)?-1:(_chunkSize-1);
-            return b;
-        }
- 
-        /* ------------------------------------------------------------ */
-        public int read(byte b[]) throws IOException
-        {
-            int len = b.length;
-            if (_chunkSize<=0 && getChunkSize()<=0)
-                return -1;
-            if (len > _chunkSize)
-                len=_chunkSize;
-            len=_realIn.read(b,0,len);
-            _chunkSize=(len<0)?-1:(_chunkSize-len);
-            return len;
-        }
- 
-        /* ------------------------------------------------------------ */
-        public int read(byte b[], int off, int len) throws IOException
-        {  
-            if (_chunkSize<=0 && getChunkSize()<=0)
-                return -1;
-            if (len > _chunkSize)
-                len=_chunkSize;
-            len=_realIn.read(b,off,len);
-            _chunkSize=(len<0)?-1:(_chunkSize-len);
-            return len;
-        }
-    
-        /* ------------------------------------------------------------ */
-        public long skip(long len) throws IOException
-        { 
-            if (_chunkSize<=0 && getChunkSize()<=0)
-                return -1;
-            if (len > _chunkSize)
-                len=_chunkSize;
-            len=_realIn.skip(len);
-            _chunkSize=(len<0)?-1:(_chunkSize-(int)len);
-            return len;
-        }
-
-        /* ------------------------------------------------------------ */
-        public int available()
-            throws IOException
-        {
-            int len = _realIn.available();
-            if (len<=_chunkSize)
-                return len;
-            return _chunkSize;
-        }
- 
-        /* ------------------------------------------------------------ */
-        public void close()
-            throws IOException
-        {
-            _chunkSize=-1;
-        }
- 
-        /* ------------------------------------------------------------ */
-        /** Mark is not supported.
-         * @return false
-         */
-        public boolean markSupported()
-        {
-            return false;
-        }
-    
-        /* ------------------------------------------------------------ */
-        /** Not Implemented.
-         */
-        public void reset()
-        {
-            Code.notImplemented();
-        }
-
-        /* ------------------------------------------------------------ */
-        /** Not Implemented.
-         * @param readlimit 
-         */
-        public void mark(int readlimit)
-        {
-            Code.notImplemented();
-        }
-    
-        /* ------------------------------------------------------------ */
-        /* Get the size of the next chunk.
-         * @return size of the next chunk or -1 for EOF.
-         * @exception IOException 
-         */
-        private int getChunkSize()
-            throws IOException
-        {
-            if (_chunkSize<0)
-                return -1;
-        
-            _trailer=null;
-            _chunkSize=-1;
-
-            // Get next non blank line
-            org.mortbay.util.LineInput.LineBuffer line_buffer
-                =_realIn.readLineBuffer();
-            while(line_buffer!=null && line_buffer.size==0)
-                line_buffer=_realIn.readLineBuffer();
-            
-            // Handle early EOF or error in format
-            if (line_buffer==null)
-            {
-                Code.warning("EOF");
-                return -1;
-            }
-            String line= new String(line_buffer.buffer,0,line_buffer.size);
-            
-        
-            // Get chunksize
-            int i=line.indexOf(';');
-            if (i>0)
-                line=line.substring(0,i).trim();
-            _chunkSize = Integer.parseInt(line,16);
-        
-            // check for EOF
-            if (_chunkSize==0)
-            {
-                _chunkSize=-1;
-                // Look for trailers
-                _trailer = new HttpFields();
-                _trailer.read(_realIn);
-            }
-
-            return _chunkSize;
-        }
-    }
+    }    
 }

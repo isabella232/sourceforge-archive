@@ -17,9 +17,10 @@ import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.ByteBufferOutputStream;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
+import org.mortbay.util.OutputObserver;
 
 /* ---------------------------------------------------------------- */
-/** HTTP Chunkable OutputStream.
+/** HTTP Http OutputStream.
  * Acts as a BufferedOutputStream until setChunking(true) is called.
  * Once chunking is enabled, the raw stream is chunk encoded as per RFC2616.
  *
@@ -36,7 +37,10 @@ import org.mortbay.util.IO;
  * @version $Id$
  * @author Greg Wilkins
 */
-public class ChunkableOutputStream extends FilterOutputStream
+public class HttpOutputStream
+    extends FilterOutputStream
+    implements OutputObserver,
+               HttpMessage.HeaderWriter
 {
     /* ------------------------------------------------------------ */
     final static String
@@ -48,28 +52,31 @@ public class ChunkableOutputStream extends FilterOutputStream
 
     final static int __BUFFER_SIZE=4096;
     final static int __FIRST_RESERVE=512;
-    final static int __CHUNK_RESERVE=8;
     
     public final static Class[] __filterArg = {java.io.OutputStream.class};
     
     /* ------------------------------------------------------------ */
-    OutputStream _realOut;
-    ByteBufferOutputStream _buffer;
-    boolean _chunking;
-    HttpFields _trailer;
-    boolean _committed;
-    boolean _written;
-    ArrayList _observers;
-    ByteArrayISO8859Writer _rawWriter;
-    boolean _nulled=false;
-    int _bytes;
-    int _headerReserve;
+    private OutputStream _realOut;
+    private NullableOutputStream _nullableOut;
+    private HttpMessage.HeaderWriter _headerOut;
+    private BufferedOutputStream _bufferedOut;
+    private ChunkingOutputStream _chunkingOut;
+    
+    private boolean _committed;
+    private boolean _written;
+    
+    private ArrayList _observers;
+    
+    private int _bytes;
+    private int _bufferSize;
+    private int _headerReserve;
+    private boolean _bufferHeaders;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param outputStream The outputStream to buffer or chunk to.
      */
-    public ChunkableOutputStream(OutputStream outputStream)
+    public HttpOutputStream(OutputStream outputStream)
     {
         this (outputStream,__BUFFER_SIZE,__FIRST_RESERVE);
     }
@@ -78,7 +85,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     /** Constructor. 
      * @param outputStream The outputStream to buffer or chunk to.
      */
-    public ChunkableOutputStream(OutputStream outputStream, int bufferSize)
+    public HttpOutputStream(OutputStream outputStream, int bufferSize)
     {
         this (outputStream,bufferSize,__FIRST_RESERVE);
     }
@@ -87,42 +94,39 @@ public class ChunkableOutputStream extends FilterOutputStream
     /** Constructor. 
      * @param outputStream The outputStream to buffer or chunk to.
      */
-    public ChunkableOutputStream(OutputStream outputStream,
-                                 int bufferSize,
-                                 int headerReserve)
+    public HttpOutputStream(OutputStream outputStream,
+                            int bufferSize,
+                            int headerReserve)
     {
-        super(new ByteBufferOutputStream(bufferSize,headerReserve));
-        _buffer=(ByteBufferOutputStream)out;
-        _realOut=outputStream;
+        super(outputStream);
         _committed=false;
         _written=false;
+        _bufferSize=bufferSize;
         _headerReserve=headerReserve;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get the raw stream.
-     * A stream without filters or chunking is returned.
-     * @return Raw OutputStream.
-     */
-    public OutputStream getRawStream()
-    {
-        return _realOut;
+        
+        _realOut=outputStream;
+        _nullableOut=new NullableOutputStream(_realOut,headerReserve);
+        _headerOut=_nullableOut;
+        out=_nullableOut;
     }
     
     /* ------------------------------------------------------------ */
-    /** Get Writer for the raw stream.
-     * A writer without filters or chunking is returned, which uses
-     * the 8859-1 encoding. The converted bytes from this writer will be
-     * writen to the rawStream when writeRawWriter() is called.
-     * These methods allow Character encoded data to be mixed with
-     * raw data on the same stream without excessive buffering or flushes.
-     * @return Raw Writer
-     */
-    public Writer getRawWriter()
+    public void setBufferedOutputStream(BufferedOutputStream bos,
+                                        boolean bufferHeaders)
     {
-        if (_rawWriter==null)
-            _rawWriter=new ByteArrayISO8859Writer(2048);
-        return _rawWriter;
+        _bufferedOut=bos;
+        _bufferedOut.setCommitObserver(this);
+        _bufferHeaders=bufferHeaders;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the backing output stream.
+     * A stream without filters or chunking is returned.
+     * @return Raw OutputStream.
+     */
+    public OutputStream getOutputStream()
+    {
+        return _realOut;
     }
     
     /* ------------------------------------------------------------ */
@@ -169,7 +173,9 @@ public class ChunkableOutputStream extends FilterOutputStream
      */
     public int getBufferCapacity()
     {
-        return _buffer.getCapacity();
+        if (_bufferedOut==null)
+            return _bufferSize-_headerReserve;
+        return _bufferedOut.capacity();
     }
     
     /* ------------------------------------------------------------ */
@@ -186,14 +192,20 @@ public class ChunkableOutputStream extends FilterOutputStream
         if (capacity<=getBufferCapacity())
             return;
         
-        if (_buffer.size()>0)
+        if (_bufferedOut!=null && _bufferedOut.size()>0)
             throw new IllegalStateException("Buffer is not empty");
         if (_committed)
             throw new IllegalStateException("Output committed");
-        if (out!=_buffer)
-            throw new IllegalStateException("Filter(s) installed");
 
-        _buffer.ensureCapacity(capacity+_headerReserve);
+        try
+        {
+            _bufferSize=capacity;
+            if (_bufferedOut!=null)
+                _bufferedOut.ensureSpareCapacity(capacity);
+            if (_chunkingOut!=null)
+                _chunkingOut.ensureSpareCapacity(capacity);
+        }
+        catch (IOException e){Code.warning(e);}
     }
 
     /* ------------------------------------------------------------ */
@@ -216,26 +228,35 @@ public class ChunkableOutputStream extends FilterOutputStream
             throw new IllegalStateException("Output committed");
 
         // Shutdown filters without observation
-        ArrayList save_observers=_observers;
-        _observers=null;
-        try
+        if (out!=null && out!=_headerOut)
         {
-            out.flush();
-            out.close();
+            ArrayList save_observers=_observers;
+            _observers=null;
+            try
+            {
+                _nullableOut.nullOutput();
+                out.close();
+            }
+            catch(Exception e)
+            {
+                Code.ignore(e);
+            }
+            finally
+            {
+                _observers=save_observers;
+                _nullableOut.resetStream();
+            }
         }
-        catch(Exception e)
-        {
-            Code.ignore(e);
-        }
-        finally
-        {
-            _observers=save_observers;
-        }
-
+        
         // discard current buffer and set it to output
-        _buffer.reset(_headerReserve);
+        if (_bufferedOut!=null)
+            _bufferedOut.resetStream();
+        if (_chunkingOut!=null)
+            _chunkingOut.resetStream();
+
+        _headerOut=_nullableOut;
+        out=(OutputStream)_headerOut;
 	_bytes=0;
-        out=_buffer;
         _written=false;
         _committed=false;
         try
@@ -281,7 +302,6 @@ public class ChunkableOutputStream extends FilterOutputStream
         _observers.add(data);
     }
     
-    
     /* ------------------------------------------------------------ */
     /** Null the output.
      * All output written is discarded until the stream is reset. Used
@@ -290,7 +310,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     public void nullOutput()
         throws IOException
     {
-        _nulled=true;
+        _nullableOut.nullOutput();
     }
     
     /* ------------------------------------------------------------ */
@@ -299,7 +319,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     public boolean isNullOutput()
         throws IOException
     {
-        return _nulled;
+        return _nullableOut.isNullOutput();
     }
     
     /* ------------------------------------------------------------ */
@@ -307,7 +327,23 @@ public class ChunkableOutputStream extends FilterOutputStream
      */
     public void setChunking()
     {
-        _chunking=true;
+        if (_chunkingOut==null)
+        {
+            _chunkingOut=new ChunkingOutputStream(_nullableOut,
+                                                  _bufferSize,
+                                                  _headerReserve);
+            _chunkingOut.setCommitObserver(this);
+        }
+        _headerOut=_chunkingOut;
+        out=_chunkingOut;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get chunking mode 
+     */
+    public boolean isChunking()
+    {
+        return _chunkingOut!=null && _headerOut==_chunkingOut;
     }
     
     /* ------------------------------------------------------------ */
@@ -322,17 +358,18 @@ public class ChunkableOutputStream extends FilterOutputStream
         if (isChunking())
             throw new IllegalStateException("Chunking");
         
-        _trailer=null;
         _committed=false;
         _written=false;
-        _buffer.reset(_headerReserve);
+        if (_bufferedOut!=null)
+            _bufferedOut.resetStream();
+        if (_chunkingOut!=null)
+            _chunkingOut.resetStream();
+        _nullableOut.resetStream();
         
-        out=_buffer;    
-        _nulled=false;
-        _bytes=0;
+        _headerOut=_nullableOut;
+        out=_nullableOut;
 
-        if (_rawWriter!=null)
-            _rawWriter.reset();
+        _bytes=0;
 
         if (_observers!=null)
             _observers.clear();
@@ -341,16 +378,12 @@ public class ChunkableOutputStream extends FilterOutputStream
     /* ------------------------------------------------------------ */
     public void destroy()
     {
-        if (_buffer!=null)
-            _buffer.destroy();
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get chunking mode 
-     */
-    public boolean isChunking()
-    {
-        return _chunking;
+        if (_bufferedOut!=null)
+            _bufferedOut.destroy();
+        if (_chunkingOut!=null)
+            _chunkingOut.destroy();
+        if (_nullableOut!=null)
+            _nullableOut.destroy();
     }
     
     /* ------------------------------------------------------------ */
@@ -361,26 +394,25 @@ public class ChunkableOutputStream extends FilterOutputStream
     {
         if (!isChunking())
             throw new IllegalStateException("Not Chunking");
-        _trailer=trailer;
+        _chunkingOut.setTrailer(trailer);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void writeHeader(HttpMessage httpMessage)
+        throws IOException
+    {
+        if (_bufferHeaders)
+            _bufferedOut.writeHeader(httpMessage);
+        else
+            _headerOut.writeHeader(httpMessage);
     }
     
     /* ------------------------------------------------------------ */
     public void write(int b) throws IOException
     {
-	if (out==null)
-	    throw new IOException("closed");
-
-        if (!_written)
-        {
-            _written=true;
-            notify(OutputObserver.__FIRST_WRITE);
-        }
-        
-        if (!_buffer.canFit(_chunking?__CHUNK_RESERVE:1))
-            flush();
-        
-        _bytes++;
+        prepareOutput();
         out.write(b);
+        _bytes++;
     }
 
     /* ------------------------------------------------------------ */
@@ -390,152 +422,59 @@ public class ChunkableOutputStream extends FilterOutputStream
     }
 
     /* ------------------------------------------------------------ */
-    public void write(byte b[], int off, int len) throws IOException
-    {        
+    public void write(byte b[], int off, int len)
+        throws IOException
+    {     
+        prepareOutput();
+        out.write(b,off,len);
+        _bytes+=len;
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected void prepareOutput()
+        throws IOException
+    {   
 	if (out==null)
 	    throw new IOException("closed");
 
         if (!_written)
         {
             _written=true;
+
+            if (out==_nullableOut)
+            {
+                if (_bufferedOut==null)
+                {
+                    _bufferedOut=new BufferedOutputStream(_nullableOut,
+                                                          _bufferSize,
+                                                          _headerReserve,0,0);
+                    _bufferedOut.setCommitObserver(this);
+                    _bufferedOut.setBypassBuffer(true);
+                    _bufferedOut.setFixed(true);
+                }
+                out=_bufferedOut;
+                _headerOut=_bufferedOut;
+            }
+            
             notify(OutputObserver.__FIRST_WRITE);
-        }
-
-        int capacity=_buffer.getSpareCapacity();
-        if (_chunking)
-            capacity=capacity-__CHUNK_RESERVE;
-
-        while (len>capacity)
-        {
-            _bytes+=capacity;
-            out.write(b,off,capacity);
-            off+=capacity;
-            len-=capacity;
-            flush(false);
-            capacity=_buffer.getSpareCapacity();
-            if (_chunking)
-                capacity=capacity-__CHUNK_RESERVE;
-        }
-        
-        _bytes+=len;
-        out.write(b,off,len);
+            
+            if (out==_nullableOut)
+                notify(OutputObserver.__COMMITING);
+        }        
     }
-
     /* ------------------------------------------------------------ */
-    public void flush() throws IOException
-    {
-        flush(false);
-    }
-
-    /* ------------------------------------------------------------ */
-    public void commit()
+    public void flush()
         throws IOException
     {
-        _committed=true;
-        notify(OutputObserver.__COMMITING);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Flush.
-     * @param complete If true, filters are closed, chunking ended and
-     * trailers written. 
-     * @exception IOException 
-     */
-    public void flush(boolean complete)
-        throws IOException
-    {        
-        // Flush filters
         if (out!=null)
         {
+            if (out==_nullableOut)
+                notify(OutputObserver.__COMMITING);
             out.flush();
-            if (complete)
-            {
-                if (out!=_buffer)
-                    out.close();
-                out=null;
-            }
-        }
-        
-        // Save non-raw size
-        int size=_buffer.size();
-        
-        // Do we need to commit?
-        if (!_committed && (size>0 || (_rawWriter!=null && _rawWriter.length()>0)))
-        {
-            commit();            
-            if (out!=null)
-                out.flush();
-            size=_buffer.size();
-        }
-
-        try
-        {
-            if (_nulled)
-            {
-                // Just write the contents of the rawWriter
-                if (_rawWriter!=null)
-                    _rawWriter.writeTo(_realOut);
-            }
-            else
-            {
-                // Handle chunking
-                if (_chunking)
-                {
-                    Writer writer=getRawWriter();
-                    if (size>0)
-                    {
-                        writer.write(Integer.toString(size,16));
-                        writer.write(__CRLF);
-                        writer.flush();
-                        _buffer.write(__CRLF_B);
-                    }
-
-                    if (complete)
-                    {
-                        _buffer.write(__CHUNK_EOF_B);
-                        if (_trailer==null)
-                            _buffer.write(__CRLF_B);
-                    }
-                }
-                
-                // Pre write the raw writer to the buffer
-                if (_rawWriter!=null && _rawWriter.length()>0)
-                    _buffer.prewrite(_rawWriter.getBuf(),0,_rawWriter.length());
-                
-                
-                // Handle any trailers
-                if (_trailer!=null && complete)
-                {
-                    Writer writer=getRawWriter();
-                    _rawWriter.reset();
-                    _trailer.write(writer);
-                    _rawWriter.writeTo(_buffer);
-                }
-                
-                // Write the buffer
-                if (_buffer.size()>0)
-                {
-                    _buffer.writeTo(_realOut);
-                    _buffer.reset(_chunking?__CHUNK_RESERVE:0);
-                }
-            }
-            _realOut.flush();
-        }
-        finally
-        {
-            if (_rawWriter!=null)
-                _rawWriter.reset();
-
-            if (complete)
-            {
-                _buffer.reset(_headerReserve);
-                _chunking=false;
-            }
-            else
-                _buffer.reset();
         }
     }
-
+    
+    
     /* ------------------------------------------------------------ */
     /** Close the stream.
      * @exception IOException 
@@ -550,14 +489,29 @@ public class ChunkableOutputStream extends FilterOutputStream
         // Close
         try {
             notify(OutputObserver.__CLOSING);
-            flush(true);
+            if (_bufferHeaders)
+                _bufferedOut.close();
+            else if (out!=null)
+                out.close();
             out=null;
+            _headerOut=_nullableOut;
             notify(OutputObserver.__CLOSED);
         }
         catch (IOException e)
         {
             Code.ignore(e);
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Output Notification.
+     * Called by the internal Buffered Output and the event is passed on to
+     * this streams observers.
+     */
+    public void outputNotify(OutputStream out, int action, Object ignoredData)
+        throws IOException
+    {
+        notify(action);
     }
 
     /* ------------------------------------------------------------ */

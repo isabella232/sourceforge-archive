@@ -6,11 +6,12 @@
 package org.mortbay.http.handler;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-import org.mortbay.http.ChunkableInputStream;
-import org.mortbay.http.ChunkableOutputStream;
+import org.mortbay.http.HttpInputStream;
+import org.mortbay.http.HttpOutputStream;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
@@ -18,9 +19,9 @@ import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.HttpEncoding;
 import org.mortbay.http.HttpContext;
-import org.mortbay.http.OutputObserver;
 import org.mortbay.http.PathMap;
 import org.mortbay.util.Code;
+import org.mortbay.util.OutputObserver;
 
 /* ------------------------------------------------------------ */
 /** Content Encoding Handler.
@@ -115,7 +116,7 @@ public class ContentEncodingHandler
                 encoding=HttpFields.valueParameters(encoding,encodingParams);
             }
             
-            _httpEncoding.enableEncoding((ChunkableInputStream)request.getInputStream(),
+            _httpEncoding.enableEncoding((HttpInputStream)request.getInputStream(),
                                          encoding,encodingParams);
             request.setState(HttpMessage.__MSG_EDITABLE);
             request.removeField(HttpFields.__ContentEncoding);
@@ -133,7 +134,7 @@ public class ContentEncodingHandler
             if (_httpEncoding.knownEncoding(encoding))
             {
                 // We can handle this encoding, so observe for content.
-                ChunkableOutputStream out = (ChunkableOutputStream)response.getOutputStream();
+                HttpOutputStream out = (HttpOutputStream)response.getOutputStream();
                 out.addObserver(this,response);
                 response.setAttribute("Encoding",encoding);
                 break;
@@ -149,7 +150,7 @@ public class ContentEncodingHandler
      * @param event The notified event.
      * @param data The associated response object.
      */
-    public void outputNotify(ChunkableOutputStream out, int event, Object data)
+    public void outputNotify(OutputStream out, int event, Object data)
     {
         switch (event)
         {
@@ -179,7 +180,7 @@ public class ContentEncodingHandler
               try
               {
                   Code.debug("Enable: ",encoding);
-                  _httpEncoding.enableEncoding(out,encoding,null);
+                  _httpEncoding.enableEncoding((HttpOutputStream)out,encoding,null);
                   response.setField(HttpFields.__ContentEncoding,encoding);
               }
               catch(Exception e)

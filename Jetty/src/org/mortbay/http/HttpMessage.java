@@ -44,6 +44,12 @@ public abstract class HttpMessage
     public final static String __HTTP_1_1 ="HTTP/1.1";
     public final static String __HTTP_1_X ="HTTP/1.";
 
+    /* ------------------------------------------------------------ */
+    public interface HeaderWriter
+    {
+        void writeHeader(HttpMessage httpMessage)
+            throws IOException;
+    }
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -719,60 +725,11 @@ public abstract class HttpMessage
     abstract void writeHeader(Writer writer)
         throws IOException;
 
-    /* ------------------------------------------------------------ */
-    public synchronized void commitHeader()
-        throws IOException
-    {
-        ChunkableOutputStream out = (ChunkableOutputStream)getOutputStream();
-        if (out==null)
-            throw new IllegalStateException("No output stream");
-
-        _connection.setupOutputStream();
-        Writer writer = out.getRawWriter();
-        writeHeader(writer);
-        _state=__MSG_SENDING;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Commit the message.
-     * Take whatever actions possible to move the message to the SENDING state.
-     */
-    public synchronized void commit()
-        throws IOException, IllegalStateException
-    {
-        if (isCommitted())
-            return;
-        
-        if (Code.verbose(99))
-            Code.debug("commit from "+__state[_state]);
-        
-        ChunkableOutputStream out = (ChunkableOutputStream)getOutputStream();
-        
-        switch(_state)
-        {
-          case __MSG_EDITABLE:
-              out.commit();
-              out.flush(false);
-              break;
-          case __MSG_BAD:
-              throw new IllegalStateException("BAD");
-          case __MSG_RECEIVED:
-              throw new IllegalStateException("RECEIVED");
-          case __MSG_SENDING:
-              out.flush();
-              break;
-          case __MSG_SENT:
-              break;
-        }
-    }
 
     /* ------------------------------------------------------------ */
     public boolean isCommitted()
     {
-        ChunkableOutputStream out=(ChunkableOutputStream)getOutputStream();
-        return out!=null && out.isCommitted() ||
-            _state==__MSG_SENDING ||
-            _state==__MSG_SENT;
+        return _state==__MSG_SENDING || _state==__MSG_SENT;
     }
     
     /* ------------------------------------------------------------ */
@@ -781,7 +738,7 @@ public abstract class HttpMessage
      */
     public boolean isDirty()
     {
-        ChunkableOutputStream out=(ChunkableOutputStream)getOutputStream();
+        HttpOutputStream out=(HttpOutputStream)getOutputStream();
         
         return _state!=__MSG_EDITABLE
             || ( out!=null &&

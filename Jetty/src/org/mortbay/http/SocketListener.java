@@ -44,9 +44,10 @@ public class SocketListener
 
     private transient HttpServer _server;
     private transient int _throttled=0;
-    private transient boolean _lastLow=false;
-    private transient boolean _lastOut=false;
-
+    private transient boolean _isLow=false;
+    private transient boolean _isOut=false;
+    private transient long _warned=0;
+    
     /* ------------------------------------------------------------------- */
     public SocketListener()
     {}
@@ -200,6 +201,7 @@ public class SocketListener
         {
             Code.warning(e);
         }
+
         connection.handle();
     }
 
@@ -288,14 +290,21 @@ public class SocketListener
         boolean low =
             getThreads()==getMaxThreads() &&
             getIdleThreads()<getMinThreads();
-        if (low && !_lastLow)
-            Log.event("LOW ON THREADS: "+this);
-        else if (!low && _lastLow)
+        
+        if (low && !_isLow)
         {
-            Log.event("OK on threads: "+this);
-            _lastOut=false;
+            Log.event("LOW ON THREADS: "+this);
+            _warned=System.currentTimeMillis();
+            _isLow=true;
         }
-        _lastLow=low;
+        else if (!low && _isLow)
+        {
+            if (System.currentTimeMillis()-_warned > 1000)
+            {
+                _isOut=false;
+                _isLow=false;
+            }
+        }
         return low;
     }
 
@@ -310,10 +319,14 @@ public class SocketListener
         boolean out =
             getThreads()==getMaxThreads() &&
             getIdleThreads()==0;
-        if (out && !_lastOut)
+        
+        if (out && !_isOut)
+        {
             Code.warning("OUT OF THREADS: "+this);
-            
-        _lastOut=out;
+            _warned=System.currentTimeMillis();
+            _isOut=true;
+        }
+        
         return out;
     }
     

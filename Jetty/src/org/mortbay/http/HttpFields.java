@@ -378,7 +378,7 @@ public class HttpFields
             _next=null;
             _prev=null;
         }
-
+        
         /* ------------------------------------------------------------ */
         public void write(Writer writer)
             throws IOException
@@ -411,6 +411,7 @@ public class HttpFields
             }
         }
 
+        /* ------------------------------------------------------------ */
         public String getDisplayName()
         {
             return _info==null?"NULLED":_info._name;

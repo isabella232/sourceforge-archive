@@ -58,7 +58,7 @@ public class TestHarness
     public static void chunkInTest()
         throws Exception
     {
-        TestCase test = new TestCase("org.mortbay.http.ChunkableInputStream");
+        TestCase test = new TestCase("org.mortbay.http.HttpInputStream");
 
         byte[] buf = new byte[18];
         
@@ -67,7 +67,7 @@ public class TestHarness
                 new FileInputStream(__userDir+File.separator+
                                     "TestData"+File.separator+
                                     "chunkIn.bin");
-            ChunkableInputStream cin = new ChunkableInputStream(fin);
+            HttpInputStream cin = new HttpInputStream(fin);
             cin.setContentLength(10);
             test.checkEquals(cin.read(buf),10,"content length limited");
             test.checkEquals(cin.read(buf),-1,"content length EOF");
@@ -75,7 +75,7 @@ public class TestHarness
             fin= new FileInputStream(__userDir+File.separator+
                                     "TestData"+File.separator+
                                     "chunkIn.bin");
-            cin = new ChunkableInputStream(fin);
+            cin = new HttpInputStream(fin);
             cin.setChunking();
             test.checkEquals(cin.read(),'a',"Read 1st char");
             test.checkEquals(cin.read(),'b',"Read cont char");
@@ -134,7 +134,7 @@ public class TestHarness
     public static void chunkOutTest()
         throws Exception
     {
-        TestCase test = new TestCase("org.mortbay.http.ChunkableOutputStream");
+        TestCase test = new TestCase("org.mortbay.http.HttpOutputStream");
 
         try{
             File tmpFile=File.createTempFile("HTTP.TestHarness",".chunked");
@@ -145,7 +145,7 @@ public class TestHarness
                 Code.debug("Chunk out tmp = ",tmpFile);
             
             FileOutputStream fout = new FileOutputStream(tmpFile);
-            ChunkableOutputStream cout = new ChunkableOutputStream(fout,4020);
+            HttpOutputStream cout = new HttpOutputStream(fout,4020);
             cout.setChunking();
             
             cout.write("Reset Output".getBytes());
@@ -171,7 +171,80 @@ public class TestHarness
             cout.close();
             
             FileInputStream ftmp= new FileInputStream(tmpFile);
-            ChunkableInputStream cin = new ChunkableInputStream(ftmp);
+            ChunkingInputStream cin = new ChunkingInputStream(new LineInput(ftmp));
+
+            test.checkEquals(cin.read(),'a',"a in 1");
+            byte[] b = new byte[100];
+            test.checkEquals(cin.read(b,0,2),2,"bc in 23");
+            test.checkEquals(b[0],'b',"b in 2");
+            test.checkEquals(b[1],'c',"c in 3");
+
+            LineInput lin = new LineInput(cin);            
+            String line=lin.readLine();
+            
+            test.checkEquals(line.length(),33,"def...");            test.checkEquals(line,"defghijklmnopqrstuvwxyz0123456789",
+                             "readLine");
+            int chars=0;
+            while (cin.read()!=-1)
+                chars++;
+            test.checkEquals(chars,400*11,"Auto flush");
+
+            
+            ftmp= new FileInputStream(tmpFile);
+            FileInputStream ftest=
+                new FileInputStream(__userDir+File.separator+
+                                    "TestData"+File.separator+
+                                    "chunkOut.bin");
+            test.checkEquals(ftmp,ftest,"chunked out");
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            test.check(false,e.toString());
+        }
+    }
+
+    /* -------------------------------------------------------------- */
+    public static void chunkingOSTest()
+        throws Exception
+    {
+        TestCase test = new TestCase("org.mortbay.http.ChunkingOutputStream");
+
+        try{
+            File tmpFile=File.createTempFile("HTTP.TestHarness",".chunked");
+
+            if (!Code.debug())
+                tmpFile.deleteOnExit();
+            else
+                Code.debug("Chunk out tmp = ",tmpFile);
+            
+            FileOutputStream fout = new FileOutputStream(tmpFile);
+            ChunkingOutputStream cout = new ChunkingOutputStream(fout,4020);
+            
+            cout.write("Reset Output".getBytes());
+            cout.reset();
+            
+            cout.flush();
+            cout.write('a');
+            cout.flush();
+            cout.write('b');
+            cout.write('c');
+            cout.flush();
+            cout.write("defghijklmnopqrstuvwxyz".getBytes());
+            cout.flush();
+            cout.write("XXX0123456789\nXXX".getBytes(),3,11);
+            cout.flush();
+            byte[] eleven = "0123456789\n".getBytes();
+            for (int i=0;i<400;i++)
+                cout.write(eleven);
+            HttpFields trailer=new HttpFields();
+            trailer.put("trailer1","value1");
+            trailer.put("trailer2","value2");
+            cout.setTrailer(trailer);
+            cout.close();
+            
+            FileInputStream ftmp= new FileInputStream(tmpFile);
+            HttpInputStream cin = new HttpInputStream(ftmp);
             cin.setChunking();
 
             test.checkEquals(cin.read(),'a',"a in 1");
@@ -207,14 +280,14 @@ public class TestHarness
     /* --------------------------------------------------------------- */
     public static void filters()
     {
-        TestCase t = new TestCase("org.mortbay.http.ChunkableXxxputStream");
+        TestCase t = new TestCase("org.mortbay.http.HttpXxxputStream");
         try
         {
             File tmpFile=File.createTempFile("HTTP.TestHarness",".gzip");
             tmpFile.deleteOnExit();
             FileOutputStream fout =
                 new FileOutputStream(tmpFile);
-            ChunkableOutputStream cout = new ChunkableOutputStream(fout);
+            HttpOutputStream cout = new HttpOutputStream(fout);
             cout.setChunking();
 
             cout.setFilterStream(new java.util.zip.GZIPOutputStream(cout.getFilterStream()));
@@ -228,7 +301,7 @@ public class TestHarness
             
             FileInputStream fin=
                 new FileInputStream(tmpFile);
-            ChunkableInputStream cin = new ChunkableInputStream(fin);
+            HttpInputStream cin = new HttpInputStream(fin);
             cin.setChunking();
             cin.setFilterStream(new java.util.zip.GZIPInputStream(cin.getFilterStream()));
             
@@ -510,6 +583,7 @@ public class TestHarness
         {
             chunkInTest();
             chunkOutTest();
+            chunkingOSTest();
             filters();
             httpFields();
             pathMap();

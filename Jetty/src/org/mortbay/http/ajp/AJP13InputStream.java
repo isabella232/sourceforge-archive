@@ -36,7 +36,7 @@ public class AJP13InputStream extends InputStream
     }
 
     /* ------------------------------------------------------------ */
-    public void recycle()
+    public void resetStream()
     {
         _gotFirst=false;
         _closed=false;

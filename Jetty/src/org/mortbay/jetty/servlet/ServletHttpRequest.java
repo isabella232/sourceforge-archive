@@ -35,7 +35,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequestWrapper;
-import org.mortbay.http.ChunkableInputStream;
+import org.mortbay.http.HttpInputStream;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpFields;
@@ -647,7 +647,7 @@ public class ServletHttpRequest
         if (_inputState!=0 && _inputState!=1)
             throw new IllegalStateException();
         if (_in==null)
-            _in = new ServletIn((ChunkableInputStream)_httpRequest.getInputStream());  
+            _in = new ServletIn((HttpInputStream)_httpRequest.getInputStream());  
         _inputState=1;
         _reader=null;
         return _in;

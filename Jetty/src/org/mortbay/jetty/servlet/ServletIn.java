@@ -8,15 +8,15 @@ package org.mortbay.jetty.servlet;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import javax.servlet.ServletInputStream;
-import org.mortbay.http.ChunkableInputStream;
+import org.mortbay.http.HttpInputStream;
 
 
 class ServletIn extends ServletInputStream
 {
-    ChunkableInputStream _in;
+    HttpInputStream _in;
 
     /* ------------------------------------------------------------ */
-    ServletIn(ChunkableInputStream in)
+    ServletIn(HttpInputStream in)
     {
         _in=in;
     }

@@ -3,14 +3,15 @@
 // $Id$
 // ========================================================================
 
-package org.mortbay.http;
+package org.mortbay.util;
 
 import java.io.IOException;
+import java.io.OutputStream;
 
 /* ------------------------------------------------------------ */
 /** Observer output events.
  *
- * @see ChunkableOutputStream
+ * @see HttpOutputStream
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -29,6 +30,6 @@ public interface OutputObserver
      * @param action The action taken
      * @param data Data associated with the event.
      */
-    void outputNotify(ChunkableOutputStream out, int action, Object data)
+    void outputNotify(OutputStream out, int action, Object data)
         throws IOException;
 }

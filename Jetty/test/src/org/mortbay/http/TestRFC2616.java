@@ -452,7 +452,7 @@ public class TestRFC2616
                                                  "\n").getBytes());
             Code.debug("RESPONSE: ",new String(rbytes));
             ByteArrayInputStream bin = new ByteArrayInputStream(rbytes);
-            ChunkableInputStream cin = new ChunkableInputStream(bin);
+            HttpInputStream cin = new HttpInputStream(bin);
             HttpFields header = new HttpFields();
             header.read((LineInput)cin.getRawStream());
             Code.debug("HEADER:\n",header);

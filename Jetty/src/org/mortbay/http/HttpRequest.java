@@ -259,7 +259,7 @@ public class HttpRequest extends HttpMessage
     /* -------------------------------------------------------------- */
     /** Write the request header.
      * Places the message in __MSG_SENDING state.
-     * @param out Chunkable output stream
+     * @param out Http output stream
      * @exception IOException IO problem
      */
     public void writeHeader(Writer writer)

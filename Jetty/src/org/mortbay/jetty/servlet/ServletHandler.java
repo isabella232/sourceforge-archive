@@ -636,12 +636,11 @@ public class ServletHandler extends AbstractHttpHandler
         {
             if (servletHolder!=null)
             {
-                httpRequest.setHandled(true);
                 response.flushBuffer();
-                if (!httpResponse.isCommitted())
-                    httpResponse.commit();
+                if (!httpRequest.isHandled())
+                    new Throwable().printStackTrace();
             }
-        
+            
             request.recycle(null,null);
             response.recycle();
         }
@@ -868,7 +867,7 @@ public class ServletHandler extends AbstractHttpHandler
         ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer();
         writer.write(request.toString());
         writer.flush();
-        response.setIntHeader(HttpFields.__ContentLength,writer.length());
+        response.setIntHeader(HttpFields.__ContentLength,writer.size());
         writer.writeTo(out);
         out.flush();
     }

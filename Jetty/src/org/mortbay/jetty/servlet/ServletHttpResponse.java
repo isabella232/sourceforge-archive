@@ -21,7 +21,7 @@ import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.mortbay.http.ChunkableOutputStream;
+import org.mortbay.http.HttpOutputStream;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
@@ -187,7 +187,7 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void setBufferSize(int size)
     {
-        ChunkableOutputStream out = (ChunkableOutputStream)_httpResponse.getOutputStream();
+        HttpOutputStream out = (HttpOutputStream)_httpResponse.getOutputStream();
         if (out.isWritten()  || _writer!=null && _writer.isWritten())
             throw new IllegalStateException("Output written");
         out.setBufferCapacity(size);
@@ -196,7 +196,7 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public int getBufferSize()
     {
-        return ((ChunkableOutputStream)_httpResponse.getOutputStream()).getBufferCapacity();
+        return ((HttpOutputStream)_httpResponse.getOutputStream()).getBufferCapacity();
     }
     
     /* ------------------------------------------------------------ */
@@ -218,7 +218,7 @@ public class ServletHttpResponse implements HttpServletResponse
     {
         if (isCommitted())
             throw new IllegalStateException("committed");
-        ((ChunkableOutputStream)_httpResponse.getOutputStream()).resetBuffer();
+        ((HttpOutputStream)_httpResponse.getOutputStream()).resetBuffer();
         if (_writer!=null)
             _writer.reset();
     }

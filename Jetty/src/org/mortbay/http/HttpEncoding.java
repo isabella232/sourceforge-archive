@@ -38,7 +38,7 @@ public class HttpEncoding implements Serializable
      * @param coding Coding enumeration
      * @exception HttpException 
      */
-    public void enableEncoding(ChunkableInputStream in,
+    public void enableEncoding(HttpInputStream in,
                                String coding,
                                Map parameters)
         throws HttpException
@@ -69,13 +69,13 @@ public class HttpEncoding implements Serializable
     }
     
     /* ------------------------------------------------------------ */
-    /** Enable a encoding on a ChunkableOutputStream.
+    /** Enable a encoding on a HttpOutputStream.
      * @param out
      * @param coding Coding name 
      * @param parameters Coding parameters or null
      * @exception HttpException 
      */
-    public void enableEncoding(ChunkableOutputStream out,
+    public void enableEncoding(HttpOutputStream out,
                                String coding,
                                Map parameters)
         throws HttpException

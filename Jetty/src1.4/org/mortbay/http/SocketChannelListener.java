@@ -7,7 +7,7 @@ package org.mortbay.http;
 import org.mortbay.http.SocketListener;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpConnection;
-import org.mortbay.http.ChunkableInputStream;
+import org.mortbay.http.HttpInputStream;
 import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.Log;
@@ -290,7 +290,7 @@ public class SocketChannelListener
                     }
 
                     // If no more bytes available, goto idle connection
-                    ChunkableInputStream cin=connection.getInputStream();
+                    HttpInputStream cin=connection.getInputStream();
                     if (cin.available()<=0)
                     {
                         Thread.yield();
@@ -473,22 +473,15 @@ public class SocketChannelListener
         protected void readRequest()
             throws IOException
         {
-            Thread handlingThread=Thread.currentThread();
-            if (handlingThread instanceof PoolThread)
+            try
             {
-                PoolThread poolThread=(PoolThread)handlingThread;
-                try
-                {
-                    poolThread.setActive(false);
-                    super.readRequest();
-                }
-                finally
-                {
-                    poolThread.setActive(true);
-                }
-            }
-            else
+                // XXXXXXXXXXXXX - mark Idle
                 super.readRequest();
+            }
+            finally
+            {
+                // XXXXXXXXXXXXX - mark active
+            }
         }
     
         public SocketChannel getSocketChannel()
@@ -606,6 +599,14 @@ public class SocketChannelListener
                         }
                     }
                 }
+            }
+            catch(InterruptedException e)
+            {
+                Code.ignore(e);
+            }
+            catch(IOException e)
+            {
+                Code.ignore(e);
             }
             catch(Exception e)
             {

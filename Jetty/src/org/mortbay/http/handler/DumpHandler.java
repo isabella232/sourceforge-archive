@@ -17,7 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.Cookie;
-import org.mortbay.http.ChunkableOutputStream;
+import org.mortbay.http.HttpOutputStream;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;

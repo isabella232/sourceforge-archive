@@ -105,7 +105,13 @@ public class LineInput extends FilterInputStream
         _reader=new InputStreamReader(_byteBuffer,encoding);
         _encoding=encoding;
     }
-
+    
+    /* ------------------------------------------------------------ */
+    public InputStream getInputStream()
+    {
+        return in;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Set the byte limit.
      * If set, only this number of bytes are read before EOF.

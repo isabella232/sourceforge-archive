@@ -312,7 +312,7 @@ public class NCSARequestLog implements RequestLog
                 _buf.write(StringUtil.__LINE_SEPARATOR);
                 _buf.flush();
                 _buf.writeTo(_out);
-                _buf.reset();
+                _buf.resetWriter();
             }
         }
         catch(IOException e)

@@ -60,15 +60,21 @@ public class ByteArrayISO8859Writer extends Writer
     }
     
     /* ------------------------------------------------------------ */
+    public int size()
+    {
+        return _size;
+    }
+    
+    /* ------------------------------------------------------------ */
     public int capacity()
     {
         return _buf.length;
     }
-    
+
     /* ------------------------------------------------------------ */
-    public int length()
+    public int spareCapacity()
     {
-        return _size;
+        return _buf.length-_size;
     }
     
     /* ------------------------------------------------------------ */
@@ -84,12 +90,6 @@ public class ByteArrayISO8859Writer extends Writer
     }
     
     /* ------------------------------------------------------------ */
-    public int getCapacity()
-    {
-        return _buf.length;
-    }
-    
-    /* ------------------------------------------------------------ */
     public void writeTo(OutputStream out)
         throws IOException
     {
@@ -100,7 +100,7 @@ public class ByteArrayISO8859Writer extends Writer
     public void write(char c)
         throws IOException
     {
-        ensureCapacity(1);
+        ensureSpareCapacity(1);
         if (c>=0&&c<=0x7f)
             _buf[_size++]=(byte)c;
         else
@@ -114,7 +114,7 @@ public class ByteArrayISO8859Writer extends Writer
     public void write(char[] ca)
         throws IOException
     {
-        ensureCapacity(ca.length);
+        ensureSpareCapacity(ca.length);
         for (int i=0;i<ca.length;i++)
         {
             char c=ca[i];
@@ -132,7 +132,7 @@ public class ByteArrayISO8859Writer extends Writer
     public void write(char[] ca,int offset, int length)
         throws IOException
     {
-        ensureCapacity(length);
+        ensureSpareCapacity(length);
         for (int i=0;i<length;i++)
         {
             char c=ca[offset+i];
@@ -151,7 +151,7 @@ public class ByteArrayISO8859Writer extends Writer
         throws IOException
     {
         int length=s.length();
-        ensureCapacity(length);
+        ensureSpareCapacity(length);
         for (int i=0;i<length;i++)
         {
             char c=s.charAt(i);
@@ -171,7 +171,7 @@ public class ByteArrayISO8859Writer extends Writer
     public void write(String s,int offset, int length)
         throws IOException
     {
-        ensureCapacity(length);
+        ensureSpareCapacity(length);
         for (int i=0;i<length;i++)
         {
             char c=s.charAt(offset+i);
@@ -198,7 +198,7 @@ public class ByteArrayISO8859Writer extends Writer
             _bout.reset();
         _writer.write(ca,offset,length);
         _writer.flush();
-        ensureCapacity(_bout.getCount());
+        ensureSpareCapacity(_bout.getCount());
         System.arraycopy(_bout.getBuf(),0,_buf,_size,_bout.getCount());
         _size+=_bout.getCount();
     }
@@ -208,7 +208,7 @@ public class ByteArrayISO8859Writer extends Writer
     {}
 
     /* ------------------------------------------------------------ */
-    public void reset()
+    public void resetWriter()
     {
         _size=0;
     }
@@ -218,7 +218,14 @@ public class ByteArrayISO8859Writer extends Writer
     {}
 
     /* ------------------------------------------------------------ */
-    public void ensureCapacity(int n)
+    public void destroy()
+    {
+        ByteArrayPool.returnByteArray(_buf);
+        _buf=null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void ensureSpareCapacity(int n)
         throws IOException
     {
         if (_size+n>_buf.length)

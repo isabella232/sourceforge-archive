@@ -95,17 +95,35 @@ public class AJP13Packet
     private int _bytes;
     private int _pos;
     private ByteArrayISO8859Writer _byteWriter;
+    private boolean _ownBuffer;
+    
+    /* ------------------------------------------------------------ */
+    public AJP13Packet(byte[] buffer, int len)
+    {
+        _buf=buffer;
+        _ownBuffer=false;
+        _bytes=len;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public AJP13Packet(byte[] buffer)
+    {
+        _buf=buffer;
+        _ownBuffer=false;
+    }
     
     /* ------------------------------------------------------------ */
     public AJP13Packet(int size)
     {
         _buf=ByteArrayPool.getByteArray(size);
+        _ownBuffer=true;
     }
 
     /* ------------------------------------------------------------ */
     public void destroy()
     {
-        ByteArrayPool.returnByteArray(_buf);
+        if (_ownBuffer)
+            ByteArrayPool.returnByteArray(_buf);
         _buf=null;
         _byteWriter=null;
     }
@@ -195,7 +213,7 @@ public class AJP13Packet
         
         if (Code.verbose(99))
             Code.debug("AJP13 rcv: "+this.toString(64));
-	// System.out.println(Thread.currentThread()+" AJP13 rcv "+this.toString(10));
+	//System.err.println(Thread.currentThread()+" AJP13 rcv "+this.toString());
 
         return true;
     }
@@ -206,7 +224,7 @@ public class AJP13Packet
     {
         if (Code.verbose(99))
             Code.debug("AJP13 snd: "+this.toString(64));
-	// System.out.println(Thread.currentThread()+" AJP13 snd "+this.toString(10));
+	//System.err.println(Thread.currentThread()+" AJP13 snd "+this.toString());
         out.write(_buf,0,_bytes);
     }
     
@@ -328,7 +346,7 @@ public class AJP13Packet
         int p=_bytes+2;
         _byteWriter.setLength(p);
         _byteWriter.write(s);
-        int l=_byteWriter.length()-p;
+        int l=_byteWriter.size()-p;
 
         addInt(l);
         _bytes+=l;
@@ -361,6 +379,7 @@ public class AJP13Packet
     /* ------------------------------------------------------------ */
     public void setDataSize(int s)
     {
+        _bytes=s+__HDR_SIZE;
         _buf[2]=(byte)((s>>8) & 0xFF);
         _buf[3]=(byte)(s & 0xFF);
         if (_buf[4]==__SEND_BODY_CHUNK)
@@ -399,21 +418,21 @@ public class AJP13Packet
           case __END_RESPONSE:    b.append("END_RESPONSE  )}:");break;
           case __GET_BODY_CHUNK:  b.append("GET_BODY_CHUNK  :");break;
         }
-        b.append(" ");
+        b.append("\n");
         
         for (int i=0;i<_bytes;i++)
         {
             char c=(char)((int)_buf[i]&0xFF);
-            if (c<16)
+            if (c<32)
                 b.append('0');
-            b.append(Integer.toString(c,16));
+            b.append(Integer.toString(c,32));
             
             if (Character.isLetterOrDigit(c))
                 a.append(c);
             else
                 a.append('.');
             
-            if (i%16==15 || i==(_bytes-1))
+            if (i%32==31 || i==(_bytes-1))
             {
                 b.append(" : ");
                 b.append(a.toString());

@@ -85,9 +85,7 @@ abstract public class ThreadedServer extends ThreadPool
     public ThreadedServer(InetAddrPort address) 
     {
         setInetAddrPort(address);
-    }
-    
-    
+    }    
     
     /* ------------------------------------------------------------ */
     /** Set the server InetAddress and port.
@@ -275,6 +273,7 @@ abstract public class ThreadedServer extends ThreadPool
         
         in=null;
         out=null;
+        connection.close();
     }
     
     /* ------------------------------------------------------------ */
@@ -386,7 +385,7 @@ abstract public class ThreadedServer extends ThreadPool
                 return;
             
             _listen=newServerSocket(_address,
-                                    getMaxThreads()>0?(getMaxThreads()+1):50);
+                                    (getMaxThreads()>0?(getMaxThreads()+1):50));
             if (_address==null)
                 _address=new InetAddrPort(_listen.getInetAddress(),_listen.getLocalPort());
             else
@@ -432,6 +431,8 @@ abstract public class ThreadedServer extends ThreadPool
             _acceptor=null;
         }
 
+        Thread.yield();
+        
         try{
             super.stop();
         }
@@ -453,36 +454,14 @@ abstract public class ThreadedServer extends ThreadPool
      */
     protected void stopJob(Thread thread,Object job)
     {
-        if ((job instanceof Socket) && (thread instanceof PoolThread))
-        {
-            PoolThread poolThread = (PoolThread)thread;
-            if (!poolThread.isActive())
-            {
-                Log.event("close "+job);
-                try{((Socket)job).close();}
-                catch(Exception e){Code.ignore(e);}
-            }
-        }
-        
-        super.stopJob(thread,job);
+         if (job instanceof Socket)
+         {
+             try{((Socket)job).close();}
+             catch(Exception e){Code.ignore(e);}
+         }
+         super.stopJob(thread,job);
     }
 
-    /* ------------------------------------------------------------ */
-    /** Kill a job.
-     * This method closes the socket associated with a job
-     * @param thread 
-     * @param job 
-     */
-    protected void killJob(Thread thread,Object job)
-    {
-        if (job instanceof Socket)
-        {
-            Log.event("close "+job);
-            try{((Socket)job).close();}
-            catch(Exception e){Code.ignore(e);}
-        }
-        super.killJob(thread,job);
-    }
     
     /* ------------------------------------------------------------ */
     public String toString()
@@ -498,27 +477,55 @@ abstract public class ThreadedServer extends ThreadPool
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     private class Acceptor extends Thread
     {
+        
         boolean _running=false;
         public void run()
         {
+            ThreadedServer threadedServer = ThreadedServer.this;
+            Thread acceptor = Thread.currentThread();
+            int priority=Thread.currentThread().getPriority();
             try
             {
                 this.setName("Acceptor "+_listen);
                 _running=true;
                 while(_running)
                 {
+                    boolean low_threads=
+                        (threadedServer.getMaxThreads()+
+                         threadedServer.getIdleThreads()-
+                         threadedServer.getThreads())<threadedServer.getMinThreads();
+                
                     try
                     {
-                        Socket socket=acceptSocket(_listen,_soTimeOut);
-                        if (socket!=null)
+                        // Reduce acceptor priority if we are low on Threads
+                        if (low_threads)
                         {
-                            if (_running)
-                                ThreadedServer.this.run(socket);
-                            else
-                                socket.close();
+                            acceptor.setPriority(priority-1);
+                            Thread.yield();
                         }
+
+                        // Reserve a thread
+//                         while (!threadedServer.reserveThread())
+//                         {
+//                             Thread.sleep(250);
+//                         }
+                        
+                        // Accept a socket
+                        Socket socket=acceptSocket(_listen,_soTimeOut);
+
+                        // Handle the socket
+                        if (_running)
+                        {
+                            if (socket==null)
+                                threadedServer.shrink();
+                            else
+                                threadedServer.run(socket);
+                        }
+                        else if (socket!=null)
+                            socket.close();
                     }
                     catch(Exception e)
                     {
@@ -528,6 +535,11 @@ abstract public class ThreadedServer extends ThreadPool
                     {
                         Code.warning(e);
                         break;
+                    }
+                    finally
+                    {
+                        if (low_threads)
+                            acceptor.setPriority(priority);
                     }
                 }
             }
@@ -539,7 +551,7 @@ abstract public class ThreadedServer extends ThreadPool
                     Log.event("Stopping "+this.getName());
                 try{if (_listen!=null)_listen.close();}
                 catch (IOException e) {Code.ignore(e);}
-                synchronized(ThreadedServer.this)
+                synchronized(threadedServer)
                 {
                     _listen=null;
                     _acceptor=null;

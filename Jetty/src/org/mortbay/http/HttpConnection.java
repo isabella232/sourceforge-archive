@@ -21,6 +21,7 @@ import org.mortbay.util.StringUtil;
 import org.mortbay.util.ThreadPool;
 import org.mortbay.util.ThreadPool.PoolThread;
 import org.mortbay.util.LineInput;
+import org.mortbay.util.OutputObserver;
 
 
 /* ------------------------------------------------------------ */
@@ -50,14 +51,14 @@ public class HttpConnection
     protected HttpResponse _response;
 
     private HttpListener _listener;
-    private ChunkableInputStream _inputStream;
-    private ChunkableOutputStream _outputStream;
+    private HttpInputStream _inputStream;
+    private HttpOutputStream _outputStream;
     private boolean _persistent;
     private boolean _close;
     private boolean _keepAlive;
     private String _version;
     private int _dotVersion;
-    private boolean _outputSetup;
+    private boolean _firstWrite;
     private Thread _handlingThread;
     
     private InetAddress _remoteInetAddress;
@@ -97,10 +98,10 @@ public class HttpConnection
         _remoteInetAddress=remoteAddr;
         int bufferSize=listener==null?4096:listener.getBufferSize();
         int reserveSize=listener==null?512:listener.getBufferReserve();
-        _inputStream=new ChunkableInputStream(in,bufferSize);
-        _outputStream=new ChunkableOutputStream(out,bufferSize,reserveSize);
+        _inputStream=new HttpInputStream(in,bufferSize);
+        _outputStream=new HttpOutputStream(out,bufferSize,reserveSize);
         _outputStream.addObserver(this);
-        _outputSetup=false;
+        _firstWrite=false;
         if (_listener!=null)
             _httpServer=_listener.getHttpServer();
         _connection=connection;
@@ -171,7 +172,7 @@ public class HttpConnection
     /** Get the connections InputStream.
      * @return the connections InputStream
      */
-    public ChunkableInputStream getInputStream()
+    public HttpInputStream getInputStream()
     {
         return _inputStream;
     }
@@ -180,7 +181,7 @@ public class HttpConnection
     /** Get the connections OutputStream.
      * @return the connections OutputStream
      */
-    public ChunkableOutputStream getOutputStream()
+    public HttpOutputStream getOutputStream()
     {
         return _outputStream;
     }
@@ -458,10 +459,9 @@ public class HttpConnection
                 // Send continue if no body available yet.
                 if (_inputStream.available()<=0)
                 {
-                    _outputStream.getRawStream()
-                        .write(_response.__Continue);
-                    _outputStream.getRawStream()
-                        .flush();
+                    OutputStream real_out=_outputStream.getOutputStream();
+                    real_out.write(_response.__Continue);
+                    real_out.flush();
                 }
             }
             else
@@ -472,15 +472,13 @@ public class HttpConnection
                   _request.__POST.equals(_request.getMethod())))
         {
             // Send continue for RFC 2068 exception
-            _outputStream.getRawStream()
-                .write(_response.__Continue);
-            _outputStream.getRawStream()
-                .flush();
+            OutputStream real_out=_outputStream.getOutputStream();
+            real_out.write(_response.__Continue);
+            real_out.flush();
         }            
              
         // Persistent unless requested otherwise
         _persistent=!_close;
-
     }
     
 
@@ -489,12 +487,12 @@ public class HttpConnection
      * Trigger header and/or filters from output stream observations.
      * Also finalizes method of indicating response content length.
      * Called as a result of the connection subscribing for notifications
-     * to the ChunkableOutputStream.
-     * @see ChunkableOutputStream
+     * to the HttpOutputStream.
+     * @see HttpOutputStream
      * @param out The output stream observed.
      * @param action The action.
      */
-    public void outputNotify(ChunkableOutputStream out, int action, Object ignoredData)
+    public void outputNotify(OutputStream out, int action, Object ignoredData)
         throws IOException
     {
         if (_response==null)
@@ -503,20 +501,23 @@ public class HttpConnection
         switch(action)
         {
           case OutputObserver.__FIRST_WRITE:
-              if (!_outputSetup)
-                  setupOutputStream();
+              if (!_firstWrite)
+                  firstWrite();
               break;
               
           case OutputObserver.__RESET_BUFFER:
-              _outputSetup=false;
+              _firstWrite=false;
               break;
               
           case OutputObserver.__COMMITING:
-              if (_response.getState()==HttpMessage.__MSG_EDITABLE)
-                  _response.commitHeader();
+              commit();
               break;
               
           case OutputObserver.__CLOSING:
+              if (_response!=null &&
+                  !_response.isCommitted() &&
+                  _request.getState()==HttpMessage.__MSG_RECEIVED)
+                  commit();
               break;
               
           case OutputObserver.__CLOSED:
@@ -529,12 +530,12 @@ public class HttpConnection
      * Use the current state of the request and response, to set tranfer
      * parameters such as chunking and content length.
      */
-    protected void setupOutputStream()
+    protected void firstWrite()
         throws IOException
     {
-        if (_outputSetup)
+        if (_firstWrite)
             return;
-        _outputSetup=true;
+        _firstWrite=true;
         
         // Determine how to limit content length and
         // enable output transfer encodings 
@@ -655,10 +656,14 @@ public class HttpConnection
 
     
     /* ------------------------------------------------------------ */
-    protected void commitResponse()
+    protected void commit()
         throws IOException
-    {            
-        _outputSetup=true;
+    {
+        if (_response.isCommitted())
+            return;
+
+        // Mark request as handled.
+        _request.setHandled(true);
         
         // Handler forced close, listener stopped or no idle threads left.
         _close=HttpFields.__Close.equals(_response.getField(HttpFields.__Connection));
@@ -670,6 +675,7 @@ public class HttpConnection
         }
         if (_close)
             _persistent=false;
+
         
         // if we have no content or encoding, and no content length
         int status = _response.getStatus();
@@ -714,6 +720,8 @@ public class HttpConnection
                                    HttpFields.__Close);
             }
         }
+
+        _outputStream.writeHeader(_response);
     }
 
     
@@ -850,8 +858,8 @@ public class HttpConnection
         throws IOException
     {
         Code.debug("readRequest() ...");
-        _request.readHeader((LineInput)((ChunkableInputStream)_inputStream)
-                            .getRawStream());
+        _request.readHeader((LineInput)((HttpInputStream)_inputStream)
+                            .getInputStream());
     }
     
     /* ------------------------------------------------------------ */
@@ -876,7 +884,7 @@ public class HttpConnection
             _persistent=false;
             _close=false;
             _keepAlive=false;
-            _outputSetup=false;
+            _firstWrite=false;
             _dotVersion=0;
 
             // Read requests
@@ -1007,12 +1015,11 @@ public class HttpConnection
                 
                 // Commit the response
                 try{
-                    _outputStream.flush(true);
-                    _response.commit();
+                    _outputStream.close();
                     bytes_written=_outputStream.getBytesWritten();
                     _outputStream.resetStream();
                     _outputStream.addObserver(this);
-                        _inputStream.resetStream();
+                    _inputStream.resetStream();
                 }
                 catch(IOException e) {exception(e);}
             }

@@ -18,6 +18,7 @@ package org.mortbay.util;
 public class BlockingQueue
 {
     Object[] elements;
+    Object lock;
     int maxSize;
     int size=0;
     int head=0;
@@ -28,12 +29,32 @@ public class BlockingQueue
      */
     public BlockingQueue(int maxSize)
     {
+        this(null,maxSize);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     */
+    public BlockingQueue(Object lock, int maxSize)
+    {
         this.maxSize=maxSize;
         if (maxSize==0)
             this.maxSize=255;
         elements = new Object[this.maxSize];
+        this.lock=lock==null?elements:lock;
     }
-
+    
+    /* ------------------------------------------------------------ */
+    public  void clear()
+    {
+        synchronized(lock)
+        {
+            size=0;
+            head=0;
+            tail=0;
+        }
+    }
+    
     /* ------------------------------------------------------------ */
     public int size()
     {
@@ -54,16 +75,16 @@ public class BlockingQueue
     public void put(Object o)
         throws InterruptedException
     {
-        synchronized(elements)
+        synchronized(lock)
         {
             while (size==maxSize)
-                elements.wait();
+                lock.wait();
 
             elements[tail]=o;
             if(++tail==maxSize)
                 tail=0;
             size++;
-            elements.notify();
+            lock.notify();
         }
     }
     
@@ -76,11 +97,11 @@ public class BlockingQueue
     public void put(Object o, int timeout)
         throws InterruptedException
     {
-        synchronized(elements)
+        synchronized(lock)
         {
             if (size==maxSize)
             {
-                elements.wait(timeout);
+                lock.wait(timeout);
                 if (size==maxSize)
                     throw new InterruptedException("Timed out");
             }
@@ -89,7 +110,7 @@ public class BlockingQueue
             if(++tail==maxSize)
                 tail=0;
             size++;
-            elements.notify();
+            lock.notify();
         }
     }
 
@@ -101,17 +122,17 @@ public class BlockingQueue
     public Object get()
         throws InterruptedException
     {
-        synchronized(elements)
+        synchronized(lock)
         {
             while (size==0)
-                elements.wait();
+                lock.wait();
             
             Object o = elements[head];
             elements[head]=null;
             if(++head==maxSize)
                 head=0;
             if (size==maxSize)
-                elements.notifyAll();
+                lock.notifyAll();
             size--;
             return o;
         }
@@ -127,10 +148,10 @@ public class BlockingQueue
     public Object get(int timeoutMs)
         throws InterruptedException
     {
-        synchronized(elements)
+        synchronized(lock)
         {
-            if (size==0)
-                elements.wait((long)timeoutMs);
+            if (size==0 && timeoutMs!=0)
+                lock.wait((long)timeoutMs);
             
             if (size==0)
                 return null;
@@ -141,7 +162,7 @@ public class BlockingQueue
                 head=0;
 
             if (size==maxSize)
-                elements.notifyAll();
+                lock.notifyAll();
             size--;
             
             return o;
@@ -156,10 +177,10 @@ public class BlockingQueue
     public Object peek()
         throws InterruptedException
     {
-        synchronized(elements)
+        synchronized(lock)
         {
             if (size==0)
-                elements.wait();
+                lock.wait();
             
             if (size==0)
                 return null;
@@ -178,10 +199,10 @@ public class BlockingQueue
     public Object peek(int timeoutMs)
         throws InterruptedException
     {
-        synchronized(elements)
+        synchronized(lock)
         {
             if (size==0)
-                elements.wait((long)timeoutMs);
+                lock.wait((long)timeoutMs);
             
             if (size==0)
                 return null;

@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.io.OutputStream;
-import org.mortbay.http.ChunkableOutputStream;
+import org.mortbay.http.HttpOutputStream;
 import org.mortbay.util.Code;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
@@ -116,7 +116,7 @@ abstract public class AbstractHttpHandler implements HttpHandler
         ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer();
         writer.write(request.toString());
         writer.flush();
-        response.setIntField(HttpFields.__ContentLength,writer.length());
+        response.setIntField(HttpFields.__ContentLength,writer.size());
         writer.writeTo(out);
         out.flush();
         request.setHandled(true);

@@ -200,12 +200,10 @@ public class AJP13Listener
         socket.setSoTimeout(getMaxIdleTimeMs());
         AJP13Connection connection=
             new AJP13Connection(this,
-                                new AJP13InputStream(socket.getInputStream(),
-                                                     socket.getOutputStream(),
-                                                     getBufferSize()+7),
-                                new AJP13OutputStream(socket.getOutputStream(),
-                                                      getBufferSize()+7),
-                                socket);
+                                socket.getInputStream(),
+                                socket.getOutputStream(),
+                                socket,
+                                getBufferSize());
         try{connection.handle();}
         finally{connection.destroy();}
     }

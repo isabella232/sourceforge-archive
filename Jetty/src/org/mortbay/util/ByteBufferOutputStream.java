@@ -18,16 +18,19 @@ import java.io.OutputStream;
  */
 public class ByteBufferOutputStream extends OutputStream
 {
-    private byte[] _buf;
+    protected byte[] _buf;
     private int _start;
+    private int _pos;
     private int _end;
-    private int _reserve;
+    private int _preReserve;
+    private int _postReserve;
     private boolean _resized;
+    private boolean _fixed ;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
-    public ByteBufferOutputStream(){this(4096,512);}
+    public ByteBufferOutputStream(){this(4096,0,0);}
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -35,8 +38,9 @@ public class ByteBufferOutputStream extends OutputStream
      */
     public ByteBufferOutputStream(int capacity)
     {
-        this(capacity,512);
+        this(capacity,0,0);
     }
+    
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -44,67 +48,107 @@ public class ByteBufferOutputStream extends OutputStream
      * @param fullAt The size of the buffer.
      * @param reserve The reserve of byte for prepending
      */
-    public ByteBufferOutputStream(int capacity,int reserve)
+    public ByteBufferOutputStream(int capacity,int preReserve)
     {
-        _buf=ByteArrayPool.getByteArray(capacity);
-        _reserve=reserve;
-        _start=reserve;
-        _end=reserve;
+        this(capacity,preReserve,0);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param BufferSize The size of the buffer == capacity+preReserve+postReserve
+     * @param fullAt The size of the buffer.
+     * @param preReserve The reserve of byte for prepending
+     * @param postReserve The reserve of byte for appending
+     */
+    public ByteBufferOutputStream(int bufferSize,int preReserve,int postReserve)
+    {
+        _buf=ByteArrayPool.getByteArray(bufferSize);
+        _end=_buf.length-postReserve;
+        _preReserve=preReserve;
+        _start=preReserve;
+        _pos=preReserve;
+        _postReserve=postReserve;
     }
 
     /* ------------------------------------------------------------ */
+    /** 
+     * @return  True if the buffer cannot be expanded 
+     */
+    public boolean isFixed()
+    {
+        return _fixed;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param fixed True if the buffer cannot be expanded 
+     */
+    public void setFixed(boolean fixed)
+    {
+        _fixed = fixed;
+    }
+    
+    /* ------------------------------------------------------------ */
     public int size()
+    {
+        return _pos-_start;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public int capacity()
     {
         return _end-_start;
     }
     
     /* ------------------------------------------------------------ */
-    public int getCapacity()
+    public int spareCapacity()
     {
-        return _buf.length-_start;
+        return _end-_pos;
     }
     
     /* ------------------------------------------------------------ */
-    public int getSpareCapacity()
+    public int preReserve()
+    {
+        return _start;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public int postReserve()
     {
         return _buf.length-_end;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public boolean canFit(int n)
-    {
-        return _end+n<_buf.length;
     }
     
     /* ------------------------------------------------------------ */
     public void writeTo(OutputStream out)
         throws IOException
     {
-        out.write(_buf,_start,_end-_start);
+        out.write(_buf,_start,_pos-_start);
     }
-    
 
     /* ------------------------------------------------------------ */
     public void write(int b)
+        throws IOException
     {
-        ensureCapacity(1);
-        _buf[_end++]=(byte)b;
+        ensureSpareCapacity(1);
+        _buf[_pos++]=(byte)b;
     }
     
     /* ------------------------------------------------------------ */
     public void write(byte[] b)
+        throws IOException
     {
-        ensureCapacity(b.length);
-        System.arraycopy(b,0,_buf,_end,b.length);
-        _end+=b.length;
+        ensureSpareCapacity(b.length);
+        System.arraycopy(b,0,_buf,_pos,b.length);
+        _pos+=b.length;
     }
     
     /* ------------------------------------------------------------ */
     public void write(byte[] b,int offset, int length)
+        throws IOException
     {
-        ensureCapacity(length);
-        System.arraycopy(b,offset,_buf,_end,length);
-        _end+=length;
+        ensureSpareCapacity(length);
+        System.arraycopy(b,offset,_buf,_pos,length);
+        _pos+=length;
     }
     
     /* ------------------------------------------------------------ */
@@ -142,33 +186,54 @@ public class ByteBufferOutputStream extends OutputStream
     }
 
     /* ------------------------------------------------------------ */
-    public void flush()
-    {}
+    /** Write bytes into the postreserve.
+     * The capacity is not checked.
+     * @param b 
+     * @param offset 
+     * @param length 
+     * @exception IOException 
+     */
+    public void postwrite(byte[] b,int offset, int length)
+        throws IOException
+    {
+        System.arraycopy(b,offset,_buf,_pos,length);
+        _pos+=length;
+    }
     
     /* ------------------------------------------------------------ */
-    public void reset()
+    public void flush()
+        throws IOException
     {
-        _end=_reserve;
-        _start=_reserve;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void resetStream()
+    {
+        _pos=_preReserve;
+        _start=_preReserve;
     }
     
     /* ------------------------------------------------------------ */
     public void reset(int reserve)
     {
-        _reserve=reserve;
-        _end=_reserve;
-        _start=_reserve;
+        _preReserve=reserve;
+        _pos=_preReserve;
+        _start=_preReserve;
     }
 
     /* ------------------------------------------------------------ */
     public void close()
-    {}
+        throws IOException
+    {
+        flush();
+    }
     
     /* ------------------------------------------------------------ */
     public void destroy()
     {
         if (!_resized)
             ByteArrayPool.returnByteArray(_buf);
+        _buf=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -177,38 +242,79 @@ public class ByteBufferOutputStream extends OutputStream
         if (n>_start)
         {
             if (Code.debug())Code.debug("Reserve: "+n+">"+_start);
-            if ((_end+n)<_buf.length)
+            if ((_pos+n)<_end)
             {
-                if (Code.debug())Code.debug("Shift reserve: "+_end+"+"+n+"<"+_buf.length);
-                System.arraycopy(_buf,_start,_buf,n,_end-_start);
-                _end=_end+n-_start;
+                if (Code.debug())Code.debug("Shift reserve: "+_pos+"+"+n+"<"+_end);
+                System.arraycopy(_buf,_start,_buf,n,_pos-_start);
+                _pos=_pos+n-_start;
                 _start=n;
             }
             else
-            {    
-                if (Code.debug())Code.debug("New reserve: "+_end+"+"+n+">="+_buf.length);
+            {
+                if (Code.debug())Code.debug("New reserve: "+_pos+"+"+n+">="+_end);
                 byte[] buf = new byte[_buf.length+n-_start];
-                System.arraycopy(_buf,_start,buf,n,_end-_start);
-                _end=n+_end-_start;
+                System.arraycopy(_buf,_start,buf,n,_pos-_start);
+                _pos=n+_pos-_start;
                 _start=n;
                 _buf=buf;
+                _end=_buf.length-_postReserve;
             }
         }
     }
     
+    
     /* ------------------------------------------------------------ */
-    public void ensureCapacity(int n)
+    public void ensureCapacity(int n,int pre, int post)
+        throws IOException
     {
-        if ((_end+n)>_buf.length)
+        // Do we have space?
+        if (n>_end || pre > _preReserve || post > _postReserve)
         {
-            int bl = ((_end+n+4095)/4096)*4096;
-            byte[] buf = new byte[bl];
-            if (Code.debug())Code.debug("New buf for ensure: "+_end+"+"+n+">"+_buf.length+" --> "+buf.length);
-            System.arraycopy(_buf,_start,buf,_start,_end-_start);
+            // Make a bigger buffer if we are allowed.
+            if (_fixed)
+                throw new IllegalStateException("Fixed");
+            if (_start!=_pos)
+                throw new IllegalStateException("Not reset");
+            
             if (!_resized)
                 ByteArrayPool.returnByteArray(_buf);
-            _buf=buf;
-            _resized=true;
+                
+            _buf=ByteArrayPool.getByteArray(n+pre+post);
+            _end=_buf.length-post;
+            _preReserve=pre;
+            _start=pre;
+            _pos=pre;
+            _postReserve=post;
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void ensureSpareCapacity(int n)
+        throws IOException
+    {
+        // Do we have space?
+        if ((_pos+n)>_end)
+        {
+            // No, then try flushing what we do have
+            flush();
+            
+            // Do we have space now?
+            if ((_pos+n)>_end)
+            {
+                // Make a bigger buffer if we are allowed.
+                if (_fixed)
+                    throw new IllegalStateException("Buffer Full");
+                
+                int bl = ((_pos+n+4095)/4096)*4096;
+                byte[] buf = new byte[bl];
+                if (Code.debug())Code.debug("New buf for ensure: "+_pos+"+"+n+">"+_buf.length+" --> "+buf.length);
+                System.arraycopy(_buf,_start,buf,_start,_pos-_start);
+                if (!_resized)
+                    ByteArrayPool.returnByteArray(_buf);
+                _buf=buf;
+                _end=_buf.length-_postReserve;
+                _resized=true;
+            }
         }
     }
 }

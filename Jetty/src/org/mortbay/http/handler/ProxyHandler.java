@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.Socket;
-import org.mortbay.http.ChunkableOutputStream;
+import org.mortbay.http.HttpOutputStream;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
@@ -111,9 +111,9 @@ public class ProxyHandler extends AbstractHttpHandler
             header.write(writer);
             
             // Send the request to the next hop.
-            Code.debug("\nreq=\n"+new String(writer.getBuf(),0,writer.length()));
+            Code.debug("\nreq=\n"+new String(writer.getBuf(),0,writer.size()));
             writer.writeTo(sout);
-            writer.reset();
+            writer.resetWriter();
             
             // XXX If expect 100-continue flush or no body the header now!
             sout.flush();
@@ -145,7 +145,7 @@ public class ProxyHandler extends AbstractHttpHandler
                 writer.write(resLine);
                 writer.writeTo(out);
                 out.flush();
-                writer.reset();
+                writer.resetWriter();
                 
                 resLine = lin.readLine();
                 if (resLine==null)

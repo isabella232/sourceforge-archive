@@ -180,7 +180,7 @@ public class HttpResponse extends HttpMessage
 
         try
         {
-            ((ChunkableOutputStream)getOutputStream()).resetBuffer();
+            ((HttpOutputStream)getOutputStream()).resetBuffer();
             _status= __200_OK;
             _reason=null;
             super.reset();
@@ -219,7 +219,7 @@ public class HttpResponse extends HttpMessage
      * @param in 
      * @exception IOException 
      */
-    public void readHeader(ChunkableInputStream in)
+    public void readHeader(HttpInputStream in)
         throws IOException
     {
         _state=__MSG_BAD;
@@ -377,7 +377,7 @@ public class HttpResponse extends HttpMessage
                 ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer(1500);
                 writeErrorPage(writer,code,message);
                 writer.flush();
-                setContentLength(writer.length());
+                setContentLength(writer.size());
                 writer.writeTo(getOutputStream());
             }
         }
@@ -388,8 +388,8 @@ public class HttpResponse extends HttpMessage
             _characterEncoding=null;
             _mimeType=null;
         }
-        if (!isCommitted())
-            commitHeader();
+
+        commit();
     }
     
     /* ------------------------------------------------------------ */
@@ -449,7 +449,7 @@ public class HttpResponse extends HttpMessage
             throw new IllegalStateException("Commited");
         _header.put(HttpFields.__Location,location);
         setStatus(__302_Moved_Temporarily);
-        commitHeader();
+        commit();
     }
 
     /* -------------------------------------------------------------- */
@@ -480,6 +480,17 @@ public class HttpResponse extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
+    /** 
+     * @exception IOException 
+     */
+    public void commit()
+        throws IOException
+    {
+        if (!isCommitted())
+            getOutputStream().flush();
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Recycle the response.
      */
     void recycle(HttpConnection connection)
@@ -500,30 +511,6 @@ public class HttpResponse extends HttpMessage
         super.destroy();
     }
 
-    /* ------------------------------------------------------------ */
-    public synchronized void commitHeader()
-        throws IOException
-    {
-        _connection.commitResponse();
-        if (getState()!=__MSG_SENDING)
-            super.commitHeader();
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @exception IOException 
-     */
-    public void commit()
-        throws IOException
-    {
-        if (isCommitted())
-            return;
-        
-        super.commit();
-        HttpRequest request=getRequest();
-        if (request!=null)
-            request.setHandled(true);
-    }    
 }
 
 

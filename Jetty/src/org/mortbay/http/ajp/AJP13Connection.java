@@ -24,6 +24,7 @@ import org.mortbay.http.HttpResponse;
 import org.mortbay.http.HttpServer;
 import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
+import org.mortbay.util.LineInput;
 import org.mortbay.util.IO;
 import org.mortbay.util.Log;
 import org.mortbay.util.ThreadPool;
@@ -39,7 +40,6 @@ public class AJP13Connection extends HttpConnection
 {
     private AJP13InputStream _ajpIn;
     private AJP13OutputStream _ajpOut;
-    private AJP13Packet _ajpResponse;
     private String _remoteHost;
     private String _remoteAddr;
     private String _serverName;
@@ -48,18 +48,24 @@ public class AJP13Connection extends HttpConnection
     
     /* ------------------------------------------------------------ */
     public AJP13Connection(AJP13Listener listener,
-                           AJP13InputStream in,
-                           AJP13OutputStream out,
-                           Socket socket)
+                           InputStream in,
+                           OutputStream out,
+                           Socket socket,
+                           int bufferSize)
         throws IOException
     {
-        super(listener,null,in,out,socket);
-        _ajpIn=in;
-        _ajpOut=out;
-        _ajpResponse=new AJP13Packet(listener.getBufferSize());
-        _ajpResponse.addByte((byte)'A');
-        _ajpResponse.addByte((byte)'B');
-        _ajpResponse.addInt(0);
+        super(listener,
+              null,
+              new AJP13InputStream(in,out,bufferSize),
+              out,
+              socket);
+
+        LineInput lin = (LineInput)getInputStream().getInputStream();
+        _ajpIn=(AJP13InputStream)lin.getInputStream();
+        _ajpOut=new AJP13OutputStream(getOutputStream().getFilterStream(),
+                                      bufferSize);
+        _ajpOut.setCommitObserver(this);
+        getOutputStream().setBufferedOutputStream(_ajpOut,true);
     }
 
     /* ------------------------------------------------------------ */
@@ -78,8 +84,6 @@ public class AJP13Connection extends HttpConnection
         _ajpIn=null;
         if (_ajpOut!=null)_ajpOut.destroy();
         _ajpOut=null;
-        if (_ajpResponse!=null)_ajpResponse.destroy();
-        _ajpResponse=null;
         _remoteHost=null;
         _remoteAddr=null;
         _serverName=null;
@@ -259,7 +263,7 @@ public class AJP13Connection extends HttpConnection
             Code.warning(e);
             try{
                 if (gotRequest)
-                    _ajpOut.end(false);
+                    _ajpOut.close();
             }
             catch (IOException e2){Code.ignore(e2);}
         }
@@ -275,9 +279,9 @@ public class AJP13Connection extends HttpConnection
                 // while(_ajpIn.skip(4096)>0 || _ajpIn.read()>=0);
 
                 // end response
-                getOutputStream().flush(true);
-                response.commit();
-                _ajpOut.end(persistent);
+                getOutputStream().close();
+                if (!persistent)
+                    _ajpOut.end();
 
                 // Close the outout
                 _ajpOut.close();
@@ -286,8 +290,8 @@ public class AJP13Connection extends HttpConnection
                 getOutputStream().resetStream();
                 getOutputStream().addObserver(this);
                 getInputStream().resetStream();
-                _ajpIn.recycle();
-                _ajpOut.recycle();
+                _ajpIn.resetStream();
+                _ajpOut.resetStream();
             }
             catch (Exception e)
             {
@@ -313,42 +317,5 @@ public class AJP13Connection extends HttpConnection
         // Nobble the OutputStream for HEAD requests
         if (HttpRequest.__HEAD.equals(getRequest().getMethod()))
             getOutputStream().nullOutput();
-    }
-    
-    
-    /* ------------------------------------------------------------ */
-    protected void commitResponse()
-        throws IOException
-    {
-        HttpResponse response = getResponse();
-        
-        _ajpResponse.resetData();
-        _ajpResponse.addByte(AJP13Packet.__SEND_HEADERS);
-        _ajpResponse.addInt(response.getStatus());
-        _ajpResponse.addString(response.getReason());
-
-        int mark=_ajpResponse.getMark();
-        _ajpResponse.addInt(0);
-
-        int nh=0;
-        Enumeration e1=_response.getFieldNames();
-        while(e1.hasMoreElements())
-        {
-            String h=(String)e1.nextElement();
-            Enumeration e2=_response.getFieldValues(h);
-            while(e2.hasMoreElements())
-            {
-                _ajpResponse.addHeader(h);
-                _ajpResponse.addString((String)e2.nextElement());
-                nh++;
-            }
-        }
-
-        if (nh>0)
-            _ajpResponse.setInt(mark,nh);
-        _ajpResponse.setDataSize();
-
-        _ajpOut.write(_ajpResponse);
-        response.setState(HttpMessage.__MSG_SENDING);
     }
 }

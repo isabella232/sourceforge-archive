@@ -290,7 +290,7 @@ public class OutputStreamLogSink
         _reopen=isStarted() && out!=out;
         _filename=null;
         if (_buffer!=null)
-            _buffer.reset();
+            _buffer.resetWriter();
         _out=out;
     }
 
@@ -422,7 +422,7 @@ public class OutputStreamLogSink
             // line is not blank
             String nl=__lineSeparator;
             
-            if (_logLabels && !_logOneLine && _buffer.length() > 0)
+            if (_logLabels && !_logOneLine && _buffer.size() > 0)
                 _buffer.write(nl);
             
             // Log indented message
@@ -453,10 +453,10 @@ public class OutputStreamLogSink
                 _buffer.write(frame.getStack());
             }
             
-            if (_flushOn || _buffer.length()>_bufferSize)
+            if (_flushOn || _buffer.size()>_bufferSize)
             {
                 _buffer.writeTo(_out);
-                _buffer.reset();
+                _buffer.resetWriter();
                 if (_flushOn)
                     _out.flush();
             }
@@ -481,10 +481,10 @@ public class OutputStreamLogSink
         {
             _buffer.write(formattedLog);
             _buffer.write(StringUtil.__LINE_SEPARATOR);
-            if (_flushOn || _buffer.length()>_bufferSize)
+            if (_flushOn || _buffer.size()>_bufferSize)
             {
                 _buffer.writeTo(_out);
-                _buffer.reset();
+                _buffer.resetWriter();
                 if (_flushOn)
                     _out.flush();
             }
@@ -535,7 +535,7 @@ public class OutputStreamLogSink
         {
             try
             {
-                if (_buffer.length()>0)
+                if (_buffer.size()>0)
                 {
                     _buffer.writeTo(_out);
                 }
