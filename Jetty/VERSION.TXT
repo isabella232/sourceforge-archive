@@ -1,7 +1,9 @@
 Jetty Versions
 --------------
 
- + Created Jetty Launcher
+Jetty-4.1.0RC3 - 28 August 2002
+ + Fixed security problem for suffix matching with trailing "/" 
+ + Created and integrated the Jetty Launcher
  + Made Resource canonicalize it's base path for directories
  + Allow WebApplicationHandler to be used with other handlers.
  + Added defaults descriptor to addWebApplications.
