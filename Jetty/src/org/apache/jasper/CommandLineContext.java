@@ -216,9 +216,33 @@ public class CommandLineContext implements JspCompilationContext {
      * The package name for the generated class.
      */
     public String getServletPackageName() {
-        return servletPackageName;
+        //get the path to the jsp file
+        int indexOfSlash = getJspFile().lastIndexOf('/');
+        String pathName;
+        if (indexOfSlash != -1) {
+            pathName = getJspFile().substring(0, indexOfSlash);
+        } else {
+            pathName = "/";
+        }
+        //Assemble the package name from the base package name speced on
+        //the command line and the package name derived from the path to
+        //the jsp file
+        String packageName = "";
+        if (servletPackageName != null && !servletPackageName.equals("")) {
+            packageName = servletPackageName;
+        }
+        if (packageName.equals("")) {
+            packageName = pathName.replace('/', '.');
+        } else {
+            packageName += pathName.replace('/', '.');
+        }
+        //strip off any leading '.' in the package name
+        if (!packageName.equals("") && packageName.charAt(0) == '.') {
+            packageName = packageName.substring(1);
+        }
+        return packageName;
     }
-
+     
     /**
      * Full path name of the Java file into which the servlet is being
      * generated. 
