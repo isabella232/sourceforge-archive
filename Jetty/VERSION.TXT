@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + cookies with maxAge==0 expire on 1 jan 1970
  + setCookie always has equals
 
 Jetty-4.0.D2 - 2 Dec 2001

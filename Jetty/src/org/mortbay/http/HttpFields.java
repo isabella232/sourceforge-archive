@@ -131,8 +131,6 @@ public class HttpFields
     public final static String __SetCookie2 = "Set-Cookie2";
     public final static String __MimeVersion ="MIME-Version";
     public final static String __Identity ="identity";
-
-
     
     /* ------------------------------------------------------------ */
     /** Private class to hold Field name info
@@ -285,6 +283,9 @@ public class HttpFields
         new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'",
                              Locale.US);
 
+    public final static String __01Jan1970=
+        HttpFields.__dateSend.format(new Date(0));
+    
     /* ------------------------------------------------------------ */
     private final static String __dateReceiveFmt[] =
     {
@@ -1181,7 +1182,10 @@ public class HttpFields
                 if (version==0)
                 {
                     buf.append(";Expires=");
-                    buf.append(HttpFields.__dateSend.format(new Date(System.currentTimeMillis()+1000L*maxAge)));
+                    if (maxAge==0)
+                        buf.append(__01Jan1970);
+                    else
+                        buf.append(HttpFields.__dateSend.format(new Date(System.currentTimeMillis()+1000L*maxAge)));
                 }
                 else
                 {
