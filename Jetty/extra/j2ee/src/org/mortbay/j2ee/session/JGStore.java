@@ -19,19 +19,19 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
-import org.javagroups.Address;
-import org.javagroups.Channel;
-import org.javagroups.JChannel;
-import org.javagroups.MembershipListener; // we are notified of changes to membership list
-import org.javagroups.MergeView;
-import org.javagroups.Message;
-import org.javagroups.MessageListener; // we are notified of changes to other state
-import org.javagroups.View;
-import org.javagroups.blocks.GroupRequest;
-import org.javagroups.blocks.MessageDispatcher;
-import org.javagroups.blocks.MethodCall;
-import org.javagroups.blocks.RpcDispatcher;
-import org.javagroups.util.Util;
+import org.jgroups.Address;
+import org.jgroups.Channel;
+import org.jgroups.JChannel;
+import org.jgroups.MembershipListener; // we are notified of changes to membership list
+import org.jgroups.MergeView;
+import org.jgroups.Message;
+import org.jgroups.MessageListener; // we are notified of changes to other state
+import org.jgroups.View;
+import org.jgroups.blocks.GroupRequest;
+import org.jgroups.blocks.MessageDispatcher;
+import org.jgroups.blocks.MethodCall;
+import org.jgroups.blocks.RpcDispatcher;
+import org.jgroups.util.Util;
 import org.jboss.logging.Logger;
 import org.jboss.logging.Logger;
 //----------------------------------------
@@ -57,7 +57,7 @@ import org.jboss.logging.Logger;
  * publish changes to our state, receive and dispatch notification of
  * changes in other states, initialise our state from other members,
  * allow other members to initialise their state from us - all via
- * JavaGroups...
+ * JGroups...
  *
  * @author <a href="mailto:jules@mortbay.com">Jules Gosnell</a>
  * @version 1.0
@@ -197,22 +197,22 @@ public class
 	      return null;
 	    }
 	  });
-	_log.debug("JavaGroups RpcDispatcher initialised");
+	_log.debug("JGroups RpcDispatcher initialised");
 
 	_channel.setOpt(Channel.GET_STATE_EVENTS, Boolean.TRUE);
-	_log.debug("JavaGroups Channel initialised");
+	_log.debug("JGroups Channel initialised");
 
 	View view=_channel.getView();
 	if (view!=null)
 	  _members=(Vector)view.getMembers().clone();
 
 	_members=(_members==null)?new Vector():(Vector)_members.clone(); // we don't own it
-	if (_log.isDebugEnabled()) _log.debug("JavaGroups View: "+_members);
+	if (_log.isDebugEnabled()) _log.debug("JGroups View: "+_members);
 	_members.remove(_channel.getLocalAddress());
       }
       catch (Exception e)
       {
-	_log.error("could not initialise JavaGroups Channel and Dispatcher", e);
+	_log.error("could not initialise JGroups Channel and Dispatcher", e);
       }
 
       _log.trace("...initialised");
@@ -234,17 +234,17 @@ public class
       init();
 
       String channelName=getChannelName();
-      if (_log.isDebugEnabled()) _log.debug("starting JavaGroups...: ("+channelName+")");
+      if (_log.isDebugEnabled()) _log.debug("starting JGroups...: ("+channelName+")");
 
       _channel.connect(channelName); // group should be on a per-context basis
-      _log.trace("JavaGroups Channel connected");
+      _log.trace("JGroups Channel connected");
       _dispatcher.start();
-      _log.trace("JavaGroups Dispatcher started");
+      _log.trace("JGroups Dispatcher started");
 
       if (!_channel.getState(null, getRetrievalTimeOut()))
 	_log.info("cluster state is null - this must be the first node");
 
-      _log.debug("...JavaGroups started");
+      _log.debug("...JGroups started");
       _log.trace("...started");
     }
 
@@ -255,12 +255,12 @@ public class
       _timer.cancel();
       _log.trace("Touch Timer stopped");
 
-      if (_log.isDebugEnabled()) _log.debug("stopping JavaGroups...: ("+getChannelName()+")");
+      if (_log.isDebugEnabled()) _log.debug("stopping JGroups...: ("+getChannelName()+")");
       _dispatcher.stop();
-      _log.trace("JavaGroups RpcDispatcher stopped");
+      _log.trace("JGroups RpcDispatcher stopped");
       _channel.disconnect();
-      _log.trace("JavaGroups Channel disconnected");
-      _log.debug("...JavaGroups stopped");
+      _log.trace("JGroups Channel disconnected");
+      _log.debug("...JGroups stopped");
 
       super.stop();
       _log.trace("...stopped");
@@ -373,7 +373,7 @@ public class
       }
       catch(Exception e)
       {
-	_log.error("problem publishing change in state over JavaGroups", e);
+	_log.error("problem publishing change in state over JGroups", e);
       }
     }
 
@@ -470,7 +470,7 @@ public class
 	}
 	catch (Exception e)
 	{
-	  _log.error ("Unable to getState from JavaGroups: ", e);
+	  _log.error ("Unable to getState from JGroups: ", e);
 	  return null;
 	}
       }
@@ -501,7 +501,7 @@ public class
 	}
 	catch (Exception e)
 	{
-	  _log.error ("Unable to setState from JavaGroups: ", e);
+	  _log.error ("Unable to setState from JGroups: ", e);
 	}
 
 	AbstractReplicatedStore.setReplicating(true);
@@ -530,24 +530,24 @@ public class
   public void
     block()
     {
-      _log.trace("handling JavaGroups block()...");
-      _log.trace("...JavaGroups block() handled");
+      _log.trace("handling JGroups block()...");
+      _log.trace("...JGroups block() handled");
     }
 
   // Called when a member is suspected
   public synchronized void
     suspect(Address suspected_mbr)
     {
-      if (_log.isTraceEnabled()) _log.trace("handling JavaGroups suspect("+suspected_mbr+")...");
+      if (_log.isTraceEnabled()) _log.trace("handling JGroups suspect("+suspected_mbr+")...");
       _log.warn("cluster suspects member may have been lost: "+suspected_mbr);
-      _log.trace("...JavaGroups suspect() handled");
+      _log.trace("...JGroups suspect() handled");
     }
 
   // Called when channel membership changes
   public synchronized void
     viewAccepted(View newView)
     {
-      if (_log.isTraceEnabled()) _log.trace("handling Javagroups viewAccepted("+newView+")...");
+      if (_log.isTraceEnabled()) _log.trace("handling JGroups viewAccepted("+newView+")...");
 
       // this is meant to happen if a network split is healed and two
       // clusters try to reconcile their separate states into one -
@@ -561,10 +561,10 @@ public class
       {
  	_members.clear();
  	_members.addAll(newMembers);
-	_log.info("JavaGroups View: "+_members);
+	_log.info("JGroups View: "+_members);
 	_members.remove(_channel.getLocalAddress());
       }
 
-      _log.trace("...Javagroups viewAccepted() handled");
+      _log.trace("...JGroups viewAccepted() handled");
     }
 }

@@ -28,11 +28,14 @@ all         - everything
   <property environment="env"/>
   <property file="../../ant.properties" />
   <property file="../build.package.properties" />
+  <property file="jboss.properties" />
 
   <property name="j2ee.etc"       value="${basedir}/etc"/>
   <property name="generated.src"  value="${basedir}/gensrc"/>
   <property name="mortbay.j2ee.jar" value="${lib}/org.mortbay.j2ee.jar"/>
   <property name="org.jboss.jetty.jar" value="${lib}/org.jboss.jetty.jar"/>
+  <property name="jboss.jetty.sar" value="${basedir}/jboss-${jboss.version}-jetty-${RELEASE.MAJOR.MINOR}.sar"/>
+  <property name="jboss.jetty.deploy.dir" value="${jboss.home}/server/default/deploy/jboss-jetty.sar"/>
 
   <path id="jboss.classpath">
     <pathelement location="${jboss.home}/client/jboss-j2ee.jar"/>
@@ -43,7 +46,7 @@ all         - everything
     <pathelement location="${jboss.home}/server/all/lib/jboss.jar"/>
     <pathelement location="${jboss.home}/server/all/lib/jbosssx.jar"/>
     <pathelement location="${jboss.home}/server/all/lib/jbossha.jar"/>
-    <pathelement location="${jboss.home}/server/all/lib/javagroups-2.0.jar"/> 
+    <pathelement location="${jboss.home}/server/all/lib/jgroups.jar"/> 
     <pathelement location="${jboss.home}/server/all/deploy/jbossha-httpsession.sar"/> 
   </path>
 
@@ -92,6 +95,7 @@ all         - everything
   <target name="clean" depends="tidy">
     <delete file="${mortbay.j2ee.jar}"/>
     <delete file="${org.jboss.jetty.jar}"/>
+    <delete file="${org.jboss.sar}"/>
   </target>
 
 <!--=========================================================================-->
@@ -148,6 +152,36 @@ all         - everything
     </jar>
   </target>
 
+  <target name="jboss.jetty.sar" depends="jboss.jetty.jar,j2ee.jar">
+
+    <jar jarfile="${jboss.jetty.sar}">
+      <metainf dir="${j2ee.etc}">
+        <include name="jboss-service.xml"/>
+      </metainf>
+      <fileset dir="${lib}">   
+        <include name="org.jboss.jetty.jar"/>
+        <include name="org.mortbay.j2ee.jar"/>
+      </fileset>
+      <fileset dir="${jetty.lib}">   
+        <include name="org.mortbay.jetty.jar"/>
+        <include name="org.mortbay.jmx.jar"/>
+        <include name="javax.servlet.jar"/>
+      </fileset>
+      <fileset dir="${jetty.ext}">   
+        <include name="jasper-*.jar"/>
+        <include name="ant*.jar"/>
+      </fileset>
+      <fileset dir="${jetty.etc}">   
+        <include name="webdefault.xml"/>
+      </fileset>
+    </jar>
+  </target>
+
+  <target name="deploy" depends="jboss.jetty.sar">
+    <mkdir dir="${jboss.jetty.deploy.dir}" />
+    <unjar src="${jboss.jetty.sar}" dest="${jboss.jetty.deploy.dir}"/>
+  </target>
+
   <target name="test" depends="classes" >
     <java classname="org.mortbay.j2ee.TestHarness"
           classpath="${classes}:${classpath}"
@@ -175,7 +209,7 @@ all         - everything
       <arg line="src/org/mortbay/servlets/packageindex/JettyServer.xml" />
     </java>
   </target>
-  <target name="all" depends="j2ee.jar,jboss.jetty.jar"/>
+  <target name="all" depends="j2ee.jar,jboss.jetty.jar,jboss.jetty.sar"/>
 
 </project>
 

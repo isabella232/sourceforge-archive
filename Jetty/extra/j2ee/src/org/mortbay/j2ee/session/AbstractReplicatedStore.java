@@ -14,9 +14,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.Map;
-import org.javagroups.Message;
-import org.javagroups.blocks.MessageDispatcher;
-import org.javagroups.util.Util;
+import org.jgroups.Message;
+import org.jgroups.blocks.MessageDispatcher;
+import org.jgroups.util.Util;
 import org.jboss.logging.Logger;
 
 //----------------------------------------
@@ -277,7 +277,10 @@ abstract public class
 	try
 	{
 	  Method method=_integerToMethod[methodId.intValue()];
-	  method.invoke(target, argInstances);
+	  if(target!=null)
+	      method.invoke(target, argInstances);
+	  else
+	      _log.warn("Not calling null target for method "+method);
 	}
 	catch (Exception e)
 	{
