@@ -621,6 +621,8 @@ public class HttpFields
     private ArrayList _fields=new ArrayList(15);
     private int[] _index=new int[__maxCacheSize];
     private int _version;
+    private SimpleDateFormat _dateReceive[]=
+        new SimpleDateFormat[__dateReceive.length]; 
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -985,10 +987,14 @@ public class HttpFields
         if (val==null)
             return -1;
 
-        for (int i=0;i<__dateReceive.length;i++)
+        for (int i=0;i<_dateReceive.length;i++)
         {
+            // clone formatter for thread safety
+            if (_dateReceive[i]==null)
+                _dateReceive[i]=(SimpleDateFormat)__dateReceive[i].clone();
+            
             try{
-                Date date=(Date)__dateReceive[i].parseObject(val);
+                Date date=(Date)_dateReceive[i].parseObject(val);
                 return date.getTime();
             }
             catch(java.lang.Exception e)
@@ -999,10 +1005,10 @@ public class HttpFields
         if (val.endsWith(" GMT"))
         {
             val=val.substring(0,val.length()-4);
-            for (int i=0;i<__dateReceive.length;i++)
+            for (int i=0;i<_dateReceive.length;i++)
             {
                 try{
-                    Date date=(Date)__dateReceive[i].parseObject(val);
+                    Date date=(Date)_dateReceive[i].parseObject(val);
                     return date.getTime();
                 }
                 catch(java.lang.Exception e)

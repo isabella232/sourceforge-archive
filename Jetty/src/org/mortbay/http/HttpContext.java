@@ -956,8 +956,6 @@ public class HttpContext extends ResourceCache
             LogSupport.ignore(log,e);
         }
 
-	System.err.println("WORK="+work);
-
         // No tempdir set so make one!
         try
         {
