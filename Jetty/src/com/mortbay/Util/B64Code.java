@@ -7,9 +7,14 @@ package com.mortbay.Util;
 import java.io.UnsupportedEncodingException;
 
 /* ------------------------------------------------------------ */
-/** Fast B64 Encoder/Decoder.
+/** Fast B64 Encoder/Decoder as described in RFC 1421.
+ * <p>Does not insertor interpret whitespace as described in RFC
+ * 1521. If you require this you must pre/post process your data.
+ * <p> Note that in a web services context the usual case is to not want
+ * linebreaks or other white space in the encoded output.
  *
  * @version $Revision$
+ * @author Brett Sealey (bretts)
  * @author Greg Wilkins (gregw)
  */
 public class B64Code
@@ -37,152 +42,214 @@ public class B64Code
     
 
     // ------------------------------------------------------------------
+    /**
+     * Base 64 encode as described in RFC 1421.
+     * <p>Does not insert whitespace as described in RFC 1521.
+     * @param s String to encode.
+     * @return String containing the encoded form of the input.
+     */
     static public String encode(String s)
     {
-        try
-        {
-            return encode(s,null);
-        }
-        catch(UnsupportedEncodingException e)
-        {
-            Code.fail(e);
-        }
-        return null;
+        char[] encoded = encode(s.getBytes());
+	return new String(encoded);
     }
 
 
     // ------------------------------------------------------------------
+    /**
+     * Base 64 encode as described in RFC 1421.
+     * <p>Does not insert whitespace as described in RFC 1521.
+     * @param s String to encode.
+     * @param charEncoding String representing the name of
+     *        the character encoding of the provided input String.
+     * @return String containing the encoded form of the input.
+     */
     static public String encode(String s,String charEncoding)
         throws UnsupportedEncodingException
     {
-        int nibble=0;
         byte[] bytes;
         if (charEncoding==null)
-            bytes= s.getBytes();
+            bytes = s.getBytes();
         else
-            bytes= s.getBytes(charEncoding);
-        char[] encode = new char[bytes.length*2+4];
+            bytes = s.getBytes(charEncoding);
 
-        int e=0;
-        int n=0;
-        int code=0;
-        for (int i=0;i<bytes.length;i++)
-        {
-            byte b=bytes[i];
-            switch(n++)
-            {
-              case 0:
-                  nibble = (b&0xfc)>>2;
-                  encode[e++]=nibble2code[nibble];
-                  nibble = (b&0x3)<<4;
-                  break;
-                
-              case 1:
-                  nibble += (b&0xf0)>>4;
-                  encode[e++]=nibble2code[nibble];
-                  nibble = (b&0xf)<<2;
-                  break;
-                
-              case 2:
-              default:
-                  n=0;
-                  nibble += (b&0xc0)>>6;
-                  encode[e++]=nibble2code[nibble];
-                  nibble = (b&0x3f);
-                  encode[e++]=nibble2code[nibble];
-                  break;
-            }
-        }
-
-        switch(n++)
-        {
-          case 0:
-              break;
-                
-          case 1:
-              encode[e++]=nibble2code[nibble];
-              encode[e++]=pad;
-              encode[e++]=pad;
-              break;
-                
-          case 2:
-          default:
-              encode[e++]=nibble2code[nibble];
-              encode[e++]=pad;
-        }
-        return new String(encode,0,e);
+	return new String(encode(bytes));
     }
 
-
-    
     
     // ------------------------------------------------------------------
+    /**
+     * Fast Base 64 encode as described in RFC 1421.
+     * <p>Does not insert whitespace as described in RFC 1521.
+     * <p> Avoids creating extra copies of the input/output.
+     * @param b byte array to encode.
+     * @return char array containing the encoded form of the input.
+     */
+    static public char[] encode(byte[] b)
+    {
+	if (b == null)
+	    return null;
+	
+	int bLen = b.length;
+	char r[] = new char[((bLen+2)/3)*4];
+	int ri = 0;
+	int bi = 0;
+	byte b0, b1, b2;
+	int stop = (bLen/3)*3;
+	while (bi < stop)
+	{
+	    b0 = b[bi++];
+	    b1 = b[bi++];
+	    b2 = b[bi++];
+	    r[ri++] = nibble2code[(b0 >>> 2) & 0x3f];
+	    r[ri++] = nibble2code[(b0 << 4) & 0x3f | (b1 >>> 4) & 0x0f];
+	    r[ri++] = nibble2code[(b1 << 2) & 0x3f | (b2 >>> 6) & 0x03];
+	    r[ri++] = nibble2code[ b2 & 077];
+	}
+
+	if (bLen != bi)
+	{
+	    switch (bLen % 3)
+	    {
+	    case 2:
+		b0 = b[bi++];
+		b1 = b[bi++];
+		r[ri++] = nibble2code[(b0 >>> 2) & 0x3f];
+		r[ri++] = nibble2code[(b0 << 4) & 0x3f | (b1 >>> 4) & 0x0f];
+		r[ri++] = nibble2code[(b1 << 2) & 0x3f];
+		r[ri++] = pad;
+		break;
+		
+	    case 1:
+		b0 = b[bi++];
+		r[ri++] = nibble2code[(b0 >>> 2) & 0x3f];
+		r[ri++] = nibble2code[(b0 << 4) & 0x3f];
+		r[ri++] = pad;
+		r[ri++] = pad;
+		break;
+		
+	    default:
+		break;
+	    }
+	}
+
+	return r;
+    }
+    
+    // ------------------------------------------------------------------
+    /**
+     * Base 64 decode as described in RFC 1421.
+     * <p>Does not attempt to cope with extra whitespace
+     * as described in RFC 1521.
+     * @param s String to decode
+     * @return String decoded byte array.
+     */
     static public String decode(String s)
     {
-        try
-        {
-            return decode(s,null);
-        }
-        catch(UnsupportedEncodingException e)
-        {
-            Code.fail(e);
-        }
-        return null;
+	return new String(decode(s.toCharArray()));
     }
     
     // ------------------------------------------------------------------
+    /**
+     * Base 64 decode as described in RFC 1421.
+     * <p>Does not attempt to cope with extra whitespace
+     * as described in RFC 1521.
+     * @param s String to decode
+     * @param charEncoding String representing the character encoding
+     *        used to map the decoded bytes into a String.
+     * @return String decoded byte array.
+     */
     static public String decode(String s,String charEncoding)
         throws UnsupportedEncodingException
     {
-        byte[] nibble = new byte[4];
-        byte[] decode = new byte[s.length()];
-        int d=0;
-        int n=0;
-        byte b;
-        
-        for (int i=0;i<s.length();i++)
-        {
-            char c = s.charAt(i);
-            if (c>=256)
-                throw new IllegalArgumentException("String is not B64 encoded");
-            nibble[n] = code2nibble[(int)c];
-            if (nibble[n]<0)
-                throw new IllegalArgumentException("String is not B64 encoded");
-            
-            if (c==pad)
-                break;
-            
-            
-            switch(n++)
-            {
-              case 0:
-                  break;
-                
-              case 1:
-                  b=(byte)((nibble[0]<<2) + (nibble[1]>>4));
-                  decode[d++]=b;
-                  break;
-                  
-              case 2:
-                  b=(byte)(((nibble[1]&0xf)<<4) + (nibble[2]>>2));
-                  decode[d++]=b;
-                  break;
-                  
-              case 3:
-              default:
-                  b=(byte)(((nibble[2]&0x3)<<6) + nibble[3]);
-                  decode[d++]=b;
-                  n=0;
-                  break;
-            }
-
-        }
-
-        
+	byte[] decoded = decode(s.toCharArray());
+	
         if (charEncoding==null)
-            return new String(decode,0,d);
-        return new String(decode,0,d,charEncoding);
+            return new String(decoded);
+        return new String(decoded,charEncoding);
     }
 
-    
+    /**
+     * Fast Base 64 decode as described in RFC 1421.
+     * <p>Does not attempt to cope with extra whitespace
+     * as described in RFC 1521.
+     * <p> Avoids creating extra copies of the input/output.
+     * <p> Note this code has been flattened for performance.
+     * @param b char array to decode.
+     * @return byte array containing the decoded form of the input.
+     * @throws IllegalArgumentException if the input is not a valid
+     *         B64 encoding.
+     */
+    static public byte[] decode(char[] b)
+    {
+	if (b == null)
+	    return null;
+
+	int bLen = b.length;
+	if (bLen % 4 != 0)
+	    throw new IllegalArgumentException("Input block size is not 4");
+
+	int li = bLen - 1;
+	while (li >= 0 && b[li] == (byte) pad)
+	    li--;
+
+	if (li < 0)
+	    return new byte[0];
+
+	// Create result array of exact required size.
+	int rLen = ((li+1)*3)/4;
+	byte r[] = new byte[rLen];
+	int ri = 0;
+	int bi = 0;
+	int stop = (rLen/3)*3;
+	byte b0,b1,b2,b3;
+	try
+	{
+	    while (ri < stop)
+	    {
+		b0 = code2nibble[b[bi++]];
+		b1 = code2nibble[b[bi++]];
+		b2 = code2nibble[b[bi++]];
+		b3 = code2nibble[b[bi++]];
+		if (b0<0||b1<0||b2<0||b3<0)
+		    throw new IllegalArgumentException("Not B64 encoded");
+		
+		r[ri++] = (byte) (b0 << 2 | b1 >>> 4);
+		r[ri++] = (byte) (b1 << 4 | b2 >>> 2);
+		r[ri++] = (byte) (b2 << 6 | b3);
+	    }
+
+	    if (rLen != ri)
+	    {
+		switch (rLen % 3)
+		{
+		  case 2:
+		      b0 = code2nibble[b[bi++]];
+		      b1 = code2nibble[b[bi++]];
+		      b2 = code2nibble[b[bi++]];
+		      if (b0<0||b1<0||b2<0)
+			  throw new IllegalArgumentException("Not B64 encoded");
+		      r[ri++] = (byte) (b0 << 2 | b1 >>> 4);
+		      r[ri++] = (byte) (b1 << 4 | b2 >>> 2);
+		      break;
+		
+		  case 1:
+		      b0 = code2nibble[b[bi++]];
+		      b1 = code2nibble[b[bi++]];
+		      if (b0<0||b1<0)
+			  throw new IllegalArgumentException("Not B64 encoded");
+		      r[ri++] = (byte) (b0 << 2 | b1 >>> 4);
+		      break;
+		
+		  default:
+		      break;
+		}
+	    }
+	} catch (IndexOutOfBoundsException e) {
+	    throw new IllegalArgumentException("char "+bi
+					       +" was not B64 encoded");
+	}
+	
+	return r;
+    }
 }
