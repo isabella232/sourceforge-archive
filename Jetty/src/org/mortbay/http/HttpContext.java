@@ -71,6 +71,15 @@ public class HttpContext implements LifeCycle,
                                     Serializable
 {
     /* ------------------------------------------------------------ */
+    /** File class path attribute.
+     * If this name is set as a context init parameter, then the attribute
+     * name given will be used to set the file classpath for the context as a
+     * context attribute. 
+     */
+    public final static String __fileClassPathAttr=
+        "org.mortbay.http.HttpContext.FileClassPathAttribute";
+    
+    /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     private final static Map __dftMimeMap = new HashMap();
     private final static Map __encodings = new HashMap();
@@ -1751,6 +1760,11 @@ public class HttpContext implements LifeCycle,
         
         // setup the context loader
         initClassLoader(false);
+        
+        // Set attribute if needed
+        String attr = getInitParameter(__fileClassPathAttr);
+        if (attr!=null && attr.length()>0)
+            setAttribute(attr,getFileClassPath());
         
         // Start the handlers
         Thread thread = Thread.currentThread();
