@@ -95,7 +95,7 @@ public class Log
         if (!_initialized)
         {
             _logOptions=System.getProperty("LOG_OPTIONS",
-                                           Code.debug()?"stLT":"tOT");
+                                           Code.debug()?"stLT":"tT");
             String sinkClasses = System.getProperty("LOG_CLASSES",
                                                     "com.mortbay.Util.WriterLogSink");
             StringTokenizer sinkTokens = new StringTokenizer(sinkClasses, ";");

@@ -440,11 +440,10 @@ public class WriterLogSink
             // Determine the indent string for the message and append it
             // to the buffer. Only put a newline in the buffer if the first
             // line is not blank
-            String nl=__lineSeparator+"+ ";
-            if (!_logOneLine && _stringBuffer.length() > 0)
+            String nl=__lineSeparator+(_logOneLine?"":"+ ");
+            
+            if (_logLabels && !_logOneLine && _stringBuffer.length() > 0)
             	_stringBuffer.append(nl);
-            else
-                nl=__lineSeparator;
 
             // Log indented message
             String smsg=(msg==null)
