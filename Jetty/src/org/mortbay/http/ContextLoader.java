@@ -52,7 +52,8 @@ public class ContextLoader extends URLClassLoader
      * @param quiet If true, non existant paths are not reported
      * @exception IOException
      */
-    public ContextLoader(String classPath,
+    public ContextLoader(HttpContext context,
+                         String classPath,
                          ClassLoader parent,
                          PermissionCollection permisions)
         throws MalformedURLException, IOException
@@ -70,44 +71,56 @@ public class ContextLoader extends URLClassLoader
         {
             Resource resource = Resource.newResource(tokenizer.nextToken());
             Code.debug("Path resource=",resource);
+
             
             // Resolve file path if possible
             File file=resource.getFile();
+            
             if (file!=null)
             {
                 _fileClassPath=(_fileClassPath==null)
                     ?file.getCanonicalPath()
-                    :(_fileClassPath+File.pathSeparator+file.getCanonicalPath());            
-            }
-            else
-                _fileClassPathWarning=true;
-            
-            // Add resource or expand jar/
-            if (!resource.isDirectory() && file!=null)
-            {
-                // XXX - this is a jar in a jar, so we must
-                // extract it - probably should be to an in memory
-                // structure, but this will do for now.
-                InputStream in =resource.getInputStream();
-                File jar=File.createTempFile("Jetty-"+file.getName()+"-",".jar");
-                file.deleteOnExit();
-                Code.debug("Extract ",resource," to ",jar);
-                FileOutputStream out = new FileOutputStream(jar);
-                IO.copy(in,out);
-                out.close();
-                URL url = jar.toURL();
-                addURL(url);
-                _urlClassPath=(_urlClassPath==null)
-                    ?url.toString()
-                    :(_urlClassPath+","+url.toString());
-            }
-            else
-            {
+                    :(_fileClassPath+File.pathSeparator+file.getCanonicalPath());    
                 URL url = resource.getURL();
                 addURL(url);
                 _urlClassPath=(_urlClassPath==null)
                     ?url.toString()
-                    :(_urlClassPath+","+url.toString());
+                    :(_urlClassPath+","+url.toString());        
+            }
+            else
+            {
+                _fileClassPathWarning=true;
+                
+                // Add resource or expand jar/
+                if (!resource.isDirectory() && file==null)
+                {
+                    // XXX - this is a jar in a jar, so we must
+                    // extract it - probably should be to an in memory
+                    // structure, but this will do for now.
+                    InputStream in =resource.getInputStream();
+                    File jar=File.createTempFile("Jetty-",".jar",context.getTempDirectory());
+                    jar.deleteOnExit();
+                    Code.debug("Extract ",resource," to ",jar);
+                    FileOutputStream out = new FileOutputStream(jar);
+                    IO.copy(in,out);
+                    out.close();
+                    _fileClassPath=(_fileClassPath==null)
+                        ?jar.getCanonicalPath()
+                        :(_fileClassPath+File.pathSeparator+jar.getCanonicalPath());
+                    URL url = jar.toURL();
+                    addURL(url);
+                    _urlClassPath=(_urlClassPath==null)
+                        ?url.toString()
+                        :(_urlClassPath+","+url.toString());
+                }
+                else
+                {
+                    URL url = resource.getURL();
+                    addURL(url);
+                    _urlClassPath=(_urlClassPath==null)
+                        ?url.toString()
+                        :(_urlClassPath+","+url.toString());
+                }
             }
         }
         
@@ -141,8 +154,8 @@ public class ContextLoader extends URLClassLoader
         if (_fileClassPathWarning)
         {
             _fileClassPathWarning=false;
-            Code.warning("Classpath incomplete as it cannot include URL elements: "+
-                         _fileClassPath);            
+            Code.warning("File Classpath incomplete "+ _fileClassPath);
+            Code.warning("URL Classpath "+ _urlClassPath);            
         }
         
         return _fileClassPath;

@@ -5,6 +5,7 @@
 
 package org.mortbay.http;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.security.Permission;
@@ -21,6 +22,7 @@ import java.util.ResourceBundle;
 import org.mortbay.http.handler.ResourceHandler;
 import org.mortbay.http.handler.SecurityHandler;
 import org.mortbay.util.Code;
+import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LifeCycle;
 import org.mortbay.util.Log;
 import org.mortbay.util.LogSink;
@@ -95,10 +97,13 @@ public class HttpContext implements LifeCycle
     private boolean _redirectNullPath=true;
     private boolean _httpServerAccess=false;
     
+    private File _tmpDir;
+    
     private Map _mimeMap;
     private Map _encodingMap;
     private Map _resourceAliases;
     private Map _errorPages;
+    
 
     private PermissionCollection _permissions;    
     
@@ -350,6 +355,123 @@ public class HttpContext implements LifeCycle
     }
 
     /* ------------------------------------------------------------ */
+    public File getTempDirectory()
+    {
+        if (_tmpDir!=null)
+            return _tmpDir;
+        
+        // Initialize temporary directory
+        //
+        // I'm afraid that this is very much black magic.
+        // but if you can think of better....
+        Object t = getAttribute("javax.servlet.context.tempdir");
+        
+        if (t!=null && (t instanceof File))
+        {
+            _tmpDir=(File)t;
+            if (_tmpDir.isDirectory() && _tmpDir.canWrite())
+                return _tmpDir;
+        }
+                
+        if (t!=null && (t instanceof String))
+        {
+            try
+            {
+                _tmpDir=new File((String)t);
+                
+                if (_tmpDir.isDirectory() && _tmpDir.canWrite())
+                {
+                    Log.event("Converted to File "+_tmpDir+" for "+this);
+                    setAttribute("javax.servlet.context.tempdir",_tmpDir);
+                    return _tmpDir;
+                }
+            }
+            catch(Exception e)
+            {
+                Code.warning(e);
+            }
+        }
+
+        // No tempdir set so make one!
+        try
+        {
+            HttpListener httpListener=(HttpListener)
+                _httpServer.getListeners().iterator().next();
+            
+            String vhost = null;
+            for (int h=0;vhost==null && _hosts!=null && h<_hosts.size();h++)
+                vhost=(String)_hosts.get(h);
+            if (InetAddrPort.__0_0_0_0.equals(vhost))
+                vhost=null;
+            
+            String host=httpListener.getHost();
+            if (InetAddrPort.__0_0_0_0.equals(host))
+                host=null;
+            
+            String temp="Jetty_"+
+                (host==null?"":host)+
+                "_"+
+                httpListener.getPort()+
+                "_"+
+                (vhost==null?"":vhost)+
+                "_"+
+                getContextPath();
+            
+            temp=temp.replace('/','_');
+            temp=temp.replace('.','_');
+            temp=temp.replace('\\','_');
+            
+            _tmpDir=new File(System.getProperty("java.io.tmpdir"),
+                             temp);
+            if (!_tmpDir.exists())
+            {
+                _tmpDir.mkdir();
+                _tmpDir.deleteOnExit();
+                Log.event("Created temp dir "+_tmpDir+" for "+this);
+            }
+            else if (!_tmpDir.isDirectory() || !_tmpDir.canWrite())
+                _tmpDir=null;
+            else
+            {
+                _tmpDir.deleteOnExit();
+                Log.event("Reused temp dir "+_tmpDir+" for "+this);
+            }
+        }
+        catch(Exception e)
+        {
+            _tmpDir=null;
+            Code.warning(e);
+        }    
+        
+        if (_tmpDir==null)
+        {
+            try{
+                // that didn't work, so try something simpler (ish)
+                _tmpDir=File.createTempFile("JettyContext",null);
+                if (_tmpDir.exists())
+                    _tmpDir.delete();
+                _tmpDir.mkdir();
+                _tmpDir.deleteOnExit();
+                Log.event("Created temp dir "+_tmpDir+" for "+this);
+            }
+            catch(IOException e)
+            {
+                Code.fail(e);
+            }
+        }
+        
+        setAttribute("javax.servlet.context.tempdir",_tmpDir);
+        return _tmpDir;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setTempDirectory(File file)
+    {
+        _tmpDir=file;
+        setAttribute("javax.servlet.context.tempdir",_tmpDir);
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Get the classloader.
      * If no classloader has been set and the context has been loaded
      * normally, then null is returned.
@@ -390,7 +512,7 @@ public class HttpContext implements LifeCycle
                        ", ",_parent," for ",this);
 
             if (_classPath!=null || _permissions!=null)
-                _loader=new ContextLoader(_classPath,_parent,_permissions);
+                _loader=new ContextLoader(this,_classPath,_parent,_permissions);
             else
                 _loader=_parent;
         }

@@ -180,7 +180,8 @@ public class Server extends HttpServer
                 context.startsWith("."))
                 continue;
             
-            if (context.toLowerCase().endsWith(".war"))
+            if (context.toLowerCase().endsWith(".war") ||
+                context.toLowerCase().endsWith(".jar"))
                 context=context.substring(0,context.length()-4);
             if (context.equalsIgnoreCase("root")||
                 context.equalsIgnoreCase("root/"))

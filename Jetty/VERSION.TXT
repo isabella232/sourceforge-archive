@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Generalized temp file handling
+ + Fixed ContextLoader lib handling.
  + DateCache handles misses better.
  + HttpFields uses DateCache more.
  + Moved admin port to 8081 to avoid JBuilder

@@ -137,14 +137,7 @@ can be run with
 The org.mortbay.jetty.Server class is simply an xml configuration
 frontend to org.mortbay.http.HttpServer.
 
-Jetty comes with the JAXP 1.1 reference XML parser, which is cromson from
-apache. Use the org.xml.sax.parser property to specify an alternative SAX parser.
-
-The DTDs used by jetty are resolved as resources from the system classpath,
-thus they are stored in org.mortbay.http/web.dtd and org.mortbay.util.configure.dtd
-within the source tree and jar file.  Copies are also placed in etc for reference.
-
-There is also a Jetty extension configuration mechanism for web applications.
+There is a Jetty extension configuration mechanism for web applications.
 If a file WEB-INF/web-jetty.xml is found, it is treated as a Jetty XmlConfiguration
 file and applied to the WebApplicationContext object when the context
 is started.
@@ -405,10 +398,16 @@ Specific access should be granted with constraints like:
 
 XML Parsing
 -----------
-Jetty uses the reference implementation of JAXP1.1 for XML parsing.
-The jars have been renamed with their main package name.
+Jetty comes with the JAXP 1.1 reference XML parser, which is crimson from
+apache.  The jars have been renamed with their main package name.
 Jetty does not use any of the DOM classes, so these jars can be
 trimmed significantly if you want to reduce size.
+
+Use the org.xml.sax.parser property to specify an alternative SAX parser.
+
+The DTDs used by jetty are resolved as resources from the system classpath,
+thus they are stored in org.mortbay.http/web.dtd and org.mortbay.util.configure.dtd
+within the source tree and jar file.  Copies are also placed in etc for reference.
 
 
 JMX Management
