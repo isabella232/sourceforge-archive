@@ -13,7 +13,8 @@ import javax.servlet.http.*;
 import java.io.*;
 import java.util.*;
 import java.lang.reflect.*;
-
+import java.net.URL;
+import java.net.MalformedURLException;
 
 /* ------------------------------------------------------------------ */
 /** Hnadling of a HTTP response
@@ -45,6 +46,8 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     public final static String Expires ="Expires"   ;
     public final static String Location ="Location"   ;
     public final static String Allow = "Allow"   ;
+    public final static String SessionUrlPrefix = "/js!*";
+    public final static String SessionUrlPostfix = "*!";
     
     /* -------------------------------------------------------------- */
     public final static Hashtable __errorCodeMap = new Hashtable();
@@ -498,8 +501,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public java.lang.String encodeUrl(java.lang.String url)
     {
-	//XXX - Don't support rewriting
-	return url;
+	return encodeURL(url);
     }
     
     /* -------------------------------------------------------------- */
@@ -512,8 +514,22 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     /* -------------------------------------------------------------- */
     public java.lang.String encodeURL(java.lang.String url)
     {
-	//XXX - Don't support rewriting
-	return url;
+	HttpSession session = request.getSession();
+	if (session == null) return url;
+	String id = session.getId();
+	if (id == null) return url;
+	try {
+	    URL theUrl = new URL(url);
+	    String file = SessionUrlPrefix + id + SessionUrlPostfix +
+		theUrl.getFile();
+	    String ref = theUrl.getRef();
+	    URL encoded = new URL(theUrl.getProtocol(), theUrl.getHost(),
+				  theUrl.getPort(), file + (ref == null ? "" :
+							    "#" + ref));
+	    return encoded.toString();
+	} catch (MalformedURLException ex){}
+	// Must be a partial url...
+	return SessionUrlPrefix + id + SessionUrlPostfix + url;
     }
     
     /* -------------------------------------------------------------- */
@@ -553,11 +569,3 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     }    
 
 }
-
-
-
-
-
-
-
-

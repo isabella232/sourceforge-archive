@@ -51,6 +51,14 @@ public class HttpRequest extends HttpHeader
     private static final Enumeration __NoAttributes = new Vector().elements();
     
     /* -------------------------------------------------------------- */
+    /** For decoding session ids etc. */
+    public static final String SESSIONID_NOT_CHECKED = "not checked";
+    public static final String SESSIONID_URL = "url";
+    public static final String SESSIONID_COOKIE = "cookie";
+    public static final String SESSIONID_NONE = "none";
+    
+    /* ------------------------------------------------------------ */
+
     public String method=null;
     public URI uri=null;
     public String version=null;
@@ -63,7 +71,10 @@ public class HttpRequest extends HttpHeader
     private Hashtable formParameters=null;
     private Hashtable cookieParameters=null;
     private Cookie[] cookies=null;
-    
+    private String sessionId=null;
+    private HttpSession session=null;
+    private String sessionIdState=SESSIONID_NOT_CHECKED;
+
     private String requestLine=null;
     private String requestURI=null;
     private String protocolHostPort=null;
@@ -881,10 +892,39 @@ public class HttpRequest extends HttpHeader
     /* -------------------------------------------------------------- */
     public String getRequestedSessionId()
     {
-	return (String)cookieParameters.get(SessionContext.SessionId);
+	if (sessionIdState == SESSIONID_NOT_CHECKED){	    
+	    // First, check if there is a url encoded session param.
+	    if (getRequestPath().indexOf(HttpResponse.SessionUrlPrefix) == 0)
+	    {
+		String path = getRequestPath();
+		if ((path.indexOf(HttpResponse.SessionUrlPostfix) +
+		     HttpResponse.SessionUrlPostfix.length())
+		    == path.indexOf("/", 1))
+		{
+		    // definitely a session id in there!
+		    sessionId =
+			path.substring(HttpResponse.SessionUrlPrefix.length(),
+				       path.indexOf(HttpResponse.
+						    SessionUrlPostfix));
+		    sessionIdState = SESSIONID_URL;
+		    // translate our path to drop the prefix off.
+		    setRequestPath(path.substring(path.indexOf("/", 1)));
+		    Code.debug("XXX:"+getRequestPath());
+		}
+	    }
+	    // Then try cookies
+	    if (sessionId == null){
+		sessionId =
+		    (String)cookieParameters.get(SessionContext.SessionId);
+		if (sessionId != null)
+		    sessionIdState = SESSIONID_COOKIE;
+	    }
+	    if (sessionId == null)
+		sessionIdState = SESSIONID_NONE;
+	}
+	return sessionId;
     }
-    
-    /* -------------------------------------------------------------- */
+    /* ------------------------------------------------------------ */
     public HttpSession getSession()
     {
 	return getSession(true);
@@ -893,40 +933,25 @@ public class HttpRequest extends HttpHeader
     /* -------------------------------------------------------------- */
     public HttpSession getSession(boolean create)
     {
-	HttpSession session=null;
+	Code.debug("sessionIdState:"+sessionIdState);
+	if (session != null) return session;
 	String id = getRequestedSessionId();
-	boolean old=false;
-	
-	String browserId =
-	    (String)cookieParameters.get(SessionContext.BrowserId);
-	
-	if (id!=null)
-	{
+	if (id != null){
 	    session = sessions.getSession(id);
-	    if(session==null && create && browserId!=null)
-		session=sessions.oldSession(id,browserId);
+	    // Bad sessionId, create one marked as old
+	    if (session == null && create)
+		session = sessions.oldSession(id);
 	}
 	
-	if (session==null && create)
+	if (session == null && create)
 	{
-	    session=sessions.newSession();
+	    session = sessions.newSession();
+	    // Try and set the cookie...
 	    Cookie cookie =
 		new Cookie(SessionContext.SessionId,(String)
 			   session.getValue(SessionContext.SessionId));
 	    cookie.setPath("/");
-	    response.addCookie(cookie);
-	
-	    if (browserId==null)
-	    {
-		cookie =
-		    new Cookie(SessionContext.BrowserId,(String)
-			       session.getValue(SessionContext.BrowserId));
-		cookie.setPath("/");
-		cookie.setMaxAge(SessionContext.distantFuture);
-		response.addCookie(cookie);
-	    }
-	    else
-		session.putValue(SessionContext.BrowserId,browserId);
+	    response.addCookie(cookie);	
 	}
 
 	return session;
@@ -935,7 +960,7 @@ public class HttpRequest extends HttpHeader
     /* -------------------------------------------------------------- */
     public boolean isRequestedSessionIdFromCookie()
     {
-	return getRequestedSessionId()!=null;
+	return sessionIdState == SESSIONID_COOKIE;
     }
     
     /* -------------------------------------------------------------- */
@@ -944,19 +969,19 @@ public class HttpRequest extends HttpHeader
      */
     public boolean isRequestedSessionIdFromUrl()
     {
-	return false;
+	return isRequestedSessionIdFromURL();
     }
     
     /* -------------------------------------------------------------- */
     public boolean isRequestedSessionIdFromURL()
     {
-	return false;
+	return sessionIdState == SESSIONID_URL;
     }
     
     /* -------------------------------------------------------------- */
     public boolean isRequestedSessionIdValid()
     {
-	return getSession(false)!=null;
+	return sessionId != null && getSession(false) == null;
     }
     
     /* -------------------------------------------------------------- */

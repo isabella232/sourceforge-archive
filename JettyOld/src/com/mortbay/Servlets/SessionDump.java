@@ -61,6 +61,9 @@ public class SessionDump extends HttpServlet
 	    page = Page.getPage(pageType,request);
 	    page.title("Session Dump Servlet");	    
 
+	    page.add(new Link(response.encodeURL(request.getServletPath()),
+			      "Try url encoding"));
+	    
 	    Table table = new Table(0).cellPadding(0).cellSpacing(0);
 	    page.add(table);
 	    table.newRow();
@@ -84,7 +87,7 @@ public class SessionDump extends HttpServlet
 		if (name.equals(SessionContext.SessionStatus))
 		{
 		    if (value.equals(SessionContext.NewSession))
-			table.addCell("New  - This is the first hit of the session<BR>(or the browswer does not support cookies).");
+			table.addCell("New  - This is the first hit of the session<BR>(or the browser does not support cookies).");
 		    else if (value.equals(SessionContext.OldSession))
 			table.addCell("Old  - The server has been restarted.<BR> Session data lost.");
 		    else

@@ -20,7 +20,6 @@ import javax.servlet.http.*;
 public class SessionContext extends Hashtable
     implements javax.servlet.http.HttpSessionContext	    
 {
-    public static final String BrowserId  = "JettyBrowserId";
     public static final String SessionId  = "JettySessionId";
     public static final String SessionStatus  = "JettySessionStatus";
     public static final String OldSession  = "Old";
@@ -29,7 +28,6 @@ public class SessionContext extends Hashtable
     public static final int distantFuture = 60*60*24*7*52*20; 
 
     static long nextSessionId = System.currentTimeMillis();
-    static long nextBrowserId = System.currentTimeMillis();
     
     /* ------------------------------------------------------------ */
     class Session extends Hashtable
@@ -46,16 +44,14 @@ public class SessionContext extends Hashtable
 	{
 	    this.id=Long.toString(nextSessionId++,36);
 	    put(SessionId,id);
-	    put(BrowserId,Long.toString(nextBrowserId++,36));
 	    put(SessionStatus,NewSession);
 	}
 
 	/* ------------------------------------------------------------- */
-	Session(String sid,String bid)
+	Session(String sid)
 	{
 	    id=sid;
 	    put(SessionId,id);
-	    put(BrowserId,bid);
 	    put(SessionStatus,OldSession);
 	}
 	
@@ -207,10 +203,9 @@ public class SessionContext extends Hashtable
     }
     
     /* ------------------------------------------------------------ */
-    public HttpSession oldSession(String sessionId,
-				  String browserId)
+    public HttpSession oldSession(String sessionId)
     {
-	HttpSession session = new Session(sessionId,browserId);
+	HttpSession session = new Session(sessionId);
 	put(sessionId,session);
 	return session;
     }
