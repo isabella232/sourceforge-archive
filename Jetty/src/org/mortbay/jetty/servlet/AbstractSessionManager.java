@@ -183,6 +183,7 @@ public abstract class AbstractSessionManager implements SessionManager
     public HttpSession newHttpSession(HttpServletRequest request)
     {
         Session session = newSession(request);
+        
         session.setMaxInactiveInterval(_dftMaxIdleSecs);
         synchronized(_sessions)
         {

@@ -7,9 +7,15 @@
     <param-name>home</param-name>
     <param-value>http://jetty.mortbay.org</param-value>
   </context-param>
+
   <context-param>
     <param-name>admin</param-name>
     <param-value>mortbay@mortbay.com</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>org.mortbay.jetty.servlet.SessionPath</param-name>
+    <param-value>/</param-value>
   </context-param>
 
   <filter>

@@ -49,7 +49,13 @@ public class SessionDump extends HttpServlet
         String value =  request.getParameter("Value");
         String age =  request.getParameter("MaxAge");
 
-        String nextUrl = request.getRequestURI()+"?R="+redirectCount++;
+        
+        String nextUrl = request.getRequestURI();
+        int slash=nextUrl.lastIndexOf("/");
+        if (slash>0 && (slash+1)<nextUrl.length())
+            nextUrl=nextUrl.substring(slash+1);
+        nextUrl+="?R="+redirectCount++;
+        
         if (action.equals("New Session"))
         {   
             session = request.getSession(true);
@@ -94,8 +100,11 @@ public class SessionDump extends HttpServlet
         
         HttpSession session = request.getSession(request.getRequestURI().indexOf("new")>0);
         
-        TableForm tf =
-            new TableForm(response.encodeURL(request.getRequestURI()));
+        String nextUrl = request.getRequestURI();
+        int slash=nextUrl.lastIndexOf("/");
+        if (slash>0 && (slash+1)<nextUrl.length())
+            nextUrl=nextUrl.substring(slash+1);
+        TableForm tf = new TableForm(response.encodeURL(nextUrl));
         tf.method("POST");
         
         if (session==null)
@@ -145,7 +154,11 @@ public class SessionDump extends HttpServlet
             {
                 Code.debug(e);
                 page.add("<H1>INVALID Session</H1>");
-                tf=new TableForm(request.getRequestURI());
+                nextUrl = request.getRequestURI();
+                slash=nextUrl.lastIndexOf("/");
+                if (slash>0 && (slash+1)<nextUrl.length())
+                    nextUrl=nextUrl.substring(slash+1);
+                tf=new TableForm(nextUrl);
                 tf.addButton("Action","New Session");
             }
         }

@@ -3,7 +3,7 @@
 
 <!--
 This is the jetty specific web application configuration file.  When starting
-a Web Application, the WEB-INF/web-jetty.xml file is looked for and if found, treated
+a Web Application, the WEB-INF/jetty-web.xml file is looked for and if found, treated
 as a org.mortbay.xml.XmlConfiguration file and is applied to the
 org.mortbay.jetty.servlet.WebApplicationContext objet
 -->
@@ -14,7 +14,6 @@ org.mortbay.jetty.servlet.WebApplicationContext objet
       <Set name="usingCookies">true</Set>
     </Call>
 
-    <!-- get in ahead of the default handlers -->
     <!-- Uncomment to add a sample ExpiryHandler.
     <Call name="addHandler">
       <Arg type="int">0</Arg>
@@ -63,5 +62,33 @@ org.mortbay.jetty.servlet.WebApplicationContext objet
       </Array>
     </Set>
     -->
+
+    <!-- uncomment this section to add a session manager with a SecureRandom generator
+    <Call name="getServletHandler">
+      <Set name="sessionManager">
+        <New class="org.mortbay.jetty.servlet.HashSessionManager">
+          <Arg><New class="java.security.SecureRandom"/></Arg>
+        </New>
+      </Set>
+    </Call>
+    -->  
+
+    <!-- uncomment to add a worker tag to the session manager
+    <Call name="getServletHandler">
+      <Call name="getSessionManager">
+        <Set name="workerName">demo0</Set>
+      </Call>
+    </Call>
+    -->
+
+    <!-- uncomment to allow shared session IDs for SSO or cross context dispatch 
+    -->
+    <Call name="getServletHandler">
+      <Call name="getSessionManager">
+        <Call name="setUseRequestedId">
+          <Arg type="boolean">true</Arg>
+        </Call>
+      </Call>
+    </Call>
 
 </Configure>

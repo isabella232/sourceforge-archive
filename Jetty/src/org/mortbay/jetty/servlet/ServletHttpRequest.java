@@ -70,7 +70,6 @@ public class ServletHttpRequest
     private String _servletPath=null;
     private String _pathInfo=null;
     private String _query=null;
-    private String _pathTranslated=null;
     private String _sessionId=null;
     private HttpSession _session=null;
     private String _sessionIdState=__SESSIONID_NOT_CHECKED;
@@ -104,7 +103,6 @@ public class ServletHttpRequest
         _servletPath=null;
         _pathInfo=null;
         _query=null;
-        _pathTranslated=null;
         _sessionId=null;
         _session=null;
         _sessionIdState=__SESSIONID_NOT_CHECKED;
@@ -327,31 +325,9 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public String getPathTranslated()
     {
-        if (_pathInfo==null || _pathInfo.length()==0)
+        if (_pathInfo==null)
             return null;
-        if (_pathTranslated==null)
-        {
-            Resource resource =
-                _servletHandler.getHttpContext().getBaseResource();
-
-            if (resource==null)
-                return null;
-
-            try
-            {
-                resource=resource.addPath(_pathInfo);
-                File file = resource.getFile();
-                if (file==null)
-                    return null;
-                _pathTranslated=file.getAbsolutePath();
-            }
-            catch(Exception e)
-            {
-                Code.debug(e);
-            }
-        }
-        
-        return _pathTranslated;
+        return getRealPath(_pathInfo);
     }
     
     /* ------------------------------------------------------------ */

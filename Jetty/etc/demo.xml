@@ -160,24 +160,16 @@
     <Arg>/jetty/*</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/jetty</Arg>
 
-    <!-- uncomment this section to add a session manager with a SecureRandom generator
-    <Call name="getServletHandler">
-      <Set name="sessionManager">
-        <New class="org.mortbay.jetty.servlet.HashSessionManager">
-          <Arg><New class="java.security.SecureRandom"/></Arg>
-        </New>
-      </Set>
-    </Call>
-    -->  
+    <!-- See demo/webapps/jetty/WEB-INF/jetty-web.xml for more configuration -->
 
-    <!-- uncomment to add a worker tag to the session manager
-    <Call name="getServletHandler">
-      <Call name="getSessionManager">
-        <Set name="workerName">demo0</Set>
-      </Call>
-    </Call>
-    -->
+  </Call>
 
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Add jetty demo web applications.                                -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <Call name="addWebApplication">
+    <Arg>/jetty2/*</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/jetty</Arg>
   </Call>
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
