@@ -146,8 +146,7 @@ class ServletRequest
     /* ------------------------------------------------------------ */
     public boolean isSecure()
     {
-	return "HTTPS".equals(_httpRequest.getScheme()) ||
-	    "https".equals(_httpRequest.getScheme());
+	return "https".equals(_httpRequest.getScheme());
     }
     
     /* ------------------------------------------------------------ */
@@ -246,47 +245,16 @@ class ServletRequest
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     *
-     * Returns a boolean indicating whether the authenticated user is included
-     * in the specified logical "role".  Roles and role membership can be
-     * defined using deployment descriptors.  If the user has not been
-     * authenticated, the method returns <code>false</code>.
-     *
-     * @param role		a <code>String</code> specifying the name
-     *				of the role
-     *
-     * @return		a <code>boolean</code> indicating whether
-     *			the user making this request belongs to a given role;
-     *			<code>false</code> if the user has not been 
-     *			authenticated
-     *
-     */
     public boolean isUserInRole(String role)
     {
-	Code.notImplemented();
-	return false;
+	return _httpRequest.isUserInRole(role);
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     *
-     * Returns a <code>java.security.Principal</code> object containing
-     * the name of the current authenticated user. If the user has not been
-     * authenticated, the method returns <code>null</code>.
-     *
-     * @return		a <code>java.security.Principal</code> containing
-     *			the name of the user making this request;
-     *			<code>null</code> if the user has not been 
-     *			authenticated
-     *
-     */
     public Principal getUserPrincipal()
     {
-	Code.notImplemented();
-	return null;
+	return _httpRequest.getUserPrincipal();
     }
-    
     
     /* ------------------------------------------------------------ */
     public String getRequestedSessionId()

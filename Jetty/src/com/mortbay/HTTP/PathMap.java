@@ -191,6 +191,8 @@ public class PathMap extends HashMap
     /* --------------------------------------------------------------- */
     /** Get all entries matched by the path.
      * Best match first.
+     * @param path Path to match
+     * @return List of Map.Entry instances key=pathSpec
      */
     public List getMatches(String path)
     {        

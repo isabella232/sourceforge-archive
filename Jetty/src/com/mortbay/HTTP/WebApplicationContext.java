@@ -78,7 +78,6 @@ public class WebApplicationContext extends HandlerContext
 	    if (classes.exists())
 		setClassPath(classes.getCanonicalPath());
 	    // XXX - need to add jar files to classpath
-
 	    
 	    // Add servlet Handler
 	    addHandler(new ServletHandler());
@@ -88,8 +87,20 @@ public class WebApplicationContext extends HandlerContext
 	    // FileBase and ResourcePath
 	    setResourceBase(_directoryName);
 	    setServingResources(true);
+	    ResourceHandler rh = getResourceHandler();
+	    rh.setDirAllowed(true);
+	    rh.setPutAllowed(true);
+	    rh.setDelAllowed(true);
 	    
-	    _web = __xmlParser.parse(web);	    
+	    _web = __xmlParser.parse(web);
+
+	    // Standard constraint
+	    SecurityConstraint sc=new SecurityConstraint();
+	    sc.setName("WEB-INF");
+	    sc.addRole("com.mortbay.jetty.WebApplicationContext");
+	    addSecurityConstraint("/WEB-INF/*",sc);
+	    addSecurityConstraint("/WEB-INF",sc);
+	    
 	    initialize();
 	}
 	catch(IOException e)
@@ -159,20 +170,11 @@ public class WebApplicationContext extends HandlerContext
 		System.err.println(node);
 	    }
 	    else if ("security-constraint".equals(name))
-	    {
-		Code.warning("Not implemented: "+name);
-		System.err.println(node);
-	    }
+		initSecurityConstraint(node);
 	    else if ("login-config".equals(name))
-	    {
-		Code.warning("Not implemented: "+name);
-		System.err.println(node);
-	    }
+		initLoginConfig(node);
 	    else if ("security-role".equals(name))
-	    {
-		Code.warning("Not implemented: "+name);
-		System.err.println(node);
-	    }
+		Code.warning("Not implemented: "+node);
 	    else if ("env-entry".equals(name))
 	    {
 		Code.warning("Not implemented: "+name);
@@ -212,7 +214,7 @@ public class WebApplicationContext extends HandlerContext
     {
 	String name=node.get("servlet-name").toString(false);
 	String className=node.get("servlet-class").toString(false);
-
+	
 	ServletHolder holder = _servletHandler.newServletHolder(className);
 	holder.setServletName(name);
 	
@@ -223,6 +225,18 @@ public class WebApplicationContext extends HandlerContext
 	    String pname=paramNode.get("param-name").toString(false);
 	    String pvalue=paramNode.get("param-value").toString(false);
 	    holder.put(pname,pvalue);
+	}
+
+	XmlParser.Node startup = node.get("load-on-startup");
+	if (startup!=null &&
+	    startup.toString(false).trim().toLowerCase().startsWith("t"))
+	    holder.setInitOnStartup(true);
+	
+	XmlParser.Node securityRef = node.get("security-role-ref");
+	if (securityRef!=null)
+	{
+	    // XXX - If you know what to do with this, please tell me
+	    Code.warning("Not Implemented: "+securityRef+" in servlet "+name);
 	}
     }
 
@@ -269,6 +283,73 @@ public class WebApplicationContext extends HandlerContext
 	}
     }
 
+    /* ------------------------------------------------------------ */
+    private void initSecurityConstraint(XmlParser.Node node)
+    {
+	SecurityConstraint scBase = new SecurityConstraint();
+	
+	XmlParser.Node auths=node.get("auth-constraint");
+	Iterator iter= auths.iterator("role-name");
+	while(iter.hasNext())
+	{
+	    XmlParser.Node role=(XmlParser.Node)iter.next();
+	    scBase.addRole(role.toString(false));
+	}
+	XmlParser.Node data=node.get("user-data-constraint");
+	if (data!=null)
+	{
+	    String guarantee = data.toString(false).trim().toUpperCase();
+	    if (guarantee==null || guarantee.length()==0 ||
+		"NONE".equals(guarantee))
+		scBase.setDataConstraint(scBase.DC_NONE);
+	    else if ("INTEGRAL".equals(guarantee))
+		scBase.setDataConstraint(scBase.DC_INTEGRAL);
+	    else if ("CONFIDENTIAL".equals(guarantee))
+		scBase.setDataConstraint(scBase.DC_CONFIDENTIAL);
+	    else
+	    {
+		Code.warning("Unknown user-data-constraint:"+guarantee);
+		scBase.setDataConstraint(scBase.DC_CONFIDENTIAL);
+	    }
+	}
+
+	iter= node.iterator("web-resource-collection");
+	while(iter.hasNext())
+	{
+	    XmlParser.Node collection=(XmlParser.Node)iter.next();
+	    String name=collection.get("web-resource-name").toString(false);
+	    SecurityConstraint sc = (SecurityConstraint)scBase.clone();
+	    sc.setName(name);
+	    
+	    Iterator iter2= collection.iterator("http-method");
+	    while(iter2.hasNext())
+		sc.addMethod(((XmlParser.Node)iter2.next()).toString(false));
+
+	    iter2= collection.iterator("url-pattern");
+	    while(iter2.hasNext())
+	    {
+		String url=
+		    ((XmlParser.Node)iter2.next()).toString(false).trim();
+		addSecurityConstraint(url,sc);
+	    }
+	}
+    }
+    
+    /* ------------------------------------------------------------ */
+    private void initLoginConfig(XmlParser.Node node)
+    {
+	SecurityHandler sh = getSecurityHandler();
+	if (sh==null)
+	    return;
+
+	XmlParser.Node method=node.get("auth-method");
+	if (method!=null)
+	    sh.setAuthMethod(method.toString(false));
+	XmlParser.Node name=node.get("realm-name");
+	if (name!=null)
+	    sh.setAuthRealm(name.toString(false));
+    }
+    
 
     /* ------------------------------------------------------------ */
     /** 
@@ -281,11 +362,3 @@ public class WebApplicationContext extends HandlerContext
 	return _directoryName;
     }
 }
-
-    
-    
-
-
-
-
-

@@ -51,14 +51,12 @@ public class HandlerContext
     {
 	_httpServer=httpServer;
     }
-
     
     /* ------------------------------------------------------------ */
     public HttpServer getHttpServer()
     {
 	return _httpServer;
     }
-
 
     /* ------------------------------------------------------------ */
     public String getClassPath()
@@ -338,6 +336,27 @@ public class HandlerContext
     }
     
     /* ------------------------------------------------------------ */
+    public SecurityHandler getSecurityHandler()
+    {
+	return (SecurityHandler)
+	    getHandler(com.mortbay.HTTP.Handler.SecurityHandler.class);
+    }
+
+    /* ------------------------------------------------------------ */
+    public void addSecurityConstraint(String pathSpec,
+				      SecurityConstraint sc)
+    {
+	SecurityHandler sh=getSecurityHandler();
+	if (sh==null)
+	{
+	    sh=new SecurityHandler();
+	    _handlers.add(0,sh);
+	}
+	sh.addSecurityConstraint(pathSpec,sc);
+    }
+
+    
+    /* ------------------------------------------------------------ */
     /** 
      * @param name 
      * @return 
@@ -387,7 +406,7 @@ public class HandlerContext
 	else if ("com.mortbay.HTTP.mimeMap".equals(name))
 	    _mimeMap=null;
     }
-
+    
     /* ------------------------------------------------------------ */
     /** 
      * @param filename 

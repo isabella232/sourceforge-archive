@@ -91,7 +91,14 @@ public class ServletHandler extends NullHandler
     public void start()
     {
 	initializeLoader();
-        Log.event("ServletHandler started");
+        Iterator i = _servletMap.values().iterator();
+        while (i.hasNext())
+        {
+            ServletHolder holder = (ServletHolder)i.next();
+	    if (holder.isInitOnStartup())
+		holder.initialize();
+        }
+        Log.event("ServletHandler started: "+this);
 	super.start();
     }
 	

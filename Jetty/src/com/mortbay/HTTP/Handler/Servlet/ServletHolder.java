@@ -41,6 +41,7 @@ public class ServletHolder
     private String _name=null;    
     private String _className ;
     private Map _initParams ;
+    private boolean _initOnStartup =false;
 
     /* ---------------------------------------------------------------- */
     /** Construct a Servlet property mostly from the servers config
@@ -85,6 +86,19 @@ public class ServletHolder
 	_className = className;
     }
 
+    
+    /* ------------------------------------------------------------ */
+    public boolean isInitOnStartup()
+    {
+	return _initOnStartup;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setInitOnStartup(boolean b)
+    {
+	_initOnStartup = b;
+    }
+    
     /* ------------------------------------------------------------ */
     public void initialize()
     {

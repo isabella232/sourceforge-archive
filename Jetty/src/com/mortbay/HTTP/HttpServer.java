@@ -492,7 +492,7 @@ public class HttpServer implements LifeCycle
 	    PathMap contextMap=(PathMap)_hostMap.get(host);
 	    if (contextMap!=null)
 	    {
-		List contextLists =(List)contextMap.getMatches(request.getPath());
+		List contextLists =contextMap.getMatches(request.getPath());
 		if(contextLists!=null)
 		{
 		    if (Code.verbose(99))

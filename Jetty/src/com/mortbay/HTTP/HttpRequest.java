@@ -10,6 +10,7 @@ import com.mortbay.Util.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.security.Principal;
 
 
 /* ------------------------------------------------------------ */
@@ -785,6 +786,7 @@ public class HttpRequest extends HttpMessage
         return _cookies;
     }
 
+
     /* ------------------------------------------------------------ */
     /** Get a request attribute.
      * @param name 
@@ -835,6 +837,24 @@ public class HttpRequest extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
+    public boolean isUserInRole(String role)
+    {
+	Code.warning("Temp implementation");
+	if ("com.mortbay.HTTP.HttpRequest.ANY_ROLE".equals(role))
+	{
+	    return getAttribute(HttpRequest.__AuthUser)!=null;
+	}
+	return false;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Principal getUserPrincipal()
+    {
+	Code.warning("Not implemented");
+	return null;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Destroy the request.
      * Help the garbage collector by null everything that we can.
      */
@@ -846,7 +866,7 @@ public class HttpRequest extends HttpMessage
 	if (_attributes!=null)
 	    _attributes.clear();
         super.destroy();
-    }
+    }  
 }
 
            
