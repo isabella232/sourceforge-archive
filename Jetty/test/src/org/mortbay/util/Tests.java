@@ -7,10 +7,7 @@ package org.mortbay.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FilePermission;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.util.Locale;
 import java.util.TimeZone;
 import junit.framework.TestSuite;
@@ -23,13 +20,7 @@ import junit.framework.TestSuite;
  */
 public class Tests extends junit.framework.TestCase
 {
-    public final static String __CRLF = "\015\012";
-    public static String __userDir =
-        System.getProperty("user.dir",".");
-    public static URL __userURL=null;
-    private static String __relDir="";
-
-    public Tests(String name) 
+    public Tests(String name)
     {
       super(name);
     }
@@ -49,28 +40,6 @@ public class Tests extends junit.framework.TestCase
       junit.textui.TestRunner.run(suite());
     }    
     
-    static
-    {
-        try{
-            File file = new File(__userDir);
-            __userURL=file.toURL();
-            if (!__userURL.toString().endsWith("/Util/"))
-            {
-                __userURL=new URL(__userURL.toString()+
-                                  "src/org/mortbay/util/");
-                FilePermission perm = (FilePermission)
-                    __userURL.openConnection().getPermission();
-                __userDir=new File(perm.getName()).getCanonicalPath();
-                __relDir="src/org/mortbay/util/".replace('/',
-                                                         File.separatorChar);
-            }                
-        }
-        catch(Exception e)
-        {
-            Code.fail(e);
-        }
-    }
-
     /*-------------------------------------------------------------------*/
     /** Check that string contains a substring.
      *  @return Index of substring
@@ -79,19 +48,7 @@ public class Tests extends junit.framework.TestCase
     {
         return realCheckContains(check, string,0,subString);
     }
-    
-    /*-------------------------------------------------------------------*/
-    /** Check that string contains a substring.
-     *  @return Index of substring
-     */
-    private int checkContains(String check,
-                              String string,
-                              int offset,
-                              String subString)
-    {
-        return realCheckContains(check, string,offset,subString);
-    }
-    
+
     /*-------------------------------------------------------------------*/
     /** Check that string contains a substring.
      *  @return Index of substring
@@ -110,7 +67,7 @@ public class Tests extends junit.framework.TestCase
         }
         else
         {
-            fail('"' + subString + "\" not contained in \"" +
+            fail(check + " \"" + subString + "\" not contained in \"" +
                  (string==null?"null":string.substring(offset))+ '"');
         }
         return index;
