@@ -349,29 +349,31 @@ public class TestHarness
 
             t.check(f1.equals(f1),"PW to PW");
             t.check(f1.equals(f2),"PW to Obf");
-            t.check(f1.equals(f3),"PW to CS");
-            t.check(f1.equals("Foo"),"PW to Str");
+            t.check(!f1.equals(f3),"PW to CS");
             t.check(f2.equals(f1),"Obf to PW");
             t.check(f2.equals(f2),"Obf to Obf");
-            t.check(f2.equals(f3),"Obf to CS");
-            t.check(f2.equals("Foo"),"Obf to Str");
-            t.check(f3.equals(f1),"CS to PW");
-            t.check(f3.equals(f2),"CS to Obf");
+            t.check(!f2.equals(f3),"Obf to CS");
+            t.check(!f3.equals(f1),"CS to PW");
+            t.check(!f3.equals(f2),"CS to Obf");
             t.check(f3.equals(f3),"CS to CS");
-            t.check(f3.equals("Foo"),"CS to Str");
+            
+            t.check(f1.check("Foo"),"PW to Str");
+            t.check(f2.check("Foo"),"Obf to Str");
+            t.check(f3.check("Foo"),"CS to Str");
             
             t.check(!f1.equals(b1),"PW to PW");
             t.check(!f1.equals(b2),"PW to Obf");
             t.check(!f1.equals(b3),"PW to CS");
-            t.check(!f1.equals("Bar"),"PW to Str");
             t.check(!f2.equals(b1),"Obf to PW");
             t.check(!f2.equals(b2),"Obf to Obf");
             t.check(!f2.equals(b3),"Obf to CS");
-            t.check(!f2.equals("Bar"),"Obf to Str");
             t.check(!f3.equals(b1),"CS to PW");
             t.check(!f3.equals(b2),"CS to Obf");
             t.check(!f3.equals(b3),"CS to CS");
-            t.check(!f3.equals("Bar"),"CS to Str");
+            
+            t.check(!f1.check("Bar"),"PW to Str");
+            t.check(!f2.check("Bar"),"Obf to Str");
+            t.check(!f3.check("Bar"),"CS to Str");
         }
         catch(Exception e)
         {
@@ -719,9 +721,26 @@ public class TestHarness
             test.checkEquals(URI.addPaths("aaa/;JS?A=1","bbb"),"aaa/bbb;JS?A=1","aaa;JS?A=1+bbb");
             test.checkEquals(URI.addPaths("aaa/;JS?A=1","/"),"aaa/;JS?A=1","aaa;JS?A=1+/");
             test.checkEquals(URI.addPaths("aaa/;JS?A=1","/bbb"),"aaa/bbb;JS?A=1","aaa;JS?A=1+/bbb");
+
+            test.checkEquals(URI.parentPath("/aaa/bbb/"),"/aaa/","parent /aaa/bbb/");
+            test.checkEquals(URI.parentPath("/aaa/bbb"),"/aaa/","parent /aaa/bbb");
+            test.checkEquals(URI.parentPath("/aaa/"),"/","parent /aaa/");
+            test.checkEquals(URI.parentPath("/aaa"),"/","parent /aaa");
+            test.checkEquals(URI.parentPath("/"),null,"parent /");
+            test.checkEquals(URI.parentPath(null),null,"parent null");
+            
+            test.checkEquals(URI.canonicalPath("/aaa/bbb/"),"/aaa/bbb/","canonical /aaa/bbb/");
+            test.checkEquals(URI.canonicalPath("/aaa//bbb/"),"/aaa/bbb/","canonical /aaa//bbb/");
+            test.checkEquals(URI.canonicalPath("/aaa/./bbb/"),"/aaa/bbb/","canonical /aaa/./bbb/");
+            test.checkEquals(URI.canonicalPath("/aaa/../bbb/"),"/bbb/","canonical /aaa/../bbb/");
+            test.checkEquals(URI.canonicalPath("./bbb/"),"bbb/","canonical ./bbb/");
+            test.checkEquals(URI.canonicalPath("./aaa/../bbb/"),"bbb/","canonical ./aaa/../bbb/");
+            test.checkEquals(URI.canonicalPath(".//"),"/","canonical .//");
+            test.checkEquals(URI.canonicalPath("/"),"/","canonical /");
             
         }
-        catch(Exception e){
+        catch(Exception e)
+        {
             Code.warning(e);
             test.check(false,e.toString());
         }

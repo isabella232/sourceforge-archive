@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.ArrayList;
 
 /* ------------------------------------------------------------ */
 /** URI Holder.
@@ -597,6 +599,68 @@ public class URI
         }
     }
     
+    /* ------------------------------------------------------------ */
+    public static String parentPath(String p)
+    {
+        if (p==null || "/".equals(p))
+            return null;
+        int slash=p.lastIndexOf('/',p.length()-2);
+        if (slash>=0)
+            return p.substring(0,slash+1);
+        return null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Convert a path to a cananonical form.
+     * All instances of "//", "." and ".." are factored out.  Null is returned
+     * if the path tries to .. above it's root.
+     * @param path 
+     * @return path or null.
+     */
+    public static String canonicalPath(String path)
+    {
+        /// XXX - this could be a LOT more efficient.
+        if (path==null || (!path.startsWith(".") &&  
+                           path.indexOf("/.")<0 &&
+                           path.indexOf("//")<0))
+            return path;
+        
+        StringTokenizer tok = new StringTokenizer(path,"/",false);
+        ArrayList paths = new ArrayList(10);
+
+        while (tok.hasMoreTokens())
+        {
+            String item=tok.nextToken();
+            if ("..".equals(item))
+            {
+                if (paths.size()==0)
+                    return null;
+                paths.remove(paths.size()-1);
+            }
+            else if (".".equals(item))
+                continue;
+            else
+                paths.add(item);
+        }
+
+        StringBuffer buf = new StringBuffer(path.length());
+        synchronized(buf)
+        {
+            if (path.startsWith("/"))
+                    buf.append("/");
+                
+            for (int i=0;i<paths.size();i++)
+            {
+                if (i>0)
+                    buf.append("/");
+                buf.append((String)paths.get(i));
+            }
+            if (path.endsWith("/") && (buf.length()==0 || buf.charAt(buf.length()-1)!='/'))
+                buf.append("/");
+
+            return buf.toString();
+        }
+    }
 }
 
 

@@ -206,7 +206,7 @@ public class HashUserRealm extends HashMap
         /* -------------------------------------------------------- */
         public boolean authenticate(String password)
         {
-            return _pw!=null && _pw.equals(password);
+            return _pw!=null && _pw.check(password);
         }
         
         /* -------------------------------------------------------- */

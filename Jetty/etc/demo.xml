@@ -91,7 +91,15 @@ $Id$
 
   <Call name="addContext">
     <Arg>/demo/*</Arg>
-    <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/docroot/</Set>
+
+    <!-- Remove this comment for .htaccess handling
+    <Call name="addHandler">
+      <Arg><New class="com.mortbay.HTTP.Handler.HTAccessHandler">
+	    <Set name="Default"><SystemProperty name="jetty.home" default="."/>/etc/htaccess</Set>
+	    <Set name="AccessFile">.htaccess</Set></New></Arg>
+    </Call>
+    -->
+
     <Call name="addServlet">
       <Arg>Dump</Arg>
       <Arg>/dump/*,*.DUMP</Arg>
@@ -112,14 +120,11 @@ $Id$
       <Arg>JSP</Arg>
       <Arg>*.jsp,*.jsP,*.jSp,*.jSP,*.Jsp,*.JsP,*.JSp,*.JSP</Arg>
       <Arg>org.apache.jasper.servlet.JspServlet</Arg>
-    </Call>    
-    <!--<Call name="addServlet">
-      <Arg>Stress</Arg>
-      <Arg>/stress/*</Arg>
-      <Arg>com.mortbay.Servlet.Stress</Arg>
-    </Call>-->
+    </Call>   
 
+    <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/docroot/</Set>
     <Set name="ServingResources">TRUE</Set>
+
     <Call name="addHandler">
       <Arg><New class="com.mortbay.HTTP.Handler.DumpHandler"/></Arg>
     </Call>
@@ -157,6 +162,9 @@ $Id$
     <Arg>/</Arg>
     <Set name="ClassPath"><SystemProperty name="jetty.home" default="."/>/servlets/</Set>
     <Set name="DynamicServletPathSpec">/servlet/*</Set>
+    <Call name="getServletHandler">
+      <Set name="ServeDynamicSystemServlets" type="boolean">FALSE</Set>
+    </Call>
     <Call name="addHandler">
       <Arg type="int">0</Arg>
       <Arg>
@@ -164,9 +172,6 @@ $Id$
           <Arg>/jetty/index.html</Arg>
         </New>
       </Arg>
-    </Call>
-    <Call name="getServletHandler">
-      <Set name="ServeDynamicSystemServlets" type="boolean">FALSE</Set>
     </Call>
     <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/etc/dtd/</Set>
     <Set name="ServingResources">TRUE</Set>

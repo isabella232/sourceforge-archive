@@ -16,7 +16,6 @@ import com.mortbay.HTTP.UserRealm;
 import com.mortbay.HTTP.UserPrincipal;
 import com.mortbay.Util.B64Code;
 import com.mortbay.Util.Code;
-import com.mortbay.Util.Password;
 import com.mortbay.Util.StringUtil;
 import java.io.IOException;
 import java.io.OutputStream;

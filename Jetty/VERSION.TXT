@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+Jetty-3.1.rc5 - 29 April 2001
+ + Added UnixCrypt support to c.m.U.Password
+ + Added HTaccessHandler to authenitcate against apache .htaccess files.
  + Fixed ResourceHandler handling of ;JSESSIONID
  + Added query param handling to ForwardHandler
  + Fixed handling of empty responses at header commit.
@@ -12,6 +15,14 @@ Jetty Versions
  + Fixed EOF handlding in MultiPartRequest.
  + Fixed sync of ThreadPool idleSet.
  + Fixed jetty.bat classpath problems.
+ 
+Jetty-3.0.6 - 26 Apr 2001
+ + Fixed handling of empty responses at header commit.
+ + Fixed ResourceHandler handling of ;JSESSIONID
+ + Fixed forwarding to null pathInfo requests.
+ + Fixed EOF handlding in MultiPartRequest.
+ + Fixed sync of ThreadPool idleSet.
+ + Load-on-startup the JspServlet so that precompiled servlets work.
 
 Jetty-3.1.rc4 - 14 April 2001
  + Include full versions of JAXP and Crimson
