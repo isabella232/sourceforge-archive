@@ -46,7 +46,6 @@ public class NCSARequestLog implements RequestLog
     
     /* ------------------------------------------------------------ */
     /** Constructor.
-     * @exception IOException
      */
     public NCSARequestLog()
     {
@@ -75,7 +74,7 @@ public class NCSARequestLog implements RequestLog
 
     /* ------------------------------------------------------------ */
     /** Set the log filename.
-     * @see setRetainDays()
+     * @see NCSARequestLog#setRetainDays(int)
      * @param filename The filename to use. If the filename contains the
      * string "yyyy_mm_dd", then a RolloverFileOutputStream is used and the
      * log is rolled over nightly and aged according setRetainDays. If no
@@ -95,7 +94,7 @@ public class NCSARequestLog implements RequestLog
 
     /* ------------------------------------------------------------ */
     /** Get the log filename.
-     * @see getDatedFilename()
+     * @see NCSARequestLog#getDatedFilename()
      * @return The log filename without any date expansion.
      */
     public String getFilename()
@@ -105,7 +104,7 @@ public class NCSARequestLog implements RequestLog
 
     /* ------------------------------------------------------------ */
     /** Get the dated log filename.
-     * @see getFilename()
+     * @see NCSARequestLog#getFilename()
      * @return The log filename with any date encoding expanded.
      */
     public String getDatedFilename()

@@ -336,7 +336,7 @@ public abstract class HttpMessage
         if (HttpFields.__ContentType.equalsIgnoreCase(name))
             setMimeAndEncoding(value);
 
-        return (String) fields.put(name,value);
+        return fields.put(name,value);
     }
 
     /* ------------------------------------------------------------ */
@@ -375,7 +375,6 @@ public abstract class HttpMessage
      * field is set.
      * @param name Name of field 
      * @param value New values of field
-     * @return Old values of field
      * @exception IllegalStateException Not editable or sending 1.1
      *                                  with trailers
      */
@@ -466,7 +465,7 @@ public abstract class HttpMessage
     /** Sets the value of a date field.
      * Header or Trailer fields are set depending on message state.
      * @param name the field name
-     * @param value the field date value
+     * @param date the field date value
      * @exception IllegalStateException Not editable or sending 1.1
      *                                  with trailers
      */
@@ -479,7 +478,7 @@ public abstract class HttpMessage
     /** Adds the value of a date field.
      * Header or Trailer fields are set depending on message state.
      * @param name the field name
-     * @param value the field date value
+     * @param date the field date value
      * @exception IllegalStateException Not editable or sending 1.1
      *                                  with trailers
      */
@@ -492,7 +491,7 @@ public abstract class HttpMessage
     /** Sets the value of a date field.
      * Header or Trailer fields are set depending on message state.
      * @param name the field name
-     * @param value the field date value
+     * @param date the field date value
      * @exception IllegalStateException Not editable or sending 1.1
      *                                  with trailers
      */
@@ -505,7 +504,7 @@ public abstract class HttpMessage
     /** Add the value of a date field.
      * Header or Trailer fields are set depending on message state.
      * @param name the field name
-     * @param value the field date value
+     * @param date the field date value
      * @exception IllegalStateException Not editable or sending 1.1
      *                                  with trailers
      */
@@ -529,7 +528,7 @@ public abstract class HttpMessage
         throws IllegalStateException
     {
         HttpFields fields=setFields();
-        return (String) fields.remove(name);
+        return fields.remove(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -598,7 +597,6 @@ public abstract class HttpMessage
     
     /* ------------------------------------------------------------ */
     /** Set if trailers are accepted.
-     * @param acceptTrailer  If true, setField() may use trailers.
      */
     public boolean acceptTrailer()
     {
@@ -782,7 +780,6 @@ public abstract class HttpMessage
     /* ------------------------------------------------------------ */
     /** Remove a request attribute.
      * @param name Attribute name
-     * @return Previous Attribute value
      */
     public void removeAttribute(String name)
     {
