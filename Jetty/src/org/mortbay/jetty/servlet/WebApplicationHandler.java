@@ -78,6 +78,7 @@ public class WebApplicationHandler extends ServletHandler
     protected transient Object _requestAttributeListeners;
     protected transient Object _sessionListeners;
     protected transient Object _contextAttributeListeners;
+    protected transient FilterHolder jsr154FilterHolder;
     protected transient JSR154Filter jsr154Filter;
 
     /* ------------------------------------------------------------ */
@@ -297,9 +298,9 @@ public class WebApplicationHandler extends ServletHandler
             mex.add(e);
         }
 
-        FilterHolder holder=getFilter("jsr154");
-        if (holder!=null)
-            jsr154Filter= (JSR154Filter)holder.getFilter();
+        jsr154FilterHolder=getFilter("jsr154");
+        if (jsr154FilterHolder!=null)
+            jsr154Filter= (JSR154Filter)jsr154FilterHolder.getFilter();
         log.debug("jsr154filter="+jsr154Filter);
         
         if (LazyList.size(_requestAttributeListeners) > 0 || LazyList.size(_requestListeners) > 0)
@@ -454,7 +455,7 @@ public class WebApplicationHandler extends ServletHandler
         Object filters= null;
 
         // Path filters
-        if (pathInContext != null && _pathFilters.size() > 0)
+        if (pathInContext != null)
         {
             for (int i= 0; i < _pathFilters.size(); i++)
             {
@@ -462,7 +463,14 @@ public class WebApplicationHandler extends ServletHandler
                 if (holder.appliesTo(pathInContext, requestType))
                     filters= LazyList.add(filters, holder);
             }
+        } 
+        else if (jsr154Filter!=null)
+        {
+            // Slight hack for Named servlets
+            // TODO query JSR how to apply filter to all dispatches
+            filters=LazyList.add(filters,jsr154FilterHolder);
         }
+        
 
         // Servlet filters
         if (servletHolder != null && _servletFilterMap.size() > 0)

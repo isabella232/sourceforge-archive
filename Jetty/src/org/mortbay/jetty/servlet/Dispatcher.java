@@ -215,7 +215,19 @@ public class Dispatcher implements RequestDispatcher
             if (isNamed())
             {
                 // No further modifications required.
-                _servletHandler.dispatch(null,request,response,_holder);
+                if (_servletHandler instanceof WebApplicationHandler)
+                {
+                    JSR154Filter filter = ((WebApplicationHandler)_servletHandler).getJsr154Filter();
+                    if (filter!=null && filter.isUnwrappedDispatchSupported())
+                    {
+                        filter.setDispatch(request, response);
+                        _servletHandler.dispatch(null,httpServletRequest,httpServletResponse,_holder);
+                    }
+                    else
+                        _servletHandler.dispatch(null,request,response,_holder);
+                }
+                else
+                	_servletHandler.dispatch(null,request,response,_holder);
             }
             else
             {
