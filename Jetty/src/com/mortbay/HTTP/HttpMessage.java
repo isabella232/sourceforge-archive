@@ -56,18 +56,6 @@ abstract public class HttpMessage
 
 
     /* ------------------------------------------------------------ */
-    private static Map __defaultEncodingMap = new HashMap();
-    static
-    {
-        // These are known default encodings for MIME types. Additions welcome.
-        // This table should be probably configurable in future.
-        __defaultEncodingMap.put("text/html",   "ISO-8859-1"  );
-        __defaultEncodingMap.put("text/plain",  "US-ASCII"    );
-        __defaultEncodingMap.put("text/xml",    "UTF-8"       );
-    }
-    
-    
-    /* ------------------------------------------------------------ */
     protected int _state;
     protected String _version;
     protected int _dotVersion;
@@ -498,9 +486,6 @@ abstract public class HttpMessage
     
     /* -------------------------------------------------------------- */
     /** Character Encoding.
-     * Checks the Content-Type header for a charset parameter and return its
-     * value if found. If it is not found try finding a default for
-     * any mime type set.
      * @return Character Encoding or null
      */
     public String getCharacterEncoding()
@@ -520,31 +505,7 @@ abstract public class HttpMessage
                     encoding = (0 < i2) ? s.substring(i1,i2) : s.substring(i1);
                 }
             }
-        }            /* if there is none */
-
-        if (encoding == null)
-        {
-            /* JH: Here, I believe, we should set default encoding
-             * based on MIME type in Content-Type header. Most
-             * mime types have defined default charsets which have
-             * to be assumed when charset parameter of MIME type
-             * is missing, and they are not the same! 
-             */
-            
-            /* implementation of educated defaults */
-            String type = _header.get(HttpFields.__ContentType);
-            
-            // get only MIME type/subtype from complete Content-Type
-            if (type!=null)
-            {
-                int split = type.indexOf(';');
-                if (split != -1)
-                    type = type.substring(0,split);
-            }
-            
-            /* look up correct default encoding for given MIME type */
-            encoding = (String)__defaultEncodingMap.get(type);  
-        }
+        }            
 
         return encoding;
     }

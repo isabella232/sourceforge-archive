@@ -49,30 +49,30 @@ public class ServletResponse implements HttpServletResponse
         __charSetMap.put("ar", "ISO-8859-6");
         __charSetMap.put("be", "ISO-8859-5");
         __charSetMap.put("bg", "ISO-8859-5");
-        __charSetMap.put("ca", "ISO-8859-1");
+        __charSetMap.put("ca", StringUtil.__ISO_8859_1);
         __charSetMap.put("cs", "ISO-8859-2");
-        __charSetMap.put("da", "ISO-8859-1");
-        __charSetMap.put("de", "ISO-8859-1");
+        __charSetMap.put("da", StringUtil.__ISO_8859_1);
+        __charSetMap.put("de", StringUtil.__ISO_8859_1);
         __charSetMap.put("el", "ISO-8859-7");
-        __charSetMap.put("en", "ISO-8859-1");
-        __charSetMap.put("es", "ISO-8859-1");
-        __charSetMap.put("et", "ISO-8859-1");
-        __charSetMap.put("fi", "ISO-8859-1");
-        __charSetMap.put("fr", "ISO-8859-1");
+        __charSetMap.put("en", StringUtil.__ISO_8859_1);
+        __charSetMap.put("es", StringUtil.__ISO_8859_1);
+        __charSetMap.put("et", StringUtil.__ISO_8859_1);
+        __charSetMap.put("fi", StringUtil.__ISO_8859_1);
+        __charSetMap.put("fr", StringUtil.__ISO_8859_1);
         __charSetMap.put("hr", "ISO-8859-2");
         __charSetMap.put("hu", "ISO-8859-2");
-        __charSetMap.put("is", "ISO-8859-1");
-        __charSetMap.put("it", "ISO-8859-1");
+        __charSetMap.put("is", StringUtil.__ISO_8859_1);
+        __charSetMap.put("it", StringUtil.__ISO_8859_1);
         __charSetMap.put("iw", "ISO-8859-8");
         __charSetMap.put("ja", "Shift__JIS");
         __charSetMap.put("ko", "EUC-KR");     
         __charSetMap.put("lt", "ISO-8859-2");
         __charSetMap.put("lv", "ISO-8859-2");
         __charSetMap.put("mk", "ISO-8859-5");
-        __charSetMap.put("nl", "ISO-8859-1");
-        __charSetMap.put("no", "ISO-8859-1");
+        __charSetMap.put("nl", StringUtil.__ISO_8859_1);
+        __charSetMap.put("no", StringUtil.__ISO_8859_1);
         __charSetMap.put("pl", "ISO-8859-2");
-        __charSetMap.put("pt", "ISO-8859-1");
+        __charSetMap.put("pt", StringUtil.__ISO_8859_1);
         __charSetMap.put("ro", "ISO-8859-2");
         __charSetMap.put("ru", "ISO-8859-5");
         __charSetMap.put("sh", "ISO-8859-5");
@@ -80,7 +80,7 @@ public class ServletResponse implements HttpServletResponse
         __charSetMap.put("sl", "ISO-8859-2");
         __charSetMap.put("sq", "ISO-8859-2");
         __charSetMap.put("sr", "ISO-8859-5");
-        __charSetMap.put("sv", "ISO-8859-1");
+        __charSetMap.put("sv", StringUtil.__ISO_8859_1);
         __charSetMap.put("tr", "ISO-8859-9");
         __charSetMap.put("uk", "ISO-8859-5");
         __charSetMap.put("zh", "GB2312");
@@ -463,10 +463,23 @@ public class ServletResponse implements HttpServletResponse
         {
             /* get encoding from Content-Type header */
             String encoding = getCharacterEncoding();
+            if (encoding==null && _servletRequest!=null)
+            {
+                /* implementation of educated defaults */
+                String type =
+                    _httpResponse.getField(HttpFields.__ContentType);
+                
+                /* get only MIME type/subtype from complete Content-Type */
+                int split = type.indexOf(';');
+                if (split != -1)
+                    type = type.substring(0,split);
+                encoding = _servletRequest.getContext().getServletHandler()
+                    .getHandlerContext().getEncodingByMimeType(type);
+            }
             if (encoding==null)
                 // get last resort hardcoded default
-                encoding = "ISO-8859-1"; 
-                
+                encoding = StringUtil.__ISO_8859_1; 
+            
             /* construct Writer using correct encoding */
             try
             {

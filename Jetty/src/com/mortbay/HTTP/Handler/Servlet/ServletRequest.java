@@ -141,6 +141,12 @@ class ServletRequest
     {
         _servletResponse = response;
     }
+
+    /* ------------------------------------------------------------ */
+    Context getContext()
+    {
+        return _context;
+    }
     
     /* ------------------------------------------------------------ */
     public Locale getLocale()
