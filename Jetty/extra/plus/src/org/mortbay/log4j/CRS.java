@@ -44,7 +44,8 @@ public class CRS implements RepositorySelector
 
     public static void remove(ClassLoader cl) 
     {
-	__repositoryMap.remove(cl); 
+	if (cl!=null)
+	    __repositoryMap.remove(cl); 
     } 
 }
 
