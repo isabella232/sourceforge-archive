@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+# $Id$
 #
 # Perl filter to handle the log messages from the checkin of files in
 # a directory.  This script will group the lists of files by log
@@ -266,6 +267,12 @@ sub change_summary {
 		close(DIFF);
 		$diff .= "\n\n";
 	    }
+
+            # Do not append a diff that is too large...
+            my $difflen = length($diff);
+            if ($difflen > (16 * 1024)) {
+                $diff = "\n\n\t<<Changes too large to display ($difflen bytes)>>\n\n";
+            }
 	}
 
 	&append_line($out, sprintf("%-9s%-12s%s%s", $rev, $delta,
