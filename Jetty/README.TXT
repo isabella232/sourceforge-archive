@@ -10,12 +10,38 @@ It is designed to be light weight, high performance, embeddable,
 extensible and flexible, thus making it an ideal platform for serving
 dynamic HTTP requests from any Java application.
 
-Installation
+
+Downloading
 ============
-Jetty is installed simply by untaring the tgz file.
-There are two distributions. The complete distribution has everything
-needed to run and is precompiled. The source distribution has no
-3rd party jars, no demo, no test harnesses and is not pre compiled.
+Jetty is can be downloaded in one of three distribution files:
+
+  Jetty-X.X.X.tar.gz : This is the complete release containing source,
+  compiled jars, external jars and demos.  Installation is simply
+  untaring the tar.gz file in the directory required.
+
+  Jetty-X.X.X-no-ext.tar.gz : This is the complete release with the
+  external jars removed.  This release is good if you already have
+  the required external jars (see below).
+
+  Jetty-X.X.X-src.tar.gz : A source only distribution which needs
+  to be build using ant. This distribution also excludes the demo.
+
+
+Quick Start
+===========
+
+  Unpack the full jetty release Jetty-X.X.X.tar.gz using an archive 
+  tool such as tar or winzip.
+
+  The demo server can be run with the commands
+
+     cd Jetty-X.X.X
+     java -jar start.jar
+
+  Then point your browser at http://localhost:8080 to see the demo 
+  web site.
+
+
 
 
 Starting Jetty
@@ -69,14 +95,15 @@ the location of the JDK so the compiler can be accessed:
   java -Djava.home=C:\j2sdk1.4.1 -jar start.jar <configfile> ...
 
 
-If an extra classpaths is needed, it can be added with the jetty.class.path
+If an extra classpaths are needed, they can be added with the jetty.class.path
 property:
  
   java -Djetty.class.path=/usr/share/java -jar start.jar <configfile> ...
 
 
-Ant Quick Start
-===============
+
+Starting with Ant
+=================
 
 If you have the ant java build tool ant installed, you may use that to
 start jetty.  The demo can be started with:
@@ -157,7 +184,7 @@ Other jetty.sh actions are:
 Windows and other Start Scripts
 ===============================
 
-There are various unmaintained start scripts in contrib/bin that
+There are various unmaintained start scripts in extra/win32 that
 may be of assistance writing your own start script.
 
 
@@ -171,23 +198,25 @@ If you are using jdk1.4, you should use the path (or non-unix equivalent):
     $JETTY_HOME/lib/org.mortbay.jetty.jar:\
     $JETTY_HOME/lib/javax.servlet.jar:\
     $JETTY_HOME/ext/jasper-runtime.jar:\
-    $JETTY_HOME/ext/jasper-compiler.jar
+    $JETTY_HOME/ext/jasper-compiler.jar:\
+    $JETTY_HOME/ext/xercesImpl.jar
 
 
 For jdk1.2 or jdk1.3 us the following classpath, you need to use an
-alternative jetty jar and add the XML jars. Thus the classpath 
+alternative jetty jars and add the XML support. Thus the classpath 
 to use is:
 
   CLASSPATH=\
     $JETTY_HOME/lib/org.mortbay.jetty-jdk1.2.jar:\
     $JETTY_HOME/lib/javax.servlet.jar:\
     $JETTY_HOME/ext/jasper-runtime.jar:\
-    $JETTY_HOME/ext/jasper-compiler.jar
-    $JETTY_HOME/ext/javax.xml.jaxp.jar:\
-    $JETTY_HOME/ext/crimson.jar
+    $JETTY_HOME/ext/jasper-compiler.jar:\
+    $JETTY_HOME/ext/xercesImpl.jar:\
+    $JETTY_HOME/ext/xml-apis.jar:\
+    $JETTY_HOME/ext/xmlParserAPIs.jar
 
 
-To use the default SSL you may also need to add the the jars below, 
+To use the default SSL provider you may also need to add the the jars below, 
 which is a merge of the jsse, jnet and jcert jars from the JSSE package
 (see $JETTY_HOME/demo/webapps/jetty/doc/JsseSSL.html for more details):
 
@@ -212,65 +241,143 @@ option to include when starting Jetty.  It can reduce memory size and
 avoid some JVM crashes.
 
 
-Running the Demo Server
-=======================
-A Demo server can be run on port 8080 with the commands:
+External Jars
+=============
 
-  cd $JETTY_HOME
-  java org.mortbay.jetty.Server etc/admin.xml etc/demo.xml
+The ext directories within the Jetty hierarchy contain external libraries
+that are required to compile run Jetty. Many of these jars may now be
+provided by your JVM or elsewhere on your classpath.  If so, these jars
+can probably be safely removed from the Jetty distribution.
 
+A SAX XML parser is required by webapp components of Jetty and the xerces
+parser is included as well as the javax apis for this:
 
-You can access this demo with at http://localhost:8080
-The demo also runs a simple admin servlet at http://localhost:8081,
-with user username=admin, password=admin.
-
-
-This script finds the JVM and sets the CLASSPATH, so it can be used as
-an /etc/init.d script and also looks for xml config files in
-/etc/jetty (among other places).
+   $JETTY_HOME/ext/xercesImpl.jar      
+   $JETTY_HOME/ext/xml-apis.jar
+   $JETTY_HOME/ext/xmlParserAPIs.jar
 
 
-Configuring the Server
-======================
+If JSP is to be used, then the Jasper jars from jakarta and an ant jar must
+be present.  Jetty includes Jasper2, but jasper1 may be safely substituted:
 
-The demo server contains a tutorial on Jetty and other documentation
-that should be read before trying to configure Jetty.
+   $JETTY_HOME/ext/jasper-compiler.jar
+   $JETTY_HOME/ext/jasper-runtime.jar
+   $JETTY_HOME/ext/ant.jar
 
-The class org.mortbay.jetty.Server reads an xml configuration
-file and configures one or more instances of org.mortbay.http.HttpServer:
+If SSL is to be used then the JSSE libraries may need to be present plus 
+the reference implementation from sun:
 
-  java org.mortbay.jetty.Server [configuration.xml]
+   $JETTY_HOME/ext/jnet.jar
+   $JETTY_HOME/ext/jcert.jar
+   $JETTY_HOME/ext/jsse.jar
 
-The class org.mortbay.http.HttpServer is the main class to be
-configured.  It has a configuration API and a command line API and
-can be run with
+If SSL is to be used, then the JMX library and tools need present:
 
-  java org.mortbay.http.HttpServer [options | -?]
+   $JETTY_HOME/ext/jmxri.jar
+   $JETTY_HOME/ext/jmxtools.jar
 
-The org.mortbay.jetty.Server class is simply an xml configuration
-frontend to org.mortbay.http.HttpServer.
 
-There is a Jetty extension configuration mechanism for web
-applications.  If a file WEB-INF/web-jetty.xml is found, it is treated
-as a Jetty XmlConfiguration file and applied to the
-WebApplicationContext object when the context is started.
+There are additional ext jars that may be included in the extra/ext
+directory.  These are docuented elsewhere.
+
+
+
+Support FAQ
+===========
+ + The jetty-support@yahoogroups.com list is for jetty related support 
+   questions.  General questions about servlets and/or java should not 
+   be posted here.
+
+ + Before posting, please check the archives that the question has
+   not been asked before by checking the archives at 
+       http://groups.yahoo.com/group/jetty-support
+
+ + Please also read the improving documentation at
+       http://jetty.mortbay.org/jetty/doc/index.html
+   Please read the tutorial, then read it again.
+
+ + Jetty 4 configuration is based around the concept of contexts,
+   which were introduced in the 2.2 servlet specification.  It is
+   important to understand contexts when configuring Jetty and it may
+   be worth while reading the 2.3 servlet specification in addtion to
+   the Jetty documentation.
+
+ + Before posting, try increasing the debug output of Jetty.  Debugging 
+   control is described in the README file.  Even if you cannot spot the
+   problem in the output, it may be valuable to make the trace available
+   to whoever helps you with your problem.
+
+ + When posting a support question, please provide as much information as
+   possible, which should include:
+      - The version of Jetty.
+      - The version of java.
+      - Your Operating system.
+      - Overview of your configuration.
+      - What URL was tried.
+      - What browser and what it rendered.
+      - Details of the problem, including stack traces and/or log files.
+      - Details of what you have tried to make it work.
+      
+ + For JSP problems, consider checking JSP forums first. Jetty uses the
+   Jasper engine from jakarta.apache.org - bugs and all.
+   If you can write a small JSP that demonstrates your problem, you 
+   will get much faster results.
+
+ + For general class loading problems, the solution is often best to start
+   with your classes on the system classpath until you are more familiar
+   with the configuration of Contexts. 
+
+ + If in doubt about if you should post or not - please post, we are pretty
+   friendly and will tell you nicely if it is not appropriate.
+
+
+DEBUGGING
+=========
+
+The debug and logging output of jetty can be controlled with java
+System properties:
+
+    DEBUG - If set, debug output is enabled
+
+    DEBUG_PATTERNS - If set to a comma separated list of strings, Then
+        debug output is only produced from those classes whose fully
+        qualified class name contains one of the strings as a substring.
+
+    DEBUG_VERBOSE - Set to an integer verbosity level for use in
+        controlling debug verbosity (see verbose(int))
+
+Using this with the java program:
+
+   java [-DDEBUG [-DDEBUG_PATTERNS="MyClass,my.package"] [-DDEBUG_VERBOSE=n] ] my.package.main
+
+example:
+
+   java -DDEBUG -DDEBUG_PATTERNS=com.acme.MyServlet,HttpHandler org.mortbay.jetty.Server
+
+
+There is also a debug servlet that can change the debug setting of a
+running server.  It is configured by the admin.xml file and is run on
+port 8081 as part of the standard Jetty demo.
+
+Finally the JMX MBeans provided by the JettyExtra package also provide
+a mechanism to configure debugging and logging at runtime.
 
 
 
 Building from source
 ====================
-An Ant build file is included in build.xml.  This file is configured to
-use the jikes compiler from IBM. To use the normal JDK compiler comment
-out the jikes line in build.xml.  Ant is available from
+An Ant build file is included in build.xml.   Ant is available from
 
     http://jakarta.apache.org/ant/index.html
 
-You can run ant for the following targets:
+The ant.properties file can be edited to customize the environment and
+then the following ant targets can be used to build and run Jetty:
 
     ant         - Build source
     ant all     - Build everything
     ant test    - Build and run tests
     ant demo    - Build and run the demo
+    ant dist    - Build the distriutions
     ant clean   - Remove generated files
 
 
@@ -330,19 +437,12 @@ difference between these two approaches.
 
 JDK 1.4 Support
 ---------------
-Jetty has been developed for JDK 1.2, can be run with 1.2, 1.3 and 1.4.
+Jetty is written for JDK 1.4.  However it can be built and run on 1.3
+and 1.2.  The build file for this and the source changes required are
+in the $JETTY_HOME/extra/jdk1.2 directory.
 
-Furthermore, the new features of JDK1.4 are now being supported in a src1.4
-hierarchy.  If Jetty is built and the 1.4 classes are available, the source
-in $JETTY_HOME/src1.4 is used to replace or enhance the standard classes.
+These build an alternate jetty jar called org.mortbay.jetty-jdk1.2.jar
 
-These extra or enhanced classes are placed in the
-org.mortbay.jetty.jar file, which must be in your path instead of 
-org.mortbay.jetty-jdk1.2.jar for the enhanced classes to replace the standard
-classes.
-
-The SocketChannelListener class uses non blocking IO for idle connections to
-greatly reduce the threads needed by Jetty.
 
 
 Minimal HTTP jar
@@ -361,10 +461,6 @@ The mini server can be run with
   java -jar lib/org.mortbay.http.jar
 
 
-JettyExtra
------------
-Extra jetty functionality is available via the JettyExtra
-package.  This include gtp, tools and SASL support.
 
 JSP Engine
 ----------
@@ -389,19 +485,6 @@ reasonable file based classpath that can be passed to the compiler.
 If this proves to be a problem for you, then unpack your WAR files
 (which is what most other containers do by default anyway).
 
-
-Unimplemented WebApplication features
--------------------------------------
-The following WebApplication tags are not implemented in standalone
-jetty.
-
-  <distributable>
-  <resource-ref>
-  <env-entry>
-  <ejb-ref>
-
-When Jetty is used in a J2EE container such JBoss or JOnAS then 
-these may be implemented by those containers.
 
 
 Unix SystemV Init
@@ -578,103 +661,3 @@ authentication data.  Users may simply implement their own Realms and
 platforms such as JBoss use this mechanism to link the Jetty
 authentication mechanism to their own.
 
-
-XML Parsing
------------
-Jetty comes with the JAXP 1.1 reference XML parser, which is crimson
-from apache.  The jars have been renamed with their main package name.
-Jetty does not use any of the DOM classes, so these jars can be
-trimmed significantly if you want to reduce size.
-
-Use the org.xml.sax.parser property to specify an alternative SAX parser.
-For example, the jakarta watchdog tests need xerces and can be run with
-
-java -Djetty.class.path=$CLASSPATH \
-     -Dorg.xml.sax.parser=org.apache.xerces.parsers.SAXParser \
-     -jar start.jar \
-     etc/watchdog.xml 
-
-The DTDs used by jetty are resolved as resources from the system
-classpath, thus they are stored in org.mortbay.http/web.dtd and
-org.mortbay.util.configure.dtd within the source tree and jar file.
-Copies are also placed in etc for reference.
-
-
-DEBUGGING
-=========
-
-The debug and logging output of jetty can be controlled with java
-System properties:
-
-    DEBUG - If set, debug output is enabled
-
-    DEBUG_PATTERNS - If set to a comma separated list of strings, Then
-        debug output is only produced from those classes whose fully
-        qualified class name contains one of the strings as a substring.
-
-    DEBUG_VERBOSE - Set to an integer verbosity level for use in
-        controlling debug verbosity (see verbose(int))
-
-Using this with the java program:
-
-   java [-DDEBUG [-DDEBUG_PATTERNS="MyClass,my.package"] [-DDEBUG_VERBOSE=n] ] my.package.main
-
-example:
-
-   java -DDEBUG -DDEBUG_PATTERNS=com.acme.MyServlet,HttpHandler org.mortbay.jetty.Server
-
-
-There is also a debug servlet that can change the debug setting of a
-running server.  It is configured by the admin.xml file and is run on
-port 8081 as part of the standard Jetty demo.
-
-Finally the JMX MBeans provided by the JettyExtra package also provide
-a mechanism to configure debugging and logging at runtime.
-
-
-Support FAQ
-===========
- + This list if for jetty related support questions.  General
-   questions about servlets and/or java should not be posted here.
-
- + Before posting, please check the archives that the question has
-   not been asked before by checking the archives at 
-       http://groups.yahoo.com/group/jetty-support
-
- + Please also read the improving documentation at
-       http://jetty.mortbay.org/jetty/doc/index.html
-   Please read the tutorial, then read it again.
-
- + Jetty 4 configuration is based around the concept of contexts,
-   which were introduced in the 2.2 servlet specification.  It is
-   important to understand contexts when configuring Jetty and it may
-   be worth while reading the 2.3 servlet specification in addtion to
-   the Jetty documentation.
-
- + Before posting, try increasing the debug output of Jetty.  Debugging 
-   control is described in the README file.  Even if you cannot spot the
-   problem in the output, it may be valuable to make the trace available
-   to whoever helps you with your problem.
-
- + When posting a support question, please provide as much information as
-   possible, which should include:
-      - The version of Jetty.
-      - The version of java.
-      - Your Operating system.
-      - Overview of your configuration.
-      - What URL was tried.
-      - What browser and what it rendered.
-      - Details of the problem, including stack traces and/or log files.
-      - Details of what you have tried to make it work.
-      
- + For JSP problems, consider checking JSP forums first. Jetty uses the
-   Jasper engine from jakarta.apache.org - bugs and all.
-   If you can write a small JSP that demonstrates your problem, you 
-   will get much faster results.
-
- + For general class loading problems, the solution is often best to start
-   with your classes on the system classpath until you are more familiar
-   with the configuration of Contexts. 
-
- + If in doubt about if you should post or not - please post, we are pretty
-   friendly and will tell you nicely if it is not appropriate.
