@@ -27,10 +27,11 @@ public class BasicAuthenticator implements Authenticator
      * the response as an auth challenge or redirect.
      * @exception IOException 
      */
-    public Principal authenticated(UserRealm realm,
-                                   String pathInContext,
-                                   HttpRequest request,
-                                   HttpResponse response)
+    public Principal authenticate(UserRealm realm,
+                                  String pathInContext,
+                                  HttpRequest request,
+                                  HttpResponse response,
+                                  boolean check)
         throws IOException
     {
         // Get the user if we can
@@ -46,16 +47,22 @@ public class BasicAuthenticator implements Authenticator
                 credentials = B64Code.decode(credentials,StringUtil.__ISO_8859_1);
                 int i = credentials.indexOf(':');
                 String username = credentials.substring(0,i);
-                String password = credentials.substring(i+1);
-            
-                user = realm.authenticate(username,password,request);
+
+                if (check)
+                {
+                    String password = credentials.substring(i+1);
+                    user = realm.authenticate(username,password,request);
+                }
+                else
+                    user = realm.getUserPrincipal(username);
+                
                 if (user!=null)
                 {
                     request.setAuthType(SecurityConstraint.__BASIC_AUTH);
                     request.setAuthUser(username);
                     request.setUserPrincipal(user);                
                 }
-                else
+                else if (check)
                     Code.warning("AUTH FAILURE: user "+username);
             }
             catch (Exception e)

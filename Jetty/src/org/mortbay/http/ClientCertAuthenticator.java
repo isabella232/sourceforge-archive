@@ -53,16 +53,17 @@ public class ClientCertAuthenticator implements Authenticator
      * the response as an auth challenge or redirect.
      * @exception IOException 
      */
-    public Principal authenticated(UserRealm realm,
-                                   String pathInContext,
-                                   HttpRequest request,
-                                   HttpResponse response)
+    public Principal authenticate(UserRealm realm,
+                                  String pathInContext,
+                                  HttpRequest request,
+                                  HttpResponse response,
+                                  boolean check)
         throws IOException
     {
         java.security.cert.X509Certificate[] certs =
             (java.security.cert.X509Certificate[])
             request.getAttribute("javax.servlet.request.X509Certificate");
-        if (certs==null || certs.length==0 || certs[0]==null)
+        if (check && (certs==null || certs.length==0 || certs[0]==null))
         {
             // No certs available so lets try and force the issue
             
@@ -99,9 +100,10 @@ public class ClientCertAuthenticator implements Authenticator
         Principal principal = certs[0].getSubjectDN();
         if (principal==null)
             principal=certs[0].getIssuerDN();
-        Principal user =
-            realm.authenticate(principal==null?"clientcert":principal.getName(),
-                               certs,request);
+        String username=principal==null?"clientcert":principal.getName();
+        Principal user = check
+            ?realm.authenticate(username,certs,request)
+            :realm.getUserPrincipal(username);
         
         request.setAuthType(SecurityConstraint.__CERT_AUTH);
         request.setAuthUser(user.getName());
@@ -109,6 +111,14 @@ public class ClientCertAuthenticator implements Authenticator
         return user;
     }
     
+    /* ------------------------------------------------------------ */
+    public Principal identify(UserRealm realm,
+                              HttpRequest request)
+    {
+        return null;
+    }
+    
+    /* ------------------------------------------------------------ */
     public String getAuthMethod()
     {
         return SecurityConstraint.__CERT_AUTH;

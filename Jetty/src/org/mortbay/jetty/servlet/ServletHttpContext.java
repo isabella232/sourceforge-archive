@@ -117,10 +117,11 @@ public class ServletHttpContext extends HttpContext
     {
         if (getAuthenticator() instanceof FormAuthenticator &&
             pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK) &&
-            getAuthenticator().authenticated(getRealm(),
-                                             pathInContext,
-                                             request,
-                                             response)==null)
+            getAuthenticator().authenticate(getRealm(),
+                                            pathInContext,
+                                            request,
+                                            response,
+                                            true)==null)
             return false;
         return true;
     }

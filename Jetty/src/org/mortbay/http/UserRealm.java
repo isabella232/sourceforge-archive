@@ -24,6 +24,11 @@ public interface UserRealm
     public String getName();
 
     /* ------------------------------------------------------------ */
+    /** Get the principal for a username
+     */
+    public Principal getUserPrincipal(String username);
+    
+    /* ------------------------------------------------------------ */
     /** Authenticate a users credentials.
      * Implementations of this method may adorn the calling context to
      * assoicate it with the authenticated principal (eg ThreadLocals). If

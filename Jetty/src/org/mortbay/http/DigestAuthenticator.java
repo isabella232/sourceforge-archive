@@ -30,10 +30,11 @@ public class DigestAuthenticator implements Authenticator
      * the response as an auth challenge or redirect.
      * @exception IOException 
      */
-    public Principal authenticated(UserRealm realm,
-                                   String pathInContext,
-                                   HttpRequest request,
-                                   HttpResponse response)
+    public Principal authenticate(UserRealm realm,
+                                  String pathInContext,
+                                  HttpRequest request,
+                                  HttpResponse response,
+                                  boolean check)
         throws IOException
     {
         
@@ -58,7 +59,8 @@ public class DigestAuthenticator implements Authenticator
             Digest digest=new Digest(request.getMethod());
             String last=null;
             String name=null;
-            
+
+          loop:
             while (tokenizer.hasMoreTokens())
             {
                 String tok = tokenizer.nextToken();
@@ -80,7 +82,11 @@ public class DigestAuthenticator implements Authenticator
                       if (name!=null)
                       {
                           if ("username".equalsIgnoreCase(name))
+                          {
                               digest.username=tok;
+                              if (!check)
+                                  break loop;
+                          }
                           else if ("realm".equalsIgnoreCase(name))
                               digest.realm=tok;
                           else if ("nonce".equalsIgnoreCase(name))
@@ -100,14 +106,17 @@ public class DigestAuthenticator implements Authenticator
                 }
             }            
 
-            user = realm.authenticate(digest.username,digest,request);
+            user = check
+                ?realm.authenticate(digest.username,digest,request)
+                :realm.getUserPrincipal(digest.username);
+            
             if (user!=null)
             {
                 request.setAuthType(SecurityConstraint.__DIGEST_AUTH);
                 request.setAuthUser(digest.username);
                 request.setUserPrincipal(user);                
             }
-            else
+            else if (check)
                 Code.warning("AUTH FAILURE: user "+digest.username);
         }
 

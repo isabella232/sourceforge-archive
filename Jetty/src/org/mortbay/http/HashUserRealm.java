@@ -173,6 +173,12 @@ public class HashUserRealm
     }
 
     /* ------------------------------------------------------------ */
+    public Principal getUserPrincipal(String username)
+    {
+        return (Principal)super.get(username);
+    }
+    
+    /* ------------------------------------------------------------ */
     public Principal authenticate(String username,
                                   Object credentials,
                                   HttpRequest request)

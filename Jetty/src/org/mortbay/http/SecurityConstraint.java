@@ -37,19 +37,27 @@ public class SecurityConstraint
     /* ------------------------------------------------------------ */
     public interface Authenticator extends Serializable
     {
-        /* ------------------------------------------------------------ */
         /** Authenticate.
-         * @return User Principal if authenticated. Null if Authentication
+         * @param realm an <code>UserRealm</code> value
+         * @param pathInContext a <code>String</code> value
+         * @param request a <code>HttpRequest</code> value
+         * @param response a <code>HttpResponse</code> value
+         * @param check If true, the users credentials are checked with the
+         * realm otherwise only their identity is derived.
+         * @return User <code>Principal</code> if authenticated. Null if Authentication
          * failed. If the SecurityConstraint.__NOBODY instance is returned,
          * the request is considered as part of the authentication process.
-         * @exception IOException 
+         * @exception IOException if an error occurs
          */
-        public Principal authenticated(UserRealm realm,
-                                       String pathInContext,
-                                       HttpRequest request,
-                                       HttpResponse response)
+        public Principal authenticate(UserRealm realm,
+                                      String pathInContext,
+                                      HttpRequest request,
+                                      HttpResponse response,
+                                      boolean check)
         throws IOException;
+        
 
+        /* ------------------------------------------------------------ */
         public String getAuthMethod();
     }
 
@@ -401,18 +409,20 @@ public class SecurityConstraint
                                                 null,
                                                 request);
                     if (user==null && authenticator!=null)
-                        user=authenticator.authenticated(realm,
-                                                         pathInContext,
-                                                         request,
-                                                         response);
+                        user=authenticator.authenticate(realm,
+                                                        pathInContext,
+                                                        request,
+                                                        response,
+                                                        true);
                 }
                 else if (authenticator!=null)
                 {
                     // User authenticator.
-                    user=authenticator.authenticated(realm,
-                                                     pathInContext,
-                                                     request,
-                                                     response);
+                    user=authenticator.authenticate(realm,
+                                                    pathInContext,
+                                                    request,
+                                                    response,
+                                                    true);
                 }
                 else
                 {
@@ -453,7 +463,18 @@ public class SecurityConstraint
                     }
                 }
             }
-
+            // identify requests
+            else if (request.getAuthType()==null &&
+                     request.getAuthUser()==null &&
+                     authenticator!=null)
+            {
+                // Identify.
+                Principal user=authenticator.authenticate(realm,
+                                                          pathInContext,
+                                                          request,
+                                                          response,
+                                                          false);
+            }
             
             // Matches a constraint that does not fail
             // anything, so must be OK

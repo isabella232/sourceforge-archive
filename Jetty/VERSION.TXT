@@ -5,6 +5,7 @@ Jetty-5.x.x
  + Compiled against 2.4 servlet spec.
  + Implemented remote/local addr/port methods
  + Updated authentication so that a normal Principal is used.
+ + updated to jasper 5.0.3
 
 Jetty-4.2.11 - 12 July 2003
  + Fixed race in servlet initialization code.
