@@ -22,11 +22,15 @@ import java.util.List;
 public class SecurityConstraint
     implements Cloneable
 {
+    /* ------------------------------------------------------------ */
     public final static int
         DC_NONE=0,
         DC_INTEGRAL=1,
         DC_CONFIDENTIAL=2;
+    /* ------------------------------------------------------------ */
+    public final static String NONE="NONE";
     
+    /* ------------------------------------------------------------ */
     private String _name;
     private List _methods;
     private List _roles;
@@ -104,6 +108,16 @@ public class SecurityConstraint
             return Collections.EMPTY_LIST.iterator();
         return _roles.iterator();
     }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param role 
+     * @return True if the constraint contains the role.
+     */
+    public boolean hasRole(String role)
+    {
+        return _roles!=null && _roles.contains(role);
+    }
     
     /* ------------------------------------------------------------ */
     /** 
@@ -135,6 +149,15 @@ public class SecurityConstraint
         return _dataConstraint;
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if there is a data constraint.
+     */
+    public boolean hasDataConstraint()
+    {
+        return _dataConstraint!=DC_NONE;
+    }
+    
     
     /* ------------------------------------------------------------ */
     public Object clone()

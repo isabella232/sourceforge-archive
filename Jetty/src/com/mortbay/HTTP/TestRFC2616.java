@@ -333,6 +333,29 @@ public class TestRFC2616
             offset = t.checkContains(response,offset,"123456","3.6.1 Chunking");
             offset = t.checkContains(response,offset,"/R2","3.6.1 Chunking")+10;
 
+            // Chunked and keep alive
+            offset=0;
+            response=listener.getResponses("GET /R1 HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Transfer-Encoding: chunked\n"+
+                                           "Content-Type: text/plain\n"+
+                                           "Connection: keep-alive\n"+
+                                           "\n"+
+                                           "3;\n"+
+                                           "123\n"+
+                                           "3;\n"+
+                                           "456\n"+
+                                           "0;\n\n"+
+                                           
+                                           "GET /R2 HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Connection: close\n"+
+                                           "\n");
+            Code.debug("RESPONSE: ",response);
+            offset = t.checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking")+10;
+            offset = t.checkContains(response,offset,"123456","3.6.1 Chunking");
+            offset = t.checkContains(response,offset,"/R2","3.6.1 Chunking")+10;
+
             // gzip encoding
             offset=0;
             ByteArrayOutputStream bout1 = new ByteArrayOutputStream();

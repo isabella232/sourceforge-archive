@@ -442,12 +442,16 @@ public class WebApplicationContext extends HandlerContext
         SecurityConstraint scBase = new SecurityConstraint();
         
         XmlParser.Node auths=node.get("auth-constraint");
-        Iterator iter= auths.iterator("role-name");
-        while(iter.hasNext())
+        if (auths!=null)
         {
-            XmlParser.Node role=(XmlParser.Node)iter.next();
-            scBase.addRole(role.toString(false,true));
+            Iterator iter= auths.iterator("role-name");
+            while(iter.hasNext())
+            {
+                XmlParser.Node role=(XmlParser.Node)iter.next();
+                scBase.addRole(role.toString(false,true));
+            }
         }
+        
         XmlParser.Node data=node.get("user-data-constraint");
         if (data!=null)
         {
@@ -466,7 +470,7 @@ public class WebApplicationContext extends HandlerContext
             }
         }
 
-        iter= node.iterator("web-resource-collection");
+        Iterator iter= node.iterator("web-resource-collection");
         while(iter.hasNext())
         {
             XmlParser.Node collection=(XmlParser.Node)iter.next();
@@ -557,7 +561,7 @@ public class WebApplicationContext extends HandlerContext
         {
             if(StringUtil.asciiToLowerCase(pathInContext).startsWith("/web-inf/"))
             {
-                response.sendError(HttpResponse.__404_Not_Found);
+                response.sendError(HttpResponse.__403_Forbidden);
             }
         }
     }

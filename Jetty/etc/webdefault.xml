@@ -28,9 +28,6 @@
       <http-method>DELETE</http-method>
       <http-method>PUT</http-method>
     </web-resource-collection>
-    <auth-constraint>
-      <role-name>content-administrator</role-name>
-    </auth-constraint>
   </security-constraint>
 
   <!--

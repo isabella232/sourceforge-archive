@@ -133,7 +133,8 @@ public class SecurityHandler extends NullHandler
             {
                 // Get all constraints
                 Map.Entry entry=(Map.Entry)scss.get(m);
-                Code.debug("Auth ",pathInContext," against ",entry);
+                if (Code.verbose())
+                    Code.debug("Auth ",pathInContext," against ",entry);
                 
                 List scs = (List)entry.getValue();
                 // for each constraint
@@ -145,20 +146,26 @@ public class SecurityHandler extends NullHandler
                     if (!sc.forMethod(request.getMethod()))
                         continue;
 
-                    // Check roles
-                    if (sc.isAuthenticated())
-                    {
-                        if (!authenticatedInRole(request,response,sc.roles()))
-                            return;
-                    }
-
-                    // Check data
-                    if (sc.getDataConstraint()!=SecurityConstraint.DC_NONE &&
-                        !"https".equals(request.getScheme()))
-                    {
+                    // Does this forbid everything?
+                    if (!sc.isAuthenticated() && !sc.hasDataConstraint())    
                         response.sendError(HttpResponse.__403_Forbidden);
+
+                    
+                    // Does it fail a role check?
+                    if (sc.isAuthenticated() &&
+                        !sc.hasRole(SecurityConstraint.NONE) &&
+                        authenticatedInRole(request,response,sc.roles()))
+                        // return as an auth challenge will have been set
                         return;
-                    }
+                    
+                    // Does it fail a data constraint
+                    if (sc.hasDataConstraint() &&
+                        "https".equalsIgnoreCase(request.getScheme()))   
+                        response.sendError(HttpResponse.__403_Forbidden);
+                        
+                    // Matches a constraint that does not fail
+                    // anything, so must be OK
+                    return;    
                 }
             }
         }
@@ -178,8 +185,12 @@ public class SecurityHandler extends NullHandler
         if (__BASIC_AUTH.equals(_authMethod))
             userAuth=basicAuthenticated(request,response);
         else
+        {
+            response.setField(HttpFields.__WwwAuthenticate,
+                              "basic realm=\""+_realmName+'"');
             response.sendError(HttpResponse.__401_Unauthorized);
-
+        }
+        
         if (!userAuth)
             return false;
 
@@ -187,7 +198,7 @@ public class SecurityHandler extends NullHandler
         boolean inRole=false;
         while(roles.hasNext())
         {
-            String role=roles.next().toString();
+            String role=roles.next().toString();            
             if (request.isUserInRole(role))
             {
                 inRole=true;
@@ -202,16 +213,9 @@ public class SecurityHandler extends NullHandler
                          request.getUserPrincipal().getName());
             if (__BASIC_AUTH.equals(_authMethod))
             {
-                Code.debug("Not in role "+_realmName);
-                response.setField(HttpFields.__ContentType,"text/html");
-                response.setStatus(HttpResponse.__401_Unauthorized);
                 response.setField(HttpFields.__WwwAuthenticate,
                                   "basic realm=\""+_realmName+'"');
-                OutputStream out = response.getOutputStream();
-                out.write("<HTML><BODY><H1>Authentication Failed</H1></BODY></HTML>\nUser not in an Authorized role".getBytes());
-                out.flush();
-                response.commit();
-                request.setHandled(true);
+                response.sendError(HttpResponse.__401_Unauthorized);
             }
             else
                 response.sendError(HttpResponse.__403_Forbidden);
@@ -259,16 +263,9 @@ public class SecurityHandler extends NullHandler
         }
         
         Code.debug("Unauthorized in "+_realmName);
-        response.setField(HttpFields.__ContentType,"text/html");
-        response.setStatus(HttpResponse.__401_Unauthorized);
         response.setField(HttpFields.__WwwAuthenticate,
                           "basic realm=\""+_realmName+'"');
-        OutputStream out = response.getOutputStream();
-        out.write("<HTML><BODY><H1>Authentication Failed</H1></BODY></HTML>"
-                  .getBytes());
-        out.flush();
-        response.commit();
-        request.setHandled(true);
+        response.sendError(HttpResponse.__401_Unauthorized);
         return false;
     }
 
