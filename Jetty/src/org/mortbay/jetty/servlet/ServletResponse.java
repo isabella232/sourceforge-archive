@@ -382,23 +382,36 @@ public class ServletResponse implements HttpServletResponse
     {
         if (url==null)
             throw new IllegalArgumentException();
-
+        
         if (url.indexOf(":/")<0)
         {
-            if (url.startsWith("/"))
-                url=_servletRequest.getScheme()+
-                    "://"+_servletRequest.getServerName()+
-                    ":"+_servletRequest.getServerPort()+
-                    // XXX URI.canonicalPath(URI.addPaths(_servletRequest.getContextPath(),url));
-                    URI.canonicalPath(url);
+            StringBuffer buf=new StringBuffer(48);
+            String scheme=_servletRequest.getScheme();
+            buf.append(scheme);
+            buf.append("://");
+            
+            String hostport=_servletRequest.getHeader(HttpFields.__Host);
+            if (hostport!=null)
+                buf.append(hostport);
             else
-                url=_servletRequest.getScheme()+
-                    "://"+_servletRequest.getServerName()+
-                    ":"+_servletRequest.getServerPort()+
-                    URI.canonicalPath(URI.addPaths(URI.parentPath(_servletRequest.getRequestURI()),
-                                 url));
+            {
+                buf.append(_servletRequest.getServerName());
+                int port=_servletRequest.getServerPort();
+                if (port>0 &&
+                    ((scheme.equals ("http") && port != 80)||
+                     (scheme.equals ("https") && port != 443)))
+                {
+                    buf.append(':');
+                    buf.append(port);
+                }
+            }
+            
+            if (url.startsWith("/"))
+                buf.append(URI.canonicalPath(url));
+            else
+                buf.append(URI.canonicalPath(URI.addPaths(URI.parentPath(_servletRequest.getRequestURI()),url)));
+            url=buf.toString();
         }
-        
         _httpResponse.sendRedirect(url);
     }
 

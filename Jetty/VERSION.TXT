@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Fixed formatting of redirectURLs for NS4.08
  + Fixed ChunableInputStream.resetStream bug.
  + Ignore IO errors when trying to persist connections.
  + Allow POSTs to static resources.

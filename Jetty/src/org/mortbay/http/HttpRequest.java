@@ -6,6 +6,7 @@
 package org.mortbay.http;
 
 import org.mortbay.util.Code;
+import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiMap;
@@ -418,9 +419,10 @@ public class HttpRequest extends HttpMessage
         {
             _host=_connection.getHost();
             _port=_connection.getPort();
-            return _host;
+            if (!InetAddrPort.__0_0_0_0.equals(_host))
+                return _host;
         }
-
+        
         // Return the local host
         try {_host=InetAddress.getLocalHost().getHostName();}
         catch(java.net.UnknownHostException e){Code.ignore(e);}

@@ -14,6 +14,8 @@ import java.net.UnknownHostException;
 public class InetAddrPort
     implements Cloneable
 {
+    public static String __0_0_0_0 = "0.0.0.0";
+    
     private InetAddress _addr=null;
     private boolean _addrIsHost=false;
     private int _port=0;
@@ -69,7 +71,7 @@ public class InetAddrPort
                 addr=addr.substring(addr.indexOf('/')+1);
             inetAddrPort=inetAddrPort.substring(c+1);
         
-            if (addr.length()>0 && ! "0.0.0.0".equals(addr))
+            if (addr.length()>0 && ! __0_0_0_0.equals(addr))
             {
                 _addrIsHost=!Character.isDigit((addr.charAt(0)));   
                 this._addr=InetAddress.getByName(addr);
@@ -99,7 +101,7 @@ public class InetAddrPort
     public String getHost()
     {
         if (_addr==null)
-            return "0.0.0.0";
+            return __0_0_0_0;
         
         return _addrIsHost?_addr.getHostName():_addr.getHostAddress();
     }

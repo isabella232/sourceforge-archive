@@ -11,6 +11,9 @@ The current date is <%= new Date() %>.
 <P>
 Include Hello World:<UL>
 <%@ include file="hello.jsp"%> 
+<HL>
+<%@ include file="snoop.jsp?A=1&B=2"%> 
+<HL>
 </UL>Included
 </BODY>
 </HTML>
