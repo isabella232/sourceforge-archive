@@ -11,6 +11,7 @@ Release 2.4.0 - 24th March 2000 LATEST
   + Fixed caste problem in UrlEncoded
   + Fixed null pointer in ThreadedServer with stopAll
   + Added VirtualHostHandler for virtual host handling
+  + Added doc directory with a small start
 
 Release 2.3.5 - 25th January 2000 
   + Fixed nasty bug with HTTP/1.1 redirects.
