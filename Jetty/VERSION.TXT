@@ -1,11 +1,13 @@
 Jetty3 Versions
 --------------
 
- + Patched Jasper to 3.2.3 standard.
  + Fixed handling of rel form authentication URLs
  + Added support for Nonblocking listener.
  + Added lowResourcePersistTimeMs for more graceful degradation when
    we run out of threads.
+ + Patched Jasper to 3.2.3.
+ + Added handlerContext.setClassPaths
+
 
 Jetty-3.1.rc8 - 22 Aug 2001
  + Support WEB-INF/web-jetty.xml configuration extension for webapps

@@ -272,28 +272,12 @@ public class WebApplicationContext extends ServletHandlerContext
             Resource classes = _webInf.addPath("classes/");
             String classPath="";
             if (classes.exists())
-                classPath=classes.toString();
-
+                super.setClassPath(classes.toString());
+            
             // Look for jars
             Resource lib = _webInf.addPath("lib/");
-            if (lib.exists() && lib.isDirectory())
-            {
-                String[] files=lib.list();
-                for (int f=0;files!=null && f<files.length;f++)
-                {
-                    Resource fn=lib.addPath(files[f]);
-                    String fnlc=fn.getName().toLowerCase();
-                    if (fnlc.endsWith(".jar") || fnlc.endsWith(".zip"))
-                    {
-                        classPath+=(classPath.length()>0?",":"")+
-                            fn.toString();
-                    }
-                }
-            }
-
-            // Set the classpath
-            if (classPath.length()>0)
-                super.setClassPath(classPath);
+            super.setClassPaths(lib,true);
+            
 
             // do web.xml file
             Resource web = _webInf.addPath("web.xml");

@@ -271,6 +271,61 @@ public class HandlerContext implements LifeCycle
     }
 
     /* ------------------------------------------------------------ */
+    /** Sets the class path for the context from the jar and zip files found
+     *  in the specified resource.
+     * @param lib the resource that contains the jar and/or zip files.
+     * @param append true if the classpath entries are to be appended to any
+     * existing classpath, or false if they replace the existing classpath.
+     * @see setClassPath
+     */
+    public void setClassPaths(Resource lib, boolean append)
+    {
+        if (lib.exists() && lib.isDirectory())
+        {
+            StringBuffer classPath=new StringBuffer();
+            String[] files=lib.list();
+
+            for (int f=0;files!=null && f<files.length;f++)
+            {
+                try {
+                    Resource fn=lib.addPath(files[f]);
+                    String fnlc=fn.getName().toLowerCase();
+                    if (fnlc.endsWith(".jar") || fnlc.endsWith(".zip"))
+                    {
+                        classPath.append(classPath.length()>0?",":"");
+                        classPath.append(fn.toString());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Code.warning(ex);
+                }
+            }
+
+            if (classPath.length()>0)
+            {
+                if (append && this.getClassPath()!=nully)
+                       classPath.append(",").append(this.getClassPath());
+                this.setClassPath(classPath.toString());
+            }
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Sets the class path for the context from the jar and zip files found
+     *  in the specified resource.
+     * @param lib the resource that contains the jar and/or zip files.
+     * @param append true if the classpath entries are to be appended to any
+     * existing classpath, or false if they are to be prepended.
+     * @see setClassPaths
+     * @exception IOException
+     */
+    public void setClassPaths(String lib, boolean append) throws IOException
+    {
+        this.setClassPaths(Resource.newResource(lib), append);
+    }
+
+    /* ------------------------------------------------------------ */
     /** Get the classloader.
      * If no classloader has been set and the context has been loaded
      * normally, then null is returned.
