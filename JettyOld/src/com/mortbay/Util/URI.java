@@ -274,7 +274,7 @@ public class URI
      * @param path The path the encode
      * @return The encoded path
      */
-    private String encodePath(String path)
+    public static String encodePath(String path)
     {
         if (path==null || path.length()==0)
             return path;
@@ -291,7 +291,7 @@ public class URI
      * @param path The path the encode
      * @param buf StringBuffer to encode path into
      */
-    private void encodePath(StringBuffer buf, String path)
+    public static void encodePath(StringBuffer buf, String path)
     {
         synchronized(buf)
         {

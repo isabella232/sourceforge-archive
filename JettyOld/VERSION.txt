@@ -1,4 +1,11 @@
 
+Release 2.4.9
+  + HttpListener ignore InterruptedIOExceptions
+  + HttpListener default max idle time = 20s
+  + HtmlFilter handles non default encodings
+  + Writing HttpRequests encodes path
+
+
 Release 2.4.8 23 Oct 2000
   + Fixed bug with 304 replies with bodies.
   + Improved win32 make files.

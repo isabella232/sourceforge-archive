@@ -500,7 +500,7 @@ public class HttpRequest extends HttpHeader
 
         if (resourcePath!=null && resourcePath.length()>0)
         {
-            out.write(resourcePath.getBytes());
+            out.write(URI.encodePath(resourcePath).getBytes());
             String qs = getQueryString();
             if (qs!=null && qs.length()>0)
                 out.write(("?"+qs).getBytes());

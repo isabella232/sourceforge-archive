@@ -58,7 +58,7 @@ public class HttpListener extends ThreadedServer
                         HttpServer server)
         throws IOException
     {
-        this(address,server,0,0,0);
+        this(address,server,0,0,20000);
     }
     
     
@@ -180,6 +180,10 @@ public class HttpListener extends ThreadedServer
 			    Code.ignore(e);
 			}
 		    }
+                }
+                catch (InterruptedIOException e)
+                {
+                    Code.ignore(e);
                 }
                 catch (HeadException e)
                 {

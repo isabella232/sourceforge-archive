@@ -52,6 +52,7 @@ public class HtmlFilter extends HttpFilter
     StringBuffer tagBuf = new StringBuffer(128);
     byte[] ba={0};
     protected Hashtable info = null;
+    private String _responseEncoding = null;
 
 
     /* ------------------------------------------------------------ */
@@ -90,6 +91,13 @@ public class HtmlFilter extends HttpFilter
         info = new Hashtable();
         if(response!=null)
         {
+            long now = System.currentTimeMillis();
+            response.setDateHeader(HttpHeader.LastModified, now);
+            response.setDateHeader(HttpHeader.Expires, 0);
+            response.setHeader(HttpHeader.ContentLength, null);
+            response.setHeader("Pragma", "no-cache");
+            response.setHeader("Cache-Control", "no-cache,no-store");
+
             String connection_header =response.getHeader(response.Connection);
             if (connection_header!=null)
             {
@@ -98,6 +106,11 @@ public class HtmlFilter extends HttpFilter
                 if ("keep-alive".equals(connection_header))
                     response.setHeader(HttpHeader.Connection,HttpHeader.Close);
             }
+            
+            // collect this now so we can write with it later
+            _responseEncoding = response.getCharacterEncoding();
+            if (_responseEncoding==null)
+                _responseEncoding="ISO8859_1";
         }
     }
 
@@ -255,7 +268,7 @@ public class HtmlFilter extends HttpFilter
                       out.write("</PRE></B><P>".getBytes());
                   }
                   if (o!=null)
-                      out.write(o.toString().getBytes());
+                      out.write(o.toString().getBytes(_responseEncoding));
                  
                   break;
             }   

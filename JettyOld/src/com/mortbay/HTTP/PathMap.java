@@ -636,6 +636,8 @@ public class PathMap extends Dictionary
             
             for (int i=cache.length;i-->0;)
             {
+                if (cache[i]==null)
+                    continue;
                 if (path.endsWith(cache[i].suffix) &&
                     path.startsWith(cache[i].prefix) &&
                     path.length()>=(cache[i].suffix.length()+

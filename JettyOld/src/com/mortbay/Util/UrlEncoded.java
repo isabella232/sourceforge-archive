@@ -241,7 +241,6 @@ public class UrlEncoded extends Hashtable
 
     /* ------------------------------------------------------------ */
     /** Perform URL encoding.
-     * Simply calls URLEncoder.encode
      * @param string
      * @return encoded string.
      */
