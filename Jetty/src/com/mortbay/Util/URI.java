@@ -23,7 +23,7 @@ public class URI
 {
     /* ------------------------------------------------------------ */
     private String _uri;
-    private String _protocol;
+    private String _scheme;
     private String _host;
     private int _port;
     private String _path;
@@ -40,7 +40,7 @@ public class URI
         throws IllegalArgumentException
     {
         _uri=uri.toString();
-        _protocol=uri._protocol;
+        _scheme=uri._scheme;
         _host=uri._host;
         _port=uri._port;
         _path=uri._path;
@@ -53,9 +53,9 @@ public class URI
     /* ------------------------------------------------------------ */
     /** Construct from a String.
      * The string must contain a URI path, but optionaly may contain a
-     * protocol, host, port and query string.
+     * scheme, host, port and query string.
      * 
-     * @param uri [protocol://host[:port]]/path[?query]
+     * @param uri [scheme://host[:port]]/path[?query]
      */
     public URI(String uri)
         throws IllegalArgumentException
@@ -73,13 +73,13 @@ public class URI
                 char c=uri.charAt(i);
                 switch(state)
                 {
-                  case 0: // looking for protocol or path
+                  case 0: // looking for scheme or path
                       if (c==':' &&
                           uri.charAt(i+1)=='/' &&
                           uri.charAt(i+2)=='/')
                       {
-                          // found end of protocol & start of host
-                          _protocol=uri.substring(mark,i);
+                          // found end of scheme & start of host
+                          _scheme=uri.substring(mark,i);
                           i+=2;
                           mark=i+1;
                           state=1;
@@ -185,29 +185,29 @@ public class URI
 
     /* ------------------------------------------------------------ */
     /** Is the URI an absolute URL? 
-     * @return True if the URI has a protocol or host
+     * @return True if the URI has a scheme or host
      */
     public boolean isAbsolute()
     {
-        return _protocol!=null || _host!=null;
+        return _scheme!=null || _host!=null;
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the uri protocol
-     * @return the URI protocol
+    /** Get the uri scheme
+     * @return the URI scheme
      */
-    public String getProtocol()
+    public String getScheme()
     {
-        return _protocol;
+        return _scheme;
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the uri protocol.
-     * @param protocol the uri protocol
+    /** Set the uri scheme.
+     * @param scheme the uri scheme
      */
-    public void setProtocol(String protocol)
+    public void setScheme(String scheme)
     {
-        _protocol=protocol;
+        _scheme=scheme;
         _dirty=true;
     }
     
@@ -305,7 +305,7 @@ public class URI
 
     /* ------------------------------------------------------------ */
     /** Get the uri query _parameters names
-     * @return the URI query _parameters names
+     * @return  Unmodifiable set of URI query _parameters names
      */
     public Set getParameterNames()
     {
@@ -316,10 +316,19 @@ public class URI
     /** Get the uri query _parameters.
      * @return the URI query _parameters
      */
-    public Map getParameters()
+    public MultiMap getParameters()
     {
         _dirty=true;
         return _parameters;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the uri query _parameters.
+     * @return the URI query _parameters in an unmodifiable map.
+     */
+    public Map getUnmodifiableParameters()
+    {
+        return Collections.unmodifiableMap(_parameters);
     }
     
     /* ------------------------------------------------------------ */
@@ -372,6 +381,8 @@ public class URI
     
     /* ------------------------------------------------------------ */
     /** Get named multiple values
+     * @param name The parameter name
+     * @return Umodifiable list of values or null
      */
     public List getValues(String name)
     {
@@ -398,9 +409,9 @@ public class URI
             StringBuffer buf = new StringBuffer(_uri.length()*2);
             synchronized(buf)
             {
-                if (_protocol!=null)
+                if (_scheme!=null)
                 {
-                    buf.append(_protocol);
+                    buf.append(_scheme);
                     buf.append("://");
                     buf.append(_host);
                     if (_port>0)

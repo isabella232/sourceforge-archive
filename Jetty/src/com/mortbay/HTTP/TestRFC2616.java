@@ -39,7 +39,7 @@ public class TestRFC2616
     }
     
     /* --------------------------------------------------------------- */
-    public String getDefaultProtocol()
+    public String getDefaultScheme()
     {
         return "jettytest";
     }

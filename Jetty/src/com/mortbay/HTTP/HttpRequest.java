@@ -44,6 +44,7 @@ public class HttpRequest extends HttpMessage
     private String _host;
     private int _port;
     private List _te;
+    private MultiMap _parameters;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -187,27 +188,28 @@ public class HttpRequest extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the request protocol.
-     * The protocol is obtained from an absolute URI.  If the URI in
-     * the request is not absolute, "http" is returned.
-     * NB. This is different to the getProtocol method of a
-     * HttpServletRequest, which returns the protocol version.
-     * @return The request protocol
+    /** Get the request Scheme.
+     * The scheme is obtained from an absolute URI.  If the URI in
+     * the request is not absolute, then the connections default
+     * scheme is returned.  If there is no connection "http" is returned.
+     * @return The request scheme (eg. "http", "https", etc.)
      */
-    public String getProtocol()
+    public String getScheme()
     {
-        String protocol=_uri.getProtocol();
-        return protocol==null?"http":protocol;
+        String scheme=_uri.getScheme();
+        if (scheme==null && _connection!=null)
+            scheme=_connection.getDefaultScheme();
+        return scheme==null?"http":scheme;
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the request protocol.
+    /** Set the request scheme.
      * If the URI was not previously an absolute URI, the URI host and
      * port are also set from the HTTP Host Header field.
-     * @param protocol The protocol
+     * @param scheme The scheme
      * @exception IllegalStateException Request is not EDITABLE
      */
-    public void setProtocol(String protocol)
+    public void setScheme(String scheme)
     {
         if (_state!=__MSG_EDITABLE)
             throw new IllegalStateException("Not EDITABLE");
@@ -217,7 +219,7 @@ public class HttpRequest extends HttpMessage
             _uri.setHost(getHost());
             _uri.setPort(getPort());
         }
-        _uri.setProtocol(protocol);
+        _uri.setScheme(scheme);
     }
     
     /* ------------------------------------------------------------ */
@@ -556,7 +558,105 @@ public class HttpRequest extends HttpMessage
 
         return _te;
     }
+
+
+    /* ------------------------------------------------------------ */
+    /* Extract Paramters from query string and/or form content.
+     */
+    private void extractParameters()
+    {
+        _parameters=new MultiMap(_uri.getUnmodifiableParameters());
+        
+        if (_state==__MSG_RECEIVED)
+        {
+            String content_type=getField(HttpFields.__ContentType);
+            if (content_type!=null && content_type.length()>0)
+            {
+                content_type=StringUtil.asciiToLowerCase(content_type);
+                content_type=HttpFields.valueParameters(content_type,null);
+
+                if (HttpFields.__WwwFormUrlEncode.equals(content_type)&&
+                    HttpRequest.__POST.equals(getMethod()))
+                {
+                    int content_length = getIntField(HttpFields.__ContentLength);
+                    if (content_length<0)
+                        Code.warning("No contentLength for "+
+                                     HttpFields.__WwwFormUrlEncode);
+                    else
+                    {          
+                        try
+                        {
+                            // Read the content
+                            byte[] content=new byte[content_length];
+                            InputStream in = getInputStream();
+                            int offset=0;
+                            int len=0;
+                            do
+                            {
+                                 len=in.read(content,offset,content_length-offset);
+                                 if (len <= 0)
+                                     throw new IOException("Premature EOF");
+                                 offset+=len;
+                            }
+                            while ((content_length - offset) > 0);
+
+                            // Add form params to query params
+                            UrlEncoded.decodeTo(new String(content,
+                                                           0,
+                                                           content_length,
+                                                           "UTF8"),
+                                                _parameters);
+                        }
+                        catch (IOException e)
+                        {
+                            if (Code.debug())
+                                Code.warning(e);
+                            else
+                                Code.warning(e.toString());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     
+    /* ------------------------------------------------------------ */
+    /** Get the set of parameter names
+     * @return Set of parameter names.
+     */
+    public Set getParameterNames()
+    {
+        if (_parameters==null)
+            extractParameters();
+        return _parameters.keySet();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get a parameter value.
+     * @param name Parameter name
+     * @return Parameter value
+     */
+    public String getParameter(String name)
+    {
+        if (_parameters==null)
+            extractParameters();
+        return _parameters.getString(name);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get multi valued paramater
+     * @param name Parameter name
+     * @return Parameter values
+     */
+    public List getParameterValues(String name)
+    {
+        if (_parameters==null)
+            extractParameters();
+        return _parameters.getValues(name);
+    }
+    
+
     
     /* ------------------------------------------------------------ */
     /** Destroy the request.

@@ -20,7 +20,7 @@ import java.util.*;
 public interface HttpListener 
 {
     public abstract HttpServer getServer();
-    public abstract String getDefaultProtocol();
+    public abstract String getDefaultScheme();
     public abstract String getHost();
     public abstract int getPort();
 };

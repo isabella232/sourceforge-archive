@@ -279,66 +279,6 @@ public class TestHarness
         }
     }
     
-    /* --------------------------------------------------------------- */
-    public static void httpRequest()
-    {
-        Test test = new Test("com.mortbay.HTTP.HttpRequest");
-
-        String[] rl =
-        {
-            "GET /xxx HTTP/1.0",          "GET", "/xxx",    "HTTP/1.0",
-            " GET /xxx HTTP/1.0 ",        "GET", "/xxx",    "HTTP/1.0",
-            "  PUT  /xxx  HTTP/1.1  ",    "PUT", "/xxx",    "HTTP/1.1",
-            "  GET  /xxx   ",             "GET", "/xxx",    "HTTP/1.0",
-            "GET  /xxx",                  "GET", "/xxx",    "HTTP/1.0",
-            "  GET  /xxx   ",             "GET", "/xxx",    "HTTP/1.0",
-            "GET / ",                     "GET", "/",       "HTTP/1.0",
-            "GET /",                      "GET", "/",       "HTTP/1.0",
-            "GET http://h:1/ HTTP/1.0",   "GET", "/",       "HTTP/1.0",
-            "GET http://h:1/xx HTTP/1.0", "GET", "/xx",     "HTTP/1.0",
-            "GET http HTTP/1.0",          "GET", "/http",   "HTTP/1.0",
-            "GET http://h:1/",            "GET", "/",       "HTTP/1.0",
-            "GET http://h:1/xxx",         "GET", "/xxx",    "HTTP/1.0",
-            "  GET     ",                 null,  null,      null,
-            "GET",                        null,  null,      null,
-            "",                           null,  null,      null,
-            "Option * http/1.1  ",        "OPTION", "*",    "HTTP/1.1",
-        };
-
-        HttpRequest r = new HttpRequest();
-        
-        try{
-            for (int i=0; i<rl.length ; i+=4)
-            {
-                try{
-                    r.decodeRequestLine(rl[i].toCharArray(),rl[i].length());
-                    test.checkEquals(r.getMethod(),rl[i+1],rl[i]);
-                    URI uri=r.getURI();
-                    test.checkEquals(uri!=null?uri.getPath():null,
-                                     rl[i+2],rl[i]);
-                    test.checkEquals(r.getVersion(),rl[i+3],rl[i]);
-                }
-                catch(IOException e)
-                {
-                    if (rl[i+1]!=null)
-                        Code.warning(e);
-                    test.check(rl[i+1]==null,rl[i]);
-                }
-                catch(IllegalArgumentException e)
-                {
-                    if (rl[i+1]!=null)
-                        Code.warning(e);
-                    test.check(rl[i+1]==null,rl[i]);
-                }
-            }
-        }
-        catch(Exception e)
-        {
-            test.check(false,e.toString());
-            Code.warning("failed",e);
-        }
-    }
-    
     /* ------------------------------------------------------------ */
     public static void main(String[] args)
     {
@@ -347,9 +287,9 @@ public class TestHarness
             chunkOutTest();
             filters();
             httpFields();
-            httpRequest();
             //pathMap();
 
+            TestRequest.test();
             TestRFC2616.test();
         }
         catch(Throwable e)

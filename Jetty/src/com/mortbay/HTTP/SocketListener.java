@@ -39,9 +39,9 @@ public class SocketListener
     }
     
     /* --------------------------------------------------------------- */
-    public String getDefaultProtocol()
+    public String getDefaultScheme()
     {
-        return "http:";
+        return "http";
     }
 
     /* --------------------------------------------------------------- */

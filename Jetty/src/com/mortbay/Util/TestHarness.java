@@ -335,25 +335,25 @@ public class TestHarness
             code.decode("Name1=Value1");
             test.checkEquals(code.size(),1,"simple param size");
             test.checkEquals(code.encode(),"Name1=Value1","simple encode");
-            test.checkEquals(code.get("Name1"),"Value1","simple get");
+            test.checkEquals(code.getString("Name1"),"Value1","simple get");
             
             code.clear();
             code.decode("Name2=");
             test.checkEquals(code.size(),1,"dangling param size");
             test.checkEquals(code.encode(),"Name2","dangling encode");
-            test.checkEquals(code.get("Name2"),null,"dangling get");
+            test.checkEquals(code.getString("Name2"),null,"dangling get");
         
             code.clear();
             code.decode("Name3");
             test.checkEquals(code.size(),1,"noValue param size");
             test.checkEquals(code.encode(),"Name3","noValue encode");
-            test.checkEquals(code.get("Name3"),null,"noValue get");
+            test.checkEquals(code.getString("Name3"),null,"noValue get");
         
             code.clear();
             code.decode("Name4=Value+4%21");
             test.checkEquals(code.size(),1,"encoded param size");
             test.checkEquals(code.encode(),"Name4=Value+4%21","encoded encode");
-            test.checkEquals(code.get("Name4"),"Value 4!","encoded get");
+            test.checkEquals(code.getString("Name4"),"Value 4!","encoded get");
             
             code.clear();
             code.decode("Name5=aaa&Name6=bbb");
@@ -361,15 +361,15 @@ public class TestHarness
             test.check(code.encode().equals("Name5=aaa&Name6=bbb") ||
                        code.encode().equals("Name6=bbb&Name5=aaa"),
                        "multi encode");
-            test.checkEquals(code.get("Name5"),"aaa","multi get");
-            test.checkEquals(code.get("Name6"),"bbb","multi get");
+            test.checkEquals(code.getString("Name5"),"aaa","multi get");
+            test.checkEquals(code.getString("Name6"),"bbb","multi get");
         
             code.clear();
             code.decode("Name7=aaa&Name7=b%2Cb&Name7=ccc");
             test.checkEquals(code.encode(),
                              "Name7=aaa&Name7=b%2Cb&Name7=ccc",
                              "multi encode");
-            test.checkEquals(code.get("Name7"),"aaa,b,b,ccc","list get all");
+            test.checkEquals(code.getString("Name7"),"aaa,b,b,ccc","list get all");
             test.checkEquals(code.getValues("Name7").get(0),"aaa","list get");
             test.checkEquals(code.getValues("Name7").get(1),"b,b","list get");
             test.checkEquals(code.getValues("Name7").get(2),"ccc","list get");
@@ -452,11 +452,11 @@ public class TestHarness
             uri.put("b","2 !");
             test.checkEquals(uri.toString(),"http://host:8080/Test/URI?b=2+%21","add param");
         
-            test.checkEquals(uri.getProtocol(),"http","protocol");
+            test.checkEquals(uri.getScheme(),"http","protocol");
             test.checkEquals(uri.getHost(),"host","host");
             test.checkEquals(uri.getPort(),8080,"port");
 
-            uri.setProtocol("ftp");
+            uri.setScheme("ftp");
             uri.setHost("fff");
             uri.setPort(23);
             test.checkEquals(uri.toString(),"ftp://fff:23/Test/URI?b=2+%21","add param");

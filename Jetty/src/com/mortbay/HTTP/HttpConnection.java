@@ -128,13 +128,13 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the listeners Default protocol.
+    /** Get the listeners Default scheme. 
      * Conveniance method equivalent to getListener().getDefaultProtocol().
      * @return HttpServer.
      */
-    public String getDefaultProtocol()
+    public String getDefaultScheme()
     {
-        return _listener.getDefaultProtocol();
+        return _listener.getDefaultScheme();
     }
     
     /* ------------------------------------------------------------ */
