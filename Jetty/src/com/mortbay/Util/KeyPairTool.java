@@ -26,6 +26,8 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Collection;
 import java.util.ArrayList;
 
+// Document our single dependency on the Util package.
+import com.mortbay.Util.Password;
 
 /* ------------------------------------------------------------ */
 /**
@@ -57,7 +59,7 @@ public class KeyPairTool
 	= "org.bouncycastle.jce.provider.BouncyCastleProvider";
 
 
-    private final String usageString
+    private static final String usageString
         = "Tool to insert a private key/certificate pair into a keystore.\n"
         + "Parameters:\n"
         + " -key        FILENAME, location of private key [MANDATORY]\n"
@@ -66,7 +68,7 @@ public class KeyPairTool
         + " -keypass    PASSWORD, password for new entry  [=STOREPASS]\n"
         + " -keystore   FILENAME, location of keystore,   [~/.keystore]\n"
         + " -storetype  STRING,   name/type of keystore,  ["
-        +                                  keyStoreType + "]\n"
+        + KeyStore.getDefaultType() + "]\n"
         + " -alias      NAME,     alias used to store key [mykey]\n"
         + " -provider   NAME,     name of provider class [org.bouncycastle.jce.provider.BouncyCastleProvider]\n\n"
         + "The keystore and key passwords will be prompted for or can be\n"
@@ -76,6 +78,9 @@ public class KeyPairTool
 
     
     /* ------------------------------------------------------------ */
+    /** main entry point to start this tool
+     * @param args String array containing command line arguments
+     */
     public static void main(String[] args)
     {
         // Doit
@@ -87,6 +92,7 @@ public class KeyPairTool
     /**
      * Load parameters and perform the import command.
      * Catch any exceptions and clear the password arrays.
+     * @param args String array containing command line arguments
      */
     private void doit(String[] args)
     {
@@ -112,6 +118,7 @@ public class KeyPairTool
         }
     }
 
+    /* ------------------------------------------------------------ */
     /**
      * Import a key/cert pair into the keystore.
      * <p> Class variables hold the state information required for this
@@ -170,10 +177,14 @@ public class KeyPairTool
 
         System.out.println("Keys have been written to keystore");
     }
-	
 
+    /* ------------------------------------------------------------ */
     /**
-     * Load the chain of certificates from the given File
+     * Load the chain of certificates from the given File.
+     * <p> Note that the certificates must be in the correct order to
+     * form a valid chain starting with the cert corresponding to the
+     * private key and ending with the cert just before the top level
+     * cert.
      * @param privateKeyFile String name of file to load the key from
      * @return PrivateKey loaded from the file
      * @throws Exception if there are problems with loading the key.
@@ -206,6 +217,7 @@ public class KeyPairTool
 	return certChain;
     }
     
+    /* ------------------------------------------------------------ */
     /**
      * Load an RSA private key from the given File
      * @param privateKeyFile String name of file to load the key from
@@ -250,15 +262,17 @@ public class KeyPairTool
 	}
     }
     
+    /* ------------------------------------------------------------ */
     /**
      * Show a usage message.
      */
-    private void usage()
+    static private void usage()
     {
         System.out.println(usageString);
         System.exit(23);
     }
 
+    /* ------------------------------------------------------------ */
     /**
      * Load parameters from the given args and check usage.
      * Will exit on usage errors.
