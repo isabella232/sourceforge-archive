@@ -1,3 +1,6 @@
+<!--
+$Id$
+-->
 <project name="Jetty launcher" default="jar">
     <property name="srcdir" value="${basedir}/src"/>
     <property name="classdir" value="${basedir}/classes"/>
@@ -8,7 +11,7 @@
     </target>
     
     <target name="compile" depends="prepare">
-        <javac srcdir="${srcdir}" destdir="${classdir}">
+        <javac srcdir="${srcdir}" destdir="${classdir}" target="1.1">
             <include name="**/*.java"/>
         </javac>
     </target>
@@ -19,7 +22,10 @@
              manifest="${srcdir}/MANIFEST.MF"
              basedir="${classdir}"
          >
-            <include name="org/mortbay/**"/>
+            <fileset dir="${srcdir}">
+            <include name="**/*.class"/>
+            <include name="**/*.config"/>
+            </fileset>
         </jar>
     </target>
 
@@ -32,4 +38,12 @@
         <delete file="${jarfile}" quiet="true"/>
     </target>
 
+    <target name="test" depends="jar,tidy">
+        <java fork="true" jar="${jarfile}">
+        </java>
+    </target>
+    
+    <target name="all" depends="jar,tidy">
+    </target>
+    
 </project>
