@@ -147,9 +147,6 @@ public class Dispatcher implements RequestDispatcher
             ?(ServletHttpRequest)httpConnection.getRequest().getWrapper()
             :ServletHttpRequest.unwrap(servletRequest);
 
-        // Is this being dispatched to a different context?
-        _xContext=
-            servletHttpRequest.getServletHandler()!=_servletHandler;
 
         // wrap the request and response
         DispatcherRequest request = new DispatcherRequest(httpServletRequest);
@@ -169,38 +166,60 @@ public class Dispatcher implements RequestDispatcher
             UrlEncoded.decodeTo(query,parameters);
             request.addParameters(parameters);
         }
+
         
-        if (isNamed())
+        // Is this being dispatched to a different context?
+        _xContext=
+            servletHttpRequest.getServletHandler()!=_servletHandler;
+
+        ClassLoader loader = null;
+        try
         {
-            // No further modifications required.
-            _servletHandler.dispatch(null,request,response,_holder);
-        }
-        else
-        {
-            // merge query string
-            String oldQ=httpServletRequest.getQueryString();
-            if (oldQ!=null && oldQ.length()>0)
+            if (_xContext)
             {
-                if (query==null)
-                    query=oldQ;
-                else
-                    query=query+"&"+oldQ;
+                // Set the context classloader to the new contexts loader.
+                loader=Thread.currentThread().getContextClassLoader();
+                Thread.currentThread()
+                    .setContextClassLoader(_servletHandler.getHttpContext().getClassLoader());
             }
-            
-            // Adjust servlet paths
-            servletHttpRequest.setServletHandler(_servletHandler);
-            request.setPaths(_servletHandler.getHttpContext().getContextPath(),
-                             PathMap.pathMatch(_pathSpec,_pathInContext),
-                             PathMap.pathInfo(_pathSpec,_pathInContext),
-                             query);
-            _servletHandler.dispatch(_pathInContext,request,response,_holder);
-            
-            if (!_include)
-                response.close();
-            else if (response.isFlushNeeded())
-                response.flushBuffer();
+        
+            if (isNamed())
+            {
+                // No further modifications required.
+                _servletHandler.dispatch(null,request,response,_holder);
+            }
+            else
+            {
+                // merge query string
+                String oldQ=httpServletRequest.getQueryString();
+                if (oldQ!=null && oldQ.length()>0)
+                {
+                    if (query==null)
+                        query=oldQ;
+                    else
+                        query=query+"&"+oldQ;
+                }
+                
+                // Adjust servlet paths
+                servletHttpRequest.setServletHandler(_servletHandler);
+                request.setPaths(_servletHandler.getHttpContext().getContextPath(),
+                                 PathMap.pathMatch(_pathSpec,_pathInContext),
+                                 PathMap.pathInfo(_pathSpec,_pathInContext),
+                                 query);
+                _servletHandler.dispatch(_pathInContext,request,response,_holder);
+                
+                if (!_include)
+                    response.close();
+                else if (response.isFlushNeeded())
+                    response.flushBuffer();
+            }
         }
-            
+        finally
+        {
+            // restore loader
+            if (loader!=null)
+                Thread.currentThread().setContextClassLoader(loader);
+        }
     }
 
     /* ------------------------------------------------------------ */

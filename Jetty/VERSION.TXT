@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Correctly setup context classloader in cross context dispatch.
+
 Jetty-4.2.12 - 12 August 2003
  + Restore max inactive interval for session manager
  + Removed protection of org.mortbay.http attributes
