@@ -18,7 +18,9 @@ endif
 include $(MORTBAY_HOME)/etc/Global.mk
 
 #help target  jetty-release    Make a release of Jetty
-jetty-release:
+jetty-release: jetty-jars javadoc cleansrc
+
+jetty-jars:
 	make rall 
 	make install
 	cd $(INSTALLROOT)/classes \
@@ -41,3 +43,7 @@ jetty-release:
 javadoc:
 	bin/generateJavaDoc
 
+cleansrc:
+	cd src && make rclean
+
+    
