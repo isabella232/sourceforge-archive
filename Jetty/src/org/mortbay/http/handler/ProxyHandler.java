@@ -12,6 +12,7 @@ import java.net.HttpURLConnection;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.MalformedURLException;
 import java.util.Enumeration;
 import java.util.HashSet;
 import org.mortbay.http.HttpException;
@@ -98,14 +99,13 @@ public class ProxyHandler extends AbstractHttpHandler
             handleConnect(pathInContext,pathParams,request,response);
             return;
         }
-
-        // Do we proxy this?
-        if (!isProxied(uri))
-            return;
         
         try
         {
-            URL url = new URL(uri.toString());
+            // Do we proxy this?
+            URL url=isProxied(uri);
+            if (url==null)
+                return;
             Code.debug("PROXY URL=",url);
 
             URLConnection connection = url.openConnection();
@@ -276,14 +276,17 @@ public class ProxyHandler extends AbstractHttpHandler
     
     /* ------------------------------------------------------------ */
     /** Is URL Proxied.
-     * Method to allow derived handlers to select which URIs are proxied.
-     * @return Default implementation returns true if the URI has a schema
-     * and it is in the _ProxySchemes map.
+     * Method to allow derived handlers to select which URIs are proxied and
+     * to where.
+     * @return The URL to proxy to, or null if the passed URI should not be proxied.
+     * The default implementation returns the passed uri if it has a schema
+     * that is in the _ProxySchemes map.
      */
-    protected boolean isProxied(URI uri)
+    protected URL isProxied(URI uri)
+        throws MalformedURLException
     {
         // Is this a proxy request?
         String scheme=uri.getScheme();
-        return  (scheme!=null && _ProxySchemes.containsKey(scheme));
+        return  (scheme!=null && _ProxySchemes.containsKey(scheme))?new URL(uri.toString()):null;
     }    
 }
