@@ -203,20 +203,7 @@ class ServletRequest
     /* ------------------------------------------------------------ */
     public Cookie[] getCookies()
     {
-        Map cookies=_httpRequest.getCookies();
-        if (cookies==null|| cookies.size()==0)
-            return null; // XXX or empty set?
-
-        // XXX save this for next call?
-        Cookie[] ca = new Cookie[cookies.size()];
-        int c=0;
-        Iterator i=cookies.keySet().iterator();
-        while(i.hasNext())
-        {
-            String cookie=i.next().toString();
-            ca[c++] = new Cookie(cookie,cookies.get(cookie).toString());
-        }
-        return ca;
+        return _httpRequest.getCookies();
     }
     
     /* ------------------------------------------------------------ */
@@ -339,10 +326,18 @@ class ServletRequest
             // Then try cookies
             if (_sessionId == null)
             {
-                Map cookies=_httpRequest.getCookies();
-                if (cookies!=null && cookies.size()>0)
+                Cookie[] cookies=_httpRequest.getCookies();
+                if (cookies!=null && cookies.length>0)
                 {
-                    _sessionId=(String)cookies.get(Context.__SessionId);
+                    for (int i=0;i<cookies.length;i++)
+                    {
+                        if (Context.__SessionId.equals(cookies[i].getName()))
+                        {
+                            _sessionId=cookies[i].getValue();
+                            break;
+                        }
+                    }
+                    
                     if (_sessionId!=null && _sessionId.length()>0)
                     {
                         _sessionIdState = __SESSIONID_COOKIE;

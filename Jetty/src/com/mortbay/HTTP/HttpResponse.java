@@ -14,6 +14,7 @@ import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import javax.servlet.http.Cookie;
 
 
 /* ------------------------------------------------------------ */
@@ -392,52 +393,22 @@ public class HttpResponse extends HttpMessage
     public void addSetCookie(String name,
                              String value)
     {
-        addSetCookie(name,value,null,"/",-1,false);
+        addSetCookie(new Cookie(name,value));
     }
     
     /* -------------------------------------------------------------- */
-    /** Add a Set-Cookie field. 
-     * @param name The cookie name
-     * @param value The cookie value which must not contain ';'.
-     * @param domain The domain, which must be a subdomain of the server.
-     *        If null is passed the default of this domain is used.
-     * @param path The path the cookie applies to.
-     *        If null is passed the default of "/" is used.
-     * @param maxAge the seconds until the cokkie expires.
-     *        A negative value implies browser session and zero causes 
-     *        the cookie to be deleted.
-     * @param secure if true the cookie is flagged secure.
+    /** Add a Set-Cookie field.
      */
-    public void addSetCookie(String name,
-                             String value,
-                             String domain,
-                             String path,
-                             int maxAge,
-                             boolean secure)
+    public void addSetCookie(Cookie cookie)
     {
+        String name=cookie.getName();
+        String value=cookie.getValue();
+        
         // Check arguments
         if (name==null || name.length()==0)
             throw new IllegalArgumentException("Bad cookie name");
         if (value==null || value.length()==0)
             throw new IllegalArgumentException("Bad cookie value");
-        for(int i = 0; i < name.length(); i++)
-        {
-            char c = name.charAt(i);
-            if (Character.isWhitespace(c) || c==',' || c==';' || c=='=')
-                throw new IllegalArgumentException("Bad cookie name:'"+name+"'");
-        }
-        if(name.equalsIgnoreCase ("Comment") ||
-           name.equalsIgnoreCase ("Discard") ||
-           name.equalsIgnoreCase ("Domain")  ||
-           name.equalsIgnoreCase ("Expires") ||
-           name.equalsIgnoreCase ("Max-Age") ||
-           name.equalsIgnoreCase ("Path")    ||
-           name.equalsIgnoreCase ("Secure")  ||
-           name.equalsIgnoreCase ("Version"))
-            throw new IllegalArgumentException("Bad cookie name");
-        if (secure)
-            Code.notImplemented();
-
         
         // Format value and params
         StringBuffer buf = new StringBuffer(128);
@@ -447,23 +418,54 @@ public class HttpResponse extends HttpMessage
             buf.append(name);
             buf.append('=');
             buf.append(UrlEncoded.encodeString(value));
+
+            int version=cookie.getVersion();
+            if (version>0)
+            {
+                buf.append(";Version=");
+                buf.append(version);
+                String comment=cookie.getComment();
+                if (comment!=null && comment.length()>0)
+                {
+                    buf.append(";Comment=\"");
+                    buf.append(comment);
+                    buf.append('"');
+                }
+            }
+            String path=cookie.getPath();
             if (path!=null && path.length()>0)
             {
-                buf.append(";path=");
+                buf.append(";Path=");
                 buf.append(path);
             }
+            String domain=cookie.getDomain();
             if (domain!=null && domain.length()>0)
             {
-                buf.append(";domain=");
-                buf.append(domain);
+                buf.append(";Domain=");
+                buf.append(domain.toLowerCase());// lowercase for IE
             }
+            long maxAge = cookie.getMaxAge();
             if (maxAge>=0)
             {
-                buf.append(";expires=");
-                Date expires = new Date(System.currentTimeMillis()+1000L*maxAge);
-                buf.append(HttpFields.__dateSend.format(expires));
+                if (version==0)
+                {
+                    buf.append(";Expires=");
+                    buf.append(HttpFields.__dateSend.format(new Date(System.currentTimeMillis()+1000L*maxAge)));
+                }
+                else
+                {
+                    buf.append (";Max-Age=");
+                    buf.append (cookie.getMaxAge());
+                }
             }
-        
+            else if (version>0)
+            {
+                buf.append (";Discard");
+            }
+            if (cookie.getSecure())
+            {
+                buf.append(";secure");
+            }
             name_value_params=buf.toString();
         }
         

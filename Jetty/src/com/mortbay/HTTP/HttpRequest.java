@@ -21,10 +21,12 @@ import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import javax.servlet.http.Cookie;
 
 
 /* ------------------------------------------------------------ */
@@ -69,7 +71,7 @@ public class HttpRequest extends HttpMessage
     private List _te;
     private MultiMap _parameters;
     private boolean _handled;
-    private Map _cookies;
+    private Cookie[] _cookies;
     private Map _attributes;
 
     /* ------------------------------------------------------------ */
@@ -787,40 +789,97 @@ public class HttpRequest extends HttpMessage
      * @param buffer Contains encoded cookies
      * @return Array of Cookies.
      */
-    public Map getCookies()
+    public Cookie[] getCookies()
     {
         if (_cookies!=null)
             return _cookies;
-        
-        String cookies = (String)_header.get(HttpFields.__Cookie);
-        if (cookies==null || cookies.length()==0)
+
+        try
         {
-            _cookies=__emptyMap;
-            return _cookies;
+            String cookieStr = (String)_header.get(HttpFields.__Cookie);
+            if (cookieStr==null || cookieStr.length()==0)
+                return null;
+            
+            ArrayList cookies=new ArrayList(4);
+            int version=0;
+            Cookie cookie=null;
+            
+            QuotedStringTokenizer tok = new QuotedStringTokenizer(cookieStr,";");
+            while (tok.hasMoreTokens())
+            {
+                String c = tok.nextToken();
+                int e = c.indexOf("=");
+                String n;
+                String v;
+                if (e>0)
+                {
+                    n=c.substring(0,e).trim();
+                    v=c.substring(e+1).trim();
+                }
+                else
+                {
+                    n=c.trim();
+                    v="";
+                }
+
+                // Handle quoted values
+                if (version>0)
+                    v=StringUtil.unquote(v);
+                
+                // Ignore $ names
+                if (n.startsWith("$"))
+                {
+                    if ("$version".equalsIgnoreCase(n))
+                    {
+                        int coma=v.indexOf(",");
+                        if (coma>=0)
+                        {   
+                            version=Integer.parseInt
+                                (StringUtil.unquote(v.substring(0,coma)));
+                            v=v.substring(coma+1);
+                            e=v.indexOf("=");
+                            if (e>0)
+                            {
+                                n=v.substring(0,e).trim();
+                                v=v.substring(e+1).trim();
+                                v=StringUtil.unquote(v);
+                            }
+                            else
+                            {
+                                n=v.trim();
+                                v="";
+                            }
+                        }
+                        else
+                            continue;
+                    }
+                    else
+                    {
+                        if ("$path".equalsIgnoreCase(n) && cookie!=null)
+                            cookie.setPath(v);
+                        else if ("$domain".equalsIgnoreCase(n)&&cookie!=null)
+                            cookie.setDomain(v);
+                        continue;
+                    }
+                }
+                
+                
+                v=UrlEncoded.decodeString(v);
+                cookie=new Cookie(n,v);
+                if (version>0)
+                    cookie.setVersion(version);
+                cookies.add(cookie);
+            }
+            if (cookies.size()==0)
+                return null;
+            _cookies=new Cookie[cookies.size()];
+            cookies.toArray(_cookies);
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
         }
         
-        _cookies=new HashMap(8);
-        QuotedStringTokenizer tok = new QuotedStringTokenizer(cookies,";");
-        
-        while (tok.hasMoreTokens())
-        {
-            String c = tok.nextToken();
-            int e = c.indexOf("=");
-            String n;
-            String v;
-            if (e>0)
-            {
-                n=c.substring(0,e).trim();
-                v=c.substring(e+1).trim();
-            }
-            else
-            {
-                n=c.trim();
-                v="";
-            }
-            v=UrlEncoded.decodeString(v);
-            _cookies.put(n,v);
-        }
         return _cookies;
     }
 
@@ -903,6 +962,3 @@ public class HttpRequest extends HttpMessage
         super.destroy();
     }  
 }
-
-           
-

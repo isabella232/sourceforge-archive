@@ -85,7 +85,19 @@ public class StringUtil
             return buf.toString();
         }
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /** Remove single or double quotes. 
+     * @param s 
+     * @return 
+     */
+    public static String unquote(String s)
+    {
+        if ((s.startsWith("\"") && s.endsWith("\"")) ||
+            (s.startsWith("'") && s.endsWith("'")))
+            s=s.substring(1,s.length()-1);
+        return s;
+    }
     
     /* ------------------------------------------------------------ */
     /** Test main

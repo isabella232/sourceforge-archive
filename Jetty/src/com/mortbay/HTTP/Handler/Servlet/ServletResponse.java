@@ -173,12 +173,7 @@ public class ServletResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void addCookie(Cookie cookie) 
     {
-        _httpResponse.addSetCookie(cookie.getName(),
-                                   cookie.getValue(),
-                                   cookie.getDomain(),
-                                   cookie.getPath(),
-                                   cookie.getMaxAge(),
-                                   cookie.getSecure());
+        _httpResponse.addSetCookie(cookie);
     }
 
     /* ------------------------------------------------------------ */

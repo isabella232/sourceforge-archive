@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.servlet.http.Cookie;
 
 /* ------------------------------------------------------------ */
 /** Dump request handler.
@@ -104,7 +105,7 @@ public class DumpHandler extends NullHandler
             try{
                 set_cookie=set_cookie.trim();
                 String cv=request.getParameter("CookieVal");
-                response.addSetCookie(set_cookie,cv,null,"/",60*60*1000,false);
+                response.addSetCookie(set_cookie,cv);
             }
             catch(IllegalArgumentException e)
             {
@@ -114,21 +115,20 @@ public class DumpHandler extends NullHandler
             }
         }
         
-        
-        Map cookies=request.getCookies();
-        if (cookies!=null && cookies.size()>0)
+        Cookie[] cookies=request.getCookies();
+        if (cookies!=null && cookies.length>0)
         {
             writer.write("</PRE>\n<H3>Cookies:</H3>\n<PRE>");
-            Iterator c=cookies.keySet().iterator();
-            while(c.hasNext())
+            for(int c=0;c<cookies.length;c++)
             {
-                String cookie=c.next().toString();
-                writer.write(cookie);
+                Cookie cookie=cookies[c];
+                writer.write(cookie.getName());
                 writer.write("=");
-                writer.write(cookies.get(cookie).toString());
+                writer.write(cookie.getValue());
                 writer.write("\n");
             }
         }
+        
         
         Collection attributes=request.getAttributeNames();
         if (attributes!=null && attributes.size()>0)

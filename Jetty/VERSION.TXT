@@ -1,6 +1,7 @@
 Stable 2.4.7
 Dev    3.0.B04
 
+ + Handler RFC2109 cookies (like any browser handles them!)
  + Added default webapp servlet mapping /servlet/name/*
  + Improved path spec interpretation by looking at 2.3 spec
  + Implemented security-role-ref for servlets
