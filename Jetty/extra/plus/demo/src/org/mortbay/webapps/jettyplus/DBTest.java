@@ -15,6 +15,8 @@ import javax.naming.InitialContext;
 import javax.sql.DataSource;
 import javax.transaction.UserTransaction;
 import org.mortbay.util.Log;
+import org.mortbay.util.Code;
+
 
 /* ---------------------------------------------------- */
 /** DBTest
@@ -73,7 +75,9 @@ public class DBTest
                 Log.event("<<< Environment retrieved >>>");
                 
                 //get datasource
+                Log.event("<<< Retrieving DataSource >>>");
                 datasource = (DataSource)context.lookup("java:comp/env/jdbc/myDB");
+                Log.event("<<< DataSource retrieved >>>");
             }
         }
         catch (Exception e)
@@ -92,7 +96,7 @@ public class DBTest
         try
         {
             init();
-                        
+            Log.event ("<<< Looking up UserTransaction >>>");
             UserTransaction usertransaction = (UserTransaction)context.lookup("java:comp/UserTransaction");
             Log.event ("<<< Connecting to datasource >>>");
             Connection connection = datasource.getConnection();
@@ -152,6 +156,8 @@ public class DBTest
         {
             init();
             
+            Log.event ("<<< Getting connection >>>");
+
             connection = datasource.getConnection();
             Statement statement = connection.createStatement();
             ResultSet resultset = statement.executeQuery(selectString);
@@ -172,7 +178,8 @@ public class DBTest
         {
             try
             {
-                connection.close();
+                if (connection != null)
+                    connection.close();
             }
             catch (Exception e)
             {

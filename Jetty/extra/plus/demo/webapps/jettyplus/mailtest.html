@@ -1,0 +1,64 @@
+<html>
+  <title>JettyPlus Mail Service Test</title>
+
+<body>
+  <H1> JettyPlus Mail Service Test</H1>
+
+  <font color="red">
+   Before running this test, ensure that you have configured the Mail provider in
+   your <b>$JETTY_HOME/extra/etc/jettyplus.xml</b> file as follows:
+  </font>
+  <pre>
+  &lt;Call name="addService"&gt;
+    &lt;Arg&gt;
+      &lt;New class="org.mortbay.jetty.plus.MailService"&gt;
+        &lt;Set name="Name"&gt;MailService&lt;/Set&gt;
+        &lt;Set name="JNDI"&gt;mail/TestMail&lt;/Set&gt;
+   <font color="red">     &lt;!-- set up the id of the smtp user                 --&gt;
+        &lt;Set name="User"&gt;XXX&lt;/Set&gt;
+        &lt;!-- set up the password of the smtp user           --&gt;
+        &lt;Set name="Password"&gt;XXX&lt;/Set&gt;
+        &lt;!-- set up the hostname/ip addr of the smtp server --&gt;
+        &lt;Put name="mail.smtp.host"&gt;XXX&lt;/Put&gt;  </font>
+        &lt;!-- setup any javax.mail.smtp provider variables   --&gt;
+        &lt;Put name="mail.pop3.user"&gt;zzz&lt;/Put&gt;
+        &lt;Put name="mail.pop3.host"&gt;vvv&lt;/Put&gt;
+        &lt;Put name="mail.from"&gt;me@me&lt;/Put&gt;
+        &lt;Put name="mail.debug"&gt;false&lt;/Put&gt;
+      &lt;/New&gt;
+    &lt;/Arg&gt;
+  &lt;/Call&gt;
+  </pre>
+ 
+  <P>
+  <form method=GET
+  action="servlet/org.mortbay.webapps.jettyplus.MailTest">
+  
+  <table>
+    <tr>
+      <td>
+          <b>Enter the email address of the recipient:</b> 
+      </td>
+      <td>
+          <INPUT TYPE=TEXT SIZE=30 NAME=recipient value="">
+      </td>
+    </tr>
+    <tr>
+      <td>
+          <b>Enter the email address of the sender:</b>
+      </td>
+      <td>
+          <INPUT TYPE=TEXT SIZE=30 NAME=sender value="">
+      </td>
+    </tr>
+    <tr>
+      <td colspan=2>
+         <INPUT TYPE=SUBMIT VALUE="Send mail">
+	 &nbsp;&nbsp;&nbsp;
+         <INPUT TYPE=RESET VALUE="Clear">
+      </td>
+    </tr>
+  </form>
+
+</body>
+</html>
