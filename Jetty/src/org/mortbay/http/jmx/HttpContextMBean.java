@@ -38,6 +38,7 @@ public class HttpContextMBean extends LifeCycleMBean
         super.defineManagedResource();
 
         defineAttribute("virtualHosts");
+        defineAttribute("hosts");
         defineAttribute("contextPath");
         
         defineAttribute("handlers",READ_ONLY,ON_MBEAN);

@@ -6,7 +6,9 @@ Jetty-4.2.6
  + Allow AJP13 buffers to be resized.
  + Fixed LineInput problem with expanded buffers.
  + ClientCertAuthentication updates request.
- + Fix rel sendRedirects for root context.
+ + Fixed rel sendRedirects for root context.
+ + Added HttpContext.setHosts to restrict context by real interface.
+ + Added MBeans for session managers
 
 Jetty-4.2.5 - 14 January 2003
  + Fixed pathParam bug for ;jsessionid

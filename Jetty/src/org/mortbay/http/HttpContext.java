@@ -9,6 +9,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Permissions;
@@ -99,6 +102,7 @@ public class HttpContext implements LifeCycle,
     // These attributes are serialized by WebApplicationContext, which needs
     // to be updated if you add to these
     private String _contextPath;
+    private List _vhosts=new ArrayList(2);
     private List _hosts=new ArrayList(2);
     private List _handlers=new ArrayList(3);
     private Map _attributes = new HashMap(3);
@@ -143,7 +147,7 @@ public class HttpContext implements LifeCycle,
     private transient CachedMetaData _mostRecentlyUsed;
     private transient CachedMetaData _leastRecentlyUsed;
     private transient HttpHandler[] _handlersArray;
-    private transient String[] _hostsArray;
+    private transient String[] _vhostsArray;
 
     /* ------------------------------------------------------------ */
     transient Object _statsLock=new Object[0];
@@ -274,18 +278,18 @@ public class HttpContext implements LifeCycle,
     public void addVirtualHost(String hostname)
     {
         // Note that null hosts are also added.
-        if (!_hosts.contains(hostname))
+        if (!_vhosts.contains(hostname))
         {
-            _hosts.add(hostname);
+            _vhosts.add(hostname);
             _contextName=null;
 
             if (_httpServer!=null)
             {
-                if (_hosts.size()==1)
+                if (_vhosts.size()==1)
                     _httpServer.removeMapping(null,this);
                 _httpServer.addMapping(hostname,this);
             }
-            _hostsArray=null;
+            _vhostsArray=null;
         }
     }
 
@@ -298,16 +302,16 @@ public class HttpContext implements LifeCycle,
     public void removeVirtualHost(String hostname)
     {
         // Note that null hosts are also added.
-        if (_hosts.remove(hostname))
+        if (_vhosts.remove(hostname))
         {
             _contextName=null;
             if (_httpServer!=null)
             {
                 _httpServer.removeMapping(hostname,this);
-                if (_hosts.size()==0)
+                if (_vhosts.size()==0)
                     _httpServer.addMapping(null,this);
             }
-            _hostsArray=null;
+            _vhostsArray=null;
         }
     }
 
@@ -324,7 +328,7 @@ public class HttpContext implements LifeCycle,
      */
     public void setVirtualHosts(String[] hosts)
     {
-        List old = new ArrayList(_hosts);
+        List old = new ArrayList(_vhosts);
 
         for (int i=0;i<hosts.length;i++)
         {
@@ -336,6 +340,47 @@ public class HttpContext implements LifeCycle,
         for (int i=0;i<old.size();i++)
             removeVirtualHost((String)old.get(i));
     }
+
+    /* ------------------------------------------------------------ */
+    /** Set the hosts for the context.
+     * Set the real hosts that this context will accept requests for.
+     * If not null or empty, then only requests from HttpListeners for hosts
+     * in this array are accepted by this context. 
+     * Unlike virutal hosts, this value is not used by HttpServer for
+     * matching a request to a context.
+     */
+    public void setHosts(String[] hosts)
+        throws UnknownHostException
+    {
+        if (hosts==null || hosts.length==0)
+            _hosts=null;
+        else
+        {
+            _hosts=new ArrayList();
+            for (int i=0;i<hosts.length;i++)
+                if (hosts[i]!=null)
+                    _hosts.add(InetAddress.getByName(hosts[i]));
+        }
+        
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get the hosts for the context.
+     */
+    public String[] getHosts()
+    {
+        if (_hosts==null || _hosts.size()==0)
+            return null;
+        String[] hosts=new String[_hosts.size()];
+        for (int i=0;i<hosts.length;i++)
+        {
+            InetAddress a = (InetAddress)_hosts.get(i);
+            if (a!=null)
+                hosts[i]=a.getHostName();
+        }
+        return hosts;
+    }
+
 
     /* ------------------------------------------------------------ */
     /** Get the virtual hosts for the context.
@@ -350,16 +395,16 @@ public class HttpContext implements LifeCycle,
      */
     public String[] getVirtualHosts()
     {
-        if (_hostsArray!=null)
-            return _hostsArray;
-        if (_hosts==null)
-            _hostsArray=new String[0];
+        if (_vhostsArray!=null)
+            return _vhostsArray;
+        if (_vhosts==null)
+            _vhostsArray=new String[0];
         else
         {
-            _hostsArray=new String[_hosts.size()];
-            _hostsArray=(String[])_hosts.toArray(_hostsArray);
+            _vhostsArray=new String[_vhosts.size()];
+            _vhostsArray=(String[])_vhosts.toArray(_vhostsArray);
         }
-        return _hostsArray;
+        return _vhostsArray;
     }
 
 
@@ -1100,8 +1145,8 @@ public class HttpContext implements LifeCycle,
             HttpListener httpListener=_httpServer.getListeners()[0];
 
             String vhost = null;
-            for (int h=0;vhost==null && _hosts!=null && h<_hosts.size();h++)
-                vhost=(String)_hosts.get(h);
+            for (int h=0;vhost==null && _vhosts!=null && h<_vhosts.size();h++)
+                vhost=(String)_vhosts.get(h);
             String host=httpListener.getHost();
             String temp="Jetty_"+
                 (host==null?"":host)+
@@ -1545,6 +1590,22 @@ public class HttpContext implements LifeCycle,
         if (!_started)
             return false;
 
+        // reject requests by real host
+        if (_hosts!=null && _hosts.size()>0)
+        {
+            Object o = request.getHttpConnection().getConnection();
+            if (o instanceof Socket)
+            {
+                Socket s=(Socket)o;
+                if (!_hosts.contains(s.getLocalAddress()))
+                {
+                    Code.debug(s.getLocalAddress()," not in ",_hosts);
+                    return false;
+                }
+            }
+        }
+        
+        // handle stats
         if (_statsOn)
         {
             synchronized(_statsLock)
@@ -1677,7 +1738,7 @@ public class HttpContext implements LifeCycle,
     public String getHttpContextName()
     {
         if (_contextName==null)
-            _contextName = (_hosts.size()>1?(_hosts.toString()+":"):"")+_contextPath;
+            _contextName = (_vhosts.size()>1?(_vhosts.toString()+":"):"")+_contextPath;
         return _contextName;
     }
 
@@ -1863,8 +1924,9 @@ public class HttpContext implements LifeCycle,
         if (_initParams!=null)
             _initParams.clear();
         _initParams=null;
-        if (_hosts!=null)
-            _hosts.clear();
+        if (_vhosts!=null)
+            _vhosts.clear();
+        _vhosts=null;
         _hosts=null;
         _tmpDir=null;
 

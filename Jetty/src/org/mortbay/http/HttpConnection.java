@@ -9,12 +9,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.util.Enumeration;
 import java.util.List;
 import org.mortbay.util.Code;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.OutputObserver;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.InetAddrPort;
 
 
 /* ------------------------------------------------------------ */
@@ -267,13 +269,18 @@ public class HttpConnection
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the listeners HttpServer .
-     * Conveniance method equivalent to getListener().getHost().
+    /** Get the listeners HttpServer.
+     * But if the name is 0.0.0.0, then the real interface address is used.
      * @return HttpServer.
      */
     public String getServerName()
     {
-        return _listener.getHost();
+        String host=_listener.getHost();
+        if (InetAddrPort.__0_0_0_0.equals(host) &&
+            _connection instanceof Socket)
+            host = ((Socket)_connection).getLocalAddress().getHostName();
+        
+        return host;
     }
     
     /* ------------------------------------------------------------ */

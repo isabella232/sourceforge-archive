@@ -1,5 +1,5 @@
 // ========================================================================
-// Copyright (c) 2002 Mort Bay Consulting (Australia) Pty. Ltd.
+// Copyright (c) 2002,2003 Mort Bay Consulting (Australia) Pty. Ltd.
 // $Id$
 // ========================================================================
 
@@ -8,9 +8,11 @@ package org.mortbay.jetty.servlet.jmx;
 import javax.management.MBeanException;
 import org.mortbay.http.jmx.HttpHandlerMBean;
 import org.mortbay.jetty.servlet.ServletHandler;
+import org.mortbay.jetty.servlet.SessionManager;
 import org.mortbay.http.PathMap;
 import java.util.Iterator;
 import java.util.Map;
+import javax.management.ObjectName;
 
 
 /* ------------------------------------------------------------ */
@@ -38,9 +40,20 @@ public class ServletHandlerMBean extends HttpHandlerMBean
         super.defineManagedResource();
         defineAttribute("usingCookies"); 
         defineAttribute("servlets",READ_ONLY,ON_MBEAN);
+        defineAttribute("sessionManager",READ_ONLY,ON_MBEAN);
         _servletHandler=(ServletHandler)getManagedResource();
     }
 
+    /* ------------------------------------------------------------ */
+    public ObjectName getSessionManager()
+    {
+        SessionManager sm=_servletHandler.getSessionManager();
+        if (sm==null)
+            return null;
+        ObjectName[] on=getComponentMBeans(new Object[]{sm},null);
+        return on[0];
+    }
+    
     /* ------------------------------------------------------------ */
     public String[] getServlets()
     {
@@ -55,5 +68,13 @@ public class ServletHandlerMBean extends HttpHandlerMBean
         }
         
         return s;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void postRegister(Boolean ok)
+    {
+        super.postRegister(ok);
+        if (ok.booleanValue())
+            getSessionManager();
     }
 }

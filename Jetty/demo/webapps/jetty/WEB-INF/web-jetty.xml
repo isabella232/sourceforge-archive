@@ -14,7 +14,15 @@ org.mortbay.jetty.servlet.WebApplicationContext objet
       <Set name="usingCookies">true</Set>
     </Call>
     
-    <!--
+    <!-- Uncomment to restrict context by real host
+    <Set name="Hosts">
+      <Array type="java.lang.String">
+        <Item>127.0.0.1</Item>
+      </Array>
+    </Set>
+    -->
+
+    <!-- uncomment to map context by virtual host.
     <Set name="virtualHosts">
       <Array type="java.lang.String">
         <Item></Item>

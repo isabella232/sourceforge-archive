@@ -103,6 +103,12 @@ public abstract class AbstractSessionManager implements SessionManager
     {
         return Collections.unmodifiableMap(_sessions);
     }
+
+    /* ------------------------------------------------------------ */
+    public int getSessions()
+    {
+        return _sessions.size();
+    }
     
     /* ------------------------------------------------------------ */
     /* new Session ID.
@@ -190,6 +196,15 @@ public abstract class AbstractSessionManager implements SessionManager
     
     /* ------------------------------------------------------------ */
     /** 
+     * @return seconds 
+     */
+    public int getMaxInactiveInterval()
+    {
+        return _dftMaxIdleSecs;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
      * @param seconds 
      */
     public void setMaxInactiveInterval(int seconds)
@@ -197,6 +212,16 @@ public abstract class AbstractSessionManager implements SessionManager
         _dftMaxIdleSecs = seconds;
         if (_dftMaxIdleSecs>0 && _scavengePeriodMs>_dftMaxIdleSecs*100)
             setScavangePeriod((_dftMaxIdleSecs+9)/10);
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return seconds 
+     */
+    public int getScavangePeriod()
+    {
+        return _scavengePeriodMs/1000;
     }
     
     /* ------------------------------------------------------------ */
