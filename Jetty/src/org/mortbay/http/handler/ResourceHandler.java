@@ -147,7 +147,6 @@ public class ResourceHandler extends AbstractHttpHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
-        boolean endsWithSlash= pathInContext.endsWith("/");
         Resource resource = getHttpContext().getResource(pathInContext);
 
         if (resource==null)
@@ -177,7 +176,7 @@ public class ResourceHandler extends AbstractHttpHandler
             if (method.equals(HttpRequest.__GET) ||
                 method.equals(HttpRequest.__POST) ||
                 method.equals(HttpRequest.__HEAD))
-                handleGet(request, response, pathInContext, pathParams, resource, endsWithSlash);  
+                handleGet(request, response, pathInContext, pathParams, resource);  
             else if (method.equals(HttpRequest.__PUT))
                 handlePut(request, response, pathInContext, resource);
             else if (method.equals(HttpRequest.__DELETE))
@@ -215,18 +214,17 @@ public class ResourceHandler extends AbstractHttpHandler
                           HttpResponse response,
                           String pathInContext,
                           String pathParams,
-                          Resource resource,
-                          boolean endsWithSlash)
+                          Resource resource)
         throws IOException
     {
         Code.debug("Looking for ",resource);
- 
+        
         if (resource!=null && resource.exists())
         {            
             // check if directory
             if (resource.isDirectory())
             {
-                if (!endsWithSlash && !pathInContext.equals("/"))
+                if (!pathInContext.endsWith("/") && !pathInContext.equals("/"))
                 {
                     Code.debug("Redirect to directory/");
                     

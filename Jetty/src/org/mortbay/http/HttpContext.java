@@ -723,19 +723,26 @@ public class HttpContext implements LifeCycle,
             if (resource==null)
                 return null;
 
-            // Is it cacheable?
+            // Is it an existing file?
             long len = resource.length();
             if (resource.exists() &&
-                !resource.isDirectory() &&
-                len>0 && len<_maxCachedFileSize && len<_maxCacheSize)
+                !resource.isDirectory())
             {
-                int needed=_maxCacheSize-(int)len;
-                while(_cacheSize>needed)
-                    _leastRecentlyUsed.invalidate();
-            
-                cached=resource.cache();
-                new CachedMetaData(cached,pathInContext);
-                return cached;
+                // Is it badly named?
+                if (pathInContext.endsWith("/"))
+                    return null;
+                
+                // Is it cacheable?
+                if (len>0 && len<_maxCachedFileSize && len<_maxCacheSize)
+                {
+                    int needed=_maxCacheSize-(int)len;
+                    while(_cacheSize>needed)
+                        _leastRecentlyUsed.invalidate();
+                    
+                    cached=resource.cache();
+                    new CachedMetaData(cached,pathInContext);
+                    return cached;
+                }
             }
         }
 

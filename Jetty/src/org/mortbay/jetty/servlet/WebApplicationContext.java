@@ -1261,7 +1261,7 @@ public class WebApplicationContext
         try
         {
             resource=super.getResource(uriInContext);
-            if (resource.exists())
+            if (resource!=null && resource.exists())
                 return resource;
         }
         catch (IOException e)
