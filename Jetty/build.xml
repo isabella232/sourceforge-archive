@@ -137,6 +137,7 @@
     <delete file="${start.jar}" quiet="false"/>
     <delete file="${stop.jar}" quiet="false"/>
     <delete file="${etc}/demo.mlet" quiet="false"/>
+    <delete file="${etc}/jetty.mlet" quiet="false"/>
     <delete file="${etc}/webdefault.xml" quiet="false"/>
     <delete file="${demo.webapps}/jetty/LICENSE.html" quiet="false"/>
     <delete file="${demo.webapps}/jetty/versions.txt" quiet="false"/>
@@ -281,6 +282,7 @@
   <!-- ==================================================================== -->
   <target name="mortbay.jmx.jar" depends="classes">
     <copy file="${src}/org/mortbay/jetty/jmx/demo.mlet" tofile="${etc}/demo.mlet" />
+    <copy file="${src}/org/mortbay/jetty/jmx/jetty.mlet" tofile="${etc}/jetty.mlet" />
     <jar jarfile="${mortbay.jmx.jar}">
        <manifest>    
          <attribute name="Main-Class" value="org.mortbay.util.jmx.Main"/>
@@ -413,6 +415,12 @@
          <pathelement path="${extra}/ftp/src"/>  
        </sourcepath>
     </javadoc>
+
+    <jar jarfile="${webapps}/javadoc.war">
+      <fileset dir="${javadoc}">
+        <exclude name="**/CVS"/>
+      </fileset>
+    </jar>
   </target>
 
 
@@ -586,7 +594,9 @@
       </zipfileset>
     </zip>
 
-    <copy file="extra/j2ee/*.sar" todir="${dist}" />
+    <copy todir="${dist}">
+      <fileset dir="${extra}/j2ee" includes="*.sar"/>
+    </copy>  
 
   </target>
 

@@ -49,20 +49,26 @@ Package contents
 Quick Start
 ===========
 
-  Unpack the full jetty release Jetty-X.X.X.tar.gz using an archive 
-  tool such as tar or winzip.
+Unpack the full jetty release Jetty-X.X.X.tar.gz using an archive 
+tool such as tar or winzip.
 
-  The demo server can be run with the commands
+The server can be run with the commands
 
      cd Jetty-X.X.X
-     java -jar start.jar etc/demo.xml
+     java -jar start.jar 
 
-  Then point your browser at http://localhost:8080 to see the demo 
-  web site.
+Then point your browser at http://localhost:8080 to see the web site.
 
-  The default configuration file (etc/jetty.xml) can be run with:
 
-     java -jar start.jar
+The demo configuration file can be run with:
+
+     java -jar start.jar etc/admin.xml etc/demo.xml
+
+
+The JMX variants may be started with 
+   java -Dstart.class=org.mortbay.util.jmx.Main -jar start.jar etc/jetty.mlet 
+or
+   java -Dstart.class=org.mortbay.util.jmx.Main -jar start.jar etc/demo.mlet 
 
 
 Starting Jetty

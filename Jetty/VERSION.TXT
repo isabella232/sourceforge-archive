@@ -14,6 +14,7 @@ Jetty-4.2.14RC0 - 7 October 2003
  + Set TransactionManager on JettyPlus datasources and pools
  + Fixed null pointer if no sevices configured for JettyPlus
  + Fixed comments with embedded double dashes on jettyplus.xml file
+ + Improved JMX start mechanism
 
 Jetty-4.2.12 - 12 August 2003
  + Restore max inactive interval for session manager

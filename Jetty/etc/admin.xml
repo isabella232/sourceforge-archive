@@ -33,15 +33,16 @@ $Id$
   <Call name="addRealm">
     <Arg>
       <New class="org.mortbay.http.HashUserRealm">
-        <Arg>Jetty Demo Realm</Arg>
-        <Arg><SystemProperty name="jetty.home" default="."/>/etc/demoRealm.properties</Arg>
+        <Arg>Admin Realm</Arg>
+	<Put name="admin">admin</Put>
+	<Call name="addUserToRole"><Arg>admin</Arg><Arg>server-administrator</Arg></Call>
       </New>
     </Arg>
   </Call>
 
   <Call name="addContext">
     <Arg>/</Arg>   
-    <Set name="realmName">Jetty Demo Realm</Set>
+    <Set name="realmName">Admin Realm</Set>
     <Set name="authenticator"><New class="org.mortbay.http.BasicAuthenticator"/></Set>
    
     <Call name="addHandler">
