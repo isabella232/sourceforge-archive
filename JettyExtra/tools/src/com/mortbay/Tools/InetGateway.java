@@ -173,6 +173,7 @@ public class InetGateway extends ThreadedServer
     /* ------------------------------------------------------------------- */
     protected void handleConnection(InputStream in,OutputStream out)
     {
+        System.err.println(Thread.currentThread().getName()+": New Connection ");
         Code.debug("Handle InetGateway connection");
         try
         {

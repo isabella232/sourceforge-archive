@@ -104,7 +104,6 @@ public class HttpServerMBean extends LifeCycleMBean
         super.defineManagedResource();
         
         defineAttribute("logSink");
-        defineAttribute("logDateFormat");
         defineAttribute("configuration");
         
         defineOperation("addListener",
@@ -126,7 +125,22 @@ public class HttpServerMBean extends LifeCycleMBean
                                      "java.lang.String",
                                      "boolean"},
                         IMPACT_ACTION);
+
         
+        defineAttribute("statsOn");
+        defineOperation("statsReset",IMPACT_ACTION);
+        defineAttribute("connections");
+        defineAttribute("connectionsOpen");
+        defineAttribute("connectionsOpenMax");
+        defineAttribute("connectionsDurationAve");
+        defineAttribute("connectionsDurationMax");
+        defineAttribute("connectionsRequestsAve");
+        defineAttribute("connectionsRequestsMax");
+        defineAttribute("requests");
+        defineAttribute("requestsActive");
+        defineAttribute("requestsActiveMax");
+        defineAttribute("requestsDurationAve");
+        defineAttribute("requestsDurationMax");
     }
     
     /* ------------------------------------------------------------ */
