@@ -46,7 +46,7 @@ The current release also requires that the 2.1 servlet API is in the
 system CLASSPATH.  Eventually this will be included dynamically when the
 handler is specified.  To add this to your CLASSPATH do:
 
-  CLASSPATH=$CLASSPATH:$JETTY3_HOME/servlet2.1
+  CLASSPATH=$CLASSPATH:$JETTY3_HOME/lib/javax.servlet2.1.jar
 
 
 
