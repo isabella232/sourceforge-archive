@@ -136,7 +136,7 @@ public class AJP13Connection extends HttpConnection
             
             int type=packet.getByte();
             if (Code.debug())
-                Code.debug("AJP13 type="+type);
+                Code.debug("AJP13 type="+type+" size="+packet.unconsumedData());
             
             switch (type)
             {
@@ -223,6 +223,7 @@ public class AJP13Connection extends HttpConnection
                   
               default:
                   Code.warning("Not implemented: "+packet);
+                  persistent=false;
             }
 
             persistent=true;   
@@ -240,7 +241,7 @@ public class AJP13Connection extends HttpConnection
                 response.commit();
                 _ajpOut.end(persistent);
 
-                // Consume unread input.
+                //Consume unread input.
                 while(_ajpIn.skip(4096)>0 || _ajpIn.read()>=0);
                 
                 // Close the outout

@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Fixed AJP13 POST handling.
+
 Jetty-4.1.0RC6 - 14 September 2002
  + Don't URL encode FileURLS.
  + Improved HashUserRealm doco

@@ -21,7 +21,6 @@ public class AJP13InputStream extends InputStream
     private boolean _gotFirst=false;
     private boolean _closed;
     
-    
     /* ------------------------------------------------------------ */
     AJP13InputStream(InputStream in, OutputStream out, int bufferSize)
     {
@@ -87,12 +86,14 @@ public class AJP13InputStream extends InputStream
         if (_closed)
             return -1;
         
-        if (_packet.unconsumedData()==0)
-            fillPacket();
-        if (_packet.unconsumedData()==0)
+        if (_packet.unconsumedData()<=0)
         {
-            _closed=true;
-            return -1;
+            fillPacket();
+            if (_packet.unconsumedData()<=0)
+            {
+                _closed=true;
+                return -1;
+            }
         }
         return _packet.getByte();
     }
@@ -139,17 +140,21 @@ public class AJP13InputStream extends InputStream
         
         if (_gotFirst)
             // Ask for next packet
-            _getBodyChunk.write(_out);        
+        {
+        }
         _gotFirst=true;
 
         // read packet
         _packet.read(_in);
-        
-        if (_packet.unconsumedData()==0)
+
+        if (_packet.unconsumedData()<=0)
             _closed=true;
         else if(_packet.getInt()>_packet.getBufferSize())
             throw new IOException("AJP Protocol error");
+        else
+            _getBodyChunk.write(_out);
     }
+    
     
     /* ------------------------------------------------------------ */
     public long skip(long n)
@@ -161,7 +166,6 @@ public class AJP13InputStream extends InputStream
         for (int i=0;i<n;i++)
             if (read()<0)
                 return i==0?-1:i;
-        
         return n;
     }
 }
