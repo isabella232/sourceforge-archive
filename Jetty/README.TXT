@@ -221,7 +221,40 @@ The following WebApplication tags are not implemented:
   <load-on-startup>  - ordering is not supported.
 
 
+Run script
+----------
 
+The unix start/stop script bin/jetty.sh which can run with:
 
+   bin/jetty.sh start [ jetty.xml ... ]
 
+This script is controlled by the following environment variables:
+ 
+ JAVA       - executable JVM
+ JAVA_HOME  - Home of java, specifically $JAVA_HOME/lib/tools.jar
+ JETTY_HOME - Home of jetty
+ JETTY_ETC  - Jetty configuration file directory
+ JETTY_RUN  - Directory for jetty pid file
+ JETTY_LOG  - Directory for jetty output log
+
+If any of these variables are not set, then frantic searches are made
+of likely locations to try and find them.
+
+To use this to start jetty at boot time:
+ + put your jetty.xml files in a /etc/jetty directory  
+   Make sure they use absolute paths or relative to $JETTY_HOME
+ + copy jetty.sh to the /etc/init.d directory
+ + make a symlink from the rc directory of your choice:  
+    cd /etc/rc2.d
+    ln -s ../init.d/jetty.sh S20jetty
+ + Make similar kill links:
+    cd /etc/rc6.d
+    ln -s ../init.d/jetty.sh K20jetty
+    cd /etc/rc1.d
+    ln -s ../init.d/jetty.sh K20jetty
+
+Note if you don't setup the etc/jetty directory then running
+"jetty.sh start" without a config specified, will start multiple 
+servers (demo, jetty, watchdog) on the same port - causing errors.
+    
 

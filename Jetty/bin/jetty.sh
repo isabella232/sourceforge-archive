@@ -202,10 +202,9 @@ case "$ACTION" in
             echo "Already Running!!"
             exit 1
         fi
-        case $JETTY_ETC in
-           */etc ) cd `dirname $JETTY_ETC` ;;
-           * ) cd $JETTY_ETC ;;
-        esac
+
+        cd $JETTY_HOME
+       
         echo "STARTED `date`" >>$JETTY_LOG/jetty.out
         nohup $JAVA $JAVA_OPTIONS com.mortbay.Jetty.Server $CONFIGS >>$JETTY_LOG/jetty.out 2>&1 &
         echo $! > $JETTY_RUN/jetty.pid
