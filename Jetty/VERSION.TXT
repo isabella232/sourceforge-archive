@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-5.1.3rc1 - 
+Jetty-5.1.3rc1 - 13 March 2005
  + Fixed typo in context-param handling.
  + update to demo site look and feel.
  + Fixed principal naming in FormAuthenticator
