@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Map;
+import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -69,6 +70,7 @@ public class XmlConfiguration
     /* ------------------------------------------------------------ */
     private static XmlParser __parser;
     private XmlParser.Node _config;
+    private Map _idMap = new HashMap();
 
     /* ------------------------------------------------------------ */
     private synchronized static void initParser()
@@ -78,33 +80,30 @@ public class XmlConfiguration
             return;
         
         __parser = new XmlParser();
+        URL config13URL=XmlConfiguration.class.getClassLoader()
+            .getResource("org/mortbay/xml/configure_1_3.dtd");
+        __parser.redirectEntity("configure.dtd",config13URL);
+        __parser.redirectEntity("configure_1_3.dtd",config13URL);
+        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_3.dtd", config13URL);
+        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.3//EN", config13URL);
+
         URL config12URL=XmlConfiguration.class.getClassLoader()
             .getResource("org/mortbay/xml/configure_1_2.dtd");
-        __parser.redirectEntity("configure.dtd",config12URL);
         __parser.redirectEntity("configure_1_2.dtd",config12URL);
-        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_2.dtd",
-                                config12URL);
-        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.2//EN",
-                                config12URL);
-        
+        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_2.dtd", config12URL);
+        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.2//EN", config12URL);
         
         URL config11URL=XmlConfiguration.class.getClassLoader()
             .getResource("org/mortbay/xml/configure_1_1.dtd");
-        
         __parser.redirectEntity("configure_1_1.dtd",config11URL);
-        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_1.dtd",
-                                config11URL);
-        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.1//EN",
-                                config11URL);
-        
+        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_1.dtd", config11URL);
+        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.1//EN", config11URL);
         
         URL config10URL=XmlConfiguration.class.getClassLoader()
             .getResource("org/mortbay/xml/configure_1_0.dtd");  
         __parser.redirectEntity("configure_1_0.dtd",config10URL);
-        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_0.dtd",
-                                config10URL);
-        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.0//EN",
-                                config10URL);
+        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_0.dtd", config10URL);
+        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.0//EN", config10URL);
     }
     
     /* ------------------------------------------------------------ */
@@ -252,6 +251,8 @@ public class XmlConfiguration
                 call(obj,node);
             else if("Get".equals(tag))
                 get(obj,node);
+            else if("New".equals(tag))
+                newObj(obj,node);
             else
                 throw new IllegalStateException("Unknown tag: "+tag);
         }
@@ -551,6 +552,7 @@ public class XmlConfiguration
         throw new IllegalStateException("No Method: "+node+" on "+oClass);
     }
     
+    
     /* ------------------------------------------------------------ */
     /* Create a new value object.
      *
@@ -568,6 +570,7 @@ public class XmlConfiguration
                IllegalAccessException
     {
         Class oClass = nodeClass(node);
+        String id=node.getAttribute("id");
         int size=0;
         int argi=node.size();
         for (int i=0;i<node.size();i++)
@@ -615,6 +618,8 @@ public class XmlConfiguration
             {LogSupport.ignore(log,e);}
             if(called)
             {
+                if (id!=null)
+		    _idMap.put(id,n);
                 configure(n,node,argi);
                 return n;
             }
@@ -622,10 +627,29 @@ public class XmlConfiguration
 
         throw new IllegalStateException("No Constructor: "+node+" on "+obj);
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /* object reference.
+     *
+     * @param obj 
+     * @param node 
+     * @return the object
+     */
+    private Object ref(Object obj,XmlParser.Node node)
+        throws NoSuchMethodException,
+               ClassNotFoundException,
+               InvocationTargetException,
+               IllegalAccessException
+    {
+        String id=node.getAttribute("id");
+        Object n=_idMap.get(id);
+        System.err.println("Reference "+id+" == "+n);
+	configure(n,node,0);
+	return n;
+    }
     
     /* ------------------------------------------------------------ */
-    /* Create a new value object.
+    /* Create a new array object.
      *
      * @param obj 
      * @param node 
@@ -840,6 +864,8 @@ public class XmlConfiguration
             return get(obj,node);
         if ("New".equals(tag))
             return newObj(obj,node);
+        if ("Ref".equals(tag))
+            return ref(obj,node);
         if ("Array".equals(tag))
             return newArray(obj,node);
         
