@@ -21,9 +21,9 @@ public class PackageVersionOrderer implements Comparator
 	String[] s2 = versions(v2);
 	int i;
 	for (i = 0; i < s1.length && i < s2.length; i++){
-	    if (!s1[i].equals(s2[i])) return compare(s1[i], s2[i]);
+	    if (!s1[i].equals(s2[i])) return strcompare(s1[i], s2[i]);
 	}
-	return s2.length - i;
+	return s1.length - s2.length;
     }
     public static String[] versions(String v){
 	char[] chars = v.toCharArray();
@@ -48,16 +48,16 @@ public class PackageVersionOrderer implements Comparator
 	if (strstart != i) res[version] = v.substring(strstart, i);
 	return res;
     }
-    public static int compare(String s1, String s2){
-	if (!Character.isDigit(s1.charAt(0))){
+    public static int strcompare(String s1, String s2){
+        if (!Character.isDigit(s1.charAt(0))){
 	    if (!Character.isDigit(s2.charAt(0)))
 		// Both begin with chars - string compare!
 		return s1.compareTo(s2);
 	    // first begins with char
-	    return 1;
+	    return -1;
 	}
 	if (!Character.isDigit(s2.charAt(0)))
-	    return -1;
+	    return 1;
 	// Both are digits
 	try {
 	    float f1 = getNum(s1);

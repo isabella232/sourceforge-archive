@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -42,6 +44,12 @@ import org.mortbay.html.FrameSet;
 import org.mortbay.html.Element;
 
 /** Servlet for serving a documentation index.
+ * <p>This servlet makes it much easier to browse multiple javadoc
+ * installations. It allows the user to select the packages they want and
+ * displays a frame-based or popup index of the selected packages. In
+ * addition, if your packages are versioned, it allows you to select the
+ * version of the package you want to see. Configurations of viewed doco can
+ * easily be saved as bookmarks.
  * <p> This servlet can be configured with paths etc for different packages
  * (optionally versioned packages) and this servlet will search the local
  * hard disk throught the paths given looking for documentation
@@ -51,6 +59,10 @@ import org.mortbay.html.Element;
  * to display in an index format for easy selection of the required
  * documentation.
  *
+ * <p>For ease of configuration, it is possible to specify simply a
+ * directory, and this servlet will assume all subdirs are packages to look
+ * for doco in.
+ *
  * <p> Documentation can be divided into arbitrary sections, each package on
  * the local hard disk having documentation in one or more sections. The
  * properties are read using the mortbay PropertyTree object, so that
@@ -58,11 +70,11 @@ import org.mortbay.html.Element;
  * appropriate.
  *
  * <p><h4>Usage</h4>
- * See the enclosed property file PackageIndex.prp on examples of how to
- * configure this servlet.
+ * See the enclosed property file PackageIndex_en.properties on examples of
+ * how to configure this servlet.
  *
  * @see
- * @version 1.0 Fri Jun  2 2000
+ * @version $Id$
  * @author Matthew Watson (mattw)
  */
 public class PackageIndex extends DispatchServlet
@@ -85,10 +97,11 @@ public class PackageIndex extends DispatchServlet
         public String httpIndexPrefix = null;
         public String httpIndexTruncate = null;
 	public int tocTableBorderWidth = 0;
+        public String[] scan = null;
     }
     public static class PackageSpecArgs
     {
-	public String description = "???";
+	public String description = null;
 	public String paths[] = null;
 	public int versioning = 1;
 	public String ignore[] = null;
@@ -156,32 +169,48 @@ public class PackageIndex extends DispatchServlet
 	    if (args.paths != null && (args.paths.length > 0)){
 		PackageSpec spec =
 		    new PackageSpec(packName,
-				    args.description,
+				    args.description == null ? packName :
+                                    args.description,
 				    args.paths[0] + "/",
 				    args.versioning);
 		for (int i = 1; i < args.paths.length; i++)
-		    spec.addBasePath(args.paths[i]);
+		    spec.addBasePath(args.paths[i] + "/");
 		for (int i = 0; i < args.ignore.length; i++)
 		    spec.addIgnoreDir(args.ignore[i]);
-		boolean pathAdded = false;
-		for (Enumeration types = docTypes.keys();
-		     types.hasMoreElements();)
-		{
-		    String type = (String)types.nextElement();
-		    String paths = (String)packageArgs.get(type);
-		    if (type != null){
-			String pathsAr[] = new String[1];
-			pathsAr = (String[])
-			    cs.convert(paths, pathsAr.getClass(), cs);
-			for (int i = 0; i < pathsAr.length; i++){
-			    spec.addDocPath(type, pathsAr[i]);
-			    pathAdded = true;
-			}
-		    }
-		}
-		if (pathAdded) packages.addElement(spec);
+                if (addDocPaths(spec, packageArgs, cs))
+                    packages.addElement(spec);
 	    }
 	}
+        // Now look in the scan directories
+        FileFilter filter = new FileFilter() {
+                public boolean accept(File path){
+                    return path.isDirectory();
+                }
+            };
+        for (int i = 0; sargs.scan != null && i < sargs.scan.length; i++)
+        {
+            File dir = new File(sargs.scan[i]);
+            if (dir.exists() && dir.isDirectory()){
+                // Get the subdirectories
+                File list[] = dir.listFiles(filter);
+                for (int j = 0; list != null && j < list.length; j++){
+                    PropertyTree packageArgs =
+                        packconfig.getTree(list[j].getName());
+                    PackageSpecArgs args = (PackageSpecArgs)
+                        cs.convert(packageArgs, PackageSpecArgs.class, cs);
+                    PackageSpec spec =
+                        new PackageSpec(list[j].getName(),
+                                        args.description == null ?
+                                        list[j].getName() : args.description,
+                                        dir.toString() + "/",
+                                        args.versioning);
+                    for (int k = 0; k < args.ignore.length; k++)
+                        spec.addIgnoreDir(args.ignore[k]);
+                    if (addDocPaths(spec, packageArgs, cs))
+                        packages.addElement(spec);
+                }
+            }
+        }
     }
     /* ------------------------------------------------------------ */
     /* Servlet public methods */
@@ -193,6 +222,11 @@ public class PackageIndex extends DispatchServlet
 	}
 	Page page = getPage(pageType, req, res);
 	page.title("Paths Re-Checked OK...");
+        page.add(Break.line);
+	page.add(new Link(req.getServletPath() + "makeIndex", "Make Index"));
+	page.add(" : ");
+	page.add(new Link(req.getServletPath() + "checkPaths",
+                          "Re-Read Directories"));
 	return page;
     }
     /* ------------------------------------------------------------ */
@@ -237,6 +271,9 @@ public class PackageIndex extends DispatchServlet
 	    }
 	}
 	page.add(new Link(req.getServletPath() + "makeIndex", "Make Index"));
+	page.add(" : ");
+	page.add(new Link(req.getServletPath() + "checkPaths",
+                          "Re-Read Directories"));
 	page.add(Break.line);
 	Form form = new Form(req.getServletPath());
 	Table table = new Table(0);
@@ -283,6 +320,11 @@ public class PackageIndex extends DispatchServlet
 	}
 	table.addCell(new Input(Input.Submit, "submit", "Make Index"),
 		      "COLSPAN=2").cell().center();
+	page.add(new Link(req.getServletPath(), "Full List"));
+	page.add(" : ");
+	page.add(new Link(req.getServletPath() + "checkPaths",
+                          "Re-Read Directories"));
+	page.add(Break.line);
 	return page;
     }
     /* ------------------------------------------------------------ */
@@ -351,7 +393,7 @@ public class PackageIndex extends DispatchServlet
         if (!smallIndex){
             Link link = new Link(req.getServletPath() + "cfgIndexToc2?" +
                                  req.getQueryString(),
-                                 "Small Index");
+                                 "Pop-Up Index");
             link.attribute("onClick=\"window.open('" +
                            req.getServletPath() + "cfgIndexToc2?" +
                            req.getQueryString() +
@@ -363,6 +405,12 @@ public class PackageIndex extends DispatchServlet
                             req.getQueryString(),
                             "Edit Index").target("_parent");
             page.add(link);
+            page.add(" : ");
+            page.add(new Link(req.getServletPath(), "Full List"));
+            page.add(" : ");
+            page.add(new Link(req.getServletPath() + "checkPaths",
+                              "Re-Read Directories"));
+            page.add(Break.line);
         }
 
 	res.setContentType("text/html");
@@ -504,5 +552,28 @@ public class PackageIndex extends DispatchServlet
 	    }
 	}	
     }
+    /* ------------------------------------------------------------ */
+    private boolean addDocPaths(PackageSpec spec,
+                                PropertyTree packageArgs,
+                                ConverterSet cs)
+    {
+        boolean pathAdded = false;
+        for (Enumeration types = docTypes.keys();
+             types.hasMoreElements();)
+        {
+            String type = (String)types.nextElement();
+            String paths = (String)packageArgs.get(type);
+            if (type != null){
+                String pathsAr[] = new String[1];
+                pathsAr = (String[])
+                    cs.convert(paths, pathsAr.getClass(), cs);
+                for (int i = 0; i < pathsAr.length; i++){
+                    spec.addDocPath(type, pathsAr[i]);
+                    pathAdded = true;
+                }
+            }
+        }
+        return pathAdded;
+    }                           
     /* ------------------------------------------------------------ */
 }

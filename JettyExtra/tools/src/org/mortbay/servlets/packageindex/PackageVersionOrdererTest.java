@@ -19,12 +19,15 @@ public class PackageVersionOrdererTest
 	test.checkEquals(pvo.compare("1", "2"), -1, "1 < 2");
 	test.checkEquals(pvo.compare("2", "1"), 1, "2 > 1");
 	test.checkEquals(pvo.compare("2", "2"), 0, "2 == 2");
+	test.checkEquals(pvo.compare("1.A","1.3"), -1, "1.A < 1.3");
 	test.checkEquals(pvo.compare("1.2","1.3"), -1, "1.2 < 1.3");
-	test.checkEquals(pvo.compare("1.2","1.2.3"), -2, "1.2 < 1.2.3");
-	test.checkEquals(pvo.compare("1.2.3.1","1.2.3"), 2, "1.2.3.1 > 1.2.3");
-	test.checkEquals(pvo.compare("1.2.1", "1.2a.1"), -51,
+	test.checkEquals(pvo.compare("1.2","1.2.3"), -1, "1.2 < 1.2.3");
+	test.checkEquals(pvo.compare("1.2.3.1","1.2.3"), 1, "1.2.3.1 > 1.2.3");
+	test.checkEquals(pvo.compare("1.2.1", "1.2a.1"), -1,
 			 "1.2.1 < 1.2a.1");
-	test.checkEquals(pvo.compare("1", "a"), -1, "1 < a");
+	test.checkEquals(pvo.compare("3.1.RC5", "3.1.2"), -1,
+			 "3.1.RC5 < 3.1.2");
+	test.checkEquals(pvo.compare("a", "1"), -1, "1 < a");
 	test.report();
     }
     /* ------------------------------------------------------------ */

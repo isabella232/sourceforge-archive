@@ -5,7 +5,7 @@
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.SocketListener">
-        <Set name="Port">8081</Set>
+        <Set name="Port">8088</Set>
         <Set name="MinThreads">5</Set>
         <Set name="MaxThreads">255</Set>
         <Set name="MaxIdleTimeMs">50000</Set>
@@ -14,13 +14,33 @@
   </Call>
 
   <Call name="addContext">
-    <Arg>/usr/local/pkgs/java</Arg>
-    <Set name="ResourceBase">/usr/local/pkgs/java</Set>
+    <Arg>/usr/local/java</Arg>
+    <Set name="ResourceBase">/usr/local/java</Set>
     <Set name="ServingResources">TRUE</Set>
   </Call>
   <Call name="addContext">
-    <Arg>/usr/local/pkgs/jdk</Arg>
-    <Set name="ResourceBase">/usr/local/pkgs/jdk</Set>
+    <Arg>/tools</Arg>
+    <Set name="ResourceBase">.</Set>
+    <Set name="ServingResources">TRUE</Set>
+  </Call>
+  <Call name="addContext">
+    <Arg>/ftp</Arg>
+    <Set name="ResourceBase">../ftp</Set>
+    <Set name="ServingResources">TRUE</Set>
+  </Call>
+  <Call name="addContext">
+    <Arg>/jmx</Arg>
+    <Set name="ResourceBase">../jmx</Set>
+    <Set name="ServingResources">TRUE</Set>
+  </Call>
+  <Call name="addContext">
+    <Arg>/nbio</Arg>
+    <Set name="ResourceBase">../nbio</Set>
+    <Set name="ServingResources">TRUE</Set>
+  </Call>
+  <Call name="addContext">
+    <Arg>/sasl</Arg>
+    <Set name="ResourceBase">../sasl</Set>
     <Set name="ServingResources">TRUE</Set>
   </Call>
   <Call name="addContext">

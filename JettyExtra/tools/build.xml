@@ -35,6 +35,9 @@ all         - everything
   <property name="jetty.jar"      value="${jetty.lib}/org.mortbay.jetty.jar"/>
   <property name="servlet.jar"    value="${jetty.lib}/javax.servlet.jar"/>
   <property name="classpath"      value="${jetty.jar};${servlet.jar}"/>
+  <property name="jaxp.jar"       value="${jetty.lib}/javax.xml.jaxp.jar"/>
+  <property name="crimson.jar"    value="${jetty.lib}/org.apache.crimson.jar"/>
+  <property name="rtclasspath"    value="${jaxp.jar};${crimson.jar}"/>
 
   <property name="mortbay.tools.jar" value="${lib}/org.mortbay.tools.jar"/>
 
@@ -102,15 +105,27 @@ all         - everything
           failonerror="yes"
           >
     </java>
+    <java classname="org.mortbay.servlets.packageindex.PackageVersionOrdererTest"
+          classpath="${classes}:${classpath}"
+          fork="yes"
+          failonerror="yes"
+          >
+      <!--jvmarg line="-DDEBUG"/-->
+    </java>
   </target>
 
+  <target name="run" depends="classes" >
+    <java classname="org.mortbay.jetty.Server"
+          fork="yes"
+          failonerror="yes"
+          classpath="${classes}:${classpath};${rtclasspath}"
+          >
+      <!--jvmarg line="-DDEBUG_PATTERNS=HttpConnection.handle,i3sp,ServletHandler.handle -DDEBUG=yes -DDEBUG_VERBOSE=9999 -DLOG_OPTIONS=tsTL -Djetty.home=. -Djetty.log=." /-->
+      <jvmarg line="-DDEBUG=yes -DDEBUG_VERBOSE=9999 -DLOG_OPTIONS=tsTL -Djetty.home=. -Djetty.log=." />
+      <arg line="src/org/mortbay/servlets/packageindex/JettyServer.xml" />
+    </java>
+  </target>
   <target name="all" depends="tools.jar,javadoc"/>
 
 </project>
-
-
-
-
-
-
 
