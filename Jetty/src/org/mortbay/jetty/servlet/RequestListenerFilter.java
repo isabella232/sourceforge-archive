@@ -139,8 +139,7 @@ public  class RequestListenerFilter implements Filter
     private void attributeNotify(ServletRequest request,String name,Object oldValue,Object newValue)
     {
         ServletRequestAttributeEvent event =
-            new ServletRequestAttributeEvent(_servletContext,request,name,
-                                             ((newValue==null)?oldValue:newValue));
+            new ServletRequestAttributeEvent(_servletContext,request,name,oldValue);
         for (int i=0;i<LazyList.size(_requestAttributeListeners);i++)
         {
             ServletRequestAttributeListener listener = 
