@@ -1,7 +1,9 @@
 ROOTNAME := com
-TESTS := TestHarness.java Select.java 
-JAVAOPTIONS := $(JAVAOPTIONS) -DMSQL2
+#TESTS := TestHarness.java Select.java 
+# JAVAOPTIONS := $(JAVAOPTIONS) -DMSQL2
 EXCLUDECLASSES := MultiTestTable.class TestHarness.class TestTable.class
+
+all:
 
 tests: TestDB
 
@@ -13,14 +15,16 @@ msql: all
 	runjava -r com CreateTables com.mortbay.JDBC.MsqlAdaptor com.mortbay.JDBC.TestTable com.mortbay.JDBC.MultiTestTable | msql TestDB
 	echo 'SELECT * FROM TestTable \p\g' | msql TestDB
 
+# tests with ansi SQL
 ansi: all
 	JAVAOPTIONS=-DDbDriver=com.imaginary.sql.msql.MsqlDriver \
 	runjava -r com CreateTables com.mortbay.JDBC.DbAdaptor \
 	com.mortbay.JDBC.TestTable com.mortbay.JDBC.MultiTestTable
 
+# tests with cloudscape db
 cloudscape: all
 	rm -fr /tmp/TestDB
 	{ echo "connect '/tmp/TestDB;create=true';" ; java com.mortbay.JDBC.CreateTables com.mortbay.JDBC.CloudscapeAdaptor com.mortbay.JDBC.TestTable com.mortbay.JDBC.MultiTestTable ; } | ij
 
 
-TestDB: cloudscape
+TestDB: 
