@@ -144,6 +144,10 @@ public class Context implements ServletContext, HttpSessionContext
             if (aliasedUri!=null)
                 return getResource(aliasedUri);
         }
+        catch(IllegalArgumentException e)
+        {
+            Code.ignore(e);
+        }
         catch(MalformedURLException e)
         {
             throw e;
