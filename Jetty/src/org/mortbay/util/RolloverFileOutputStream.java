@@ -195,9 +195,7 @@ public class RolloverFileOutputStream extends FilterOutputStream
                 {        
                     try
                     {
-                        StringTokenizer st = new StringTokenizer
-                            (fn.substring(prefix.length()),
-                             "_.");
+                        StringTokenizer st = new StringTokenizer (fn.substring(prefix.length(), prefix.length()+YYYY_MM_DD.length()), "_.");
                         int nYear = Integer.parseInt(st.nextToken());
                         int nMonth = Integer.parseInt(st.nextToken());
                         int nDay = Integer.parseInt(st.nextToken());
