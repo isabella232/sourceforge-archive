@@ -60,8 +60,6 @@ import org.mortbay.util.URI;
  */
 public class WebApplicationHandler extends ServletHandler
 {
-    private static String __AllowString="GET, HEAD, POST, OPTION, TRACE";
-    
     private Map _filterMap=new HashMap();
     private List _pathFilters=new ArrayList();
     private MultiMap _servletFilterMap=new MultiMap();
@@ -235,14 +233,9 @@ public class WebApplicationHandler extends ServletHandler
                 return;
             }
             
-            // Look for the servlet and/or resource
+            // Look for the servlet
             Map.Entry servlet=getHolderEntry(pathInContext);
-            Resource resource=null;
-            if (servlet==null)
-                resource=getHttpContext().getResource(pathInContext);
-            
-            Code.debug("servlet=",servlet,"  resource=",resource);
-            
+            Code.debug("servlet=",servlet);
             
             // Build list of filters
             LazyList filters = null;
@@ -299,7 +292,7 @@ public class WebApplicationHandler extends ServletHandler
             // Do the handling thang
             if (LazyList.size(filters)>0)
             {
-                Chain chain=new Chain(pathInContext,filters,servlet,resource);
+                Chain chain=new Chain(pathInContext,filters,servlet);
                 chain.doFilter(request,response);
             }
             else
@@ -311,12 +304,7 @@ public class WebApplicationHandler extends ServletHandler
                     if (Code.verbose()) Code.debug("call servlet ",holder);
                     holder.handle(request,response);
                 }
-                
-                // Do resource
-                else if (resource!=null)
-                    serve(pathInContext,resource,request,response);
-                // Not found
-                else
+                else // Not found
                     notFound(request,response);
             }
         }
@@ -387,418 +375,7 @@ public class WebApplicationHandler extends ServletHandler
             response.recycle();
         }
     }
-
-
-    /* ------------------------------------------------------------ */
-    public void serve(String pathInContext,
-                      Resource resource,
-                      ServletRequest request,
-                      ServletResponse response)
-        throws ServletException,IOException
-    {
-        if (request instanceof HttpServletRequest)
-        {
-            HttpServletRequest httpServletRequest=(HttpServletRequest)request;
-            HttpServletResponse httpServletResponse=(HttpServletResponse)response;
-            serve(pathInContext,resource,httpServletRequest,httpServletResponse);
-        }
-        else
-        {
-            // Handle non HTTP request
-            Code.notImplemented();
-        }
-    }
     
-    /* ------------------------------------------------------------ */
-    private void setAllowHeader(HttpServletResponse response)
-    {
-        if (response!=null)
-            response.setHeader(HttpFields.__Allow, __AllowString);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void serve(String pathInContext,
-                      Resource resource,
-                      HttpServletRequest request,
-                      HttpServletResponse response)
-        throws ServletException,IOException
-    {
-        Code.debug("Server ",resource);
-        
-        boolean endsWithSlash= pathInContext.endsWith("/");
-        String method=request.getMethod();
-        
-        // Is the method allowed?        
-        if (__AllowString.indexOf(method)<0)
-        {
-            Code.debug("Method not allowed: ",method);
-            if (resource.exists())
-            {
-                setAllowHeader(response);
-                response.sendError(HttpResponse.__405_Method_Not_Allowed);
-            }
-            return;
-        }
-
-        // Handle the request
-        try
-        {
-            Code.debug("PATH=",pathInContext,
-                       " RESOURCE=",resource);
-            
-            // check filename
-            if (method.equals(HttpRequest.__GET) ||
-                method.equals(HttpRequest.__POST) ||
-                method.equals(HttpRequest.__HEAD))
-                handleGet(pathInContext,resource,request, response,endsWithSlash);  
-            else if (method.equals(HttpRequest.__OPTIONS))
-                // handleOptions(response,pathInContext);
-                Code.notImplemented();
-            else if (method.equals(HttpRequest.__TRACE))
-                // handleTrace(request, response);
-                Code.notImplemented();
-            else
-            {
-                Code.debug("Unknown action:"+method);
-                // anything else...
-                try{
-                    if (resource.exists())
-                        response.sendError(HttpResponse.__501_Not_Implemented);
-                    else
-                        notFound(request,response);
-                }
-                catch(Exception e) {Code.ignore(e);}
-            }
-        }
-        catch(IllegalArgumentException e)
-        {
-            Code.ignore(e);
-        }
-        finally
-        {
-            if (resource!=null && !(resource instanceof CachedResource))
-                resource.release();
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    /* Check modification date headers.
-     */
-    private boolean passConditionalHeaders(HttpServletRequest request,
-                                           HttpServletResponse response,
-                                           Resource resource)
-        throws IOException
-    {
-        if (!request.getMethod().equals(HttpRequest.__HEAD))
-        {
-            // check any modified headers.
-            long date=0;
-            
-            if ((date=request.getDateHeader(HttpFields.__IfUnmodifiedSince))>0)
-            {
-                if (resource.lastModified() > date)
-                {
-                    response.sendError(HttpResponse.__412_Precondition_Failed);
-                    return false;
-                }
-            }
-            
-            if ((date=request.getDateHeader(HttpFields.__IfModifiedSince))>0)
-            {
-                if (resource.lastModified() <= date)
-                {
-                    response.sendError(HttpResponse.__304_Not_Modified);
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
- 
-    /* ------------------------------------------------------------------- */
-    public void handleGet(String pathInContext,
-                          Resource resource,
-                          HttpServletRequest request,
-                          HttpServletResponse response,
-                          boolean endsWithSlash)
-        throws ServletException,IOException
-    {
-        Code.debug("handleGet ",resource);
- 
-        if (!resource.exists())
-            notFound(request,response);
-        else
-        {
-            // Check modified dates
-            if (!passConditionalHeaders(request,response,resource))
-                return;            
-     
-            // check if directory
-            if (resource.isDirectory())
-            {
-                if (!endsWithSlash && !pathInContext.equals("/"))
-                {
-                    Code.debug("Redirect to directory/");
-                    
-                    String q=request.getQueryString();
-                    StringBuffer buf=request.getRequestURL();
-                    if (q!=null&&q.length()!=0)
-                    {
-                        buf.append('?');
-                        buf.append(q);
-                    }
-                    response.setHeader(HttpFields.__Location, URI.addPaths(buf.toString(),"/"));
-                    response.sendError(302);
-                    return;
-                }
-  
-                // See if index file exists
-                String welcome=getHttpContext().getWelcomeFile(resource);
-                if (welcome!=null)
-                {     
-                    // Forward to the index
-                    String ipath=URI.addPaths(pathInContext,welcome);
-                    RequestDispatcher dispatcher=getRequestDispatcher(ipath);
-                    dispatcher.forward(request,response);
-                    return;
-                }
-
-                // If we got here, no forward to index took place
-                sendDirectory(request,response,resource,pathInContext.length()>1);
-            }
-            // check if it is a file
-            else if (resource.exists())
-                sendData(request,response,resource,true);
-            else
-                // don't know what it is
-                Code.warning("Unknown file type");
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    void sendData(HttpServletRequest request,
-                  HttpServletResponse response,
-                  Resource resource,
-                  boolean writeHeaders)
-        throws IOException
-    {
-        long resLength=resource.length();
-        
-        //  see if there are any range headers
-        Enumeration reqRanges = request.getHeaders(HttpFields.__Range);
-        
-        if (!writeHeaders || reqRanges == null || !reqRanges.hasMoreElements())
-        {
-            //  if there were no ranges, send entire entity
-            if (writeHeaders)
-                writeHeaders(response,resource,resLength);
-            OutputStream out = response.getOutputStream();
-            resource.writeTo(out,0,resLength);            
-            return;
-        }
-            
-        // Parse the satisfiable ranges
-        List ranges =InclusiveByteRange.satisfiableRanges(reqRanges,resLength);
-        if (Code.debug())
-            Code.debug("ranges: " + reqRanges + " == " + ranges);
-        
-        //  if there are no satisfiable ranges, send 416 response
-        if (ranges==null || ranges.size()==0)
-        {
-            Code.debug("no satisfiable ranges");
-            writeHeaders(response, resource, resLength);
-            response.setStatus(HttpResponse.__416_Requested_Range_Not_Satisfiable,
-                               "Requested Range Not Satisfiable");
-            response.setHeader(HttpFields.__ContentRange, 
-                               InclusiveByteRange.to416HeaderRangeString(resLength));
-            
-            OutputStream out = response.getOutputStream();
-            resource.writeTo(out,0,resLength);
-            return;
-        }
-
-        
-        //  if there is only a single valid range (must be satisfiable 
-        //  since were here now), send that range with a 216 response
-        if ( ranges.size()== 1)
-        {
-            InclusiveByteRange singleSatisfiableRange =
-                (InclusiveByteRange)ranges.get(0);
-            Code.debug("single satisfiable range: " + singleSatisfiableRange);
-            long singleLength = singleSatisfiableRange.getSize(resLength);
-            writeHeaders(response,resource,singleLength);
-            response.setStatus(HttpResponse.__206_Partial_Content,"Partial Content");
-            response.setHeader(HttpFields.__ContentRange, 
-                               singleSatisfiableRange.toHeaderRangeString(resLength));
-            OutputStream out = response.getOutputStream();
-            resource.writeTo(out,singleSatisfiableRange.getFirst(resLength),singleLength);
-            return;
-        }
-        
-        
-        //  multiple non-overlapping valid ranges cause a multipart
-        //  216 response which does not require an overall 
-        //  content-length header
-        //
-        HttpContext.ResourceMetaData metaData =
-            (HttpContext.ResourceMetaData)resource.getAssociate();
-        String encoding = metaData.getEncoding();
-        MultiPartResponse multi = new MultiPartResponse(response.getOutputStream());
-        response.setStatus(HttpResponse.__206_Partial_Content,"Partial Content");
-
-	// If the request has a "Request-Range" header then we need to
-	// send an old style multipart/x-byteranges Content-Type. This
-	// keeps Netscape and acrobat happy. This is what Apache does.
-	String ctp;
-	if (request.getHeader(HttpFields.__RequestRange)!=null)
-	    ctp = "multipart/x-byteranges; boundary=";
-	else
-	    ctp = "multipart/byteranges; boundary=";
-	response.setContentType(ctp+multi.getBoundary());
-
-        InputStream in=(resource instanceof CachedResource)
-            ?null:resource.getInputStream();
-        OutputStream out = response.getOutputStream();
-        long pos=0;
-            
-        for (int i=0;i<ranges.size();i++)
-        {
-            InclusiveByteRange ibr = (InclusiveByteRange) ranges.get(i);
-            String header=HttpFields.__ContentRange+": "+
-                ibr.toHeaderRangeString(resLength);
-            Code.debug("multi range: ",encoding," ",header);
-            multi.startPart(encoding,new String[]{header});
-
-            long start=ibr.getFirst(resLength);
-            long size=ibr.getSize(resLength);
-            if (in!=null)
-            {
-                // Handle non cached resource
-                if (start<pos)
-                {
-                    in.close();
-                    in=resource.getInputStream();
-                    pos=0;
-                }
-                if (pos<start)
-                {
-                    in.skip(start-pos);
-                    pos=start;
-                }
-                IO.copy(in,out,size);
-                pos+=size;
-            }
-            else
-                // Handle cached resource
-                ((CachedResource)resource).writeTo(out,start,size);
-            
-        }
-        if (in!=null)
-            in.close();
-        multi.close();
-        
-        return;
-    }
-
-    /* ------------------------------------------------------------ */
-    void writeHeaders(HttpServletResponse response,
-                      Resource resource,
-                      long count)
-        throws IOException
-    {
-        HttpContext.ResourceMetaData metaData =
-            (HttpContext.ResourceMetaData)resource.getAssociate();
-
-        response.setContentType(metaData.getEncoding());
-        if (count != -1)
-        {
-            if (count==resource.length())
-                response.setHeader(HttpFields.__ContentLength,metaData.getLength());
-            else
-                response.setContentLength((int)count);
-        }
-
-        response.setHeader(HttpFields.__LastModified,metaData.getLastModified());
-        
-        if (_acceptRanges)
-            response.setHeader(HttpFields.__AcceptRanges,"bytes");
-    }
-
-    /* ------------------------------------------------------------------- */
-    void sendDirectory(HttpServletRequest request,
-                       HttpServletResponse response,
-                       Resource resource,
-                       boolean parent)
-        throws IOException
-    {
-        Code.debug("sendDirectory: "+resource);
-        String base = URI.addPaths(request.getRequestURI(),"/");
-        ByteArrayISO8859Writer dir = getHttpContext()
-            .getDirectoryListing(resource,base,parent);
-        if (dir==null)
-        {
-            response.sendError(HttpResponse.__403_Forbidden,
-                               "No directory");
-            return;
-        }
-        
-        response.setContentType("text/html");
-        response.setContentLength(dir.length());
-        
-        if (!request.getMethod().equals(HttpRequest.__HEAD))
-            dir.writeTo(response.getOutputStream());
-    }
-
-    
-    /* ------------------------------------------------------------ */
-    public void notFound(ServletRequest request,
-                         ServletResponse response)
-        throws IOException
-    {
-        if (request instanceof HttpServletRequest)
-        {
-            HttpServletRequest httpServletRequest=(HttpServletRequest)request;
-            HttpServletResponse httpServletResponse=(HttpServletResponse)response;
-            notFound(httpServletRequest,httpServletResponse);
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void notFound(HttpServletRequest request,
-                         HttpServletResponse response)
-        throws IOException
-    {
-        Code.debug("Not Found ",request.getRequestURI());
-        String method=request.getMethod();
-            
-        // Not found special requests.
-        if (method.equals(HttpRequest.__GET)    ||
-            method.equals(HttpRequest.__HEAD)   ||
-            method.equals(HttpRequest.__POST))
-        {
-            response.sendError(HttpResponse.__404_Not_Found,request.getRequestURI()+" Not Found");
-        }
-        
-        else if (method.equals(HttpRequest.__OPTIONS))
-        {
-            // Handle OPTIONS request for entire server
-            if ("*".equals(request.getRequestURI()))
-            {
-                // 9.2
-                response.setIntHeader(HttpFields.__ContentLength,0);
-                response.setHeader(HttpFields.__Allow,__AllowString);                
-                response.flushBuffer();
-            }
-            else
-                response.sendError(HttpResponse.__404_Not_Found);
-        }
-        else
-        {
-            // Unknown METHOD
-            response.setHeader(HttpFields.__Allow,__AllowString);
-            response.sendError(HttpResponse.__405_Method_Not_Allowed);
-        }
-    }
     
 
     
@@ -811,18 +388,15 @@ public class WebApplicationHandler extends ServletHandler
         int _filter=0;
         LazyList _filters;
         Map.Entry _servlet;
-        Resource _resource;
 
         /* ------------------------------------------------------------ */
         Chain(String pathInContext,
               LazyList filters,
-              Map.Entry servlet,
-              Resource resource)
+              Map.Entry servlet)
         {
             _pathInContext=pathInContext;
             _filters=filters;
             _servlet=servlet;
-            _resource=resource;
         }
         
         /* ------------------------------------------------------------ */
@@ -849,14 +423,9 @@ public class WebApplicationHandler extends ServletHandler
                 if (Code.verbose()) Code.debug("call servlet ",holder);
                 holder.handle(request,response);
             }
-            
-            // Do resource
-            else if (_resource!=null)
-                serve(_pathInContext,_resource,request,response);
-
-            // Not found
-            else
-                notFound(request,response);
+            else // Not found
+                notFound((HttpServletRequest)request,
+                         (HttpServletResponse)response);
         }
     }
 }

@@ -348,23 +348,12 @@ public class ResourceHandler extends NullHandler
         {
             int toRead = request.getContentLength();
             InputStream in = request.getInputStream();
-     
-            OutputStream fos = resource.getOutputStream();
-            final int bufSize = 1024;
-            byte bytes[] = new byte[bufSize];
-            int read;
-            Code.debug(HttpFields.__ContentLength+"="+toRead);
-            while (toRead > 0 &&
-                   (read = in.read(bytes, 0,
-                                   (toRead>bufSize?bufSize:toRead))) > 0)
-            {
-                toRead -= read;
-                fos.write(bytes, 0, read);
-                if (Code.debug())
-                    Code.debug("Read " + read + "bytes: " + bytes);
-            }
-            in.close();
-            fos.close();
+            OutputStream out = resource.getOutputStream();
+            if (toRead>=0)
+                IO.copy(in,out,toRead);
+            else
+                IO.copy(in,out);
+            out.close();
             request.setHandled(true);
             response.sendError(response.__204_No_Content);
         }

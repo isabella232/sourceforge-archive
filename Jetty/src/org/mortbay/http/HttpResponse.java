@@ -350,7 +350,11 @@ public class HttpResponse extends HttpMessage
                                          getHttpRequest().getEncodedPath());
                     request.setAttribute("javax.servlet.error.status_code",code_integer);
                     request.setAttribute("javax.servlet.error.message",message);
-                    
+
+                    // Change method to GET
+                    request.setState(HttpMessage.__MSG_EDITABLE);
+                    request.setMethod(HttpRequest.__GET);
+                    request.setState(HttpMessage.__MSG_RECEIVED);
                     // Do a forward to the error page resource.
                     setContentType(HttpFields.__TextHtml);
                     getHttpContext().handle(0,error_page,null,request,this);

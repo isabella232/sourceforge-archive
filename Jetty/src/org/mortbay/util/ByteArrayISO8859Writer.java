@@ -32,7 +32,10 @@ public class ByteArrayISO8859Writer extends Writer
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
-    public ByteArrayISO8859Writer(){this(4096);}
+    public ByteArrayISO8859Writer()
+    {
+        _buf=ByteArrayPool.getByteArray();
+    } 
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -40,7 +43,7 @@ public class ByteArrayISO8859Writer extends Writer
      */
     public ByteArrayISO8859Writer(int capacity)
     {
-        _buf=new byte[capacity];
+        _buf=ByteArrayPool.getByteArray(capacity);
     }
     
     /* ------------------------------------------------------------ */
@@ -225,7 +228,14 @@ public class ByteArrayISO8859Writer extends Writer
             System.arraycopy(_buf,0,buf,0,_size);
             _buf=buf;
         }
-    }    
+    }
+
+    /* ------------------------------------------------------------ */
+    public void finalize()
+    {
+        ByteArrayPool.returnByteArray(_buf);
+    }
+    
 }
     
     

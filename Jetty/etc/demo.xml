@@ -183,7 +183,7 @@
     </Call>
     <Call name="addServlet">
       <Arg>Dispatch</Arg>
-      <Arg>/Dispatch/*</Arg>
+      <Arg>/dispatch/*</Arg>
       <Arg>org.mortbay.servlet.RequestDispatchTest</Arg>
     </Call>
     <Call name="addServlet">

@@ -10,6 +10,9 @@ Jetty-4.1.B1
  + Support HTTP/0.9 requests again
  + Reversed order of ServletContextListener.contextDestroyed calls
  + Moved dynamic servlet handling to Invoker servlet.
+ + Moved webapp resource handling to Default servlet.
+ + Sessions create attribute map lazily.
+ + Added PUT,DELETE,MOVE support to webapps.
 
 Jetty-3.1.9 - 15 July 2002
  + Allow doHead requests to be forwarded.

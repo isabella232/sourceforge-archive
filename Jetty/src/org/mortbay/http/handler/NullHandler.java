@@ -20,6 +20,7 @@ import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.util.Log;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.ByteArrayISO8859Writer;
 
 /* ------------------------------------------------------------ */
 /** Base HTTP Handler.
@@ -83,12 +84,12 @@ abstract public class NullHandler implements HttpHandler
         response.setField(HttpFields.__ContentType,
                           HttpFields.__MessageHttp);
         OutputStream out = response.getOutputStream();
-        ByteArrayOutputStream buf = new ByteArrayOutputStream(2048);
-        Writer writer = new OutputStreamWriter(buf,StringUtil.__ISO_8859_1);
+        ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer();
         writer.write(request.toString());
         writer.flush();
-        response.setIntField(HttpFields.__ContentLength,buf.size());
-        buf.writeTo(out);
+        response.setIntField(HttpFields.__ContentLength,writer.length());
+        writer.writeTo(out);
+        out.flush();
         request.setHandled(true);
     }
     

@@ -1002,7 +1002,7 @@ public class HttpConnection
                     // half hearted attempt to eat any remaining input
                     try{
                         if (_inputStream.getContentLength()>0)
-                        while(_inputStream.skip(4096)>0 ||_inputStream.read()>=0);
+                        while(_inputStream.skip(4096)>0 || _inputStream.read()>=0);
                         _inputStream.resetStream();
                     }
                     catch(IOException e){Code.ignore(e);}

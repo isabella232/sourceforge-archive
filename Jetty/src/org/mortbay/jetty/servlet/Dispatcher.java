@@ -67,9 +67,6 @@ public class Dispatcher implements RequestDispatcher
     String _uriInContext;
     String _path;
     String _query;
-    Resource _resource;
-    ResourceHandler _resourceHandler;
-    WebApplicationHandler _webAppHandler;
     boolean _include;
     
     /* ------------------------------------------------------------ */
@@ -93,13 +90,6 @@ public class Dispatcher implements RequestDispatcher
         String pathInContext=URI.decodePath(_uriInContext);
         
         _servletHandler=servletHandler;
-        _resourceHandler=resourceHandler;
-        if (_servletHandler instanceof WebApplicationHandler)
-        {
-            _webAppHandler=(WebApplicationHandler)_servletHandler;
-            _resourceHandler=null;
-        }
-        
         _path=URI.canonicalPath(pathInContext);
         _query=query;
 
@@ -109,37 +99,9 @@ public class Dispatcher implements RequestDispatcher
             _pathSpec=(String)entry.getKey();
             _holder = (ServletHolder)entry.getValue();
         }
-        else if (_resourceHandler!=null)
-        {            
-            // Look for a static resource
-            try{
-                Resource resource=
-                    _resourceHandler.getHttpContext().getResource(pathInContext);
-                if (resource.exists())
-                {
-                    _resource=resource;
-                    Code.debug("Dispatcher for resource ",_resource);
-                }
-            }
-            catch(IOException e){Code.ignore(e);}
-        }
-        else if (_webAppHandler!=null)
-        {            
-            // Look for a static resource
-            try{
-                Resource resource=
-                    _webAppHandler.getHttpContext().getResource(pathInContext);
-                if (resource.exists())
-                {
-                    _resource=resource;
-                    Code.debug("Dispatcher for resource ",_resource);
-                }
-            }
-            catch(IOException e){Code.ignore(e);}
-        }
 
-        // if no servlet and no resource
-        if (_holder==null && _resource==null)
+        // if no servlet
+        if (_holder==null)
             throw new IllegalStateException("No servlet handlers in context");
     }
     
@@ -162,20 +124,8 @@ public class Dispatcher implements RequestDispatcher
     {
         return _path==null;
     }
-
-    /* ------------------------------------------------------------ */
-    public boolean isResource()
-    {
-        return _resource!=null;
-    }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @param request 
-     * @param response 
-     * @exception ServletException 
-     * @exception IOException 
-     */
     public void include(ServletRequest servletRequest,
                         ServletResponse servletResponse)
         throws ServletException, IOException     
@@ -222,25 +172,6 @@ public class Dispatcher implements RequestDispatcher
         {
             // No further modifications required.
             _holder.handle(request,response);
-        }
-        else if (isResource())
-        {
-            if (_include)
-            {
-                OutputStream out=response.getOutputStream();
-                _resource.writeTo(out,0,-1);
-            }
-            else
-            {
-                if (_webAppHandler!=null)
-                    _webAppHandler.handleGet(_path,_resource,request,response,true);
-                else
-                {
-                    HttpRequest httpRequest=servletHttpRequest.getHttpRequest();
-                    HttpResponse httpResponse=httpRequest.getHttpResponse();
-                    _resourceHandler.handle(_path,null,httpRequest,httpResponse);
-                }
-            }
         }
         else
         {

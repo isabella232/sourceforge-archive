@@ -636,9 +636,14 @@ public class HttpContext implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
+    /** Get a resource from the context.
+     * @param pathInContext 
+     * @return Resource
+     * @exception IOException 
+     */
     public Resource getResource(String pathInContext)
         throws IOException
-    {    
+    {
         if (_resourceBase==null)
             return null;
         

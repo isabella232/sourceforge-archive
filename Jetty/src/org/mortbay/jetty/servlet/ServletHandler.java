@@ -9,6 +9,7 @@ package org.mortbay.jetty.servlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.AbstractCollection;
@@ -41,6 +42,7 @@ import javax.servlet.http.HttpSessionListener;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
+import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpListener;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
@@ -54,6 +56,7 @@ import org.mortbay.http.Version;
 import org.mortbay.http.handler.NullHandler;
 import org.mortbay.http.handler.SecurityHandler;
 import org.mortbay.http.handler.ResourceHandler;
+import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.Code;
 import org.mortbay.util.Frame;
 import org.mortbay.util.InetAddrPort;
@@ -87,7 +90,8 @@ public class ServletHandler
 {
     /* ------------------------------------------------------------ */
     private static final boolean __Slosh2Slash=File.separatorChar=='\\';
-
+    private static String __AllowString="GET, HEAD, POST, OPTION, TRACE";
+    
     /* ------------------------------------------------------------ */
     private PathMap _servletMap=new PathMap();
     private Map _nameMap=new HashMap();
@@ -610,6 +614,7 @@ public class ServletHandler
             Code.debug(httpRequest);
             
             httpResponse.getHttpConnection().forceClose();
+            httpResponse.setField(HttpFields.__Connection,HttpFields.__Close);
             if (!httpResponse.isCommitted())
             {
                 httpRequest.setAttribute("javax.servlet.error.exception_type",th.getClass());
@@ -626,6 +631,7 @@ public class ServletHandler
             Code.warning("Servlet Error for "+httpRequest.getURI(),e);
             Code.debug(httpRequest);
             httpResponse.getHttpConnection().forceClose();
+            httpResponse.setField(HttpFields.__Connection,HttpFields.__Close);
             if (!httpResponse.isCommitted())
             {
                 httpRequest.setAttribute("javax.servlet.error.exception_type",e.getClass());
@@ -794,6 +800,69 @@ public class ServletHandler
         
         return null;
     }
+
+
+    
+    /* ------------------------------------------------------------ */
+    void notFound(HttpServletRequest request,
+                  HttpServletResponse response)
+        throws IOException
+    {
+        Code.debug("Not Found ",request.getRequestURI());
+        String method=request.getMethod();
+            
+        // Not found special requests.
+        if (method.equals(HttpRequest.__GET)    ||
+            method.equals(HttpRequest.__HEAD)   ||
+            method.equals(HttpRequest.__POST))
+        {
+            response.sendError(HttpResponse.__404_Not_Found,request.getRequestURI()+" Not Found");
+        }
+        else if (method.equals(HttpRequest.__TRACE))
+            handleTrace(request,response);
+        else if (method.equals(HttpRequest.__OPTIONS))
+            handleOptions(request,response);
+        else
+        {
+            // Unknown METHOD
+            response.setHeader(HttpFields.__Allow,__AllowString);
+            response.sendError(HttpResponse.__405_Method_Not_Allowed);
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    void handleTrace(HttpServletRequest request,
+                            HttpServletResponse response)
+        throws IOException
+    {
+        response.setHeader(HttpFields.__ContentType,
+                           HttpFields.__MessageHttp);
+        OutputStream out = response.getOutputStream();
+        ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer();
+        writer.write(request.toString());
+        writer.flush();
+        response.setIntHeader(HttpFields.__ContentLength,writer.length());
+        writer.writeTo(out);
+        out.flush();
+    }
+    
+    /* ------------------------------------------------------------ */
+    void handleOptions(HttpServletRequest request,
+                              HttpServletResponse response)
+        throws IOException
+    {
+        // Handle OPTIONS request for entire server
+        if ("*".equals(request.getRequestURI()))
+        {
+            // 9.2
+            response.setIntHeader(HttpFields.__ContentLength,0);
+            response.setHeader(HttpFields.__Allow,__AllowString);                
+            response.flushBuffer();
+        }
+        else
+            response.sendError(HttpResponse.__404_Not_Found);
+    }
+    
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */

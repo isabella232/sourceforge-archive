@@ -1152,9 +1152,10 @@ public class WebApplicationContext extends ServletHttpContext
         throws IOException
     {
         IOException ioe=null;
+        Resource resource=null;
         try
         {
-            Resource resource=super.getResource(uriInContext);
+            resource=super.getResource(uriInContext);
             if (resource.exists())
                 return resource;
         }
@@ -1170,7 +1171,7 @@ public class WebApplicationContext extends ServletHttpContext
         if (ioe!=null)
             throw ioe;
 
-        return null;
+        return resource;
     }
     
 }

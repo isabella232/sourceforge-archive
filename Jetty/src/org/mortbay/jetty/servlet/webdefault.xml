@@ -30,6 +30,45 @@
     This file is applied to a Web application before it's own WEB_INF/web.xml file
   </description>
 
+  <!-- ==================================================================== -->
+  <!-- The default servlet.                                                 -->
+  <!-- This servlet, normally mapped to /, provides the handling for static -->
+  <!-- content, OPTION and TRACE methods for the context.                   -->
+  <!-- The following initParameters are supported:                          -->
+  <!--                                                                      -->
+  <!--   acceptRanges     If true, range requests and responses are         -->
+  <!--                    supported                                         -->
+  <!--                                                                      -->
+  <!--   dirAllowed       If true, directory listings are returned if no    -->
+  <!--                    welcome file is found. Else 403 Forbidden.        -->
+  <!--                                                                      -->
+  <!--   putAllowed       If true, the PUT method is allowed                -->
+  <!--                                                                      -->
+  <!--   delAllowed       If true, the DELETE method is allowed             -->
+  <!--                                                                      -->
+  <!-- The MOVE method is allowed if PUT and DELETE are allowed             -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
+  <servlet>
+    <servlet-name>Default</servlet-name>
+    <servlet-class>org.mortbay.jetty.servlet.Default</servlet-class>
+    <init-param>
+      <param-name>acceptRanges</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>dirAllowed</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>putAllowed</param-name>
+      <param-value>false</param-value>
+    </init-param>
+    <init-param>
+      <param-name>delAllowed</param-name>
+      <param-value>false</param-value>
+    </init-param>
+    <load-on-startup>0</load-on-startup>
+  </servlet>
   
   <!-- ==================================================================== -->
   <!-- JSP Servlet                                                          -->
@@ -122,6 +161,11 @@
     <load-on-startup>0</load-on-startup>
   </servlet>
 
+  <!-- ==================================================================== -->
+  <servlet-mapping>
+    <servlet-name>Default</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping>
 
   <!-- ==================================================================== -->
   <servlet-mapping>
