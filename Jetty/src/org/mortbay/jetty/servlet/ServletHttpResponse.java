@@ -28,6 +28,7 @@ import org.mortbay.util.IO;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URI;
+import org.mortbay.util.TypeUtil;
 
 /* ------------------------------------------------------------ */
 /** Servlet Response Wrapper.
@@ -365,6 +366,13 @@ public class ServletHttpResponse implements HttpServletResponse
         }
         else
         {
+	    if (message == null)
+	    {
+		message = (String)HttpResponse.__statusMsg.get(TypeUtil.newInteger(status));
+		if (message==null)
+		    message=""+status;
+	    }
+
             // handle error page
             ServletHolder holder = _servletHttpRequest.getServletHolder();
             if (holder!=null)
@@ -397,11 +405,7 @@ public class ServletHttpResponse implements HttpServletResponse
     public void sendError(int status) 
         throws IOException
     {
-        ServletHolder holder = _servletHttpRequest.getServletHolder();
-        if (holder!=null)
-            _servletHttpRequest.setAttribute(ServletHandler.__J_S_ERROR_SERVLET_NAME,
-                                             holder.getName());
-        _httpResponse.sendError(status);
+	sendError(status,null);
     }
 
     /* ------------------------------------------------------------ */
