@@ -161,7 +161,7 @@ public class Context implements ServletContext, HttpSessionContext
 	if (path == null || !path.startsWith("/"))
             return null;
 
-	return new PathDispatcher(path);
+	return new Dispatcher(this,path);
     }
     
     /* ------------------------------------------------------------ */
@@ -668,92 +668,4 @@ public class Context implements ServletContext, HttpSessionContext
     }
 
     
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private class PathDispatcher implements RequestDispatcher
-    {
-	String _path;
-	String _query;
-	
-	/* ------------------------------------------------------------ */
-	/** Constructor. 
-	 * @param server 
-	 * @param URL 
-	 */
-	PathDispatcher(String path)
-	{
-	    _path = path;
-	}
-
-    
-	/* ------------------------------------------------------------ */
-	/** 
-	 * @param request 
-	 * @param response 
-	 * @exception ServletException 
-	 * @exception IOException 
-	 */
-	public void forward(javax.servlet.ServletRequest request,
-			    javax.servlet.ServletResponse response)
-	    throws ServletException,IOException
-	{
-	    ServletRequest servletRequest=(ServletRequest)request;
-	    ServletResponse servletResponse=(ServletResponse)response;
-	    
-	    if (servletRequest.getHttpRequest().isCommitted())
-		throw new IllegalStateException("Request is committed");
-	    
-	    Code.notImplemented();
-
-	    // XXX - no this is totally wrong as it needs to go to
-	    // the level of HandlerContext?????????????????????
-	    
-	    _handler.handle(_path,servletRequest,servletResponse);
-	    
-	    
-//  	    HttpRequest req = (HttpRequest) request;
-//  	    HttpResponse res = (HttpResponse) response;
-//  	    req.getHttpResponse().preDispatch();
-//  	    req.setResourcePath(_uri);
-//  	    _server.handle(req,res);
-//  	    req.getHttpResponse().postDispatchForward();  
-	}
-	
-	
-	/* ------------------------------------------------------------ */
-	/** 
-	 * @param request 
-	 * @param response 
-	 * @exception ServletException 
-	 * @exception IOException 
-	 */
-	public void include(javax.servlet.ServletRequest request,
-			    javax.servlet.ServletResponse response)
-	    throws ServletException, IOException     
-	{
-	    ServletRequest servletRequest=(ServletRequest)request;
-	    ServletResponse servletResponse=(ServletResponse)response;
-	    
-	    Code.notImplemented();
-	    
-//  	    HttpRequest req = (HttpRequest) request;
-//  	    HttpResponse res = (HttpResponse) response;
-//  	    Code.debug("Include ",_uri.getPath());
-//  	    req.getHttpResponse().preDispatch();
-//  	    req.setResourcePath(_uri);
-//  	    _server.handle(req,res);
-//  	    req.getHttpResponse().postDispatchInclude();
-//  	    req.setResourcePath((URI)null);
-	}
-    };
 }
-
-
-
-
-
-
-
-
-
-
