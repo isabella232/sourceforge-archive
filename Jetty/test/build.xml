@@ -126,16 +126,17 @@ the Ant optional tasks from:
   <target name="junit" depends="prepare,classes">
     <echo>
 Test results in ${test.results}
+Test basedir=${basedir}
     </echo>
     <delete file="${test.results}/*" quiet="true" />
-    <junit fork="no" printsummary="yes" haltonerror="yes" haltonfailure="yes" >
+    <junit dir="${basedir}" fork="yes" printsummary="yes" haltonerror="yes" haltonfailure="yes" >
       <formatter type="plain" usefile="true" />                  
       <classpath> 
          <path refid="classpath" />
          <pathelement location="${junit.jar}" />     
          <pathelement location="${test.classes}" />     
       </classpath>        
-      <batchtest fork="no" todir="${test.results}">
+      <batchtest  todir="${test.results}">
         <fileset dir="${test.src}">
           <include name="**/Tests.java" />
         </fileset>
