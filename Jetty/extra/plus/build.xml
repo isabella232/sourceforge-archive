@@ -16,7 +16,7 @@ Other targets:
 
 -->
 
-<project name="JettyPlus" default="jars" basedir=".">
+<project name="JettyPlus" default="all" basedir=".">
 
   <!-- ==================================================================== -->
   <property name="package"          value="jetty.plus" />
@@ -329,9 +329,16 @@ Other targets:
   </target>
 
 
+
   <!-- ==================================================================== -->
   <!-- all                                                                  -->
   <!-- ==================================================================== -->
-  <target name="all" depends="clean, jars" description="default">
+  <target name="webapps" depends="build.jaas.webapp, build.jettyplus.webapp" description="build webapps">
+  </target>
+
+  <!-- ==================================================================== -->
+  <!-- all                                                                  -->
+  <!-- ==================================================================== -->
+  <target name="all" depends="jars, webapps" description="default">
   </target>
 </project>
