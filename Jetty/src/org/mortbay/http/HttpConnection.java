@@ -618,9 +618,12 @@ public class HttpConnection
         
         // if we have no content or encoding,
         // and no content length
+        int status = _response.getStatus();
         if (!_outputStream.isWritten() &&
             !_response.containsField(HttpFields.__TransferEncoding) &&
-            !_response.containsField(HttpFields.__ContentLength))
+            !_response.containsField(HttpFields.__ContentLength) &&
+            status!=HttpResponse.__304_Not_Modified &&
+            status!=HttpResponse.__204_No_Content)
         {
             // Persist only if idle threads are available.
             if(_persistent)

@@ -10,7 +10,8 @@ Jetty Versions
  + Added short delay to shutdown hook for JVM bug.
  + Added ServletHandler.sessionCount()
  + Added run target to ant
- + Change JSESSIONID to jsessionid
+ + Changed 304 responses for Opera browser.
+ + Changed JSESSIONID to jsessionid
  + Log OK state after thread low warnings.
  + Changed unsatisfiable range warnings to debug.
  + Further improvements in handling of shutdown.

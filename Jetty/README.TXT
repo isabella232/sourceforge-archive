@@ -35,13 +35,14 @@ run:
 Browse to:
   http://localhost:8080
 
+If you still have problems:
+  - try installing in a path with no spaces in the directory name. 
+  - Check that the case of JETTY_HOME is exactly the same as reported by
+    your system. Also read the section on alias checking in the web application
+    security section below.
+
 If this doesn't work - you can try the ant quick start below or you will need to 
 read some more and setup the environment.
-
-If you still have problems - try installing in a path with no spaces in the
-directory name.  Also read the section on alias checking in the web application
-security section below.
-
 
 
 Ant Quick Start
@@ -359,7 +360,8 @@ Jetty makes the following interpretations:
  + On platforms without the / file separator or when the system parameter 
    org.mortbay.util.FileResource.checkAliases is true, then the FileResouce class 
    compares the absolutePath and canonicalPath and treats the resource as not found
-   if they do not match.
+   if they do not match.  THIS means that win32 platforms need to exactly match
+   the case of drive letters and filenames.
 
  + Dynamic servlets by default, can only be loaded from the context classpath.
    Use ServletHandler.setServeDynamicSystemServlets to control this behaivour.
