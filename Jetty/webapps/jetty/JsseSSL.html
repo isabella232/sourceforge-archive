@@ -47,20 +47,20 @@ If you have a pre-existing key and certificate for an apache server which you ar
 
 <p>
 
-<P><B>Sun Key/Certificate Pair</B><BR>
+<P><B><a name="sunkeypair">Sun Key/Certificate Pair</a></B><BR>
 
 In order to generate the certificate with the reference implementation 
-you need to install the JSEE as a security provider for JDK.  You can do 
+you need to install JSSE as a security provider for JDK.  You can do 
 this by editing $JDK12/jre/lib/security/java.security and adding the 
 following lines:
 <pre>
       security.provider.2=com.sun.net.ssl.internal.ssl.Provider
 </pre>
 This is assuming that JSSE is the only additional provider you want
-installed.  Note that all Jetty Jsse classes manually install  this
+installed.  Note that all Jetty JSSE classes manually install  this
 provider as needed, so you should probably remove this line after
 the certificate has been generated, as it will interfere with other
-providers (see loading OpenSSL keypair below). 
+providers (see loading OpenSSL keypairs below). 
 
 <p>
 A new key and with a self signed certificate can be generated and loaded
@@ -72,18 +72,29 @@ using the standard Sun jdk keytool utility with a command like:
 <p> If you want to have a certificate that has been signed by one of
 the trusted root CA's you should follow the instruction in the keytool
 documentation for generation of a certificate signing request, csr,
-and how to import the signed certificate. (-certreq and -import)
+and how to import the signed certificate received from the CA. (-certreq and -import)
+
+<p> At this point you are ready to skip down and
+<a href="#usekeys">Configure Jetty to use JSSE and the keystore.</a>
 
 
-<P><B>OpenSSL Key/Certificate Pair</B><BR>
+<P><B><a name="opensslkeypair">OpenSSL Key/Certificate Pair</a></B><BR>
 The procedure to get a key and certificate for use with OpenSSL
 is described in <a href="http://www.thawte.com/">Thawte's</a> <a href="http://www.thawte.com/certs/server/keygen/apachessl.html">Apache SSL Key and CSR Generation Instructions.</a>
+
+<p><b>NOTE: You probably only want to follow these steps if you want
+to reuse an existing certificate that was being used with another
+webserver such as apache. If you are just testing or you have no
+pre-existing keys/certs then just generate yourself a
+<a href="#sunkeypair">Sun Key/Certificate Pair.</a></b>
+
+
 
 <p> Here is a log of me following a simplified version of those instructions.
 <pre>
 <b>$</b> mkdir keytest
 <b>$</b> cd keytest
-<b>$</b> openssl genrsa -des3 -rand file1:file2:file3 1024 > bee.hive.net.key
+<b>$</b> openssl genrsa -des3 -rand file1:file2:file3 1024 > beehive[D[D[D[D.hive.net.key
 235890 semi-random bytes loaded
 Generating RSA private key, 1024 bit long modulus
 ...............................++++++
@@ -152,6 +163,141 @@ eHL4df28CBXV6tva77g=
 </pre>
 
 
+<p> Sanity Check
+<p>
+<pre>
+<b>$</b> openssl rsa -text -in bee.hive.net.key
+read RSA key
+Enter PEM pass phrase:
+Private-Key: (1024 bit)
+modulus:
+    00:cf:e5:0c:5e:1c:07:26:24:fb:f0:22:a3:f1:c0:
+    8f:21:5a:97:6a:86:3e:b9:ba:65:02:0f:39:32:7a:
+    df:72:e2:d7:20:00:76:97:1e:1b:f5:cf:ce:bf:dd:
+    b0:89:19:e4:a7:69:12:08:51:53:a2:b1:61:a3:0a:
+    9f:00:38:14:c3:5a:2c:d8:63:88:57:ce:13:5f:23:
+    65:9e:5c:fd:ab:b3:ba:01:b1:fb:af:7a:cc:ec:bc:
+    aa:3e:e7:49:07:d8:6a:80:2e:f8:91:93:f4:b9:cb:
+    60:2b:a0:de:a7:b1:dd:a9:81:fc:d4:5e:70:7a:79:
+    69:9c:4b:e6:34:56:e0:c9:17
+publicExponent: 65537 (0x10001)
+privateExponent:
+    00:ae:60:a6:46:0d:e6:65:35:62:69:62:f4:f6:e3:
+    98:6a:d6:ac:e8:fa:1f:84:f3:f6:a3:8a:97:64:63:
+    32:28:10:63:77:81:4b:f7:a7:96:b6:51:8f:4e:da:
+    29:a8:66:22:a7:d5:76:fd:a9:11:a9:06:76:2a:26:
+    cf:85:84:84:cc:6f:71:ba:93:cd:6c:d5:08:fe:c6:
+    d2:07:d6:64:f4:33:83:b0:49:8f:f8:ee:43:72:1c:
+    fb:02:37:51:a1:ca:cc:1c:27:ec:bf:7a:f2:d9:db:
+    a1:d1:54:93:bd:f0:9d:77:80:95:77:89:8b:88:2c:
+    7b:a3:61:4d:e4:b4:37:9d:e1
+prime1:
+    00:f6:3f:9d:64:51:b7:67:ea:ca:88:24:d3:75:c8:
+    45:b9:3a:99:9f:65:dc:a9:e6:bd:58:29:bf:7f:03:
+    91:b5:87:50:20:08:35:17:d1:c1:6e:1d:89:4d:e4:
+    50:c2:ee:0b:ec:95:9e:5b:b7:a2:4d:0c:99:70:a1:
+    94:67:27:45:f1
+prime2:
+    00:d8:20:9d:9e:d3:d2:17:7e:46:5c:42:3c:e3:fd:
+    d7:9b:6e:20:15:60:d4:45:c6:2f:63:fe:67:48:53:
+    34:29:c7:bf:b7:a4:d5:07:33:d1:f2:4a:5d:68:72:
+    42:75:a2:19:67:59:a8:96:36:ae:bc:38:0d:c8:38:
+    3b:80:c6:57:87
+exponent1:
+    5d:bd:51:b9:02:b2:82:c8:8a:58:d1:4b:fe:26:43:
+    04:84:1e:3e:e3:93:e0:c9:89:82:aa:41:cf:a4:18:
+    2f:b6:56:f6:1a:a9:bb:6b:89:ea:d5:2b:93:8f:3a:
+    7f:3a:07:28:04:bc:c7:c5:5b:ef:60:c0:78:73:c9:
+    fe:8a:a0:c1
+exponent2:
+    00:b8:29:72:a5:f8:10:b9:7c:1c:30:59:30:d1:85:
+    67:c7:45:db:88:db:ed:85:57:0e:e2:c1:d0:f8:4c:
+    0d:d2:dc:26:7d:31:b3:64:63:bf:ae:19:b7:e6:5c:
+    16:4d:6e:46:ff:4d:e2:dd:bc:d2:c0:07:73:96:fc:
+    73:97:93:6a:d9
+coefficient:
+    7c:02:a7:76:e0:4b:f2:25:5b:aa:7c:a8:a5:cd:97:
+    77:ce:39:e4:37:ec:2d:2d:4e:d0:bc:cf:e1:2b:dd:
+    c6:22:25:b7:66:f4:53:c9:ec:88:29:2f:cc:17:23:
+    15:ea:32:87:bb:7d:14:e7:c7:b9:a3:2e:05:1a:e6:
+    d9:8f:d5:07
+writing RSA key
+-----BEGIN RSA PRIVATE KEY-----
+MIICXQIBAAKBgQDP5QxeHAcmJPvwIqPxwI8hWpdqhj65umUCDzkyet9y4tcgAHaX
+Hhv1z86/3bCJGeSnaRIIUVOisWGjCp8AOBTDWizYY4hXzhNfI2WeXP2rs7oBsfuv
+eszsvKo+50kH2GqALviRk/S5y2AroN6nsd2pgfzUXnB6eWmcS+Y0VuDJFwIDAQAB
+AoGBAK5gpkYN5mU1Ymli9PbjmGrWrOj6H4Tz9qOKl2RjMigQY3eBS/enlrZRj07a
+KahmIqfVdv2pEakGdiomz4WEhMxvcbqTzWzVCP7G0gfWZPQzg7BJj/juQ3Ic+wI3
+UaHKzBwn7L968tnbodFUk73wnXeAlXeJi4gse6NhTeS0N53hAkEA9j+dZFG3Z+rK
+iCTTdchFuTqZn2Xcqea9WCm/fwORtYdQIAg1F9HBbh2JTeRQwu4L7JWeW7eiTQyZ
+cKGUZydF8QJBANggnZ7T0hd+RlxCPOP915tuIBVg1EXGL2P+Z0hTNCnHv7ek1Qcz
+0fJKXWhyQnWiGWdZqJY2rrw4Dcg4O4DGV4cCQF29UbkCsoLIiljRS/4mQwSEHj7j
+k+DJiYKqQc+kGC+2VvYaqbtrierVK5OPOn86BygEvMfFW+9gwHhzyf6KoMECQQC4
+KXKl+BC5fBwwWTDRhWfHRduI2+2FVw7iwdD4TA3S3CZ9MbNkY7+uGbfmXBZNbkb/
+TeLdvNLAB3OW/HOXk2rZAkB8Aqd24EvyJVuqfKilzZd3zjnkN+wtLU7QvM/hK93G
+IiW3ZvRTyeyIKS/MFyMV6jKHu30U58e5oy4FGubZj9UH
+-----END RSA PRIVATE KEY-----
+
+<b>$</b> openssl x509 -text -in bee.hive.net.crt
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 2388339 (0x247173)
+        Signature Algorithm: md5WithRSAEncryption
+        Issuer: C=ZA, ST=FOR TESTING PURPOSES ONLY, O=Thawte Certification, \
+                OU=TEST TEST TEST, CN=Thawte Test CA Root
+        Validity
+            Not Before: Nov 28 23:28:17 2000 GMT
+            Not After : Nov 13 23:28:17 2001 GMT
+        Subject: C=AU, ST=Some-State, O=Internet Widgits Pty Ltd, \
+                 CN=bee.hive.net/Email=postmaster@bee.hive.net
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:cf:e5:0c:5e:1c:07:26:24:fb:f0:22:a3:f1:c0:
+                    8f:21:5a:97:6a:86:3e:b9:ba:65:02:0f:39:32:7a:
+                    df:72:e2:d7:20:00:76:97:1e:1b:f5:cf:ce:bf:dd:
+                    b0:89:19:e4:a7:69:12:08:51:53:a2:b1:61:a3:0a:
+                    9f:00:38:14:c3:5a:2c:d8:63:88:57:ce:13:5f:23:
+                    65:9e:5c:fd:ab:b3:ba:01:b1:fb:af:7a:cc:ec:bc:
+                    aa:3e:e7:49:07:d8:6a:80:2e:f8:91:93:f4:b9:cb:
+                    60:2b:a0:de:a7:b1:dd:a9:81:fc:d4:5e:70:7a:79:
+                    69:9c:4b:e6:34:56:e0:c9:17
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Extended Key Usage: 
+                TLS Web Server Authentication
+            X509v3 Basic Constraints: critical
+                CA:FALSE
+    Signature Algorithm: md5WithRSAEncryption
+        00:c2:08:54:0d:a5:62:a0:9c:54:03:bc:e8:3a:a0:24:7a:c4:
+        ee:2d:18:d9:52:50:12:48:2b:0b:7d:b9:17:71:68:d0:f0:b1:
+        9b:16:31:68:4e:a0:0e:8a:37:72:2d:c7:ab:82:94:d2:9a:5e:
+        06:a8:1d:0c:91:b1:bd:b3:eb:ae:2f:fe:0a:e0:61:26:b0:0f:
+        73:fb:31:26:32:43:19:43:ed:a1:3d:b6:5a:75:01:0a:4a:e3:
+        8f:53:16:18:bd:6b:26:da:e9:72:8a:94:bb:f5:e0:79:36:74:
+        f1:98:5f:ba:6c:32:c8:b0:45:e0:af:78:eb:d2:d9:46:15:52:
+        cd:f7
+-----BEGIN CERTIFICATE-----
+MIICqjCCAhOgAwIBAgIDJHFzMA0GCSqGSIb3DQEBBAUAMIGHMQswCQYDVQQGEwJa
+QTEiMCAGA1UECBMZRk9SIFRFU1RJTkcgUFVSUE9TRVMgT05MWTEdMBsGA1UEChMU
+VGhhd3RlIENlcnRpZmljYXRpb24xFzAVBgNVBAsTDlRFU1QgVEVTVCBURVNUMRww
+GgYDVQQDExNUaGF3dGUgVGVzdCBDQSBSb290MB4XDTAwMTEyODIzMjgxN1oXDTAx
+MTExMzIzMjgxN1owgYQxCzAJBgNVBAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRl
+MSEwHwYDVQQKExhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQxFTATBgNVBAMTDGJl
+ZS5oaXZlLm5ldDEmMCQGCSqGSIb3DQEJARYXcG9zdG1hc3RlckBiZWUuaGl2ZS5u
+ZXQwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAM/lDF4cByYk+/Aio/HAjyFa
+l2qGPrm6ZQIPOTJ633Li1yAAdpceG/XPzr/dsIkZ5KdpEghRU6KxYaMKnwA4FMNa
+LNhjiFfOE18jZZ5c/auzugGx+696zOy8qj7nSQfYaoAu+JGT9LnLYCug3qex3amB
+/NRecHp5aZxL5jRW4MkXAgMBAAGjJTAjMBMGA1UdJQQMMAoGCCsGAQUFBwMBMAwG
+A1UdEwEB/wQCMAAwDQYJKoZIhvcNAQEEBQADgYEAAMIIVA2lYqCcVAO86DqgJHrE
+7i0Y2VJQEkgrC325F3Fo0PCxmxYxaE6gDoo3ci3Hq4KU0ppeBqgdDJGxvbPrri/+
+CuBhJrAPc/sxJjJDGUPtoT22WnUBCkrjj1MWGL1rJtrpcoqUu/XgeTZ08Zhfumwy
+yLBF4K9469LZRhVSzfc=
+-----END CERTIFICATE-----
+
+</pre>
 
 
 <P><HR><P>
@@ -167,13 +313,14 @@ point of view, so only do this in a secure directory on a secure machine.
 Remember to clean up properly.
 
 <P><B>Crypto Provider</B><BR>
-The JSSE provider is not able to handle openSSL key pairs, so another 
-provider is required. Get your hands on a copy of the Bouncy Castle 
+<p>
+The JSSE provider is not able to load openSSL key pairs into a keystore,
+so another provider is temporarily required - purely to load the keys with.
+Get your hands on a copy of the Bouncy Castle 
 Crypto Package from <a href="http://www.bouncycastle.org/">The Legion of 
 the Bouncy Castle</a>. Other JCE 1.2 providers may work too but at the 
-moment this is the one that this is tested against. You will only need 
+moment this is the one that has been succesfully tested. You will only need 
 it for the key loading stage so install it on your safe machine somewhere.
-<p> <b>Note:<b> There is a bug in which prevents this procedure from working in the following versions jce-jdk12-10b4 and jce-jdk12-10. A version which does work is <a href="http://www.bouncycastle.org/download/jce-jdk12-10b3.tar.gz">jce-jdk12-10b3</a>.
 <p>
 To perform these step, you do not need to have any providers registered
 in the JRE java.security file. In fact having the JSSE reference
@@ -244,7 +391,7 @@ Will create keystore: keypair.keystore
 Keys have been written to keystore
 </pre>
 <p>
-<B><font color=red> Remember to clean up!</font></B> a simple way to do this without going to overboard is:
+<B><font color=red> Remember to clean up!</font></B> a simple way to do this if you want to which is a bit better than just removing the file is to overwrite it first. e.g.
 <pre>
 <b>$</b> man man > bee.hive.net.clearkey
 <b>$</b> cat /var/log/messages | compress > bee.hive.net.clearkey
@@ -364,6 +511,8 @@ it does allow customized security arrangements to be configured.
  <li> Reading passwords from prompts should turn echo off.</li>
  <li> Better recommendations for keystore location and permissions. </li>
  <li> Jetty is not yet ready to insist on client certificates. </li>
+ <li> This page should be broken up with separate pages for Sun keytool and openssl key generation. </li>
+ <li> A list of common problems and there solutions would be helpful. </li>
 </ul>
 
 <p>
@@ -382,9 +531,9 @@ it does allow customized security arrangements to be configured.
 <hr>
 Written by Brett Sealey. 13th August 2000.<br>
 Updated by Greg Wilkins. 14th August 2000.<br>
-Last updated: 17th December 2000
+Last updated: 14th March 2001
 <hr>
-I told you to clean up your private key - do it NOW!
+I told you to clean up your clear-text private key - if you haven't then do it NOW!
 </body>
 </html>
 
