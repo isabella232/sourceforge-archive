@@ -44,6 +44,7 @@ import org.mortbay.http.handler.SecurityHandler;
 import org.mortbay.util.Code;
 import org.mortbay.util.JarResource;
 import org.mortbay.util.Log;
+import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
 import org.mortbay.util.StringUtil;
 import org.mortbay.xml.XmlConfiguration;
@@ -394,31 +395,43 @@ public class WebApplicationContext extends ServletHttpContext
                 }
             }
         }
+
+        // Don't init servlets
+        if (_servletHandler!=null)
+            _servletHandler.setAutoInitializeServlets(false);
+
+        MultiException mex = new MultiException();
         
         // Start handlers
-        Exception ex=null;
-        try {super.start();} catch(Exception e){ex=e;}
-
-        // Handle context init.
-        if (ex==null || super.isStarted())
-        {
+        try { super.start(); }
+        catch(Exception ex) { mex.add(ex); }
+        
+        // If it actually started
+        if (super.isStarted())
+        {    
+            if (_resourceHandler.isPutAllowed())
+                Log.event("PUT allowed in "+this);
+            if (_resourceHandler.isDelAllowed())
+                Log.event("DEL allowed in "+this);
+                
+            
             // Context listeners
             if (_contextListeners!=null && _servletHandler!=null)
             {
                 ServletContextEvent event = new ServletContextEvent(getServletContext());
                 for (int i=0;i<_contextListeners.size();i++)
-                    ((ServletContextListener)_contextListeners.get(i))
-                        .contextInitialized(event);
+                    try{((ServletContextListener)_contextListeners.get(i))
+                            .contextInitialized(event);}
+                    catch(Exception ex) { mex.add(ex); }
             }
-        
-            if (_resourceHandler.isPutAllowed())
-                Log.event("PUT allowed in "+this);
-            if (_resourceHandler.isDelAllowed())
-                Log.event("DEL allowed in "+this);
+
+            // Initialize servlets
+            if (_servletHandler!=null)
+                try{_servletHandler.initializeServlets();}
+                catch(Exception ex) { mex.add(ex); }
         }
-        
-        if (ex!=null)
-            throw ex;
+
+        mex.ifExceptionThrow();
     }
 
     /* ------------------------------------------------------------ */

@@ -96,6 +96,7 @@ public class ServletHandler
     private boolean _usingCookies=true;
     private LogSink _logSink;
     private SessionManager _sessionManager;
+    private boolean _autoInitializeServlets=true;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -348,6 +349,18 @@ public class ServletHandler
     {
         return super.isStarted();
     }
+
+    /* ------------------------------------------------------------ */
+    public boolean isAutoInitializeServlets()
+    {
+        return _autoInitializeServlets;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setAutoInitializeServlets(boolean b)
+    {
+        _autoInitializeServlets=b;
+    }
     
     /* ----------------------------------------------------------------- */
     public synchronized void start()
@@ -367,8 +380,18 @@ public class ServletHandler
         // end of the call.
         super.start();
 
+        if (_autoInitializeServlets)
+            initializeServlets();
+    }   
+    
+    /* ------------------------------------------------------------ */
+    /** Initialize load-on-startup servlets.
+     * Called automatically from start if autoInitializeServlet is true.
+     */
+    public void initializeServlets()
+        throws Exception
+    {
         MultiException mx = new MultiException();
-        
         // Sort and Initialize servlets
         ServletHolder holders [] = (ServletHolder [])
             (new HashSet(_servletMap.values ())).toArray(new ServletHolder [0]);
@@ -385,7 +408,7 @@ public class ServletHandler
             }
         } 
         mx.ifExceptionThrow();       
-    }   
+    }
     
     /* ----------------------------------------------------------------- */
     public synchronized void stop()
@@ -406,7 +429,7 @@ public class ServletHandler
         _httpContext=null;
         super.stop();
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get or create a ServletRequest.
      * Create a new or retrieve a previously created servlet request

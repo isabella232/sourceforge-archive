@@ -5,6 +5,7 @@ Jetty-4.0.0 - wait for it...
  + Fixed ZZZ offset format to +/-HHMM
  + Updated history
  + JDBCUserRealm instantiates JDBC driver
+ + ContextInitialized notified before load-on-startup servlets.
 
 Jetty-4.0.RC2 - 12 March 2002
  + Fixed security constraint problem with //
