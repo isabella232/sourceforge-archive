@@ -268,7 +268,7 @@ public class ResourceHandler extends NullHandler
             if (method.equals(HttpRequest.__GET) ||
                 method.equals(HttpRequest.__POST) ||
                 method.equals(HttpRequest.__HEAD))
-                handleGet(request, response, pathInContext, resource, endsWithSlash);  
+                handleGet(request, response, pathInContext, pathParams, resource, endsWithSlash);  
             else if (method.equals(HttpRequest.__PUT))
                 handlePut(request, response, pathInContext, resource);
             else if (method.equals(HttpRequest.__DELETE))
@@ -305,6 +305,7 @@ public class ResourceHandler extends NullHandler
     public void handleGet(HttpRequest request,
                           HttpResponse response,
                           String pathInContext,
+                          String pathParams,
                           Resource resource,
                           boolean endsWithSlash)
         throws IOException
@@ -372,7 +373,7 @@ public class ResourceHandler extends NullHandler
                         URI uri=request.getURI();
                         uri.setPath(URI.addPaths(uri.getPath(),(String)_indexFiles.get(i)));
                         
-                        getHttpContext().handle(0,ipath,null,request,response);
+                        getHttpContext().handle(0,ipath,pathParams,request,response);
                         return;
                     }
                 }
