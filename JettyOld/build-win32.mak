@@ -39,7 +39,7 @@ gen-demos   : ; perl etc/gen-build-class.pl BuildDemos   contrib | egrep "[{}]| 
 
 build-debug   : classes-compile-debug properties-copy-debug
 build-release : classes-compile-release properties-copy-release
-build-demos   : classes-compile-demos
+build-demos   : servlets-compile-demos
 
 SOURCES = src/BuildJetty.java contrib/BuildContrib.java
 
@@ -52,7 +52,9 @@ classes-mkdir-debug     : classes-mkdir ; cd classes/debug || mkdir classes/debu
 classes-mkdir-release   : classes-mkdir ; cd classes/release || mkdir classes/release
 classes-compile-debug   : classes-mkdir-debug   ; export CLASSPATH="src;contrib;." && $(JAVAC_DEBUG)   $(SOURCES)
 classes-compile-release : classes-mkdir-release ; export CLASSPATH="src;contrib;." && $(JAVAC_RELEASE) $(SOURCES)
-classes-compile-demos   : ; export CLASSPATH="lib/javax.servlet.jar;contrib;." && $(JAVAC_DEMOS) contrib/BuildDemos.java
+
+servlets-mkdir          : ; cd servlets || mkdir servlets
+servlets-compile-demos  : servlets-mkdir ; export CLASSPATH="lib/javax.servlet.jar;contrib;." && $(JAVAC_DEMOS) contrib/BuildDemos.java
 
 properties-copy           : properties-copy-debug properties-copy-release
 
