@@ -340,7 +340,6 @@ public abstract class AbstractSessionManager implements SessionManager
         {
             super("SessionScavenger");
             setDaemon(true);
-            this.start();
         }
 
     }   // SessionScavenger

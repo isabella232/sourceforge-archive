@@ -18,7 +18,6 @@ import java.io.OutputStream;
  */
 public class ByteBufferOutputStream extends OutputStream
 {
-    private int _fullAt;
     private byte[] _buf;
     private int _start;
     private int _end;
@@ -27,7 +26,7 @@ public class ByteBufferOutputStream extends OutputStream
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
-    public ByteBufferOutputStream(){this(4096,4000,1024);}
+    public ByteBufferOutputStream(){this(4096,512);}
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -35,22 +34,21 @@ public class ByteBufferOutputStream extends OutputStream
      */
     public ByteBufferOutputStream(int capacity)
     {
-        this(capacity,(capacity*95)/100,capacity/4);
+        this(capacity,512);
     }
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param capacity Buffer capacity.
-     * @param fullAt The size at which isFull returns true.
+     * @param fullAt The size of the buffer.
      * @param reserve The reserve of byte for prepending
      */
-    public ByteBufferOutputStream(int capacity,int fullAt,int reserve)
+    public ByteBufferOutputStream(int capacity,int reserve)
     {
-        _buf=new byte[capacity+reserve];
+        _buf=new byte[capacity];
         _reserve=reserve;
         _start=reserve;
         _end=reserve;
-        _fullAt=fullAt+_start;
     }
 
     /* ------------------------------------------------------------ */
@@ -66,9 +64,15 @@ public class ByteBufferOutputStream extends OutputStream
     }
     
     /* ------------------------------------------------------------ */
-    public boolean isFull()
+    public int getSpareCapacity()
     {
-        return _end>=_fullAt;
+        return _buf.length-_end;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean canFit(int n)
+    {
+        return _end+n<_buf.length;
     }
     
     /* ------------------------------------------------------------ */
@@ -138,10 +142,18 @@ public class ByteBufferOutputStream extends OutputStream
     /* ------------------------------------------------------------ */
     public void flush()
     {}
-
+    
     /* ------------------------------------------------------------ */
     public void reset()
     {
+        _end=_reserve;
+        _start=_reserve;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void reset(int reserve)
+    {
+        _reserve=reserve;
         _end=_reserve;
         _start=_reserve;
     }
@@ -155,22 +167,35 @@ public class ByteBufferOutputStream extends OutputStream
     {
         if (n>_start)
         {
-            byte[] buf = new byte[_buf.length+n-_start];
-            System.arraycopy(_buf,_start,buf,n,_end-_start);
-            _end=n+_end-_start;
-            _start=n;
-            _buf=buf;
+            Code.warning("Reserve: "+n+">"+_start);
+            if ((_end+n)<_buf.length)
+            {
+                Code.warning("Shift reserve: "+_end+"+"+n+"<"+_buf.length);
+                System.arraycopy(_buf,_start,_buf,n,_end-_start);
+                _end=_end+n-_start;
+                _start=n;
+            }
+            else
+            {    
+                Code.warning("New reserve: "+_end+"+"+n+">="+_buf.length);
+                byte[] buf = new byte[_buf.length+n-_start];
+                System.arraycopy(_buf,_start,buf,n,_end-_start);
+                _end=n+_end-_start;
+                _start=n;
+                _buf=buf;
+            }
         }
     }
+    
     
     /* ------------------------------------------------------------ */
     public void ensureCapacity(int n)
     {
-        if (_end+n>_buf.length)
+        if ((_end+n)>_buf.length)
         {
+            Code.warning("New buf for ensure: "+_end+"+"+n+">"+_buf.length);
             byte[] buf = new byte[(_buf.length+n)*4/3];
             System.arraycopy(_buf,_start,buf,_start,_end-_start);
-            _fullAt = _fullAt  + buf.length-_buf.length;
             _buf=buf;
         }
     }

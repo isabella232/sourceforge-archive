@@ -208,13 +208,12 @@ public class ResourceBase
                 if (cmd!=null && cmd.isValid())
                     return cached;
             }
-            else
-            {    
-                resource=baseResource.addPath(pathInContext);
-                Code.debug("CACHE MISS: ",resource);
-                if (resource==null)
-                    return null;
-            }
+
+            // Make the resource
+            resource=baseResource.addPath(pathInContext);
+            Code.debug("CACHE MISS: ",resource);
+            if (resource==null)
+                return null;
 
             // Is it cacheable?
             long len = resource.length();

@@ -144,7 +144,7 @@ public class TestHarness
                 Code.debug("Chunk out tmp = ",tmpFile);
             
             FileOutputStream fout = new FileOutputStream(tmpFile);
-            ChunkableOutputStream cout = new ChunkableOutputStream(fout);
+            ChunkableOutputStream cout = new ChunkableOutputStream(fout,4030);
             cout.setChunking();
             
             cout.write("Reset Output".getBytes());
@@ -182,8 +182,7 @@ public class TestHarness
             LineInput lin = new LineInput(cin);            
             String line=lin.readLine();
             
-            test.checkEquals(line.length(),33,"def...");
-            test.checkEquals(line,"defghijklmnopqrstuvwxyz0123456789",
+            test.checkEquals(line.length(),33,"def...");            test.checkEquals(line,"defghijklmnopqrstuvwxyz0123456789",
                              "readLine");
             int chars=0;
             while (cin.read()!=-1)
