@@ -43,4 +43,5 @@ public class HttpException extends IOException
         String reason=getReason();
         return "HttpException("+_code+","+reason+","+message+")";
     }
-};
+}
+

@@ -79,6 +79,7 @@ public class NullHandler implements HttpHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
+	Code.warning("NullHandler called for "+pathSpec);
     }
     
 }

@@ -74,6 +74,5 @@ public interface HttpHandler extends LifeCycle
     public String realPath(String pathSpec, String path);
     
     
-};
-
+}
 

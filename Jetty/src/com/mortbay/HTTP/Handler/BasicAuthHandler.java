@@ -92,4 +92,4 @@ public class BasicAuthHandler extends NullHandler
         response.commit();
         request.setHandled(true);
     }
-};
+}

@@ -185,13 +185,4 @@ public class B64Code
     }
 
     
-};
-
-
-
-
-
-
-
-
-
+}

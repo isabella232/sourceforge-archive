@@ -486,8 +486,12 @@ public class HttpServer
     {
         if (args.length==0)
         {
-            String[] newArgs= {"-a","8080","-f","/=.","-d","/",
-                               "-h","com.mortbay.HTTP.Handler.NotFoundHandler"};
+            String[] newArgs=
+	    {
+		"-a","8080","-f","/=.","-d","/",
+		"-s21","/servlet/*=./servlets",
+		"-h","com.mortbay.HTTP.Handler.NotFoundHandler"
+	    };
             args=newArgs;
         }
         else if (args.length%2==1)
@@ -502,6 +506,9 @@ public class HttpServer
                 (" -d <path>           - Dump handler at path Spec");
             
             System.err.println
+                (" -s21 <path>=<path>  - Dynamic servlet2.1 handler at path & path");
+            
+            System.err.println
                 (" -h <path>=<class>   - Map a hander");
             
             System.err.println
@@ -510,7 +517,7 @@ public class HttpServer
             System.err.println
                 ("Default options:");
             System.err.println
-                (" -a 8080   -f /=.   -d /   -h /=com.mortbay.HTTP.Handler.NotFoundHandler");
+                (" -a 8080 -f /=. -d / -s21 /servlet/*=./servlets -h /=com.mortbay.HTTP.Handler.NotFoundHandler");
             System.exit(1);
         }
         
@@ -557,6 +564,25 @@ public class HttpServer
                             server.mapFiles(host,pathSpec,file);
                         }
                     }
+		    
+                    // Look for servlet handler
+                    if ("-s21".equals(args[i]))
+                    {
+                        i++;
+                        String spec=args[i];
+                        int e=spec.indexOf("=");
+                        if (e>0)
+                        {
+                            String pathSpec=spec.substring(0,e);
+                            String file=spec.substring(e+1);
+			    com.mortbay.HTTP.Handler.Servlet2_1.ServletHandler
+				handler = new
+				    com.mortbay.HTTP.Handler.Servlet2_1.ServletHandler();
+			    handler.addDynamic(pathSpec,file,true,null);
+                            server.mapHandler(host,pathSpec,handler);
+                            handler.start();
+                        }
+                    }
                     
                     // Look for Virtual host
                     if ("-v".equals(args[i]))
@@ -600,4 +626,4 @@ public class HttpServer
             Code.warning(e);
         }
     }
-};
+}

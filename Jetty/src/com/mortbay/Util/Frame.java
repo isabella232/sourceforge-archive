@@ -53,7 +53,7 @@ public class Frame
             __out.flush();
             _stack = __writerBuffer.toString();
         }
-        internalInit(1, false);
+        internalInit(0, false);
     }
     
     /*-------------------------------------------------------------------*/
@@ -71,7 +71,7 @@ public class Frame
             __out.flush();
             _stack = __writerBuffer.toString();
         }
-        internalInit(ignoreFrames+1, false);
+        internalInit(ignoreFrames, false);
     }
     
     /* ------------------------------------------------------------ */
@@ -90,7 +90,7 @@ public class Frame
             __out.flush();
             _stack = __writerBuffer.toString();
         }
-        internalInit(ignoreFrames+1, partial);
+        internalInit(ignoreFrames, partial);
     }
     
     /* ------------------------------------------------------------ */
@@ -104,11 +104,15 @@ public class Frame
     /* ------------------------------------------------------------ */
     protected void internalInit(int ignoreFrames, boolean partial)
     {   
-        // Extract stack components
-        _lineStart = _stack.indexOf(__lineSeparator,_lineStart)+__lineSeparatorLen;
+	// Extract stack components, after we look for the Frame constructor
+ 	// itself and pull that off the stack!
+ 	_lineStart = _stack.indexOf("Frame.<init>(",_lineStart);
+	_lineStart = _stack.indexOf(__lineSeparator,_lineStart)+
+ 	    __lineSeparatorLen;
         for (int i = 0; _lineStart > 0 && i < ignoreFrames; i++)
         {
-            _lineStart = _stack.indexOf(__lineSeparator,_lineStart)+__lineSeparatorLen;;
+            _lineStart = _stack.indexOf(__lineSeparator,_lineStart)+
+                         __lineSeparatorLen;
         }
         _lineEnd = _stack.indexOf(__lineSeparator,_lineStart);
         

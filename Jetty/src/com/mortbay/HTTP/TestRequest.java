@@ -213,8 +213,4 @@ public class TestRequest
             t.check(false,e.toString());
         }
     }
-};
-
-
-
-
+}

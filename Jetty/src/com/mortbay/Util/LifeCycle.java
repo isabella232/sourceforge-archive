@@ -72,5 +72,4 @@ public interface LifeCycle
      */
     public boolean isDestroyed();
     
-};
-
+}

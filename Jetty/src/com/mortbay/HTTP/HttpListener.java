@@ -46,15 +46,4 @@ public interface HttpListener extends LifeCycle
      * terminated.
      */
     public abstract void destroy();
-};
-
-
-
-
-
-
-
-
-
-
-
+}

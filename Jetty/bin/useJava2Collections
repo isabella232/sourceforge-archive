@@ -5,7 +5,9 @@ do
     printf "%s - " "$FILE"
 
     sed -e '/^import.*com.sun.java.util.collections/d' \
-        -e 's/com.sun.java.util.collections.//g' $FILE > /tmp/u2c$$
+        -e 's/com.sun.java.util.collections.//g' \
+        -e 's/Map\$Entry/Map.Entry/g' \
+        $FILE > /tmp/u2c$$
     if diff -q $FILE /tmp/u2c$$ > /dev/null
     then
 	printf "ok\n" 

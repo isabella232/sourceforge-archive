@@ -371,4 +371,4 @@ public class TestHarness
             Test.report();
         }
     }
-};
+}

@@ -633,7 +633,7 @@ public class Code
     
     /*-------------------------------------------------------------------*/
     /** As debug(String)
-     * <strong>Don Notnot rely on side-effects</strong>
+     * <strong>Dont rely on side-effects</strong>
      * @param ex The Throwable to print the full stack trace of
      */
     public static void debug(Throwable ex)
@@ -980,7 +980,4 @@ public class Code
         return buf.toString();
     }
     
-};
-
-
-
+}

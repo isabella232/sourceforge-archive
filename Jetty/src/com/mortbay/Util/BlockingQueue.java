@@ -152,6 +152,49 @@ public class BlockingQueue
             return o;
         }
     }
+    
+    /* ------------------------------------------------------------ */
+    /** Peek at the  queue.
+     * Block  if there are no objects to peek.
+     * @return The next object in the queue, or null if timedout.
+     */
+    public Object peek()
+        throws InterruptedException
+    {
+        synchronized(elements)
+        {
+            if (size==0)
+                elements.wait();
+            
+            if (size==0)
+                return null;
+            
+            Object o = elements[head];
+            return o;
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Peek at the  queue.
+     * Block for timeout if there are no objects to peek.
+     * @param timeoutMs the time to wait for a job
+     * @return The next object in the queue, or null if timedout.
+     */
+    public Object peek(int timeoutMs)
+        throws InterruptedException
+    {
+        synchronized(elements)
+        {
+            if (size==0)
+                elements.wait((long)timeoutMs);
+            
+            if (size==0)
+                return null;
+            
+            Object o = elements[head];
+            return o;
+        }
+    }
 }
 
 

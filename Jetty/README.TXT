@@ -17,9 +17,9 @@ the Jetty 2 code base. The aims of the Jetty 3 developement include:
   + Utilize java collection classes for improved performance.
   + Improved coding standards and increasing test coverage.
 
-Currently the release contains the Utils package (with about half a 
-cleanup done) and the HTTP package. Work to date in the HTTP package 
-has concentrated on RFC2616 compliance, performance and testing.  
+Currently the release contains only a skeleton 2.1 servlet container. 
+Work to date in the HTTP package has concentrated on RFC2616 compliance, 
+performance and testing.  
 See the VERSION.TXT and FEATURES.TXT files for more detail.
 
 
@@ -40,6 +40,14 @@ must be removed by running the bin/useJava2Collections script must be
 run in the src directory and then compile using the class path:
 
   CLASSPATH=$JETTY3_HOME
+
+
+The current release also requires that the 2.1 servlet API is in the
+system CLASSPATH.  Eventually this will be included dynamically when the
+handler is specified.  To add this to your CLASSPATH do:
+
+  CLASSPATH=$CLASSPATH:$JETTY3_HOME/servlet2.1
+
 
 
 
@@ -74,13 +82,17 @@ The server can be configured by using the options:
   -f <path>=<dir>     - FileHandler at path
   -h <path>=<class>   - Map a handler at path
   -v <host>=<alias>   - Remaining options are for virtual host.
+  -s21 <path>=<classpath>
+                      - Add a 2.1 dynamic servlet handler.
+
 
 The default is equivalent to
   java com.mortbay.HTTP.HttpServer            \
        -a 8080                                \
        -f /=.                                 \
        -d /                                   \
-       -h /=com.mortbay.HTTP.NotFoundHandler
+       -s21 /servlet/*=./servlets             \
+       -h /=com.mortbay.HTTP.NotFoundHandler  
 
 Multiple addresses, handlers and hosts can be specified.
 

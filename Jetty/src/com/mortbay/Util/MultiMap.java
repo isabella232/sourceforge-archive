@@ -256,10 +256,4 @@ public class MultiMap extends HashMap
             put(entry.getKey(),entry.getValue());
         }        
     }
-};
-
-
-
-
-
-
+}

@@ -769,5 +769,4 @@ public class FileHandler extends NullHandler
 
     
 
-};
-
+}

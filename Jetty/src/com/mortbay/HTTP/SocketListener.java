@@ -108,11 +108,4 @@ public class SocketListener
             socket=null;
         }
     }
-};
-
-
-
-
-
-
-
+}

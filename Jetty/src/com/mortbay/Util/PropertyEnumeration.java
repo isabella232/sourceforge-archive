@@ -136,4 +136,4 @@ public class PropertyEnumeration implements Enumeration
         return false;
     }
     /* ------------------------------------------------------------ */
-};
+}

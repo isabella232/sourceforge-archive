@@ -94,6 +94,4 @@ public class NotFoundHandler extends NullHandler
             response.sendError(response.__405_Method_Not_Allowed);
         }
     }
-};
-
-
+}

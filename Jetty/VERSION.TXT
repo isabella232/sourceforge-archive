@@ -1,3 +1,6 @@
+Jetty-3.0.A6 - 9 Apr 2000
+   + Integrated skeleton 2.1 Servlet container
+   + Improved portability of Frame and Debug.
    + Dates forced to use US locale
    + Removed Converter utilities and InetGateway.
    + added bin/useJava2Collections to convert to JDK1.2

@@ -21,6 +21,11 @@ Response set-cookies.
 Redirections
 Basic Authentication
 
+
+2.1 ServletHandler
+------------------
+Skeleton dynamic servlets
+
 FileHandler:
 ------------
 GET

@@ -844,8 +844,4 @@ public class TestRFC2616
             t.check(false,e.toString());
         }
     }
-};
-
-
-
-
+}

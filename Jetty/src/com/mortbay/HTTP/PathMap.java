@@ -270,4 +270,4 @@ public class PathMap extends HashMap
         throw new IllegalArgumentException("Invalid PathSpec");
     }
     
-};
+}

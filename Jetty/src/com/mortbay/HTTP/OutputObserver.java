@@ -32,4 +32,4 @@ public interface OutputObserver
      */
     void outputNotify(ChunkableOutputStream out, int action)
         throws IOException;
-};
+}

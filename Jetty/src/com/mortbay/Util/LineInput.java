@@ -576,7 +576,7 @@ public class LineInput extends FilterInputStream
             count=offset+length;
             mark=-1;
         }        
-    };
+    }
     
     /* ------------------------------------------------------------ */
     public static class LineBuffer
@@ -585,6 +585,5 @@ public class LineInput extends FilterInputStream
         public int size;
         public LineBuffer(int maxLineLength)
         {buffer=new char[maxLineLength];}
-    };
-
-};
+    }
+}

@@ -332,5 +332,5 @@ public class ChunkableInputStream extends FilterInputStream
 
             return _chunkSize;
         }
-    };
-};
+    }
+}

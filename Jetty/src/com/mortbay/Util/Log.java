@@ -62,7 +62,7 @@ public class Log
     public boolean _logStackSize=true;
     public boolean _logStackTrace=false;
     public boolean _logOneLine=false;
-    public PrintWriter _out = null;;
+    public PrintWriter _out = null;
     public DateCache _dateFormat=null;
 
     /*-------------------------------------------------------------------*/

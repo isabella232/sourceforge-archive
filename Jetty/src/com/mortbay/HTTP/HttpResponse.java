@@ -428,11 +428,4 @@ public class HttpResponse extends HttpMessage
         _reason=null;
         super.destroy();
     }
-};
-
-
-
-
-
-
-
+}
