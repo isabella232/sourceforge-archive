@@ -36,15 +36,16 @@ To compile the source with JDK1.1 the following class path should be used.
   CLASSPATH=$JETTY3_HOME/src:$JETTY3_HOME/lib/collections.jar
 
 To compile with JDK1.2, the com.sun.java.util.collections package
-must be removed by running the bin/useJava2Collections script must be
-run in the src directory and then compile using the class path:
+must be removed by running the bin/useJava2Collections script (the
+distribution includes the results of this in src1.2 directory).
+Then compile using the class path:
 
   CLASSPATH=$JETTY3_HOME
 
-
 In order to support multiple versions of the javax.servlet API, the 
 javax.servlet.jar is loaded as a resource as part of the particular
-ServletHandler used.
+ServletHandler.  Each ServletHandler instantiated has it's own classloader
+and may have it own class path.
 
 
 Test Harnesses
@@ -89,7 +90,7 @@ The default is equivalent to
        -a 8080                                \
        -f /=.                                 \
        -d /                                   \
-       -s21 /servlet/*=./servlets             \
+       -ds /servlet/*=./servlets             \
        -h /=com.mortbay.HTTP.NotFoundHandler  
 
 Multiple addresses, handlers and hosts can be specified.
@@ -112,25 +113,13 @@ configured and started with:
 
 Distribution
 ============
-Currently the jetty.mortbay.com host has a dead hard disk, so no public
-CVS repository is available yet.
+Jetty distributions and information is available from:
 
-For now, the package and collections jar will be made available on the
-Mort Bay FTP site or the document vault of the jetty3-discuss egroups page:
-
-   ftp://ftp.mortbay.com/pub
-   http://www.egroups.com/docvault/jetty3-discuss/
-
+   http://jetty.mortbay.com
+   ftp://jetty.mortbay.com/pub
+   
 
 How to Contribute
 =================
 Comments, contributions, feedback, bugs, testing, etc. please....
 
-The mailing list for Jetty3 development can be subscribed to via
-  http://www.egroups.com/group/jetty3-discuss
-
-Other information can be obtained via
-  http://www.mortbay.com/software/Jetty.html
-
-A dedicated project host will soon be available at
-  http://jetty.mortbay.com

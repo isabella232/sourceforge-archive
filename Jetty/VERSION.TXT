@@ -1,4 +1,6 @@
-
+Jetty-3.0.A8
+   + Servlet2_1 class loading re-acrchitected. See README.
+   + Moved Sevlet2_1 handler to com.mortbay.Servlet2_1
    + addCookie takes an int maxAge rather than a expires date.
    + Added LogSink extensible log architecture.
    + Code.ignore only outputs when debug is verbose.
