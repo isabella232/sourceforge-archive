@@ -52,7 +52,6 @@ public class Resource
             if (perm instanceof java.io.FilePermission)
             {
                 File file =new File(perm.getName());
-		System.err.println(file.getCanonicalPath());
                 if (urls.indexOf("..")>=0)
                 {
                     file=new File(file.getCanonicalPath());
@@ -98,7 +97,6 @@ public class Resource
             {
                 // It's a local file.
                 File file=new File(resource);
-		System.err.println(file.getCanonicalPath());
                 file =new File(file.getCanonicalPath());
                 url=file.toURL();
             }
@@ -108,7 +106,6 @@ public class Resource
             {
                 // Nope - try it as a file
                 url = new File(resource).toURL();
-		System.err.println(new File(resource).getCanonicalPath());
             }
             else
                 Code.warning(e);
