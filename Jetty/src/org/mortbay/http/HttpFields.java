@@ -55,6 +55,7 @@ public class HttpFields
         __Connection = "Connection",
         __Date = "Date",
         __Pragma = "Pragma",
+        __ProxyConnection = "Proxy-Connection",
         __Trailer = "Trailer",
         __TransferEncoding = "Transfer-Encoding",
         __Upgrade = "Upgrade",

@@ -51,7 +51,7 @@ public class ProxyHandler extends AbstractHttpHandler
     {
         Object o = new Object();
         _DontProxyHeaders.setIgnoreCase(true);
-        _DontProxyHeaders.put("Proxy-Connection",o);
+        _DontProxyHeaders.put(HttpFields.__ProxyConnection,o);
         _DontProxyHeaders.put(HttpFields.__Connection,o);
         _DontProxyHeaders.put(HttpFields.__KeepAlive,o);
         _DontProxyHeaders.put(HttpFields.__TransferEncoding,o);
@@ -204,6 +204,7 @@ public class ProxyHandler extends AbstractHttpHandler
             {
                 // XXX could be better than this!
                 String hdr=(String)enum.nextElement();
+
                 if (_DontProxyHeaders.containsKey(hdr))
                     continue;
                 if (connectionHdr!=null && connectionHdr.indexOf(hdr)>=0)
@@ -211,7 +212,8 @@ public class ProxyHandler extends AbstractHttpHandler
 
                 if (HttpFields.__ContentType.equals(hdr))
                     hasContent=true;
-                
+
+
                 Enumeration vals = request.getFieldValues(hdr);
                 while (vals.hasMoreElements())
                 {
@@ -263,10 +265,10 @@ public class ProxyHandler extends AbstractHttpHandler
             InputStream proxy_in = null;
 
             // handler status codes etc.
+            int code=HttpResponse.__500_Internal_Server_Error;
             if (http!=null)
             {
                 proxy_in = http.getErrorStream();
-                int code=HttpResponse.__500_Internal_Server_Error;
                 
                 code=http.getResponseCode();
                 response.setStatus(code);
@@ -283,6 +285,10 @@ public class ProxyHandler extends AbstractHttpHandler
                 }
             }
             
+            // clear response defaults.
+            response.removeField(HttpFields.__Date);
+            response.removeField(HttpFields.__Server);
+            
             // set response headers
             int h=0;
             String hdr=connection.getHeaderFieldKey(h);
@@ -296,7 +302,8 @@ public class ProxyHandler extends AbstractHttpHandler
                 val=connection.getHeaderField(h);
             }
             response.setField("Via","1.1 (jetty)");
-            
+
+            // Handled
             request.setHandled(true);
             if (proxy_in!=null)
                 IO.copy(proxy_in,response.getOutputStream());

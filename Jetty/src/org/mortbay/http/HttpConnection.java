@@ -394,7 +394,11 @@ public class HttpConnection
             _inputStream.setContentLength(0);
         }
 
-        // dont support persistent connections in HTTP/1.0
+        // Check netscape proxy connection - this is not strictly correct.
+        if (!_keepAlive && HttpFields.__KeepAlive.equalsIgnoreCase(_request.getField(HttpFields.__ProxyConnection)))
+            _keepAlive=true;
+
+        // persistent connections in HTTP/1.0 only if requested.
         _persistent=_keepAlive;
     }
     
@@ -652,45 +656,54 @@ public class HttpConnection
         
         // if we have no content or encoding, and no content length
         int status = _response.getStatus();
-        if (status!=HttpResponse.__304_Not_Modified &&
-            status!=HttpResponse.__204_No_Content &&
-            !_outputStream.isWritten() &&
+        if (!_outputStream.isWritten() &&
             !_response.containsField(HttpFields.__ContentLength) &&
             !_response.containsField(HttpFields.__TransferEncoding))
         {
-            if(_persistent)
+            // Special case for responses with no content.
+            if (status==HttpResponse.__304_Not_Modified ||
+                status==HttpResponse.__204_No_Content)
             {
-                switch (_dotVersion)
-                {
-                  case 0:
-                      {
-                          _close=true;
-                          _persistent=false;
-                          _response.setField(HttpFields.__Connection,
-                                             HttpFields.__Close);
-                      }
-                      break;
-                  case 1:
-                      {
-                          // force chunking on.
-                          _response.setField(HttpFields.__TransferEncoding,
-                                             HttpFields.__Chunked);
-                          _outputStream.setChunking();
-                      }
-                      break;
-                      
-                  default:
-                      _close=true;
-                      _response.setField(HttpFields.__Connection,
-                                         HttpFields.__Close);
-                      break;
-                }
+                if (_persistent && _keepAlive && _dotVersion==0)
+                    _response.setField(HttpFields.__Connection,
+                                       HttpFields.__KeepAlive);
             }
             else
             {
-                _close=true;
-                _response.setField(HttpFields.__Connection,
-                                   HttpFields.__Close);
+                if(_persistent)
+                {
+                    switch (_dotVersion)
+                    {
+                    case 0:
+                        {
+                            _close=true;
+                            _persistent=false;
+                            _response.setField(HttpFields.__Connection,
+                                               HttpFields.__Close);
+                        }
+                        break;
+                    case 1:
+                        {
+                            // force chunking on.
+                            _response.setField(HttpFields.__TransferEncoding,
+                                               HttpFields.__Chunked);
+                            _outputStream.setChunking();
+                        }
+                        break;
+                        
+                    default:
+                        _close=true;
+                        _response.setField(HttpFields.__Connection,
+                                           HttpFields.__Close);
+                        break;
+                    }
+                }
+                else
+                {
+                    _close=true;
+                    _response.setField(HttpFields.__Connection,
+                                       HttpFields.__Close);
+                }
             }
         }
 
