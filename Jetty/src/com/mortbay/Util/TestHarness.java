@@ -9,6 +9,8 @@ import com.mortbay.Util.DataClassTest.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.zip.*;
+
 
 public class TestHarness
 {
@@ -1219,6 +1221,41 @@ public class TestHarness
         }
     }
     
+
+    /* ------------------------------------------------------------ */
+    static void testZipResource()
+    {
+        Test test = new Test("com.mortbay.Util.ZipResource");
+        try
+        {
+	    try
+	    {
+		new ZipResource("com/mortbay/Util/Test/unknown.zip");
+		test.check(false,"Not found");
+	    }
+	    catch(IllegalArgumentException e)
+	    {
+		test.check(true,"No Such Resource");
+	    }
+	    
+	    ZipResource zr = new
+		ZipResource("com/mortbay/Util/Test/test.zip");
+	    test.checkEquals(zr.getNames().size(),3,"getNames()");
+
+	    ZipEntry entry = zr.getEntry("alphabet");
+	    test.checkEquals(entry.getName(),"alphabet","getEntry(alphabet)");	    
+
+	    byte[] b = zr.getBytes("alphabet");
+	    test.checkEquals(b.length,27,"getBytes(alphabet)");
+	    test.checkEquals(b[0],'A',"getBytes(alphabet)");
+	    
+	}
+        catch(Exception e)
+        {
+            Code.warning(e);
+            test.check(false,e.toString());
+        }
+    }
     
     /* ------------------------------------------------------------ */
     /** main
@@ -1242,6 +1279,7 @@ public class TestHarness
             testThreadPool();
             testThreadedServer();
             testB64();
+	    testZipResource();
             PropertyTreeTest.test();
         }
         catch(Throwable th)

@@ -31,6 +31,7 @@ public class Tenlet extends ThreadedServer
     {
 	try
 	{
+	    System.err.println("Conected "+Thread.currentThread());
 	    IO.copyThread(System.in,out);
 	    IO.copy(in,System.err);
 	}
@@ -40,7 +41,7 @@ public class Tenlet extends ThreadedServer
 	}
 	finally
 	{
-	    System.exit(0);
+	    System.err.println("EOF\n");
 	}
     }
     

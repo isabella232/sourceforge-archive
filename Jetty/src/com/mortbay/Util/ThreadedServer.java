@@ -252,7 +252,11 @@ abstract public class ThreadedServer extends ThreadPool
     {
         try
         {
-            Socket s=_listen.accept();
+	    Socket s;
+	    synchronized(_listen)
+	    {
+		s=_listen.accept();
+	    }
             if (_maxReadTimeMs>0)
                 s.setSoTimeout(_maxReadTimeMs);
             return s;
