@@ -72,7 +72,7 @@ public class
   public Object
     getAttribute(String name)
     {
-      _log.info("getAttribute("+name+")");
+      //      _log.info("getAttribute("+name+")");
       return _attributes==null?null:_attributes.get(name);
     }
 
@@ -100,7 +100,7 @@ public class
       // we can be sure that name is non-null, because this will have
       // been checked in our adaptor...
 
-      _log.info("setAttribute("+name+", "+value+", "+returnValue+")");
+      //      _log.info("setAttribute("+name+", "+value+", "+returnValue+")");
 
       ensureAttributes();
       Object tmp=_attributes.put(name, value);
