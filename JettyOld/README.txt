@@ -4,10 +4,7 @@ By Mort Bay Consulting Pty. Ltd.  http://www.mortbay.com
 INSTALLATION
 ============
 Jetty comes compiled and ready to go. Unpack the Jetty distribution 
-to a shared locations (/usr/local/Jetty-X.X is a good spot).   
-The distribution names this directory Jetty-X.X, but you may 
-wish to rename this (or link it) to MortBay if other MortBay
-packages are to be installed.
+to a shared locations (/usr/local/Jetty is a good spot).   
 
 The environment variable MORTBAY_HOME should be set to this directory. 
 For the rest of this README the unix convention of $MORTBAY_HOME refers 
@@ -15,16 +12,15 @@ to the installed directory path (%MORTBAY_HOME% on dos/NT/windows).
 
    Unix:
 	cd /usr/local
-	gunzip < Jetty-X.X.tgz | tar xfv -
-	ln -s Jetty-X.X MortBay
-	MORTBAY_HOME=/usr/local/MortBay
+	gunzip < Jetty-X.X.X.tgz | tar xfv -
+	MORTBAY_HOME=/usr/local/Jetty
 	export MORTBAY_HOME
 
    Win95,NT:
 	c:
 	cd "\Program Files"
-        winzip Jetty-X.X.tgz
-	set MORTBAY_HOME="c:\Program files\Jetty-X.X"
+        winzip Jetty-X.X.X.tgz
+	set MORTBAY_HOME="c:\Program files\Jetty"
 
 
 Make sure your CLASSPATH includes all the jar files in
