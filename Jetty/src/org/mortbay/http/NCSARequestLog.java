@@ -12,6 +12,8 @@ import org.mortbay.util.DateCache;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Locale;
+
 
 /* ------------------------------------------------------------ */
 /** NCSA HTTP Request Log.
@@ -41,7 +43,7 @@ public class NCSARequestLog implements RequestLog
         throws IOException
     {
         _filename=filename;
-        _logDateCache=new DateCache("dd/MMM/yyyy:HH:mm:ss ZZZ");
+        _logDateCache=new DateCache("dd/MMM/yyyy:HH:mm:ss ZZZ",Locale.US);
         _logDateCache.setTimeZoneID(TimeZone.getDefault().getID());
         _extended=true;
         _append=true;
