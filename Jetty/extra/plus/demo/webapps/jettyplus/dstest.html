@@ -114,28 +114,33 @@ The relevant sections of the jetty xml configuration file are:
       &lt;/Arg&gt;
     &lt;/Call&gt;
   &lt;/Call&gt;
+
 <font color="blue">
   &lt;!-- =============================================================== --&gt;
-  &lt;!-- Set the transaction manager, datasource                         --&gt;
+  &lt;!-- Add a transaction manager                                       --&gt;
   &lt;!-- =============================================================== --&gt;
 </font>
-  &lt;Call name="setTransactionManager"&gt;
+  &lt;Call name="addService"&gt;
     &lt;Arg&gt;
-      &lt;New class="org.mortbay.jetty.plus.JotmService "&gt;
-        &lt;Call name="addDataSource"&gt;
-           &lt;Arg&gt;jdbc/myDB&lt;/Arg&gt;                    <font color=blue>&lt;-- name --&gt;</font>
-           &lt;Arg&gt;org.hsqldb.jdbcDriver&lt;/Arg&gt;        <font color=blue>&lt;-- driver class --&gt;</font>
-           &lt;Arg&gt;jdbc:hsqldb:extra/etc/tmtest&lt;/Arg&gt; <font color=blue>&lt;-- url --&gt;</font>
-           &lt;Arg&gt;sa&lt;/Arg&gt; <font color=blue>&lt;-- username --&gt;</font>
-           &lt;Arg&gt;&lt;/Arg&gt;   <font color=blue>&lt;-- password --&gt;</font>
-           &lt;Arg&gt;8&lt;/Arg&gt; <font color=blue> &lt;-- inital connection pool size --&gt;</font>
-           &lt;Arg&gt;4&lt;/Arg&gt;  <font color=blue>&lt;-- min connection pool size --&gt;</font>
-           &lt;Arg&gt;15&lt;/Arg&gt;<font color=blue> &lt;-- max connection pool size --&gt;</font>
+      &lt;New class="org.mortbay.jetty.plus.JotmService"&gt;
+        &lt;Set name="Name"&gt;TransactionMgr&lt;/Set&gt;
+           &lt;Call name="addDataSource"&gt;
+           &lt;Arg&gt;jdbc/myDB&lt;/Arg&gt;              <font color="blue"> &lt;!-- jndi name </font>
+           &lt;Arg&gt;org.hsqldb.jdbcDriver&lt;/Arg&gt;  <font color="blue"> &lt;!-- driver class  --&gt;</font>
+           &lt;Arg&gt;jdbc:hsqldb:extra/etc/tmtest&lt;/Arg&gt; <font color="blue"> &lt;!-- url --&gt; </font>
+           &lt;Arg&gt;sa&lt;/Arg&gt;                     <font color="blue"> &lt;!-- username --&gt;</font>
+           &lt;Arg&gt;&lt;/Arg&gt;                       <font color="blue"> &lt;!-- password --&gt;</font>
+           &lt;Arg&gt;8&lt;/Arg&gt;                      <font color="blue"> &lt;!-- inital connection pool size --&gt;</font>  
+           &lt;Arg&gt;4&lt;/Arg&gt;                      <font color="blue"> &lt;!-- min connection pool size --&gt;</font> 
+           &lt;Arg&gt;15&lt;/Arg&gt;                     <font color="blue"> &lt;!-- max connection pool size --&gt;</font> 
         &lt;/Call&gt;
-      &lt;/New&gt;
-    &lt;/Arg&gt;
+     &lt;/New&gt;
+   &lt;/Arg&gt;
   &lt;/Call&gt;
-&lt;Configure&gt;
+
+
+ 
+&lt;/Configure&gt;
 </code>
 </pre>
 </font> 
