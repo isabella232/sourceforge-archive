@@ -36,6 +36,7 @@ Other targets:
   <property name="etc"            value="${basedir}/etc" />
   <property name="lib"            value="${basedir}/lib"/>
   <property name="classes"        value="${basedir}/classes"/>
+  <property name="classes1.4"     value="${basedir}/classes1.4"/>
   <property name="javadoc"        value="${basedir}/javadoc"/>
   <property name="logs"           value="${basedir}/logs"/>
   <property name="webapps"        value="${basedir}/webapps"/>
@@ -45,7 +46,6 @@ Other targets:
   <property name="test.lib"       value="${test}/lib"/>
   <property name="test.src"       value="${test}/src"/>
   <property name="test.classes"   value="${test}/classes" />
-  <property name="extra"          value="${basedir}/extra" />
   <property name="build.compiler" value="jikes" />
   <!-- property name="build.compiler" value="classic"/ -->
   <!-- property name="build.compiler" value="modern" / -->
@@ -60,28 +60,35 @@ Other targets:
   <property name="jetty.webapp.webinf"    value="${jetty.webapp}/WEB-INF"/>
   <property name="jetty.webapp.classes"   value="${jetty.webapp.webinf}/classes"/>
 
-  <property name="jetty.jar"      value="${lib}/org.mortbay.jetty.jar"/>
-  <property name="mini.http.jar"  value="${basedir}/org.mortbay.http.jar"/>
-  <property name="servlet.jar"    value="${lib}/javax.servlet.jar"/>
-  <property name="jasper.jar"     value="${lib}/org.apache.jasper.jar"/>
-  <property name="jaxp.jar"       value="${lib}/javax.xml.jaxp.jar"/>
-  <property name="xml.jar"        value="${lib}/org.apache.crimson.jar"/>
-  <property name="jdom.jar"       value="${lib}/jdom.jar"/>
-  <property name="jsse.jar"       value="${lib}/com.sun.net.ssl.jar"/>
-  <property name="junit.jar"      value="${test.lib}/junit-3.7.jar"/>
+  <property name="jetty.jar"       value="${lib}/org.mortbay.jetty.jar"/>
+  <property name="jetty1.4.jar"    value="${lib}/org.mortbay.jetty-jdk1.4.jar"/>
+  <property name="mortbay.jmx.jar" value="${lib}/org.mortbay.jmx.jar"/>
+  <property name="mini.http.jar"   value="${basedir}/org.mortbay.http.jar"/>
+  <property name="servlet.jar"     value="${lib}/javax.servlet.jar"/>
+  <property name="jasper.jar"      value="${lib}/org.apache.jasper.jar"/>
+  <property name="jaxp.jar"        value="${lib}/javax.xml.jaxp.jar"/>
+  <property name="xml.jar"         value="${lib}/org.apache.crimson.jar"/>
+  <property name="jdom.jar"        value="${lib}/jdom.jar"/>
+  <property name="jsse.jar"        value="${lib}/com.sun.net.ssl.jar"/>
+  <property name="jmxri.jar"       value="${lib}/jmxri.jar"/>
+  <property name="jmxtools.jar"    value="${lib}/jmxtools.jar"/>
+  <property name="junit.jar"       value="${test.lib}/junit-3.7.jar"/>
 
-  <path id="external.classpath">
-    <pathelement path="${jsse.jar}" />
-    <pathelement path="${jaxp.jar}" />
-    <pathelement path="${xml.jar}" />
-    <pathelement path="${jdom.jar}" />
+  <path id="libpath">
+    <pathelement location="${jsse.jar}" />
+    <pathelement location="${jaxp.jar}" />
+    <pathelement location="${xml.jar}" />
+    <pathelement location="${jdom.jar}" />
+    <pathelement location="${jmxri.jar}" />
+    <pathelement location="${jmxtools.jar}" />
   </path>
 
   <path id="classpath">
-    <pathelement path="${jetty.jar}" />
-    <pathelement path="${jasper.jar}" />
-    <pathelement path="${servlet.jar}" />
-    <path refid="external.classpath" />
+    <pathelement location="${jetty1.4.jar}" />
+    <pathelement location="${jetty.jar}" />
+    <pathelement location="${jasper.jar}" />
+    <pathelement location="${servlet.jar}" />
+    <path refid="libpath" />
   </path>
 
 
@@ -104,39 +111,32 @@ Other targets:
         <include name="*.dtd"/>
       </fileset>
     </copy>
-    <available property="extra.available" file="${extra}" />
     <available property="jdk1.4.available" classname="java.util.logging.Handler" />
   </target>
+  
 
   <!-- ==================================================================== -->
-  <target name="tidy" depends="tidy.jetty,tidy.extra" 
-     description="Remove generated files not needed for running"
-   />
-  
-  <target name="tidy.jetty">
+  <target name="tidy" description="Remove generated files not needed for running">
     <delete dir="${classes}" quiet="true"/>
+    <delete dir="${classes1.4}" quiet="true"/>
     <delete dir="${test.classes}" quiet="true"/>
     <delete file="${mini.http.jar}" quiet="true"/>
     <ant antfile="${test}/build.xml" inheritAll="true" target="tidy"/>
   </target>
   
-  <target name="tidy.extra" if="extra.available" >
-    <ant antfile="${extra}/build.xml" inheritAll="true" target="tidy" />
-  </target>
-
 
   <!-- ==================================================================== -->
-  <target name="clean" depends="tidy,clean.jetty,clean.extra"
-     description="Remove generated files"
-    />
-        
-  <target name="clean.jetty" depends="tidy.jetty">
+  <target name="clean" depends="tidy"
+     description="Remove generated files">
     <delete dir="${jetty.webapp.classes}" quiet="true"/>
     <delete dir="${javadoc}" quiet="true"/>
     <delete dir="${etc}/dtd" quiet="true"/>
     <delete file="${jetty.jar}" quiet="true"/>
+    <delete file="${jetty1.4.jar}" quiet="true"/>
+    <delete file="${mortbay.jmx.jar}" quiet="true"/>
     <delete file="${servlet.jar}" quiet="true"/>
     <delete file="${jasper.jar}" quiet="true"/>
+    <delete file="${etc}/demo.mlet" quiet="true"/>
     <delete quiet="true">
       <fileset dir="${logs}">
         <include name="**/*.log"/>
@@ -153,11 +153,6 @@ Other targets:
       </fileset>
     </delete>
     <ant antfile="${test}/build.xml" inheritAll="true" target="clean"/>
-  </target>
-
-
-  <target name="clean.extra" depends="tidy.extra" if="extra.available" >
-    <ant basedir="${extra}" target="clean"/>
   </target>
 
 
@@ -178,17 +173,16 @@ Other targets:
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
            >
-       <classpath refid="classpath" />
+       <classpath refid="libpath" />
        <include name="**/*.java"/>
     </javac>
   </target>
 
   <!-- ==================================================================== -->
-  <target name="classes1.4" depends="prepare" if="jdk1.4.available"
+  <target name="classes1.4" depends="prepare,classes" if="jdk1.4.available"
    description="Compile the java 1.4 classes" >
-    <delete file="${classes}/org/mortbay/util/Frame.class" quiet="true"/>
-    <delete file="${classes}/org/mortbay/util/FileResource.class" quiet="true"/>
-    <copy todir="${classes}">
+    <mkdir dir="${classes1.4}" />
+    <copy todir="${classes1.4}">
       <fileset dir="${src1.4}">
         <include name="**/defaultManifest.mf" />
         <include name="**/*.properties" />
@@ -197,12 +191,15 @@ Other targets:
       </fileset>
     </copy>
     <javac srcdir="${src1.4}"
-           destdir="${classes}"
+           destdir="${classes1.4}"
            debug="${javac.debug}"
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
            >
-       <classpath refid="classpath" />
+       <classpath>
+         <path refid="libpath"/>
+         <pathelement path="${classes}"/>
+       </classpath>
        <include name="**/*.java"/>
     </javac>
   </target>
@@ -215,19 +212,56 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="jetty.jar" depends="classes1.4,classes,servlet.jar">
-    <delete file="${mini.http.jar}" quiet="true"/>
+  <target name="jetty.jar" depends="classes,servlet.jar">
     <jar jarfile="${jetty.jar}" basedir="${classes}" manifest="${src}/org/mortbay/MANIFEST.MF" >
        <include name="org/mortbay/**"  />
        <include name="org/jboss/**"  />
+       <exclude name="**/jmx/**" />
+    </jar>
+  </target>
+
+  <!-- ==================================================================== -->
+  <target name="jetty1.4.jar" depends="classes1.4,servlet.jar" if="jdk1.4.available">
+    <jar jarfile="${jetty1.4.jar}" manifest="${src}/org/mortbay/MANIFEST.MF">
+       <fileset dir="${classes1.4}">
+         <include name="org/mortbay/**"/>
+         <exclude name="**/jmx/**" />
+       </fileset>
+    </jar>
+  </target>
+
+  <!-- ==================================================================== -->
+  <target name="merge.jetty.jar" depends="classes1.4,servlet.jar" 
+    description="Merge standard and jdk1.4 jetty jars into org.mortbay.jetty.jar"
+    if="jdk1.4.available">
+    <delete file="${jetty.jar}" quiet="true"/>
+    <delete file="${jetty1.4.jar}" quiet="true"/>
+    <jar jarfile="${jetty.jar}" manifest="${src}/org/mortbay/MANIFEST.MF">
+       <fileset dir="${classes}">
+         <include name="org/mortbay/**"/>
+         <exclude name="**/jmx/**" />
+       </fileset>
+       <fileset dir="${classes1.4}">
+         <include name="org/mortbay/**"/>
+         <exclude name="**/jmx/**" />
+       </fileset>
+    </jar>
+  </target>
+
+  <!-- ==================================================================== -->
+  <target name="mortbay.jmx.jar" depends="classes">
+    <copy file="${src}/org/mortbay/jetty/jmx/demo.mlet" tofile="${etc}/demo.mlet" />
+    <replace file="${etc}/demo.mlet" token="__JETTY_JMX_HOME__" value="${basedir}" />
+    <replace file="${etc}/demo.mlet" token="__JETTY_HOME__" value="${basedir}" />
+    <jar jarfile="${mortbay.jmx.jar}">
+       <fileset dir="${classes}">
+         <include name="org/mortbay/**/jmx/**"/>
+       </fileset>
     </jar>
   </target>
 
   <!-- ==================================================================== -->
   <target name="mini.http.jar" depends="classes,servlet.jar">
-    <delete file="${jetty.jar}" quiet="true"/>
-    <delete file="${servlet.jar}" quiet="true"/>
-    <delete file="${jasper.jar}" quiet="true"/>
     <jar jarfile="${mini.http.jar}" basedir="${classes}" manifest="${src}/org/mortbay/MANIFEST.MF" compress="true">
        <include name="org/mortbay/util/**" />
        <include name="org/mortbay/http/**" />
@@ -250,7 +284,7 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="jars" depends="servlet.jar,jetty.jar,jasper.jar"
+  <target name="jars" depends="servlet.jar,jetty.jar,jetty1.4.jar,jasper.jar,mortbay.jmx.jar"
    description="Build the jar files" >
   </target>
 
@@ -342,13 +376,8 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="all" depends="prepare,jars,webapps,javadoc,test,extra"
+  <target name="all" depends="prepare,jars,webapps,javadoc,test"
    description="Build everything"/>
-
-  <!-- ==================================================================== -->
-  <target name="extra" depends="prepare"  if="extra.available" >
-    <ant dir="${extra}" inheritAll="false" target="all" />
-  </target>
 
   <!-- ==================================================================== -->
   <target name="demo" depends="webapps" 
@@ -364,6 +393,22 @@ Other targets:
        </classpath>
        <jvmarg line="-Djetty.home=${jetty.home} -Djetty.log=${jetty.home}/logs" />
        <arg line="${etc}/admin.xml ${etc}/demo.xml" />
+    </java>
+  </target>
+
+  <!-- ==================================================================== -->
+  <target name="demo.jmx" depends="mortbay.jmx.jar,webapps" 
+   description="Build and run the demo with JMX">   
+    <java classname="org.mortbay.util.jmx.Main"
+          fork="yes"
+          failonerror="yes"
+          >
+       <classpath>
+         <pathelement path="${mortbay.jmx.jar}"/>
+         <path refid="classpath"/>
+       </classpath>
+       <jvmarg line="-Djetty.home=${basedir} -Djetty.log=${basedir}/logs" />
+       <arg line="${etc}/demo.mlet" />
     </java>
   </target>
 
@@ -403,10 +448,4 @@ Other targets:
 
 
 </project>
-
-
-
-
-
-
 

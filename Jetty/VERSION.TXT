@@ -1,11 +1,23 @@
 Jetty Versions
 --------------
 
+ + Moved jmx classes from JettyExtra to here.
  + Set contextloader during webapplicationcontext.start
  + Added AJP13 listener for apache integration.
  + Fixed ChunkableOutputStream close propagation
  + Better recycling of HttpRequests.
  + Protect session.getAttributeNames from concurrent modifications.
+ + Allow coma separated cookies and headers
+
+Jetty-4.0.3 - 20 June 2002
+ + WebapplicationContext.start sets context loader
+ + Fixed close propagation of on-chunked output streams
+ + Force security disassociation.
+ + Better recycling of HttpRequests.
+ + Protect session.getAttributeNames from concurrent modifications.
+ + Allow session manager to be initialized when set.
+ + Fixed japanese locale
+ + Allow coma separated cookies and headers
 
 Jetty-4.1.D1 - 8 June 2002
  + Recycle servlet requests and responses

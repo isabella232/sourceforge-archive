@@ -606,7 +606,9 @@ public class HttpFields
                 {
                     if (!hasMoreElements())
                         throw new NoSuchElementException();
-                    return tok.nextElement();
+                    String next=(String) tok.nextElement();
+		    if (next!=null)next=next.trim();
+		    return next;
                 }
             };
     }

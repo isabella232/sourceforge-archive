@@ -53,24 +53,30 @@ the Ant optional tasks from:
 
   <property name="jetty.jar"      value="${lib}/org.mortbay.jetty.jar"/>
   <property name="mini.http.jar"  value="${basedir}/org.mortbay.http.jar"/>
+  <property name="mortbay.jmx.jar" value="${lib}/org.mortbay.jmx.jar"/>
   <property name="servlet.jar"    value="${lib}/javax.servlet.jar"/>
   <property name="jasper.jar"     value="${lib}/org.apache.jasper.jar"/>
   <property name="jaxp.jar"       value="${lib}/javax.xml.jaxp.jar"/>
   <property name="xml.jar"        value="${lib}/org.apache.crimson.jar"/>
   <property name="jsse.jar"       value="${lib}/com.sun.net.ssl.jar"/>
+  <property name="jmxri.jar"      value="${lib}/jmxri.jar"/>
+  <property name="jmxtools.jar"   value="${lib}/jmxtools.jar"/>
   <property name="junit.jar"      value="${test.lib}/junit-3.7.jar"/>
 
-  <path id="external.classpath">
-    <pathelement path="${jsse.jar}" />
-    <pathelement path="${jaxp.jar}" />
-    <pathelement path="${xml.jar}" />
+  <path id="libpath">
+    <pathelement location="${jsse.jar}" />
+    <pathelement location="${jaxp.jar}" />
+    <pathelement location="${xml.jar}" />
+    <pathelement location="${jmxri.jar}" />
+    <pathelement location="${jmxtools.jar}" />
   </path>
 
   <path id="classpath">
-    <pathelement path="${jetty.jar}" />
-    <pathelement path="${jasper.jar}" />
-    <pathelement path="${servlet.jar}" />
-    <path refid="external.classpath" />
+    <pathelement location="${jetty.jar}" />
+    <pathelement location="${jasper.jar}" />
+    <pathelement location="${servlet.jar}" />
+    <pathelement location="${mortbay.jmx.jar}" />
+    <path refid="libpath" />
   </path>
 
   <!-- ==================================================================== -->
@@ -158,6 +164,7 @@ Test results in ${test.results}
         <classpath>  
           <pathelement location="${test.classes}" /> 
           <pathelement location="${classes}" />     
+          <path refid="libpath" />   
        </classpath>
      </java>        
   </target>
@@ -171,7 +178,7 @@ Test results in ${test.results}
       <classpath> 
           <pathelement location="${test.classes}" /> 
           <pathelement location="${classes}" />
-          <path refid="external.classpath" />   
+          <path refid="libpath" />   
       </classpath>
     </java>
   </target>
@@ -184,7 +191,7 @@ Test results in ${test.results}
       <classpath>
           <pathelement location="${test.classes}" /> 
           <pathelement location="${classes}" />
-          <path refid="external.classpath" />  
+          <path refid="libpath" />   
       </classpath>
     </java>
   </target>

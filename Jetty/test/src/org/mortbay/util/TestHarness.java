@@ -817,7 +817,7 @@ public class TestHarness
             test.check(true,"Constructed");
             server.start();
             System.err.print(".");System.err.flush();
-            Thread.sleep(100);
+            Thread.sleep(250);
             test.check(server.isStarted(),"Started");
             test.checkEquals(server._connections,0,"Minimum Threads");
             test.checkEquals(server._jobs,0,"Minimum Threads");
@@ -851,7 +851,7 @@ public class TestHarness
             p1.print("Exit\015");
             p1.flush();
             System.err.print(".");System.err.flush();
-            Thread.sleep(100);
+            Thread.sleep(250);
             
             test.checkEquals(server._connections,2,"exit job");
             test.checkEquals(server._jobs,1,"exit job");
@@ -872,7 +872,7 @@ public class TestHarness
             p1.print("Exit\015");
             p1.flush();
             System.err.print(".");System.err.flush();
-            Thread.sleep(100);
+            Thread.sleep(250);
             
             test.checkEquals(server._connections,3,"idle thread");
             test.checkEquals(server._jobs,1,"idle thread");
