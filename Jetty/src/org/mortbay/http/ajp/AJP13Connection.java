@@ -347,6 +347,8 @@ public class AJP13Connection extends HttpConnection
         throws IOException
     {
         Code.debug("ajp13 commit()");
+        if (_response.isCommitted())
+            return;
         _request.setHandled(true);
         getOutputStream().writeHeader(_response);
     }
