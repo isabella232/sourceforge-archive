@@ -57,7 +57,6 @@ public class Debug extends HttpServlet
         tf.addCheckbox("D","Debug On",Code.getDebug());
         tf.addTextField("V","Verbosity Level",6,""+Code.getVerbose());
         tf.addTextField("P","Debug Patterns",40,Code.getDebugPatterns());
-        tf.addTextField("T","Debug Triggers",40,Code.getDebugTriggers());
         tf.addCheckbox("W","Suppress Warnings",Code.getSuppressWarnings());
         tf.addCheckbox("S","Suppress Stacks",Code.getSuppressStack());
 
@@ -136,7 +135,6 @@ public class Debug extends HttpServlet
             else
                 Code.setVerbose(0);
             Code.setDebugPatterns(request.getParameter("P"));
-            Code.setDebugTriggers(request.getParameter("T"));
 
 
             LogSink[] sinks = log.getLogSinks();
@@ -207,13 +205,3 @@ public class Debug extends HttpServlet
         return "Debug And  Log Options";
     }
 }
-
-
-
-
-
-
-
-
-
-

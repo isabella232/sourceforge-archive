@@ -90,10 +90,7 @@ public class Code
     private boolean _suppressWarnings=false;
     private int _verbose=0;
     Vector _debugPatterns=null;
-    private Vector _debugTriggers=null;
     private String _patterns=null;
-    private String _triggers=null;
-    private Hashtable _triggerSet = new Hashtable();
     
     /*-------------------------------------------------------------------*/
     /** Construct shared instance that decodes the options setup
@@ -119,9 +116,6 @@ public class Code
 
             String dp = System.getProperty("DEBUG_PATTERNS");
             setDebugPatterns(dp);
-
-            String dt = System.getProperty("DEBUG_TRIGGERS");
-            setDebugTriggers(dt);
 
             String v = System.getProperty("DEBUG_VERBOSE");
             if (v!=null)
@@ -247,87 +241,6 @@ public class Code
         return instance()._patterns;
     }
 
-    /* ------------------------------------------------------------ */
-    /** Set debug triggers.
-     * @param triggers comma separated string of triggers 
-     */
-    public static void setDebugTriggers(String triggers)
-    {
-        Code code = instance();
-        code._triggers=triggers;
-        if (triggers!=null && triggers.length()>0)
-        {
-            code._debugTriggers = new Vector();
-
-            StringTokenizer tok = new StringTokenizer(triggers,", \t");
-            while (tok.hasMoreTokens())
-            {
-                String trigger = tok.nextToken();
-                code._debugTriggers.addElement(trigger);
-            }
-        }
-        else
-            code._debugTriggers = null;
-    }
-
-
-    /* ------------------------------------------------------------ */
-    /** Get the debug triggers.
-     * @return Coma separated list of debug triggers
-     */
-    public static String getDebugTriggers()
-    {
-        return instance()._triggers;
-    }
-
-    /* ------------------------------------------------------------ */
-    public static void triggerOn(String trigger)
-    {
-        Code code = instance();
-        
-        // Look for a substring match in triggers
-        int i = code._debugTriggers.size();
-        for (;--i>=0;)
-        {
-            if(trigger.indexOf((String)code._debugTriggers.elementAt(i))>=0)
-            {
-                // Triggered!!!!
-
-                // Add ourselves to the triggerSet
-                if (code._triggerSet.put(trigger,"")==null)
-                    Log.message(Log.DEBUG, "TRIGGERED ON "+trigger,
-                                new Frame(1));
-
-                // Turn debug On
-                setDebug(true);
-            }
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    public static void triggerOff(String trigger)
-    {
-        Code code = instance();
-        
-        // Look for a substring match in triggers
-        int i = code._debugTriggers.size();
-        for (;--i>=0;)
-        {
-            if(trigger.indexOf((String)code._debugTriggers.elementAt(i))>=0)
-            {
-                // Triggered!!!!
-
-                // Remove ourselves to the triggerSet
-                if (code._triggerSet.remove(trigger)!=null)
-                    Log.message(Log.DEBUG, "TRIGGERED OFF "+trigger,
-                                new Frame(1));
-
-                // Turn debug off if no more triggers
-                setDebug(code._triggerSet.size()>0);
-            }
-        }
-    }
-    
     
     /*-------------------------------------------------------------------*/
     /** Check assertion that a boolean is true. Logs and throws

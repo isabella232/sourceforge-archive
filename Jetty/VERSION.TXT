@@ -25,6 +25,7 @@ Jetty-4.0.B0 - 4 Feb 2002
    RolloverFileOutputStream
  + Handle special characters in resource file names better.
  + Welcome file dispatch sets requestURI. 
+ + Removed triggers from Code.
 
 Jetty-4.0.D4 - 14 Jan 2002
  + Prevent output after forward
