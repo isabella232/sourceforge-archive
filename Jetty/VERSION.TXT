@@ -2,11 +2,8 @@ Jetty3 Versions
 --------------
 
 Jetty-3.1.0 - ?????
-
- + Added HandlerContext.registerHost
  + Added long overdue Tutorial documentation.
- + Improved some documentation.
- + New simplified jetty.bat
+ + Improved some other documentation.
  + Fix ResourceHandler cache invalidate.
  + Fix ServletResponse.setLocale()
  + Fix reuse of Resource
@@ -14,9 +11,12 @@ Jetty-3.1.0 - ?????
  + Fix .. handling in URI
  + Fix REFFERER in CGI
  + Fix FORM authentication on exact patterns
+ + Fix flush on stop bug in logs. 
+ + New simplified jetty.bat
  + Improved closing of listeners.
  + Optimized List creation
  + Removed win32 service.exe
+ + Added HandlerContext.registerHost
 
 Jetty-3.1.rc9 - 02 Sep 2001
  + Added bin/orgPackage.sh script to change package names.
