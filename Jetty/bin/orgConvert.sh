@@ -47,5 +47,6 @@ perl -pi \
     -e 's/com\/mortbay\/Tools\/Servlet([^A-Za-z])/org\/mortbay\/tools\/servlet\1/g ;' \
     -e 's/com\/mortbay\/Tools\/DataClassTest([^A-Za-z])/org\/mortbay\/tools\/dataclasstest\1/g ;' \
     -e 's/com\/mortbay\/Tools([^A-Za-z])/org\/mortbay\/tools\1/g ;' \
-    -e 's/com\/mortbay([^A-Za-z])/org\/mortbay\1/g ;' \
+    -e 's/com\(.\)mortbay([^A-Za-z])/org\1mortbay\2/g ;' \
+    -e 's/mortbay\(.\)([^A-Za-z])/mortbay\1org\2/g ;' \
     $*

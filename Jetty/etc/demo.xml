@@ -45,7 +45,6 @@ conveniance methods for the common handlers so
 that servlet and file serving may be configured for
 a context without explicit creation of a Handler.
 
-
 This file configures the demo server and is equivalent
 to the org.mortbay.jetty.Demo class.
 
@@ -80,7 +79,7 @@ $Id$
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.SocketListener">
-        <Set name="Port">8080</Set>
+        <Set name="Port"><SystemProperty name="jetty.port" default="8080"/></Set>
         <Set name="MinThreads">5</Set>
         <Set name="MaxThreads">255</Set>
         <Set name="MaxIdleTimeMs">60000</Set>

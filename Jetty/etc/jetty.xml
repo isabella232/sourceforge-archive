@@ -49,8 +49,10 @@ a context without explicit creation of a Handler.
 
 
 This file configures:
- + A listener at port 8080 on all known interfaces
+ + A listener at port 8080 on all known interfaces.
+   The jetty.port property can be used to change this.
  + The default web applicaton at / context
+   The jetty.webapp system property can be used to change this
 
 $Id$
 -->
@@ -59,7 +61,7 @@ $Id$
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.SocketListener">
-        <Set name="Port">8080</Set>
+        <Set name="Port"><SystemProperty name="jetty.port" default="8080"/></Set>
         <Set name="MinThreads">5</Set>
         <Set name="MaxThreads">255</Set>
         <Set name="MaxIdleTimeMs">60000</Set>
@@ -71,7 +73,7 @@ $Id$
 
   <Call name="addWebApplication">
     <Arg>/</Arg>
-    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/default/</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/<SystemProperty name="jetty.webapp" default="default"/></Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml/</Arg>
   </Call>
 
