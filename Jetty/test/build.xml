@@ -74,8 +74,6 @@ the Ant optional tasks from:
         <include name="*.ZIP"/>
         <exclude name="javax.xml.jaxp.jar"/>
         <exclude name="crimson.jar"/>
-        <exclude name="xercesImpl.jar"/>
-        <exclude name="xmlParserAPIs.jar"/>
        </fileset>
     </path>
 
