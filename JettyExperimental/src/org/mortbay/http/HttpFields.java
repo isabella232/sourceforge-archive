@@ -493,7 +493,18 @@ public class HttpFields
     {
         Buffer n=HttpHeaders.CACHE.lookup(name);
         Buffer v=HttpHeaderValues.CACHE.lookup(value);
-        put(n,v);
+        put(n,v,-1);
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Set a field.
+     * @param name the name of the field
+     * @param value the value of the field. If null the field is cleared.
+     */
+    public void put(Buffer name,String value)
+    {
+        Buffer v=HttpHeaderValues.CACHE.lookup(value);
+        put(name,v,-1);
     }
 
     /* -------------------------------------------------------------- */
@@ -503,33 +514,7 @@ public class HttpFields
      */
     public void put(Buffer name,Buffer value)
     {
-        if (value==null)
-            {remove(name);return;} 
-        
-        if (!(name instanceof BufferCache.CachedBuffer))
-            name = HttpHeaders.CACHE.lookup(name);
-        
-        Field field=(Field)_bufferMap.get(name);
-        
-        // Look for value to replace.
-        if (field!=null)
-        {
-            field.reset(value,-1L,_revision);
-            field=field._next;
-            while(field!=null)
-            {
-                field.clear();
-                field=field._next;
-            }
-            return;    
-        }
-        else
-        {
-            // new value;
-            field=new Field(name,value,-1,_revision);
-            _fields.add(field);
-            _bufferMap.put(name,field);
-        }
+        put(name,value,-1);
     }
     
     /* -------------------------------------------------------------- */
@@ -617,7 +602,7 @@ public class HttpFields
     {
         Buffer n=HttpHeaders.CACHE.lookup(name);
         Buffer v=HttpHeaderValues.CACHE.lookup(value);
-        add(n,v);
+        add(n,v,-1);
     }
 
     /* -------------------------------------------------------------- */
@@ -630,6 +615,21 @@ public class HttpFields
      *            valued field and already has a value.
      */
     public void add(Buffer name,Buffer value)
+        throws IllegalArgumentException
+    {
+        add(name,value,-1);
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Add to or set a field.
+     * If the field is allowed to have multiple values, add will add
+     * multiple headers of the same name.
+     * @param name the name of the field
+     * @param value the value of the field.
+     * @exception IllegalArgumentException If the name is a single
+     *            valued field and already has a value.
+     */
+    private void add(Buffer name,Buffer value,long numValue)
         throws IllegalArgumentException
     {
         if (value==null)
@@ -650,11 +650,11 @@ public class HttpFields
         }
 
         if (field!=null)    
-            field.reset(value,-1,_revision);
+            field.reset(value,numValue,_revision);
         else
         {
             // create the field
-            field=new Field(name,value,-1,_revision);
+            field=new Field(name,value,numValue,_revision);
             
             // look for chain to add too
             if(last!=null)
@@ -785,10 +785,22 @@ public class HttpFields
      */
     public void putLongField(String name, long value)
     {
-        // TODO can do much much better than this
         Buffer n=HttpHeaders.CACHE.lookup(name);
         Buffer v=BufferUtil.toBuffer(value);
         put(n,v,value);
+    }
+    
+    /* -------------------------------------------------------------- */
+    /**
+     * Sets the value of an long field.
+     * @param name the field name
+     * @param value the field long value
+     */
+    public void addLongField(String name, long value)
+    {
+        Buffer n=HttpHeaders.CACHE.lookup(name);
+        Buffer v=BufferUtil.toBuffer(value);
+        add(n,v,value);
     }
     
     /* -------------------------------------------------------------- */
@@ -810,6 +822,27 @@ public class HttpFields
         Buffer n=HttpHeaders.CACHE.lookup(name);
         Buffer v=new ByteArrayBuffer(_dateBuffer.toString());
         put(n,v,date);
+    }
+    
+    /* -------------------------------------------------------------- */
+    /**
+     * Sets the value of a date field.
+     * @param name the field name
+     * @param date the field date value
+     */
+    public void addDateField(String name, long date)
+    {
+        if (_dateBuffer==null)
+        {
+            _dateBuffer=new StringBuffer(32);
+            _calendar=new GregorianCalendar(__GMT);
+        }
+        _dateBuffer.setLength(0);
+        _calendar.setTimeInMillis(date);
+        formatDate(_dateBuffer, _calendar, false);
+        Buffer n=HttpHeaders.CACHE.lookup(name);
+        Buffer v=new ByteArrayBuffer(_dateBuffer.toString());
+        add(n,v,date);
     }
 
     /* ------------------------------------------------------------ */
@@ -1180,8 +1213,8 @@ public class HttpFields
         /* ------------------------------------------------------------ */
         private Field(Buffer name, Buffer value, long numValue, int revision)
         {
-            _name=name.asReadOnlyBuffer();
-            _value=value.asReadOnlyBuffer();
+            _name=name;
+            _value=value;
             _numValue=numValue;
             _next=null;
             _prev=null;

@@ -16,13 +16,18 @@
 package org.mortbay.util;
 import java.lang.reflect.Method;
 
+import org.apache.ugli.LoggerFactory;
 import org.apache.ugli.ULogger;
+import org.mortbay.http.HttpConnection;
 
 /*-----------------------------------------------------------------------*/
 /** Log Support class.
  */
 public class LogSupport 
 {    
+    private static ULogger log = LoggerFactory.getLogger(LogSupport.class);
+    
+    public final static String FATAL= "FATAL ";
     public final static String IGNORED= "IGNORED ";
     public final static String EXCEPTION= "EXCEPTION ";
     public final static String NOT_IMPLEMENTED= "NOT IMPLEMENTED ";
@@ -39,7 +44,28 @@ public class LogSupport
         if (trace && log.isDebugEnabled()) log.debug(IGNORED,th);
     }
     
+    /* ------------------------------------------------------------ */
+    /**
+     * Ignore an exception unless trace is enabled.
+     * This works around the problem that log4j does not support the trace level.
+     */
+    public static void ignore(Throwable th)
+    {
+        if (trace && log.isDebugEnabled()) log.debug(IGNORED,th);
+    }
+    
 
+    /* ------------------------------------------------------------ */
+    /**
+     * Fatal exception
+     * This works around the problem that log4j does not support the trace level.
+     */
+    public static void fatal(ULogger log,Throwable th)
+    {
+        log.debug(FATAL,th);
+        System.exit(1);
+    }
+    
     /*-------------------------------------------------------------------*/
     private static final Class[] __noArgs=new Class[0];
     private static final String[] __nestedEx =

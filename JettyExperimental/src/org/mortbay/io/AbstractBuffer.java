@@ -32,9 +32,10 @@ public abstract class AbstractBuffer implements Buffer
     protected boolean _volatile;
 
     private int _get;
+    private int _put;
+    private int _length=-1;
     private int _hash;
     private int _mark;
-    private int _put;
     protected String _string;
     private View _view;
 
@@ -150,6 +151,9 @@ public abstract class AbstractBuffer implements Buffer
 
     public boolean equals(Object obj)
     {
+        if (obj==this)
+            return true;
+        
         // reject non buffers;
         if (obj == null || !(obj instanceof Buffer)) return false;
         Buffer b = (Buffer) obj;
@@ -179,6 +183,9 @@ public abstract class AbstractBuffer implements Buffer
 
     public boolean equalsIgnoreCase(Buffer b)
     {
+        if (b==this)
+            return true;
+        
         // reject different lengths
         if (b.length() != length()) return false;
 
@@ -206,9 +213,9 @@ public abstract class AbstractBuffer implements Buffer
 
     public byte get()
     {
-        int gi = getIndex();
-        byte b = peek(gi);
-        setGetIndex(gi + 1);
+        byte b = peek(_get++);
+        _hash=0;
+        _length=-1;
         return b;
     }
 
@@ -228,33 +235,28 @@ public abstract class AbstractBuffer implements Buffer
         return view;
     }
 
-    public int getIndex()
+    public final int getIndex()
     {
         return _get;
     }
 
     public boolean hasContent()
     {
-        return putIndex() > getIndex();
+        return _put > _get;
     }
-
-    private int hash()
-    {
-        int hash = 0;
-        for (int i = putIndex(); i-- > getIndex();)
-        {
-            byte b = peek(i);
-            if ('a' <= b && b <= 'z') b = (byte) (b - 'a' + 'A');
-            hash = 31 * hash + b;
-        }
-        if (hash == 0) hash = -1;
-        return hash;
-    }
-
+    
     public int hashCode()
     {
-        if (!isImmutable()) return hash();
-        if (_hash == 0) _hash = hash();
+        if (_hash == 0) 
+        {
+            for (int i = putIndex(); i-- > getIndex();)
+            {
+                byte b = peek(i);
+                if ('a' <= b && b <= 'z') b = (byte) (b - 'a' + 'A');
+                _hash = 31 * _hash + b;
+            }
+            if (_hash == 0) _hash = -1;
+        }
         return _hash;
     }
 
@@ -275,17 +277,19 @@ public abstract class AbstractBuffer implements Buffer
 
     public int length()
     {
-        return putIndex() - getIndex();
+        if (_length<0)
+            _length=_put - _get;
+        return _length;
     }
 
     public void mark()
     {
-        setMarkIndex(getIndex() - 1);
+        setMarkIndex(_get - 1);
     }
 
     public void mark(int offset)
     {
-        setMarkIndex(getIndex() + offset);
+        setMarkIndex(_get + offset);
     }
 
     public int markIndex()
@@ -295,7 +299,7 @@ public abstract class AbstractBuffer implements Buffer
 
     public byte peek()
     {
-        return peek(getIndex());
+        return peek(_get);
     }
 
     public Buffer peek(int index, int length)
@@ -316,6 +320,7 @@ public abstract class AbstractBuffer implements Buffer
 
     public int poke(int index, Buffer src)
     {
+        _hash=0;
         if (isReadOnly()) Portable.throwIllegalState(__READONLY);
         if (index < 0) Portable.throwIllegalArgument("index<0: " + index + "<0");
         
@@ -359,6 +364,7 @@ public abstract class AbstractBuffer implements Buffer
 
     public int poke(int index, byte[] b, int offset, int length)
     {
+        _hash=0;
         if (isReadOnly()) Portable.throwIllegalState(__READONLY);
         if (index < 0) Portable.throwIllegalArgument("index<0: " + index + "<0");
 
@@ -412,7 +418,7 @@ public abstract class AbstractBuffer implements Buffer
         return l;
     }
 
-    public int putIndex()
+    public final int putIndex()
     {
         return _put;
     }
@@ -431,11 +437,14 @@ public abstract class AbstractBuffer implements Buffer
 
     public void setGetIndex(int getIndex)
     {
+        /* TODO
         if (isImmutable()) Portable.throwIllegalState(__IMMUTABLE);
         if (getIndex < 0) Portable.throwIllegalArgument("getIndex<0: " + getIndex + "<0");
-        if (getIndex > putIndex())
-                Portable.throwIllegalArgument("getIndex>putIndex: " + getIndex + ">" + putIndex());
+        if (getIndex > putIndex()) Portable.throwIllegalArgument("getIndex>putIndex: " + getIndex + ">" + putIndex());
+         */
         _get = getIndex;
+        _hash=0;
+        _length=-1;
     }
 
     public void setMarkIndex(int index)
@@ -446,12 +455,16 @@ public abstract class AbstractBuffer implements Buffer
 
     public void setPutIndex(int putIndex)
     {
+        /* TODO
         if (isImmutable()) Portable.throwIllegalState(__IMMUTABLE);
         if (putIndex > capacity())
                 Portable.throwIllegalArgument("putIndex>capacity: " + putIndex + ">" + capacity());
         if (getIndex() > putIndex)
                 Portable.throwIllegalArgument("getIndex>putIndex: " + getIndex() + ">" + putIndex);
+         */
         _put = putIndex;
+        _hash=0;
+        _length=-1;
     }
 
     public int skip(int n)

@@ -100,9 +100,13 @@ public class ByteArrayEndPoint implements EndPoint
     }
 
     /* ------------------------------------------------------------ */
-    public void block(long millisecs)
+    public void blockReadable(long millisecs)
     {
-        Portable.throwNotSupported();
+    }
+
+    /* ------------------------------------------------------------ */
+    public void blockWritable(long millisecs)
+    {
     }
 
     /* ------------------------------------------------------------ */

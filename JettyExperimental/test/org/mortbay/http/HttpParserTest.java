@@ -19,6 +19,7 @@ import junit.framework.TestCase;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
+import org.mortbay.io.SimpleBuffers;
 import org.mortbay.io.bio.StringEndPoint;
 
 /**
@@ -67,9 +68,10 @@ public class HttpParserTest extends TestCase
         StringEndPoint io=new StringEndPoint();
         io.setInput("POST /foo HTTP/1.0\015\012" + "\015\012");
         ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
+        SimpleBuffers buffers=new SimpleBuffers(buffer,null);
 
         Handler handler = new Handler();
-        HttpParser parser= new HttpParser(buffer,io, handler);
+        HttpParser parser= new HttpParser(buffers,io, handler);
         parser.parse();
         assertEquals("POST", f0);
         assertEquals("/foo", f1);
@@ -83,10 +85,11 @@ public class HttpParserTest extends TestCase
         StringEndPoint io=new StringEndPoint();
         io.setInput("GET /999\015\012");
         ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
+        SimpleBuffers buffers=new SimpleBuffers(buffer,null);
 
         f2= null;
         Handler handler = new Handler();
-        HttpParser parser= new HttpParser(buffer,io, handler);
+        HttpParser parser= new HttpParser(buffers,io, handler);
         parser.parse();
         assertEquals("GET", f0);
         assertEquals("/999", f1);
@@ -100,10 +103,11 @@ public class HttpParserTest extends TestCase
         StringEndPoint io=new StringEndPoint();
         io.setInput("POST /222  \015\012");
         ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
+        SimpleBuffers buffers=new SimpleBuffers(buffer,null);
 
         f2= null;
         Handler handler = new Handler();
-        HttpParser parser= new HttpParser(buffer,io, handler);
+        HttpParser parser= new HttpParser(buffers,io, handler);
         parser.parse();
         assertEquals("POST", f0);
         assertEquals("/222", f1);
@@ -125,9 +129,10 @@ public class HttpParserTest extends TestCase
                 + "  value4\015\012"
                 + "\015\012");
         ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
+        SimpleBuffers buffers=new SimpleBuffers(buffer,null);
 
         Handler handler = new Handler();
-        HttpParser parser= new HttpParser(buffer,io, handler);
+        HttpParser parser= new HttpParser(buffers,io, handler);
         parser.parse();
         assertEquals("GET", f0);
         assertEquals("/", f1);
@@ -158,9 +163,10 @@ public class HttpParserTest extends TestCase
                 + "ABCDEFGHIJKLMNOPQRSTUVWXYZ\015\012"
                 + "0\015\012");
         ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
+        SimpleBuffers buffers=new SimpleBuffers(buffer,new ByteArrayBuffer(4096));
 
         Handler handler = new Handler();
-        HttpParser parser= new HttpParser(buffer,io, handler);
+        HttpParser parser= new HttpParser(buffers,io, handler);
         parser.parse();
         assertEquals("GET", f0);
         assertEquals("/chunk", f1);
@@ -196,9 +202,10 @@ public class HttpParserTest extends TestCase
                 + "0123456789\015\012");
 
         ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
+        SimpleBuffers buffers=new SimpleBuffers(buffer,new ByteArrayBuffer(4096));
 
         Handler handler = new Handler();
-        HttpParser parser= new HttpParser(buffer,io, handler);
+        HttpParser parser= new HttpParser(buffers,io, handler);
         parser.parse();
         assertEquals("GET", f0);
         assertEquals("/mp", f1);
@@ -270,10 +277,11 @@ public class HttpParserTest extends TestCase
             try
             {
                 ByteArrayBuffer buffer= new ByteArrayBuffer(tests[t]);
+                SimpleBuffers buffers=new SimpleBuffers(buffer,new ByteArrayBuffer(4096));
                 io.setInput(http);
                 
                 Handler handler = new Handler();
-                HttpParser parser= new HttpParser(buffer,io, handler);
+                HttpParser parser= new HttpParser(buffers,io, handler);
                 parser.parse();
                 assertEquals(tst,"GET", f0);
                 assertEquals(tst,"/", f1);

@@ -126,6 +126,7 @@ public abstract class AbstractHttpConnector extends AbstractLifeCycle implements
         // open listener port
         open();
         _buffers=new ArrayList();
+        _headerBuffers=new ArrayList();
 
         // Start selector thread
         _server.dispatch(new Acceptor());

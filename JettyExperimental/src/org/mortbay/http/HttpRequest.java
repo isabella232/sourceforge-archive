@@ -100,7 +100,7 @@ public class HttpRequest implements HttpServletRequest
         _dns=_connection.useDNS();
     }
 
-    void reset()
+    void recycle()
     {
         if(_attributes!=null)
             _attributes.clear();
@@ -263,8 +263,10 @@ public class HttpRequest implements HttpServletRequest
      */
     public ServletInputStream getInputStream() throws IOException
     {
-        // TODO Auto-generated method stub
-        return null;
+        if (_inputState!=NONE && _inputState!=STREAM)
+            throw new IllegalStateException("READER");
+        _inputState=STREAM;
+        return _connection.getInputStream();
     }
 
     /* ------------------------------------------------------------ */
@@ -483,7 +485,7 @@ public class HttpRequest implements HttpServletRequest
     public BufferedReader getReader() throws IOException
     {
         if (_inputState!=NONE && _inputState!=READER)
-            throw new IllegalStateException();
+            throw new IllegalStateException("STREAMED");
         if (_reader==null)
         {
             String encoding=getCharacterEncoding();
@@ -894,12 +896,6 @@ public class HttpRequest implements HttpServletRequest
     }
     
     
-    
-    
-    
-    
-    
-    
     /* ------------------------------------------------------------ */
     /**
      * @param host The host to set.
@@ -923,7 +919,9 @@ public class HttpRequest implements HttpServletRequest
     void setUri(URI uri)
     {
         _uri = uri;
+        _requestURI=uri.getPath();
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the connection.
@@ -932,6 +930,7 @@ public class HttpRequest implements HttpServletRequest
     {
         return _connection;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the inputState.
@@ -940,6 +939,7 @@ public class HttpRequest implements HttpServletRequest
     {
         return _inputState;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param authType The authType to set.
@@ -948,6 +948,7 @@ public class HttpRequest implements HttpServletRequest
     {
         _authType = authType;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param contextPath The contextPath to set.
@@ -956,6 +957,7 @@ public class HttpRequest implements HttpServletRequest
     {
         _contextPath = contextPath;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param cookies The cookies to set.
@@ -964,6 +966,7 @@ public class HttpRequest implements HttpServletRequest
     {
         _cookies = cookies;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param method The method to set.
@@ -972,6 +975,7 @@ public class HttpRequest implements HttpServletRequest
     {
         _method = method;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param pathInfo The pathInfo to set.
@@ -980,6 +984,7 @@ public class HttpRequest implements HttpServletRequest
     {
         _pathInfo = pathInfo;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param protocol The protocol to set.
@@ -988,6 +993,7 @@ public class HttpRequest implements HttpServletRequest
     {
         _protocol = protocol;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param requestedSessionId The requestedSessionId to set.
@@ -996,6 +1002,7 @@ public class HttpRequest implements HttpServletRequest
     {
         _requestedSessionId = requestedSessionId;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param scheme The scheme to set.
@@ -1004,6 +1011,7 @@ public class HttpRequest implements HttpServletRequest
     {
         _scheme = scheme;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param userPrincipal The userPrincipal to set.

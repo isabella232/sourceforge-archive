@@ -32,7 +32,7 @@ public class SimpleBuffers implements Buffers
     /**
      * 
      */
-    public SimpleBuffers(Buffer big,Buffer small)
+    public SimpleBuffers(Buffer small,Buffer big)
     {
         _big=big;
         _small=small;

@@ -55,7 +55,7 @@ public class HttpBuilderTest extends TestCase
         Buffer sb=new ByteArrayBuffer(1500);
         HttpFields fields = new HttpFields();
         ByteArrayEndPoint endp = new ByteArrayEndPoint(new byte[0],4096);
-        HttpBuilder hb = new HttpBuilder(new SimpleBuffers(bb,sb),endp);
+        HttpBuilder hb = new HttpBuilder(new SimpleBuffers(sb,bb),endp);
         Handler handler = new Handler();
         HttpParser parser=null;
         
@@ -89,7 +89,7 @@ public class HttpBuilderTest extends TestCase
                             continue;
                         }
                         
-                        parser=new HttpParser(new ByteArrayBuffer(response.getBytes()),null, handler);
+                        parser=new HttpParser(new ByteArrayBuffer(response.getBytes()), handler);
                         try
                         {
                             parser.parse();
@@ -147,8 +147,7 @@ public class HttpBuilderTest extends TestCase
                     continue;
                 fields.put(new ByteArrayBuffer(headers[i]),new ByteArrayBuffer(values[i]));
             }
-            
-            
+                        
             if (content!=null)
             {
                 int inc=1+content.length()/chunks;
@@ -158,7 +157,8 @@ public class HttpBuilderTest extends TestCase
                 {
                     view.setPutIndex(i*inc);
                     view.setGetIndex((i-1)*inc);
-                    if (hb.addContent(view, false) && hb.isState(HttpBuilder.STATE_HEADER))
+                    hb.addContent(view,HttpBuilder.MORE);
+                    if (hb.isBufferFull() && hb.isState(HttpBuilder.STATE_HEADER))
                         hb.completeHeader(fields, HttpBuilder.MORE);
                     if (i%2==0)
                     {
@@ -169,7 +169,8 @@ public class HttpBuilderTest extends TestCase
                 }
                 view.setPutIndex(buf.putIndex());
                 view.setGetIndex((chunks-1)*inc);
-                if(hb.addContent(view, true) && hb.isState(HttpBuilder.STATE_HEADER))
+                hb.addContent(view,HttpBuilder.LAST);
+                if(hb.isBufferFull() && hb.isState(HttpBuilder.STATE_HEADER))
                     hb.completeHeader(fields, HttpBuilder.LAST);
             }
             else

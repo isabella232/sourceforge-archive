@@ -110,7 +110,10 @@ public interface EndPoint
     public boolean isBlocking();
     
     /* ------------------------------------------------------------ */
-    public void block(long millisecs);
+    public void blockReadable(long millisecs);
+
+    /* ------------------------------------------------------------ */
+    public void blockWritable(long millisecs);
 
     /* ------------------------------------------------------------ */
     public boolean isClosed();

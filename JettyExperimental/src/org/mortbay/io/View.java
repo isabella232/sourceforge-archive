@@ -54,6 +54,9 @@ public class View extends AbstractBuffer
         _access=buffer.isReadOnly()?READONLY:READWRITE;
     }
     
+    /**
+     * Update view to buffer
+     */
     public void update(Buffer buffer)
     {
         _access=READWRITE;

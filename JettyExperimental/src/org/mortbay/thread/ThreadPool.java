@@ -257,7 +257,7 @@ public class ThreadPool extends AbstractLifeCycle implements Serializable
             _jobs.add(job);
             queued=true;
             _jobLock.notify();
-            Thread.yield(); 
+            // TODO ?? Thread.yield(); 
         }
         
         return queued;

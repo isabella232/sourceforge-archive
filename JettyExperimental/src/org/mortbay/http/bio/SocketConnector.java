@@ -97,7 +97,7 @@ public class SocketConnector extends AbstractHttpConnector
         Connection(Socket socket) throws IOException
         {
             super(socket);
-            _connection = new HttpConnection(SocketConnector.this,this);
+            _connection = new HttpConnection(SocketConnector.this,this, null);
         }
         
         void dispatch() throws InterruptedException

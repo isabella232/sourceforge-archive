@@ -23,6 +23,14 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.ugli.LoggerFactory;
+import org.apache.ugli.ULogger;
+import org.mortbay.io.IO;
+import org.mortbay.io.Portable;
+import org.mortbay.util.LogSupport;
+import org.mortbay.util.QuotedStringTokenizer;
+import org.mortbay.util.StringUtil;
+
 /* ------------------------------------------------------------ */
 /** HttpResponse.
  * @author gregw
@@ -30,25 +38,76 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class HttpResponse implements HttpServletResponse
 {
+    private static ULogger log = LoggerFactory.getLogger(HttpResponse.class);
+    
+    public static final int
+        DISABLED=-1,
+        NONE=0,
+        STREAM=1,
+        WRITER=2;
+    
+    private static ServletWriter __nullServletWriter;
+    private static ServletOutputStream __nullServletOut;
+    static
+    {
+        try{
+            __nullServletWriter = new ServletWriter(IO.getNullStream());
+            __nullServletOut = new NullOutput();
+        }
+        catch (Exception e)
+        {
+            LogSupport.fatal(log,e);
+        }
+    }
+    
+    private HttpConnection _connection;
+    private int _status=200;
+    private String _reason;
+    private Locale _locale;
+    private String _mimeType;
+    private String _characterEncoding;
+    private boolean _explicitEncoding;
+    private String _contentType;    
+    private int _outputState;
+    private ServletWriter _writer;
+
+
 
     /* ------------------------------------------------------------ */
     /**
      * 
      */
-    public HttpResponse()
+    HttpResponse(HttpConnection connection)
     {
-        super();
-        // TODO Auto-generated constructor stub
+        _connection=connection;
     }
 
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see javax.servlet.ServletResponse#reset()
+     */
+    void recycle()
+    {
+        _status=200;
+        _reason=null;
+        _locale=null;
+        _mimeType=null;
+        _characterEncoding=null;
+        _explicitEncoding=false;
+        _contentType=null;
+        _outputState=NONE;  
+        _writer=null;
+    }
+    
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.http.HttpServletResponse#addCookie(javax.servlet.http.Cookie)
      */
     public void addCookie(Cookie cookie)
     {
-        // TODO Auto-generated method stub
-
+        _connection.getResponseFields().addSetCookie(cookie);
     }
 
     /* ------------------------------------------------------------ */
@@ -57,8 +116,7 @@ public class HttpResponse implements HttpServletResponse
      */
     public boolean containsHeader(String name)
     {
-        // TODO Auto-generated method stub
-        return false;
+        return _connection.getResponseFields().containsKey(name);
     }
 
     /* ------------------------------------------------------------ */
@@ -68,7 +126,7 @@ public class HttpResponse implements HttpServletResponse
     public String encodeURL(String url)
     {
         // TODO Auto-generated method stub
-        return null;
+        return url;
     }
 
     /* ------------------------------------------------------------ */
@@ -77,8 +135,7 @@ public class HttpResponse implements HttpServletResponse
      */
     public String encodeRedirectURL(String url)
     {
-        // TODO Auto-generated method stub
-        return null;
+        return encodeURL(url);
     }
 
     /* ------------------------------------------------------------ */
@@ -87,8 +144,7 @@ public class HttpResponse implements HttpServletResponse
      */
     public String encodeUrl(String url)
     {
-        // TODO Auto-generated method stub
-        return null;
+        return encodeURL(url);
     }
 
     /* ------------------------------------------------------------ */
@@ -97,8 +153,7 @@ public class HttpResponse implements HttpServletResponse
      */
     public String encodeRedirectUrl(String url)
     {
-        // TODO Auto-generated method stub
-        return null;
+        return encodeURL(url);
     }
 
     /* ------------------------------------------------------------ */
@@ -107,6 +162,9 @@ public class HttpResponse implements HttpServletResponse
      */
     public void sendError(int sc, String msg) throws IOException
     {
+        _status=sc;
+        _reason=msg;
+        
         // TODO Auto-generated method stub
 
     }
@@ -117,6 +175,9 @@ public class HttpResponse implements HttpServletResponse
      */
     public void sendError(int sc) throws IOException
     {
+        _status=sc;
+        _reason=null;
+        
         // TODO Auto-generated method stub
 
     }
@@ -137,8 +198,7 @@ public class HttpResponse implements HttpServletResponse
      */
     public void setDateHeader(String name, long date)
     {
-        // TODO Auto-generated method stub
-
+        _connection.getResponseFields().putDateField(name, date);
     }
 
     /* ------------------------------------------------------------ */
@@ -147,8 +207,7 @@ public class HttpResponse implements HttpServletResponse
      */
     public void addDateHeader(String name, long date)
     {
-        // TODO Auto-generated method stub
-
+        _connection.getResponseFields().addDateField(name, date);
     }
 
     /* ------------------------------------------------------------ */
@@ -157,8 +216,7 @@ public class HttpResponse implements HttpServletResponse
      */
     public void setHeader(String name, String value)
     {
-        // TODO Auto-generated method stub
-
+        _connection.getResponseFields().put(name, value);
     }
 
     /* ------------------------------------------------------------ */
@@ -167,8 +225,7 @@ public class HttpResponse implements HttpServletResponse
      */
     public void addHeader(String name, String value)
     {
-        // TODO Auto-generated method stub
-
+        _connection.getResponseFields().put(name, value);
     }
 
     /* ------------------------------------------------------------ */
@@ -177,8 +234,7 @@ public class HttpResponse implements HttpServletResponse
      */
     public void setIntHeader(String name, int value)
     {
-        // TODO Auto-generated method stub
-
+        _connection.getResponseFields().putLongField(name, value);
     }
 
     /* ------------------------------------------------------------ */
@@ -187,8 +243,7 @@ public class HttpResponse implements HttpServletResponse
      */
     public void addIntHeader(String name, int value)
     {
-        // TODO Auto-generated method stub
-
+        _connection.getResponseFields().addLongField(name, value);
     }
 
     /* ------------------------------------------------------------ */
@@ -197,8 +252,8 @@ public class HttpResponse implements HttpServletResponse
      */
     public void setStatus(int sc)
     {
-        // TODO Auto-generated method stub
-
+        _status=sc;
+        _reason=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -207,8 +262,8 @@ public class HttpResponse implements HttpServletResponse
      */
     public void setStatus(int sc, String sm)
     {
-        // TODO Auto-generated method stub
-
+        _status=sc;
+        _reason=sm;
     }
 
     /* ------------------------------------------------------------ */
@@ -217,8 +272,9 @@ public class HttpResponse implements HttpServletResponse
      */
     public String getCharacterEncoding()
     {
-        // TODO Auto-generated method stub
-        return null;
+        if (_characterEncoding==null)
+            _characterEncoding=StringUtil.__ISO_8859_1;
+        return _characterEncoding;
     }
 
     /* ------------------------------------------------------------ */
@@ -227,8 +283,7 @@ public class HttpResponse implements HttpServletResponse
      */
     public String getContentType()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return _contentType;
     }
 
     /* ------------------------------------------------------------ */
@@ -237,8 +292,14 @@ public class HttpResponse implements HttpServletResponse
      */
     public ServletOutputStream getOutputStream() throws IOException
     {
-        // TODO Auto-generated method stub
-        return null;
+        if (_outputState==DISABLED)
+            return __nullServletOut;
+        
+        if (_outputState!=NONE && _outputState!=STREAM)
+            Portable.throwIllegalState("WRITER");
+       
+        _outputState=STREAM;
+        return _connection.getOutputStream();
     }
 
     /* ------------------------------------------------------------ */
@@ -247,18 +308,67 @@ public class HttpResponse implements HttpServletResponse
      */
     public PrintWriter getWriter() throws IOException
     {
-        // TODO Auto-generated method stub
-        return null;
+        if (_outputState==DISABLED)
+            return __nullServletWriter;
+                                   
+        if (_outputState!=NONE && _outputState!=WRITER)
+            Portable.throwIllegalState("STREAM");
+        
+        /* if there is no writer yet */
+        if (_writer==null)
+        {
+            /* get encoding from Content-Type header */
+            String encoding = _characterEncoding;
+            
+            if (encoding==null)
+            {
+                /* implementation of educated defaults */
+                if(_mimeType!=null)
+                    encoding = null; // TODO getHttpContext().getEncodingByMimeType(_mimeType);
+                
+                if (encoding==null)
+                    encoding = StringUtil.__ISO_8859_1;
+                
+                setCharacterEncoding(encoding);
+            }
+            
+            /* construct Writer using correct encoding */
+            _writer = new ServletWriter(_connection.getOutputStream(), encoding);
+        }                    
+        _outputState=WRITER;
+        return _writer;
     }
 
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.ServletResponse#setCharacterEncoding(java.lang.String)
      */
-    public void setCharacterEncoding(String charset)
+    public void setCharacterEncoding(String encoding)
     {
-        // TODO Auto-generated method stub
-
+        if (this._outputState==0 && !isCommitted())
+        {
+            _explicitEncoding=true;
+                 
+            if (encoding==null)
+            {
+                // Clear any encoding.
+                if (_characterEncoding!=null)
+                {
+                    _characterEncoding=null;
+                    _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_mimeType);
+                }
+            }
+            else
+            {
+                // No, so just add this one to the mimetype
+                _characterEncoding=encoding;
+                if (_mimeType!=null)
+                {
+                    _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,_mimeType+";charset="+
+                        	QuotedStringTokenizer.quote(_characterEncoding,";= "));
+                }
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -267,18 +377,71 @@ public class HttpResponse implements HttpServletResponse
      */
     public void setContentLength(int len)
     {
-        // TODO Auto-generated method stub
-
+        // Protect from setting after committed as default handling
+        // of a servlet HEAD request ALWAYS sets content length, even
+        // if the getHandling committed the response!
+        if (!isCommitted())
+            _connection.getResponseFields().putLongField(HttpHeaders.CONTENT_LENGTH, len);
     }
 
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.ServletResponse#setContentType(java.lang.String)
      */
-    public void setContentType(String type)
+    public void setContentType(String typeAndMime)
     {
-        // TODO Auto-generated method stub
+        if (isCommitted())
+            return;
+        
+        if (typeAndMime==null)
+        {
+            if (_locale==null)
+                _characterEncoding=null;
+            _mimeType=null;
+            _contentType=null;
+            _connection.getResponseFields().remove(HttpHeaders.CONTENT_TYPE_BUFFER);
+        }
+        else
+        {
+            // Look for encoding in contentType
+            int i0=typeAndMime.indexOf(';');
+            
+            if (i0>0)
+            {
+                // Strip params off mimetype
+                _mimeType=typeAndMime.substring(0,i0).trim();
 
+                // Look for charset
+                int i1=typeAndMime.indexOf("charset=",i0);
+                if (i1>=0)
+                {
+                    i1+=8;
+                    int i2 = typeAndMime.indexOf(' ',i1);
+                    _characterEncoding = (0<i2)
+                        ? typeAndMime.substring(i1,i2)
+                        : typeAndMime.substring(i1);
+                    _characterEncoding = QuotedStringTokenizer.unquote(_characterEncoding);
+                }
+                else // No encoding in the params.
+                {
+                     if (_characterEncoding!=null)
+                         // Add any previously set encoding.
+                         _contentType=typeAndMime+";charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
+                }
+            }
+            else // No encoding and no other params
+            {
+                _mimeType=typeAndMime;
+               
+                // Add any previously set encoding.
+                if (_characterEncoding!=null)
+                    _contentType=typeAndMime+";charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
+                else
+                    _contentType=_mimeType;
+            }
+            
+            _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,MimeTypes.CACHE.lookup(_contentType)); 
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -288,7 +451,7 @@ public class HttpResponse implements HttpServletResponse
     public void setBufferSize(int size)
     {
         // TODO Auto-generated method stub
-
+        // maybe just insert extra buffer for these wallies ????
     }
 
     /* ------------------------------------------------------------ */
@@ -307,28 +470,7 @@ public class HttpResponse implements HttpServletResponse
      */
     public void flushBuffer() throws IOException
     {
-        // TODO Auto-generated method stub
-
-    }
-
-    /* ------------------------------------------------------------ */
-    /* 
-     * @see javax.servlet.ServletResponse#resetBuffer()
-     */
-    public void resetBuffer()
-    {
-        // TODO Auto-generated method stub
-
-    }
-
-    /* ------------------------------------------------------------ */
-    /* 
-     * @see javax.servlet.ServletResponse#isCommitted()
-     */
-    public boolean isCommitted()
-    {
-        // TODO Auto-generated method stub
-        return false;
+        _connection.flushResponse();
     }
 
     /* ------------------------------------------------------------ */
@@ -337,18 +479,74 @@ public class HttpResponse implements HttpServletResponse
      */
     public void reset()
     {
-        // TODO Auto-generated method stub
-
+        resetBuffer();
+        
+        _status=200;
+        _reason=null;
+        _mimeType=_contentType=_characterEncoding=null;
+        _explicitEncoding=false;
+        _locale=null;
+        _outputState=NONE;
+        _writer=null; 
     }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see javax.servlet.ServletResponse#resetBuffer()
+     */
+    public void resetBuffer()
+    {
+        if (isCommitted())
+            throw new IllegalStateException("Committed");
+        if (_writer!=null)
+            _writer.reset();
+        
+        // TODO Auto-generated method stub
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see javax.servlet.ServletResponse#isCommitted()
+     */
+    public boolean isCommitted()
+    {
+        return _connection.isResponseCommitted();
+    }
+
 
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.ServletResponse#setLocale(java.util.Locale)
      */
-    public void setLocale(Locale loc)
+    public void setLocale(Locale locale)
     {
-        // TODO Auto-generated method stub
+        if (this._outputState!=0 || locale == null || isCommitted())
+            return; 
 
+        _locale = locale;
+        _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,locale.toString().replace('_','-'));
+                          
+        /* get current MIME type from Content-Type header */                  
+        String type=getContentType();
+        if (type==null)
+        {
+            // servlet did not set Content-Type yet
+            // so lets assume default one
+            type="application/octet-stream";
+        }
+        
+        String charset = null; // TODO getLocaleEncoding(locale);
+        if (charset != null && charset.length()>0)
+        {
+            int semi=type.indexOf(';');
+            if (semi<0)
+                type += "; charset="+charset;
+            else if (!_explicitEncoding)
+                type = type.substring(0,semi)+"; charset="+charset;
+            
+            _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,type);
+        }
+        
     }
 
     /* ------------------------------------------------------------ */
@@ -357,14 +555,41 @@ public class HttpResponse implements HttpServletResponse
      */
     public Locale getLocale()
     {
-        // TODO Auto-generated method stub
-        return null;
+        if (_locale==null)
+            return Locale.getDefault();
+        return _locale;
     }
-
 
     /* ------------------------------------------------------------ */
-    public void sendContent(Object content)
+    /**
+     * @return
+     */
+    public int getStatus()
     {
-        // TODO
+        return _status;
     }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public String getReason()
+    {
+        return _reason;
+    }
+    
+
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private static class NullOutput extends ServletOutputStream
+    {
+        public void write(int b) throws IOException
+        {
+        }
+    }
+
+
+
 }

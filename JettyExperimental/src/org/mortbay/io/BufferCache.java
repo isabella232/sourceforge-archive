@@ -69,7 +69,10 @@ public class BufferCache
     {
         Buffer b= get(buffer);
         if (b == null)
+        {
             return buffer;
+        }
+
         return b;
     }
 
@@ -77,7 +80,9 @@ public class BufferCache
     {
         Buffer b= get(value);
         if (b == null)
+        {
             return new CachedBuffer(value,-1);
+        }
         return b;
     }
 

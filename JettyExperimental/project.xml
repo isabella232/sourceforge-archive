@@ -70,7 +70,7 @@
      -->
      <dependency>
         <groupId>log4j</groupId>
-        <artifactId>log4j</artifactId>
+        <artifactId>ugli-simple</artifactId>
         <version>1.3alpha-6</version>
      </dependency>
   </dependencies>

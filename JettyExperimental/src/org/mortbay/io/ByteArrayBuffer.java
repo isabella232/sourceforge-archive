@@ -116,4 +116,34 @@ public class ByteArrayBuffer extends AbstractBuffer
         }
     }
 
+
+    /* ------------------------------------------------------------ */
+    /** Wrap a byte array.
+     * @param b
+     * @param off
+     * @param len
+     */
+    public void wrap(byte[] b, int off, int len)
+    {
+        if (isReadOnly()) Portable.throwIllegalState(__READONLY);
+        if (isImmutable()) Portable.throwIllegalState(__IMMUTABLE);
+        _bytes=b;
+        clear();
+        setGetIndex(off);
+        setPutIndex(off+len);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Wrap a byte array
+     * @param b
+     */
+    public void wrap(byte[] b)
+    {
+        if (isReadOnly()) Portable.throwIllegalState(__READONLY);
+        if (isImmutable()) Portable.throwIllegalState(__IMMUTABLE);
+        _bytes=b;
+        setGetIndex(0);
+        setPutIndex(b.length);
+    }
+
 }

@@ -50,9 +50,12 @@ public class StreamEndPoint implements EndPoint
         return true;
     }
 
-    public void block(long millisecs)
+    public void blockReadable(long millisecs)
     {
-        Portable.throwNotSupported();
+    }
+    
+    public void blockWritable(long millisecs)
+    {
     }
 
     /* (non-Javadoc)
@@ -114,7 +117,20 @@ public class StreamEndPoint implements EndPoint
             return -1;
         int length=buffer.length();
         if (length>0)
-            _out.write(buffer.array(),buffer.getIndex(),length);
+        {
+            if (buffer.array()!=null)
+                _out.write(buffer.array(),buffer.getIndex(),length);
+            else
+            {
+                // TODO horrid hack
+                byte[] b = new byte[8192];
+                while (buffer.length()>0)
+                {
+                    int len = buffer.get(b,0,8192);
+                    _out.write(b,0,len);
+                }
+            }
+        }
         if (!buffer.isImmutable())
             buffer.clear();
         return length;
@@ -125,68 +141,46 @@ public class StreamEndPoint implements EndPoint
      */
     public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
     {
-        // TODO lots of efficiency stuff here to avoid double write
-        // TODO handle null array()
-
-        int total=0;
+        int len=0;
         
-        // See if the header buffer will fit in front of buffer content.
-        int length=header==null?0:header.length();
-        if (length>0 && length<=buffer.getIndex())
+        if (header!=null)
         {
-            int pi=buffer.putIndex();
-            buffer.setGetIndex(buffer.getIndex()-length);
-            buffer.setPutIndex(buffer.getIndex());
-            buffer.put(header);
-            buffer.setPutIndex(pi);
-        }
-        else if (length>0)
-        {
-            _out.write(header.array(),header.getIndex(),length);
-            total=length;
-        }
-        // TODO
-        header.clear();
-
-        // See if the trailer buffer will fit in front of buffer content.
-        length=trailer==null?0:trailer.length();
-        if (length>0 && length<=buffer.space())
-        {
-            buffer.put(trailer); 
-            trailer.clear();
-        }
-        
-        length=buffer.length();
-        if (length>0)
-        {
-            if (buffer.array()!=null)
-                _out.write(buffer.array(),buffer.getIndex(),length);
-            else
+            int tw=header.length();
+            if (tw>0)
             {
-                // TODO horrid hack
-                byte[] b = new byte[2048];
-                while (buffer.length()>0)
-                {
-                    int len = buffer.get(b,0,2048);
-                    _out.write(b,0,len);
-                }
+                int f=flush(header);
+                len=f;
+                if (f<tw)
+                    return len;
             }
         }
-       
-        total+=length;
-        if (!buffer.isImmutable())
-            buffer.clear();
         
-        // write trailer if it was not stuffed in the buffer.
-        length=trailer==null?0:trailer.length();
-        if (length>0 && length<=buffer.space())
+        if (buffer!=null)
         {
-            _out.write(trailer.array(),trailer.getIndex(),length);
-            total+=length;
-            trailer.clear();
+            int tw=buffer.length();
+            if (tw>0)
+            {
+                int f=flush(buffer);
+                if (f<0)
+                    return len>0?len:f;
+                len+=f;
+                if (f<tw)
+                    return len;
+            }
         }
         
-        return total;
+        if (trailer!=null)
+        {
+            int tw=trailer.length();
+            if (tw>0)
+            {
+                int f=flush(trailer);
+                if (f<0)
+                    return len>0?len:f;
+                len+=f;
+            }
+        }
+        return len;
     }
 
     /* ------------------------------------------------------------ */

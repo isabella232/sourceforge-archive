@@ -103,7 +103,7 @@ public class SocketChannelConnector extends AbstractHttpConnector
     	throws IOException
     {      
         // Give other threads a chance to process last loop.
-        Thread.yield();
+        // TODO ? Thread.yield();
         
         // Make any key changes required
         synchronized(_keyChanges)
@@ -158,14 +158,14 @@ public class SocketChannelConnector extends AbstractHttpConnector
                         HttpEndPoint connection=new HttpEndPoint(channel,newKey);
                         
                         // assume something to do
-                        dispatched=dispatched||connection.dispatch();
+                        dispatched=connection.dispatch()||dispatched;
                     }
                 }
                 else
                 {
                     HttpEndPoint connection = (HttpEndPoint)key.attachment();
                     if (connection!=null)
-                        dispatched=dispatched||connection.dispatch();    
+                        dispatched=connection.dispatch()||dispatched;    
                 }
                 
                 key= null;
@@ -199,30 +199,42 @@ public class SocketChannelConnector extends AbstractHttpConnector
     private class HttpEndPoint extends ChannelEndPoint implements Runnable
     {
         boolean _dispatched=false;
-        boolean _writable=true;
+        boolean _writable=true;  // TODO - get rid of this bad side effect
         SelectionKey _key;
         HttpConnection _connection;
         int _interestOps;
-        int _blocked;
+        int _readBlocked;
+        int _writeBlocked;
         
-        
+
+        /* ------------------------------------------------------------ */
         HttpEndPoint(SocketChannel channel,SelectionKey key) 
         {
             super(channel);
-            _connection = new HttpConnection(SocketChannelConnector.this,this);
+            _connection = new HttpConnection(SocketChannelConnector.this,this, null);
             key.attach(this);
             _key=key;
         }
-        
+
+        /* ------------------------------------------------------------ */
+        /** Dispatch the endpoint by arranging for a thread to service it.
+         * Either a blocked thread is woken up or the endpoint is passed to the server job queue.
+         * If the thread is already dispatched and the server is otherwise idle, then the selection key 
+         * is modified  so that it is no longer selected.
+         */
         boolean dispatch() 
         {
             synchronized(this)
             {
                 // If threads are blocked on this
-                if (_blocked>0)
+                if (_readBlocked>0 || _writeBlocked>0)
                 {
                     // wake them up is as good as a dispatched.
                     this.notifyAll();
+
+                    // then we are not interested in further selecting if we are idle
+                    if (_idle)
+                        _key.interestOps(0);
                     return true;
                 }
                 
@@ -234,6 +246,11 @@ public class SocketChannelConnector extends AbstractHttpConnector
                         _key.interestOps(0);
                     return false;
                 }
+                
+                // Remove writeable op
+                if ((_key.readyOps()|SelectionKey.OP_WRITE)!=0 &&
+                    (_key.interestOps()|SelectionKey.OP_WRITE)!=0)
+                    _key.interestOps(_interestOps=_key.interestOps()&(-1^SelectionKey.OP_WRITE));
                 
                 _dispatched=true;
             }
@@ -251,8 +268,10 @@ public class SocketChannelConnector extends AbstractHttpConnector
             }
             return true;
         }
-        
-        /**
+
+        /* ------------------------------------------------------------ */
+        /** Called when a dispatched thread is no longer handling the endpoint.
+         * The selection key operations are updated.
          */
         private void undispatch()
         {
@@ -261,21 +280,7 @@ public class SocketChannelConnector extends AbstractHttpConnector
                 _dispatched=false;
                 
                 if (getChannel().isOpen() && _key.isValid())
-                {
-                    int ops = _key.interestOps();
-                    _interestOps=SelectionKey.OP_READ | (_writable?0:SelectionKey.OP_WRITE);
-                    
-                    _writable=true;
-                    
-                    if (_interestOps!=ops)
-                    {
-                        synchronized(_keyChanges)
-                        {
-                            _keyChanges.add(this);
-                        }
-                        _selector.wakeup();
-                    }
-                }
+                    updateKey();
             }
             catch(Exception e)
             {
@@ -288,6 +293,7 @@ public class SocketChannelConnector extends AbstractHttpConnector
             }
         }
 
+        /* ------------------------------------------------------------ */
         /* 
          */
         public int fill(Buffer buffer) throws IOException
@@ -297,52 +303,107 @@ public class SocketChannelConnector extends AbstractHttpConnector
                 getChannel().close();
             return l;
         }
-        
+
+        /* ------------------------------------------------------------ */
         /*
          */
         public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
         {
-            int l0 = (header!=null?header.length():0) +
-                     (buffer!=null?buffer.length():0) +
-                     (trailer!=null?trailer.length():0);
             int l = super.flush(header, buffer, trailer);
-            _writable=l0==l;
+            _writable=l>0;
             return l;
         }
-        
+
+        /* ------------------------------------------------------------ */
         /*
          */
         public int flush(Buffer buffer) throws IOException
         {
-            int l0=buffer.length();
             int l = super.flush(buffer);
-            _writable=l==l0;
+            _writable=l>0;
             return l;
         }
         
         /* ------------------------------------------------------------ */
         /* Allows thread to block waiting for further events.
          */
-        public void block(long timeoutMs)
+        public void blockReadable(long timeoutMs)
         {
             synchronized(this)
             {
-                try
+                if (getChannel().isOpen() && _key.isValid())
                 {
-                    _blocked++;
-                    this.wait(timeoutMs);
-                }
-                catch (InterruptedException e)
-                {
-                    e.printStackTrace();
-                }
-                finally
-                {
-                    _blocked--;
+                    try
+                    {
+                        _readBlocked++;
+                        updateKey();
+                        this.wait(timeoutMs);
+                    }
+                    catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
+                    finally
+                    {
+                        _readBlocked--;
+                    }
                 }
             }
         }
 
+        /* ------------------------------------------------------------ */
+        /* Allows thread to block waiting for further events.
+         */
+        public void blockWritable(long timeoutMs)
+        {
+            synchronized(this)
+            {
+                if (getChannel().isOpen() && _key.isValid())
+                {
+                    try
+                    {
+                        _writeBlocked++;
+                        updateKey();
+                        this.wait(timeoutMs);
+                    }
+                    catch (InterruptedException e)
+                    {
+                        e.printStackTrace();
+                    }
+                    finally
+                    {
+                        _writeBlocked--;
+                    }
+                }
+            }
+        }
+
+        /* ------------------------------------------------------------ */
+        /** Updates selection key.
+         * Adds operations types to the selection key as needed.
+         * No operations are removed as this is only done during dispatch
+         */
+        private void updateKey()
+        {
+            synchronized(this)
+            {
+                int ops = _key.interestOps();
+                _interestOps=ops | 
+                ((!_dispatched||_readBlocked>0)?SelectionKey.OP_READ:0) | 
+                ((!_writable||_writeBlocked>0)?SelectionKey.OP_WRITE:0);
+                _writable=true; // Once writable is in ops, only removed with dispatch.
+                                
+                if (_interestOps!=ops)
+                {
+                    synchronized(_keyChanges)
+                    {
+                        _keyChanges.add(this);
+                    }
+                    _selector.wakeup();
+                }
+            }
+        }
+        
         /* ------------------------------------------------------------ */
         /* 
          */

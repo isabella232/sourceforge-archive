@@ -59,9 +59,12 @@ public class ChannelEndPoint implements EndPoint
         return false;
     }
     
-    public void block(long millisecs)
+    public void blockReadable(long millisecs)
     {
-        Portable.throwNotSupported();
+    }
+    
+    public void blockWritable(long millisecs)
+    {
     }
 
     /* (non-Javadoc)
