@@ -73,11 +73,18 @@ public class Server extends LifeCycleThread
     {
         SocketChannel socket_channel= SocketChannel.open();
         socket_channel.configureBlocking(false);
-        System.err.println("Connecting... "+socket_channel);
-        socket_channel.connect(_address);
+        Code.debug("Connecting... ",socket_channel);
+
+        if (socket_channel.connect(_address))
+        {
+            Log.event("Connected! "+socket_channel);
+            connection.connected(socket_channel,_selector);
+        }
+        
         _pending.add(socket_channel);
         _pending.add(connection);
-        System.err.println("wakeup "+_selector);
+        
+        Code.debug("wakeup ",_selector);
         _selector.wakeup();
     }
 
@@ -97,11 +104,10 @@ public class Server extends LifeCycleThread
     public void loop()
         throws Exception
     {
-        System.err.println("server keys="+_selector.keys());
+        Code.debug("server keys=",_selector.keys());
         if (_selector.select()>0)
         {
             Set ready=_selector.selectedKeys();
-            System.err.println("\nserver ready="+ready);
             Iterator iter = ready.iterator();
             while(iter.hasNext())
             {
@@ -109,9 +115,8 @@ public class Server extends LifeCycleThread
                 iter.remove();
                 
                 Channel channel = key.channel();
-                System.err.println("Ready key "+key+
-                                   " for "+channel);
-                System.err.println(key+" interested in "+key.interestOps());
+                if (Code.debug())
+                    Code.debug("Ready key "+key+" for "+channel);
 
                 if (!channel.isOpen())
                     key.cancel();
@@ -122,16 +127,25 @@ public class Server extends LifeCycleThread
                     
                     if ((key.interestOps()&SelectionKey.OP_CONNECT)!=0)
                     {
-                        if (socket_channel.finishConnect())
+                        boolean connected=false;
+                        
+                        try{connected=socket_channel.finishConnect();}
+                        catch(Exception e)
+                        {if (Code.debug())Code.warning(e);else Log.event(e.toString());}
+                        
+                        if (connected)
                         {
-                            System.err.println("Connected "+socket_channel);
+                            Log.event("Connected "+socket_channel);
                             connection.connected(socket_channel,_selector);
                             key.interestOps(key.interestOps()&~SelectionKey.OP_CONNECT
                                             |SelectionKey.OP_READ);
-                            System.err.println(key+" interested in "+key.interestOps());
                         }
                         else
+                        {
+                            Log.warning("Not Connected "+socket_channel);
                             key.cancel();
+                            connection.deallocate();
+                        }
                     }
                     else if ((key.interestOps()&SelectionKey.OP_WRITE)!=0)
                         connection.serverWriteWakeup(key);
@@ -148,11 +162,10 @@ public class Server extends LifeCycleThread
             {
                 SocketChannel sc = (SocketChannel)_pending.get(i++);
                 Connection c=(Connection)_pending.get(i);
-                System.err.println("register "+sc);
+                Code.debug("register ",sc);
                 sc.register(_selector,
                             sc.isConnected()
-                            ?SelectionKey.OP_WRITE
-                                :SelectionKey.OP_CONNECT,
+                            ?SelectionKey.OP_WRITE:SelectionKey.OP_CONNECT,
                             c);
             }
             _pending.clear();

@@ -20,6 +20,7 @@ public class Connection
     private Server _server;
     private QueuedChannel _serverQ;
     private QueuedChannel _clientQ;
+    private int _allocationTry;
     
     /* ------------------------------------------------------------ */
     public Connection(ByteBufferPool bufferPool,
@@ -47,7 +48,7 @@ public class Connection
     {
         _serverQ.read(key);
         if (!isAllocated())
-            _listener.getPolicy().allocate(this,_serverQ);
+            _listener.getPolicy().allocate(this,_serverQ,0);
     }
     
     /* ------------------------------------------------------------ */
@@ -73,6 +74,26 @@ public class Connection
     
     
     /* ------------------------------------------------------------ */
+    public synchronized void allocate(Server server, int allocationTry)
+        throws IOException
+    {
+        _server=server;
+        _allocationTry=allocationTry;
+        server.connect(this);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public synchronized void deallocate()
+        throws IOException
+    {
+        _server=null;
+        _serverQ._channel=null;
+        _serverQ._selector=null;
+        
+        _listener.getPolicy().deallocate(this,_serverQ,_allocationTry);
+    }
+    
+    /* ------------------------------------------------------------ */
     public synchronized void connected(SocketChannel channel,
                                        Selector selector)
         throws IOException
@@ -84,27 +105,17 @@ public class Connection
     }
     
     /* ------------------------------------------------------------ */
-    public synchronized void allocate(Server server)
-        throws IOException
-    {
-        _server=server;
-        server.connect(this);            
-    }
-
-    /* ------------------------------------------------------------ */
     public boolean isAllocated()
     {
-        return _server!=null &&
-            _serverQ!=null &&
-            _serverQ._channel!=null &&
-            _serverQ._channel.isOpen();
+        return _server!=null;
     }
     
     /* ------------------------------------------------------------ */
     public void close()
     {
         try{_clientQ._channel.close();}catch(IOException e){Code.warning(e);}
-        try{_serverQ._channel.close();}catch(IOException e){Code.warning(e);}
+        try{if (_serverQ._channel!=null)_serverQ._channel.close();}
+        catch(IOException e){Code.warning(e);}
     }
     
     /* ------------------------------------------------------------ */
@@ -138,7 +149,7 @@ public class Connection
         synchronized void read(SelectionKey key)
             throws IOException
         {
-            System.err.println("Read "+key);
+            Code.debug("Read ",key);
             // Do we have space?
             if (isFull())
                 // No - unregister READs from src
@@ -160,10 +171,6 @@ public class Connection
                 if (l<0)
                     close();
             }
-
-            if (key.isValid())
-                System.err.println(key+" interested in "+key.interestOps());
-
         }
         
         /* ------------------------------------------------------------ */
@@ -182,13 +189,13 @@ public class Connection
             // Are we using the queue
             if (!isEmpty() || _channel==null)
             {
-                System.err.println("QUEUE! "+buffer);
+                Code.debug("QUEUE! ",buffer);
                 queue(buffer);
             }
             else
             {
                 // No - write buffer directly
-                System.err.println("Write! "+buffer);
+                Code.debug("Write! ",buffer);
 
                 if (_channel.write(buffer)<0)
                 {
@@ -199,7 +206,7 @@ public class Connection
                 // If we have bytes remaining
                 if (buffer.remaining()>0)
                 {
-                    System.err.println("QUEUE "+buffer);
+                    Code.debug("QUEUE ",buffer);
                     // Queue it
                     queue(buffer);
                     synchronized(_selector)
@@ -212,7 +219,6 @@ public class Connection
                                                   SelectionKey.OP_WRITE,
                                                   Connection.this);
                         _selector.wakeup();
-                        System.err.println(key+" interested in "+key.interestOps());
                     }
                 }
                 else
@@ -226,18 +232,18 @@ public class Connection
         synchronized void writeWakeup(SelectionKey key)
             throws IOException
         {
-            System.err.println("WRITE WAKEUP: "+key);
+            Code.debug("WRITE WAKEUP: ",key);
             
             boolean was_full = isFull();
-            
-            System.err.println("was_full=="+was_full+
-                               "\nisEmpty()=="+isEmpty());
+
+            if (Code.debug())
+                Code.debug("was_full=="+was_full+" isEmpty()=="+isEmpty());
             
             // While we have buffers to write
             while (!isEmpty())
             {
                 ByteBuffer buffer = (ByteBuffer)peek();
-                System.err.println("Write  "+buffer);
+                Code.debug("Write  ",buffer);
                 int len=_channel.write(buffer);
                 
                 if (len<0)
@@ -257,13 +263,7 @@ public class Connection
             }
 
             if (key!=null&& isEmpty())
-            {
-                System.err.println("All written");
                 key.interestOps(~SelectionKey.OP_WRITE&key.interestOps());
-                System.err.println(key+" interested in "+key.interestOps());
-            }
-            else
-                System.err.println("Some written");
             
             if (was_full)
                 _reverse.readRegister();
@@ -273,7 +273,7 @@ public class Connection
         void readRegister()
             throws IOException
         {
-            System.err.println("READ REGISTER: ");
+            Code.debug("READ REGISTER: ",this);
             
             SelectionKey key=_channel.keyFor(_selector);
             if (key!=null)
@@ -283,14 +283,13 @@ public class Connection
                                   SelectionKey.OP_READ,
                                   Connection.this);
             _selector.wakeup();
-            System.err.println(key+" interested in "+key.interestOps());
         }
     
         
         /* ------------------------------------------------------------ */
         void close()
         {
-            System.err.println("CLOSE: "+this+" in "+Connection.this);
+            Code.debug("CLOSE: "+this);
             Connection.this.close();
         }
     }

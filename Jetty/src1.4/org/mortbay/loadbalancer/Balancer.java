@@ -33,11 +33,6 @@ public class Balancer
     public static void main(String[] arg)
         throws Exception
     {
-        System.err.println("SelectionKey.OP_CONNECT == "+SelectionKey.OP_CONNECT);
-        System.err.println("SelectionKey.OP_ACCEPT == "+SelectionKey.OP_ACCEPT);
-        System.err.println("SelectionKey.OP_READ == "+SelectionKey.OP_READ);
-        System.err.println("SelectionKey.OP_WRITE == "+SelectionKey.OP_WRITE);
-
         if (arg.length<3)
             usage();
         

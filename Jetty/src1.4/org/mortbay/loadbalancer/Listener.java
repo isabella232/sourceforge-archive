@@ -103,7 +103,7 @@ public class Listener extends LifeCycleThread
 	// Bind the server socket to the local host and port
 	_acceptChannel.socket().bind(_address);
 
-        System.err.println("Bound "+_acceptChannel);
+        Log.event("Listening on "+_acceptChannel);
         
         // create a selector;
         _selector=Selector.open();
@@ -111,7 +111,7 @@ public class Listener extends LifeCycleThread
 	// Register accepts on the server socket with the selector.
         _acceptChannel.register(_selector,SelectionKey.OP_ACCEPT);
 
-        System.err.println("Selector "+_selector);
+        Code.debug("Selector ",_selector);
         
         super.start();
         
@@ -130,11 +130,11 @@ public class Listener extends LifeCycleThread
     public void loop()
         throws Exception
     {
-        System.err.println("client keys="+_selector.keys());
+        if (Code.debug())
+            Code.debug("client keys=",_selector.keys());
         if (_selector.select()>0)
         {
             Set ready=_selector.selectedKeys();
-            System.err.println("\nclient ready="+ready);
             Iterator iter = ready.iterator();
             while(iter.hasNext())
             {
@@ -142,8 +142,8 @@ public class Listener extends LifeCycleThread
                 iter.remove();
 
                 Channel channel = key.channel();
-                System.err.println("Ready key "+key+
-                                   " for "+channel);
+                if (Code.debug())
+                    Code.debug("Ready key "+key+" for "+channel);
 
                 if (!channel.isOpen())
                     key.cancel();
@@ -151,7 +151,7 @@ public class Listener extends LifeCycleThread
                 {
                     SocketChannel socket_channel =(SocketChannel)
                         ((ServerSocketChannel)channel).accept();
-                    System.err.println("Accepted "+socket_channel);
+                    Code.debug("Accepted ",socket_channel);
                     socket_channel.configureBlocking(false);
 
                     Connection connection=
