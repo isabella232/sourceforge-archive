@@ -26,6 +26,7 @@ public class HttpTunnel
 {
     private Socket _socket;
     private Thread _thread;
+    private int _timeoutMs;
     private InputStream _in;
     private OutputStream _out;
 
@@ -38,8 +39,10 @@ public class HttpTunnel
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param socket The tunnel socket.
+     * @param timeoutMs The maximum time to wait for a read on the tunnel. Note that
+     * sotimer exceptions are ignored by the tunnel.
      */
-    public HttpTunnel(Socket socket)
+    public HttpTunnel(Socket socket,int timeoutMs)
     {
         _socket=socket;
     }
@@ -63,7 +66,7 @@ public class HttpTunnel
             _thread=Thread.currentThread();
             copy.start();
             
-            IO.copy(_socket.getInputStream(),_out);           
+            copydata(_socket.getInputStream(),_out);
         }
         catch (Exception e)
         {
@@ -82,6 +85,31 @@ public class HttpTunnel
         }
     }
 
+    
+    /* ------------------------------------------------------------ */
+    private void copydata(InputStream in, OutputStream out)
+        throws java.io.IOException
+    {
+        long timestamp=0;
+	while (true)
+        {
+	    try
+            {
+		IO.copy(in, out);
+                timestamp=0;
+		return;
+	    }
+            catch (java.net.SocketTimeoutException e)
+            {
+                Code.ignore(e);
+                if (timestamp==0)
+                    timestamp=System.currentTimeMillis();
+                else if (_timeoutMs>0 &&
+                         (System.currentTimeMillis()-timestamp)>_timeoutMs)
+                    throw e;
+            }
+	}
+    }
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -94,7 +122,7 @@ public class HttpTunnel
         {
             try
             {
-                IO.copy(_in,_socket.getOutputStream());
+                copydata(_in,_socket.getOutputStream());
             }
             catch (Exception e)
             {
