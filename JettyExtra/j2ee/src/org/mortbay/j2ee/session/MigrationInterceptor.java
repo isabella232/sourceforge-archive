@@ -55,7 +55,6 @@ public class
 {
   Category _log=Category.getInstance(getClass().getName());
 
-  final Manager _manager;
   StateInterceptor _last;
 
   State _buffer;
@@ -71,7 +70,7 @@ public class
     {
       super(session, null);
       ((StateAdaptor)session).registerMigrationListener(this);
-      _manager=manager;
+      setManager(manager);
 
       try
       {
@@ -111,7 +110,7 @@ public class
 	last=(StateInterceptor)i;
       try
       {
-	State state=_manager.getStore().newState(getLocalState().getId(), getLocalState().getMaxInactiveInterval());
+	State state=getManager().getStore().newState(getLocalState().getId(), getLocalState().getMaxInactiveInterval());
 	last.setState(state); //  somewhere to passivate to
 	// now the distributableState is ready for use...
 	// distributableState.setMaxInactiveInterval(localState.getMaxInactiveInterval()); // done already for ctor
@@ -119,7 +118,7 @@ public class
 	// each attribute that is a Activation Listener needs to be
 	// notified...
 	distributableState.setAttributes(localState.getAttributes());
-	_log.info("migrated session: "+_manager.getContextPath()+":"+localState.getId());
+	_log.info("migrated session: "+getManager().getContextPath()+":"+localState.getId());
       }
       catch (Exception e)
       {
@@ -165,7 +164,7 @@ public class
 	}
 	try
 	{
-	  _manager.getStore().removeState(last.getState());
+	  getManager().getStore().removeState(last.getState());
 	}
 	catch (Exception e)
 	{

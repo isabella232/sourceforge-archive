@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingEvent;
@@ -27,6 +28,8 @@ import javax.servlet.http.HttpSessionContext;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 import org.apache.log4j.Category;
+
+import org.mortbay.jetty.servlet.WebApplicationContext;
 import org.mortbay.j2ee.J2EEWebApplicationContext;
 
 //----------------------------------------
@@ -73,56 +76,100 @@ public class Manager
   Category _log=Category.getInstance(getClass().getName());
 
 
+  //----------------------------------------
+  protected String _workerName;
+  public String getWorkerName() { return _workerName; }
+  public void setWorkerName(String workerName) { _workerName=workerName; }
+  //----------------------------------------
+  protected WebApplicationContext _context;
+  public WebApplicationContext getContext() {return _context;}
+  public void setContext(WebApplicationContext context) {_context=context;}
+  //----------------------------------------
+  protected int _scavengerPeriod=60*10; // every 10 mins
+  public void setScavengerPeriod(int period) {_scavengerPeriod=period;}
+  public int getScavengerPeriod() {return _scavengerPeriod;}
+  //----------------------------------------
+  protected StateInterceptor[] _interceptorStack=null;
+  public StateInterceptor[] getInterceptorStack() {return _interceptorStack;}
+  public void setInterceptorStack(StateInterceptor[] interceptorStack) {_interceptorStack=interceptorStack;}
+  //----------------------------------------
+  protected int _maxInactiveInterval;
+  public int getMaxInactiveInterval() {return _maxInactiveInterval;}
+  public void setMaxInactiveInterval(int seconds) {_maxInactiveInterval=seconds;}
+  //----------------------------------------
+  protected Store _store = null;
+
+  public Store
+    getStore()
+  {
+    return _store;
+  }
+
+  public void
+    setStore(Store store)
+  {
+    _store=store;
+
+    if (_store!=null)
+      _store.setManager(this);
+  }
+  //----------------------------------------
+  protected Medium _medium = null;
+
+  public Medium
+    getMedium()
+  {
+    return _medium;
+  }
+
+  public void
+    setMedium(Medium medium)
+  {
+    _medium=medium;
+
+    if (_medium!=null)
+      _medium.setManager(this);
+  }
+  //----------------------------------------
+
+  public Object
+    clone()
+  {
+    _log.info("cloning Manager: "+this);
+    Manager m=new Manager();
+
+    // deep-copy Store attribute - each Manager gets it's own Store instance
+    Store store=getStore();
+    if (store!=null)
+      m.setStore((Store)store.clone());
+
+    // deep-copy Medium attribute - each Manager gets it's own Medium instance
+    try
+    {
+      Medium medium=getMedium();
+      if (medium!=null)
+	m.setMedium((Medium)medium.clone());
+    }
+    catch (CloneNotSupportedException e)
+    {
+      // should never happen
+      e.printStackTrace();
+    }
+    // Stateless Interceptors may be shared between Contexts...
+    m.setInterceptorStack(getInterceptorStack());
+
+    m.setMaxInactiveInterval(getMaxInactiveInterval());
+    m.setScavengerPeriod(getScavengerPeriod());
+    m.setWorkerName(getWorkerName());
+
+    return m;
+  }
+
+  //----------------------------------------
+
   final Map _sessions = new HashMap();
 
-  Store _store = null;
-  public Store getStore() {return _store;}
-
-  protected final String _contextPath;
-  public String getContextPath() {return _contextPath;}
-
-  public
-    Manager(J2EEWebApplicationContext context)
-  {
-    _contextPath=context.getContextPath();
-
-    // default interceptor stack
-    if (_interceptorClasses==null)
-      _interceptorClasses=context.getDistributableHttpSessionInterceptorClasses();
-
-    // default store
-    if (_storeClass==null)
-      _storeClass=context.getDistributableHttpSessionStoreClass();
-
-    setMaxInactiveInterval(context.getHttpSessionMaxInactiveInterval());
-    setActualMaxInactiveInterval(context.getHttpSessionActualMaxInactiveInterval());
-    setLocalScavengePeriod(context.getLocalHttpSessionScavengePeriod());
-    setDistributableScavengePeriod(context.getDistributableHttpSessionScavengePeriod());
-    setDistributableScavengeOffset(context.getDistributableHttpSessionScavengeOffset());
-
-    _log.debug("constructed");
-  }
-
-  // this is really only for tests... - lose later..
-  public
-    Manager()
-  {
-    _contextPath="/";
-    setStoreClass("org.mortbay.j2ee.session.LocalStore");
-    List list=new ArrayList();
-    list.add("org.mortbay.j2ee.session.TypeCheckingInterceptor");
-    list.add("org.mortbay.j2ee.session.BindingInterceptor");
-    list.add("org.mortbay.j2ee.session.MarshallingInterceptor");
-    setInterceptorClasses(list);
-
-    setMaxInactiveInterval(12*60*60);
-    setActualMaxInactiveInterval(60);
-    setLocalScavengePeriod(10);
-    setDistributableScavengePeriod(20);
-    setDistributableScavengeOffset(10);
-
-    initialize(null);
-  }
+  public String getContextPath() {return _handler.getHttpContext().getContextPath();}
 
   //----------------------------------------
   // LifeCycle API
@@ -132,46 +179,50 @@ public class Manager
   Object  _startedLock=new Object();
   Timer   _scavenger;
 
-  protected int _localScavengePeriod=60*10; // every 10 mins
-  public void setLocalScavengePeriod(int period) {_localScavengePeriod=period;}
-  public int getLocalScavengePeriod() {return _localScavengePeriod;}
-
-  protected int _distributableScavengePeriod=60*60; // 1 hour
-  public void setDistributableScavengePeriod(int period) {_distributableScavengePeriod=period;}
-  public int getDistributableScavengePeriod() {return _distributableScavengePeriod;}
-
-  protected int _distributableScavengeOffset=(int)(_localScavengePeriod*1.5); // 15 mins;
-  public void setDistributableScavengeOffset(int offset) {_distributableScavengeOffset=offset;}
-  public int getDistributableScavengeOffset() {return _distributableScavengeOffset;}
-
-  protected int _actualMaxInactiveInterval=60*60*24*7;	// a week;
-  public void setActualMaxInactiveInterval(int interval) {_actualMaxInactiveInterval=interval;}
-  public int getActualMaxInactiveInterval() {return _actualMaxInactiveInterval;}
-
   class Scavenger extends TimerTask {public void run() {scavenge();}}
 
   public void
     start()
   {
+    _log.debug("starting...");
     synchronized (_startedLock)
     {
-      _store.setScavengerPeriod(_distributableScavengePeriod);
-      _store.setScavengerExtraTime(_distributableScavengeOffset);
-      _store.setActualMaxInactiveInterval(_actualMaxInactiveInterval);
+      if (_started)
+      {
+	_log.warn("already started");
+	return;
+      }
+
+      if (_store==null)
+      {
+	_log.warn("No Store. Falling back to a local session implementation - NO HTTPSESSION DISTRIBUTION");
+	setStore(new LocalStore());
+      }
 
       try
       {
 	_store.start();
       }
-      catch (Throwable t)
+      catch (Exception e)
       {
-	_log.warn("distributed Store ("+_store.getClass().getName()+") failed to initialise", t);
-	_log.warn("falling back to a local session implementation - NO HTTPSESSION DISTRIBUTION");
-	_store=new LocalStore(this);
+	_log.warn("Faulty Store. Falling back to a local session implementation - NO HTTPSESSION DISTRIBUTION", e);
+	setStore(new LocalStore());
+	try{_store.start();}catch(Exception e2){_log.error("could not start Store", e2);}
       }
+
+      try
+      {
+	if (_medium!=null)
+	  _medium.start();
+      }
+      catch (Exception e)
+      {
+	_log.warn("Faulty Medium", e);
+      }
+
       boolean isDaemon=true;
       _scavenger=new Timer(isDaemon);
-      long delay=_localScavengePeriod*1000;
+      long delay=getScavengerPeriod()*1000;
       _scavenger.scheduleAtFixedRate(new Scavenger() ,delay,delay);
       _started=true;
     }
@@ -188,8 +239,15 @@ public class Manager
   public void
     stop()
   {
+    _log.debug("stopping...");
+
     synchronized (_startedLock)
     {
+      if (!_started)
+      {
+	_log.warn("already stopped/not yet started");
+	return;
+      }
 
       // I guess we will have to ask the store for a list of sessions
       // to migrate... - TODO
@@ -206,9 +264,17 @@ public class Manager
       _scavenger.cancel();
       _scavenger=null;
       scavenge();
+
+      if (_medium!=null)
+      {
+	_medium.stop();
+	_medium.destroy();
+	setMedium(null);
+      }
+
       _store.stop();
       _store.destroy();
-      _store=null;
+      setStore(null);
       _started=false;
     }
 
@@ -219,42 +285,18 @@ public class Manager
   // SessionManager API
   //----------------------------------------
 
-  org.mortbay.jetty.servlet.ServletHandler _handler;
-  List _interceptorClasses=null;
-  String _storeClass=null;
-
-  public void
-    setInterceptorClasses(List interceptorClasses)
-  {
-    _interceptorClasses=interceptorClasses;
-  }
-
-  public void
-    setStoreClass(String storeClass)
-  {
-    _storeClass=storeClass;
-  }
+  protected org.mortbay.jetty.servlet.ServletHandler _handler;
 
   public void
     initialize(org.mortbay.jetty.servlet.ServletHandler handler)
   {
+    _log.debug("initialising...");
     _handler=handler;
     //    _log = Logger.getLogger(getClass().getName()+"#" + getServletContext().getServletContextName());
-
-    try
-    {
-      Class[] ctorParams={Manager.class};
-      Object[] params={this};
-      _store=(Store)Class.forName(_storeClass, true, Thread.currentThread().getContextClassLoader()).getConstructor(ctorParams).newInstance(params);
-    }
-    catch (Exception e)
-    {
-      _log.error("could not create Store: "+_storeClass, e);
-    }
-
     // perhaps we should cache the interceptor classes here as well...
 
     //    _log.info("initialised("+_handler+"): "+Thread.currentThread().getContextClassLoader());
+    _log.debug("initialised");
   }
 
   //----------------------------------------
@@ -268,27 +310,13 @@ public class Manager
   }
 
   public HttpSession
-    newHttpSession()
+    newHttpSession(HttpServletRequest request) // TODO
   {
     return newSession();
   }
 
   //----------------------------------------
   // this does not need locking as it is an int and access should be atomic...
-
-  int _maxInactiveInterval;
-
-  public int
-    getMaxInactiveInterval()
-  {
-    return _maxInactiveInterval;
-  }
-
-  public void
-    setMaxInactiveInterval(int seconds)
-  {
-    _maxInactiveInterval=seconds;
-  }
 
   //----------------------------------------
   // Listeners
@@ -394,32 +422,7 @@ public class Manager
   {
     // put together the make-believe container and HttpSession state
 
-    StateAdaptor adp=new StateAdaptor(id, this, getMaxInactiveInterval(), currentSecond());
-
-    State last=state;
-    try
-    {
-      Class[] ctorParams={Manager.class, HttpSession.class, State.class};
-      for (ListIterator i=_interceptorClasses.listIterator(_interceptorClasses.size()); i.hasPrevious();)
-      {
-	String name=(String)i.previous();
-	_log.debug("adding interceptor instance: "+name);
-	Class clazz=Class.forName(name, true, Thread.currentThread().getContextClassLoader());
-	Object[] params={this, adp, last};
-	StateInterceptor interceptor=(StateInterceptor)clazz.getConstructor(ctorParams).newInstance(params);
-	interceptor.setState(last); // this is also passed into ctor - make up your mind - TODO
-	interceptor.start();
-	last=interceptor;
-      }
-    }
-    catch (Exception e)
-    {
-      _log.error("could not build distributed HttpSession container", e);
-    }
-
-    adp.setState(last);
-
-    return adp;
+    return Container.newContainer(this, id, state, getMaxInactiveInterval(), currentSecond(), getInterceptorStack());
   }
 
   protected HttpSession
@@ -451,21 +454,7 @@ public class Manager
   protected State
     destroyContainer(HttpSession session)
   {
-    // dissasemble the container here to aid GC
-
-    StateAdaptor sa=(StateAdaptor)session;
-    State last=sa.getState(); sa.setState(null);
-
-    for (int i=_interceptorClasses.size(); i>0; i--)
-    {
-      StateInterceptor si=(StateInterceptor)last;
-      si.stop();
-      State s=si.getState();
-      si.setState(null);
-      last=s;
-    }
-
-    return last;
+    return Container.destroyContainer(session, getInterceptorStack());
   }
 
   protected void

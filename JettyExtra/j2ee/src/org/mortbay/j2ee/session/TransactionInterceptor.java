@@ -32,9 +32,9 @@ public class TransactionInterceptor
   protected       Context     _ctx;
 
   public
-    TransactionInterceptor(Manager ignore, HttpSession session, State state)
+    TransactionInterceptor()
   {
-    super(session, state);
+    super();
 
     try
     {
@@ -93,4 +93,6 @@ public class TransactionInterceptor
       _theirTransaction.set(null);
     }
   }
+
+  //  public Object clone() { return this; } // Stateless - Context should be valid for whole webapp
 }

@@ -20,7 +20,11 @@ package org.mortbay.j2ee.session;
 
 public interface
   Store
+  extends Cloneable
 {
+  Manager getManager();
+  void setManager(Manager manager);
+
   // Store LifeCycle
   void start() throws Exception;
   void stop();
@@ -45,5 +49,7 @@ public interface
   // Store misc
   void scavenge() throws Exception;
   void passivateSession(StateAdaptor sa);
+
+  public Object clone();
 }
 

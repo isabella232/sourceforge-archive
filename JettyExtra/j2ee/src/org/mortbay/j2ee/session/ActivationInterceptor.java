@@ -22,9 +22,8 @@ public class ActivationInterceptor
   protected final HttpSessionEvent _event;
 
   public
-    ActivationInterceptor(Manager ignore, HttpSession session, State state)
+    ActivationInterceptor()
   {
-    super(session, state);
     _event=new HttpSessionEvent(getSession()); // cache an event ready for use...
   }
 
@@ -91,4 +90,6 @@ public class ActivationInterceptor
       throw new IllegalArgumentException("could not remove Attribute");
     }
   }
+
+  //  public Object clone() { return null; } // Stateful
 }

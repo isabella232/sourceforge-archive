@@ -37,16 +37,7 @@ public class BindingInterceptor
   extends StateInterceptor
 {
   protected final Category _log=Category.getInstance(getClass().getName());
-  protected final Manager  _manager;
-
   // All Interceptors are expected to provide this constructor...
-
-  public
-    BindingInterceptor(Manager manager, HttpSession session, State state)
-  {
-    super(session, state);
-    _manager=manager;
-  }
 
   // HttpSessionBindingListeners are held in the SessionManager -
   // because they are attached at the webapp, rather than session
@@ -122,9 +113,9 @@ public class BindingInterceptor
 
       // send attribute notifications
       if (oldValue!=null)
-	_manager.notifyAttributeReplaced(getSession(), name, oldValue);
+	getManager().notifyAttributeReplaced(getSession(), name, oldValue);
       else
-	_manager.notifyAttributeAdded(getSession(), name, value);
+	getManager().notifyAttributeAdded(getSession(), name, value);
     }
     catch (Throwable t)
     {
@@ -155,7 +146,7 @@ public class BindingInterceptor
       try
       {
 	notifyValueUnbound(name, oldValue);
-	_manager.notifyAttributeRemoved(getSession(), name, oldValue);
+	getManager().notifyAttributeRemoved(getSession(), name, oldValue);
       }
       catch (Throwable t)
       {
@@ -165,4 +156,6 @@ public class BindingInterceptor
 
     return oldValue;
   }
+
+  //  public Object clone() { return null; } // Stateful
 }

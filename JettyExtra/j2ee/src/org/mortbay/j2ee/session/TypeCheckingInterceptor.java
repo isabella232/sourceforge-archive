@@ -29,12 +29,6 @@ public
 {
   Category _log=Category.getInstance(getClass().getName());
 
-  public
-    TypeCheckingInterceptor(Manager ignore, HttpSession session, State state)
-  {
-    super(session, state);
-  }
-
   public Object
     setAttribute(String name, Object value, boolean returnValue)
     throws IllegalArgumentException, RemoteException
@@ -103,4 +97,6 @@ public
 
     return tmp;
   }
+
+  //  public Object clone() { return this; } // Stateless
 }

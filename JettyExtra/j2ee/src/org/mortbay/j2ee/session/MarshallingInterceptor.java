@@ -34,7 +34,7 @@ import org.apache.log4j.Category;
 public class MarshallingInterceptor
   extends StateInterceptor
 {
-  class ObjectInputStream
+  static class ObjectInputStream
     extends java.io.ObjectInputStream
   {
     ObjectInputStream(InputStream is)
@@ -52,13 +52,7 @@ public class MarshallingInterceptor
 
   Category _log=Category.getInstance(getClass().getName());
 
-  public
-    MarshallingInterceptor(Manager ignore, HttpSession session, State state)
-  {
-    super(session, state);
-  }
-
-  protected byte[]
+  static public byte[]
     marshal(Object value)
     throws IOException
   {
@@ -72,7 +66,7 @@ public class MarshallingInterceptor
     return baos.toByteArray();
   }
 
-  protected Object
+  static public Object
     demarshal(byte[] buffer)
     throws IOException,ClassNotFoundException
   {
@@ -141,4 +135,6 @@ public class MarshallingInterceptor
       throw new IllegalArgumentException("could not remove Attribute");
     }
   }
+
+  //  public Object clone() { return this; } // Stateless
 }

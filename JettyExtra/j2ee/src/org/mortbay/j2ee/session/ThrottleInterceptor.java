@@ -29,8 +29,6 @@ public class
 {
   Category _log=Category.getInstance(getClass().getName());
 
-  final Manager _manager;
-
   State _buffer;
   boolean _dirty=false;
 
@@ -41,7 +39,7 @@ public class
     ThrottleInterceptor(Manager manager, HttpSession session, State state)
   {
     super(session, state);
-    _manager=manager;
+    setManager(manager);
 
     int maxInactiveInterval;
 //     try
@@ -51,7 +49,7 @@ public class
 //     catch (RemoteException e)
 //     {
 //       _log.error("could not retrieve MaxInactiveInterval from State - defaulting...",e );
-//       //      maxInactiveInterval=_manager.getMaxInactiveInterval();
+//       //      maxInactiveInterval=getManager().getMaxInactiveInterval();
       maxInactiveInterval=10;	// TODO
       //    }
 

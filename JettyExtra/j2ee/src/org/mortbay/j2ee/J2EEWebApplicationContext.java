@@ -7,12 +7,17 @@ package org.mortbay.j2ee;
 
 import java.io.IOException;
 import java.util.List;
+import org.mortbay.jetty.servlet.SessionManager;
 import org.mortbay.jetty.servlet.WebApplicationContext;
+import org.mortbay.j2ee.session.Manager;
+import org.apache.log4j.Category;
 
 public class
   J2EEWebApplicationContext
   extends WebApplicationContext
 {
+  protected Category _log=Category.getInstance(getClass().getName());
+
   public
     J2EEWebApplicationContext(String warUrl)
     throws IOException
@@ -24,41 +29,36 @@ public class
   // DistributedHttpSession support
   //----------------------------------------------------------------------------
 
-  protected String _distributableHttpSessionManagerClass;
-  public void setDistributableHttpSessionManagerClass(String managerClass) {_distributableHttpSessionManagerClass=managerClass;}
-  public String getDistributableHttpSessionManagerClass() {return _distributableHttpSessionManagerClass;}
+  protected boolean _distributable=false;
 
-  protected String _distributableHttpSessionStoreClass;
-  public void setDistributableHttpSessionStoreClass(String storeClass) {_distributableHttpSessionStoreClass=storeClass;}
-  public String getDistributableHttpSessionStoreClass() {return _distributableHttpSessionStoreClass;}
+  public boolean
+    getDistributable()
+    {
+      return _distributable;
+    }
 
-  protected List _distributableHttpSessionInterceptorClasses;
-  public void setDistributableHttpSessionInterceptorClasses(List interceptorClasses) {_distributableHttpSessionInterceptorClasses=interceptorClasses;}
-  public List getDistributableHttpSessionInterceptorClasses() {return _distributableHttpSessionInterceptorClasses;}
+  public void
+    setDistributable(boolean distributable)
+    {
+      _log.info("setDistributable "+distributable);
+      _distributable=distributable;
+    }
 
-  protected int _httpSessionMaxInactiveInterval=-1;	// never time out
-  public void setHttpSessionMaxInactiveInterval(int i) {_httpSessionMaxInactiveInterval=i;}
-  public int getHttpSessionMaxInactiveInterval() {return _httpSessionMaxInactiveInterval;}
+  protected Manager _distributableSessionManager;
 
-  protected int _httpSessionActualMaxInactiveInterval=60*60*24*7; // a week
-  public void setHttpSessionActualMaxInactiveInterval(int i) {_httpSessionActualMaxInactiveInterval=i;}
-  public int getHttpSessionActualMaxInactiveInterval() {return _httpSessionActualMaxInactiveInterval;}
+  public void
+    setDistributableSessionManager(Manager manager)
+    {
+      _log.info("setDistributableSessionManager "+manager);
+      _distributableSessionManager=(Manager)manager;
+      _distributableSessionManager.setContext(this);
+    }
 
-  protected int _localHttpSessionScavengePeriod=60*10; // 10 mins
-  public void setLocalHttpSessionScavengePeriod(int i) {_localHttpSessionScavengePeriod=i;}
-  public int getLocalHttpSessionScavengePeriod() {return _localHttpSessionScavengePeriod;}
-
-  protected int _distributableHttpSessionScavengePeriod=60*60; // 1 hour
-  public void setDistributableHttpSessionScavengePeriod(int i) {_distributableHttpSessionScavengePeriod=i;}
-  public int getDistributableHttpSessionScavengePeriod() {return _distributableHttpSessionScavengePeriod;}
-
-  protected int _distributableHttpSessionScavengeOffset=(int)(_localHttpSessionScavengePeriod*1.5); // 15 mins
-  public void setDistributableHttpSessionScavengeOffset(int i) {_distributableHttpSessionScavengeOffset=i;}
-  public int getDistributableHttpSessionScavengeOffset() {return _distributableHttpSessionScavengeOffset;}
-
-  protected boolean _distributableHttpSession=false;
-  public boolean getDistributableHttpSession() {return _distributableHttpSession;}
-  public void setDistributableHttpSession(boolean distributable) {_distributableHttpSession=distributable;}
+  public Manager
+    getDistributableSessionManager()
+    {
+      return _distributableSessionManager;
+    }
 
   //----------------------------------------------------------------------------
 
@@ -84,5 +84,4 @@ public class
 
       super.start();
     }
-
 }

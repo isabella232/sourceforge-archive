@@ -23,24 +23,32 @@ import javax.servlet.http.HttpSession;
  */
 public class
   StateInterceptor
-  implements State
+  implements State, Cloneable
 {
-  final HttpSession _session;	// TODO - lose session from state - pass in in context
-  State _state;
+  //   protected final ThreadLocal _state  =new ThreadLocal();
+  //   protected State       getState   ()                   {return (State)_state.get();}
+  //   protected void        setState(State state)           {_state.set(state);}
+  //
+  private final static ThreadLocal _manager=new ThreadLocal();
+  protected Manager     getManager ()                   {return (Manager)_manager.get();}
+  protected void        setManager(Manager manager)     {_manager.set(manager);}
+
+  private final static ThreadLocal _session=new ThreadLocal();
+  protected HttpSession getSession ()                   {return (HttpSession)_session.get();}
+  protected void        setSession(HttpSession session) {_session.set(session);}
+
+  // management of this attribute needs to move into the container...
+  private State _state;
+  protected State       getState   ()                   {return _state;}
+  protected void        setState(State state)           {_state=state;}
+
+  //   protected HttpSession _session;
+  //   protected HttpSession getSession ()                   {return _session;}
+  //   protected void        setSession(HttpSession session) {_session=session;}
 
   //----------------------------------------
   // 'StateInterceptor' API
   //----------------------------------------
-
-  StateInterceptor(HttpSession session, State state)
-    {
-      _session=session;
-      _state=state;
-    }
-
-  protected State       getState()            {return _state;}
-  protected void        setState(State state) {_state=state;}
-  protected HttpSession getSession()          {return _session;}
 
   // lifecycle
   public    void start() {}
@@ -72,5 +80,21 @@ public class
   public    Enumeration getAttributeNameEnumeration()                                throws RemoteException {return getState().getAttributeNameEnumeration();}
   public    String[]    getAttributeNameStringArray()                                throws RemoteException {return getState().getAttributeNameStringArray();}
   public    boolean     isValid()                                                    throws RemoteException {return getState().isValid();}
+
+  public Object
+    clone()
+    {
+      Object tmp=null;
+      try
+      {
+	tmp=getClass().newInstance();
+      }
+      catch (Exception e)
+      {
+	//	_log.error("could not clone "+getClass().getName(),e); - TODO
+      }
+
+      return tmp;
+    }
 }
 

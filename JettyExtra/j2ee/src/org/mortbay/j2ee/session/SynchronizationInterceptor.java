@@ -28,12 +28,6 @@ public class SynchronizationInterceptor
 {
   Category _log=Category.getInstance(getClass().getName());
 
-  public
-    SynchronizationInterceptor(Manager ignore, HttpSession session, State state)
-  {
-    super(session, state);
-  }
-
   protected final Object _lastAccessedTimeLock=new Object();
   public void        setLastAccessedTime(long time)          throws RemoteException {synchronized(_lastAccessedTimeLock){super.setLastAccessedTime(time);}}
   public long        getLastAccessedTime()                   throws RemoteException {synchronized(_lastAccessedTimeLock){return super.getLastAccessedTime();}}
@@ -50,4 +44,6 @@ public class SynchronizationInterceptor
   public Object      removeAttribute(String name, boolean returnValue)            throws RemoteException {synchronized(_attributesLock){return super.removeAttribute(name, returnValue);}}
   public Map         getAttributes()                         throws RemoteException {synchronized(_attributesLock){return super.getAttributes();}}
   public void        setAttributes(Map attributes)           throws RemoteException {synchronized(_attributesLock){super.setAttributes(attributes);}}
+
+  //  public Object clone() { return null; } // Stateful
 }

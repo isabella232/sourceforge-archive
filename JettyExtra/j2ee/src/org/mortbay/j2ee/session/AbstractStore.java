@@ -25,21 +25,46 @@ public abstract class
    * The period between scavenges
    */
   protected int _scavengerPeriod=60*30;	// 1/2 an hour
+  public int getScavengerPeriod() {return _scavengerPeriod;}
+  public void setScavengerPeriod(int secs) {_scavengerPeriod=secs;}
   /**
    * The extra time we wait before tidying up a CMPState to ensure
    * that if it loaded locally it will be scavenged locally first...
    */
   protected int _scavengerExtraTime=60*30; // 1/2 an hour
+  public int getScavengerExtraTime() {return _scavengerExtraTime;}
+  public void setScavengerExtraTime(int secs) {_scavengerExtraTime=secs;}
   /**
    * A maxInactiveInterval of -1 means never scavenge. The DB would
    * fill up very quickly - so we can override -1 with a real value
    * here.
    */
   protected int _actualMaxInactiveInterval=60*60*24*28;	// 28 days
-
-  public void setScavengerPeriod(int secs) {_scavengerPeriod=secs;}
-  public void setScavengerExtraTime(int secs) {_scavengerExtraTime=secs;}
+  public int getActualMaxInactiveInterval() {return _actualMaxInactiveInterval;}
   public void setActualMaxInactiveInterval(int secs) {_actualMaxInactiveInterval=secs;}
+
+  public Object
+    clone()
+    {
+      try
+      {
+	AbstractStore as=(AbstractStore)(getClass().newInstance());
+	as.setScavengerPeriod(_scavengerPeriod);
+	as.setScavengerExtraTime(_scavengerExtraTime);
+	as.setActualMaxInactiveInterval(_actualMaxInactiveInterval);
+	return as;
+      }
+      catch (Exception e)
+      {
+	_log.warn("could not clone Store", e);
+	return null;
+      }
+    }
+
+  protected Manager _manager;
+  public Manager getManager(){return _manager;}
+  public void setManager(Manager manager){_manager=manager;}
+
 
   protected static Timer _scavenger;
   protected static int   _scavengerCount=0;
@@ -108,15 +133,15 @@ public abstract class
 
   public String
     allocateId()
-  {
-    return _guidGenerator.generateSessionId();
-  }
+    {
+      return _guidGenerator.generateSessionId();
+    }
 
   public void
     deallocateId(String id)
-  {
-    // these ids are disposable
-  }
+    {
+      // these ids are disposable
+    }
 
   // still abstract...
 

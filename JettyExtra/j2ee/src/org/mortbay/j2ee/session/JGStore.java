@@ -6,13 +6,14 @@
 package org.mortbay.j2ee.session;
 
 //----------------------------------------
-import java.util.Vector;
-import java.util.Iterator;
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Iterator;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Vector;
 import org.apache.log4j.Category;
 import org.javagroups.Address;
 import org.javagroups.Channel;
@@ -58,9 +59,9 @@ import org.javagroups.util.Util;
 public class
   JGStore
   extends AbstractReplicatedStore
-  implements MessageListener//, MembershipListener
+  implements MessageListener, MembershipListener
 {
-  String _properties=""+
+  protected String _protocolStack=""+
     "UDP(mcast_addr=228.8.8.8;mcast_port=45566;ip_ttl=32;" +
     "ucast_recv_buf_size=16000;ucast_send_buf_size=16000;" +
     "mcast_send_buf_size=32000;mcast_recv_buf_size=64000;loopback=true):"+
@@ -74,22 +75,77 @@ public class
     "FRAG(frag_size=8192;down_thread=false;up_thread=false):"+
     "pbcast.GMS(join_timeout=5000;join_retry_timeout=2000;shun=false;print_local_addr=true):"+
     "pbcast.STATE_TRANSFER";
+  public String getProtocolStack() {return _protocolStack;}
+  public void setProtocolStack(String protocolStack) {_protocolStack=protocolStack;}
+
+  protected String _subClusterName="DefaultSubCluster";
+  public String getSubClusterName() {return _subClusterName;}
+  public void setSubClusterName(String subClusterName) {_subClusterName=subClusterName;}
+
+  protected int _retrievalTimeOut=20000;
+  public int getRetrievalTimeOut() {return _retrievalTimeOut;}
+  public void setRetrievalTimeOut(int retrievalTimeOut) {_retrievalTimeOut=retrievalTimeOut;}
+
+  protected int _distributionModeInternal=GroupRequest.GET_ALL; // synchronous
+  protected int getDistributionModeInternal() {return _distributionModeInternal;}
+  protected void
+    setDistributionModeInternal(String distributionMode)
+    {
+      try
+      {
+	_distributionModeInternal=GroupRequest.class.getDeclaredField(distributionMode).getInt(GroupRequest.class);
+      }
+      catch (Exception e)
+      {
+	_log.error("could not convert "+distributionMode+" to GroupRequest field", e);
+      }
+      _log.debug("GroupRequest:"+distributionMode+"="+_distributionModeInternal);
+    }
+
+  protected String _distributionMode="GET_ALL";
+  public String getDistributionMode() {return _distributionMode;}
+  public void
+    setDistributionMode(String distributionMode)
+    {
+      _distributionMode=distributionMode;
+      setDistributionModeInternal(_distributionMode);
+    }
+
+  protected int _distributionTimeOut=0;
+  public int getDistributionTimeOut() {return _distributionTimeOut;}
+  public void setDistributionTimeOut(int distributionTimeOut) {_distributionTimeOut=distributionTimeOut;}
+
+  public Object
+    clone()
+    {
+      JGStore jgs=(JGStore)super.clone();
+      jgs.setProtocolStack(getProtocolStack());
+      jgs.setSubClusterName(getSubClusterName());
+      jgs.setRetrievalTimeOut(getRetrievalTimeOut());
+      jgs.setDistributionMode(getDistributionMode());
+      jgs.setDistributionTimeOut(getDistributionTimeOut());
+
+      return jgs;
+    }
+
+  //----------------------------------------
 
   protected Channel       _channel;
   protected RpcDispatcher _dispatcher;
+  protected Vector        _members;
 
   //----------------------------------------
   // Store API - Store LifeCycle
 
   public
-    JGStore(Manager manager)
+    JGStore()
     {
-      super(manager);
+      super();
 
       try
       {
 	// start up our channel...
-	_channel=new JChannel(_properties); // channel should be JBoss or new Jetty channel
+	_channel=new JChannel(_protocolStack); // channel should be JBoss or new Jetty channel
 
 	MessageListener messageListener=this;
 	MembershipListener membershipListener=null; //this - later
@@ -97,11 +153,19 @@ public class
 	_dispatcher=new RpcDispatcher(_channel, messageListener, membershipListener, serverObject);
 
 	_channel.setOpt(Channel.GET_STATE_EVENTS, new Boolean(true));
+	_members=(Vector)_channel.getView().getMembers().clone();
+	_members.remove(_channel.getLocalAddress());
       }
       catch (Exception e)
       {
 	_log.error("could not initialise JavaGroups Channel and Dispatcher");
       }
+    }
+
+  public String
+    getChannelName()
+    {
+      return "JETTY_HTTPSESSION_DISTRIBUTION:"+getContextPath()+"-"+getSubClusterName();
     }
 
   public void
@@ -110,13 +174,16 @@ public class
     {
       super.start();
 
-      if (!_channel.isOpen()) _channel.open();
-      _channel.connect("HTTPSESSION_REPLICATION:"+getContextPath()); // group should be on a per-context basis
+      String channelName=getChannelName();
+      _log.debug("starting ("+channelName+")....");
+
+      _channel.connect(channelName); // group should be on a per-context basis
       _dispatcher.start();
 
-      int timeOut=500;
-      if (!_channel.getState(null, timeOut))
-	_log.info("could not retrieve current sessions from JavaGroups");
+      if (!_channel.getState(null, getRetrievalTimeOut()))
+	_log.info("could not retrieve current sessions from JavaGroups - I must be first up");
+
+      _log.debug("started ("+channelName+")....");
     }
 
   public void
@@ -124,7 +191,6 @@ public class
     {
       _dispatcher.stop();
       _channel.disconnect();
-      _channel.close();
 
       super.stop();
     }
@@ -144,6 +210,29 @@ public class
   protected void
     publish(String methodName, Class[] argClasses, Object[] argInstances)
     {
+      //      _log.info("publishing: "+methodName);
+      // we also need to dispatch this on ourselves synchronously,
+      // since we are excluded from members list...
+      super.dispatch(methodName, argClasses, argInstances);
+
+      // hack... - awkward - we can't use the current
+      // MarshallingInterceptor because we need the original reference
+      // of the object given us preserved all the way to the cache, so
+      // that subsequent requests from this cache yield the same
+      // reference, rather than value...
+
+	for (int i=0; i<argInstances.length; i++)
+	{
+	  try
+	  {
+	    argInstances[i]=MarshallingInterceptor.marshal(argInstances[i]);
+	  }
+	  catch(IOException e)
+	  {
+	    _log.error("could not marshal arg for publication", e);
+	  }
+	}
+
       try
       {
 	Class[] tmp={String.class, Class[].class, Object[].class};
@@ -152,23 +241,37 @@ public class
 	method.addArg(argClasses);
 	method.addArg(argInstances);
 
-	synchronized (_dispatcher)
-	{
-	  // why doesn't dispatcher do this for us ?
-	  // is it intended to be multi-threaded ?
-	  _dispatcher.callRemoteMethods(null,method,GroupRequest.GET_ALL,0); // synchronous
-	}
+	_dispatcher.callRemoteMethods(_members,
+				      method,
+				      getDistributionModeInternal(),
+				      getDistributionTimeOut());
       }
       catch(Exception e)
       {
 	_log.error("problem publishing change in state over JavaGroups", e);
       }
+
     }
 
   // JG doesn't find this method in our superclass ...
   public void
     dispatch(String methodName, Class[] argClasses, Object[] argInstances)
     {
+      //      _log.info("dispatching: "+methodName);
+
+      // unhack...
+      for (int i=0; i<argInstances.length; i++)
+	{
+	  try
+	  {
+	    argInstances[i]=MarshallingInterceptor.demarshal((byte[])argInstances[i]);
+	  }
+	  catch(Exception e)
+	  {
+	    _log.error("could not demarshal arg from publication", e);
+	  }
+	}
+
       super.dispatch(methodName, argClasses, argInstances);
     }
 
@@ -192,7 +295,7 @@ public class
    *
    * @return an <code>Object</code> value
    */
-  public Object
+  public byte[]
     getState()
     {
       _log.info("initialising another store from our current state");
@@ -211,22 +314,39 @@ public class
       }
 
       Object[] data={new Long(System.currentTimeMillis()), state};
-      return data;
+      try
+      {
+	return org.javagroups.util.Util.objectToByteBuffer (data);
+      }
+      catch (Exception e)
+      {
+	_log.error ("Unable to getState from JavaGroups: ", e);
+	return null;
+      }
     }
-
   /**
    * initialise ourself from the current state of another store...
    *
    * @param new_state an <code>Object</code> value
    */
   public void
-    setState(Object tmp)
+    setState (byte[] tmp)
     {
       if (tmp!=null)
       {
 	_log.info("initialising our state from another Store");
 
-	Object[] data=(Object[])tmp;
+	Object[] data = null;
+	try
+	{
+	  // TODO - this needs to be loaded into webapps ClassLoader,
+	  // then we can lose the MarshallingInterceptor...
+	  data=(Object[])org.javagroups.util.Util.objectFromByteBuffer (tmp);
+	}
+	catch (Exception e)
+	{
+	  _log.error ("Unable to setState from JavaGroups: ", e);
+	}
 
 	long remoteTime=((Long)data[0]).longValue();
 	long localTime=System.currentTimeMillis();
@@ -245,83 +365,35 @@ public class
     }
 
   //----------------------------------------
-//   // 'MembershipListener' API
-//
-//   // Block sending and receiving of messages until viewAccepted() is called
-//   public void
-//     block()
-//     {
-//       _log.info("??? block()");
-//     }
-//
-//   // Called when a member is suspected
-//   public void
-//     suspect(Address suspected_mbr)
-//     {
-//       _log.info("??? suspect()");
-//     }
-//
-//   protected Vector _members=new Vector(); // keeps track of all DHTs
-//   protected Vector _notifs=new Vector();  // to be notified when mbrship changes
-//
-//   public void
-//     viewAccepted(View new_view)
-//     {
-//       _log.info("??? viewAccepted()");
-//
-//       Vector new_mbrs=new_view.getMembers();
-//
-//       if (new_mbrs != null)
-//       {
-// 	sendViewChangeNotifications(new_mbrs, _members); // notifies observers (joined, left)
-// 	_members.removeAllElements();
-// 	_members.addAll(new_mbrs);
-//       }
-//     }
-//
-//   public interface Notification
-//   {
-//     void entrySet(Object key, Object value);
-//     void entryRemoved(Object key);
-//     void viewChange(Vector new_mbrs, Vector old_mbrs);
-//   }
-//
-//   protected void
-//     sendViewChangeNotifications(Vector new_mbrs, Vector old_mbrs)
-//     {
-//       Vector        joined, left;
-//       Object        mbr;
-//       Notification  n;
-//
-//       if(_notifs.size() == 0 || old_mbrs == null || new_mbrs == null ||
-// 	 old_mbrs.size() == 0 || new_mbrs.size() == 0)
-// 	return;
-//
-//       // 1. Compute set of members that joined: all that are in new_mbrs, but not in old_mbrs
-//       joined=new Vector();
-//       for (int i=0; i < new_mbrs.size(); i++)
-//       {
-// 	mbr=new_mbrs.elementAt(i);
-// 	if (!old_mbrs.contains(mbr))
-// 	  joined.addElement(mbr);
-//       }
-//
-//
-//       // 2. Compute set of members that left: all that were in old_mbrs, but not in new_mbrs
-//       left=new Vector();
-//       for (int i=0; i < old_mbrs.size(); i++)
-//       {
-// 	mbr=old_mbrs.elementAt(i);
-// 	if (!new_mbrs.contains(mbr))
-// 	{
-// 	  left.addElement(mbr);
-// 	}
-//       }
-//
-//       for (int i=0; i < _notifs.size(); i++)
-//       {
-// 	n=(Notification)_notifs.elementAt(i);
-// 	n.viewChange(joined, left);
-//       }
-//     }
+  // 'MembershipListener' API
+
+  // Block sending and receiving of messages until viewAccepted() is called
+  public void
+    block()
+    {
+      _log.info("block()");
+    }
+
+  // Called when a member is suspected
+  public void
+    suspect(Address suspected_mbr)
+    {
+      _log.info("suspect("+suspected_mbr+")");
+    }
+
+  // Called when channel membership changes
+  public void
+    viewAccepted(View new_view)
+    {
+      _log.info("viewAccepted("+new_view+")");
+
+      Vector new_mbrs=new_view.getMembers();
+
+      if (new_mbrs != null)
+      {
+ 	_members.clear();
+ 	_members.addAll(new_mbrs);
+	_members.remove(_channel.getLocalAddress());
+      }
+    }
 }

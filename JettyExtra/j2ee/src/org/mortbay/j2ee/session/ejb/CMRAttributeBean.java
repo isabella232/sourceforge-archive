@@ -39,13 +39,13 @@ import org.mortbay.j2ee.session.interfaces.CMRAttributePK;
  *
  *   @jboss:table-name "JETTY_HTTPSESSION_CMRAttribute"
  *   @jboss:create-table create="true"
- *   @jboss:remove-table remove="true"
+ *   @jboss:remove-table remove="false"
  *   @jboss:container-configuration name="Standard CMP 2.x EntityBean"
  *
  */
 
 public abstract class CMRAttributeBean
-  implements EntityBean, org.mortbay.j2ee.session.State
+  implements EntityBean
 {
   Category _log=Category.getInstance(getClass().getName());
 

@@ -28,13 +28,6 @@ public class CMRStore
   InitialContext _jndiContext;
   CMRStateHome   _home;
   String         _name="jetty/CMRState"; // TODO - parameterise
-  Manager        _manager;
-
-  public
-    CMRStore(Manager manager)
-  {
-    _manager=manager;
-  }
 
   // Store LifeCycle
   public void
@@ -59,7 +52,7 @@ public class CMRStore
 
     try
     {
-      return (CMRState)PortableRemoteObject.narrow(_home.findByPrimaryKey(new CMRStatePK(_manager.getContextPath(), id)), CMRState.class);
+      return (CMRState)PortableRemoteObject.narrow(_home.findByPrimaryKey(new CMRStatePK(getManager().getContextPath(), id)), CMRState.class);
     }
     catch (Throwable e)
     {
@@ -75,7 +68,7 @@ public class CMRStore
     if (_home==null)
       throw new IllegalStateException("invalid store");
 
-    Object tmp=_home.create(_manager.getContextPath(), id, maxInactiveInterval);
+    Object tmp=_home.create(getManager().getContextPath(), id, maxInactiveInterval);
     CMRState state=(CMRState)PortableRemoteObject.narrow(tmp, CMRState.class);
     return state;
   }

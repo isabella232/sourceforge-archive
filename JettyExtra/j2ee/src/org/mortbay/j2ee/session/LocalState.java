@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.log4j.Category;
 
 //----------------------------------------
 
@@ -23,9 +24,9 @@ import java.util.Map;
  */
 public class
   LocalState
-  implements State
+  implements State, java.io.Serializable
 {
-  // should be final - but class must be Serializable
+  protected static Category _log=Category.getInstance("org.mortbay.j2ee.session.LocalState");
 
   protected String _id;
   protected int    _maxInactiveInterval;
@@ -66,11 +67,12 @@ public class
   protected static Enumeration _emptyEnumeration =Collections.enumeration(_emptyMap.keySet());
   protected static String[]    _emptyStringArray =new String[0]; // could this be changed by user ?
 
-  protected void ensureAttributes() { _attributes=new HashMap();}
+  protected void ensureAttributes() { if (_attributes==null) _attributes=new HashMap();}
 
   public Object
     getAttribute(String name)
     {
+      _log.info("getAttribute("+name+")");
       return _attributes==null?null:_attributes.get(name);
     }
 
@@ -97,6 +99,9 @@ public class
     {
       // we can be sure that name is non-null, because this will have
       // been checked in our adaptor...
+
+      _log.info("setAttribute("+name+", "+value+", "+returnValue+")");
+
       ensureAttributes();
       Object tmp=_attributes.put(name, value);
       return returnValue?tmp:null;
@@ -130,14 +135,17 @@ public class
   protected long
     remainingTime()
     {
-      int maxInactiveInterval=_maxInactiveInterval<1?_actualMaxInactiveInterval:_maxInactiveInterval;
-      return (_lastAccessedTime+(maxInactiveInterval*1000))-System.currentTimeMillis();
+      long maxInactiveInterval=_maxInactiveInterval<1?_actualMaxInactiveInterval:_maxInactiveInterval;
+      return (_lastAccessedTime+(maxInactiveInterval*1000L))-System.currentTimeMillis();
     }
 
   public boolean
     isValid(int extraTime)
     {
-      return remainingTime()+(extraTime*1000)>0;
+      long remainingTime=remainingTime();
+      long etime=(extraTime*1000L);
+      boolean valid=remainingTime+etime>0;
+      return valid;
     }
 
   public boolean

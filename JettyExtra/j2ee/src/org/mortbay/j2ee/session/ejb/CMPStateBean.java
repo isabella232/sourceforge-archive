@@ -35,13 +35,13 @@ import org.mortbay.j2ee.session.interfaces.CMPStatePK;
  *
  *   @jboss:table-name "JETTY_HTTPSESSION_CMPState"
  *   @jboss:create-table create="true"
- *   @jboss:remove-table remove="true"
+ *   @jboss:remove-table remove="false"
  *   @jboss:container-configuration name="Sharing Standard CMP 2.x EntityBean"
  *
  */
 
 public abstract class CMPStateBean
-  implements EntityBean, org.mortbay.j2ee.session.State
+  implements EntityBean
 {
   Category _log=Category.getInstance(getClass().getName());
 
@@ -232,7 +232,7 @@ public abstract class CMPStateBean
    */
   public Object
     getAttribute(String name)
-    throws IllegalStateException
+    //    throws IllegalStateException
   {
     //    _log.info(getId()+": get attribute - "+name);
     return getAttributes().get(name);
@@ -243,7 +243,7 @@ public abstract class CMPStateBean
    */
   public Object
     setAttribute(String name, Object value, boolean returnValue)
-    throws IllegalStateException
+    //    throws IllegalStateException
   {
     Map attrs=getAttributes();
     Object tmp=attrs.put(name, value);
@@ -260,7 +260,7 @@ public abstract class CMPStateBean
    */
   public Object
     removeAttribute(String name, boolean returnValue)
-    throws IllegalStateException
+    //    throws IllegalStateException
   {
     Map attrs=getAttributes();
     Object tmp=attrs.remove(name);
@@ -281,7 +281,7 @@ public abstract class CMPStateBean
    */
   public Enumeration
     getAttributeNameEnumeration()
-    throws IllegalStateException
+    //    throws IllegalStateException
   {
     return Collections.enumeration(getAttributes().keySet());
   }
@@ -291,7 +291,7 @@ public abstract class CMPStateBean
    */
   public String[]
     getAttributeNameStringArray()
-    throws IllegalStateException
+    //    throws IllegalStateException
   {
     Map attrs=getAttributes();
     return (String[])attrs.keySet().toArray(new String[attrs.size()]);

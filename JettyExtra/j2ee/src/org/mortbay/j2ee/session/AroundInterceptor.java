@@ -20,12 +20,6 @@ import org.apache.log4j.Category;
 public abstract class AroundInterceptor
   extends StateInterceptor
 {
-  public
-    AroundInterceptor(HttpSession session, State state)
-  {
-    super(session, state);
-  }
-
   protected abstract void before();
   protected abstract void after();
 

@@ -63,6 +63,10 @@ public class StateAdaptor
     if (_state==null)
       return false;
 
+    StateInterceptor si=(StateInterceptor)_state;
+     si.setManager(_manager);
+     si.setSession(this);
+
     try
     {
       _state.getLastAccessedTime(); // this should cause an interceptor/the session to check
@@ -386,6 +390,11 @@ public class StateAdaptor
   {
     if (_state==null)
       throw new IllegalStateException("invalid session");
+
+    // this is a hack to get new interceptor stack to work... - TODO
+    StateInterceptor si=(StateInterceptor)_state;
+     si.setManager(_manager);
+     si.setSession(this);
   }
 
   public String
@@ -398,18 +407,18 @@ public class StateAdaptor
   // method- but I can;t think of a better way - maybe in the next
   // iteration...
 
-  MigrationInterceptor _mi=null;
-
-  public void
-    registerMigrationListener(MigrationInterceptor mi)
-  {
-    _mi=mi;
-  }
-
-  public void
-    migrate()
-  {
-    if (_mi!=null)
-      _mi.migrate(); // yeugh - TODO
-  }
+//   MigrationInterceptor _mi=null;
+//
+//   public void
+//     registerMigrationListener(MigrationInterceptor mi)
+//   {
+//     _mi=mi;
+//   }
+//
+   public void
+     migrate()
+   {
+     //     if (_mi!=null)
+     //       _mi.migrate(); // yeugh - TODO
+   }
 }

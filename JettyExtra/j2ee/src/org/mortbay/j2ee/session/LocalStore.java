@@ -17,10 +17,9 @@ public class LocalStore
   Category _log=Category.getInstance(getClass().getName());
   Map _sessions=new HashMap();
 
-  public
-    LocalStore(Manager manager)
-  {
-  }
+  protected Manager _manager;
+  public Manager getManager(){return _manager;}
+  public void setManager(Manager manager){_manager=manager;}
 
   // Store LifeCycle
   public void start() {}
@@ -93,11 +92,19 @@ public class LocalStore
     sa.invalidate();
   }
 
-    // there is no need to scavenge distributed state - as there is none.
+  // there is no need to scavenge distributed state - as there is none.
   public void setScavengerPeriod(int period) {}
   public void setScavengerExtraTime(int time) {}
   public void scavenge() {}
 
   protected int _actualMaxInactiveInterval=0;
   public void setActualMaxInactiveInterval(int interval) {_actualMaxInactiveInterval=interval;}
+
+  public Object
+    clone()
+  {
+    LocalStore ls=new LocalStore();
+    ls.setActualMaxInactiveInterval(_actualMaxInactiveInterval);
+    return ls;
+  }
 }

@@ -40,24 +40,23 @@ abstract public class
   AbstractReplicatedStore
   extends AbstractStore
 {
+  public Object
+    clone()
+    {
+      return super.clone();
+    }
+
   protected Map     _sessions=new HashMap();
-  protected Manager _manager;
 
   //----------------------------------------
   // Store API - Store LifeCycle
-
-  public
-    AbstractReplicatedStore(Manager manager)
-    {
-      _manager=manager;
-    }
 
   public void
     destroy()			// corresponds to ctor
     {
       _sessions.clear();
       _sessions=null;
-      _manager=null;
+      setManager(null);
       super.destroy();
     }
 
@@ -147,7 +146,7 @@ abstract public class
   public String
     getContextPath()
     {
-      return _manager.getContextPath();
+      return getManager().getContextPath();
     }
 
   //----------------------------------------
@@ -160,10 +159,10 @@ abstract public class
     {
       // only stuff meant for our context will be dispatched to us
 
-      String tmp="(";
-      for (int i=2; i<argInstances.length; i++)
-	tmp=tmp+argInstances[i]+((i<argInstances.length-1)?", ":"");
-      tmp=tmp+")";
+      //      String tmp="(";
+      //      for (int i=2; i<argInstances.length; i++)
+      //	tmp=tmp+argInstances[i]+((i<argInstances.length-1)?", ":"");
+      //      tmp=tmp+")";
 
       //      _log.info("dispatching call: "+argInstances[1]+"."+methodName+tmp);
 
@@ -172,6 +171,7 @@ abstract public class
       // either this is a class method
       if (methodName.equals("create"))
       {
+	_log.debug("creating replicated session: "+id);
 	long creationTime=((Long)argInstances[2]).longValue();
 	int maxInactiveInterval=((Integer)argInstances[3]).intValue();
 	int actualMaxInactiveInterval=((Integer)argInstances[4]).intValue();
@@ -181,6 +181,7 @@ abstract public class
       }
       else if (methodName.equals("destroy"))
       {
+	_log.debug("destroying replicated session: "+id);
 	synchronized(_sessions) {_sessions.remove(id);}
       }
       else

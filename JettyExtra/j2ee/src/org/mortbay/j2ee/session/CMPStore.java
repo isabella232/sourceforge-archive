@@ -26,13 +26,6 @@ public class CMPStore
   InitialContext _jndiContext;
   CMPStateHome   _home;
   String         _name="jetty/CMPState"; // TODO - parameterise
-  Manager        _manager;
-
-  public
-    CMPStore(Manager manager)
-  {
-    _manager=manager;
-  }
 
   // Store LifeCycle
   public void
@@ -57,7 +50,7 @@ public class CMPStore
     if (_home==null)
       throw new IllegalStateException("invalid store");
 
-    Object tmp=_home.create(_manager.getContextPath(), id, maxInactiveInterval, _actualMaxInactiveInterval);
+    Object tmp=_home.create(getManager().getContextPath(), id, maxInactiveInterval, _actualMaxInactiveInterval);
     CMPState state=(CMPState)PortableRemoteObject.narrow(tmp, CMPState.class);
     return state;
   }
@@ -70,7 +63,7 @@ public class CMPStore
 
     try
     {
-      return (CMPState)PortableRemoteObject.narrow(_home.findByPrimaryKey(new CMPStatePK(_manager.getContextPath(), id)), CMPState.class);
+      return (CMPState)PortableRemoteObject.narrow(_home.findByPrimaryKey(new CMPStatePK(getManager().getContextPath(), id)), CMPState.class);
     }
     catch (Throwable e)
     {
