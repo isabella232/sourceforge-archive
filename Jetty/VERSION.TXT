@@ -4,6 +4,8 @@ Jetty Versions
  + Fixed ContextLoader parent delegation bug
  + Use IE date formatting for last-modified efficiency
  + Last modified handling uses second resolution.
+ + Made NCSARequestLog simpler to extend.
+ + Fixed remove SocketListener bug.
 
 Jetty-4.1.3 - 24 October 2002
  + Fixed RolloverFileOutputStream without date.
