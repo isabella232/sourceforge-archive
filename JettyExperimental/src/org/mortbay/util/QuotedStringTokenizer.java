@@ -28,7 +28,7 @@ public class QuotedStringTokenizer
     private String _string;
     private String _delim = __delim;
     private boolean _returnQuotes=false;
-    private boolean _returnTokens=false;
+    private boolean _returnDelimiters=false;
     private StringBuffer _token;
     private boolean _hasToken=false;
     private int _i=0;
@@ -37,14 +37,14 @@ public class QuotedStringTokenizer
     /* ------------------------------------------------------------ */
     public QuotedStringTokenizer(String str,
                                  String delim,
-                                 boolean returnTokens,
+                                 boolean returnDelimiters,
                                  boolean returnQuotes)
     {
         super("");
         _string=str;
         if (delim!=null)
             _delim=delim;
-        _returnTokens=returnTokens;
+        _returnDelimiters=returnDelimiters;
         _returnQuotes=returnQuotes;
         
         if (_delim.indexOf('\'')>=0 ||
@@ -57,9 +57,9 @@ public class QuotedStringTokenizer
     /* ------------------------------------------------------------ */
     public QuotedStringTokenizer(String str,
                                  String delim,
-                                 boolean returnTokens)
+                                 boolean returnDelimiters)
     {
-        this(str,delim,returnTokens,false);
+        this(str,delim,returnDelimiters,false);
     }
     
     /* ------------------------------------------------------------ */
@@ -95,7 +95,7 @@ public class QuotedStringTokenizer
               case 0: // Start
                   if(_delim.indexOf(c)>=0)
                   {
-                      if (_returnTokens)
+                      if (_returnDelimiters)
                       {
                           _token.append(c);
                           return _hasToken=true;
@@ -125,7 +125,7 @@ public class QuotedStringTokenizer
                   _hasToken=true;
                   if(_delim.indexOf(c)>=0)
                   {
-                      if (_returnTokens)
+                      if (_returnDelimiters)
                           _i--;
                       return _hasToken;
                   }

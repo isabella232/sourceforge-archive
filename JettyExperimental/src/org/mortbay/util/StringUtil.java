@@ -127,11 +127,14 @@ public class StringUtil
     {
         if (w==null)
             return true;
-        
+
+        if (s==null)
+            return false;
+            
         int sl=s.length();
         int wl=w.length();
         
-        if (s==null || sl<wl)
+        if (sl<wl)
             return false;
         
         for (int i=wl;i-->0;)
@@ -192,6 +195,7 @@ public class StringUtil
         }
     }
 
+
     /* ------------------------------------------------------------ */
     /** Remove single or double quotes.
      */
@@ -230,6 +234,10 @@ public class StringUtil
 
     
     /* ------------------------------------------------------------ */
+    /**
+     * append hex digit
+     * 
+     */
     public static void append(StringBuffer buf,byte b,int base)
     {
         int bi=0xff&b;
