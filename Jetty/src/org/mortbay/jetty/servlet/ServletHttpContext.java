@@ -28,9 +28,9 @@ public class ServletHttpContext extends HttpContext
      * @param server 
      * @param contextPathSpec 
      */
-    public ServletHttpContext(HttpServer server,String contextPathSpec)
+    public ServletHttpContext()
     {
-        super(server,contextPathSpec);
+        super();
     }
 
     /* ------------------------------------------------------------ */
@@ -75,11 +75,11 @@ public class ServletHttpContext extends HttpContext
     public synchronized ServletHandler getServletHandler()
     {
         if (_servletHandler==null)
-            _servletHandler= (ServletHandler) getHttpHandler(ServletHandler.class);
+            _servletHandler= (ServletHandler) getHandler(ServletHandler.class);
         if (_servletHandler==null)
         {
             _servletHandler=new ServletHandler();
-            addHttpHandler(_servletHandler);
+            addHandler(_servletHandler);
         }
         return _servletHandler;
     }
@@ -138,7 +138,7 @@ public class ServletHttpContext extends HttpContext
     public synchronized void setDynamicServletPathSpec(String pathSpecInContext)
     {
         ServletHandler handler = (ServletHandler)
-            getHttpHandler(org.mortbay.jetty.servlet.ServletHandler.class);
+            getHandler(org.mortbay.jetty.servlet.ServletHandler.class);
         if (pathSpecInContext!=null)
         {
             if (handler==null)
@@ -146,14 +146,14 @@ public class ServletHttpContext extends HttpContext
             handler.setDynamicServletPathSpec(pathSpecInContext);
         }
         else if (handler!=null)
-            removeHttpHandler(handler);
+            removeHandler(handler);
     }
 
     /* ------------------------------------------------------------ */
     public String getDynamicServletPathSpec()
     {
         ServletHandler handler = (ServletHandler)
-            getHttpHandler(org.mortbay.jetty.servlet.ServletHandler.class);
+            getHandler(org.mortbay.jetty.servlet.ServletHandler.class);
         if (handler!=null)
             return handler.getDynamicServletPathSpec();
         return null;

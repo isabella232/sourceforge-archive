@@ -18,6 +18,8 @@ import org.mortbay.util.LifeCycle;
  */
 public interface HttpListener extends LifeCycle
 {
+    public static final String ATTRIBUTE="org.mortbay.http.HttpListener";
+        
     public abstract void setHttpServer(HttpServer server);
     public abstract HttpServer getHttpServer();
     public abstract void setHost(String host)

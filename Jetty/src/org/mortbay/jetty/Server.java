@@ -102,13 +102,16 @@ public class Server extends HttpServer
     public void configure(String configuration)
         throws IOException
     {
+
+        URL url=Resource.newResource(configuration).getURL();
+        if (_configuration!=null && _configuration.equals(url.toString()))
+            return;
         if (_configuration!=null)
             throw new IllegalStateException("Already configured with "+_configuration);
-        URL url=Resource.newResource(configuration).getURL();
-        _configuration=url.toString();
         try
         {
             XmlConfiguration config=new XmlConfiguration(url);
+            _configuration=url.toString();
             config.configure(this);
         }
         catch(IOException e)
@@ -137,9 +140,9 @@ public class Server extends HttpServer
      * @param contextPathSpec 
      * @return ServletHttpContext
      */
-    protected HttpContext newHttpContext(String contextPathSpec)
+    protected HttpContext newHttpContext()
     {
-        return new ServletHttpContext(this,contextPathSpec);
+        return new ServletHttpContext();
     }
 
 
@@ -174,7 +177,8 @@ public class Server extends HttpServer
         throws IOException
     {
         WebApplicationContext appContext =
-            new WebApplicationContext(this,contextPathSpec,webApp);
+            new WebApplicationContext(webApp);
+        appContext.setContextPath(contextPathSpec);
         addContext(virtualHost,appContext);
         Log.event("Web Application "+appContext+" added");
         return appContext;

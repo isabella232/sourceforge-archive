@@ -1,6 +1,10 @@
 Jetty Versions
 --------------
 
+Jetty-4.1.D0
+ + General clean up of the API for for MBean getters/setters.
+ + Experimental CLIENT-CERT Authenticator
+
 Jetty-4.0.1 - 22 May 2002
  + Fixed contextclassloader on ServletContextEvents.
  + Support graceful stopping of context and server.

@@ -10,6 +10,7 @@ import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.AbstractCollection;
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -86,7 +87,7 @@ public class HttpServer implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    private HashMap _listeners = new HashMap(3);
+    private List _listeners = new ArrayList(3);
     private HttpEncoding _httpEncoding ;
     private HashMap _realmMap = new HashMap(3);    
     private StringMap _virtualHostMap = new StringMap();
@@ -129,163 +130,55 @@ public class HttpServer implements LifeCycle
         else
             __servers.put(this,__servers);
     }
+
+
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param listeners Array of HttpListeners.
+     */
+    public void setListeners(HttpListener[] listeners)
+    {
+        List old = new ArrayList(_listeners);
+        
+        for (int i=0;i<listeners.length;i++)
+        {
+            boolean existing=old.remove(listeners[i]);
+            if (!existing)
+                addListener(listeners[i]);
+        }
+
+        for (int i=0;i<old.size();i++)
+        {
+            HttpListener listener=(HttpListener)old.get(i);
+            removeListener(listener);
+        }
+    }
     
     /* ------------------------------------------------------------ */
     /** 
-     * @return The HttpEncoding helper instance.
+     * @return Array of HttpListeners.
      */
-    public HttpEncoding getHttpEncoding()
+    public HttpListener[] getListeners()
     {
-        if (_httpEncoding==null)
-            _httpEncoding=new HttpEncoding();
-        return _httpEncoding;
+        if (_listeners==null)
+            return new HttpListener[0];
+        HttpListener[] listeners=new HttpListener[_listeners.size()];
+        return (HttpListener[])_listeners.toArray(listeners);
     }
     
-    /* ------------------------------------------------------------ */
-    /** The HttpEncoding instance is used to extend the transport
-     * encodings supprted by this server.
-     * @param httpEncoding The HttpEncoding helper instance.
-     */
-    public void setHttpEncoding(HttpEncoding httpEncoding)
-    {
-        _httpEncoding = httpEncoding;
-    }
     
     /* ------------------------------------------------------------ */
-    /** Start all handlers then listeners.
-     * If a subcomponent fails to start, it's exception is added to a
-     * org.mortbay.util.MultiException and the start method continues.
-     * @exception MultiException A collection of exceptions thrown by
-     * start() method of subcomponents of the HttpServer. 
+    /** Create and add a SocketListener.
+     * Conveniance method.
+     * @param address
+     * @return the HttpListener.
+     * @exception IOException 
      */
-    public synchronized void start()
-        throws MultiException
+    public HttpListener addListener(String address)
+        throws IOException
     {
-        Log.event("Starting "+Version.__VersionImpl);
-        MultiException mex = new MultiException();
-
-        statsReset();
-        
-        if (Code.verbose(99))
-        {
-            Code.debug("LISTENERS: ",_listeners);
-            Code.debug("HANDLER: ",_virtualHostMap);
-        }   
-
-        if (_requestLog!=null && !_requestLog.isStarted())
-        {
-            try{
-                _requestLog.start();
-                Log.event("Started "+_requestLog);
-            }
-            catch(Exception e){mex.add(e);}
-        }
-        
-        Iterator contexts = getHttpContexts().iterator();
-        while(contexts.hasNext())
-        {
-            HttpContext context=(HttpContext)contexts.next();
-            if (!context.isStarted())
-                try{context.start();}catch(Exception e){mex.add(e);}
-        }
-        
-        Iterator listeners = getListeners().iterator();
-        while(listeners.hasNext())
-        {
-            HttpListener listener =(HttpListener)listeners.next();
-            listener.setHttpServer(this);
-            if (!listener.isStarted())
-                try{listener.start();}catch(Exception e){mex.add(e);}
-        }
-        
-        mex.ifExceptionThrowMulti();
-        Log.event("Started "+this);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Start all handlers then listeners.
-     */
-    public synchronized boolean isStarted()
-    {
-        if (_requestLog!=null && _requestLog.isStarted())
-            return true;
-        
-        Iterator listeners = getListeners().iterator();
-        while(listeners.hasNext())
-        {
-            HttpListener listener =(HttpListener)listeners.next();
-            if (listener.isStarted())
-                return true;
-        }
-        Iterator contexts = getHttpContexts().iterator();
-        while(contexts.hasNext())
-        {
-            HttpContext context=(HttpContext)contexts.next();
-            if (context.isStarted())
-                return true;
-        }
-        
-        return false;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Stop all listeners then handlers.
-     * Equivalent to stop(false);
-     * @exception InterruptedException If interrupted, stop may not have
-     * been called on everything.
-     */
-    public synchronized void stop()
-        throws InterruptedException
-    {
-        stop(false);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Stop all listeners then handlers.
-     * @param graceful If true and statistics are on, then this method will wait
-     * for requestsActive to go to zero before calling stop()
-     */
-    public synchronized void stop(boolean graceful)
-        throws InterruptedException
-    {
-        Iterator listeners = getListeners().iterator();
-        while(listeners.hasNext())
-        {
-            HttpListener listener =(HttpListener)listeners.next();
-            if (listener.isStarted())
-            {
-                try{listener.stop();}
-                catch(Exception e)
-                {
-                    if (Code.debug())
-                        Code.warning(e);
-                    else
-                        Code.warning(e.toString());
-                }
-            }
-        }
-        
-        Iterator contexts = getHttpContexts().iterator();
-        while(contexts.hasNext())
-        {
-            HttpContext context=(HttpContext)contexts.next();
-            context.stop(graceful);
-        }
-
-        if (_notFoundContext!=null)
-        {
-            _notFoundContext.stop();
-            remove(_notFoundContext);
-        }
-        _notFoundContext=null;
-        
-        if (_requestLog!=null && _requestLog.isStarted())
-        {
-            _requestLog.stop();
-            Log.event("Stopped "+_requestLog);
-        }
-        
-        Log.event("Stopped "+this);
+        return addListener(new InetAddrPort(address));
     }
     
     /* ------------------------------------------------------------ */
@@ -298,15 +191,10 @@ public class HttpServer implements LifeCycle
     public HttpListener addListener(InetAddrPort address)
         throws IOException
     {
-        HttpListener listener = (HttpListener)_listeners.get(address);
-        if (listener==null)
-        {
-            listener=new SocketListener(address);
-            listener.setHttpServer(this);
-            _listeners.put(address,listener);
-        }
-
-        add(listener);
+        HttpListener listener = new SocketListener(address);
+        listener.setHttpServer(this);
+        _listeners.add(listener);
+        addComponent(listener);
         return listener;
     }
     
@@ -320,35 +208,8 @@ public class HttpServer implements LifeCycle
         throws IllegalArgumentException
     {
         listener.setHttpServer(this);        
-        _listeners.put(listener,listener);
-        add(listener);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Add a HTTP Listener to the server.
-     * @param listenerClass The Listener classname, or null for the default
-     * Listener class.
-     * @exception IllegalArgumentException
-     */
-    public HttpListener addListener(String listenerClass)
-        throws IllegalArgumentException
-    {
-        try
-        {
-            if (listenerClass==null || listenerClass.length()==0)
-                listenerClass="org.mortbay.http.SocketListener";
-            Class lc = Loader.loadClass(this.getClass(),listenerClass);
-            HttpListener listener = (HttpListener) lc.newInstance();
-            listener.setHttpServer(this);        
-            _listeners.put(listener,listener);
-            add(listener);
-            return listener;
-        }
-        catch(Exception e)
-        {
-            Code.warning(e);
-            throw new IllegalArgumentException(e.toString());
-        }
+        _listeners.add(listener);
+        addComponent(listener);
     }
     
     /* ------------------------------------------------------------ */
@@ -357,57 +218,122 @@ public class HttpServer implements LifeCycle
      */
     public void removeListener(HttpListener listener)
     {
-        Iterator iterator = _listeners.entrySet().iterator();
-        while(iterator.hasNext())
+        if (listener==null)
+            return;
+        
+        for (int l=0;l<_listeners.size();l++)
         {
-            Map.Entry entry=
-                (Map.Entry) iterator.next();
-            if (entry.getValue()==listener)
+            if (listener.equals(_listeners.get(l)))
             {
-                iterator.remove();
-                remove(listener);
+                _listeners.remove(l);
+                removeComponent(listener);
+                if (listener.isStarted())
+                    try{listener.stop();}catch(InterruptedException e){Code.warning(e);}
+                listener.setHttpServer(null);
             }
         }
     }
+
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @return Set of all listeners.
-     */
-    public Collection getListeners()
+    public synchronized void setContexts(HttpContext[] contexts)
     {
-        if (_listeners==null)
-            return Collections.EMPTY_LIST;
-        return _listeners.values();
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Define a virtual host alias.
-     * All requests to the alias are handled the same as request for
-     * the virtualHost.
-     * @param virtualHost Host name or IP
-     * @param alias Alias hostname or IP
-     */
-    public void addHostAlias(String virtualHost, String alias)
-    {
-        Object contextMap=_virtualHostMap.get(virtualHost);
-        if (contextMap==null)
-            throw new IllegalArgumentException("No Such Host: "+virtualHost);
-        _virtualHostMap.put(alias,contextMap);
+        List old = Arrays.asList(getContexts());
+        
+        for (int i=0;i<contexts.length;i++)
+        {
+            boolean existing=old.remove(contexts[i]);
+            if (!existing)
+                addContext(contexts[i]);
+        }
+
+        for (int i=0;i<old.size();i++)
+            removeContext((HttpContext)old.get(i));
     }
 
+    
     /* ------------------------------------------------------------ */
-    /** Create a new HttpContext.
-     * Specialized HttpServer classes may specialize this method to
-     * return subclasses of HttpContext.
-     * @param contextPathSpec Path specification relative to the context path. 
-     * @return A new instance of HttpContext or a subclass of HttpContext
-     */
-    protected HttpContext newHttpContext(String contextPathSpec)
+    public synchronized HttpContext[] getContexts()
     {
-        return new HttpContext(this,contextPathSpec);
+        if (_virtualHostMap==null)
+            return new HttpContext[0];
+        
+        ArrayList contexts = new ArrayList(33);
+        Iterator maps=_virtualHostMap.values().iterator();
+        while (maps.hasNext())
+        {
+            PathMap pm=(PathMap)maps.next();
+            Iterator lists=pm.values().iterator();
+            while(lists.hasNext())
+            {
+                List list=(List)lists.next();
+                for (int i=0;i<list.size();i++)
+                {
+                    HttpContext context=(HttpContext)list.get(i);
+                    if (!contexts.contains(context))
+                        contexts.add(context);
+                }
+            }
+        }
+        return (HttpContext[])contexts.toArray(new HttpContext[contexts.size()]);
+    }
+
+
+
+    /* ------------------------------------------------------------ */
+    /** Add a context.
+     * @param context 
+     */
+    public void addContext(HttpContext context)
+    {
+        if (context.getContextPath()==null ||
+            context.getContextPath().length()==0)
+            throw new IllegalArgumentException("No Context Path Set");
+        boolean existing=removeMappings(context);
+        if (!existing)
+        {
+            context.setHttpServer(this);
+            addComponent(context);
+        }
+        addMappings(context);
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /** Remove a context or Web application.
+     * @exception IllegalStateException if context not stopped
+     */
+    public boolean removeContext(HttpContext context)
+        throws IllegalStateException
+    {
+        if (removeMappings(context))
+        {
+            removeComponent(context);
+            if (context.isStarted())
+                try{context.stop();} catch (InterruptedException e){Code.warning(e);}
+            context.setHttpServer(null);
+            return true;
+        }
+        return false;
     }
     
+
+    /* ------------------------------------------------------------ */
+    /** Add a context.
+     * As contexts cannot be publicly created, this may be used to
+     * alias an existing context.
+     * @param virtualHost The virtual host or null for all hosts.
+     * @param context 
+     */
+    public void addContext(String virtualHost,
+                           HttpContext context)
+    {
+        if (virtualHost!=null)
+            context.addVirtualHost(virtualHost);
+        addContext(context);
+    }
+
+
     /* ------------------------------------------------------------ */
     /** Create and add a new context.
      * Note that multiple contexts can be created for the same
@@ -418,9 +344,11 @@ public class HttpServer implements LifeCycle
      */
     public HttpContext addContext(String contextPath)
     {
-        return addContext(null,contextPath);
+        HttpContext hc = newHttpContext();
+        hc.setContextPath(contextPath);
+        addContext(hc);
+        return hc;
     }
-
     
     /* ------------------------------------------------------------ */
     /** Create and add a new context.
@@ -435,118 +363,17 @@ public class HttpServer implements LifeCycle
     {
         if (virtualHost!=null && virtualHost.length()==0)
             virtualHost=null;
-        HttpContext hc = newHttpContext(contextPathSpec);
-        addContext(virtualHost,hc);
+        HttpContext hc = newHttpContext();
+        hc.setContextPath(contextPathSpec);
+        if (virtualHost!=null)
+            hc.addVirtualHost(virtualHost);
+        addContext(hc);
         return hc;
     }
-
-    /* ------------------------------------------------------------ */
-    /** Add a context.
-     * As contexts cannot be publicly created, this may be used to
-     * alias an existing context.
-     * @param context 
-     */
-    public void addContext(HttpContext context)
-    {
-        addContext(null,context);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Add a context.
-     * As contexts cannot be publicly created, this may be used to
-     * alias an existing context.
-     * @param virtualHost The virtual host or null for all hosts.
-     * @param context 
-     */
-    public void addContext(String virtualHost,
-                           HttpContext context)
-    {
-        PathMap contextMap=(PathMap)_virtualHostMap.get(virtualHost);
-        if (contextMap==null)
-        {
-            contextMap=new PathMap(7);
-            _virtualHostMap.put(virtualHost,contextMap);
-        }
-
-        String contextPathSpec=context.getContextPath();
-        if (contextPathSpec.length()>1)
-            contextPathSpec+="/*";
-        
-        List contextList = (List)contextMap.get(contextPathSpec);
-        if (contextList==null)
-        {
-            contextList=new ArrayList(1);
-            contextMap.put(contextPathSpec,contextList);
-        }
-
-        contextList.add(context);
-        context.addHost(virtualHost);
-        add(context);
-
-        Code.debug("Added ",context," for host ",virtualHost);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Remove a context or Web application.
-     * @param virtualHost The virtual host or null for all hosts.
-     * @param contextPathSpec Path specification relative to the context path.
-     * @param i Index among contexts of same virtualHost and pathSpec.
-     * @exception IllegalStateException if context not stopped
-     */
-    public void removeContext(String virtualHost, String contextPathSpec, int i)
-        throws IllegalStateException
-    {
-        PathMap contextMap=(PathMap)_virtualHostMap.get(virtualHost);
-        if (contextMap!=null)
-        {
-            List contextList = (List)contextMap.get(contextPathSpec);
-            if (contextList!=null)
-            {
-                if (i< contextList.size())
-                {
-                    HttpContext hc=(HttpContext)contextList.get(i);
-                    if (hc!=null && hc.isStarted())
-                        throw new IllegalStateException("Context not stopped");
-                    remove(hc);
-                    contextList.remove(i);
-                }
-            }
-            if (contextList.size()==0)
-                contextMap.remove(contextPathSpec);
-        }
-    }
+    
     
     /* ------------------------------------------------------------ */
-    /** Remove a context or Web application.
-     * @exception IllegalStateException if context not stopped
-     */
-    public void removeContext(HttpContext context)
-        throws IllegalStateException
-    {
-        if (_virtualHostMap==null)
-            return;
-        if (context.isStarted())
-            throw new IllegalStateException("Context not stopped");
-        Iterator i1 = _virtualHostMap.values().iterator();
-        while(i1.hasNext())
-        {
-            PathMap contextMap=(PathMap)i1.next();
-
-            Iterator i2=contextMap.values().iterator();
-            while(i2.hasNext())
-            {
-                List contextList = (List)i2.next();
-                if(contextList.remove(context))
-                    remove(context);
-                if (contextList.size()==0)
-                    i2.remove();
-            }
-        }
-    }
-    
-        
-    /* ------------------------------------------------------------ */
-    /** Get or create context. 
+    /** Get specific context. 
      * @param virtualHost The virtual host or null for all hosts.
      * @param contextPathSpec Path specification relative to the context path.
      * @param i Index among contexts of same virtualHost and pathSpec.
@@ -601,79 +428,273 @@ public class HttpServer implements LifeCycle
     /* ------------------------------------------------------------ */
     /** Get or create context. 
      * @param contextPathSpec Path specification relative to the context path.
-     * @return The HttpContext or null.
+     * @return The HttpContext  If multiple contexts exist for the same
+     * pathSpec, the most recently added context is returned.
+     * If no context exists, a new context is created by a call to newHttpContext.
      */
     public HttpContext getContext(String contextPathSpec)
     {
-	return getContext(null,contextPathSpec,0);
+	return getContext(null,contextPathSpec);
     }    
  
     /* ------------------------------------------------------------ */
-    /** 
-     * @return Collection of all handler from all contexts
+    /** Create a new HttpContext.
+     * Specialized HttpServer classes may specialize this method to
+     * return subclasses of HttpContext.
+     * @param contextPathSpec Path specification relative to the context path. 
+     * @return A new instance of HttpContext or a subclass of HttpContext
      */
-    public synchronized Set getHandlers()
+    protected HttpContext newHttpContext()
     {
-        HashSet set = new HashSet(33);
-        Iterator maps=_virtualHostMap.values().iterator();
-        while (maps.hasNext())
+        return  new HttpContext();
+    }
+
+    /* ------------------------------------------------------------ */    
+    void addMapping(String virtualHost, HttpContext context)
+    {
+        // Get the map of contexts
+        PathMap contextMap=(PathMap)_virtualHostMap.get(virtualHost);
+        if (contextMap==null)
         {
-            PathMap pm=(PathMap)maps.next();
-            Iterator lists=pm.values().iterator();
-            while(lists.hasNext())
+            contextMap=new PathMap(7);
+            _virtualHostMap.put(virtualHost,contextMap);
+        }
+        
+        // Generalize contextPath
+        String contextPathSpec=context.getContextPath();
+        if (contextPathSpec.length()>1)
+            contextPathSpec+="/*";
+        
+        // Get the list of contexts at this path
+        List contextList = (List)contextMap.get(contextPathSpec);
+        if (contextList==null)
+        {
+            contextList=new ArrayList(1);
+            contextMap.put(contextPathSpec,contextList);
+        }
+        
+        // Add the context to the list
+        contextList.add(context);
+        
+        Code.debug("Added ",context," for host ",(virtualHost==null?"*":virtualHost));
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    void addMappings(HttpContext context)
+    {
+        String[] hosts=context.getVirtualHosts();
+        if (hosts==null || hosts.length==0)
+            hosts = new String[]{null};
+
+        // For each host name
+        for (int h=0;h<hosts.length;h++)
+        {
+            String virtualHost=hosts[h];
+            addMapping(virtualHost,context);
+        }
+    }
+
+
+    /* ------------------------------------------------------------ */
+    boolean removeMapping(String virtualHost, HttpContext context)
+    {
+        boolean existing=false;
+        if (_virtualHostMap!=null)
+        {
+            PathMap contextMap=(PathMap)_virtualHostMap.get(virtualHost);
+            
+            Iterator i2=contextMap.values().iterator();
+            while(i2.hasNext())
             {
-                List list=(List)lists.next();
-                Iterator contexts=list.iterator();
-                while(contexts.hasNext())
+                List contextList = (List)i2.next();
+                if (contextList.remove(context))
+                    existing=true;                
+                if (contextList.size()==0)
+                    i2.remove();
+            }
+        }
+        return existing;
+    }
+    
+    /* ------------------------------------------------------------ */
+    boolean removeMappings(HttpContext context)
+    {
+        boolean existing=false;
+        
+        if (_virtualHostMap!=null)
+        {
+            Iterator i1 = _virtualHostMap.keySet().iterator();
+            while(i1.hasNext())
+            {
+                String virtualHost=(String)i1.next();
+                if (removeMapping(virtualHost,context))
+                    existing=true;
+            }
+        }
+        return existing;
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return The HttpEncoding helper instance.
+     */
+    public HttpEncoding getHttpEncoding()
+    {
+        if (_httpEncoding==null)
+            _httpEncoding=new HttpEncoding();
+        return _httpEncoding;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** The HttpEncoding instance is used to extend the transport
+     * encodings supprted by this server.
+     * @param httpEncoding The HttpEncoding helper instance.
+     */
+    public void setHttpEncoding(HttpEncoding httpEncoding)
+    {
+        _httpEncoding = httpEncoding;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Start all handlers then listeners.
+     * If a subcomponent fails to start, it's exception is added to a
+     * org.mortbay.util.MultiException and the start method continues.
+     * @exception MultiException A collection of exceptions thrown by
+     * start() method of subcomponents of the HttpServer. 
+     */
+    public synchronized void start()
+        throws MultiException
+    {
+        Log.event("Starting "+Version.__VersionImpl);
+        MultiException mex = new MultiException();
+
+        statsReset();
+        
+        if (Code.verbose(99))
+        {
+            Code.debug("LISTENERS: ",_listeners);
+            Code.debug("HANDLER: ",_virtualHostMap);
+        }   
+
+        if (_requestLog!=null && !_requestLog.isStarted())
+        {
+            try{
+                _requestLog.start();
+                Log.event("Started "+_requestLog);
+            }
+            catch(Exception e){mex.add(e);}
+        }
+        
+        HttpContext[] contexts = getContexts();
+        for (int i=0;i<contexts.length;i++)
+        {
+            HttpContext context=contexts[i];
+            try{context.start();}catch(Exception e){mex.add(e);}
+        }
+        
+        for (int l=0;l<_listeners.size();l++)
+        {
+            HttpListener listener =(HttpListener)_listeners.get(l);
+            listener.setHttpServer(this);
+            if (!listener.isStarted())
+                try{listener.start();}catch(Exception e){mex.add(e);}
+        }
+        
+        mex.ifExceptionThrowMulti();
+        Log.event("Started "+this);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public synchronized boolean isStarted()
+    {
+        for (int l=0;l<_listeners.size();l++)
+        {
+            HttpListener listener =(HttpListener)_listeners.get(l);
+            if (listener.isStarted())
+                return true;
+        }
+        
+        return false;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Stop all listeners then handlers.
+     * Equivalent to stop(false);
+     * @exception InterruptedException If interrupted, stop may not have
+     * been called on everything.
+     */
+    public synchronized void stop()
+        throws InterruptedException
+    {
+        stop(false);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Stop all listeners then handlers.
+     * @param graceful If true and statistics are on, then this method will wait
+     * for requestsActive to go to zero before calling stop()
+     */
+    public synchronized void stop(boolean graceful)
+        throws InterruptedException
+    { 
+        for (int l=0;l<_listeners.size();l++)
+        {
+            HttpListener listener =(HttpListener)_listeners.get(l); 
+            if (listener.isStarted())
+            {
+                try{listener.stop();}
+                catch(Exception e)
                 {
-                    HttpContext context = (HttpContext) contexts.next();
-                    set.addAll(context.getHttpHandlers());
+                    if (Code.debug())
+                        Code.warning(e);
+                    else
+                        Code.warning(e.toString());
                 }
             }
         }
-        return set;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get Context.
-     * This method is just an alias for getHttpContexts();
-     * @return Set of all HttpContexts.
-     */
-    public synchronized Set getContexts()
-    {
-        return getHttpContexts();
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return Set of all HttpContexts.
-     */
-    public synchronized Set getHttpContexts()
-    {
-        if (_virtualHostMap==null)
-            return Collections.EMPTY_SET;
         
-        HashSet set = new HashSet(33);
-        Iterator maps=_virtualHostMap.values().iterator();
-        while (maps.hasNext())
+        HttpContext[] contexts = getContexts();
+        for (int i=0;i<contexts.length;i++)
         {
-            PathMap pm=(PathMap)maps.next();
-            Iterator lists=pm.values().iterator();
-            while(lists.hasNext())
-            {
-                List list=(List)lists.next();
-                set.addAll(list);
-            }
+            HttpContext context=contexts[i];
+            context.stop(graceful);
         }
-        return set;
+
+        if (_notFoundContext!=null)
+        {
+            _notFoundContext.stop();
+            removeComponent(_notFoundContext);
+        }
+        _notFoundContext=null;
+        
+        if (_requestLog!=null && _requestLog.isStarted())
+        {
+            _requestLog.stop();
+            Log.event("Stopped "+_requestLog);
+        }
+        
+        Log.event("Stopped "+this);
     }
     
     /* ------------------------------------------------------------ */
-    public RequestLog getRequestLog()
+    /** Define a virtual host alias.
+     * All requests to the alias are handled the same as request for
+     * the virtualHost.
+     * @deprecated Use HttpContext.addVirtualHost
+     * @param virtualHost Host name or IP
+     * @param alias Alias hostname or IP
+     */
+    public void addHostAlias(String virtualHost, String alias)
     {
-        return _requestLog;
+        Code.warning("addHostAlias is deprecated. Use HttpContext.addVirtualHost");
+        Object contextMap=_virtualHostMap.get(virtualHost);
+        if (contextMap==null)
+            throw new IllegalArgumentException("No Such Host: "+virtualHost);
+        _virtualHostMap.put(alias,contextMap);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Set the request log.
      * @param logSink 
@@ -683,12 +704,19 @@ public class HttpServer implements LifeCycle
         if (isStarted())
             throw new IllegalStateException("Started");
         if (_requestLog!=null)
-            remove(_requestLog);
+            removeComponent(_requestLog);
         _requestLog=log;
         if (_requestLog!=null)
-            add(_requestLog);
+            addComponent(_requestLog);
     }
 
+    
+    /* ------------------------------------------------------------ */
+    public RequestLog getRequestLog()
+    {
+        return _requestLog;
+    }
+    
 
     /* ------------------------------------------------------------ */
     /** Log a request to the request log
@@ -772,8 +800,8 @@ public class HttpServer implements LifeCycle
             if (_notFoundContext==null)
             {
                 _notFoundContext=new HttpContext(this,"/");
-                _notFoundContext.addHttpHandler(new NotFoundHandler());
-                add(_notFoundContext);
+                _notFoundContext.addHandler(new NotFoundHandler());
+                addComponent(_notFoundContext);
                 try{_notFoundContext.start();}catch(Exception e){Code.warning(e);}
             }
             if (!_notFoundContext.handle(request,response))
@@ -794,12 +822,12 @@ public class HttpServer implements LifeCycle
      */
     public HttpHandler findHandler(Class handlerClass,
                                    String uri,
-                                   List hosts)
+                                   String[] hosts)
     {
         uri = URI.stripPath(uri);
-        for (int h=0; h<hosts.size() ; h++)
+        for (int h=0; h<hosts.length ; h++)
         {
-            String host = (String)hosts.get(h);
+            String host = hosts[h];
             
             PathMap contextMap=(PathMap)_virtualHostMap.get(host);
             if (contextMap!=null)
@@ -820,8 +848,7 @@ public class HttpServer implements LifeCycle
                             HttpContext context=
                                 (HttpContext)contextList.get(j);
                             
-                            HttpHandler handler =
-                                context.getHttpHandler(handlerClass);
+                            HttpHandler handler = context.getHandler(handlerClass);
 
                             if (handler!=null)
                                 return handler;
@@ -878,6 +905,7 @@ public class HttpServer implements LifeCycle
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     private boolean _statsOn=false;
+    private long _statsStartedAt=0;
     private int _connections;
     private int _connectionsOpen;
     private int _connectionsOpenMax;
@@ -898,6 +926,8 @@ public class HttpServer implements LifeCycle
      */
     public void statsReset()
     {
+        _statsStartedAt=System.currentTimeMillis();
+        
         _connections=0;
         _connectionsOpen=0;
         _connectionsOpenMax=0;
@@ -928,6 +958,15 @@ public class HttpServer implements LifeCycle
     public boolean getStatsOn()
     {
         return _statsOn;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Timestamp stats were started at.
+     */
+    public long getStatsOnMs()
+    {
+        return _statsOn?(System.currentTimeMillis()-_statsStartedAt):0;
     }
 
     /* ------------------------------------------------------------ */
@@ -1101,7 +1140,7 @@ public class HttpServer implements LifeCycle
             HttpContext context = server.getContext(host,"/");
             context.setResourceBase("docroot/");
             context.setServingResources(true);
-            context.addHttpHandler(new DumpHandler());
+            context.addHandler(new DumpHandler());
             
             // Parse arguments
             for (int i=0;i<args.length;i++)
@@ -1144,7 +1183,7 @@ public class HttpServer implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    private void add(Object o)
+    private void addComponent(Object o)
     {
         Code.debug("add component: ",o);
         if (_components==null)
@@ -1165,7 +1204,7 @@ public class HttpServer implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    private void remove(Object o)
+    private void removeComponent(Object o)
     {
         Code.debug("remove component: ",o);
         if (_components.remove(o) && _eventListeners!=null)

@@ -866,7 +866,7 @@ public class ServletHandler
                 _httpContext.getHttpServer()
                 .findHandler(org.mortbay.jetty.servlet.ServletHandler.class,
                              uri,
-                             _httpContext.getHosts());
+                             _httpContext.getVirtualHosts());
             if (handler!=null)
                 return handler.getServletContext();
             return null;

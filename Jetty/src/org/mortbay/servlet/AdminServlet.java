@@ -126,11 +126,11 @@ public class AdminServlet extends HttpServlet
             {
                 // Listener stop/start
                 String l=tok.nextToken()+":"+tok.nextToken();
-                Collection listeners=server.getListeners();
-                Iterator i2 = listeners.iterator();
-                while(i2.hasNext())
+
+                HttpListener[] listeners=server.getListeners();
+                for (int i2=0;i2<listeners.length;i2++)
                 {
-                    HttpListener listener = (HttpListener) i2.next();
+                    HttpListener listener = listeners[i2];
                     if (listener.toString().indexOf(l)>=0)
                     {
                         if (start) listener.start();
@@ -163,7 +163,7 @@ public class AdminServlet extends HttpServlet
                 {
                     // Handler stop/start
                     int handlerIndex=Integer.parseInt(tok.nextToken());
-                    HttpHandler handler=context.getHttpHandler(handlerIndex);
+                    HttpHandler handler=context.getHandlers()[handlerIndex];
                     
                     if (start) handler.start();
                     else handler.stop();
@@ -238,11 +238,10 @@ public class AdminServlet extends HttpServlet
             List lList=new List(List.Unordered);
             sItem.add(lList);
 
-            Collection listeners=server.getListeners();
-            Iterator i2 = listeners.iterator();
-            while(i2.hasNext())
+            HttpListener[] listeners=server.getListeners();
+            for (int i2=0;i2<listeners.length;i2++)
             {
-                HttpListener listener = (HttpListener) i2.next();
+                HttpListener listener = listeners[i2];
                 String id2=id1+":"+listener;
                 lList.add(lifeCycle(request,id2,listener));
             }
@@ -252,7 +251,7 @@ public class AdminServlet extends HttpServlet
             sItem.add("<B>Contexts:</B>");
             List hcList=new List(List.Unordered);
             sItem.add(hcList);
-            i2=hostMap.entrySet().iterator();
+            Iterator i2=hostMap.entrySet().iterator();
             while(i2.hasNext())
             {
                 Map.Entry hEntry=(Map.Entry)(i2.next());
@@ -291,11 +290,11 @@ public class AdminServlet extends HttpServlet
                     
                         List hList=new List(List.Ordered);
                         cItem.add(hList);
-                        int handlers = hc.getHttpHandlers().size();
+                        int handlers = hc.getHandlers().length;
                         for(int i5=0;i5<handlers;i5++)
                         {
                             String id5=id4+":"+i5;
-                            HttpHandler handler = hc.getHttpHandler(i5);
+                            HttpHandler handler = hc.getHandlers()[i5];
                             Composite hItem=hList.newItem();
                             hItem.add(lifeCycle(request,
                                                 id5,

@@ -58,7 +58,7 @@ import org.mortbay.xml.XmlParser;
  * HttpContext.
  * <P>
  * It creates and/or configures the following Handlers:<UL>
- * <LI>SecurityHandler - Implements BASIC and FORM
+ * <LI>SecurityHandler - Implements CLIENT_CERT, BASIC and FORM
  * authentication. This handler is forced to be the first handler in
  * the context.
  * <LI>ServletHandler - Servlet handler for dynamic and configured
@@ -108,12 +108,9 @@ public class WebApplicationContext extends ServletHttpContext
      * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
      * @exception IOException 
      */
-    public WebApplicationContext(HttpServer httpServer,
-                                 String contextPathSpec,
-                                 String webApp)
+    public WebApplicationContext(String webApp)
         throws IOException
     {
-        super(httpServer,contextPathSpec);
         _war=webApp;
     }
     
@@ -217,73 +214,73 @@ public class WebApplicationContext extends ServletHttpContext
         resolveWebApp();
 
         // add security handler first
-        _securityHandler=(SecurityHandler)getHttpHandler(SecurityHandler.class);
+        _securityHandler=(SecurityHandler)getHandler(SecurityHandler.class);
         if (_securityHandler==null)
             _securityHandler=new SecurityHandler();
-        if (getHttpHandlerIndex(_securityHandler)!=0)
+        if (getHandlerIndex(_securityHandler)!=0)
         {
-            removeHttpHandler(_securityHandler);
-            addHttpHandler(0,_securityHandler);
+            removeHandler(_securityHandler);
+            addHandler(0,_securityHandler);
         }        
         
         // Protect WEB-INF
         _webInfHandler=new WebInfProtect();
-        addHttpHandler(1,_webInfHandler);
+        addHandler(1,_webInfHandler);
         
         // Add filter Handler
-        _filterHandler = (FilterHandler)getHttpHandler(FilterHandler.class);
+        _filterHandler = (FilterHandler)getHandler(FilterHandler.class);
         if (_filterHandler==null)
         {
             _filterHandler=new FilterHandler();
-            addHttpHandler(_filterHandler);
+            addHandler(_filterHandler);
         }
         
         // Add servlet Handler
-        _servletHandler = (ServletHandler)getHttpHandler(ServletHandler.class);
+        _servletHandler = (ServletHandler)getHandler(ServletHandler.class);
         if (_servletHandler==null)
         {
             _servletHandler=new ServletHandler();
-            addHttpHandler(_servletHandler);
+            addHandler(_servletHandler);
         }
         _servletHandler.setDynamicServletPathSpec("/servlet/*");
         
         // Check order
-        if (getHttpHandlerIndex(_servletHandler)<getHttpHandlerIndex(_filterHandler))
+        if (getHandlerIndex(_servletHandler)<getHandlerIndex(_filterHandler))
         {
-            removeHttpHandler(_servletHandler);
-            addHttpHandler(_servletHandler);
+            removeHandler(_servletHandler);
+            addHandler(_servletHandler);
         }
         
         // Resource Handler
-        _resourceHandler = (ResourceHandler)getHttpHandler(ResourceHandler.class);
+        _resourceHandler = (ResourceHandler)getHandler(ResourceHandler.class);
         if (_resourceHandler==null)
         {
             _resourceHandler=new ResourceHandler();
             _resourceHandler.setPutAllowed(false);
             _resourceHandler.setDelAllowed(false);
-            addHttpHandler(_resourceHandler);
+            addHandler(_resourceHandler);
         }
 
         // Check order
         if (_servletHandler!=null &&
-            getHttpHandlerIndex(_resourceHandler)<getHttpHandlerIndex(_servletHandler))
+            getHandlerIndex(_resourceHandler)<getHandlerIndex(_servletHandler))
         {
-            removeHttpHandler(_resourceHandler);
-            addHttpHandler(_resourceHandler);
+            removeHandler(_resourceHandler);
+            addHandler(_resourceHandler);
         }
         
         // NotFoundHandler
-        _notFoundHandler=(NotFoundHandler)getHttpHandler(NotFoundHandler.class);
+        _notFoundHandler=(NotFoundHandler)getHandler(NotFoundHandler.class);
         if (_notFoundHandler==null)
             _notFoundHandler=new NotFoundHandler();
         else
-            removeHttpHandler(_notFoundHandler);
-        addHttpHandler(_notFoundHandler);
+            removeHandler(_notFoundHandler);
+        addHandler(_notFoundHandler);
 
         // Handle welcome redirection index
         if (_filterHandler!=null && _resourceHandler!=null)
             _resourceHandler.setWelcomeRedirectionIndex
-                (getHttpHandlerIndex(_filterHandler)+1);
+                (getHandlerIndex(_filterHandler)+1);
         
         // Do the default configuration
         try
@@ -475,27 +472,27 @@ public class WebApplicationContext extends ServletHttpContext
 
         // clean up
         if (_resourceHandler!=null)
-            removeHttpHandler(_resourceHandler);
+            removeHandler(_resourceHandler);
         _resourceHandler=null;
         
         if (_servletHandler!=null)
-            removeHttpHandler(_servletHandler);
+            removeHandler(_servletHandler);
         _servletHandler=null;
         
         if (_filterHandler!=null)
-            removeHttpHandler(_filterHandler);
+            removeHandler(_filterHandler);
         _filterHandler=null;
         
         if (_webInfHandler!=null)
-            removeHttpHandler(_webInfHandler);
+            removeHandler(_webInfHandler);
         _webInfHandler=null;
         
         if (_securityHandler!=null)
-            removeHttpHandler(_securityHandler);
+            removeHandler(_securityHandler);
         _securityHandler=null;
         
         if (_notFoundHandler!=null)
-            removeHttpHandler(_notFoundHandler);
+            removeHandler(_notFoundHandler);
         _notFoundHandler=null;
     }
 

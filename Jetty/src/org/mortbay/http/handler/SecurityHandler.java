@@ -42,6 +42,7 @@ public class SecurityHandler extends NullHandler
     
     public final static String __BASIC_AUTH="BASIC";
     public final static String __FORM_AUTH="FORM";
+    public final static String __CERT_AUTH="CLIENT-CERT";
     public final static String __ATTR="org.mortbay.J.H.SecurityHandler";
 
     
@@ -87,7 +88,6 @@ public class SecurityHandler extends NullHandler
             return "BASIC";
         }
     }
-
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -116,7 +116,9 @@ public class SecurityHandler extends NullHandler
     /* ------------------------------------------------------------ */
     public void setRealmName(String realmName)
     {
-        if (isStarted())
+        if (isStarted() &&
+            ((_realmName!=null && !_realmName.equals(realmName)) ||
+             (_realmName==null && realmName!=null)))
             throw new IllegalStateException("Handler started");
         _realmName=realmName;
         _realmForced=false;
@@ -143,7 +145,9 @@ public class SecurityHandler extends NullHandler
     {
         if (isStarted())
             throw new IllegalStateException("Handler started");
-        if (!__BASIC_AUTH.equals(method) && !__FORM_AUTH.equals(method))
+        if (!__BASIC_AUTH.equals(method) &&
+            !__FORM_AUTH.equals(method) &&
+            !__CERT_AUTH.equals(method))
             throw new IllegalArgumentException("Not supported: "+method);
         _authMethod = method;
     }
@@ -225,14 +229,18 @@ public class SecurityHandler extends NullHandler
                 }
             }
         }
-        // If method is FORM
+
+        // Find out the Authenticator.
         if (__BASIC_AUTH.equalsIgnoreCase(_authMethod))
         {
             _authenticator=new BasicAuthenticator();
             Code.debug("BasicAuthenticator=",_authenticator);
         }
-        
-        // If method is FORM
+        else if (__CERT_AUTH.equalsIgnoreCase(_authMethod))
+        {
+            _authenticator=new ClientCertAuthenticator();
+            Code.debug("CertAuthenticator=",_authenticator);
+        }
         else if (__FORM_AUTH.equalsIgnoreCase(_authMethod))
         {
             // Make sure that we have both login and error page set
@@ -248,10 +256,10 @@ public class SecurityHandler extends NullHandler
                 // look for FormAuthenticator
                 try
                 {
-                    Iterator iter = getHttpContext().getHttpHandlers().iterator();
-                    while (iter.hasNext())
+                    HttpHandler[] handlers = getHttpContext().getHandlers();
+                    for (int i=0;i<handlers.length;i++)
                     {
-                        HttpHandler handler=(HttpHandler)iter.next();
+                        HttpHandler handler=handlers[i];
                         if (handler instanceof FormAuthenticator)
                         {
                             _authenticator=(FormAuthenticator)handler;

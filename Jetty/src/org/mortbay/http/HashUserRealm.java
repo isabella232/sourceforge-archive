@@ -110,11 +110,12 @@ public class HashUserRealm extends HashMap implements UserRealm
 
     /* ------------------------------------------------------------ */
     public UserPrincipal authenticate(String username,
-                                                   String credentials,
-                                                   HttpRequest request)
+                                      String credentials,
+                                      HttpRequest request)
     {
         KnownUser user;
-        synchronized (this) {
+        synchronized (this)
+        {
             user = (KnownUser)super.get(username);
         }
         

@@ -84,6 +84,7 @@ public class HttpContext implements LifeCycle
     /* ------------------------------------------------------------ */
     private HttpServer _httpServer;
     private List _handlers=new ArrayList(3);
+    private HttpHandler[] _handlersArray;
     private String _classPath;
     private ClassLoader _parent;
     private ClassLoader _loader;
@@ -94,6 +95,7 @@ public class HttpContext implements LifeCycle
     private Map _initParams = new HashMap(11);
     
     private List _hosts=new ArrayList(2);
+    private String[] _hostsArray=null;
     private String _contextPath;
     private String _name;
     private boolean _redirectNullPath=true;
@@ -110,11 +112,40 @@ public class HttpContext implements LifeCycle
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
+     */
+    public HttpContext()
+    {}
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
      * @param httpServer 
      * @param contextPathSpec 
      */
-    protected HttpContext(HttpServer httpServer,String contextPathSpec)
+    public HttpContext(HttpServer httpServer,String contextPathSpec)
     {
+        setHttpServer(httpServer);
+        setContextPath(contextPathSpec);
+    }
+
+    /* ------------------------------------------------------------ */
+    void setHttpServer(HttpServer httpServer)
+    {
+        _httpServer=httpServer;
+        _name=null;
+    }
+
+    /* ------------------------------------------------------------ */
+    public HttpServer getHttpServer()
+    {
+        return _httpServer;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setContextPath(String contextPathSpec)
+    {
+        if (_httpServer!=null)
+            _httpServer.removeMappings(this);
+        
         // check context path
         if (contextPathSpec==null ||
             contextPathSpec.indexOf(',')>=0 ||
@@ -141,9 +172,230 @@ public class HttpContext implements LifeCycle
         else
             _contextPath="/";
 
-        _httpServer=httpServer;
         _name=null;
+
+        if (_httpServer!=null)
+            _httpServer.addMappings(this);
     }
+    
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return The context prefix
+     */
+    public String getContextPath()
+    {
+        return _contextPath;
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /** Add a virtual host alias to this context.
+     * @param host A hostname. A null host name means any hostname is
+     * acceptable. Host names may String representation of IP addresses.
+     */
+    public void addVirtualHost(String hostname)
+    {
+        // Note that null hosts are also added.
+        if (!_hosts.contains(hostname))
+        {
+            _hosts.add(hostname);
+            _name=null;
+
+            if (_httpServer!=null)
+                _httpServer.addMapping(hostname,this);
+            _hostsArray=null;
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** remove a virtual host alias to this context.
+     * @param host A hostname. A null host name means any hostname is
+     * acceptable. Host names may String representation of IP addresses.
+     */
+    public void removeVirtualHost(String hostname)
+    {
+        // Note that null hosts are also added.
+        if (_hosts.remove(hostname))
+        {
+            _name=null;
+            if (_httpServer!=null)
+                _httpServer.removeMapping(hostname,this);
+            _hostsArray=null;
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param hosts Array of virtual hosts that this context responds to. A
+     * null host name or null/empty array means any hostname is acceptable.
+     * Host names may String representation of IP addresses.
+     */
+    public void setVirtualHosts(String[] hosts)
+    {
+        List old = new ArrayList(_hosts);
+        
+        for (int i=0;i<hosts.length;i++)
+        {
+            boolean existing=old.remove(hosts[i]);
+            if (!existing)
+                addVirtualHost(hosts[i]);
+        }
+
+        for (int i=0;i<old.size();i++)
+            removeVirtualHost((String)old.get(i));
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Array of virtual hosts that this context responds to. A
+     * null host name or empty array means any hostname is acceptable.
+     * Host names may be String representation of IP addresses.
+     */
+    public String[] getVirtualHosts()
+    {
+        if (_hostsArray!=null)
+            return _hostsArray;
+        if (_hosts==null)
+            _hostsArray=new String[0];
+        else
+        {
+            _hostsArray=new String[_hosts.size()];
+            _hostsArray=(String[])_hosts.toArray(_hostsArray);
+        }
+        return _hostsArray;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Register a host mapping for this context.
+     * @deprecated USe addVirtualHost(String)
+     * @param hostname 
+     */
+    public void registerHost(String hostname)
+    {
+        addVirtualHost(hostname);
+    }
+
+
+    /* ------------------------------------------------------------ */
+    public void setHandlers(HttpHandler[] handlers)
+    {
+        List old = new ArrayList(_handlers);
+        
+        for (int i=0;i<handlers.length;i++)
+        {
+            boolean existing=old.remove(handlers[i]);
+            if (!existing)
+                addHandler(handlers[i]);
+        }
+
+        for (int i=0;i<old.size();i++)
+            removeHandler((HttpHandler)old.get(i));
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get all handlers.
+     * @return List of all HttpHandlers
+     */
+    public HttpHandler[] getHandlers()
+    {
+        if (_handlersArray!=null)
+            return _handlersArray;
+        if (_handlers==null)
+            _handlersArray=new HttpHandler[0];
+        else
+        {
+            _handlersArray=new HttpHandler[_handlers.size()];
+            _handlersArray=(HttpHandler[])_handlers.toArray(_handlersArray);
+        }
+        return _handlersArray;
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /** Add a handler.
+     * @param i The position in the handler list
+     * @param handler The handler.
+     */
+    public synchronized void addHandler(int i,HttpHandler handler)
+    {
+        _handlers.add(i,handler);
+        _handlersArray=null;
+
+        HttpContext context = handler.getHttpContext();
+        if (context==null)
+            handler.initialize(this);
+        else if (context!=this)
+            throw new IllegalArgumentException("Handler already initialized in another HttpContext");
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add a HttpHandler to the context.
+     * @param handler 
+     */
+    public synchronized void addHandler(HttpHandler handler)
+    {
+        addHandler(_handlers.size(),handler);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get handler index.
+     * @param Handler instance 
+     * @return Index of handler in context or -1 if not found.
+     */
+    public int getHandlerIndex(HttpHandler handler)
+    {
+        for (int h=0;h<_handlers.size();h++)
+        {
+            if ( handler == _handlers.get(h))
+                return h;
+        }
+        return -1;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get a handler by class.
+     * @param handlerClass 
+     * @return The first handler that is an instance of the handlerClass
+     */
+    public synchronized HttpHandler getHandler(Class handlerClass)
+    {
+        for (int h=0;h<_handlers.size();h++)
+        {
+            HttpHandler handler = (HttpHandler)_handlers.get(h);
+            if (handlerClass.isInstance(handler))
+                return handler;
+        }
+        return null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Remove a handler.
+     * The handler must be stopped before being removed.
+     * @param i index of handler
+     */
+    public synchronized HttpHandler removeHandler(int i)
+    {
+        HttpHandler handler = _handlersArray[i];
+        if (handler.isStarted())
+            try{handler.stop();} catch (InterruptedException e){Code.warning(e);}
+        _handlers.remove(i);
+        _handlersArray=null;
+        return handler;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Remove a handler.
+     * The handler must be stopped before being removed.
+     */
+    public synchronized void removeHandler(HttpHandler handler)
+    {
+        if (handler.isStarted())
+            try{handler.stop();} catch (InterruptedException e){Code.warning(e);}
+        _handlers.remove(handler);
+        _handlersArray=null;
+    }
+
     
     /* ------------------------------------------------------------ */
     /** Set context init parameter.
@@ -213,54 +465,6 @@ public class HttpContext implements LifeCycle
     public synchronized void removeAttribute(String name)
     {
         _attributes.remove(name);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Register a host mapping for this context.
-     * This method is a shorthand for
-     * <Code>context.getHttpServer()..addContext(hostname,context)</Code>.
-     * The call does not alter the original registration of the
-     * context, nor can it change the context path.
-     * @param hostname 
-     */
-    public void registerHost(String hostname)
-    {
-        _httpServer.addContext(hostname,this);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Add a virtual host alias to this context.
-     * @param host 
-     */
-    void addHost(String host)
-    {
-        // Note that null hosts are also added.
-        _hosts.add(host);
-        _name=null;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return List of virtual hosts that this context is registered in.
-     */
-    public List getHosts()
-    {
-        return _hosts;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return The context prefix
-     */
-    public String getContextPath()
-    {
-        return _contextPath;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public HttpServer getHttpServer()
-    {
-        return _httpServer;
     }
 
     /* ------------------------------------------------------------ */
@@ -462,8 +666,7 @@ public class HttpContext implements LifeCycle
         // No tempdir set so make one!
         try
         {
-            HttpListener httpListener=(HttpListener)
-                _httpServer.getListeners().iterator().next();
+            HttpListener httpListener=_httpServer.getListeners()[0];
             
             String vhost = null;
             for (int h=0;vhost==null && _hosts!=null && h<_hosts.size();h++)
@@ -770,187 +973,8 @@ public class HttpContext implements LifeCycle
             return null;
        return (String) _errorPages.remove(error);
     }
-    
-    /* ------------------------------------------------------------ */
-    /** Get all handlers.
-     * @return List of all HttpHandlers
-     */
-    public List getHttpHandlers()
-    {
-        return _handlers;
-    }
 
-    /* ------------------------------------------------------------ */
-    /** Add a handler.
-     * @param i The position in the handler list
-     * @param handler The handler.
-     */
-    public synchronized void addHttpHandler(int i,HttpHandler handler)
-    {
-        _handlers.add(i,handler);
-
-        HttpContext context = handler.getHttpContext();
-        if (context==null)
-            handler.initialize(this);
-        else if (context!=this)
-            throw new IllegalArgumentException("Handler already initialized in another HttpContext");
-    }
     
-    /* ------------------------------------------------------------ */
-    /** Add a HttpHandler to the context.
-     * @param handler 
-     */
-    public synchronized void addHttpHandler(HttpHandler handler)
-    {
-        addHttpHandler(_handlers.size(),handler);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @deprecated
-     */
-    public HttpHandler getHandler(int i)
-    {
-        return (HttpHandler)_handlers.get(i);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get handler by index.
-     */
-    public HttpHandler getHttpHandler(int i)
-    {
-        return (HttpHandler)_handlers.get(i);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get handler index.
-     * @param Handler instance 
-     * @return Index of handler in context or -1 if not found.
-     */
-    public int getHttpHandlerIndex(HttpHandler handler)
-    {
-        for (int h=0;h<_handlers.size();h++)
-        {
-            if ( handler == _handlers.get(h))
-                return h;
-        }
-        return -1;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get a handler by class.
-     * @param handlerClass 
-     * @return The first handler that is an instance of the handlerClass
-     */
-    public synchronized HttpHandler getHttpHandler(Class handlerClass)
-    {
-        for (int h=0;h<_handlers.size();h++)
-        {
-            HttpHandler handler = (HttpHandler)_handlers.get(h);
-            if (handlerClass.isInstance(handler))
-                return handler;
-        }
-        return null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Remove a handler.
-     * The handler must be stopped before being removed.
-     * @param i index of handler
-     */
-    public synchronized HttpHandler removeHttpHandler(int i)
-    {
-        HttpHandler handler = getHandler(i);
-        if (handler.isStarted())
-            throw new IllegalStateException("Handler is started");
-        return (HttpHandler)_handlers.remove(i);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Remove a handler.
-     * The handler must be stopped before being removed.
-     */
-    public synchronized void removeHttpHandler(HttpHandler handler)
-    {
-        if (handler.isStarted())
-            throw new IllegalStateException("Handler is started");
-        _handlers.remove(handler);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get all handlers.
-     * This method is an alias for getHttpHandlers
-     * @return List of all HttpHandlers
-     */
-    public List getHandlers()
-    {
-        return _handlers;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Add a handler.
-     * This method is an alias for addHttpHandler.
-     * @param i The position in the handler list
-     * @param handler The handler.
-     */
-    public synchronized void addHandler(int i,HttpHandler handler)
-    {
-        addHttpHandler(i,handler);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Add a HttpHandler to the context.
-     * This method is an alias for addHttpHandler.
-     * @param handler 
-     */
-    public synchronized void addHandler(HttpHandler handler)
-    {
-        addHttpHandler(_handlers.size(),handler);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get handler index.
-     * This method is an alias for getHttpHandlerIndex.
-     * @param Handler instance 
-     * @return Index of handler in context or -1 if not found.
-     */
-    public int getHandlerIndex(HttpHandler handler)
-    {
-        return getHttpHandlerIndex(handler);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get a handler by class.
-     * This method is an alias for getHttpHandler
-     * @param handlerClass 
-     * @return The first handler that is an instance of the handlerClass
-     */
-    public synchronized HttpHandler getHandler(Class handlerClass)
-    {
-        return getHttpHandler(handlerClass);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Remove a handler.
-     * This method is an alias for removeHttpHandler.
-     * The handler must be stopped before being removed.
-     * @param i index of handler
-     */
-    public synchronized HttpHandler removeHandler(int i)
-    {
-        return removeHttpHandler(i);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Remove a handler.
-     * This method is an alias for removeHttpHandler.
-     * The handler must be stopped before being removed.
-     */
-    public synchronized void removeHandler(HttpHandler handler)
-    {
-        removeHttpHandler(handler);
-    }
-
     /* ------------------------------------------------------------ */
     /** Get the context ResourceHandler.
      * Conveniance method. If no ResourceHandler exists, a new one is added to
@@ -1370,11 +1394,10 @@ public class HttpContext implements LifeCycle
                 thread.setContextClassLoader(_loader);
             response.setHttpContext(this);
             
-            List handlers=getHandlers();
-            for (int k=firstHandler;k<handlers.size();k++)
+            HttpHandler[] handlers=getHandlers();
+            for (int k=firstHandler;k<handlers.length;k++)
             {
-                HttpHandler handler =
-                    (HttpHandler)handlers.get(k);
+                HttpHandler handler = handlers[k];
                 
                 if (!handler.isStarted())
                 {
@@ -1598,6 +1621,7 @@ public class HttpContext implements LifeCycle
 
     /* ------------------------------------------------------------ */
     private boolean _statsOn=false;
+    long _statsStartedAt;
     int _requests;
     int _requestsActive;
     int _requestsActiveMax;
@@ -1620,20 +1644,24 @@ public class HttpContext implements LifeCycle
 
     /* ------------------------------------------------------------ */
     public boolean getStatsOn() {return _statsOn;}
+
+    /* ------------------------------------------------------------ */
+    public long getStatsOnMs()
+    {return _statsOn?(System.currentTimeMillis()-_statsStartedAt):0;}
     
     /* ------------------------------------------------------------ */
     public synchronized void statsReset()
     {
-         _requests=0;
-         _requestsActive=0;
-         _requestsActiveMax=0;
-         _responses1xx=0;
-         _responses2xx=0;
-         _responses3xx=0;
-         _responses4xx=0;
-         _responses5xx=0;
+        _statsStartedAt=System.currentTimeMillis();
+        _requests=0;
+        _requestsActive=0;
+        _requestsActiveMax=0;
+        _responses1xx=0;
+        _responses2xx=0;
+        _responses3xx=0;
+        _responses4xx=0;
+        _responses5xx=0;
     }
-    
     
     /* ------------------------------------------------------------ */
     /**
@@ -1696,26 +1724,6 @@ public class HttpContext implements LifeCycle
      * if setStatsOn(false). 
      */
     public int getResponses5xx() {return _responses5xx;}
-
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @deprecated use HttpServer.getRequestLogSink() 
-     */
-    public synchronized LogSink getLogSink()
-    {
-        return null;
-    }
-    
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @deprecated use HttpServersetRequestLogSink()
-     */
-    public synchronized void setLogSink(LogSink logSink)
-    {
-        Log.warning("HttpContext.setLogSink not supported. Use HttpServer.setLogSink");
-    }
     
         
     /* ------------------------------------------------------------ */

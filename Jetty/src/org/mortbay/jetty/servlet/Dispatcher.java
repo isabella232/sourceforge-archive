@@ -90,7 +90,7 @@ public class Dispatcher implements RequestDispatcher
         else
         {
             _resourceHandler=(ResourceHandler)
-                _servletHandler.getHttpContext().getHttpHandler(ResourceHandler.class);
+                _servletHandler.getHttpContext().getHandler(ResourceHandler.class);
             
             // If no servlet found
             if (_resourceHandler!=null)

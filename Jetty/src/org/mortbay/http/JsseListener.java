@@ -109,6 +109,12 @@ public abstract class JsseListener extends SocketListener
     {
         _needClientAuth = needClientAuth;
     }
+    
+    /* ------------------------------------------------------------ */
+    public boolean getNeedClientAuth()
+    {
+        return _needClientAuth;
+    }
 
     /* ------------------------------------------------------------ */
     public boolean isIntegral(HttpConnection connection)

@@ -146,9 +146,9 @@ public class FilterHandler
     {
         super.start();        
         _httpContext= getHttpContext();
-        _handlerIndex = _httpContext.getHttpHandlerIndex(this);
+        _handlerIndex = _httpContext.getHandlerIndex(this);
         _servletHandler = (ServletHandler)
-            _httpContext.getHttpHandler(ServletHandler.class);
+            _httpContext.getHandler(ServletHandler.class);
 
         if (_cacheFilterChains)
             _chainMap=new HashMap();

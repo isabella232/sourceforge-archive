@@ -43,7 +43,8 @@ public class SocketListener
     private String _confidentialScheme=HttpMessage.__SSL_SCHEME;
     private int _integralPort=0;
     private int _confidentialPort=0;
-
+    private boolean _identifyListener=false;
+    
     /* ------------------------------------------------------------------- */
     public SocketListener()
     {}
@@ -54,7 +55,7 @@ public class SocketListener
     {
         super(address);
     }
-
+    
     /* ------------------------------------------------------------ */
     public void setHttpServer(HttpServer server)
     {
@@ -69,6 +70,22 @@ public class SocketListener
         return _server;
     }
 
+    /* ------------------------------------------------------------ */
+    public boolean getIdentifyListener()
+    {
+        return _identifyListener;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param identifyListener If true, the listener name is added to all
+     * requests as the org.mortbay.http.HttListener attribute
+     */
+    public void setIdentifyListener(boolean identifyListener)
+    {
+        _identifyListener = identifyListener;
+    }
+    
     /* --------------------------------------------------------------- */
     public void setDefaultScheme(String scheme)
     {
@@ -100,6 +117,7 @@ public class SocketListener
     {
         _lowResourcePersistTimeMs=ms;
     }
+    
     
     /* --------------------------------------------------------------- */
     public void start()
@@ -160,6 +178,9 @@ public class SocketListener
     public void customizeRequest(HttpConnection connection,
                                  HttpRequest request)
     {
+        if (_identifyListener)
+            request.setAttribute(HttpListener.ATTRIBUTE,getName());
+        
         Socket socket=(Socket)(connection.getConnection());
         customizeRequest(socket,request);
     }
