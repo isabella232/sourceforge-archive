@@ -10,17 +10,27 @@ import java.io.Serializable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.SecurityConstraint;
 import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.http.UserPrincipal;
 import org.mortbay.http.UserRealm;
+import org.mortbay.http.SSORealm;
 import org.mortbay.util.Code;
 import org.mortbay.util.URI;
+import org.mortbay.util.Credential;
+import org.mortbay.util.Password;
 
 /* ------------------------------------------------------------ */
-/** 
+/** FORM Authentication Authenticator.
+ * The HTTP Session is used to store the authentication status of the
+ * user, which can be distributed.
+ * If the realm implements SSORealm, SSO is supported.
+ *
  * @version $Id$
  * @author Greg Wilkins (gregw)
  * @author dan@greening.name
@@ -33,11 +43,13 @@ public class FormAuthenticator implements Authenticator
     public final static String __J_SECURITY_CHECK="j_security_check";
     public final static String __J_USERNAME="j_username";
     public final static String __J_PASSWORD="j_password";
+    public final static String __SSO_SIGNOFF="SSO_SIGNOFF";
 
     private String _formErrorPage;
     private String _formErrorPath;
     private String _formLoginPage;
     private String _formLoginPath;
+    private transient SSORealm _ssoRealm;
     
     /* ------------------------------------------------------------ */
     public String getAuthMethod()
@@ -99,6 +111,14 @@ public class FormAuthenticator implements Authenticator
         HttpServletRequest request =(ServletHttpRequest)httpRequest.getWrapper();
         HttpServletResponse response =(HttpServletResponse) httpResponse.getWrapper();
 
+        if (realm instanceof SSORealm)
+            _ssoRealm=(SSORealm)realm;
+        else if (_ssoRealm!=null)
+        {
+            Code.warning("Mixed realms");
+            _ssoRealm=null;
+        }
+        
         // Handle paths
         String uri = pathInContext;
 
@@ -109,31 +129,45 @@ public class FormAuthenticator implements Authenticator
         if ( uri.substring(uri.lastIndexOf("/")+1).startsWith(__J_SECURITY_CHECK) )
         {
             // Check the session object for login info.
-            FormCredential credential=new FormCredential();
-            credential._jUserName = request.getParameter(__J_USERNAME);
-            credential._jPassword = request.getParameter(__J_PASSWORD);
+            FormCredential form_cred=new FormCredential();
+            form_cred._jUserName = request.getParameter(__J_USERNAME);
+            form_cred._jPassword = request.getParameter(__J_PASSWORD);
             
-            credential._userPrincipal = realm.authenticate(credential._jUserName,
-                                                           credential._jPassword,
+            form_cred._userPrincipal = realm.authenticate(form_cred._jUserName,
+                                                           form_cred._jPassword,
                                                            httpRequest);
             
             String nuri=(String)session.getAttribute(__J_URI);
             if (nuri==null || nuri.length()==0)
                 nuri="/";
             
-            if (credential._userPrincipal!=null)
+            if (form_cred._userPrincipal!=null)
             {
-                Code.debug("Form authentication OK for ",credential._jUserName);
+                // Authenticated OK
+                Code.debug("Form authentication OK for ",form_cred._jUserName);
                 session.removeAttribute(__J_URI); // Remove popped return URI.
                 httpRequest.setAuthType(SecurityConstraint.__FORM_AUTH);
-                httpRequest.setAuthUser(credential._jUserName);
-                httpRequest.setUserPrincipal(credential._userPrincipal);
-                session.setAttribute(__J_AUTHENTICATED,credential);
+                httpRequest.setAuthUser(form_cred._jUserName);
+                httpRequest.setUserPrincipal(form_cred._userPrincipal);
+                session.setAttribute(__J_AUTHENTICATED,form_cred);
+
+                // Sign-on to SSO mechanism
+                if (_ssoRealm!=null)
+                {
+                    _ssoRealm.setSingleSignOn(httpRequest,
+                                              httpResponse,
+                                              form_cred._userPrincipal,
+                                              new Password(form_cred._jPassword));
+                    session.setAttribute(__SSO_SIGNOFF,
+                                         new SSOSignoff(form_cred._userPrincipal));
+                }
+
+                // Redirect to original request
                 response.sendRedirect(response.encodeRedirectURL(nuri));
             }
             else
             {
-                Code.debug("Form authentication FAILED for ",credential._jUserName);
+                Code.debug("Form authentication FAILED for ",form_cred._jUserName);
                 if (_formErrorPage!=null)
                 {
                     response.sendRedirect(response.encodeRedirectURL
@@ -149,32 +183,67 @@ public class FormAuthenticator implements Authenticator
             // Security check is always false, only true after final redirection.
             return null;
         }
-
-        // Check if the session is already authenticated.
-        FormCredential credential = (FormCredential) session.getAttribute(__J_AUTHENTICATED);
         
-        if (credential != null)
+        // Check if the session is already authenticated.
+        FormCredential form_cred = (FormCredential) session.getAttribute(__J_AUTHENTICATED);
+        
+        if (form_cred != null)
         {
-            if (credential._userPrincipal==null)
+            // We have a form credential. Has it been distributed?
+            if (form_cred._userPrincipal==null)
             {
-                // This credential appears to have been distributed.  Need to reauth
-                credential._userPrincipal = realm.authenticate(credential._jUserName,
-                                                               credential._jPassword,
-                                                               httpRequest);
+                // This form_cred appears to have been distributed.  Need to reauth
+                form_cred._userPrincipal = realm.authenticate(form_cred._jUserName,
+                                                              form_cred._jPassword,
+                                                              httpRequest);
+                // Sign-on to SSO mechanism
+                if (_ssoRealm!=null)
+                {
+                    _ssoRealm.setSingleSignOn(httpRequest,
+                                              httpResponse,
+                                              form_cred._userPrincipal,
+                                              new Password(form_cred._jPassword));
+                    session.setAttribute(__SSO_SIGNOFF,
+                                         new SSOSignoff(form_cred._userPrincipal));
+                }
             }
-            else if (!credential._userPrincipal.isAuthenticated())
-                credential._userPrincipal=null;
-                
-            if (credential._userPrincipal!=null)
+            
+            // Check that it is still authenticated.
+            else if (!form_cred._userPrincipal.isAuthenticated())
+                form_cred._userPrincipal=null;
+
+            // If this credential is still authenticated
+            if (form_cred._userPrincipal!=null)
             {
-                Code.debug("FORM Authenticated for ",credential._userPrincipal.getName());
+                Code.debug("FORM Authenticated for ",form_cred._userPrincipal.getName());
                 httpRequest.setAuthType(SecurityConstraint.__FORM_AUTH);
-                httpRequest.setAuthUser(credential._userPrincipal.getName());
-                httpRequest.setUserPrincipal(credential._userPrincipal);
-                return credential._userPrincipal;
+                httpRequest.setAuthUser(form_cred._userPrincipal.getName());
+                httpRequest.setUserPrincipal(form_cred._userPrincipal);
+                return form_cred._userPrincipal;
             }
             else
                 session.setAttribute(__J_AUTHENTICATED,null);
+        }
+        else if (_ssoRealm!=null)
+        {
+            // Try a single sign on.
+            Credential cred = _ssoRealm.getSingleSignOn(httpRequest,httpResponse);
+            
+            if (request.getUserPrincipal()!=null)
+            {
+                form_cred=new FormCredential();
+                form_cred._userPrincipal=(UserPrincipal)request.getUserPrincipal();
+                form_cred._jUserName=form_cred._userPrincipal.toString();
+                if (cred!=null)
+                    form_cred._jPassword=cred.toString();
+                Code.debug("SSO for ",form_cred._userPrincipal);
+                           
+                httpRequest.setAuthType(SecurityConstraint.__FORM_AUTH);
+                session.setAttribute(__J_AUTHENTICATED,form_cred);
+                session.setAttribute(__SSO_SIGNOFF,
+                                     new SSOSignoff(form_cred._userPrincipal));
+                return form_cred._userPrincipal;
+            }
         }
         
         // Don't authenticate authform or errorpage
@@ -189,7 +258,7 @@ public class FormAuthenticator implements Authenticator
         	request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() 
         	+ URI.addPaths(request.getContextPath(),uri));
         response.sendRedirect(response.encodeRedirectURL(URI.addPaths(request.getContextPath(),
-                                           _formLoginPage)));
+                                                                      _formLoginPage)));
         return null;
     }
 
@@ -222,7 +291,28 @@ public class FormAuthenticator implements Authenticator
         {
             return "Cred["+_jUserName+"]";
         }
-        
+
     }
-    
+
+    /* ------------------------------------------------------------ */
+    private class SSOSignoff implements Serializable,HttpSessionBindingListener
+    {
+        private String _username;
+
+        SSOSignoff(UserPrincipal principal){_username=principal.getName();}
+        
+        public void valueBound(HttpSessionBindingEvent event) {}
+        
+        public void valueUnbound(HttpSessionBindingEvent event)
+        {
+            Code.debug("SSO signoff",_username);
+            if(_ssoRealm!=null)
+                _ssoRealm.clearSingleSignOn(_username);
+        }
+
+        public String toString()
+        {
+            return _username;
+        }
+    }
 }

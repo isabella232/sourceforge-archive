@@ -1,20 +1,22 @@
 <H2>Can Jetty use JDK 1.4 features?</H2>
 
-Jetty can use JDK 1.4 features such as logging and non blocking IO.
-The src1.4 directory is optionally compiled if a 1.4 javac is detected.
+Jetty is compiled by default to use JDK 1.4 features. The extras/jdk1.2
+directory provides alternatives source for java &lt; jdk1.4/
+
 <P>
 Currently the 1.4 features used include:<UL>
 <LI>The org.mortbay.http.SocketChannelListener class uses the java.nio package
 for nonblocking IO for accepting connections and monitoring idle connections.  
 A thread is only allocated to a connection to perform blocking IO when a request
-is actively being handled.
+is actively being handled.  This has not proved to be of any significant
+benefit as the constantly changing SelectSets stress the current generations
+of JVMs.  It has currently been deprecated.
 
 <LI>The org.mortbay.util.Frame class replaces the 1.2 version with a more efficient
 handling of the stack frame for debugging.
 
 <LI>The org.mortbay.util.LoggerLogSink class sends Jetty logging data to the 1.4 log mechanism
 </UL>
-
 
 <P>
 

@@ -37,15 +37,29 @@ import org.mortbay.util.Resource;
  * 
  * If DIGEST Authentication is used, the password must be in a recoverable
  * format, either plain text or OBF:.
+ *
+ * The HashUserRealm also implements SSORealm but provides no implementation
+ * of SSORealm. Instead setSSORealm may be used to provide a delegate
+ * SSORealm implementation. 
+ *
  * @see Password
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HashUserRealm extends HashMap implements UserRealm, Externalizable
+public class HashUserRealm
+    extends HashMap
+    implements UserRealm, SSORealm, Externalizable
 {
+    /** HttpContext Attribute to set to activate SSO.
+     */
+    public static final String __SSO = "org.mortbay.http.SSO";
+    
+    /* ------------------------------------------------------------ */
     private String _realmName;
     private String _config;
     protected HashMap _roles=new HashMap(7);
+    private SSORealm _ssoRealm;
+    
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -240,7 +254,6 @@ public class HashUserRealm extends HashMap implements UserRealm, Externalizable
     
     /* ------------------------------------------------------------ */
     /** Check if a user is in a role.
-     * All users are in the role "org.mortbay.http.User".
      * @param user The user, which must be from this realm 
      * @param roleName 
      * @return True if the user can act in the role.
@@ -249,9 +262,6 @@ public class HashUserRealm extends HashMap implements UserRealm, Externalizable
     {
         if (user==null || ((User)user).getUserRealm()!=this)
             return false;
-
-        if (UserRealm.__UserRole.equals(roleName))
-            return true;
         
         HashSet userSet = (HashSet)_roles.get(roleName);
         return userSet!=null && userSet.contains(user.getName());
@@ -270,7 +280,52 @@ public class HashUserRealm extends HashMap implements UserRealm, Externalizable
         out.println(super.toString());
         out.println(_roles);
     }
-
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return The SSORealm to delegate single sign on requests to.
+     */
+    public SSORealm getSSORealm()
+    {
+        return _ssoRealm;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the SSORealm.
+     * A SSORealm implementation may be set to enable support for SSO.
+     * @param ssoRealm The SSORealm to delegate single sign on requests to.
+     */
+    public void setSSORealm(SSORealm ssoRealm)
+    {
+        _ssoRealm = ssoRealm;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Credential getSingleSignOn(HttpRequest request,
+                                      HttpResponse response)
+    {
+        if (_ssoRealm!=null)
+            return _ssoRealm.getSingleSignOn(request,response);
+        return null;
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    public void setSingleSignOn(HttpRequest request,
+                                HttpResponse response,
+                                UserPrincipal principal,
+                                Credential credential)
+    {
+        if (_ssoRealm!=null)
+            _ssoRealm.setSingleSignOn(request,response,principal,credential);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void clearSingleSignOn(String username)
+    {
+        if (_ssoRealm!=null)
+            _ssoRealm.clearSingleSignOn(username);
+    }
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */

@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Added SSO implementation for FORM authentication.
  + WebApplicationContext does not reassign defaults descriptor value.
  + Fixed AJP13 protocol so that request/response header enums are correct.
  + Fixed form auth success redirect after retry, introduced in 4.2.9rc1
@@ -8,6 +9,7 @@ Jetty Versions
  + Deprecated forced chunking.
  + Form authentication remembers URL over 403
  + ProxyHandler has improved test for request content
+ + Removed support of org.mortbay.http.User role.
 
 Jetty-4.2.10pre0 - 5 May 2003
  + Moved Log4JLogSink into JettyPlus
