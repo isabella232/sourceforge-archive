@@ -180,9 +180,10 @@ public class ServletHolder extends Holder
         if (!javax.servlet.Servlet.class
             .isAssignableFrom(_class))
         {
-            super.stop();
-            throw new IllegalStateException("Servlet class "+_class+
+            Exception ex = new IllegalStateException("Servlet "+_class+
                                             " is not a javax.servlet.Servlet");
+            super.stop();
+            throw ex;
         }
         
 

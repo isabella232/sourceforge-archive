@@ -681,7 +681,7 @@ public class ServletHandler
                 }
                 catch(Exception e)
                 {
-                    Code.ignore(e);
+                    Code.warning(e);
                 }
             }
         }
