@@ -86,9 +86,7 @@ public abstract class Resource implements Serializable
                     if (resource.startsWith("./"))
                         resource=resource.substring(2);
                     
-                    File file=new File(resource);
-                    if (resource.indexOf("..")>=0)
-                        file=new File(file.getCanonicalPath());
+                    File file=new File(resource).getCanonicalFile();
                     url=file.toURL();
                     URLConnection connection=url.openConnection();
                     FileResource fileResource= new FileResource(url,connection,file);
