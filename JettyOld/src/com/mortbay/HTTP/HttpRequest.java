@@ -481,8 +481,8 @@ public class HttpRequest extends HttpHeader
 		else
 		    serverPort=80;
 	    }
-	    else if (address.inetAddress!=null)
-		serverName = address.inetAddress.getHostName();
+	    else if (address.getInetAddress()!=null)
+		serverName = address.getInetAddress().getHostName();
 	    
 	    if (serverName==null)
 	    {
@@ -511,7 +511,7 @@ public class HttpRequest extends HttpHeader
 	    getServerName();
 
 	if (serverPort==0)
-	    serverPort=address.port;
+	    serverPort=address.getPort();
 	
 	return serverPort;
     }

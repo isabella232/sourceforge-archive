@@ -233,12 +233,14 @@ public class HtmlFilter extends HttpFilter
 	
 	URL url = new URL(relUrl,urlString);
 
-	if (proxyUrlString!=null)
+	if (proxyUrlString!=null && proxyUrlString.length()>0)
 	{
+	    Code.debug("Proxy=",proxyUrlString);
+	    
 	    URL proxyUrl = new URL(proxyUrlString);
 	    InetAddrPort proxy = new InetAddrPort();
-	    proxy.inetAddress = InetAddress.getByName(proxyUrl.getHost());
-	    proxy.port = proxyUrl.getPort();
+	    proxy.setInetAddress(InetAddress.getByName(proxyUrl.getHost()));
+	    proxy.setPort(proxyUrl.getPort());
 
 	    embed = new EmbedUrl(url,proxy);
 	}

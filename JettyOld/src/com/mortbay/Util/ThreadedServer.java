@@ -69,6 +69,15 @@ abstract public class ThreadedServer implements Runnable
     }
     
     /* ------------------------------------------------------------------- */
+    /** Construct for specific address and port
+     */
+    public ThreadedServer(InetAddrPort address) 
+	 throws java.io.IOException
+    {
+	setAddress(address.getInetAddress(),address.getPort());
+    }
+    
+    /* ------------------------------------------------------------------- */
     /** Handle new connection
      * This method should be overriden by the derived class to implement
      * the required handling.  It is called by a thread created for it and
@@ -100,7 +109,6 @@ abstract public class ThreadedServer implements Runnable
 	    in=null;
 	    out=null;
 	    connection=null;
-	    this.stop();
 	}
 	catch ( Exception e ){
 	    Code.warning("Connection problem",e);
@@ -108,14 +116,40 @@ abstract public class ThreadedServer implements Runnable
     }
   
     
-    /* ------------------------------------------------------------------- */
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return IP Address
+     * @deprecated Use getInetAddress()
+     */
     public InetAddress address()
     {
 	return address;
     }
     
-    /* ------------------------------------------------------------------- */
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return IP Address
+     */
+    public InetAddress getInetAddress()
+    {
+	return address;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return port number
+     * @deprecated Use getPort()
+     */
     public int port()
+    {
+	return port;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return port number
+     */
+    public int getPort()
     {
 	return port;
     }
@@ -157,6 +191,7 @@ abstract public class ThreadedServer implements Runnable
     /* ------------------------------------------------------------------- */
     final public void stop() 
     {
+	Code.debug("Stop listening on "+listen,new Throwable());
 	if( serverThread != null ) 
 	{
 	    serverThread.stop( );
@@ -197,22 +232,27 @@ abstract public class ThreadedServer implements Runnable
 	    Code.debug( "Max Threads = " + ConnectionThread.__maxThreads );
 	
 	// While the thread is running . . .
-	while( serverThread != null ) 
-	{
-	    // Accept an incoming connection
-	    try 
+	try{
+	    while( serverThread != null ) 
 	    {
-		Socket connection = listen.accept( );
-		Code.debug( "Connection: ",connection );
-		ConnectionThread.handle(this,connection);
-	    } 
-	    catch ( Exception e ){
-		Code.warning("Listen problem",e);
+		// Accept an incoming connection
+		try 
+		{
+		    Socket connection = listen.accept( );
+		    Code.debug( "Connection: ",connection );
+		    ConnectionThread.handle(this,connection);
+		} 
+		catch ( Exception e )
+		{
+		    Code.warning("Listen problem",e);
+		}
 	    }
 	}
+	finally
+	{
+	    Code.debug("Stopped listening on " + listen);
+	}
     }
-    
-    
 }
 
 // =======================================================================

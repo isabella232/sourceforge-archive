@@ -112,7 +112,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	setHeader(MIME_Version,"1.0");
 	
 	// XXX - need to automate setting this with getServerInfo
-	setHeader(Server,"MortBay-Jetty-2.1.B0");
+	setHeader(Server,Version.__jetty);
 	setDateHeader(Date,System.currentTimeMillis());
 
 	if (HttpHeader.Close.equals(request.getHeader(HttpHeader.Connection)))

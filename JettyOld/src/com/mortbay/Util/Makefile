@@ -10,7 +10,8 @@
 TESTS := TestHarness.java
 ROOTNAME := com
 SUBDIRS := STF Gateway
-
+INSTALLPATH := etc
+INSTALLFILES := InetGateway.prp
 
 include $(JETTY_HOME)/etc/Global.mk
 tests:

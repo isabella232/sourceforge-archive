@@ -507,8 +507,7 @@ public class HttpServer implements ServletContext
      */
     public String getServerInfo()
     {
-	// XXX - need to automate setting this
-	return "MortBay-Jetty-2.1.B0";
+	return Version.__jetty;
     }
 
     /* ---------------------------------------------------------------- */

@@ -62,7 +62,8 @@ public class EmbedUrl extends  Element
 	    }
 	    else
 	    {
-		socket= new Socket(proxy.inetAddress, proxy.port);
+		socket= new Socket(proxy.getInetAddress(),
+				   proxy.getPort());
 		request=new HttpRequest(HttpRequest.GET,
 					url.toString());
 	    }

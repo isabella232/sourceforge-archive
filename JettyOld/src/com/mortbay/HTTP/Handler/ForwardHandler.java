@@ -107,7 +107,8 @@ public class ForwardHandler extends NullHandler
 		}
 		else
 		{
-		    socket= new Socket(proxy.inetAddress, proxy.port);
+		    socket= new Socket(proxy.getInetAddress(),
+				       proxy.getPort());
 		    request.translateAddress(requestPath,url.toString());
 		}
 		

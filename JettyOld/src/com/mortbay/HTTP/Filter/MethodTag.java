@@ -100,6 +100,9 @@ public class MethodTag
 	    tok.whitespaceChars(',',',');
 
 	    String nullArg = "null";
+	    if (namedArgs!=null)
+		namedArgs.put(nullArg,nullArg);
+		
 	    Vector tmpArgs = new Vector();
 	    int ttype=0;
 	    while ((ttype=tok.nextToken())!=StreamTokenizer.TT_EOF)
@@ -124,7 +127,10 @@ public class MethodTag
 			      a="";
 		      }
 		      if (a==null && tok.sval.equals(nullArg))
+		      {
 			  a=nullArg;
+		      }
+		      
 		      if (a==null)
 			  a=tok.sval;
 		      tmpArgs.addElement(a);
@@ -143,7 +149,9 @@ public class MethodTag
 		{
 		    Object a = tmpArgs.elementAt(i);
 		    if (a==nullArg)
+		    {
 			tagArgs[i]=null;
+		    }
 		    else
 			tagArgs[i]=a;
 		}

@@ -173,7 +173,8 @@ public class InetGateway extends ThreadedServer
 		new Thread(new Runnable(){
 		    public void run(){
 			try { IO.copy(remoteIn,localOut); }
-			catch(Exception e) { Code.warning(e); }
+			catch(Exception e)
+			{ if (Code.verbose())Code.debug(e); }
 			finally
 			{
 			    try { localOut.close() ; }

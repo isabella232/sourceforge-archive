@@ -41,10 +41,11 @@ public class HttpListener extends ThreadedServer
 			HttpServer server)
 	throws IOException
     {
-	super(address.inetAddress,(address.port==0)?80:address.port);
+	super(address.getInetAddress(),
+	      (address.getPort()==0)?80:address.getPort());
 	
-	if (address.port==0)
-	    address.port=80;
+	if (address.getPort()==0)
+	    address.setPort(80);
 	
 	this.address=address;
 	this.server=server;

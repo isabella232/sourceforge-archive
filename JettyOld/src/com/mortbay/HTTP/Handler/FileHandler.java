@@ -135,7 +135,7 @@ public class FileHandler extends NullHandler
 	else {
 	// anything else...
 	    Code.debug("Unknown action:"+request.getMethod());
-	    response.sendError(501, "Not Implemented");
+	    response.sendError(response.SC_NOT_IMPLEMENTED);
 	}
     }
 
@@ -151,20 +151,22 @@ public class FileHandler extends NullHandler
 	File file = new File(filename);
 	if (file.exists())
 	{	    
-	    if (!request.getMethod().equals(HttpRequest.HEAD)){
+	    if (!request.getMethod().equals(HttpRequest.HEAD))
+	    {
 		// check any modified headers.
 		long date=0;
 		if ((date=request.
-		     getIntHeader(HttpHeader.IfModifiedSince))>0)
+		     getDateHeader(HttpHeader.IfModifiedSince))>0)
 		{
-		    if (file.lastModified() < date)
+		    if (file.lastModified() <= date)
 		    {
 			response.sendError(response.SC_NOT_MODIFIED);
 			return;
 		    }
 		}
+		
 		if ((date=request.
-		     getIntHeader(HttpHeader.IfUnmodifiedSince))>0)
+		     getDateHeader(HttpHeader.IfUnmodifiedSince))>0)
 		{
 		    if (file.lastModified() > date)
 		    {
@@ -227,7 +229,8 @@ public class FileHandler extends NullHandler
 			       (deleteAllowed ? HttpRequest.DELETE : ""));
 	    response.sendError(response.SC_METHOD_NOT_ALLOWED);
 	}
-	try {
+	try
+	{
 	    int toRead = request.getIntHeader(HttpHeader.ContentLength);
 	    InputStream in = request.getInputStream();
 	    FileOutputStream fos = new FileOutputStream(filename);
@@ -246,10 +249,14 @@ public class FileHandler extends NullHandler
 	    fos.close();
 	    response.setStatus(response.SC_NO_CONTENT);
 	    response.writeHeaders();
-	} catch (SecurityException sex){
+	}
+	catch (SecurityException sex)
+	{
 	    Code.warning(sex);
 	    response.sendError(response.SC_FORBIDDEN, sex.getMessage());
-	} catch (Exception ex){
+	}
+	catch (Exception ex)
+	{
 	    Code.warning(ex);
 	}
     }
@@ -259,7 +266,8 @@ public class FileHandler extends NullHandler
 	throws Exception
     {
 	Code.debug("DELETEting "+uri+" from "+filename);
-	if (!deleteAllowed){
+	if (!deleteAllowed)
+	{
 	    response.setHeader(HttpResponse.Allow,
 			       HttpRequest.GET + HttpRequest.HEAD +
 			       (putAllowed ? HttpRequest.PUT : ""));
@@ -269,17 +277,22 @@ public class FileHandler extends NullHandler
 	File file = new File(filename);
 	if (!file.exists())
 	    response.sendError(response.SC_METHOD_NOT_ALLOWED);
-	else {
-	    try {
+	else
+	{
+	    try
+	    {
 		file.delete();
 		response.setStatus(response.SC_NO_CONTENT);
 		response.writeHeaders();
-	    } catch (SecurityException sex){
+	    }
+	    catch (SecurityException sex)
+	    {
 		Code.warning(sex);
 		response.sendError(response.SC_FORBIDDEN, sex.getMessage());
 	    }
 	}
     }
+    
     /* ------------------------------------------------------------ */
     void handleMove(HttpRequest request, HttpResponse response,
 		    String uri, String filename, String path)
