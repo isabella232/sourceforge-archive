@@ -1,6 +1,10 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.2 - 20 November 2002
+ + Fixed sendRedirect for non http URLS
+ + Fixed URI query recycling for persistent connections
+ + Fixed handling of empty headers
  + Added EOFException to reduce log verbosity on closed connections.
  + Avoided bad buffer status after closed connection.
 
