@@ -6,6 +6,7 @@ class BuildJetty { Class[] classes = {
     com.mortbay.Base.Frame.class,
     com.mortbay.Base.Log.class,
     com.mortbay.Base.LogSink.class,
+    com.mortbay.Base.LogWriter.class,
     com.mortbay.Base.RolloverFileLogSink.class,
     com.mortbay.Base.Test.class,
     com.mortbay.Base.TestHarness.class,
@@ -136,6 +137,7 @@ class BuildJetty { Class[] classes = {
     com.mortbay.Util.BlockingQueue.class,
     com.mortbay.Util.ContainerIteratorTransformer.class,
     com.mortbay.Util.ConvertFail.class,
+    com.mortbay.Util.ConverterBase.class,
     com.mortbay.Util.ConverterSet.class,
     com.mortbay.Util.DataClass.class,
     com.mortbay.Util.DictionaryConverter.class,
@@ -150,6 +152,7 @@ class BuildJetty { Class[] classes = {
     com.mortbay.Util.Password.class,
     com.mortbay.Util.PropertyEnumeration.class,
     com.mortbay.Util.PropertyTree.class,
+    com.mortbay.Util.PropertyTreeConverter.class,
     com.mortbay.Util.PropertyTreeTest.class,
     com.mortbay.Util.SmtpMail.class,
     com.mortbay.Util.StringUtil.class,
@@ -175,4 +178,3 @@ class BuildJetty { Class[] classes = {
     javax.servlet.jsp.JspWriter.class,
     javax.servlet.jsp.PageContext.class,
 };}
-
