@@ -11,6 +11,8 @@ Jetty-5
  + Added JSR77 servlet statistic support
  + Refactored webapp context configurations
  + Added LifeCycle events and generic container.
+ + Upgraded to ant-1.6 for jasper
+
 
 Jetty-4
  + LineInput handles readers with small internal buffer
