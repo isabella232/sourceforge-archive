@@ -6,6 +6,7 @@ Jetty Versions
  + Fixed race in servlet initialization code.
  + Cookie params all in lower case.
  + Simplified AJP13 connection handling. 
+ + Support separate Monitor class for start
  
 Jetty-4.2.10 - 7 July 2003
  + Updates to JettyPlus documentation

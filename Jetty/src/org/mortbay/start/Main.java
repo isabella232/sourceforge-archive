@@ -1,5 +1,5 @@
 // ========================================================================
-// Copyright (c) 2002 Mort Bay Consulting (Australia) Pty. Ltd.
+// Copyright (c) 2003 Mort Bay Consulting (Australia) Pty. Ltd.
 // $Id$
 // ========================================================================
 
@@ -13,9 +13,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.FileInputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.InetAddress;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.Policy;
@@ -77,12 +74,11 @@ import java.util.StringTokenizer;
  
 public class Main
 {
+    static boolean _debug = System.getProperty("DEBUG",null)!=null;
+    
     private String _classname = null;
     private Classpath _classpath = new Classpath();
-    private boolean _debug = System.getProperty("DEBUG",null)!=null;
     private String _config = System.getProperty("START","org/mortbay/start/start.config");
-    private int _port = Integer.getInteger("STOP.PORT",8079).intValue();
-    private String _key = System.getProperty("STOP.KEY","mortbay");
     private ArrayList _xml = new ArrayList();
        
     public static void main(String[] args)
@@ -408,7 +404,7 @@ public class Main
         // set up classpath:
         try
         {
-            new Monitor();
+            Monitor.monitor();
             InputStream cpcfg =getClass().getClassLoader().getResourceAsStream(_config);
             if (_debug) System.err.println("config="+_config);
             if (cpcfg==null)
@@ -478,82 +474,4 @@ public class Main
     }
 
 
-    class Monitor extends Thread
-    {
-        ServerSocket _socket;
-
-        Monitor()
-        {
-            try
-            {
-                if(_port<0)
-                    return;
-                setDaemon(true);
-                _socket=new ServerSocket(_port,1,InetAddress.getByName("127.0.0.1"));
-                if (_port==0)
-                {
-                    _port=_socket.getLocalPort();
-                    System.out.println(_port);
-                }
-                if (!"mortbay".equals(_key))
-                {
-                    _key=Long.toString((long)(Long.MAX_VALUE*Math.random()),36);
-                    System.out.println(_key);
-                }
-            }
-            catch(Exception e)
-            {
-                if (_debug)
-                    e.printStackTrace();
-                else
-                    System.err.println(e.toString());
-            }
-            if (_socket!=null)
-                this.start();
-            else
-                System.err.println("WARN: Not listening on monitor port: "+_port);
-        }
-
-        public void run()
-        {
-            while (true)
-            {
-                Socket socket=null;
-                try{
-                    socket=_socket.accept();
-
-                    LineNumberReader lin=
-                        new LineNumberReader(new InputStreamReader(socket.getInputStream()));
-                    String key=lin.readLine();
-                    if (!_key.equals(key))
-                        continue;
-
-                    String cmd=lin.readLine();
-                    if (_debug) System.err.println("command="+cmd);
-                    if ("stop".equals(cmd))
-                        System.exit(0);
-                    if ("status".equals(cmd))
-                    {
-                        socket.getOutputStream().write("OK\r\n".getBytes());
-                        socket.getOutputStream().flush();
-                    }
-                }
-                catch(Exception e)
-                {
-                    if (_debug)
-                        e.printStackTrace();
-                    else
-                        System.err.println(e.toString());
-                }
-                finally
-                {
-                    if (socket!=null)
-                    {
-                        try{socket.close();}catch(Exception e){}
-                    }
-                    socket=null;
-                }
-            }
-        }
-    }
 }
