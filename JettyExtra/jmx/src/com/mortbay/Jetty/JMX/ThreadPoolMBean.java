@@ -47,6 +47,7 @@ public class ThreadPoolMBean extends LifeCycleMBean
             defineAttribute("name");
             defineAttribute("threadClass");
             defineAttribute("threads");
+            defineAttribute("idleThreads");
             defineAttribute("minThreads");
             defineAttribute("maxThreads");
             defineAttribute("maxIdleTimeMs");

@@ -1,7 +1,10 @@
 Jetty3Extra Versions
 --------------------
 
-Jetty3Extra-0.0.3 - 
+  + Added idle thread getter to ThreadPoolMBean.
+  + Added simple HTTP stress tester
+
+Jetty3Extra-0.0.3 -  10 Apr 2001
   + Moved FTP and Tools into Jetty3Extra.
   + Fixed InetGateway package names.
 
