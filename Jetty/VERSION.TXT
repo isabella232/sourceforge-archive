@@ -14,6 +14,7 @@ Jetty-5.0.alpha3
  + Lazy authentication if no auth constraint.
  + Restore servlet handler after dispatch
  + Allow customization of HttpConnections
+ + Failed requests excluded from duration stats
 
 Jetty-4.2.14RC0 - 7 October 2003
  + Correctly setup context classloader in cross context dispatch.

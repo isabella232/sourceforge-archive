@@ -154,10 +154,10 @@ public class HttpContext implements LifeCycle,
     private transient HttpHandler[] _handlersArray;
     private transient String[] _vhostsArray;
 
-	protected transient Map _cache=new HashMap();
-	protected transient int _cacheSize;
-	protected transient CachedMetaData _mostRecentlyUsed;
-	protected transient CachedMetaData _leastRecentlyUsed;
+    protected transient Map _cache=new HashMap();
+    protected transient int _cacheSize;
+    protected transient CachedMetaData _mostRecentlyUsed;
+    protected transient CachedMetaData _leastRecentlyUsed;
 
     /* ------------------------------------------------------------ */
     transient Object _statsLock=new Object[0];

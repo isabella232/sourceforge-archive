@@ -1203,15 +1203,18 @@ public class HttpServer implements LifeCycle,
         synchronized(_statsLock)
         {
             _requests++;
-            if (!ok)
-                _errors++;
             if (--_requestsActive<0)
                 _requestsActive=0;
-            if (duration>_requestsDurationMax)
-                _requestsDurationMax=duration;
-            if (_requestsDurationAve==0)
-                _requestsDurationAve=duration*128;
-            _requestsDurationAve=_requestsDurationAve-_requestsDurationAve/128+duration;
+            if (!ok)
+                _errors++;
+            else
+            {
+                if (duration>_requestsDurationMax)
+                    _requestsDurationMax=duration;
+                if (_requestsDurationAve==0)
+                    _requestsDurationAve=duration*128;
+                _requestsDurationAve=_requestsDurationAve-_requestsDurationAve/128+duration;
+            }
         }
     }
     
