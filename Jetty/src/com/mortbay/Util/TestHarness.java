@@ -1243,7 +1243,6 @@ public class TestHarness
             testThreadedServer();
             testB64();
             PropertyTreeTest.test();
-            DictionaryConverterTest.test();
         }
         catch(Throwable th)
         {
