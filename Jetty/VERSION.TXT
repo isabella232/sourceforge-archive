@@ -7,6 +7,7 @@ Jetty-5.1.RC1
  + improved clean targets
  + when committed setHeader is a noop rather than IllegalStateException 
  + Partially flush writers on every write so content length can be detected.
+ + Build unsealed jars
 
 Jetty-5.1.RC0 - 11 October 2004
  + Fixed many minor issues from J2EE 1.4 TCK testing
