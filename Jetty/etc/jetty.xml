@@ -70,7 +70,8 @@ $ID: $
 
   <Call name="addWebApplication">
     <Arg>/default/*</Arg>
-    <Arg><SystemProperty name="user.dir"/>/webapps/default/</Arg>
+    <Arg>webapps/default/</Arg>
+    <Arg>etc/webdefault.xml/</Arg>
   </Call>
 
   <Call name="addContext">
