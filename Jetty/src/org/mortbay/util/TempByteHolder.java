@@ -252,6 +252,56 @@ public class TempByteHolder {
     }
 
     
+    /**
+     * Writes efficiently whole content to output stream.
+     * @param os OutputStream to write to
+     * @throws IOException
+     */
+    public void writeTo(java.io.OutputStream os) throws IOException {
+        writeTo(os, 0, getLength());
+    }
+    
+    
+    /**
+     * Writes efficiently part of the content to output stream.
+     * @param os OutputStream to write to
+     * @param start_offset  Offset of data fragment to be written
+     * @param length        Length of data fragment to be written
+     * @throws IOException
+     */
+    public void writeTo(java.io.OutputStream os, int start_offset, int length) throws IOException {
+        int towrite = min(length, _write_pos-start_offset);
+        int writeoff = start_offset;
+        if (towrite > 0) {
+            while (towrite >= _window_size) {
+                moveWindow(writeoff);
+                os.write(_memory_buffer,0,_window_size);
+                towrite -= _window_size;
+                writeoff += _window_size;
+            }
+            if (towrite > 0) {
+                moveWindow(writeoff);
+                os.write(_memory_buffer,0,towrite);
+            }
+        }
+    }
+    
+    
+    /**
+     * Reads all available data from input stream.
+     * @param is
+     * @throws IOException
+     */    
+    public void readFrom(java.io.InputStream is) throws IOException {
+        int howmuch = 0;
+        do {
+            _write_pos += howmuch;
+            moveWindow(_write_pos);
+            howmuch = is.read(_memory_buffer);
+        } while (howmuch != -1);
+    }
+    
+    
     // ----- helper methods -------
     
     /**
@@ -534,9 +584,8 @@ public class TempByteHolder {
                         moveWindow(_read_pos);
                     }
                     System.arraycopy(_memory_buffer, _read_pos - _window_low, buff, off, read_size);
-                    _read_pos += read_size;
-                        
                 }
+                _read_pos += read_size;
             }
             return read_size;
         }
