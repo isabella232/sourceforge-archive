@@ -344,7 +344,7 @@ public class ServletHolder extends Holder
             _servlet=null;
             _config=null;
             log.warn(LogSupport.EXCEPTION,e);
-            throw new UnavailableException(_servlet,e.toString());
+            throw new UnavailableException(getName()+":"+e.toString());
         }    
     }
 
@@ -359,6 +359,14 @@ public class ServletHolder extends Holder
             if (_runAs!=null && _realm!=null)
                 user=_realm.pushRole(null,_runAs);
             servlet.init(config);
+        }
+        catch(UnavailableException e)
+        {
+            throw e;
+        }
+        catch(Throwable e)
+        {
+            throw new UnavailableException(getName()+":"+e);
         }
         finally
         {

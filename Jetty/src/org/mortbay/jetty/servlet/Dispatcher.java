@@ -668,6 +668,7 @@ public class Dispatcher implements RequestDispatcher
             super(response);
             _request=request;
             _include=_request._filterType==FilterHolder.__INCLUDE;
+            
         }
 
         /* ------------------------------------------------------------ */
@@ -755,14 +756,16 @@ public class Dispatcher implements RequestDispatcher
         public void sendError(int status, String message)
             throws IOException
         {
-            if (!_include) super.sendError(status,message);
+            if (_request._filterType!=FilterHolder.__ERROR && !_include)
+                super.sendError(status,message);
         }
         
         /* ------------------------------------------------------------ */
         public void sendError(int status)
             throws IOException
         {
-            if (!_include) super.sendError(status);
+            if (_request._filterType!=FilterHolder.__ERROR && !_include)
+                super.sendError(status);
         }
         
         /* ------------------------------------------------------------ */
@@ -825,7 +828,8 @@ public class Dispatcher implements RequestDispatcher
         /* ------------------------------------------------------------ */
         public void setStatus(int status)
         {
-            if (!_include) super.setStatus(status);
+            if (_request._filterType!=FilterHolder.__ERROR && !_include)
+                super.setStatus(status);
         }
         
         /* ------------------------------------------------------------ */
@@ -843,7 +847,8 @@ public class Dispatcher implements RequestDispatcher
         */
         public void setStatus(int status, String message)
         {
-            if (!_include) super.setStatus(status,message);
+            if (_request._filterType!=FilterHolder.__ERROR && !_include)
+                super.setStatus(status,message);
         }
         
         /* ------------------------------------------------------------ */

@@ -378,6 +378,9 @@ public class ServletHttpResponse implements HttpServletResponse
         }
         else
         {
+            if (!_httpResponse.isCommitted())
+                _httpResponse.setStatus(status);
+            
             if (message == null)
             {
                 message= (String)HttpResponse.__statusMsg.get(TypeUtil.newInteger(status));
@@ -417,7 +420,7 @@ public class ServletHttpResponse implements HttpServletResponse
     public void sendError(int status) 
         throws IOException
     {
-	sendError(status,null);
+        sendError(status,null);
     }
 
     /* ------------------------------------------------------------ */
