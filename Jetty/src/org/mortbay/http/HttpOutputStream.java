@@ -488,7 +488,8 @@ public class HttpOutputStream
         {
             if (out==_nullableOut)
                 notify(OutputObserver.__COMMITING);
-            out.flush();
+            if (out!=null)
+                out.flush();
         }
     }
     

@@ -675,5 +675,7 @@ public class LineInput extends FilterInputStream
         _lineBuffer=null;
         _encoding=null;
     }
+
+    
 }
 
