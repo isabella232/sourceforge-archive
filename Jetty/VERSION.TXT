@@ -2,7 +2,7 @@ Jetty Versions
 --------------
 
 Jetty-4.2.16 - 29 Jan 2004
- + Fixed setDate thread safety
+ + Fixed setDate multi-cpu race
  + Improved low thread handling
  + FileResource better handles non sun JVM
  + Fixed HttpTunnel for JDK 1.2
