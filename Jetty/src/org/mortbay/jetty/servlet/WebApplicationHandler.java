@@ -289,6 +289,7 @@ public class WebApplicationHandler extends ServletHandler
         }
     }
 
+    /* ----------------------------------------------------------------- */
     private HashMap[] getChainCache() {
          HashMap[] _chainCache=new HashMap[FilterHolder.__ERROR+1];
         _chainCache[FilterHolder.__REQUEST]=new HashMap();
@@ -498,111 +499,109 @@ public class WebApplicationHandler extends ServletHandler
             notFound(request, response);
     }
 
+    /* ------------------------------------------------------------ */
     private FilterChain getChainForName(int requestType, ServletHolder servletHolder) {
         if (servletHolder == null) {
             throw new IllegalStateException("Named dispatch must be to an explicitly named servlet");
         }
-        if (_filterChainsCached && _namedChainCache[requestType].containsKey(servletHolder.getName()))
+        
+        
+        if (_filterChainsCached)
         {
-            return (FilterChain)_namedChainCache[requestType].get(servletHolder.getName());
+            synchronized(this)
+            {
+                if (_namedChainCache[requestType].containsKey(servletHolder.getName()))
+                    return (FilterChain)_namedChainCache[requestType].get(servletHolder.getName());
+            }
         }
-        else
+        
+        // Build list of filters
+        Object filters= null;
+        
+        if (jsr154Filter!=null)
         {
-            // Build list of filters
-            Object filters= null;
-
-            if (jsr154Filter!=null)
+            // Slight hack for Named servlets
+            // TODO query JSR how to apply filter to all dispatches
+            filters=LazyList.add(filters,jsr154FilterHolder);
+        }
+        
+        // Servlet filters
+        if (_servletFilterMap.size() > 0)
+        {
+            Object o= _servletFilterMap.get(servletHolder.getName());
+            for (int i=0; i<LazyList.size(o);i++)
             {
-                // Slight hack for Named servlets
-                // TODO query JSR how to apply filter to all dispatches
-                filters=LazyList.add(filters,jsr154FilterHolder);
+                FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
+                if (mapping.appliesTo(null,requestType))
+                    filters=LazyList.add(filters,mapping.getHolder());
             }
+        }
+        
 
-            // Servlet filters
-            if (_servletFilterMap.size() > 0)
+        FilterChain chain = null;
+        if (_filterChainsCached)
+        {
+            synchronized(this)
             {
-                Object o= _servletFilterMap.get(servletHolder.getName());
-                for (int i=0; i<LazyList.size(o);i++)
-                {
-                    FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
-                    if (mapping.appliesTo(null,requestType))
-                        filters=LazyList.add(filters,mapping.getHolder());
-                }
-            }
-
-            if (LazyList.size(filters) > 0)
-            {
-                if (_filterChainsCached)
-                {
-                    FilterChain chain = null;
+                if (LazyList.size(filters) > 0)
                     chain= new CachedChain(filters, servletHolder);
-                    _namedChainCache[requestType].put(servletHolder.getName(),chain);
-                    return chain;
-                }
-                else
-                    return new Chain(filters, servletHolder);
-            }
-            else if (_filterChainsCached)
-            {
-                _namedChainCache[requestType].put(servletHolder.getName(),null);
-                return null;
-            }
-            else {
-                return null;
+                _namedChainCache[requestType].put(servletHolder.getName(),chain);
             }
         }
+        else if (LazyList.size(filters) > 0)
+            chain = new Chain(filters, servletHolder);
+        
+        return chain;   
     }
 
-    private FilterChain getChainForPath(int requestType, String pathInContext, ServletHolder servletHolder) {
-        if (_filterChainsCached && _chainCache[requestType].containsKey(pathInContext))
+    /* ------------------------------------------------------------ */
+    private FilterChain getChainForPath(int requestType, String pathInContext, ServletHolder servletHolder) 
+    {
+        if (_filterChainsCached)
         {
-            return (FilterChain)_chainCache[requestType].get(pathInContext);
+            synchronized(this)
+            {
+                if(_chainCache[requestType].containsKey(pathInContext))
+                    return (FilterChain)_chainCache[requestType].get(pathInContext);
+            }
         }
-        else
+        
+        // Build list of filters
+        Object filters= null;
+        
+        // Path filters
+        for (int i= 0; i < _pathFilters.size(); i++)
         {
-            // Build list of filters
-            Object filters= null;
-
-            // Path filters
-            for (int i= 0; i < _pathFilters.size(); i++)
+            FilterMapping mapping = (FilterMapping)_pathFilters.get(i);
+            if (mapping.appliesTo(pathInContext, requestType))
+                filters= LazyList.add(filters, mapping.getHolder());
+        }
+        // Servlet filters
+        if (servletHolder != null && _servletFilterMap.size() > 0)
+        {
+            Object o= _servletFilterMap.get(servletHolder.getName());
+            for (int i=0; i<LazyList.size(o);i++)
             {
-                FilterMapping mapping = (FilterMapping)_pathFilters.get(i);
-                if (mapping.appliesTo(pathInContext, requestType))
-                    filters= LazyList.add(filters, mapping.getHolder());
+                FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
+                if (mapping.appliesTo(null,requestType))
+                    filters=LazyList.add(filters,mapping.getHolder());
             }
-            // Servlet filters
-            if (servletHolder != null && _servletFilterMap.size() > 0)
+        }
+        
+        FilterChain chain = null;
+        if (_filterChainsCached)
+        {
+            synchronized(this)
             {
-                Object o= _servletFilterMap.get(servletHolder.getName());
-                for (int i=0; i<LazyList.size(o);i++)
-                {
-                    FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
-                    if (mapping.appliesTo(null,requestType))
-                        filters=LazyList.add(filters,mapping.getHolder());
-                }
-            }
-
-            if (LazyList.size(filters) > 0)
-            {
-                if (_filterChainsCached)
-                {
-                    FilterChain chain = null;
+                if (LazyList.size(filters) > 0)
                     chain= new CachedChain(filters, servletHolder);
-                    _chainCache[requestType].put(pathInContext,chain);
-                    return chain;
-                }
-                else
-                    return new Chain(filters, servletHolder);
-            }
-            else if (_filterChainsCached)
-            {
-                _chainCache[requestType].put(pathInContext,null);
-                return null;
-            }
-            else {
-                return null;
+                _chainCache[requestType].put(pathInContext,chain);
             }
         }
+        else if (LazyList.size(filters) > 0)
+            chain = new Chain(filters, servletHolder);
+    
+        return chain;
     }
 
 
@@ -669,7 +668,42 @@ public class WebApplicationHandler extends ServletHandler
     {
         _filterChainsCached = filterChainsCached;
     }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @see org.mortbay.util.Container#addComponent(java.lang.Object)
+     */
+    protected void addComponent(Object o)
+    {
+        if (_filterChainsCached && isStarted())
+        { 
+            synchronized(this)
+            {
+                for (int i=0;i<_chainCache.length;i++)
+                    if (_chainCache[i]!=null)
+                        _chainCache[i].clear();
+            }
+        }
+        super.addComponent(o);
+    }
     
+    /* ------------------------------------------------------------ */
+    /**
+     * @see org.mortbay.util.Container#removeComponent(java.lang.Object)
+     */
+    protected void removeComponent(Object o)
+    {
+        if (_filterChainsCached && isStarted())
+        { 
+            synchronized(this)
+            {
+                for (int i=0;i<_chainCache.length;i++)
+                    if (_chainCache[i]!=null)
+                        _chainCache[i].clear();
+            }
+        }
+        super.removeComponent(o);
+    }
 
     /* ----------------------------------------------------------------- */
     public void destroy()
