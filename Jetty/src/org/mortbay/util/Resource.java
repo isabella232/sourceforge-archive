@@ -88,6 +88,9 @@ public abstract class Resource implements Serializable
                     
                     File file=new File(resource).getCanonicalFile();
                     url=file.toURL();
+                    // Correct for bad JVMs that don't encode path.
+                    url=new URL("file:"+URI.encodePath(url.toString().substring(5)));
+                    
                     URLConnection connection=url.openConnection();
                     FileResource fileResource= new FileResource(url,connection,file);
                     if (fileResource.getAlias()!=null)
@@ -261,6 +264,7 @@ public abstract class Resource implements Serializable
     /* ------------------------------------------------------------ */
     /**
      * Returns a list of resource names contained in the given resource
+     * The resource names are not URL encoded.
      */
     public abstract String[] list();
     
@@ -268,7 +272,8 @@ public abstract class Resource implements Serializable
     /* ------------------------------------------------------------ */
     /**
      * Returns the resource contained inside the current resource with the
-     * given name
+     * given name.
+     * @param path The path segment to add, which should be URL encoded. 
      */
     public abstract Resource addPath(String path)
         throws IOException,MalformedURLException;
