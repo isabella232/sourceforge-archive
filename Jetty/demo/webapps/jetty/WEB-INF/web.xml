@@ -12,23 +12,6 @@
     <param-value>mortbay@mortbay.com</param-value>
   </context-param>
 
-  <!-- Context params to control Session Cookies
-  <context-param>
-    <param-name>org.mortbay.jetty.servlet.SessionDomain</param-name>
-    <param-value>127.0.0.1</param-value>
-  </context-param>
-
-  <context-param>
-    <param-name>org.mortbay.jetty.servlet.SessionPath</param-name>
-    <param-value>/</param-value>
-  </context-param>
-
-  <context-param>
-    <param-name>org.mortbay.jetty.servlet.MaxAge</param-name>
-    <param-value>-1</param-value>
-  </context-param>
-  -->
-
   <filter>
     <filter-name>Demo Filter</filter-name>
     <filter-class>org.mortbay.webapps.jetty.DemoFilter</filter-class>
@@ -116,10 +99,6 @@
     <location>/error401.html</location>
   </error-page>
   <error-page>
-    <error-code>403</error-code>
-    <location>/error403.html</location>
-  </error-page>
-  <error-page>
     <error-code>404</error-code>
     <location>/error404.html</location>
   </error-page>
@@ -181,10 +160,12 @@
     </user-data-constraint>
   </security-constraint>
 
+<!--
   <login-config>
     <auth-method>BASIC</auth-method>
     <realm-name>Jetty Demo Realm</realm-name>
   </login-config>
+-->
 
 <!--
   <login-config>
@@ -193,7 +174,6 @@
   </login-config>
 -->
 
-<!--
   <login-config>
     <auth-method>FORM</auth-method>
     <realm-name>Jetty Demo Realm</realm-name>
@@ -202,7 +182,6 @@
        <form-error-page>/logonError.html</form-error-page>
     </form-login-config>
   </login-config>
--->
 
   <security-role>
       <role-name>adminRef</role-name>

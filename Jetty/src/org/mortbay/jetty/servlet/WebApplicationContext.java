@@ -1157,7 +1157,12 @@ public class WebApplicationContext
                     _formAuthenticator.setLoginPage(loginPage.toString(false,true));
                 XmlParser.Node errorPage = formConfig.get("form-error-page");
                 if (errorPage != null)
-                    _formAuthenticator.setErrorPage(errorPage.toString(false,true));
+                {
+                    String ep=errorPage.toString(false,true);
+                    _formAuthenticator.setErrorPage(ep);
+                    if (getErrorPage("403")==null)
+                        setErrorPage("403",ep);
+                }
             }
         }
     }

@@ -1621,11 +1621,16 @@ public class HttpContext implements LifeCycle,
         }
         
         String pathParams=null;
-        int semi = pathInContext.indexOf(';');
+        int semi = pathInContext.lastIndexOf(';');
         if (semi>=0)
         {
-            pathParams=pathInContext.substring(semi+1);
-            pathInContext=pathInContext.substring(0,semi);
+            int pl = pathInContext.length()-semi;
+            String ep=request.getEncodedPath();
+            if(';'==ep.charAt(ep.length()-pl))
+            {
+                pathParams=pathInContext.substring(semi+1);
+                pathInContext=pathInContext.substring(0,semi);
+            }
         }
 
         try
@@ -1738,7 +1743,7 @@ public class HttpContext implements LifeCycle,
         getEncodingMap();
 
         // Setup realm
-        if (_userRealm==null && _realmName!=null)
+        if (_userRealm==null && _authenticator!=null)
         {
             _userRealm=_httpServer.getRealm(_realmName);
             if (_userRealm==null)

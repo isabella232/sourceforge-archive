@@ -94,24 +94,25 @@ public class FormAuthenticator implements Authenticator
             String password = request.getParameter(__J_PASSWORD);
             
             UserPrincipal user = realm.authenticate(username,password,httpRequest);
-            if (user!=null)
+            String nuri=(String)session.getAttribute(__J_URI);
+            if (user!=null && nuri!=null)
             {
                 Code.debug("Form authentication OK for ",username);
                 httpRequest.setAuthType(SecurityConstraint.__FORM_AUTH);
                 httpRequest.setAuthUser(username);
                 httpRequest.setUserPrincipal(user);
                 session.setAttribute(__J_AUTHENTICATED,user);
-                String nuri=(String)session.getAttribute(__J_URI);
-                if (nuri==null)
-                    nuri=URI.addPaths(request.getContextPath(),_formErrorPage);
-
                 response.sendRedirect(response.encodeRedirectURL(nuri));
             }
             else
             {
                 Code.debug("Form authentication FAILED for ",username);
-                response.sendRedirect(response.encodeRedirectURL(URI.addPaths(request.getContextPath(),
-                                                _formErrorPage)));
+                if (_formErrorPage!=null)
+                    response.sendRedirect(response.encodeRedirectURL
+                                          (URI.addPaths(request.getContextPath(),
+                                                        _formErrorPage)));
+                else
+                    response.sendError(HttpResponse.__403_Forbidden);
             }
             
             // Security check is always false, only true after final redirection.

@@ -32,6 +32,30 @@
     This file is applied to a Web application before it's own WEB_INF/web.xml file
   </description>
 
+
+
+  <!-- ==================================================================== -->
+  <!-- Context params to control Session Cookies                            -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
+  <!-- UNCOMMENT TO ACTIVATE
+  <context-param>
+    <param-name>org.mortbay.jetty.servlet.SessionDomain</param-name>
+    <param-value>127.0.0.1</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>org.mortbay.jetty.servlet.SessionPath</param-name>
+    <param-value>/</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>org.mortbay.jetty.servlet.MaxAge</param-name>
+    <param-value>-1</param-value>
+  </context-param>
+  -->
+
+
+
   <!-- ==================================================================== -->
   <!-- The default servlet.                                                 -->
   <!-- This servlet, normally mapped to /, provides the handling for static -->
@@ -200,7 +224,7 @@
   <!-- resource in the org.mortbay.jetty.jar file.  Additional or modified  -->
   <!-- mappings may be specified here                                       -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
-  <!--
+  <!-- UNCOMMENT TO ACTIVATE
   <mime-mapping>
     <extension>mysuffix</extension>
     <mime-type>mymime/type</mime-type>
