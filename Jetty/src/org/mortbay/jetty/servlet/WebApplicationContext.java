@@ -883,7 +883,7 @@ public class WebApplicationContext
                 holder.setInitOrder(order);
             }
         }
-    
+
         Iterator sRefsIter= node.iterator("security-role-ref");
         while(sRefsIter.hasNext())
         {

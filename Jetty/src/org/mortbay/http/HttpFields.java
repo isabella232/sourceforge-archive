@@ -307,6 +307,10 @@ public class HttpFields
         new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'",
                              Locale.US);
 
+    public final static SimpleDateFormat __dateCookie = 
+        new SimpleDateFormat("EEE, dd-MMM-yyyy HH:mm:ss 'GMT'",
+                             Locale.US);
+
     public final static String __01Jan1970=
         '"'+HttpFields.__dateSend.format(new Date(0))+'"';
     
@@ -1311,8 +1315,13 @@ public class HttpFields
             buf.append(name);
             buf.append('=');
             if (value!=null && value.length()>0)
-                URI.encodeString(buf,value,"\"; ");
-            
+            {
+                if (version==0)
+                    URI.encodeString(buf,value,"\"; ");
+                else
+                    QuotedStringTokenizer.quote(buf,value);
+            }
+
             if (version>0)
             {
                 buf.append(";Version=");
@@ -1321,7 +1330,7 @@ public class HttpFields
                 if (comment!=null && comment.length()>0)
                 {
                     buf.append(";Comment=");
-                    QuotedStringTokenizer.quote(buf,value);
+                    QuotedStringTokenizer.quote(buf,comment);
                 }
             }
             String path=cookie.getPath();
@@ -1345,9 +1354,7 @@ public class HttpFields
                     if (maxAge==0)
                         buf.append(__01Jan1970);
                     else
-                        QuotedStringTokenizer.quote
-                            (buf,HttpFields.__dateSend
-                             .format(new Date(System.currentTimeMillis()+1000L*maxAge)));
+                        buf.append(HttpFields.__dateCookie.format(new Date(System.currentTimeMillis()+1000L*maxAge)));
                 }
                 else
                 {

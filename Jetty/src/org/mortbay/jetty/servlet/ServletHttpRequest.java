@@ -529,8 +529,6 @@ public class ServletHttpRequest
                 
                 cookie.setPath(path);
                 _servletHttpResponse.getHttpResponse().addSetCookie(cookie,false);
-                cookie.setVersion(1);
-                _servletHttpResponse.getHttpResponse().addSetCookie(cookie,true); 
             }
         }
 

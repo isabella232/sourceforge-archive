@@ -13,6 +13,7 @@ import java.util.Locale;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -95,6 +96,19 @@ public class Dump extends HttpServlet
                 Code.ignore(e);
                 response.setLocale(Locale.getDefault());
             }
+        }
+
+        if (info!=null && info.indexOf("Cookie")>=0)
+        {
+            Cookie cookie = new Cookie("Cookie",info);
+            cookie.setMaxAge(300);
+            cookie.setPath("/");
+            cookie.setComment("Cookie from dump servlet");
+            if (info.indexOf("Cookie1")>=0)
+                cookie.setVersion(1);
+            if (info.indexOf("Cookie2")>=0)
+                cookie.setVersion(2);
+            response.addCookie(cookie);
         }
 
         String pi=request.getPathInfo();

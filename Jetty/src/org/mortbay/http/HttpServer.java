@@ -589,7 +589,7 @@ public class HttpServer implements LifeCycle,
     
     /* ------------------------------------------------------------ */
     /** 
-     * @param trace 
+     * @param trace True if the TRACE method is fully implemented.
      */
     public void setTrace(boolean trace)
     {
