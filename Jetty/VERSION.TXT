@@ -2,6 +2,9 @@ Jetty Versions
 --------------
 
 Jetty-4.1.D0
+ + The 4.1 Series started looking for even more performance
+   within the 2.3 specification.
+ + Removed the HttpMessage facade mechanism
  + BRAND NEW WebApplicationHandler & WebApplicationContext
  + Added TypeUtil to reduce Integer creation.
  + General clean up of the API for for MBean getters/setters.
