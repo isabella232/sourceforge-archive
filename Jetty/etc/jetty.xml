@@ -112,7 +112,7 @@
   <Call name="addWebApplications">
     <Arg></Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/</Arg>
-    <Arg type="boolean">false</Arg>
+    <Arg type="boolean">true</Arg>
   </Call>
 
 

@@ -51,7 +51,7 @@ public class ServletHttpContext extends HttpContext
      */
     void setServletContext(ServletContext servletContext)
     {
-        if (_servletContext!=null)
+        if (_servletContext!=null && servletContext!=_servletContext)
             throw new IllegalStateException("ServletContext already set");
         _servletContext=servletContext;
     }
