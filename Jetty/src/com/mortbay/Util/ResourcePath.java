@@ -44,7 +44,7 @@ public class ResourcePath
     public ResourcePath(String path, boolean quiet)
 	throws IOException
     { 
-	StringTokenizer tokenizer = new StringTokenizer(path,",;" + File.pathSeparator);
+	StringTokenizer tokenizer = new StringTokenizer(path,",;");
 	 
 	while (tokenizer.hasMoreTokens())
 	{

@@ -1,4 +1,4 @@
-<?xml version="1.0"  encoding="ISO8859-1"?> 
+<?xml version="1.0"  encoding="ISO-8859-1"?> 
 <!DOCTYPE Configure SYSTEM "configure.dtd"> 
 
 <!--
@@ -92,6 +92,7 @@ $ID: $
     <Call name="addHandler">
       <Arg><New class="com.mortbay.HTTP.Handler.NotFoundHandler"/></Arg>
     </Call>
+
   </Call>
 </Configure>
 

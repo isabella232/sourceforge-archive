@@ -25,59 +25,68 @@ import javax.servlet.*;
  */
 public class WebApplicationContext extends HandlerContext
 {
-    static private XmlParser __xmlParser=null;    
-	
     /* ------------------------------------------------------------ */
     private String _name;
-    private File _directory;
-    private String _directoryName;
-    private XmlParser.Node _web;
+    private Resource _webApp;
+    private String _webAppName;
     private ServletHandler _servletHandler;
-    Context _context;
+    private Context _context;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param httpServer 
      * @param directory 
      */
-    WebApplicationContext(HttpServer httpServer, String directory)
+    WebApplicationContext(HttpServer httpServer, String webApp)
 	throws IOException
     {
 	super(httpServer);
 
-	if (__xmlParser==null)
-	{
-	    __xmlParser=new XmlParser();
-	    __xmlParser.redirectEntity
-		("web-app_2_2.dtd",
-		 Resource.newSystemResource("com/mortbay/HTTP/web.dtd"));
-	}
+	// Get parser
+	XmlParser xmlParser=new XmlParser();
+	xmlParser.redirectEntity
+	    ("web-app_2_2.dtd",
+	     Resource.newSystemResource("com/mortbay/HTTP/web.dtd"));
 
-	File _directory = new File(directory);
-	if (!_directory.exists() || !_directory.isDirectory())
-	    throw new IllegalArgumentException("No such directory: "+directory);
-	_directoryName=_directory.getCanonicalPath();
+	Resource _webApp = Resource.newResource(webApp);
+	if (!_webApp.exists() || !_webApp.isDirectory())
+	    throw new IllegalArgumentException("No such directory: "+_webApp);
+	_webAppName=_webApp.getName();
 
 	// Check web.xml file
-	File web = new File(_directoryName+
-			    File.separatorChar+
-			    "WEB-INF"+
-			    File.separatorChar+
-			    "web.xml");
+	Resource web = _webApp.addPath("WEB-INF/web.xml");
 	if (!web.exists())
 	    throw new IllegalArgumentException("No web file: "+web);
 
 	try
 	{
-	    // Set the classpath
-	    File classes = new File(_directoryName+
-				    File.separatorChar+
-				    "WEB-INF"+
-				    File.separatorChar+
-				    "classes");
+	    // Look for classes directory
+	    Resource classes = _webApp.addPath("WEB-INF/classes/");
+	    String classPath="";
 	    if (classes.exists())
-		setClassPath(classes.getCanonicalPath());
-	    // XXX - need to add jar files to classpath
+		classPath=classes.toString();
+
+	    // Look for jars
+	    Resource lib = _webApp.addPath("WEB-INF/lib/");
+	    if (lib.exists() && lib.isDirectory())
+	    {
+		String[] files=lib.list();
+		for (int f=0;files!=null && f<files.length;f++)
+		{
+		    Resource fn=lib.addPath(files[f]);
+		    String fnlc=fn.getName().toLowerCase();
+		    if (fnlc.endsWith(".jar") || fnlc.endsWith(".zip"))
+		    {
+			classPath+=(classPath.length()>0?",":"")+
+			    fn.toString();
+		    }
+		}
+	    }
+
+	    // Set the classpath
+	    System.err.println("CLASSPATH="+classPath);
+	    if (classPath.length()>0)
+		setClassPath(classPath);
 	    
 	    // Add servlet Handler
 	    addHandler(new ServletHandler());
@@ -85,14 +94,14 @@ public class WebApplicationContext extends HandlerContext
 	    _context=_servletHandler.getContext();
 	    
 	    // FileBase and ResourcePath
-	    setResourceBase(_directoryName);
+	    setResourceBase(_webAppName);
 	    setServingResources(true);
 	    ResourceHandler rh = getResourceHandler();
 	    rh.setDirAllowed(true);
 	    rh.setPutAllowed(true);
 	    rh.setDelAllowed(true);
 	    
-	    _web = __xmlParser.parse(web);
+	    XmlParser.Node config = xmlParser.parse(web.getURL().toString());
 
 	    // Standard constraint
 	    SecurityConstraint sc=new SecurityConstraint();
@@ -101,27 +110,27 @@ public class WebApplicationContext extends HandlerContext
 	    addSecurityConstraint("/WEB-INF/*",sc);
 	    addSecurityConstraint("/WEB-INF",sc);
 	    
-	    initialize();
+	    initialize(config);
 	}
 	catch(IOException e)
 	{
-	    Code.warning("Parse error on "+_directoryName,e);
+	    Code.warning("Parse error on "+_webAppName,e);
 	    throw e;
 	}	
 	catch(Exception e)
 	{
-	    Code.warning("Configuration error "+_directoryName,e);
-	    throw new IOException("Parse error on "+_directoryName+
+	    Code.warning("Configuration error "+_webAppName,e);
+	    throw new IOException("Parse error on "+_webAppName+
 				  ": "+e.toString());
 	}
     }
 
 
     /* ------------------------------------------------------------ */
-    private void initialize()
+    private void initialize(XmlParser.Node config)
 	throws ClassNotFoundException,UnavailableException
     {
-	Iterator iter=_web.iterator();
+	Iterator iter=config.iterator();
 	while (iter.hasNext())
 	{
 	    XmlParser.Node node=(XmlParser.Node)iter.next();
@@ -358,7 +367,7 @@ public class WebApplicationContext extends HandlerContext
     public String toString()
     {
 	if (_name!=null)
-	    return "'"+_name+"' @ "+_directoryName;
-	return _directoryName;
+	    return "'"+_name+"' @ "+_webAppName;
+	return _webAppName;
     }
 }

@@ -1095,10 +1095,12 @@ public class TestHarness
             }
             catch(Error e)
             {
+		System.err.println(e);
                 Code.ignore(e);
             }
             catch(Exception e)
             {
+		System.err.println(e);
                 Code.ignore(e);
             }
             finally
@@ -1313,10 +1315,22 @@ public class TestHarness
 	    r = Resource.newResource("TestHarness.java");
 	    t.check(r.exists(),"Rel File exists");
 	    t.check(!r.isDirectory(),"Rel URL not directory");
+
+
+	    Resource rt = Resource.newResource("file:"+
+					       System.getProperty("user.dir"));
+	    Resource rt1=rt.addPath("Test");
+	    t.check(rt1.exists(),"Test File exists");
+	    t.check(rt1.isDirectory(),"Test URL is directory");
+	    Resource rt2=rt.addPath("Test/");
+	    t.check(rt2.exists(),"Test File exists");
+	    t.check(rt2.isDirectory(),"Test URL is directory");
+	    
 	    
 	    Resource b = Resource.newResource("file:"+
 					      System.getProperty("user.dir")+
-				     "/");
+					      "/");
+	    
 	    r = b.addPath("Resource.java");
 	    t.check(r.exists(),"AddPath resource exists");
 	    r = b.addPath("UnknownFile");
@@ -1479,27 +1493,27 @@ public class TestHarness
     {
         try
         {
-       	    testMultiMap();
-      	    testQuotedStringTokenizer();            
-      	    testDateCache();
-      	    testTest();
-      	    testLog();
-      	    testFrame();
-      	    testCode();
-      	    testDataHelper();
-      	    testBlockingQueue();
-      	    testIO();
-      	    testUrlEncoded();
-      	    testURI();
-      	    testLineInput();
-    	    testThreadPool();
-    	    testThreadedServer();
-      	    testB64();
+        	    testMultiMap();
+       	    testQuotedStringTokenizer();            
+       	    testDateCache();
+       	    testTest();
+       	    testLog();
+       	    testFrame();
+       	    testCode();
+       	    testDataHelper();
+       	    testBlockingQueue();
+       	    testIO();
+       	    testUrlEncoded();
+       	    testURI();
+       	    testLineInput();
+     	    testThreadPool();
+     	    testThreadedServer();
+       	    testB64();
        	    testZipResource();
-      	    PropertyTreeTest.test();
+       	    PropertyTreeTest.test();
       	    resourceTest();
-    	    testXmlParser();
-	    testXmlConfiguration();
+     	    testXmlParser();
+ 	    testXmlConfiguration();
         }
         catch(Throwable th)
         {

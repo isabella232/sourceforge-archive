@@ -391,7 +391,14 @@ public class Resource
 	 */
 	public String getName()
 	{
-	    return _file.getName();
+	    try{
+		return _file.getCanonicalPath();
+	    }
+	    catch(IOException e)
+	    {
+		Code.ignore(e);
+		return _file.getName();
+	    }
 	}
 	
 	/* ------------------------------------------------------------ */
@@ -466,7 +473,6 @@ public class Resource
 		_file.equals(((FileResource)o)._file);
 	}
     }
-
 }
 
 

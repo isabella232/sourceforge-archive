@@ -32,6 +32,7 @@ abstract public class ThreadedServer extends ThreadPool
     ServerSocket _listen = null;
     int _soTimeOut=-1;
     int _maxReadTimeMs=-1;
+    int _lingerTimeSecs=30;
     
     /* ------------------------------------------------------------------- */
     /* Construct
@@ -85,7 +86,7 @@ abstract public class ThreadedServer extends ThreadPool
         if (isStarted())
         {
             Code.debug( "Restart for ", address );
-            destroy();
+            try{stop();}catch(InterruptedException e){Code.warning(e);}
             start();
         }
     }
@@ -128,6 +129,33 @@ abstract public class ThreadedServer extends ThreadPool
     public void setMaxReadTimeMs(int ms)
     {
 	_maxReadTimeMs=ms;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return milliseconds
+     */
+    public int getMaxReadTimeMs()
+    {
+	return _maxReadTimeMs;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param sec seconds to linger or -1 to disable linger.
+     */
+    public void setLingerTimeSecs(int ls)
+    {
+	_lingerTimeSecs=ls;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return seconds.
+     */
+    public int getLingerTimeSecs()
+    {
+	return _lingerTimeSecs;
     }
     
     
@@ -204,7 +232,12 @@ abstract public class ThreadedServer extends ThreadPool
         }
         finally
         {
-            try {connection.setSoLinger(true,0);}
+            try {
+		if (_lingerTimeSecs>=0)
+		    connection.setSoLinger(true,_lingerTimeSecs);
+		else
+		    connection.setSoLinger(false,0);
+	    }
             catch ( Exception e ){Code.ignore(e);}
             try {connection.close();}
             catch ( Exception e ){Code.warning("Connection problem",e);}
@@ -259,16 +292,15 @@ abstract public class ThreadedServer extends ThreadPool
         try
         {
 	    Socket s;
-	    //synchronized(_listen)
-	    //{
-		if (_soTimeOut!=timeout)
-		{
-		    _soTimeOut=timeout;
-		    _listen.setSoTimeout(_soTimeOut);
-		}
-		
-		s=_listen.accept();
-		//}
+	    
+	    if (_soTimeOut!=timeout)
+	    {
+		_soTimeOut=timeout;
+		_listen.setSoTimeout(_soTimeOut);
+	    }
+	    
+	    s=_listen.accept();
+	    
             if (_maxReadTimeMs>0)
                 s.setSoTimeout(_maxReadTimeMs);
             return s;
@@ -337,6 +369,35 @@ abstract public class ThreadedServer extends ThreadPool
         }        
     }
 
+    /* --------------------------------------------------------------- */
+    public void stop()
+        throws InterruptedException
+    {
+	if (_listen!=null)
+	{
+	    try{_listen.setSoTimeout(0);}
+	    catch(SocketException e){Code.warning(e);}
+	    try{_listen.close();}
+	    catch(IOException e){Code.warning(e);}
+	    _listen=null;
+	}
+        super.stop();
+    }
+    
+    /* --------------------------------------------------------------- */
+    public void destroy()
+    {
+	if (_listen!=null)
+	{
+	    try{_listen.setSoTimeout(0);}
+	    catch(SocketException e){Code.warning(e);}
+	    try{_listen.close();}
+	    catch(IOException e){Code.warning(e);}
+	    _listen=null;
+	}
+	_address=null;
+        super.destroy();
+    }
 
     /* ------------------------------------------------------------ */
     /** Disabled.
@@ -347,8 +408,6 @@ abstract public class ThreadedServer extends ThreadPool
     {
         throw new IllegalStateException("Can't run jobs on ThreadedServer");
     }
-
-
 }
 
 

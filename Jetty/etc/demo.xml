@@ -65,6 +65,7 @@ $ID: $
     </Arg>
   </Call>
 
+  <!--
   <Call name="addListener">
     <Arg>
       <New class="com.mortbay.HTTP.SunJsseListener">
@@ -77,10 +78,11 @@ $ID: $
       </New>
     </Arg>
   </Call>
+  -->
 
   <Call name="addWebApplication">
     <Arg>/</Arg>
-    <Arg><SystemProperty name="user.dir"/>/webapps/jetty/</Arg>
+    <Arg>file:<SystemProperty name="user.dir"/>/webapps/jetty/</Arg>
   </Call>
 
   <Call name="addContext">

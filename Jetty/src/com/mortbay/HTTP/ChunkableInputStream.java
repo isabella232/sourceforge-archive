@@ -31,6 +31,7 @@ public class ChunkableInputStream extends FilterInputStream
     public static int __maxLineLength=4096;
     
     public final static Class[] __filterArg = {java.io.InputStream.class};
+    private static ClosedStream __closedStream=new ClosedStream();
     
     /* ------------------------------------------------------------ */
     private DeChunker _deChunker;
@@ -114,7 +115,14 @@ public class ChunkableInputStream extends FilterInputStream
         _chunking=false;
         _realIn.setByteLimit(-1);
     }
-    
+ 
+    /* ------------------------------------------------------------ */
+    public void close()
+	throws IOException
+    {
+	in=__closedStream;
+    }
+ 
     /* ------------------------------------------------------------ */
     /** Insert FilterInputStream.
      * Place a Filtering InputStream into this stream, after the
@@ -162,22 +170,25 @@ public class ChunkableInputStream extends FilterInputStream
     }
 
     /* ------------------------------------------------------------ */
-    /** XXX 
-     */
-//      public com.mortbay.Util.LineInput$LineBuffer readLine(int maxLen)
-//          throws IOException,
-//                 IllegalStateException
-//      {
-//          if (_chunking || _filters>0)
-//              throw new IllegalStateException("Chunking or filters");
-//          return _realIn.readLineBuffer(maxLen);
-//      }
-
-    /* ------------------------------------------------------------ */
     public HttpFields getTrailer()
     {
         return _deChunker._trailer;
     }
+
+    
+    /* ------------------------------------------------------------ */
+    /** A closed input stream
+     */
+    private static class ClosedStream extends InputStream
+    {
+        /* ------------------------------------------------------------ */
+        public int read()
+            throws IOException
+        {
+	    return -1;
+	}
+    }
+    
     
     /* ------------------------------------------------------------ */
     /** Dechunk input.
@@ -258,6 +269,7 @@ public class ChunkableInputStream extends FilterInputStream
         public void close()
             throws IOException
         {
+	    Code.debug("Close");
             _chunkSize=-1;
         }
  
