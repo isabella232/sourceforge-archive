@@ -173,10 +173,10 @@ public class Default extends HttpServlet
     protected void service(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException
     {
-        String pathInContext=(String)request.getAttribute(Dispatcher.__PATH_INFO);
+        String pathInContext=(String)request.getAttribute(Dispatcher.__INCLUDE_PATH_INFO);
         if (pathInContext==null)
         {
-            pathInContext=(String)request.getAttribute(Dispatcher.__SERVLET_PATH);
+            pathInContext=(String)request.getAttribute(Dispatcher.__INCLUDE_SERVLET_PATH);
             if (pathInContext==null)
             {
                 pathInContext=request.getPathInfo();
@@ -479,7 +479,7 @@ public class Default extends HttpServlet
         throws IOException
     {
         if (!request.getMethod().equals(HttpRequest.__HEAD)  &&
-            request.getAttribute(Dispatcher.__REQUEST_URI)==null)
+            request.getAttribute(Dispatcher.__INCLUDE_REQUEST_URI)==null)
         {
             // If we have meta data for the file
             // Try a direct match for most common requests. Avoids
@@ -575,7 +575,7 @@ public class Default extends HttpServlet
     {
         long resLength=resource.length();
 
-        boolean include = request.getAttribute(Dispatcher.__REQUEST_URI)!=null;
+        boolean include = request.getAttribute(Dispatcher.__INCLUDE_REQUEST_URI)!=null;
         
         //  see if there are any range headers
         Enumeration reqRanges = include?null:request.getHeaders(HttpFields.__Range);

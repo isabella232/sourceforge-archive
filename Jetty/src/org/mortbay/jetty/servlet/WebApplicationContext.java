@@ -833,11 +833,19 @@ public class WebApplicationContext
         String filterName=node.getString("filter-name",false,true);
         String pathSpec=node.getString("url-pattern",false,true);
         String servletName=node.getString("servlet-name",false,true);
+
+
+        FilterHolder holder = (servletName!=null)
+            ?_webAppHandler.mapServletToFilter(servletName,filterName)
+            :_webAppHandler.mapPathToFilter(pathSpec,filterName);
         
-        if (servletName!=null)
-            _webAppHandler.mapServletToFilter(servletName,filterName);
-        else
-            _webAppHandler.mapPathToFilter(pathSpec,filterName);
+        Iterator iter= node.iterator("dispatcher");
+        while(iter.hasNext())
+        {
+            String dispatcher=((XmlParser.Node)iter.next())
+                .toString(false,true);
+            holder.addAppliesTo(dispatcher);
+        }
     }
     
     /* ------------------------------------------------------------ */

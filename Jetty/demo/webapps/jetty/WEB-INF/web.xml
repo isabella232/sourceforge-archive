@@ -21,6 +21,8 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
   <filter-mapping>
       <filter-name>Demo Filter</filter-name>
       <url-pattern>/*</url-pattern>
+      <dispatcher>REQUEST</dispatcher>
+      <dispatcher>FORWARD</dispatcher>
   </filter-mapping>
 
   <!--

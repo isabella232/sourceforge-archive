@@ -44,25 +44,35 @@ import org.mortbay.util.WriterOutputStream;
  */
 public class Dispatcher implements RequestDispatcher
 {
-    // XXX
-    static
-    {
-        System.err.println("XXX forward attributes not implemented");
-    }
     
-    public final static String __REQUEST_URI= "javax.servlet.include.request_uri";
-    public final static String __CONTEXT_PATH= "javax.servlet.include.context_path";
-    public final static String __SERVLET_PATH= "javax.servlet.include.servlet_path";
-    public final static String __PATH_INFO= "javax.servlet.include.path_info";
-    public final static String __QUERY_STRING= "javax.servlet.include.query_string";
+    public final static String __INCLUDE_REQUEST_URI= "javax.servlet.include.request_uri";
+    public final static String __INCLUDE_CONTEXT_PATH= "javax.servlet.include.context_path";
+    public final static String __INCLUDE_SERVLET_PATH= "javax.servlet.include.servlet_path";
+    public final static String __INCLUDE_PATH_INFO= "javax.servlet.include.path_info";
+    public final static String __INCLUDE_QUERY_STRING= "javax.servlet.include.query_string";
+
+    public final static String __FORWARD_REQUEST_URI= "javax.servlet.forward.request_uri";
+    public final static String __FORWARD_CONTEXT_PATH= "javax.servlet.forward.context_path";
+    public final static String __FORWARD_SERVLET_PATH= "javax.servlet.forward.servlet_path";
+    public final static String __FORWARD_PATH_INFO= "javax.servlet.forward.path_info";
+    public final static String __FORWARD_QUERY_STRING= "javax.servlet.forward.query_string";
+
+    
+    
     public final static StringMap __managedAttributes = new StringMap();
     static
     {
-        __managedAttributes.put(__REQUEST_URI,__REQUEST_URI);
-        __managedAttributes.put(__CONTEXT_PATH,__CONTEXT_PATH);
-        __managedAttributes.put(__SERVLET_PATH,__SERVLET_PATH);
-        __managedAttributes.put(__PATH_INFO,__PATH_INFO);
-        __managedAttributes.put(__QUERY_STRING,__QUERY_STRING);
+        __managedAttributes.put(__INCLUDE_REQUEST_URI,__INCLUDE_REQUEST_URI);
+        __managedAttributes.put(__INCLUDE_CONTEXT_PATH,__INCLUDE_CONTEXT_PATH);
+        __managedAttributes.put(__INCLUDE_SERVLET_PATH,__INCLUDE_SERVLET_PATH);
+        __managedAttributes.put(__INCLUDE_PATH_INFO,__INCLUDE_PATH_INFO);
+        __managedAttributes.put(__INCLUDE_QUERY_STRING,__INCLUDE_QUERY_STRING);
+        
+        __managedAttributes.put(__FORWARD_REQUEST_URI,__FORWARD_REQUEST_URI);
+        __managedAttributes.put(__FORWARD_CONTEXT_PATH,__FORWARD_CONTEXT_PATH);
+        __managedAttributes.put(__FORWARD_SERVLET_PATH,__FORWARD_SERVLET_PATH);
+        __managedAttributes.put(__FORWARD_PATH_INFO,__FORWARD_PATH_INFO);
+        __managedAttributes.put(__FORWARD_QUERY_STRING,__FORWARD_QUERY_STRING);
     }
     
     ServletHandler _servletHandler;
@@ -71,10 +81,6 @@ public class Dispatcher implements RequestDispatcher
     String _uriInContext;
     String _pathInContext;
     String _query;
-    boolean _include;
-    DispatcherRequest _request;
-    boolean _xContext;
-    HttpSession _xSession;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -127,8 +133,7 @@ public class Dispatcher implements RequestDispatcher
                         ServletResponse servletResponse)
         throws ServletException, IOException     
     {
-        _include=true;
-        dispatch(servletRequest,servletResponse);
+        dispatch(servletRequest,servletResponse,true);
     }
     
     /* ------------------------------------------------------------ */
@@ -136,12 +141,13 @@ public class Dispatcher implements RequestDispatcher
                         ServletResponse servletResponse)
         throws ServletException,IOException
     {
-        dispatch(servletRequest,servletResponse);
+        dispatch(servletRequest,servletResponse,false);
     }
     
     /* ------------------------------------------------------------ */
     void dispatch(ServletRequest servletRequest,
-                  ServletResponse servletResponse)
+                  ServletResponse servletResponse,
+                  boolean include)
         throws ServletException,IOException
     {
         HttpServletRequest httpServletRequest=(HttpServletRequest)servletRequest;
@@ -153,16 +159,15 @@ public class Dispatcher implements RequestDispatcher
             ?(ServletHttpRequest)httpConnection.getRequest().getWrapper()
             :ServletHttpRequest.unwrap(servletRequest);
 
-        // Is this being dispatched to a different context?
-        _xContext=
-            servletHttpRequest.getServletHandler()!=_servletHandler;
 
         // wrap the request and response
-        DispatcherRequest request = new DispatcherRequest(httpServletRequest);
-        DispatcherResponse response = new DispatcherResponse(httpServletResponse);
-        _request=request;
+        DispatcherRequest request = new DispatcherRequest(httpServletRequest,
+                                                          servletHttpRequest,
+                                                          include);
+        DispatcherResponse response = new DispatcherResponse(request,
+                                                             httpServletResponse);        
         
-        if (!_include)
+        if (!include)
             servletResponse.resetBuffer();
         
         // Merge parameters
@@ -203,6 +208,7 @@ public class Dispatcher implements RequestDispatcher
                     query=oldQ;
             }
             
+            
             // Adjust servlet paths
             servletHttpRequest.setServletHandler(_servletHandler);
             request.setPaths(_servletHandler.getHttpContext().getContextPath(),
@@ -211,7 +217,7 @@ public class Dispatcher implements RequestDispatcher
                              query);
             _servletHandler.dispatch(_pathInContext,request,response,_holder);
             
-            if (!_include)
+            if (!include)
                 response.close();
             else if (response.isFlushNeeded())
                 response.flushBuffer();
@@ -231,17 +237,31 @@ public class Dispatcher implements RequestDispatcher
     /* ------------------------------------------------------------ */
     class DispatcherRequest extends HttpServletRequestWrapper
     {
+        
+        boolean _include;
         String _contextPath;
         String _servletPath;
         String _pathInfo;
         String _query;
         MultiMap _parameters;
         HashMap _attributes;
+        boolean _xContext;
+        HttpSession _xSession;
+        
+        ServletHttpRequest _servletHttpRequest;
         
         /* ------------------------------------------------------------ */
-        DispatcherRequest(HttpServletRequest request)
+        DispatcherRequest(HttpServletRequest httpServletRequest,
+                          ServletHttpRequest servletHttpRequest,
+                          boolean include)
         {
-            super(request);
+            super(httpServletRequest);
+            _servletHttpRequest=servletHttpRequest;
+            _include=include;
+            
+            // Is this being dispatched to a different context?
+            _xContext=
+                servletHttpRequest.getServletHandler()!=_servletHandler;
         }
 
         /* ------------------------------------------------------------ */
@@ -433,20 +453,35 @@ public class Dispatcher implements RequestDispatcher
                 
             if (_include && !isNamed())
             {
-                if (name.equals(__PATH_INFO))    return _pathInfo;
-                if (name.equals(__REQUEST_URI))  return URI.addPaths(_contextPath,_uriInContext);
-                if (name.equals(__SERVLET_PATH)) return _servletPath;
-                if (name.equals(__CONTEXT_PATH)) return _contextPath;
-                if (name.equals(__QUERY_STRING)) return _query;
+                if (name.equals(__INCLUDE_PATH_INFO))    return _pathInfo;
+                if (name.equals(__INCLUDE_REQUEST_URI))  return URI.addPaths(_contextPath,_uriInContext);
+                if (name.equals(__INCLUDE_SERVLET_PATH)) return _servletPath;
+                if (name.equals(__INCLUDE_CONTEXT_PATH)) return _contextPath;
+                if (name.equals(__INCLUDE_QUERY_STRING)) return _query;
             }
             else
             {
-                if (name.equals(__PATH_INFO))    return null;
-                if (name.equals(__REQUEST_URI))  return null;
-                if (name.equals(__SERVLET_PATH)) return null;
-                if (name.equals(__CONTEXT_PATH)) return null;
-                if (name.equals(__QUERY_STRING)) return null;
+                if (name.equals(__INCLUDE_PATH_INFO))    return null;
+                if (name.equals(__INCLUDE_REQUEST_URI))  return null;
+                if (name.equals(__INCLUDE_SERVLET_PATH)) return null;
+                if (name.equals(__INCLUDE_CONTEXT_PATH)) return null;
+                if (name.equals(__INCLUDE_QUERY_STRING)) return null;
             }
+
+            if (!_include)
+            {
+                if (name.equals(__FORWARD_PATH_INFO))
+                    return _servletHttpRequest.getPathInfo();
+                if (name.equals(__FORWARD_REQUEST_URI))
+                    return _servletHttpRequest.getRequestURI();
+                if (name.equals(__FORWARD_SERVLET_PATH))
+                    return _servletHttpRequest.getServletPath();
+                if (name.equals(__FORWARD_CONTEXT_PATH))
+                    return _servletHttpRequest.getContextPath();
+                if (name.equals(__FORWARD_QUERY_STRING))
+                    return _servletHttpRequest.getQueryString();
+            }
+            
             
             return super.getAttribute(name);
         }
@@ -461,19 +496,28 @@ public class Dispatcher implements RequestDispatcher
             
             if (_include && !isNamed())
             {
-                set.add(__PATH_INFO);
-                set.add(__REQUEST_URI);
-                set.add(__SERVLET_PATH);
-                set.add(__CONTEXT_PATH);
-                set.add(__QUERY_STRING);
+                set.add(__INCLUDE_PATH_INFO);
+                set.add(__INCLUDE_REQUEST_URI);
+                set.add(__INCLUDE_SERVLET_PATH);
+                set.add(__INCLUDE_CONTEXT_PATH);
+                set.add(__INCLUDE_QUERY_STRING);
             }
             else
             {
-                set.remove(__PATH_INFO);
-                set.remove(__REQUEST_URI);
-                set.remove(__SERVLET_PATH);
-                set.remove(__CONTEXT_PATH);
-                set.remove(__QUERY_STRING);
+                set.remove(__INCLUDE_PATH_INFO);
+                set.remove(__INCLUDE_REQUEST_URI);
+                set.remove(__INCLUDE_SERVLET_PATH);
+                set.remove(__INCLUDE_CONTEXT_PATH);
+                set.remove(__INCLUDE_QUERY_STRING);
+            }
+
+            if (!_include)
+            {
+                set.add(__FORWARD_PATH_INFO);
+                set.add(__FORWARD_REQUEST_URI);
+                set.add(__FORWARD_SERVLET_PATH);
+                set.add(__FORWARD_CONTEXT_PATH);
+                set.add(__FORWARD_QUERY_STRING);
             }
             
             if (_attributes!=null)
@@ -511,14 +555,18 @@ public class Dispatcher implements RequestDispatcher
     /* ------------------------------------------------------------ */
     class DispatcherResponse extends HttpServletResponseWrapper
     {
+        DispatcherRequest _request;
         private ServletOutputStream _out=null;
         private PrintWriter _writer=null;
         private boolean _flushNeeded=false;
+        private boolean _include;
         
         /* ------------------------------------------------------------ */
-        DispatcherResponse(HttpServletResponse response)
+        DispatcherResponse(DispatcherRequest request, HttpServletResponse response)
         {
             super(response);
+            _request=request;
+            _include=_request._include;
         }
 
         /* ------------------------------------------------------------ */

@@ -30,6 +30,15 @@ public  class DemoFilter implements Filter
 	throws IOException, ServletException
     {
         Code.debug("doFilter:",request);
+        synchronized(this)
+        {
+            Integer called = (Integer)request.getAttribute("DemoFilter called");
+            if (called==null)
+                called=new Integer(1);
+            else
+                called=new Integer(called.intValue()+1);
+            request.setAttribute("DemoFilter called",called);
+        }
         chain.doFilter(request, response);
     }
 
