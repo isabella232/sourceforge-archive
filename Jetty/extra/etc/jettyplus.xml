@@ -57,11 +57,11 @@
                  <Set name="MaxSize">15</Set> 
                  <!-- Uncomment to setup other pool params as required          -->
                  <!--
-                 <Set name="SleepTime">10</Set>
-                 <Set name="LifeTime">10</Set>
-                 <Set name="DeadLockMaxWait">10</Set>
-                 <Set name="DeadLockRetryWait">10</Set>
-                 <Set name="LoginTimeout">10</Set>
+                 <Set name="SleepTime">10</Set>          -- millisec --
+                 <Set name="LifeTime">10</Set>           -- millisec --
+                 <Set name="DeadLockMaxWait">10</Set>    -- millisec --
+                 <Set name="DeadLockRetryWait">10</Set>  -- millisec --
+                 <Set name="LoginTimeout">10</Set>       -- sec      --
                  <Set name="Debug" type="boolean">true</Set>
                  -->
                </New>
