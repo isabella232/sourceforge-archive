@@ -122,7 +122,7 @@ public class ServletHolder
 
     /* ------------------------------------------------------------ */
     /**
-     * @deprecated Use getInitORder()
+     * @deprecated Use getInitOrder()
      */
     public boolean isInitOnStartup()
     {
