@@ -17,7 +17,7 @@ public class PropertyTreeTest
     {
 	Test test = new Test("PropertyTree");
 	PropertyTree props = new PropertyTree();
-	props.load(new FileInputStream("test.prp"));
+	props.load(new FileInputStream("PropertyTreeTest.prp"));
 	Code.debug(props);
 	System.out.println(props);
 	

@@ -80,6 +80,8 @@ public class PropertyTree extends Properties
 	Object retv = null;
 	if (values != null)
 	    retv = values.get(key);
+	if (retv == null && subNodes != null)
+	    retv = subNodes.get(key);
 	if (retv == null)
 	    retv = defaultValue;
 	return retv;
@@ -90,13 +92,25 @@ public class PropertyTree extends Properties
      */
     private Object valuePut(Object key, Object value){
 	if ("*".equals(key)) {
-	    Object retv = defaultValue;
-	    defaultValue = value;
-	    return retv;
+	    if (value instanceof PropertyTree){
+		Object retv = defaultValues;
+		defaultValues = (PropertyTree)value;
+		return retv;
+	    } else {
+		Object retv = defaultValue;
+		defaultValue = value;
+		return retv;
+	    }
 	}
-	if (values == null)
-	    values = new Hashtable();
-	return values.put(key, value);
+	if (value instanceof PropertyTree){
+	    if (subNodes == null)
+		subNodes = new Hashtable();
+	    return subNodes.put(key, value);
+	} else {
+	    if (values == null)
+		values = new Hashtable();
+	    return values.put(key, value);
+	}
     }
     /* ------------------------------------------------------------ */
     /* Lookup a value in the tree recursively
@@ -254,6 +268,36 @@ public class PropertyTree extends Properties
 	listValues("", writer, "\n");
 	writer.flush();
 	return sw.toString();
+    }
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return A Converter for converting Dictionaries into PropertyTrees
+     */
+    public static Converter getConverter(){
+	return new Converter(){
+	    public Object convert(Object toConvert, Class convertTo,
+				  Converter context) {
+		if (toConvert.getClass().equals(convertTo))
+		    // Already correct type!
+		    return toConvert;
+		// Make sure we have a dictionary
+		if (!(toConvert instanceof Dictionary))
+		    return null;
+		// Check if already OK
+		if (toConvert instanceof PropertyTree)
+		    return toConvert;
+		PropertyTree pt = new PropertyTree();
+		Dictionary dict = (Dictionary)toConvert;
+		Converter converter = context == null ? this : context;
+		for (Enumeration enum = dict.keys(); enum.hasMoreElements();){
+		    Object key = enum.nextElement();
+		    Object value = dict.get(key);
+		    Object converted =
+			converter.convert(value, getClass(), converter);
+		    pt.put(key, converted == null ? value : converted);
+		}
+	    }
+	}
     }
     /* ------------------------------------------------------------ */
 };
