@@ -41,8 +41,8 @@ public class SocketListener
     private String _scheme=HttpMessage.__SCHEME;
     private String _integralScheme=HttpMessage.__SSL_SCHEME;
     private String _confidentialScheme=HttpMessage.__SSL_SCHEME;
-    private int _integralPort =0;
-    private int _confidentialPort =0;
+    private int _integralPort=0;
+    private int _confidentialPort=0;
 
     /* ------------------------------------------------------------------- */
     public SocketListener()
