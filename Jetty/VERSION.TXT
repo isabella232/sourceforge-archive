@@ -15,6 +15,7 @@ Jetty-4.2.9
  + ProxyHandler has black and white host list.
  + Added requestlog to HttpContext.
  + Allow delegated creation of WebApplication derivations.
+ + Check Data contraints before Auth constraints
 
 Jetty-4.2.8_01 - 18 February 2004
  + Patched first release of 4.2.8 with correct version number

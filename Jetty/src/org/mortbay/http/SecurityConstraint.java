@@ -319,82 +319,15 @@ public class SecurityConstraint
                 response.sendError(HttpResponse.__403_Forbidden);
                 return -1;
             }
-                    
-            // Does it fail a role check?
-            if (sc.isAuthenticate())
-            {
-                if (realm==null)
-                {
-                    response.sendError(HttpResponse.__500_Internal_Server_Error,
-                                       "Realm Not Configured");
-                    return -1;
-                }
-        
-                UserPrincipal user = null;
-                
-                // Handle pre-authenticated request
-                if (request.getAuthType()!=null &&
-                    request.getAuthUser()!=null)
-                {
-                    user=request.getUserPrincipal();
-                    if (user==null)
-                        user=realm.authenticate(request.getAuthUser(),
-                                                null,
-                                                request);
-                    if (user==null && authenticator!=null)
-                        user=authenticator.authenticated(realm,
-                                                         pathInContext,
-                                                         request,
-                                                         response);
-                }
-                else if (authenticator!=null)
-                {
-                    // User authenticator.
-                    user=authenticator.authenticated(realm,
-                                                     pathInContext,
-                                                     request,
-                                                     response);
-                }
-                else
-                {
-                    // don't know how authenticate
-                    Code.warning("Mis-configured Authenticator for "+request.getPath());
-                    response.sendError(HttpResponse.__500_Internal_Server_Error);
-                }
-                
-                // If we still did not get a user
-                if (user==null)
-                    return -1; // Auth challenge or redirection already sent
-                else if (user==__NOBODY)
-                    return 0; // The Nobody user indicates authentication in transit.
-                    
-                
-                if (!sc.isAnyRole())
-                {
-                    List roles=sc.getRoles();
-                    boolean inRole=false;
-                    for (int r=roles.size();r-->0;)
-                    {
-                        if (user.isUserInRole(roles.get(r).toString()))
-                        {
-                            inRole=true;
-                            break;
-                        }
-                    }
-                    
-                    if (!inRole)
-                    {
-                        Code.warning("AUTH FAILURE: role for "+user.getName());
-                        if ("BASIC".equalsIgnoreCase(authenticator.getAuthMethod()))
-                            ((BasicAuthenticator)authenticator).sendChallenge(realm,response);
-                        else
-                            response.sendError(HttpResponse.__403_Forbidden,
-                                               "User not in required role");
-                        return -1; // role failed.
-                    }
-                }
-            }
-                
+            
+            // To avoid revealing a request parameter, in the case of browsing
+            // to a CONFIDENTIAL resource with http: which also requires FORM authentication
+            // (each of which separately trigger a redirect), we MUST check for
+            // confidentiality first, doing that redirect to confidentialPort/Scheme first
+            // if necessary.  THEN we check for authentication.  This will preserve the
+            // confidentialPort/Scheme when FORM authentication pops back to the resource
+            // URL.
+                            
             // Does it fail a data constraint
             if (sc.hasDataConstraint())
             {
@@ -434,6 +367,82 @@ public class SecurityConstraint
                       return -1;
                 }
             }
+            
+			// Does it fail a role check?
+			if (sc.isAuthenticate())
+			{
+				if (realm==null)
+				{
+					response.sendError(HttpResponse.__500_Internal_Server_Error,
+									   "Realm Not Configured");
+					return -1;
+				}
+        
+				UserPrincipal user = null;
+                
+				// Handle pre-authenticated request
+				if (request.getAuthType()!=null &&
+					request.getAuthUser()!=null)
+				{
+					user=request.getUserPrincipal();
+					if (user==null)
+						user=realm.authenticate(request.getAuthUser(),
+												null,
+												request);
+					if (user==null && authenticator!=null)
+						user=authenticator.authenticated(realm,
+														 pathInContext,
+														 request,
+														 response);
+				}
+				else if (authenticator!=null)
+				{
+					// User authenticator.
+					user=authenticator.authenticated(realm,
+													 pathInContext,
+													 request,
+													 response);
+				}
+				else
+				{
+					// don't know how authenticate
+					Code.warning("Mis-configured Authenticator for "+request.getPath());
+					response.sendError(HttpResponse.__500_Internal_Server_Error);
+				}
+                
+				// If we still did not get a user
+				if (user==null)
+					return -1; // Auth challenge or redirection already sent
+				else if (user==__NOBODY)
+					return 0; // The Nobody user indicates authentication in transit.
+                    
+                
+				if (!sc.isAnyRole())
+				{
+					List roles=sc.getRoles();
+					boolean inRole=false;
+					for (int r=roles.size();r-->0;)
+					{
+						if (user.isUserInRole(roles.get(r).toString()))
+						{
+							inRole=true;
+							break;
+						}
+					}
+                    
+					if (!inRole)
+					{
+						Code.warning("AUTH FAILURE: role for "+user.getName());
+						if ("BASIC".equalsIgnoreCase(authenticator.getAuthMethod()))
+							((BasicAuthenticator)authenticator).sendChallenge(realm,response);
+						else
+							response.sendError(HttpResponse.__403_Forbidden,
+											   "User not in required role");
+						return -1; // role failed.
+					}
+				}
+			}
+
             
             // Matches a constraint that does not fail
             // anything, so must be OK

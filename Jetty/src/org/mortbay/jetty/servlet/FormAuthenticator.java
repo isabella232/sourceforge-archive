@@ -22,6 +22,7 @@ import org.mortbay.util.URI;
 /** 
  * @version $Id$
  * @author Greg Wilkins (gregw)
+ * @author dan@greening.name
  */
 public class FormAuthenticator implements Authenticator
 {
@@ -104,6 +105,7 @@ public class FormAuthenticator implements Authenticator
             
             UserPrincipal user = realm.authenticate(username,password,httpRequest);
             String nuri=(String)session.getAttribute(__J_URI);
+            session.removeAttribute(__J_URI); // Remove popped return URI.
             if (user!=null && nuri!=null)
             {
                 Code.debug("Form authentication OK for ",username);
@@ -150,7 +152,9 @@ public class FormAuthenticator implements Authenticator
         // redirect to login page
         if (httpRequest.getQuery()!=null)
             uri+="?"+httpRequest.getQuery();
-        session.setAttribute(__J_URI, URI.addPaths(request.getContextPath(),uri));
+        session.setAttribute(__J_URI, 
+        	request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() 
+        	+ URI.addPaths(request.getContextPath(),uri));
         response.sendRedirect(response.encodeRedirectURL(URI.addPaths(request.getContextPath(),
                                            _formLoginPage)));
         return null;
