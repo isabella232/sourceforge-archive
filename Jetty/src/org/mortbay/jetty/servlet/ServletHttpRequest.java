@@ -711,21 +711,12 @@ public class ServletHttpRequest
         if (!url.startsWith("/"))
         {
             String relTo=URI.addPaths(_servletPath,_pathInfo);
-            
-            int slash=relTo.lastIndexOf('/');
-            relTo=relTo.substring(0,slash);
-            
-            while(url.startsWith("../"))
-            {
-                if (relTo.length()==0)
-                    return null;
-                url=url.substring(3);
-                slash=relTo.lastIndexOf('/');
-                relTo=relTo.substring(0,slash);
-            }
-
-            url=relTo+url;
-            
+            int slash=relTo.lastIndexOf("/");
+            if (slash>1)
+                relTo=relTo.substring(0,slash+1);
+            else
+                relTo="/";
+            url=URI.addPaths(relTo,url);
         }
     
         return _servletHandler.getServletContext().getRequestDispatcher(url);
