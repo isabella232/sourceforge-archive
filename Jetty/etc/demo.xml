@@ -136,8 +136,12 @@
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add and configure a NIO HTTP listener to port 8888              -->
-  <!-- This listener should be used to replace the standard HTTP       -->
+  <!-- This listener can be used to replace the standard HTTP          -->
   <!-- listener when deployed on LARGE systems using jdk 1.4           -->
+  <!-- While it does not improve straight line performance, it doe     -->
+  <!-- reduce the thread burden for systems that do not cope well with -->
+  <!-- thousands of threads.  It is still experimental, so please      -->
+  <!-- feedback any experiences you have with it.                      -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- UNCOMMENT TO ACTIVATE
   <Call name="addListener">
@@ -151,7 +155,6 @@
     </Arg>
   </Call>
   -->
-
 
 
 
