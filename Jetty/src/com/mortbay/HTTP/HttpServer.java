@@ -439,43 +439,50 @@ public class HttpServer implements LifeCycle
     
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @param contextPathSpec
-     * @param directory 
-     * @param defaultResource resource of default xml file or null.
+    /** Add Web Application.
+     * @param contextPathSpec The context path spec. Which must be of
+     * the form / or /path/*
+     * @param webApp The Web application directory or WAR file.
+     * @param defaults The defaults xml filename or URL which is
+     * loaded before any in the web app. Must respect the web.dtd.
+     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
+     * @return The WebApplicationContext
      * @exception IOException 
      */
     public WebApplicationContext addWebApplication(String contextPathSpec,
-                                                   String directory,
-                                                   String defaultResource)
+                                                   String webApp,
+                                                   String defaults)
         throws IOException
     {
         return addWebApplication(null,
                                  contextPathSpec,
-                                 directory,
-                                 defaultResource);
+                                 webApp,
+                                 defaults);
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @param host 
-     * @param contextPathSpec 
-     * @param directory 
-     * @param defaultResource resource of default xml file or null.
-     * @return 
+    /**  Add Web Application.
+     * @param host Virtual host name or null
+     * @param contextPathSpec The context path spec. Which must be of
+     * the form / or /path/*
+     * @param webApp The Web application directory or WAR file.
+     * @param defaults The defaults xml filename or URL which is
+     * loaded before any in the web app. Must respect the web.dtd.
+     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
+     * @return The WebApplicationContext
      * @exception IOException 
      */
     public WebApplicationContext addWebApplication(String host,
                                                    String contextPathSpec,
-                                                   String directory,
-                                                   String defaultResource)
+                                                   String webApp,
+                                                   String defaults)
         throws IOException
     {
         WebApplicationContext appContext =
             new WebApplicationContext(this,
                                       contextPathSpec,
-                                      directory,
-                                      defaultResource);
+                                      webApp,
+                                      defaults);
         addContext(host,appContext);
         Log.event("Web Application "+appContext+" added");
         return appContext;
@@ -784,15 +791,12 @@ public class HttpServer implements LifeCycle
 
             // Default is no virtual host
             String host=null;
-            HandlerContext context = server.getContext(host,"/");	    
-            
+            HandlerContext context = server.getContext(host,"/");
+            context.setClassPath("./servlets/");
+            context.setDynamicServletPathSpec("/servlet/*");
             context.setResourceBase("./docroot/");
             context.setServingResources(true);
             context.addHandler(new NotFoundHandler());
-
-            context=server.addContext(null,"/servlet/*");
-            context.setClassPath("./servlets/");
-            context.setServingDynamicServlets(true);
             
             // Parse arguments
             for (int i=0;i<args.length;i++)

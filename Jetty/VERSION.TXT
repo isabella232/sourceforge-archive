@@ -5,6 +5,8 @@ Jetty Versions
  + Avoid jprobe race warnings in DateCache 
  + Allow null cookie values 
  + Servlet exceptions cause 503 unavailable rather than 500 server error
+ + RequestDispatcher can dispatch static resources.
+ + Merged DynamicHandler into ServletHandler.
 
 Jetty-3.0.0.rc4 - 6 Nov 2000
  + Provide default JettyIndex.properties

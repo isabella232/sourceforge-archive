@@ -78,11 +78,11 @@ public class Demo
             
             // Configure handlers
             server.addWebApplication(null,"/jetty/*",
-                                     "./webapps/jetty.war",
-                                     "./etc/webdefault.xml");
+                                     "webapps/jetty.war",
+                                     "etc/webdefault.xml");
             
             context=server.getContext(null,"/demo/*");
-            context.setResourceBase("./docroot/");
+            context.setResourceBase("docroot/");
             context.addServlet("Dump",
                                "/dump/*,*.DUMP",
                                "com.mortbay.Servlet.Dump");
@@ -97,16 +97,12 @@ public class Demo
             context.setServingResources(true);
             context.addHandler(new DumpHandler());
             
-            context=server.addContext(null,"/servlet/*");
-            context.setClassPath("./servlets/");
-            context.setServingDynamicServlets(true);
-            
             context=server.addContext(null,"/javadoc/*");
-            context.setResourceBase("./javadoc/");
+            context.setResourceBase("javadoc/");
             context.setServingResources(true);
 
             context=server.addContext(null,"/cgi-bin/*");
-            context.setResourceBase("./cgi-bin/");
+            context.setResourceBase("cgi-bin/");
             context.addServlet("CGI","/","com.mortbay.Servlet.CGI")
                 .put("Path","/bin:/usr/bin:/usr/local/bin");
             
@@ -114,8 +110,9 @@ public class Demo
             context.setRealm("Jetty Demo Realm");
             context.addSecurityConstraint
                 ("/admin/*",
-                 new SecurityConstraint("admin",
-                                        "content-administrator"));
+                 new SecurityConstraint("admin","content-administrator"));
+            context.setClassPath("servlets/");
+            context.setDynamicServletPathSpec("/servlet/*");
             context.addServlet("Forward","/","com.mortbay.Servlet.Forward")
                 .put("/","/jetty/index.html");
             context.addServlet("Admin","/admin/*","com.mortbay.HTTP.AdminServlet");
@@ -124,7 +121,7 @@ public class Demo
             
             // Logger
             RolloverFileLogSink log = new RolloverFileLogSink();
-            log.setLogDir("./logs");
+            log.setLogDir("logs");
             log.setRetainDays(90);
             log.setMultiDay(false);
             log.setAppend(true);

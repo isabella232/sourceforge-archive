@@ -39,9 +39,13 @@ public class WebApplicationContext extends HandlerContext
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @param httpServer 
-     * @param webApp 
-     * @param defaults 
+     * @param httpServer The HttpServer for this context
+     * @param contextPathSpec The context path spec. Which must be of
+     * the form / or /path/*
+     * @param webApp The Web application directory or WAR file.
+     * @param defaults The defaults xml filename or URL which is
+     * loaded before any in the web app. Must respect the web.dtd.
+     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
      * @exception IOException 
      */
     WebApplicationContext(HttpServer httpServer,
@@ -122,7 +126,7 @@ public class WebApplicationContext extends HandlerContext
             rh.setPutAllowed(true);
             rh.setDelAllowed(true);
             
-            if (defaults!=null)
+            if (defaults!=null && defaults.length()>0)
             {
                 Resource dftResource= Resource.newResource(defaults);
                 XmlParser.Node defaultConfig =

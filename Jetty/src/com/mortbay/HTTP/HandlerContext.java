@@ -613,24 +613,6 @@ public class HandlerContext implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the context Dynamic Servlet Handler.
-     * Conveniance method. If no dynamicHandler exists, a new one is added to
-     * the context.
-     * @return DynamicHandler
-     */
-    public DynamicHandler getDynamicHandler()
-    {
-        DynamicHandler dynamicHandler= (DynamicHandler)
-            getHandler(com.mortbay.HTTP.Handler.Servlet.DynamicHandler.class);
-        if (dynamicHandler==null)
-        {
-            dynamicHandler=new DynamicHandler();
-            addHandler(dynamicHandler);
-        }
-        return dynamicHandler;
-    }
-    
-    /* ------------------------------------------------------------ */
     /** Get the context ResourceHandler.
      * Conveniance method. If no ResourceHandler exists, a new one is added to
      * the context.
@@ -674,19 +656,43 @@ public class HandlerContext implements LifeCycle
      * @param serve If true and there is no DynamicHandler instance in the
      * context, a dynamicHandler is added. If false, all DynamicHandler
      * instances are removed from the context.
+     * @deprecated Use setServingDynamicServlets(String)
      */
     public synchronized void setServingDynamicServlets(boolean serve)
     {
-        HttpHandler handler = (DynamicHandler)
-            getHandler(com.mortbay.HTTP.Handler.Servlet.DynamicHandler.class);
-        if (serve)
+        setDynamicServletPathSpec(serve?"/":null);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Setup context for serving dynamic servlets.
+     * Conveniance method.  A Dynamic servlet is one which is mapped from a
+     * URL containing the class name of the servlet - which is dynamcially
+     * loaded when the first request is received.
+     * @param pathSpecInContext The path within the context at which
+     * dynamic servlets are launched. eg /servlet/*
+     */
+    public synchronized void setDynamicServletPathSpec(String pathSpecInContext)
+    {
+        if (pathSpecInContext!=null && !pathSpecInContext.startsWith("/"))
+        {
+            Code.warning("Using deprecated setServingDynamicServlets.");
+            pathSpecInContext=null;  
+            char b=pathSpecInContext.charAt(0);
+            if (b=='1'||b=='t'||b=='T')
+                pathSpecInContext="/";
+        }
+        
+        ServletHandler handler = (ServletHandler)
+            getHandler(com.mortbay.HTTP.Handler.Servlet.ServletHandler.class);
+        if (pathSpecInContext!=null)
         {
             if (handler==null)
-                getDynamicHandler();
+                handler=getServletHandler();
+            handler.setDynamicServletPathSpec(pathSpecInContext);
         }
         else if (handler!=null)
             _handlers.remove(handler);
-    }
+    }    
 
     /* ------------------------------------------------------------ */
     /** Setup context for serving Resources as files.

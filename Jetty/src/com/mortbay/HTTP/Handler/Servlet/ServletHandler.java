@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.http.HttpSession;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
@@ -51,7 +52,11 @@ public class ServletHandler extends NullHandler
     private PathMap _servletMap=new PathMap();
     private Map _nameMap=new HashMap();
     private Context _context;
-    private ClassLoader _loader;
+    private ClassLoader _loader;    
+
+    private String _dynamicServletPathSpec;
+    private Set _dynamicPaths = new HashSet();
+    private Map _dynamicInitParams ;
 
     /* ----------------------------------------------------------------- */
     /** Construct basic auth handler.
@@ -77,6 +82,49 @@ public class ServletHandler extends NullHandler
     public boolean isAutoReload()
     {
         return false;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getDynamicServletPathSpec()
+    {
+        return _dynamicServletPathSpec;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the dynamic servlet path.
+     * If set, the ServletHandler will dynamically load servlet
+     * classes that have their class names as the path info after the
+     * set path sepcification.
+     * @param dynamicServletPathSpec The path within the context at which
+     * dynamic servlets are launched. eg /servlet/*
+     */
+    public void setDynamicServletPathSpec(String dynamicServletPathSpec)
+    {
+        if (dynamicServletPathSpec!=null &&
+            !dynamicServletPathSpec.equals("/") &&
+            !dynamicServletPathSpec.endsWith("/*"))
+            throw new IllegalArgumentException("dynamicServletPathSpec must end with /*");
+        
+        if ("/".equals(dynamicServletPathSpec))
+            dynamicServletPathSpec=null;
+            
+        _dynamicServletPathSpec=dynamicServletPathSpec;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Map getDynamicInitParams()
+    {
+        return _dynamicInitParams;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set dynamic servlet initial parameters.
+     * @param initParams Map passed as initParams to newly created
+     * dynamic servlets.
+     */
+    public void setDynamicInitParams(Map initParams)
+    {
+        _dynamicInitParams = initParams;
     }
     
     /* ------------------------------------------------------------ */
@@ -298,6 +346,70 @@ public class ServletHandler extends NullHandler
      */
     public Map.Entry getHolderEntry(String pathInContext)
     {
+        Map.Entry entry=null;
+    
+        // Do we have a static match already
+        if (_dynamicServletPathSpec==null)
+        {
+            entry =_servletMap.getMatch(pathInContext);
+            if (entry!=null)
+                return entry;
+        }
+        // else if we have not looked at this path before
+        else if (!_dynamicPaths.contains(pathInContext))
+        {
+            String path=pathInContext;
+        
+            _dynamicPaths.add(path);
+            
+            // OK lets look for a dynamic servlet.
+            Code.debug("looking for ", path," in ",
+                       getHandlerContext().getClassPath());
+
+            // remove prefix
+            String servletClass=PathMap.pathInfo(_dynamicServletPathSpec,path);
+            if (servletClass==null || servletClass.length()<2)
+                return null;
+            servletClass=servletClass.substring(1);
+            
+            // remove suffix
+            int slash=servletClass.indexOf("/");
+            if (slash>=0)
+                servletClass=servletClass.substring(0,slash);            
+            if (servletClass.endsWith(".class"))
+                servletClass=servletClass.substring(0,servletClass.length()-6);
+
+            // work out the actual servlet path
+            if ("/".equals(_dynamicServletPathSpec))
+                path="/"+servletClass;
+            else
+                path=PathMap.pathMatch(_dynamicServletPathSpec,path)+"/"+servletClass;
+            
+            Code.debug("Dynamic path=",path);
+
+            // make a holder
+            ServletHolder holder=null;
+            try{
+                holder=newServletHolder(servletClass);
+                Map params=getDynamicInitParams();
+                if (params!=null)
+                    holder.putAll(params);
+                holder.getServlet();
+            }
+            catch(Exception e)
+            {
+                Code.ignore(e);
+                return null;
+            }
+            
+            Log.event("Dynamic load '"+servletClass+"' at "+path);
+            addHolder(path,holder);
+            addHolder(path+".class",holder);
+            addHolder(path+"/*",holder);
+            addHolder(path+".class/*",holder);
+            
+        }
+        
         return _servletMap.getMatch(pathInContext);
     }
     
@@ -343,10 +455,6 @@ public class ServletHandler extends NullHandler
     }
         
     /* ------------------------------------------------------------ */
-    /** 
-     * @param servletName 
-     * @return 
-     */
     public ServletHolder newServletHolder(String servletClass)
         throws javax.servlet.UnavailableException,
                ClassNotFoundException

@@ -1,7 +1,5 @@
 <?xml version="1.0"  encoding="ISO-8859-1"?>
-<!DOCTYPE Configure PUBLIC
- "-//Mort Bay Consulting//DTD Configure 1.0//EN"
- "http://jetty.mortbay.com/configure_1_0.dtd">
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.0//EN" "http://jetty.mortbay.com/configure_1_0.dtd">
 
 <!--
 This is a Jetty HTTP server configuration file.  This configuration
@@ -91,7 +89,7 @@ $ID: $
 
   <Call name="addContext">
     <Arg>/demo/*</Arg>
-    <Set name="ResourceBase">./docroot/</Set>
+    <Set name="ResourceBase">docroot/</Set>
     <Call name="addServlet">
       <Arg>Dump</Arg>
       <Arg>/dump/*,*.DUMP</Arg>
@@ -120,20 +118,14 @@ $ID: $
   </Call>
 
   <Call name="addContext">
-    <Arg>/servlet/*</Arg>
-    <Set name="ClassPath">./servlets/</Set>
-    <Set name="ServingDynamicServlets">TRUE</Set>
-  </Call>
-
-  <Call name="addContext">
     <Arg>/javadoc/*</Arg>
-    <Set name="ResourceBase">./javadoc/</Set>
+    <Set name="ResourceBase">javadoc/</Set>
     <Set name="ServingResources">TRUE</Set>
   </Call>
 
   <Call name="addContext">
     <Arg>/cgi-bin/*</Arg>
-    <Set name="ResourceBase">./cgi-bin</Set>
+    <Set name="ResourceBase">cgi-bin</Set>
     <Call name="addServlet">
       <Arg>Common Gateway Interface</Arg>
       <Arg>/</Arg>
@@ -144,6 +136,8 @@ $ID: $
 
   <Call name="addContext">
     <Arg>/</Arg>
+    <Set name="ClassPath">servlets/</Set>
+    <Set name="DynamicServletPathSpec">/servlet/*</Set>
     <Call name="addServlet">
       <Arg>Forward</Arg>
       <Arg>/</Arg>
@@ -166,7 +160,7 @@ $ID: $
 
   <Set name="LogSink">
     <New class="com.mortbay.Util.RolloverFileLogSink">
-      <Set name="LogDir">./logs</Set>
+      <Set name="LogDir">logs</Set>
       <Set name="RetainDays">90</Set>
       <Set name="MultiDay">false</Set>
       <Set name="Append">true</Set>

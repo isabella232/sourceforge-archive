@@ -78,14 +78,10 @@ $ID: $
   </Call>
 
   <Call name="addContext">
-    <Arg>/servlet/*</Arg>
-    <Set name="ClassPath">./servlets/</Set>
-    <Set name="ServingDynamicServlets">TRUE</Set>
-  </Call>
-
-  <Call name="addContext">
     <Arg>/</Arg>
-    <Set name="ResourceBase">./docroot/</Set>
+    <Set name="ClassPath">servlets/</Set>
+    <Set name="DynamicServletPathSpec">/servlet/*</Set>
+    <Set name="ResourceBase">docroot/</Set>
     <Set name="ServingResources">TRUE</Set>
     <Call name="addServlet">
       <Arg>Dump</Arg>
