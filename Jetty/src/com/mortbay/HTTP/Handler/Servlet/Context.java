@@ -172,34 +172,20 @@ public class Context implements ServletContext, HttpSessionContext
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * Returns a {@link RequestDispatcher} object that acts
-     * as a wrapper for the named servlet.
-     *
-     * <p>Servlets (and JSP pages also) may be given names via server 
-     * administration or via a web application deployment descriptor.
-     * A servlet instance can determine its name using 
-     * {@link ServletConfig#getServletName}.
-     *
-     * <p>This method returns <code>null</code> if the 
-     * <code>ServletContext</code>
-     * cannot return a <code>RequestDispatcher</code> for any reason.
-     *
-     * @param name 	a <code>String</code> specifying the name
-     *			of a servlet to wrap
-     *
-     * @return 		a <code>RequestDispatcher</code> object
-     *			that acts as a wrapper for the named servlet
-     *
-     * @see 		RequestDispatcher
-     * @see 		ServletContext#getContext
-     * @see 		ServletConfig#getServletName
-     *
-     */
     public RequestDispatcher getNamedDispatcher(String name)
     {
-	Code.notImplemented();
-	return null;
+	if (name == null || name.length()==0)
+            return null;
+
+	try
+	{
+	    return new Dispatcher(this,name);
+	}
+	catch(Exception e)
+	{
+	    Code.ignore(e);
+	    return null;
+	}
     }
 
 

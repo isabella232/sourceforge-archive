@@ -27,6 +27,7 @@ public class Dispatcher implements RequestDispatcher
     Context _context;
     HandlerContext _handlerContext;
     List _holders=new ArrayList(8);
+    ServletHolder _holder=null;
     String _path;
     String _query;
     
@@ -63,6 +64,33 @@ public class Dispatcher implements RequestDispatcher
 
     
     /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param server 
+     * @param URL 
+     */
+    Dispatcher(Context context, String name)
+	throws IllegalStateException
+    {
+	_context = context;
+	_handlerContext = _context.getHandler().getHandlerContext();
+
+	for(int i=_handlerContext.getHandlerSize();i-->0;)
+	{
+	    if (_handlerContext.getHandler(i) instanceof ServletHandler)
+	    {
+		ServletHandler handler=(ServletHandler)
+		    _handlerContext.getHandler(i);
+		_holder=handler.getServletHolder(name);
+		break;
+	    }
+	}
+	
+	if (_holder==null)
+	    throw new IllegalStateException("No named servlet handler in context");
+    }
+
+    
+    /* ------------------------------------------------------------ */
     /** 
      * @param request 
      * @param response 
@@ -78,7 +106,24 @@ public class Dispatcher implements RequestDispatcher
 	    
 	if (servletRequest.getHttpRequest().isCommitted())
 	    throw new IllegalStateException("Request is committed");
+	servletResponse.reset();
 
+	// Remove any evidence of previous include
+	request.removeAttribute( "javax.servlet.include.request_uri");
+	request.removeAttribute( "javax.servlet.include.servlet_path");
+	request.removeAttribute( "javax.servlet.include.context_path");
+	request.removeAttribute( "javax.servlet.include.query_string");
+	request.removeAttribute( "javax.servlet.include.path_info");
+
+
+	// handle named servlet
+	if (_holder!=null)
+	{
+	    // just call it with existing request/response
+	    _holder.handle(servletRequest,servletResponse);
+	    return;
+	}
+	
 	// merge query string
 	if (_query!=null && _query.length()>0)
 	{
@@ -146,6 +191,22 @@ public class Dispatcher implements RequestDispatcher
 	servletResponse.setLocked(true);
 	int old_output_state = servletResponse.getOutputState();
 	servletResponse.setOutputState(0);
+
+	// handle named servlet
+	if (_holder!=null)
+	{
+	    // just call it with existing request/response
+	    try
+	    {
+		_holder.handle(servletRequest,servletResponse);
+		return;
+	    }
+	    finally
+	    {
+		servletResponse.setLocked(old_locked);
+		servletResponse.setOutputState(old_output_state);
+	    }
+	}
 	
 	// merge query string
 	MultiMap old_parameters=null;

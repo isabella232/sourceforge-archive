@@ -47,7 +47,7 @@ public class Demo
 	    context=server.getContext(null,"/handler/*");
 	    context.setResourceBase("./FileBase/");
 	    context.setServingResources(true);
-	    context.addServlet("/dump,/dump/*","com.mortbay.Servlet.Dump");
+	    context.addServlet("Dump","/dump,/dump/*","com.mortbay.Servlet.Dump");
 	    context.addServlet("/session","com.mortbay.Servlet.SessionDump");
 	    context.addServlet("/Dispatch,/Dispatch/*",
 			       "com.mortbay.Servlet.RequestDispatchTest");

@@ -49,6 +49,12 @@ public class ServletHandler extends NullHandler
     {
 	return _context;
     }
+
+    /* ------------------------------------------------------------ */
+    public PathMap getServletMap()
+    {
+	return _servletMap;
+    }
     
     /* ------------------------------------------------------------ */
     public boolean isAutoReload()
@@ -217,7 +223,6 @@ public class ServletHandler extends NullHandler
 	    throw new HttpException();
 	}
     }
-
 
     
     /* ------------------------------------------------------------ */
