@@ -102,8 +102,9 @@ public class BlockingQueue
     }
 
     /* ------------------------------------------------------------ */
-    /** 
-     * @return 
+    /** Get object from queue.
+     * Block if there are no objects to get.
+     * @return The next object in the queue.
      */
     public Object get()
 	throws InterruptedException
@@ -116,17 +117,19 @@ public class BlockingQueue
 	    Object o = elements[head];
 	    if(++head==maxSize)
 		head=0;
+	    if (size==maxSize)
+		notifyAll();
 	    size--;
-	    elements.notify();
 	    return o;
 	}
     }
     
 	
     /* ------------------------------------------------------------ */
-    /** 
-     * @param timeout 
-     * @return 
+    /** Get from queue.
+     * Block for timeout if there are no objects to get.
+     * @param timeout the time to wait for a job
+     * @return The next object in the queue, or null if timedout.
      */
     public Object get(long timeout)
 	throws InterruptedException
@@ -135,14 +138,17 @@ public class BlockingQueue
 	{
 	    if (size==0)
 		elements.wait(timeout);
+	    
 	    if (size==0)
 		return null;
 	    
 	    Object o = elements[head];
 	    if(++head==maxSize)
 		head=0;
+
+	    if (size==maxSize)
+		notifyAll();
 	    size--;
-	    elements.notify();
 	    
 	    return o;
 	}

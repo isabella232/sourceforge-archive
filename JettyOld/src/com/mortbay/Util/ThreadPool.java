@@ -141,9 +141,6 @@ public class ThreadPool
 	// Place job on job queue
 	jobs.put(job);
 
-	// Give the pool a chance to consume the job
-	Thread.yield();
-	
 	// If there are jobs in the queue and we are not at our
 	// maximum number of threads, create a new thread
 	if (jobs.size()>0 && (_maxThreads==0 || _nThreads<_maxThreads))
@@ -161,13 +158,13 @@ public class ThreadPool
 
     /* ------------------------------------------------------------ */
     /** Handle a job.
-     * This method must be specialized by a derived class if non
-     * Runnable jobs are given to the threads in the pool.
+     * Unless the job is an instance of Runnable, then
+     * this method must be specialized by a derived class.
      * @param job 
      */
     protected void handle(Object job)
     {
-	throw new Error("handle must be overridden");
+	((Runnable)job).run();
     }
     
     
@@ -201,10 +198,12 @@ public class ThreadPool
 		int runs=0;
 		while(true)
 		{
+		    // get the next job (may block)
 		    Object job =(_maxIdleTimeMs>0)
 			?jobs.get(_maxIdleTimeMs)
 			:jobs.get();
-		    
+
+		    // If not jobs available in timeout, this thread dies.
 		    if (job == null)
 		    {
 			if (_nThreads>_minThreads)
@@ -219,11 +218,8 @@ public class ThreadPool
 			    Code.debug("Thread: ",this," Handling ",job);
 		    }
 
-		    if (job instanceof Runnable)
-			((Runnable)job).run();
-		    else
-			ThreadPool.this.handle(job);
-		    Thread.yield();
+		    // Handle the job
+		    ThreadPool.this.handle(job);
 		}
 	    }
 	    catch(InterruptedException e)

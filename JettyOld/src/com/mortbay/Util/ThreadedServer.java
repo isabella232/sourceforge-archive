@@ -19,10 +19,6 @@ import java.lang.InterruptedException;
  * The class is abstract and derived classes must provide the handling
  * for the connections.
  * <P>
- * If the property THREADED_SERVER_LOW_PRIO is set, then the accept thread
- * runs at a lower priority, so that new connections are only accepted if
- * spare CPU is available.
- * <P>
  * The properties THREADED_SERVER_MIN_THREADS and THREADED_SERVER_MAX_THREADS
  * can be set to control the number of threads created.
  * <P>
@@ -36,10 +32,6 @@ abstract public class ThreadedServer
     extends ThreadPool
     implements Runnable 
 {    
-    /* ------------------------------------------------------------------- */
-    private static boolean __lowPrio =
-	(System.getProperty("THREADED_SERVER_LOW_PRIO")!=null);
-    
     /* ------------------------------------------------------------ */
     static int __maxThreads =
 	Integer.getInteger("THREADED_SERVER_MAX_THREADS",0).intValue();
@@ -53,7 +45,8 @@ abstract public class ThreadedServer
     private InetAddress address = null;
     private int port=0;
     ServerSocket listen = null;
-  
+    private int listenPriorityDelta=0;
+    
     /* ------------------------------------------------------------------- */
     /* Construct on any free port.
      */
@@ -292,11 +285,13 @@ abstract public class ThreadedServer
     final public void run( ) 
     {
 	Code.debug( "Listener running on " + listen );
-	if (__lowPrio)
+	if (listenPriorityDelta!=0)
 	{
-	    Code.debug( "Listening at lower priority");
-	    serverThread.setPriority(serverThread.getPriority()-1);
+	    Code.debug( "Listener priority delta = " + listenPriorityDelta );
+	    serverThread.setPriority(serverThread.getPriority()+
+				     listenPriorityDelta);
 	}
+	
 	if (getSize()>0)
 	{
 	    Code.debug( "Min Threads = " + getMinSize() );
