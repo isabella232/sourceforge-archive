@@ -325,7 +325,11 @@ public class HttpResponse extends HttpMessage
     {        
         Integer code_integer=TypeUtil.newInteger(code);
         if (message == null)
+        {
             message = (String)__statusMsg.get(code_integer);
+            if (message==null)
+                message=""+code;
+        }
         HttpRequest request=getHttpRequest();
         Class exClass=(Class)request.getAttribute("javax.servlet.error.exception_type");
              
