@@ -129,7 +129,7 @@ fi
 ##################################################
 # Jetty's hallmark
 ##################################################
-JETTY_JAR="lib/org.mortbay.jetty.jar"
+JETTY_INSTALL_TRACE_FILE="lib/org.mortbay.jmx.jar"
 
 
 ##################################################
@@ -139,7 +139,7 @@ if [ -z "$JETTY_HOME" ]
 then
   JETTY_HOME_1=`dirname "$0"`
   JETTY_HOME_1=`dirname "$JETTY_HOME_1"`
-  if [ -f "${JETTY_HOME_1}/${JETTY_JAR}" ] ; 
+  if [ -f "${JETTY_HOME_1}/${JETTY_INSTALL_TRACE_FILE}" ] ; 
   then 
      JETTY_HOME=${JETTY_HOME_1} 
   fi
@@ -173,7 +173,7 @@ if [ "$JETTY_HOME" = "" ] ; then
   do
      for N in $JETTY_DIR_NAMES 
      do
-         if [ -d "$L/$N" ] && [ -f "$L/${N}/${JETTY_JAR}" ] ; 
+         if [ -d "$L/$N" ] && [ -f "$L/${N}/${JETTY_INSTALL_TRACE_FILE}" ] ; 
          then 
             JETTY_HOME="$L/$N"
             echo "Defaulting JETTY_HOME to $JETTY_HOME"
@@ -190,13 +190,18 @@ fi
 if [ -z "$JETTY_HOME" ] ; then
     echo "** ERROR: JETTY_HOME not set, you need to set it or install in a standard location" 
     exit 1
-else
-    if [ ! -r $JETTY_HOME/$JETTY_JAR ] 
-    then
-       echo "** ERROR: Oops! $JETTY_HOME/$JETTY_JAR is not readable!" 
-       exit 1
-    fi
 fi
+
+#####################################################
+# Check that jetty is where we think it is
+#####################################################
+if [ ! -r $JETTY_HOME/$JETTY_INSTALL_TRACE_FILE ] 
+then
+   echo "** ERROR: Oops! Jetty doesn't appear to be installed in $JETTY_HOME"
+   echo "** ERROR:  $JETTY_HOME/$JETTY_INSTALL_TRACE_FILE is not readable!"
+   exit 1
+fi
+
 
 ###########################################################
 # Get the list of config.xml files from the command line.
@@ -411,6 +416,8 @@ then
     exit 1
 fi
 
+JAVA_VERSION=`expr "$($JAVA -version 2>&1 | head -1)" : '.*1\.\([0-9]\)'`
+
 #####################################################
 # See if JETTY_PORT is defined
 #####################################################
@@ -432,16 +439,14 @@ esac
 #####################################################
 # Build the classpath with Jetty's bundled libraries.
 #####################################################
-
-JAVA_VERSION=`expr "$(java -version 2>&1 | head -1)" : '.*1\.\([0-9]\)'`
-if [ $JAVA_VERSION -lt 4 ] 
+if [ $JAVA_VERSION -lt 4 ]
 then
    CP=$(ls $JETTY_HOME/ext/*.jar $JETTY_HOME/lib/*.jar | \
-      egrep -v org.mortbay.jetty-jdk1.4.jar | \
+      egrep -v org.mortbay.jetty.jar | \
       paste -s -d"$PATH_SEPARATOR" - )
 else
    CP=$(ls $JETTY_HOME/ext/*.jar $JETTY_HOME/lib/*.jar | \
-      egrep -v org.mortbay.jetty.jar\|crimson.jar\|javax.xml.jaxp.jar | \
+      egrep -v org.mortbay.jetty-jdk1.2.jar\|crimson.jar\|javax.xml.jaxp.jar | \
       paste -s -d"$PATH_SEPARATOR" - )
 fi
 [ "$CLASSPATH" != "" ] && CP=$CP$PATH_SEPARATOR$CLASSPATH
