@@ -34,7 +34,7 @@ all         - everything
   <property name="generated.src"  value="${basedir}/gensrc"/>
   <property name="mortbay.j2ee.jar" value="${lib}/org.mortbay.j2ee.jar"/>
   <property name="org.jboss.jetty.jar" value="${lib}/org.jboss.jetty.jar"/>
-  <property name="jboss.jetty.sar" value="${basedir}/jboss-${jboss.version}-jetty-${RELEASE.MAJOR.MINOR}.sar"/>
+  <property name="jboss.jetty.sar" value="${basedir}/jetty-${RELEASE.MAJOR.MINOR}-jboss-${jboss.version}.sar"/>
   <property name="jboss.jetty.deploy.dir" value="${jboss.home}/server/default/deploy/jboss-jetty.sar"/>
 
   <path id="jboss.classpath">

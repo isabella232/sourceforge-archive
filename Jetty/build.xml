@@ -510,12 +510,12 @@
           description="Build the distribution archives">
     <mkdir dir="${dist}"/>
 
-    <tar tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}.tar.gz" 
+    <tar tarfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}.tar.gz" 
          compression="gzip"
          longfile="gnu">
       <tarfileset 
        dir="${basedir}"
-       prefix="Jetty-${RELEASE.MAJOR.MINOR}/"> 
+       prefix="jetty-${RELEASE.MAJOR.MINOR}/"> 
         <include name="LICENSE.html"/>
         <include name="README.TXT"/>
         <include name="VERSION.TXT"/>
@@ -535,13 +535,13 @@
     </tar>
 
     <tar 
-     tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-extra.tar.gz" 
+     tarfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}-extra.tar.gz" 
      compression="gzip"
      longfile="gnu"
     >
       <tarfileset 
        dir="${basedir}"
-       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">   
+       prefix="jetty-${RELEASE.MAJOR.MINOR}/">   
         <include name="demo/**"/>   
         <include name="extra/**"/>     
         <include name="etc/**"/> 
@@ -554,13 +554,13 @@
     </tar>
 
     <tar 
-     tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-src.tar.gz" 
+     tarfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}-src.tar.gz" 
      compression="gzip"
      longfile="gnu"
     >
       <tarfileset 
        dir="${basedir}"
-       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
+       prefix="jetty-${RELEASE.MAJOR.MINOR}/">
         <include name="src/**"/>
         <include name="test/**"/> 
         <include name="extra/**/src/**"/>  
@@ -571,12 +571,12 @@
       </tarfileset>
     </tar>
 
-    <tar tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-all.tar.gz" 
+    <tar tarfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}-all.tar.gz" 
          compression="gzip"
          longfile="gnu">
       <tarfileset 
        dir="${basedir}"
-       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
+       prefix="jetty-${RELEASE.MAJOR.MINOR}/">
         <exclude name="dist/**"/>
         <exclude name="**/CVS/**"/>
         <exclude name="**/logs/*.log"/>
@@ -584,10 +584,10 @@
       </tarfileset>
     </tar>
 
-    <zip destfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-all.zip">
+    <zip destfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}-all.zip">
       <zipfileset 
        dir="${basedir}"
-       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
+       prefix="jetty-${RELEASE.MAJOR.MINOR}/">
         <exclude name="dist/**"/>
         <exclude name="**/CVS/**"/>
         <exclude name="**/logs/*.log"/>
