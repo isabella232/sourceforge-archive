@@ -135,7 +135,7 @@ public abstract class AbstractBuffer implements Buffer
 
     public void markOffset()
     {
-        _mark= _offset;
+        _mark= _offset -1;
     }
 
     public void markOffset(int offset)
@@ -145,7 +145,7 @@ public abstract class AbstractBuffer implements Buffer
 
     public Buffer marked()
     {
-        return marked(_offset - _mark);
+        return marked(_offset - _mark -1);
     }
 
     public Buffer marked(int length)

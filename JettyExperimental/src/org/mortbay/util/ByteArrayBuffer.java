@@ -1,8 +1,10 @@
 package org.mortbay.util;
 
-/**
+/* ------------------------------------------------------------------------------- */
+/** 
+ * 
+ * @version $Revision$
  * @author gregw
- *
  */
 public class ByteArrayBuffer extends AbstractBuffer
 {

@@ -3,13 +3,11 @@ package org.mortbay.http;
 import org.mortbay.util.Buffer;
 import org.mortbay.util.Portable;
 
-/**
+/* ------------------------------------------------------------------------------- */
+/** 
+ * 
+ * @version $Revision$
  * @author gregw
- *
- * To change this generated comment edit the template variable "typecomment":
- * Window>Preferences>Java>Templates.
- * To enable and disable the creation of type comments go to
- * Window>Preferences>Java>Code Generation.
  */
 public class HttpParser
 {
@@ -43,16 +41,19 @@ public class HttpParser
     public static final int EOF_CONTENT= -1;
     public static final int NO_CONTENT= 0;
 
-    /** Constructor. 
-     * @param handler 
+    /* ------------------------------------------------------------------------------- */
+    /** Constructor.
+     * 
      */
     private HttpParser()
     {
     }
 
-    /** 
-     * @param buf 
-     * @exception ParserException 
+    /* ------------------------------------------------------------------------------- */
+    /** parse.
+     * @param handler
+     * @param source
+     * @return
      */
     public static int parse(Handler handler, Buffer source)
     {
@@ -114,7 +115,7 @@ public class HttpParser
                 case STATE_START :
                     if (ch > SPACE)
                     {
-                        source.markOffset(-1);
+                        source.markOffset();
                         ctx.state= STATE_FIELD0;
                     }
                     break;
@@ -136,7 +137,7 @@ public class HttpParser
                 case STATE_SPACE1 :
                     if (ch > SPACE)
                     {
-                        source.markOffset(-1);
+                        source.markOffset();
                         ctx.state= STATE_FIELD1;
                     }
                     else if (ch < SPACE)
@@ -156,7 +157,7 @@ public class HttpParser
                 case STATE_SPACE2 :
                     if (ch > SPACE)
                     {
-                        source.markOffset(-1);
+                        source.markOffset();
                         ctx.state= STATE_FIELD2;
                     }
                     else if (ch < SPACE)
@@ -198,13 +199,13 @@ public class HttpParser
                     }
                     else if (ch == COLON || ch == SPACE || ch == TAB)
                     {
-                        ctx.trimLength= -1;
+                        ctx.length= -1;
                         ctx.state= STATE_HEADER_VALUE;
                     }
                     else
                     {
-                        ctx.trimLength= 1;
-                        source.markOffset(-1);
+                        ctx.length= 1;
+                        source.markOffset();
                         ctx.state= STATE_HEADER_NAME;
                     }
                     break;
@@ -212,43 +213,43 @@ public class HttpParser
                 case STATE_HEADER_NAME :
                     if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                     {
-                        if (ctx.trimLength > 0)
+                        if (ctx.length > 0)
                             handler.foundHttpHeader(
-                                source.marked(ctx.trimLength));
+                                source.marked(ctx.length));
                         ctx.eol= ch;
                         ctx.state= STATE_HEADER;
                     }
                     else if (ch == COLON)
                     {
-                        if (ctx.trimLength > 0)
+                        if (ctx.length > 0)
                             handler.foundHttpHeader(
-                                source.marked(ctx.trimLength));
-                        ctx.trimLength= -1;
+                                source.marked(ctx.length));
+                        ctx.length= -1;
                         ctx.state= STATE_HEADER_VALUE;
                     }
                     else if (ch != SPACE && ch != TAB)
                     {
-                        if (ctx.trimLength == -1)
-                            source.markOffset(-1);
-                        ctx.trimLength= source.offset() - source.mark();
+                        if (ctx.length == -1)
+                            source.markOffset();
+                        ctx.length= source.offset() - source.mark();
                     }
                     break;
 
                 case STATE_HEADER_VALUE :
                     if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                     {
-                        if (ctx.trimLength > 0)
+                        if (ctx.length > 0)
                             handler.foundHttpValue(
-                                source.marked(ctx.trimLength));
+                                source.marked(ctx.length));
 
                         ctx.eol= ch;
                         ctx.state= STATE_HEADER;
                     }
                     else if (ch != SPACE && ch != TAB)
                     {
-                        if (ctx.trimLength == -1)
-                            source.markOffset(-1);
-                        ctx.trimLength= source.offset() - source.mark();
+                        if (ctx.length == -1)
+                            source.markOffset();
+                        ctx.length= source.offset() - source.mark();
                     }
                     break;
             }
@@ -367,11 +368,14 @@ public class HttpParser
         }
     }
 
+    /**
+     * @author gregw
+     */
     protected static class Context
     {
         public int state= STATE_START;
         public byte eol;
-        public int trimLength;
+        public int length;
         public int contentLength;
         public int contentOffset;
         public int chunkLength;
@@ -379,11 +383,13 @@ public class HttpParser
 
         private String toString(Buffer buf)
         {
-           // TODO  better string.
-            return "CTX";  
+        	return "state="+state+" length="+length;
         }
     }
 
+    /**
+     * @author gregw
+     */
     public interface Handler
     {
         /**
