@@ -293,6 +293,9 @@ public class HandlerContext implements LifeCycle
      */
     public void setClassPaths(Resource lib, boolean append)
     {
+        if (isStarted())
+            Code.warning("classpaths set while started");
+        
         if (lib.exists() && lib.isDirectory())
         {
             StringBuffer classPath=new StringBuffer();
@@ -318,8 +321,8 @@ public class HandlerContext implements LifeCycle
             if (classPath.length()>0)
             {
                 if (append && this.getClassPath()!=null)
-                       classPath.append(",").append(this.getClassPath());
-                this.setClassPath(classPath.toString());
+                       classPath.append(",").append(_classPath);
+                _classPath=classPath.toString();
             }
         }
     }
