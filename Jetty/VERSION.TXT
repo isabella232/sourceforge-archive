@@ -10,6 +10,7 @@ Jetty Versions
  + Handle chunked form data.
  + Allow empty host header.
  + Avoid optional 100 continues.
+ + Limit form content size.
 
 Jetty-4.2.3 - 2 December 2002
  + Removed aggressive threadpool shrinkage to avoid deadlock on SMP machines. 
