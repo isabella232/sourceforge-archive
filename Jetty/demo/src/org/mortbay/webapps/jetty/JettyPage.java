@@ -26,6 +26,7 @@ public class JettyPage extends Page
 {
     private static  Section[][] __section;
     private static final PathMap __pathMap = new PathMap();
+    private static final PathMap __linkMap = new PathMap();
 
     private static boolean __realSite;
     static
@@ -72,7 +73,18 @@ public class JettyPage extends Page
                         Code.debug(key," = ",section);
                         minor.add(section);
                         if (section._pathSpec!=null)
+                        {
                             __pathMap.put(section._pathSpec,section);
+
+                            try{
+                                String links=index.getString(section._pathSpec);
+                                if (links!=null)
+                                    __linkMap.put(section._pathSpec,new Links(links)); }
+                            catch(MissingResourceException e)
+                            {
+                                Code.ignore(e);
+                            }
+                        }
                         
                         j++;
                         key=i+"."+j;
@@ -140,6 +152,32 @@ public class JettyPage extends Page
              context+"/jetty.css\">");
 
         addHeader("<link REL=\"icon\" HREF=\""+context+"/images/jicon.png\" TYPE=\"image/png\">");
+        
+        Links links = (Links)__linkMap.match(_path);
+        if (links!=null)
+        {
+                addHeader("<link REL=\"top\" HREF=\""+context+links._top+"\" >");
+            if (links._up!=null)
+                addHeader("<link REL=\"up\" HREF=\""+context+links._up+"\" >");
+            if (links._links!=null)
+            {
+                addHeader("<link REL=\"first\" HREF=\""+context+links._links[0]+"\" >");
+                addHeader("<link REL=\"last\" HREF=\""+context+links._links[links._links.length-1]+"\" >");
+                for (int i=0;i<links._links.length;i++)
+                {
+                    if (path.equals(links._links[i]))
+                    {
+                        if (i>0)
+                            addHeader("<link REL=\"prev\" HREF=\""+context+links._links[i-1]+"\" >");
+                        if (i+1<links._links.length)
+                            addHeader("<link REL=\"next\" HREF=\""+context+links._links[i+1]+"\" >");
+                            
+                    }
+                }
+            }
+        }
+        
+        
 
         attribute("text","#000000");
         attribute(BGCOLOR,"#FFFFFF");
@@ -258,6 +296,8 @@ public class JettyPage extends Page
     }
 
     /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     public static class Section
     {
         String _uri;
@@ -310,6 +350,46 @@ public class JettyPage extends Page
         {
             return _key+", "+_uri+", "+(_pathSpec==null?"":_pathSpec);
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private static class Links
+    {
+        String _top;
+        String _up;
+        String[] _links;
+        
+        Links(String l)
+        {
+            StringTokenizer tok=new StringTokenizer(l,", ");
+            if (tok.hasMoreTokens())
+                _top=tok.nextToken();
+            if (tok.hasMoreTokens())
+                _up=tok.nextToken();
+            _links=new String[tok.countTokens()];
+            int i=0;
+            while (tok.hasMoreTokens())
+                _links[i++]=tok.nextToken();
+        }
+
+        public String toString()
+        {
+            StringBuffer buf = new StringBuffer();
+            buf.append("Links[up=");
+            buf.append(_up);
+            buf.append(",links=(");
+            for (int i=0;i<_links.length;i++)
+            {
+                if (i>0)
+                    buf.append(',');
+                buf.append(_links[i]);
+            }
+            buf.append(")]");
+            return buf.toString();
+        }
+        
     }
 }
 

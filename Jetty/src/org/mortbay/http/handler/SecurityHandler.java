@@ -192,7 +192,7 @@ public class SecurityHandler extends NullHandler
                 while(j.hasNext())
                 {
                     SecurityConstraint sc = (SecurityConstraint)j.next();
-                    if (sc.isAuthenticated())
+                    if (sc.isAuthenticate())
                     {
                         Code.warning("No Realm set for "+this);
                         super.start();
@@ -275,19 +275,25 @@ public class SecurityHandler extends NullHandler
                         continue;
                     
                     // Does this forbid everything?
-                    if (!sc.isAuthenticated() &&!sc.hasDataConstraint())
+                    if (sc.isForbidden())
                     {
                         response.sendError(HttpResponse.__403_Forbidden);
                         return;
                     }
                     
                     // Does it fail a role check?
-                    if (sc.isAuthenticated() &&
-                        !sc.hasRole(SecurityConstraint.NONE) &&
-                        !authenticatedInRole(pathInContext,pathParams,request,response,sc.roles()))
-                        // return as an auth challenge will have been set
-                        return;
-                    
+                    if (sc.isAuthenticate())
+                    {
+                        UserPrincipal user =
+                            authenticate(pathInContext,pathParams,request,response);
+                        if (user==null)
+                            return; // Auth challenge or redirection already sent
+
+                        if (!sc.isAnyRole() &&
+                            !userInRole(user,sc.getRoles(),request,response))
+                            return; // role failed.
+                    }
+                
                     // Does it fail a data constraint
                     if (sc.hasDataConstraint() &&
                         sc.getDataConstraint() > SecurityConstraint.DC_NONE &&
@@ -314,14 +320,10 @@ public class SecurityHandler extends NullHandler
     }
 
     /* ------------------------------------------------------------ */
-    /** 
-     * @return True if request is authenticated in the role.
-     */
-    private boolean authenticatedInRole(String pathInContext,
-                                        String pathParams,
-                                        HttpRequest request,
-                                        HttpResponse response,
-                                        Iterator roles)
+    private UserPrincipal authenticate(String pathInContext,
+                                       String pathParams,
+                                       HttpRequest request,
+                                       HttpResponse response)
         throws IOException
     {
         boolean userAuth=false;
@@ -331,12 +333,10 @@ public class SecurityHandler extends NullHandler
         else if (__FORM_AUTH.equals(_authMethod))
         {
             if (_formAuthenticator==null)
-            {
                 response.sendError(HttpResponse.__500_Internal_Server_Error);
-                return false;
-            }
-            userAuth= _formAuthenticator
-                .formAuthenticated(this,pathInContext,pathParams,request,response);
+            else
+                userAuth= _formAuthenticator
+                    .formAuthenticated(this,pathInContext,pathParams,request,response);
         }
         else
         {
@@ -346,25 +346,37 @@ public class SecurityHandler extends NullHandler
         }
         
         if (!userAuth)
-            return false;
+            return null;
+        return (UserPrincipal) request.getUserPrincipal();
+    }
+    
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if request is authenticated in the role.
+     */
+    private boolean userInRole(UserPrincipal user,
+                               List roles,
+                               HttpRequest request,
+                               HttpResponse response)
+        throws IOException
+    {
         // Check if user is in a role that is suitable
         boolean inRole=false;
-        Principal principal=request.getUserPrincipal();
-        if (principal!=null && principal instanceof UserPrincipal)
+
+        if (roles!=null)
         {
-            UserPrincipal userPrincipal= (UserPrincipal)principal;
-            while(roles.hasNext())
+            for (int r=roles.size();r-->0;)
             {
-                String role=roles.next().toString();            
-                if (userPrincipal.isUserInRole(role))
+                String role=roles.get(r).toString();            
+                if (user.isUserInRole(role))
                 {
                     inRole=true;
                     break;
                 }
             }
         }
-
+        
         // If no role reject authentication.
         if (!inRole)
         {
@@ -374,14 +386,14 @@ public class SecurityHandler extends NullHandler
             {
                 response.setField(HttpFields.__WwwAuthenticate,
                                   "basic realm=\""+_realmName+'"');
-                response.sendError(HttpResponse.__401_Unauthorized);
+                response.sendError(HttpResponse.__401_Unauthorized,"User not in role");
             }
             else
-                response.sendError(HttpResponse.__403_Forbidden);
+                response.sendError(HttpResponse.__403_Forbidden,"User not in role");
             return false;
         }
         
-        return userAuth && inRole;
+        return inRole;
     }
     
 

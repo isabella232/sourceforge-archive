@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Implemented 2.3 security constraint semantics
+ + Added index links to tutorial
  + Renamed getHttpServers and added setAnonymous
  + Updated crimson to 1.1.3
  + Added hack for compat tests in watchdog for old tomcat stuff 

@@ -270,13 +270,25 @@ public class ContextLoader extends URLClassLoader
     {
         return (name.startsWith("java.") ||
                 name.startsWith("javax.servlet.") ||
+                name.startsWith("javax.xml.") ||
                 name.startsWith("org.mortbay.") ||
+                name.startsWith("org.xml.") ||
+                name.startsWith("org.w3c.") ||
+
                 name.startsWith("java/") ||
                 name.startsWith("javax/servlet/") ||
+                name.startsWith("javax/xml/") ||
                 name.startsWith("org/mortbay/") ||
+                name.startsWith("org/xml/") ||
+                name.startsWith("org/w3c/") ||
+                
                 name.startsWith("/java/") ||
                 name.startsWith("/javax/servlet/") ||
-                name.startsWith("/org/mortbay/"));
+                name.startsWith("/javax/xml/") ||
+                name.startsWith("/org/mortbay/") ||
+                name.startsWith("/org/xml/") ||
+                name.startsWith("/org/w3c/")
+                );
     }
 }
 

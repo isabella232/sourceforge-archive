@@ -227,6 +227,14 @@ public class LazyList extends AbstractList
             
         return list._list.get(i);
     }
+
+    /* ------------------------------------------------------------ */
+    public static LazyList clone(LazyList list)
+    {
+        if (list==null)
+            return null;
+        return (LazyList) list.clone();
+    }
     
     /* ------------------------------------------------------------ */
     public Object get(int i)

@@ -194,7 +194,9 @@ public class WebApplicationContext extends ServletHttpContext
         {
             // Set dir or WAR
             _webApp = Resource.newResource(_war);
-            if (_webApp.exists() && !_webApp.isDirectory())
+            if (_webApp.exists() &&
+                !_webApp.isDirectory() &&
+                !_webApp.toString().startsWith("jar:"))
             {
                 _webApp = Resource.newResource("jar:"+_webApp+"!/");
                 if (_webApp.exists())
@@ -1024,13 +1026,18 @@ public class WebApplicationContext extends ServletHttpContext
         XmlParser.Node auths=node.get("auth-constraint");
         if (auths!=null)
         {
+            scBase.setAuthenticate(true);
+            // auth-constraint
             Iterator iter= auths.iterator("role-name");
             while(iter.hasNext())
             {
-                XmlParser.Node role=(XmlParser.Node)iter.next();
-                scBase.addRole(role.toString(false,true));
+                String role=((XmlParser.Node)iter.next()).toString(false,true);
+                scBase.addRole(role);
+                if (SecurityConstraint.ANY_ROLE.equals(role))
+                    break; // * overrides all roles.
             }
         }
+        
         
         XmlParser.Node data=node.get("user-data-constraint");
         if (data!=null)

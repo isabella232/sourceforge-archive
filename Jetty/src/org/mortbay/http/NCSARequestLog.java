@@ -68,6 +68,14 @@ public class NCSARequestLog implements RequestLog
     }
 
     /* ------------------------------------------------------------ */
+    public String getDatedFilename()
+    {
+        if (_fileOut==null)
+            return null;
+        return _fileOut.getDatedFilename();
+    }
+    
+    /* ------------------------------------------------------------ */
     public void setLogDateFormat(String format)
     {
         TimeZone tz=_logDateCache.getTimeZone();
@@ -164,6 +172,9 @@ public class NCSARequestLog implements RequestLog
         try{
             synchronized(_buf.getLock())
             {
+                if (_fileOut==null)
+                    return;
+        
                 _out.print(request.getRemoteAddr());
                 _out.print(" - ");
                 String user = (String)request.getAttribute(HttpRequest.__AuthUser);

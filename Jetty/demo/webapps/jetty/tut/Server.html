@@ -420,104 +420,143 @@ An explanation of the Jetty XML syntax can be found in the section on
 <br>
 <br>
 <big><b><a name="security"></a>Web Application Security </b></big><br>
-                                            <br>
-             Jetty has made a few interpretations of the security mechanism 
- "described"     in the servlet specifiction.  The default security model 
-is that all access     is allowed unless a  particular security constraint 
-prevents access. This     is vulnerable to alias attacks where alternate case
-or names can be used    to access a resource.                           
-                                                                        
-                                                                        
-                                                                        
-                                                              
-                                                                        <p>
-   Jetty makes the following interpretations:</p>
-                                                                        
-                                                                        
-                                                                        
-                                                                        
-                       
-                                                                        <ul>
-            <li>Methods <tt>PUT</tt>, <tt>DELETE</tt> and <tt>GET</tt> are
- disabled  unless code (or a <tt>web-jetty.xml</tt> file) explicitly enables
- them  </li>
-            <li>If multiple security constraints are defined, the most specific 
-   applies   to a     request  </li>
-            <li>A security constraint with no data or auth constraint prevents
-   all    access  </li>
-            <li>A security constraint with only a transport guarantee of
-                                                                            <tt>
-    NONE </tt>grants    access  </li>
-            <li>On platforms without the <tt>/</tt> file separator or when
- the  system parameter          <tt>org.mortbay.util.FileResource.checkAliases</tt>
-     is <tt>TRUE,</tt> then the <tt>FileResouce</tt>     class      compares
-  the <tt>absolutePath</tt> and <tt>canonicalPath</tt> and treats the resource 
-     as not found     if they do not match </li>
-                                                                        
-                                                                        
-                                                                        
-                                                                        
-                       
-                                                                        </ul>
-                                            <br>
-    It is <b>strongly recommended</b> that secure Web Applications take following
-      approach in <tt>web.xml</tt> files:<br>
-                                            <br>
-                                                                        
-                                                                        
-                                                                        
-                                    
-<ul>
-<li>&nbsp;All access should be  denied by default with </li>
-                                                                        
-</ul>
-                                                                        
-<blockquote>
-<blockquote><tt>
-     &lt;security-constraint&gt;    <br>
-    &nbsp; &lt;display-name&gt;Default contraint denies all&lt;/display-name&gt;<br>
-    &nbsp; &lt;web-resource-collection&gt;<br>
-    &nbsp; &nbsp; &lt;url-pattern&gt;/&lt;/url-pattern&gt;<br>
-    &nbsp; &lt;/web-resource-collection&gt;<br>
-      &lt;/security-constraint&gt;</tt><br>
-                                                <br>
-</blockquote>
-</blockquote>
-                                                                        
-                                                                        
-                                                                        
-                                                    
-<ul>
-<li>Specific accesses should be granted with constraints, such as:             </li>
-</ul>
-                                                                        
-                                                    
-<blockquote>
-<blockquote><tt>
-     &lt;security-constraint&gt;</tt><br>
-                                                    <tt>&nbsp; &lt;display-name&gt;Relax
-  contstraint for specific requests&lt;/display-name&gt;</tt><br>
-                                                    <tt>&nbsp; &lt;web-resource-collection&gt;</tt><br>
-                                                    <tt>&nbsp; &nbsp; &lt;url-pattern&gt;/public/*&lt;/url-pattern&gt;</tt><br>
-                                                    <tt>&nbsp; &nbsp; &lt;url-pattern&gt;/images/*&lt;/url-pattern&gt;</tt><br>
-                                                    <tt>&nbsp; &nbsp; &lt;http-method&gt;GET&lt;/http-method&gt;</tt><br>
-                                                    <tt>&nbsp; &nbsp; &lt;http-method&gt;HEAD&lt;/http-method&gt;</tt><br>
-                                                    <tt>&nbsp; &lt;/web-resource-collection&gt;</tt><br>
-                                                    <tt>&nbsp; &lt;web-resource-collection&gt;</tt><br>
-                                                    <tt>&nbsp; &nbsp; &lt;url-pattern&gt;/servlet/*&lt;/url-pattern&gt;</tt><br>
-                                                    <tt>&nbsp; &nbsp; &lt;http-method&gt;GET&lt;/http-method&gt;</tt><br>
-                                                    <tt>&nbsp; &nbsp; &lt;http-method&gt;HEAD&lt;/http-method&gt;</tt><br>
-                                                    <tt>&nbsp; &nbsp; &lt;http-method&gt;POST&lt;/http-method&gt;</tt><br>
-                                                    <tt>&nbsp; &lt;/web-resource-collection&gt;</tt><br>
-                                                    <tt>&nbsp; &lt;user-data-constraint&gt;</tt><br>
-                                                    <tt>&nbsp; &nbsp; &lt;transport-guarantee&gt;NONE&lt;/transport-guarantee&gt;</tt><br>
-                                                    <tt>&nbsp; &lt;/user-data-constraint&gt;</tt><br>
-                                                    <tt>  &lt;/security-constraint&gt;</tt><br>
-                                                    </blockquote>
-                                                    </blockquote>
-          <br>
-           <br>
-           &nbsp;                                                       
+                                            <br>     
+Jetty makes the following interpretations for the configuration of security
+constraints within a web.xml file:
+<UL>
+ <LI> Methods PUT, DELETE and GET are disabled unless explicitly enabled.
+
+ <LI> If multiple security-constraints are defined, the most specific applies to a
+   request.
+
+ <LI> A security-constraint an empty auth-constraint forbids all access by any
+   user:
+
+ <blockquote>
+ <TT><PRE>
+    &lt;security-constraint&gt;
+      &lt;web-resource-collection&gt;
+       &lt;web-resource-name&gt;Forbidden&lt;/web-resource-name&gt;
+        &lt;url-pattern&gt;/auth/noaccess/*&lt;/url-pattern&gt;
+      &lt;/web-resource-collection&gt;
+      &lt;auth-constraint/&gt;
+    &lt;/security-constraint&gt;
+ </PRE></TT>
+ </blockquote>
+
+ <LI> A security constraint with an auth constraint with a role of "*" gives access
+   to all authenticated users:
+
+ <blockquote>
+ <TT><PRE>
+    &lt;security-constraint&gt;
+      &lt;web-resource-collection&gt;
+        &lt;web-resource-name&gt;Any User&lt;/web-resource-name&gt;
+        &lt;url-pattern&gt;/auth/*&lt;/url-pattern&gt;
+      &lt;/web-resource-collection&gt;
+      &lt;auth-constraint&gt;
+        &lt;role-name&gt;*&lt;/role-name&gt;
+      &lt;/auth-constraint&gt;
+    &lt;/security-constraint&gt;
+ </PRE></TT>
+ </blockquote>
+
+ <LI>A security-constraint with no auth-constraint and no data contrain gives access
+   to any request:
+
+ <blockquote>
+ <TT><PRE>
+    &lt;security-constraint&gt;
+      &lt;web-resource-collection&gt;
+        &lt;web-resource-name&gt;Relax&lt;/web-resource-name&gt;
+        &lt;url-pattern&gt;/auth/relax/*&lt;/url-pattern&gt;
+      &lt;/web-resource-collection&gt;
+    &lt;/security-constraint&gt;
+ </PRE></TT>
+ </blockquote>
+
+
+ <LI> On platforms without the / file separator or when the system parameter
+   org.mortbay.util.FileResource.checkAliases is true, then the FileResouce class
+   compares the absolutePath and canonicalPath and treats the resource as not found
+   if they do not match.  THIS means that win32 platforms need to exactly match
+   the case of drive letters and filenames.
+
+ <LI> Dynamic servlets by default, can only be loaded from the context classpath.
+   Use ServletHandler.setServeDynamicSystemServlets to control this behaivour.
+</UL>
+
+<BR><big><b>Security Recommendation</b></big><br>
+                                            <br>     
+It is strongly recommended that secure WebApplications take following
+approach.  All access should be denied by default with
+
+ <blockquote>
+ <TT><PRE>
+    &lt;security-constraint&gt;
+      &lt;web-resource-collection&gt;
+       &lt;web-resource-name&gt;Default&lt;/web-resource-name&gt;
+        &lt;url-pattern&gt;/&lt;/url-pattern&gt;
+      &lt;/web-resource-collection&gt;
+      &lt;auth-constraint/&gt;
+    &lt;/security-constraint&gt;
+ </PRE></TT>
+ </blockquote>
+
+
+Specific access should then be granted with constraints like:
+
+ <blockquote>
+ <TT><PRE>
+  &lt;security-constraint&gt;
+    &lt;web-resource-collection&gt;
+      &lt;url-pattern&gt;/public/*&lt;/url-pattern&gt;
+      &lt;url-pattern&gt;/images/*&lt;/url-pattern&gt;
+      &lt;http-method&gt;GET&lt;/http-method&gt;
+      &lt;http-method&gt;HEAD&lt;/http-method&gt;
+    &lt;/web-resource-collection&gt;
+    &lt;web-resource-collection&gt;
+      &lt;url-pattern&gt;/servlet/*&lt;/url-pattern&gt;
+      &lt;http-method&gt;GET&lt;/http-method&gt;
+      &lt;http-method&gt;HEAD&lt;/http-method&gt;
+      &lt;http-method&gt;POST&lt;/http-method&gt;
+    &lt;/web-resource-collection&gt;
+    &lt;auth-constraint&gt;
+      &lt;role-name&gt;*&lt;/role-name&gt;
+    &lt;/auth-constraint&gt;
+  &lt;/security-constraint&gt;
+ </PRE></TT>
+ </blockquote>
+
+<BR><big><b>Session Security</b></big><br>
+                                            <br> 
+Jetty uses the standard java.util.Random class to generate session IDs.  This
+may be insufficient for high security sites.  The SessionManager instance can
+be initialized with a more secure random number generator, such as java.security.SecureRandom
+The Jetty configuration XML to do this to a webapplication is:
+
+ <blockquote>
+ <TT><PRE>
+  &lt;Call name="addWebApplication"&gt;
+    &lt;Arg&gt;/myapp/*&lt;/Arg&gt;
+    &lt;Arg&gt;&lt;SystemProperty name="jetty.home" default="."/&gt;/demo/webapps/myapp&lt;/Arg&gt;
+    &lt;Arg&gt;&lt;SystemProperty name="jetty.home" default="."/&gt;/etc/webdefault.xml&lt;/Arg&gt;
+    &lt;Arg type="boolean"&gt;false&lt;/Arg&gt; 
+    &lt;Call name="getServletHandler"&gt;
+      &lt;Set name="sessionManager"&gt;
+        &lt;New class="org.mortbay.jetty.servlet.HashSessionManager"&gt;
+          &lt;Arg&gt;&lt;New class="java.security.SecureRandom"/&gt;&lt;/Arg&gt;
+        &lt;/New&gt;
+      &lt;/Set&gt;
+    &lt;/Call&gt;
+  &lt;/Call&gt;
+ </PRE></TT>
+ </blockquote>
+
+Note: initialising the SecureRandom object is a one-off time consuming
+operation which may cause the initial request to take much longer.
+
+                                  
                                                                         
                                                                         
                                                                         

@@ -342,22 +342,50 @@ a win32 service.
 
 Web Application Security
 ------------------------
-Jetty has made a few extensions to the security mechanism "described" in the servlet
-specifiction.  The default security model is that all access is allowed unless a
-particular security constraint prevents access. This is vulnerable to alias attacks
-where alternate case or names can be used to get to a resource.
 
-Jetty makes the following interpretations:
+Jetty makes the following interpretations for the configuration of security
+constraints within a web.xml file:
 
- + Methods PUT, DELETE and GET are disabled unless both a web.xml and a default
-   config file are provided.
+ + Methods PUT, DELETE and GET are disabled unless explicitly enabled.
 
- + If multiple security constraints are defined, the most specific applies to a
+ + If multiple security-constraints are defined, the most specific applies to a
    request.
 
- + A security constraint with no data or auth constraint prevents all access.
+ + A security-constraint an empty auth-constraint forbids all access by any
+   user:
 
- + A security constraint with an auth constraint of NONE grants access.
+    <security-constraint>
+      <web-resource-collection>
+       <web-resource-name>Forbidden</web-resource-name>
+        <url-pattern>/auth/noaccess/*</url-pattern>
+      </web-resource-collection>
+      <auth-constraint/>
+    </security-constraint>
+
+
+ + A security constraint with an auth constraint with a role of "*" gives access
+   to all authenticated users:
+
+    <security-constraint>
+      <web-resource-collection>
+        <web-resource-name>Any User</web-resource-name>
+        <url-pattern>/auth/*</url-pattern>
+      </web-resource-collection>
+      <auth-constraint>
+        <role-name>*</role-name>
+      </auth-constraint>
+    </security-constraint>
+
+ + A security-constraint with no auth-constraint and no data contrain gives access
+   to any request:
+
+    <security-constraint>
+      <web-resource-collection>
+        <web-resource-name>Relax</web-resource-name>
+        <url-pattern>/auth/relax/*</url-pattern>
+      </web-resource-collection>
+    </security-constraint>
+
 
  + On platforms without the / file separator or when the system parameter
    org.mortbay.util.FileResource.checkAliases is true, then the FileResouce class
@@ -368,16 +396,20 @@ Jetty makes the following interpretations:
  + Dynamic servlets by default, can only be loaded from the context classpath.
    Use ServletHandler.setServeDynamicSystemServlets to control this behaivour.
 
+
 It is strongly recommended that secure WebApplications take following
 approach.  All access should be denied by default with
 
-  <security-constraint>
-    <web-resource-collection>
-      <url-pattern>/</url-pattern>
-    </web-resource-collection>
-  </security-constraint>
+    <security-constraint>
+      <web-resource-collection>
+       <web-resource-name>Default</web-resource-name>
+        <url-pattern>/</url-pattern>
+      </web-resource-collection>
+      <auth-constraint/>
+    </security-constraint>
 
-Specific access should be granted with constraints like:
+
+Specific access should then be granted with constraints like:
 
   <security-constraint>
     <web-resource-collection>
@@ -393,7 +425,7 @@ Specific access should be granted with constraints like:
       <http-method>POST</http-method>
     </web-resource-collection>
     <auth-constraint>
-      <role-name>NONE</role-name>
+      <role-name>*</role-name>
     </auth-constraint>
   </security-constraint>
 

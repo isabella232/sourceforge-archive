@@ -2,6 +2,7 @@
 
 <!-- This file contains the default settings for webapplications -->
 
+
 <web-app>
  <welcome-file-list>
     <welcome-file>index.jsp</welcome-file>
@@ -21,16 +22,4 @@
   <session-config>
     <session-timeout>60</session-timeout>
   </session-config>
-
-<!-- Constrain PUT and DELETE if enabled
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>Read Only</web-resource-name>
-      <url-pattern>/</url-pattern>
-      <http-method>DELETE</http-method>
-      <http-method>PUT</http-method>
-    </web-resource-collection>
-  </security-constraint>
--->
-
 </web-app>

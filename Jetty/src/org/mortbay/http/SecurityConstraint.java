@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import org.mortbay.util.Code;
+import org.mortbay.util.LazyList;
 
 
 
@@ -31,14 +32,17 @@ public class SecurityConstraint
     
     /* ------------------------------------------------------------ */
     public final static String NONE="NONE";
+    public final static String ANY_ROLE="*";
     
     /* ------------------------------------------------------------ */
     private String _name;
-    private List _methods;
+    private LazyList _methods;
     private List _umMethods;
-    private List _roles;
+    private LazyList _roles;
     private List _umRoles;
     private int _dataConstraint=DC_NOT_SET;
+    private boolean _anyRole=false;
+    private boolean _authenticate=false;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -72,52 +76,58 @@ public class SecurityConstraint
      */
     public synchronized void addMethod(String method)
     {
-        if (_methods==null)
-            _methods=new ArrayList(3);
-        _methods.add(method);
+        _methods=LazyList.add(_methods,method);
     }
-
+    
     /* ------------------------------------------------------------ */
     public List getMethods()
     {
-        if (_umMethods==null)
-            _umMethods=Collections.unmodifiableList(_methods);
+        if (_umMethods==null && _methods!=null)
+            _umMethods=Collections.unmodifiableList(LazyList.getList(_methods));
         return _umMethods;
     }
     
     /* ------------------------------------------------------------ */
     /** 
-     * @param method 
-     * @return True if this constraint applies to the method. 
+     * @param method Method name.
+     * @return True if this constraint applies to the method. If no
+     * method has been set, then the constraint applies to all methods.
      */
     public boolean forMethod(String method)
     {
         if (_methods==null)
             return true;
-        return _methods.contains(method);
-    }
-    
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @param role 
-     */
-    public synchronized void addRole(String role)
-    {
-        if (_roles==null)
-            _roles=new ArrayList(3);
-        _roles.add(role);
+        for (int i=0;i<LazyList.size(_methods);i++)
+            if (LazyList.get(_methods,i).equals(method))
+                return true;
+        return false;
     }
 
     /* ------------------------------------------------------------ */
     /** 
-     * @return Iterator of role names
+     * @param role The rolename.  If the rolename is '*' all other
+     * roles are removed and anyRole is set true and subsequent
+     * addRole calls are ignored.
      */
-    public Iterator roles()
+    public synchronized void addRole(String role)
     {
-        if (_roles==null)
-            return Collections.EMPTY_LIST.iterator();
-        return _roles.iterator();
+        if (ANY_ROLE.equals(role))
+        {
+            _roles=null;
+            _umRoles=null;
+            _anyRole=true;
+        }
+        else if (!_anyRole)
+            _roles=LazyList.add(_roles,role);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if any user role is permitted.
+     */
+    public boolean isAnyRole()
+    {
+        return _anyRole;
     }
 
     /* ------------------------------------------------------------ */
@@ -126,8 +136,8 @@ public class SecurityConstraint
      */
     public List getRoles()
     {
-        if (_umRoles==null)
-            _umRoles=Collections.unmodifiableList(_roles);
+        if (_umRoles==null && _roles!=null)
+            _umRoles=Collections.unmodifiableList(LazyList.getList(_roles));
         return _umRoles;
     }
     
@@ -143,11 +153,29 @@ public class SecurityConstraint
     
     /* ------------------------------------------------------------ */
     /** 
+     * @param authenticate True if users must be authenticated 
+     */
+    public void setAuthenticate(boolean authenticate)
+    {
+        _authenticate=authenticate;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
      * @return True if the constraint requires request authentication
      */
-    public boolean isAuthenticated()
+    public boolean isAuthenticate()
     {
-        return _roles!=null && _roles.size()>0;
+        return _authenticate;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if authentication required but no roles set
+     */
+    public boolean isForbidden()
+    {
+        return _authenticate && !_anyRole && LazyList.size(_roles)==0;
     }
     
     /* ------------------------------------------------------------ */
@@ -184,18 +212,15 @@ public class SecurityConstraint
     /* ------------------------------------------------------------ */
     public Object clone()
     {
-        SecurityConstraint sc=null;
-        try{
-            sc = (SecurityConstraint)super.clone();
-            if (_methods!=null)
-                sc._methods=new ArrayList(_methods);
-            if (_roles!=null)
-                sc._roles=new ArrayList(_roles);
-        }
-        catch (CloneNotSupportedException e)
-        {
-            Code.fail("Oh yes it does");
-        }
+        SecurityConstraint sc=new SecurityConstraint();
+        sc._name=_name;
+        sc._dataConstraint=_dataConstraint;
+        sc._anyRole=_anyRole;
+        sc._authenticate=_authenticate;
+        
+        sc._methods=LazyList.clone(_methods);
+        sc._roles=LazyList.clone(_roles);
+        
         return sc;
     }
     

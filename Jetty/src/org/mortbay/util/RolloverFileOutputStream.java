@@ -99,6 +99,14 @@ public class RolloverFileOutputStream extends FilterOutputStream
     }
     
     /* ------------------------------------------------------------ */
+    public String getDatedFilename()
+    {
+        if (_file==null)
+            return null;
+        return _file.toString();
+    }
+    
+    /* ------------------------------------------------------------ */
     public int getRetainDays()
     {
         return _retainDays;

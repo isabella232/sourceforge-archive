@@ -1136,8 +1136,7 @@ public class HttpServer implements LifeCycle
     private void remove(Object o)
     {
         Code.debug("remove component: ",o);
-        _components.remove(o);
-        if (_eventListeners!=null)
+        if (_components.remove(o) && _eventListeners!=null)
         {
             ComponentEvent event = new ComponentEvent(o);
             for(int i=0;i<_eventListeners.size();i++)
