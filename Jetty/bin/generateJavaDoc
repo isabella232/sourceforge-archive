@@ -1,8 +1,9 @@
 #!/bin/sh
 
-cd $JETTY_HOME/src
+cd $JETTY_HOME/src1.2
+CLASSPATH=$JETTY_HOME/src1.2:$JETTY_HOME/lib/javax.servlet2_1.jar
 DOCDIR=$JETTY_HOME/javadoc
-export DOCDIR
+export DOCDIR CLASSPATH
 mkdir -p $DOCDIR
 SRCDIRS=
 PACKAGES=
