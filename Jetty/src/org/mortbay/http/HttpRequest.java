@@ -334,8 +334,8 @@ public class HttpRequest extends HttpMessage
             else
             {
                 url.append (getHost());
-                if (port>0 && ((scheme.equals ("http") && port != 80)||
-                               (scheme.equals ("https") && port != 443)))
+                if (port>0 && ((scheme.equalsIgnoreCase ("http") && port != 80)||
+                               (scheme.equalsIgnoreCase ("https") && port != 443)))
                 {
                     url.append (':');
                     url.append (port);
@@ -720,14 +720,14 @@ public class HttpRequest extends HttpMessage
                     String coding= StringUtil.asciiToLowerCase
                         (HttpFields.valueParameters(iter.next().toString(),null));
                     
-                    if ("trailer".equals(coding))
+                    if ("trailer".equalsIgnoreCase(coding))
                     {
                         // Allow trailers in the response
                         HttpResponse response=getResponse();
                         if (response!=null)
                             response.setAcceptTrailer(true);
                     }
-                    else if (!HttpFields.__Chunked.equals(coding))
+                    else if (!HttpFields.__Chunked.equalsIgnoreCase(coding))
                         acceptable=LazyList.add(acceptable,size,coding);
                 }
                 _te=LazyList.getList(acceptable);
@@ -760,7 +760,7 @@ public class HttpRequest extends HttpMessage
                 content_type=StringUtil.asciiToLowerCase(content_type);
                 content_type=HttpFields.valueParameters(content_type,null);
 
-                if (HttpFields.__WwwFormUrlEncode.equals(content_type)&&
+                if (HttpFields.__WwwFormUrlEncode.equalsIgnoreCase(content_type)&&
                     HttpRequest.__POST.equals(getMethod()))
                 {
                     int content_length = getIntField(HttpFields.__ContentLength);

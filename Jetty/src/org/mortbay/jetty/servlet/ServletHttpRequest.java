@@ -422,7 +422,7 @@ public class ServletHttpRequest
             {
                 for (int i=0;i<cookies.length;i++)
                 {
-                    if (SessionManager.__SessionId.equals(cookies[i].getName()))
+                    if (SessionManager.__SessionId.equalsIgnoreCase(cookies[i].getName()))
                     {
                         if (_sessionId!=null)
                         {

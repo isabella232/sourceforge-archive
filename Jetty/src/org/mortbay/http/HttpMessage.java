@@ -327,7 +327,7 @@ public abstract class HttpMessage
     {
         HttpFields fields=setFields();
 
-        if (HttpFields.__ContentType.equals(name))
+        if (HttpFields.__ContentType.equalsIgnoreCase(name))
             setMimeAndEncoding(value);
 
         return (String) fields.put(name,value);
