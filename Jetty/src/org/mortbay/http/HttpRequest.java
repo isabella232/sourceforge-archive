@@ -807,17 +807,7 @@ public class HttpRequest extends HttpMessage
             // An encoding has been set, so reencode query string.
             String query=_uri.getQuery();
             if (query!=null)
-            {
-                try
-                {
-                    byte[]qbytes=query.getBytes(StringUtil.__ISO_8859_1);
-                    UrlEncoded.decodeTo(qbytes,0,qbytes.length,_parameters,encoding);
-                }
-                catch(Exception e)
-                {
-                    _uri.putParametersTo(_parameters);
-                }
-            }
+                    UrlEncoded.decodeTo(query, _parameters, encoding);
         }
 
         // handle any content.

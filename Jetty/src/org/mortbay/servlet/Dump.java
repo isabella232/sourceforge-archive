@@ -416,11 +416,25 @@ public class Dump extends HttpServlet
                 table.addCell(""+getServletContext().getResource(res));
             }
 
+            page.add(Break.para);
+            page.add(new Heading(1,"International Characters"));
+	    page.add("Directly encoced:  Dürst<br/>");
+	    page.add("HTML reference: D&uuml;rst<br/>");
+	    page.add("Decimal (252) 8859-1: D&#252;rst<br/>");
+	    page.add("Hex (xFC) 8859-1: D&#xFC;rst<br/>");
+	    page.add("Javascript unicode (00FC) : <script language='javascript'>document.write(\"D\u00FCrst\");</script><br/>");
             
             page.add(Break.para);
-            
-            page.add(new Heading(1,"Form to generate Dump content"));
+            page.add(new Heading(1,"Form to generate GET content"));
             TableForm tf = new TableForm(response.encodeURL(getURI(request)));
+            tf.method("GET");
+            tf.addTextField("TextField","TextField",20,"value");
+            tf.addButton("Action","Submit");
+            page.add(tf);
+
+            page.add(Break.para);
+            page.add(new Heading(1,"Form to generate POST content"));
+            tf = new TableForm(response.encodeURL(getURI(request)));
             tf.method("POST");
             tf.addTextField("TextField","TextField",20,"value");
             Select select = tf.addSelect("Select","Select",true,3);
@@ -429,6 +443,7 @@ public class Dump extends HttpServlet
             select.add("ValueC");
             tf.addButton("Action","Submit");
             page.add(tf);
+
 
             page.add(new Heading(1,"Form to upload content"));
             tf = new TableForm(response.encodeURL(getURI(request)));

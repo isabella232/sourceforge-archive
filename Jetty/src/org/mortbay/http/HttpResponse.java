@@ -138,7 +138,8 @@ public class HttpResponse extends HttpMessage
      */
     public HttpResponse()
     {
-        _version=__HTTP_1_0;
+        _version=__HTTP_1_1;
+        _dotVersion=1;
         _state=__MSG_EDITABLE;
     }
     
@@ -149,7 +150,8 @@ public class HttpResponse extends HttpMessage
     public HttpResponse(HttpConnection connection)
     {
         super(connection);
-        _version=__HTTP_1_0;
+        _version=__HTTP_1_1;
+        _dotVersion=1;
         _state=__MSG_EDITABLE;
     }
 

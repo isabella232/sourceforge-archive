@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-5.0.beta2 
  + Added skeleton JMX MBean for jetty plus
  + Fixed HEAD with empty chunk bug.
  + Fixed jetty.home/work handling
@@ -10,6 +11,8 @@ Jetty Versions
  + FileResource better handles non sun JVM
  + Monitor closes socket before exit
  + Updated to Japser 5.0.16
+ + RequestDispatcher uses request encoding for query params
+
 
 Jetty-5.0.beta1 - 24 December 2003
  + SecurityConstraints not reset by stop() on custom context

@@ -662,8 +662,8 @@ public abstract class HttpMessage
     void recycle(HttpConnection connection)
     {
         _state=__MSG_EDITABLE;
-        _version=null;
-        _dotVersion=0;
+        _version=__HTTP_1_1;
+        _dotVersion=1;
         _header.clear();
         _connection=connection;
         _characterEncoding=null;

@@ -468,6 +468,8 @@ public class JBossUserRealm
     public Credential getSingleSignOn(HttpRequest request,
                                       HttpResponse response) 
     {
+        if (!isSSORealm())
+            return null;
         Credential singleSignOnCredential = _ssoRealm.getSingleSignOn(request, response);
         if (_log.isDebugEnabled())
             _log.debug("getSingleSignOn principal="+request.getUserPrincipal()+
