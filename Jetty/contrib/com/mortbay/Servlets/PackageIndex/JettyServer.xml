@@ -14,13 +14,13 @@
   </Call>
 
   <Call name="addContext">
-    <Arg>/usr/local/java/packages</Arg>
-    <Set name="ResourceBase">/usr/local/java/packages</Set>
+    <Arg>/usr/local/pkgs/java</Arg>
+    <Set name="ResourceBase">/usr/local/pkgs/java</Set>
     <Set name="ServingResources">TRUE</Set>
   </Call>
   <Call name="addContext">
-    <Arg>/projects/edt</Arg>
-    <Set name="ResourceBase">/projects/edt</Set>
+    <Arg>/usr/local/pkgs/jdk</Arg>
+    <Set name="ResourceBase">/usr/local/pkgs/jdk</Set>
     <Set name="ServingResources">TRUE</Set>
   </Call>
   <Call name="addContext">

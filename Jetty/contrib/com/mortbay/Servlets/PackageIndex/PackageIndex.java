@@ -22,12 +22,12 @@ import java.util.Iterator;
 import java.util.Dictionary;
 import java.util.ResourceBundle;
 
-import com.mortbay.Util.Servlet.DispatchServlet;
-import com.mortbay.Util.Servlet.ServletDispatch;
-import com.mortbay.Util.Converter.ConverterSet;
-import com.mortbay.Util.Converter.ObjectConverter;
-import com.mortbay.Util.Converter.ArrayConverter;
-import com.mortbay.Util.PropertyTree;
+import com.mortbay.Tools.Servlet.DispatchServlet;
+import com.mortbay.Tools.Servlet.ServletDispatch;
+import com.mortbay.Tools.Converter.ConverterSet;
+import com.mortbay.Tools.Converter.ObjectConverter;
+import com.mortbay.Tools.Converter.ArrayConverter;
+import com.mortbay.Tools.PropertyTree;
 import com.mortbay.HTML.Page;
 import com.mortbay.HTML.Heading;
 import com.mortbay.HTML.Block;
