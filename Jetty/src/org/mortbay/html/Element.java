@@ -124,13 +124,6 @@ public abstract class Element
         StringBuffer buf = new StringBuffer(128);
         synchronized(buf)
         {
-            if(attributes!=null && attributes.length()>0)
-            {
-                if (!attributes.startsWith(" "))
-                    buf.append(' ');
-                buf.append(attributes);
-            }
-        
             if (attributeMap!=null)
             {
                 Enumeration e = attributeMap.keys();
@@ -142,6 +135,13 @@ public abstract class Element
                     buf.append('=');
                     buf.append(attributeMap.get(a).toString());
                 }
+            }
+            
+            if(attributes!=null && attributes.length()>0)
+            {
+                if (!attributes.startsWith(" "))
+                    buf.append(' ');
+                buf.append(attributes);
             }
         }
 
