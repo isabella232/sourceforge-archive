@@ -283,6 +283,13 @@ public class Dispatcher implements RequestDispatcher
             return buf;
         }
 
+        
+        /* ------------------------------------------------------------ */
+        public String getPathTranslated()
+        {
+            return getRealPath(getPathInContext());
+        }
+        
         /* ------------------------------------------------------------ */
         StringBuffer getRootURL()
         {
