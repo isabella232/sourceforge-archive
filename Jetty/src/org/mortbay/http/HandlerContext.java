@@ -516,32 +516,6 @@ public class HandlerContext implements LifeCycle
        return (String) _errorPages.get(error);
     }
     
-    /* ------------------------------------------------------------ */
-    /** get error page URI.
-     * @param error A string representing an error code or a
-     * exception classname
-     * @return URI within context
-     */
-    public Resource getErrorPageResource(String error)
-    {
-        if (_errorPages==null || _resourceBase==null)
-            return null;
-        
-        String page = (String) _errorPages.get(error);
-        if (page==null)
-            return null;
-        
-        try{
-            Resource resource = _resourceBase.addPath(page);
-            if (resource.exists())
-                return resource;
-        }
-        catch(IOException e)
-        {
-            Code.ignore(e);
-        }
-        return null;
-    }
     
     /* ------------------------------------------------------------ */
     public String removeErrorPage(String error)
