@@ -157,10 +157,9 @@
   <!--                       for the current web application]               -->
   <!--                                                                      -->
   <!-- If you wish to use Jikes to compile JSP pages:                       -->
-  <!-- * Set the "classpath" initialization parameter appropriately         -->
-  <!--   for this web application.                                          -->
-  <!-- * Set the "jspCompilerPlugin" initialization parameter to            -->
-  <!--   "org.apache.jasper.compiler.JikesJavaCompiler".                    -->
+  <!-- * Set the "compiler" initialization parameter to  "jikes".           -->
+  <!-- * See the Jasper pages at http://jakarta.apache.org/tomcat for more  -->
+  <!--   info.                                                              -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <servlet>
     <servlet-name>jsp</servlet-name>
