@@ -104,7 +104,6 @@ public class PropertyEnumeration implements Enumeration
                InvocationTargetException,
                IllegalAccessException
     {
-        Code.debug("Set "+name+" on "+obj+"="+value+"("+value.getClass().getName()+")");
         try {
             BeanInfo beanInf = Introspector.getBeanInfo(obj.getClass());
             PropertyDescriptor props[] = beanInf.getPropertyDescriptors();
@@ -137,4 +136,43 @@ public class PropertyEnumeration implements Enumeration
         return false;
     }
     /* ------------------------------------------------------------ */
-};
+    /** utility method for transparently getting a property or field
+     * @param obj The object to set the value on
+     * @param name The name of the property or field
+     * @return The value of the property, or null if an error (or it was null!)
+     * @exception InvocationTargetException If the set throws an Exception
+     * @exception IllegalAccessException If the field is not public
+     */
+    public static Object get(Object obj, String name)
+	throws InvocationTargetException,
+	       IllegalAccessException
+    {
+        try {
+            BeanInfo beanInf = Introspector.getBeanInfo(obj.getClass());
+            PropertyDescriptor props[] = beanInf.getPropertyDescriptors();
+            for (int i = 0; i < props.length; i++){
+                if (!name.equals(props[i].getName()))
+                    continue;
+                Method method = props[i].getReadMethod();
+                if (method == null) return null; // no get method
+                return method.invoke(obj, null);
+            }
+        } catch (IntrospectionException ex){
+            Code.debug("While BeanIntrospecting", ex);
+        }
+        Field field = null;
+        try {
+            field = obj.getClass().getField(name);
+        } catch (Exception ex){
+            Code.debug("Looking up field:"+name, ex);
+            return null;
+        }
+        int mod = field.getModifiers();
+        if (!Modifier.isStatic(mod) && !Modifier.isFinal(mod)){
+            return field.get(obj);
+        } else
+            Code.debug("Field "+name+" static or final");
+        return null;
+    }
+    /* ------------------------------------------------------------ */
+}

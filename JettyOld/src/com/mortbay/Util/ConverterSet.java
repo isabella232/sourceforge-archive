@@ -8,6 +8,8 @@ package com.mortbay.Util;
 import com.mortbay.Base.Code;
 import java.util.Vector;
 import java.util.Enumeration;
+import java.math.BigInteger;
+import java.math.BigDecimal;
 
 /** Class to handle converting of types from one to another.
  * Other Converters can be registered with this ConverterSet and it will try
@@ -17,25 +19,39 @@ import java.util.Enumeration;
  * primitive types, that can be installed by calling
  * registerPrimitiveConverters(). 
  */
-public class ConverterSet implements Converter
+public class ConverterSet extends  ConverterBase
 {
     private Vector converters = null;
     /* ------------------------------------------------------------ */
-    public Object convert(Object toConvert, Class convertTo, Converter context)
+    protected Object doConvert(Object toConvert,
+			       Class convertTo,
+			       Converter context,
+			       boolean safe)
     {
-        if (toConvert == null) return null;
-        if (toConvert.getClass().equals(convertTo))
-            // Already correct type!
-            return toConvert;
+	ConvertFail error = null;
         if (converters != null)
             for (Enumeration enum = converters.elements();
                  enum.hasMoreElements();){
                 Converter converter = (Converter)enum.nextElement();
-                Object retv =
-                    converter.convert(toConvert, convertTo,
-                                      (context == null ? this : context));
-                if (retv != null) return retv;
+		Object retv = null;
+		if (safe){
+		    retv = converter.convert(toConvert, convertTo,
+					     (context == null ?
+					      this : context));
+		} else {
+		    try {
+			retv = converter.unsafeConvert(toConvert, convertTo,
+						       (context == null ?
+							this : context));
+		    } catch (ConvertFail ex){
+			retv = null;
+			error = ex;
+		    }
+		}
+		if (retv != null) return retv;
             }
+	if (error != null)
+	    return error;
         return null;
     }
     /* ------------------------------------------------------------ */
@@ -44,7 +60,7 @@ public class ConverterSet implements Converter
         converters.addElement(converter);
     }
     /* ------------------------------------------------------------ */
-    public static class PrimitiveConverter implements Converter
+    public static class PrimitiveConverter extends ConverterBase
     {
         private static Class primitives[] = null;
         public static final Boolean aBoolean    = Boolean.TRUE;
@@ -57,12 +73,15 @@ public class ConverterSet implements Converter
                                                               MIN_VALUE);
         public static final Long aLong          = new Long(Long.MIN_VALUE);
         public static final Short aShort        = new Short(Short.MIN_VALUE);
+	public static final BigInteger aBigInt  = BigInteger.ZERO;
+	public static final BigDecimal aBigDec  =
+	    new BigDecimal(BigInteger.ZERO);
         /* -------------------------------------------------------- */
         /** Return an Array of all the primitive class types */
         public static Class[] getPrimitives(){
             synchronized (aByte){
                 if (primitives == null){
-                    primitives = new Class[17];
+                    primitives = new Class[19];
                     primitives[ 0] = aBoolean.getClass();
                     primitives[ 1] = Boolean.TYPE;
                     primitives[ 2] = aByte.getClass();
@@ -80,13 +99,16 @@ public class ConverterSet implements Converter
                     primitives[14] = aShort.getClass();
                     primitives[15] = Short.TYPE;
                     primitives[16] = "".getClass();
+		    primitives[17] = aBigInt.getClass();
+		    primitives[18] = aBigDec.getClass();
                 }
             }
             return primitives;
         }
         /* -------------------------------------------------------- */
-        public Object convert(Object toConvert, Class convertTo,
-                              Converter context) {
+        protected Object doConvert(Object toConvert, Class convertTo,
+				   Converter context, boolean safe)
+	{
             Class primitives[] = getPrimitives();
             try {
                 for (int i = 0; i < primitives.length; i++){
@@ -108,17 +130,25 @@ public class ConverterSet implements Converter
                             return Long.valueOf(value);
                         else if (i == 14 || i == 15)
                             return Short.valueOf(value);
-                        else
+                        else if (i == 17)
+			    return new BigInteger(value);
+			else if (i == 18)
+			    return new BigDecimal(value);
+			else
                             return value;
                     }
                 }
             } catch (Exception ex){
                 Code.debug("Cant Convert", ex);
+		if (!safe)
+		    return new ConvertFail(ex.toString(),
+					   convertTo,
+					   toConvert);
             }
             return null;
         }
         /* -------------------------------------------------------- */
-    };
+    }
     /* ------------------------------------------------------------ */
     /** register the standard converters for the primitive types */
     public void registerPrimitiveConverters()
@@ -126,4 +156,4 @@ public class ConverterSet implements Converter
         register(new PrimitiveConverter());
     }
     /* ------------------------------------------------------------ */
-};
+}
