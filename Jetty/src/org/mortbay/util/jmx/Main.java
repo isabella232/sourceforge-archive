@@ -45,8 +45,7 @@ public class Main
             Code.debug("MBeanServer=",server);
             
             // Create and register the MLet
-            //mlet = new MLet(new URL[0],Thread.currentThread().getContextClassLoader());
-            mlet = new MLet();
+            mlet = new MLet(new URL[0],Thread.currentThread().getContextClassLoader());
             server.registerMBean(mlet,new ObjectName(server.getDefaultDomain(),"service","MLet"));      
             Code.debug("MLet=",mlet);
             
