@@ -22,6 +22,7 @@ public class Frame
     private static StringBuffer __writerBuffer = __stringWriter.getBuffer();
     private static PrintWriter __out = new PrintWriter(__stringWriter,false);
     private static final String __lineSeparator = System.getProperty("line.separator");
+    private static final int __lineSeparatorLen = __lineSeparator.length();
     
     /*-------------------------------------------------------------------*/
     /** The full stack of where the Frame was created. */
@@ -101,20 +102,25 @@ public class Frame
     }
     
     /* ------------------------------------------------------------ */
-    protected void internalInit(int ignoreFrames, boolean partial){
-	// Extract stack components
-	_lineStart = _stack.indexOf(__lineSeparator,_lineStart)+1;
-	for (int i = 0; _lineStart > 0 && i < ignoreFrames; i++){
-	    _lineStart = _stack.indexOf(__lineSeparator,_lineStart)+1;
-	}
-	_lineEnd = _stack.indexOf(__lineSeparator,_lineStart);
-	if (_lineEnd < _lineStart || _lineStart < 0){
-	    _where = null;
-	    _stack = null;
-	} else {
-	    _where = _stack.substring(_lineStart,_lineEnd);
-	    if (!partial) complete();
-	}
+    protected void internalInit(int ignoreFrames, boolean partial)
+    {   
+        // Extract stack components
+        _lineStart = _stack.indexOf(__lineSeparator,_lineStart)+__lineSeparatorLen;
+        for (int i = 0; _lineStart > 0 && i < ignoreFrames; i++)
+        {
+            _lineStart = _stack.indexOf(__lineSeparator,_lineStart)+__lineSeparatorLen;;
+        }
+        _lineEnd = _stack.indexOf(__lineSeparator,_lineStart);
+        
+        if (_lineEnd < _lineStart || _lineStart < 0){
+            _where = null;
+            _stack = null;
+        }
+        else
+        {
+            _where = _stack.substring(_lineStart,_lineEnd);
+            if (!partial) complete();
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -123,10 +129,10 @@ public class Frame
     void complete()
     {
 	// trim stack
-	// XXX - Need to handle Java2 correctly
-	if (_stack != null) {
+	if (_stack != null) 
 	    _stack = _stack.substring(_lineStart);
-	} else {
+	else
+	{
 	    // Handle nulls
 	    if (_method==null)
 		_method= "unknownMethod";
@@ -134,34 +140,35 @@ public class Frame
 		_file= "UnknownFile";
 	    return;
 	}
-	
+
 	// calculate stack depth
-	int i=0;
-	while ((i=_stack.indexOf(__lineSeparator,i+1))>0)
-		_depth++;
+        int i=0-__lineSeparatorLen;
+        while ((i=_stack.indexOf(__lineSeparator,i+__lineSeparatorLen))>0)
+                _depth++;
+        
+        // extract details
+        if (_where!=null)
+        {
+            int lb = _where.indexOf('(');
+            int rb = _where.indexOf(')');
+            if (lb>=0 && rb >=0 && lb<rb)
+                _file = _where.substring(lb+1,rb).trim();
+            
+            int at = _where.indexOf("at");
+            if (at >=0 && (at+3)<_where.length())
+                _method = _where.substring(at+3);
+        }
+        
+        // Get Thread name
+        _thread = Thread.currentThread().getName();
 
-	// extract details
-	if (_where!=null)
-	{
-	    int lb = _where.indexOf('(');
-	    int rb = _where.indexOf(')');
-	    if (lb>=0 && rb >=0 && lb<rb)
-		_file = _where.substring(lb+1,rb).trim();
-	    
-	    int at = _where.indexOf("at");
-	    if (at >=0 && (at+3)<_where.length())
-		_method = _where.substring(at+3);
-	}
-
-	// Get Thread name
-	_thread = Thread.currentThread().getName();
-
-	// Handle nulls
-	if (_method==null)
-	    _method= "unknownMethod";
-	if (_file==null)
-	    _file= "UnknownFile";
+        // Handle nulls
+        if (_method==null)
+            _method= "unknownMethod";
+        if (_file==null)
+            _file= "UnknownFile";
     }
+    
     
     /*-------------------------------------------------------------------*/
     public String file()
@@ -186,52 +193,9 @@ public class Frame
 	return f;
     }
     
-    /* ------------------------------------------------------------ */
-    private static void testChecker(Test t, Frame f, String desc,
-				    String method, int depth,
-				    String thread, String file)
-    {
-	t.checkContains(f._method, method, desc+": method");
-	t.checkEquals(f._depth, depth, desc+": depth");
-	t.checkEquals(f._thread, thread, desc+": thread");
-	t.checkContains(f._file, file, desc+": file");
-    }
     
-    /* ------------------------------------------------------------ */
-    static void test(){
-	realTest();
-    }
-    
-    /* ------------------------------------------------------------ */
-    static void realTest(){
-	Test t = new Test("Frame");
-	Frame f = new Frame();
-	testChecker(t, f, "default constructor",
-		    "com.mortbay.Base.Frame.realTest",
-		    3, "main", "Frame.java");
-	f = f.getParent();
-	testChecker(t, f, "getParent",
-		    "com.mortbay.Base.Frame.test",
-		    2, "main", "Frame.java");
-	f = f.getParent();
-	f = f.getParent();
-	t.checkEquals(f, null, "getParent() off top of stack");
-	f = new Frame(1);
-	testChecker(t, f, "new Frame(1)",
-		    "com.mortbay.Base.Frame.test",
-		    2, "main", "Frame.java");
-	f = new Frame(1, true);
-	testChecker(t, f, "partial",
-		    "unknownMethod", 0, "unknownThread", "UnknownFile");
-	f.complete();
-	testChecker(t, f, "new Frame(1)",
-		    "com.mortbay.Base.Frame.test",
-		    2, "main", "Frame.java");
-    }
-    
-    /* ------------------------------------------------------------ */
-    public static void main(String argv[]) {
-	test();
-	Test.report();
-    }
 }
+
+
+
+

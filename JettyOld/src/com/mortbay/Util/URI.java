@@ -266,50 +266,6 @@ public class URI
 	return result;
     }
 
-    /* ------------------------------------------------------------ */
-    public static void test()
-    {
-	Test test = new Test("com.mortbay.Util.URI");
-	try
-	{
-	    URI uri;
-
-	    uri = new URI("/Test/URI");
-	    test.checkEquals(uri.toString(),"/Test/URI","no params");
-    
-	    uri = new URI("/Test/URI?a=1");
-	    test.checkEquals(uri.toString(),"/Test/URI?a=1","one param");
-	
-	    uri = new URI("/Test/URI");
-	    uri.put("b","2 !");
-	    test.checkEquals(uri.toString(),"/Test/URI?b=2+%21","add param");
-	
-	    uri = new URI("/Test/URI?c=1&d=2");
-	    uri.put("e","3");
-	    String s = uri.toString();
-	    test.check(s.startsWith("/Test/URI?"),"merge params path");
-	    test.check(s.indexOf("c=1")>0,"merge params c1");
-	    test.check(s.indexOf("d=2")>0,"merge params d2");
-	    test.check(s.indexOf("e=3")>0,"merge params e3");
-
-	    uri = new URI("/Test/URI?a=");
-	    test.checkEquals(uri.toString(),"/Test/URI?a=","null param");
-	    uri.parameters();
-	    test.checkEquals(uri.toString(),"/Test/URI?a","null param");
-	    uri.encodeNulls(true);
-	    test.checkEquals(uri.toString(),"/Test/URI?a=","null= param");
-	}
-	catch(Exception e){
-	    test.check(false,e.toString());
-	}
-    }
-    
-    /* -------------------------------------------------------------- */
-    public static void main(String[] args)
-    {
-	test();
-	Test.report(); 
-    }
 }
 
 

@@ -34,9 +34,27 @@ public abstract class ServletLoader extends ClassLoader
      * @return The Class instance
      * @exception ClassNotFoundException 
      */
-    abstract public Class loadClass(String name, boolean resolve)
+    abstract public Class loadClass(String name)
 	throws ClassNotFoundException;
     
+
+    /* ------------------------------------------------------------ */
+    /** Load a class.
+     * @param name Class name (without ".class");
+     * @param resolve True if the class should be resolved when loaded. 
+     * @return The Class instance
+     * @exception ClassNotFoundException 
+     */
+    public Class loadClass(String name, boolean resolve)
+	throws ClassNotFoundException
+    {
+	Class c = loadClass(name);
+	
+	// resolve
+	if (resolve)
+	    resolveClass(c);
+	return c;
+    }
 
     /* ------------------------------------------------------------ */
     /** Return true a class is modified.

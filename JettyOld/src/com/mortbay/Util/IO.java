@@ -197,7 +197,7 @@ public class IO extends ThreadPool
     /* ------------------------------------------------------------ */
     /** Run copy for copyThread()
      */
-    public void Handle(Object o)
+    public void handle(Object o)
     {
 	Job job=(Job)o;
 	try {

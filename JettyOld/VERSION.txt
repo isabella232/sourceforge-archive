@@ -1,3 +1,18 @@
+
+Release 2.2.2 - 22 July 1999
+  + Fixed bug in HtmlFilter that prevented single char buffers
+    from being written.
+  + Implemented getResourceAsStream in FileJarServletLoader
+  + Fixed bug with CLASSPATH in FileJarServletLoader after attempt
+    to load from a jar.
+  + Fixed bug in com.mortbay.Util.IO with thread routines.
+  + Moved more test harnesses out of classes.
+  + File handler passes through not allowed options for 
+    non existant files.
+  + NotFoundHandler can repond with SC_METHOD_NOT_ALLOWED.
+  + Improved com.mortbay.Base.Log handling of different JVMs
+  + Minor fixes to README
+
 Release 2.2.1 - 18 July 1999
   + Comma separate header fields.
   + Protect against duplicate single valued headers.

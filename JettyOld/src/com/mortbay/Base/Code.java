@@ -71,7 +71,7 @@ public class Code
     private static PrintWriter __out = new PrintWriter(__stringWriter,false);
     
     /*-------------------------------------------------------------------*/
-    private static Code instance()
+    static Code instance()
     {	
 	if (__instance==null)
 	{
@@ -119,11 +119,11 @@ public class Code
     }
     
     /*-------------------------------------------------------------------*/
-    private boolean _debugOn=false;
+    boolean _debugOn=false;
     private boolean _suppressStack=true;
     private boolean _suppressWarnings=false;
     private int _verbose=0;
-    private Vector _debugPatterns=null;
+    Vector _debugPatterns=null;
     private Vector _debugTriggers=null;
     private String _patterns=null;
     private String _triggers=null;
@@ -980,85 +980,6 @@ public class Code
 	return buf.toString();
     }
     
-    /*-------------------------------------------------------------------*/
-    /** Test Harness
-     */
-    static void test()
-    {
-	System.err.println("com.mortbay.Base.Code");
-	Code code = instance();
-	
-	code._debugOn=false;
-	Code.debug("message");
-	
-	code._debugOn=true;
-	Code.debug("message");
-	Code.debug("message",new Throwable());
-	Code.debug("object",new Throwable(),"\n",code);
-	
-	code._debugPatterns = new Vector();
-	code._debugPatterns.addElement("ZZZZZ");
-	Code.debug("YOU SHOULD NOT SEE THIS");
-	Code.debug("YOU SHOULD"," NOT SEE ","THIS");
-	
-	code._debugPatterns.addElement("ISS.Base");
-	Code.debug("message");
-	
-	code._debugPatterns = null;
-
-	Code.warning("warning");
-	
-	Code.setDebug(false);
-	Code.setDebugTriggers("FOO,BAR");
-	Code.debug("YOU SHOULD NOT SEE THIS");
-	Code.triggerOn("BLAH");
-	Code.debug("YOU SHOULD NOT SEE THIS");
-	Code.triggerOn("FOO");
-	Code.debug("triggered");
-	Code.triggerOn("BAR");
-	Code.debug("triggered");
-	Code.triggerOn("FOO");
-	Code.triggerOff("FOO");
-	Code.debug("triggered");
-	Code.triggerOff("BAR");
-	Code.debug("YOU SHOULD NOT SEE THIS");
-	Code.triggerOff("BLAH");
-	Code.debug("YOU SHOULD NOT SEE THIS");
-	
-	Code.setDebug(true);
-	
-	try
-	{
-	    Code.fail("fail");
-	}
-	catch(CodeException e){
-	    Code.warning(e);
-	}
-	
-	try
-	{
-	    Code.assert(true,"assert");
-	    Code.assertEquals("String","String","equals");
-	    Code.assertEquals(1,1,"equals");
-	    Code.assertContains("String","rin","contains");	    
-	    
-	    Code.assertEquals("foo","bar","assert");
-	}
-	catch(CodeException e)
-	{
-	    Code.warning(e);
-	}
-    }
-    
-    /*-------------------------------------------------------------------*/
-    /** Main for Code test harness
-     */
-    public static void main(String[] args)
-    {	
-	test();
-    }
-    
-    /*-------------------------------------------------------------------*/
 };
 
 

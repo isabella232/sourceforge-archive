@@ -8,6 +8,7 @@
 #JAVAOPTIONS := 
 #JAVACOPTIONS :=
 ROOTNAME := com
-TESTS := DateCache.java Log.java Code.java Test.java Frame.java
+TESTS := TestHarness.java
+EXCLUDECLASSES := TestHarness.class
 
 include $(JETTY_HOME)/etc/Global.mk

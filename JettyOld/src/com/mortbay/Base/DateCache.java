@@ -141,24 +141,6 @@ public final class DateCache
 		
 	return lastResult;
     }
-
-    /* ------------------------------------------------------------ */
-    public static void main(String[] arg)
-    {
-	DateCache dc = new DateCache();
-	try
-	{
-	    for (int t=0;t<25;t++)
-	    {
-		Thread.sleep(100);
-		System.err.println(dc.format(System.currentTimeMillis()));
-	    }
-	}
-	catch(Exception e)
-	{
-	    Code.fail(e);
-	}
-    }
 }	
 
 

@@ -232,8 +232,10 @@ PATHS does not work in config file
 ----------------------------------
 For URL path lists, ';' or ',' should be used as a separator.
 
-
-
+Method not found exception
+--------------------------
+An earlier version of the javax.servlet package may be in your
+CLASSPATH.
 
 
 FREQUENTLY ASKED QUESTIONS
@@ -256,7 +258,8 @@ Does Jetty support "standard" server side includes?
 No. Jetty's server include tags are not standard, as they
 pre-date the "standard" and use a very simple/fast parser.
 We are waiting to see what happens with JSP,SML,etc. before
-investing effort towards this.
+investing effort towards this.  Standard SSI is available
+as a servlet from http://java.apache.org/jservssi/index.html
 
 
 Does Jetty support chained servlets?

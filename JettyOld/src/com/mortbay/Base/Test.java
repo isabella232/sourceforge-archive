@@ -42,7 +42,7 @@ public class Test
     private static final String fail = "FAIL";
     private static final char[] spaces = "                                                                                 ".toCharArray();
     
-    private static final String SelfFailTest =
+    static final String SelfFailTest =
         "com.mortbay.Base.Test all fail";
     
     /*-------------------------------------------------------------------*/
@@ -259,29 +259,6 @@ public class Test
 	    System.exit(1);
 	System.exit(0);
     }
-    
-    /*-------------------------------------------------------------------*/
-    public static void main(String[] args)
-    {
-	Test t1 = new Test("Test all pass");
-	Test t2 = new Test(SelfFailTest);
-
-	t1.check(true,"Boolean check that passes");
-	t2.check(false,"Boolean check that fails");
-	t1.checkEquals("Foo","Foo","Object comparison that passes");
-	t2.checkEquals("Foo","Bar","Object comparison that fails");
-	t1.checkEquals(1,1,"Long comparison that passes");
-	t2.checkEquals(1,2,"Long comparison that fails");
-	t1.checkEquals(1.1,1.1,"Double comparison that passes");
- 	t2.checkEquals(1.1,2.2,"Double comparison that fails");
-	t1.checkEquals('a','a',"Char comparison that passes");
-	t2.checkEquals('a','b',"Char comparison that fails");
-	t1.checkContains("ABCD","BC","Contains check that passes");
-	t2.checkContains("ABCD","CB","Contains check that fails");
-
-	Test.report();
-    }
-
 };
 
 

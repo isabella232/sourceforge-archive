@@ -49,6 +49,10 @@ public class Log
     public final static String CODE_WARN="CODE.WARN";
     public final static String CODE_FAIL="CODE.FAIL";
     public final static String CODE_DEBUG="CODE.DEBUG";
+
+    /*-------------------------------------------------------------------*/
+    private static final String __lineSeparator = System.getProperty("line.separator");
+    private static final int __lineSeparatorLen = __lineSeparator.length();
     
     /*-------------------------------------------------------------------*/
     public String _logOptions=null;
@@ -275,19 +279,20 @@ public class Log
 		msg = msg + "\n" + frame._stack;
 
 	    // Log indented message
-	    int i=0;
-	    int last=-1;	
-	    while ((i=msg.indexOf('\n',i))>last)
-	    {
-		__stringBuffer.append(msg.substring(last+1,i));
-		__stringBuffer.append(indent);
-		last=i++;
-	    }
-	    if (msg.length()>last+1)
-		__stringBuffer.append(msg.substring(last+1));
+            int i=0;
+            int last=0; 
+            while ((i=msg.indexOf(__lineSeparator,i))>=last)
+            {
+                __stringBuffer.append(msg.substring(last,i));
+                __stringBuffer.append(indent);
+                i+=__lineSeparatorLen;
+                last=i;
+            }
+            if (msg.length()>last)
+                __stringBuffer.append(msg.substring(last));
 
-	    _out.println(__stringBuffer.toString());
-	    _out.flush();
+            _out.println(__stringBuffer.toString());
+            _out.flush();
 	}
     }
 
@@ -321,25 +326,6 @@ public class Log
     public static void warning(String message)
     {
 	Log.message(Log.WARN,message,new Frame(1));
-    }
-    
-    /*-------------------------------------------------------------------*/
-    /** Test Harness
-     */
-    static void test()
-    {
-	instance();
-	Log.message("TAG","MSG",new Frame());
-	Log.event("event");
-	Log.warning("warning");
-    }
-    
-    /*-------------------------------------------------------------------*/
-    /** Main for Code test harness
-     */
-    public static void main(String[] args)
-    {	
-	test();
     }
 }
 

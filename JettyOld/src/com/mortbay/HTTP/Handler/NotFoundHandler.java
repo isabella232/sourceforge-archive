@@ -53,7 +53,17 @@ public class NotFoundHandler extends NullHandler
 		       HttpResponse response)
 	 throws Exception
     {
-	response.sendError(response.SC_NOT_FOUND);
+	String method=request.getMethod();
+	if (method.equals(HttpRequest.GET))
+	    response.sendError(response.SC_NOT_FOUND);
+	else if (method.equals(HttpRequest.POST))
+	    response.sendError(response.SC_NOT_FOUND);
+	else if (method.equals(HttpRequest.HEAD))
+	    response.sendError(response.SC_NOT_FOUND);
+	else if (method.equals(HttpRequest.OPTIONS))
+	    response.sendError(response.SC_NOT_FOUND);
+	else
+	    response.sendError(response.SC_METHOD_NOT_ALLOWED);
     }    
 }
 

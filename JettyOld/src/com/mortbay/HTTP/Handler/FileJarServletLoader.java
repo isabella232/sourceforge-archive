@@ -37,7 +37,6 @@ public class FileJarServletLoader extends ServletLoader
 	"java.",
 	"javax."
     };
-
 	
     /* ------------------------------------------------------------ */
     /* Is the class a system class.
@@ -108,10 +107,9 @@ public class FileJarServletLoader extends ServletLoader
     /* ------------------------------------------------------------ */
     /** 
      */
-    private Class loadFromServletClassPath(String name)
+    private InputStream getStreamFromPath(String filename)
     {
-	String filename = name.replace('.',File.separatorChar)+".class";
-	Code.debug("Load ",name);
+	Code.debug("Load ",filename);
 	InputStream in=null;
 	int length=0;
 	
@@ -130,11 +128,12 @@ public class FileJarServletLoader extends ServletLoader
 		    {
 			// Try alternate file separator for jars prepared
 			// on other architectures.
+			String alt=null;
 			if (File.separatorChar=='/')
-			    filename=name.replace('.','\\')+".class";
+			    alt=filename.replace('/','\\');
 			else
-			    filename=name.replace('.','/')+".class";
-			entry = zip.getEntry(filename);
+			    alt=filename.replace(File.separatorChar,'/');
+			entry = zip.getEntry(alt);
 		    }
 		    
 		    if (entry!=null)
@@ -151,7 +150,7 @@ public class FileJarServletLoader extends ServletLoader
 		    File file = new File(dir+File.separator+filename);
 		    if (file.exists())
 		    {
-			Code.debug("Loading ",file);
+			Code.debug("Loading ",filename);
 			in = new FileInputStream(file);
 			length=(int)file.length();
 			
@@ -165,16 +164,28 @@ public class FileJarServletLoader extends ServletLoader
 	    }
 	    catch(Exception e)
 	    {
-		if (Code.verbose(9))
-		    Code.ignore(e);
+		if (Code.verbose())
+		    Code.debug(e);
 	    }
 	}
+	
+	return in;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     */
+    private Class loadClassFromPath(String name)
+    {
+	String filename = name.replace('.',File.separatorChar)+".class";
 
+	// Try for class
+	InputStream in=getStreamFromPath(filename);
 	if (in!=null)
 	{
 	    try{
 		ByteArrayOutputStream out =
-		    new ByteArrayOutputStream(length);
+		    new ByteArrayOutputStream(8192);
 		com.mortbay.Util.IO.copy(in,out);
 		
 		byte data[] = out.toByteArray();
@@ -189,6 +200,20 @@ public class FileJarServletLoader extends ServletLoader
 	
 	return null;
     }
+
+
+    /* ------------------------------------------------------------ */
+    /** Get a resource as a stream.
+     * Return the raw input stream from a file in the classpath
+     * @param filename The filename of the resource
+     * @return An InputStream to the resource or null
+     */
+    public InputStream getResourceAsStream(String filename)
+    {
+	return getStreamFromPath(filename);
+    }
+    
+
     
     /* ------------------------------------------------------------ */
     /** Load a class
@@ -198,7 +223,7 @@ public class FileJarServletLoader extends ServletLoader
      * @exception ClassNotFoundException 
      */
     synchronized
-    public Class loadClass(String name, boolean resolve)
+    public Class loadClass(String name)
 	throws ClassNotFoundException
     {
 	Class c;
@@ -230,16 +255,12 @@ public class FileJarServletLoader extends ServletLoader
 		return findSystemClass(name);
 	    
 	    // Load & define
-	    c=loadFromServletClassPath(name);
+	    c=loadClassFromPath(name);
 	    
 	    // Try the system class for additional CLASSPATH entries.
 	    // classes found here can't be reloaded.
 	    if (c==null)
 		return findSystemClass(name);
-	    
-	    // resolve
-	    if (resolve)
-		resolveClass(c);    
 	}
 	finally
 	{

@@ -340,7 +340,7 @@ public class FileHandler extends NullHandler
 	    handleDelete(request, response, uri, filename);
 	else if (request.getMethod().equals(HttpRequest.OPTIONS))
 	    handleOptions(response);
-	else if (request.getMethod().equals("MOVE"))
+	else if (request.getMethod().equals(HttpRequest.MOVE))
 	    handleMove(request, response, uri, filename, path);
 	else {
 	// anything else...
@@ -482,13 +482,11 @@ public class FileHandler extends NullHandler
 		   String uri, String filename)
 	throws Exception
     {
-	Code.debug("PUTting "+uri+" in "+filename);
-	if (!putAllowed){
-	    response.setHeader(HttpResponse.Allow,
-			       HttpRequest.GET + HttpRequest.HEAD +
-			       (deleteAllowed ? HttpRequest.DELETE : ""));
-	    response.sendError(response.SC_METHOD_NOT_ALLOWED);
-	}
+	Code.debug("PUT ",uri," in ",filename);
+
+	if (!putAllowed)
+	    return;
+	
 	try
 	{
 	    int toRead = request.getIntHeader(HttpHeader.ContentLength);
@@ -527,43 +525,41 @@ public class FileHandler extends NullHandler
 		      String uri, String filename)
 	throws Exception
     {
-	Code.debug("DELETE "+uri+" from "+filename);
+	Code.debug("DELETE ",uri," from ",filename);	
 	
+	File file = new File(filename);
+
+	if (!file.exists())
+	    return;
+
 	if (!deleteAllowed)
 	{
-	    response.setHeader(HttpResponse.Allow,
-			       HttpRequest.GET + HttpRequest.HEAD +
-			       (putAllowed ? HttpRequest.PUT : ""));
+	    setAllowHeader(response);
 	    response.sendError(response.SC_METHOD_NOT_ALLOWED);
 	    return;
 	}
-	File file = new File(filename);
-	if (!file.exists())
-	    response.sendError(response.SC_NOT_FOUND);
-	else
+	    
+	try
 	{
-	    try
+	    // delete the file
+	    file.delete();
+	    
+	    // flush the cache
+	    if (cacheMap!=null)
 	    {
-		// delete the file
-		file.delete();
-
-		// flush the cache
-		if (cacheMap!=null)
-		{
-		    CachedFile cachedFile=(CachedFile)cacheMap.get(filename);
-		    if (cachedFile!=null)
-			cachedFile.flush();
-		}
-		
-		// Send response
-		response.setStatus(response.SC_NO_CONTENT);
-		response.writeHeaders();
+		CachedFile cachedFile=(CachedFile)cacheMap.get(filename);
+		if (cachedFile!=null)
+		    cachedFile.flush();
 	    }
-	    catch (SecurityException sex)
-	    {
-		Code.warning(sex);
-		response.sendError(response.SC_FORBIDDEN, sex.getMessage());
-	    }
+	    
+	    // Send response
+	    response.setStatus(response.SC_NO_CONTENT);
+	    response.writeHeaders();
+	}
+	catch (SecurityException sex)
+	{
+	    Code.warning(sex);
+	    response.sendError(response.SC_FORBIDDEN, sex.getMessage());
 	}
     }
 
@@ -573,34 +569,48 @@ public class FileHandler extends NullHandler
 		    String uri, String filename, String path)
 	throws Exception
     {
-	if (!deleteAllowed || !putAllowed){
-	    response.setHeader(HttpResponse.Allow,
-			       HttpRequest.GET + HttpRequest.HEAD +
-			       (putAllowed ? HttpRequest.PUT : "") +
-			       (deleteAllowed ? HttpRequest.DELETE : ""));
+	if (!deleteAllowed || !putAllowed)
+	    return;
+	
+	File file = new File(filename);
+	if (!file.exists())
+	{
+	    if (deleteAllowed && putAllowed)
+		response.sendError(response.SC_NOT_FOUND);
+	    return;
+	}
+
+	if (!deleteAllowed || !putAllowed)
+	{
+	    setAllowHeader(response);
 	    response.sendError(response.SC_METHOD_NOT_ALLOWED);
 	    return;
 	}
+	
 	String newUri = request.getHeader("New-uri");
 	if (newUri.indexOf("..")>=0)
 	{
 	    response.sendError(405, "File contains ..");
 	    return;
 	}
+
 	// Find path
-	try {
+	try
+	{    
 	    String newPathInfo = PathMap.pathInfo(path,newUri);
 	    String newFilename = dirMap.get(path) +
 		(newPathInfo.startsWith("/")?"":File.separator)+
 		newPathInfo;
-	    File file = new File(filename);
 	    File newFile = new File(newFilename);
 	    Code.debug("Moving "+filename+" to "+newFilename);
 	    file.renameTo(newFile);
 	    response.setStatus(response.SC_NO_CONTENT);
 	    response.writeHeaders();
-	} catch (Exception ex){
+	}
+	catch (Exception ex)
+	{
 	    Code.warning(ex);
+	    setAllowHeader(response);
 	    response.sendError(response.SC_METHOD_NOT_ALLOWED, "Error:"+ex);
 	    return;
 	}
@@ -615,25 +625,28 @@ public class FileHandler extends NullHandler
     }
     
     /* ------------------------------------------------------------ */
-    void setAllowHeader(HttpResponse response){
-	if (allowHeader == null){
+    void setAllowHeader(HttpResponse response)
+    {
+	if (allowHeader == null)
+	{
 	    StringBuffer sb = new StringBuffer(128);
 	    sb.append(HttpRequest.GET);
-	    sb.append(" ");
+	    sb.append(", ");
 	    sb.append(HttpRequest.HEAD);
-	    sb.append(" ");
 	    if (putAllowed){
+		sb.append(", ");
 		sb.append(HttpRequest.PUT);
-		sb.append(" ");
 	    }
 	    if (deleteAllowed){
+		sb.append(", ");
 		sb.append(HttpRequest.DELETE);
-		sb.append(" ");
 	    }
-	    if (putAllowed && deleteAllowed){
-		sb.append("MOVE");
-		sb.append(" ");
+	    if (putAllowed && deleteAllowed)
+	    {
+		sb.append(", ");
+		sb.append(HttpRequest.MOVE);
 	    }
+	    sb.append(", ");
 	    sb.append(HttpRequest.OPTIONS);
 	    allowHeader = sb.toString();
 	}
