@@ -46,6 +46,7 @@ public class PlusWebAppContext extends WebApplicationContext
     )
     {
         super(webApp);
+        setConfiguration(new Configuration(this));
     }
 
     /* ------------------------------------------------------------ */

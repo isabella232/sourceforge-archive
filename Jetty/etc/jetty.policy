@@ -3,6 +3,7 @@
 // It should be used with a command like:
 //  java -Djetty.home=$JETTY_HOME -Dwebapp=jetty -Djava.security.manager -Djava.security.policy=file:$JETTY_HOME/etc/jetty.policy com.mortbay.Jetty.Demo
 //
+
 grant codeBase "file:${jetty.home}/lib/-" 
 {
   permission java.net.SocketPermission "localhost:1-65536", "connect,accept,listen,resolve";
@@ -10,7 +11,7 @@ grant codeBase "file:${jetty.home}/lib/-"
   permission java.util.PropertyPermission "*", "read,write";
   permission java.io.FilePermission "${jetty.home}${/}-", "read";
   permission java.io.FilePermission "${jetty.home}${/}logs${/}*", "read,write,delete";
-  permission java.io.FilePermission "${jetty.home}${/}cgi-bin${/}-", "read,execute";
+  permission java.io.FilePermission "${jetty.home}${/}demo${/}cgi-bin${/}-", "read,execute";
   permission java.io.FilePermission "${java.io.tmpdir}${/}-", "read,write,delete";
   permission java.security.SecurityPermission "putProviderProperty.SunJSSE";
   permission java.security.SecurityPermission "insertProvider.SunJSSE";

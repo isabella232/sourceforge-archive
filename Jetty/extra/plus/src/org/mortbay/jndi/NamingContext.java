@@ -351,6 +351,7 @@ public class NamingContext implements Context, Cloneable
                     }
                     catch (Exception e)
                     {
+			log.warn("",e);
                         throw new NamingException (e.getMessage());
                     }
                 }
@@ -444,6 +445,7 @@ public class NamingContext implements Context, Cloneable
                 }
                 catch (Exception e)
                 {
+		    log.warn("",e);
                     throw new NamingException (e.getMessage());
                 }
             }
@@ -560,6 +562,7 @@ public class NamingContext implements Context, Cloneable
                 }
                 catch (Exception e)
                 {
+		    log.warn("",e);
                     throw new NamingException (e.getMessage());
                 }
             }
@@ -599,6 +602,7 @@ public class NamingContext implements Context, Cloneable
                 }
                 catch (Exception e)
                 {
+		    log.warn("",e);
                     throw new NamingException (e.getMessage());
                 }
             }
@@ -670,6 +674,7 @@ public class NamingContext implements Context, Cloneable
                 }
                 catch (Exception e)
                 {
+		    log.warn("",e);
                     throw new NamingException (e.getMessage());
                 }
             }
@@ -709,6 +714,7 @@ public class NamingContext implements Context, Cloneable
                 }
                 catch (Exception e)
                 {
+		    log.warn("",e);
                     throw new NamingException (e.getMessage());
                 }
             }
@@ -793,6 +799,7 @@ public class NamingContext implements Context, Cloneable
                 }
                 catch (Exception e)
                 {
+		    log.warn("",e);
                     throw new NamingException (e.getMessage());
                 }
             }
@@ -876,6 +883,7 @@ public class NamingContext implements Context, Cloneable
                 }
                 catch (Exception e)
                 {
+		    log.warn("",e);
                     throw new NamingException (e.getMessage());
                 }
             }
@@ -964,6 +972,7 @@ public class NamingContext implements Context, Cloneable
                     }
                     catch (Exception e)
                     {
+			log.warn("",e);
                         throw new NamingException (e.getMessage());
                     }
                 }

@@ -85,7 +85,7 @@ public class DBTest
         }
         catch (Exception e)
         {
-            log.warn (e.getMessage());
+            log.warn ("init",e);
         }
         
     }
@@ -138,9 +138,9 @@ public class DBTest
             log.info(new StringBuffer().append("<<< foo = ").append(this.foo).append(" (after completion) >>>").toString());
             log.info("<<< done >>>");
         }
-        catch ( Exception  exception  )
+        catch (Exception e)
         {
-            log.warn(exception.getMessage());
+            log.warn("doIt",e);
         }
         return;
     }
@@ -174,7 +174,7 @@ public class DBTest
         }
         catch (Exception e)
         {
-            log.info(e.getMessage());
+            log.info(e);
             return fooValue;
         }
         finally
@@ -186,7 +186,7 @@ public class DBTest
             }
             catch (Exception e)
             {
-                log.warn(e.getMessage());
+                log.warn("readFoo",e);
             }
         }
     }

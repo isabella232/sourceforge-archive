@@ -327,6 +327,6 @@ Other targets:
   <!-- ==================================================================== -->
   <!-- all                                                                  -->
   <!-- ==================================================================== -->
-  <target name="all" depends="clean, jars" description="default">
+  <target name="all" depends="jars,webapps" description="default">
   </target>
 </project>

@@ -385,7 +385,7 @@ public class Main
                 continue;
             if(args[i].startsWith("-"))
             {
-                System.err.println("Usage: java [-DDEBUG] [-Dmain.class=org.MyMain]-jar start.jar [--help] [config ...]");
+                System.err.println("Usage: java [-DDEBUG] [-Dmain.class=org.MyMain] -jar start.jar [--help] [config ...]");
                 System.exit(1);
             }
             else

@@ -44,6 +44,7 @@ public class JotmWebAppContext extends WebApplicationContext
     public JotmWebAppContext(String webApp)
     {
         super(webApp);
+        setConfiguration(new Configuration(this));
     }
 
     /* ------------------------------------------------------------ */
