@@ -56,7 +56,6 @@ public class ChunkableOutputStream extends FilterOutputStream
     HttpFields _trailer;
     boolean _committed;
     boolean _written;
-    int _filters;
     ArrayList _observers;
     ByteArrayISO8859Writer _rawWriter;
     boolean _nulled=false;
@@ -85,7 +84,6 @@ public class ChunkableOutputStream extends FilterOutputStream
     {
         return _realOut;
     }
-
     
     /* ------------------------------------------------------------ */
     /** Get Writer for the raw stream.
@@ -103,6 +101,25 @@ public class ChunkableOutputStream extends FilterOutputStream
         return _rawWriter;
     }
     
+    /* ------------------------------------------------------------ */
+    /** Get Filter OutputStream.
+     * Get the current top of the OutputStream filter stack
+     * @return OutputStream.
+     */
+    public OutputStream getFilterStream()
+    {
+        return out;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set Filter OutputStream.
+     * Set output filter stream, which should be constructed to wrap
+     * the stream returned from get FilterStream.
+     */
+    public void setFilterStream(OutputStream filter)
+    {
+        out=filter;
+    }
     
     /* ------------------------------------------------------------ */
     /** Has any data been written to the stream.
@@ -198,7 +215,6 @@ public class ChunkableOutputStream extends FilterOutputStream
         _buffer.reset();
 	_bytes=0;
         out=_buffer;
-        _filters=0;
         _written=false;
         _committed=false;
         try
@@ -214,7 +230,9 @@ public class ChunkableOutputStream extends FilterOutputStream
     /* ------------------------------------------------------------ */
     /** Add an Output Observer.
      * Output Observers get notified of significant events on the
-     * output stream. They are removed when the stream is closed.
+     * output stream. Observers are called in the reverse order they
+     * were added.
+     * They are removed when the stream is closed.
      * @param observer The observer. 
      */
     public void addObserver(OutputObserver observer)
@@ -222,6 +240,24 @@ public class ChunkableOutputStream extends FilterOutputStream
         if (_observers==null)
             _observers=new ArrayList(4);
         _observers.add(observer);
+        _observers.add(null);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add an Output Observer.
+     * Output Observers get notified of significant events on the
+     * output stream. Observers are called in the reverse order they
+     * were added.
+     * They are removed when the stream is closed.
+     * @param observer The observer. 
+     * @param data Data to be passed wit notify calls. 
+     */
+    public void addObserver(OutputObserver observer, Object data)
+    {
+        if (_observers==null)
+            _observers=new ArrayList(4);
+        _observers.add(observer);
+        _observers.add(data);
     }
     
     
@@ -273,14 +309,14 @@ public class ChunkableOutputStream extends FilterOutputStream
         _written=false;
         _buffer.reset();
         out=_buffer;    
-        _filters=0;
         _nulled=false;
         _bytes=0;
 
         if (_rawWriter!=null)
-        {
             _rawWriter.reset();
-        }
+
+        if (_observers!=null)
+            _observers.clear();
     }
         
     /* ------------------------------------------------------------ */
@@ -290,31 +326,8 @@ public class ChunkableOutputStream extends FilterOutputStream
     {
         return _chunking;
     }
-    
-    /* ------------------------------------------------------------ */
-    /** Insert FilterOutputStream.
-     * Place a Filtering OutputStream into this stream, but before the
-     * chunking stream.  
-     * @param filter The Filter constructor.  It must take an OutputStream
-     *             as the first arguement.
-     * @param arg  Optional argument array to pass to filter constructor.
-     *             The first element of the array is replaced with the
-     *             current output stream.
-     */
-    public void insertFilter(Constructor filter,
-                                          Object[] args)
-        throws InstantiationException,
-               InvocationTargetException,
-               IllegalAccessException
-    {
-        if (args==null || args.length<1)
-            args=new Object[1];
-        
-        args[0]=out;
-        out=(OutputStream)filter.newInstance(args);
-        _filters++;
-    }
 
+    
     /* ------------------------------------------------------------ */
     /** Set the trailer to send with a chunked close.
      * @param trailer 
@@ -511,11 +524,12 @@ public class ChunkableOutputStream extends FilterOutputStream
         throws IOException
     {
         if (_observers!=null)
-            for (int i=0;i<_observers.size();i++)
-                ((OutputObserver)_observers.get(i))
-                    .outputNotify(this,action);
+            for (int i=_observers.size();i-->0;)
+            {
+                Object data=_observers.get(i--);
+                ((OutputObserver)_observers.get(i)).outputNotify(this,action,data);
+            }
     }
-
 
     /* ------------------------------------------------------------ */
     public void write(InputStream in, int len)

@@ -25,21 +25,11 @@ public class HttpEncoding
         {
             if ("gzip".equalsIgnoreCase(coding))
             {
-                if (parameters!=null && parameters.size()>0)
-                    throw new HttpException(HttpResponse.__501_Not_Implemented,
-                                            "gzip parameters");
-                in.insertFilter(java.util.zip.GZIPInputStream.class
-                                .getConstructor(ChunkableInputStream.__filterArg),
-                                null);
+                in.setFilterStream(new java.util.zip.GZIPInputStream(in.getFilterStream()));
             }
             else if ("deflate".equalsIgnoreCase(coding))
             {
-                if (parameters!=null && parameters.size()>0)
-                    throw new HttpException(HttpResponse.__501_Not_Implemented,
-                                            "deflate parameters");
-                in.insertFilter(java.util.zip.InflaterInputStream.class
-                                .getConstructor(ChunkableInputStream.__filterArg),
-                                null);
+                in.setFilterStream(new java.util.zip.InflaterInputStream(in.getFilterStream()));
             }
             else throw new
                 HttpException(HttpResponse.__501_Not_Implemented);   
@@ -72,21 +62,11 @@ public class HttpEncoding
         {
             if ("gzip".equalsIgnoreCase(coding))
             {
-                if (parameters!=null && parameters.size()>0)
-                    throw new HttpException(HttpResponse.__501_Not_Implemented,
-                                            "gzip parameters");
-                out.insertFilter(java.util.zip.GZIPOutputStream.class
-                                 .getConstructor(ChunkableOutputStream.__filterArg),
-                                 null);
+                out.setFilterStream(new java.util.zip.GZIPOutputStream(out.getFilterStream()));
             }
             else if ("deflate".equalsIgnoreCase(coding))
             {
-                if (parameters!=null && parameters.size()>0)
-                    throw new HttpException(HttpResponse.__501_Not_Implemented,
-                                            "deflate parameters");
-                out.insertFilter(java.util.zip.DeflaterOutputStream.class
-                                 .getConstructor(ChunkableOutputStream.__filterArg),
-                                null);
+                out.setFilterStream(new java.util.zip.DeflaterOutputStream(out.getFilterStream()));
             }
             else
                 throw new HttpException(HttpResponse.__501_Not_Implemented);

@@ -19,13 +19,14 @@ my be specified if a match is not achieved.
 $Id$
 -->
 
-<!ENTITY % CONFIG "Set|Put|Call|New">
-<!ENTITY % TYPE "String|Character|Short|Byte|Integer|Long|Boolean|Float|Double|char|short|byte|int|long|boolean|float|double|URL|InetAddress|InetAddrPort">
+<!ENTITY % CONFIG "Get|Set|Put|Call|New">
 <!ENTITY % VALUE "#PCDATA|Call|New|SystemProperty|Array">
-<!ENTITY % TYPEATTR "type (%TYPE;) #IMPLIED " >
+
+<!ENTITY % TYPEATTR "type CDATA #IMPLIED " > <!-- String|Character|Short|Byte|Integer|Long|Boolean|Float|Double|char|short|byte|int|long|boolean|float|double|URL|InetAddress|InetAddrPort| #classname -->
+<!ENTITY % IMPLIEDCLASSATTR "class NMTOKEN #IMPLIED" >
 <!ENTITY % CLASSATTR "class NMTOKEN #REQUIRED" >
 <!ENTITY % NAMEATTR "name NMTOKEN #REQUIRED" >
-
+<!ENTITY % DEFAULTATTR "default CDATA #IMPLIED" >
 <!--
 Configure Element.
 This is the root element that specifies the class of object that
@@ -53,6 +54,16 @@ specified type.
 <!ELEMENT Set ( %VALUE; )* >
 <!ATTLIST Set %NAMEATTR; %TYPEATTR; >
 
+
+<!--
+Get Element.
+This element maps to a call to a get method on the current object.
+The name attribute used to select the get method.
+A Get element can contain Set, Put and/or Call elements which act on the object
+returned by the get call.
+-->
+<!ELEMENT Get (%CONFIG;)*>
+<!ATTLIST Get %NAMEATTR;>
 
 <!--
 Put Element.
@@ -87,9 +98,11 @@ This is equivalent to:
  Object o2 = o1.test("value1");
  o2.setTest("value2");
 
+A Call with a class atribute is treated as a static call.
+
 -->
 <!ELEMENT Call (Arg*,(%CONFIG;)*)>
-<!ATTLIST Call %NAMEATTR;>
+<!ATTLIST Call %NAMEATTR; %IMPLIEDCLASSATTR;>
 
 
 <!--
@@ -182,7 +195,7 @@ This is equivalent to:
 
 -->
 <!ELEMENT SystemProperty EMPTY>
-<!ATTLIST SystemProperty %NAMEATTR; default CDATA #IMPLIED>
+<!ATTLIST SystemProperty %NAMEATTR; %DEFAULTATTR;>
 
 
 

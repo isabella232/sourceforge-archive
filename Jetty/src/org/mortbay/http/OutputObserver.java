@@ -25,10 +25,11 @@ public interface OutputObserver
         __CLOSED=5;
     
     /* ------------------------------------------------------------ */
-    /** XXX 
-     * @param out 
-     * @param action 
+    /** Notify an output action.
+     * @param out The OutputStream that caused the event
+     * @param action The action taken
+     * @param data Data associated with the event.
      */
-    void outputNotify(ChunkableOutputStream out, int action)
+    void outputNotify(ChunkableOutputStream out, int action, Object data)
         throws IOException;
 }

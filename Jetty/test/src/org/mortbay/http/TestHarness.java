@@ -216,9 +216,8 @@ public class TestHarness
                 new FileOutputStream(tmpFile);
             ChunkableOutputStream cout = new ChunkableOutputStream(fout);
             cout.setChunking();
-            
-            cout.insertFilter(java.util.zip.GZIPOutputStream.class
-                              .getConstructor(cout.__filterArg),null);
+
+            cout.setFilterStream(new java.util.zip.GZIPOutputStream(cout.getFilterStream()));
             
             byte[] data =
                 "ABCDEFGHIJKlmnopqrstuvwxyz;:#$0123456789\n".getBytes();
@@ -231,8 +230,7 @@ public class TestHarness
                 new FileInputStream(tmpFile);
             ChunkableInputStream cin = new ChunkableInputStream(fin);
             cin.setChunking();
-            cin.insertFilter(java.util.zip.GZIPInputStream.class
-                              .getConstructor(cin.__filterArg),null);
+            cin.setFilterStream(new java.util.zip.GZIPInputStream(cin.getFilterStream()));
             
             for (int i=0;i<400;i++)
             {

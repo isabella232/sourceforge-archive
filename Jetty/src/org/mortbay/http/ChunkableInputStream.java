@@ -36,16 +36,13 @@ public class ChunkableInputStream extends FilterInputStream
 {
     /* ------------------------------------------------------------ */
     /** Limit max line length */
-    public static int __maxLineLength=4096;
-    
-    public final static Class[] __filterArg = {java.io.InputStream.class};
+    public static int __maxLineLength=4096;    
     private static ClosedStream __closedStream=new ClosedStream();
     
     /* ------------------------------------------------------------ */
     private DeChunker _deChunker;
     private LineInput _realIn;
     private boolean _chunking;
-    private int _filters;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -72,6 +69,26 @@ public class ChunkableInputStream extends FilterInputStream
     public InputStream getRawStream()
     {
         return _realIn;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get Filter InputStream.
+     * Get the current top of the InputStream filter stack
+     * @return InputStream.
+     */
+    public InputStream getFilterStream()
+    {
+        return in;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set Filter InputStream.
+     * Set input filter stream, which should be constructed to wrap
+     * the stream returned from get FilterStream.
+     */
+    public void setFilterStream(InputStream filter)
+    {
+        in=filter;
     }
     
     /* ------------------------------------------------------------ */
@@ -117,7 +134,6 @@ public class ChunkableInputStream extends FilterInputStream
         if (Code.verbose())
             Code.debug("resetStream()");
         in=_realIn;
-        _filters=0;
         if (_deChunker!=null)
             _deChunker.resetStream();
         _chunking=false;
@@ -129,30 +145,6 @@ public class ChunkableInputStream extends FilterInputStream
         throws IOException
     {
         in=__closedStream;
-    }
- 
-    /* ------------------------------------------------------------ */
-    /** Insert FilterInputStream.
-     * Place a Filtering InputStream into this stream, after the
-     * chunking stream.  
-     * @param filter The Filter constructor.  It must take an InputStream
-     *             as the first arguement.
-     * @param arg  Optional argument array to pass to filter constructor.
-     *             The first element of the array is replaced with the
-     *             current input stream.
-     */
-    public void insertFilter(Constructor filter,
-                             Object[] args)
-        throws InstantiationException,
-               InvocationTargetException,
-               IllegalAccessException
-    {
-        if (args==null || args.length<1)
-            args=new Object[1];
-        
-        args[0]=in;
-        in=(InputStream)filter.newInstance(args);
-        _filters++;
     }
     
     

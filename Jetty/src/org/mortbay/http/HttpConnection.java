@@ -336,8 +336,6 @@ public class HttpConnection
                     _codingParams.clear();
             }
             
-
-            
             while(transfer_coding.hasMoreElements())
                 _codings.add(transfer_coding.nextElement());
 
@@ -356,7 +354,7 @@ public class HttpConnection
                 if (HttpFields.__Chunked.equalsIgnoreCase(coding))
                 {
                     // chunking must be last and have no parameters
-                    if (i+1<_codings.size() || _codingParams.size()>0)
+                    if (i+1<_codings.size() || _codingParams!=null&&_codingParams.size()>0)
                         throw new HttpException(HttpResponse.__400_Bad_Request);
                     _inputStream.setChunking();
                 }
@@ -441,7 +439,7 @@ public class HttpConnection
      * @param out The output stream observed.
      * @param action The action.
      */
-    public void outputNotify(ChunkableOutputStream out, int action)
+    public void outputNotify(ChunkableOutputStream out, int action, Object ignoredData)
         throws IOException
     {
         if (_response==null)
@@ -548,22 +546,23 @@ public class HttpConnection
             // Use transfer encodings to determine length
             _response.removeField(HttpFields.__ContentLength);
             
-            if (_codingParams==null)
-            {
-                _codingParams=new HashMap(7);
-                _codings=new ArrayList(4);
-            }
+            if (_codings==null)
+                _codings=new ArrayList(2);
             else
             {
-                _codingParams.clear();
                 _codings.clear();
+                if (_codingParams!=null)
+                    _codingParams.clear();
             }
-            
+
+            // Handle transfer encoding
             while(transfer_coding.hasMoreElements())
                 _codings.add(transfer_coding.nextElement());
             for(int i=_codings.size();i-->0;)
             {        
                 String value=_codings.get(i).toString();
+                if (_codingParams==null && value.indexOf(';')>0)
+                    _codingParams=new HashMap(7);
                 String coding=HttpFields.valueParameters(value,_codingParams);
                 
                 if (HttpFields.__Identity.equalsIgnoreCase(coding))
@@ -577,7 +576,7 @@ public class HttpConnection
                 if (HttpFields.__Chunked.equalsIgnoreCase(coding))
                 {
                     // chunking must be last and have no parameters
-                    if (i+1<_codings.size() || _codingParams.size()>0)
+                    if (i+1<_codings.size() || _codingParams!=null&&_codingParams.size()>0)
                         throw new HttpException(_response.__400_Bad_Request,
                                                 "Missing or incorrect chunked transfer-encoding");
                     _outputStream.setChunking();
@@ -975,6 +974,7 @@ public class HttpConnection
                         _outputStream.flush(_outputStream.isChunking());
                         bytes_written=_outputStream.getBytesWritten();
                         _outputStream.resetStream();
+                        _outputStream.addObserver(this);
                         _inputStream.resetStream();
                     }
                     catch(IOException e) {exception(e);}
@@ -984,6 +984,7 @@ public class HttpConnection
                     // half hearted attempt to eat any remaining input
                     try{
                         while(_inputStream.skip(4096)>0 ||_inputStream.read()>=0);
+                        _inputStream.resetStream();
                     }
                     catch(IOException e){Code.ignore(e);}
                 
@@ -994,6 +995,7 @@ public class HttpConnection
                         _outputStream.flush();
                         bytes_written=_outputStream.getBytesWritten();
                         _outputStream.close();
+                        _outputStream.resetStream();
                     }
                     catch(IOException e) {exception(e);}
                 }

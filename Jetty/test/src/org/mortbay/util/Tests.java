@@ -129,7 +129,7 @@ public class Tests extends junit.framework.TestCase
         else
         {
             fail('"' + subString + "\" not contained in \"" +
-                             string.substring(offset) + '"');
+                 (string==null?"null":string.substring(offset))+ '"');
         }
         return index;
     }

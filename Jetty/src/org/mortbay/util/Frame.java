@@ -18,7 +18,7 @@ public class Frame
      * of lock contention in multi threaded debugging */
     private static Throwable __throwable = new Throwable();
     private static StringBuffer __stringBuffer = new StringBuffer();
-    private static StringBufferWriter __stringBufferWriter = new StringBufferWriter();
+    private static StringBufferWriter __stringBufferWriter = new StringBufferWriter(__stringBuffer);
     private static PrintWriter __printWriter = new PrintWriter(__stringBufferWriter,false);
     private static final String __lineSeparator = System.getProperty("line.separator");
     private static final int __lineSeparatorLen = __lineSeparator.length();

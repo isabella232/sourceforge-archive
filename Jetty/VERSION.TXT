@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
 Jetty-4.0.RC1 - wait for it....
+ + Simplified filter API to chunkable streams
  + XmlParser is validating by default. use o.m.x.XmlParser.NotValidating property to change.
  + contextDestroyed event sent before destruction.
  + Minor changes to make HttpServer work on J2ME CVM
