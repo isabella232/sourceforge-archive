@@ -332,37 +332,15 @@ public class HttpFields
                 header=source.get(i).toString();
             
             QuotedStringTokenizer tok =
-                new QuotedStringTokenizer(header,separators,true,false);
+                new QuotedStringTokenizer(header,separators,false,false);
             header=null;
             
-            String value=null;
-            boolean space=false;
             while (tok.hasMoreTokens())
             {
                 String token=tok.nextToken();
-                if (",".equals(token))
-                {
-                    if (value!=null)
-                        values.add(QuotedStringTokenizer.unquote(value));
-                    value=null;
-                }
-                else if (" ".equals(token) || "\t".equals(token))
-                    space=(value!=null);
-                else if (value==null)
-                {
-                    value=token;
-                    space=false;
-                }
-                else if (space)
-                {
-                    value+=" "+token;
-                    space=false;
-                }
-                else
-                    value+=token;
+                if (token!=null)
+                    values.add(QuotedStringTokenizer.unquote(token));
             }   
-            if(value!=null)
-                values.add(QuotedStringTokenizer.unquote(value));
         }
         return values;
     }

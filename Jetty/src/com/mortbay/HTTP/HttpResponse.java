@@ -166,8 +166,8 @@ public class HttpResponse extends HttpMessage
 
     /* ------------------------------------------------------------ */
     /** Reset the response.
-     * Clears any data that exists in the buffer as well as the status code and
-     * headers.  If the response has been committed, this method throws an 
+     * Clears any data that exists in the buffer as well as the status
+     * code. If the response has been committed, this method throws an 
      * <code>IllegalStateException</code>.
      *
      * @exception IllegalStateException  if the response has already been

@@ -360,7 +360,7 @@ abstract public class HttpMessage
     public int getIntField(String name)
     {
         int v=_header.getIntField(name);
-        if (v<0 && _trailer!=null)
+        if (v==-1 && _trailer!=null)
             v=_trailer.getIntField(name);
         return v;
     }

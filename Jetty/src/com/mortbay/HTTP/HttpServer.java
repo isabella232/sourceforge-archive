@@ -855,14 +855,14 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
      * @param request 
      * @param response 
      */
-    public synchronized void log(HttpRequest request,HttpResponse response)
+    public synchronized void log(HttpRequest request,
+                                 HttpResponse response,
+                                 int length)
     {
         // Log request - XXX should be in HttpHandler
         if (_logSink!=null && request!=null && response!=null)
         {
-            int length =
-                response.getIntField(HttpFields.__ContentLength);
-            String bytes = ((length>=0)?Long.toString(length):"-");
+            String bytes = ((length>=0)?Integer.toString(length):"-");
             String user = (String)request.getAttribute(HttpRequest.__AuthUser);
             if (user==null)
                 user = "-";

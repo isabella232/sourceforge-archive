@@ -358,6 +358,10 @@ public class HttpConnection
             catch (Error e)         {exception(e);}
             finally
             {
+                int content_length = _response==null
+                    ?-1:_response.getIntField(HttpFields.__ContentLength);
+                int bytes_written=0;
+                
                 // Complete the request
                 if (_persistent)
                 {
@@ -387,6 +391,7 @@ public class HttpConnection
                     // Commit the response
                     try{
                         _outputStream.flush(_outputStream.isChunking());
+                        bytes_written=_outputStream.getBytesWritten();
                         _outputStream.resetStream();
                         _inputStream.resetStream();
                     }
@@ -394,22 +399,39 @@ public class HttpConnection
                 }
                 else
                 {
+                    // commit non persistent
                     try{
                         if (_response!=null)
                             _response.commit();
                         _outputStream.flush();
+                        bytes_written=_outputStream.getBytesWritten();
                         _outputStream.close();
                     }
                     catch(IOException e) {exception(e);}
                 }
 
-                // Log request and response
+                // Check response length
                 if (Code.debug())
                     Code.debug("RESPONSE:\n",_response);
-                if (logRequest && _httpServer!=null && _response!=null)
-                    _httpServer.log(_request,_response);
-            }    
-        }while(_persistent);
+                if (_response!=null)
+                {
+                    if (content_length>=0 && bytes_written>0 && content_length!=bytes_written)
+                    {
+                        Code.warning("Invalid length: Content-Length="+content_length+
+                                     " bytes written="+bytes_written+
+                                     " for "+_request.getRequestURL());
+                        _persistent=false;
+                        try{_outputStream.close();}
+                        catch(IOException e) {Code.warning(e);}
+                    }
+                    
+                    // Log request and response
+                    if (logRequest && _httpServer!=null)
+                        _httpServer.log(_request,_response,bytes_written);
+                }
+            }
+        }
+        while(_persistent);
         
         // Destroy request and response
         if (_request!=null)
@@ -805,22 +827,40 @@ public class HttpConnection
         {
             if(_persistent)
             {
-                _response.setIntField(HttpFields.__ContentLength,0);
-                if (_dotVersion==0)
+                switch (_dotVersion)
                 {
-                    // Netscape does not like empty responses with
-                    // keep-alive
-                    if (_response.getStatus()==200)
-                    {
-                        _close=true;
-                        _persistent=false;
-                        _response.setField(HttpFields.__Connection,
-                                           HttpFields.__Close);
-                    }
-                    else
-                        // Keep it alive
-                        _response.setField(HttpFields.__Connection,
-                                           HttpFields.__KeepAlive);
+                  case 0:
+                      {
+                          // Netscape does not like empty 200s with
+                          // keep-alive
+                          if (_response.getStatus()==200)
+                          {
+                              _close=true;
+                              _persistent=false;
+                              _response.setField(HttpFields.__Connection,
+                                                 HttpFields.__Close);
+                          }
+                          else
+                          {
+                              _response.setIntField(HttpFields.__ContentLength,0);
+                              // Keep it alive
+                              _response.setField(HttpFields.__Connection,
+                                                 HttpFields.__KeepAlive);
+                          }
+                      }
+                      break;
+                  case 1:
+                      {
+                          // force chunking on.
+                          _response.setField(HttpFields.__TransferEncoding,
+                                             HttpFields.__Chunked);
+                          _outputStream.setChunking();
+                      }
+                      break;
+                      
+                  default:
+                    _response.setIntField(HttpFields.__ContentLength,0);
+                      break;
                 }
             }
             else

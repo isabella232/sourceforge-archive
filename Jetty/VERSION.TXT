@@ -1,11 +1,32 @@
 Jetty Versions
 --------------
 
+ + Added query param handling to ForwardHandler
+ + Improved handling of empty responses at header commit.
+   Allow empty commit and then extra content to be written.
+ + Warn and close connections if content-length is incorrectly set.
+ + Request log contains bytes actually returned.
+ + Fixed handling of multiple cookies.
+ + Fixed EOF handlding in MultiPartRequest.
+ + Fixed sync of ThreadPool idleSet.
+
 Jetty-3.1.rc4 - 14 April 2001
  + Include full versions of JAXP and Crimson
  + Added idle thread getter to ThreadPool.
  + Load-on-startup the JspServlet so that precompiled servlets work.
  + Removed stray debug println from the Frame class.
+
+Jetty-3.0.5 - 14 Apr 2001
+ + Branched from 3.1 trunk to fix major errors
+ + Fixed LineInput bug EOF
+ + Improved flush ordering for forwarded requests.
+ + Turned off range handling by default until bugs resolved
+ + Don't chunk if content length is known.
+ + fixed getLocales handling of quality params
+ + Created better random session ID
+ + Resource handler strips URL params like JSESSION.
+ + Fixed session invalidation unbind notification to conform with spec
+ + Load-on-startup the JspServlet so that precompiled servlets work.
 
 Jetty-3.1.rc3 - 9 April 2001
  + Implemented multi-part ranges so that acrobat is happy.

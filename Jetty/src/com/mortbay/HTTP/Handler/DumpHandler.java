@@ -100,13 +100,17 @@ public class DumpHandler extends NullHandler
             }
         }
         
-        String set_cookie=request.getParameter("CookieName");
-        if (set_cookie!=null && set_cookie.trim().length()>0)
+        String cookie_name=request.getParameter("CookieName");
+        if (cookie_name!=null && cookie_name.trim().length()>0)
         {
+            String cookie_action=request.getParameter("Button");
             try{
-                set_cookie=set_cookie.trim();
-                String cv=request.getParameter("CookieVal");
-                response.addSetCookie(set_cookie,cv);
+                Cookie cookie=
+                    new Cookie(cookie_name.trim(),
+                               request.getParameter("CookieVal"));
+                if ("Clear Cookie".equals(cookie_action))
+                    cookie.setMaxAge(0);
+                response.addSetCookie(cookie);
             }
             catch(IllegalArgumentException e)
             {

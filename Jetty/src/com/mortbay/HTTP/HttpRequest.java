@@ -837,7 +837,7 @@ public class HttpRequest extends HttpMessage
             {
                 try
                 {
-                    String c = iter.next().toString();
+                    String c = iter.next().toString().trim();
                     int e = c.indexOf("=");
                     String n;
                     String v;

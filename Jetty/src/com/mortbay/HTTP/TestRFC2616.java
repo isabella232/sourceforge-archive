@@ -1033,7 +1033,7 @@ public class TestRFC2616
                             "Location: /dump",
                             "redirected");
             t.checkContains(response,offset,
-                            "Content-Length: 0",
+                            "Transfer-Encoding: chunked",
                             "content length");
             
             offset=t.checkContains(response,offset,

@@ -63,6 +63,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     OutputStreamWriter _rawWriter;
     RawOutputStream _rawWriterBuffer;
     boolean _nulled=false;
+    int _bytes;
     
     
     /* ------------------------------------------------------------ */
@@ -168,6 +169,11 @@ public class ChunkableOutputStream extends FilterOutputStream
         _buffer.ensureCapacity(capacity);
     }
 
+    /* ------------------------------------------------------------ */
+    public int getBytesWritten()
+    {
+        return _bytes;
+    }
     
     /* ------------------------------------------------------------ */
     /** Reset Buffered output.
@@ -283,6 +289,7 @@ public class ChunkableOutputStream extends FilterOutputStream
         out=_buffer;    
         _filters=0;
         _nulled=false;
+        _bytes=0;
 
         if (_rawWriter!=null)
         {
@@ -352,6 +359,7 @@ public class ChunkableOutputStream extends FilterOutputStream
             notify(OutputObserver.__FIRST_WRITE);
         }
         
+        _bytes++;
         out.write(b);
         if (_buffer.isFull())
             flush();
@@ -365,6 +373,7 @@ public class ChunkableOutputStream extends FilterOutputStream
             _written=true;
             notify(OutputObserver.__FIRST_WRITE);
         }
+        _bytes+=b.length;
         out.write(b);
         if (_buffer.isFull())
             flush();
@@ -378,6 +387,7 @@ public class ChunkableOutputStream extends FilterOutputStream
             _written=true;
             notify(OutputObserver.__FIRST_WRITE);
         }
+        _bytes+=len;
         out.write(b,off,len);
         if (_buffer.isFull())
             flush();
