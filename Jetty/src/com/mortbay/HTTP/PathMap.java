@@ -272,6 +272,7 @@ public class PathMap extends HashMap
         _prefixMap.clear();
         super.clear();
     }
+
     
     /* --------------------------------------------------------------- */
     /** Return the portion of a path that matches a path spec.
@@ -279,13 +280,13 @@ public class PathMap extends HashMap
      */
     public static String pathMatch(String pathSpec, String path)
         throws IllegalArgumentException
-    {
+    {  
         if (pathSpec==null ||
             pathSpec.startsWith("*."))
             return path;
 
         if (pathSpec.equals("/"))
-            return null;
+            return "";
         
         if (pathSpec.startsWith("/"))
         {
@@ -319,11 +320,7 @@ public class PathMap extends HashMap
             return null;
 
         if (pathSpec.equals("/"))
-	{
-	    if ("/".equals(path))
-		return null;
             return path;
-        }
 	
         if (pathSpec.startsWith("/"))
         {

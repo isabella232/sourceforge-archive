@@ -68,7 +68,7 @@ public class HandlerContext
     /* ------------------------------------------------------------ */
     /** Sets the file base for the context.
      * Also sets the com.mortbay.HTTP.fileBase context attribute
-     * @param fileBase 
+     * @param fileBase A directory name.
      */
     public void setFileBase(String fileBase)
     {
@@ -104,7 +104,7 @@ public class HandlerContext
      * If a relative file is passed, it is converted to a file
      * URL based on the current working directory.
      * Also sets the com.mortbay.HTTP.resouceBase context attribute
-     * @param resourceBase 
+     * @param resourceBase A URL prefix or directory name.
      */
     public void setResourceBase(String resourceBaseUrl)
     {

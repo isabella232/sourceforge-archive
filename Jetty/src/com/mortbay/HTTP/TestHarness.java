@@ -335,7 +335,7 @@ public class TestHarness
             t.checkEquals(p.pathMatch("/Foo/bar","/Foo/bar"),"/Foo/bar","pathInfo exact");
             t.checkEquals(p.pathMatch("/Foo/*","/Foo/bar"),"/Foo","pathInfo prefix");
             t.checkEquals(p.pathMatch("*.ext","/Foo/bar.ext"),"/Foo/bar.ext","pathInfo suffix");
-            t.checkEquals(p.pathMatch("/","/Foo/bar.ext"),null,"pathInfo default");
+            t.checkEquals(p.pathMatch("/","/Foo/bar.ext"),"","pathMatch default");
             
             t.checkEquals(p.pathInfo("/Foo/bar","/Foo/bar"),null,"pathInfo exact");
             t.checkEquals(p.pathInfo("/Foo/*","/Foo/bar"),"/bar","pathInfo prefix");

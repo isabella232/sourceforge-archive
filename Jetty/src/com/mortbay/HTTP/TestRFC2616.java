@@ -414,7 +414,7 @@ public class TestRFC2616
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200","Default host")+1;
             offset=t.checkContains(response,offset,
-                                   "match=null","Default host")+1;
+                                   "match=","Default host")+1;
             offset=t.checkContains(response,offset,
                                    "info=/path/R1","Default host")+1;
             

@@ -394,7 +394,6 @@ public class HttpConnection
         {
             // Handle HTTP Exception by sending error code (if output not
             // committed) and closing connection.
-            Code.warning(e);
             _persistent=false;
             if (_outputStream.isCommitted())
             {
