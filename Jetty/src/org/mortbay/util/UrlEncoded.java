@@ -3,7 +3,6 @@
 package org.mortbay.util;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -103,7 +102,7 @@ public class UrlEncoded extends MultiMap
                 
                 if (s==0)
                 {
-                    result.append(URLEncoder.encode(key));
+                    result.append(encodeString(key,charset));
                     if(equalsForNullValue)
                         result.append('=');
                 }
