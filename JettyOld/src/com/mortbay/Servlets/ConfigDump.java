@@ -66,7 +66,7 @@ public class ConfigDump extends HttpServlet
 	{
 	    String path = (String)e.nextElement();
 	    page.add("Stack at "+path);
-	    List list = new List(List.Ordered);
+	    com.mortbay.HTML.List list = new com.mortbay.HTML.List(com.mortbay.HTML.List.Ordered);
 	    page.add(list);
 	    HttpHandler[] handlers = (HttpHandler[])pm.get(path);
 	    for (int h=0;h<handlers.length;h++)
