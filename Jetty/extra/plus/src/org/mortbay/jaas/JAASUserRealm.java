@@ -14,6 +14,7 @@ import org.mortbay.http.UserPrincipal;
 import org.mortbay.http.UserRealm;
 import org.mortbay.jaas.callback.AbstractCallbackHandler;
 import org.mortbay.jaas.callback.DefaultCallbackHandler;
+import org.mortbay.util.Loader;
 import org.mortbay.util.Log;
 
 
@@ -39,7 +40,7 @@ public class JAASUserRealm implements UserRealm
 {
     protected String realmName;
     protected String loginModuleName;
-    protected AbstractCallbackHandler callbackHandler;
+    protected String callbackHandlerClass;
     protected HashMap userMap;
     protected RoleCheckPolicy roleCheckPolicy;
 
@@ -150,11 +151,11 @@ public class JAASUserRealm implements UserRealm
      * Set up a specifc CallbackHandler. 
      * If not called, then the DefaultCallbackHandler is used.
      *
-     * @param handler an <code>AbstractCallbackHandler</code> value
+     * @param handler an <code>String</code> value
      */
-    public void setCallbackHandler (AbstractCallbackHandler handler)
+    public void setCallbackHandlerClass (String cname)
     {
-        callbackHandler = handler;
+        callbackHandlerClass = cname;
     }
     
     
@@ -181,7 +182,11 @@ public class JAASUserRealm implements UserRealm
     {
         try
         {
-            UserInfo info = (UserInfo)userMap.get(username);
+            UserInfo info = null;
+            synchronized (this)
+            {
+                info = (UserInfo)userMap.get(username);
+            }
 
             //user has been previously authenticated, but
             //re-authentication has been requested, so flow that 
@@ -190,16 +195,24 @@ public class JAASUserRealm implements UserRealm
             //TODO: ensure cache state and "logged in status" are synchronized
             if (info != null)
             {
-                userMap.remove (username);
+                synchronized (this)
+                {
+                    userMap.remove (username);
+                }
             }
 
 
+            AbstractCallbackHandler callbackHandler = null;
+            
             //user has not been authenticated
-            if (callbackHandler == null)
+            if (callbackHandlerClass == null)
             {
                 Log.warning ("No CallbackHandler configured: using DefaultCallbackHandler");
                 callbackHandler = new DefaultCallbackHandler();
             }
+            else
+                callbackHandler = (AbstractCallbackHandler)Loader.loadClass(JAASUserRealm.class, callbackHandlerClass).getConstructors()[0].newInstance(new Object[0]);
+
 
             callbackHandler.setUserName(username);
             callbackHandler.setCredential(credentials);
@@ -216,11 +229,14 @@ public class JAASUserRealm implements UserRealm
             userPrincipal.setSubject(loginContext.getSubject());
             userPrincipal.setRoleCheckPolicy (roleCheckPolicy);
             
-            userMap.put (username, new UserInfo (username, userPrincipal, loginContext));
+            synchronized (this)
+            {
+                userMap.put (username, new UserInfo (username, userPrincipal, loginContext));
+            }
             
             return userPrincipal;       
         }
-        catch (LoginException e)
+        catch (Exception e)
         {
             Log.warning (e);
             return null;
@@ -293,16 +309,24 @@ public class JAASUserRealm implements UserRealm
             if (!(user instanceof JAASUserPrincipal))
                 throw new IllegalArgumentException (user + " is not a JAASUserPrincipal");
             
-	    String key = ((JAASUserPrincipal)user).getName();
-            UserInfo info = (UserInfo)userMap.get(key);
+            String key = ((JAASUserPrincipal)user).getName();
+            
+            UserInfo info  = null;
+            synchronized (this)
+            {
+                info = (UserInfo)userMap.get(key);
+            }
             
             if (info == null)
                 Log.warning ("Logout called for user="+user+" who is NOT in the authentication cache");
             else 
                 info.getLoginContext().logout();
-
-	    userMap.remove (key);
-	    Log.event (user+" has been LOGGED OUT");
+            
+            synchronized (this)
+            {
+                userMap.remove (key);
+            }
+            Log.event (user+" has been LOGGED OUT");
         }
         catch (LoginException e)
         {
