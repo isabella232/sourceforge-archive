@@ -397,6 +397,8 @@ public class
 	  _log.error ("Unable to setState from JavaGroups: ", e);
 	}
 
+	AbstractReplicatedStore.setReplicating(true);
+
 	long remoteTime=((Long)data[0]).longValue();
 	long localTime=System.currentTimeMillis();
 	long disparity=(localTime-remoteTime)/1000;
@@ -409,6 +411,7 @@ public class
 	{
 	  LocalState ls=state[i];
 	  _sessions.put(ls.getId(), ls);
+	  getManager().getHttpSession(ls.getId()); // should cause creation of corresponding InterceptorStack
 	}
       }
     }
