@@ -169,7 +169,7 @@ public class JDBCUserRealm extends HashUserRealm
         if (credentials==null)
             return authenticate(username,null,request);
         if (credentials instanceof String)
-            return authenticate(username,credentials,request);
+            return authenticate(username,(String)credentials,request);
         return authenticate(username,credentials.toString(),request);
     }
     
