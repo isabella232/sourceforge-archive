@@ -6,6 +6,7 @@ Jetty-3.0.A2 - 13 Oct 1999
    + Cleaned up Util TestHarness.
    + Prevent entity content for responses 100-199,203,304
    + Added cookie support and demo.
+   + HTTP/1.0 Keep-alive (about time!)
 
 Jetty-3.0.A1 - 12 Oct 1999
    + LineInput uses own buffering and uses character encodings.

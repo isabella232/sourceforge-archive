@@ -32,6 +32,7 @@ public class HttpConnection
     private ChunkableOutputStream _outputStream;
     private boolean _persistent;
     private boolean _close;
+    private boolean _keepAlive;
     private String _version;
     private boolean _http1_1;
     private boolean _http1_0;
@@ -206,6 +207,7 @@ public class HttpConnection
         // Assume the connection is not persistent, unless told otherwise.
         _persistent=false;
         _close=false;
+        _keepAlive=false;
         _http1_0=true;
         _http1_1=false;
         
@@ -282,6 +284,12 @@ public class HttpConnection
                         _close=true;
                         _response.setField(HttpFields.__Connection,
                                            HttpFields.__Close);
+                    }
+                    else if (token.equals(HttpFields.__KeepAlive))
+                    {
+                        _keepAlive=true;
+                        _response.setField(HttpFields.__Connection,
+                                           HttpFields.__KeepAlive);
                     }
                     
                     // Remove headers for HTTP/1.0 requests
@@ -417,8 +425,7 @@ public class HttpConnection
         }
 
         // dont support persistent connections in HTTP/1.0
-        _response.setField(HttpFields.__Connection,HttpFields.__Close);
-        _persistent=false;
+        _persistent=_keepAlive;
     }
     
     /* ------------------------------------------------------------ */
@@ -530,6 +537,7 @@ public class HttpConnection
     /* ------------------------------------------------------------ */
     /** Output Notifications.
      * Trigger header and/or filters from output stream observations.
+     * Also finalizes method of indicating response content length.
      * Called as a result of the connection subscribing for notifications
      * to the ChunkableOutputStream.
      * @see ChunkableOutputStream
@@ -544,7 +552,8 @@ public class HttpConnection
           case OutputObserver.__FIRST_WRITE:
               Code.debug("notify FIRST_WRITE");
 
-              // enable output translation
+              // Determine how to limit content length and
+              // enable output transfer encodings 
               List transfer_coding=_response.getFieldValues(HttpFields.__TransferEncoding);
               if (transfer_coding==null || transfer_coding.size()==0)
               {
@@ -555,6 +564,17 @@ public class HttpConnection
                       _response.setField(HttpFields.__TransferEncoding,
                                          HttpFields.__Chunked);
                       _outputStream.setChunking();
+                  }
+                  else if (_http1_0)
+                  {
+                      // If we dont have a content length, we can't be persistent
+                      if (!_keepAlive || !_persistent ||
+                          _response.getIntField(HttpFields.__ContentLength)<0)
+                      {
+                          _persistent=false;
+                          _response.setField(HttpFields.__Connection,
+                                             HttpFields.__Close);
+                      }
                   }
               }
               else if (_http1_0)

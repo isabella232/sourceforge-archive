@@ -40,7 +40,8 @@ public class DumpHandler extends NullHandler
         response.setField(HttpFields.__ContentType,
                           HttpFields.__TextHtml);
         ChunkableOutputStream out = response.getOutputStream();
-        Writer writer = new OutputStreamWriter(out,"UTF8");
+        ByteArrayOutputStream buf = new ByteArrayOutputStream(2048);
+        Writer writer = new OutputStreamWriter(buf,"UTF8");
         writer.write("<HTML><H1>HTTP Request Dump</H1>");
         writer.write("<PRE>\npath="+request.getPath()+
                     "\nmatch="+
@@ -116,12 +117,12 @@ public class DumpHandler extends NullHandler
         }
         
         writer.write("</PRE>\n<H3>Content:</H3>\n<PRE>");
-        byte[] buf= new byte[4096];
+        byte[] content= new byte[4096];
         int len;
         try{
             InputStream in=request.getInputStream();
-            while((len=in.read(buf))>=0)
-                writer.write(new String(buf,0,len));
+            while((len=in.read(content))>=0)
+                writer.write(new String(content,0,len));
         }
         catch(IOException e)
         {
@@ -133,6 +134,8 @@ public class DumpHandler extends NullHandler
         writer.write(response.toString());
         writer.write("</PRE></HTML>");
         writer.flush();
+        response.setIntField(HttpFields.__ContentLength,buf.size());
+        buf.writeTo(out);
 
         // You wouldn't normally set a trailer like this, but
         // we don't want to commit the output to force trailers as

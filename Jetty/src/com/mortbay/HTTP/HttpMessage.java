@@ -466,6 +466,9 @@ abstract public class HttpMessage
     public synchronized void commit()
         throws IOException, IllegalStateException
     {
+        if (Code.verbose(99))
+            Code.debug("Commit()");
+        
         ChunkableOutputStream out = getOutputStream();
         out.flush();
         
@@ -486,6 +489,8 @@ abstract public class HttpMessage
           case __MSG_SENT:
               break;
         }
+        
+        out.getRawStream().flush();
         _state=__MSG_SENT;
     }
 }

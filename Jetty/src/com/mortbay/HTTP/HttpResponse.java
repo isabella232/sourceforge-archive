@@ -245,6 +245,7 @@ public class HttpResponse extends HttpMessage
 
         if (code!=204 && code!=304 && code>=200)
         {
+            _header.put(HttpFields.__ContentType,"text/html");
             ChunkableOutputStream out=getOutputStream();
             Writer writer= new OutputStreamWriter(out,"UTF8");
             synchronized(writer)
@@ -258,6 +259,11 @@ public class HttpResponse extends HttpMessage
                 writer.write("\n</BODY>\n</HTML>\n");
                 writer.flush();
             }
+        }
+        else
+        {
+            _header.remove(HttpFields.__ContentType);
+            _header.remove(HttpFields.__ContentLength);
         }
         commit();
     }
@@ -273,13 +279,13 @@ public class HttpResponse extends HttpMessage
     public void sendError(int code,String message) 
         throws IOException
     {
-        _header.put(HttpFields.__ContentType,"text/html");
         setStatus(code);
         String reason = (String)__statusMsg.get(new Integer(code));
         setReason(reason);
 
         if (code!=204 && code!=304 && code>=200)
         {
+            _header.put(HttpFields.__ContentType,"text/html");
             ChunkableOutputStream out=getOutputStream();
             Writer writer=new OutputStreamWriter(out,"UTF8");
             synchronized(writer)
@@ -293,6 +299,11 @@ public class HttpResponse extends HttpMessage
                 writer.write("</BODY>\n</HTML>\n");
                 writer.flush();
             }
+        }
+        else
+        {
+            _header.remove(HttpFields.__ContentType);
+            _header.remove(HttpFields.__ContentLength);
         }
         commit();
     }

@@ -220,6 +220,7 @@ public class FileHandler extends NullHandler
             }
             if (bytes!=null)
             {
+                Code.debug("Cache hit: "+filename);
                 OutputStream out = response.getOutputStream();
                 out.write(bytes);
                 out.flush();
