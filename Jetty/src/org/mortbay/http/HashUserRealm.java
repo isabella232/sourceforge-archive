@@ -109,12 +109,16 @@ public class HashUserRealm extends HashMap implements UserRealm
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized UserPrincipal authenticate(String username,
+    public UserPrincipal authenticate(String username,
                                                    String credentials,
                                                    HttpRequest request)
     {
-        KnownUser user = (KnownUser)super.get(username);
-        if (user !=null && user.authenticate(credentials,request))
+        KnownUser user;
+        synchronized (this) {
+            user = (KnownUser)super.get(username);
+        }
+        
+        if (user!=null && user.authenticate(credentials,request))
             return user;
         return null;
     }
@@ -269,7 +273,7 @@ public class HashUserRealm extends HashMap implements UserRealm
         }
         
         /* -------------------------------------------------------- */
-        private synchronized boolean authenticate(String password, HttpRequest request)
+        private boolean authenticate(String password, HttpRequest request)
         {
             return _pw!=null && _pw.check(password);
         }
