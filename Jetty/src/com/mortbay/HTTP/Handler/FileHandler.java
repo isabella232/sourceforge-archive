@@ -20,7 +20,7 @@ import java.io.*;
  * IfModifiedSince and IfUnmodifiedSince header fields.
  * A simple memory cache is also provided to reduce file I/O.
  *
- * @version 1.0 Mon Oct 11 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class FileHandler extends NullHandler

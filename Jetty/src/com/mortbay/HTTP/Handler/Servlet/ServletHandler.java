@@ -24,7 +24,6 @@ import javax.servlet.http.*;
  * javax.servlet.http.HttpServlet API.
  * It is configured with a PathMap of paths to ServletHolder instances.
  *
- * @see Interface.HttpHandler
  * @version $Id$
  * @author Greg Wilkins
  */

@@ -17,7 +17,7 @@ import java.io.*;
  *
  *
  * @see
- * @version 1.0 Fri Apr 28 2000
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class ZipResource

@@ -17,8 +17,7 @@ import javax.servlet.*;
 /* ------------------------------------------------------------ */
 /** Wrapper of Jetty request for Servlet API.
  *
- * @see
- * @version 1.0 Sun Apr  9 2000
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class ServletResponse implements HttpServletResponse

@@ -16,7 +16,7 @@ import java.io.*;
  *
  * Access files from a path of directories and Jar files.
  *
- * @version 1.0 Tue May  4 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class FileJarPath

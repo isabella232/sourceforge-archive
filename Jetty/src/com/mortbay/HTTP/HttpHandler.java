@@ -11,7 +11,7 @@ import java.io.*;
 /* ------------------------------------------------------------ */
 /** HTTP request handler.
  *
- * @version 1.0 Tue Oct 12 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public interface HttpHandler extends LifeCycle

@@ -18,7 +18,7 @@ import java.io.*;
  * Authenticated requests have the username set as the
  * com.mortbay.HTTP.Handler.BasicAuthHandler.User request attribute.
  *
- * @version 1.0 Fri Oct 15 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class BasicAuthHandler extends NullHandler

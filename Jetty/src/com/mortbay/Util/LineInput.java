@@ -29,7 +29,7 @@ import java.util.*;
  * Line input uses the mark/reset mechanism, so any marks set
  * prior to a readLine call are lost.
  *
- * @version 1.0 Thu Oct  7 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class LineInput extends FilterInputStream

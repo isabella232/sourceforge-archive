@@ -20,7 +20,7 @@ import java.net.*;
  * get operations are not protected from concurrent updates.
  *
  * @see java.net.URLEncoder
- * @version 1.0 Fri Dec 12 1997
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class UrlEncoded extends MultiMap

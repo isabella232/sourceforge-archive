@@ -39,7 +39,7 @@ import java.util.Vector;
  * Note that exact matches can be terminated my the ; or # characters as
  * used in servlet session rewriting and targets
  *
- * @version 1.0 Tue Oct 12 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class PathMap extends HashMap

@@ -11,7 +11,7 @@ import com.mortbay.Util.Code;
 
 /* ------------------------------------------------------------ */
 /** HTML Comment
- * @version 1.0 Sat Sep  4 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class Comment extends Composite

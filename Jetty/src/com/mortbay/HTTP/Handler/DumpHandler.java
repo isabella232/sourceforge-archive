@@ -17,7 +17,7 @@ import java.io.*;
  * Dumps GET and POST requests.
  * Useful for testing and debugging.
  * @see
- * @version 1.0 Mon Oct 11 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class DumpHandler extends NullHandler

@@ -29,7 +29,7 @@ import java.lang.reflect.*;
  *
  * @see HttpServer
  * @see HttpHandler
- * @version 1.0 Sat Jun 17 2000
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class HandlerContext
@@ -379,7 +379,7 @@ public class HandlerContext
      */
     public String getMimeByExtension(String filename)
     {
-        int i=filename.indexOf(".");
+        int i=filename.lastIndexOf(".");
         String ext;
 
         if (i<0 || i>=filename.length())

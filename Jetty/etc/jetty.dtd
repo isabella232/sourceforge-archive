@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="ISO8859_1"?>
 
+<!ENTITY % VALUE "(#PCDATA|SystemProperty)*">
+
 <!ELEMENT Server (Listener+,Context+)>
 
 <!ELEMENT Listener 
@@ -10,16 +12,16 @@
     port NMTOKEN "80"
 >
 
-<!ELEMENT Context (VirtualHost*,Path+,ResourceBase?,Classes*,Handler*)>
+<!ELEMENT Context (VirtualHost*,Path+,ResourceBase?,ClassPath*,Handler*)>
 <!ATTLIST Context
     type (handler|application|other) "handler" 
-    class  NMTOKEN ""
+    class NMTOKEN ""
 >
 
-<!ELEMENT Path (#PCDATA) >
-<!ELEMENT VirtualHost (#PCDATA) >
-<!ELEMENT Classes (#PCDATA) >
-<!ELEMENT ResourceBase (#PCDATA) >
+<!ELEMENT Path %VALUE; >
+<!ELEMENT VirtualHost %VALUE; >
+<!ELEMENT ClassPath %VALUE; >
+<!ELEMENT ResourceBase %VALUE; >
 
 <!ELEMENT Application  (Parameter*,Init*)>
 
@@ -29,15 +31,25 @@
 "com.mortbay.HTTP.Handler.Servlet.ServletHandler"
 >
 
-<!ELEMENT Parameter (Name,Value)>
-<!ELEMENT Name (#PCDATA) >
-<!ELEMENT Value (#PCDATA) >
+<!ELEMENT Parameter %VALUE; >
+<!ATTLIST Parameter
+   name NMTOKEN #REQUIRED>
 
 <!ELEMENT Init (Arg*)>
 <!ATTLIST Init
    method NMTOKEN "init">
 
-<!ELEMENT Arg (#PCDATA) >
+<!ELEMENT Arg %VALUE; >
 <!ATTLIST Arg
     type (String|int|boolean) "String">
+
+<!ELEMENT SystemProperty EMPTY>
+<!ATTLIST SystemProperty
+    name NMTOKEN #REQUIRED
+    default NMTOKEN #IMPLIED>
+
+
+
+
+
 

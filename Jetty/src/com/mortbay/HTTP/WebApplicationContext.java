@@ -14,7 +14,6 @@ import java.net.*;
 import com.mortbay.HTTP.Handler.*;
 import com.mortbay.HTTP.Handler.Servlet.*;
 import java.lang.reflect.*;
-import org.w3c.dom.*;
 import javax.xml.parsers.*;
 import org.xml.sax.*;
 import javax.servlet.*;
@@ -25,7 +24,7 @@ import javax.servlet.*;
  *
  *
  * @see
- * @version 1.0 Tue Jul 18 2000
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class WebApplicationContext extends HandlerContext
@@ -36,7 +35,7 @@ public class WebApplicationContext extends HandlerContext
     private String _name;
     private File _directory;
     private String _directoryName;
-    private Document _web;
+    private XmlParser.Node _web;
     private ServletHandler _servletHandler;
     
     /* ------------------------------------------------------------ */
@@ -93,9 +92,7 @@ public class WebApplicationContext extends HandlerContext
 	    setResourceBase(_directoryName);
 	    setServingResources(true);
 	    
-	    _web = __xmlParser.parse(web);
-	    _web.getDocumentElement ().normalize();
-	    
+	    _web = __xmlParser.parse(web);	    
 	    initialize();
 	}
 	catch(IOException e)
@@ -116,127 +113,121 @@ public class WebApplicationContext extends HandlerContext
     private void initialize()
 	throws ClassNotFoundException,UnavailableException
     {
-	NodeList children=_web.getDocumentElement().getChildNodes();
-	for (int c=0;children!=null &&c<children.getLength();c++)
+	Iterator iter=_web.iterator();
+	while (iter.hasNext())
 	{
-	    Node child=children.item(c);
-	    if (child.getNodeType()!=Node.ELEMENT_NODE)
-		continue;
-
-	    String name=child.getNodeName();
+	    XmlParser.Node node=(XmlParser.Node)iter.next();
+	    String name=node.getTag();
 
 	    if ("display-name".equals(name))
-		initDisplayName(child);
+		initDisplayName(node);
 	    else if ("description".equals(name))
 	    {
 		Code.warning("Not implemented: "+name);
-		dump("",child);
+		System.err.println(node);
 	    }
 	    else if ("distributable".equals(name))
 	    {
 		Code.warning("Not implemented: "+name);
-		dump("",child);
+		System.err.println(node);
 	    }
 	    else if ("context-param".equals(name))
-		initContextParam(child);
+		initContextParam(node);
 	    else if ("servlet".equals(name))
-		initServlet(child);
+		initServlet(node);
 	    else if ("servlet-mapping".equals(name))
-		initServletMapping(child);
+		initServletMapping(node);
 	    else if ("session-config".equals(name))
 	    {
 		Code.warning("Not implemented: "+name);
-		dump("",child);
+		System.err.println(node);
 	    }
 	    else if ("mime-mapping".equals(name))
 	    {
 		Code.warning("Not implemented: "+name);
-		dump("",child);
+		System.err.println(node);
 	    }
 	    else if ("welcome-file-list".equals(name))
-		initWelcomeFileList(child);
+		initWelcomeFileList(node);
 	    else if ("error-page".equals(name))
 	    {
 		Code.warning("Not implemented: "+name);
-		dump("",child);
+		System.err.println(node);
 	    }
 	    else if ("taglib".equals(name))
 	    {
 		Code.warning("Not implemented: "+name);
-		dump("",child);
+		System.err.println(node);
 	    }
 	    else if ("resource-ref".equals(name))
 	    {
 		Code.warning("Not implemented: "+name);
-		dump("",child);
+		System.err.println(node);
 	    }
 	    else if ("security-constraint".equals(name))
 	    {
 		Code.warning("Not implemented: "+name);
-		dump("",child);
+		System.err.println(node);
 	    }
 	    else if ("login-config".equals(name))
 	    {
 		Code.warning("Not implemented: "+name);
-		dump("",child);
+		System.err.println(node);
 	    }
 	    else if ("security-role".equals(name))
 	    {
 		Code.warning("Not implemented: "+name);
-		dump("",child);
+		System.err.println(node);
 	    }
 	    else if ("env-entry".equals(name))
 	    {
 		Code.warning("Not implemented: "+name);
-		dump("",child);
+		System.err.println(node);
 	    }
 	    else if ("ejb-ref".equals(name))
 	    {
 		Code.warning("Not implemented: "+name);
-		dump("",child);
+		System.err.println(node);
 	    }
 	    else
 	    {
 		Code.warning("UNKNOWN TAG: "+name);
-		dump("",child);
+		System.err.println(node);
 	    }
 	}
     }
 
     /* ------------------------------------------------------------ */
-    private void initDisplayName(Node node)
+    private void initDisplayName(XmlParser.Node node)
     {
-	_name=text(node.getFirstChild(),false);
+	_name=node.toString(false);
     }
     
     /* ------------------------------------------------------------ */
-    private void initContextParam(Node node)
+    private void initContextParam(XmlParser.Node node)
     {
-	NodeList list = node.getChildNodes();
-	String name=value(list,"param-name");
-	String value=value(list,"param-value");
+	String name=node.get("param-name").toString(false);
+	String value=node.get("param-value").toString(false);
 	Code.debug("ContextParam: ",name,"=",value);
 	setAttribute(name,value); 
     }
 
     /* ------------------------------------------------------------ */
-    private void initServlet(Node node)
+    private void initServlet(XmlParser.Node node)
 	throws ClassNotFoundException, UnavailableException
     {
-	NodeList list = node.getChildNodes();
-	String name=value(list,"servlet-name");
-	String className=value(list,"servlet-class");
+	String name=node.get("servlet-name").toString(false);
+	String className=node.get("servlet-class").toString(false);
 
 	Map params=null;
-	Iterator iter= new NodeIterator(list,"init-param");
+	Iterator iter= node.iterator("init-param");
 	while(iter.hasNext())
 	{
 	    if (params==null)
 		params=new HashMap(7);
-	    Node paramNode=(Node)iter.next();
-	    NodeList plist = node.getChildNodes();
-	    String pname=value(list,"param-name");
-	    String pvalue=value(list,"param-value");
+	    XmlParser.Node paramNode=(XmlParser.Node)iter.next();
+	    String pname=paramNode.get("param-name").toString(false);
+	    String pvalue=paramNode.get("param-value").toString(false);
 	    params.put(pname,pvalue);
 	}
 	Code.debug(name,"=",className,": ",params);
@@ -248,11 +239,10 @@ public class WebApplicationContext extends HandlerContext
     }
 
     /* ------------------------------------------------------------ */
-    private void initServletMapping(Node node)
+    private void initServletMapping(XmlParser.Node node)
     {
-	NodeList list = node.getChildNodes();
-	String name=value(list,"servlet-name");
-	String pathSpec=value(list,"url-pattern");
+	String name=node.get("servlet-name").toString(false);
+	String pathSpec=node.get("url-pattern").toString(false);
 
 	ServletHolder holder = _servletHandler.getServletHolder(name);
 	if (holder==null)
@@ -265,83 +255,20 @@ public class WebApplicationContext extends HandlerContext
     }
     
     /* ------------------------------------------------------------ */
-    private void initWelcomeFileList(Node node)
+    private void initWelcomeFileList(XmlParser.Node node)
     {
 	FileHandler fh = getFileHandler();
 	fh.setIndexFiles(null);
 	
-	Iterator iter= new NodeIterator(node.getChildNodes(),
-					"welcome-file");
+	Iterator iter= node.iterator("welcome-file");
 	while(iter.hasNext())
 	{
-	    Node indexNode=(Node)iter.next();
-	    String index=indexNode.getFirstChild().getNodeValue();
+	    XmlParser.Node indexNode=(XmlParser.Node)iter.next();
+	    String index=indexNode.toString(false);
 	    Code.debug("Index: ",index);
 	    fh.addIndexFile(index);
 	}
     }
-    
-    
-    /* ------------------------------------------------------------ */
-    private String text(Node node,boolean deep)
-    {
-	StringBuffer buf = new StringBuffer();
-	synchronized(buf)
-	{
-	    text(buf,node,deep);
-	    return buf.toString();
-	}
-    }
-    
-    /* ------------------------------------------------------------ */
-    private void text(StringBuffer buf, Node node,boolean deep)
-    {
-	int t = node.getNodeType();
-	if (t==Node.TEXT_NODE)
-	    buf.append(node.getNodeValue());
-
-	if (deep)
-	{
-	    NodeList children=node.getChildNodes();
-	    for (int c=0;children!=null &&c<children.getLength();c++)
-		text(buf,children.item(c),deep);
-	}
-    }
-
-    /* ------------------------------------------------------------ */
-    private String value(NodeList list,String element)
-    {
-	for (int c=0;list!=null &&c<list.getLength();c++)
-	{
-	    Node child = list.item(c);   
-	    int t = child.getNodeType();
-	    if (t==Node.ELEMENT_NODE && element.equals(child.getNodeName()))
-		return text(child.getFirstChild(),false);
-	}
-	return null;
-    }
-	
-    /* ------------------------------------------------------------ */
-    private void dump(String indent,Node node)
-    {
-	int t = node.getNodeType();
-	String n=node.getNodeName();
-	String v=node.getNodeValue();
-
-	if (t==Node.ELEMENT_NODE)
-	{   
-	    System.out.println (indent+n);
-	}
-	else if (t==Node.TEXT_NODE)
-	{
-	    System.out.println (indent+v);
-	}
-	
-	NodeList children=node.getChildNodes();
-	for (int c=0;children!=null &&c<children.getLength();c++)
-	    dump(indent+"  ",children.item(c));
-    }
-    
 
 
     /* ------------------------------------------------------------ */
@@ -354,65 +281,6 @@ public class WebApplicationContext extends HandlerContext
 	    return "'"+_name+"' @ "+_directoryName;
 	return _directoryName;
     }
-    
-    /* ------------------------------------------------------------ */
-    private static class NodeIterator implements Iterator
-    {
-	int c=0;
-	NodeList _list;
-	String _element;
-	Node _child=null;
-	
-	/* ------------------------------------------------------------ */
-	NodeIterator(NodeList list,String element)
-	{
-	    _list=list;
-	    _element=element;
-	}
-
-	/* ------------------------------------------------------------ */
-	public boolean hasNext()
-	{
-	    if (_child!=null)
-		return true;
-	    while (c<_list.getLength())
-	    {
-		Node child = _list.item(c);   
-		int t = child.getNodeType();
-		if (t==Node.ELEMENT_NODE && _element.equals(child.getNodeName()))
-		{
-		    _child=child;
-		    return true;
-		}
-		c++;
-	    }
-	    return false;
-	}
-	
-	/* ------------------------------------------------------------ */
-	public Object next()
-	{
-	    try
-	    {
-		if (hasNext())
-		    return _child;
-		throw new NoSuchElementException();
-	    }
-	    finally
-	    {
-		_child=null;
-		c++;
-	    }
-	}
-
-	/* ------------------------------------------------------------ */
-	public void remove()
-	{
-	    throw new UnsupportedOperationException("Not supported");
-	}
-	
-    }
-    
 }
 
     

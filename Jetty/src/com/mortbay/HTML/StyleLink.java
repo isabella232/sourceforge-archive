@@ -11,7 +11,7 @@ import com.mortbay.Util.Code;
 /* ------------------------------------------------------------ */
 /** CSS Style LINK
  *
- * @version 1.0 Sat Sep  4 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class StyleLink extends Tag

@@ -23,7 +23,7 @@ import java.util.TimeZone;
  * If consecutive calls are frequently very different, then this
  * may be a little slower than a normal DateFormat.
  *
- * @version 1.0 Wed Mar  3 1999
+ * @version $Id$
  * @author Kent Johnson <KJohnson@transparent.com>
  */
 

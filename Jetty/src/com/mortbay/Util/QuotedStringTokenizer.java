@@ -19,7 +19,7 @@ import java.util.NoSuchElementException;
  * Quotes can be escaped with '\'.
  *
  * @see java.util.Stringtokenizer
- * @version 1.0 Wed Sep 29 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class QuotedStringTokenizer

@@ -16,7 +16,7 @@ import java.io.*;
 /** Null HTTP Handler
  * This No-op handler is a good base for other handlers
  *
- * @version 1.0 Mon Oct 11 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class NullHandler implements HttpHandler

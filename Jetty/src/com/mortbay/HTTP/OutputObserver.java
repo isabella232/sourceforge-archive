@@ -12,7 +12,7 @@ import java.io.IOException;
 /** Observer output events.
  *
  * @see ChunkableOutputStream
- * @version 1.0 Fri Oct  1 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public interface OutputObserver

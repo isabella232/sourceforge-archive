@@ -15,7 +15,7 @@ import java.util.*;
  *
  * Temparary implementation, just to get the ball rolling.
  * 
- * @version 1.0 Fri Oct  8 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class SocketListener 

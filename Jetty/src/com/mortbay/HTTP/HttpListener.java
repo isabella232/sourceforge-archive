@@ -14,7 +14,7 @@ import java.util.*;
 /** HTTP Listener
  *
  * @see HttpConnection
- * @version 1.0 Sat Oct  2 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public interface HttpListener extends LifeCycle

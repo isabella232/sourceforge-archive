@@ -29,7 +29,7 @@ package com.mortbay.Util;
  *    destroy()    -> Destroyed
  * </PRE>
  *
- * @version 1.0 Thu Oct 14 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public interface LifeCycle

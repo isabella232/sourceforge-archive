@@ -17,7 +17,7 @@ import java.util.*;
  * Multi-values items are always stored as a List.
  *
  * @see
- * @version 1.0 Mon Oct 11 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class MultiMap extends HashMap

@@ -18,7 +18,7 @@ import java.text.*;
  * This class is not synchronized and needs to be protected from
  * concurrent access.
  * @see
- * @version 1.0 Wed Sep 29 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class HttpFields extends HashMap

@@ -24,7 +24,7 @@ import java.lang.reflect.*;
  * @see HttpHandler
  * @see HttpConnection
  * @see HttpListener
- * @version 1.0 Thu Oct  7 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class HttpServer implements LifeCycle

@@ -15,7 +15,7 @@ import java.util.*;
  * communications ability, but it does assist with query string
  * formatting.
  * @see UrlEncoded
- * @version 1.0 Sun Dec 14 1997
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class URI

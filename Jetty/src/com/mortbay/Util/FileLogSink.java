@@ -18,7 +18,7 @@ import java.text.*;
  * etc.
  *
  * @see
- * @version 1.0 Sun Apr 23 2000
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class FileLogSink extends LogSink

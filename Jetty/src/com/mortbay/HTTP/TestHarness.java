@@ -13,7 +13,7 @@ import java.io.*;
 /** 
  *
  * @see
- * @version 1.0 Wed Sep 29 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class TestHarness

@@ -16,7 +16,7 @@ import java.io.*;
 /** Handler for resources that were not found.
  * Implements OPTIONS and TRACE methods for the server.
  * @see
- * @version 1.0 Wed Oct 13 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class NotFoundHandler extends NullHandler

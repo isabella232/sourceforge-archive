@@ -19,7 +19,7 @@ import java.lang.reflect.*;
  * requests.
  *
  * @see HttpRequest
- * @version 1.0 Tue Oct  5 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class HttpResponse extends HttpMessage 

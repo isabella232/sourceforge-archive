@@ -3,14 +3,13 @@
 
 <Server>
   <Listener port="8080"/>
-
   <Listener class="com.mortbay.HTTP.JsseListener" port="8181">
-    <Parameter><Name>Password</Name><Value>Secret</Value></Parameter>
+    <Parameter name="Password">Secret</Parameter>
   </Listener>
 
   <Context type="application">
     <Path>/</Path>
-    <ResourceBase>./webapps/jetty/</ResourceBase>
+    <ResourceBase><SystemProperty name="user.dir"/>/webapps/jetty/</ResourceBase>
   </Context>
 
   <Context>
@@ -32,7 +31,7 @@
 
   <Context>
     <Path>/servlet/*</Path>
-    <Classes>./servlets/</Classes>
+    <ClassPath>./servlets/</ClassPath>
     <Handler class="com.mortbay.HTTP.Handler.Servlet.DynamicHandler"/>
     <Handler class="com.mortbay.HTTP.Handler.NotFoundHandler"/>
   </Context>

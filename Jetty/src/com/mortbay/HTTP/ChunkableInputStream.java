@@ -21,7 +21,7 @@ import java.lang.reflect.*;
  * line based reads from the raw stream.
  *
  * @see com.mortbay.Util.LineInput.
- * @version 1.0 Wed Sep 29 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class ChunkableInputStream extends FilterInputStream

@@ -13,7 +13,7 @@ import java.util.Vector;
  * Implemented as circular buffer in a Vector. Synchronization is on the
  * vector to avoid double synchronization.
  *
- * @version 1.0 Fri May 28 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class BlockingQueue

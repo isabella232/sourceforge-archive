@@ -17,7 +17,7 @@ import java.io.*;
  * If 'gzip' or 'deflate' is in the query string, the
  * response is given that transfer encoding
  *
- * @version 1.0 Tue Oct 12 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class TestTEHandler extends NullHandler

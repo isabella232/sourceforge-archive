@@ -14,7 +14,7 @@ import java.lang.reflect.*;
  * classes that contain public data members (what used to be
  * called structures :-).
  *
- * @version 1.0 Fri Dec  5 1997
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class DataClass

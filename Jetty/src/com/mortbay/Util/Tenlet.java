@@ -14,7 +14,7 @@ import java.lang.reflect.Constructor;
 /** Reverse Telnet class
  * 
  * @see
- * @version 1.0 Sun Apr 23 2000
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class Tenlet extends ThreadedServer 

@@ -20,7 +20,7 @@ import java.lang.reflect.*;
 /** 
  *
  * @see
- * @version 1.0 Sun Jun 18 2000
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class Demo

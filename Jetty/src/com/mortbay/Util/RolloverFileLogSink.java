@@ -24,7 +24,7 @@ package com.mortbay.Util;
  * ROLLOVER_LOG_STOP_TIMEOUT How long to wait to kill the cleanup thread
  * ROLLOVER_LOG_TIMER_INTERVAL How long the cleanup thread sleeps
  *
- * @version 1.0 Tue May 23 2000
+ * @version $Id$
  * @author V. Lipovetsky
  * @author Kent Johnson
  */

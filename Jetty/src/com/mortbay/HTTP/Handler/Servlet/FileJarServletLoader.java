@@ -13,7 +13,6 @@ import java.io.*;
 
 /* ------------------------------------------------------------ */
 /** Servlet Class Loader.
- * 
  *
  * <h4>Notes</h4>
  * The load search order is:<NL>
@@ -23,7 +22,7 @@ import java.io.*;
  * <LI>Try the loader path.
  * <LI>Try the builtin loader. Classes found here may not be reloaded.
  *
- * @version 1.0 Tue May  4 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class FileJarServletLoader extends ServletLoader

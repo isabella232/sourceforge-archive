@@ -16,7 +16,7 @@ import com.mortbay.HTTP.Handler.*;
 /* ------------------------------------------------------------ */
 /** Test against RFC 2616
  *
- * @version 1.0 Thu Oct  7 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class TestRFC2616

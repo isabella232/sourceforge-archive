@@ -18,19 +18,17 @@ import java.security.Principal;
 
 
 /* ------------------------------------------------------------ */
-/** Servlet Request Wrapper
+/** Servlet Request Wrapper.
  * This class wraps a Jetty HTTP request as a 2.1 Servlet
  * request.
  *
- * @see
- * @version 1.0 Thu Jan 27 2000
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 class ServletRequest
     implements HttpServletRequest
 {
     /* -------------------------------------------------------------- */
-    /** For decoding session ids etc. */
     public static final String
         __SESSIONID_NOT_CHECKED = "not checked",
         __SESSIONID_URL = "url",

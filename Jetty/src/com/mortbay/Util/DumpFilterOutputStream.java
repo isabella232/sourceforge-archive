@@ -11,7 +11,7 @@ import java.io.*;
  * <p>
  *
  * @see filterOutputStream
- * @version 1.0 Tue Jan 26 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class DumpFilterOutputStream extends SummaryFilterOutputStream

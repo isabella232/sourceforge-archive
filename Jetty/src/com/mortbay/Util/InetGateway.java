@@ -26,7 +26,7 @@ import java.lang.reflect.Constructor;
  * java com.mortbay.Util.InetGateway propertyFile.prp
  * </pre>
  *
- * @version 1.0 Thu Feb 11 1999
+ * @version $Id$
  * @author Greg Wilkins (inspired by M Watson and J Gosnell)
  */
 public class InetGateway extends ThreadedServer

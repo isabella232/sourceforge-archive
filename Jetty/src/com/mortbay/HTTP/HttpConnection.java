@@ -22,7 +22,7 @@ import java.net.InetAddress;
  *
  * @see HttpListener
  * @see HttpServer
- * @version 1.0 Wed Oct  6 1999
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class HttpConnection
