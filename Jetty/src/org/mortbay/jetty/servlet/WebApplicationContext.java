@@ -200,7 +200,7 @@ public class WebApplicationContext
     private void resolveWebApp()
         throws IOException
     {
-        if (_webApp==null)
+        if (_webApp==null && _war!=null && _war.length()>0)
         {
             // Set dir or WAR
             _webApp = Resource.newResource(_war);
