@@ -1,1 +1,0 @@
-SET CLASSPATH=%JETTY_HOME%\lib\org.mortbay.jetty.jar;%JETTY_HOME%\lib\com.sun.net.ssl.jar;%JETTY_HOME%\lib\javax.servlet.jar;%JETTY_HOME%\lib\org.apache.jasper.jar;%JETTY_HOME%\lib\javax.xml.jaxp.jar;%JETTY_HOME%\lib\org.apache.crimson.jar
