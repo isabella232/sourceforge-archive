@@ -191,6 +191,8 @@ public class XmlParser
 		try
 		{
 		    InputStream in= resource.getInputStream();
+		    Code.debug("Redirected entity ",
+			       sid," --> ",resource);
 		    return new InputSource(in);
 		}
 		catch(IOException e){Code.ignore(e);}
