@@ -6,6 +6,7 @@
 package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
+import java.io.Serializable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -107,28 +108,32 @@ public class FormAuthenticator implements Authenticator
         // Handle a request for authentication.
         if ( uri.substring(uri.lastIndexOf("/")+1).startsWith(__J_SECURITY_CHECK) )
         {
-            // Check the session object for login info. 
-            String username = request.getParameter(__J_USERNAME);
-            String password = request.getParameter(__J_PASSWORD);
+            // Check the session object for login info.
+            FormCredential credential=new FormCredential();
+            credential._jUserName = request.getParameter(__J_USERNAME);
+            credential._jPassword = request.getParameter(__J_PASSWORD);
             
-            UserPrincipal user = realm.authenticate(username,password,httpRequest);
+            credential._userPrincipal = realm.authenticate(credential._jUserName,
+                                                           credential._jPassword,
+                                                           httpRequest);
+            
             String nuri=(String)session.getAttribute(__J_URI);
             session.removeAttribute(__J_URI); // Remove popped return URI.
             if (nuri==null || nuri.length()==0)
                 nuri="/";
             
-            if (user!=null)
+            if (credential._userPrincipal!=null)
             {
-                Code.debug("Form authentication OK for ",username);
+                Code.debug("Form authentication OK for ",credential._jUserName);
                 httpRequest.setAuthType(SecurityConstraint.__FORM_AUTH);
-                httpRequest.setAuthUser(username);
-                httpRequest.setUserPrincipal(user);
-                session.setAttribute(__J_AUTHENTICATED,user);
+                httpRequest.setAuthUser(credential._jUserName);
+                httpRequest.setUserPrincipal(credential._userPrincipal);
+                session.setAttribute(__J_AUTHENTICATED,credential);
                 response.sendRedirect(response.encodeRedirectURL(nuri));
             }
             else
             {
-                Code.debug("Form authentication FAILED for ",username);
+                Code.debug("Form authentication FAILED for ",credential._jUserName);
                 if (_formErrorPage!=null)
                     response.sendRedirect(response.encodeRedirectURL
                                           (URI.addPaths(request.getContextPath(),
@@ -142,17 +147,30 @@ public class FormAuthenticator implements Authenticator
         }
 
         // Check if the session is already authenticated.
-        UserPrincipal user = (UserPrincipal) session.getAttribute(__J_AUTHENTICATED);
-        if (user != null)
+        FormCredential credential = (FormCredential) session.getAttribute(__J_AUTHENTICATED);
+        
+        if (credential != null)
         {
-            if (user.isAuthenticated())
+            if (credential._userPrincipal==null)
             {
-                Code.debug("FORM Authenticated for ",user.getName());
-                httpRequest.setAuthType(SecurityConstraint.__FORM_AUTH);
-                httpRequest.setAuthUser(user.getName());
-                httpRequest.setUserPrincipal(user);
-                return user;
+                // This credential appears to have been distributed.  Need to reauth
+                credential._userPrincipal = realm.authenticate(credential._jUserName,
+                                                               credential._jPassword,
+                                                               httpRequest);
             }
+            else if (!credential._userPrincipal.isAuthenticated())
+                credential._userPrincipal=null;
+                
+            if (credential._userPrincipal!=null)
+            {
+                Code.debug("FORM Authenticated for ",credential._userPrincipal.getName());
+                httpRequest.setAuthType(SecurityConstraint.__FORM_AUTH);
+                httpRequest.setAuthUser(credential._userPrincipal.getName());
+                httpRequest.setUserPrincipal(credential._userPrincipal);
+                return credential._userPrincipal;
+            }
+            else
+                session.setAttribute(__J_AUTHENTICATED,null);
         }
         
         // Don't authenticate authform or errorpage
@@ -171,4 +189,36 @@ public class FormAuthenticator implements Authenticator
         return null;
     }
 
+
+    /* ------------------------------------------------------------ */
+    /** FORM Authentication credential holder.
+     */
+    private static class FormCredential implements Serializable
+    {
+        private String _jUserName;
+        private String _jPassword;
+        private transient UserPrincipal _userPrincipal;
+        
+        public int hashCode()
+        {
+            return _jUserName.hashCode()+_jPassword.hashCode();
+        }
+
+        public boolean equals(Object o)
+        {
+            if (!(o instanceof FormCredential))
+                return false;
+            FormCredential fc = (FormCredential)o;
+            return
+                _jUserName.equals(fc._jUserName) &&
+                _jPassword.equals(fc._jPassword);
+        }
+
+        public String toString()
+        {
+            return "Cred["+_jUserName+"]";
+        }
+        
+    }
+    
 }

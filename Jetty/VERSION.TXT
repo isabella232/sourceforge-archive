@@ -21,6 +21,7 @@ Jetty-4.2.10pre0 - 5 May 2003
  + Warn if max form content size is reached.
  + getAuthType returns CLIENT_CERT instead of CLIENT-CERT.
  + getAuthType maps the HttpServletRequest final strings.
+ + FORM Authentication is serializable for session distribution.
 
 Jetty-4.2.9 - 19 March 2003
  + Conditional headers check after /dir to /dir/ redirection.
