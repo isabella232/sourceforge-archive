@@ -765,7 +765,7 @@ public class ServletHandler extends AbstractHttpHandler
             method.equals(HttpRequest.__HEAD)   ||
             method.equals(HttpRequest.__POST))
         {
-            response.sendError(HttpResponse.__404_Not_Found,request.getRequestURI()+" Not Found");
+            response.sendError(HttpResponse.__404_Not_Found);
         }
         else if (method.equals(HttpRequest.__TRACE))
             handleTrace(request,response);
