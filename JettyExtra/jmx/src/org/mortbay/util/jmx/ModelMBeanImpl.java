@@ -170,7 +170,7 @@ public class ModelMBeanImpl
                 catch(ClassNotFoundException e)
                 {
                     if (e.toString().endsWith("MBean"))
-                        if (Code.verbose()) Code.debug(e.toString());
+			{if (Code.verbose()) Code.debug(e.toString());}
                     else
                         Code.warning(e);
                 }
