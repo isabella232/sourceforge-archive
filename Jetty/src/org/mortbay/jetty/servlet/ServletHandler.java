@@ -794,7 +794,7 @@ public class ServletHandler extends Container implements HttpHandler
             return null;
 
         if (!uriInContext.startsWith("/"))
-            uriInContext="/"+uriInContext;
+            return null;
         
         try
         {
