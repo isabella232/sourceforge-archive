@@ -327,21 +327,21 @@ public class HttpHeader
 		catch(java.lang.Exception e)
 		{}
 	    }
-	}
-	if (val.endsWith(" GMT"))
-	{
-	    val=val.substring(0,val.length()-4);
-	    for (int i=0;i<__dateReceive.length;i++)
+	    if (val.endsWith(" GMT"))
 	    {
-		try{
-		    Code.debug("TRY ",val," against ",__dateReceive[i].toPattern());
-		    Date date=(Date)__dateReceive[i].parseObject(val);
-		    Code.debug("GOT ",date);
-		    return date.getTime();
-		}
-		catch(java.lang.Exception e)
+		val=val.substring(0,val.length()-4);
+		for (int i=0;i<__dateReceive.length;i++)
 		{
-		    Code.ignore(e);
+		    try{
+			Code.debug("TRY ",val," against ",__dateReceive[i].toPattern());
+			Date date=(Date)__dateReceive[i].parseObject(val);
+			Code.debug("GOT ",date);
+			return date.getTime();
+		    }
+		    catch(java.lang.Exception e)
+		    {
+			Code.ignore(e);
+		    }
 		}
 	    }
 	}
