@@ -840,6 +840,8 @@ public class ServletHttpRequest
         {Object old=getAttribute(name);getWrapper().setAttribute(name,attribute);return old;}
         public Enumeration getAttributeNames(){return getWrapper().getAttributeNames();}
         public void removeAttribute(String name){getWrapper().removeAttribute(name);}
+
+        public String toString(){ return "Facade:"+ServletHttpRequest.this.toString();}
     }
 
     

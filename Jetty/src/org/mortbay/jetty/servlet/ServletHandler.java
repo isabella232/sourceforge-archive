@@ -430,7 +430,7 @@ public class ServletHandler
                                           httpResponse,
                                           getHolderEntry(pathInContext));
         
-        return servletHttpRequest; // XXX should this be getWrapper()???
+        return servletHttpRequest; 
     }
 
     /* ------------------------------------------------------------ */
@@ -546,12 +546,16 @@ public class ServletHandler
             else if (!pathInContext.equals(request.getPathInContext()))
             {
                 // pathInContext has changed, so get a new holder!
-                // But do not make a new facade. It should have been
-                // wrapped if the paths needed to be changed.
                 Map.Entry entry=getHolderEntry(pathInContext);
                 if (entry==null)
                     return;
+                String servletPathSpec=(String)entry.getKey(); 
                 holder=(ServletHolder)entry.getValue();
+                request.setServletPaths(PathMap.pathMatch(servletPathSpec,
+                                                          pathInContext),
+                                        PathMap.pathInfo(servletPathSpec,
+                                                         pathInContext),
+                                        holder);
             }
             else
                 holder = request.getServletHolder();

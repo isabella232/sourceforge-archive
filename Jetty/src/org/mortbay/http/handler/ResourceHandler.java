@@ -366,10 +366,12 @@ public class ResourceHandler extends NullHandler
       
                     if (index.exists())
                     {
+                                           
                         // Forward to the index
                         String ipath=URI.addPaths(pathInContext,(String)_indexFiles.get(i));
                         URI uri=request.getURI();
                         uri.setPath(URI.addPaths(uri.getPath(),(String)_indexFiles.get(i)));
+                        
                         getHttpContext().handle(0,ipath,null,request,response);
                         return;
                     }
