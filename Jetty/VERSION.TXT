@@ -11,6 +11,7 @@ Jetty-3.1.x ???
  + Imporved InetAddrPort and ThreadedServer to reduce DNS lookups.
  + Dynamic servlets may be restricted to Context classloader.
  + Fixed getter and setter methods that did not conform to beans API.
+ + Fixed LineInput bug with split CRLF.
 
 Jetty-3.0.3 - 3 Feb 2001
  + Fixed pipelined request buffer bug.

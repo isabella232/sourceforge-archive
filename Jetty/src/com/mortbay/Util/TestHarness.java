@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.FilePermission;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -717,6 +718,7 @@ public class TestHarness
         Test test = new Test("com.mortbay.Util.LineInput");
         try
         {
+                
             String data=
                 "abcd\015\012"+
                 "E\012"+
@@ -725,7 +727,6 @@ public class TestHarness
             
             ByteArrayInputStream dataStream;
             LineInput in;
-            if (System.currentTimeMillis()==0){
                 
             dataStream=new ByteArrayInputStream(data.getBytes());
             in = new LineInput(dataStream);
@@ -761,7 +762,6 @@ public class TestHarness
             dataStream=new ByteArrayInputStream(data.getBytes());
             in = new LineInput(dataStream,bs);
             test.checkEquals(in.readLine(),"abcd","1."+bs+" read first line");
-            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
             test.checkEquals(in.readLine(),"E","1."+bs+" read line");
             test.checkEquals(in.readLine(),"","1."+bs+" blank line");
             test.checkEquals(in.readLine(),"fghi","1."+bs+" read last line");
@@ -778,7 +778,7 @@ public class TestHarness
             test.checkEquals(in.readLine(),"fghi","1."+bs+" read last line");
             test.checkEquals(in.readLine(),null,"1."+bs+" read EOF");
             test.checkEquals(in.readLine(),null,"1."+bs+" read EOF again");
-
+            
             bs=3;
             dataStream=new ByteArrayInputStream(data.getBytes());
             in = new LineInput(dataStream,bs);
@@ -804,27 +804,7 @@ public class TestHarness
             test.checkEquals(in.readLine(),null,"1."+bs+" read EOF");
             test.checkEquals(in.readLine(),null,"1."+bs+" read EOF again");
             
-            bs=1;
-            dataStream=new ByteArrayInputStream(data.getBytes());
-            in = new LineInput(dataStream,bs);
-            test.checkEquals(in.readLine(),"a","1."+bs+" read first line");
-            test.checkEquals(in.readLine(),"b","1."+bs+" remainder line");
-            test.checkEquals(in.readLine(),"c","1."+bs+" remainder line");
-            test.checkEquals(in.readLine(),"d","1."+bs+" remainder line");
-            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
-            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
-            test.checkEquals(in.readLine(),"E","1."+bs+" read line");
-            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
-            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
-            test.checkEquals(in.readLine(),"f","1."+bs+" read last line");
-            test.checkEquals(in.readLine(),"g","1."+bs+" remainder line");
-            test.checkEquals(in.readLine(),"h","1."+bs+" remainder line");
-            test.checkEquals(in.readLine(),"i","1."+bs+" remainder line");
-            test.checkEquals(in.readLine(),null,"1."+bs+" read EOF");
-            test.checkEquals(in.readLine(),null,"1."+bs+" read EOF again");
             
-
-
             dataStream=new ByteArrayInputStream(data.getBytes());
             in = new LineInput(dataStream);
             char[] b = new char[8];
@@ -855,7 +835,7 @@ public class TestHarness
             test.checkEquals(in.readLineBuffer(2).size,2,"4 read rest of last line");
             test.checkEquals(in.readLineBuffer(2),null,"4 read EOF");
             test.checkEquals(in.readLineBuffer(2),null,"4 read EOF again");
-            
+
             dataStream=new ByteArrayInputStream(data.getBytes());
             in = new LineInput(dataStream);
             in.setByteLimit(8);
@@ -863,7 +843,7 @@ public class TestHarness
             test.checkEquals(in.readLine(),"E","read line");
             test.checkEquals(in.readLine(),null,"read EOF");
             test.checkEquals(in.readLine(),null,"read EOF again");
-            
+
             dataStream=new ByteArrayInputStream(data.getBytes());
             in = new LineInput(dataStream);
             test.checkEquals(in.readLine(),"abcd","1 read first line");
@@ -879,7 +859,6 @@ public class TestHarness
             test.checkEquals(in.readLine(),null,"1 read EOF");
             test.checkEquals(in.readLine(),null,"1 read EOF again");
 
-            
             String dataCR=
                 "abcd\015"+
                 "E\015"+
@@ -892,7 +871,7 @@ public class TestHarness
             test.checkEquals(in.readLine(),"","CR blank line");
             test.checkEquals(in.readLine(),"fghi","CR read last line");
             test.checkEquals(in.readLine(),null,"CR read EOF");
-            test.checkEquals(in.readLine(),null,"CR read EOF again");
+            test.checkEquals(in.readLine(),null,"CR read EOF again");            
             
             String dataLF=
                 "abcd\012"+
@@ -921,8 +900,7 @@ public class TestHarness
             test.checkEquals(in.readLine(),"fghi","CRLF read last line");
             test.checkEquals(in.readLine(),null,"CRLF read EOF");
             test.checkEquals(in.readLine(),null,"CRLF read EOF again");
-        }
-        
+     
 
             String dataEOF=
                 "abcd\015\012"+
@@ -936,6 +914,47 @@ public class TestHarness
             test.checkEquals(in.readLine(),null,"read EOF");
             in.setByteLimit(-1);
             test.checkEquals(in.readLine(),"ijkl","EOF read second line");
+        
+            String dataEOL=
+                "abcdefgh\015\012"+
+                "ijklmnop\015\012"+
+                "12345678\015\012"+
+                "87654321\015\012";
+            
+            dataStream=new PauseInputStream(dataEOL.getBytes(),11);
+            in = new LineInput(dataStream,100);
+            test.checkEquals(in.readLine(),"abcdefgh","EOL read 1");
+            test.checkEquals(in.readLine(),"ijklmnop","EOL read 2");
+            test.checkEquals(in.readLine(),"12345678","EOL read 3");
+            test.checkEquals(in.readLine(),"87654321","EOL read 4");
+
+            dataStream=new PauseInputStream(dataEOL.getBytes(),100);
+            in = new LineInput(dataStream,11);
+            test.checkEquals(in.readLine(),"abcdefgh","EOL read 1");
+            test.checkEquals(in.readLine(),"ijklmnop","EOL read 2");
+            test.checkEquals(in.readLine(),"12345678","EOL read 3");
+            test.checkEquals(in.readLine(),"87654321","EOL read 4");
+            
+            dataStream=new PauseInputStream(dataEOL.getBytes(),50);
+            in = new LineInput(dataStream,19);
+            test.checkEquals(in.readLine(),"abcdefgh","EOL read 1");
+            test.checkEquals(in.readLine(),"ijklmnop","EOL read 2");
+            in.setByteLimit(5);
+            test.checkEquals(in.readLine(),"12345","EOL read 3 limited");
+            in.setByteLimit(-1);
+            test.checkEquals(in.readLine(),"678","EOL read 4 unlimited");
+            test.checkEquals(in.readLine(),"87654321","EOL read 5");
+
+            for (int s=20;s>1;s--)
+            {
+                dataStream=new PauseInputStream(dataEOL.getBytes(),s);
+                in = new LineInput(dataStream,100);
+                test.checkEquals(in.readLine(),"abcdefgh",s+" read 1");
+                test.checkEquals(in.readLine(),"ijklmnop",s+" read 2");
+                test.checkEquals(in.readLine(),"12345678",s+" read 3");
+                test.checkEquals(in.readLine(),"87654321",s+" read 4");
+            }
+
         }
         catch(Exception e)
         {
@@ -944,6 +963,58 @@ public class TestHarness
         }
     }
 
+    /* ------------------------------------------------------------ */
+    private static class PauseInputStream extends ByteArrayInputStream
+    {
+        int size;
+        int c;
+        
+        PauseInputStream(byte[] data,int size)
+        {
+            super(data);
+            this.size=size;
+            c=size;
+        }
+        
+        public synchronized int read()
+        {
+            c--;
+            if(c==0)
+                c=size;
+            return super.read();
+        }
+        
+        /* ------------------------------------------------------------ */
+        public synchronized int read(byte b[], int off, int len)
+        {
+            if (len>c)
+                len=c;
+            if(c==0)
+            {
+                Code.debug("read(b,o,l)==0");
+                c=size;
+                return 0;
+            }
+            
+            len=super.read(b,off,len);
+            if (len>=0)
+                c-=len;
+            return len;
+        }
+
+        /* ------------------------------------------------------------ */
+        public int available()
+        {   
+            if(c==0)
+            {
+                Code.debug("available==0");
+                c=size;
+                return 0;
+            }
+            return c;
+        }
+    }
+    
     /* ------------------------------------------------------------ */
     static class TestThreadPool extends ThreadPool
     {
@@ -1640,7 +1711,7 @@ public class TestHarness
        	    testThreadPool();
        	    testThreadedServer();
        	    testB64();
-       	    testResource();
+      	    testResource();
        	    testXmlParser();
        	    testXmlConfiguration();
         }

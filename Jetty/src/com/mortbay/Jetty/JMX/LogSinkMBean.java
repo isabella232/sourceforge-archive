@@ -7,6 +7,7 @@ package com.mortbay.Jetty.JMX;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
+import javax.management.MBeanServer;
 import javax.management.MBeanOperationInfo;
 import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
@@ -53,8 +54,8 @@ public class LogSinkMBean extends LifeCycleMBean
     }
     
     /* ------------------------------------------------------------ */
-    protected String newObjectName()
+    protected String newObjectName(MBeanServer server)
     {
-        return uniqueObjectName(getJettyDomain()+":name=Log");
+        return uniqueObjectName(server,getJettyDomain()+":name=Log");
     }
 }

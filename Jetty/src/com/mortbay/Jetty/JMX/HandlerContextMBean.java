@@ -6,6 +6,7 @@
 package com.mortbay.Jetty.JMX;
 
 import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServer;
 import javax.management.MBeanException;
 import javax.management.MBeanOperationInfo;
 import javax.management.modelmbean.InvalidTargetObjectTypeException;
@@ -106,10 +107,10 @@ public class HandlerContextMBean extends LifeCycleMBean
     }
     
     /* ------------------------------------------------------------ */
-    protected String newObjectName()
+    protected String newObjectName(MBeanServer server)
     {
         return
-            uniqueObjectName(_httpServerMBean.getObjectName().toString()+
+            uniqueObjectName(server,_httpServerMBean.getObjectName().toString()+
                              ",context="+
                              _handlerContext.getContextPath());
     }

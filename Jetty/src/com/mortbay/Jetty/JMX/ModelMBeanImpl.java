@@ -845,11 +845,11 @@ public class ModelMBeanImpl
      * to uniqueObjectName method.
      * @return 
      */
-    protected String newObjectName()
+    protected String newObjectName(MBeanServer server)
     {
         // Create own ObjectName of the form:
         // package:class=id
-        return uniqueObjectName(getJettyDomain()+":");
+        return uniqueObjectName(server,getJettyDomain()+":");
     }
     
     /* ------------------------------------------------------------ */
@@ -867,7 +867,7 @@ public class ModelMBeanImpl
         _objectName=oName;
         if (_objectName==null)
         {
-            try{oName=new ObjectName(newObjectName());}
+            try{oName=new ObjectName(newObjectName(server));}
             catch(Exception e){Code.warning(e);}
         }
         Code.debug("preRegister ",_objectName," -> ",oName);
@@ -911,7 +911,7 @@ public class ModelMBeanImpl
      * @param objectName 
      * @return objectName with id= class.
      */
-    public synchronized String uniqueObjectName(String objectName)
+    public synchronized String uniqueObjectName(MBeanServer server,String objectName)
     {        
         if (!objectName.endsWith("="))
         {
@@ -925,12 +925,33 @@ public class ModelMBeanImpl
             objectName+=className+"=";
         }
         
-        Integer id=(Integer)__objectId.get(objectName);
-        if (id==null)
-            id=new Integer(0);
-        String newName=objectName+id;
-        id=new Integer(id.intValue()+1);
-        __objectId.put(objectName,id);
+        String newName=null;
+        while(true)
+        {
+            Integer id=(Integer)__objectId.get(objectName);
+            if (id==null)
+                id=new Integer(0);
+            newName=objectName+id;
+            id=new Integer(id.intValue()+1);
+            __objectId.put(objectName,id);
+            
+            // If no server, this must be unique
+            if (server==null)
+                break;
+
+            // Otherwise let's check it is unique
+            try
+            {
+                // if not found then it is unique
+                if (!server.isRegistered(new ObjectName(newName)))
+                    break;
+            }
+            catch(Exception e)
+            {
+                Log.warning(e);
+                break;
+            }
+        }
         return newName;
     }
     

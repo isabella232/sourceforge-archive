@@ -6,6 +6,7 @@
 package com.mortbay.Jetty.JMX;
 
 import javax.management.InstanceNotFoundException;
+import javax.management.MBeanServer;
 import javax.management.MBeanException;
 import javax.management.ObjectName;
 import javax.management.MBeanOperationInfo;
@@ -79,11 +80,11 @@ public class HttpServerMBean extends LifeCycleMBean
     }
 
     /* ------------------------------------------------------------ */
-    protected String newObjectName()
+    protected String newObjectName(MBeanServer server)
     {
         // Create own ObjectName of the form:
         // package:class=id
-        return uniqueObjectName(getJettyDomain()+":name=Jetty");
+        return uniqueObjectName(server, getJettyDomain()+":name=Jetty");
     }
 
     /* ------------------------------------------------------------ */

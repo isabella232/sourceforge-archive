@@ -37,22 +37,26 @@ import java.io.UnsupportedEncodingException;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class LineInput extends FilterInputStream
+public class LineInput extends FilterInputStream                           
 {
+    
     /* ------------------------------------------------------------ */
     private byte _buf[];
     private ByteBuffer _byteBuffer;
     private InputStreamReader _reader;
-    private int _contents; // Back marker of buffer
-    private int _avail;    // Available back marker, may be byte limited
-    private int _pos;      // Start marker
     private int _mark=-1;  // reset marker
+    private int _pos;      // Start marker
+    private int _avail;    // Available back marker, may be byte limited
+    private int _contents; // Absolute back marker of buffer
     private int _byteLimit=-1;
-    private int _origLimit=-1;
+    private boolean _newByteLimit;
     private LineBuffer _lineBuffer;
     private String _encoding;
     private boolean _eof=false;
     private boolean _lastCr=false;
+
+    private final static int LF=10;
+    private final static int CR=13;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -77,6 +81,7 @@ public class LineInput extends FilterInputStream
             bufferSize=2048;
         _buf=new byte[bufferSize];
         _byteBuffer=new ByteBuffer(_buf);
+        _lineBuffer=new LineBuffer(bufferSize);
         _reader=new InputStreamReader(_byteBuffer);
     }
     
@@ -96,6 +101,7 @@ public class LineInput extends FilterInputStream
             bufferSize=2048;
         _buf=new byte[bufferSize];
         _byteBuffer=new ByteBuffer(_buf);
+        _lineBuffer=new LineBuffer(bufferSize);
         _reader=new InputStreamReader(_byteBuffer,encoding);
         _encoding=encoding;
     }
@@ -108,10 +114,10 @@ public class LineInput extends FilterInputStream
     public void setByteLimit(int bytes)
     {
         _byteLimit=bytes;
-        _origLimit=bytes;
         
         if (bytes>=0)
         {
+            _newByteLimit=true;
             _byteLimit-=_contents-_pos;
             if (_byteLimit<0)
             {
@@ -121,6 +127,7 @@ public class LineInput extends FilterInputStream
         }
         else
         {
+            _newByteLimit=false;
             _avail=_contents;
             _eof=false;
         }
@@ -153,7 +160,7 @@ public class LineInput extends FilterInputStream
         
         if (len<0)
             return null;
-        
+
         String s=null;
         if (_encoding==null)
             s=new String(_buf,_mark,len);
@@ -258,9 +265,6 @@ public class LineInput extends FilterInputStream
         if (len<0)
             return null;
         
-        if (_lineBuffer==null)
-            _lineBuffer=new LineBuffer(_buf.length);
-
         if (len==0)
         {
             _lineBuffer.size=0;
@@ -398,79 +402,70 @@ public class LineInput extends FilterInputStream
         }
         else if (_mark==0 && _pos>0 && _contents==_buf.length)
         {
+            // Discard the mark as we need the space.
             _mark=-1;
             fill();
             return;
         }
 
+        // Get ready to top up the buffer
         int n=0;
         _eof=false;
-        
+
+        // Handle byte limited EOF
         if (_byteLimit==0)
             _eof=true;
-        else if (_buf.length>_contents)
+        // else loop until something is read.
+        else while (n==0 && _buf.length>_contents)
         {
-            int space=_buf.length-_contents;
-            if (_byteLimit>=0 && space>_byteLimit)
-                space=_byteLimit;
-            
+            // try to read as much as will fit.
+            int space=_buf.length-_contents;            
             n=in.read(_buf,_contents,space);
             
             _eof=(n<0);
             if (!_eof)
                 _contents+=n;
             _avail=_contents;
-            
+
+            // If we have a byte limit
             if (_byteLimit>0)
             {
+                // adjust the bytes available
                 if (_contents-_pos >=_byteLimit)
                     _avail=_byteLimit+_pos;
                 
-                if (n>0)
+                if (n>_byteLimit)
+                    _byteLimit=0;
+                else if (n>=0)
                     _byteLimit-=n;
                 else if (n==-1)
                     throw new IOException("Premature EOF");
             }
-
-            byte[]b2=new byte[_buf.length];
-            System.arraycopy(_buf,0,b2,0,_buf.length);
-            for (int b=0;b<_buf.length;b++)
-            {
-                if (b2[b]==10)
-                    b2[b]=(byte)'|';
-                if (b2[b]==13)
-                    b2[b]=(byte)'|';
-            }
-            
-            String buf2=new String(b2);
-        }
-
-        // If we have some characters
-        if (_avail-_pos>0)
-        {
-            // if the last read was a CR, may need to consume LF
-            if (_lastCr && _buf[_pos]==10)
-            {
-                _pos++;
-
-                // If this was part of the header, don't count
-                // as content.
-                if(_byteLimit>=0 && _byteLimit+n==_origLimit)
-                {
-                    _byteLimit++;
-                    if (_avail<_contents)
-                        _avail++;
-                }
-                // If we ate all that ws filled, fill some more
-                if (_pos==_avail)
-                    fill();
-            }
         }
         
-//          String buffer=new String(_buf,_pos,_contents-_pos);
-//          buffer=StringUtil.replace(buffer,"\r","<");
-//          buffer=StringUtil.replace(buffer,"\n","|");
-//          System.err.println("FILL: ["+buffer+"]");
+        // If we have some characters and the last read was a CR and
+        // the first char is a LF, skip it
+        if (_avail-_pos>0 && _lastCr && _buf[_pos]==LF)
+        {
+            _pos++;
+            if (_mark>=0)
+                _mark++;
+            _lastCr=false;
+
+            // If the byte limit has just been imposed, dont count
+            // LF as content.
+            if(_byteLimit>=0 && _newByteLimit)
+            {
+                if (_avail<_contents)
+                    _avail++;
+                else
+                    _byteLimit++;
+            }
+            // If we ate all that ws filled, fill some more
+            if (_pos==_avail)
+                fill();
+        }
+        _newByteLimit=false;
     }
 
     
@@ -486,26 +481,26 @@ public class LineInput extends FilterInputStream
             return -1;
         
         byte b;  
-        boolean cr=false;
+        boolean cr=_lastCr;
         boolean lf=false;
-        boolean last_cr=_lastCr;
         _lastCr=false;
-        
         int len=0;
         
     LineLoop:
         while (_pos<=_avail)
         {
             // if we have gone past the end of the buffer
-            if (_pos==_avail)
+            while (_pos==_avail)
             {
                 // If EOF or no more space in the buffer,
                 // return a line.
-                if (_eof || (_mark==0 && _avail==_buf.length))
+                if (_eof || (_mark==0 && _contents==_buf.length))
                 {
+                    _lastCr=!_eof && _buf[_avail-1]==CR;
+                    
                     cr=true;
                     lf=true;
-                    break;
+                    break LineLoop;
                 }
                 
                 // If we have a CR and no more characters are available
@@ -516,7 +511,7 @@ public class LineInput extends FilterInputStream
                     _lastCr=true;
                     cr=true;
                     lf=true;
-                    break;
+                    break LineLoop;
                 }
                 else
                 {
@@ -525,7 +520,6 @@ public class LineInput extends FilterInputStream
                     fill();
                     _pos=len;
                     cr=false;
-                    continue;
                 }
             }
 
@@ -534,20 +528,19 @@ public class LineInput extends FilterInputStream
             
             switch(b)
             {
-              case 10:
-                  if (last_cr && !cr && len==0)
-                  {
-                      _lastCr=false;
-                      continue;
-                  }
+              case LF: 
                   lf=true;
                   break LineLoop;
                 
-              case 13:
+              case CR: 
                   if (cr)
                   {
-                      _pos--;
-                      break LineLoop;
+                      // Double CR
+                      if (_pos>1)
+                      {
+                          _pos--;
+                          break LineLoop;
+                      }
                   }
                   cr=true;
                   break;
@@ -555,8 +548,13 @@ public class LineInput extends FilterInputStream
               default:
                   if(cr)
                   {
-                      _pos--;
-                      break LineLoop;
+                      if (_pos==1)
+                          cr=false;
+                      else
+                      {
+                          _pos--;
+                          break LineLoop;
+                      }
                   }
                   
                   len++;
@@ -566,12 +564,12 @@ public class LineInput extends FilterInputStream
                       if (_mark!=0 && _pos+2>=_avail && _avail<_buf.length)
                           fill();
                           
-                      if (_pos<_avail && _buf[_pos]==13)
+                      if (_pos<_avail && _buf[_pos]==CR)
                       {
                           cr=true;
                           _pos++;
                       }
-                      if (_pos<_avail && _buf[_pos]==10)
+                      if (_pos<_avail && _buf[_pos]==LF)
                       {
                           lf=true;
                           _pos++;
@@ -592,6 +590,7 @@ public class LineInput extends FilterInputStream
         
         if (!cr && !lf && len==0)
             len=-1;
+        
         return len;
     }
 
@@ -624,4 +623,89 @@ public class LineInput extends FilterInputStream
 
         public String toString(){return new String(buffer,0,size);}
     }
+
+
+    
+//      /* ------------------------------------------------------------ */
+//      /* ------------------------------------------------------------ */
+//      /* ------------------------------------------------------------ */
+//      private static final String __dash =
+//          "==================================================================================================================================================================================================";
+    
+//      /* ------------------------------------------------------------ */
+//      private static final String __blank=
+//          "                                                                                                                                                                                                  ";
+  
+//      /* ------------------------------------------------------------ */
+//      private void dump(String label)
+//      {
+//          StringBuffer buf= new StringBuffer();
+
+//          buf.append(label);
+//          buf.append("           [".substring(label.length()));
+//          String buffer=new String(_buf,0,_contents);
+//          buffer=StringUtil.replace(buffer,"\r","<");
+//          buffer=StringUtil.replace(buffer,"\n","|");
+//          buf.append(buffer);
+//          buf.append("] ");
+//          buf.append(_byteLimit);
+//          buf.append(" ");
+//          buf.append(_buf.length);
+//          buf.append(" ");
+//          buf.append(_lastCr);
+
+//          if (_pos<_avail)
+//          {
+//              buf.append("\n            ");
+//              if (_mark<0)
+//              {
+//                  buf.append(__blank.substring(0,_avail));
+//                  buf.append("|");
+//              }
+//              else if (_mark<_pos)
+//              {
+//                  buf.append(__blank.substring(0,_mark));
+//                  buf.append("^");
+//                  buf.append(__dash.substring(0,_pos-_mark-1));
+//                  buf.append(__blank.substring(0,_avail-_pos));
+//                  buf.append("|");
+//              }
+//              else if (_mark==_pos)
+//              {
+//                  buf.append(__blank.substring(0,_mark));
+//                  buf.append("+");
+//                  buf.append(__blank.substring(0,_avail-_pos-1));
+//                  buf.append("|");
+//              }
+//              else
+//                  buf.append("?");   
+//          }
+//          else if (_pos==_avail)
+//          {
+//              buf.append("\n            ");
+//              if (_mark<0)
+//              {
+//                  buf.append(__blank.substring(0,_avail));
+//                  buf.append("|");
+//              }
+//              else if (_mark<_avail)
+//              {
+//                  buf.append(__blank.substring(0,_mark));
+//                  buf.append("^");
+//                  buf.append(__dash.substring(0,_avail-_mark-1));
+//                  buf.append("|");
+//              }
+//              else if (_mark==_avail)
+//              {
+//                  buf.append(__blank.substring(0,_mark));
+//                  buf.append("#");
+//              }
+//              else
+//                  buf.append("?");   
+//          }
+
+//          if (Code.debug())
+//              System.err.println(buf.toString());
+//      }
 }
+
