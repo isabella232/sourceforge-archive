@@ -195,14 +195,14 @@ public class CgiServlet extends HttpServlet
 
 		Code.debug("Header - "+name+" : "+value);
 
-		if (name.equalsIgnoreCase("Location"))
-		{
-		    Code.debug("Found a Location header - what to do...?");
-		}
-		else if (name.equalsIgnoreCase("Status"))
+		if (name.equalsIgnoreCase("Status"))
 		{
 		    Code.debug("Found a Status header - setting status on response");
-		    res.setStatus(new Integer(value).intValue());
+		    // NOTE: we ignore any reason phrase, otherwise we
+		    // would need to use res.sendError() selectively.
+		    int i = value.indexOf(' ');
+		    String status = (i>0) ? value.substring(0,i) : value;
+		    res.setStatus(Integer.parseInt(status));
 		}
 		else
 		{
@@ -220,12 +220,12 @@ public class CgiServlet extends HttpServlet
 	    // terminate script and clean up...
 	    Code.debug("CgiServlet: Client closed connection!");
 	    p.destroy();
+	    throw e;
 	}
 	// think about this a bit more :
 	// what should we do with our processes error stream ?
 	// what should we do with it's exit value ?
 	// so should we wait for it ?
-	// will Greg's stuff flush and close all streams correctly ?
     }
 };
 
