@@ -11,7 +11,10 @@ import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import org.mortbay.http.jmx.HttpServerMBean;
-import org.mortbay.util.Code;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.LogSupport;
+
 
 /* ------------------------------------------------------------ */
 /** JettyPlus Server MBean.
@@ -25,6 +28,7 @@ import org.mortbay.util.Code;
  */
 public class ServerMBean extends org.mortbay.jetty.jmx.ServerMBean
 {
+    private static Log log = LogFactory.getLog(ServerMBean.class);
     org.mortbay.jetty.plus.Server _jettyServer;
     String _configuration;
     
@@ -98,7 +102,7 @@ public class ServerMBean extends org.mortbay.jetty.jmx.ServerMBean
                 }
                 catch(Exception e)
                 {
-                    Code.warning(e);
+		    log.warn(e);
                 }
             }
         }
