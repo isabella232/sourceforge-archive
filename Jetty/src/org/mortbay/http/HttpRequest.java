@@ -362,7 +362,6 @@ public class HttpRequest extends HttpMessage
         buf.append(getPath());
         return buf;
     }
-
     
     /* -------------------------------------------------------------- */
     /** Get the full URI.

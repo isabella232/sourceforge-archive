@@ -64,10 +64,11 @@ public class ResourceHandler extends NullHandler
     private boolean _acceptRanges=true;
     
     /* ------------------------------------------------------------ */
-    List _indexFiles =new ArrayList(2);
+    List _indexFiles =new ArrayList(4);
     {
         _indexFiles.add("index.html");
         _indexFiles.add("index.htm");
+        _indexFiles.add("index.jsp");
     }
  
     /* ------------------------------------------------------------ */
@@ -256,8 +257,6 @@ public class ResourceHandler extends NullHandler
         
         try
         {
-            Code.setDebug(true);
-            
             resource = baseResource.addPath(URI.encodePath(pathInContext));
             Code.debug("PATH=",pathInContext,
                        " RESOURCE=",resource);
@@ -366,7 +365,8 @@ public class ResourceHandler extends NullHandler
                     {
                         // Forward to the index
                         String ipath=URI.addPaths(pathInContext,(String)_indexFiles.get(i));
-                        
+                        URI uri=request.getURI();
+                        uri.setPath(URI.addPaths(uri.getPath(),(String)_indexFiles.get(i)));
                         getHttpContext().handle(0,ipath,null,request,response);
                         return;
                     }
