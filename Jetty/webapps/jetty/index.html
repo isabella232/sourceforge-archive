@@ -109,11 +109,9 @@ engine from apache.
 
 <A NAME="SSL"></A>
 <BR>&nbsp;<H3>SSL Support</H3>
-A HttpListener extension class has been contributed by
-<A HREF=http://www.forge.com.au>FORGE</A> that integrates their
-Protekt SSL product with Jetty. A similar approach may be used to
-integrate other SSL implementations.
+Jetty has a <A HREF="JsseSSL.html">SunJsseListener</A> which uses Sun's JSSE reference implementation to provide support for HTTPS. It is even possible to use the same pair of public/private keys as a pre-existing apache server by using the KeyPairTool to load the private key and its certificate into a keystore for JSSE.
 
+<p> If the use of a commercial SSL implementation is required, <A HREF=http://www.forge.com.au>FORGE</A> have contributed a listener which allows their Protekt product to be used as an SSL provider. A similar approach may be used to integrate other SSL implementations.
 
 <A NAME="Efficient"></A>
 <BR>&nbsp;<H3>Small & Efficient</H3>
@@ -122,7 +120,7 @@ a small and efficient server is the result: <UL>
   <LI>A full featured server can be configured in a jar file under 100KB.
   <LI>Optimized parsing is performed on requests.
   <LI>Minimal Object and thread creation.
-  <LI>Server performance degrades reasonably under stress.
+  <LI>Server performance degrades gracefully under stress.
 </UL>
 
 
