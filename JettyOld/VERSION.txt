@@ -4,6 +4,7 @@ Release 2.3.0A -
   + ServerContext available to HtmlFilters via context param
   + Made session IDs less predictable and removed race.
   + Added BuildJetty.java file.
+  + Expanded tabs to spaces in source.
 
 Release 2.2.8 - 15 Sep 1999
   + Fixed bug in Element.attribute with empty string values.
