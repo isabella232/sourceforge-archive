@@ -59,4 +59,30 @@ public class
   protected boolean _distributableHttpSession=false;
   public boolean getDistributableHttpSession() {return _distributableHttpSession;}
   public void setDistributableHttpSession(boolean distributable) {_distributableHttpSession=distributable;}
+
+  //----------------------------------------------------------------------------
+
+  protected boolean _stopGracefully=false;
+
+  public void
+    setStopGracefully(boolean stopGracefully)
+    {
+      if (isStarted())
+	throw new IllegalStateException("setStopGracefully() must be called before J2EEWebApplicationContext is started");
+
+      _stopGracefully=stopGracefully;
+    }
+
+  public boolean getStopGracefully() {return _stopGracefully;}
+
+  public void
+    start()
+    throws Exception
+    {
+      if (_stopGracefully && !getStatsOn())
+	setStatsOn(true);
+
+      super.start();
+    }
+
 }
