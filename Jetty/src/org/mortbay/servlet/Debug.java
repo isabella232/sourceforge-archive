@@ -13,7 +13,7 @@ import org.mortbay.util.Code;
 import org.mortbay.util.Log;
 import org.mortbay.util.LogSink;
 import org.mortbay.util.StringUtil;
-import org.mortbay.util.WriterLogSink;
+import org.mortbay.util.OutputStreamLogSink;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -71,7 +71,7 @@ public class Debug extends HttpServlet
             tf.addCheckbox("LSS"+s,"Started",sinks[s].isStarted());
             
             String logOptions=sinks[s].getOptions();
-            if (sinks[s] instanceof WriterLogSink)
+            if (sinks[s] instanceof OutputStreamLogSink)
             {
                 tf.addCheckbox("Lt"+s,"Timestamp",logOptions.indexOf('t')>=0);
                 logOptions=StringUtil.replace(logOptions,"t","");
@@ -87,7 +87,7 @@ public class Debug extends HttpServlet
                 logOptions=StringUtil.replace(logOptions,"O","");
                 tf.addTextField("LO"+s,"Other Options",10,logOptions);
                 
-                String filename=((WriterLogSink)sinks[s]).getFilename();
+                String filename=((OutputStreamLogSink)sinks[s]).getFilename();
                 tf.addTextField("LF"+s,"Log File Name",40,filename);
             }
             else
@@ -96,7 +96,7 @@ public class Debug extends HttpServlet
         
         tf.table().newRow().addCell(Break.rule).cell().attribute("COLSPAN","2");
         
-        tf.addTextField("LSC","Add LogSink Class",40,"org.mortbay.util.WriterLogSink");
+        tf.addTextField("LSC","Add LogSink Class",40,"org.mortbay.util.OutputStreamLogSink");
         
         tf.addButtonArea();
         tf.addButton("Action","Set Options");
@@ -156,7 +156,7 @@ public class Debug extends HttpServlet
                 if (options==null)
                     options="";
                 
-                if (sinks[s] instanceof WriterLogSink)
+                if (sinks[s] instanceof OutputStreamLogSink)
                 {
                     if ("on".equals(request.getParameter("Lt"+s)))options+="t";
                     if ("on".equals(request.getParameter("LL"+s)))options+="L";
@@ -166,7 +166,7 @@ public class Debug extends HttpServlet
                     if ("on".equals(request.getParameter("SL"+s)))options+="O";
 
                     String filename = request.getParameter("LF"+s);
-                    ((WriterLogSink)sinks[s]).setFilename(filename);
+                    ((OutputStreamLogSink)sinks[s]).setFilename(filename);
                 }
                 
                 sinks[s].setOptions(options);
