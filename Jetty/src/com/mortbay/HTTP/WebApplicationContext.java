@@ -566,11 +566,11 @@ public class WebApplicationContext extends HandlerContext
                            HttpResponse response)
             throws HttpException, IOException
         {
-            if(StringUtil.asciiToLowerCase(pathInContext).startsWith("/web-inf/"))
+            String path=Resource.canonicalPath(StringUtil.asciiToLowerCase(pathInContext));
+            if(path.startsWith("/web-inf/") || path.startsWith("/meta-inf/" ))
             {
                 response.sendError(HttpResponse.__403_Forbidden);
             }
         }
-    }
-    
+    } 
 }

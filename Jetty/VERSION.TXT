@@ -2,6 +2,9 @@ Jetty Versions
 --------------
 
 Jetty-3.0.0 - 
+ + Mapped *.jsp,*.jsP,*.jSp,*.jSP,*.Jsp,*.JsP,*.JSp,*.JSP
+ + Tidied handling of ".", ".." and "//" in resource paths
+ + Protected META-INF as well as WEB-INF in web applications.
  + Jetty.Server catches init exceptions per server
  + getSecurityHandler creates handler at position 0.
  + SysV unix init script
@@ -12,6 +15,7 @@ Jetty-3.0.0 -
  + Default log options changed if in debug mode.
  + Removed some unused variables.
  + Added ForwardHandler
+ + Removed security constraint on demo admin server.
 
 Jetty-3.0.0.rc7 - 02 Dec 2000
  + Fixed security problem with lowercase WEB-INF uris on windows.

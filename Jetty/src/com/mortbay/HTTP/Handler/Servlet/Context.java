@@ -128,7 +128,8 @@ public class Context implements ServletContext, HttpSessionContext
         throws MalformedURLException
     {
         Resource resourceBase=_handlerContext.getResourceBase();
-        if (resourceBase==null)
+        uriInContext=Resource.canonicalPath(uriInContext);
+        if (resourceBase==null || uriInContext==null)
             return null;
 
         try{

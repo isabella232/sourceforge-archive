@@ -53,7 +53,7 @@ public class Dispatcher implements RequestDispatcher
     {
         Code.debug("Dispatcher for ",context,",",pathInContext,",",query);
         
-        _path = pathInContext;
+        _path = Resource.canonicalPath(pathInContext);
         _query=query;
         
         _context = context;

@@ -1457,6 +1457,31 @@ public class TestHarness
             in = r.getInputStream();
             data=IO.toString(in);
             t.checkContains(data,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","Fetched file");
+
+
+            t.checkEquals(Resource.canonicalPath("foo"),"foo","canonicalPath");
+            t.checkEquals(Resource.canonicalPath("/"),"/","canonicalPath");
+            t.checkEquals(Resource.canonicalPath("/foo/bar"),"/foo/bar","canonicalPath");
+            t.checkEquals(Resource.canonicalPath("/foo/bar/"),"/foo/bar/","canonicalPath");
+            t.checkEquals(Resource.canonicalPath("//"),"/","canonicalPath //");
+            t.checkEquals(Resource.canonicalPath("//foo//bar"),"/foo/bar","canonicalPath //");
+            t.checkEquals(Resource.canonicalPath("//foo//bar//"),"/foo/bar/","canonicalPath //");
+            t.checkEquals(Resource.canonicalPath("//foo//bar//"),"/foo/bar/","canonicalPath //");
+            t.checkEquals(Resource.canonicalPath("/foo/../bar"),"/bar","canonicalPath ..");
+            t.checkEquals(Resource.canonicalPath("/foo/bar/.."),"/foo","canonicalPath ..");
+            t.checkEquals(Resource.canonicalPath("/foo/../bar/"),"/bar/","canonicalPath ..");
+            t.checkEquals(Resource.canonicalPath("/foo/bar/../"),"/foo/","canonicalPath ..");
+            t.checkEquals(Resource.canonicalPath("/foo/bar/../.."),"/","canonicalPath");
+            t.checkEquals(Resource.canonicalPath("/foo/bar/../../"),"/","canonicalPath");
+            t.checkEquals(Resource.canonicalPath("/foo/../bar/../"),"/","canonicalPath");
+            t.checkEquals(Resource.canonicalPath("/foo/bar/../../.."),null,"canonicalPath");
+            t.checkEquals(Resource.canonicalPath("../foo"),null,"canonicalPath");
+            t.checkEquals(Resource.canonicalPath("/../foo"),null,"canonicalPath");
+            t.checkEquals(Resource.canonicalPath("."),"","canonicalPath");
+            t.checkEquals(Resource.canonicalPath("/."),"/","canonicalPath");
+            t.checkEquals(Resource.canonicalPath("./"),"/","canonicalPath");
+            t.checkEquals(Resource.canonicalPath("/foo/."),"/foo","canonicalPath");
+            t.checkEquals(Resource.canonicalPath("/foo/./"),"/foo/","canonicalPath");
             
             
         }

@@ -77,7 +77,7 @@ public class Demo
             context.addServlet("Dispatch",
                                "/Dispatch/*",
                                "com.mortbay.Servlet.RequestDispatchTest");
-            context.addServlet("JSP","*.jsp",
+            context.addServlet("JSP","*.jsp,*.jsP,*.jSp,*.jSP,*.Jsp,*.JsP,*.JSp,*.JSP",
                                "org.apache.jasper.servlet.JspServlet");
             context.setServingResources(true);
             context.addHandler(new DumpHandler());
@@ -123,11 +123,6 @@ public class Demo
             listener.setMaxIdleTimeMs(60000);
             listener.setMaxReadTimeMs(60000);
             context=admin.addContext(null,"/");
-            context.setRealm("Jetty Demo Realm");
-            context.addSecurityConstraint
-                ("/",
-                 new SecurityConstraint("admin",
-                                        "content-administrator"));
             context.addServlet("Admin","/","com.mortbay.HTTP.AdminServlet");
             context.addServlet("Debug","/Debug/*","com.mortbay.Servlet.Debug");
             admin.start();

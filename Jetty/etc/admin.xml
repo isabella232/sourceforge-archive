@@ -31,15 +31,6 @@ $Id$
     </Arg>
   </Call>
 
-  <Call name="addRealm">
-    <Arg>
-      <New class="com.mortbay.HTTP.HashUserRealm">
-        <Arg>Jetty Demo Realm</Arg>
-        <Arg><SystemProperty name="jetty.home" default="."/>/etc/demoRealm.properties</Arg>
-      </New>
-    </Arg>
-  </Call>
-
   <Call name="addContext">
     <Arg>/</Arg>
     <Call name="addServlet">

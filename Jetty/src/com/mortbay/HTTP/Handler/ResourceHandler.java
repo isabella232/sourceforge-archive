@@ -220,7 +220,8 @@ public class ResourceHandler extends NullHandler
         throws HttpException, IOException
     {
         // Extract and check filename
-        if (pathInContext.indexOf("..")>=0)
+        pathInContext=Resource.canonicalPath(pathInContext);
+        if (pathInContext==null)
             throw new HttpException(HttpResponse.__403_Forbidden);
         
         Resource resourceBase=getHandlerContext().getResourceBase();
@@ -507,15 +508,15 @@ public class ResourceHandler extends NullHandler
             return;
         }
  
-        String newPath = request.getField("New-uri");
-        String contextPath = getHandlerContext().getContextPath();
-        if (newPath.indexOf("..")>=0)
+        String newPath = Resource.canonicalPath(request.getField("New-uri"));
+        if (newPath==null)
         {
             response.sendError(response.__405_Method_Not_Allowed,
-                               "File contains ..");
+                               "Bad new uri");
             return;
         }
 
+        String contextPath = getHandlerContext().getContextPath();
         if (contextPath!=null && !newPath.startsWith(contextPath))
         {
             response.sendError(response.__405_Method_Not_Allowed,

@@ -15,6 +15,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.Permission;
+import java.util.StringTokenizer;
+import java.util.ArrayList;
 
 
 /* ------------------------------------------------------------ */
@@ -348,19 +350,9 @@ public class Resource
         if (path==null)
             return null;
 
-        path = path.replace('\\','/');
-
-        // XXX - need to check for ../ which might take us
-        // out-side of resourcebase - or at least make sure we
-        // never see that here.
-        while (path.indexOf("..")>=0)
-        {
-            Code.notImplemented();
-        }
+        path = canonicalPath(path);
 
         String resourceBase = _url.toExternalForm();
-        if( path.startsWith( "./"))
-            path = path.substring( 2);
         if( resourceBase.endsWith( "/"))
             if( path.startsWith( "/"))
                 path = resourceBase + path.substring( 1);
@@ -392,5 +384,56 @@ public class Resource
     {
         return o instanceof Resource &&
             _url.equals(((Resource)o)._url);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Convert a path to a cananonical form.
+     * All instances of "//", "." and ".." are factored out.  Null is returned
+     * if the path tries to .. above it's root.
+     * @param path 
+     * @return path or null.
+     */
+    public static String canonicalPath(String path)
+    {
+        if (!path.startsWith(".") &&  
+            path.indexOf("/.")<0 &&
+            path.indexOf("//")<0)
+            return path;
+        
+        StringTokenizer tok = new StringTokenizer(path,"/",false);
+        ArrayList paths = new ArrayList(10);
+
+        while (tok.hasMoreTokens())
+        {
+            String item=tok.nextToken();
+            if ("..".equals(item))
+            {
+                if (paths.size()==0)
+                    return null;
+                paths.remove(paths.size()-1);
+            }
+            else if (".".equals(item))
+                continue;
+            else
+                paths.add(item);
+        }
+
+        StringBuffer buf = new StringBuffer(path.length());
+        synchronized(buf)
+        {
+            if (path.startsWith("/"))
+                    buf.append("/");
+                
+            for (int i=0;i<paths.size();i++)
+            {
+                if (i>0)
+                    buf.append("/");
+                buf.append((String)paths.get(i));
+            }
+            if (path.endsWith("/") && (buf.length()==0 || buf.charAt(buf.length()-1)!='/'))
+                buf.append("/");
+
+            return buf.toString();
+        }
     }
 }
