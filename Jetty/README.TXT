@@ -53,29 +53,10 @@ On some systems with graphical file browsers, it may be possible to start
 jetty by double clicking on this jar file. For more details see 
 $JETTY_HOME/launcher/README.txt
 
+If JSPs do not work with this start method, you may want to clearly specify 
+the location of the JDK so the compiler can be accessed:
 
-JDK 1.4 Quick start
-===================
-
-If using jdk 1.4 run:
-
-  cd <jetty install directory>
-  java -jar lib/org.mortbay.jetty.jar etc/demo.xml
-
-Where cd and / have been repaced with any non-unix platform versions. 
-Browse to http://localhost:8080
-  
-For the JMX enabled demo run:
-  java -jar lib/org.mortbay.jmx.jar etc/demo.mlet
-
-If using JDK 1.3, you can still run this way, but you must add the
-libraries from the ext to your classpath.
-
-Note that this start method will not allow JSPs to work, unless
-you have the tools.jar from your JDK and ant.jar from jakarta-ant
-in your system classpath.
-
-The other start methods below will set this classpath if possible.
+  java -Djava.home=C:\j2sdk1.4.1 -jar start.jar <configfile> ....
 
 
 
@@ -192,7 +173,8 @@ If you are using jdk1.4, you should use the path (or non-unix equivalent):
   CLASSPATH=\
     $JETTY_HOME/lib/org.mortbay.jetty.jar:\
     $JETTY_HOME/lib/javax.servlet.jar:\
-    $JETTY_HOME/lib/org.apache.jasper.jar
+    $JETTY_HOME/ext/jasper-runtime.jar:\
+    $JETTY_HOME/ext/jasper-compiler.jar
 
 
 For jdk1.2 or jdk1.3 us the following classpath, you need to use an
@@ -202,9 +184,10 @@ to use is:
   CLASSPATH=\
     $JETTY_HOME/lib/org.mortbay.jetty-jdk1.2.jar:\
     $JETTY_HOME/lib/javax.servlet.jar:\
-    $JETTY_HOME/lib/org.apache.jasper.jar:\
+    $JETTY_HOME/ext/jasper-runtime.jar:\
+    $JETTY_HOME/ext/jasper-compiler.jar
     $JETTY_HOME/ext/javax.xml.jaxp.jar:\
-    $JETTY_HOME/ext/org.apache.crimson.jar
+    $JETTY_HOME/ext/crimson.jar
 
 
 To use the default SSL you will also need to add the the jar below, 

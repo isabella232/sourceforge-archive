@@ -17,17 +17,21 @@ whereas this can happen with provided C code.
 In both cases described below, it is assumed that the following
 environment variables have been set correctly:
 
-set JAVA_HOME=C:\Java\JDK1.3.1_04
+set JAVA_HOME=C:\Java\JDK1.4.1
 REM -- Sun Java VM choices are server, hotspot and classic --
 set JAVA_VM=%JAVA_HOME\jre\bin\server
 set JETTY_HOME=C:\Java\Jetty
 set CLASSPATH=%JETTY_HOME%\lib\org.mortbay.jetty.jar
 set CLASSPATH=%CLASSPATH%;%JETTY_HOME%\lib\javax.servlet.jar
-set CLASSPATH=%CLASSPATH%;%JETTY_HOME%\lib\javax.xml.jaxp.jar
-set CLASSPATH=%CLASSPATH%;%JETTY_HOME%\lib\org.apache.crimson.jar
-set CLASSPATH=%CLASSPATH%;%JETTY_HOME%\lib\org.apache.jasper.jar
-set CLASSPATH=%CLASSPATH%;%JETTY_HOME%\lib\com.sun.net.ssl.jar
+set CLASSPATH=%CLASSPATH%;%JETTY_HOME%\ext\jasper-runtime.jar
+set CLASSPATH=%CLASSPATH%;%JETTY_HOME%\ext\jasper-compiler.jar
+set CLASSPATH=%CLASSPATH%;%JETTY_HOME%\ext\ant.jar
 set CLASSPATH=%CLASSPATH%;%JAVA_HOME%\lib\tools.jar
+
+If you are not using jdk 1.4, you will also need to add an xml parser
+to the classpath.  Note you can also add these jars to the ext directory
+of your JRE.
+
 
 
 Using the C Code
