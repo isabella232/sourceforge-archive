@@ -814,7 +814,7 @@ public class HttpFields
         for (int i=0;i<_fields.size();i++)
         {
             Field field=(Field)_fields.get(i);
-            if (info.equals(field._info))
+            if (field!=null && info.equals(field._info))
             {
                 old=field._value;
                 _fields.set(i,null);

@@ -201,7 +201,7 @@ public class ByteBufferOutputStream extends OutputStream
     {
         if ((_end+n)>_buf.length)
         {
-            int bl = ((_end+n+1023)/1024)*1024;
+            int bl = ((_end+n+4095)/4096)*4096;
             byte[] buf = new byte[bl];
             if (Code.debug())Code.debug("New buf for ensure: "+_end+"+"+n+">"+_buf.length+" --> "+buf.length);
             System.arraycopy(_buf,_start,buf,_start,_end-_start);
