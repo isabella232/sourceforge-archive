@@ -116,6 +116,8 @@ ServerA./.Servlet./Jetty/Program|   : Index=com.mortbay.Jetty.DemoIndex
 ServerA./.Servlet./Jetty/Config|    : Index=com.mortbay.Jetty.DemoIndex
 
 ServerA./.Directory./      : ./FileBase
+ServerA./.Directory.allowPut : false
+ServerA./.Directory.allowDelete : false
 
 ServerA./.Forward./Forward%: http://localhost:8080
 ServerA./.Forward.http     : http://localhost:8081

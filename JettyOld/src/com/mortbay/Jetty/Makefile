@@ -21,6 +21,7 @@ INSTALLFILES := \
 	etc/RealmOther.prp \
 	etc/ParamDemo.prp \
 	etc/JettyDemo.prp \
+	etc/NSRoamDemo.prp \
         classes/HelloWorldServlet.class \
 	$(wildcard FileBase/Images/*.gif) \
 	$(wildcard FileBase/*.txt) \

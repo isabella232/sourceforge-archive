@@ -34,10 +34,13 @@ import java.util.*;
  * configuration file allows for multiple named servers to be
  * included as follows
  * <pre>
- * ServerName.InetAddrPort    n.n.n.n:pppp
- * ServerName.Servlet/path    name=package.class[?paramFile]
- * ServerName.Directory/path  directory/name
- * ServerName.Log/path        filename|err|out
+ * ServerName./pathOfStack.InetAddrPort	         n.n.n.n:pppp
+ * ServerName./pathOfStack.Servlet./path         name=package.class[?paramFile]
+ * ServerName./pathOfStack.Directory./path       directory/name
+ * ServerName./pathOfStack.Directory.allowPut    true|false
+ * ServerName./pathOfStack.Directory.allowDelete true|false
+ * ServerName./pathOfStack.Directory./path       directory/name
+ * ServerName./pathOfStack.Log./path             filename|err|out
  * </pre>
  *
  * @see JettyServer.prp
@@ -57,6 +60,8 @@ public class Server extends BaseConfiguration
 	String path=null;
 	PathMap servletMap= new PathMap();
 	PathMap dirMap= new PathMap();
+	boolean dirAllowPut = false;
+	boolean dirAllowDelete = false;
 	PathMap logMap = new PathMap();
 	PathMap authMap = new PathMap();
 	PathMap transMap = new PathMap();
@@ -166,8 +171,8 @@ public class Server extends BaseConfiguration
     
     /* ------------------------------------------------------------ */
     /** Add a file directory to the server
-     * @param path The path of the servlet (see PathMap for encoding)
-     * @param directory The name of the directory
+     * @param path The path of the url to map
+     * @param directory The name of the directory with the files to serve
      * @see com.mortbay.HTTP.PathMap
      */
     public void addDirectory(String stack, String path, String directory)
@@ -176,6 +181,26 @@ public class Server extends BaseConfiguration
 	getStack(stack).dirMap.put(path,directory);
     }
 
+    /* ------------------------------------------------------------ */
+    /** Set the allowPut option on the FileHandler for the server
+     * @param value The new value for the option
+     * @see com.mortbay.HTTP.Handler.FileHandler
+     */
+    public void allowPut(String stack, Boolean value){
+	Code.debug(serverName,".allowPut:", value);
+	getStack(stack).dirAllowPut = value.booleanValue();
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the allowDelete option on the FileHandler for the server
+     * @param value The new value for the option
+     * @see com.mortbay.HTTP.Handler.FileHandler
+     */
+    public void allowDelete(String stack, Boolean value){
+	Code.debug(serverName,".allowDelete:", value);
+	getStack(stack).dirAllowDelete = value.booleanValue();
+    }
+    
     /* ------------------------------------------------------------ */
     /** Add a log sink to the server
      * @param path The path of the servlet (see PathMap for encoding)
@@ -326,8 +351,12 @@ public class Server extends BaseConfiguration
 	    }
 	
 	    // File Handler
-	    if (stack.dirMap.size()>0)
-		httpHandlers[h++] = new FileHandler(stack.dirMap);
+	    if (stack.dirMap.size()>0){
+		FileHandler fh = new FileHandler(stack.dirMap);
+		httpHandlers[h++] = fh;
+		fh.setPutAllowed(stack.dirAllowPut);
+		fh.setDeleteAllowed(stack.dirAllowDelete);
+	    }
 	    
 	    // Forward Handler
 	    if (stack.forwardMap.size()>0)
@@ -382,13 +411,13 @@ public class Server extends BaseConfiguration
 		fields.addElement(tok.nextToken());
 	    
 	    // Extract the server name and handler stack
-	    if (fields.size()<3)
+	    if (fields.size()<3 || fields.size()>4)
 		throw new Exception("Badly formatted configuration key: "+key);
 	    String name = (String)fields.elementAt(0);
 	    String stack = (String)fields.elementAt(1);
 	    String type = (String)fields.elementAt(2);
 	    String path = null;
-	    if (fields.size()==4)
+	    if (fields.size() > 3)
 		path=(String)fields.elementAt(3);
 	    
 	    // Get a server instance for the name
@@ -432,7 +461,12 @@ public class Server extends BaseConfiguration
 	    {
 		if (path==null)
 		    throw new Exception("Missing path: "+key);
-		server.addDirectory(stack,path,value);
+		if (path.equals("allowPut"))
+		    server.allowPut(stack, Boolean.valueOf(value));
+		else if (path.equals("allowDelete"))
+		    server.allowDelete(stack, Boolean.valueOf(value));
+		else 
+		    server.addDirectory(stack,path,value);
 	    }
 	    else if ("Log".equals(type))
 	    {

@@ -16,7 +16,8 @@
 # Note that all your information will be stored in /tmp. This will only serve
 # 1 users netscape profile (or all the people using it can share the profile,
 # but there WILL be concurrency issues). To serve more, each user would need
-# their own directory on the server and should user the url
+# Their own userid and password in the realm file, their own directory on the
+# server under the fileroot and should use the url
 # "http://localhost:8080/$USERID" (netscape does the substitution for you).
 #
 # ------------------------------------------------------------------------
