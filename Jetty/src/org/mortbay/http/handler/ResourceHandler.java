@@ -255,6 +255,7 @@ public class ResourceHandler extends NullHandler
             
             String method=request.getMethod();
             if (method.equals(HttpRequest.__GET) ||
+                method.equals(HttpRequest.__POST) ||
                 method.equals(HttpRequest.__HEAD))
                 handleGet(request, response, pathInContext, resource, endsWithSlash);  
             else if (method.equals(HttpRequest.__PUT))

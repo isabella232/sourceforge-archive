@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Allow POSTs to static resources.
+
 Jetty-4.0.D1 - 14 Nov 2001
  + Fixed ServletHandler with no servlets 
  + Fixed bug with request dispatcher parameters
