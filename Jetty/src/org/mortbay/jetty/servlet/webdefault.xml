@@ -111,7 +111,10 @@
     </init-param>
     <load-on-startup>0</load-on-startup>
   </servlet> 
+
+  <servlet-mapping> <servlet-name>default</servlet-name> <url-pattern>/</url-pattern> </servlet-mapping>
   
+
   <!-- ==================================================================== -->
   <!-- JSP Servlet                                                          -->
   <!-- This is the jasper JSP servlet from the jakarta project              -->
@@ -213,6 +216,12 @@
     <load-on-startup>0</load-on-startup>
   </servlet>
 
+  <servlet-mapping> <servlet-name>jsp</servlet-name> <url-pattern>*.jsp</url-pattern> </servlet-mapping>
+  <servlet-mapping> <servlet-name>jsp</servlet-name> <url-pattern>*.jspf</url-pattern> </servlet-mapping>
+  <servlet-mapping> <servlet-name>jsp</servlet-name> <url-pattern>*.jspx</url-pattern> </servlet-mapping>
+  <servlet-mapping> <servlet-name>jsp</servlet-name> <url-pattern>*.xsp</url-pattern> </servlet-mapping>
+
+
   <!-- ==================================================================== -->
   <!-- Dynamic Servlet Invoker.                                             -->
   <!-- This servlet invokes anonymous servlets that have not been defined   -->
@@ -250,43 +259,11 @@
     </init-param>
     <load-on-startup>0</load-on-startup>
   </servlet>
+
+  <servlet-mapping> <servlet-name>invoker</servlet-name> <url-pattern>/servlet/*</url-pattern> </servlet-mapping>
   -->
 
-  <!-- ==================================================================== -->
-  <servlet-mapping>
-    <servlet-name>default</servlet-name>
-    <url-pattern>/</url-pattern>
-  </servlet-mapping>
 
-  <!-- ==================================================================== -->
-  <servlet-mapping>
-    <servlet-name>jsp</servlet-name>
-    <url-pattern>*.jsp</url-pattern>
-  </servlet-mapping>
-
-  <!-- ==================================================================== -->
-  <servlet-mapping>
-    <servlet-name>jsp</servlet-name>
-    <url-pattern>*.jspf</url-pattern>
-  </servlet-mapping>
-
-  <!-- ==================================================================== -->
-  <servlet-mapping>
-    <servlet-name>jsp</servlet-name>
-    <url-pattern>*.jspx</url-pattern>
-  </servlet-mapping>
-
-  <!-- ==================================================================== -->
-  <servlet-mapping>
-    <servlet-name>jsp</servlet-name>
-    <url-pattern>*.xsp</url-pattern>
-  </servlet-mapping>
-
-  <!-- ==================================================================== -->
-  <servlet-mapping>
-    <servlet-name>invoker</servlet-name>
-    <url-pattern>/servlet/*</url-pattern>
-  </servlet-mapping>
 
   <!-- ==================================================================== -->
   <session-config>
