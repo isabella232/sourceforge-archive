@@ -33,7 +33,7 @@ import org.mortbay.j2ee.session.interfaces.CMPStatePK;
  *        signature="java.util.Collection findTimedOut(long currentTime, int extraTime, int actualMaxInactiveInterval)"
  *        query="SELECT OBJECT(o) FROM CMPState o WHERE (o.maxInactiveInterval>0 AND o.creationTime < (?1-(1000*(o.maxInactiveInterval+?2)))) OR (o.maxInactiveInterval<1 AND o.creationTime < (?1-(1000*(?3+?2))))"
  *
- *   @jboss:table-name "HTTPSESSION"
+ *   @jboss:table-name "JETTY_HTTPSESSION_CMPState"
  *   @jboss:create-table create="true"
  *   @jboss:remove-table remove="true"
  *   @jboss:container-configuration name="Shared Standard CMP 2.x EntityBean"

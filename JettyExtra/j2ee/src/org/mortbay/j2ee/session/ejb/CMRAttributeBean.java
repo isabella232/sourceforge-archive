@@ -37,6 +37,7 @@ import org.mortbay.j2ee.session.interfaces.CMRAttributePK;
  *   @ejb:pk
  *     generate="true"
  *
+ *   @jboss:table-name "JETTY_HTTPSESSION_CMRAttribute"
  *   @jboss:create-table create="true"
  *   @jboss:remove-table remove="true"
  *   @jboss:container-configuration name="Standard CMP 2.x EntityBean"
