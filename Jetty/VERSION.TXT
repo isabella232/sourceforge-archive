@@ -1,3 +1,7 @@
+Jetty-3.0.A93 - 14 June 2000
+   + Major rethink! Moved to 2.2 servlet API
+   + Lots of changes and probably unstable
+
 Jetty-3.0.A92 - 7 June 2000
    + Added HTML classes to jar
    + Fixed redirection bug in FileHandler

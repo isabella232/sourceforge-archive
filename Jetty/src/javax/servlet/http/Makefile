@@ -5,13 +5,12 @@
 # $Id$
 #
 
-rall:
-
 #JAVAOPTIONS := 
 #JAVACOPTIONS :=
 TESTS :=
-ROOTNAME := src
+ROOTNAME := javax
+SUBDIRS := 
 
-SUBDIRS := javax com
+CLASSFILES += $(wildcard *.properties *.class)
 
 include $(JETTY_HOME)/etc/Global.mk

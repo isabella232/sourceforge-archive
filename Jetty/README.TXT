@@ -11,8 +11,7 @@ the Jetty 2 code base. The aims of the Jetty 3 developement include:
 
   + Fully RFC2616 compliant implementation of HTTP/1.1.
   + Decouple HTTP server from specific Servlet container.
-  + Integrate with the jakarta.apache.org  Servlet 2.2 Container.
-  + Integrate with the Jetty Servlet 2.1 Container.
+  + Implement Servlet 2.2 Container.
   + Remain efficient, embedable & extensible.
   + Utilize java collection classes for improved performance.
   + Improved coding standards and increasing test coverage.
@@ -29,18 +28,18 @@ Development has been done in JDK1.1 with the 1.2 Collection classes.
 The compiled classes excluding test harnesses are put into lib/jetty3.jar,
 so the following CLASSPATH is required (or the non unix equivalent):
 
-  CLASSPATH=$JETTY3_HOME/lib/com.mortbay.jetty.jar:$JETTY3_HOME/lib/collections.jar:$JETTY3_HOME/lib/javax.servlet2_1.jar
+  CLASSPATH=$JETTY3_HOME/lib/com.mortbay.jetty.jar:$JETTY3_HOME/lib/collections.jar:$JETTY3_HOME/lib/javax.servlet.jar
 
 To compile the source with JDK1.1 the following class path should be used.
 
-  CLASSPATH=$JETTY3_HOME/src:$JETTY3_HOME/lib/collections.jar:$JETTY3_HOME/lib/javax.servlet2_1.jar
+  CLASSPATH=$JETTY3_HOME/src:$JETTY3_HOME/lib/collections.jar:$JETTY3_HOME/lib/javax.servlet.jar
 
 To compile with JDK1.2, the com.sun.java.util.collections package
 must be removed by running the bin/useJava2Collections script (the
 distribution includes the results of this in src1.2 directory).
 Then compile using the class path:
 
-  CLASSPATH=$JETTY3_HOME/src:$JETTY3_HOME/lib/javax.servlet2_1.jar
+  CLASSPATH=$JETTY3_HOME/src:$JETTY3_HOME/lib/javax.servlet.jar
 
 
 Test Harnesses

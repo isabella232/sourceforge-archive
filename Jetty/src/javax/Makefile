@@ -5,13 +5,12 @@
 # $Id$
 #
 
-rall:
-
 #JAVAOPTIONS := 
 #JAVACOPTIONS :=
 TESTS :=
-ROOTNAME := src
-
-SUBDIRS := javax com
+ROOTNAME := javax
+SUBDIRS := servlet
 
 include $(JETTY_HOME)/etc/Global.mk
+
+

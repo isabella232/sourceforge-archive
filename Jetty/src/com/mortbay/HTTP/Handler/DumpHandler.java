@@ -50,7 +50,7 @@ public class DumpHandler extends NullHandler
         ChunkableOutputStream out = response.getOutputStream();
         ByteArrayOutputStream buf = new ByteArrayOutputStream(2048);
         Writer writer = new OutputStreamWriter(buf,"ISO-8859-1");
-        writer.write("<HTML><H1>HTTP Request Dump</H1>");
+        writer.write("<HTML><H1>Dump HttpHandler</H1>");
         writer.write("<PRE>\npath="+request.getPath()+
                     "\nmatch="+
                     PathMap.pathMatch(pathSpec,request.getPath())+

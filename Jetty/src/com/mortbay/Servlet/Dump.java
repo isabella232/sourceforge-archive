@@ -46,8 +46,9 @@ public class Dump extends HttpServlet
 
         try{
             page = new Page();
-            page.title("Dump Request Servlet");     
+            page.title("Dump Servlet");     
 
+	    page.add(new Heading(1,"Dump Servlet"));
             Table table = new Table(0).cellPadding(0).cellSpacing(0);
             page.add(table);
             table.newRow();
