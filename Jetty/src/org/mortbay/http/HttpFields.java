@@ -313,11 +313,11 @@ public class HttpFields
                              Locale.US);
 
     public final static SimpleDateFormat __dateCookie = 
-        new SimpleDateFormat("EEE, dd-MMM-yyyy HH:mm:ss 'GMT'",
+        new SimpleDateFormat("EEE, dd-MMM-yy HH:mm:ss 'GMT'",
                              Locale.US);
 
     public final static String __01Jan1970=
-        '"'+HttpFields.__dateSend.format(new Date(0))+'"';
+        HttpFields.__dateSend.format(new Date(0));
     
     /* ------------------------------------------------------------ */
     private final static String __dateReceiveFmt[] =
@@ -1378,6 +1378,7 @@ public class HttpFields
             }
             name_value_params = buf.toString();
         }
+        put(__Expires,__01Jan1970);
         add(cookie2
             ?HttpFields.__SetCookie2:HttpFields.__SetCookie,
             name_value_params); 

@@ -3,6 +3,8 @@ Jetty Versions
 
  + respect content length when decoding form content.
  + JBoss integration uses writer rather than stream for XML config handling
+ + Expire pages that contain set-cookie as per RFC2109 recommendation
+
 
 
 Jetty-5.0.alpha3 -19 October 2003
