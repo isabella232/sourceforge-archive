@@ -139,12 +139,12 @@ public class DigestAuthenticator implements Authenticator
         throws IOException
     {
         response.setField(HttpFields.__WwwAuthenticate,
-                          "digest realm=\""+realm.getName()+
-                          "\" domain=\""+
-                          "/"+ // request.getContextPath()+
-                          "\" nonce=\""+
-                          Long.toString(request.getTimeStamp(),27)+
-                          "\""
+			    "digest realm=\""+realm.getName()+
+			    "\", domain=\""+
+			    "/"+ // request.getContextPath()+
+			    "\", nonce=\""+
+			    Long.toString(request.getTimeStamp(),27)+
+			    "\""
                           );
         response.sendError(HttpResponse.__401_Unauthorized);
     }
