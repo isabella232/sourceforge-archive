@@ -128,6 +128,7 @@
     <delete dir="${jetty.webapp.classes}" quiet="false"/>
     <delete dir="${javadoc}" quiet="false"/>
     <delete dir="${etc}/dtd" quiet="false"/>
+    <delete dir="${logs}" quiet="false"/>
     <delete file="${jetty.jar}" quiet="false"/>
     <delete file="${mortbay.jmx.jar}" quiet="false"/>
     <delete file="${servlet.jar}" quiet="false"/> 
@@ -138,11 +139,6 @@
     <delete file="${demo.webapps}/jetty/LICENSE.html" quiet="false"/>
     <delete file="${demo.webapps}/jetty/versions.txt" quiet="false"/>
 
-    <delete quiet="false">
-      <fileset dir="${logs}">
-        <include name="**/*.log"/>
-      </fileset>
-    </delete>
     <delete quiet="false">
       <fileset dir="${demo.webapps}/examples">
         <include name="**/*.class"/>
