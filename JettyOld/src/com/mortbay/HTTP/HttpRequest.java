@@ -41,6 +41,7 @@ public class HttpRequest extends HttpHeader
     public static final String PUT="PUT";
     public static final String HEAD="HEAD";
     public static final String DELETE="DELETE";
+    public static final String OPTIONS="OPTIONS";
     public static final byte[] Continue=
 	"HTTP/1.1 100 Continue\015\012\015\012".getBytes();
 
