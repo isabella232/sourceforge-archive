@@ -1193,9 +1193,6 @@ public class HttpContext implements LifeCycle
         if (_httpServer==null)
             throw new IllegalStateException("No server for "+this);
 
-        // Prepare a multi exception
-        MultiException mx = new MultiException();
-
         // start the context itself
         _started=true;
         getMimeMap();
@@ -1212,20 +1209,38 @@ public class HttpContext implements LifeCycle
         {
             if (_loader!=null)
                 thread.setContextClassLoader(_loader);
+
+            startHandlers();
             
-            Iterator handlers = _handlers.iterator();
-            while(handlers.hasNext())
-            {
-                HttpHandler handler=(HttpHandler)handlers.next();
-                if (!handler.isStarted())
-                    try{handler.start();}catch(Exception e){mx.add(e);}
-            }
         }
         finally
         {
             thread.setContextClassLoader(lastContextLoader);
         }
 
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Start the handlers.
+     * This is called by start after the classloader has been
+     * initialized and set as the thread context loader.
+     * It may be specialized to provide custom handling
+     * before any handlers are started.
+     * @exception Exception 
+     */
+    protected void startHandlers()
+        throws Exception
+    {   
+        // Prepare a multi exception
+        MultiException mx = new MultiException();
+
+        Iterator handlers = _handlers.iterator();
+        while(handlers.hasNext())
+        {
+            HttpHandler handler=(HttpHandler)handlers.next();
+            if (!handler.isStarted())
+                try{handler.start();}catch(Exception e){mx.add(e);}
+        }
         mx.ifExceptionThrow();
     }
     
