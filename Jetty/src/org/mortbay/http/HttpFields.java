@@ -1241,8 +1241,8 @@ public class HttpFields
         if(enum==null || !enum.hasMoreElements())
             return Collections.EMPTY_LIST;
 
-        LazyList list=null;
-        LazyList qual=null;
+        Object list=null;
+        Object qual=null;
 
         // Assume list will be well ordered and just add nonzero
         while(enum.hasMoreElements())

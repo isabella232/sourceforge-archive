@@ -229,7 +229,7 @@ public class ServletHttpRequest
             return
                 Collections.enumeration(__defaultLocale);
 
-        LazyList langs = null;
+        Object langs = null;
         int size=acceptLanguage.size();
         
         // convert to locals

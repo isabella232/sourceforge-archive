@@ -58,7 +58,7 @@ public class InclusiveByteRange {
      */
     public static List satisfiableRanges(Enumeration headers,long size)
     {
-        LazyList satRanges=null;
+        Object satRanges=null;
         
         // walk through all Range headers
     headers:

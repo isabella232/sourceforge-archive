@@ -255,7 +255,7 @@ public class PathMap extends HashMap implements Externalizable
     public List getMatches(String path)
     {        
         Map.Entry entry;
-        LazyList entries=null;
+        Object entries=null;
 
         if (path==null)
             return LazyList.getList(entries);

@@ -602,7 +602,7 @@ public class TestHarness
         
         try
         {
-            LazyList list = null;
+            Object list = null;
             Object o1="X1";
             Object o2="X2";
 
@@ -613,10 +613,10 @@ public class TestHarness
             // singleton list
             list=LazyList.add(list,o1);
             
-            t.checkEquals(list.size(),1,"singleton LazyList.size()");
-            t.checkEquals(list.get(0),o1,"singleton LazyList.get(0)");
-            Iterator i=list.iterator();
-            ListIterator li=list.listIterator();
+            t.checkEquals(LazyList.size(list),1,"singleton LazyList.size()");
+            t.checkEquals(LazyList.get(list,0),o1,"singleton LazyList.get(0)");
+            Iterator i=LazyList.iterator(list);
+            ListIterator li=LazyList.listIterator(list);
             t.check(i.hasNext(),"singleton LazyList.iterator().hasNext()");
             t.check(li.hasNext(),"singleton LazyList.listIterator().hasNext()");
             t.check(!li.hasPrevious(),"singleton LazyList.listIterator().hasPrevious()");
@@ -640,11 +640,11 @@ public class TestHarness
             // normal list
             list=LazyList.add(list,o2);
             
-            t.checkEquals(list.size(),2,"normal LazyList.size()");
-            t.checkEquals(list.get(0),o1,"normal LazyList.get(0)");
-            t.checkEquals(list.get(1),o2,"normal LazyList.get(0)");
-            i=list.iterator();
-            li=list.listIterator();
+            t.checkEquals(LazyList.size(list),2,"normal LazyList.size(list,)");
+            t.checkEquals(LazyList.get(list,0),o1,"normal LazyList.get(list,0)");
+            t.checkEquals(LazyList.get(list,1),o2,"normal LazyList.get(list,0)");
+            i=LazyList.iterator(list);
+            li=LazyList.listIterator(list);
             t.check(i.hasNext(),"normal LazyList.iterator().hasNext()");
             t.check(li.hasNext(),"normal LazyList.listIterator().hasNext()");
             t.check(!li.hasPrevious(),"normal LazyList.listIterator().hasPrevious()");

@@ -58,7 +58,7 @@ public class MultiMap extends HashMap
      */
     public List getValues(Object name)
     {
-        return LazyList.getList((LazyList)super.get(name),true);
+        return LazyList.getList(super.get(name),true);
     }
     
     /* ------------------------------------------------------------ */
@@ -71,7 +71,7 @@ public class MultiMap extends HashMap
      */
     public Object getValue(Object name,int i)
     {
-        LazyList l=(LazyList)super.get(name);
+        Object l=super.get(name);
         if (i==0 && LazyList.size(l)==0)
             return null;
         return LazyList.get(l,i);
@@ -88,21 +88,21 @@ public class MultiMap extends HashMap
      */
     public String getString(Object name)
     {
-        LazyList l=(LazyList)super.get(name);
+        Object l=super.get(name);
         switch(LazyList.size(l))
         {
           case 0:
               return null;
           case 1:
-              Object o=l.get(0);
+              Object o=LazyList.get(l,0);
               return o==null?null:o.toString();
           default:
               StringBuffer values=new StringBuffer(128);
               synchronized(values)
               {
-                  for (int i=0; i<l.size(); i++)              
+                  for (int i=0; i<LazyList.size(l); i++)              
                   {
-                      Object e=l.get(i);
+                      Object e=LazyList.get(l,i);
                       if (e!=null)
                       {
                           if (values.length()>0)
@@ -118,13 +118,13 @@ public class MultiMap extends HashMap
     /* ------------------------------------------------------------ */
     public Object get(Object name) 
     {
-        LazyList l=(LazyList)super.get(name);
+        Object l=super.get(name);
         switch(LazyList.size(l))
         {
           case 0:
               return null;
           case 1:
-              Object o=l.get(0);
+              Object o=LazyList.get(l,0);
               return o;
           default:
               return LazyList.getList(l,true);
@@ -150,7 +150,7 @@ public class MultiMap extends HashMap
      */
     public Object putValues(Object name, List values) 
     {
-        return super.put(name,LazyList.add(null,values));
+        return super.put(name,values);
     }
     
     /* ------------------------------------------------------------ */
@@ -161,7 +161,10 @@ public class MultiMap extends HashMap
      */
     public Object putValues(Object name, String[] values) 
     {
-        return putValues(name,LazyList.add(null,Arrays.asList(values)));
+        Object list=null;
+        for (int i=0;i<values.length;i++)
+            list=LazyList.add(list,values[i]);
+        return put(name,list);
     }
     
     
@@ -174,8 +177,8 @@ public class MultiMap extends HashMap
      */
     public void add(Object name, Object value) 
     {
-        LazyList lo = (LazyList)super.get(name);
-        LazyList ln = LazyList.add(lo,value);
+        Object lo = super.get(name);
+        Object ln = LazyList.add(lo,value);
         if (lo!=ln)
             super.put(name,ln);
     }
@@ -189,8 +192,8 @@ public class MultiMap extends HashMap
      */
     public void addValues(Object name, List values) 
     {
-        LazyList lo = (LazyList)super.get(name);
-        LazyList ln = LazyList.add(lo,values);
+        Object lo = super.get(name);
+        Object ln = LazyList.add(lo,values);
         if (lo!=ln)
             super.put(name,ln);
     }
@@ -204,8 +207,8 @@ public class MultiMap extends HashMap
      */
     public void addValues(Object name, String[] values) 
     {
-        LazyList lo = (LazyList)super.get(name);
-        LazyList ln = LazyList.add(lo,Arrays.asList(values));
+        Object lo = super.get(name);
+        Object ln = LazyList.add(lo,Arrays.asList(values));
         if (lo!=ln)
             super.put(name,ln);
     }
@@ -218,8 +221,8 @@ public class MultiMap extends HashMap
      */
     public boolean removeValue(Object name,Object value)
     {
-        LazyList lo = (LazyList)super.get(name);
-        LazyList ln=lo;
+        Object lo = super.get(name);
+        Object ln=lo;
         int s=LazyList.size(lo);
         if (s>0)
             ln=LazyList.remove(lo,value);
@@ -234,18 +237,16 @@ public class MultiMap extends HashMap
      */
     public void putAll(Map m)
     {
-        boolean multi = (m instanceof MultiMap);
         Iterator i = m.entrySet().iterator();
+        boolean multi=m instanceof MultiMap;
         while(i.hasNext())
         {
             Map.Entry entry =
                 (Map.Entry)i.next();
-
-            Object value=entry.getValue();
             if (multi)
-                super.put(entry.getKey(),value==null?null:((LazyList)value).clone());
+                super.put(entry.getKey(),LazyList.clone(entry.getValue()));
             else
-                put(entry.getKey(),value);
+                put(entry.getKey(),entry.getValue());
         }
     }
 
@@ -261,7 +262,7 @@ public class MultiMap extends HashMap
         while(i.hasNext())
         {
             Map.Entry entry = (Map.Entry)i.next();
-            LazyList l = (LazyList)entry.getValue();
+            Object l = entry.getValue();
             map.put(entry.getKey(),LazyList.toStringArray(l));
         }
         return map;

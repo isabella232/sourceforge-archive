@@ -82,9 +82,9 @@ public class SecurityConstraint
     
     /* ------------------------------------------------------------ */
     private String _name;
-    private LazyList _methods;
+    private Object _methods;
     private List _umMethods;
-    private LazyList _roles;
+    private Object _roles;
     private List _umRoles;
     private int _dataConstraint=DC_NONE;
     private boolean _anyRole=false;
@@ -196,7 +196,7 @@ public class SecurityConstraint
      */
     public boolean hasRole(String role)
     {
-        return _roles!=null && _roles.contains(role);
+        return LazyList.contains(_roles,role);
     }
     
     /* ------------------------------------------------------------ */

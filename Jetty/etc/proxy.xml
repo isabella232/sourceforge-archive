@@ -90,10 +90,6 @@
       </New></Arg>
     </Call>
 
-    <Call name="addHandler">
-      <Arg><New class="org.mortbay.http.handler.NotFoundHandler"/></Arg>
-    </Call>
-
   </Call>
 
 

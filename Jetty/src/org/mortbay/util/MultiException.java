@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class MultiException extends Exception
 {
-    private LazyList nested;
+    private Object nested;
 
     /* ------------------------------------------------------------ */
     public MultiException()

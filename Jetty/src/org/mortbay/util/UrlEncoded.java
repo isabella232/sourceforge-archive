@@ -97,7 +97,7 @@ public class UrlEncoded extends MultiMap
                 Map.Entry entry = (Map.Entry)iter.next();
                 
                 String key = entry.getKey().toString();
-                LazyList list = (LazyList)entry.getValue();
+                Object list = entry.getValue();
                 int s=LazyList.size(list);
                 
                 if (s==0)
@@ -112,7 +112,7 @@ public class UrlEncoded extends MultiMap
                     {
                         if (i>0)
                             result.append('&');
-                        Object val=list.get(i);
+                        Object val=LazyList.get(list,i);
                         result.append(encodeString(key,charset));
 
                         if (val!=null)

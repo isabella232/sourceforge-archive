@@ -241,7 +241,7 @@ public class WebApplicationHandler extends ServletHandler
         }
         
         // Build list of filters
-        LazyList filters = null;
+        Object filters = null;
         
         // Path filters
         if (pathInContext!=null && _pathFilters.size()>0)
@@ -305,12 +305,12 @@ public class WebApplicationHandler extends ServletHandler
     {
         String _pathInContext;
         int _filter=0;
-        LazyList _filters;
+        Object _filters;
         ServletHolder _servletHolder;
 
         /* ------------------------------------------------------------ */
         Chain(String pathInContext,
-              LazyList filters,
+              Object filters,
               ServletHolder servletHolder)
         {
             _pathInContext=pathInContext;

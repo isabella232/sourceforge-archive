@@ -26,7 +26,7 @@ import java.util.NoSuchElementException;
  *
  * <p><h4>Usage</h4>
  * <pre>
- *   LazyList lazylist =null;
+ *   Object lazylist =null;
  *   while(loopCondition)
  *   {
  *     Object item = getItem();
@@ -42,25 +42,14 @@ import java.util.NoSuchElementException;
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
-public class LazyList extends AbstractList
+public class LazyList
     implements Cloneable, Serializable
 {
     private static final String[] __EMTPY_STRING_ARRAY = new String[0];
     
-    private Object _first;
-    private List _list;
-
     /* ------------------------------------------------------------ */
-    private LazyList(Object first)
-    {
-        _first=first;
-    }
-    
-    /* ------------------------------------------------------------ */
-    private LazyList(List list)
-    {
-        _list=list;
-    }
+    private LazyList()
+    {}
     
     /* ------------------------------------------------------------ */
     /** Add an item to a LazyList 
@@ -68,23 +57,30 @@ public class LazyList extends AbstractList
      * @param item The item to add.
      * @return The lazylist created or added to.
      */
-    public static LazyList add(LazyList list, Object item)
+    public static Object add(Object list, Object item)
     {
         if (list==null)
-            return new LazyList(item);
-
-        if (list._list!=null)
         {
-            list._list.add(item);
+            if (item instanceof List || item==null)
+            {
+                List l = new ArrayList();
+                l.add(item);
+                return l;
+            }
+
+            return item;
+        }
+
+        if (list instanceof List)
+        {
+            ((List)list).add(item);
             return list;
         }
 
-        list._list=new ArrayList();
-        list._list.add(list._first);
-        list._list.add(item);
-        list._first=null;
-        
-        return list;    
+        List l=new ArrayList();
+        l.add(list);
+        l.add(item);
+        return l;    
     }
     
     /* ------------------------------------------------------------ */
@@ -93,7 +89,7 @@ public class LazyList extends AbstractList
      * @param collection The Collection whose contents should be added.
      * @return The lazylist created or added to.
      */
-    public static LazyList add(LazyList list, Collection collection)
+    public static Object add(Object list, Collection collection)
     {
         Iterator i=collection.iterator();
         while(i.hasNext())
@@ -108,39 +104,48 @@ public class LazyList extends AbstractList
      * @param item The item to add.
      * @return The lazylist created or added to.
      */
-    public static LazyList add(LazyList list, int initialSize, Object item)
+    public static Object add(Object list, int initialSize, Object item)
     {
         if (list==null)
-            return new LazyList(item);
-
-        if (list._list!=null)
         {
-            list._list.add(item);
+            if (item instanceof List || item==null)
+            {
+                List l = new ArrayList(initialSize);
+                l.add(item);
+                return l;
+            }
+
+            return item;
+        }
+
+        if (list instanceof List)
+        {
+            ((List)list).add(item);
             return list;
         }
 
-        list._list=new ArrayList(initialSize);
-        list._list.add(list._first);
-        list._list.add(item);
-        return list;    
+        List l=new ArrayList(initialSize);
+        l.add(list);
+        l.add(item);
+        return l;    
     }
 
     /* ------------------------------------------------------------ */
-    public static LazyList remove(LazyList list, Object o)
+    public static Object remove(Object list, Object o)
     {
         if (list==null)
             return null;
 
-        if (list._first!=null && list._first.equals(o))
-            return null;
-
-        list._list.remove(o);
-        if (list._list.size()==1)
+        if (list instanceof List)
         {
-            list._first=list._list.get(0);
-            list._list=null;
+            List l = (List)list;
+            l.remove(o);
+            if (l.size()==0)
+                return null;
+            return list;
         }
-        return list;
+
+        return null;
     }
     
     
@@ -151,7 +156,7 @@ public class LazyList extends AbstractList
      * @return The List of added items, which may be an EMPTY_LIST
      * or a SingletonList.
      */
-    public static List getList(LazyList list)
+    public static List getList(Object list)
     {
         return getList(list,false);
     }
@@ -166,33 +171,40 @@ public class LazyList extends AbstractList
      * @return The List of added items, which may be null, an EMPTY_LIST
      * or a SingletonList.
      */
-    public static List getList(LazyList list, boolean nullForEmpty)
+    public static List getList(Object list, boolean nullForEmpty)
     {
         if (list==null)
             return nullForEmpty?null:Collections.EMPTY_LIST;
-        if (list._list==null)
-            return list;
-        return list._list;
+        if (list instanceof List)
+            return (List)list;
+        
+        List l = new ArrayList(1);
+        l.add(list);
+        return l;
     }
+
     
     /* ------------------------------------------------------------ */
-    public static String[] toStringArray(LazyList list)
+    public static String[] toStringArray(Object list)
     {
         if (list==null)
             return __EMTPY_STRING_ARRAY;
-        if (list._list!=null)
+        
+        if (list instanceof List)
         {
-            String[] a = new String[list._list.size()];
-            for (int i=list._list.size();i-->0;)
+            List l = (List)list;
+            
+            String[] a = new String[l.size()];
+            for (int i=l.size();i-->0;)
             {
-                Object o=list._list.get(i);
+                Object o=l.get(i);
                 if (o!=null)
                     a[i]=o.toString();
             }
             return a;
         }
         
-        return new String[] {list._first==null?null:list._first.toString()};
+        return new String[] {list.toString()};
     }
 
 
@@ -201,13 +213,13 @@ public class LazyList extends AbstractList
      * @param list  A LazyList returned from LazyList.add(Object) or null
      * @return the size of the list.
      */
-    public static int size(LazyList list)
+    public static int size(Object list)
     {
         if (list==null)
             return 0;
-        if (list._list==null)
-            return 1;
-        return list._list.size();
+        if (list instanceof List)
+            return ((List)list).size();
+        return 1;
     }
     
     /* ------------------------------------------------------------ */
@@ -216,130 +228,72 @@ public class LazyList extends AbstractList
      * @param i int index
      * @return the item from the list.
      */
-    public static Object get(LazyList list, int i)
+    public static Object get(Object list, int i)
     {
         if (list==null)
             throw new IndexOutOfBoundsException();
         
-        if (list._list==null)
-        {
-            if (i==0)
-                return list._first;
-            throw new IndexOutOfBoundsException();
-        }
-            
-        return list._list.get(i);
+        if (list instanceof List)
+            return ((List)list).get(i);
+
+        if (i==0)
+            return list;
+        
+        throw new IndexOutOfBoundsException();
     }
+    
+    /* ------------------------------------------------------------ */
+    public static boolean contains(Object list,Object item)
+    {
+        if (list==null)
+            return false;
+        
+        if (list instanceof List)
+            return ((List)list).contains(item);
+
+        return list.equals(item);
+    }
+    
 
     /* ------------------------------------------------------------ */
-    public static LazyList clone(LazyList list)
+    public static Object clone(Object list)
     {
         if (list==null)
             return null;
-        return (LazyList) list.clone();
+        if (list instanceof List)
+            return new ArrayList((List)list);
+        return list;
     }
     
     /* ------------------------------------------------------------ */
-    public Object get(int i)
-    {
-        if (_list!=null)
-            return _list.get(i);
-        if (i!=0)
-            throw new IndexOutOfBoundsException("index "+i);
-        return _first;
-    }
-
-    /* ------------------------------------------------------------ */
-    public int size()
-    {
-        if (_list!=null)
-            return _list.size();
-        return 1;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public ListIterator listIterator()
-    {
-        if (_list!=null)
-            return _list.listIterator();
-        return new SIterator();
-    }
-    
-    /* ------------------------------------------------------------ */
-    public ListIterator listIterator(int i)
-    {
-        if (_list!=null)
-            return _list.listIterator(i);
-        return new SIterator(i);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public Iterator iterator()
-    {
-        if (_list!=null)
-            return _list.iterator();
-        return new SIterator();
-    }
-
-    /* ------------------------------------------------------------ */
-    public Object clone()
-    {
-        if (_list!=null)
-            return new LazyList(new ArrayList(_list));
-        return new LazyList(_first);
-    }
-    
-    /* ------------------------------------------------------------ */
-    private class SIterator implements ListIterator
-    {
-        int i;
-        
-        SIterator(){i=0;}
-        
-        SIterator(int i)
-        {
-            if (i<0||i>1)
-                throw new IndexOutOfBoundsException("index "+i);
-            this.i=i;
-        }
-        
-        public void add(Object o){throw new UnsupportedOperationException("LazyList.add()");}
-        public boolean hasNext() {return i==0;}
-        public boolean hasPrevious() {return i==1;}
-        public Object next() {
-            if (i!=0) throw new NoSuchElementException();
-            if (_list!=null) throw new ConcurrentModificationException();
-            i++;
-            return _first;
-        }
-        public int nextIndex() {return i;}
-        public Object previous() {
-            if (i!=1) throw new NoSuchElementException();i--;
-            if (_list!=null) throw new ConcurrentModificationException();
-            return _first;
-        }
-        public int previousIndex() {return i-1;}
-        public void remove(){throw new UnsupportedOperationException("LazyList.remove()");}
-        public void set(Object o){throw new UnsupportedOperationException("LazyList.add()");}
-    }
-
-
-    /* ------------------------------------------------------------ */
-    public String toString()
-    {
-        if (_list==null)
-            return "["+_first+"]";
-        return _list.toString();
-    }
-
-    /* ------------------------------------------------------------ */
-    public static String toString(LazyList list)
+    public static String toString(Object list)
     {
         if (list==null)
             return "[]";
-        return list.toString();
+        if (list instanceof List)
+            return ((List)list).toString();
+        return "["+list+"]";
     }
 
+    /* ------------------------------------------------------------ */
+    public static Iterator iterator(Object list)
+    {
+        if (list==null)
+            return Collections.EMPTY_LIST.iterator();
+        if (list instanceof List)
+            return ((List)list).iterator();
+        return getList(list).iterator();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public static ListIterator listIterator(Object list)
+    {
+        if (list==null)
+            return Collections.EMPTY_LIST.listIterator();
+        if (list instanceof List)
+            return ((List)list).listIterator();
+        return getList(list).listIterator();
+    }
     
 }
 

@@ -46,7 +46,7 @@ public class FilterHolder
     /* ------------------------------------------------------------ */
     private PathMap _pathSpecs;
     private int _appliesTo;
-    private LazyList _servlets;
+    private Object _servlets;
 
     private transient Filter _filter;
     private transient Config _config;

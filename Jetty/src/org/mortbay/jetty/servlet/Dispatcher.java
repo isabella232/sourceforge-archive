@@ -182,7 +182,7 @@ public class Dispatcher implements RequestDispatcher
                     {
                         Map.Entry entry=(Map.Entry)iter.next();
                         encoded.addValues(entry.getKey(),
-                                          LazyList.getList((LazyList)entry.getValue(),true));
+                                          LazyList.getList(entry.getValue(),true));
                     }
                     query=encoded.encode();
                 }

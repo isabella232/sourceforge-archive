@@ -749,7 +749,7 @@ public class HttpRequest extends HttpMessage
             // Process if something there
             if (size >0)
             {
-                LazyList acceptable = null;
+                Object acceptable = null;
                 
                 // remove trailer and chunked items.
                 ListIterator iter = te.listIterator();
@@ -969,8 +969,8 @@ public class HttpRequest extends HttpMessage
             }
             
             // Get ready to parse cookies (Expensive!!!)
-            LazyList cookies=null;
-            LazyList lastCookies=null;
+            Object cookies=null;
+            Object lastCookies=null;
             
             int version=0;
             Cookie cookie=null;

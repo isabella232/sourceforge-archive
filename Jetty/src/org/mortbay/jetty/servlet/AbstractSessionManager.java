@@ -360,7 +360,7 @@ public abstract class AbstractSessionManager implements SessionManager
             
             // Since Hashtable enumeration is not safe over deletes,
             // we build a list of stale sessions, then go back and invalidate them
-            LazyList stale=null;
+            Object stale=null;
             
             // For each session
             try
