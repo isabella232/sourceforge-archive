@@ -48,7 +48,8 @@ class FileResource extends URLResource
     
     /* ------------------------------------------------------------ */
     private File _file;
-    private BadResource _alias=null;
+    private transient URL _alias=null;
+    private transient boolean _aliasChecked=false;
     
     /* -------------------------------------------------------- */
     FileResource(URL url)
@@ -82,8 +83,6 @@ class FileResource extends URLResource
                 _file =new File(perm.getName());
             }
         }
-        
-        checkAliases(url);
     }
     
     /* -------------------------------------------------------- */
@@ -91,7 +90,6 @@ class FileResource extends URLResource
     {
         super(url,connection);
         _file=file;
-        checkAliases(url);
     }
     
     /* -------------------------------------------------------- */
@@ -113,29 +111,26 @@ class FileResource extends URLResource
                 path = path.substring(1);
             
             File newFile = new File(_file,path);
-
-//             if (path.length()>0 && !path.endsWith("/") && newFile.isDirectory())
-//                 path+="/";
             
             r=new FileResource(newFile.toURL(),null,newFile);
         }
-
-        if (r!=null && r.getAlias()!=null)
-            return r.getAlias();
+                                  
         return r;
     }
+   
     
     /* ------------------------------------------------------------ */
-    private void checkAliases(URL url)
+    public URL getAlias()
     {
-        if (__checkAliases)
+        if (!_aliasChecked)
         {
-            try{
+            try
+            {    
                 String abs=_file.getAbsolutePath();
                 String can=_file.getCanonicalPath();
-
+                
                 if (abs.length()!=can.length() || !abs.equals(can))
-                    _alias=new BadResource(url,abs+" is alias of "+can);
+                    _alias=new File(can).toURL();
                 
                 if (_alias!=null && Code.debug())
                 {
@@ -143,25 +138,18 @@ class FileResource extends URLResource
                     Code.debug("ALIAS can=",can);
                 }
             }
-            catch(IOException e)
+            catch(Exception e)
             {
-                Code.ignore(e);
-            }
+                Code.warning(e);
+                return getURL();
+            }                
         }
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get an Alias BadResource if one was created.
-     * @return BadResource for alias or null.
-     */
-    BadResource getAlias()
-    {
         return _alias;
     }
     
     /* -------------------------------------------------------- */
     /**
-     * Returns true if the respresenetd resource exists.
+     * Returns true if the resource exists.
      */
     public boolean exists()
     {

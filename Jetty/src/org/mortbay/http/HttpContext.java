@@ -790,6 +790,15 @@ public class HttpContext implements LifeCycle,
             if (resource==null)
                 return null;
 
+            
+            // Check for file aliasing
+            if (resource.getAlias()!=null)
+            {
+                Code.warning("Alias request of '"+resource.getAlias()+
+                             "' for '"+resource+"'");
+                return null;
+            }
+
             // Is it an existing file?
             long len = resource.length();
             if (resource.exists())

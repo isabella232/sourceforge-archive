@@ -163,9 +163,9 @@ public class Default extends HttpServlet
         
         boolean endsWithSlash= pathInContext.endsWith("/");
         Resource resource=getResource(pathInContext);
-        String method=request.getMethod();
 
-        // Is the method allowed?        
+        // Is the method allowed?  
+        String method=request.getMethod();      
         if (_AllowString.indexOf(method)<0)
         {
             Code.debug("Method not allowed: ",method);
@@ -184,7 +184,7 @@ public class Default extends HttpServlet
         {
             if (Code.debug())Code.debug(method," PATH=",pathInContext," RESOURCE=",resource);
             
-            // check filename
+            // handle by method.
             if (method.equals(HttpRequest.__GET) ||
                 method.equals(HttpRequest.__POST) ||
                 method.equals(HttpRequest.__HEAD))

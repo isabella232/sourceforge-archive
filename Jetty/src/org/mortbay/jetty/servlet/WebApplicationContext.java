@@ -189,6 +189,14 @@ public class WebApplicationContext
             // Set dir or WAR
             _webApp = Resource.newResource(_war);
 
+
+            // Accept aliases for WAR files
+            if (_webApp.getAlias()!=null)
+            {
+                Log.event(_webApp+" anti-aliased to "+_webApp.getAlias());
+                _webApp= Resource.newResource(_webApp.getAlias());
+            }
+
             if (Code.debug())
                 Code.debug("Try webapp=",_webApp+
                            ", exists="+_webApp.exists()+

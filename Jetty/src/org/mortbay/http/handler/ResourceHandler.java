@@ -203,10 +203,8 @@ public class ResourceHandler extends AbstractHttpHandler
         throws HttpException, IOException
     {
         Resource resource = getResource(pathInContext);
-
         if (resource==null)
             return;
-
 
         // Is the method allowed?
         if (!isMethodAllowed(request.getMethod()))
