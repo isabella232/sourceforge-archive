@@ -1663,7 +1663,7 @@ public class HttpContext implements LifeCycle,
             response.setField(HttpFields.__Location,
                               buf.toString());
             if (log.isDebugEnabled())
-                log.warn(this+" consumed all of path "+
+                log.debug(this+" consumed all of path "+
                              request.getPath()+
                              ", redirect to "+buf.toString());
             response.sendError(302);
