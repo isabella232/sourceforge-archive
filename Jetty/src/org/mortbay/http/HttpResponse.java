@@ -237,19 +237,16 @@ public class HttpResponse
 
         if (_dotVersion>=0)
         {
-            String status=_status+" ";
-            if (Code.verbose())
-                Code.debug("writeHeaders: ",status);
             _state=__MSG_BAD;
-            synchronized(writer)
-            {
-                writer.write(_version);
-                writer.write(' ');
-                writer.write(status);
-                writer.write(getReason());
-                writer.write(HttpFields.__CRLF);
-                _header.write(writer);
-            }
+	    writer.write(_version);
+	    writer.write(' ');
+	    writer.write('0'+((_status/100)%10));
+	    writer.write('0'+((_status/10)%10));
+	    writer.write('0'+(_status%10));
+	    writer.write(' ');
+	    writer.write(getReason());
+	    writer.write(HttpFields.__CRLF);
+	    _header.write(writer);
         }
         _state=__MSG_SENDING;
     }
