@@ -17,17 +17,17 @@ import org.apache.log4j.Category;
 //----------------------------------------
 
 
-public abstract class PushPopInterceptor
+public abstract class AroundInterceptor
   extends StateInterceptor
 {
   public
-    PushPopInterceptor(HttpSession session, State state)
+    AroundInterceptor(HttpSession session, State state)
   {
     super(session, state);
   }
 
-  protected abstract void pushContext();
-  protected abstract void popContext();
+  protected abstract void before();
+  protected abstract void after();
 
   public long
     getCreationTime()
@@ -35,14 +35,14 @@ public abstract class PushPopInterceptor
   {
     long tmp=0;
 
-    pushContext();
+    before();
     try
     {
       tmp=super.getCreationTime();
     }
     finally
     {
-      popContext();
+      after();
     }
 
     return tmp;
@@ -54,14 +54,14 @@ public abstract class PushPopInterceptor
   {
     String tmp=null;
 
-    pushContext();
+    before();
     try
     {
       tmp=super.getId();
     }
     finally
     {
-      popContext();
+      after();
     }
 
     return tmp;
@@ -71,14 +71,14 @@ public abstract class PushPopInterceptor
     setLastAccessedTime(long time)
     throws RemoteException
   {
-    pushContext();
+    before();
     try
     {
       super.setLastAccessedTime(time);
     }
     finally
     {
-      popContext();
+      after();
     }
   }
 
@@ -88,14 +88,14 @@ public abstract class PushPopInterceptor
   {
     long tmp=0;
 
-    pushContext();
+    before();
     try
     {
       tmp=super.getLastAccessedTime();
     }
     finally
     {
-      popContext();
+      after();
     }
 
     return tmp;
@@ -105,14 +105,14 @@ public abstract class PushPopInterceptor
     setMaxInactiveInterval(int interval)
     throws RemoteException
   {
-    pushContext();
+    before();
     try
     {
       super.setMaxInactiveInterval(interval);
     }
     finally
     {
-      popContext();
+      after();
     }
   }
 
@@ -122,14 +122,14 @@ public abstract class PushPopInterceptor
   {
     int tmp=0;
 
-    pushContext();
+    before();
     try
     {
       tmp=super.getMaxInactiveInterval();
     }
     finally
     {
-      popContext();
+      after();
     }
 
     return tmp;
@@ -141,14 +141,14 @@ public abstract class PushPopInterceptor
   {
     Object tmp=null;
 
-    pushContext();
+    before();
     try
     {
       tmp=super.getAttribute(name);
     }
     finally
     {
-      popContext();
+      after();
     }
 
     return tmp;
@@ -160,14 +160,14 @@ public abstract class PushPopInterceptor
   {
     Enumeration tmp=null;
 
-    pushContext();
+    before();
     try
     {
       tmp=super.getAttributeNameEnumeration();
     }
     finally
     {
-      popContext();
+      after();
     }
 
     return tmp;
@@ -179,14 +179,14 @@ public abstract class PushPopInterceptor
   {
     String[] tmp=null;
 
-    pushContext();
+    before();
     try
     {
       tmp=super.getAttributeNameStringArray();
     }
     finally
     {
-      popContext();
+      after();
     }
 
     return tmp;
@@ -198,14 +198,14 @@ public abstract class PushPopInterceptor
   {
     Object tmp=null;
 
-    pushContext();
+    before();
     try
     {
       tmp=super.setAttribute(name, value, returnValue);
     }
     finally
     {
-      popContext();
+      after();
     }
 
     return tmp;
@@ -217,14 +217,14 @@ public abstract class PushPopInterceptor
   {
     Object tmp=null;
 
-    pushContext();
+    before();
     try
     {
       tmp=super.removeAttribute(name, returnValue);
     }
     finally
     {
-      popContext();
+      after();
     }
 
     return tmp;
@@ -236,14 +236,14 @@ public abstract class PushPopInterceptor
   {
     Map tmp=null;
 
-    pushContext();
+    before();
     try
     {
       tmp=super.getAttributes();
     }
     finally
     {
-      popContext();
+      after();
     }
 
     return tmp;
@@ -253,14 +253,14 @@ public abstract class PushPopInterceptor
     setAttributes(Map attributes)
     throws RemoteException
   {
-    pushContext();
+    before();
     try
     {
       super.setAttributes(attributes);
     }
     finally
     {
-      popContext();
+      after();
     }
   }
 }

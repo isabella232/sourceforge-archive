@@ -57,7 +57,8 @@ public class
 
     try
     {
-      _buffer=new LocalState(getState().getId(), maxInactiveInterval);
+      int actualMaxInactiveInterval=60*60*24; // TODO
+      _buffer=new LocalState(getState().getId(), maxInactiveInterval, actualMaxInactiveInterval);
     }
     catch (RemoteException e)
     {

@@ -84,9 +84,10 @@ abstract public class
     newState(String id, int maxInactiveInterval)
     throws Exception
     {
+      int actualMaxInactiveInterval=60*60*24; // TODO
       long creationTime=System.currentTimeMillis();
-      Class[]  argClasses   = {String.class, String.class, Long.class, Integer.class};
-      Object[] argInstances = {getContextPath(), id, new Long(creationTime), new Integer(maxInactiveInterval)};
+      Class[]  argClasses   = {String.class, String.class, Long.class, Integer.class, Integer.class};
+      Object[] argInstances = {getContextPath(), id, new Long(creationTime), new Integer(maxInactiveInterval), new Integer(actualMaxInactiveInterval)};
       publish("create", argClasses, argInstances);
 
       // if we get one - all we have to do is loadState - because we
@@ -198,8 +199,8 @@ abstract public class
       {
 	long creationTime=((Long)argInstances[2]).longValue();
 	int maxInactiveInterval=((Integer)argInstances[3]).intValue();
-
-	State state=new ReplicatedState(this, id, creationTime, maxInactiveInterval);
+	int actualMaxInactiveInterval=((Integer)argInstances[4]).intValue();
+	State state=new ReplicatedState(this, id, creationTime, maxInactiveInterval, actualMaxInactiveInterval);
 
 	synchronized(_sessions) {_sessions.put(id, state);}
       }

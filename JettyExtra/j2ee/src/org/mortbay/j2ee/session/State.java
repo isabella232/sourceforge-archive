@@ -22,22 +22,35 @@ import java.util.Map;
 
 //----------------------------------------
 
+/**
+ * Implemented by objects wishing to be used to store the state from
+ * an HttpSession.
+ *
+ * @author <a href="mailto:jules@mortbay.com">Jules Gosnell</a>
+ * @version 1.0
+ */
 public interface
   State
 {
-  long        getCreationTime()                       throws RemoteException;
-  String      getId()                                 throws RemoteException;
-  void        setLastAccessedTime(long time)          throws RemoteException;
-  long        getLastAccessedTime()                   throws RemoteException;
-  void        setMaxInactiveInterval(int interval)    throws RemoteException;
-  int         getMaxInactiveInterval()                throws RemoteException;
-  Object      setAttribute(String name, Object value, boolean returnValue) throws RemoteException; // returns old binding
-  Object      getAttribute(String name)               throws RemoteException;
-  Object      removeAttribute(String name, boolean returnValue)            throws RemoteException; // returns old binding
-  Enumeration getAttributeNameEnumeration()           throws RemoteException;
-  String[]    getAttributeNameStringArray()           throws RemoteException;
+  // invariant field accessors
+  String      getId()                                                      throws RemoteException;
+  int         getActualMaxInactiveInterval()                               throws RemoteException;
+  long        getCreationTime()                                            throws RemoteException;
 
-  Map         getAttributes()                         throws RemoteException;
-  void        setAttributes(Map attributes)           throws RemoteException;
+  // variant field accessors
+  Map         getAttributes()                                              throws RemoteException;
+  void        setAttributes(Map attributes)                                throws RemoteException;
+  long        getLastAccessedTime()                                        throws RemoteException;
+  void        setLastAccessedTime(long time)                               throws RemoteException;
+  int         getMaxInactiveInterval()                                     throws RemoteException;
+  void        setMaxInactiveInterval(int interval)                         throws RemoteException;
+
+  // compound fn-ality
+  Object      getAttribute(String name)                                    throws RemoteException;
+  Object      setAttribute(String name, Object value, boolean returnValue) throws RemoteException;
+  Object      removeAttribute(String name, boolean returnValue)            throws RemoteException;
+  Enumeration getAttributeNameEnumeration()                                throws RemoteException;
+  String[]    getAttributeNameStringArray()                                throws RemoteException;
+  boolean     isValid()                                                    throws RemoteException;
 }
 

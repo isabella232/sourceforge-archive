@@ -40,14 +40,14 @@ public class
   protected LocalState _state;
 
   public
-    ReplicatedState(AbstractReplicatedStore store, String id, long creationTime, int maxInactiveInterval)
+    ReplicatedState(AbstractReplicatedStore store, String id, long creationTime, int maxInactiveInterval, int actualMaxInactiveInterval)
     {
       _store=store;
       _context=_store.getContextPath();
       _id=id;
 
       // need to pass through creation time...
-      _state=new LocalState(id, maxInactiveInterval);
+      _state=new LocalState(id, maxInactiveInterval, actualMaxInactiveInterval);
     }
 
   ReplicatedState(AbstractReplicatedStore store, LocalState state)
@@ -57,7 +57,6 @@ public class
       _state=state;		// we are taking ownership...
       _id=_state.getId();
     }
-
 
   //----------------------------------------
 
@@ -69,6 +68,12 @@ public class
 
   //----------------------------------------
   // readers - simply wrap-n-delegate
+
+  public int
+    getActualMaxInactiveInterval()
+    {
+      return _state.getActualMaxInactiveInterval();
+    }
 
   public long
     getCreationTime()
@@ -116,6 +121,12 @@ public class
     getAttributes()
     {
       return _state.getAttributes();
+    }
+
+  public boolean
+    isValid()
+    {
+      return _state.isValid();
     }
 
   //----------------------------------------

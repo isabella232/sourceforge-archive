@@ -25,7 +25,7 @@ import org.apache.log4j.Category;
 // vice-versa...
 
 public class TransactionInterceptor
-  extends PushPopInterceptor
+  extends AroundInterceptor
 {
   protected final Category    _log              =Category.getInstance(getClass().getName());
   protected final ThreadLocal _theirTransaction =new ThreadLocal();
@@ -63,7 +63,7 @@ public class TransactionInterceptor
 
   // despite the names (push/pop) these are not expected to be reentrant....
   protected void
-    pushContext()
+    before()
   {
     try
     {
@@ -77,7 +77,7 @@ public class TransactionInterceptor
   }
 
   protected void
-    popContext()
+    after()
   {
     try
     {

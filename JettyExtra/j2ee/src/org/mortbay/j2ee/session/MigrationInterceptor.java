@@ -75,7 +75,7 @@ public class
 
       try
       {
-	setLocalState(new LocalState(state.getId(), state.getMaxInactiveInterval()));
+	setLocalState(new LocalState(state.getId(), state.getMaxInactiveInterval(), state.getActualMaxInactiveInterval()));
       }
       catch(Exception e)
       {

@@ -42,7 +42,8 @@ public class LocalStore
   public State
     newState(String id, int maxInactiveInterval)
   {
-    return new LocalState(id, maxInactiveInterval);
+    int actualMaxInactiveInterval=60*60*24;	// TODO
+    return new LocalState(id, maxInactiveInterval, actualMaxInactiveInterval);
   }
 
   public State

@@ -502,6 +502,20 @@ public class Manager
     {
       State state=((StateAdaptor)container).getState();
 
+      // filthy hack...
+      // stop InvalidInterceptors - otherwise we can't clean up session... - TODO
+      {
+	State s=state;
+	StateInterceptor si=null;
+	while (s instanceof StateInterceptor)
+	{
+	  si=(StateInterceptor)s;
+	  s=si.getState();	// next interceptor
+	  if (si instanceof ValidationInterceptor)
+	    si.stop();
+	}
+      }
+
       String[] names=state.getAttributeNameStringArray();
       for (int i=0; i<names.length; i++)
 	state.removeAttribute(names[i], false);
@@ -549,25 +563,29 @@ public class Manager
     {
       State state=_store.loadState(id);
 
+      state=((state!=null) && state.isValid())?state:null; // expensive ?
+
       if (state!=null)
       {
 
 	// this looks slow - but to be 100% safe we need to make sure
 	// that no-one can enter another container for the same id,
 	// whilst we are thinking about it...
-	Object tmp;
 	synchronized (_sessions)
 	{
 	  // do we have an existing container ?
-	  tmp=_sessions.get(id);
+	  Object tmp=_sessions.get(id);
 
 	  if (tmp==null)
 	  {
-	    tmp=newContainer(id, state);// we could lower contention by preconstructing containers... - TODO
-	    _sessions.put(id, tmp);
+	    container=newContainer(id, state);// we could lower contention by preconstructing containers... - TODO
+	    _sessions.put(id, container);
+	  }
+	  else
+	  {
+	    container=(HttpSession)tmp;
 	  }
 	}
-	container=(HttpSession)tmp;;
       }
     }
     catch (Exception ignore)

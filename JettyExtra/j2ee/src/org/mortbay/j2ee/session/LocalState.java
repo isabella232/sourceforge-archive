@@ -29,6 +29,7 @@ public class
 
   protected String _id;
   protected int    _maxInactiveInterval;
+  protected int    _actualMaxInactiveInterval;
 
   protected long   _creationTime     =System.currentTimeMillis();
   protected long   _lastAccessedTime =_creationTime;
@@ -36,10 +37,11 @@ public class
 
 
   public
-    LocalState(String id, int maxInactiveInterval)
+    LocalState(String id, int maxInactiveInterval, int actualMaxInactiveInterval)
     {
       _id=id;
       _maxInactiveInterval=maxInactiveInterval;
+      _actualMaxInactiveInterval=actualMaxInactiveInterval;
     }
 
   protected
@@ -50,6 +52,7 @@ public class
 
   public String      getId()                                 {return _id;}
   public long        getCreationTime()                       {return _creationTime;}
+  public int         getActualMaxInactiveInterval()          {return _actualMaxInactiveInterval;}
   public long        getLastAccessedTime()                   {return _lastAccessedTime;}
   public void        setLastAccessedTime(long time)          {_lastAccessedTime=time;};
   public int         getMaxInactiveInterval()                {return _maxInactiveInterval;}
@@ -122,5 +125,12 @@ public class
 	Object tmp=_attributes.remove(name);
 	return returnValue?tmp:null;
       }
+    }
+
+  public boolean
+    isValid()
+    {
+      long maxInactiveInterval=(_maxInactiveInterval<1?_actualMaxInactiveInterval:_maxInactiveInterval)*1000;
+      return (_lastAccessedTime+maxInactiveInterval)>System.currentTimeMillis();
     }
 }
