@@ -231,17 +231,6 @@ public class HttpRequest extends HttpHeader
         return uri.getPath();
     }
     
-    
-    /* -------------------------------------------------------------- */
-    /** Set the URI path 
-     */
-    public void setRequestPath(String path)
-    {
-        if (uri!=null)
-            uri.setPath(path);
-        servletPath=null;
-        pathInfo=path;
-    }
 
     /* -------------------------------------------------------------- */
     /** Set the URI path and redirect params
@@ -805,7 +794,9 @@ public class HttpRequest extends HttpHeader
      */
     public Enumeration getParameterNames()
     {
-        if (formParameters==null && cookieParameters==null)
+        if (formParameters==null && 
+            cookieParameters==null && 
+            redirectParams==null)
             return uri.getParameterNames();
 
         Vector names = new Vector();
@@ -822,10 +813,20 @@ public class HttpRequest extends HttpHeader
         
         if (cookieParameters!=null)
         {
+            // XXX - This is probably not correct
             e = cookieParameters.keys();
             while (e.hasMoreElements())
                 names.addElement(e.nextElement());
         }
+
+        if (redirectParams!=null)
+        {
+            // XXX - This could cause duplicates.
+            e =redirectParams.keys();
+            while (e.hasMoreElements())
+                names.addElement(e.nextElement());
+        }
+
         
         return names.elements();
     }
@@ -1064,9 +1065,9 @@ public class HttpRequest extends HttpHeader
                             <path.length())
                             setRequestPath(path.substring(0,prefix)+
                                            path.substring(suffix+
-                                                          SessionContext.SessionUrlSuffix.length()));
+                                                          SessionContext.SessionUrlSuffix.length()),null);
                         else
-                            setRequestPath(path.substring(0,prefix));
+                            setRequestPath(path.substring(0,prefix),null);
                         
                         Code.debug(getRequestPath());
                     }

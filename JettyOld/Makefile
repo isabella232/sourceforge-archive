@@ -25,7 +25,8 @@ SUBDIRS := \
     contrib/org/gjt/jsp \
     contrib/org/gjt/jsp10 \
     contrib/au/com/forge/Protekt/Jetty \
-    contrib/com/mortbay/HTTP/Handler
+    contrib/com/mortbay/HTTP/Handler \
+    contrib/com/mortbay/Jetty
 
 include $(JETTY_HOME)/etc/Global.mk
 

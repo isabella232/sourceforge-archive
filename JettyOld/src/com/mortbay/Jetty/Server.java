@@ -259,6 +259,7 @@ public class Server extends BaseConfiguration
         {
             // do this using reflection, so that the SetUID class
             // is only loaded if needed.
+            // The source of the class is in the contrib hierarchy
             Class[] types = {java.lang.Integer.TYPE};
             java.lang.reflect.Method setUid =
                 Class.forName("com.mortbay.Jetty.SetUID")

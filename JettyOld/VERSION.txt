@@ -1,5 +1,6 @@
-  + Form parameters only decoded for POSTs UNTESTED! need to check spec
-  + RequestDispathcer handles URI parameters UNTESTED!
+  + Moved SetUID native code to contrib hierarchy
+  + Form parameters only decoded for POSTs
+  + RequestDispatcher handles URI parameters
   + Fixed bug with RequestDispatcher.include()
   + Fixed caste problem in UrlEncoded
   + Fixed null pointer in ThreadedServer with stopAll

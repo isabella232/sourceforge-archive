@@ -727,10 +727,10 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     }
     
     /* ------------------------------------------------------------ */
-    boolean preIncludeHandled=false;
-    void preInclude()
+    boolean preDispatchHandled=false;
+    void preDispatch()
     {
-	preIncludeHandled=handled;
+	preDispatchHandled=handled;
 	handled=false;
 	if (writer!=null)
 	    writer.flush();
@@ -738,9 +738,9 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     }
     
     /* ------------------------------------------------------------ */
-    void postInclude()
+    void postDispatch()
     {
-	handled=preIncludeHandled;
+	handled=preDispatchHandled;
 	if (writer!=null)
 	    outputState=2;
     }

@@ -52,6 +52,8 @@ public class Dispatch extends HttpServlet
 	if (info.startsWith("/include/"))
 	{
 	    info=info.substring(8);
+            if (info.indexOf('?')<0)
+                info+="?Dispatch=Demo";
 	    PrintWriter pout = sres.getWriter();
 	    pout.write("<H1>Include: "+info+"</H1><HL>");
 	    pout.flush();
@@ -64,10 +66,13 @@ public class Dispatch extends HttpServlet
 	else if (info.startsWith("/INCLUDE/"))
 	{
 	    info=info.substring(8);
+            if (info.indexOf('?')<0)
+                info+="?Dispatch=Demo";
 	    OutputStream out = sres.getOutputStream();
 	    PrintWriter pout = new PrintWriter(out);
 	    pout.write("<H1>Include: "+info+"</H1><HL>");
 	    pout.flush();
+
 
 	    RequestDispatcher dispatch = getServletContext().getRequestDispatcher(info);
 	    dispatch.include(sreq,sres);
@@ -77,6 +82,8 @@ public class Dispatch extends HttpServlet
 	else if (info.startsWith("/forward/"))
 	{
 	    info=info.substring(8);
+            if (info.indexOf('?')<0)
+                info+="?Dispatch=Demo";
 	    RequestDispatcher dispatch = getServletContext().getRequestDispatcher(info);
 	    dispatch.forward(sreq,sres);
 	}
