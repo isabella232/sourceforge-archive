@@ -2,6 +2,11 @@
 <!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.0//EN" "http://jetty.mortbay.org/configure_1_2.dtd">
 
 <Configure class="org.mortbay.jetty.Server">
+
+  <!-- =============================================================== -->
+  <!-- Add and configure a listener to port 8080                       -->
+  <!-- The default port can be changed using: java -Djetty.port=80     -->
+  <!-- _______________________________________________________________ -->
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.SocketListener">
@@ -17,26 +22,41 @@
   </Call>
 
   
-  <!-- add a single web application to the / context -->
+  <!-- =============================================================== -->
+  <!-- Add a single web application                                    -->
+  <!-- _______________________________________________________________ -->
+  <!-- Remove this comment to activate this section
   <Call name="addWebApplication">
     <Arg>/</Arg>
-    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/root</Arg>
-     <Call name="getServletHandler">
-       <Call name="getSessionManager">
-         <Call name="setMaxInactiveInterval">
-           <Arg type="int">20</Arg>
-         </Call>
-       </Call>
-     </Call>
+    <Arg>./webapps/root</Arg>
+  </Call>
+  -->
+
+  <!-- =============================================================== -->
+  <!-- Add a single web application using java properties and defaults -->
+  <!-- The webapplication deployed can use defaults or be configured   -->
+  <!-- with:  java -Djetty.context=/context -Djetty.webapp=mywebapp    -->
+  <!-- _______________________________________________________________ -->
+  <Call name="addWebApplication">
+    <Arg><SystemProperty name="jetty.context" default="/"/></Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/<SystemProperty name="jetty.webapp" default="root"/></Arg>
   </Call>
 
-  <!-- Uncomment this section to  configure all webapplications found in the webapps directory 
+
+
+  <!-- =============================================================== -->
+  <!-- Add a all web application within the webapps directory          -->
+  <!-- _______________________________________________________________ -->
+  <!-- Remove this comment to activate this section
   <Call name="addWebApplications">
     <Arg></Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/</Arg>
   </Call>
   -->
 
+  <!-- =============================================================== -->
+  <!-- Add an extended NCSA request log                                -->
+  <!-- _______________________________________________________________ -->
   <Set name="RequestLog">
     <New class="org.mortbay.http.NCSARequestLog">
       <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.request.log</Arg>

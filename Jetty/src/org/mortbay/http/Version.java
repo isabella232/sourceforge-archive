@@ -4,6 +4,8 @@
 // ========================================================================
 
 package org.mortbay.http;
+import org.mortbay.util.Code;
+
 
 /* ------------------------------------------------------------ */
 /** Jetty version.
@@ -19,15 +21,21 @@ package org.mortbay.http;
 public class Version
 {
     public static boolean __paranoid = 
-        Boolean.getBoolean("java.org.mortbay.http.Version.paranoid");
+        Boolean.getBoolean("org.mortbay.http.Version.paranoid");
     
-    public static String __Version="Jetty/3";
+    public static String __Version="Jetty/4";
     public static String __VersionImpl=__Version;
     public static String __VersionDetail="Unknown";
-    public static String __ServletEngine="Unknown (Servlet 2.2; JSP 1.1)";
+    public static String __ServletEngine="Unknown (Servlet 2.3; JSP 1.2)";
 
     static
     {
+        if (Boolean.getBoolean("java.org.mortbay.http.Version.paranoid"))
+        {
+            Code.warning("OLD property set. Use org.mortbay.http.Version.paranoid");
+            __paranoid=true;
+        }
+        
         Package p = Version.class.getPackage();
         if (p!=null)
         {
@@ -42,10 +50,9 @@ public class Version
                 System.getProperty("os.version")+" "+
                 System.getProperty("os.arch")+")";
 
-            __ServletEngine=__Version+" (JSP 1.1; Servlet 2.2; java "+
+            __ServletEngine=__Version+" (Servlet 2.3; JSP 1.2; java "+
                 System.getProperty("java.version")+")";
         }
-
     }
 }
 

@@ -89,15 +89,13 @@
     <Arg>/demo/*</Arg>
 
     <Call name="addHandler">
-      <Arg><New class="org.mortbay.http.handler.ProxyHandler">
-      </New>
-      </Arg>
+      <Arg><New class="org.mortbay.http.handler.ProxyHandler"></New></Arg>
     </Call>
 
     <Call name="addHandler">
       <Arg><New class="org.mortbay.http.handler.HTAccessHandler">
-	    <Set name="AccessFile">.htaccess</Set></New>
-      </Arg>
+	    <Set name="AccessFile">.htaccess</Set>
+      </New></Arg>
     </Call>
 
     <Call name="addServlet">
@@ -151,8 +149,6 @@
      <Put name="Path">/bin:/usr/bin:/usr/local/bin</Put>
     </Call>
   </Call>
-
-
 
 
   <Call name="addRealm">
