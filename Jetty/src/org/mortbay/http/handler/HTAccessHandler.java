@@ -446,7 +446,7 @@ public class HTAccessHandler extends AbstractHttpHandler
             {
                 // Have to authenticate the user with the password file
                 String code=getUserCode(user);
-                String cred=(user!=null&&pass!=null)?UnixCrypt.crypt(user,pass):null;
+                String cred=(user!=null&&pass!=null)?UnixCrypt.crypt(pass,user):null;
                 if (code==null || (code.equals("") && !pass.equals("")) || !code.equals(cred))
                     return false;
             }
