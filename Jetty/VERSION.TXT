@@ -3,17 +3,16 @@ Jetty Versions
 
 Jetty-4.1.0 - 22 September 2002
  + Fixed CGI+windows security hole.
- + Fixed AJP13 POST handling.
+ + Fixed AJP13 handling of mod_jk loadbalancing.
+ + Stop servlets in opposite order to start.
  + NCSARequest log buffered default
  + WEB-INF/classes before WEB-INF/lib
  + Sorted directory listings.
- + Stop servlets in opposite order to start.
  + Handle unremovable tempdir.
  + Context Initparams to control session cookie domain, path and age.
  + ClientCertAuthenticator protected from null subjectDN
  + Added LimitedNCSARequestLog
  + Use javac -target 1.2 for normal classes
- + AJP13 fixed for mod_jk sesson affinity
 
 Jetty-4.1.0RC6 - 14 September 2002
  + Don't URL encode FileURLS.
