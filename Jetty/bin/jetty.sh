@@ -384,7 +384,7 @@ fi
 #####################################################
 # Build the classpath with Jetty's bundled libraries.
 #####################################################
-CP=`ls $JETTY_HOME/lib/*.jar | paste -s -d'$PATH_SEPARATOR' - `
+CP=`ls $JETTY_HOME/lib/*.jar | paste -s -d"$PATH_SEPARATOR" - `
 [ "$CLASSPATH" != "" ] && CP=$CP$PATH_SEPARATOR$CLASSPATH
 [ -f $JAVA_HOME/lib/tools.jar ] && CP="$CP$PATH_SEPARATOR$JAVA_HOME/lib/tools.jar"
 CLASSPATH="$CP"
