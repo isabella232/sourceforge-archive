@@ -8,3 +8,6 @@
 
 2004-08-04 Jan Bartel <janb@mortbay.com>
         * ensured logout() is called on jaas login modules
+
+2004-08-06 Jan Bartel <janb@mortbay.com>
+        * fixed deployment of ejb-link elements

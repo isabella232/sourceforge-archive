@@ -4,6 +4,7 @@ Jetty Versions
  + DIGEST auth handles qop, stale and maxNonceAge.
  + Less verbose warning for non validating xml parser.
  + fixed jaas logout for jetty-jboss
+ + fixed deployment of ejb-link elements in web.xml with jboss
 
 Jetty-5.0.RC2 - 2 July 2004
  + Fixed DIGEST challenge delimiters
