@@ -132,7 +132,6 @@
     <jar jarfile="${jetty.war}"
          basedir="${jetty.webapp}" 
          >
-       <include name="**"  />
     </jar>
   </target>
   <target name="javadoc" depends="libs">
