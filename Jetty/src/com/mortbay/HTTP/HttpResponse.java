@@ -140,7 +140,7 @@ public class HttpResponse extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    /** XXX
+    /** XXX Not Implemented
      * @param in 
      * @exception IOException 
      */
@@ -153,11 +153,9 @@ public class HttpResponse extends HttpMessage
     
     
     /* -------------------------------------------------------------- */
-    public synchronized  void writeHeader(OutputStream out) 
+    public synchronized  void writeHeader(Writer writer) 
         throws IOException
     {
-        // XXX use a UTF8 writer.
-        
         if (_state!=__MSG_EDITABLE)
             throw new IllegalStateException(__state[_state]+
                                             " is not EDITABLE");
@@ -166,17 +164,17 @@ public class HttpResponse extends HttpMessage
         if (Code.verbose())
             Code.debug("writeHeaders: ",status);
         _state=__MSG_BAD;
-        synchronized(out)
+        synchronized(writer)
         {
-            out.write(_version.getBytes());
-            out.write(' ');
-            out.write(status.getBytes());
-            out.write(getReason().getBytes());
-            out.write(HttpFields.__CRLF_B);
+            writer.write(_version);
+            writer.write(' ');
+            writer.write(status);
+            writer.write(getReason());
+            writer.write(HttpFields.__CRLF);
             if (_cookies!=null)
-                _header.write(out,(HttpFields)_cookies); //XXX
+                _header.write(writer,(HttpFields)_cookies); //XXX
             else
-                _header.write(out);
+                _header.write(writer);
         }
         _state=__MSG_SENDING;
     }
@@ -248,15 +246,17 @@ public class HttpResponse extends HttpMessage
         setReason(reason);
 
         ChunkableOutputStream out=getOutputStream();
-        synchronized(out)
+        Writer writer=out.getRawWriter();
+        synchronized(writer)
         {
-            out.print("<HTML>\n<HEAD>\n<TITLE>Error ");
-            out.print(exception.getCode()+" "+reason+"</TITLE>\n");
-            out.print("<BODY>\n<H2>HTTP ERROR: ");
-            out.println(exception.getCode() +" "+reason + "</H2>");
+            writer.write("<HTML>\n<HEAD>\n<TITLE>Error ");
+            writer.write(exception.getCode()+" "+reason+"</TITLE>\n");
+            writer.write("<BODY>\n<H2>HTTP ERROR: ");
+            writer.write(exception.getCode() +" "+reason + "</H2>\n");
             if (message!=null)
-                out.println(message);
-            out.print("</BODY>\n</HTML>\n");
+                writer.write(message);
+            writer.write("\n</BODY>\n</HTML>\n");
+            out.writeRawWriter();
         }
         commit();
     }
@@ -278,15 +278,17 @@ public class HttpResponse extends HttpMessage
         setReason(reason);
 
         ChunkableOutputStream out=getOutputStream();
-        synchronized(out)
+        Writer writer=out.getRawWriter();
+        synchronized(writer)
         {
-            out.print("<HTML>\n<HEAD>\n<TITLE>Error ");
-            out.print(code+" "+reason+"</TITLE>\n");
-            out.print("<BODY>\n<H2>HTTP ERROR: ");
-            out.println(code +" "+reason + "</H2>");
+            writer.write("<HTML>\n<HEAD>\n<TITLE>Error ");
+            writer.write(code+" "+reason+"</TITLE>\n");
+            writer.write("<BODY>\n<H2>HTTP ERROR: ");
+            writer.write(code +" "+reason + "</H2>");
             if (message!=null)
-                out.println(message);
-            out.print("</BODY>\n</HTML>\n");
+                writer.write(message);
+            writer.write("</BODY>\n</HTML>\n");
+            out.writeRawWriter();
         }
         commit();
     }

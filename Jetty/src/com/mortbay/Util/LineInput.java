@@ -47,31 +47,6 @@ public class LineInput extends FilterInputStream
     private String _encoding;
     private boolean _eof=false;
 
-    /* ------------------------------------------------------------ */
-    private static class ByteBuffer extends ByteArrayInputStream
-    {
-        ByteBuffer(byte[] buffer)
-        {
-            super(buffer);
-        }
-        
-        void setStream(int offset,int length)
-        {
-            pos=offset;
-            count=offset+length;
-            mark=-1;
-        }        
-    };
-    
-    /* ------------------------------------------------------------ */
-    public static class LineBuffer
-    {
-        public char[] buffer;
-        public int size;
-        public LineBuffer(int maxLineLength)
-        {buffer=new char[maxLineLength];}
-    };
-
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -551,4 +526,30 @@ public class LineInput extends FilterInputStream
 
         return len;
     }
+
+    /* ------------------------------------------------------------ */
+    private static class ByteBuffer extends ByteArrayInputStream
+    {
+        ByteBuffer(byte[] buffer)
+        {
+            super(buffer);
+        }
+        
+        void setStream(int offset,int length)
+        {
+            pos=offset;
+            count=offset+length;
+            mark=-1;
+        }        
+    };
+    
+    /* ------------------------------------------------------------ */
+    public static class LineBuffer
+    {
+        public char[] buffer;
+        public int size;
+        public LineBuffer(int maxLineLength)
+        {buffer=new char[maxLineLength];}
+    };
+
 };

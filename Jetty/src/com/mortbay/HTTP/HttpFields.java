@@ -130,9 +130,7 @@ public class HttpFields extends HashMap
     
     /* ------------------------------------------------------------ */
     public final static String __CRLF = "\015\012";
-    public final static byte[] __CRLF_B = {(byte)'\015',(byte)'\012'};
     public final static String __COLON = ": ";
-    public final static byte[] __COLON_B = {(byte)':',(byte)' '};
 
     /* -------------------------------------------------------------- */
     public final static DateCache __dateCache = 
@@ -370,27 +368,6 @@ public class HttpFields extends HashMap
             return null;
         return old.toString();
     }
-    
-    /* -------------------------------------------------------------- */
-    protected void write(OutputStream out)
-    throws IOException
-    {
-        write(out,null);
-    }
-    
-    /* -------------------------------------------------------------- */
-    public String toString()
-    {
-        try
-        {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            write(bos);
-            return bos.toString();
-        }
-        catch(Exception e)
-        {}
-        return null;
-    }
    
     /* -------------------------------------------------------------- */
     /** Get a header as an integer value.
@@ -619,29 +596,48 @@ public class HttpFields extends HashMap
     /* -------------------------------------------------------------- */
     /* Write Extra HTTP headers.
      */
-    protected void write(OutputStream out, HttpFields extra)
+    public void write(Writer writer, HttpFields extra)
         throws IOException
     {
-        // XXX use a UTF8 writer
-        synchronized(out)
+        synchronized(writer)
         {
             int size=_names.size();
             for(int k=0;k<size;k++)
             {
                 String name = (String)_names.get(k);
                 String value = get(name);
-                out.write(name.getBytes());
-                out.write(__COLON_B);
-                out.write(value.getBytes());
-                out.write(__CRLF_B);
+                writer.write(name);
+                writer.write(__COLON);
+                writer.write(value);
+                writer.write(__CRLF);
             }
             if (extra!=null)
-                extra.write(out,null);
+                extra.write(writer,null);
             else
-                out.write(__CRLF_B);
+                writer.write(__CRLF);
         
-            out.flush();
         }
+    }
+    
+    /* -------------------------------------------------------------- */
+    public void write(Writer writer)
+        throws IOException
+    {
+        write(writer,null);
+    }
+    
+    /* -------------------------------------------------------------- */
+    public String toString()
+    {
+        try
+        {
+            StringWriter writer = new StringWriter();
+            write(writer,null);
+            return writer.toString();
+        }
+        catch(Exception e)
+        {}
+        return null;
     }
     
     /* ------------------------------------------------------------ */

@@ -107,10 +107,13 @@ public class HttpRequest extends HttpMessage
         throws IOException
     {
         _state=__MSG_BAD;
+
+        LineInput line_input = (LineInput)in.getRawStream();
         
         // Get start line
         com.mortbay.Util.LineInput$LineBuffer line_buffer
-                =in.readLine(in.__maxLineLength);
+            = line_input.readLineBuffer();
+        
         if (line_buffer==null)
             throw new IOException("EOF");
         if (line_buffer.size==in.__maxLineLength)
@@ -118,7 +121,7 @@ public class HttpRequest extends HttpMessage
         decodeRequestLine(line_buffer.buffer,line_buffer.size);
         
         // Read headers
-        _header.read((LineInput)in.getRawStream());
+        _header.read(line_input);
 
         // Handle version
         if (__HTTP_1_1.equals(_version))
@@ -138,23 +141,22 @@ public class HttpRequest extends HttpMessage
      * @param out Chunkable output stream
      * @exception IOException IO problem
      */
-    public synchronized void writeHeader(OutputStream out)
+    public synchronized void writeHeader(Writer writer)
         throws IOException
     {
         if (_state!=__MSG_EDITABLE)
             throw new IllegalStateException("Not MSG_EDITABLE");
         
         _state=__MSG_BAD;
-        synchronized(out)
+        synchronized(writer)
         {
-            out.write(_method.getBytes());
-            out.write(' ');
-            out.write(_uri.toString().getBytes());
-            out.write(' ');
-            out.write(_version.getBytes());
-            out.write(HttpFields.__CRLF_B);
-            _header.write(out);
-            out.flush();
+            writer.write(_method);
+            writer.write(' ');
+            writer.write(_uri.toString());
+            writer.write(' ');
+            writer.write(_version);
+            writer.write(HttpFields.__CRLF);
+            _header.write(writer);
         }
         _state=__MSG_SENDING;
     }

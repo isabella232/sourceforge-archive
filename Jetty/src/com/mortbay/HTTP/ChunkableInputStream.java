@@ -16,6 +16,10 @@ import java.lang.reflect.*;
  * setChunking(true) is called.  Once chunking is
  * enabled, the raw stream is chunk decoded as per RFC2616.
  *
+ * The "UTF8" encoding is used on underlying LineInput instance for
+ * line based reads from the raw stream.
+ *
+ * @see com.mortbay.Util.LineInput.
  * @version 1.0 Wed Sep 29 1999
  * @author Greg Wilkins (gregw)
  */
@@ -38,8 +42,15 @@ public class ChunkableInputStream extends FilterInputStream
      */
     public ChunkableInputStream( InputStream in)
     {
-        super(new LineInput(in));
-        _realIn=(LineInput)this.in;
+        super(null);
+        try {
+            _realIn= new LineInput(in,0,"UTF8");
+        }
+        catch(UnsupportedEncodingException e)
+        {
+            Code.fail(e);
+        }
+        this.in=_realIn;
     }
     
     /* ------------------------------------------------------------ */
@@ -152,14 +163,14 @@ public class ChunkableInputStream extends FilterInputStream
     /* ------------------------------------------------------------ */
     /** XXX 
      */
-    public com.mortbay.Util.LineInput$LineBuffer readLine(int maxLen)
-        throws IOException,
-               IllegalStateException
-    {
-        if (_chunking || _filters>0)
-            throw new IllegalStateException("Chunking or filters");
-        return _realIn.readLineBuffer(maxLen);
-    }
+//      public com.mortbay.Util.LineInput$LineBuffer readLine(int maxLen)
+//          throws IOException,
+//                 IllegalStateException
+//      {
+//          if (_chunking || _filters>0)
+//              throw new IllegalStateException("Chunking or filters");
+//          return _realIn.readLineBuffer(maxLen);
+//      }
 
     /* ------------------------------------------------------------ */
     public HttpFields getTrailer()

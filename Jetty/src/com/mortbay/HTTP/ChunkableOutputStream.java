@@ -28,9 +28,11 @@ import java.lang.reflect.*;
 public class ChunkableOutputStream extends FilterOutputStream
 {
     /* ------------------------------------------------------------ */
+    final static String
+        __CRLF      = "\015\012",
+        __CHUNK_EOF = "0;\015\012";
     final static byte[]
-        __CRLF_B      ={(byte)'\015',(byte)'\012'},
-        __CHUNK_EOF_B ={(byte)'0',(byte)';',(byte)'\015',(byte)'\012'};
+        __CRLF_B    = {(byte)'\015',(byte)'\012'};
 
     public final static Class[] __filterArg = {java.io.OutputStream.class};
         
@@ -50,12 +52,14 @@ public class ChunkableOutputStream extends FilterOutputStream
     /* ------------------------------------------------------------ */
     OutputStream _realOut;
     Buffer _buffer;
-    byte[] _chunkSize;
+    boolean _chunking;
     HttpFields _trailer;
     boolean _committed;
     boolean _written;
     int _filters;
     ArrayList _observers;
+    OutputStreamWriter _rawWriter;
+    ByteArrayOutputStream _rawWriterBuffer;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -79,6 +83,56 @@ public class ChunkableOutputStream extends FilterOutputStream
     {
         return _realOut;
     }
+    
+    /* ------------------------------------------------------------ */
+    /** Get Writer for the raw stream.
+     * A writer without filters or chunking is returned, which uses
+     * the UTF8 encoding. The converted bytes from this writer will be
+     * writen to the rawStream when writeRawWriter() is called.
+     * These methods allow Character encoded data to be mixed with
+     * raw data on the same stream without excessive buffering or flushes.
+     * @return Raw Writer
+     */
+    public synchronized Writer getRawWriter()
+    {
+        if (_rawWriter==null)
+        {
+            try
+            {
+                _rawWriterBuffer=new ByteArrayOutputStream(1024);
+                _rawWriter=new OutputStreamWriter(_rawWriterBuffer,"UTF8");
+            }
+            catch(IOException e)
+            {
+                Code.warning(e);
+            }
+        }
+        
+        return _rawWriter;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Write the raw writer to the raw stream.
+     * When called any UTF8 converted bytes written to the raw writer,
+     * are writen to the rawStream, but the rawStream is not flushed.
+     *
+     * These methods allow Character encoded data to be mixed with
+     * raw data on the same stream without excessive buffering or flushes.
+     * @exception IOException 
+     */
+    public synchronized void writeRawWriter()
+        throws IOException
+    {
+        if (_rawWriter==null)
+            return;
+        
+        _rawWriter.flush();
+        _rawWriterBuffer.writeTo(_realOut);
+        if (Code.verbose(100))
+            Code.debug("RAW WRITE:\n",_rawWriterBuffer.toString());
+        _rawWriterBuffer.reset();
+    }
+
     
     /* ------------------------------------------------------------ */
     /** Has any data been written to the stream.
@@ -195,7 +249,7 @@ public class ChunkableOutputStream extends FilterOutputStream
         throws IOException
     {
         flush();
-        _chunkSize=new byte[16];
+        _chunking=true;
     }
     
     /* ------------------------------------------------------------ */
@@ -218,13 +272,14 @@ public class ChunkableOutputStream extends FilterOutputStream
         notify(OutputObserver.__CLOSING);
         
         // send last chunk and revert to normal output
-        _realOut.write(__CHUNK_EOF_B);
+        Writer writer = getRawWriter();
+        writer.write(__CHUNK_EOF);
         if (_trailer!=null)
-            _trailer.write(_realOut);
+            _trailer.write(writer);
         else
-            _realOut.write(__CRLF_B);
-        _realOut.flush();
-        _chunkSize=null;
+            writer.write(__CRLF);
+        writeRawWriter();
+        _chunking=false;
         resetStream();
         notify(OutputObserver.__CLOSED);
     }
@@ -250,15 +305,29 @@ public class ChunkableOutputStream extends FilterOutputStream
         _buffer.reset();
         out=_buffer;    
         _filters=0;
+
+        if (_rawWriter!=null)
+        {
+            try
+            {    
+                _rawWriter.flush();
+                _rawWriterBuffer.reset();
+            }
+            catch(IOException e)
+            {
+                Code.warning(e);
+                _rawWriterBuffer=null;
+                _rawWriter=null;
+            }
+        }
     }
-    
         
     /* ------------------------------------------------------------ */
     /** Get chunking mode 
      */
     public boolean isChunking()
     {
-        return _chunkSize!=null;
+        return _chunking;
     }
     
     /* ------------------------------------------------------------ */
@@ -346,17 +415,14 @@ public class ChunkableOutputStream extends FilterOutputStream
             if (!_committed)
                 notify(OutputObserver.__COMMITING);
             
-            if (_chunkSize!=null)
+            if (_chunking)
             {
+                Writer writer=getRawWriter();
                 String size = Integer.toString(_buffer.size(),16);
-                byte[] b = size.getBytes();
-                int i;
-                for (i=0;i<b.length;i++)
-                    _chunkSize[i]=b[i];
-                _chunkSize[i++]=(byte)';';
-                _chunkSize[i++]=__CRLF_B[0];
-                _chunkSize[i++]=__CRLF_B[1];
-                _realOut.write(_chunkSize,0,i);
+                writer.write(size);
+                writer.write(';');
+                writer.write(__CRLF);
+                writeRawWriter();
                 _buffer.writeTo(_realOut);
                 _buffer.reset();
                 _realOut.write(__CRLF_B);

@@ -182,7 +182,15 @@ public class HttpServer
                 while (!request.isHandled() && i2.hasNext())
                 {
                     HttpHandler handler = (HttpHandler)i2.next();
-                    handler.handle(pathSpec,request,response);
+                    if (Code.verbose(9))
+                    {
+                        Code.debug("Try handler ",handler);
+                        handler.handle(pathSpec,request,response);
+                        if (request.isHandled())
+                            Code.debug("Handled by ",handler);
+                    }
+                    else
+                        handler.handle(pathSpec,request,response);
                 }
             }
 

@@ -40,17 +40,17 @@ public class DumpHandler extends NullHandler
         response.setField(HttpFields.__ContentType,
                           HttpFields.__TextHtml);
         ChunkableOutputStream out = response.getOutputStream();
-
-        out.println("<HTML><H1>HTTP Request Dump</H1>");
-        out.println("<PRE>path="+request.getPath()+
+        Writer writer = new OutputStreamWriter(out,"UTF8");
+        writer.write("<HTML><H1>HTTP Request Dump</H1>");
+        writer.write("<PRE>\npath="+request.getPath()+
                     "\nmatch="+
                     PathMap.pathMatch(pathSpec,request.getPath())+
                     "\ninfo="+
                     PathMap.pathInfo(pathSpec,request.getPath())+
-                    "</PRE>");
-        out.println("<H3>Header:</H3><PRE>");
-        out.print(request.toString());
-        out.println("</PRE><H3>Parameters:</H3><PRE>");
+                    "\n</PRE>\n");
+        writer.write("<H3>Header:</H3><PRE>");
+        writer.write(request.toString());
+        writer.write("</PRE>\n<H3>Parameters:</H3>\n<PRE>");
         Set names=request.getParameterNames();
         Iterator iter = names.iterator();
         while(iter.hasNext())
@@ -59,43 +59,46 @@ public class DumpHandler extends NullHandler
             List values=request.getParameterValues(name);
             if (values==null || values.size()==0)
             {
-                out.print(name);
-                out.println("=");
+                writer.write(name);
+                writer.write("=\n");
             }
             else if (values.size()==1)
             {
-                out.print(name);
-                out.print("=");
-                out.println(values.get(0));
+                writer.write(name);
+                writer.write("=");
+                writer.write((String)values.get(0));
+                writer.write("\n");
             }
             else
             {
                 for (int i=0; i<values.size(); i++)
                 {
-                    out.print(name);
-                    out.print("["+i+"]=");
-                    out.println(values.get(i));
+                    writer.write(name);
+                    writer.write("["+i+"]=");
+                    writer.write((String)values.get(i));
+                    writer.write("\n");
                 }
             }
         }
             
-        out.println("</PRE><H3>Content:</H3><PRE>");
+        writer.write("</PRE>\n<H3>Content:</H3>\n<PRE>");
         byte[] buf= new byte[4096];
         int len;
         try{
             InputStream in=request.getInputStream();
             while((len=in.read(buf))>=0)
-                out.write(buf,0,len);
+                writer.write(new String(buf,0,len));
         }
         catch(IOException e)
         {
             Code.ignore(e);
-            out.println(e);
+            writer.write(e.toString());
         }
         
-        out.println("</PRE><H3>Response:</H3><PRE>");
-        out.print(response.toString());
-        out.println("</PRE></HTML>");
+        writer.write("</PRE>\n<H3>Response:</H3>\n<PRE>");
+        writer.write(response.toString());
+        writer.write("</PRE></HTML>");
+        writer.flush();
 
         // You wouldn't normally set a trailer like this, but
         // we don't want to commit the output to force trailers as

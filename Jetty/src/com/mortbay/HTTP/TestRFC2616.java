@@ -82,7 +82,6 @@ public class TestRFC2616
         return out.toByteArray();
     }
     
-    
     /* --------------------------------------------------------------- */
     public static void test()
     {   
@@ -130,10 +129,10 @@ public class TestRFC2616
     public static void test3_6()
     {        
         Test t = new Test("RFC2616 3.6 Transfer Coding");
+        String response=null;
         try
         {
             TestRFC2616 listener = new TestRFC2616();
-            String response;
             int offset=0;
 
             // Chunk once
@@ -230,7 +229,7 @@ public class TestRFC2616
             offset = t.checkContains(response,offset,"HTTP/1.1 200","gzip in")+10;
             offset = t.checkContains(response,offset,"1234567890","gzip in");
 
-
+            
             // output gzip
             offset=0;
             byte[] rbytes=listener.getResponses(("GET /R1?gzip HTTP/1.1\n"+
@@ -250,12 +249,13 @@ public class TestRFC2616
             IO.copy(gin,bout3);
             response=new String(bout3.toByteArray());
             t.checkContains(response,"<H3>","gzip out");
-            
         }
         catch(Exception e)
         {
             Code.warning(e);
             t.check(false,e.toString());
+            if (response!=null)
+                Code.warning(response);
         }
     }
    
@@ -347,18 +347,18 @@ public class TestRFC2616
                                            "123456");
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 200 OK","3. ignore c-l")+10;
+                                   "HTTP/1.1 200 OK","3. ignore c-l")+1;
             offset=t.checkContains(response,offset,
-                                   "/R1","3. ignore c-l")+3;
+                                   "/R1","3. ignore c-l")+1;
             offset=t.checkContains(response,offset,
-                                   "123456","3. ignore c-l")+6;
+                                   "123456","3. ignore c-l")+1;
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 200 OK","3. ignore c-l")+10;
+                                   "HTTP/1.1 200 OK","3. ignore c-l")+1;
             offset=t.checkContains(response,offset,
-                                   "/R2","3. content-length")+3;
+                                   "/R2","3. content-length")+1;
             offset=t.checkContains(response,offset,
-                                   "123456","3. content-length")+6;
-
+                                   "123456","3. content-length")+1;
+            
             // No content length
             offset=0;
             response=listener.getResponses("GET /R2 HTTP/1.1\n"+
@@ -446,6 +446,11 @@ public class TestRFC2616
         Test t = new Test("RFC2616 8.2 Transmission");
         try
         {
+            // Suppress EOF warnings. Premature EOF used to trigger
+            // sending of 100-Continue.
+            // This is not a very good way of doingit, but ...
+            Code.setSuppressWarnings(!Code.debug());
+            
             TestRFC2616 listener = new TestRFC2616();
             String response;
             int offset=0;
@@ -472,7 +477,7 @@ public class TestRFC2616
                                            "\n");
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 400 Bad","8.2.3 no expect no 100")+1;
+                                   "HTTP/1.1 200","8.2.3 no expect no 100")+1;
             t.checkEquals(response.indexOf("HTTP/1.1 100"),-1,
                           "8.2.3 no expect no 100");
 
@@ -505,7 +510,7 @@ public class TestRFC2616
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 100 Continue","8.2.3 expect 100")+1;
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 400 Bad","8.2.3 expect 100")+1;
+                                   "HTTP/1.1 200","8.2.3 expect 100")+1;
             
             // No Expect PUT
             offset=0;
@@ -518,7 +523,7 @@ public class TestRFC2616
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 100 Continue","8.2.3 RFC2068")+1;
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 400 Bad","8.2.3 RFC2068")+1;
+                                   "HTTP/1.1 200","8.2.3 RFC2068")+1;
             // No Expect PUT
             offset=0;
             response=listener.getResponses("POST /R1 HTTP/1.1\n"+
@@ -530,12 +535,15 @@ public class TestRFC2616
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 100 Continue","8.2.3 RFC2068")+1;
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.1 400 Bad","8.2.3 RFC2068")+1;
+                                   "HTTP/1.1 200","8.2.3 RFC2068")+1;
         }
         catch(Exception e)
         {
             Code.warning(e);
             t.check(false,e.toString());
+        }
+        finally{
+            Code.setSuppressWarnings(Code.debug());
         }
     }
     

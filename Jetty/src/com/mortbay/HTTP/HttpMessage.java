@@ -403,25 +403,15 @@ abstract public class HttpMessage
      */
     public String getCharacterEncoding()
     {
-        // XXX simplify
-        String encoding = _header.get(HttpFields.__ContentType);
-        if (encoding==null || encoding.length()==0)
+        String s = _header.get(HttpFields.__ContentType);
+        try {
+            int i1 = s.indexOf("charset=",s.indexOf(';')) + 8;
+            int i2 = s.indexOf(' ',i1);
+            return (0 < i2) ? s.substring(i1,i2) : s.substring(i1);
+        }
+        catch (Exception e) {
             return "ISO-8859-1";
-        
-        int i=encoding.indexOf(';');
-        if (i<0)
-            return "ISO-8859-1";
-        
-        i=encoding.indexOf("charset=",i);
-        if (i<0 || i+8>=encoding.length())
-            return "ISO-8859-1";
-            
-        encoding=encoding.substring(i+8);
-        i=encoding.indexOf(' ');
-        if (i>0)
-            encoding=encoding.substring(0,i);
-            
-        return encoding;
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -439,10 +429,10 @@ abstract public class HttpMessage
     }
 
     /* ------------------------------------------------------------ */
-    /** XXX 
-     * @param out 
+    /** Write the message header
+     * @param writer
      */
-    abstract void writeHeader(OutputStream out)
+    abstract void writeHeader(Writer writer)
         throws IOException;
     
     /* ------------------------------------------------------------ */
@@ -452,12 +442,12 @@ abstract public class HttpMessage
      */
     public synchronized String toString()
     {
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        StringWriter writer = new StringWriter();
 
         int save_state=_state;
         try{
             _state=__MSG_EDITABLE;
-            writeHeader(bout);
+            writeHeader(writer);
         }
         catch(IOException e)
         {
@@ -467,11 +457,12 @@ abstract public class HttpMessage
         {
             _state=save_state;
         }
-        return bout.toString();
+        return writer.toString();
     }
 
     /* ------------------------------------------------------------ */
-    /** XXX 
+    /** Commit the message.
+     * Take whatever actions possible to move the message to the SENT state.
      */
     public synchronized void commit()
         throws IOException, IllegalStateException
@@ -482,7 +473,10 @@ abstract public class HttpMessage
         switch(_state)
         {
           case __MSG_EDITABLE:
-              writeHeader(out.getRawStream());
+              Writer writer = out.getRawWriter();
+              writeHeader(writer);
+              out.writeRawWriter();
+              out.flush();
               break;
           case __MSG_BAD:
               throw new IllegalStateException("BAD");
@@ -496,6 +490,9 @@ abstract public class HttpMessage
         _state=__MSG_SENT;
     }
 }
+
+
+
 
 
 

@@ -32,7 +32,6 @@ public class HttpConnection
     private ChunkableOutputStream _outputStream;
     private boolean _persistent;
     private boolean _close;
-    private ByteArrayOutputStream _headerBuffer=new ByteArrayOutputStream(512);
     private String _version;
     private boolean _http1_1;
     private boolean _http1_0;
@@ -612,9 +611,8 @@ public class HttpConnection
               Code.debug("notify COMMITING");
               // XXX Unchunked 1.1 requests with content length may
               // may be made persistent here.
-              _headerBuffer.reset();
-              _response.writeHeader(_headerBuffer);
-              _headerBuffer.writeTo(_outputStream.getRawStream());
+              _response.writeHeader(_outputStream.getRawWriter());
+              _outputStream.writeRawWriter();
               break;
               
           case OutputObserver.__COMMITED:
