@@ -100,6 +100,10 @@ public class Manager
   protected Store _store = null;
 
   private boolean _secureCookies = false;
+  private boolean _httpOnly = false;
+
+
+
   public Store
     getStore()
   {
@@ -717,5 +721,23 @@ public class Manager
       {
         _secureCookies = secureCookies;
       }
+      /* ------------------------------------------------------------ */
+      /**
+       * @return Returns the httpOnly.
+       */
+      public boolean getHttpOnly()
+      {
+         return _httpOnly;
+      }
+                                                                                                                         
+     /* ------------------------------------------------------------ */
+     /**
+      * @param httpOnly The httpOnly to set.
+      */
+     public void setHttpOnly(boolean httpOnly)
+     {
+        _httpOnly = httpOnly;
+     }
+
 
 }
