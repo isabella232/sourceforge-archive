@@ -71,11 +71,11 @@ public class HttpContext implements LifeCycle
         }
 
         ResourceBundle encoding = ResourceBundle.getBundle("org/mortbay/http/encoding");
-        i = mime.getKeys();
+        i = encoding.getKeys();
         while(i.hasMoreElements())
         {
             String type = (String)i.nextElement();
-            __encodings.put(type,mime.getString(type));
+            __encodings.put(type,encoding.getString(type));
         }
     }
 

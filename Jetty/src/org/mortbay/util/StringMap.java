@@ -41,21 +41,8 @@ public class StringMap extends AbstractMap
         Node(char c)
         {
             _char=c;
-            if (c>='A'&&c<='Z')
-            {
-                _uchar=c;
-                _lchar=(char)(c+'a'-'A');
-            }
-            else if (c>='a'&&c<='z')
-            {
-                _uchar=(char)(c+'A'-'a');
-                _lchar=c;
-            }
-            else
-            {
-                _uchar=c;
-                _lchar=c;
-            }
+            _uchar=Character.toUpperCase(c);
+            _lchar=Character.toLowerCase(c);
         }
         public Object getKey(){return _key;}
         public Object getValue(){return _value;}
