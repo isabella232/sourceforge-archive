@@ -107,8 +107,8 @@ public class HttpContext implements LifeCycle,
     private List _handlers=new ArrayList(3);
     private Map _attributes = new HashMap(3);
     private boolean _redirectNullPath=false;
-    private int _maxCachedFileSize =400*1024;
-    private int _maxCacheSize =4*1024*1024;
+    private int _maxCachedFileSize =100*1024;
+    private int _maxCacheSize =1024*1024;
     private boolean _statsOn=false;
     private PermissionCollection _permissions;
     private boolean _classLoaderJava2Compliant;
@@ -122,6 +122,7 @@ public class HttpContext implements LifeCycle,
     private String _realmName;
     private PathMap _constraintMap=new PathMap();
     private Authenticator _authenticator;
+    private RequestLog _requestLog;
 
     private Resource _resourceBase;
     private Map _mimeMap;
@@ -1791,6 +1792,9 @@ public class HttpContext implements LifeCycle,
             if (_loader!=null)
                 thread.setContextClassLoader(_loader);
 
+            if (_requestLog!=null)
+                _requestLog.start();
+            
             startHandlers();
         }
         finally
@@ -1881,6 +1885,9 @@ public class HttpContext implements LifeCycle,
                         catch(Exception e){Code.warning(e);}
                     }
                 }
+                
+                if (_requestLog!=null)
+                    _requestLog.stop();
             }
             finally
             {
@@ -1936,6 +1943,20 @@ public class HttpContext implements LifeCycle,
     }
 
 
+    /* ------------------------------------------------------------ */
+    /** Set the request log.
+     * @param log RequestLog to use.
+     */
+    public void setRequestLog(RequestLog log)
+    {
+        _requestLog=log;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public RequestLog getRequestLog()
+    {
+        return _requestLog;
+    }
 
     /* ------------------------------------------------------------ */
     /** True set statistics recording on for this context.
@@ -2067,7 +2088,11 @@ public class HttpContext implements LifeCycle,
             }
         }
 
-        if (_httpServer!=null)
+        if (_requestLog!=null &&
+            request!=null &&
+            response!=null)
+            _requestLog.log(request,response,length);
+        else if (_httpServer!=null)
             _httpServer.log(request,response,length);
     }
 

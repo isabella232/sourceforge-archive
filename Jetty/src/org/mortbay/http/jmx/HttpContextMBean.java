@@ -11,6 +11,8 @@ import javax.management.ObjectName;
 import org.mortbay.http.HttpContext;
 import org.mortbay.util.Code;
 import org.mortbay.util.jmx.LifeCycleMBean;
+import java.util.HashMap;
+
 
 /* ------------------------------------------------------------ */
 /**
@@ -21,6 +23,7 @@ import org.mortbay.util.jmx.LifeCycleMBean;
 public class HttpContextMBean extends LifeCycleMBean
 {
     private HttpContext _httpContext;
+    private HashMap _rlMap=new HashMap(3);
 
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -40,7 +43,8 @@ public class HttpContextMBean extends LifeCycleMBean
         defineAttribute("contextPath");
 
         defineAttribute("handlers",READ_ONLY,ON_MBEAN);
-
+        defineAttribute("requestLog",READ_ONLY,ON_MBEAN);
+        
         defineAttribute("classPath");
 
         defineAttribute("realm");
@@ -67,6 +71,7 @@ public class HttpContextMBean extends LifeCycleMBean
         defineAttribute("mimeMap");
         defineOperation("setMimeMapping",new String[] {STRING,STRING},IMPACT_ACTION);
 
+        
         defineAttribute("statsOn");
         defineAttribute("statsOnMs");
         defineOperation("statsReset",IMPACT_ACTION);
@@ -99,6 +104,7 @@ public class HttpContextMBean extends LifeCycleMBean
         defineOperation("getAttributeNames",NO_PARAMS,IMPACT_INFO);
         defineOperation("removeAttribute",new String[] {STRING},IMPACT_ACTION);
 
+        defineOperation("addHandler",new String[] {"org.mortbay.http.HttpHandler"},IMPACT_ACTION);
         defineOperation("addHandler",new String[] {INT,"org.mortbay.http.HttpHandler"},IMPACT_ACTION);
         defineOperation("removeHandler",new String[] {INT},IMPACT_ACTION);
 
@@ -138,6 +144,19 @@ public class HttpContextMBean extends LifeCycleMBean
     public ObjectName[] getHandlers()
     {
         return getComponentMBeans(_httpContext.getHandlers(),null);
+    }
+
+    /* ------------------------------------------------------------ */
+    public ObjectName getRequestLog()
+    {
+        Object o = _httpContext.getRequestLog();
+        if (o==null)
+            return null;
+        
+        ObjectName[] on=getComponentMBeans(new Object[]{o},_rlMap);
+        if (on.length>0)
+            return on[0];
+        return null;
     }
 
 }

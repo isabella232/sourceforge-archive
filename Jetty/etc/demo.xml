@@ -204,6 +204,19 @@
   <Call name="addContext">
     <Arg>/demo/*</Arg>
 
+    <!-- Uncomment for Context specific request log
+    <Set name="RequestLog">
+      <New class="org.mortbay.http.NCSARequestLog">
+        <Set name="filename"><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.demo.request.log</Set>
+        <Set name="buffered">false</Set>
+        <Set name="retainDays">90</Set>
+        <Set name="append">true</Set>
+        <Set name="extended">true</Set>
+        <Set name="LogTimeZone">GMT</Set>
+      </New>
+    </Set>
+    -->
+
     <Call name="addHandler">
       <Arg><New class="org.mortbay.http.handler.ForwardHandler">
         <Call name="addForward"><Arg>/forward/*</Arg><Arg>/dump</Arg></Call>
