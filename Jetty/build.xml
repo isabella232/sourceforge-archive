@@ -12,8 +12,8 @@
 <project name="Jetty HTTP Server" default="webapps" basedir=".">
 
   <!-- ==================================================================== -->
-  <property name="RELEASE.MAJOR"  value="4.1" />
-  <property name="RELEASE.MAJOR.MINOR"  value="4.1.1" />
+  <property name="RELEASE.MAJOR"  value="4.2" />
+  <property name="RELEASE.MAJOR.MINOR"  value="4.2.0pre0" />
 
 
   <!-- ==================================================================== -->
