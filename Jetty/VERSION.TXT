@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Extract WAR files to standard temp directory
  + URI uses UTF8 for % encodings.
  + Added BlueRibbon campaign.
  + RequestDispatcher uses cached resources for include

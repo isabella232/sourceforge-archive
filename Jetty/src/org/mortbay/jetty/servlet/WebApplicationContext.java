@@ -205,8 +205,8 @@ public class WebApplicationContext extends ServletHttpContext
             
             // Expand
             if (_extract && _webApp instanceof JarResource)
-            {
-                File tempDir=File.createTempFile("Jetty-",".war");
+            {                
+                File tempDir=new File(getTempDirectory(),"webapp");
                 if (tempDir.exists())
                     tempDir.delete();
                 tempDir.mkdir();
