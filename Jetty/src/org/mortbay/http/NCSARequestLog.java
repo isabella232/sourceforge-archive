@@ -30,7 +30,7 @@ public class NCSARequestLog implements RequestLog
     private String _filename;
     private boolean _extended;
     private boolean _append;
-    private boolean _buffered=true;
+    private boolean _buffered;
     private int _retainDays;
     private boolean _closeOut;
     private String _logDateFormat="dd/MMM/yyyy:HH:mm:ss ZZZ";
@@ -49,9 +49,7 @@ public class NCSARequestLog implements RequestLog
     public NCSARequestLog()
         throws IOException
     {
-        _extended=true;
-        _append=true;
-        _retainDays=31;
+        this(null);
     }
     
     /* ------------------------------------------------------------ */
@@ -64,10 +62,12 @@ public class NCSARequestLog implements RequestLog
     public NCSARequestLog(String filename)
         throws IOException
     {
-        this();
+        _extended=true;
+        _append=true;
+        _retainDays=31;
         setFilename(filename);
+        _buffered=(filename!=null);
     }
-
 
     /* ------------------------------------------------------------ */
     public void setFilename(String filename)
