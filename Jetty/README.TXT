@@ -107,8 +107,7 @@ You can run ant for the following targets:
     ant test    - Build and run tests
     ant demo    - Build and run the demo
     ant clean   - Remove generated files
-    ant release - Build everything and cleanup a bit
-  
+
 
 Test Harnesses
 ==============

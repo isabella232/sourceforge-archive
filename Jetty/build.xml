@@ -31,7 +31,7 @@ release     - Cleanup for release
   basedir=".">
   
   <property name="app.name"       value="Jetty3" />
-  <property name="version"        value="3.0.B04" />
+  <property name="version"        value="3.0.B05" />
   
   <property name="src.dir"        value="${basedir}/src" />
   <property name="webapps"        value="${basedir}/webapps"/>
@@ -205,13 +205,9 @@ release     - Cleanup for release
           />
   </target>
   
-  <target name="release" depends="prepare,libs,webapp,javadoc">
-    <deltree dir="${classes}"/>
-  </target>
-
   <target name="all" depends="prepare,libs,webapp,javadoc,test"/>
   
-  <target name="run.demo" depends="webapp" >
+  <target name="demo" depends="webapp" >
     <java classname="com.mortbay.Jetty.Server"
           args="etc/demo.xml"
           classpath="${libs}"
@@ -231,8 +227,8 @@ release     - Cleanup for release
     <delete  file="${tarfile}.gz"/>
     <gzip zipfile="${tarfile}.gz" src="${tarfile}" />
     <delete  file="${tarfile}"/>
-</target>
-  
+  </target>
+
 </project>
 
 
