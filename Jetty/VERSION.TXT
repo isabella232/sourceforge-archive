@@ -1,6 +1,6 @@
 Jetty Versions
 --------------
-
+ + Moved mime types and encodings to property bundles.
  + RequestDispatch.forward() uses normal HandlerContext.handle() path if possible.
  + Cleaned up destroy handling of listeners and contexts.
 

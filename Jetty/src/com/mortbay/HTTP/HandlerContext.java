@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.StringTokenizer;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.security.PermissionCollection;
 import java.security.Permissions;
 import java.security.Permission;
@@ -57,162 +58,27 @@ import java.security.Permission;
  */
 public class HandlerContext implements LifeCycle
 {
-    /* ------------------------------------------------------------ */
-    final static String[] __mimeType =
-    {
-        "default","application/octet-stream",
-        "ai","application/postscript",
-        "aif","audio/x-aiff",
-        "aifc","audio/x-aiff",
-        "aiff","audio/x-aiff",
-        "asc","text/plain",
-        "au","audio/basic",
-        "avi","video/x-msvideo",
-        "bcpio","application/x-bcpio",
-        "bin","application/octet-stream",
-        "cdf","application/x-netcdf",
-        "class","application/java-vm",
-        "cpio","application/x-cpio",
-        "cpt","application/mac-compactpro",
-        "csh","application/x-csh",
-        "css","text/css",
-        "dcr","application/x-director",
-        "dir","application/x-director",
-        "dms","application/octet-stream",
-        "doc","application/msword",
-        "dvi","application/x-dvi",
-        "dxr","application/x-director",
-        "eps","application/postscript",
-        "etx","text/x-setext",
-        "exe","application/octet-stream",
-        "ez","application/andrew-inset",
-        "gif","image/gif",
-        "gtar","application/x-gtar",
-        "gz","application/gzip",
-        "gzip","application/gzip",
-        "hdf","application/x-hdf",
-        "hqx","application/mac-binhex40",
-        "html","text/html",
-        "htm","text/html",
-        "ice","x-conference/x-cooltalk",
-        "ief","image/ief",
-        "iges","model/iges",
-        "igs","model/iges",
-        "java","text/plain",
-        "jpeg","image/jpeg",
-        "jpe","image/jpeg",
-        "jpg","image/jpeg",
-        "js","application/x-javascript",
-        "jsp","text/plain",
-        "kar","audio/midi",
-        "latex","application/x-latex",
-        "lha","application/octet-stream",
-        "lzh","application/octet-stream",
-        "man","application/x-troff-man",
-        "me","application/x-troff-me",
-        "mesh","model/mesh",
-        "mid","audio/midi",
-        "midi","audio/midi",
-        "mif","application/vnd.mif",
-        "movie","video/x-sgi-movie",
-        "mov","video/quicktime",
-        "mp2","audio/mpeg",
-        "mp3","audio/mpeg",
-        "mpeg","video/mpeg",
-        "mpe","video/mpeg",
-        "mpga","audio/mpeg",
-        "mpg","video/mpeg",
-        "ms","application/x-troff-ms",
-        "msh","model/mesh",
-        "nc","application/x-netcdf",
-        "oda","application/oda",
-        "pbm","image/x-portable-bitmap",
-        "pdb","chemical/x-pdb",
-        "pdf","application/pdf",
-        "pgm","image/x-portable-graymap",
-        "pgn","application/x-chess-pgn",
-        "png","image/png",
-        "pnm","image/x-portable-anymap",
-        "ppm","image/x-portable-pixmap",
-        "ppt","application/vnd.ms-powerpoint",
-        "ps","application/postscript",
-        "qt","video/quicktime",
-        "ra","audio/x-pn-realaudio",
-        "ra","audio/x-realaudio",
-        "ram","audio/x-pn-realaudio",
-        "ras","image/x-cmu-raster",
-        "rgb","image/x-rgb",
-        "rm","audio/x-pn-realaudio",
-        "roff","application/x-troff",
-        "rpm","application/x-rpm",
-        "rpm","audio/x-pn-realaudio",
-        "rtf","application/rtf",
-        "rtf","text/rtf",
-        "rtx","text/richtext",
-        "sgml","text/sgml",
-        "sgm","text/sgml",
-        "sh","application/x-sh",
-        "shar","application/x-shar",
-        "silo","model/mesh",
-        "sit","application/x-stuffit",
-        "skd","application/x-koan",
-        "skm","application/x-koan",
-        "skp","application/x-koan",
-        "skt","application/x-koan",
-        "smi","application/smil",
-        "smil","application/smil",
-        "snd","audio/basic",
-        "spl","application/x-futuresplash",
-        "src","application/x-wais-source",
-        "sv4cpio","application/x-sv4cpio",
-        "sv4crc","application/x-sv4crc",
-        "swf","application/x-shockwave-flash",
-        "t","application/x-troff",
-        "tar","application/x-tar",
-        "tar.gz","application/x-gtar",
-        "tcl","application/x-tcl",
-        "tex","application/x-tex",
-        "texi","application/x-texinfo",
-        "texinfo","application/x-texinfo",
-        "tgz","application/x-gtar",
-        "tiff","image/tiff",
-        "tif","image/tiff",
-        "tr","application/x-troff",
-        "tsv","text/tab-separated-values",
-        "txt","text/plain",
-        "ustar","application/x-ustar",
-        "vcd","application/x-cdlink",
-        "vrml","model/vrml",
-        "wav","audio/x-wav",
-        "wbmp","image/vnd.wap.wbmp",
-        "wml","text/vnd.wap.wml",
-        "wmlc","application/vnd.wap.wmlc",
-        "wmls","text/vnd.wap.wmlscript",
-        "wmlsc","application/vnd.wap.wmlscriptc",
-        "wtls-ca-certificate","application/vnd.wap.wtls-ca-certificate",
-        "wrl","model/vrml",
-        "xbm","image/x-xbitmap",
-        "xml","text/xml",
-        "xpm","image/x-xpixmap",
-        "xwd","image/x-xwindowdump",
-        "xyz","chemical/x-pdb",
-        "zip","application/zip",
-        "z","application/compress"
-    };
     
     private final static Map __dftMimeMap = new HashMap();
+    private final static Map __encodings = new HashMap();
     static
-    {        
-        for (int i=0; i<__mimeType.length; i+=2)
-            __dftMimeMap.put(__mimeType[i],__mimeType[i+1]);
-    }
-    
-    final static String[] __encodings =
     {
-        "text/html",   StringUtil.__ISO_8859_1,
-        "text/plain",  "US-ASCII",
-        "text/xml",    "UTF-8",
-    };
+        ResourceBundle mime = ResourceBundle.getBundle("com/mortbay/HTTP/mime");
+        Enumeration i = mime.getKeys();
+        while(i.hasMoreElements())
+        {
+            String ext = (String)i.nextElement();
+            __dftMimeMap.put(ext,mime.getString(ext));
+        }
+
+        ResourceBundle encoding = ResourceBundle.getBundle("com/mortbay/HTTP/encoding");
+        i = mime.getKeys();
+        while(i.hasMoreElements())
+        {
+            String type = (String)i.nextElement();
+            __encodings.put(type,mime.getString(type));
+        }
+    }
 
     /* ------------------------------------------------------------ */
     private HttpServer _httpServer;
@@ -888,11 +754,7 @@ public class HandlerContext implements LifeCycle
     public synchronized Map getEncodingMap()
     {
         if (_encodingMap==null)
-        {
-            _encodingMap = new HashMap((__encodings.length*3)/4);
-            for (int i=0; i<__encodings.length; i+=2)
-                _encodingMap.put(__encodings[i],__encodings[i+1]);
-        }
+            _encodingMap=Collections.unmodifiableMap(__encodings);
         return _encodingMap;
     }
     
