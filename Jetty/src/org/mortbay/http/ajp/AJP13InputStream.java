@@ -149,7 +149,7 @@ public class AJP13InputStream extends InputStream
         if (_closed)
             return;
         
-        if (_gotFirst)
+        if (_gotFirst || _in.available()==0) 
             _getBodyChunk.write(_out);
         _gotFirst=true;
 
@@ -162,8 +162,6 @@ public class AJP13InputStream extends InputStream
         else if(_packet.getInt()>_packet.getBufferSize())
             throw new IOException("AJP Protocol error");
     }
-    
-    
     
     /* ------------------------------------------------------------ */
     public long skip(long n)
