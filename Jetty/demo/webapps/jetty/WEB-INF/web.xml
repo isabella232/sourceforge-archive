@@ -283,14 +283,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
 
   <security-constraint>
     <web-resource-collection>
-      <web-resource-name>ForbiddenXXXX</web-resource-name>
-      <url-pattern>/auth/*</url-pattern>
-    </web-resource-collection>
-    <auth-constraint/>
-  </security-constraint>
-
-  <security-constraint>
-    <web-resource-collection>
       <web-resource-name>Forbidden</web-resource-name>
       <url-pattern>/auth/noaccess/*</url-pattern>
     </web-resource-collection>
