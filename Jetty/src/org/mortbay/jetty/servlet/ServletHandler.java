@@ -110,6 +110,18 @@ public class ServletHandler
             servletHttpContext.setServletContext(_context);
         }
     }
+
+    /* ------------------------------------------------------------ */
+    public void setSessionManager(SessionManager sm)
+    {
+        _sessionManager=sm;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public SessionManager getSessionManager()
+    {
+        return _sessionManager;
+    }
     
     /* ------------------------------------------------------------ */
     public ServletContext getServletContext() { return _context; }
