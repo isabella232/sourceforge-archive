@@ -293,7 +293,7 @@ public class ServletResponse implements HttpServletResponse
         // should not encode if cookies in evidence
         if (_servletRequest==null ||
             _servletRequest.isRequestedSessionIdFromCookie() &&
-            _servletRequest.getContext().getServletHandler().isUsingCookies())
+            _servletRequest.getServletHandler().isUsingCookies())
             return url;        
         
         // get session;
@@ -510,7 +510,7 @@ public class ServletResponse implements HttpServletResponse
             {
                 /* implementation of educated defaults */
                 String mimeType = _httpResponse.getMimeType();                
-                encoding = _servletRequest.getContext().getServletHandler()
+                encoding = _servletRequest.getServletHandler()
                     .getHandlerContext().getEncodingByMimeType(mimeType);
             }
             if (encoding==null)

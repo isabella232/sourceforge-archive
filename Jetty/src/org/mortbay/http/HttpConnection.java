@@ -844,7 +844,7 @@ public class HttpConnection
             if (_statsOn)
             {
                 _requests++;
-                _tmpTime=System.currentTimeMillis();
+                _tmpTime=_request.getTimeStamp();
                 _reqTime=_tmpTime;
                 _httpServer.statsGotRequest();
             }
@@ -869,7 +869,7 @@ public class HttpConnection
             // Common fields on the response
             // XXX could be done faster?
             _response.setVersion(_version);
-            _response.setCurrentTime(HttpFields.__Date);
+            _response.setDateField(HttpFields.__Date,_request.getTimeStamp());
             _response.setField(HttpFields.__Server,Version.__VersionDetail);
             _response.setField(HttpFields.__ServletEngine,Version.__ServletEngine);
             

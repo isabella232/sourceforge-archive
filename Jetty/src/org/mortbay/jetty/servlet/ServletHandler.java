@@ -15,11 +15,15 @@ import org.mortbay.http.PathMap;
 import org.mortbay.http.handler.SecurityHandler;
 import org.mortbay.http.UserRealm;
 import org.mortbay.http.UserPrincipal;
+import org.mortbay.http.Version;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.Log;
+import org.mortbay.util.Frame;
+import org.mortbay.util.LogSink;
 import org.mortbay.util.URI;
 import org.mortbay.util.Resource;
+import org.mortbay.util.MultiException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -28,8 +32,11 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,9 +44,12 @@ import java.util.StringTokenizer;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
+import javax.servlet.RequestDispatcher;
 import java.security.Principal;
 
 
@@ -56,6 +66,9 @@ public class ServletHandler
     implements SecurityHandler.FormAuthenticator
 {
     /* ------------------------------------------------------------ */
+    private static final boolean __Slosh2Slash=File.separatorChar=='\\';
+
+    /* ------------------------------------------------------------ */
     public final static String __SERVLET_REQUEST="org.mortbay.jetty.Request";
     public final static String __SERVLET_HOLDER="org.mortbay.jetty.Holder";
     public final static String __J_URI="org.mortbay.jetty.URI";
@@ -63,25 +76,28 @@ public class ServletHandler
     
     /* ------------------------------------------------------------ */
     private PathMap _servletMap=new PathMap();
-    
     private Map _nameMap=new HashMap();
+    private HandlerContext _handlerContext;
     private Context _context;
     private ClassLoader _loader;
     private String _dynamicServletPathSpec;
     private Map _dynamicInitParams ;
     private boolean _serveDynamicSystemServlets=false;
     private boolean _usingCookies=true;
+    private LogSink _logSink;
+    private SessionManager _sessionManager;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
     public ServletHandler()
     {
-        _context = new Context(this);
+        _context=new Context();
+        _sessionManager = new HashSessionManager(this);
     }
     
     /* ------------------------------------------------------------ */
-    public Context getContext() { return _context; }
+    public ServletContext getServletContext() { return _context; }
 
     /* ------------------------------------------------------------ */
     public PathMap getServletMap() { return _servletMap; }
@@ -146,17 +162,6 @@ public class ServletHandler
     }
     
     /* ------------------------------------------------------------ */
-    /** Not Supported. 
-     * @param autoReload 
-     */
-    public void setAutoReload(boolean autoReload)
-    {
-        if (autoReload==true)
-            Code.warning("AutoReload is no longer supported!\n"+
-                         "It may be resurrected once the URL libraries fully support lastModified");
-    }
-    
-    /* ------------------------------------------------------------ */
     public ClassLoader getClassLoader()
     {
         return _loader;
@@ -172,6 +177,18 @@ public class ServletHandler
     }
 
     /* ------------------------------------------------------------ */
+    public void setLogSink(LogSink logSink)
+    {
+        _logSink=logSink;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public LogSink getLogSink()
+    {
+        return _logSink;
+    }
+    
+    /* ------------------------------------------------------------ */
     public synchronized boolean isStarted()
     {
         return super.isStarted();
@@ -180,8 +197,10 @@ public class ServletHandler
     /* ----------------------------------------------------------------- */
     public synchronized void start()
         throws Exception
-    {        
-        _context.setHandlerContext(getHandlerContext());
+    {
+        _handlerContext=getHandlerContext();
+        
+        _sessionManager.start();
         
         // Initialize classloader
         _loader=getHandlerContext().getClassLoader();
@@ -189,6 +208,8 @@ public class ServletHandler
         // start the handler - protected by synchronization until
         // end of the call.
         super.start();
+
+        MultiException mx = new MultiException();
         
         // Sort and Initialize servlets
         ServletHolder holders [] = (ServletHolder [])
@@ -198,67 +219,64 @@ public class ServletHandler
         {
             ServletHolder holder = holders [i];
             
-            if (holder.isInitOnStartup())
-                holder.initialize();
-            else
+            try{holder.start();}
+            catch(Exception e)
             {
-                try
-                {
-                    holder.initializeClass();
-                }
-                catch(UnavailableException e)
-                {
-                    Code.warning(e);
-                }
+                Code.debug(e);
+                mx.add(e);
             }
-        }        
+        } 
+        mx.ifExceptionThrow();       
     }   
     
     /* ----------------------------------------------------------------- */
     public synchronized void stop()
+        throws InterruptedException
     {
-        _loader=null;
         // Stop servlets
+        Iterator i = _servletMap.values().iterator();
+        while (i.hasNext())
+        {
+            ServletHolder holder = (ServletHolder)i.next();
+            holder.stop();
+        }      
+        _sessionManager.stop();
+        _loader=null;
+        _context=null;
+        _handlerContext=null;
+        super.stop();
+    }
+    
+    /* ----------------------------------------------------------------- */
+    public synchronized void destroy()
+    {
+        // Destroy servlets
         Iterator i = _servletMap.values().iterator();
         while (i.hasNext())
         {
             ServletHolder holder = (ServletHolder)i.next();
             holder.destroy();
         }
-        if (_context!=null)
-            _context.stop();
-        super.stop();
+
+        _sessionManager.destroy();
+        _sessionManager=null;
+        _loader=null;
+        _context=null;
+        _handlerContext=null;
+        super.destroy();
     }
     
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @param path 
-     * @param servletClass 
-     */
     public ServletHolder addServlet(String name,
                                     String pathSpec,
-                                    String servletClass)
-    {
-        ServletHolder holder = addServlet(pathSpec,servletClass);
-        holder.setServletName(name);
-        return holder;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @param path 
-     * @param servletClass 
-     */
-    public ServletHolder addServlet(String pathSpec,
-                                    String servletClass)
+                                    String servletClass,
+                                    String path)
     {
         try
         {
-            ServletHolder holder =
-                newServletHolder(servletClass);
+            ServletHolder holder = new ServletHolder(this,name,servletClass,null);
             addHolder(pathSpec,holder);
-            
             return holder;
         }
         catch(Exception e)
@@ -266,6 +284,21 @@ public class ServletHandler
             Code.warning(e);
             throw new IllegalArgumentException(e.toString());
         }
+    }
+    
+    /* ------------------------------------------------------------ */
+    public ServletHolder addServlet(String name,
+                                    String pathSpec,
+                                    String servletClass)
+    {
+        return addServlet(name,pathSpec,servletClass,null);
+    }
+
+    /* ------------------------------------------------------------ */
+    public ServletHolder addServlet(String pathSpec,
+                                    String servletClass)
+    {
+        return addServlet(servletClass,pathSpec,servletClass,null);
     }
 
     /* ------------------------------------------------------------ */
@@ -283,16 +316,16 @@ public class ServletHandler
     {
         try
         {
-            if (isStarted())
-                holder.initializeClass();
+            if (isStarted() && !holder.isStarted())
+                holder.start();
             _servletMap.put(pathSpec,holder);
+            _nameMap.put(holder.getName(),holder);
         }
-        catch(UnavailableException e)
+        catch(Exception e)
         {
             Code.warning(e);
         }
     }
-
 
     /* ------------------------------------------------------------ */
     /** Get or create a ServletRequest.
@@ -311,7 +344,7 @@ public class ServletHandler
         
         if (servletRequest==null)
         {
-            servletRequest  = new ServletRequest(_context,httpRequest);
+            servletRequest  = new ServletRequest(this,httpRequest);
             httpRequest.setAttribute(ServletHandler.__SERVLET_REQUEST,servletRequest);
             ServletResponse servletResponse =
                 new ServletResponse(servletRequest,httpResponse);
@@ -319,6 +352,24 @@ public class ServletHandler
         return servletRequest;
     }
     
+
+    /* ------------------------------------------------------------ */
+    HttpSession getHttpSession(String id)
+    {
+        return _sessionManager.getHttpSession(id);
+    }
+    
+    /* ------------------------------------------------------------ */
+    HttpSession newHttpSession()
+    {
+        return _sessionManager.newHttpSession();
+    }
+
+    /* ------------------------------------------------------------ */
+    void setSessionTimeout(int timeoutMinutes)
+    {
+        _sessionManager.setSessionTimeout(timeoutMinutes);
+    }
 
     /* ------------------------------------------------------------ */
     /** Strip session from path.
@@ -334,7 +385,7 @@ public class ServletHandler
         request.setSessionId(pathParams);
         HttpSession session=request.getSession(false);
         if (session!=null)
-            _context.access(session);
+            ((SessionManager.Session)session).access();
     }
     
 
@@ -383,7 +434,7 @@ public class ServletHandler
                     request.setPaths(PathMap.pathMatch(servletPathSpec,
                                                        pathInContext),
                                      PathMap.pathInfo(servletPathSpec,
-                                                  pathInContext));
+                                                      pathInContext));
                 }
             }
             
@@ -496,12 +547,13 @@ public class ServletHandler
                     Code.debug("Dynamic path=",path);
                 
                     // make a holder
-                    ServletHolder holder=newServletHolder(servletClass);
-                
+                    ServletHolder holder=new ServletHolder(this,servletClass,servletClass);
+                    
                     // Set params
                     Map params=getDynamicInitParams();
                     if (params!=null)
                         holder.putAll(params);
+                    holder.start();
                     Object servlet=holder.getServlet();
 
                     // Check that the class was intended as a dynamic
@@ -517,7 +569,7 @@ public class ServletHandler
                             String msg = "Dynamic servlet "+
                                 servletClass+
                                 " is not loaded from context: "+
-                                getContext().getHandlerContext().getContextPath();
+                                getHandlerContext().getContextPath();
                         
                             Code.warning(msg);
                             throw new UnavailableException(msg);
@@ -540,37 +592,6 @@ public class ServletHandler
         return entry;
     }
     
-
-        
-    /* ------------------------------------------------------------ */
-    public ServletHolder newServletHolder(String servletClass)
-        throws javax.servlet.UnavailableException,
-               ClassNotFoundException
-    {
-        return new ServletHolder(this,servletClass);
-    }
-
-    /* ------------------------------------------------------------ */
-    public ServletHolder newServletHolder(String servletClass, String path)
-        throws javax.servlet.UnavailableException,
-               ClassNotFoundException
-    {
-        return new ServletHolder(this,servletClass,path);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Destroy Handler.
-     * Destroy all servlets
-     */
-    public synchronized void destroy()
-    {
-        Iterator i = _servletMap.values().iterator();
-        while (i.hasNext())
-        {
-            ServletHolder holder = (ServletHolder)i.next();
-            holder.destroy();
-        }
-    }
 
 
     /* ------------------------------------------------------------ */
@@ -661,4 +682,368 @@ public class ServletHandler
                                            shandler.getLoginPage()));
         return false;
     }
+
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class Context implements ServletContext
+    {
+        /* ------------------------------------------------------------ */
+        public ServletContext getContext(String uri)
+        {        
+            ServletHandler handler= (ServletHandler)
+                _handlerContext.getHttpServer()
+                .findHandler(org.mortbay.jetty.servlet.ServletHandler.class,
+                             uri,
+                             _handlerContext.getHosts());
+            if (handler!=null)
+                return handler.getServletContext();
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        public int getMajorVersion()
+        {
+            return 2;
+        }
+
+        /* ------------------------------------------------------------ */
+        public int getMinorVersion()
+        {
+            return 3;
+        }
+
+        /* ------------------------------------------------------------ */
+        public String getMimeType(String file)
+        {
+            return _handlerContext.getMimeByExtension(file);
+        }
+
+        /* ------------------------------------------------------------ */
+        public Set getResourcePaths(String uriInContext)
+        {
+            Resource baseResource=_handlerContext.getBaseResource();
+            uriInContext=Resource.canonicalPath(uriInContext);
+            if (baseResource==null || uriInContext==null)
+                return Collections.EMPTY_SET;
+
+            try
+            {
+                Resource resource = baseResource.addPath(uriInContext);
+                String[] contents=resource.list();
+                if (contents==null || contents.length==0)
+                    return Collections.EMPTY_SET;
+                HashSet set = new HashSet(contents.length*2);
+                for (int i=0;i<contents.length;i++)
+                    set.add(URI.addPaths(uriInContext,contents[i]));
+                return set;
+            }
+            catch(Exception e)
+            {
+                Code.ignore(e);
+            }
+        
+            return Collections.EMPTY_SET;
+        }
+    
+
+        /* ------------------------------------------------------------ */
+        /** Get a Resource.
+         * If no resource is found, resource aliases are tried.
+         * @param uriInContext 
+         * @return 
+         * @exception MalformedURLException 
+         */
+        public URL getResource(String uriInContext)
+            throws MalformedURLException
+        {
+            Resource baseResource=_handlerContext.getBaseResource();
+            uriInContext=Resource.canonicalPath(uriInContext);
+            if (baseResource==null || uriInContext==null)
+                return null;
+        
+            try{
+                Resource resource = baseResource.addPath(uriInContext);
+                if (resource.exists())
+                    return resource.getURL();
+
+                String aliasedUri=_handlerContext.getResourceAlias(uriInContext);
+                if (aliasedUri!=null)
+                    return getResource(aliasedUri);
+            }
+            catch(IllegalArgumentException e)
+            {
+                Code.ignore(e);
+            }
+            catch(MalformedURLException e)
+            {
+                throw e;
+            }
+            catch(IOException e)
+            {
+                Code.warning(e);
+            }
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        public InputStream getResourceAsStream(String uriInContext)
+        {
+            try
+            {
+                URL url = getResource(uriInContext);
+                if (url!=null)
+                    return url.openStream();
+            }
+            catch(MalformedURLException e) {Code.ignore(e);}
+            catch(IOException e) {Code.ignore(e);}
+            return null;
+        }
+
+
+        /* ------------------------------------------------------------ */
+        public RequestDispatcher getRequestDispatcher(String uriInContext)
+        {
+        
+            if (uriInContext == null || !uriInContext.startsWith("/"))
+                return null;
+
+            try
+            {
+                String pathInContext=uriInContext;
+                String query=null;
+                int q=0;
+                if ((q=pathInContext.indexOf('?'))>0)
+                {
+                    pathInContext=uriInContext.substring(0,q);
+                    query=uriInContext.substring(q+1);
+                }
+
+                return new Dispatcher(ServletHandler.this,pathInContext,query);
+            }
+            catch(Exception e)
+            {
+                Code.ignore(e);
+                return null;
+            }
+        }
+
+        /* ------------------------------------------------------------ */
+        public RequestDispatcher getNamedDispatcher(String name)
+        {
+            if (name == null || name.length()==0)
+                return null;
+
+            try { return new Dispatcher(ServletHandler.this,name); }
+            catch(Exception e) {Code.ignore(e);}
+        
+            return null;
+        }
+    
+        /* ------------------------------------------------------------ */
+        /**
+         * @deprecated 
+         */
+        public Servlet getServlet(String name)
+        {
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @deprecated 
+         */
+        public Enumeration getServlets()
+        {
+            return Collections.enumeration(Collections.EMPTY_LIST);
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @deprecated 
+         */
+        public Enumeration getServletNames()
+        {
+            return Collections.enumeration(Collections.EMPTY_LIST);
+        }
+
+
+    
+        /* ------------------------------------------------------------ */
+        /** Servlet Log.
+         * Log message to servlet log. Use either the system log or a
+         * LogSinkset via the context attribute
+         * org.mortbay.jetty.servlet.Context.LogSink
+         * @param msg 
+         */
+        public void log(String msg)
+        {
+            // XXX logSink ????
+            LogSink logSink = null;
+            if (logSink!=null)
+                logSink.log(Log.EVENT,msg,new
+                    Frame(2),System.currentTimeMillis());
+            else
+                Log.message(Log.EVENT,msg,new Frame(2));
+        }
+
+        /* ------------------------------------------------------------ */
+        public void log(Exception e, String msg)
+        {
+            Code.warning(msg,e);
+            log(msg+": "+e.toString());
+        }
+
+        /* ------------------------------------------------------------ */
+        public void log(String msg, Throwable th)
+        {
+            Code.warning(msg,th);
+            log(msg+": "+th.toString());
+        }
+
+        /* ------------------------------------------------------------ */
+        public String getRealPath(String path)
+        {
+            if(Code.debug())
+                Code.debug("getRealPath of ",path," in ",this);
+
+            if (__Slosh2Slash)
+                path=path.replace('\\','/');
+        
+            Resource baseResource=_handlerContext.getBaseResource();
+            if (baseResource==null )
+                return null;
+
+            try{
+                Resource resource = baseResource.addPath(path);
+                File file = resource.getFile();
+
+                return (file==null)
+                    ?"null"
+                    :(file.getAbsolutePath());
+            }
+            catch(IOException e)
+            {
+                Code.warning(e);
+                return null;
+            }
+        }
+
+        /* ------------------------------------------------------------ */
+        public String getServerInfo()
+        {
+            return Version.__Version;
+        }
+
+
+        /* ------------------------------------------------------------ */
+        /** Get context init parameter.
+         * Delegated to HandlerContext.
+         * @param param param name
+         * @return param value or null
+         */
+        public String getInitParameter(String param)
+        {
+            return _handlerContext.getInitParameter(param);
+        }
+
+        /* ------------------------------------------------------------ */
+        /** Get context init parameter names.
+         * Delegated to HandlerContext.
+         * @return Enumeration of names
+         */
+        public Enumeration getInitParameterNames()
+        {
+            return _handlerContext.getInitParameterNames();
+        }
+
+    
+        /* ------------------------------------------------------------ */
+        /** Get context attribute.
+         * Delegated to HandlerContext.
+         * @param name attribute name.
+         * @return attribute
+         */
+        public Object getAttribute(String name)
+        {
+            if ("javax.servlet.context.tempdir".equals(name))
+            {
+                // Initialize temporary directory
+                File tempDir=(File)_handlerContext
+                    .getAttribute("javax.servlet.context.tempdir");
+                if (tempDir==null)
+                {
+                    try{
+                        tempDir=File.createTempFile("JettyContext",null);
+                        if (tempDir.exists())
+                            tempDir.delete();
+                        tempDir.mkdir();
+                        tempDir.deleteOnExit();
+                        _handlerContext
+                            .setAttribute("javax.servlet.context.tempdir",
+                                          tempDir);
+                    }
+                    catch(Exception e)
+                    {
+                        Code.warning(e);
+                    }
+                }
+                Code.debug("TempDir=",tempDir);
+            }
+
+            return _handlerContext.getAttribute(name);
+        }
+
+        /* ------------------------------------------------------------ */
+        /** Get context attribute names.
+         * Delegated to HandlerContext.
+     */
+        public Enumeration getAttributeNames()
+        {
+            return _handlerContext.getAttributeNames();
+        }
+
+        /* ------------------------------------------------------------ */
+        /** Set context attribute names.
+         * Delegated to HandlerContext.
+         * @param name attribute name.
+         * @param value attribute value
+         */
+        public void setAttribute(String name, Object value)
+        {
+            if (name.startsWith("org.mortbay.http"))
+            {
+                Code.warning("Servlet attempted update of "+name);
+                return;
+            }
+            _handlerContext.setAttribute(name,value);
+        }
+
+        /* ------------------------------------------------------------ */
+        /** Remove context attribute.
+         * Delegated to HandlerContext.
+         * @param name attribute name.
+         */
+        public void removeAttribute(String name)
+        {
+            if (name.startsWith("org.mortbay.http"))
+            {
+                Code.warning("Servlet attempted update of "+name);
+                return;
+            }
+            _handlerContext.removeAttribute(name);
+        }
+    
+        /* ------------------------------------------------------------ */
+        public String getServletContextName()
+        {
+            if (_handlerContext instanceof WebApplicationContext)
+                return ((WebApplicationContext)_handlerContext).getDisplayName();
+            return null;
+        }
+    }
+
+
+    
 }

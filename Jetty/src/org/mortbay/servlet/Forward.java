@@ -5,7 +5,6 @@
 
 package org.mortbay.servlet;
 import org.mortbay.util.Code;
-import org.mortbay.jetty.servlet.Context;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -79,7 +78,7 @@ public class Forward extends HttpServlet
         {            
             ServletContext context =
                 getServletContext().getContext(forward);
-            String contextPath=((Context)context).getContextPath();
+            String contextPath=sreq.getContextPath();
             if (contextPath.length()>1)
                 forward=forward.substring(contextPath.length());
             

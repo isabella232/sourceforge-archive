@@ -461,19 +461,6 @@ abstract public class HttpMessage
         setFields().putDateField(name,date);
     }
     
-    /* -------------------------------------------------------------- */
-    /** Sets the value of a date field to the current time.
-     * Header or Trailer fields are set depending on message state.
-     * Uses efficient DateCache mechanism.
-     * @param name the field name
-     * @param value the field date value
-     * @exception IllegalStateException Not editable or sending 1.1
-     *                                  with trailers
-     */
-    public void setCurrentTime(String name)
-    {
-        setFields().putCurrentTime(name);
-    }
 
     /* ------------------------------------------------------------ */
     /** Remove a field.

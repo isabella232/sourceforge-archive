@@ -16,7 +16,6 @@ import org.mortbay.http.handler.ResourceHandler;
 import org.mortbay.http.handler.SecurityHandler;
 import org.mortbay.http.handler.NotFoundHandler;
 import org.mortbay.http.handler.NullHandler;
-import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.util.Code;
@@ -66,7 +65,6 @@ public class WebApplicationContext extends ServletHandlerContext
     private Resource _webInf;
     private ServletHandler _servletHandler;
     private SecurityHandler _securityHandler;
-    private Context _context;
     private Map _tagLibMap=new HashMap(3);
     private NotFoundHandler _notFoundHandler;
     private String _deploymentDescriptor;
@@ -247,7 +245,6 @@ public class WebApplicationContext extends ServletHandlerContext
             addHandler(_servletHandler);
         }
         _servletHandler.setDynamicServletPathSpec("/servlet/*");
-        _context=_servletHandler.getContext();
         
         // Resource Handler
         ResourceHandler rh = (ResourceHandler)getHandler(ResourceHandler.class);
@@ -547,8 +544,7 @@ public class WebApplicationContext extends ServletHandlerContext
             name=className;
         
         ServletHolder holder =
-            _servletHandler.newServletHolder(className,jspFile);
-        holder.setServletName(name);
+            new ServletHolder(_servletHandler,name,className,jspFile);
         
         Iterator iter= node.iterator("init-param");
         while(iter.hasNext())
@@ -596,12 +592,12 @@ public class WebApplicationContext extends ServletHandlerContext
 
         // add default mappings
         String defaultPath="/servlet/"+name+"/*";
-        Code.debug("ServletMapping: ",holder.getServletName(),"=",defaultPath);
+        Code.debug("ServletMapping: ",holder.getName(),"=",defaultPath);
         _servletHandler.addHolder(defaultPath,holder);
         if (!className.equals(name))
         {
             defaultPath="/servlet/"+className+"/*";
-            Code.debug("ServletMapping: ",holder.getServletName(),
+            Code.debug("ServletMapping: ",holder.getName(),
                        "=",defaultPath);
             _servletHandler.addHolder(defaultPath,holder);
         }
@@ -631,7 +627,7 @@ public class WebApplicationContext extends ServletHandlerContext
         if(tNode!=null)
         {
             int timeout = Integer.parseInt(tNode.toString(false,true));
-            _context.setSessionTimeout(timeout);
+            _servletHandler.setSessionTimeout(timeout);
         }
     }
     

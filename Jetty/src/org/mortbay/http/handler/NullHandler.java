@@ -82,6 +82,7 @@ abstract public class NullHandler implements HttpHandler
     
     /* ----------------------------------------------------------------- */
     public void stop()
+        throws InterruptedException
     {
         _started=false;
         Log.event("Stopped "+this);

@@ -37,87 +37,41 @@ import javax.servlet.UnavailableException;
  * @version $Id$
  * @author Greg Wilkins
  */
-public class ServletHolder
-    extends AbstractMap
+public class ServletHolder extends Holder
     implements Comparable
 {
     /* ---------------------------------------------------------------- */
-    private ServletHandler _handler;
-    private Context _context;
-    private boolean _singleThreadModel;
-
-    private Class _servletClass=null;
-    private Stack _servlets=new Stack();
-    private Servlet _servlet=null;
-    private String _name=null;
-    private String _className ;
-    private Map _initParams ;
+    private ServletHandler _servletHandler;
+    private Stack _servlets;
+    private Servlet _servlet;
+    
     private int _initOrder;
     private boolean _initOnStartup=false;
     private Config _config;
     private Map _roleMap;
-    private int _checks;
     private String _path;
-
     
     /* ---------------------------------------------------------------- */
-    /** Construct a Servlet property mostly from the servers config.
-     * file.
-     * @param handler ServletHandler
-     * @param className Servlet class name (fully qualified)
+    /** Constructor.
      */
     public ServletHolder(ServletHandler handler,
+                         String name,
                          String className)
     {
-        _handler=handler;
-        _context=_handler.getContext();
-        setServletName(className);
-        _className=className;
-        _name=className;
-        _config=new Config();
+        super(handler.getHandlerContext(),name,className);
+        _servletHandler=handler;
     }
 
     /* ---------------------------------------------------------------- */
     /** Constructor. 
-     * @param handler 
-     * @param className 
-     * @param pathName 
      */
     public ServletHolder(ServletHandler handler,
+                         String name,
                          String className,
                          String path)
     {
-        this(handler,className);
+        this(handler,name,className);
         _path=path;
-    }
-    
-    
-    /* ------------------------------------------------------------ */
-    public String getServletName()
-    {
-        return _name;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setServletName(String name)
-    {
-        synchronized(_handler)
-        {
-            _handler.mapHolder(name,this,_name);
-            _name=name;
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public String getClassName()
-    {
-        return _className;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setClassName(String className)
-    {
-        _className = className;
     }
 
     /* ------------------------------------------------------------ */
@@ -186,138 +140,12 @@ public class ServletHolder
         return compareTo(o)==0;
     }
     
-    /* ------------------------------------------------------------ */
-    public void initialize()
-    {
-        try
-        {
-            getServlet();
-        }
-        catch(javax.servlet.UnavailableException e)
-        {
-            Code.warning(e);
-            throw new IllegalStateException(e.toString());
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    synchronized void initializeClass()
-        throws UnavailableException
-    {
-        try
-        {
-            Code.debug("InitializeClass "+getClassName());
-            
-            ClassLoader loader=_context.getHandler().getClassLoader();
-            Code.debug("Servlet loader ",loader);
-            if (loader==null)
-                _servletClass=Class.forName(getClassName());
-            else
-                _servletClass=loader.loadClass(getClassName());
-            Code.debug("Servlet Class ",_servletClass);
-            if (!javax.servlet.Servlet.class
-                .isAssignableFrom(_servletClass))
-                Code.fail("Servlet class "+getClassName()+
-                          " is not a javax.servlet.Servlet");
-        }
-        catch(ClassNotFoundException e)
-        {
-            Code.debug(e);
-            throw new UnavailableException(e.toString());
-        }
-    }
-
-    /* ---------------------------------------------------------------- */
-    /** Destroy.
-     */
-    public synchronized void destroy()
-    {
-        // Destroy singleton servlet
-        if (_servlet!=null)
-            _servlet.destroy();
-        _servlet=null;
-        _checks=0;
-        
-        // Destroy stack of servlets
-        while (_servlets!=null && _servlets.size()>0)
-        {
-            Servlet s = (Servlet)_servlets.pop();
-            s.destroy();
-        }
-        _servlets=new Stack();
-        _servletClass=null;
-    }
-
-
-    /* ------------------------------------------------------------ */
-    /** Get the servlet.
-     * The state of the servlet is unknown, specially if using
-     * SingleThreadModel
-     * @return The servlet
-     */
-    public synchronized Servlet getServlet()
-        throws UnavailableException
-    {
-        try{
-            if (_servletClass==null)
-                initializeClass();
-
-            if (_servlet==null)
-            {
-                Servlet newServlet =
-                    newServlet = (Servlet)_servletClass.newInstance();
-                newServlet.init(_config);
-                _singleThreadModel =
-                    newServlet instanceof
-                    javax.servlet.SingleThreadModel;
-                
-                if (_servlet==null && !_singleThreadModel)
-                        _servlet=newServlet;
-            }
-            return _servlet;
-        }
-        catch(UnavailableException e)
-        {
-            throw e;
-        }
-        catch(Exception e)
-        {
-            Code.warning(e);
-            throw new UnavailableException(e.toString());
-        }    
-    }
 
 
     /* ---------------------------------------------------------------- */
-    public javax.servlet.ServletContext getServletContext()
+    public ServletContext getServletContext()
     {
-        return (javax.servlet.ServletContext)_context;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setInitParameter(String param,String value)
-    {
-        put(param,value);
-    }
-
-    /* ---------------------------------------------------------------- */
-    /**
-     * Gets an initialization parameter of the servlet.
-     * @param name the parameter name
-     */
-    public String getInitParameter(String param)
-    {
-        if (_initParams==null)
-            return null;
-        return (String)_initParams.get(param);
-    }
-
-    /* ------------------------------------------------------------ */
-    public Enumeration getInitParameterNames()
-    {
-        if (_initParams==null)
-            return Collections.enumeration(Collections.EMPTY_LIST);
-        return Collections.enumeration(_initParams.keySet());
+        return _servletHandler.getServletContext();
     }
 
     /* ------------------------------------------------------------ */
@@ -347,6 +175,96 @@ public class ServletHolder
         return (link==null)?name:link;
     }
     
+    /* ------------------------------------------------------------ */
+    public void start()
+        throws Exception
+    {
+        super.start();
+        
+        if (!javax.servlet.Servlet.class
+            .isAssignableFrom(_class))
+            Code.fail("Servlet class "+_class+
+                      " is not a javax.servlet.Servlet");
+
+        if (javax.servlet.SingleThreadModel.class
+            .isAssignableFrom(_class))
+            _servlets=new Stack();
+
+        if (isInitOnStartup())
+        {
+            _servlet=(Servlet)newInstance();
+            _config=new Config();
+            _servlet.init(_config);
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    public void stop()
+    {
+        if (_servlet!=null)
+            _servlet.destroy();
+        _servlet=null;
+        
+        while (_servlets!=null && _servlets.size()>0)
+        {
+            Servlet s = (Servlet)_servlets.pop();
+            s.destroy();
+        }
+        _config=null;
+        super.stop();   
+    }
+    
+    
+    /* ---------------------------------------------------------------- */
+    public synchronized void destroy()
+    {
+        _config=null;
+        _roleMap=null;
+        super.destroy();
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /** Get the servlet.
+     * @return The servlet
+     */
+    public synchronized Servlet getServlet()
+        throws UnavailableException
+    {
+        try
+        {
+            if (_servlet==null)
+                _servlet=(Servlet)newInstance();
+        
+            if (_config==null)
+            {
+                _config=new Config();
+                _servlet.init(_config);
+            }
+            
+            if (_servlets!=null)
+            {
+                Servlet servlet=null;
+                if (_servlets.size()==0)
+                {
+                    servlet= (Servlet)newInstance();
+                    servlet.init(_config);
+                }
+                else
+                    servlet = (Servlet)_servlets.pop();
+
+                return servlet;
+            }
+
+            return _servlet;
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            throw new UnavailableException(e.toString());
+        }    
+    }
+    
     /* --------------------------------------------------------------- */
     /** Service a request with this servlet.
      */
@@ -356,83 +274,13 @@ public class ServletHolder
                UnavailableException,
                IOException
     {
-        if (_servletClass==null)
+        if (_class==null)
             throw new UnavailableException("Servlet class not initialized");
         
-        Servlet useServlet=null;
-
-        // reference pool to protect from reloads
-        Stack pool=_servlets;
-
-        if (_singleThreadModel)
-        {
-            // try getting a servlet from the pool of servlets
-            try{useServlet = (Servlet)pool.pop();}
-            catch(EmptyStackException e)
-            {
-                // Create a new one for the pool
-                try
-                {
-                    useServlet = (Servlet) _servletClass.newInstance();
-                    useServlet.init(_config);
-                }
-                catch(Exception e2)
-                {
-                    Code.warning(e2);
-                    useServlet = null;
-                }
-            }
-        }
-        else
-        {
-            // Is the singleton instance ready?
-            // Double null check sync problem is reduced by hit
-            // counter. First 10 hits always  
-            if (_servlet == null || _checks<2)
-            {
-                // no so get a lock on the class
-                synchronized(this)
-                {
-                    // check if still not ready
-                    if (_servlet == null)
-                    {
-                        // no so build it
-                        try
-                        {
-                            useServlet =
-                                (Servlet) _servletClass.newInstance();
-                            useServlet.init(_config);
-                            _servlet = useServlet;
-
-                            _singleThreadModel =
-                                _servlet instanceof
-                                javax.servlet.SingleThreadModel;
-                            if (_singleThreadModel)
-                                _servlet=null;
-                        }
-                        catch(UnavailableException e)
-                        {
-                            throw e;
-                        }
-                        catch(Exception e)
-                        {
-                            Code.warning(e);
-                            useServlet = _servlet = null;
-                        }
-                    }
-                    else
-                        // yes so use it.
-                        useServlet = _servlet;
-                    _checks++;
-                }
-            }
-            else
-                // yes so use it.
-                useServlet = _servlet;
-        }
-
+        Servlet servlet=getServlet();
+        
         // Check that we got one in the end
-        if (useServlet==null)
+        if (servlet==null)
             throw new UnavailableException("Could not construct servlet");
 
         // Service the request
@@ -447,85 +295,46 @@ public class ServletHolder
                                      _path);
                 request.setAttribute("javax.servlet.include.servlet_path",_path);
             }
-            
-            useServlet.service(request,response);
+
+            servlet.service(request,response);
             response.flushBuffer();
         }
         catch(UnavailableException e)
         {
-            if (_singleThreadModel && useServlet!=null)
-                useServlet.destroy();
-            else
-                destroy();
-            useServlet=null;
+            if (_servlets!=null && servlet!=null)
+                servlet.destroy();
+            servlet=null;
             throw e;
         }
         finally
         {
             // Return to singleThreaded pool
-            if (_singleThreadModel && useServlet!=null)
-                pool.push(useServlet);
+            synchronized(this)
+            {
+                if (_servlets!=null && servlet!=null)
+                    _servlets.push(servlet);
+            }
         }
     }
 
-    /* ------------------------------------------------------------ */
-    /** Map method.
-     * ServletHolder implements the Map interface as a
-     * configuration conveniance. The methods are mapped to the
-     * servlet properties.
-     * @return The entrySet of the initParameter map
-     */
-    public synchronized Set entrySet()
-    {
-        if (_initParams==null)
-            _initParams=new HashMap(3);
-        return _initParams.entrySet();
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Map method.
-     * ServletHolder implements the Map interface as a
-     * configuration conveniance. The methods are mapped to the
-     * servlet properties.
-     */
-    public synchronized Object put(Object name,Object value)
-    {
-        if (_initParams==null)
-            _initParams=new HashMap(3);
-        return _initParams.put(name,value);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get the name of the Servlet.
-     * @return Servlet name
-     */
-    public String toString()
-    {
-        return _name;
-    }
-    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     class Config implements ServletConfig
-    {
+    {   
         /* -------------------------------------------------------- */
         public String getServletName()
         {
-            return ServletHolder.this.getServletName();
+            return getName();
         }
         
         /* -------------------------------------------------------- */
-        public javax.servlet.ServletContext getServletContext()
+        public ServletContext getServletContext()
         {
-            return (javax.servlet.ServletContext)_context;
+            return _servletHandler.getServletContext();
         }
 
         /* -------------------------------------------------------- */
-        /**
-         * Gets an initialization parameter of the servlet.
-         * @param name the parameter name
-         */
         public String getInitParameter(String param)
         {
             return ServletHolder.this.getInitParameter(param);

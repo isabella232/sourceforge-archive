@@ -99,13 +99,13 @@ public class HttpRequest extends HttpMessage
     private boolean _handled;
     private Cookie[] _cookies;
     private Map _attributes;
+    private long _timeStamp;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
     public HttpRequest()
-    {
-    }
+    {}
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -116,6 +116,15 @@ public class HttpRequest extends HttpMessage
         super(connection);
     }
 
+    /* ------------------------------------------------------------ */
+    /** Get Request TimeStamp
+     * @return The time that the request was received.
+     */
+    public long getTimeStamp()
+    {
+        return _timeStamp;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Get the HTTP Response.
      * Get the HTTP Response associated with this request.
@@ -201,6 +210,7 @@ public class HttpRequest extends HttpMessage
 
         _handled=false;
         _state=__MSG_RECEIVED;
+        _timeStamp=System.currentTimeMillis();
     }
     
     /* -------------------------------------------------------------- */

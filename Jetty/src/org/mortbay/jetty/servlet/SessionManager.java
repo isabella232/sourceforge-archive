@@ -5,37 +5,56 @@
 
 package org.mortbay.jetty.servlet;
 
+import java.util.EventListener;
+
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionContext;
-
+import javax.servlet.http.HttpSession;
+import org.mortbay.util.LifeCycle;
+    
 /* --------------------------------------------------------------------- */
 /**
  *
  * @version $Id$
  * @author Greg Wilkins
  */
-public interface SessionManager 
+public interface SessionManager extends LifeCycle
 {
     /* ------------------------------------------------------------ */
     public final static String __SessionId  = "jsessionid";
     public final static String __SessionUrlPrefix = ";"+__SessionId+"=";
     
     /* ------------------------------------------------------------ */
-    boolean isValid(HttpSession session);
-
-    /* ------------------------------------------------------------ */
-    HttpSession getHttpSession(String id);
+    public HttpSession getHttpSession(String id);
     
     /* ------------------------------------------------------------ */
-    HttpSession newSession();
+    public HttpSession newHttpSession();
 
     /* ------------------------------------------------------------ */
-    void stop();
+    public void setSessionTimeout(int timeoutMinutes);
 
     /* ------------------------------------------------------------ */
-    void access(HttpSession session);
-
+    /** Add an event listener.
+     * @param listener An Event Listener. Individual SessionManagers
+     * implemetations may accept arbitrary listener types, but they
+     * are expected to at least handle
+     *   HttpSessionActivationListener,
+     *   HttpSessionAttributeListener,
+     *   HttpSessionBindingListener,
+     *   HttpSessionListener
+     */
+    public void addEventListener(EventListener listener);
+    
+    
     /* ------------------------------------------------------------ */
-    void setSessionTimeout(int timeoutMinutes);
+    /* ------------------------------------------------------------ */
+    public interface Session extends HttpSession
+    {
+        /* ------------------------------------------------------------ */
+        public boolean isValid();
 
+        /* ------------------------------------------------------------ */
+        public void access();
+    }
+    
 }

@@ -56,7 +56,7 @@ public class NCSARequestLogFormat implements RequestLogFormat
             String user = (String)request.getAttribute(HttpRequest.__AuthUser);
             buf.append((user==null)?"-":user);
             buf.append(" [");
-            _logDateCache.format(System.currentTimeMillis(),buf);
+            _logDateCache.format(request.getTimeStamp(),buf);
             buf.append("] \"");
             request.appendRequestLine(buf);
             buf.append("\" ");

@@ -195,6 +195,7 @@ public class ResourceHandler extends NullHandler
  
     /* ----------------------------------------------------------------- */
     public void stop()
+        throws InterruptedException
     {
         super.stop();
     }
@@ -626,15 +627,14 @@ public class ResourceHandler extends NullHandler
     {
         long resLength = data.getLength();
         
-        //
         //  see if there are any range headers
-        //
-        Enumeration reqRanges = request.getFieldValues(HttpFields.__Range);
+        Enumeration reqRanges =
+            request.getDotVersion()>0
+            ?request.getFieldValues(HttpFields.__Range)
+            :null;
         if ( reqRanges == null || !reqRanges.hasMoreElements())
         {
-            // 
             //  if there were no ranges, send entire entity
-            //
             data.writeHeaders(response, resLength);
             data.writeBytes(response.getOutputStream(), 0, resLength);
             request.setHandled(true);

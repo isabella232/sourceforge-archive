@@ -22,7 +22,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.ConcurrentModificationException;
-
+import java.util.EventListener;
 
 public class HashSessionManager implements SessionManager
 {
@@ -35,14 +35,14 @@ public class HashSessionManager implements SessionManager
     // -1 means no timeout
     private int _dftMaxIdleSecs = -1;
     private SessionScavenger _scavenger = null;
-    private Map _sessions = new HashMap();
+    private Map _sessions;
     private int _scavengeDelay = 30000;
-    private Context _context;
+    private ServletHandler _handler;
 
     /* ------------------------------------------------------------ */
-    HashSessionManager(Context context)
+    HashSessionManager(ServletHandler handler)
     {
-        _context=context;
+        _handler=handler;
     }
 
     /* ------------------------------------------------------------ */
@@ -57,24 +57,12 @@ public class HashSessionManager implements SessionManager
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized HttpSession newSession()
+    public synchronized HttpSession newHttpSession()
     {
         HttpSession session = new Session();
         session.setMaxInactiveInterval(_dftMaxIdleSecs);
         _sessions.put(session.getId(),session);
         return session;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void access(HttpSession session)
-    {
-        ((Session)session).accessed();
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isValid(HttpSession session)
-    {
-        return !(((Session)session).invalid);
     }
 
     /* -------------------------------------------------------------- */
@@ -95,6 +83,30 @@ public class HashSessionManager implements SessionManager
             _scavenger = new SessionScavenger();
     }
 
+    public void addEventListener(EventListener listener)
+    {
+        // XXX
+        Code.notImplemented();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isStarted()
+    {
+        return _scavenger!=null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void start()
+        throws Exception
+    {
+        if (_sessions==null)
+            _sessions=new HashMap();
+        
+        // Start the session scavenger if we haven't already
+        if (_scavenger == null)
+            _scavenger = new SessionScavenger();
+    }
+    
     /* ------------------------------------------------------------ */
     public void stop()
     {
@@ -105,11 +117,27 @@ public class HashSessionManager implements SessionManager
             Session session = (Session)i.next();
             session.invalidate();
         }
+        _sessions.clear();
         
         // stop the scavenger
-        if (_scavenger!=null)
-            _scavenger.interrupt();
+        SessionScavenger scavenger = _scavenger;
         _scavenger=null;
+        if (scavenger!=null)
+            scavenger.interrupt();
+    }
+
+
+    /* ------------------------------------------------------------ */
+    public boolean isDestroyed()
+    {
+        return _sessions==null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void destroy()
+    {
+        stop();
+        _sessions=null;
     }
     
     /* -------------------------------------------------------------- */
@@ -130,8 +158,8 @@ public class HashSessionManager implements SessionManager
             for (Iterator i = _sessions.values().iterator(); i.hasNext(); )
             {
                 Session session = (Session)i.next();
-                long idleTime = session.maxIdleMillis;
-                if (idleTime > 0 && session.accessed + idleTime < now) {
+                long idleTime = session._maxIdleMs;
+                if (idleTime > 0 && session._accessed + idleTime < now) {
                     // Found a stale session, add it to the list
                     if (staleSessions == null)
                         staleSessions = new ArrayList(5);
@@ -175,7 +203,8 @@ public class HashSessionManager implements SessionManager
     class SessionScavenger extends Thread
     {
         public void run() {
-            while (_scavengeDelay>0) {
+            while (isStarted())
+            {
                 try {
                     sleep(_scavengeDelay);
                     HashSessionManager.this.scavenge();
@@ -193,18 +222,17 @@ public class HashSessionManager implements SessionManager
 
     }   // SessionScavenger
     
-    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    class Session implements HttpSession
+    class Session implements SessionManager.Session
     {
         HashMap _values = new HashMap(11);
-        boolean invalid=false;
-        boolean newSession=true;
-        long created=System.currentTimeMillis();
-        long accessed=created;
-        long maxIdleMillis = -1;
+        boolean _invalid=false;
+        boolean _newSession=true;
+        long _created=System.currentTimeMillis();
+        long _accessed=_created;
+        long _maxIdleMs = -1;
         String id=null;
 
         /* ------------------------------------------------------------- */
@@ -217,35 +245,39 @@ public class HashSessionManager implements SessionManager
                     long newId = __nextSessionId;
                     __nextSessionId+=this.hashCode();
                     if (newId<0)newId=-newId;
-                    this.id=Long.toString(newId,30+(int)(created%7));
+                    this.id=Long.toString(newId,30+(int)(_created%7));
                 }
                 while (_sessions.containsKey(this.id));
             }
             if (_dftMaxIdleSecs>=0)
-                maxIdleMillis=_dftMaxIdleSecs*1000;
+                _maxIdleMs=_dftMaxIdleSecs*1000;
         }
 
-        /* ------------------------------------------------------------- */
-        void accessed()
+
+        /* ------------------------------------------------------------ */
+        public void access()
         {
-            newSession=false;
-            accessed=System.currentTimeMillis();
+            _newSession=false;
+            _accessed=System.currentTimeMillis();
         }
 
         /* ------------------------------------------------------------ */
-        /** 
-         * @deprecated 
-         */
+        public boolean isValid()
+        {
+            return !_invalid;
+        }
+        
+        /* ------------------------------------------------------------ */
         public ServletContext getServletContext()
         {
-            return _context;
+            return _handler.getServletContext();
         }
         
         /* ------------------------------------------------------------- */
         public String getId()
             throws IllegalStateException
         {
-            if (invalid) throw new IllegalStateException();
+            if (_invalid) throw new IllegalStateException();
             return id;
         }
 
@@ -253,23 +285,23 @@ public class HashSessionManager implements SessionManager
         public long getCreationTime()
             throws IllegalStateException
         {
-            if (invalid) throw new IllegalStateException();
-            return created;
+            if (_invalid) throw new IllegalStateException();
+            return _created;
         }
 
         /* ------------------------------------------------------------- */
         public long getLastAccessedTime()
             throws IllegalStateException
         {
-            if (invalid) throw new IllegalStateException();
-            return accessed;
+            if (_invalid) throw new IllegalStateException();
+            return _accessed;
         }
 
         /* ------------------------------------------------------------- */
         public int getMaxInactiveInterval()
         {
-            if (invalid) throw new IllegalStateException();
-            return (int)(maxIdleMillis / 1000);
+            if (_invalid) throw new IllegalStateException();
+            return (int)(_maxIdleMs / 1000);
         }
 
         /* ------------------------------------------------------------- */
@@ -279,27 +311,24 @@ public class HashSessionManager implements SessionManager
         public HttpSessionContext getSessionContext()
             throws IllegalStateException
         {
-            if (invalid) throw new IllegalStateException();
+            if (_invalid) throw new IllegalStateException();
             return SessionContext.NULL_IMPL;
         }
 
         /* ------------------------------------------------------------- */
         public void setMaxInactiveInterval(int secs)
         {
-            maxIdleMillis = (long)secs * 1000;
+            _maxIdleMs = (long)secs * 1000;
 
-            if (maxIdleMillis>0 && maxIdleMillis/4<_scavengeDelay)
+            if (_maxIdleMs>0 && _maxIdleMs/4<_scavengeDelay)
             {
                 synchronized(HashSessionManager.this)
                 {
-                    // Adjust scavange delay to 25% of timeout
-                    _scavengeDelay=_dftMaxIdleSecs*250;
+                    // Adjust scavange delay to 10% of timeout
+                    _scavengeDelay=_dftMaxIdleSecs*100;
                     if (_scavengeDelay>60000)
                         _scavengeDelay=60000;
-                
-                    // Start the session scavenger if we haven't already
-                    if (_scavenger == null && _scavengeDelay>0)
-                        _scavenger = new SessionScavenger();
+                    _scavenger.interrupt();
                 }
             }
         }
@@ -308,7 +337,7 @@ public class HashSessionManager implements SessionManager
         public synchronized void invalidate()
             throws IllegalStateException
         {
-            if (invalid) throw new IllegalStateException();
+            if (_invalid) throw new IllegalStateException();
             
             Iterator iter = _values.keySet().iterator();
             while (iter.hasNext())
@@ -322,36 +351,36 @@ public class HashSessionManager implements SessionManager
             {
                 _sessions.remove(id);
             }
-            invalid=true;
+            _invalid=true;
         }
 
         /* ------------------------------------------------------------- */
         public boolean isNew()
             throws IllegalStateException
         {
-            if (invalid) throw new IllegalStateException();
-            return newSession;
+            if (_invalid) throw new IllegalStateException();
+            return _newSession;
         }
 
 
         /* ------------------------------------------------------------ */
         public Object getAttribute(String name)
         {
-            if (invalid) throw new IllegalStateException();
+            if (_invalid) throw new IllegalStateException();
             return _values.get(name);
         }
 
         /* ------------------------------------------------------------ */
         public Enumeration getAttributeNames()
         {
-            if (invalid) throw new IllegalStateException();
+            if (_invalid) throw new IllegalStateException();
             return Collections.enumeration(_values.keySet());
         }
 
         /* ------------------------------------------------------------ */
         public void setAttribute(String name, Object value)
         {
-            if (invalid) throw new IllegalStateException();
+            if (_invalid) throw new IllegalStateException();
             Object oldValue = _values.put(name,value);
 
             if (value != oldValue)
@@ -364,7 +393,7 @@ public class HashSessionManager implements SessionManager
         /* ------------------------------------------------------------ */
         public void removeAttribute(String name)
         {
-            if (invalid) throw new IllegalStateException();
+            if (_invalid) throw new IllegalStateException();
             Object value=_values.remove(name);
             unbindValue(name, value);
         }
@@ -388,7 +417,7 @@ public class HashSessionManager implements SessionManager
         public synchronized String[] getValueNames()
             throws IllegalStateException
         {
-            if (invalid) throw new IllegalStateException();
+            if (_invalid) throw new IllegalStateException();
             String[] a = new String[_values.size()];
             return (String[])_values.keySet().toArray(a);
         }

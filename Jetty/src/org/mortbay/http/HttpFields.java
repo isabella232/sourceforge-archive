@@ -806,17 +806,6 @@ public class HttpFields
     {
         put(name, __dateSend.format(new Date(date)));
     }
-    
-    /* -------------------------------------------------------------- */
-    /** Set date field to the current time.
-     * Sets the value of a date field to the current time.  Uses
-     * efficient DateCache mechanism.
-     * @param name the field name
-     */
-    public void putCurrentTime(String name)
-    {
-        put(name, __dateCache.format(System.currentTimeMillis()));
-    }
 
     /* -------------------------------------------------------------- */
     /** Read HttpHeaders from inputStream.

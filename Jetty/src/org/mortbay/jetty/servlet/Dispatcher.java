@@ -41,8 +41,7 @@ public class Dispatcher implements RequestDispatcher
     public final static String __QUERY_STRING= "javax.servlet.include.query_string";
     public final static String __PATH_INFO= "javax.servlet.include.path_info";
     
-    Context _context;
-    HandlerContext _handlerContext;
+    ServletHandler _servletHandler;
     ServletHolder _holder=null;
     String _pathSpec;
     String _path;
@@ -55,53 +54,31 @@ public class Dispatcher implements RequestDispatcher
      * @param server 
      * @param URL 
      */
-    Dispatcher(Context context, String pathInContext, String query)
+    Dispatcher(ServletHandler servletHandler, String pathInContext, String query)
         throws IllegalStateException
     {
-        Code.debug("Dispatcher for ",context,",",pathInContext,",",query);
+        Code.debug("Dispatcher for ",servletHandler,",",pathInContext,",",query);
         
-        _path = Resource.canonicalPath(pathInContext);
+        _servletHandler=servletHandler;
+        _path=Resource.canonicalPath(pathInContext);
         _query=query;
-        
-        _context = context;
-        _handlerContext = _context.getHandler().getHandlerContext();
 
-        // look for a servlet
-        for(int i=_handlerContext.getHandlerSize();i-->0;)
+        Map.Entry entry=_servletHandler.getHolderEntry(_path);
+        if(entry!=null)
         {
-            HttpHandler handler = _handlerContext.getHandler(i);
-            
-            if (handler instanceof ServletHandler)
-            {
-                // Look for path in servlet handlers
-                ServletHandler shandler=(ServletHandler)handler;
-                if (!shandler.isStarted())
-                    continue;
-
-                Map.Entry entry=shandler.getHolderEntry(_path);
-                if(entry!=null)
-                {
-                    _pathSpec=(String)entry.getKey();
-                    _holder = (ServletHolder)entry.getValue();
-                    break;
-                }
-            }
-            else if (handler instanceof ResourceHandler &&
-                     _resourceHandler==null)
-            {
-                // remember resourceHandler as we may need it for a
-                // resource forward.
-                _resourceHandler=(ResourceHandler)handler;
-            }
+            _pathSpec=(String)entry.getKey();
+            _holder = (ServletHolder)entry.getValue();
         }
-
+        else
+            _resourceHandler=(ResourceHandler)
+                _servletHandler.getHandlerContext().getHandler(ResourceHandler.class);
+        
         // If no servlet found
         if (_holder==null && _resourceHandler!=null)
         {
             // Look for a static resource
             try{
-                Resource resource= context.getServletHandler()
-                    .getHandlerContext().getBaseResource();
+                Resource resource= _servletHandler.getHandlerContext().getBaseResource();
                 if (resource!=null)
                     resource = resource.addPath(_path);
                 if (resource.exists() && !resource.isDirectory())
@@ -124,25 +101,11 @@ public class Dispatcher implements RequestDispatcher
      * @param server 
      * @param URL 
      */
-    Dispatcher(Context context, String name)
+    Dispatcher(ServletHandler servletHandler, String name)
         throws IllegalStateException
     {
-        _context = context;
-        _handlerContext = _context.getHandler().getHandlerContext();
-
-        for(int i=_handlerContext.getHandlerSize();i-->0;)
-        {
-            if (_handlerContext.getHandler(i) instanceof ServletHandler)
-            {
-                ServletHandler handler=(ServletHandler)
-                    _handlerContext.getHandler(i);
-                if (!handler.isStarted())
-                    continue;
-                _holder=handler.getServletHolder(name);
-                break;
-            }
-        }
-        
+        _servletHandler=servletHandler;
+        _holder=_servletHandler.getServletHolder(name);
         if (_holder==null)
             throw new IllegalStateException("No named servlet handler in context");
     }
@@ -210,17 +173,15 @@ public class Dispatcher implements RequestDispatcher
             {
                 Code.debug("Forward request to ",_holder,
                            " at ",_pathSpec);
-                servletRequest.setForwardPaths(_context,
+                servletRequest.setForwardPaths(_servletHandler,
                                                PathMap.pathMatch(_pathSpec,_path),
                                                PathMap.pathInfo(_pathSpec,_path),
                                                _query);
             }
             
             // Forward request
-            //httpRequest.setAttribute(ServletHandler.__SERVLET_REQUEST,request);
-            //httpRequest.setAttribute(ServletHandler.__SERVLET_RESPONSE,response);
             httpRequest.setAttribute(ServletHandler.__SERVLET_HOLDER,_holder);
-            _context.getHandlerContext().handle(_path,null,httpRequest,httpResponse);
+            _servletHandler.getHandlerContext().handle(_path,null,httpRequest,httpResponse);
         }
     }
         

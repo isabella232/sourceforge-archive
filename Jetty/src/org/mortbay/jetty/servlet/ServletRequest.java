@@ -66,7 +66,8 @@ public class ServletRequest
         Collections.enumeration(Collections.EMPTY_LIST);
     private static final Collection __defaultLocale =
         Collections.singleton(Locale.getDefault());
-                          
+
+    private ServletHandler _servletHandler;    
     private HttpRequest _httpRequest;
     private ServletResponse _servletResponse;
 
@@ -82,23 +83,28 @@ public class ServletRequest
     private ServletIn _in =null;
     private BufferedReader _reader=null;
     private int _inputState=0;
-    private Context _context;
     private ArrayList _mergedParameters;
 
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @param request 
      */
-    ServletRequest(Context context,HttpRequest request)
+    ServletRequest(ServletHandler servletHandler,HttpRequest request)
     {
-        _context=context;
-        _contextPath=context.getContextPath();
-        if (_contextPath.length()==1)
+        _servletHandler=servletHandler;
+        _contextPath=_servletHandler.getHandlerContext().getContextPath();
+        if (_contextPath.length()<=1)
             _contextPath="";
+
         _httpRequest=request;
     }
 
+    /* ------------------------------------------------------------ */
+    ServletHandler getServletHandler()
+    {
+        return _servletHandler;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Set servletpath and pathInfo.
      * Called by the Handler before passing a request to a particular
@@ -120,20 +126,21 @@ public class ServletRequest
      * @param pathInfo 
      * @param query 
      */
-    void setForwardPaths(Context context,
+    void setForwardPaths(ServletHandler servletHandler,
                          String servletPath,
                          String pathInfo,
                          String query)
     {
-        _context=context;
-        _contextPath=context.getContextPath();
-        if (_contextPath.length()==1)
+        _servletHandler=servletHandler;
+        _contextPath=_servletHandler.getHandlerContext().getContextPath();
+        if (_contextPath.length()<=1)
             _contextPath="";
+
         _servletPath=servletPath;
         _pathInfo=pathInfo;
         _query=query;
 
-        _uri=URI.addPaths(getContextPath(),URI.addPaths(_servletPath,_pathInfo));
+        _uri=URI.addPaths(_contextPath,URI.addPaths(_servletPath,_pathInfo));
     }
     
     /* ------------------------------------------------------------ */
@@ -154,12 +161,6 @@ public class ServletRequest
         _servletResponse = response;
     }
 
-    /* ------------------------------------------------------------ */
-    Context getContext()
-    {
-        return _context;
-    }
-    
     /* ------------------------------------------------------------ */
     public Locale getLocale()
     {
@@ -321,9 +322,7 @@ public class ServletRequest
         if (_pathTranslated==null)
         {
             Resource resource =
-                _context.getHandler()
-                .getHandlerContext()
-                .getBaseResource();
+                _servletHandler.getHandlerContext().getBaseResource();
 
             if (resource==null)
                 return null;
@@ -380,7 +379,7 @@ public class ServletRequest
         _sessionId=null;
         
         // try cookies first
-        if (_context.getServletHandler().isUsingCookies())
+        if (_servletHandler.isUsingCookies())
         {
             Cookie[] cookies=_httpRequest.getCookies();
             if (cookies!=null && cookies.length>0)
@@ -463,22 +462,22 @@ public class ServletRequest
     /* ------------------------------------------------------------ */
     public HttpSession getSession(boolean create)
     {        
-        if (_session != null && _context.isValid(_session))
+        if (_session != null && ((SessionManager.Session)_session).isValid())
             return _session;
         
         String id = getRequestedSessionId();
         
         if (id != null)
         {
-            _session=_context.getHttpSession(id);
+            _session=_servletHandler.getHttpSession(id);
             if (_session == null && !create)
                 return null;
         }
 
         if (_session == null && create)
         {
-            _session = _context.newSession();
-            if (_context.getServletHandler().isUsingCookies())
+            _session = _servletHandler.newHttpSession();
+            if (_servletHandler.isUsingCookies())
             {
                 Cookie cookie =
                     new Cookie(SessionManager.__SessionId,_session.getId());
@@ -756,7 +755,7 @@ public class ServletRequest
     /* -------------------------------------------------------------- */
     public String getRealPath(String path)
     {
-        return _context.getRealPath(path);
+        return _servletHandler.getServletContext().getRealPath(path);
     }
 
     /* ------------------------------------------------------------ */
@@ -785,7 +784,7 @@ public class ServletRequest
             
         }
     
-        return _context.getRequestDispatcher(url);
+        return _servletHandler.getServletContext().getRequestDispatcher(url);
     }
 
     /* ------------------------------------------------------------ */
