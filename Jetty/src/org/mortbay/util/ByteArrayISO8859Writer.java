@@ -34,7 +34,7 @@ public class ByteArrayISO8859Writer extends Writer
      */
     public ByteArrayISO8859Writer()
     {
-        _buf=ByteArrayPool.getByteArray();
+        _buf=ByteArrayPool.getByteArray(4096);
     } 
     
     /* ------------------------------------------------------------ */

@@ -16,21 +16,10 @@ import java.util.ArrayList;
 public class ByteArrayPool
 {
     public static final int __POOL_SIZE=
-        Integer.getInteger("org.mortbay.util.ByteArrayPool.pool_size",20).intValue();
-    public static final int __MAX_POOLS=
-        Integer.getInteger("org.mortbay.util.ByteArrayPool.max_pools",5).intValue();
+        Integer.getInteger("org.mortbay.util.ByteArrayPool.pool_size",8).intValue();
     
-    public static final ArrayList __pools=new ArrayList(__MAX_POOLS);
-    public static int __lastSize=4096;
-    
-    /* ------------------------------------------------------------ */
-    /** Get byte array from pool of any size.
-     * @return Byte array of any size.
-     */
-    public static byte[] getByteArray()
-    {
-        return getByteArray(__lastSize);
-    }
+    public static final ThreadLocal __pools=new BAThreadLocal();
+    public static int __slot;
     
     /* ------------------------------------------------------------ */
     /** Get a byte array from the pool of known size.
@@ -39,90 +28,49 @@ public class ByteArrayPool
      */
     public static byte[] getByteArray(int size)
     {
-        __lastSize=size;
-
-        for (int i=0;i<__pools.size();i++)
+        byte[][] pool = (byte[][])__pools.get();
+        for (int i=pool.length;i-->0;)
         {
-            Pool pool = (Pool)__pools.get(i);
-            if (size==pool._bufSize)
-                return pool.getByteArray();
+            if (pool[i]!=null && pool[i].length==size)
+            {
+                byte[]b = pool[i];
+                pool[i]=null;
+                return b;
+            }
         }
-
         return new byte[size];
     }
 
     /* ------------------------------------------------------------ */
-    public static synchronized void returnByteArray(byte[] b)
+    public static void returnByteArray(final byte[] b)
     {
-        if (b==null || b.length==0)
+        if (b==null)
             return;
         
-        __lastSize=b.length;
-
-        for (int i=0;i<__pools.size();i++)
+        byte[][] pool = (byte[][])__pools.get();
+        for (int i=pool.length;i-->0;)
         {
-            Pool pool = (Pool)__pools.get(i);
-            if (b.length==pool._bufSize)
+            if (pool[i]==null)
             {
-                pool.returnByteArray(b);
+                pool[i]=b;
                 return;
             }
         }
 
-        if (__pools.size()<__MAX_POOLS)
-        {
-            Pool pool=new Pool(b.length);
-            pool.returnByteArray(b);
-            __pools.add(pool);
-        }
+        // slot.
+        int s = __slot++;
+        if (s<0)s=-s;
+        pool[s%pool.length]=b;
     }
+
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private static class Pool
+    private static final class BAThreadLocal extends ThreadLocal
     {
-        int _bufSize;
-        byte[][] _pool = new byte[__POOL_SIZE][];
-        int _in;
-        int _out;
-        int _size;
-
-        /* ------------------------------------------------------------ */
-        Pool(int size)
-        {
-            _bufSize=size;
-            Code.debug("New byte[] pool. size="+size);
-        }
-        
-        /* ------------------------------------------------------------ */
-        synchronized byte[] getByteArray()
-        {
-            if (_size>0)
+        protected Object initialValue()
             {
-                byte[] b = _pool[_out++];
-                if (_out>=_pool.length)
-                    _out=0;
-                _size--;
-                
-                return b;           
+                return new byte[__POOL_SIZE][];
             }
-            
-            return new byte[_bufSize];
-        }
-        
-        /* ------------------------------------------------------------ */
-        synchronized void returnByteArray(byte[] b)
-        {
-            if (b==null)
-                return;
-            
-            if (_size<_pool.length)
-            {
-                _pool[_in++]=b;
-                if (_in>=_pool.length)
-                    _in=0;
-                _size++;
-            }
-        }
     }
 }
