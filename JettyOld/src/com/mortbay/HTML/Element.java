@@ -36,7 +36,10 @@ public abstract class Element
 	HEIGHT="HEIGHT",
 	SIZE="SIZE",
 	COLOR="COLOR",
-	BGCOLOR="BGCOLOR";
+	BGCOLOR="BGCOLOR",
+	STYLE="STYLE",
+	CLASS="CLASS",
+	ID="ID";
     
 	
     
@@ -102,15 +105,18 @@ public abstract class Element
 	    buf.append(attributes);
 	
 	if (attributeMap!=null)
-	{    
-	    Enumeration e = attributeMap.keys();
-	    while (e.hasMoreElements())
+	{
+	    synchronized(buf)
 	    {
-		buf.append(' ');
-		String a = (String)e.nextElement();
-		buf.append(a);
-		buf.append('=');
-		buf.append(attributeMap.get(a).toString());
+		Enumeration e = attributeMap.keys();
+		while (e.hasMoreElements())
+		{
+		    buf.append(' ');
+		    String a = (String)e.nextElement();
+		    buf.append(a);
+		    buf.append('=');
+		    buf.append(attributeMap.get(a).toString());
+		}
 	    }
 	}
 
@@ -350,6 +356,30 @@ public abstract class Element
     public Element bgColor(String color)
     {
 	return attribute(BGCOLOR,color);
+    }
+    
+    /* ----------------------------------------------------------------- */
+    /** set CSS CLASS
+     */
+    public Element cssClass(String c)
+    {
+	return attribute(CLASS,c);
+    }
+    
+    /* ----------------------------------------------------------------- */
+    /** set CSS ID
+     */
+    public Element cssID(String id)
+    {
+	return attribute(ID,id);
+    }
+    
+    /* ----------------------------------------------------------------- */
+    /** set Style
+     */
+    public Element style(String s)
+    {
+	return attribute(STYLE,s);
     }
 }
 

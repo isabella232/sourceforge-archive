@@ -23,6 +23,7 @@ class TestHtml
 	    {
 	    
 		Page page = new Page("Test Page");
+		page.addHeader(new StyleLink("/File/jetty.css"));
 		page.setBackGroundColor("A0A0A0");
 
 		Break rule = new Break(Break.Rule);
@@ -157,6 +158,8 @@ class TestHtml
 		tf.addSelect("F0","Select",true,3).add("A").add("B").add("C").add("D");
       
 		page.add(Break.rule);
+
+		page.add(new Style().comment().add("DT { background: yellow; color: black }"));
 
 		page.write(System.out);
 	    }

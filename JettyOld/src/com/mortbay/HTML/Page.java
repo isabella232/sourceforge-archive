@@ -131,6 +131,7 @@ public class Page extends Composite
      */    
     public Page addHeader(Object o)
     {
+	head.add("\n");
 	head.add(o);
 	return this;
     }
@@ -205,7 +206,7 @@ public class Page extends Composite
 		out.write("<TITLE>"+title+"</TITLE>");
 	    head.write(out);
 	    out.write(base);
-	    out.write("</HEAD>\n");
+	    out.write("\n</HEAD>\n");
 	}
     }
     

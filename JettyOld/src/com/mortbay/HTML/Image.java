@@ -24,13 +24,23 @@ public class Image extends Tag
     }
     
     /* ------------------------------------------------------------ */
-    /** Construct image and set size from file in dirname
+    /** Construct from Gif file.
      */
     public Image(String dirname, String src)
     {
 	super("IMG");
 	attribute("SRC",src);
 	setSizeFromGif(dirname,src);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Construct from Gif file.
+     */
+    public Image(File gif)
+    {
+	super("IMG");
+	attribute("SRC",gif.getName());
+	setSizeFromGif(gif);
     }
 
     /* ------------------------------------------------------------ */
@@ -75,8 +85,14 @@ public class Image extends Tag
      */
     public Image setSizeFromGif(String filename)
     {
-	File gif = new File(filename);
-	
+	return setSizeFromGif(new File(filename));
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the image size from the header of a GIF file
+     */
+    public Image setSizeFromGif(File gif)
+    {
 	if (gif.canRead())
 	{
 	    try{
@@ -84,7 +100,7 @@ public class Image extends Tag
 		FileInputStream in = new FileInputStream(gif);
 		if (in.read(buf,0,10)==10)
 		{
-		    Code.debug("Image "+filename+
+		    Code.debug("Image "+gif.getName()+
 			       " is " +
 			       ((0x00ff&buf[7])*256+(0x00ff&buf[6])) +
 			       " x " +

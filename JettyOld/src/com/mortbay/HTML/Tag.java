@@ -27,7 +27,7 @@ public class Tag extends Element
     public void write(Writer out)
 	 throws IOException
     {
-	out.write('<'+tag+' '+attributes()+'>');
+	out.write('<'+tag+attributes()+'>');
     }
 }
 

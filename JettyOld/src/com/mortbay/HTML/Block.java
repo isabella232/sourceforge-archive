@@ -11,7 +11,7 @@ import java.util.*;
 /** HTML Block Composite
  * Block of predefined or arbitrary type.
  * Block types are predefined for PRE, BLOCKQUOTE, CENTER, LISTING,
- * PLAINTEXT, XMP, and DIV (Left and Right).
+ * PLAINTEXT, XMP, DIV (Left and Right) and SPAN.
  * @see  com.mortbay.HTML.Composite
  */
 public class Block extends Composite
@@ -39,6 +39,8 @@ public class Block extends Composite
     public static final String Bold="B";
     /** Italic */
     public static final String Italic="I";
+    /** Span */
+    public static final String Span="SPAN";
 
     /* ----------------------------------------------------------------- */
     private String tag;
@@ -79,7 +81,6 @@ public class Block extends Composite
     {
 	out.write('<');
 	out.write(tag);
-	out.write(' ');
 	out.write(attributes());
 	out.write('>');
         super.write(out);

@@ -1,4 +1,4 @@
-release 2.2.6 - 
+release 2.2.6 - 5 Sep 1999
   + New implementation of ThreadPool, avoids a thread leak problem.
   + Fixed Cookie max age order of magnitude bug.
   + Cookies always available from getCookies.
@@ -14,6 +14,11 @@ release 2.2.6 -
     be configured in ServletHandler.
   + Removed JRUN options from ServletHandler configuration.
   + Added ServletRunnerHandler to the contrib directories.
+  + Updated HTML package to better support CSS:
+     - cssClass, cssID and style methods added to element.
+     - SPAN added to Block
+     - media added to Style
+     - class StyleLink added.
 
 Release 2.2.5 - 19 Aug 1999
   + Fixed bug with closing connections in ThreadedServer
