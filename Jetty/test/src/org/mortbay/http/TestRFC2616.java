@@ -903,10 +903,10 @@ public class TestRFC2616
             
             Code.debug("GET: ",get);
             Code.debug("HEAD: ",head);
-            t.checkContains(get,0,"HTTP/1.0 200","GET");
+            t.checkContains(get,0,"HTTP/1.1 200","GET");
             t.checkContains(get,0,"Content-Type: text/html","GET content");
             t.checkContains(get,0,"Content-Length: ","GET length");
-            t.checkContains(head,0,"HTTP/1.0 200","HEAD");
+            t.checkContains(head,0,"HTTP/1.1 200","HEAD");
             t.checkContains(head,0,"Content-Type: text/html","HEAD content");
             t.checkContains(head,0,"Content-Length: ","HEAD length");
             t.checkContains(get,0,"<HTML>","GET body");
@@ -1048,7 +1048,7 @@ public class TestRFC2616
                                            );
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.0 302","302")+1;
+                                   "HTTP/1.1 302","302")+1;
             t.checkContains(response,offset,
                             "Location: /dump",
                             "redirected");
@@ -1096,7 +1096,7 @@ public class TestRFC2616
                                            );
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.0 302","302")+1;
+                                   "HTTP/1.1 302","302")+1;
             t.checkContains(response,offset,
                             "Location: /dump",
                             "redirected");
@@ -1479,7 +1479,7 @@ public class TestRFC2616
                                            "\n");
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.0 200 OK\015\012","19.6.2 default close")+10;
+                                   "HTTP/1.1 200 OK\015\012","19.6.2 default close")+10;
             t.checkNotContained(response,offset,
                                 "Connection: close","19.6.2 not assumed");
             
@@ -1500,7 +1500,7 @@ public class TestRFC2616
                                            "\n");
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.0 200 OK\015\012","19.6.2 Keep-alive 1")+1;
+                                   "HTTP/1.1 200 OK\015\012","19.6.2 Keep-alive 1")+1;
             offset=t.checkContains(response,offset,
                                    "Connection: keep-alive",
                                    "19.6.2 Keep-alive 1")+1;
@@ -1513,7 +1513,7 @@ public class TestRFC2616
                                    "/R1","19.6.2 Keep-alive 1")+1;
             
             offset=t.checkContains(response,offset,
-                                   "HTTP/1.0 200 OK\015\012","19.6.2 Keep-alive 2")+11;
+                                   "HTTP/1.1 200 OK\015\012","19.6.2 Keep-alive 2")+11;
             offset=t.checkContains(response,offset,
                                    "Connection: close","19.6.2 Keep-alive close")+1;
             offset=t.checkContains(response,offset,

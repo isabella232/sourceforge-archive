@@ -784,7 +784,7 @@ public class HttpFields
      */
     public void putDateField(String name, Date date)
     {
-        put(name, __dateSend.format(date));
+        put(name, __dateCache.format(date));
     }
     
     /* -------------------------------------------------------------- */
@@ -806,7 +806,7 @@ public class HttpFields
      */
     public void putDateField(String name, long date)
     {
-        put(name, __dateSend.format(new Date(date)));
+        put(name, __dateCache.format(date));
     }
 
     /* -------------------------------------------------------------- */

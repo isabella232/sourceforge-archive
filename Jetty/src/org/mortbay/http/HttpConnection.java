@@ -868,7 +868,7 @@ public class HttpConnection
             
             // Common fields on the response
             // XXX could be done faster?
-            _response.setVersion(_version);
+            _response.setVersion(HttpMessage.__HTTP_1_1);
             _response.setDateField(HttpFields.__Date,_request.getTimeStamp());
             _response.setField(HttpFields.__Server,Version.__VersionDetail);
             _response.setField(HttpFields.__ServletEngine,Version.__ServletEngine);

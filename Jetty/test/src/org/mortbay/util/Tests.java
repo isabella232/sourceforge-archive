@@ -150,10 +150,15 @@ public class Tests extends junit.framework.TestCase
             {
                 Thread.sleep(100);
                 String date=dc.format(System.currentTimeMillis());
-                assertEquals( "Same Date", 
+
+                System.err.println("\nlast="+last);
+                System.err.println("date="+date);
+                
+                
+                assertEquals( "Same Date",
                               last.substring(0,17),
                               date.substring(0,17));
-
+                
                 if (last.substring(17).equals(date.substring(17)))
                     change=true;
                 else
@@ -167,13 +172,22 @@ public class Tests extends junit.framework.TestCase
 
                     // This won't work at midnight!
                     assertTrue(  "Time changed",
-                            ds==ls+1 ||
-                            ds==0 && dm==lm+1 ||
-                            ds==0 && dm==0 && dh==lh+1);
+                                 ds==ls+1 ||
+                                 ds==0 && dm==lm+1 ||
+                                 ds==0 && dm==0 && dh==lh+1);
                 }
                 last=date;
             }
             assertTrue("time changed", change);
+
+
+            // Test string is cached
+            String s1=dc.format(System.currentTimeMillis());
+            dc.format(1);
+            String s2=dc.format(System.currentTimeMillis());
+            dc.format(System.currentTimeMillis()+10*60*60);
+            String s3=dc.format(System.currentTimeMillis());
+            assertTrue(s1==s2 || s2==s3);
     }
 
     /* ------------------------------------------------------------ */
