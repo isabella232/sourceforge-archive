@@ -122,10 +122,6 @@
     <location>/error401.html</location>
   </error-page>
   <error-page>
-    <error-code>403</error-code>
-    <location>/dump/403</location>
-  </error-page>
-  <error-page>
     <error-code>404</error-code>
     <location>/error404.html</location>
   </error-page>
@@ -213,7 +209,7 @@
     <realm-name>Jetty Demo Realm</realm-name>
     <form-login-config>
        <form-login-page>/auth/logon.html?param=test</form-login-page>
-       <form-error-page></form-error-page>
+       <form-error-page>/auth/logonError.html</form-error-page>
     </form-login-config>
   </login-config>
 
