@@ -19,7 +19,7 @@ Jetty-4.2.0pre0 - 13 October 2002
  + Allow %3B encoded ; in URLs
  + Allow anonymous realm
 
-Jetty-4.1.2rc0 - 13 October 2002
+Jetty-4.1.2 - 13 October 2002
  + Some AJP13 optimizations.
  + getNamedDispatcher(null) returns containers default servlet.
  + unquote charset in content type
