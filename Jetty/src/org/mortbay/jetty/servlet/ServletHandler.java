@@ -409,6 +409,7 @@ public class ServletHandler
                                           httpRequest,
                                           httpResponse,
                                           getHolderEntry(pathInContext));
+        
         return httpServletRequest;
     }
 
@@ -448,11 +449,12 @@ public class ServletHandler
         if (entry!=null)
         {
             String servletPathSpec=(String)entry.getKey();            
-            servletHttpRequest.setPaths(PathMap.pathMatch(servletPathSpec,
-                                                          pathInContext),
-                                        PathMap.pathInfo(servletPathSpec,
-                                                         pathInContext));
-            servletHttpRequest.setServletHolder((ServletHolder)entry.getValue());
+            servletHttpRequest.setServletPaths(pathInContext,
+                                               PathMap.pathMatch(servletPathSpec,
+                                                                 pathInContext),
+                                               PathMap.pathInfo(servletPathSpec,
+                                                                pathInContext),
+                                               (ServletHolder)entry.getValue());
         }
         Code.debug("Servlet request for ",entry);
         return servletHttpRequest;

@@ -199,6 +199,7 @@ Other targets:
 
   <!-- ==================================================================== -->
   <target name="webapps" depends="webapp.jetty,webapp.examples">
+    <copy file="${demo.webapps}/jetty/images/jetty_banner.gif" tofile="${webapps}/root/jetty_banner.gif" />
   </target>
 
   <!-- ==================================================================== -->

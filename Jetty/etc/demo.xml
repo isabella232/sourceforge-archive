@@ -111,7 +111,7 @@
       <Arg>org.apache.jasper.servlet.JspServlet</Arg>
     </Call>   
 
-    <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/docroot/</Set>
+    <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/demo/docroot/</Set>
     <Set name="ServingResources">TRUE</Set>
 
     <Call name="addHandler">
@@ -121,6 +121,8 @@
     <Set name="ClassPath"><SystemProperty name="jetty.home" default="."/>/demo/servlets/</Set>
     <Set name="DynamicServletPathSpec">/servlet/*</Set>
   </Call>
+
+
 
   <Call name="addContext">
     <Arg>/javadoc/*</Arg>

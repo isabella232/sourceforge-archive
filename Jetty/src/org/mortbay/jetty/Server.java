@@ -182,7 +182,8 @@ public class Server extends HttpServer
             
             if (context.toLowerCase().endsWith(".war"))
                 context=context.substring(0,context.length()-4);
-            if (context.equalsIgnoreCase("root"))
+            if (context.equalsIgnoreCase("root")||
+                context.equalsIgnoreCase("root/"))
             {
                 Log.event("ROOT Context: "+app);
                 context="/";

@@ -90,6 +90,7 @@ public class ServletHttpRequest
     private BufferedReader _reader=null;
     private int _inputState=0;
     private ServletHolder _servletHolder;
+    private String _pathInContext;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -123,9 +124,9 @@ public class ServletHttpRequest
     }
     
     /* ------------------------------------------------------------ */
-    void setServletHolder(ServletHolder servletHolder)
+    String getPathInContext()
     {
-        _servletHolder=servletHolder;
+        return _pathInContext;
     }
     
     /* ------------------------------------------------------------ */
@@ -135,10 +136,15 @@ public class ServletHttpRequest
      * @param servletPath 
      * @param pathInfo 
      */
-    void setPaths(String servletPath,String pathInfo)
+    void setServletPaths(String pathInContext,
+                         String servletPath,
+                         String pathInfo,
+                         ServletHolder holder)
     {
+        _pathInContext=pathInContext;
         _servletPath=servletPath;
         _pathInfo=pathInfo;
+        _servletHolder=holder;
     }
     
     /* ------------------------------------------------------------ */

@@ -269,7 +269,6 @@ public class Dispatcher implements RequestDispatcher
                 request.setServletPath(PathMap.pathMatch(_pathSpec,_path));
                 request.setPathInfo(PathMap.pathInfo(_pathSpec,_path));
                 request.setQueryString(query);
-                servletHttpRequest.setServletHolder(_holder);
                 _holder.handle(request,response);
             }
         }
