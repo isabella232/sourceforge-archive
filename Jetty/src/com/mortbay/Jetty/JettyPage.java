@@ -183,6 +183,7 @@ public class JettyPage extends Page
 	_table.add("&nbsp;<P>");
 
 	// home logos
+	_table.add("<A HREF=\"http://www.mortbay.com\"><IMG SRC=\""+root+"images/mbLogoBar.png\" BORDER=0></A><P>\n");
 	_table.add("<A HREF=\"http://www.inetu.com\"><IMG SRC=\""+root+"images/inetu.png\" BORDER=0></A><P>\n");
 	_table.add("<A HREF=\"http://sourceforge.net/projects/jetty\"><IMG SRC=\""+root+"images/sourceforge.png\" BORDER=0></A><P>\n");
 	
@@ -192,6 +193,9 @@ public class JettyPage extends Page
 	_table.newCell();
 	_table.cell().top();
 	_table.cell().left();
+	if (path.endsWith(".txt"))
+	    _table.nest(new Block(Block.Pre));
+	
     }
     
     /* ------------------------------------------------------------ */

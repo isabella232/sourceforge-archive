@@ -33,7 +33,7 @@ public class JettyServlet extends HttpServlet
 	    if ("/".equals(pathInfo))
 		pathInfo="/index.html";
 	    
-	    if (!pathInfo.endsWith(".html"))
+	    if (!pathInfo.endsWith(".html") && !pathInfo.endsWith(".txt") )
 		return;
 	    
 	    file = new File(request.getPathTranslated());

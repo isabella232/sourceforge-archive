@@ -1,7 +1,4 @@
 
-THIS IS OUT OF DATE SINCE WEB APPS WERE ADDED AND 1.1 SUPPORT DROPPED
-see XXX comments.  Fixed soon....
-
 Jetty 3
 =======  
 Jetty is an Open Source HTTP Servlet Server written in 100% Java. 
@@ -19,34 +16,14 @@ the Jetty 2 code base. The aims of the Jetty 3 developement include:
   + Utilize java collection classes for improved performance.
   + Improved coding standards and increasing test coverage.
 
-Currently the release contains only a skeleton 2.1 servlet container. 
-Work to date in the HTTP package has concentrated on RFC2616 compliance, 
-performance and testing.  
-See the VERSION.TXT and FEATURES.TXT files for more detail.
-
 
 Environment
 ===========
-XXX - NOW ONLY 1.2
-Development has been done in JDK1.1 with the 1.2 Collection classes.
-The compiled classes excluding test harnesses are put into lib/jetty3.jar,
+Development has been done in JDK1.2 using the collection classes.
+The compiled classes excluding test harnesses are put into lib/com.mortbay.jetty.jar,
 so the following CLASSPATH is required (or the non unix equivalent):
 
-XXX - NOW need jaxp libraries
-
-  CLASSPATH=$JETTY3_HOME/lib/com.mortbay.jetty.jar:$JETTY3_HOME/lib/collections.jar:$JETTY3_HOME/lib/javax.servlet.jar
-
-To compile the source with JDK1.1 the following class path should be used.
-
-  CLASSPATH=$JETTY3_HOME/src:$JETTY3_HOME/lib/collections.jar:$JETTY3_HOME/lib/javax.servlet.jar
-
-XXX - not needed now
-To compile with JDK1.2, the com.sun.java.util.collections package
-must be removed by running the bin/useJava2Collections script (the
-distribution includes the results of this in src1.2 directory).
-Then compile using the class path:
-
-  CLASSPATH=$JETTY3_HOME/src:$JETTY3_HOME/lib/javax.servlet.jar
+  CLASSPATH=$JETTY3_HOME/lib/com.mortbay.jetty.jar:$JETTY3_HOME/lib/jaxp.jar:$JETTY3_HOME/lib/parser.jar:$JETTY3_HOME/lib/javax.servlet.jar
 
 
 Test Harnesses
@@ -59,16 +36,14 @@ harnesses can be run with
   java com.mortbay.HTTP.TestHarness
 
 Note that the test harnesses are not in the jar file, so you will need
-to build all the source and run with the following classpath(or the non 
-unix equivalent):
-
-  CLASSPATH=$JETTY3_HOME/src:$JETTY3_HOME/lib/collections.jar
+to build all the source and run with the source hierarchy in the CLASSPATH.
 
 
 WWW Server
 ==========
 
-A Demo server server can be run on port 8080 with the command:
+A Demo server can be run on port 8080 for the web application in 
+$JETTY_HOME/webapps/jetty with the command:
 
   java com.mortbay.Jetty.Demo
 
@@ -79,13 +54,15 @@ A raw HTTP server can be run with the command
 
 By default it runs on port 8080 and serves files from "./FileBase" and 
 dynamic servlet from "./servlets" and the system class path. 
+It also runs the web application in $JETTY_HOME/webapps.default.
+
 The server can be configured by using command line options, which can 
 be displayed with 
 
   java com.mortbay.HTTP.HttpServer -?
 
-Servers can also be configured in code.  The demo server is configured
-with code similar to:
+
+Servers can also be configured in code. For example:
 
    // Make server
    HttpServer server = new HttpServer();
@@ -109,7 +86,6 @@ with code similar to:
    server.start();
 
 
-A configuration file format based on XML will soon be developed.
 
 
 Distribution
@@ -117,6 +93,7 @@ Distribution
 Jetty distributions and information is available from:
 
    http://jetty.mortbay.com
+   http://sourceforge.net/project/jetty
    ftp://jetty.mortbay.com/pub
    
 

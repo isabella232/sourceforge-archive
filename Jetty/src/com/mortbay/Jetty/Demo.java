@@ -40,7 +40,7 @@ public class Demo
 				     "/",
 				     "./webapps/jetty");
 	    context=server.getContext(null,"/handler/*");
-	    context.setFileBase(".");
+	    context.setFileBase("./FileBase/");
 	    context.addServlet("/dump,/dump/*","com.mortbay.Servlet.Dump");
 	    context.addServlet("/session","com.mortbay.Servlet.SessionDump");
 	    context.setServingFiles(true);

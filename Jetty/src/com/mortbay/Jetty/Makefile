@@ -27,6 +27,8 @@ install: JettyServlet.class JettyPage.class
 	do \
 		cp $$FILE $(INSTALLROOT)/webapps/$(WEBAPP)/WEB-INF/classes/com/mortbay/Jetty ;\
 	done
+	cp $(INSTALLROOT)/LICENSE.html $(INSTALLROOT)/webapps/$(WEBAPP)/LICENSE.html
+	cp $(INSTALLROOT)/VERSION.TXT $(INSTALLROOT)/webapps/$(WEBAPP)/versions.txt
 
 
 

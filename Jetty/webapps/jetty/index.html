@@ -4,3 +4,183 @@ HTTP Servlet Server written in 100% Java. It is designed to be light
 weight, high performance, embeddable, extensible and flexible, thus 
 making it an ideal platform for serving  dynamic HTTP requests from 
 any Java application.
+<BR>&nbsp;
+<TABLE><TR><TD VALIGN=top><FONT FACE=Helvetica,Ariel>
+<UL>
+  <LI><A HREF="#Java">100% Java</A>
+  <LI><A HREF="#Open">Open Source</A>
+  <LI><A HREF="#Servlets">Servlet API</A>
+  <LI><A HREF="#HTTP11">HTTP/1.1 Protocol</A>
+  <LI><A HREF="#Embeddable">Embeddable</A>
+  <LI><A HREF="#JSP">Java Server Pages</A>
+  <LI><A HREF="#SSL">SSL Support</A>
+</UL>
+</TD><TD VALIGN=top><FONT FACE=Helvetica,Ariel>
+<UL>
+  <LI><A HREF="#Modular">Modular Architecture</A>
+  <LI><A HREF="#Efficient">Small & Efficient</A>
+  <LI><A HREF="#Filtering">Response Filtering</A>
+  <LI><A HREF="#Config">Flexible Configuration</A>
+  <LI><A HREF="#Util">Utility Classes</A>
+  <LI><A HREF="#HTML">HTML Generation</A>.
+</UL>
+</TABLE>
+
+<A NAME="Java"></A>
+<BR>&nbsp;<H3>100% Java Server</H3>  
+Quoting from Javasoft's <A HREF=http://www.javasoft.com/products/java-server/servlets/index.html>
+Java Servlet API White Paper</A>:
+<BLOCKQUOTE><I>
+Java is a great platform for writing the server side of your web-based
+application. Servlets are emerging as the preferred way of creating highly
+dynamic WWW services linked to real backend applications and databases.
+See the growing trend at <a href="http://www.servletcentral.com">http://www.servletcentral.com</a>.
+<P>
+Java makes it easy to develop and deploy all parts of a professional, maintainable distributed system application. The Servlet API
+provides you the fastest way to start using Java Server technology in your networked applications. You can start with applications which
+involve clients and a single server, and gradually create multi-tier enterprise applications which integrate the power and flexibility of Java
+throughout your existing network ... because Java Servlets run on the software and hardware you've already installed. 
+</I></BLOCKQUOTE>
+
+
+<A NAME="Open"></A>
+<BR>&nbsp;<H3>Open Source License</H3>
+Jetty is released under an <A HREF="http://www.opensource.org">Open Source</A>
+License, derived from the Artistic License. Full source code is included in
+the release. <B><A HREF=/software/LICENSE.html>The License</A></B> puts few restrictions on usage of Jetty.
+
+
+<A NAME="Servlets"></A>
+<BR>&nbsp;<H3>Serving Servlets</H3>
+Jetty supports the javax.servlet. API defined by
+<A HREF=http://www.javasoft.com>JavaSoft</A>:
+<BLOCKQUOTE><I>
+Servlets are protocol- and platform-independent server side components,
+written in Java, which dynamically extend Java-enabled
+servers. They provide a general framework for services built using the
+request-response paradigm. </I> [Javasoft's Java Servlet API White Paper]
+</BLOCKQUOTE>
+Jetty 2 uses the 2.1 Servlet API and Jetty 3 uses the 2.2 Servlet API.
+
+<A NAME="HTTP11"></A>
+<BR>&nbsp;<H3>HTTP/1.1 Protocol</H3>
+Jetty supports the HTTP/1.0 and HTTP/1.1 protocols. The 1.1 protocol offers
+much greater network performance.  Furthermore, as the HTTP server and the
+Servlet container and in the same JVM, this gives simpler configuration, 
+much greater performance and full access to all server resources from 
+within servlets.
+
+<A NAME="Modular"></A>
+<BR>&nbsp;<H3>Modular Architecture</H3>
+Jetty request handling is based on stacks of abstracted request handlers.
+All Jetty features are provided by modular request handlers that are stacked
+together to provide an  optimal set of handlers or new handlers
+may be written for server extensions.
+Current Handlers provided with Jetty include:<UL>
+  <LI>Logging.
+  <LI>Basic Authentication.
+  <LI>Sessions.
+  <LI>Translates.
+  <LI>Response Filtering.
+  <LI>Servlet Handling.
+  <LI>File Serving.
+  <LI>Request Forwarding.
+  <LI>Proxy Server.
+  <LI>Forms, querries & Cookies.
+</UL>
+Key classes within Jetty are dynamicaly loaded so that they may be replaced
+with alternate or extended implementations. For example SSL handling is
+provided by extending the standard HttpListener class.
+
+
+<A NAME="Embeddable"></A>
+<BR>&nbsp;<H3>Embeddable</H3>
+For many applications, HTTP is just another interface protocol. Jetty can
+easily be embedded in such applications and products without adopting a 
+WWW centric application architecture. A good example of this style of usage
+is in a distributed system, where each process runs it's own Jetty server
+in order to present a managment and monitoring Web interface. 
+
+<A NAME="JSP"></A>
+<BR>&nbsp;<H3>GNU Java Server Pages</H3>
+Jetty includes a JSP package, which implements Java Server Pages, a method
+for adding dynamic content to HTML pages.
+
+
+<A NAME="SSL"></A>
+<BR>&nbsp;<H3>SSL Support</H3>
+A HttpListener extension class has been contributed by
+<A HREF=http://www.forge.com.au>FORGE</A> that integrates their
+Protekt SSL product with Jetty. A similar approach may be used to
+integrate other SSL implementations.
+
+
+<A NAME="Efficient"></A>
+<BR>&nbsp;<H3>Small & Efficient</H3>
+Jetty has been optimized by commercial and experimental use since 1995 and
+a small and efficient server is the result: <UL>
+  <LI>A full featured server can be configured in a jar file under 100KB.
+  <LI>Optimized parsing is performed on requests.
+  <LI>Minimal Object and thread creation.
+  <LI>Server performance degrades reasonably under stress.
+</UL>
+
+
+<A NAME="Config"></A>
+<BR>&nbsp;<H3>Flexible Configuration</H3>       
+Jetty has been designed to highly configurable and flexible. It can be used
+as a stand-alone server running application servlets or it can be embedded
+in java application to provide a WWW interface to the services that they
+provide.  The configuration of a server is controlled by an abstract
+interface of which there are several implementations:<UL>
+  <LI>Property file driven configuration.
+  <LI>Dynamic loading of servlets from path.
+  <LI>Dedicated File Serving from current directory.
+  <LI>Interpretation of other common server configuration files.
+  <LI>Application specific configuration implementations.
+</UL>
+
+
+
+<A NAME="Filtering"></A>
+<BR>&nbsp;<H3>Response Filtering</H3>
+Jetty provides a mechanism to allow filters to be conditionally inserted
+into the output stream of a response to a request.  These filters, which
+are activated on content type, allow pages arbitrary changes to be made to
+responses that may have been generated, retrieved from a file or even
+fetched from another server.
+<p>
+Jetty provides a filter for HTML which can use reflection to execute
+Java method calls embedded in specially formatted HTML comments.
+This is allows dynamic content to be added to pages that have been
+statically authored or generated elsewhere.
+Support is provided to use this mechanism for server side includes and
+URL embedding.
+
+
+
+<A NAME="Util"></A>
+<BR>&nbsp;<H3>Utility Classes </B></BR> 
+Bundled with Jetty are several utility packages which form a good basis
+for a Java software infrastructure for WWW development, including:
+<UL>
+  <LI><A HREF=/javadoc/com/mortbay/Base/package-summary.html>Code debugging, asserts, warnings and event logging</A>.
+  <LI><A HREF=/javadoc/com/mortbay/Base/package-summary.html>Test harness for automated regression testing</A>.
+  <LI><A HREF=/javadoc/com/mortbay/FTP/package-summary.html>FTP client package</A>.
+  <LI><A HREF=/javadoc/com/mortbay/HTML/package-summary.html>HTML Generation</A>.
+  <LI><A HREF=/javadoc/com/mortbay/JDBC/package-summary.html>JDBC wrappers</A>.
+  <LI><A HREF=/javadoc/com/mortbay/Util/package-summary.html>Property Tree files</A>.
+  <LI><A HREF=/javadoc/com/mortbay/Util/package-summary.html>Net and IO utilities</A>.
+</UL>
+
+
+<A NAME="HTML"></A>
+<BR>&nbsp;<H3>HTML Generation</H3>
+While HTML is a simple language to learn and write, it can be also be
+very tedious, contrived and error prone.  Furthermore, authored HTML
+is a static resource and cannot be customized to each request or updated
+from a database.
+<P>
+Jetty comes with a rich HTML generation package that can be used on its
+own, with another servlet server or in Jetty servlets. Supported for
+templated look and feel is a key element of this package.

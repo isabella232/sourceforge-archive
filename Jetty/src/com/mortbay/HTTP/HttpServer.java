@@ -529,7 +529,7 @@ public class HttpServer implements LifeCycle
             String[] newArgs=
 	    {
 		"-appContext","/=./webapps/default",
-		"-content","/",
+		"-context","/",
 		"-classPath","./servlets",
 		"-dynamic",
 		"-fileBase","./FileBase/",
