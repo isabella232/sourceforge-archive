@@ -409,82 +409,65 @@ abstract public class ThreadedServer extends ThreadPool
     public void stop()
         throws InterruptedException
     {
-        try{
-            if (_acceptor!=null)
-            {
-                _acceptor._running=false;
-                _acceptor.interrupt();
-                Thread.yield();
-                while(_listen!=null && _address!=null)
-                {
-                    try{
-                        InetAddress addr=_address.getInetAddress();
-                        if (addr==null || addr.toString().startsWith("0.0.0.0"))
-                            addr=InetAddress.getLocalHost();
-                        Code.debug("Self connect to close listener ",addr,
-                                   ":"+_address.getPort());
-                        Socket socket = new
-                            Socket(addr,_address.getPort());
-                        Thread.yield();
-                        socket.close();
-                    }
-                    catch(IOException e)
-                    {
-                        Code.ignore(e);
-                        break; // this aint working
-                    }
-                }
-            }
-        }
-        finally
+        if (_acceptor!=null)
         {
-            _listen=null;
+            _acceptor._running=false;
+            _acceptor.interrupt();
+            Thread.yield();
+        }
+
+        synchronized(this)
+        {
+            if (_acceptor!=null)
+                _acceptor.forceStop();
             _acceptor=null;
+        }
+
+        try{
             super.stop();
         }
+        catch(Exception e)
+        {
+            Code.warning(e);
+        }
+        
+        _listen=null;
+        _acceptor=null;
     }
     
     /* --------------------------------------------------------------- */
     synchronized public void destroy()
     {
-        try{
-            if (_acceptor!=null)
-            {
-                _acceptor._running=false;
-                _acceptor.interrupt();
-                Thread.yield();
-                if (_listen!=null && _address!=null)
-                {
-                    try{
-                        InetAddress addr=_address.getInetAddress();
-                        if (addr==null || addr.toString().startsWith("0.0.0.0"))
-                            addr=InetAddress.getLocalHost();
-                        Code.debug("Self connect to close listener ",addr,
-                                   ":"+_address.getPort());
-
-                        Socket socket=new Socket(addr,_address.getPort());
-                        Thread.yield();
-                        socket.close();
-                    }
-                    catch(IOException e)
-                    {
-                        Code.ignore(e);
-                    }
-                }
-            }
-        }
-        finally
+        if (_acceptor!=null)
         {
-            if (_listen!=null)
-            {
-                try{_listen.close();}
-                catch(IOException e){Code.warning(e);}
-            }
-            _listen=null;
-            _acceptor=null;
-            _address=null;
-            super.destroy();
+            _acceptor._running=false;
+            _acceptor.interrupt();
+            Thread.yield();
         }
+
+        synchronized(this)
+        {
+            if (_acceptor!=null)
+                _acceptor.forceStop();
+            _acceptor=null;
+        }
+
+        try{
+            super.destroy();
+            
+            synchronized(this)
+            {
+                if (_listen!=null)
+                    _listen.close();
+            }
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+        }
+        
+        _listen=null;
+        _acceptor=null;
     }
 
 
@@ -504,7 +487,8 @@ abstract public class ThreadedServer extends ThreadPool
         public void run()
         {
             try
-            {    
+            {
+                this.setName("Acceptor "+_listen);
                 _running=true;
                 while(_running)
                 {
@@ -512,7 +496,12 @@ abstract public class ThreadedServer extends ThreadPool
                     {
                         Socket socket=acceptSocket(_listen,_soTimeOut);
                         if (socket!=null)
-                            ThreadedServer.this.run(socket);
+                        {
+                            if (_running)
+                                ThreadedServer.this.run(socket);
+                            else
+                                socket.close();
+                        }
                     }
                     catch(Exception e)
                     {
@@ -522,10 +511,37 @@ abstract public class ThreadedServer extends ThreadPool
             }
             finally
             {
-                Log.event("Closing listener on "+_address);
+                Log.event("Stopping "+this.getName());
                 try{_listen.close();}
                 catch (IOException e) {Code.ignore(e);}
-                _listen=null;
+                synchronized(ThreadedServer.this)
+                {
+                    _listen=null;
+                    _acceptor=null;
+                }
+            }
+        }
+
+        void forceStop()
+        {
+            if(_listen!=null && _address!=null)
+            {
+                try{
+                    InetAddress addr=_address.getInetAddress();
+                    if (addr==null || addr.toString().startsWith("0.0.0.0"))
+                        addr=InetAddress.getLocalHost();
+                    Code.debug("Self connect to close listener ",addr,
+                               ":"+_address.getPort());
+                    Socket socket = new
+                        Socket(addr,_address.getPort());
+                    Thread.yield();
+                    socket.close();
+                    Thread.yield();
+                }
+                catch(IOException e)
+                {
+                    Code.warning("problem stopping acceptor "+_listen,e);
+                }
             }
         }
     }

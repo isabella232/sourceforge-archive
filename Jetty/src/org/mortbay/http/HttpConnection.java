@@ -8,6 +8,7 @@ package org.mortbay.http;
 import org.mortbay.util.Code;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.ThreadPool;
+import org.mortbay.util.ThreadPool.PoolThread;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -604,13 +605,14 @@ public class HttpConnection
     {            
         _outputSetup=true;
         
-        // Handler forced close
-        // or no idle threads left.
-        _close=
-            HttpFields.__Close.equals(_response.getField(HttpFields.__Connection)) 
-            ||
-            _listener.isOutOfResources();
-        
+        // Handler forced close, listener stopped or no idle threads left.
+        _close=HttpFields.__Close.equals(_response.getField(HttpFields.__Connection));
+        if (!_close && (!_listener.isStarted()||_listener.isOutOfResources()))
+        {
+            _close=true;
+            _response.setField(HttpFields.__Connection,
+                               HttpFields.__Close);
+        }
         if (_close)
             _persistent=false;
         
@@ -751,19 +753,26 @@ public class HttpConnection
      */
     public void handle()
     {
-        while(handleNext());
+        while(_listener.isStarted())
+            if (!handleNext())
+                break;
     }
     
     /* ------------------------------------------------------------ */
     /** Handle next request off the connection.
      * The service(request,response) method is called by handle to
      * service each request received on the connection.
+     * If the thread is a PoolThread, the thread is set as inactive
+     * when waiting for a request. 
      * @return true if the connection is still open and may provide
      * more requests.
      */
     public boolean handleNext()
     {
         _handlingThread=Thread.currentThread();
+        PoolThread poolThread=(_handlingThread instanceof PoolThread)
+            ? ((PoolThread)_handlingThread):null;
+        
         HandlerContext context=null;
         try
         {
@@ -788,13 +797,16 @@ public class HttpConnection
             _close=false;
             _keepAlive=false;
             _dotVersion=0;
-            
-            Code.debug("Wait for request header...");
+            Code.debug("Wait for request...");
             
             try
             {
                 _outputSetup=false;
+                if (poolThread!=null)
+                    poolThread.setActive(false);
                 _request.readHeader(getInputStream());
+                if (poolThread!=null)
+                    poolThread.setActive(true);
                 _listener.customizeRequest(this,_request);
             }
             catch(HttpException e){throw e;}

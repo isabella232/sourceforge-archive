@@ -10,6 +10,7 @@ Jetty Versions
  + Change JSESSIONID to jsessionid
  + Log OK state after thread low warnings.
  + Changed unsatisfiable range warnings to debug.
+ + Further improvements in handling of shutdown.
 
 Jetty-3.1.1 - 27 Sep 2001
  + Fixed jar manifest format - patched 28 Sep 2001

@@ -8,6 +8,7 @@ import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.Log;
 import org.mortbay.util.ThreadedServer;
+import org.mortbay.util.ThreadPool.PoolThread;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -104,7 +105,7 @@ public class SocketListener
         super.stop();
         Log.event("Stopped SocketListener on "+getInetAddrPort());
     }
-
+    
     /* --------------------------------------------------------------- */
     public void destroy()
     {
@@ -130,17 +131,19 @@ public class SocketListener
                                socket.getOutputStream(),
                                socket);
         
-        if (_lowResourcePersistTimeMs>0 && isLowOnResources())
+        try
         {
-            try
+            if (_lowResourcePersistTimeMs>0 && isLowOnResources())
             {
                 _throttled++;
                 socket.setSoTimeout(_lowResourcePersistTimeMs);
             }
-            catch(Exception e)
-            {
-                Code.warning(e);
-            }
+            else
+                socket.setSoTimeout(getMaxIdleTimeMs());
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
         }
         connection.handle();
     }
@@ -174,9 +177,10 @@ public class SocketListener
     {
         try
         {
-            if (_throttled>0 && socket.getSoTimeout()!=getMaxReadTimeMs())
+            if (socket.getSoTimeout()!=getMaxReadTimeMs())
             {
-                _throttled--;
+                if (_throttled>0)
+                    _throttled--;
                 socket.setSoTimeout(getMaxReadTimeMs());
             }
         }
@@ -196,18 +200,23 @@ public class SocketListener
      */
     public void persistConnection(HttpConnection connection)
     {
-        if (_lowResourcePersistTimeMs>0 && isLowOnResources())
+        try
         {
-            try
+            if (_lowResourcePersistTimeMs>0 && isLowOnResources())
             {
                 _throttled++;
                 Socket socket=(Socket)(connection.getConnection());
                 socket.setSoTimeout(_lowResourcePersistTimeMs);
             }
-            catch(Exception e)
+            else
             {
-                Code.warning(e);
+                Socket socket=(Socket)(connection.getConnection());
+                socket.setSoTimeout(getMaxIdleTimeMs());
             }
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
         }
     }
 

@@ -252,24 +252,25 @@ public class Server extends HttpServer
         }
 
         // Create and add a shutdown hook
-        Thread hook =
-            new Thread() {
-                    public void run() {
-                        Log.event("Shutdown hook executing");
-                        for (int i=0;i<servers.length;i++)
-                        {
-                            try{servers[i].stop();}
-                            catch(Exception e){Code.warning(e);}
-                        }
-                    }
-                };
-
         try
         {
-            Method shutdownhook=
-                java.lang.Runtime.class.getMethod("addShutdownHook",new
-                    Class[] {java.lang.Thread.class});
-            shutdownhook.invoke(Runtime.getRuntime(),
+            Method shutdownHook=
+                java.lang.Runtime.class
+                .getMethod("addShutdownHook",new Class[] {java.lang.Thread.class});
+            Thread hook = 
+                new Thread() {
+                        public void run()
+                        {
+                            setName("Shutdown");
+                            Log.event("Shutdown hook executing");
+                            for (int i=0;i<servers.length;i++)
+                            {
+                                try{servers[i].stop();}
+                                catch(Exception e){Code.warning(e);}
+                            }
+                        }
+                    };
+            shutdownHook.invoke(Runtime.getRuntime(),
                                 new Object[]{hook});
         }
         catch(Exception e)

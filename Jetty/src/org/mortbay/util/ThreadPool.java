@@ -35,33 +35,25 @@ public class ThreadPool
     implements LifeCycle
 {
     /* ------------------------------------------------------------ */
-    static int __maxThreads =
-        Integer.getInteger("THREADPOOL_MAX_THREADS",256).intValue();
-    
-    /* ------------------------------------------------------------ */
-    static int __minThreads =
-        Integer.getInteger("THREADPOOL_MIN_THREADS",1).intValue();
-
-    /* ------------------------------------------------------------ */
-    static int __stopWaitMs =
-        Integer.getInteger("THREADPOOL_STOP_WAIT",5000).intValue();
-
-    /* ------------------------------------------------------------ */
     /** The number of times a null lock check should synchronize.
      */
     public static int __nullLockChecks =
         Integer.getInteger("THREADPOOL_NULL_LOCK_CHECKS",2).intValue();
 
     /* ------------------------------------------------------------ */
-    String __threadClass =
-        System.getProperty("THREADPOOL_THREAD_CLASS",
-                           "java.lang.Thread");
+    static int __maxThreads = 
+        Integer.getInteger("THREADPOOL_MAX_THREADS",256).intValue();
+    static int __minThreads =
+        Integer.getInteger("THREADPOOL_MIN_THREADS",1).intValue();
+    static String __threadClass =
+        System.getProperty("THREADPOOL_THREAD_CLASS");
     
     /* ------------------------------------------------------------------- */
     private HashSet _threadSet;
     private int _maxThreads = __maxThreads;
     private int _minThreads = __minThreads;
-    private int _maxIdleTimeMs=0;
+    private int _maxIdleTimeMs=10000;
+    private int _maxStopTimeMs=-1;
     private String _name;
     private int _threadId=0;
     private HashSet _idleSet=new HashSet();
@@ -79,13 +71,16 @@ public class ThreadPool
     {
         try
         {
-            _threadClass = Class.forName( __threadClass );
+            if (__threadClass!=null)
+                _threadClass = Class.forName( __threadClass );
+            else
+                _threadClass = PoolThread.class;
             Code.debug("Using thread class '", _threadClass.getName(),"'");
         }
         catch( Exception e )
         {
             Code.warning( "Invalid thread class (ignored) ",e );
-            _threadClass = java.lang.Thread.class;
+            _threadClass = PoolThread.class;
         }
         setThreadClass(_threadClass);
     }
@@ -130,6 +125,8 @@ public class ThreadPool
     public synchronized void setThreadClass(Class threadClass)
         throws IllegalStateException
     {
+        Log.event("setThreadClass("+threadClass+")");
+        
         if (_running)
             throw new IllegalStateException("Thread Pool Running");
         
@@ -140,7 +137,7 @@ public class ThreadPool
         {
             Code.warning( "Invalid thread class (ignored) "+
                           _threadClass.getName() );
-            _threadClass = java.lang.Thread.class;
+            _threadClass = PoolThread.class;
         }
 
         try
@@ -151,7 +148,7 @@ public class ThreadPool
         catch(Exception e)
         {
             Code.warning("Invalid thread class (ignored)",e);
-            setThreadClass(java.lang.Thread.class);
+            setThreadClass(PoolThread.class);
         }
 
         if (_name==null)
@@ -276,6 +273,28 @@ public class ThreadPool
     {
         _maxIdleTimeMs=maxIdleTimeMs;
     }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the maximum thread stop time.
+     * Threads that do not stop within this time are interrupted and
+     * then discarded.  If <=0 the max idle time is used instead.
+     * @return Max stop time in ms.
+     */
+    public int getMaxStopTimeMs()
+    {
+        return _maxStopTimeMs;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the maximum thread stop time.
+     * Threads that do not stop within this time are interrupted and
+     * then discarded.  If <=0 the max idle time is used instead.
+     * @param maxIdleTimeMs Max stop time in ms.
+     */
+    public void setMaxStopTimeMs(int maxStopTimeMs)
+    {
+        _maxStopTimeMs=maxStopTimeMs;
+    }
 
     /* ------------------------------------------------------------ */
     /** Not required.
@@ -316,102 +335,129 @@ public class ThreadPool
     public void stop()
         throws InterruptedException
     {
-        Code.debug("Stop Pool ",_name);
+        Code.debug("Stop ThreadPool ",_name);
         _running=false;
+
+        long stop_at = System.currentTimeMillis();
+        long now=stop_at;
+        int wait_time = getMaxStopTimeMs();
+        if (wait_time<0)
+            wait_time = getMaxIdleTimeMs();
         
-        while (_idleSet!=null && !_idleSet.isEmpty())
+        int sleep_time=500;
+        
+        while (_threadSet!=null && !_threadSet.isEmpty() && now-stop_at<=wait_time)
         {
+            if (stop_at!=now)
+            {
+                Thread.sleep(sleep_time);
+                sleep_time*=2;
+            }
+            
             synchronized(this)
             {
-                Object[] threads=_idleSet.toArray();
-                for(int t=0;t<threads.length;t++)
+                Iterator iter = _threadSet.iterator();
+                while(iter.hasNext())
                 {
-                    Thread thread=(Thread)threads[t];
-                    thread.interrupt();
-                }
-            }
-
-            // This section is here as some JVMs do not interrupt
-            // in all situations that they should.
-            Thread.yield();
-            if (_idleSet.size()>0)
-            {
-                Thread.sleep(100);   
-                if (_idleSet.size()>0)
-                {
-                    synchronized(this)
+                    Thread thread=(Thread)iter.next();
+                    if (_idleSet.contains(thread))
                     {
-                        Object[] threads=_idleSet.toArray();
-                        for(int t=0;t<threads.length;t++)
-                        {
-                            Thread thread=(Thread)threads[t];
-                            thread.stop();
-                        }
+                        Code.debug("Interrupt idle ",thread);
+                        thread.interrupt();
+                    }
+                    else if (now-stop_at>=wait_time)
+                    {
+                        Log.event("Interrupt "+thread);
+                        thread.interrupt();
+                    }
+                    else
+                    {
+                        boolean stopped=(thread instanceof PoolThread)
+                            ?stopJob(thread,((PoolThread)thread).getJob())
+                            :stopJob(thread,null);
+                        if (stopped)
+                            iter.remove();
                     }
                 }
-                
-                if (_idleSet.size()>0)
-                {
-                    Code.warning("JVM cannot interrupt Idle Threads!");
-                    _idleSet.clear();
-                }
+            }
+            Thread.yield();
+            now=System.currentTimeMillis();
+        }
+        
+        Thread.yield();
+        
+        if (_threadSet!=null && !_threadSet.isEmpty())
+            Code.warning("All threads could not be stopped");
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Stop a job.
+     * Called by stop() to encourage a active job to stop.
+     * Implementations of this method are under no obligation to
+     * interrupt active work and the default implementation waits for
+     * the job to complete.
+     * The default implementation will return true only if the job is
+     * being handled by an inactive PoolThread.
+     * @param thread The Thread running the job
+     * @param job The job, or null if it cannot be determined
+     * @return True if the job can be considered stopped.  
+     */
+    protected boolean stopJob(Thread thread,Object job)
+    {
+        if (thread instanceof PoolThread)
+        {
+            PoolThread poolThread = (PoolThread)thread;
+            if (!poolThread.isActive())
+            {
+                Log.event("Interrupt inactive "+thread);
+                thread.interrupt();
+                return true;
             }
         }
+        
+        Log.event("Wait for "+thread);
+        return false;
     }
+    
     
     /* ------------------------------------------------------------ */
     /** Destroy the ThreadPool.
      * All threads are interrupted and if they do not terminate after
      * a short delay, they are stopped.
      */
-    synchronized public void destroy() 
+    public void destroy() 
     {
-        Code.debug("Destroy Pool ",_name);
+        Code.debug("Destroy ThreadPool ",_name);
 
         if (_threadSet==null)
             return;
         
         _running=false;
         
-        // interrupt the threads
-        Object[] threads=_threadSet.toArray();
-        for(int t=0;t<threads.length;t++)
+        synchronized(this)
         {
-            Thread thread=(Thread)threads[t];
-            thread.interrupt();
-        }
-        
-        // wait a while for all threads to die
-        Thread.yield();
-        try{
-            long end_wait=System.currentTimeMillis()+__stopWaitMs;
-            while (_threadSet.size()>0 &&
-                   end_wait>System.currentTimeMillis())
-                Thread.yield();
-            
-            // Warn about any still running
-            if (_threadSet.size()>0)
+            if (_threadSet!=null && !_threadSet.isEmpty())
             {
-                threads=_threadSet.toArray();
-                for(int t=0;t<threads.length;t++)
+                Iterator iter = _threadSet.iterator();
+                while(iter.hasNext())
                 {
-                    Thread thread=(Thread)threads[t];
-                    if (thread.isAlive())
+                    Thread thread=(Thread)iter.next();
+                    if (_idleSet.contains(thread))
                     {
+                        Code.debug("Interrupt idle ",thread);
                         thread.interrupt();
-                        Thread.yield();
-                        thread.stop();
-                        if (thread.isAlive())
-                            Code.warning("Can't stop "+thread);
+                    }
+                    else 
+                    {
+                        Log.event("Interrupt "+thread);
+                        thread.interrupt();
                     }
                 }
             }
         }
-        finally
-        {
-            _threadSet.clear();
-            _threadSet=null;
-        }
+        Thread.yield();
+        _threadSet.clear();
+        _threadSet=null;
     }
 
     
@@ -421,7 +467,7 @@ public class ThreadPool
     private synchronized void newThread()
         throws InvocationTargetException,IllegalAccessException,InstantiationException
     {
-        Runnable runner = new PoolThreadRunnable();
+        Runnable runner = new JobRunner();
         Object[] args = {runner};
         Thread thread=
             (Thread)_constructThread.newInstance(args);
@@ -517,36 +563,99 @@ public class ThreadPool
 
     /* ------------------------------------------------------------ */
     /** Pool Thread run class.
+     * This class or derivations of it are recommended for use with
+     * the ThreadPool.  The PoolThread allows the threads job to be
+     * retrieved and active status to be indicated.
      */
-    private class PoolThreadRunnable
+    public static class PoolThread extends Thread
+    {
+        JobRunner _jobRunner;
+        boolean _active=true;
+        
+        /* ------------------------------------------------------------ */
+        public PoolThread(Runnable r)
+        {
+            super(r);
+            _jobRunner=(JobRunner)r;
+        }
+        
+        /* ------------------------------------------------------------ */
+        public String toString()
+        {
+            return _jobRunner.toString();
+        }
+
+        /* ------------------------------------------------------------ */
+        public Object getJob()
+        {
+            return _jobRunner.getJob();
+        }
+
+        /* ------------------------------------------------------------ */
+        /** Set active state.
+         * @param active 
+         */
+        public void setActive(boolean active)
+        {
+            _active=active;
+        }
+
+        /* ------------------------------------------------------------ */
+        /** Is the PoolThread active.
+         * A PoolThread handling a job, may set it's own active state.
+         * Implementation of of the ThreadPool.stopJob method should
+         * attempt to wait for active threads to complete.
+         * @return True if thread is active.
+         */
+        public boolean isActive()
+        {
+            return _active;
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Pool Thread run class.
+     */
+    private class JobRunner
         implements Runnable
     {
+        Object _job;
+        int _runs;
+        Thread _thread;
+        String _threadName;
+
+        /* ------------------------------------------------------------ */
+        Object getJob()
+        {
+            return _job;
+        }
+        
         /* -------------------------------------------------------- */
         /** ThreadPool run.
          * Loop getting jobs and handling them until idle or stopped.
          */
         public void run() 
         {
-            Thread thread=Thread.currentThread();
-            String name=thread.getName();
-            int runs=0;
+            _thread=Thread.currentThread();
+            _threadName=_thread.getName();
+            _runs=0;
             
             if (Code.verbose(9))
                 Code.debug( "Start thread in ", _name );
             try{
                 while(_running) 
                 {
-                    Object job=null;
+                    _job=null;
                     try 
                     {
                         // increment accepting count
-                        synchronized(ThreadPool.this){_idleSet.add(thread);}
+                        synchronized(ThreadPool.this){_idleSet.add(_thread);}
                     
                         // wait for a job
-                        job=getJob(_maxIdleTimeMs);
+                        _job=ThreadPool.this.getJob(_maxIdleTimeMs);
 
                         // If no job
-                        if (job==null && _running)
+                        if (_job==null && _running)
                         {
                             if (Code.verbose(99))
                                 Code.debug("Threads="+_threadSet.size()+
@@ -558,7 +667,7 @@ public class ThreadPool
                                 // interrupt was due to accept timeout
                                 // Kill thread if it is in excess of the minimum.
                                 if (Code.verbose(99))
-                                    Code.debug("Idle death: "+thread);
+                                    Code.debug("Idle death: "+_thread);
                                 break;
                             }
                         }
@@ -566,12 +675,10 @@ public class ThreadPool
                     catch(InterruptedException e)
                     {
                         Code.ignore(e);
-                        continue;
                     }
                     catch(InterruptedIOException e)
                     {
                         Code.ignore(e);
-                        continue;
                     }
                     catch(Exception e)
                     {
@@ -581,32 +688,32 @@ public class ThreadPool
                     {
                         synchronized(ThreadPool.this)
                         {
-                            _idleSet.remove(thread);
+                            _idleSet.remove(_thread);
                             // If not more threads accepting - start one
                             if (_idleSet.size()==0 &&
                                 _running &&
-                                job!=null &&
+                                _job!=null &&
                                 _threadSet.size()<_maxThreads)
                                 try{newThread();}
                                 catch(Exception e){Code.warning(e);}
                         }
                     }
 
-                    // handle the connection
-                    if (_running && job!=null)
+                    // handle the job
+                    if (_running && _job!=null)
                     {
                         try
                         {
                             // Tag thread if debugging
                             if (Code.debug())
                             {
-                                thread.setName(name+"/"+runs++);
+                                _thread.setName(_threadName+"/"+_runs++);
                                 if (Code.verbose(99))
-                                    Code.debug("Handling ",job);
+                                    Code.debug("Handling ",_job);
                             }
 
                             // handle the job
-                            handle(job);
+                            handle(_job);
                         }
                         catch (Exception e)
                         {
@@ -614,7 +721,7 @@ public class ThreadPool
                         }
                         finally
                         {
-                            job=null;
+                            _job=null;
                         }
                     }
                 }
@@ -624,12 +731,20 @@ public class ThreadPool
                 synchronized(ThreadPool.this)
                 {
                     if (_threadSet!=null)
-                        _threadSet.remove(Thread.currentThread());
+                        _threadSet.remove(_thread);
                 }
                 if (Code.verbose(9))
                     Code.debug("Stopped thread in ", _name);
             }
         }
+
+        public String toString()
+        {
+            Object j=_job;
+            return
+                _threadName+"|"+_runs+"|"+((j==null)?"NoJob":j.toString());
+        }
+        
     }
 
     
@@ -683,12 +798,5 @@ public class ThreadPool
     public void setMaxSize(int maxThreads)
     {
         _maxThreads=maxThreads;
-    }
-    
+    }    
 }
-
-
-
-
-
-
