@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Fixed authentication role handling in FORM auth.
  + Fixed double entry on PathMap.getMatches
  + Fixed FORM Authentication username.
  + Fixed servlet handling of non session url params.

@@ -321,7 +321,7 @@ public class SecurityHandler extends NullHandler
                 response.sendError(HttpResponse.__500_Internal_Server_Error);
                 return false;
             }
-            return _formAuthenticator
+            userAuth= _formAuthenticator
                 .formAuthenticated(this,pathInContext,pathParams,request,response);
         }
         else
