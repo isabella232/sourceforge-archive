@@ -3,6 +3,7 @@ Jetty Versions
 
  + Correctly setup context classloader in cross context dispatch.
  + Put a semi busy loop into proxy tunnels for IE problems
+ + Fixed handling of error pages for IO and Servlet exceptions
 
 Jetty-4.2.12 - 12 August 2003
  + Restore max inactive interval for session manager

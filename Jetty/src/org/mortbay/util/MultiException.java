@@ -29,6 +29,7 @@ public class MultiException extends Exception
     /* ------------------------------------------------------------ */
     public void add(Exception e)
     {
+        Code.debug(e);
         if (e instanceof MultiException)
         {
             MultiException me = (MultiException)e;

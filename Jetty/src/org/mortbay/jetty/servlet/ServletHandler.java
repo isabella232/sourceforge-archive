@@ -571,7 +571,8 @@ public class ServletHandler extends AbstractHttpHandler
             Code.debug(e);
             
             Throwable th=e;
-            if (e instanceof ServletException)
+            if (e instanceof ServletException &&
+                getHttpContext().getErrorPage(ServletException.class.getName())==null)
             {
                 if (((ServletException)e).getRootCause()!=null)
                 {
@@ -582,8 +583,6 @@ public class ServletHandler extends AbstractHttpHandler
             
             if (th instanceof HttpException)
                 throw (HttpException)th;
-            if (th.getClass().equals(IOException.class))
-                throw (IOException)th;
             if (th instanceof EOFException)
                 throw (IOException)th;
             else if (!Code.debug() && th instanceof java.io.IOException)
