@@ -114,51 +114,33 @@
     <load-on-startup>0</load-on-startup>
   </servlet>
   
-   <!-- ==================================================================== -->
+  <!-- ==================================================================== -->
   <!-- JSP Servlet                                                          -->
   <!-- This is the jasper JSP servlet from the jakarta project              -->
-  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
-  <!-- The JSP page compiler and execution servlet, which is the mechanism  -->
-  <!-- used by Jetty & Tomcat to support JSP pages.  Traditionally, this    -->
-  <!-- servlet is mapped to URL pattern "*.jsp".  This servlet supports the -->
-  <!-- following initialization parameters (default values are in square    -->
-  <!-- brackets):                                                           -->
-  <!--                                                                      -->
-  <!--   checkInterval       If development is false and reloading is true, -->
-  <!--                       background compiles are enabled. checkInterval -->
-  <!--                       is the time in seconds between checks to see   -->
-  <!--                       if a JSP page needs to be recompiled. [300]    -->
-  <!--                                                                      -->
-  <!--   compiler            Which compiler Ant should use to compile JSP   -->
-  <!--                       pages.  See the Ant documenation for more      -->
-  <!--                       information. [javac]                           -->
-  <!--                                                                      -->
-  <!--   classdebuginfo      Should the class file be compiled with         -->
-  <!--                       debugging information?  [true]                 -->
+  <!-- The following initParameters are supported:                          -->
   <!--                                                                      -->
   <!--   classpath           What class path should I use while compiling   -->
   <!--                       generated servlets?  [Created dynamically      -->
   <!--                       based on the current web application]          -->
   <!--                                                                      -->
-  <!--   development         Is Jasper used in development mode (will check -->
-  <!--                       for JSP modification on every access)?  [true] -->
-  <!--                                                                      -->
-  <!--   enablePooling       Determines whether tag handler pooling is      -->
-  <!--                       enabled  [true]                                -->
-  <!--                                                                      -->
-  <!--   fork                Tell Ant to fork compiles of JSP pages so that -->
-  <!--                       a separate JVM is used for JSP page compiles   -->
-  <!--                       from the one Tomcat is running in. [true]      -->
+  <!--   classdebuginfo      Should the class file be compiled with         -->
+  <!--                       debugging information?  [false]                -->
   <!--                                                                      -->
   <!--   ieClassId           The class-id value to be sent to Internet      -->
   <!--                       Explorer when using <jsp:plugin> tags.         -->
   <!--                       [clsid:8AD9C840-044E-11D1-B3E9-00805F499D93]   -->
   <!--                                                                      -->
-  <!--   javaEncoding        Java file encoding to use for generating java  -->
-  <!--                       source files. [UTF8]                           -->
+  <!--   jspCompilerPlugin   The fully qualified class name of the JSP      -->
+  <!--                       compiler plug-in to be used.  See below for    -->
+  <!--                       more information.                              -->
+  <!--                       [Use internal JDK compiler]                    -->
   <!--                                                                      -->
   <!--   keepgenerated       Should we keep the generated Java source code  -->
   <!--                       for each page instead of deleting it? [true]   -->
+  <!--                                                                      -->
+  <!--   largefile           Should we store the static content of JSP      -->
+  <!--                       pages in external data files, to reduce the    -->
+  <!--                       size of the generated servlets?  [false]       -->
   <!--                                                                      -->
   <!--   logVerbosityLevel   The level of detailed messages to be produced  -->
   <!--                       by this servlet.  Increasing levels cause the  -->
@@ -170,33 +152,17 @@
   <!--                       print statement per input line, to ease        -->
   <!--                       debugging?  [false]                            -->
   <!--                                                                      -->
-  <!--                                                                      -->
-  <!--   reloading           Should Jasper check for modified JSPs?  [true] -->
-  <!--                                                                      -->
-  <!--   suppressSmap        Should the generation of SMAP info for JSR45   -->
-  <!--                       debugging be suppressed?  [false]              -->
-  <!--                                                                      -->
-  <!--   dumpSmap            Should the SMAP info for JSR45 debugging be    -->
-  <!--                       dumped to a file? [false]                      -->
-  <!--                       False if suppressSmap is true                  -->
-  <!--                                                                      -->
   <!--   scratchdir          What scratch directory should we use when      -->
   <!--                       compiling JSP pages?  [default work directory  -->
   <!--                       for the current web application]               -->
   <!--                                                                      -->
-  <!--   tagpoolMaxSize      The maximum tag handler pool size  [5]         -->
-  <!--                                                                      -->
-  <!--   xpoweredBy          Determines whether X-Powered-By response       -->
-  <!--                       header is added by generated servlet  [false]  -->
-  <!--                                                                      -->
   <!-- If you wish to use Jikes to compile JSP pages:                       -->
-  <!-- Set the init parameter "compiler" to "jikes". Define the property    -->
-  <!-- "-Dbuild.compiler.emacs=true" when starting Jetty to cause Jikes to  -->
-  <!-- emit error messages in a format compatible with Jasper.              -->
-  <!-- If you get an error reporting that jikes can't use UTF8 encoding,    -->
-  <!-- try setting the init parameter "javaEncoding" to "ISO-8859-1".       -->
+  <!-- * Set the "classpath" initialization parameter appropriately         -->
+  <!--   for this web application.                                          -->
+  <!-- * Set the "jspCompilerPlugin" initialization parameter to            -->
+  <!--   "org.apache.jasper.compiler.JikesJavaCompiler".                    -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
-<servlet>
+  <servlet>
     <servlet-name>jsp</servlet-name>
     <servlet-class>org.apache.jasper.servlet.JspServlet</servlet-class>
     <load-on-startup>0</load-on-startup>
