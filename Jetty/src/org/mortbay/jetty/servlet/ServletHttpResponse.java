@@ -415,14 +415,18 @@ public class ServletHttpResponse implements HttpServletResponse
         if (!URI.hasScheme(url))
         {
             StringBuffer buf = _servletHttpRequest.getHttpRequest().getRootURL();
-            
             if (url.startsWith("/"))
                 buf.append(URI.canonicalPath(url));
             else
-                buf.append(URI.canonicalPath(URI.addPaths(URI.parentPath(_servletHttpRequest.getRequestURI()),url)));
+            {
+                url=URI.canonicalPath(URI.addPaths(URI.parentPath(_servletHttpRequest.getRequestURI()),url));
+                if (!url.startsWith("/"))
+                    buf.append('/');
+                buf.append(url);
+            }
+            
             url=buf.toString();
         }
-        
         _httpResponse.sendRedirect(url);
     }
 
