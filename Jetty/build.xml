@@ -349,7 +349,6 @@
 
     <copy file="LICENSE.html" tofile="${jetty.webapp}/LICENSE.html" />
     <copy file="VERSION.TXT" tofile="${jetty.webapp}/versions.txt" />
-    <copy file="${demo.webapps}/jetty/images/jetty_banner.gif" tofile="${webapps}/root/jetty_banner.gif" />
   </target>
 
   <!-- ==================================================================== -->
