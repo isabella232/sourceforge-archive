@@ -39,6 +39,10 @@ public class HttpRequest extends HttpMessage
         __CONNECT="CONNECT",
         __MOVE="MOVE";
 
+    public static final String
+        __AuthType = "com.mortbay.HTTP.HttpRequest.AuthType",
+        __AuthUser = "com.mortbay.HTTP.HttpRequest.AuthUser";
+    
     /* -------------------------------------------------------------- */
     private static Map __emptyMap =
         Collections.unmodifiableMap(new HashMap(1));
@@ -220,7 +224,7 @@ public class HttpRequest extends HttpMessage
      * @param uri the uri
      * @exception IllegalStateException Request is not EDITABLE
      */
-    public void setURI (URI uri)
+    public void setURI(URI uri)
     {
         if (_state!=__MSG_EDITABLE)
             throw new IllegalStateException("Not EDITABLE");

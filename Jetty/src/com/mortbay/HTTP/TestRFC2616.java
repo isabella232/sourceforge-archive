@@ -76,7 +76,7 @@ public class TestRFC2616
     {
         ByteArrayInputStream in = new ByteArrayInputStream(request);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        HttpConnection connection = new HttpConnection(this,in,out);
+        HttpConnection connection = new HttpConnection(this,null,in,out);
         connection.handle();
         connection.close();
         return out.toByteArray();

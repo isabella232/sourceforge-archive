@@ -5,6 +5,7 @@
 
 package com.mortbay.Util;
 
+import com.sun.java.util.collections.*;
 import java.util.Properties;
 import java.io.InputStream;
 import java.io.IOException;
@@ -311,6 +312,25 @@ public class PropertyTree extends Properties
         while(tok.hasMoreTokens())
             v.addElement(tok.nextToken());
         return v;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get List of values.
+     * @param key the Value(s) to get.
+     * @param separators String of separator charactors
+     * @return List of values.
+     */
+    public List getList(String key, String separators)
+    {
+        String values=getProperty(key);
+        if (values==null)
+            return null;
+
+        List l=new ArrayList(9);
+        StringTokenizer tok=new StringTokenizer(values,separators);
+        while(tok.hasMoreTokens())
+            l.add(tok.nextToken());
+        return l;
     }
     
     /* ------------------------------------------------------------ */

@@ -8,6 +8,7 @@ package com.mortbay.HTTP;
 import com.mortbay.Util.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
+import java.net.InetAddress;
 
 
 /* ------------------------------------------------------------ */
@@ -39,21 +40,34 @@ public class HttpConnection
     private HttpRequest _request;
     private HttpResponse _response;
     private Thread _handlingThread;
+    private InetAddress _remoteAddr;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
      * @param listener The listener that created this connection.
+     * @param remoteAddr The address of the remote end or null.
      * @param in InputStream to read request(s) from.
      * @param out OutputputStream to write response(s) to.
      */
     protected HttpConnection(HttpListener listener,
+                             InetAddress remoteAddr,
                              InputStream in,
                              OutputStream out)
     {
         _listener=listener;
+        _remoteAddr=remoteAddr;
         _inputStream=new ChunkableInputStream(in);
         _outputStream=new ChunkableOutputStream(out);
         _outputStream.addObserver(this);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get the Remote address.
+     * @return the remote address
+     */
+    public InetAddress getRemoteAddr()
+    {
+        return _remoteAddr;
     }
 
     /* ------------------------------------------------------------ */

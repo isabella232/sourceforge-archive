@@ -1,3 +1,4 @@
+   + Dates forced to use US locale
    + Removed Converter utilities and InetGateway.
    + added bin/useJava2Collections to convert to JDK1.2
 

@@ -25,3 +25,5 @@ SUBDIRS := \
 
 include $(JETTY_HOME)/etc/Global.mk
 
+jdk2: 
+	bin/useJava2Collections

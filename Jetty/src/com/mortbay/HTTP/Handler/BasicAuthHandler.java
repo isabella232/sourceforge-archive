@@ -24,10 +24,6 @@ import java.io.*;
 public class BasicAuthHandler extends NullHandler
 {
     /* ------------------------------------------------------------ */
-    public final static String __UserAttribute =
-        "com.mortbay.HTTP.Handler.BasicAuthHandler.User";
-    
-    /* ------------------------------------------------------------ */
     private String _name;
     private Map _user2password;
 
@@ -77,7 +73,8 @@ public class BasicAuthHandler extends NullHandler
             String user = credentials.substring(0,i);
             String password = credentials.substring(i+1);
             
-            request.setAttribute(__UserAttribute,user);
+            request.setAttribute(HttpRequest.__AuthUser,user);
+            request.setAttribute(HttpRequest.__AuthType,"BASIC");
             
             String realPassword=(String)_user2password.get(user);
             if (realPassword!=null && realPassword.equals(password))

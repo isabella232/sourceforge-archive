@@ -130,6 +130,32 @@ abstract public class HttpMessage
     }
 
     /* ------------------------------------------------------------ */
+    /** XXX
+     * @return 
+     */
+    public Collection getFieldNames()
+    {
+        if (_header!=null && _trailer==null)
+            return _header.getFieldNames();
+        HashSet fns=new HashSet(_header.getFieldNames());
+        fns.addAll(_trailer.getFieldNames());
+        return fns;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Does the header or trailer contain a field?
+     * @param name NAme of the field
+     * @return True if contained in header or trailer.
+     */
+    public boolean containsField(String name)
+    {
+        boolean contains = _header.containsKey(name);
+        if (!contains && _trailer!=null)
+            contains = _trailer.containsKey(name);
+        return contains;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Get a message field.
      * Get a field from a message header. If no header field is found,
      * trailer fields are searched.

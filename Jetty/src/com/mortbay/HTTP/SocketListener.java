@@ -94,7 +94,8 @@ public class SocketListener
             ChunkableOutputStream out =
                 new ChunkableOutputStream(socket.getOutputStream());
 
-            HttpConnection connection = new HttpConnection(this,in,out);
+            HttpConnection connection =
+                new HttpConnection(this,socket.getInetAddress(),in,out);
             connection.handle();
         }
         catch ( Exception e ){
