@@ -42,36 +42,116 @@ public class JAASUserRealm implements UserRealm
     protected AbstractCallbackHandler callbackHandler;
     protected HashMap userMap;
     protected RoleCheckPolicy roleCheckPolicy;
-    
-    
 
+    
+    /* ---------------------------------------------------- */
+    /**
+     * UserInfo
+     *
+     * Information cached for an authenticated user.
+     * 
+     *
+     * 
+     *
+     */
+    protected class UserInfo
+    {
+        String name;
+        JAASUserPrincipal principal;
+        LoginContext context;
+
+        public UserInfo (String name, JAASUserPrincipal principal, LoginContext context)
+        {
+            this.name = name;
+            this.principal = principal;
+            this.context = context;
+        }
+
+        public String getName ()
+        {
+            return name;
+        }
+
+        public JAASUserPrincipal getJAASUserPrincipal ()
+        {
+            return principal;
+        }
+
+        public LoginContext getLoginContext ()
+        {
+            return context;
+        }
+    }
+
+
+    /* ---------------------------------------------------- */
+    /**
+     * Constructor.
+     *
+     */
     public JAASUserRealm ()
     {
         userMap = new HashMap();
     }
     
+
+    /* ---------------------------------------------------- */
+    /**
+     * Constructor.
+     *
+     * @param name the name of the realm
+     */
     public JAASUserRealm(String name)
     {
         this();
         realmName = name;
     }
 
+
+    /* ---------------------------------------------------- */
+    /**
+     * Get the name of the realm.
+     *
+     * @return name or null if not set.
+     */
     public String getName()
     {
         return realmName;
     }
 
+
+    /* ---------------------------------------------------- */
+    /**
+     * Set the name of the realm
+     *
+     * @param name a <code>String</code> value
+     */
     public void setName (String name)
     {
         realmName = name;
     }
 
+
+
+    /**
+     * Set the name to use to index into the config
+     * file of LoginModules.
+     *
+     * @param name a <code>String</code> value
+     */
     public void setLoginModuleName (String name)
     {
         loginModuleName = name;
     }
 
 
+    /* ---------------------------------------------------- */
+    /**
+     * Set up a specifc CallbackHandler. 
+     * If not called, then the DefaultCallbackHandler is used.
+     *
+     * @param handler an <code>AbstractCallbackHandler</code> value
+     */
     public void setCallbackHandler (AbstractCallbackHandler handler)
     {
         callbackHandler = handler;
@@ -85,18 +165,34 @@ public class JAASUserRealm implements UserRealm
     }
 
     
+    /* ---------------------------------------------------- */
+    /**
+     * Authenticate a user.
+     * 
+     *
+     * @param username provided by the user at login
+     * @param credentials provided by the user at login
+     * @param request a <code>HttpRequest</code> value
+     * @return authenticated JAASUserPrincipal or  null if authenticated failed
+     */
     public UserPrincipal authenticate(String username,
                                       Object credentials,
                                       HttpRequest request)
     {
         try
         {
-            JAASUserPrincipal userPrincipal = (JAASUserPrincipal)userMap.get(username);
+            UserInfo info = (UserInfo)userMap.get(username);
 
-            if (userPrincipal != null)
-                return userPrincipal;
-            
-                
+            //user has been previously authenticated, but
+            //re-authentication has been requested, so flow that 
+            //thru all the way to the login module mechanism and
+            //remove their previously authenticated status
+            if (info != null)
+            {
+                userMap.remove (username);
+            }
+
+
             //user has not been authenticated
             if (callbackHandler == null)
             {
@@ -115,11 +211,11 @@ public class JAASUserRealm implements UserRealm
             loginContext.login();
 
             //login success
-            userPrincipal = new JAASUserPrincipal(username);
+            JAASUserPrincipal userPrincipal = new JAASUserPrincipal(username);
             userPrincipal.setSubject(loginContext.getSubject());
             userPrincipal.setRoleCheckPolicy (roleCheckPolicy);
             
-            userMap.put (username, userPrincipal);
+            userMap.put (username, new UserInfo (username, userPrincipal, loginContext));
             
             return userPrincipal;       
         }
@@ -131,6 +227,13 @@ public class JAASUserRealm implements UserRealm
     }
 
     
+
+    /* ---------------------------------------------------- */
+    /**
+     * Removes any auth info associated with eg. the thread.
+     *
+     * @param user a UserPrincipal to disassociate
+     */
     public void disassociate(UserPrincipal user)
     {
         if (user != null)
@@ -138,21 +241,72 @@ public class JAASUserRealm implements UserRealm
     }
 
     
+
+    /* ---------------------------------------------------- */
+    /**
+     * Temporarily adds a role to a user.
+     *
+     * Temporarily granting a role pushes the role onto a stack
+     * of temporary roles. Temporary roles must therefore be
+     * removed in order.
+     *
+     * @param user the UserPrincipal to which to add the role
+     * @param role the role name
+     * @return the UserPrincipal with the role added
+     */
     public UserPrincipal pushRole(UserPrincipal user, String role)
     {
         ((JAASUserPrincipal)user).pushRole(role);
         return user;
     }
     
+
+    /* ---------------------------------------------------- */
+    /**
+     * Remove a role temporarily granted to a user.
+     *
+     * @param user the UserPrincipal from whom to remove the role
+     * @return the UserPrincipal
+     */
     public UserPrincipal popRole(UserPrincipal user)
     {
         ((JAASUserPrincipal)user).popRole();
         return user;
     }
 
+
+
+    /* ---------------------------------------------------- */
+    /**
+     * Logout a previously logged in user.
+     * This can only work for FORM authentication
+     * as BasicAuthentication is stateless.
+     * 
+     * The user's LoginContext logout() method is called.
+     * @param user an <code>UserPrincipal</code> value
+     */
     public void logout(UserPrincipal user)
     {
-        System.err.println("LOGOUT!!!");
+        try
+        {
+            if (!(user instanceof JAASUserPrincipal))
+                throw new IllegalArgumentException (user + " is not a JAASUserPrincipal");
+            
+	    String key = ((JAASUserPrincipal)user).getName();
+            UserInfo info = (UserInfo)userMap.get(key);
+            
+            if (info == null)
+                Log.warning ("Logout called for user="+user+" who is NOT in the authentication cache");
+            
+            info.getLoginContext().logout();
+	    userMap.remove (key);
+
+	    Log.event (user+" has been LOGGED OUT");
+        }
+        catch (LoginException e)
+        {
+            Log.warning (e);
+        }
     }
     
 }
