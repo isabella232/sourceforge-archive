@@ -50,7 +50,7 @@ main.PROPERTY.MinListenerThreads	  : 1
 main.PROPERTY.MaxListenerThreads	  : 20
 main.PROPERTY.MaxListenerThreadIdleMs	  : 60000
 main.PROPERTY.HTTP1_0_KeepAlive           : True
-main.PROPERTY.MimeMap			  : /usr/local/java/packages/Jetty/current/etc/Mime.prp
+main.PROPERTY.MimeMap			  : /usr/local/pkgs/java/jetty/2.4.6/etc/Mime.prp
 main.LISTENER.all.CLASS                   : com.mortbay.HTTP.HttpListener
 main.LISTENER.all.ADDRS                   : 0.0.0.0:8081
 

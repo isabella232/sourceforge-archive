@@ -73,9 +73,8 @@ public class ConverterSet extends  ConverterBase
                                                               MIN_VALUE);
         public static final Long aLong          = new Long(Long.MIN_VALUE);
         public static final Short aShort        = new Short(Short.MIN_VALUE);
-	public static final BigInteger aBigInt  = BigInteger.ZERO;
-	public static final BigDecimal aBigDec  =
-	    new BigDecimal(BigInteger.ZERO);
+	public static final BigInteger aBigInt  = BigInteger.valueOf(0L);
+	public static final BigDecimal aBigDec  = new BigDecimal(0d);
         /* -------------------------------------------------------- */
         /** Return an Array of all the primitive class types */
         public static Class[] getPrimitives(){

@@ -451,36 +451,46 @@ public class PropertyTree extends Properties
      */
     public static Converter getConverter()
     {
-        return new Converter(){
-            public Object convert(Object toConvert, Class convertTo,
-                                  Converter context) {
-                if (toConvert.getClass().equals(convertTo))
-                    // Already correct type!
-                    return toConvert;
-                try {
-                    if (!convertTo.equals(Class.forName(
-                                        "com.mortbay.Util.PropertyTree")))
-                        return null;
-                } catch (Exception ex){}
-                // Make sure we have a dictionary
-                if (!(toConvert instanceof Dictionary))
-                    return null;
-                // Check if already OK
-                if (toConvert instanceof PropertyTree)
-                    return toConvert;
-                PropertyTree pt = new PropertyTree();
-                Dictionary dict = (Dictionary)toConvert;
-                Converter converter = context == null ? this : context;
-                for (Enumeration enum = dict.keys(); enum.hasMoreElements();){
-                    Object key = enum.nextElement();
-                    Object value = dict.get(key);
-                    Object converted =
-                        converter.convert(value, getClass(), converter);
-                    pt.put(key, converted == null ? value : converted);
-                }
-                return pt;
-            }
-        };
+        return new Converter() {
+		public Object convert(Object toConvert, Class convertTo,
+				      Converter context)
+		{
+		    if (toConvert.getClass().equals(convertTo))
+			// Already correct type!
+			return toConvert;
+		    try {
+			if (!convertTo.equals(Class.forName(
+					"com.mortbay.Util.PropertyTree")))
+			    return null;
+		    } catch (Exception ex){}
+		    // Make sure we have a dictionary
+		    if (!(toConvert instanceof Dictionary))
+			return null;
+		    // Check if already OK
+		    if (toConvert instanceof PropertyTree)
+			return toConvert;
+		    PropertyTree pt = new PropertyTree();
+		    Dictionary dict = (Dictionary)toConvert;
+		    Converter converter = context == null ? this : context;
+		    for (Enumeration enum = dict.keys();
+			 enum.hasMoreElements();)
+		    {
+			Object key = enum.nextElement();
+			Object value = dict.get(key);
+			Object converted =
+			    converter.convert(value, getClass(), converter);
+			pt.put(key, converted == null ? value : converted);
+		    }
+		    return pt;
+		}
+		public Object unsafeConvert(Object toConvert,
+					    Class convertTo,
+					    Converter context)
+		    throws ConvertFail
+		{
+		    return convert(toConvert, convertTo, context);
+		}
+	    };
     }
     
     /* ------------------------------------------------------------ */
