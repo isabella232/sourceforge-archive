@@ -444,7 +444,7 @@ public class OutputStreamLogSink
                 smsg=StringUtil.replace(smsg,"<|",nl);
             }
             _buffer.write(smsg);
-            _buffer.write("\n");
+            _buffer.write(StringUtil.__LINE_SEPARATOR);
             
             // Add stack frame to message
             if (_logStackTrace && frame != null)
@@ -480,7 +480,7 @@ public class OutputStreamLogSink
         try
         {
             _buffer.write(formattedLog);
-            _buffer.write("\n");
+            _buffer.write(StringUtil.__LINE_SEPARATOR);
             if (_flushOn || _buffer.length()>_bufferSize)
             {
                 _buffer.writeTo(_out);

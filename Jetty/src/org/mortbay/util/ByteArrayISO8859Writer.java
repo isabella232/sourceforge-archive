@@ -155,7 +155,7 @@ public class ByteArrayISO8859Writer extends Writer
         for (int i=0;i<length;i++)
         {
             char c=s.charAt(i);
-            if (c>=0&&c<=0x7f)
+            if (c>=0x0&&c<=0x7f)
                 _buf[_size++]=(byte)c;
             else
             {
@@ -163,6 +163,8 @@ public class ByteArrayISO8859Writer extends Writer
                 break;
             }
         }
+
+        
     }
     
     /* ------------------------------------------------------------ */

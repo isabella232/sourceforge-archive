@@ -10,6 +10,7 @@ import java.util.TimeZone;
 import org.mortbay.util.RolloverFileOutputStream;
 import org.mortbay.util.DateCache;
 import org.mortbay.util.ByteArrayISO8859Writer;
+import org.mortbay.util.StringUtil;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -253,7 +254,7 @@ public class NCSARequestLog implements RequestLog
                         _buf.write('"');
                     }
                 }
-                _buf.write("\n");
+                _buf.write(StringUtil.__LINE_SEPARATOR);
                 _buf.flush();
                 _buf.writeTo(_fileOut);
                 _buf.reset();
