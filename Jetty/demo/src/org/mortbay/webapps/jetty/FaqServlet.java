@@ -128,6 +128,8 @@ public class FaqServlet extends HttpServlet
         
         public String getQuestion ()
         {
+	    if (question==null)
+		return title;
             return question;
         }
 
@@ -303,7 +305,7 @@ public class FaqServlet extends HttpServlet
                 if (entry.getTitle() == null)
                 {
                     int fileSepIndex = fileName.lastIndexOf ("/");
-                    String tmp = (fileSepIndex >=0?fileName.substring(fileSepIndex): fileName);
+                    String tmp = (fileSepIndex >=0?fileName.substring(fileSepIndex+1): fileName);
                     int dotIndex = tmp.lastIndexOf(".");
                     tmp = (dotIndex >= 0?tmp.substring(0, dotIndex): tmp);
                     entry.setTitle (tmp);
@@ -349,10 +351,7 @@ public class FaqServlet extends HttpServlet
 
         String sectionName = entry.getSection();
         if (sectionName == null)
-        {
             sectionName = GENERAL_SECTION_NAME;
-            System.err.println("NO section for "+entry);
-        }
 
         TreeMap entryMap = (TreeMap)sectionMap.get(sectionName);
         if (entryMap == null)

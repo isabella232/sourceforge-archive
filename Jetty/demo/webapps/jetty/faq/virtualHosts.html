@@ -1,4 +1,6 @@
-<H2>Does Jetty support virtual hosts?</H2>
+SECTION: 300-HTTP
+TITLE: virtual
+QUESTION: Does Jetty support virtual hosts?
 <P>
 Many domain names can be mapped to a single TCP/IP address.  If
 different content needs to be served for each different domain, then the virtual
@@ -33,10 +35,3 @@ context is available to requests that do not first match other virtual host cont
 If you want different content to be served from different real IP addresses,
 then you do not need virtual hosts. Rather you need multiple instances of
 HttpServer, each with their own listeners and contexts.
-
-
-<P>
-
-<A HREF="index.html" TITLE="Back to JettyFAQ"><IMG SRC="/jetty/images/info_sm.gif" BORDER="0"><BR
-CLEAR="bottom"> JettyFaq</A>
-<BR><BR>

@@ -1,5 +1,6 @@
-<H2>Can Jetty be run with Apache?</H2>
-<P>
+SECTION: 200-General
+TITLE: apache
+QUESTION: Can Jetty be run with Apache?
 Firstly remember that Jetty is a HTTP/1.1 server and there is no need to use another webserver
 just to serve static content.  However, if existing applications or special features require Apache 
 to be used, it is possible to use Jetty behind Apache.
@@ -63,10 +64,3 @@ We would love to learn of your results with performance testing.
 The Servlet API calls ServletRequest.getRemoteHost() and ServletRequest.getRemoteAddr() will refer to the host running Apache instead of the IP address of the remote user (or their proxy server).  This limitation could be worked around in the future.
 <P>
 You may also wish to turn off Jetty's HTTP request logging.  The limitation on access to remote addresses applies to Jetty logging also.
-<P>
-
-<P>
-
-<A HREF="index.html" TITLE="Back to JettyFAQ"><IMG SRC="/jetty/images/info_sm.gif" BORDER="0"><BR
-CLEAR="bottom"> JettyFaq</A>
-<BR><BR>

@@ -1,4 +1,6 @@
-<H2>Help! My webapp suddenly stopped serving content, what's gone wrong?</H2>
+SECTION: 200-General
+TITLE: tmpdir
+QUESTION: Why has my webapp suddenly stopped working?</H2>
 <P>
 So, your webapp was humming along nicely when suddenly it stops working, and your log files are full of exceptions. You may see
 log entries for style sheet files not found, compiled JSP classes not being found or some other static content missing. The
@@ -20,8 +22,3 @@ Your solution to disappearing /tmp content is to either disable the cron job, or
 </pre>
 
 If you're on a Windows environment, then the system default location is typically c:\temp. In the same way as on Unix, you use the <code>java.io.tmpdir</code> property to change this.
-<P>
-
-<A HREF="index.html" TITLE="Back to JettyFAQ"><IMG SRC="/jetty/images/info_sm.gif" BORDER="0"><BR
-CLEAR="bottom"> JettyFaq</A>
-<BR><BR>

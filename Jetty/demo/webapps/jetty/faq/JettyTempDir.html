@@ -1,4 +1,6 @@
-<H2>Where are Jetty's temporary directories?</H2>
+SECTION: 250-Configuration
+TITLE: tempdir
+QUESTION: Where are Jetty's temporary directories?
 Jetty itself has no temporary directories, but each web application can be assigned
 a temporary directory. If the web application is a WAR file, it may be unpacked to the 
 webapp directory within the web applications temporary directory.
@@ -29,8 +31,3 @@ are not reused between invocations of the web application context.
 Once a tempory directory has been allocated, a File instance for it
 is set as the javax.servlet.context.tempdir attribute of the web
 application.
-<p>
-
-<A HREF="index.html" TITLE="Back to JettyFAQ"><IMG SRC="/jetty/images/info_sm.gif" BORDER="0"><BR
-CLEAR="bottom"> JettyFaq</A>
-<BR><BR>

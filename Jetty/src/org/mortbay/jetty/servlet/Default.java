@@ -602,7 +602,7 @@ public class Default extends HttpServlet
                     if (accept!=null && resLength>_minGzipLength &&
                         !pathInContext.endsWith(".gz"))
                     {
-                        Resource gz = _httpContext.getResource(pathInContext+".gz");
+			Resource gz = getResource(pathInContext+".gz");
                         if (gz.exists() && accept.indexOf("gzip")>=0)
                         {
                             if(log.isDebugEnabled())log.debug("gzip="+gz);

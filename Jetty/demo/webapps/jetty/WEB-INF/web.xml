@@ -76,7 +76,7 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
     <servlet-class id="yy">org.mortbay.webapps.jetty.FaqServlet</servlet-class>
     <init-param>
         <param-name>srcDir</param-name>
-	<param-value>faq/src</param-value>
+	<param-value>faq</param-value>
     </init-param>
     <init-param>
         <param-name>refreshMSec</param-name>
