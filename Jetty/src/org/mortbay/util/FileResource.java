@@ -40,9 +40,10 @@ class FileResource extends URLResource
     {
         __checkAliases=
             "true".equalsIgnoreCase
-            (System.getProperty("org.mortbay.util.FileResource.checkAliases",
-                                File.separatorChar=='/'?"false":"true"));
-        if (__checkAliases)
+            (System.getProperty("org.mortbay.util.FileResource.checkAliases","true"));
+             //                                File.separatorChar=='/'?"false":"true"));
+ 
+       if (__checkAliases)
             Log.event("Checking Resource aliases");
     }
     
@@ -123,21 +124,31 @@ class FileResource extends URLResource
     public Resource addPath(String path)
         throws IOException,MalformedURLException
     {
+        FileResource r=null;
+
         if (!isDirectory())
-            return super.addPath(path);
-
-        path = org.mortbay.util.URI.canonicalPath(path);
-        
-        // treat all paths being added as relative
-        if (path.startsWith("/"))
-            path = path.substring(1);
-
-        File newFile = new File(_file,path);
-
-        if (path.length()>0 && !path.endsWith("/") && newFile.isDirectory())
-            path+="/";
-
-        return new FileResource(new URL(_url,path),null,newFile);
+        {
+            r=(FileResource)super.addPath(path);
+        }
+        else
+        {
+            path = org.mortbay.util.URI.canonicalPath(path);
+            
+            // treat all paths being added as relative
+            if (path.startsWith("/"))
+                path = path.substring(1);
+            
+            File newFile = new File(_file,path);
+            String nfs=newFile.toString();            
+            
+            if (path.length()>0 && !path.endsWith("/") && newFile.isDirectory())
+                path+="/";
+            
+            r=new FileResource(new URL(_url,path),null,newFile);
+        }
+        if (r!=null && r.getAlias()!=null)
+            return r.getAlias();
+        return r;
     }
     
     /* ------------------------------------------------------------ */
