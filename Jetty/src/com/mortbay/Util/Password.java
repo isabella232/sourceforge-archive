@@ -24,9 +24,9 @@ import java.util.zip.CRC32;
  * Passwords that begin with EXEC: are interpreted as a command, whose
  * output is read.
  * <p>
- * Passwords that begin with OBF: are de obfiscated.
- * Passwords can be obfiscated by run com.mortbay.Util.Password as a
- * main class.  Obfiscated password are required if a system needs
+ * Passwords that begin with OBF: are de obfuscated.
+ * Passwords can be obfuscated by run com.mortbay.Util.Password as a
+ * main class.  Obfuscated password are required if a system needs
  * to recover the full password (eg. so that it may be passed to another
  * system). They are not secure, but prevent casual observation.
  * <p>
@@ -117,7 +117,7 @@ public class Password
             _pw=expand(realm,_pw.substring(5).trim());
 
         while (_pw!=null && _pw.startsWith("OBF:"))
-            _pw=deobfiscate(_pw);
+            _pw=deobfuscate(_pw);
 
         if (_pw.startsWith("CHK:"))
         {
@@ -223,7 +223,7 @@ public class Password
     }
 
     /* ------------------------------------------------------------ */
-    public static String obfiscate(String s)
+    public static String obfuscate(String s)
     {
         StringBuffer buf = new StringBuffer();
         byte[] b = s.getBytes();
@@ -253,7 +253,7 @@ public class Password
     }
     
     /* ------------------------------------------------------------ */
-    public static String deobfiscate(String s)
+    public static String deobfuscate(String s)
     {
         if (s.startsWith("OBF:"))
             s=s.substring(4);
@@ -303,7 +303,7 @@ public class Password
         if (arg.length ==0)
         {
             Password pw = new Password("password");
-            System.err.println(obfiscate(pw.toString()));
+            System.err.println(obfuscate(pw.toString()));
             System.err.println(checksum(pw.toString()));
         }
         else
@@ -311,7 +311,7 @@ public class Password
             for(int i=0; i<arg.length;i++)
             {
                 Password pw = new Password("password",arg[i]);
-                System.err.println(obfiscate(pw.toString()));
+                System.err.println(obfuscate(pw.toString()));
                 System.err.println(checksum(pw.toString()));
             }
         }

@@ -55,7 +55,7 @@ This file configures:
  + A context at / with serving files from ./docroot and
    the dump servlet at /dump.
 
-$ID: $
+$Id$
 -->
 
 <Configure class="com.mortbay.HTTP.HttpServer">

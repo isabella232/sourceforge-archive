@@ -328,13 +328,13 @@ public class TestHarness
         try{
             Password f1 = new Password("password","Foo");
             Password f2 = new Password("password",
-                                       Password.obfiscate("Foo"));
+                                       Password.obfuscate("Foo"));
             Password f3 = new Password("password",
                                        Password.checksum("Foo"));
             
             Password b1 = new Password("password","Bar");
             Password b2 = new Password("password",
-                                       Password.obfiscate("Bar"));
+                                       Password.obfuscate("Bar"));
             Password b3 = new Password("password",
                                        Password.checksum("Bar"));
 

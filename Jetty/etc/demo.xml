@@ -49,7 +49,7 @@ a context without explicit creation of a Handler.
 This file configures the demo server and is equivalent
 to the com.mortbay.Jetty.Demo class.
 
-$ID: $
+$Id$
 -->
 
 <Configure class="com.mortbay.HTTP.HttpServer">
