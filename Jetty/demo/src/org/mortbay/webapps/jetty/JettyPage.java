@@ -305,10 +305,8 @@ public class JettyPage extends Page
         
         _divLeft.add ("<P class=\"copyright\">Copyright 2005 Mort Bay Consulting</P>");
         setNest(_divContent);
-        /*
         if (path.endsWith(".txt"))
-            _table.nest(new Block(Block.Pre));
-        */
+            _divContent.nest(new Block(Block.Pre));
     }
 
     /* ------------------------------------------------------------ */

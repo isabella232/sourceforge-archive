@@ -172,7 +172,6 @@ div.menuLeft
   background-color:  #ffffff;
   margin-right: 20px;
   border-right: 1px solid #4876FF;
-  border-bottom: 1px solid #4876FF;
 }
 
 
@@ -223,7 +222,7 @@ P.copyright
 {
   font-size: 6pt;
   color: #000099;
-  font-style: italic;
+  font-style: normal;
   text-align: left;
 }
 
