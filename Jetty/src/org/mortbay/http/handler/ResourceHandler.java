@@ -57,6 +57,7 @@ public class ResourceHandler extends AbstractHttpHandler
     private boolean _redirectWelcomeFiles ;
     private String[] _methods=null;
     private String _allowed;
+    private boolean _dirAllowed=true;
     private StringMap _methodMap = new StringMap();
     {
         setAllowedMethods(new String[]
@@ -122,6 +123,18 @@ public class ResourceHandler extends AbstractHttpHandler
     public String getAllowedString()
     {
         return _allowed;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isDirAllowed()
+    {
+        return _dirAllowed;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setDirAllowed(boolean dirAllowed)
+    {
+        _dirAllowed = dirAllowed;
     }
     
     /* ------------------------------------------------------------ */
@@ -694,8 +707,13 @@ public class ResourceHandler extends AbstractHttpHandler
                        boolean parent)
         throws IOException
     {
+        if (!_dirAllowed)
+        {
+            response.sendError(HttpResponse.__403_Forbidden);
+            return;
+        }
+        
         request.setHandled(true);
-
         
         Code.debug("sendDirectory: "+resource);
         byte[] data=null;

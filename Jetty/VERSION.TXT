@@ -4,6 +4,9 @@ Jetty Versions
  + Fixed some typos
  + Added links to Jetty Powered page
  + Clean up of ThreadedServer.stop()
+ + Updated bat scripts
+ + Added PKCS12Import class to import PKCS12 key directly 
+ + removed old HttpContext.setDirAllowed()
 
 Jetty-4.2.2 - 20 November 2002
  + Fixed sendRedirect for non http URLS

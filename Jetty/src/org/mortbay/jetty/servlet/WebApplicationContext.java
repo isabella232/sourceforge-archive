@@ -132,7 +132,6 @@ public class WebApplicationContext
         out.writeBoolean(isRedirectNullPath());
         out.writeInt(getMaxCachedFileSize());
         out.writeInt(getMaxCacheSize());
-        out.writeBoolean(isDirAllowed());
         out.writeBoolean(getStatsOn());
         out.writeObject(getPermissions());
         out.writeBoolean(isClassLoaderJava2Compliant());
@@ -161,7 +160,6 @@ public class WebApplicationContext
         setRedirectNullPath(in.readBoolean());
         setMaxCachedFileSize(in.readInt());
         setMaxCacheSize(in.readInt());
-        setDirAllowed(in.readBoolean());
         setStatsOn(in.readBoolean());
         setPermissions((PermissionCollection)in.readObject());
         setClassLoaderJava2Compliant(in.readBoolean());

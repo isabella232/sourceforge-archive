@@ -103,7 +103,6 @@ public class HttpContext implements LifeCycle,
     private boolean _redirectNullPath=true;
     private int _maxCachedFileSize =400*1024;
     private int _maxCacheSize =4*1024*1024;
-    private boolean _dirAllowed=true;
     private boolean _statsOn=false;
     private PermissionCollection _permissions;
     private boolean _classLoaderJava2Compliant;
@@ -648,18 +647,6 @@ public class HttpContext implements LifeCycle,
         _maxCacheSize = maxCacheSize;
         _cache.clear();
     }
-
-    /* ------------------------------------------------------------ */
-    public boolean isDirAllowed()
-    {
-        return _dirAllowed;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void setDirAllowed(boolean dirAllowed)
-    {
-        _dirAllowed = dirAllowed;
-    }
     
     /* ------------------------------------------------------------ */
     public String[] getWelcomeFiles()
@@ -790,7 +777,7 @@ public class HttpContext implements LifeCycle,
                                                       boolean parent)
         throws IOException
     {
-        if (!_dirAllowed || !resource.isDirectory())
+        if (!resource.isDirectory())
             return null;
         
         String[] ls = resource.list();

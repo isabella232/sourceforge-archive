@@ -115,7 +115,7 @@
   <!-- + Set Default Descriptor.  Resource, file or URL                -->
   <!-- + Set Virtual Hosts. A Null host or empty array means all hosts -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- UNCOMMENT TO ACTIVATE
+  <!-- UNCOMMENT TO ACTIVATE 
   <Call name="addWebApplication">
     <Arg>/</Arg>
     <Arg>./webapps/root</Arg>
@@ -125,7 +125,7 @@
     <Set name="defaultsDescriptor">org/mortbay/jetty/servlet/webdefault.xml</Set>
 
     <Set name="virtualHosts">
-      <Array class="java.lang.String">
+      <Array type="java.lang.String">
         <Item></Item>
         <Item>127.0.0.1</Item>
         <Item>localhost</Item>

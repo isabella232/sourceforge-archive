@@ -1,4 +1,8 @@
 @echo off
+echo 
+echo DEPRECATED: Please use "java -jar start.jar"
+echo
+
 :: ===========================================================
 :: RunJetty.bat
 :: ===========================================================
@@ -121,12 +125,16 @@ rem ===========================================================
 echo ..Set classpath
 set CP=%JETTY_HOME%\lib\javax.servlet.jar
 set CP=%CP%;%JETTY_HOME%\lib\org.mortbay.jetty.jar
-set CP=%CP%;%JETTY_HOME%\lib\org.apache.jasper.jar
-set CP=%CP%;%JETTY_HOME%\ext\javax.xml.jaxp.jar
+set CP=%CP%;%JETTY_HOME%\lib\org.mortbay.jmx.jar
+set CP=%CP%;%JETTY_HOME%\ext\jasper-runtime.jar
+set CP=%CP%;%JETTY_HOME%\ext\jasper-compiler.jar
 set CP=%CP%;%JETTY_HOME%\ext\crimson.jar
+set CP=%CP%;%JETTY_HOME%\ext\javax.xml.jaxp.jar
 set CP=%CP%;%JETTY_HOME%\ext\com.sun.net.ssl.jar
+set CP=%CP%;%JETTY_HOME%\ext\ant.jar
 set CP=%CP%;%JAVA_HOME%\lib\tools.jar
 set CP="%CP%"
+
 
 rem ===========================================================
 rem == check for and set command line args
