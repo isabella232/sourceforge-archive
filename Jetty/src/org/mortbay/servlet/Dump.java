@@ -49,7 +49,7 @@ public class Dump extends HttpServlet
     /* ------------------------------------------------------------ */
     public void init(ServletConfig config) throws ServletException
     {
-        super.init(config);
+    	super.init(config);
     }
 
     /* ------------------------------------------------------------ */
