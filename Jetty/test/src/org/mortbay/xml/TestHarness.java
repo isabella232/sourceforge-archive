@@ -58,11 +58,9 @@ public class TestHarness
         try
         {
             XmlParser parser = new XmlParser();
-
             
             URL config12Resource=
-                XmlConfiguration.class.getResource("org/mortbay/xml/configure_1_2.dtd");    
-            
+                XmlConfiguration.class.getClassLoader().getResource("org/mortbay/xml/configure_1_2.dtd");    
             parser.redirectEntity("configure.dtd",config12Resource);
             parser.redirectEntity("configure_1_2.dtd",config12Resource);
             parser.redirectEntity("http://jetty.mortbay.org/configure_1_2.dtd",config12Resource);
