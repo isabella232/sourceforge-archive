@@ -14,7 +14,6 @@ extensible and flexible, thus making it an ideal platform for serving
 dynamic HTTP requests from any Java application.
 
 
-
 Quick start on Unix
 ===================
 run:
@@ -502,7 +501,3 @@ Support FAQ
 
  + If in doubt about if you should post or not - please post, we are pretty
    friendly and will tell you nicely if it is not appropriate.
-
-
-
-
