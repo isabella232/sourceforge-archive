@@ -1,27 +1,25 @@
 <H1>Jetty Web Application</H1>
 
+This demonstration is created using the webapplication in
+<code>demo/webapps/jetty</code>.   By convention the webapplications that
+Jetty use are placed in <code>webapps</code> directory either as packed war
+files or as unpacked directories.  The <code>etc/jetty.xml</code> configuraton
+file can be used to run any webapp found in the <code>webapps</code> directory.
 
-<H3>Reference Web Applications</H3>
+
+<H3>Miscellaneous Demos</H3>
 <UL>
-<A HREF="/examples/servlets/">Servlet examples</A> from the Reference Implementation.
-<BR><A HREF="/examples/jsp/">JSP examples</A> from the Reference Implementation.
-</UL>
-
-
-<H3>Security</H3>
-<UL>
-<A HREF="auth/">Security Constraint</A> Any role user=jetty password=jetty
-<BR><A HREF="auth/admin/">Security Constraint</A> Admin role user=admin password=admin
-<BR><A HREF="auth/relax/">Security Constraint</A> Relaxed constraint, using transport guarentee = NONE
-<BR><A HREF="auth/noaccess/file.txt">Security Constraint</A> No access.
-</UL>
-
-<H3>Various</H3>
-<UL>
-<A HREF="dump/">Request</A> Dump.
-<BR><A HREF="session/">Session</A> Dump.
+<A HREF="dump/">Request</A> Dump Servlet.
+<BR><A HREF="session/">Session</A> Dump Servlet.
 <BR><A HREF="sendredirect/">SendRedirect</A> Form.
 </UL>
+
+<H3>Java Server Pages</H3>
+<UL>
+<A HREF="snoop.jsp">JSP Snoop Demo</A>
+<BR><A HREF="jspsnoop">Mapped JSP Snoop Demo</A>
+</UL>
+
 
 <H3>Request Dispatchers</H3>
 <UL>
@@ -50,18 +48,29 @@ include of named Dump servlet.
 include snoop.jsp.
 </UL>
 
-<H3>Java Server Pages</H3>
+<H3>Security</H3>
+This security demo can be configured for FORM, BASIC or DIGEST authentication
+in the <code>demo/webapps/jetty/WEB-INF/web.xml</code> file.
 <UL>
-<A HREF="snoop.jsp">JSP Snoop Demo</A>
-<BR><A HREF="jspsnoop">Mapped JSP Snoop Demo</A>
+<A HREF="auth/">Security Constraint</A> Any role user=jetty password=jetty
+<BR><A HREF="auth/admin/">Security Constraint</A> Admin role user=admin password=admin
+<BR><A HREF="auth/relax/">Security Constraint</A> Relaxed constraint, using transport guarentee = NONE
+<BR><A HREF="auth/noaccess/file.txt">Security Constraint</A> No access.
 </UL>
-
 
 <H3>Error Pages</H3>
 <UL>
 <P><A HREF="anything">Error Page</A> Custom page for 404 status.
 <BR><A HREF="servlet/org.mortbay.webapps.jetty.ExServlet/java.lang.NullPointerException">Error Page</A> Custom page for NullPointerException.
 </UL>
+
+<H3>Reference Web Applications</H3>
+<UL>
+<A HREF="/examples/servlets/">Servlet examples</A> from the Reference Implementation.
+<BR><A HREF="/examples/jsp/">JSP examples</A> from the Reference Implementation.
+</UL>
+
+
 
 <P>
 &nbsp;

@@ -98,12 +98,10 @@ public class Dump extends HttpServlet
         }
 
         String pi=request.getPathInfo();
-        if (pi!=null)
+        if (pi!=null && pi.startsWith("/ex"))
         {
-            
             OutputStream out = response.getOutputStream();
             out.write("</H1>This text should be reset</H1>".getBytes());
-            
             if ("/ex0".equals(pi))
                 throw new ServletException("test ex0",new Throwable());
             if ("/ex1".equals(pi))

@@ -5,6 +5,8 @@ Jetty Versions
  + New look and feel for www site.
  + Fixed table refs in JDBCUserRealm.
  + Allow params in form auth URLs
+ + Updated to jasper jars from tomcat 4.1.24
+ + Allow query params in error page URL.
 
 Jetty-4.2.9 - 19 March 2003
  + Conditional headers check after /dir to /dir/ redirection.

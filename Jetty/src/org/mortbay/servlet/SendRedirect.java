@@ -26,6 +26,7 @@ public class SendRedirect extends HttpServlet
     public void doGet(HttpServletRequest request, HttpServletResponse response) 
         throws ServletException, IOException
     {
+        response.setContentType("text/html");
         response.setHeader("Pragma", "no-cache");
         response.setHeader("Cache-Control", "no-cache,no-store");
 

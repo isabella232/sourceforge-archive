@@ -344,10 +344,14 @@ public class HttpResponse extends HttpMessage
             {
                 error_page = _httpContext.getErrorPage(exClass.getName());
                 exClass=exClass.getSuperclass();
+                Code.debug("error page: ",exClass," -> ",error_page);
             }
             
             if (error_page==null && _httpContext!=null)
+            {
                 error_page = _httpContext.getErrorPage(TypeUtil.toString(code));
+                Code.debug("error page: "+code," -> ",error_page);
+            }
 
             // Handle error page
             if (error_page!=null)
@@ -374,7 +378,14 @@ public class HttpResponse extends HttpMessage
                     request.setState(HttpMessage.__MSG_RECEIVED);
                     // Do a forward to the error page resource.
                     setContentType(HttpFields.__TextHtml);
-                    getHttpContext().handle(error_page,null,request,this);
+                    String query=null;
+                    int q=error_page.indexOf('?');
+                    if (q>0)
+                    {
+                        query=error_page.substring(q+1);
+                        error_page=error_page.substring(0,q);
+                    }
+                    getHttpContext().handle(error_page,query,request,this);
                 }
                 else
                     Code.warning("Error "+code+" while serving error page for "+
