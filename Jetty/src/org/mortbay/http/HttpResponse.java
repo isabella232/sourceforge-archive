@@ -496,7 +496,8 @@ public class HttpResponse extends HttpMessage
         throws IOException
     {
         _connection.commitResponse();
-        super.commitHeader();
+        if (getState()!=__MSG_SENDING)
+            super.commitHeader();
     }
     
     /* ------------------------------------------------------------ */

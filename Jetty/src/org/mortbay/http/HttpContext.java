@@ -1888,9 +1888,9 @@ public class HttpContext implements LifeCycle
      * @param request 
      * @param response 
      */
-    void log(HttpRequest request,
-             HttpResponse response,
-             int length)
+    public void log(HttpRequest request,
+                    HttpResponse response,
+                    int length)
     {
         if (_statsOn)
         {

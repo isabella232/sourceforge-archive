@@ -27,6 +27,7 @@ public class ByteArrayISO8859Writer extends Writer
     private int _size;
     private ByteArrayOutputStream2 _bout=null;
     private OutputStreamWriter _writer=null;
+    private boolean _fixed=false;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -40,6 +41,13 @@ public class ByteArrayISO8859Writer extends Writer
     public ByteArrayISO8859Writer(int capacity)
     {
         _buf=new byte[capacity];
+    }
+    
+    /* ------------------------------------------------------------ */
+    public ByteArrayISO8859Writer(byte[] buf)
+    {
+        _buf=buf;
+        _fixed=true;
     }
 
     /* ------------------------------------------------------------ */
@@ -58,6 +66,12 @@ public class ByteArrayISO8859Writer extends Writer
     public int length()
     {
         return _size;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setLength(int l)
+    {
+        _size=l;
     }
 
     /* ------------------------------------------------------------ */
@@ -201,9 +215,12 @@ public class ByteArrayISO8859Writer extends Writer
 
     /* ------------------------------------------------------------ */
     public void ensureCapacity(int n)
+        throws IOException
     {
         if (_size+n>_buf.length)
         {
+            if (_fixed)
+                throw new IOException("Buffer overflow: "+_buf.length);
             byte[] buf = new byte[(_buf.length+n)*4/3];
             System.arraycopy(_buf,0,buf,0,_size);
             _buf=buf;

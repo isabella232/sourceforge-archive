@@ -209,7 +209,8 @@ public class ServletHttpResponse implements HttpServletResponse
             _out.flush();
         if (_writer==null && _out==null)
             _httpResponse.getOutputStream().flush();
-        _httpResponse.commit();
+        if (!_httpResponse.isCommitted())
+            _httpResponse.commit();
     }
     
     /* ------------------------------------------------------------ */

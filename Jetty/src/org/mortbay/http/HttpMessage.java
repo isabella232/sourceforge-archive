@@ -533,8 +533,7 @@ public abstract class HttpMessage
     public void setVersion(String version)
     {
         if (_state!=__MSG_EDITABLE)
-            throw new IllegalStateException(__state[_state]+
-                                            "is not EDITABLE");
+            throw new IllegalStateException("Not EDITABLE");
         version=version.toUpperCase();
         if (version.equals(__HTTP_1_1))
         {

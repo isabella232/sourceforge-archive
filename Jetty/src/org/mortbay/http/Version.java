@@ -23,7 +23,7 @@ public class Version
     public static boolean __paranoid = 
         Boolean.getBoolean("org.mortbay.http.Version.paranoid");
     
-    public static String __Version="Jetty/4";
+    public static String __Version="Jetty/4.1";
     public static String __VersionImpl=__Version;
     public static String __VersionDetail="Unknown";
     public static String __ServletEngine="Unknown (Servlet 2.3; JSP 1.2)";
@@ -39,13 +39,12 @@ public class Version
         Package p = Version.class.getPackage();
         if (p!=null)
         {
-            __Version="Jetty/"+p.getSpecificationVersion();
-            __VersionImpl="Jetty/"+p.getImplementationVersion();
+            __Version="Jetty/"+p.getImplementationVersion();
         }
         
         if (!__paranoid)
         {
-            __VersionDetail=__VersionImpl+" ("+
+            __VersionDetail=__Version+" ("+
                 System.getProperty("os.name")+" "+
                 System.getProperty("os.version")+" "+
                 System.getProperty("os.arch")+")";

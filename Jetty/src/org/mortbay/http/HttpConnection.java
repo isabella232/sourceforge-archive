@@ -43,6 +43,9 @@ public class HttpConnection
     implements OutputObserver
 {
     /* ------------------------------------------------------------ */
+    protected HttpRequest _request;
+    protected HttpResponse _response;
+
     private HttpListener _listener;
     private ChunkableInputStream _inputStream;
     private ChunkableOutputStream _outputStream;
@@ -52,8 +55,6 @@ public class HttpConnection
     private String _version;
     private int _dotVersion;
     private boolean _outputSetup;
-    private HttpRequest _request;
-    private HttpResponse _response;
     private Thread _handlingThread;
     private InetAddress _remoteAddr;
     private String _remoteHost;
@@ -105,20 +106,32 @@ public class HttpConnection
         }
         _reqTime=0;
         _requests=0;
+        
+        _request = new HttpRequest(this);
+        _response = new HttpResponse(this);
     }
 
     /* ------------------------------------------------------------ */
     /** Get the Remote address.
      * @return the remote address
      */
-    public InetAddress getRemoteAddr()
+    public InetAddress getRemoteInetAddress()
     {
         return _remoteAddr;
     }
+
+    /* ------------------------------------------------------------ */
+    /** Get the Remote address.
+     * @return the remote host name
+     */
+    public String getRemoteAddr()
+    {
+        return _remoteAddr.getHostAddress();
+    }
     
     /* ------------------------------------------------------------ */
-    /** Get the Remote hostname as a String.
-     * @return the remote address
+    /** Get the Remote address.
+     * @return the remote host name
      */
     public String getRemoteHost()
     {
@@ -242,7 +255,7 @@ public class HttpConnection
      * Conveniance method equivalent to getListener().getHost().
      * @return HttpServer.
      */
-    public String getHost()
+    public String getServerName()
     {
         return _listener.getHost();
     }
@@ -252,7 +265,7 @@ public class HttpConnection
      * Conveniance method equivalent to getListener().getPort().
      * @return HttpServer.
      */
-    public int getPort()
+    public int getServerPort()
     {
         return _listener.getPort();
     }
@@ -473,7 +486,7 @@ public class HttpConnection
      * Use the current state of the request and response, to set tranfer
      * parameters such as chunking and content length.
      */
-    public void setupOutputStream()
+    protected void setupOutputStream()
         throws IOException
     {
         if (_outputSetup)
@@ -599,7 +612,7 @@ public class HttpConnection
 
     
     /* ------------------------------------------------------------ */
-    void commitResponse()
+    protected void commitResponse()
         throws IOException
     {            
         _outputSetup=true;
@@ -766,11 +779,17 @@ public class HttpConnection
      * connection has been closed.
      * The handleNext() is called in a loop until it returns false,
      */
-    public void handle()
+    public final void handle()
     {
         while(_listener.isStarted())
+        {
             if (!handleNext())
                 break;
+            if (_request!=null)
+                _request.recycle(this);
+            if (_response!=null)
+                _response.recycle(this);
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -790,22 +809,7 @@ public class HttpConnection
         
         HttpContext context=null;
         try
-        {
-            // Create or recycle connection
-            if (_request!=null)
-            {
-                _request.recycle(this);
-                if (_response!=null)
-                    _response.recycle(this);
-                else
-                    _response = new HttpResponse(this);
-            }
-            else
-            {
-                _request = new HttpRequest(this);
-                _response = new HttpResponse(this);
-            }
-            
+        {   
             // Assume the connection is not persistent,
             // unless told otherwise.
             _persistent=false;
@@ -839,27 +843,21 @@ public class HttpConnection
                     _persistent=false;
                     _response.destroy();
                     _response=null;
-                    return _persistent;
+                    return false;
                 }
                 
                 exception(e);
                 _persistent=false;
                 _response.destroy();
                 _response=null;
-                return _persistent;
+                return false;
             }
             
             if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
                 throw new HttpException(_response.__400_Bad_Request);
             
             // We have a valid request!
-            if (_statsOn)
-            {
-                _requests++;
-                _tmpTime=_request.getTimeStamp();
-                _reqTime=_tmpTime;
-                _httpServer.statsGotRequest();
-            }
+            statsRequestStart();
             if (Code.debug())
             {
                 _response.setField("Jetty-Request",
@@ -1026,12 +1024,8 @@ public class HttpConnection
             finally
             {
                 // stats & logging
-                if (_statsOn && _reqTime>0)
-                {
-                    _httpServer.statsEndRequest(System.currentTimeMillis()-_reqTime,
-                                                (_response!=null));
-                    _reqTime=0;
-                }
+                statsRequestEnd();
+                
                 if (context!=null)
                     context.log(_request,_response,bytes_written);
                 
@@ -1045,6 +1039,29 @@ public class HttpConnection
         return _persistent;
     }
 
+    /* ------------------------------------------------------------ */
+    protected void statsRequestStart()
+    {
+        if (_statsOn)
+        {
+            _requests++;
+            _tmpTime=_request.getTimeStamp();
+            _reqTime=_tmpTime;
+            _httpServer.statsGotRequest();
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    protected void statsRequestEnd()
+    {
+        if (_statsOn && _reqTime>0)
+        {
+            _httpServer.statsEndRequest(System.currentTimeMillis()-_reqTime,
+                                        (_response!=null));
+            _reqTime=0;
+        }
+    }
+    
     /* ------------------------------------------------------------ */
     /** Destroy the connection.
      * called by handleNext when handleNext returns false.

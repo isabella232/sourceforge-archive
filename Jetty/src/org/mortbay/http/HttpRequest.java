@@ -129,6 +129,12 @@ public class HttpRequest extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
+    public void setTimeStamp(long ts)
+    {
+        _timeStamp=ts;
+    }
+    
+    /* ------------------------------------------------------------ */
     /**
      * @deprecated use getHttpResponse()
      */
@@ -277,7 +283,14 @@ public class HttpRequest extends HttpMessage
     {
         return _method;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public void setMethod(String method)
+    {
+        if (getState()!=__MSG_EDITABLE)
+            throw new IllegalStateException("Not EDITABLE");
+        _method=method;
+    }
 
     /* ------------------------------------------------------------ */
     /**
@@ -353,6 +366,8 @@ public class HttpRequest extends HttpMessage
     {
         return _uri;
     }
+
+    
     
     /* ------------------------------------------------------------ */
     /** Get the request Scheme.
@@ -413,8 +428,8 @@ public class HttpRequest extends HttpMessage
         // Return host from connection
         if (_connection!=null)
         {
-            _host=_connection.getHost();
-            _port=_connection.getPort();
+            _host=_connection.getServerName();
+            _port=_connection.getServerPort();
             if (_host!=null && !InetAddrPort.__0_0_0_0.equals(_host))
                 return _host;
         }
@@ -440,7 +455,7 @@ public class HttpRequest extends HttpMessage
         if (_uri.isAbsolute())
             _port=_uri.getPort();
         else if (_connection!=null)
-            _port=_connection.getPort();
+            _port=_connection.getServerPort();
         return _port;    
     }
     
@@ -451,6 +466,17 @@ public class HttpRequest extends HttpMessage
     public String getPath()
     {
         return _uri.getPath();
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setPath(String path)
+    {
+        if (getState()!=__MSG_EDITABLE)
+            throw new IllegalStateException("Not EDITABLE");
+        if (_uri==null)
+            _uri=new URI(path);
+        else
+            _uri.setPath(path);
     }
     
     /* ------------------------------------------------------------ */
@@ -471,23 +497,40 @@ public class HttpRequest extends HttpMessage
         return _uri.getQuery();
     }
     
-
+    /* ------------------------------------------------------------ */
+    public void setQuery(String q)
+    {   
+        if (getState()!=__MSG_EDITABLE)
+            throw new IllegalStateException("Not EDITABLE");
+        _uri.setQuery(q);
+    }
+    
     /* ------------------------------------------------------------ */
     public String getRemoteAddr()
     {
+        String addr="127.0.0.1";
         HttpConnection connection = getHttpConnection();
         if (connection!=null)
-            return connection.getRemoteAddr().getHostAddress();
-        return "127.0.0.1";
+        {
+            addr=connection.getRemoteAddr();
+            if (addr==null)
+                addr=connection.getRemoteHost();
+        }
+        return addr;
     }
     
     /* ------------------------------------------------------------ */
     public String getRemoteHost()
     {
+        String host="127.0.0.1";
         HttpConnection connection = getHttpConnection();
         if (connection!=null)
-            return connection.getRemoteAddr().getHostAddress();
-        return "127.0.0.1";
+        {
+            host=connection.getRemoteHost();
+            if (host==null)
+                host=connection.getRemoteAddr();
+        }
+        return host;
     }
     
     /* ------------------------------------------------------------ */
