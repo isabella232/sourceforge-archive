@@ -20,6 +20,50 @@ import java.util.Hashtable;
 import java.util.Vector;
 import java.util.StringTokenizer;
 
+/** Extension of Properties to allow nesting of Properties and default values
+ * This class extends Properties and uses a "." separated notation to allow
+ * nesting of property values. Property keys such as "a.b" and "a.c" cat be
+ * retrieved (and set) as normal, but it is possible to retrieve a
+ * PropertyTree by get("a"), and then use get("b") and get("c") to achieve
+ * the same thing (although most times this is unneccessary). This makes it
+ * easy to have nested sets of values in the same properties file and iterate
+ * over nested keys.
+ *
+ * <p>The "*" can also be used as a default key and when matched, its value
+ * will be returned if there is no explicitly matching key.
+ * <br>E.G<pre>
+ * a.b.* = foo      # Match anything starting in "a.b"
+ * *.c = bar        # Match anything ending in "c"
+ * a.*.c = flob     # Match anything starting in "a" that ends in a "c"
+ * * = blob         # Match anything
+ * </pre>
+ * All the standard Properties methods work as usual, but keys such as
+ * "a.b.c" can be used to retrieve nested values. The Properties methods,
+ * <code>propertyNames</code> only returns proper key names, not default
+ * keys, but <code>list</code> and <code>save</code> will write out the
+ * default keys and their values.
+ *
+ * <p> This class adds methods to navigate over different elements of the
+ * tree: <ul>
+ *   <li> <code>valueNames</code>: Return an Enumeration of the names of the
+ * values on this PropertyTree (only its direct values, not values of
+ * sub-node PropertyTrees)
+ *   <li> <code>nodeNames</code>: Return an Enumeration of the names of the
+ * sub-node PropertyTrees of this PropertyTree (only direct sub-nodes)
+ *   <li> <code>getNode</code>: Retrieve a direct child node of this
+ * PropertyTree
+ * </ul>
+ *
+ * <p> To aid in constructing and saving Properties files,
+ * <code>getConverter</code> will convert Dictionaries into PropertyTrees
+ * recursively.
+ *
+ * <strong>Note:</strong> If keys for "a.b.c=xxx" and "a.b=xxx" exist, then
+ * doing a get("a.b") will return the value for "a.b" rather than returning
+ * the PropertyTree representing "a.b". Because of this it is recommended
+ * that Properties files not be written to contain such keys where nested
+ * PropertyTrees need to be retrieved.
+ */
 public class PropertyTree extends Properties
 {
     /* ------------------------------------------------------------ */
@@ -241,6 +285,10 @@ public class PropertyTree extends Properties
 	Vector v = new Vector();
 	listNames("", v);
 	return v.elements();
+    }
+    /* ------------------------------------------------------------ */
+    public Enumeration keys(){
+	return proertyNames();
     }
     /* ------------------------------------------------------------ */
     /** Retrurn a sub node of this PropertyTree
