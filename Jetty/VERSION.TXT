@@ -10,6 +10,7 @@ Jetty Versions
  + Handle unremovable tempdir.
  + Context Initparams to control session cookie domain, path and age.
  + ClientCertAuthenticator protected from null subjectDN
+ + Added LimitedNCSARequestLog
 
 Jetty-4.1.0RC6 - 14 September 2002
  + Don't URL encode FileURLS.
