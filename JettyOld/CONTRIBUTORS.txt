@@ -20,7 +20,8 @@ Contributions, Testing & valuable feedback from:
   Ernest Leipold <everlongh@hotmail.com>
   Doyle Davidson <ddavidso@automatedlogic.com>
   Petr Jiricka <petr.jiricka@netbeans.com>
-
+  Brett Sealey <brett@ind.tansu.com.au>
+  Norbert Renner <norbert.renner@innovations.de>
 
   Plus a few more in the pipe line (tell me if your one of them...)
 

@@ -308,9 +308,11 @@ public class FileHandler extends NullHandler
 	    }
 	    else
 		// dont know what it is
-		Code.warning("Unknown file type");
+		Code.warning("Unknown file type");    
 	}
+	file=null;
     }
+    
     /* ------------------------------------------------------------ */
     void handlePut(HttpRequest request, HttpResponse response,
 		   String uri, String filename)
@@ -340,6 +342,7 @@ public class FileHandler extends NullHandler
 		fos.write(bytes, 0, read);
 		Code.debug("Read " + read + "bytes: " + bytes);
 	    }
+	    in.close();
 	    fos.close();
 	    response.setStatus(response.SC_NO_CONTENT);
 	    response.writeHeaders();
@@ -456,6 +459,7 @@ public class FileHandler extends NullHandler
 	}
 	response.setHeader(HttpResponse.Allow, allowHeader);
     }
+    
     /* ------------------------------------------------------------ */
     void sendFile(HttpRequest request,HttpResponse response, File file)
 	throws Exception

@@ -49,7 +49,7 @@ public class MultiPartResponse
 {
     /* ------------------------------------------------------------ */
     private static String boundary =
-    "com.mortbay.HTTP.MutliPartResponse.boundary.";
+    "com.mortbay.HTTP.MultiPartResponse.boundary.";
     
     /* ------------------------------------------------------------ */
     ServletResponse response=null;

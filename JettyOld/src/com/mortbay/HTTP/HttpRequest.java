@@ -687,7 +687,7 @@ public class HttpRequest extends HttpHeader
     public Enumeration getParameterNames()
     {
 	if (formParameters==null && cookieParameters==null)
-	    return uri.getParameters().keys();
+	    return uri.getParameterNames();
 
 	Vector names = new Vector();
 	Enumeration e = uri.getParameters().keys();

@@ -23,6 +23,8 @@ public class Exit extends HttpServlet
 	throws ServletException, IOException
     {
 	Code.warning("Exit requested");
-	System.exit(0);
+	// XXX - Need to move this servlet to Jetty package to avoid the
+	// cyclic dependancy between packages.
+	com.mortbay.Jetty.Server.shutdown();
     }    
 }

@@ -456,6 +456,9 @@ public class ServletHolder implements ServletConfig
 				useServlet = servlet = null;
 			    }
 			}
+			else
+			    // yes so use it.
+			    useServlet = servlet;
 		    }
 		}
 		else

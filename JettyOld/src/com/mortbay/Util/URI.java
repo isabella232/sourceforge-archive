@@ -148,6 +148,15 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
+    /** Get the uri query parameters names
+     * @return the URI query parameters names
+     */
+    public Enumeration getParameterNames()
+    {
+	return parameters.keys();
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Get the uri query parameters
      * @return the URI query parameters
      */

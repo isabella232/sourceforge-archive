@@ -26,7 +26,7 @@ public class Cookies
     
     /* -------------------------------------------------------------- */
     public final static SimpleDateFormat __dateSend = 
-	new SimpleDateFormat("dd MMM yyyy HH:mm:ss 'GMT'");
+	new SimpleDateFormat("EEE, dd-MMM-yyyy HH:mm:ss 'GMT'");
     static
     {
 	TimeZone tz = TimeZone.getTimeZone("GMT");

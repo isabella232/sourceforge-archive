@@ -54,6 +54,16 @@ public class HttpOutputStream extends ServletOutputStream
 	OutputStream getOutputStream()
 	{
 	    return this.out;
+	}	
+	public void write(byte[]  b)
+	    throws IOException
+	{
+	    this.out.write(b,0,b.length);
+	}
+	public void write(byte  buf[], int  off, int  len)
+	    throws IOException
+	{
+	    this.out.write(buf,off,len);
 	}
     }
     

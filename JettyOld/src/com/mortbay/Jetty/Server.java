@@ -110,6 +110,27 @@ public class Server extends BaseConfiguration
     }
     
     /* ------------------------------------------------------------ */
+    /** Stop serving.
+     */
+    public void stop()
+    {
+	if (httpServer != null)
+	    httpServer.close();
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /** shutdown
+     *  Stop all the server threads we started.
+     */
+    public static void shutdown()
+    {
+        Enumeration e = serverMap.elements();
+        while (e.hasMoreElements())
+	    ((Server)e.nextElement()).stop();   
+    }
+    
+    /* ------------------------------------------------------------ */
     /** join 
      */
     public void join()
@@ -264,11 +285,7 @@ public class Server extends BaseConfiguration
    	    Enumeration e = serverMap.elements();
    	    while (e.hasMoreElements())
    		((Server)e.nextElement()).start();
-	    
- 	    // Join all severs
- 	    e = serverMap.elements();
- 	    while (e.hasMoreElements())
- 		((Server)e.nextElement()).join();   
+	     
 	}
 	catch(Throwable e){
 	    Code.warning(e);

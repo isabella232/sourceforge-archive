@@ -168,7 +168,7 @@ public class ServletHandler extends NullHandler
 	    String servletClass=PathMap.pathInfo(pathSpec,address);
 	    int slash=servletClass.indexOf("/");
 	    if (slash>=0)
-		servletClass=servletClass.substring(0,slash);
+		servletClass=servletClass.substring(slash+1);
 	    
 	    if (servletClass.endsWith(".class"))
 		servletClass=servletClass.substring(0,servletClass.length()-6);
