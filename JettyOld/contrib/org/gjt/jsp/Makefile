@@ -26,7 +26,7 @@ gnujsp.jar: all
 	cf org/gjt/jsp/gnujsp.jar \
 	org/gjt/jsp/*.class \
 	org/gjt/jsp/jsdk20/*.class \
-	org/gjt/jsp/prop/*
+	org/gjt/jsp/prop/*.properties
 
 clean::
 	rm -f gnujsp.jar
