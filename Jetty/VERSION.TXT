@@ -11,6 +11,9 @@ Jetty-4.2.14
  + Priority on ThreadedServer
  + replaced win32 service with http://wrapper.tanukisoftware.org
  + Build fileclasspath from a walk of the classloaders
+ + Set TransactionManager on JettyPlus datasources and pools
+ + Fixed null pointer if no sevices configured for JettyPlus
+ + Fixed comments with embedded double dashes on jettyplus.xml file
 
 Jetty-4.2.12 - 12 August 2003
  + Restore max inactive interval for session manager
