@@ -6,8 +6,11 @@ map to kernel processes, it is not sufficient, secure or 100% java to call setui
 to change to a non-root user after opening port 80.
 <BR><BR>
 A better solution is to run the server on a non-privileged port (eg 8080) and
-use a firewall or routing mechanism to map port 80 to 8080. For example, on some
-Linux systems the ipchains REDIRECT mechanism can be used to redirect from 
+use a firewall or routing mechanism to map port 80 to 8080. 
+<p>
+<b> Using ipchains </b>
+<p>
+On some Linux systems the ipchains REDIRECT mechanism can be used to redirect from 
 one port to another inside the kernel:
 <pre>
   /sbin/ipchains -I input --proto TCP --dport 80 -j REDIRECT 8080
@@ -21,9 +24,14 @@ command-line utility installed.  (On RedHat the package is aptly named
 since it inserts another copy of the rule every time you run it.
 <BR><BR>
 Once this rule is set up, a Linux 2.2 kernel will redirect all data
-addressed to port 80 to a server such as Jetty running on port 8080.
-This includes all RedHat 6.x distros.  Linux 2.4 kernels, e.g. RedHat
+addressed to port 80 to a server such as Jetty running on port
+8080.This includes all RedHat 6.x distros.  Linux 2.4 kernels, e.g. RedHat
 7.1+,  have a similar "iptables" facility.
+<p>
+<b> Using iptables </b>
+<p>
+You need to add something like the following to the startup
+scripts or your firewall rules:
 <pre>
   /sbin/iptables -t nat -I PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8080
 </pre>
@@ -33,6 +41,12 @@ Be careful to place rules like this one early in your "input" chain.
 Such rules must precede any rule that would accept the packet, otherwise
 the redirection won't occur.  You can insert as many rules as needed if
 your server needs to listen on multiple ports, as for HTTPS.
+<p>
+<b>Note:</b> For some extremely handy scripts (verified against
+SuSe 7.3) and a detailed <font face=courier>readme.txt</font>,
+download a the tiny tarball <A
+HREF="iptables.tgz">iptables.tgz</A> contributed by Chris Haynes
+(thanks Chris!).
 
 <BR><BR><HR>
 Return to <A HREF="index.html">JettyFaq</A><HR>

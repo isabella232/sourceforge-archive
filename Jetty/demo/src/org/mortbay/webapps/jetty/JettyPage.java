@@ -225,6 +225,8 @@ public class JettyPage extends Page
         }
         
         _table = new Table(0);
+        _table.width("90%");
+        
         nest(_table);
         _table.cellPadding(0);
         _table.cellSpacing(0);
@@ -243,7 +245,7 @@ public class JettyPage extends Page
             if (_section._section.equals(__section[section][0]._section)&&
                 __section[section].length>1 )
                 para=true;
-            _table.add(para?"<P>":"<BR>");
+            _table.add(para?"<P>":"<BR><BR>");
             para=false;
             
             if(_section.equals(__section[section][0]))
@@ -296,6 +298,9 @@ public class JettyPage extends Page
 
         // home logos
         _table.add("<A HREF=\"http://www.mortbay.com\"><IMG SRC=\""+context+"/images/mbLogoBar.png\" WIDTH=120 HEIGHT=75 BORDER=0 ALT=\"Mort Bay\"></A><P>\n");
+
+         _table.add("<A HREF=\"http://www.jboss.org\"><IMG SRC=\""+context+"/images/jboss.png\" WIDTH=134 HEIGHT=60 BORDER=0 ALT=\"JBoss Group\"></A><P>\n");
+        
         _table.add("<A HREF=\"http://www.inetu.com\"><IMG SRC=\""+context+"/images/inetu.png\" WIDTH=121 HEIGHT=52 BORDER=0 ALT=\"InetU\"></A><P>\n");
 
 
@@ -309,7 +314,7 @@ public class JettyPage extends Page
 
         _table.add("<A HREF=\""+context+"/freesoftware.html\"><IMG SRC=\""+context+"/images/effbr.png\" WIDTH=88 HEIGHT=32 BORDER=0 ALT=\"EFF\"></A><P>\n");
         
-        _table.add("&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P><font size=-4 color=\"#606CC0\">Copyright 2001<BR>Mort Bay Consulting.</FONT>");
+        _table.add("&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P><font size=-4 color=\"#606CC0\">Copyright 2002<BR>Mort Bay Consulting.</FONT>");
         
         _table.newCell();
         _table.cell().width(3);
