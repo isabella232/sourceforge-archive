@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Clear interrupted status in ThreadPool
  + Fixed forward query string handling
  + fixed forward attribute handling for jsp-file servlets
  + Fixed setCharacterEncoding to work with getReader

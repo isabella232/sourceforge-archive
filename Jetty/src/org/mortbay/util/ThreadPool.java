@@ -644,6 +644,7 @@ public class ThreadPool
             try{
                 while(_running) 
                 {
+                    Thread.interrupted();
                     _job=null;
                     try 
                     {
