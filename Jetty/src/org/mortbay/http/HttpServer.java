@@ -10,12 +10,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.util.AbstractCollection;
 import java.util.AbstractMap;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EventListener;
@@ -29,8 +29,8 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.WeakHashMap;
 import org.mortbay.http.handler.DumpHandler;
-import org.mortbay.http.handler.ResourceHandler;
 import org.mortbay.http.handler.NotFoundHandler;
+import org.mortbay.http.handler.ResourceHandler;
 import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LifeCycle;
@@ -40,6 +40,7 @@ import org.mortbay.util.LogSink;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
 import org.mortbay.util.StringMap;
+import org.mortbay.util.ThreadPool;
 import org.mortbay.util.URI;
 
 
@@ -760,6 +761,22 @@ public class HttpServer implements LifeCycle,
         }
         
         Log.event("Stopped "+this);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Join the listeners.
+     * Join all listeners that are instances of ThreadPool.
+     * @exception InterruptedException 
+     */
+    public synchronized void join()
+        throws InterruptedException
+    { 
+        for (int l=0;l<_listeners.size();l++)
+        {
+            HttpListener listener =(HttpListener)_listeners.get(l); 
+            if (listener.isStarted() && listener instanceof ThreadPool)
+                ((ThreadPool)listener).join();
+        }
     }
     
     /* ------------------------------------------------------------ */
