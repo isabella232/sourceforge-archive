@@ -103,13 +103,15 @@ public interface TryCatchFinally {
      * one of the setter methods.
      *
      * <p>This method may throw an exception (the same or a new one)
-     * that will be propagated further the nest chain.  If an exception
+     * that will be propagated further up the nest chain.  If an exception
      * is thrown, doFinally() will be invoked.
      *
      * <p>This method is intended to be used to respond to an exceptional
      * condition.
      *
      * @param t The throwable exception navigating through this tag.
+     * @throws Throwable if the exception is to be rethrown further up 
+     *     the nest chain.
      */
  
     void doCatch(Throwable t) throws Throwable;

@@ -79,16 +79,19 @@ import java.util.Locale;
  * <code>ServletOutputStream</code> and manage the character sections
  * manually.
  *
- * <p>The charset for the MIME body response can be specified with 
- * {@link #setContentType}.  For example, "text/html; charset=Shift_JIS".
- * The charset can alternately be set using {@link #setLocale}.
- * If no charset is specified, ISO-8859-1 will be used.  
- * The <code>setContentType</code> or <code>setLocale</code> method 
- * must be called before <code>getWriter</code> for the charset to 
- * affect the construction of the writer.
+ * <p>The charset for the MIME body response can be specified
+ * explicitly using the {@link #setCharacterEncoding} and
+ * {@link #setContentType} methods, or implicitly
+ * using the {@link #setLocale} method.
+ * Explicit specifications take precedence over
+ * implicit specifications. If no charset is specified, ISO-8859-1 will be
+ * used. The <code>setCharacterEncoding</code>,
+ * <code>setContentType</code>, or <code>setLocale</code> method must
+ * be called before <code>getWriter</code> and before committing
+ * the response for the character encoding to be used.
  * 
  * <p>See the Internet RFCs such as 
- * <a href="http://info.internet.isi.edu/in-notes/rfc/files/rfc2045.txt">
+ * <a href="http://www.ietf.org/rfc/rfc2045.txt">
  * RFC 2045</a> for more information on MIME. Protocols such as SMTP
  * and HTTP define profiles of MIME, and those standards
  * are still evolving.
@@ -105,22 +108,52 @@ public interface ServletResponse {
 
     
     /**
-     * Returns the name of the charset used for
-     * the MIME body sent in this response.
-     *
-     * <p>If no charset has been assigned, it is implicitly
-     * set to <code>ISO-8859-1</code> (<code>Latin-1</code>).
-     *
-     * <p>See RFC 2047 (http://ds.internic.net/rfc/rfc2045.txt)
+     * Returns the name of the character encoding (MIME charset)
+     * used for the body sent in this response.
+     * The character encoding may have been specified explicitly
+     * using the {@link #setCharacterEncoding} or
+     * {@link #setContentType} methods, or implicitly using the
+     * {@link #setLocale} method. Explicit specifications take
+     * precedence over implicit specifications. Calls made
+     * to these methods after <code>getWriter</code> has been
+     * called or after the response has been committed have no
+     * effect on the character encoding. If no character encoding
+     * has been specified, <code>ISO-8859-1</code> is returned.
+     * <p>See RFC 2047 (http://www.ietf.org/rfc/rfc2047.txt)
      * for more information about character encoding and MIME.
      *
      * @return		a <code>String</code> specifying the
-     *			name of the charset, for
-     *			example, <code>ISO-8859-1</code>
+     *			name of the character encoding, for
+     *			example, <code>UTF-8</code>
      *
      */
   
     public String getCharacterEncoding();
+    
+    
+
+    /**
+     * Returns the content type used for the MIME body
+     * sent in this response. The content type proper must
+     * have been specified using {@link #setContentType}
+     * before the response is committed. If no content type
+     * has been specified, this method returns null.
+     * If a content type has been specified and a
+     * character encoding has been explicitly or implicitly
+     * specified as described in {@link #getCharacterEncoding},
+     * the charset parameter is included in the string returned.
+     * If no character encoding has been specified, the
+     * charset parameter is omitted.
+     *
+     * @return		a <code>String</code> specifying the
+     *			content type, for example,
+     *			<code>text/html; charset=UTF-8</code>,
+     *			or null
+     *
+     * @since 2.4
+     */
+  
+    public String getContentType();
     
     
 
@@ -150,37 +183,38 @@ public interface ServletResponse {
     
 
     /**
-     * Returns a <code>PrintWriter</code> object that 
-     * can send character text to the client. 
-     * The character encoding used is the one specified 
-     * in the <code>charset=</code> property of the
-     * {@link #setContentType} method, which must be called
-     * <i>before</i> calling this method for the charset to take effect. 
-     *
-     * <p>If necessary, the MIME type of the response is 
-     * modified to reflect the character encoding used.
-     *
-     * <p> Calling flush() on the PrintWriter commits the response.
-     *
+     * Returns a <code>PrintWriter</code> object that
+     * can send character text to the client.
+     * The <code>PrintWriter</code> uses the character
+     * encoding returned by {@link #getCharacterEncoding}.
+     * If the response's character encoding has not been
+     * specified as described in <code>getCharacterEncoding</code>
+     * (i.e., the method just returns the default value 
+     * <code>ISO-8859-1</code>), <code>getWriter</code>
+     * updates it to <code>ISO-8859-1</code>.
+     * <p>Calling flush() on the <code>PrintWriter</code>
+     * commits the response.
      * <p>Either this method or {@link #getOutputStream} may be called
      * to write the body, not both.
      *
      * 
-     * @return 				a <code>PrintWriter</code> object that 
-     *					can return character data to the client 
+     * @return 		a <code>PrintWriter</code> object that 
+     *			can return character data to the client 
      *
-     * @exception UnsupportedEncodingException  if the charset specified in
-     *						<code>setContentType</code> cannot be
-     *						used
+     * @exception UnsupportedEncodingException
+     *			if the character encoding returned
+     *			by <code>getCharacterEncoding</code> cannot be used
      *
-     * @exception IllegalStateException    	if the <code>getOutputStream</code>
-     * 						method has already been called for this 
-     *						response object
+     * @exception IllegalStateException
+     *			if the <code>getOutputStream</code>
+     * 			method has already been called for this 
+     *			response object
      *
-     * @exception IOException   		if an input or output exception occurred
+     * @exception IOException
+     *			if an input or output exception occurred
      *
-     * @see 					#getOutputStream
-     * @see 					#setContentType
+     * @see 		#getOutputStream
+     * @see 		#setCharacterEncoding
      *
      */
 
@@ -189,6 +223,37 @@ public interface ServletResponse {
     
     
     
+    /**
+     * Sets the character encoding (MIME charset) of the response
+     * being sent to the client, for example, to UTF-8.
+     * If the character encoding has already been set by
+     * {@link #setContentType} or {@link #setLocale},
+     * this method overrides it.
+     * Calling {@link #setContentType} with the <code>String</code>
+     * of <code>text/html</code> and calling
+     * this method with the <code>String</code> of <code>UTF-8</code>
+     * is equivalent with calling
+     * <code>setContentType</code> with the <code>String</code> of
+     * <code>text/html; charset=UTF-8</code>.
+     * <p>This method has no effect if it is called after
+     * <code>getWriter</code> has been
+     * called or after the response has been committed.
+     *
+     * @param charset 	a String specifying only the character set
+     * 			defined by IANA Character Sets
+     *			(http://www.iana.org/assignments/character-sets)
+     *
+     * @see		#setContentType
+     * 			#setLocale
+     *
+     * @since 2.4
+     *
+     */
+
+    public void setCharacterEncoding(String charset);
+    
+    
+
 
     /**
      * Sets the length of the content body in the response
@@ -207,16 +272,22 @@ public interface ServletResponse {
 
     /**
      * Sets the content type of the response being sent to
-     * the client. The content type may include the type of character
-     * encoding used, for example, <code>text/html; charset=ISO-8859-4</code>.
-     *
-     * <p>If obtaining a <code>PrintWriter</code>, this method should be 
-     * called first.
-     *
+     * the client, if the response has not been committed yet.
+     * The given content type may include a character encoding
+     * specification, for example, <code>text/html;charset=UTF-8</code>.
+     * The response's character encoding is only set from the given
+     * content type if this method is called before <code>getWriter</code>
+     * is called.
+     * <p>This method has no effect if called after the response
+     * has been committed. It does not set the response's character
+     * encoding if it is called after <code>getWriter</code>
+     * has been called or after the response has been committed.
      *
      * @param type 	a <code>String</code> specifying the MIME 
      *			type of the content
      *
+     * @see 		#setLocale
+     * @see 		#setCharacterEncoding
      * @see 		#getOutputStream
      * @see 		#getWriter
      *
@@ -238,7 +309,8 @@ public interface ServletResponse {
      * quickly.
      *
      * <p>This method must be called before any response body content is
-     * written; if content has been written, this method throws an 
+     * written; if content has been written or the response object has
+     * been committed, this method throws an 
      * <code>IllegalStateException</code>.
      *
      * @param size 	the preferred buffer size
@@ -346,14 +418,32 @@ public interface ServletResponse {
     
 
     /**
-     * Sets the locale of the response, setting the headers (including the
-     * Content-Type's charset) as appropriate.  This method should be called
-     * before a call to {@link #getWriter}.  By default, the response locale
-     * is the default locale for the server.
+     * Sets the locale of the response, setting the
+     * <code>Content-Language</code> header,
+     * if the response has not been committed yet.
+     * It also sets the response's character encoding appropriately
+     * for the locale, if the character encoding has not been
+     * explicitly set using {@link #setContentType} or
+     * {@link #setCharacterEncoding}, <code>getWriter</code> hasn't
+     * been called yet, and the response hasn't been committed yet.
+     * If the deployment descriptor contains a
+     * <code>locale-encoding-mapping-list</code> element,
+     * and that element provides a mapping for the given locale,
+     * that mapping is used. Otherwise, the mapping from locale to
+     * character encoding is container dependent.
+     * <p>This method has no effect if called after the response has been
+     * committed. It does not set the response's character encoding if
+     * it is called after <code>setContentType</code> has been called
+     * with a charset specification, after
+     * <code>setCharacterEncoding</code> has been called, after
+     * <code>getWriter</code> has been called, or after the response
+     * has been committed.
      * 
      * @param loc  the locale of the response
      *
      * @see 		#getLocale
+     * @see 		#setContentType
+     * @see 		#setCharacterEncoding
      *
      */
 
@@ -362,8 +452,11 @@ public interface ServletResponse {
     
 
     /**
-     * Returns the locale assigned to the response.
-     * 
+     * Returns the locale specified for this response
+     * using the {@link #setLocale} method. Calls made to
+     * <code>setLocale</code> after the response is committed
+     * have no effect. If no locale has been specified,
+     * the container's default locale is returned.
      * 
      * @see 		#setLocale
      *

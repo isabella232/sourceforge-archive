@@ -111,7 +111,7 @@ public class TagSupport implements IterationTag, Serializable {
      *
      * @param from The instance from where to start looking.
      * @param klass The subclass of Tag or interface to be matched
-     * @returns the nearest ancestor that implements the interface
+     * @return the nearest ancestor that implements the interface
      * or is an instance of the class specified
      */
 
@@ -154,7 +154,8 @@ public class TagSupport implements IterationTag, Serializable {
     /**
      * Default processing of the start tag, returning SKIP_BODY.
      *
-     * @returns SKIP_BODY
+     * @return SKIP_BODY
+     * @throws JspException if an error occurs while processing this tag
      *
      * @see Tag#doStartTag()
      */
@@ -166,7 +167,8 @@ public class TagSupport implements IterationTag, Serializable {
     /**
      * Default processing of the end tag returning EVAL_PAGE.
      *
-     * @returns EVAL_PAGE
+     * @return EVAL_PAGE
+     * @throws JspException if an error occurs while processing this tag
      *
      * @see Tag#doEndTag()
      */
@@ -177,9 +179,10 @@ public class TagSupport implements IterationTag, Serializable {
 
 
     /**
-     * Default processing for a body
+     * Default processing for a body.
      *
      * @return SKIP_BODY
+     * @throws JspException if an error occurs while processing this tag
      *
      * @see IterationTag#doAfterBody()
      */
@@ -198,7 +201,12 @@ public class TagSupport implements IterationTag, Serializable {
      */
 
     public void release() {
-	parent          = null;
+	parent = null;
+	id = null;
+	if( values != null ) {
+	    values.clear();
+	}
+	values = null;
     }
 
     /**
@@ -216,7 +224,7 @@ public class TagSupport implements IterationTag, Serializable {
      * The Tag instance most closely enclosing this tag instance.
      * @see Tag#getParent()
      *
-     * @returns the parent tag instance or null
+     * @return the parent tag instance or null
      */
 
     public Tag getParent() {
@@ -236,7 +244,7 @@ public class TagSupport implements IterationTag, Serializable {
     /**
      * The value of the id attribute of this tag; or null.
      *
-     * @returns the value of the id attribute, or null
+     * @return the value of the id attribute, or null
      */
     
     public String getId() {
@@ -246,7 +254,7 @@ public class TagSupport implements IterationTag, Serializable {
     /**
      * Set the page context.
      *
-     * @param pageContenxt The PageContext.
+     * @param pageContext The PageContext.
      * @see Tag#setPageContext
      */
 
@@ -272,7 +280,7 @@ public class TagSupport implements IterationTag, Serializable {
      * Get a the value associated with a key.
      *
      * @param k The string key.
-     * @returns The value associated with the key, or null.
+     * @return The value associated with the key, or null.
      */
 
     public Object getValue(String k) {
@@ -296,9 +304,10 @@ public class TagSupport implements IterationTag, Serializable {
     }
 
     /**
-     * Enumerate the values kept by this tag handler.
+     * Enumerate the keys for the values kept by this tag handler.
      *
-     * @returns An enumeration of all the values set.
+     * @return An enumeration of all the keys for the values set,
+     *     or null or an empty Enumeration if no values have been set.
      */
 
     public Enumeration getValues() {
@@ -312,10 +321,16 @@ public class TagSupport implements IterationTag, Serializable {
 
     private   Tag         parent;
     private   Hashtable   values;
+    /**
+     * The value of the id attribute of this tag; or null.
+     */
     protected String	  id;
 
     // protected fields
 
+    /**
+     * The PageContext.
+     */
     protected PageContext pageContext;
 }
 

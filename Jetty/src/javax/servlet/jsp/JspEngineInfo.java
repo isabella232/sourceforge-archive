@@ -61,6 +61,13 @@ package javax.servlet.jsp;
  */
 
 public abstract class JspEngineInfo {
+
+    /**
+     * Sole constructor. (For invocation by subclass constructors, 
+     * typically implicit.)
+     */
+    public JspEngineInfo() {
+    }
     
     /**
      * Return the version number of the JSP specification that is supported by

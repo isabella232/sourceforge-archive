@@ -177,6 +177,7 @@ public class Cookie implements Cloneable {
 		|| name.equalsIgnoreCase("Path")
 		|| name.equalsIgnoreCase("Secure")
 		|| name.equalsIgnoreCase("Version")
+		|| name.startsWith("$")
 	    ) {
 	    String errMsg = lStrings.getString("err.cookie_name_is_token");
 	    Object[] errArgs = new Object[1];
@@ -529,7 +530,7 @@ public class Cookie implements Cloneable {
     // 
     // private static final String tspecials = "()<>@,;:\\\"/[]?={} \t";
 
-    private static final String tspecials = ",;";
+    private static final String tspecials = ",; ";
     
     
     

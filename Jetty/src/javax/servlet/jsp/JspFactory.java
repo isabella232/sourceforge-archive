@@ -82,6 +82,13 @@ import javax.servlet.jsp.PageContext;
 public abstract class JspFactory {
 
     private static JspFactory deflt = null;
+    
+    /**
+     * Sole constructor. (For invocation by subclass constructors, 
+     * typically implicit.)
+     */
+    public JspFactory() {
+    }
 
     /**
      * <p>
@@ -89,7 +96,7 @@ public abstract class JspFactory {
      * any principal other than the JSP Engine runtime to call this method.
      * </p>
      *
-     * @param default	The default factory implementation
+     * @param deflt	The default factory implementation
      */
 
     public static synchronized void setDefaultFactory(JspFactory deflt) {
@@ -97,6 +104,8 @@ public abstract class JspFactory {
     }
 
     /**
+     * Returns the default factory for this implementation.
+     *
      * @return the default factory for this implementation
      */
 
@@ -126,7 +135,6 @@ public abstract class JspFactory {
      * </p>
      *
      * @param servlet   the requesting servlet
-     * @param config    the ServletConfig for the requesting Servlet
      * @param request	the current request pending on the servlet
      * @param response	the current response pending on the servlet
      * @param errorPageURL the URL of the error page for the requesting JSP, or null
@@ -164,7 +172,7 @@ public abstract class JspFactory {
 
     /**
      * <p>
-     * called to get implementation-specific information on the current JSP engine
+     * called to get implementation-specific information on the current JSP engine.
      * </p>
      *
      * @return a JspEngineInfo object describing the current JSP engine

@@ -73,8 +73,7 @@ import java.io.IOException;
 
 public interface HttpJspPage extends JspPage {
 
-    /**
-     * The _jspService()method corresponds to the body of the JSP page. This
+    /** The _jspService()method corresponds to the body of the JSP page. This
      * method is defined automatically by the JSP container and should never
      * be defined by the JSP page author.
      * <p>
@@ -82,8 +81,16 @@ public interface HttpJspPage extends JspPage {
      * superclass may choose to perform some actions in its service() method
      * before or after calling the _jspService() method.  See using the extends
      * attribute in the JSP_Engine chapter of the JSP specification.
+     *
+     * @param request Provides client request information to the JSP.
+     * @param response Assists the JSP in sending a response to the client.
+     * @throws ServletException Thrown if an error occurred during the 
+     *     processing of the JSP and that the container should take 
+     *     appropriate action to clean up the request.
+     * @throws IOException Thrown if an error occurred while writing the
+     *     response for this page.
      */
     public void _jspService(HttpServletRequest request,
-				HttpServletResponse response)
+                            HttpServletResponse response)
        throws ServletException, IOException;
 }

@@ -62,13 +62,13 @@ package javax.servlet.jsp.tagext;
  *
  * This object should be immutable.
  *
- * This information is only available in JSP 1.2 format
-*/
+ * This information is only available in JSP 1.2 format TLDs or above.
+ */
 
 public class TagVariableInfo {
 
     /**
-     * Constructor for TagVariableInfo
+     * Constructor for TagVariableInfo.
      *
      * @param nameGiven value of &lt;name-given&gt;
      * @param nameFromAttribute value of &lt;name-from-attribute&gt;
@@ -88,9 +88,9 @@ public class TagVariableInfo {
 	this.declare           = declare;
 	this.scope             = scope;
     }
-			 
+
     /**
-     * The body of the &lt;name-given&gt; element
+     * The body of the &lt;name-given&gt; element.
      *
      * @return The variable name as a constant
      */
@@ -115,7 +115,8 @@ public class TagVariableInfo {
     /**
      * The body of the &lt;variable-class&gt; element.  
      *
-     * @return The name of the class of the variable
+     * @return The name of the class of the variable or
+     *         'java.lang.String' if not defined in the TLD.
      */
 
     public String getClassName() {
@@ -123,9 +124,10 @@ public class TagVariableInfo {
     }
 
     /**
-     * The body of the &lt;declare&gt; element
+     * The body of the &lt;declare&gt; element.
      *
-     * @return Whether the variable is to be declared or not
+     * @return Whether the variable is to be declared or not.
+     *         If not defined in the TLD, 'true' will be returned.
      */
 
     public boolean getDeclare() {
@@ -133,9 +135,11 @@ public class TagVariableInfo {
     }
 
     /**
-     * The body of the &lt;scope&gt; element
+     * The body of the &lt;scope&gt; element.
      *
-     * @return The scope to give the variable.
+     * @return The scope to give the variable.  NESTED
+     *         scope will be returned if not defined in 
+     *         the TLD.
      */
 
     public int getScope() {
@@ -146,7 +150,6 @@ public class TagVariableInfo {
     /*
      * private fields
      */
-
     private String   nameGiven;         // <name-given>
     private String   nameFromAttribute; // <name-from-attribute>
     private String   className;         // <class>

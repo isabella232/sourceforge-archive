@@ -71,11 +71,18 @@ import java.util.EventListener;
 	*/
 
 public interface ServletContextListener extends EventListener {
-	/** Notification that the web application is ready to process requests.*/
+	/** Notification that the web application initialization
+	** process is starting.
+	** All ServletContextListeners are notified of context
+	** initialisation before any filter or servlet in the web
+	** application is initialized.
+	*/
 
     public void contextInitialized ( ServletContextEvent sce );
 
-	/** Notification that the servlet context is about to be shut down. */
+	/** Notification that the servlet context is about to be shut down. All servlets
+	have been dstroy()ed before any ServletContextListeners are notified of context
+	destruction. */
     public void contextDestroyed ( ServletContextEvent sce );
 }
 

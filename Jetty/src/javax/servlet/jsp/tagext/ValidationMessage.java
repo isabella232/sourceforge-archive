@@ -57,11 +57,11 @@ package javax.servlet.jsp.tagext;
 
 
 /**
- * A validation message from a TagLibraryValidator.
+ * A validation message from either TagLibraryValidator or TagExtraInfo.
  * <p>
- * A JSP container may (optionally) support a jsp:id attribute
+ * As of JSP 2.0, a JSP container must support a jsp:id attribute
  * to provide higher quality validation errors.
- * When supported, the container will track the JSP pages
+ * The container will track the JSP pages
  * as passed to the container, and will assign to each element
  * a unique "id", which is passed as the value of the jsp:id
  * attribute.  Each XML element in the XML view available will
@@ -70,6 +70,13 @@ package javax.servlet.jsp.tagext;
  * objects.  The container then, in turn, can use these
  * values to provide more precise information on the location
  * of an error.
+ *  
+ * <p>
+ * The actual prefix of the <code>id</code> attribute may or may not be 
+ * <code>jsp</code> but it will always map to the namespace
+ * <code>http://java.sun.com/JSP/Page</code>.  A TagLibraryValidator
+ * implementation must rely on the uri, not the prefix, of the <code>id</code>
+ * attribute.
  */
 
 public class ValidationMessage {

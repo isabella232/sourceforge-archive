@@ -71,15 +71,22 @@ package javax.servlet;
  * instance of the servlet, or by maintaining a pool of servlet
  * instances and dispatching each new request to a free servlet.
  *
- * <p>This interface does not prevent
- * synchronization problems that result from servlets accessing shared
- * resources such as static class variables or classes outside
- * the scope of the servlet.
+ * <p>Note that SingleThreadModel does not solve all thread safety
+ * issues.  For example, session attributes and static variables can
+ * still be accessed by multiple requests on multiple threads
+ * at the same time, even when SingleThreadModel servlets are used.
+ * It is recommended that a developer take other means to resolve
+ * those issues instead of implementing this interface, such as
+ * avoiding the usage of an instance variable or synchronizing
+ * the block of the code accessing those resources.
+ * This interface is deprecated in Servlet API version 2.4.
  *
  *
  * @author	Various
  * @version	$Version$
  *
+ * @deprecated	As of Java Servlet API 2.4, with no direct
+ *	replacement.
  */
 
 public interface SingleThreadModel {

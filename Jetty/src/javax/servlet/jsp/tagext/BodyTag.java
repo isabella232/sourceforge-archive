@@ -96,11 +96,12 @@ import javax.servlet.jsp.*;
  * object, where the JSP Page implementation object will place the
  * evaluation (and reevaluation, if appropriate) of the body.  The setter
  * method (setBodyContent) will only be invoked if doStartTag() returns
- * EVAL_BODY_BUFFERED.
+ * EVAL_BODY_BUFFERED and the corresponding action element does not have
+ * an empty body.
  *
  * <p><B>Methods</B>
  * <p> In addition to the setter method for the bodyContent property, there
- * is a new action methods: doInitBody(), which is invoked right after
+ * is a new action method: doInitBody(), which is invoked right after
  * setBodyContent() and before the body evaluation.  This method is only
  * invoked if doStartTag() returns EVAL_BODY_BUFFERED.
  *
@@ -112,30 +113,40 @@ import javax.servlet.jsp.*;
  * tag handler implements the TryCatchFinally interface; see that
  * interface for details.
  * <p>
- * <IMG src="doc-files/BodyTagProtocol.gif"/>
-
+ * <IMG src="doc-files/BodyTagProtocol.gif"
+ *      alt="Lifecycle Details Transition Diagram for BodyTag"/>
+ *
  * <p><B>Empty and Non-Empty Action</B>
  * <p> If the TagLibraryDescriptor file indicates that the action must
- * always have an empty action, by an &lt;body-content&gt; entry of "empty",
- * then the doStartTag() method must return SKIP_BODY.
- *
+ * always have an empty element body, by an &lt;body-content&gt; entry 
+ * of "empty", then the doStartTag() method must return SKIP_BODY.
  * Otherwise, the doStartTag() method may return SKIP_BODY,
  * EVAL_BODY_INCLUDE, or EVAL_BODY_BUFFERED.
+ *
+ * <p>Note that which methods are invoked after the doStartTag() depends on 
+ * both the return value and on if the custom action element is empty
+ * or not in the JSP page, not how it's declared in the TLD.
  *
  * <p>
  * If SKIP_BODY is returned the body is not evaluated, and doEndTag() is
  * invoked.
  *
  * <p>
- * If EVAL_BODY_INCLUDE is returned, setBodyContent() is not invoked,
+ * If EVAL_BODY_INCLUDE is returned, and the custom action element is not
+ * empty, setBodyContent() is not invoked,
  * doInitBody() is not invoked, the body is evaluated and
  * "passed through" to the current out, doAfterBody() is invoked
  * and then, after zero or more iterations, doEndTag() is invoked.
+ * If the custom action element is empty, only doStart() and 
+ * doEndTag() are invoked.
  *
  * <p>
- * If EVAL_BODY_BUFFERED is returned, setBodyContent() is invoked,
+ * If EVAL_BODY_BUFFERED is returned, and the custom action element is not
+ * empty, setBodyContent() is invoked,
  * doInitBody() is invoked, the body is evaluated, doAfterBody() is
  * invoked, and then, after zero or more iterations, doEndTag() is invoked.
+ * If the custom action element is empty, only doStart() and doEndTag() 
+ * are invoked.
  */
 
 public interface BodyTag extends IterationTag {
@@ -184,8 +195,8 @@ public interface BodyTag extends IterationTag {
      * may be reused.
      *
      * @param b the BodyContent
-     * @seealso #doInitBody
-     * @seealso #doAfterBody
+     * @see #doInitBody
+     * @see #doAfterBody
      */
 
     void setBodyContent(BodyContent b);
@@ -200,12 +211,12 @@ public interface BodyTag extends IterationTag {
      * tags whose doStartTag() method returns SKIP_BODY or EVAL_BODY_INCLUDE.
      *
      * <p>
-     * The JSP container will resynchronize
-     * any variable values that are indicated as so in TagExtraInfo after the
-     * invocation of doInitBody().
+     * The JSP container will resynchronize the values of any AT_BEGIN and
+     * NESTED variables (defined by the associated TagExtraInfo or TLD) after
+     * the invocation of doInitBody().
      *
-     * @throws JspException
-     * @seealso #doAfterBody
+     * @throws JspException if an error occurred while processing this tag
+     * @see #doAfterBody
      */
 
     void doInitBody() throws JspException;

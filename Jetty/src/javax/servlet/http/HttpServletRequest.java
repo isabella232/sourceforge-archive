@@ -111,8 +111,9 @@ public interface HttpServletRequest extends ServletRequest {
      *
      * @return		one of the static members BASIC_AUTH, 
      *			FORM_AUTH, CLIENT_CERT_AUTH, DIGEST_AUTH
-     *			(suitable for == comparison) 
-     *			indicating the authentication scheme, or 
+     *			(suitable for == comparison) or
+     *			the container-specific string indicating
+     *			the authentication scheme, or
      *			<code>null</code> if the request was 
      *			not authenticated.     
      *
@@ -186,6 +187,8 @@ public interface HttpServletRequest extends ServletRequest {
      * Returns the value of the specified request header
      * as a <code>String</code>. If the request did not include a header
      * of the specified name, this method returns <code>null</code>.
+     * If there are multiple headers with the same name, this method
+     * returns the first head in the request.
      * The header name is case insensitive. You can use
      * this method with any request header.
      *
@@ -316,8 +319,10 @@ public interface HttpServletRequest extends ServletRequest {
      * Returns any extra path information associated with
      * the URL the client sent when it made this request.
      * The extra path information follows the servlet path
-     * but precedes the query string.
-     * This method returns <code>null</code> if there
+     * but precedes the query string and will start with
+     * a "/" character.
+     *
+     * <p>This method returns <code>null</code> if there
      * was no extra path information.
      *
      * <p>Same as the value of the CGI variable PATH_INFO.
@@ -345,9 +350,11 @@ public interface HttpServletRequest extends ServletRequest {
      * path. Same as the value of the CGI variable PATH_TRANSLATED.
      *
      * <p>If the URL does not have any extra path information,
-     * this method returns <code>null</code>.
+     * this method returns <code>null</code> or the servlet container
+     * cannot translate the virtual path to a real path for any reason
+     * (such as when the web application is executed from an archive).
      *
-     * The web container does not decode thins string.
+     * The web container does not decode this string.
      *
      *
      * @return		a <code>String</code> specifying the
@@ -466,11 +473,9 @@ public interface HttpServletRequest extends ServletRequest {
     /**
      *
      * Returns the session ID specified by the client. This may
-     * not be the same as the ID of the actual session in use.
-     * For example, if the request specified an old (expired)
-     * session ID and the server has started a new session, this
-     * method gets a new session with a new ID. If the request
-     * did not specify a session ID, this method returns
+     * not be the same as the ID of the current valid session
+     * for this request.
+     * If the client did not specify a session ID, this method returns
      * <code>null</code>.
      *
      *
@@ -496,7 +501,7 @@ public interface HttpServletRequest extends ServletRequest {
      *
      * 
 
-     * <table>
+     * <table summary="Examples of Returned Values">
      * <tr align=left><th>First line of HTTP request      </th>
      * <th>     Returned Value</th>
      * <tr><td>POST /some/path.html HTTP/1.1<td><td>/some/path.html
@@ -542,17 +547,22 @@ public interface HttpServletRequest extends ServletRequest {
     /**
      *
      * Returns the part of this request's URL that calls
-     * the servlet. This includes either the servlet name or
-     * a path to the servlet, but does not include any extra
-     * path information or a query string. Same as the value 
-     * of the CGI variable SCRIPT_NAME.
+     * the servlet. This path starts with a "/" character
+     * and includes either the servlet name or a path to
+     * the servlet, but does not include any extra path
+     * information or a query string. Same as the value of
+     * the CGI variable SCRIPT_NAME.
      *
+     * <p>This method will return an empty string ("") if the
+     * servlet used to process this request was matched using
+     * the "/*" pattern.
      *
      * @return		a <code>String</code> containing
      *			the name or path of the servlet being
      *			called, as specified in the request URL,
-     *			decoded.
-     *
+     *			decoded, or an empty string if the servlet
+     *			used to process the request is matched
+     *			using the "/*" pattern.
      *
      */
 
@@ -564,7 +574,7 @@ public interface HttpServletRequest extends ServletRequest {
     /**
      *
      * Returns the current <code>HttpSession</code>
-     * associated with this request or, if if there is no
+     * associated with this request or, if there is no
      * current session and <code>create</code> is true, returns 
      * a new session.
      *
@@ -581,7 +591,7 @@ public interface HttpServletRequest extends ServletRequest {
      *
      *
      *
-     * @param		<code>true</code> to create
+     * @param create	<code>true</code> to create
      *			a new session for this request if necessary; 
      *			<code>false</code> to return <code>null</code>
      *			if there's no current session

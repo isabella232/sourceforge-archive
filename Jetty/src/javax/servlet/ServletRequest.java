@@ -161,7 +161,7 @@ public interface ServletRequest {
      * or reading input using getReader().
      * 
      *
-     * @param		a <code>String</code> containing the name of 
+     * @param env	a <code>String</code> containing the name of 
      *			the chararacter encoding.
      * @throws		java.io.UnsupportedEncodingException if this is not a valid encoding
      */
@@ -350,12 +350,12 @@ public interface ServletRequest {
     
 
     /**
-     * Returns the host name of the server that received the request.
-     * For HTTP servlets, same as the value of the CGI variable 
-     * <code>SERVER_NAME</code>.
+     * Returns the host name of the server to which the request was sent.
+     * It is the value of the part before ":" in the <code>Host</code>
+     * header, if any, or the resolved server name, or the server IP address.
      *
      * @return		a <code>String</code> containing the name 
-     *			of the server to which the request was sent
+     *			of the server
      */
 
     public String getServerName();
@@ -364,9 +364,10 @@ public interface ServletRequest {
     
 
     /**
-     * Returns the port number on which this request was received.
-     * For HTTP servlets, same as the value of the CGI variable 
-     * <code>SERVER_PORT</code>.
+     * Returns the port number to which the request was sent.
+     * It is the value of the part after ":" in the <code>Host</code>
+     * header, if any, or the server port where the client connection
+     * was accepted on.
      *
      * @return		an integer specifying the port number
      *
@@ -407,7 +408,8 @@ public interface ServletRequest {
 
     /**
      * Returns the Internet Protocol (IP) address of the client 
-     * that sent the request.  For HTTP servlets, same as the value of the 
+     * or last proxy that sent the request.
+     * For HTTP servlets, same as the value of the 
      * CGI variable <code>REMOTE_ADDR</code>.
      *
      * @return		a <code>String</code> containing the 
@@ -421,14 +423,15 @@ public interface ServletRequest {
     
 
     /**
-     * Returns the fully qualified name of the client that sent the
-     * request. If the engine cannot or chooses not to resolve the hostname 
+     * Returns the fully qualified name of the client
+     * or the last proxy that sent the request.
+     * If the engine cannot or chooses not to resolve the hostname 
      * (to improve performance), this method returns the dotted-string form of 
      * the IP address. For HTTP servlets, same as the value of the CGI variable 
      * <code>REMOTE_HOST</code>.
      *
      * @return		a <code>String</code> containing the fully 
-     * qualified name of the client
+     *			qualified name of the client
      *
      */
 
@@ -447,7 +450,7 @@ public interface ServletRequest {
      * package names. Names beginning with <code>java.*</code>,
      * <code>javax.*</code>, and <code>com.sun.*</code>, are
      * reserved for use by Sun Microsystems.
-     *<br> If the value passed in is null, the effect is the same as
+     *<br> If the object passed in is null, the effect is the same as
      * calling {@link #removeAttribute}.
      *
      *
@@ -559,7 +562,8 @@ public interface ServletRequest {
      * relative path.
      *
      * @param path      a <code>String</code> specifying the pathname
-     *                  to the resource
+     *                  to the resource. If it is relative, it must be
+     *                  relative against the current servlet.
      *
      * @return          a <code>RequestDispatcher</code> object
      *                  that acts as a wrapper for the resource
@@ -585,5 +589,48 @@ public interface ServletRequest {
     public String getRealPath(String path);
     
     
+    /**
+     * Returns the Internet Protocol (IP) source port of the client
+     * or last proxy that sent the request.
+     *
+     * @since 2.4
+     */    
+    public int getRemotePort();
+
+
+    /**
+     * Returns the host name of the Internet Protocol (IP) interface on
+     * which the request was received.
+     *
+     * @return	a <code>String</code> containing the host
+     *		name of the IP on which the request was received.
+     *
+     * @since 2.4
+     */
+    public String getLocalName();
+
+    /**
+     * Returns the Internet Protocol (IP) address of the interface on
+     * which the request  was received.
+     *
+     * @return	a <code>String</code> containing the
+     *		IP address on which the request was received. 
+     *
+     * @since 2.4
+     *
+     */       
+    public String getLocalAddr();
+
+
+    /**
+     * Returns the Internet Protocol (IP) port number of the interface
+     * on which the request was received.
+     *
+     * @return an integer specifying the port number
+     *
+     * @since 2.4
+     */
+    public int getLocalPort();
+
 }
 

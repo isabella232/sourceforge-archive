@@ -69,9 +69,16 @@ import java.io.InputStream;
 abstract public class PageData {
 
     /**
+     * Sole constructor. (For invocation by subclass constructors, 
+     * typically implicit.)
+     */
+    public PageData() {
+    }
+    
+    /**
      * Returns an input stream on the XML view of a JSP page.
-     * Recall tht the XML view of a JSP page has the include
-     * directives expanded.
+     * The stream is encoded in UTF-8.  Recall tht the XML view of a 
+     * JSP page has the include directives expanded.
      * 
      * @return An input stream on the document.
      */

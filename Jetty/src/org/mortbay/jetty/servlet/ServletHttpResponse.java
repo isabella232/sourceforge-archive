@@ -616,6 +616,18 @@ public class ServletHttpResponse implements HttpServletResponse
 
         return (ServletHttpResponse)response;
     }
+
+
+    // XXX
+    public String getContentType()
+    {
+        return null;
+    }
+
+    // XXX
+    public void setCharacterEncoding(String encoding)
+    {
+    }
     
 }
 

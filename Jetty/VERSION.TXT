@@ -1,6 +1,11 @@
 Jetty Versions
 --------------
 
+Jetty-5.x.x
+ + Compiled against 2.4 servlet spec.
+ + Implemented remote/local addr/port methods
+
+
 Jetty-4.2.10 - 7 July 2003
  + Updates to JettyPlus documentation
  + Updates to Jetty tutorial for start.jar, jmx etc

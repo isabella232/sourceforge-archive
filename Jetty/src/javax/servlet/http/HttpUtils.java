@@ -82,9 +82,7 @@ public class HttpUtils {
 	"javax.servlet.http.LocalStrings";
     private static ResourceBundle lStrings =
 	ResourceBundle.getBundle(LSTRING_FILE);
-    
-    static Hashtable nullHashtable = new Hashtable();
-    
+        
     
     
     /**
@@ -106,7 +104,7 @@ public class HttpUtils {
      * The query string should be in the form of a string
      * packaged by the GET or POST method, that is, it
      * should have key-value pairs in the form <i>key=value</i>,
-     * with each pair separated from the next by a & character.
+     * with each pair separated from the next by a &amp; character.
      *
      * <p>A key can appear more than once in the query string
      * with different values. However, the key appears only once in 

@@ -24,6 +24,7 @@ import javax.servlet.ServletRequestWrapper;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpInputStream;
 import org.mortbay.http.HttpRequest;
@@ -705,6 +706,42 @@ public class ServletHttpRequest
         }
         return port;
     }
+
+    /* -------------------------------------------------------------- */
+    public int getRemotePort()
+    {
+        HttpConnection connection= _httpRequest.getHttpConnection();
+        if (connection!=null)
+            return connection.getRemotePort();
+        return 0;
+    }
+    
+    /* -------------------------------------------------------------- */
+    public String getLocalName()
+    {
+        HttpConnection connection= _httpRequest.getHttpConnection();
+        if (connection!=null)
+            return connection.getServerName();
+        return null;
+    }
+    
+    /* -------------------------------------------------------------- */
+    public String getLocalAddr()
+    {
+        HttpConnection connection= _httpRequest.getHttpConnection();
+        if (connection!=null)
+            return connection.getServerAddr();
+        return null;
+    }
+    
+    /* -------------------------------------------------------------- */
+    public int getLocalPort()
+    {
+        HttpConnection connection= _httpRequest.getHttpConnection();
+        if (connection!=null)
+            return connection.getServerPort();
+        return 0;
+    }
     
     /* -------------------------------------------------------------- */
     public BufferedReader getReader()
@@ -809,6 +846,7 @@ public class ServletHttpRequest
         return (ServletHttpRequest)request;
     }
 
+    
 }
 
 

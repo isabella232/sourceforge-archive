@@ -61,8 +61,9 @@ import java.util.Hashtable;
  * The (translation-time only) attribute/value information for a tag instance.
  *
  * <p>
- * TagData is only used as an argument to the isValid and getVariableInfo
- * methods of TagExtraInfo, which are invoked at translation time.
+ * TagData is only used as an argument to the isValid, validate, and 
+ * getVariableInfo methods of TagExtraInfo, which are invoked at 
+ * translation time.
  */
 
 public class TagData implements Cloneable {
@@ -118,9 +119,10 @@ public class TagData implements Cloneable {
     }
 
     /**
-     * The value of the id attribute, if available.
+     * The value of the tag's id attribute.
      *
-     * @return the value of the id attribute or null
+     * @return the value of the tag's id attribute, or null if no such
+     *     attribute was specified.
      */
 
     public String getId() {
@@ -129,10 +131,18 @@ public class TagData implements Cloneable {
 
     /**
      * The value of the attribute.
-     * Returns the distinguished object REQUEST_TIME_VALUE if
-     * the value is request time. Returns null if the attribute is not set.
+     * If a static value is specified for an attribute that accepts a
+     * request-time attribute expression then that static value is returned,
+     * even if the value is provided in the body of a <jsp:attribute> action.
+     * The distinguished object REQUEST_TIME_VALUE is only returned if
+     * the value is specified as a request-time attribute expression
+     * or via the &lt;jsp:attribute&gt; action with a body that contains
+     * dynamic content (scriptlets, scripting expressions, EL expressions, 
+     * standard actions, or custom actions).  Returns null if the attribute 
+     * is not set. 
      *
-     * @return the attribute's value object
+     * @param attName the name of the attribute
+     * @return the attribute's value
      */
 
     public Object getAttribute(String attName) {
@@ -153,8 +163,9 @@ public class TagData implements Cloneable {
     /**
      * Get the value for a given attribute.
      *
+     * @param attName the name of the attribute
      * @return the attribute value string
-     * @throw ClassCastException if attribute value is not a String
+     * @throws ClassCastException if attribute value is not a String
      */
 
     public String getAttributeString(String attName) {

@@ -400,6 +400,47 @@ public class ServletRequestWrapper implements ServletRequest {
 	return this.request.getRealPath(path);
     }
     
+    /**
+     * The default behavior of this method is to return
+     * getRemotePort() on the wrapped request object.
+     *
+     * @since 2.4
+     */    
+    public int getRemotePort(){
+        return this.request.getRemotePort();
+    }
+
+
+    /**
+     * The default behavior of this method is to return
+     * getLocalName() on the wrapped request object.
+     *
+     * @since 2.4
+     */
+    public String getLocalName(){
+        return this.request.getLocalName();
+    }
+
+    /**
+     * The default behavior of this method is to return
+     * getLocalAddr() on the wrapped request object.
+     *
+     * @since 2.4
+     */       
+    public String getLocalAddr(){
+        return this.request.getLocalAddr();
+    }
+
+
+    /**
+     * The default behavior of this method is to return
+     * getLocalPort() on the wrapped request object.
+     *
+     * @since 2.4
+     */
+    public int getLocalPort(){
+        return this.request.getLocalPort();
+    }
     
 }
 

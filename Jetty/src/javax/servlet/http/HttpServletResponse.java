@@ -70,7 +70,7 @@ import java.io.IOException;
  * functionality in sending a response.  For example, it has methods
  * to access HTTP headers and cookies.
  *
- * <p>The servlet container creates an <code>HttpServletRequest</code> object
+ * <p>The servlet container creates an <code>HttpServletResponse</code> object
  * and passes it as an argument to the servlet's service methods
  * (<code>doGet</code>, <code>doPost</code>, etc).
  *
@@ -176,8 +176,9 @@ public interface HttpServletResponse extends ServletResponse {
 
     /**
      * Sends an error response to the client using the specified
-     * status clearing the buffer.  The server defaults to creating the 
-     * response to look like an HTML-formatted server error page containing the specified message, setting the content type
+     * status.  The server defaults to creating the
+     * response to look like an HTML-formatted server error page
+     * containing the specified message, setting the content type
      * to "text/html", leaving cookies and other headers unmodified.
      *
      * If an error-page declaration has been made for the web application
@@ -229,7 +230,8 @@ public interface HttpServletResponse extends ServletResponse {
      *
      * @param		location	the redirect location URL
      * @exception	IOException	If an input or output exception occurs
-     * @exception	IllegalStateException	If the response was committed
+     * @exception	IllegalStateException	If the response was committed or
+ if a partial URL is given and cannot be converted into a valid URL
      */
 
     public void sendRedirect(String location) throws IOException;
@@ -244,7 +246,7 @@ public interface HttpServletResponse extends ServletResponse {
      * presence of a header before setting its value.
      * 
      * @param	name	the name of the header to set
-     * @param	value	the assigned date value
+     * @param	date	the assigned date value
      * 
      * @see #containsHeader
      * @see #addDateHeader
@@ -260,7 +262,7 @@ public interface HttpServletResponse extends ServletResponse {
      * to have multiple values.
      * 
      * @param	name	the name of the header to set
-     * @param	value	the additional date value
+     * @param	date	the additional date value
      * 
      * @see #setDateHeader
      */
@@ -276,7 +278,9 @@ public interface HttpServletResponse extends ServletResponse {
      * value.
      * 
      * @param	name	the name of the header
-     * @param	value	the header value
+     * @param	value	the header value  If it contains octet string,
+     *		it should be encoded according to RFC 2047
+     *		(http://www.ietf.org/rfc/rfc2047.txt)
      *
      * @see #containsHeader
      * @see #addHeader
@@ -289,7 +293,10 @@ public interface HttpServletResponse extends ServletResponse {
      * This method allows response headers to have multiple values.
      * 
      * @param	name	the name of the header
-     * @param	value	the additional header value
+     * @param	value	the additional header value   If it contains
+     *		octet string, it should be encoded
+     *		according to RFC 2047
+     *		(http://www.ietf.org/rfc/rfc2047.txt)
      *
      * @see #setHeader
      */
@@ -445,9 +452,22 @@ public interface HttpServletResponse extends ServletResponse {
      * Status code (302) indicating that the resource has temporarily
      * moved to another location, but that future references should
      * still use the original URI to access the resource.
+     *
+     * This definition is being retained for backwards compatibility.
+     * SC_FOUND is now the preferred definition.
      */
 
     public static final int SC_MOVED_TEMPORARILY = 302;
+
+    /**
+    * Status code (302) indicating that the resource reside
+    * temporarily under a different URI. Since the redirection might
+    * be altered on occasion, the client should continue to use the
+    * Request-URI for future requests.(HTTP/1.1) To represent the
+    * status code (302), it is recommended to use this variable.
+    */
+
+    public static final int SC_FOUND = 302;
 
     /**
      * Status code (303) indicating that the response to the request

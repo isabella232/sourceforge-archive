@@ -80,7 +80,7 @@ public interface HttpSessionListener extends EventListener {
     public void sessionCreated ( HttpSessionEvent se );
     
 	/** 
-	* Notification that a session was invalidated.
+	* Notification that a session is about to be invalidated.
 	* @param se the notification event
 	*/
     public void sessionDestroyed ( HttpSessionEvent se );

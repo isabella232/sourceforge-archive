@@ -133,7 +133,7 @@ public interface ServletContext {
     /**
      * Returns the major version of the Java Servlet API that this
      * servlet container supports. All implementations that comply
-     * with Version 2.3 must have this method
+     * with Version 2.4 must have this method
      * return the integer 2.
      *
      * @return 		2
@@ -147,10 +147,10 @@ public interface ServletContext {
     /**
      * Returns the minor version of the Servlet API that this
      * servlet container supports. All implementations that comply
-     * with Version 2.3 must have this method
-     * return the integer 3.
+     * with Version 2.4 must have this method
+     * return the integer 4.
      *
-     * @return 		3
+     * @return 		4
      *
      */
 
@@ -195,7 +195,8 @@ public interface ServletContext {
 	   
 
 
-    *@param the partial path used to match the resources, which must start with a /
+    *@param path		the partial path used to match the resources,
+    *				which must start with a /
     *@return a Set containing the directory listing, or null if there are no resources in the web application whose path
 	* begins with the supplied path.
 
@@ -277,7 +278,7 @@ public interface ServletContext {
      * to a servlet from any location, without using a class loader.
      * 
      *
-     * @param name 	a <code>String</code> specifying the path
+     * @param path 	a <code>String</code> specifying the path
      *			to the resource
      *
      * @return 		the <code>InputStream</code> returned to the 

@@ -94,6 +94,29 @@ public class TagAttributeInfo {
     }
 
     /**
+     * JSP 2.0 Constructor for TagAttributeInfo.
+     * This class is to be instantiated only from the
+     * TagLibrary code under request from some JSP code that is parsing a
+     * TLD (Tag Library Descriptor).
+     *
+     * @param name The name of the attribute.
+     * @param required If this attribute is required in tag instances.
+     * @param type The name of the type of the attribute.
+     * @param reqTime Whether this attribute holds a request-time Attribute.
+     * @param fragment Whether this attribute is of type JspFragment
+     *
+     * @since 2.0
+     */
+
+    public TagAttributeInfo(String name, boolean required,
+                            String type, boolean reqTime,
+			    boolean fragment)
+    {
+	this( name, required, type, reqTime );
+	this.fragment = fragment;
+    }
+
+    /**
      * The name of this attribute.
      *
      * @return the name of the attribute
@@ -148,21 +171,45 @@ public class TagAttributeInfo {
 	return null;		// no such attribute
     }
 
+    /**
+     * Whether this attribute is of type JspFragment.
+     *
+     * @return if the attribute is of type JspFragment
+     *
+     * @since 2.0
+     */
+    public boolean isFragment() {
+	return fragment;
+    }
+
+
+    
+    /**
+     * Returns a String representation of this TagAttributeInfo, suitable
+     * for debugging purposes.
+     *
+     * @return a String representation of this TagAttributeInfo
+     */
     public String toString() {
         StringBuffer b = new StringBuffer();
         b.append("name = "+name+" ");
         b.append("type = "+type+" ");
 	b.append("reqTime = "+reqTime+" ");
         b.append("required = "+required+" ");
+        b.append("fragment = "+fragment+" ");
         return b.toString();
     }
 
     /*
-     * fields
+     * private fields
      */
-
     private String name;
     private String type;
     private boolean reqTime;
     private boolean required;
+
+    /*
+     * private fields for JSP 2.0
+     */
+    private boolean fragment;
 }

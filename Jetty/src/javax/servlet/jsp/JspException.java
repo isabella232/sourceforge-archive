@@ -67,7 +67,7 @@ public class JspException extends Exception {
 
 
     /**
-     * Construct a JspException
+     * Construct a JspException.
      */
     public JspException() {
     }

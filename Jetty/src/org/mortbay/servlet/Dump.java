@@ -183,6 +183,15 @@ public class Dump extends HttpServlet
             table.addHeading("getServerPort:&nbsp;").cell().right();
             table.addCell(""+Integer.toString(request.getServerPort()));
             table.newRow();
+            table.addHeading("getLocalName:&nbsp;").cell().right();
+            table.addCell(""+request.getLocalName());
+            table.newRow();
+            table.addHeading("getLocalAddr:&nbsp;").cell().right();
+            table.addCell(""+request.getLocalAddr());
+            table.newRow();
+            table.addHeading("getLocalPort:&nbsp;").cell().right();
+            table.addCell(""+Integer.toString(request.getLocalPort()));
+            table.newRow();
             table.addHeading("getRemoteUser:&nbsp;").cell().right();
             table.addCell(""+request.getRemoteUser());
             table.newRow();
@@ -191,6 +200,9 @@ public class Dump extends HttpServlet
             table.newRow();
             table.addHeading("getRemoteHost:&nbsp;").cell().right();
             table.addCell(""+request.getRemoteHost());            
+            table.newRow();
+            table.addHeading("getRemotePort:&nbsp;").cell().right();
+            table.addCell(""+request.getRemotePort());            
             table.newRow();
             table.addHeading("getRequestedSessionId:&nbsp;").cell().right();
             table.addCell(""+request.getRequestedSessionId());                                           

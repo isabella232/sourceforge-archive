@@ -59,7 +59,7 @@ import java.util.Map;
 
 /**
  * Translation-time validator class for a JSP page. 
- * A validator operates on the XML document associated with the JSP page.
+ * A validator operates on the XML view associated with the JSP page.
  *
  * <p>
  * The TLD file associates a TagLibraryValidator class and some init
@@ -76,7 +76,15 @@ import java.util.Map;
  *
  * once initialized, the validate(String, String, PageData) method will
  * be invoked, where the first two arguments are the prefix
- * and uri arguments used in the taglib directive.
+ * and uri arguments used in the taglib directive.  The prefix is intended
+ * to make it easier to produce an error message.  However, it is not
+ * always accurate.  In the case where a single URI is mapped to more 
+ * than one prefix in the XML view, the prefix of the first URI is provided.
+ * Therefore, to provide high quality error messages in cases where the 
+ * tag elements themselves are checked, the prefix parameter should be 
+ * ignored and the actual prefix of the element should be used instead.  
+ * TagLibraryValidators should always use the uri to identify elements 
+ * as beloning to the tag library, not the prefix.
  *
  * <p>
  * A TagLibraryValidator instance
@@ -90,9 +98,9 @@ import java.util.Map;
  * synchronization they may require.
  *
  * <p>
- * A JSP container may optionally support a jsp:id attribute to
+ * As of JSP 2.0, a JSP container must provide a jsp:id attribute to
  * provide higher quality validation errors.
- * When supported, the container will track the JSP pages
+ * The container will track the JSP pages
  * as passed to the container, and will assign to each element
  * a unique "id", which is passed as the value of the jsp:id
  * attribute.  Each XML element in the XML view available will
@@ -101,15 +109,29 @@ import java.util.Map;
  * objects.  The container then, in turn, can use these
  * values to provide more precise information on the location
  * of an error.
+ *
+ * <p>
+ * The actual prefix of the <code>id</code> attribute may or may not be 
+ * <code>jsp</code> but it will always map to the namespace
+ * <code>http://java.sun.com/JSP/Page</code>.  A TagLibraryValidator
+ * implementation must rely on the uri, not the prefix, of the <code>id</code>
+ * attribute.
  */
 
 abstract public class TagLibraryValidator {
 
     /**
+     * Sole constructor. (For invocation by subclass constructors, 
+     * typically implicit.)
+     */
+    public TagLibraryValidator() {
+    }
+    
+    /**
      * Set the init data in the TLD for this validator.
      * Parameter names are keys, and parameter values are the values.
      *
-     * @param initMap A Map describing the init parameters
+     * @param map A Map describing the init parameters
      */
     public void setInitParameters(Map map) {
 	initParameters = map;
@@ -128,27 +150,31 @@ abstract public class TagLibraryValidator {
 
     /**
      * Validate a JSP page.
-     * This will get invoked once per directive in the JSP page.
-     * This method will return null if the page is valid; otherwise
+     * This will get invoked once per unique tag library URI in the
+     * XML view.  This method will return null if the page is valid; otherwise
      * the method should return an array of ValidationMessage objects.
      * An array of length zero is also interpreted as no errors.
      *
-     * @param prefix the value of the prefix argument in the directive
+     * @param prefix the first prefix with which the tag library is 
+     *     associated, in the XML view.  Note that some tags may use 
+     *     a different prefix if the namespace is redefined.
      * @param uri the value of the uri argument in the directive
-     * @param thePage the JspData page object
+     * @param page the JspData page object
      * @return A null object, or zero length array if no errors, an array
      * of ValidationMessages otherwise.
      */
-    public ValidationMessage[] validate(String prefix, String uri, PageData page) {
+    public ValidationMessage[] validate(String prefix, String uri, 
+        PageData page) 
+    {
 	return null;
     }
 
     /**
-     * Release any data kept by this instance for validation purposes
+     * Release any data kept by this instance for validation purposes.
      */
     public void release() {
 	initParameters = null;
-    };
+    }
 
     // Private data
     private Map initParameters;

@@ -298,13 +298,35 @@ public class HttpConnection
     }
     
     /* ------------------------------------------------------------ */
+    /** Get the listeners HttpServer.
+     * @return HttpServer.
+     */
+    public String getServerAddr()
+    {
+        if (_connection instanceof Socket)
+            return ((Socket)_connection).getLocalAddress().getHostAddress();
+        return _listener.getHost();
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Get the listeners Port .
      * Conveniance method equivalent to getListener().getPort().
-     * @return HttpServer.
+     * @return local port.
      */
     public int getServerPort()
     {
         return _listener.getPort();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the remote Port .
+     * @return remote port.
+     */
+    public int getRemotePort()
+    {
+        if (_connection instanceof Socket)
+            return ((Socket)_connection).getPort();
+        return 0;
     }
 
     /* ------------------------------------------------------------ */

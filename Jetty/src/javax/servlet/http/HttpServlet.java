@@ -183,7 +183,10 @@ public abstract class HttpServlet extends GenericServlet
      * to return its response to the client, improving performance.
      * The content length is automatically set if the entire response fits
      * inside the response buffer.
-     * 
+     *
+     * <p>When using HTTP 1.1 chunked encoding (which means that the response
+     * has a Transfer-Encoding header), do not set the Content-Length header.
+     *
      * <p>The GET method should be safe, that is, without
      * any side effects for which users are held responsible.
      * For example, most form queries have no side effects.
@@ -410,8 +413,8 @@ public abstract class HttpServlet extends GenericServlet
      * Content-MD5, and Content-Range). If your method cannot
      * handle a content header, it must issue an error message
      * (HTTP 501 - Not Implemented) and discard the request.
-     * For more information on HTTP 1.1, see RFC 2068
-     * <a href="http://info.internet.isi.edu:80/in-notes/rfc/files/rfc2068.txt"></a>.
+     * For more information on HTTP 1.1, see RFC 2616
+     * <a href="http://www.ietf.org/rfc/rfc2616.txt"></a>.
      *
      * <p>This method does not need to be either safe or idempotent.
      * Operations that <code>doPut</code> performs can have side
@@ -718,10 +721,10 @@ public abstract class HttpServlet extends GenericServlet
      *
      * @exception IOException	if an input or output error occurs
      *				while the servlet is handling the
-     *				TRACE request
+     *				HTTP request
      *
-     * @exception ServletException	if the request for the
-     *					TRACE cannot be handled
+     * @exception ServletException	if the HTTP request
+     *					cannot be handled
      * 
      * @see 				javax.servlet.Servlet#service
      *
@@ -821,7 +824,7 @@ public abstract class HttpServlet extends GenericServlet
      *			the servlet
      *
      *
-     * @param resp	the {@link HttpServletResponse} object that
+     * @param res	the {@link HttpServletResponse} object that
      *			contains the response the servlet returns
      *			to the client				
      *
@@ -890,8 +893,14 @@ class NoBodyResponse implements HttpServletResponse {
 	didSetContentLength = true;
     }
 
+    public void setCharacterEncoding(String charset)
+      { resp.setCharacterEncoding(charset); }
+
     public void setContentType(String type)
       { resp.setContentType(type); }
+
+    public String getContentType()
+      { return resp.getContentType(); }
 
     public ServletOutputStream getOutputStream() throws IOException
       { return noBody; }

@@ -74,7 +74,7 @@ import java.util.Locale;
  * 
  * @author 	Various
  * @version 	$Version$
-  * @since	v 2.3
+ * @since	v 2.3
  *
  * @see 	javax.servlet.ServletResponse
  *
@@ -117,15 +117,26 @@ public class ServletResponseWrapper implements ServletResponse {
 	    this.response = response;
 	}
 
-	  /**
+    /**
+     * The default behavior of this method is to call setCharacterEncoding(String charset)
+     * on the wrapped response object.
+     *
+     * @since 2.4
+     */
+
+    public void setCharacterEncoding(String charset) {
+	this.response.setCharacterEncoding(charset);
+    }
+
+    /**
      * The default behavior of this method is to return getCharacterEncoding()
      * on the wrapped response object.
      */
 
-
     public String getCharacterEncoding() {
 	return this.response.getCharacterEncoding();
 	}
+    
     
 	  /**
      * The default behavior of this method is to return getOutputStream()
@@ -162,6 +173,17 @@ public class ServletResponseWrapper implements ServletResponse {
 
     public void setContentType(String type) {
 	this.response.setContentType(type);
+    }
+
+    /**
+     * The default behavior of this method is to return getContentType()
+     * on the wrapped response object.
+     *
+     * @since 2.4
+     */
+
+    public String getContentType() {
+	return this.response.getContentType();
     }
     
     /**

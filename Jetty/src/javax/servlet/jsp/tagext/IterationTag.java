@@ -86,7 +86,8 @@ import javax.servlet.jsp.*;
  * details.
  *
  * <p>
- * <IMG src="doc-files/IterationTagProtocol.gif"/>
+ * <IMG src="doc-files/IterationTagProtocol.gif"
+ *      alt="Lifecycle Details Transition Diagram for IterationTag"/>
  *
  * <p><B>Empty and Non-Empty Action</B>
  * <p> If the TagLibraryDescriptor file indicates that the action must
@@ -128,9 +129,13 @@ public interface IterationTag extends Tag {
      * <p>
      * If doAfterBody returns EVAL_BODY_AGAIN, a new evaluation of the
      * body will happen (followed by another invocation of doAfterBody).
-     * If doAfterBody returns SKIP_BODY no more body evaluations will
-     * occur, the value of out will be restored using the popBody method
-     * in pageContext, and then doEndTag will be invoked.
+     * If doAfterBody returns SKIP_BODY, no more body evaluations will occur,
+     * and the doEndTag method will be invoked.
+     *
+     * <p>
+     * If this tag handler implements BodyTag and doAfterBody returns
+     * SKIP_BODY, the value of out will be restored using the popBody 
+     * method in pageContext prior to invoking doEndTag.
      *
      * <p>
      * The method re-invocations may be lead to different actions because
@@ -138,12 +143,12 @@ public interface IterationTag extends Tag {
      * of external computation.
      *
      * <p>
-     * The JSP container will resynchronize
-     * any variable values that are indicated as so in TagExtraInfo after the
-     * invocation of doAfterBody().
+     * The JSP container will resynchronize the values of any AT_BEGIN and
+     * NESTED variables (defined by the associated TagExtraInfo or TLD) after
+     * the invocation of doAfterBody().
      *
      * @return whether additional evaluations of the body are desired
-     * @throws JspException
+     * @throws JspException if an error occurred while processing this tag
      */
 
     int doAfterBody() throws JspException;
