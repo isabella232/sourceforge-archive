@@ -251,7 +251,10 @@ public class WebApplicationContext extends ServletHttpContext
         {
             removeHttpHandler(_securityHandler);
             addHttpHandler(0,_securityHandler);
-        }
+        }        
+        
+        // Protect WEB-INF
+        addHttpHandler(1,new WebInfProtect());
         
         // Add filter Handler
         _filterHandler = (FilterHandler)getHttpHandler(FilterHandler.class);
@@ -269,7 +272,7 @@ public class WebApplicationContext extends ServletHttpContext
             addHttpHandler(_servletHandler);
         }
         _servletHandler.setDynamicServletPathSpec("/servlet/*");
-
+        
         // Check order
         if (getHttpHandlerIndex(_servletHandler)<getHttpHandlerIndex(_filterHandler))
         {
@@ -288,15 +291,13 @@ public class WebApplicationContext extends ServletHttpContext
         }
 
         // Check order
-        if (getHttpHandlerIndex(rh)<getHttpHandlerIndex(_servletHandler))
+        if (_servletHandler!=null &&
+            getHttpHandlerIndex(rh)<getHttpHandlerIndex(_servletHandler))
         {
             removeHttpHandler(rh);
             addHttpHandler(rh);
         }
         
-        // Protect WEB-INF
-        addHttpHandler(getHttpHandlerIndex(rh),new WebInfProtect());
-
         // NotFoundHandler
         addHttpHandler(new NotFoundHandler());
         
@@ -325,11 +326,7 @@ public class WebApplicationContext extends ServletHttpContext
         }
         
         // Do we have a WEB-INF
-        if (_webInf==null || !_webInf.isDirectory())
-        {
-            Code.warning("No WEB-INF in "+_war+". Serving files only.");
-        }
-        else
+        if (_webInf!=null && _webInf.isDirectory())
         {
             // Look for classes directory
             Resource classes = _webInf.addPath("classes/");
@@ -678,8 +675,7 @@ public class WebApplicationContext extends ServletHttpContext
         if ("display-name".equals(element))
             initDisplayName(node);
         else if ("description".equals(element))
-        {
-        }
+        {}
         else if ("context-param".equals(element))
             initContextParam(node);
         else if ("servlet".equals(element))
