@@ -73,6 +73,16 @@ abstract public class ThreadedServer extends ThreadPool
         setAddress(address);
     }
     
+    /* ------------------------------------------------------------------- */
+    /** Construct for specific address and port
+     */
+    public ThreadedServer(String name,InetAddrPort address) 
+         throws IOException
+    {
+        super(name);
+        setAddress(address);
+    }
+    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param address The address to listen on
@@ -320,6 +330,8 @@ abstract public class ThreadedServer extends ThreadPool
     {
         throw new IllegalStateException("Can't run jobs on ThreadedServer");
     }
+
+
 }
 
 

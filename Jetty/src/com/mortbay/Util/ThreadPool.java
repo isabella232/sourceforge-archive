@@ -531,6 +531,16 @@ public class ThreadPool
                             }
                         }
                     }
+                    catch(InterruptedException e)
+                    {
+                        Code.ignore(e);
+			continue;
+                    }
+                    catch(InterruptedIOException e)
+                    {
+                        Code.ignore(e);
+			continue;
+                    }
                     catch(Exception e)
                     {
                         Code.warning(e);

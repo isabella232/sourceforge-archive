@@ -137,7 +137,7 @@ public class IO extends ThreadPool
                 while (true)
                 {
                     len=in.read(buffer,0,bufferSize);
-                    if (len==-1)
+                    if (len<0 )
                         break;
                     out.write(buffer,0,len);
                 }
