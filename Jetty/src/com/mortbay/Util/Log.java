@@ -123,6 +123,29 @@ public class Log
     {}
 
 
+
+    /* ------------------------------------------------------------ */
+    /** Add a Log Sink.
+     * @param logSinkClass The logsink classname or null for the default. 
+     */
+    public synchronized void add(String logSinkClass)
+    {
+        try
+        {
+            if (logSinkClass==null || logSinkClass.length()==0)
+                logSinkClass="com.mortbay.Util.WriterLogSink";
+            Class sinkClass =  Class.forName(logSinkClass);
+            LogSink sink=(LogSink)sinkClass.newInstance();
+            add(sink);
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            throw new IllegalArgumentException(e.toString());
+        }
+        
+    }
+    
     /* ------------------------------------------------------------ */
     /** Add a Log Sink.
      * @param logSink 
@@ -194,7 +217,6 @@ public class Log
         _initialized=true;
     }
     
-    
     /*-------------------------------------------------------------------*/
     public static void message(String tag,
                                Object msg,
@@ -261,6 +283,17 @@ public class Log
             if (_sinks[s].isStarted())
                 _sinks[s].log(tag,msg,frame,time);
         }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Log a message.
+     * @param tag Tag for type of log
+     * @param msg The message
+     */
+    public synchronized void message(String tag,
+                                     String msg)
+    {
+        message(tag,msg,new Frame(1),System.currentTimeMillis());
     }
 
     

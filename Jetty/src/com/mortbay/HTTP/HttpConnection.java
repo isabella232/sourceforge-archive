@@ -52,6 +52,7 @@ public class HttpConnection
     private Thread _handlingThread;
     private InetAddress _remoteAddr;
     private HttpServer _httpServer;
+    private Object _connection;
 
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -59,11 +60,15 @@ public class HttpConnection
      * @param remoteAddr The address of the remote end or null.
      * @param in InputStream to read request(s) from.
      * @param out OutputputStream to write response(s) to.
+     * @param connection The underlying connection object, most likely
+     * a socket. This is not used by HttpConnection other than to make
+     * it available via getConnection().
      */
     protected HttpConnection(HttpListener listener,
                              InetAddress remoteAddr,
                              InputStream in,
-                             OutputStream out)
+                             OutputStream out,
+                             Object connection)
     {
         _listener=listener;
         _remoteAddr=remoteAddr;
@@ -73,6 +78,7 @@ public class HttpConnection
         _outputSetup=false;
         if (_listener!=null)
             _httpServer=_listener.getHttpServer();
+        _connection=connection;
     }
 
     /* ------------------------------------------------------------ */
@@ -102,6 +108,17 @@ public class HttpConnection
         return _outputStream;
     }
 
+    /* ------------------------------------------------------------ */
+    /** Get the underlying connection object.
+     * This opaque object, most likely a socket. This is not used by
+     * HttpConnection other than to make it available via getConnection().
+     * @return Connection abject
+     */
+    public Object getConnection()
+    {
+        return _connection;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Get the request.
      * @return the request

@@ -24,6 +24,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.beans.beancontext.BeanContextSupport;
+
+
 
 /* ------------------------------------------------------------ */
 /** HTTP Server.
@@ -35,6 +38,9 @@ import java.util.Set;
  * com.mortbay.Jetty.Server class uses XML configuration files to
  * configure instances of this class.
  *
+ * The HttpServer implements the BeanContext API so that membership
+ * events may be generated for HttpListeners, HandlerContexts and WebApplications.
+ *
  * @see HttpContext
  * @see HttpHandler
  * @see HttpConnection
@@ -42,7 +48,7 @@ import java.util.Set;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HttpServer implements LifeCycle
+public class HttpServer extends BeanContextSupport implements LifeCycle
 {    
     /* ------------------------------------------------------------ */
     private static ArrayList __servers = new ArrayList(3);
@@ -241,6 +247,7 @@ public class HttpServer implements LifeCycle
             _listeners.put(address,listener);
         }
 
+        add(listener);
         return listener;
     }
     
@@ -255,6 +262,34 @@ public class HttpServer implements LifeCycle
     {
         listener.setHttpServer(this);        
         _listeners.put(listener,listener);
+        add(listener);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add a HTTP Listener to the server.
+     * @param listenerClass The Listener classname, or null for the default
+     * Listener class.
+     * @exception IllegalArgumentException
+     */
+    public HttpListener addListener(String listenerClass)
+        throws IllegalArgumentException
+    {
+        try
+        {
+            if (listenerClass==null || listenerClass.length()==0)
+                listenerClass="com.mortbay.HTTP.SocketListener";
+            Class lc = Class.forName(listenerClass);
+            HttpListener listener = (HttpListener) lc.newInstance();
+            listener.setHttpServer(this);        
+            _listeners.put(listener,listener);
+            add(listener);
+            return listener;
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            throw new IllegalArgumentException(e.toString());
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -269,7 +304,10 @@ public class HttpServer implements LifeCycle
             Map.Entry entry=
                 (Map.Entry) iterator.next();
             if (entry.getValue()==listener)
+            {
+                remove(listener);
                 iterator.remove();
+            }
         }
     }
     
@@ -279,6 +317,8 @@ public class HttpServer implements LifeCycle
      */
     public Collection getListeners()
     {
+        if (_listeners==null)
+            return Collections.EMPTY_LIST;
         return _listeners.values();
     }
 
@@ -287,8 +327,8 @@ public class HttpServer implements LifeCycle
     /** Define a virtual host alias.
      * All requests to the alias are handled the same as request for
      * the host.
-     * @param host 
-     * @param alias 
+     * @param host Host name or IP
+     * @param alias Alias hostname or IP
      */
     public void addHostAlias(String host, String alias)
     {
@@ -323,6 +363,8 @@ public class HttpServer implements LifeCycle
      */
     public HandlerContext addContext(String host, String contextPathSpec)
     {
+        if (host!=null && host.length()==0)
+            host=null;
         HandlerContext hc = new HandlerContext(this,contextPathSpec);
         addContext(host,hc);
         return hc;
@@ -358,6 +400,7 @@ public class HttpServer implements LifeCycle
 
         contextList.add(context);
         context.addHost(host);
+        add(context);
 
         Code.debug("Added ",context," for host ",host);
     }
@@ -383,8 +426,33 @@ public class HttpServer implements LifeCycle
                     HandlerContext hc=(HandlerContext)contextList.get(i);
                     if (hc!=null && hc.isStarted())
                         throw new IllegalStateException("Context not stopped");
+                    remove(hc);
                     contextList.remove(i);
                 }
+            }
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Remove a context or Web application.
+     * @exception IllegalStateException if context not stopped
+     */
+    public void removeContext(HandlerContext context)
+        throws IllegalStateException
+    {
+        if (context.isStarted())
+            throw new IllegalStateException("Context not stopped");
+                    
+        Iterator i1 = _hostMap.values().iterator();
+        while(i1.hasNext())
+        {
+            PathMap contextMap=(PathMap)i1.next();
+
+            Iterator i2=contextMap.values().iterator();
+            while(i2.hasNext())
+            {
+                List contextList = (List)i2.next();
+                contextList.remove(context);
             }
         }
     }
@@ -557,6 +625,9 @@ public class HttpServer implements LifeCycle
      */
     public synchronized Set getHandlerContexts()
     {
+        if (_hostMap==null)
+            return Collections.EMPTY_SET;
+        
         HashSet set = new HashSet(33);
         Iterator maps=_hostMap.values().iterator();
         while (maps.hasNext())
@@ -573,6 +644,12 @@ public class HttpServer implements LifeCycle
     }
 
     /* ------------------------------------------------------------ */
+    public synchronized LogSink getLogSink()
+    {
+        return _logSink;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Set the request log.
      * Set the LogSink to be used for the request log. The log is
      * written in the combined format.
@@ -583,6 +660,7 @@ public class HttpServer implements LifeCycle
         if (_logSink!=null)
         {
             try{
+                remove(_logSink);
                 _logSink.stop();
             }
             catch(InterruptedException e)
@@ -596,8 +674,13 @@ public class HttpServer implements LifeCycle
         }	
             
         _logSink=logSink;
-        if (_logSink!=null && isStarted())
-            _logSink.start();
+        
+        if (_logSink!=null)
+        {
+            add(logSink);
+            if(isStarted())
+                _logSink.start();
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -608,8 +691,15 @@ public class HttpServer implements LifeCycle
     {
         _dateCache=new DateCache(format);
     }
-
-
+    
+    /* ------------------------------------------------------------ */
+    /** Get the request log date format.
+     * @param format 
+     */
+    public synchronized String getLogDateFormat()
+    {
+        return _dateCache.getFormatString();
+    }
         
     /* ------------------------------------------------------------ */
     /** Service a request.
@@ -809,8 +899,7 @@ public class HttpServer implements LifeCycle
     public UserRealm removeRealm(String realmName)
     {
         return (UserRealm)_realmMap.remove(realmName);
-    }
-    
+    }    
     
     /* ------------------------------------------------------------ */
     /** Construct server from command line arguments.
@@ -873,6 +962,5 @@ public class HttpServer implements LifeCycle
     Map getHostMap()
     {
         return _hostMap;
-    }
-    
+    }    
 }

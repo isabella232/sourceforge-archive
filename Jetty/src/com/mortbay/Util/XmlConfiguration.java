@@ -534,7 +534,9 @@ public class XmlConfiguration
                 return "";
             return null;
         }
+
         
+        // Try to type the object
         if (type==null)
         {
             if (value !=null && value instanceof String)
@@ -542,33 +544,14 @@ public class XmlConfiguration
             return value;
         }
 
-        // Try to type the object
-        if ("String".equals(type))
+        if ("String".equals(type) || "java.lang.String".equals(type))
             return value.toString();
+
+        Class pClass = Primitive.fromName(type);
+        if (pClass!=null)
+            return Primitive.valueOf(pClass,value.toString());
         
-        if ("int".equals(type))
-        {
-            if (value instanceof Integer)
-                return value;
-            return new Integer(value.toString());
-        }
-        if ("long".equals(type))
-        {
-            if (value instanceof Long)
-                return value;
-            return new Long(value.toString());
-        }
-        if ("boolean".equals(type))
-        {
-            if (value instanceof Boolean)
-                return value;
-            String bs=value.toString();
-            if (bs.length()==0)
-                return Boolean.FALSE;
-            char b=bs.charAt(0);
-            return (b=='1'||b=='t'||b=='T')?Boolean.TRUE:Boolean.FALSE;
-        }	
-        if ("URL".equals(type))
+        if ("URL".equals(type) || "java.net.URL".equals(type))
         {
             if (value instanceof URL)
                 return value;
@@ -577,7 +560,7 @@ public class XmlConfiguration
             {throw new InvocationTargetException(e);}
         }
         
-        if ("InetAddress".equals(type))
+        if ("InetAddress".equals(type)|| "java.net.InetAddress".equals(type))
         {
             if (value instanceof InetAddress)
                 return value;
@@ -586,7 +569,7 @@ public class XmlConfiguration
             {throw new InvocationTargetException(e);}
         }
         
-        if ("InetAddrPort".equals(type))
+        if ("InetAddrPort".equals(type) || "com.mortbay.Util.InetAddrPort".equals(type))
         {
             if (value instanceof InetAddrPort)
                 return value;

@@ -21,7 +21,7 @@ $Id$
 
 
 <!ENTITY % CONFIG "Set|Put|Call">
-<!ENTITY % TYPE "String|int|long|boolean|URL|InetAddress|InetAddrPort">
+<!ENTITY % TYPE "String|char|short|byte|int|long|boolean|float|double|URL|InetAddress|InetAddrPort">
 <!ENTITY % VALUE "#PCDATA|Call|New|SystemProperty">
 <!ENTITY % TYPEATTR "type (%TYPE;) #IMPLIED " >
 <!ENTITY % CLASSATTR "class NMTOKEN #REQUIRED" >

@@ -119,12 +119,14 @@ release     - Cleanup for release
            deprecation="off"
            >
       <include name="com/mortbay/**/*.java"/> 
+      <exclude name="com/mortbay/Jetty/JMX/**" />
       <exclude name="com/mortbay/Jetty/JettyPage.java" />
       <exclude name="com/mortbay/Jetty/JettyServlet.java" />
       <exclude name="com/mortbay/Jetty/JettyIndex*.properties" />
     </javac>
     <jar jarfile="${jetty.jar}" basedir="${classes}" >
        <include name="com/mortbay/**"  />      
+       <exclude name="com/mortbay/Jetty/JMX/**" />
        <exclude name="com/mortbay/**/TestHarness*.class" />
        <exclude name="com/mortbay/Util/DataClass/*" />
        <exclude name="com/mortbay/Util/TestConfiguration.class" />
@@ -135,9 +137,46 @@ release     - Cleanup for release
        <exclude name="com/mortbay/HTTP/Http10TestClient.class" />
        <exclude name="com/mortbay/HTTP/Handler/TestTEHandler.class" />
        <exclude name="com/mortbay/HTML/TestHtml.class" />
-    </jar>
+       <exclude name="com/mortbay/Jetty/**/Test*.class" />
+    </jar>    
+    <copy file="${classes}/com/mortbay/Servlet/Dump.class" tofile="${basedir}/servlets/com/mortbay/Servlet/Dump.class" />
   </target>
   
+  <target name="jmx" depends="libs,webapp">
+    <delete file="${jetty.jar}"/>
+    <copy todir="${classes}">
+      <fileset dir="${src.dir}">
+        <include name="com/mortbay/Jetty/JMX/**/defaultManifest.mf" />
+        <include name="com/mortbay/Jetty/JMX/**/*.dtd" />
+        <include name="com/mortbay/Jetty/JMX/**/*.properties" />
+      </fileset>
+    </copy>
+    <copy file="${src.dir}/com/mortbay/Jetty/JMX/jetty.mlet" tofile="${basedir}/etc/jetty.mlet" />
+    <javac srcdir="${src.dir}" 
+           destdir="${classes}"
+           classpath="${libs}"
+           debug="on" 
+           optimize="off" 
+           deprecation="off"
+           >
+      <include name="com/mortbay/Jetty/JMX/**/*.java"/> 
+    </javac>
+    <jar jarfile="${jetty.jar}" basedir="${classes}" >
+       <exclude name="com/mortbay/**/TestHarness*.class" />
+       <exclude name="com/mortbay/Util/DataClass/*" />
+       <exclude name="com/mortbay/Util/TestConfiguration.class" />
+       <exclude name="com/mortbay/Util/PropertyTreeTest.class" />
+       <exclude name="com/mortbay/Util/DictionaryConverterTest*.class" />
+       <exclude name="com/mortbay/HTTP/TestRFC*.class" />
+       <exclude name="com/mortbay/HTTP/TestRequest.class" />
+       <exclude name="com/mortbay/HTTP/Http10TestClient.class" />
+       <exclude name="com/mortbay/HTTP/Handler/TestTEHandler.class" />
+       <exclude name="com/mortbay/HTML/TestHtml.class" />
+       <exclude name="com/mortbay/Jetty/**/Test*.class" />
+    </jar>    
+    <copy file="${classes}/com/mortbay/Servlet/Dump.class" tofile="${basedir}/servlets/com/mortbay/Servlet/Dump.class" />
+  </target>
+
   <target name="jasper" depends="prepare">
     <copy todir="${classes}">
       <fileset dir="${src.dir}">
@@ -169,7 +208,7 @@ release     - Cleanup for release
     <copy todir="${jetty.webapp.classes}">
       <fileset dir="${src.dir}">
         <include name="com/mortbay/Jetty/defaultManifest.mf" />
-        <include name="com/mortbay/Jetty//*.properties" />
+        <include name="com/mortbay/Jetty/*.properties" />
       </fileset>
     </copy>
     <copy file="${jetty.webapp.classes}/com/mortbay/Jetty/JettyIndex_en.properties" tofile="${jetty.webapp.classes}/com/mortbay/Jetty/JettyIndex.properties" />

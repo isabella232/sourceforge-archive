@@ -49,6 +49,9 @@ public class WebApplicationContext extends HandlerContext
     private Context _context;
     private Map _tagLibMap=new HashMap(3);
     private NotFoundHandler _notFoundHandler;
+    private String _deploymentDescriptor;
+    private String _defaultsDescriptor;
+    private String _war;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -105,6 +108,7 @@ public class WebApplicationContext extends HandlerContext
         {
             webApp="jar:"+_webApp+"!/";
             _webApp = Resource.newResource(webApp);
+            _war=_webApp.toString();
         }
         _webAppName=_webApp.toString();
         if (!_webApp.exists()) {
@@ -136,7 +140,7 @@ public class WebApplicationContext extends HandlerContext
         _context=_servletHandler.getContext();
             
         // ResourcePath
-        super.setResourceBase(_webApp);
+        super.setBaseResource(_webApp);
 
         // Protect WEB-INF
         addHandler(new WebInfProtect());
@@ -154,6 +158,7 @@ public class WebApplicationContext extends HandlerContext
             if (defaults!=null && defaults.length()>0)
             {
                 Resource dftResource= Resource.newResource(defaults);
+                _defaultsDescriptor=dftResource.toString();
                 XmlParser.Node defaultConfig =
                     xmlParser.parse(dftResource.getURL().toString());
                 initialize(defaultConfig);
@@ -216,6 +221,7 @@ public class WebApplicationContext extends HandlerContext
             {
                 try
                 {
+                    _deploymentDescriptor=web.toString();
                     XmlParser.Node config = xmlParser.parse(web.getURL().toString());
                     initialize(config);
                     if (defaults!=null && defaults.length()>0)
@@ -239,6 +245,29 @@ public class WebApplicationContext extends HandlerContext
         }
     }
 
+    /* ------------------------------------------------------------ */
+    public String getDisplayName()
+    {
+        return _name;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getDeploymentDescriptor()
+    {
+        return _deploymentDescriptor;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getDefaultsDescriptor()
+    {
+        return _defaultsDescriptor;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getWAR()
+    {
+        return _war;
+    }
 
     /* ------------------------------------------------------------ */
     private void initialize(XmlParser.Node config)
@@ -566,7 +595,7 @@ public class WebApplicationContext extends HandlerContext
             sh.setAuthMethod(method.toString(false,true));
         XmlParser.Node name=node.get("realm-name");
         if (name!=null)
-            sh.setRealm(name.toString(false,true));
+            sh.setRealmName(name.toString(false,true));
     }
     
     /* ------------------------------------------------------------ */
@@ -594,10 +623,17 @@ public class WebApplicationContext extends HandlerContext
     }
     
     /* ------------------------------------------------------------ */
-    public void setResourceBase(Resource resourceBase)
+    public void setResourceBase(String resourceBase)
     {
         Code.warning("ResourceBase should not be set for WebApplication");
         super.setResourceBase(resourceBase);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setBaseResource(Resource baseResource)
+    {
+        Code.warning("BaseResource should not be set for WebApplication");
+        super.setBaseResource(baseResource);
     }
 
     /* ------------------------------------------------------------ */

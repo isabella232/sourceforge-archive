@@ -24,7 +24,14 @@ import org.xml.sax.SAXException;
  */
 public class Server extends HttpServer
 {
+    private String _configuration; 
 
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     */
+    public Server()
+    {}
+    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param configuration 
@@ -52,32 +59,54 @@ public class Server extends HttpServer
     public Server(URL configuration)
         throws IOException
     {
+        _configuration=configuration.toString();
         try
         {
             XmlConfiguration config=new XmlConfiguration(configuration);
             config.configure(this);
         }
-        catch(org.xml.sax.SAXException e)
+        catch(IOException e)
+        {
+            throw e;
+        }
+        catch(Exception e)
         {
             Code.warning(e);
             throw new IOException("Jetty configuration problem: "+e);
         }
-        catch(NoSuchMethodException e)
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param configuration 
+     */
+    public void configure(String configuration)
+        throws IOException
+    {
+        if (_configuration!=null)
+            throw new IllegalStateException("Already configured with "+_configuration);
+        URL url=Resource.newResource(configuration).getURL();
+        _configuration=url.toString();
+        try
+        {
+            XmlConfiguration config=new XmlConfiguration(url);
+            config.configure(this);
+        }
+        catch(IOException e)
+        {
+            throw e;
+        }
+        catch(Exception e)
         {
             Code.warning(e);
             throw new IOException("Jetty configuration problem: "+e);
         }
-        catch(java.lang.reflect.InvocationTargetException e)
-        {
-            Code.warning(e);
-            throw new IOException("Jetty configuration problem: "+e);
-        }
-        catch(ClassNotFoundException e)
-        {
-            Code.warning(e);
-            throw new IOException("Jetty configuration problem: "+e);
-        }
-        
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getConfiguration()
+    {
+        return _configuration;
     }
     
     

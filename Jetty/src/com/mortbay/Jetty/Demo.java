@@ -103,6 +103,7 @@ public class Demo
             context.addAuthConstraint("/admin/*","content-administrator");
             context.setClassPath("servlets/");
             context.setDynamicServletPathSpec("/servlet/*");
+            context.getServletHandler().setServeDynamicSystemServlets(true);
             context.addServlet("Admin","/admin/*","com.mortbay.HTTP.AdminServlet");
             
             

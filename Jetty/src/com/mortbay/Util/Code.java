@@ -9,6 +9,7 @@ import java.applet.Applet;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
@@ -67,6 +68,7 @@ public class Code
 {
     /*-------------------------------------------------------------------*/
     private static final String __lock="LOCK";
+    private static final Class[] __noArgs=new Class[0];
 
     /*-------------------------------------------------------------------*/
     /** Shared static instances, reduces object creation at expense
@@ -77,7 +79,7 @@ public class Code
     
     /*-------------------------------------------------------------------*/
     private static class Singleton {static Code __instance=new Code();}
-    static Code instance()
+    public static Code instance()
     {
         return Singleton.__instance;
     }
@@ -1025,22 +1027,33 @@ public class Code
                 {
                     __writerBuffer.setLength(0);
                     ex.printStackTrace(__out);
-                    if (ex instanceof
-                        java.lang.reflect.InvocationTargetException)
+
+                    try
                     {
-                        ex=((java.lang.reflect.InvocationTargetException)ex)
-                            .getTargetException();
+                        Method getTargetException =
+                            ex.getClass().getMethod("getTargetException",
+                                                  __noArgs);
+                        ex=(Throwable)
+                            getTargetException.invoke(ex,null);
                         __out.println("Target Exception:");
                         ex.printStackTrace(__out);
                     }
-                    else if (ex instanceof
-                             java.lang.ExceptionInInitializerError)
+                    catch(Exception ignore)
+                    {}
+                    
+                    try
                     {
-                        ex=((java.lang.ExceptionInInitializerError)ex)
-                            .getException();
-                        __out.println("Initializer Exception:");
+                        Method getException =
+                            ex.getClass().getMethod("getException",
+                                                  __noArgs);
+                        ex=(Throwable)
+                            getException.invoke(ex,null);
+                        __out.println("Exception:");
                         ex.printStackTrace(__out);
                     }
+                    catch(Exception ignore)
+                    {}
+
                     __out.print("--");
                     __out.flush();
                     buf.append(__writerBuffer.toString());

@@ -186,12 +186,10 @@ public class ThreadPool
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @return False - always started or stopped. 
-     */
+
     public boolean isDestroyed()
     {
-        return false;
+        return _threadSet==null;
     }
     
     /* ------------------------------------------------------------ */

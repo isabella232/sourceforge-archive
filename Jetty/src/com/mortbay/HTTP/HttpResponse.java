@@ -333,7 +333,9 @@ public class HttpResponse extends HttpMessage
                     " "+reason+
                     "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
                     " "+reason+
-                    "</H2>\n"+(message==null?"":message);
+                    "</H2>\n"+(message==null?"":message)+
+                    ("<P>RequestURI="+getRequest().getPath());
+                
                 for (int i=0;i<10;i++)
                     body+="<!-- Padding for IE                                                 -->";
                 body+="\n</BODY>\n</HTML>\n";

@@ -127,13 +127,13 @@ public class Context implements ServletContext, HttpSessionContext
     public URL getResource(String uriInContext)
         throws MalformedURLException
     {
-        Resource resourceBase=_handlerContext.getResourceBase();
+        Resource baseResource=_handlerContext.getBaseResource();
         uriInContext=Resource.canonicalPath(uriInContext);
-        if (resourceBase==null || uriInContext==null)
+        if (baseResource==null || uriInContext==null)
             return null;
 
         try{
-            Resource resource = resourceBase.addPath(uriInContext);
+            Resource resource = baseResource.addPath(uriInContext);
             if (resource.exists())
                 return resource.getURL();
 
@@ -277,12 +277,12 @@ public class Context implements ServletContext, HttpSessionContext
         if(Code.debug())
             Code.debug("getRealPath of ",path," in ",this);
 
-        Resource resourceBase=_handlerContext.getResourceBase();
-        if (resourceBase==null )
+        Resource baseResource=_handlerContext.getBaseResource();
+        if (baseResource==null )
             return null;
 
         try{
-            Resource resource = resourceBase.addPath(path);
+            Resource resource = baseResource.addPath(path);
             File file = resource.getFile();
 
             return (file==null)
@@ -644,8 +644,8 @@ public class Context implements ServletContext, HttpSessionContext
             {
                 String key = (String)iter.next();
                 Object value = _values.get(key);
-                unbindValue(key, value);
                 iter.remove();
+                unbindValue(key, value);
             }
             Context.this._sessions.remove(id);
             invalid=true;

@@ -47,16 +47,25 @@ public class SecurityHandler extends NullHandler
     /** 
      * @return 
      */
-    public UserRealm getRealm()
+    public UserRealm getUserRealm()
     {        
         return _realm;
     }
     
     /* ------------------------------------------------------------ */
     /** 
+     * @return 
+     */
+    public String getRealmName()
+    {        
+        return _realmName;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
      * @param authRealm 
      */
-    public void setRealm(String realmName)
+    public void setRealmName(String realmName)
     {
         _realmName=realmName;
     }

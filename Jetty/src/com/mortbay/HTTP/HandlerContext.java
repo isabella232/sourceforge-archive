@@ -304,6 +304,16 @@ public class HandlerContext implements LifeCycle
     /* ------------------------------------------------------------ */
     /** 
      * @param name attribute name
+     * @param value attribute value
+     */
+    public synchronized void setAttribute(String name, Object value)
+    {
+        _attributes.put(name,value);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param name attribute name
      * @return attribute value or null
      */
     public Object getAttribute(String name)
@@ -319,17 +329,6 @@ public class HandlerContext implements LifeCycle
     {
         return Collections.enumeration(_attributes.keySet());
     }
-
-    /* ------------------------------------------------------------ */
-    /** 
-     * @param name attribute name
-     * @param value attribute value
-     */
-    public synchronized void setAttribute(String name, Object value)
-    {
-        _attributes.put(name,value);
-    }
-
     
     /* ------------------------------------------------------------ */
     /** 
@@ -387,10 +386,8 @@ public class HandlerContext implements LifeCycle
      
     /* ------------------------------------------------------------ */
     /** Sets the class path for the context.
-     * Also sets the com.mortbay.HTTP.HandlerContext.classPath attribute.
      * A class path is only required for a context if it uses classes
-     * that are not in the system class path, or if class reloading is
-     * to be performed.
+     * that are not in the system class path.
      * @param fileBase 
      */
     public void setClassPath(String classPath)
@@ -434,24 +431,31 @@ public class HandlerContext implements LifeCycle
             Code.warning("classpath set while started");
     }
    
-    /* ------------------------------------------------------------ */
-    public Resource getResourceBase()
-    {
-        return _resourceBase;
-    }
     
     /* ------------------------------------------------------------ */
-    public void setResourceBase(Resource resourceBase)
-    {
-        Code.debug("resourceBase=",resourceBase," for ", this);
-        _resourceBase=resourceBase;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
+    /** Set the Resource Base.
+     * The base resource is the Resource to use as a relative base
+     * for all context resources. The ResourceBase attribute is a
+     * string version of the baseResource.
      * If a relative file is passed, it is converted to a file
      * URL based on the current working directory.
-     * Also sets the com.mortbay.HTTP.resouceBase context attribute
+     * @return The file or URL to use as the base for all resources
+     * within the context.
+     */
+    public String getResourceBase()
+    {
+        if (_resourceBase==null)
+            return null;
+        return _resourceBase.toString();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the Resource Base.
+     * The base resource is the Resource to use as a relative base
+     * for all context resources. The ResourceBase attribute is a
+     * string version of the baseResource.
+     * If a relative file is passed, it is converted to a file
+     * URL based on the current working directory.
      * @param resourceBase A URL prefix or directory name.
      */
     public void setResourceBase(String resourceBase)
@@ -465,6 +469,30 @@ public class HandlerContext implements LifeCycle
             Code.debug(e);
             throw new IllegalArgumentException(resourceBase+":"+e.toString());
         }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the base resource.
+     * The base resource is the Resource to use as a relative base
+     * for all context resources. The ResourceBase attribute is a
+     * string version of the baseResource.
+     * @return The resourceBase as a Resource instance 
+     */
+    public Resource getBaseResource()
+    {
+        return _resourceBase;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the base resource.
+     * The base resource is the Resource to use as a relative base
+     * for all context resources. The ResourceBase attribute is a
+     * string version of the baseResource.
+     * @param base The resourceBase as a Resource instance
+     */
+    public void setBaseResource(Resource base)
+    {
+        _resourceBase=base;
     }
     
     /* ------------------------------------------------------------ */
@@ -571,6 +599,19 @@ public class HandlerContext implements LifeCycle
     {
         _httpServerAccess=access;
     }
+
+    /* ------------------------------------------------------------ */
+    /** Get HttpServer Access.
+     * If true then the HttpServer instance is available as a
+     * context attribute "com.mortbay.HTTP.HttpServer".
+     * This should only been done for trusted contexts.
+     * @return 
+     */
+    public boolean getHttpServerAccess()
+    {
+        return _httpServerAccess;
+    }
+    
     
     /* ------------------------------------------------------------ */
     /** Get all handlers.
@@ -749,6 +790,7 @@ public class HandlerContext implements LifeCycle
     
     /* ------------------------------------------------------------ */
     /** Setup context for serving dynamic servlets.
+     * @deprecated Use setDynamicServletPathSpec
      */
     public synchronized void setServingDynamicServlets(boolean serve)
     {
@@ -766,15 +808,6 @@ public class HandlerContext implements LifeCycle
      */
     public synchronized void setDynamicServletPathSpec(String pathSpecInContext)
     {
-        if (pathSpecInContext!=null && !pathSpecInContext.startsWith("/"))
-        {
-            Code.warning("Using deprecated setServingDynamicServlets.");
-            pathSpecInContext=null;  
-            char b=pathSpecInContext.charAt(0);
-            if (b=='1'||b=='t'||b=='T')
-                pathSpecInContext="/";
-        }
-        
         ServletHandler handler = (ServletHandler)
             getHandler(com.mortbay.HTTP.Handler.Servlet.ServletHandler.class);
         if (pathSpecInContext!=null)
@@ -785,7 +818,17 @@ public class HandlerContext implements LifeCycle
         }
         else if (handler!=null)
             _handlers.remove(handler);
-    }    
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getDynamicServletPathSpec()
+    {
+        ServletHandler handler = (ServletHandler)
+            getHandler(com.mortbay.HTTP.Handler.Servlet.ServletHandler.class);
+        if (handler!=null)
+            return handler.getDynamicServletPathSpec();
+        return null;
+    }
 
     /* ------------------------------------------------------------ */
     /** Setup context for serving Resources as files.
@@ -810,6 +853,12 @@ public class HandlerContext implements LifeCycle
                 getHandler(com.mortbay.HTTP.Handler.ResourceHandler.class);
         }
     }
+
+    /* ------------------------------------------------------------ */
+    public boolean isServingResources()
+    {
+        return null!=getHandler(com.mortbay.HTTP.Handler.ResourceHandler.class);
+    }
     
     /* ------------------------------------------------------------ */
     /** Set the SecurityHandler realm.
@@ -821,7 +870,17 @@ public class HandlerContext implements LifeCycle
     public void setRealm(String realmName)
     {
         SecurityHandler sh=getSecurityHandler();
-        sh.setRealm(realmName);
+        sh.setRealmName(realmName);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getRealm()
+    {
+        SecurityHandler handler = (SecurityHandler)
+            getHandler(com.mortbay.HTTP.Handler.SecurityHandler.class);
+        if (handler!=null)
+            return handler.getRealmName();
+        return null;
     }
     
     /* ------------------------------------------------------------ */
@@ -902,7 +961,7 @@ public class HandlerContext implements LifeCycle
     }
 
     /* ------------------------------------------------------------ */
-    /** 
+    /** Set a mime mapping
      * @param extension 
      * @param type 
      */
@@ -963,6 +1022,16 @@ public class HandlerContext implements LifeCycle
     }
 
     /* ------------------------------------------------------------ */
+    /** Set null path redirection.
+     * @param b if true a /context request will be redirected to
+     * /context/ if there is not path in the context.
+     */
+    public void setRedirectNullPath(boolean b)
+    {
+        _redirectNullPath=b;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** 
      * @return True if a /context request is redirected to /context/ if
      * there is not path in the context.
@@ -972,15 +1041,6 @@ public class HandlerContext implements LifeCycle
         return _redirectNullPath;
     }
 
-    /* ------------------------------------------------------------ */
-    /** Set null path redirection.
-     * @param b if true a /context request will be redirected to
-     * /context/ if there is not path in the context.
-     */
-    public void setRedirectNullPath(boolean b)
-    {
-        _redirectNullPath=b;
-    }
 
 
     /* ------------------------------------------------------------ */
@@ -1131,14 +1191,20 @@ public class HandlerContext implements LifeCycle
 
         getMimeMap();
         getEncodingMap();
-        
-        setAttribute("com.mortbay.HTTP.HttpServer",
-                     _httpServerAccess?_httpServer:null);
+
+        if (_httpServerAccess)
+            setAttribute("com.mortbay.HTTP.HttpServer",_httpServer);
+        else
+            removeAttribute("com.mortbay.HTTP.HttpServer");
         
         // setup the context loader
         _loader=null;
         if (_parent!=null || _classPath!=null ||  this.getClass().getClassLoader()!=null)
         {
+            // If no parent, then try this threads classes loader as parent
+            if (_parent==null)
+                _parent=Thread.currentThread().getContextClassLoader();
+            
             // If no parent, then try this classes loader as parent
             if (_parent==null)
                 _parent=this.getClass().getClassLoader();
@@ -1222,6 +1288,9 @@ public class HandlerContext implements LifeCycle
     public synchronized void destroy()
     {
         _started=false;
+        if (_httpServer!=null)
+            _httpServer.remove(this);
+        
         Thread thread = Thread.currentThread();
         ClassLoader lastContextLoader=thread.getContextClassLoader();
         try

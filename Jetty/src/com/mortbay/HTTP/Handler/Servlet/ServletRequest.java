@@ -281,7 +281,7 @@ public class ServletRequest
             Resource resource =
                 _context.getHandler()
                 .getHandlerContext()
-                .getResourceBase();
+                .getBaseResource();
 
             if (resource==null)
                 return null;
@@ -648,11 +648,14 @@ public class ServletRequest
         {
             try
             {
-                _reader=new BufferedReader(new InputStreamReader(getInputStream(),StringUtil.__ISO_8859_1));
+                String encoding=getCharacterEncoding();
+                if (encoding==null)
+                    encoding=StringUtil.__ISO_8859_1;
+                _reader=new BufferedReader(new InputStreamReader(getInputStream(),encoding));
             }
             catch(UnsupportedEncodingException e)
             {
-                Code.ignore(e);
+                Code.warning(e);
                 _reader=new BufferedReader(new InputStreamReader(getInputStream()));
             }
             _inputState=2;

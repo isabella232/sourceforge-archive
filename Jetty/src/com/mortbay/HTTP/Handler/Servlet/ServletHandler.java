@@ -24,10 +24,10 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.TreeSet;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.List;
@@ -59,6 +59,7 @@ public class ServletHandler extends NullHandler
     private ClassLoader _loader;
     private String _dynamicServletPathSpec;
     private Map _dynamicInitParams ;
+    private boolean _serveDynamicSystemServlets=false;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -69,29 +70,27 @@ public class ServletHandler extends NullHandler
     }
     
     /* ------------------------------------------------------------ */
-    public Context getContext()
-    {
-        return _context;
-    }
+    public Context getContext() { return _context; }
 
     /* ------------------------------------------------------------ */
-    public PathMap getServletMap()
-    {
-        return _servletMap;
-    }
+    public PathMap getServletMap() { return _servletMap; }
     
     /* ------------------------------------------------------------ */
-    public boolean isAutoReload()
-    {
-        return false;
-    }
+    public boolean isAutoReload() { return false; }
     
     /* ------------------------------------------------------------ */
-    public String getDynamicServletPathSpec()
-    {
-        return _dynamicServletPathSpec;
-    }
+    public String getDynamicServletPathSpec() { return _dynamicServletPathSpec; }
 
+    /* ------------------------------------------------------------ */
+    public Map getDynamicInitParams() { return _dynamicInitParams; }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if dynamic servlets can be on the non-context classpath
+     */
+    public boolean getServeDynamicSystemServlets()
+    { return _serveDynamicSystemServlets; }
+    
     /* ------------------------------------------------------------ */
     /** Set the dynamic servlet path.
      * If set, the ServletHandler will dynamically load servlet
@@ -111,12 +110,6 @@ public class ServletHandler extends NullHandler
     }
     
     /* ------------------------------------------------------------ */
-    public Map getDynamicInitParams()
-    {
-        return _dynamicInitParams;
-    }
-    
-    /* ------------------------------------------------------------ */
     /** Set dynamic servlet initial parameters.
      * @param initParams Map passed as initParams to newly created
      * dynamic servlets.
@@ -124,6 +117,18 @@ public class ServletHandler extends NullHandler
     public void setDynamicInitParams(Map initParams)
     {
         _dynamicInitParams = initParams;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set serving dynamic system servlets.
+     * This is a security option so that you can control what servlets
+     * can be loaded with dynamic discovery.
+     * @param b If set to false, the dynamic servlets must be loaded
+     * by the context classloader.  
+     */
+    public void setServeDynamicSystemServlets(boolean b)
+    {
+        _serveDynamicSystemServlets=b;
     }
     
     /* ------------------------------------------------------------ */
@@ -152,12 +157,12 @@ public class ServletHandler extends NullHandler
         _loader=getHandlerContext().getClassLoader();
         
         // Sort and Initialize servlets
-        TreeSet sorted=new TreeSet(_servletMap.values());
-        
-        Iterator i = sorted.iterator();
-        while (i.hasNext())
+        ServletHolder holders [] = (ServletHolder [])
+            (new HashSet(_servletMap.values ())).toArray(new ServletHolder [0]);
+        java.util.Arrays.sort (holders);        
+        for (int i=0; i<holders.length; i++)
         {
-            ServletHolder holder = (ServletHolder)i.next();
+            ServletHolder holder = holders [i];
             
             if (holder.isInitOnStartup())
                 holder.initialize();
@@ -372,12 +377,30 @@ public class ServletHandler extends NullHandler
                 
                 Code.debug("Dynamic path=",path);
                 
+                
+                
                 // make a holder
                 ServletHolder holder=newServletHolder(servletClass);
+                
+                // Set params
                 Map params=getDynamicInitParams();
                 if (params!=null)
                     holder.putAll(params);
-                holder.getServlet();
+                Object servlet=holder.getServlet();
+
+                // Check that the class was intended as a dynamic
+                // servlet
+                if (!_serveDynamicSystemServlets &&
+                    _loader!=null && _loader!=this.getClass().getClassLoader())
+                {
+                    // This context has a specific class loader.
+                    if (servlet.getClass().getClassLoader()!=_loader)
+                    {
+                        Code.warning("Attempted to load non-context servlet as dynamic: "+
+                                     servletClass);
+                        return null;
+                    }
+                }
                 
                 Log.event("Dynamic load '"+servletClass+"' at "+path);
                 addHolder(path+"/*",holder);
@@ -392,7 +415,6 @@ public class ServletHandler extends NullHandler
         }
         
         return entry;
-    
     }
     
 

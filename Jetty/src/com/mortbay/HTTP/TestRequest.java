@@ -35,7 +35,7 @@ public class TestRequest
     {
         ByteArrayInputStream in = new ByteArrayInputStream(data);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        HttpConnection connection = new HttpConnection(null,null,in,out);
+        HttpConnection connection = new HttpConnection(null,null,in,out,null);
         
         HttpRequest request = new HttpRequest(connection);
         request.readHeader(connection.getInputStream());

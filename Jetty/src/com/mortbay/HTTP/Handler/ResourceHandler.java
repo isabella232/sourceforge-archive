@@ -49,7 +49,7 @@ public class ResourceHandler extends NullHandler
     private boolean _delAllowed=false;
     private int _maxCachedFiles=128;
     private int _maxCachedFileSize =40960;
-    private Resource _resourceBase=null;
+    private Resource _baseResource=null;
     private boolean _handleGeneralOptionsQuery=true;
  
     /* ------------------------------------------------------------ */
@@ -162,9 +162,9 @@ public class ResourceHandler extends NullHandler
     {
         try
         {
-            _resourceBase=getHandlerContext().getResourceBase();
+            _baseResource=getHandlerContext().getBaseResource();
 
-            Log.event("ResourceHandler started in "+ _resourceBase);
+            Log.event("ResourceHandler started in "+ _baseResource);
             _mostRecentlyUsed=null;
             _leastRecentlyUsed=null;
             if (_maxCachedFiles>0 && _maxCachedFileSize>0)
@@ -207,14 +207,14 @@ public class ResourceHandler extends NullHandler
     private Resource makeresource(String pathSpec,String path)
         throws MalformedURLException,IOException
     {
-        Resource resourceBase=getHandlerContext().getResourceBase();
-        if (resourceBase==null)
+        Resource baseResource=getHandlerContext().getBaseResource();
+        if (baseResource==null)
             return null;
         String info=PathMap.pathInfo(pathSpec,path);
         if (info==null)
             info=path;
         
-        return resourceBase.addPath(info);
+        return baseResource.addPath(info);
     }
  
     /* ------------------------------------------------------------ */
@@ -228,12 +228,12 @@ public class ResourceHandler extends NullHandler
         if (pathInContext==null)
             throw new HttpException(HttpResponse.__403_Forbidden);
         
-        Resource resourceBase=getHandlerContext().getResourceBase();
-        if (resourceBase==null)
+        Resource baseResource=getHandlerContext().getBaseResource();
+        if (baseResource==null)
             return;
         
         boolean endsWithSlash= pathInContext.endsWith("/");
-        Resource resource = resourceBase.addPath(pathInContext);
+        Resource resource = baseResource.addPath(pathInContext);
         
         try
         {
@@ -534,7 +534,7 @@ public class ResourceHandler extends NullHandler
             String newInfo=newPath;
             if (contextPath!=null)
                 newInfo=newInfo.substring(contextPath.length());
-            Resource newFile = _resourceBase.addPath(newInfo);
+            Resource newFile = _baseResource.addPath(newInfo);
      
             Code.debug("Moving "+resource+" to "+newFile);
             resource.renameTo(newFile);

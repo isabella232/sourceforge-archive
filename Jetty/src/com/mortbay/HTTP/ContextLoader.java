@@ -34,6 +34,7 @@ public class ContextLoader extends URLClassLoader
     private String _path;
     private static Class __servletClass = javax.servlet.http.HttpServlet.class;
     private PermissionCollection _permissions;
+    private boolean _jspWarned=false;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -158,9 +159,12 @@ public class ContextLoader extends URLClassLoader
     /* ------------------------------------------------------------ */
     public String getFileClassPath()
     {
-        if (_info._unresolved)
+        if (_info._unresolved && !_jspWarned)
+        {
+            _jspWarned=true;
             Code.warning("Non file CLASSPATH "+_path+
                          ". If JSP compiles are affected, try extracting WARs");
+        }
         
         return _info._fileClassPath;
     }

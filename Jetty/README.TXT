@@ -318,7 +318,7 @@ specifiction.  The default security model is that all access is allowed unless a
 particular security constraint prevents access. This is vulnerable to alias attacks
 where alternate case or names can be used to get to a resource.
 
- Jetty makes the following interpretations:
+Jetty makes the following interpretations:
 
  + Methods PUT, DELETE and GET are disabled unless both a web.xml and a default
    config file are provided.
@@ -334,6 +334,9 @@ where alternate case or names can be used to get to a resource.
    com.mortbay.Util.FileResource.checkAliases is true, then the FileResouce class 
    compares the absolutePath and canonicalPath and treats the resource as not found
    if they do not match.
+
+ + Dynamic servlets by default, can only be loaded from the context classpath.
+   Use ServletHandler.setServeDynamicSystemServlets to control this behaivour.
 
 It is strongly recommended that secure WebApplications take following 
 approach.  All access should be denied by default with 
@@ -363,3 +366,30 @@ Specific access should be granted with constraints like:
       <role-name>NONE</role-name>
     </auth-constraint>
   </security-constraint>
+
+
+JMX Management
+--------------
+
+Jetty is instrumented with an optional JMX managment layer, which wraps key Jetty objects
+as model MBeans.  To use the JMX classes you must download a JMX server from javasoft
+or elsewhere and include them in your classpath.  For suns reference JMX this
+is:
+
+  CLASSPATH=$CLASSPATH:\
+     $JMX_HOME/lib/jmxri.jar:\
+     $JMX_HOME/lib/jmxtools.jar
+
+The Jetty JMX classes are in the com.mortbay.Jetty.JMX package and are listed in the
+$JETTY_HOME/etc/jetty.mlet file.
+
+This file can be run with the following command:
+
+  java com.mortbay.Jetty.JMX.Main $JETTY_HOME/etc/jetty.mlet
+
+The MBeans created can be via at http://localhost:8082
+
+JMX management is highly experimental and likely to change.
+
+
+  

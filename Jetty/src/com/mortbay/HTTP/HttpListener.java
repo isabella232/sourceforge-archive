@@ -6,6 +6,7 @@
 package com.mortbay.HTTP;
 import com.mortbay.Util.LifeCycle;
 import java.net.UnknownHostException;
+import java.net.ServerSocket;
 
 
 /* ------------------------------------------------------------ */
@@ -28,6 +29,7 @@ public interface HttpListener extends LifeCycle
     public abstract void customizeRequest(HttpConnection connection,
                                           HttpRequest request);
     public abstract String getDefaultScheme();
+    public abstract ServerSocket getServerSocket();
 }
 
 

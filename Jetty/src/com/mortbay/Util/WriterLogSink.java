@@ -164,9 +164,9 @@ public class WriterLogSink
     }
     
     /* ------------------------------------------------------------ */
-    public DateCache getLogDateFormat()
+    public String getLogDateFormat()
     {
-        return _dateFormat;
+        return _dateFormat.getFormatString();
     }
     /* ------------------------------------------------------------ */
     public void setLogDateFormat(String logDateFormat)
@@ -176,6 +176,7 @@ public class WriterLogSink
         if (_logTimezone!=null)
             _dateFormat.getFormat().setTimeZone(TimeZone.getTimeZone(_logTimezone));
     }
+    
     /* ------------------------------------------------------------ */
     public String getLogTimezone()
     {

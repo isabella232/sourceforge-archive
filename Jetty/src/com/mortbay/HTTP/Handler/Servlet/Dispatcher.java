@@ -92,7 +92,7 @@ public class Dispatcher implements RequestDispatcher
             // Look for a static resource
             try{
                 Resource resource= context.getServletHandler()
-                    .getHandlerContext().getResourceBase();
+                    .getHandlerContext().getBaseResource();
                 if (resource!=null)
                     resource = resource.addPath(_path);
                 if (resource.exists() && !resource.isDirectory())

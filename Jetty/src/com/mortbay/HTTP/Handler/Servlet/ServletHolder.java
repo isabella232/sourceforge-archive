@@ -6,6 +6,7 @@
 package com.mortbay.HTTP.Handler.Servlet;
 
 import com.mortbay.Util.Code;
+import com.mortbay.Util.Log;
 import com.mortbay.Util.ThreadPool;
 import com.mortbay.HTTP.ContextLoader;
 import java.io.IOException;
@@ -169,11 +170,21 @@ public class ServletHolder
                 return 1;
             if (sh._initOrder>_initOrder)
                 return -1;
-            return _name.compareTo(sh._name);
+            int c=_className.compareTo(sh._className);
+            if (c==0)
+                c=_name.compareTo(sh._name);
+            if (c==0)
+                c=this.hashCode()>o.hashCode()?1:-1;
+            return c;
         }
         return 1;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public boolean equals(Object o)
+    {
+        return compareTo(o)==0;
+    }
     
     /* ------------------------------------------------------------ */
     public void initialize()
@@ -195,9 +206,12 @@ public class ServletHolder
     {
         try
         {
+            Code.debug("InitializeClass "+getClassName());
+            
             // XXX - This is horrible - got to find a better way.
             if (getClassName().equals(_handler.getJSPClassName()))
-            {                
+            {
+                Code.debug("Jasper hack");
                 ClassLoader jettyLoader=_handler.getHandlerContext().getClassLoader();
                 ClassLoader jasperLoader=(ClassLoader)
                     _context.getAttribute("org.apache.tomcat.classloader");
@@ -207,7 +221,7 @@ public class ServletHolder
                     _context.setAttribute("org.apache.tomcat.classloader",
                                           jettyLoader);
                 }
-
+                
                 String classpath = getInitParameter("classpath");
                 String ctxClasspath =(jettyLoader instanceof ContextLoader)
                     ?((ContextLoader)jettyLoader).getFileClassPath()

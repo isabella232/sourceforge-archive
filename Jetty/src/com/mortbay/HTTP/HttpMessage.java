@@ -23,7 +23,6 @@ import java.util.List;
  * header fields, content and optional trailer fields, while managing the
  * state of the message.
  *
- * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

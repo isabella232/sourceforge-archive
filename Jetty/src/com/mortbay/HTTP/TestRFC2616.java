@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.ServerSocket;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -163,6 +164,12 @@ public class TestRFC2616
         return _server;
     }
     
+    /* ------------------------------------------------------------ */
+    public ServerSocket getServerSocket()
+    {
+        return null;
+    }
+    
     /* --------------------------------------------------------------- */
     public String getDefaultScheme()
     {
@@ -204,7 +211,7 @@ public class TestRFC2616
     {
         ByteArrayInputStream in = new ByteArrayInputStream(request);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        HttpConnection connection = new HttpConnection(this,null,in,out);
+        HttpConnection connection = new HttpConnection(this,null,in,out,null);
         connection.handle();
         connection.close();
         return out.toByteArray();

@@ -44,6 +44,15 @@ abstract public class ThreadedServer extends ThreadPool
     public ThreadedServer() 
     {}
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return The ServerSocket
+     */
+    public ServerSocket getServerSocket()
+    {
+        return _listen;
+    }
+    
     /* ------------------------------------------------------------------- */
     /** Construct for specific port.
      */
@@ -85,15 +94,15 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public synchronized void setAddress(InetAddrPort address) 
     {
-        if (isStarted())
+        if (_address==null)
+            _address=address;
+        else if (isStarted())
         {
-            Code.debug( "Restart for ", address );
-            try{stop();}catch(InterruptedException e){Code.warning(e);}
-            _address = address;
-            start();
+            if (!_address.equals(address))
+                throw new IllegalStateException(this+ " is started");
         }
         else
-            _address = address;
+            _address=address;
     }
 
     /* ------------------------------------------------------------ */
@@ -103,7 +112,15 @@ abstract public class ThreadedServer extends ThreadPool
     public synchronized void setHost(String host)
         throws UnknownHostException
     {
-        setAddress(new InetAddrPort(host,_address==null?0:_address.getPort()));
+        if (_address==null)
+            _address=new InetAddrPort(host,0);
+        else if (isStarted())
+        {
+            if (!_address.getHost().equals(host))
+                throw new IllegalStateException(this+ " is started");
+        }
+        else
+            _address.setHost(host);
     }
     
     /* ------------------------------------------------------------ */
@@ -112,7 +129,15 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public synchronized void setInetAddress(InetAddress addr)
     {
-        setAddress(new InetAddrPort(addr,_address==null?0:_address.getPort()));
+        if (_address==null)
+            _address=new InetAddrPort(addr,0);
+        else if (isStarted())
+        {
+            if (!_address.getInetAddress().equals(addr))
+                throw new IllegalStateException(this+ " is started");
+        }
+        else
+            _address.setInetAddress(addr);
     }
     
     /* ------------------------------------------------------------ */
@@ -121,8 +146,15 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public synchronized void setPort(int port)
     {
-        setAddress(_address==null?new InetAddrPort(port)
-            :new InetAddrPort(_address.getInetAddress(),port));
+        if (_address==null)
+            _address=new InetAddrPort(port);
+        else if (isStarted())
+        {
+            if (_address.getPort()!=port)
+                throw new IllegalStateException(this+ " is started");
+        }
+        else
+            _address.setPort(port);
     }
 
     /* ------------------------------------------------------------ */
@@ -171,6 +203,8 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public InetAddrPort getInetAddrPort()
     {
+        if (_address==null)
+            return null;
         return new InetAddrPort(_address);
     }
     
@@ -180,6 +214,8 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public InetAddress getInetAddress()
     {
+        if (_address==null)
+            return null;
         return _address.getInetAddress();
     }
     
@@ -189,7 +225,9 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public String getHost()
     {
-        return _address.getInetAddress().getHostName();
+        if (_address==null || _address.getInetAddress()==null)
+            return null;
+        return _address.getHost();
     }
     
     /* ------------------------------------------------------------ */
@@ -198,6 +236,8 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public int getPort()
     {
+        if (_address==null)
+            return 0;
         return _address.getPort();
     }
     
@@ -360,9 +400,16 @@ abstract public class ThreadedServer extends ThreadPool
         {
             _listen=newServerSocket(_address,
                                     getMaxThreads()>0?(getMaxThreads()+1):50);
-            _address=new InetAddrPort(_listen.getInetAddress(),
-                                      _listen.getLocalPort());
-
+            if (_address==null)
+                _address=new InetAddrPort(_listen.getInetAddress(),_listen.getLocalPort());
+            else
+            {
+                if(_address.getInetAddress()==null)
+                    _address.setInetAddress(_listen.getInetAddress());
+                if(_address.getPort()==0)
+                    _address.setPort(_listen.getLocalPort());
+            }
+            
             _soTimeOut=getMaxIdleTimeMs();
             if (_soTimeOut>0)
                 _listen.setSoTimeout(_soTimeOut);
@@ -442,6 +489,8 @@ abstract public class ThreadedServer extends ThreadPool
     /* ------------------------------------------------------------ */
     public String toString()
     {
+        if (_address==null)    
+            return getName()+"@0.0.0.0:0";
         return getName()+"@"+getInetAddrPort();
     }   
 }

@@ -30,6 +30,7 @@ import java.util.TimeZone;
 
 public class DateCache  
 {
+    private String formatString;
     private SimpleDateFormat minuteFormat;
     private SimpleDateFormat format;
     private boolean millis=false;
@@ -54,18 +55,21 @@ public class DateCache
      */
     public DateCache(String format)
     {
+        formatString=format;
         this.minuteFormat=new SimpleDateFormat(mFormat(format));
     }
     
     /* ------------------------------------------------------------ */
     public DateCache(String format,Locale l)
     {
+        formatString=format;
         this.minuteFormat=new SimpleDateFormat(mFormat(format),l);
     }
     
     /* ------------------------------------------------------------ */
     public DateCache(String format,DateFormatSymbols s)
     {
+        formatString=format;
         this.minuteFormat=new SimpleDateFormat(mFormat(format),s);
     }
 
@@ -145,6 +149,12 @@ public class DateCache
         return minuteFormat;
     }
 
+    /* ------------------------------------------------------------ */
+    public String getFormatString()
+    {
+        return formatString;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Set the timezone.
      * @param tz TimeZone

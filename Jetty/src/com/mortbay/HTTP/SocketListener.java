@@ -43,7 +43,7 @@ public class SocketListener
     {
         super(address);
     }
-
+    
     /* ------------------------------------------------------------ */
     public void setHttpServer(HttpServer server)
     {
@@ -84,6 +84,9 @@ public class SocketListener
     {
         Log.event("Destroy SocketListener on "+getInetAddrPort());
         super.destroy();
+        if (_server!=null)
+            _server.remove(this);
+        _server=null;
     }
     
     /* ------------------------------------------------------------ */
@@ -95,7 +98,11 @@ public class SocketListener
         throws IOException
     {
         HttpConnection connection =
-            new SocketConnection(socket);
+            new HttpConnection(this,
+                               socket.getInetAddress(),
+                               socket.getInputStream(),
+                               socket.getOutputStream(),
+                               socket);
         connection.handle();
     }
     
@@ -106,8 +113,7 @@ public class SocketListener
     public final void customizeRequest(HttpConnection connection,
                                        HttpRequest request)
     {
-        customizeRequest(((SocketConnection)connection).getSocket(),
-                         request);
+        customizeRequest((Socket)(connection.getConnection()),request);
     }
     
     /* ------------------------------------------------------------ */
@@ -120,27 +126,6 @@ public class SocketListener
         // Do nothing
     }
 
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private class SocketConnection extends HttpConnection
-    {
-        private Socket _socket;
-        public Socket getSocket()
-        {
-            return _socket;
-        }
-
-        /* -------------------------------------------------------- */
-        SocketConnection(Socket socket)
-            throws IOException
-        {
-            super(SocketListener.this,
-                  socket.getInetAddress(),
-                  socket.getInputStream(),
-                  socket.getOutputStream());
-            _socket=socket;
-        }
-    }
 }
 
 

@@ -81,6 +81,9 @@ $Id$
     <Arg>/</Arg>
     <Set name="ClassPath"><SystemProperty name="jetty.home" default="."/>/servlets/</Set>
     <Set name="DynamicServletPathSpec">/servlet/*</Set>
+    <Call name="getServletHandler">
+      <Set name="ServeDynamicSystemServlets" type="boolean">TRUE</Set>
+    </Call>
     <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/docroot/</Set>
     <Set name="ServingResources">TRUE</Set>
     <Call name="addServlet">

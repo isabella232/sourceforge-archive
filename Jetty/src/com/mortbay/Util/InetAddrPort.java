@@ -15,6 +15,7 @@ public class InetAddrPort
     implements Cloneable
 {
     private InetAddress _addr=null;
+    private boolean _addrIsHost=false;
     private int _port=0;
 
     /* ------------------------------------------------------------------- */
@@ -49,10 +50,8 @@ public class InetAddrPort
     public InetAddrPort(String host, int port)
         throws java.net.UnknownHostException
     {
-        if (host!=null)
-            _addr=InetAddress.getByName(host);
-        
-        _port=port;
+        setHost(host);
+        setPort(port);
     }
     
     /* ------------------------------------------------------------ */
@@ -66,10 +65,15 @@ public class InetAddrPort
         if (c>=0)
         {
             String addr=inetAddrPort.substring(0,c);
+            if (addr.indexOf("/")>0)
+                addr=addr.substring(addr.indexOf("/")+1);
             inetAddrPort=inetAddrPort.substring(c+1);
         
             if (addr.length()>0 && ! "0.0.0.0".equals(addr))
+            {
+                _addrIsHost=!Character.isDigit((addr.charAt(0)));   
                 this._addr=InetAddress.getByName(addr);
+            }
         }
         
         _port = Integer.parseInt(inetAddrPort); 
@@ -94,7 +98,10 @@ public class InetAddrPort
      */
     public String getHost()
     {
-        return _addr.toString();
+        if (_addr==null)
+            return "0.0.0.0";
+        
+        return _addrIsHost?_addr.getHostName():_addr.getHostAddress();
     }
     
     /* ------------------------------------------------------------ */
@@ -105,8 +112,14 @@ public class InetAddrPort
     public void setHost(String host)
         throws java.net.UnknownHostException
     {
+        _addr=null;
         if (host!=null)
+        {
+            if (host.indexOf("/")>0)
+                host=host.substring(0,host.indexOf("/"));
+            _addrIsHost=!Character.isDigit((host.charAt(0)));
             _addr=InetAddress.getByName(host);
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -124,6 +137,7 @@ public class InetAddrPort
      */
     public void setInetAddress(InetAddress addr)
     {
+        _addrIsHost=false;
         _addr=addr;
     }
 
@@ -149,9 +163,7 @@ public class InetAddrPort
     /* ------------------------------------------------------------------- */
     public String toString()
     {
-        if (_addr==null)
-            return "0.0.0.0:"+_port;
-        return _addr.toString()+':'+_port;
+        return getHost()+':'+_port;
     }
 
     /* ------------------------------------------------------------ */

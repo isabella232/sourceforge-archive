@@ -159,6 +159,9 @@ $Id$
         </New>
       </Arg>
     </Call>
+    <Call name="getServletHandler">
+      <Set name="ServeDynamicSystemServlets" type="boolean">TRUE</Set>
+    </Call>
   </Call>
 
   <Call name="addRealm">
