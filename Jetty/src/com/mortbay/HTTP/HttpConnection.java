@@ -7,6 +7,7 @@ package com.mortbay.HTTP;
 
 import com.mortbay.Util.Code;
 import com.mortbay.Util.StringUtil;
+import com.mortbay.Util.ThreadPool;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -41,6 +42,7 @@ public class HttpConnection
 {
     /* ------------------------------------------------------------ */
     private HttpListener _listener;
+    private ThreadPool _threadPool;
     private ChunkableInputStream _inputStream;
     private ChunkableOutputStream _outputStream;
     private boolean _persistent;
@@ -76,6 +78,8 @@ public class HttpConnection
     {
         Code.debug("new HttpConnection: ",connection);
         _listener=listener;
+        if (_listener instanceof ThreadPool)
+            _threadPool=(ThreadPool)_listener;
         _remoteAddr=remoteAddr;
         _inputStream=new ChunkableInputStream(in);
         _outputStream=new ChunkableOutputStream(out);
@@ -348,13 +352,14 @@ public class HttpConnection
                     verifyHTTP_1_0();
                 else if (_dotVersion!=-1)
                     throw new HttpException(_response.__505_HTTP_Version_Not_Supported);
+                
                 if (Code.verbose(99))
                     Code.debug("IN is "+
                                (_inputStream.isChunking()
                                 ?"chunked":"not chunked")+
                                " Content-Length="+
                                _inputStream.getContentLength());
-                    
+                
                 // service the request
                 service(_request,_response);
             } 
@@ -871,8 +876,14 @@ public class HttpConnection
         _outputSetup=true;
         
         // Handler forced close
-        _close=HttpFields.__Close.equals
-            (_response.getField(HttpFields.__Connection));
+        // or no idle threads left.
+        _close=
+            HttpFields.__Close.equals(_response.getField(HttpFields.__Connection)) 
+            ||
+            _threadPool!=null &&
+            _threadPool.getThreads()==_threadPool.getMaxThreads() &&
+            _threadPool.getIdleThreads()<_threadPool.getMinThreads();
+        
         if (_close)
             _persistent=false;
         
@@ -882,6 +893,7 @@ public class HttpConnection
             !_response.containsField(HttpFields.__TransferEncoding) &&
             !_response.containsField(HttpFields.__ContentLength))
         {
+            // Persist only if idle threads are available.
             if(_persistent)
             {
                 switch (_dotVersion)

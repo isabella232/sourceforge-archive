@@ -2,6 +2,7 @@ Jetty3 Versions
 --------------
 
 Jetty-3.1.rc7 -
+ + Don't persist connections if low on threads.
  + Added shutdown hooks to Jetty.Server to trap Ctl-C
  + Fixed bug with session ID generation.
  + Added untested FORM authentication.
