@@ -30,6 +30,18 @@ public class ExServlet extends HttpServlet
             throw (Throwable)(Loader.loadClass(this.getClass(),
                                                info.substring(1)).newInstance());
         }
+        catch(ServletException e)
+        {
+            throw e;
+        }
+        catch(IOException e)
+        {
+            throw e;
+        }
+        catch(RuntimeException e)
+        {
+            throw e;
+        }
         catch(Throwable th)
         {
             throw new ServletException(th);

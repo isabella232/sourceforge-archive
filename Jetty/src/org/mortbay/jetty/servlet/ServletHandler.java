@@ -69,10 +69,18 @@ public class ServletHandler extends AbstractHttpHandler
 {
     /* ------------------------------------------------------------ */
     public static final String __DEFAULT_SERVLET="default";
+    public static final String __J_S_CONTEXT_TEMPDIR="javax.servlet.context.tempdir";
+    public static final String __J_S_ERROR_EXCEPTION="javax.servlet.error.exception";
+    public static final String __J_S_ERROR_EXCEPTION_TYPE="javax.servlet.error.exception_type";
+    public static final String __J_S_ERROR_MESSAGE="javax.servlet.error.message";
+    public static final String __J_S_ERROR_REQUEST_URI="javax.servlet.error.request_uri";
+    public static final String __J_S_ERROR_SERVLET_NAME="javax.servlet.error.servlet_name";
+    public static final String __J_S_ERROR_STATUS_CODE="javax.servlet.error.status_code";
     
     /* ------------------------------------------------------------ */
     private static final boolean __Slosh2Slash=File.separatorChar=='\\';
     private static String __AllowString="GET, HEAD, POST, OPTIONS, TRACE";
+
     
     /* ------------------------------------------------------------ */
     private boolean _usingCookies=true;
@@ -499,17 +507,19 @@ public class ServletHandler extends AbstractHttpHandler
             Throwable th=e;
             if (e instanceof ServletException)
             {
-                if (((ServletException)e).getRootCause()!=null)
+                Throwable root=((ServletException)e).getRootCause();
+                while (root instanceof ServletException)
+                    root=((ServletException)e).getRootCause();
+                if (root instanceof HttpException ||
+                    root instanceof EOFException)
                 {
                     Code.debug("Extracting root cause from ",e);
-                    th=((ServletException)e).getRootCause();
+                    th=root;
                 }
             }
             
             if (th instanceof HttpException)
                 throw (HttpException)th;
-            if (th.getClass().equals(IOException.class))
-                throw (IOException)th;
             if (th instanceof EOFException)
                 throw (IOException)th;
             else if (!Code.debug() && th instanceof java.io.IOException)
@@ -523,8 +533,8 @@ public class ServletHandler extends AbstractHttpHandler
             httpResponse.getHttpConnection().forceClose();
             if (!httpResponse.isCommitted())
             {
-                request.setAttribute("javax.servlet.error.exception_type",th.getClass());
-                request.setAttribute("javax.servlet.error.exception",th);
+                request.setAttribute(ServletHandler.__J_S_ERROR_EXCEPTION_TYPE,th.getClass());
+                request.setAttribute(ServletHandler.__J_S_ERROR_EXCEPTION,th);
                 response.sendError(th instanceof UnavailableException
                                    ?HttpResponse.__503_Service_Unavailable
                                    :HttpResponse.__500_Internal_Server_Error,
@@ -541,8 +551,8 @@ public class ServletHandler extends AbstractHttpHandler
             httpResponse.getHttpConnection().forceClose();
             if (!httpResponse.isCommitted())
             {
-                request.setAttribute("javax.servlet.error.exception_type",e.getClass());
-                request.setAttribute("javax.servlet.error.exception",e);
+                request.setAttribute(ServletHandler.__J_S_ERROR_EXCEPTION_TYPE,e.getClass());
+                request.setAttribute(ServletHandler.__J_S_ERROR_EXCEPTION,e);
                 response.sendError(HttpResponse.__500_Internal_Server_Error,
                                    e.getMessage());
             }
@@ -1004,10 +1014,10 @@ public class ServletHandler extends AbstractHttpHandler
          */
         public Object getAttribute(String name)
         {
-            if ("javax.servlet.context.tempdir".equals(name))
+            if (ServletHandler.__J_S_CONTEXT_TEMPDIR.equals(name))
             {
                 // Initialize temporary directory
-                Object t = getHttpContext().getAttribute("javax.servlet.context.tempdir");
+                Object t = getHttpContext().getAttribute(ServletHandler.__J_S_CONTEXT_TEMPDIR);
 
                 if (t instanceof File)
                     return (File)t;

@@ -310,12 +310,32 @@ public class WebApplicationHandler extends ServletHandler
     protected String getErrorPage(int status,ServletHttpRequest request)
     {
         String error_page = null;
-        Class exClass=(Class)request
-            .getAttribute("javax.servlet.error.exception_type");
-        while (error_page==null && exClass!=null && _webApplicationContext!=null)
+        Class exClass=(Class)request.getAttribute(ServletHandler.__J_S_ERROR_EXCEPTION_TYPE);
+
+        if (ServletException.class.equals(exClass))
         {
             error_page = _webApplicationContext.getErrorPage(exClass.getName());
-            exClass=exClass.getSuperclass();
+            if (error_page==null)
+            {
+                Throwable th=(Throwable)request.getAttribute(ServletHandler.__J_S_ERROR_EXCEPTION);
+                while (th instanceof ServletException)
+                    th=((ServletException)th).getRootCause();
+                if (th!=null)
+                    exClass=th.getClass();
+            }
+        }
+        
+        if (error_page==null && exClass!=null)
+        {
+            while (error_page==null && exClass!=null && _webApplicationContext!=null)
+            {
+                error_page = _webApplicationContext.getErrorPage(exClass.getName());
+                exClass=exClass.getSuperclass();
+            }
+
+            if (error_page==null)
+            {
+            }
         }
             
         if (error_page==null && _webApplicationContext!=null)

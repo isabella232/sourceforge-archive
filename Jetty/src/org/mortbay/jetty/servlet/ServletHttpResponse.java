@@ -365,13 +365,14 @@ public class ServletHttpResponse implements HttpServletResponse
             // handle error page
             ServletHolder holder = _servletHttpRequest.getServletHolder();
             if (holder!=null)
-                _servletHttpRequest.setAttribute("javax.servlet.error.servlet_name",
+                _servletHttpRequest.setAttribute(ServletHandler.__J_S_ERROR_SERVLET_NAME,
                                                  holder.getName());
-            _servletHttpRequest.setAttribute("javax.servlet.error.request_uri",
+            _servletHttpRequest.setAttribute(ServletHandler.__J_S_ERROR_REQUEST_URI,
                                              _servletHttpRequest.getRequestURI());
-            _servletHttpRequest.setAttribute("javax.servlet.error.status_code",
+            _servletHttpRequest.setAttribute(ServletHandler.__J_S_ERROR_STATUS_CODE,
                                              new Integer(status));
-            _servletHttpRequest.setAttribute("javax.servlet.error.message",message);
+            _servletHttpRequest.setAttribute(ServletHandler.__J_S_ERROR_MESSAGE,
+                                             message);
             
             RequestDispatcher dispatcher=
                 _servletHttpRequest.getServletHandler().getServletContext()
@@ -395,7 +396,7 @@ public class ServletHttpResponse implements HttpServletResponse
     {
         ServletHolder holder = _servletHttpRequest.getServletHolder();
         if (holder!=null)
-            _servletHttpRequest.setAttribute("javax.servlet.error.servlet_name",
+            _servletHttpRequest.setAttribute(ServletHandler.__J_S_ERROR_SERVLET_NAME,
                                              holder.getName());
         _httpResponse.sendError(status);
     }

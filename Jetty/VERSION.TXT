@@ -12,6 +12,7 @@ Jetty-5.0.alpha2
  + XML entity resolution uses URLs not Resources
  + Implemented ServletRequestListeners as optional filter.
  + Moved error page mechanism to be webapp only.
+ + Fixed error page handling of IO and Servlet exceptions.
 
 Jetty-5.0.alpha1 - 12 August 2003
  + Switched to mx4j
