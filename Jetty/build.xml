@@ -3,8 +3,8 @@
  Copyright (c) 1999 Mort Bay Consulting (Australia) Pty. Ltd.
  $Id$
 ========================================================================
- This build file specifies how to build Jetty3 using ANT, the
- build tool from the Apache/Jakarta project.
+ This build file specifies how to build Jetty using ant, the
+ java build tool from the Apache/Jakarta project.
   <http://jakarta.apache.org/ant/index.html>
 ========================================================================
 
@@ -29,7 +29,7 @@ Other targets:
   mini.http.jar - Build a minimal HTTP server jar.
 
 -->
-<project name="Jetty3 HTTP Server" default="webapps" basedir=".">
+<project name="Jetty HTTP Server" default="webapps" basedir=".">
   <property environment="env"/>
   <property name="src"            value="${basedir}/src" />
   <property name="etc"            value="${basedir}/etc" />

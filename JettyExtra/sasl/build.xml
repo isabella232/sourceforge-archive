@@ -12,7 +12,7 @@ sasl.jar    - Build the SASL jar
 demo        - Runs the demo web application.
 
 -->
-<project name="Jetty3 SASL" default="all" basedir=".">
+<project name="Jetty SASL" default="all" basedir=".">
 
   <property environment="env"/>
 

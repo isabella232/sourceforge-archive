@@ -1,5 +1,4 @@
-
-Jetty 3 JMX
+Jetty JMX
 ===========  
 
 This extra packages instruments Jetty with JMX model MBeans.  
@@ -11,7 +10,7 @@ Feedback is welcome and needed!
 Quick Start
 ===========
 + Install the ant build tool from http://jakarta.apache.org
-+ Download, install and test a recent release of Jetty3.1.x
++ Download, install and test a recent release of Jetty
 + Set the JETTY_HOME environment variable
 + Optional:  Build the jmx package with "ant all"
 + Optional:  Test the jmx package with "ant test"

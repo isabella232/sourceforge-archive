@@ -1,3 +1,6 @@
+----------------------------------------------------------------------
+$Id$
+----------------------------------------------------------------------
 
 Jetty 4
 =======
@@ -204,10 +207,10 @@ The mailing lists are the best place to start:
 NOTES
 =====
 
-Jetty3Extra
+JettyExtra
 -----------
 
-Extra jetty functionality is available via the Jetty3Extra
+Extra jetty functionality is available via the JettyExtra
 package.  This include JMX and SASL support.
 
 
@@ -466,10 +469,11 @@ Support FAQ
       http://jetty.mortbay.org/jetty/doc/index.html
    Please read the tutorial, then read it again.
 
- + Jetty3 uses the 2.2 servlet API, which introduced contexts.  
-   It is important to understand contexts when configuring Jetty and it 
-   may be worth while reading the Jetty documentation and the servlet spec 
-   about the 2.2 servlet API.
+ + Jetty 4 configuration is based around the concept of contexts,
+   which were introduced in the 2.2 servlet specification.  It is
+   important to understand contexts when configuring Jetty and it may
+   be worth while reading the 2.3 servlet specification in addtion to
+   the Jetty documentation.
 
  + Before posting, try increasing the debug output of Jetty.  Debugging 
    control is described in the README file.  Even if you cannot spot the

@@ -12,7 +12,7 @@ sasl        - Build the sasl package.
 clean       - Remove generated files
 
 -->
-<project name="Jetty3Extra" default="all" basedir=".">
+<project name="JettyExtra" default="all" basedir=".">
 
   <target name="jmx">
     <ant dir="jmx"/>

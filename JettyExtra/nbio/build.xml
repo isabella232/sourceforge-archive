@@ -12,7 +12,7 @@ nbio.jar    - Build the NBIO jar
 demo        - Runs the demo web application.
 
 -->
-<project name="Jetty3 NBIO" default="all" basedir=".">
+<project name="Jetty NBIO" default="all" basedir=".">
 
   <property environment="env"/>
 

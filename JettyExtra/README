@@ -2,10 +2,10 @@
 
 Extra Jetty Components
 ======================
-This package contains extra components for the Jetty3 HTTP servlet server.
+This package contains extra components for the Jetty HTTP servlet server.
 
 The packages are distributed under the same terms and conditions as the
-Jetty3 server. Contributors to these packages are listed in the Jetty3
+Jetty server. Contributors to these packages are listed in the Jetty
 contributors list.
 
 For more detail of the packages see:
