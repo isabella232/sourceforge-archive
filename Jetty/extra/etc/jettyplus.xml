@@ -29,7 +29,7 @@
       <New class="org.mortbay.jetty.plus.JotmService">
         <Set name="Name">TransactionMgr</Set>
          <!-- set up a pooled DataSource -->
-         <Call name="addPooledDataSource">
+         <Call name="addDataSource">
              <Arg>jdbc/myDB</Arg>   <!-- client lookup jndi name of datasource  -->
              <!-- set up the datasource -->
              <Arg>
@@ -66,6 +66,18 @@
                  -->
                </New>
              </Arg>               
+        </Call>
+        <!-- set up a DataSource where the driver does the pooling                 -->
+        <Call name="addDataSource">
+             <Arg>jdbc/otherDB</Arg>   <!-- client lookup jndi name of datasource  -->
+             <Arg>
+               <New class="org.enhydra.jdbc.standard.StandardXADataSource">
+                 <Set name="DriverName">com.mysql.jdbc.Driver</Set>
+                 <Set name="Url">jdbc:mysql://localhost:3306/oln </Set>
+                 <Set name="User"></Set>
+                 <Set name="Password"></Set>
+               </New>
+             </Arg>
         </Call>
      </New>
    </Arg>
