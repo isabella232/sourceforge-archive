@@ -277,10 +277,10 @@ abstract public class
 	try
 	{
 	  Method method=_integerToMethod[methodId.intValue()];
-	  if(target!=null)
-	      method.invoke(target, argInstances);
-	  else
-	      _log.warn("Not calling null target for method "+method);
+	  if (target==null)
+              _log.warn("null target for "+method);
+          else
+              method.invoke(target, argInstances);
 	}
 	catch (Exception e)
 	{
@@ -311,6 +311,8 @@ abstract public class
     destroySession(String id)
     {
       if (_log.isTraceEnabled()) _log.trace("destroying replicated session: "+id);
+      if(getManager().sessionExists(id))
+          getManager().destroyContainer(getManager().getHttpSession(id));
       synchronized(_sessions) {_sessions.remove(id);}
     }
 

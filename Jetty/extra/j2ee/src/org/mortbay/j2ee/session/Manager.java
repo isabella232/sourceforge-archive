@@ -272,9 +272,15 @@ public class Manager
   public HttpSession
     getHttpSession(String id)
   {
-    return findSession(id);
+    return findSession(id,true);
   }
-
+    
+  public boolean
+    sessionExists(String id)
+  {
+     return findSession(id,false)!=null;
+  }
+    
   public HttpSession
     newHttpSession(HttpServletRequest request) // TODO
   {
@@ -508,7 +514,7 @@ public class Manager
 
 
   protected HttpSession
-    findSession(String id)
+    findSession(String id,boolean create)
   {
     HttpSession container=null;
 
@@ -535,7 +541,7 @@ public class Manager
 	  container=(HttpSession)_sessions.get(id);
 
 	  // if not...
-	  if (container==null)
+	  if (container==null && create)
 	  {
 	    // make a new one...
 	    container=newContainer(id, state);// we could lower contention by preconstructing containers... - TODO
