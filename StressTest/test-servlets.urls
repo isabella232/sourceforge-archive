@@ -7,6 +7,10 @@
 /servlet/info/lots/of/info;JSESSION_ID=nosuchsession
 /servlet/info?lines=50
 /servlet/info?lines=500
+/servlet/info?lines=50&encoding=UTF-8
+/servlet/info?lines=500&encoding=UTF-8
+/servlet/info?lines=50&encoding=ISO-8859-1
+/servlet/info?lines=500&encoding=ISO-8859-1
 /servlet?A=0
 /servlet/?A=0
 /servlet/info?A=0
@@ -23,5 +27,7 @@
 /servlet/;JSESSION_ID=nosuchsession?A=0&BBB+CCC=d%20e$20f
 /servlet/info;JSESSION_ID=nosuchsession?A=0&BBB+CCC=d%20e$20f
 /servlet/info/lots/of/info;JSESSION_ID=nosuchsession?A=0&BBB+CCC=d%20e$20f
-/servlet/info?lines=50
-/servlet/info?lines=500
+/servlet/info/lots/of/info?A=0&BBB+CCC=d%20e$20f&encoding=UTF-8
+/servlet/;JSESSION_ID=nosuchsession?A=0&BBB+CCC=d%20e$20f&encoding=UTF-8
+/servlet/info;JSESSION_ID=nosuchsession?A=0&BBB+CCC=d%20e$20f&encoding=UTF-8
+/servlet/info/lots/of/info;JSESSION_ID=nosuchsession?A=0&BBB+CCC=d%20e$20f&encoding=UTF-8
