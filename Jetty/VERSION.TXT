@@ -1,10 +1,11 @@
 Jetty Versions
 --------------
 
-Jetty-3.1.3 - 19 Oct 2001
+Jetty-3.1.3 - 21 Oct 2001
  + Fix security problem with trailing special characters.
    Trailing %00 enabled JSP source to be viewed or other 
    servlets to be bypassed.
+ + Upgraded JSSE to 1.0.2
  + Improved FORM auth handling of role failure.
  + Improved Jasper debug output.
  + Improved ThreadedServer timeout defaults
