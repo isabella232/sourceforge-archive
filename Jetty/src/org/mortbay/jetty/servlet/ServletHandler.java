@@ -116,7 +116,9 @@ public class ServletHandler extends Container implements HttpHandler
     /** Constructor. 
      */
     public ServletHandler()
-    {}
+    {
+        _context=new Context();
+    }
 
     /* ------------------------------------------------------------ */
     public void setName(String name)
@@ -152,7 +154,6 @@ public class ServletHandler extends Container implements HttpHandler
             throw new IllegalStateException("Can't initialize handler for different context");
         _httpContext=context;
         
-        _context=new Context();
         sessionManager.initialize(this);
     }
 
@@ -509,7 +510,7 @@ public class ServletHandler extends Container implements HttpHandler
                        HttpResponse httpResponse)
          throws IOException
     {
-        if (!isStarted() && _context==null)
+        if (!isStarted())
             return;
         
         // Handle TRACE
@@ -1001,6 +1002,7 @@ public class ServletHandler extends Container implements HttpHandler
         if (_sessionManager!=null)
             removeComponent(_sessionManager);
         _sessionManager=null;
+        _context=null;
         super.destroy();
     }
     

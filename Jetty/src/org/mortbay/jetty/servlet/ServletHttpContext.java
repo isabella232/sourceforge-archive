@@ -55,7 +55,7 @@ public class ServletHttpContext extends HttpContext
         ServletHandler shandler=getServletHandler();
         if (shandler!=null)
             return shandler.getServletContext();
-        return null;
+        throw new IllegalStateException();
     }
     
     /* ------------------------------------------------------------ */

@@ -175,7 +175,7 @@ public abstract class Element
     public Element attributes(String attributes)
     {
         if (log.isDebugEnabled() && attributes!=null && attributes.indexOf('=')>=0)
-            log.warn("Set attribute with old method: "+attributes+
+            log.debug("Set attribute with old method: "+attributes+
                          " on " + getClass().getName());
 
         if (attributes==null)

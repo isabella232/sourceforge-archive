@@ -72,7 +72,6 @@ public class WebApplicationHandler extends ServletHandler
     private boolean _acceptRanges= true;
     private boolean _filterChainsCached=true;
 
-    private transient boolean _started= false;
     private transient WebApplicationContext _webApplicationContext;
 
     protected transient Object _requestListeners;
@@ -251,12 +250,6 @@ public class WebApplicationHandler extends ServletHandler
         super.setSessionManager(sm);
     }
 
-    /* ------------------------------------------------------------ */
-    public boolean isStarted()
-    {
-        return _started && super.isStarted();
-    }
-
     /* ----------------------------------------------------------------- */
     protected synchronized void doStart() throws Exception
     {
@@ -266,7 +259,7 @@ public class WebApplicationHandler extends ServletHandler
             log.debug("Path Filters: " + _pathFilters);
         if (log.isDebugEnabled())
             log.debug("Servlet Filters: " + _servletFilterMap);
-        _started= true;
+        
         if (getHttpContext() instanceof WebApplicationContext)
             _webApplicationContext= (WebApplicationContext)getHttpContext();
         
@@ -278,7 +271,6 @@ public class WebApplicationHandler extends ServletHandler
             _chainCache[FilterHolder.__INCLUDE]=new HashMap();
             _chainCache[FilterHolder.__ERROR]=new HashMap();
         }
-
     }
 
     /* ------------------------------------------------------------ */
@@ -346,7 +338,6 @@ public class WebApplicationHandler extends ServletHandler
         }
         finally
         {
-            _started= false;
             _webApplicationContext= null;
             _sessionListeners= null;
             _requestListeners= null;

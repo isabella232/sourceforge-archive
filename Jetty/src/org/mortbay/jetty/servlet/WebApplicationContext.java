@@ -487,22 +487,20 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
             super.doStart();
 
             mex= new MultiException();
-            // If it actually started
-            if (super.isStarted())
+            // Context listeners
+            if (_contextListeners != null && _webAppHandler != null)
             {
-                // Context listeners
-                if (_contextListeners != null && _webAppHandler != null)
+                ServletContextEvent event= new ServletContextEvent(getServletContext());
+                for (int i= 0; i < LazyList.size(_contextListeners); i++)
                 {
-                    ServletContextEvent event= new ServletContextEvent(getServletContext());
-                    for (int i= 0; i < LazyList.size(_contextListeners); i++)
-                        try
-                        {
-                            ((ServletContextListener)LazyList.get(_contextListeners, i)).contextInitialized(event);
-                        }
-                        catch (Exception ex)
-                        {
-                            mex.add(ex);
-                        }
+                    try
+                    {
+                        ((ServletContextListener)LazyList.get(_contextListeners, i)).contextInitialized(event);
+                    }
+                    catch (Exception ex)
+                    {
+                        mex.add(ex);
+                    }
                 }
             }
 

@@ -32,12 +32,12 @@ public  class DemoListener
 
     public void contextInitialized ( ServletContextEvent e )
     {
-        if(log.isDebugEnabled())log.debug("event contextInitialized: "+e);
+        if(log.isDebugEnabled())log.debug("event contextInitialized: "+e.getServletContext());
     }
     
     public void contextDestroyed ( ServletContextEvent e )
     {
-        if(log.isDebugEnabled())log.debug("event contextDestroyed: "+e);
+        if(log.isDebugEnabled())log.debug("event contextDestroyed: "+e.getServletContext());
     }
     
     public void sessionCreated ( HttpSessionEvent e )

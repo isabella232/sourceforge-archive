@@ -22,10 +22,10 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
   </context-param>
 
   <!-- Uncomment to demo listeners
+  -->
   <listener>
     <listener-class>org.mortbay.webapps.jetty.DemoListener</listener-class>
   </listener>
-  -->
   
   <filter>
     <filter-name>Demo REQUEST Filter</filter-name>
