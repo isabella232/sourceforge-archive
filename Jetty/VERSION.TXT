@@ -13,6 +13,14 @@ Jetty-5.0.beta2
  + Updated to Japser 5.0.16
  + RequestDispatcher uses request encoding for query params
 
+Jetty-4.2.16 - 30 Jan 2004
+ + Fixed setDate multi-cpu race
+ + Improved low thread handling
+ + FileResource better handles non sun JVM
+ + Fixed HttpTunnel for JDK 1.2
+ + Monitor closes socket before exit
+ + RequestDispatcher uses request encoding for query params
+ + Update jasper to 4.2.29
 
 Jetty-5.0.beta1 - 24 December 2003
  + SecurityConstraints not reset by stop() on custom context
