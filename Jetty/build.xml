@@ -38,6 +38,7 @@ release     - Cleanup for release
   <property name="lib"            value="${basedir}/lib"/>
   <property name="classes"        value="${basedir}/classes"/>
   <property name="javadoc"        value="${basedir}/javadoc"/>
+  <property name="logs"           value="${basedir}/logs"/>
   <property name="build.compiler" value="jikes"/> 
   <!-- property name="build.compiler" value="classic"/ -->
   
@@ -58,6 +59,7 @@ release     - Cleanup for release
     <mkdir dir="${jetty.webapp.classes}"/>
     <mkdir dir="${javadoc}" />
     <mkdir dir="${classes}" />
+    <mkdir dir="${logs}" />
   </target>
   
   <target name="clean">
