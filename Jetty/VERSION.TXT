@@ -1,5 +1,7 @@
 Jetty Versions
 --------------
+
+ + Fixed setTempDirectory creation bug
  
 Jetty-4.0.1 - 18 April 2002
  + Updated Jasper to CVS snapshot from Apr 18 18:50:59 BST 2002
