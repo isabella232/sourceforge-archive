@@ -316,8 +316,15 @@
       <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.request.log</Arg>
       <Set name="retainDays">90</Set>
       <Set name="append">true</Set>
-      <Set name="extended">true</Set>
+      <Set name="extended">false</Set>
       <Set name="LogTimeZone">GMT</Set>
+      <Set name="ignorePaths">
+        <Array type="String">
+          <Item>/jetty/images/*</Item>
+          <Item>/demo/images/*</Item>
+          <Item>*.css</Item>
+        </Array>
+      </Set>
     </New>
   </Set>
 

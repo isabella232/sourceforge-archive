@@ -36,11 +36,13 @@ public class NCSARequestLog implements RequestLog
     private String _logDateFormat="dd/MMM/yyyy:HH:mm:ss ZZZ";
     private Locale _logLocale=Locale.US;
     private String _logTimeZone=TimeZone.getDefault().getID();
+    private String[] _ignorePaths;
     
     private transient OutputStream _out;
     private transient OutputStream _fileOut;
     private transient DateCache _logDateCache;
     private transient ByteArrayISO8859Writer _buf;
+    private transient PathMap _ignorePathMap;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -168,6 +170,23 @@ public class NCSARequestLog implements RequestLog
     }
     
     /* ------------------------------------------------------------ */
+    /** Set which paths to ignore.
+     *
+     * @param ignorePaths Array of path specifications to ignore
+     */
+    public void setIgnorePaths(String[] ignorePaths)
+    {
+        // Contributed by  Martin Vilcans (martin@jadestone.se)
+        _ignorePaths = ignorePaths;
+    }
+
+    /* ------------------------------------------------------------ */
+    public String[] getIgnorePaths()
+    {
+        return _ignorePaths;
+    }
+    
+    /* ------------------------------------------------------------ */
     public void start()
         throws Exception
     {
@@ -187,6 +206,15 @@ public class NCSARequestLog implements RequestLog
             _out=new BufferedOutputStream(_fileOut);
         else
             _out=_fileOut;
+
+        if (_ignorePaths!=null && _ignorePaths.length>0)
+        {
+            _ignorePathMap=new PathMap();
+            for (int i=0;i<_ignorePaths.length;i++)
+                _ignorePathMap.put(_ignorePaths[i],_ignorePaths[i]);
+        }
+        else
+            _ignorePathMap=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -213,6 +241,12 @@ public class NCSARequestLog implements RequestLog
                     int responseLength)
     {
         try{
+            // ignore ignorables
+            if (_ignorePathMap != null &&
+                _ignorePathMap.getMatch(request.getPath()) != null)
+                return;
+
+            // log the rest
             synchronized(_buf.getLock())
             {
                 if (_fileOut==null)
