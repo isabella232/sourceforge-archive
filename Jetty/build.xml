@@ -502,7 +502,7 @@
 
   <!-- ==================================================================== -->
   <target name="dist" 
-          depends="clean,jars,webapps,extra,test,javadoc,tidy" 
+          depends="jars,webapps,extra,test,javadoc,tidy" 
           description="Build the distribution archives">
     <mkdir dir="${dist}"/>
     
