@@ -1,6 +1,6 @@
 <!-- 
 ========================================================================
- Copyright (c) 1999 Mort Bay Consulting (Australia) Pty. Ltd.
+ Copyright (c) 2000 Mort Bay Consulting (Australia) Pty. Ltd.
  $Id$
 ======================================================================== 
  This build file specifies how to build Jetty3 using ANT, the 
