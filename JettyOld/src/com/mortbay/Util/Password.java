@@ -16,7 +16,11 @@ import java.io.*;
  *  + A program is run to get the password.
  * </pre>
  * Passwords that begin with EXEC: are interpreted as a command, whose
- * output is read
+ * output is read.
+ * <p>
+ * Passwords that begin with OBF: are de obfiscated.
+ * Passwords can be obfiscated by run com.mortbay.Util.Password as a
+ * main class.
  * @see
  * @version 1.0 Thu Aug 17 2000
  * @author Greg Wilkins (gregw)
@@ -65,7 +69,9 @@ public class Password
 	// expand password
 	while (pw!=null && pw.startsWith("EXEC:"))
 	    pw=expand(name,pw.substring(5).trim());
-	
+
+	while (pw!=null && pw.startsWith("OBF:"))
+	    pw=deobfiscate(pw);
 	pwc = pw.toCharArray();
     }
 
@@ -125,6 +131,76 @@ public class Password
 	java.util.Arrays.fill(pwc,'\0');
 	pwc=null;
     }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @param s 
+     * @return 
+     */
+    private static String obfiscate(String s)
+    {
+	StringBuffer buf = new StringBuffer();
+	byte[] b = s.getBytes();
+	
+	synchronized(buf)
+	{
+	    buf.append("OBF:");
+	    for (int i=0;i<b.length;i++)
+	    {
+		byte b1 = b[i];
+		byte b2 = b[s.length()-(i+1)];
+		int i1= (int)b1+(int)b2+127;
+		int i2= (int)b1-(int)b2+127;
+		int i0=i1*256+i2;
+		String x=Integer.toString(i0,36);
+
+		switch(x.length())
+		{
+		  case 1:buf.append('0');
+		  case 2:buf.append('0');
+		  case 3:buf.append('0');
+		  default:buf.append(x);
+		}
+	    }
+	    return buf.toString();
+	}
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @param s 
+     * @return 
+     */
+    private static String deobfiscate(String s)
+    {
+	if (s.startsWith("OBF:"))
+	    s=s.substring(4);
+	
+	byte[] b=new byte[s.length()/2];
+	int l=0;
+	for (int i=0;i<s.length();i+=4)
+	{
+	    String x=s.substring(i,i+4);
+	    int i0 = Integer.parseInt(x,36);
+	    int i1=(i0/256);
+	    int i2=(i0%256);
+	    b[l++]=(byte)((i1+i2-254)/2);
+	}
+
+	return new String(b,0,l);
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param arg 
+     */
+    public static void main(String[] arg)
+    {
+	Password pw = new Password("password");
+	System.err.println(obfiscate(pw.toString()));
+    }
+    
 }
 
 

@@ -317,7 +317,11 @@ java.lang.Runtime.exec.  The password name (eg. jetty.ssl.password)
 is written to the input of the command and a line of output is read
 from the command and used as the password.
 <p>
-While this mechanism just exports the security problem for jetty,
+If jetty is given a password that begins with &quot;OBF:&quot; it is
+treated as an obfiscated password. Passwords can be obfiscated by
+running com.mortbay.Util.Password as a main class.
+<p>
+While these mechanism just exports the security problem for jetty,
 it does allow customized security arrangements to be configured.
 
 <p>
