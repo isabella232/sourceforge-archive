@@ -539,21 +539,39 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
      */
     protected void doStop() throws Exception
     {
+        MultiException mex=new MultiException();
         // Context listeners
         if (_contextListeners != null)
         {
             if (_webAppHandler != null)
             {
                 ServletContextEvent event= new ServletContextEvent(getServletContext());
+                
                 for (int i= LazyList.size(_contextListeners); i-- > 0;)
-                     ((ServletContextListener)LazyList.get(_contextListeners, i)).contextDestroyed(event);
+                {
+                    try 
+                    {
+                        ((ServletContextListener)LazyList.get(_contextListeners, i)).contextDestroyed(event);
+                    }
+                    catch (Exception e)
+                    {
+                        mex.add(e);
+                    }
+                }
             }
         }
 
         _contextListeners= null;
 
         // Stop the context
-        super.doStop();
+        try
+        {
+            super.doStop();
+        }
+        catch (Exception e)
+        {
+            mex.add(e);
+        }
 
         // clean up
         clearSecurityConstraints();
@@ -570,6 +588,9 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
         _webInf=null;
         
         _configurations=null;
+        
+        if (mex!=null)
+            mex.ifExceptionThrow();
     }
     
 
