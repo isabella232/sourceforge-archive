@@ -1,6 +1,7 @@
 Jetty3 Versions
 --------------
 
+ + Updated sponsors page
  + Added HttpServer statistics
  + Don't add notfound context.
  + Many major and minor optimizations:
