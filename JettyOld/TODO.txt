@@ -1,6 +1,0 @@
-
- + Standard SSL listener
- + Documentation
- + Portable make file
- + RPM packaging
-
