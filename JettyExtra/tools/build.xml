@@ -29,6 +29,7 @@ all         - everything
   <property name="build.compiler" value="jikes"/>
   <!-- property name="build.compiler" value="classic"/ -->
   <!-- property name="build.compiler" value="modem"/ -->
+  <property name="build.compiler.emacs"	value="true"/>
 
   <property name="jetty"          value="${env.JETTY_HOME}"/>
   <property name="jetty.lib"      value="${jetty}/lib"/>

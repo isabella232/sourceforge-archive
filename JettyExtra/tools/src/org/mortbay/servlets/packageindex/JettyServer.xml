@@ -14,33 +14,13 @@
   </Call>
 
   <Call name="addContext">
-    <Arg>/usr/local/java</Arg>
+    <Arg>/JettyExtra</Arg>
+    <Set name="ResourceBase">..</Set>
+    <Set name="ServingResources">TRUE</Set>
+  </Call>
+  <Call name="addContext">
+    <Arg>/InstalledJava</Arg>
     <Set name="ResourceBase">/usr/local/java</Set>
-    <Set name="ServingResources">TRUE</Set>
-  </Call>
-  <Call name="addContext">
-    <Arg>/tools</Arg>
-    <Set name="ResourceBase">.</Set>
-    <Set name="ServingResources">TRUE</Set>
-  </Call>
-  <Call name="addContext">
-    <Arg>/ftp</Arg>
-    <Set name="ResourceBase">../ftp</Set>
-    <Set name="ServingResources">TRUE</Set>
-  </Call>
-  <Call name="addContext">
-    <Arg>/jmx</Arg>
-    <Set name="ResourceBase">../jmx</Set>
-    <Set name="ServingResources">TRUE</Set>
-  </Call>
-  <Call name="addContext">
-    <Arg>/nbio</Arg>
-    <Set name="ResourceBase">../nbio</Set>
-    <Set name="ServingResources">TRUE</Set>
-  </Call>
-  <Call name="addContext">
-    <Arg>/sasl</Arg>
-    <Set name="ResourceBase">../sasl</Set>
     <Set name="ServingResources">TRUE</Set>
   </Call>
   <Call name="addContext">

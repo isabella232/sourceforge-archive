@@ -23,6 +23,7 @@ import java.util.Properties;
 import java.util.Iterator;
 import java.util.Dictionary;
 import java.util.ResourceBundle;
+import java.util.HashMap;
 
 import org.mortbay.tools.servlet.DispatchServlet;
 import org.mortbay.tools.servlet.ServletDispatch;
@@ -86,16 +87,13 @@ public class PackageIndex extends DispatchServlet
     /* ------------------------------------------------------------ */
     protected Vector packages = new Vector();
     protected boolean mapToFile = false;
-    protected String httpIndexPrefix = null;
-    protected String httpIndexTruncate = null;
     protected Dictionary docTypes = null;
+    protected HashMap mappings = null;
     protected int tocTableBorderWidth = 0;
     /* ------------------------------------------------------------ */
     public static class ServletArgs
     {
 	public boolean mapToFile = false;
-        public String httpIndexPrefix = null;
-        public String httpIndexTruncate = null;
 	public int tocTableBorderWidth = 0;
         public String[] scan = null;
     }
@@ -105,6 +103,11 @@ public class PackageIndex extends DispatchServlet
 	public String paths[] = null;
 	public int versioning = 1;
 	public String ignore[] = null;
+    }
+    public static class HttpMapArgs
+    {
+        public String from = null;
+	public String to = null;
     }
     /* ------------------------------------------------------------ */
     public void init(ServletConfig config)
@@ -150,8 +153,6 @@ public class PackageIndex extends DispatchServlet
 	    cs.convert(sconfig, ServletArgs.class, cs);
 	mapToFile = sargs.mapToFile;
 	tocTableBorderWidth = sargs.tocTableBorderWidth;
-        httpIndexPrefix = sargs.httpIndexPrefix; 
-        httpIndexTruncate = sargs.httpIndexTruncate;
         
 	// The package specs...
 	PropertyTree packconfig = sconfig.getTree("pkgs");
@@ -219,6 +220,17 @@ public class PackageIndex extends DispatchServlet
                         packages.addElement(spec);
                 }
             }
+        }
+        // Now read in the path translations
+        for (int i = 1; ; i++){
+            PropertyTree mapArgs = sconfig.getTree("httpIndexMap." + i);
+            HttpMapArgs args = (HttpMapArgs)
+                cs.convert(mapArgs, HttpMapArgs.class, cs);
+            if (args.from == null && args.to == null)
+                break;
+            if (mappings == null) mappings = new HashMap();
+            mappings.put(args.from == null ? "" : args.from,
+                         args.to == null ? "" : args.to);
         }
     }
     /* ------------------------------------------------------------ */
@@ -434,15 +446,21 @@ public class PackageIndex extends DispatchServlet
         if (mapToFile)
             return "file:" + index;
         else {
-            if (httpIndexTruncate != null &&
-                index.startsWith(httpIndexTruncate))
-                index = index.substring(httpIndexTruncate.length());
-            Code.debug("2:", httpIndexPrefix, ":", index);
-            if (httpIndexPrefix != null)
-                return httpIndexPrefix + index;
-            else
-                return index;
+            Iterator iter = mappings.keySet().iterator();
+            while (iter.hasNext()){
+                String from = null;
+                try {
+                    from = (String)iter.next();
+                } catch (Exception ign){}
+                String to = (String)mappings.get(from);
+                if (index.startsWith(from)){
+                    index = index.substring(from.length());
+                    if (!"".equals(to))
+                        index = to + index;
+                }
+            }
         }
+        return index;
     }
     /* ------------------------------------------------------------ */
     private abstract class ProdPrinter {
