@@ -189,11 +189,20 @@ public class HttpResponse extends HttpMessage
     
     
     /* ------------------------------------------------------------ */
+    /**
+     * @deprecated use getHttpRequest()
+     */
+    public HttpRequest getRequest()
+    {
+        return getHttpRequest();
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Get the HTTP Request.
      * Get the HTTP Request associated with this response.
      * @return associated request
      */
-    public HttpRequest getRequest()
+    public HttpRequest getHttpRequest()
     {
         if (_connection==null)
             return null;
@@ -322,6 +331,10 @@ public class HttpResponse extends HttpMessage
                 if (request.getAttribute("javax.servlet.error.status_code")==null)
                 {
                     // Set attributes to describe error
+                    request.setAttribute("javax.servlet.error.request_uri",
+                                         getHttpRequest().getPath());
+                    request.setAttribute("javax.servlet.error.servlet_name",
+                                         "NOT IMPLEMENTED");
                     request.setAttribute("javax.servlet.error.status_code",code_integer);
                     request.setAttribute("javax.servlet.error.message",
                                          message==null?reason:message);
@@ -426,6 +439,8 @@ public class HttpResponse extends HttpMessage
         {
             getRequest().setAttribute("javax.servlet.error.exception_type",
                                       exception.getClass());
+            getRequest().setAttribute("javax.servlet.error.exception",
+                                      exception);
             sendError(code,exception.getClass().getName(),exception.toString());
         }
     }

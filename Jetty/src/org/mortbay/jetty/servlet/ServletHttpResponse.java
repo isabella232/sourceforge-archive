@@ -390,7 +390,6 @@ public class ServletHttpResponse implements HttpServletResponse
                 url=_servletHttpRequest.getScheme()+
                     "://"+_servletHttpRequest.getServerName()+
                     ":"+_servletHttpRequest.getServerPort()+
-                    // XXX URI.canonicalPath(URI.addPaths(_servletHttpRequest.getContextPath(),url));
                     URI.canonicalPath(url);
             else
                 url=_servletHttpRequest.getScheme()+
@@ -541,6 +540,11 @@ public class ServletHttpResponse implements HttpServletResponse
             setLocale(_locale);
     }
 
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return _httpResponse.toString();
+    }
 }
 
 

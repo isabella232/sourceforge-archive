@@ -55,7 +55,10 @@
     <!-- Define filter mappings for the defined filters -->
     <filter-mapping>
         <filter-name>Servlet Mapped Filter</filter-name>
-	<servlet-name>invoker</servlet-name>
+	<!-- not in Jetty, use snoop instead 
+             <servlet-name>invoker</servlet-name> 
+        -->
+	<servlet-name>snoop</servlet-name>
     </filter-mapping>
     <filter-mapping>
         <filter-name>Path Mapped Filter</filter-name>
@@ -161,7 +164,7 @@
             snoop
         </servlet-name>
         <url-pattern>
-            /snoop
+            /snoop/*
         </url-pattern>
     </servlet-mapping>
     <servlet-mapping>

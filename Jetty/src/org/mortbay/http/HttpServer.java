@@ -565,7 +565,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
                 while(contexts.hasNext())
                 {
                     HttpContext context = (HttpContext) contexts.next();
-                    set.addAll(context.getHandlers());
+                    set.addAll(context.getHttpHandlers());
                 }
             }
         }
@@ -738,7 +738,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             if (_notFoundContext==null)
             {
                 _notFoundContext=new HttpContext(this,"/");
-                _notFoundContext.addHandler(new NotFoundHandler());
+                _notFoundContext.addHttpHandler(new NotFoundHandler());
                 try{_notFoundContext.start();}catch(Exception e){Code.warning(e);}
             }
             if (!_notFoundContext.handle(request,response))
@@ -786,7 +786,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
                                 (HttpContext)contextList.get(j);
                             
                             HttpHandler handler =
-                                context.getHandler(handlerClass);
+                                context.getHttpHandler(handlerClass);
 
                             if (handler!=null)
                                 return handler;
@@ -1073,7 +1073,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             HttpContext context = server.getContext(host,"/");
             context.setResourceBase("docroot/");
             context.setServingResources(true);
-            context.addHandler(new DumpHandler());
+            context.addHttpHandler(new DumpHandler());
             
             // Parse arguments
             for (int i=0;i<args.length;i++)

@@ -76,7 +76,7 @@ public class Dispatcher implements RequestDispatcher
         }
         else
             _resourceHandler=(ResourceHandler)
-                _servletHandler.getHttpContext().getHandler(ResourceHandler.class);
+                _servletHandler.getHttpContext().getHttpHandler(ResourceHandler.class);
         
         // If no servlet found
         if (_holder==null && _resourceHandler!=null)
@@ -185,7 +185,9 @@ public class Dispatcher implements RequestDispatcher
             }
             
             // Forward request
-            httpRequest.setAttribute(ServletHandler.__SERVLET_HOLDER,_holder);
+            servletHttpRequest.setServletHolder(_holder);
+
+            // XXX - need to skip security handler and filters!!!!!
             _servletHandler.getHttpContext().handle(0,_path,null,httpRequest,httpResponse);
         }
     }

@@ -228,6 +228,7 @@ public class MultiMap extends HashMap
         else
         {
             Object o=get(name);
+            // XXX What about null values?
             if (o==null)
                 put(name,value);
             else if (o instanceof List)

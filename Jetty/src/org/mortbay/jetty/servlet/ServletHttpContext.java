@@ -75,11 +75,11 @@ public class ServletHttpContext extends HttpContext
     public synchronized ServletHandler getServletHandler()
     {
         if (_servletHandler==null)
-            _servletHandler= (ServletHandler) getHandler(ServletHandler.class);
+            _servletHandler= (ServletHandler) getHttpHandler(ServletHandler.class);
         if (_servletHandler==null)
         {
             _servletHandler=new ServletHandler();
-            addHandler(_servletHandler);
+            addHttpHandler(_servletHandler);
         }
         return _servletHandler;
     }
@@ -138,7 +138,7 @@ public class ServletHttpContext extends HttpContext
     public synchronized void setDynamicServletPathSpec(String pathSpecInContext)
     {
         ServletHandler handler = (ServletHandler)
-            getHandler(org.mortbay.jetty.servlet.ServletHandler.class);
+            getHttpHandler(org.mortbay.jetty.servlet.ServletHandler.class);
         if (pathSpecInContext!=null)
         {
             if (handler==null)
@@ -146,14 +146,14 @@ public class ServletHttpContext extends HttpContext
             handler.setDynamicServletPathSpec(pathSpecInContext);
         }
         else if (handler!=null)
-            removeHandler(handler);
+            removeHttpHandler(handler);
     }
 
     /* ------------------------------------------------------------ */
     public String getDynamicServletPathSpec()
     {
         ServletHandler handler = (ServletHandler)
-            getHandler(org.mortbay.jetty.servlet.ServletHandler.class);
+            getHttpHandler(org.mortbay.jetty.servlet.ServletHandler.class);
         if (handler!=null)
             return handler.getDynamicServletPathSpec();
         return null;

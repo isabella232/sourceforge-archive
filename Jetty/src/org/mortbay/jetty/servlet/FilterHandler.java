@@ -25,6 +25,7 @@ import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.handler.NullHandler;
 import org.mortbay.util.Code;
+import org.mortbay.util.MultiMap;
 
 
 /* ------------------------------------------------------------ */
@@ -42,7 +43,7 @@ public class FilterHandler
     
     private Map _filterMap=new HashMap();
     private List _pathFilters=new ArrayList();
-    private List _servletFilterMap=new ArrayList();
+    private MultiMap _servletFilterMap=new MultiMap();
     
     /* ------------------------------------------------------------ */
     FilterHolder newFilterHolder(String name, String className)
@@ -66,7 +67,9 @@ public class FilterHandler
         if (holder==null)
             throw new IllegalArgumentException("Unknown filter :"+filterName);
         
-        System.err.println("MAP servlet "+servletName+" --> "+filterName);
+        Code.debug("Filter servlet ",servletName," --> ",filterName);
+
+        _servletFilterMap.add(servletName,holder);
         
         return holder;
     }
@@ -79,7 +82,7 @@ public class FilterHandler
         if (holder==null)
             throw new IllegalArgumentException("Unknown filter :"+filterName);
         
-        System.err.println("MAP path "+pathSpec+" --> "+filterName);
+        Code.debug("Filter path ",pathSpec," --> ",filterName);
 
         if (!holder.isMappedToPath())
             _pathFilters.add(holder);
@@ -88,6 +91,12 @@ public class FilterHandler
         return holder;
     }    
 
+    /* ------------------------------------------------------------ */
+    public ServletHandler getServletHandler()
+    {
+        return _servletHandler;
+    }
+
     
     /* ------------------------------------------------------------ */
     public void start()
@@ -95,7 +104,7 @@ public class FilterHandler
     {
         super.start();        
         _httpContext= getHttpContext();
-        _handlerIndex = _httpContext.getHandlerIndex(this);
+        _handlerIndex = _httpContext.getHttpHandlerIndex(this);
         _servletHandler = (ServletHandler)
             _httpContext.getHttpHandler(ServletHandler.class);
         
@@ -106,6 +115,9 @@ public class FilterHandler
             FilterHolder holder = (FilterHolder)iter.next();
             holder.start();
         }
+
+        Code.debug("Path Filters: "+_pathFilters);
+        Code.debug("Servlet Filters: "+_servletFilterMap);
     }
     
     /* ------------------------------------------------------------ */
@@ -133,7 +145,10 @@ public class FilterHandler
             return;
         
         ServletHttpRequest servletHttpRequest =
-            _servletHandler.getServletHttpRequest(httpRequest,httpResponse);
+            _servletHandler.getServletHttpRequest(pathInContext,
+                                                  pathParams,
+                                                  httpRequest,
+                                                  httpResponse);
         ServletHttpResponse servletHttpResponse =
              servletHttpRequest.getServletHttpResponse();
 
@@ -165,12 +180,14 @@ public class FilterHandler
     /* ------------------------------------------------------------ */
     private class Chain implements FilterChain
     {
-        int _nextFilter;
+        int _nextPathFilter;
+        int _nextServletFilter;
         int _nextHandler;
         String _pathInContext;
         String _pathParams;
         HttpRequest _httpRequest;
         HttpResponse _httpResponse;
+        List _servletFilters;
 
         /* ------------------------------------------------------------ */
         Chain(int nextHandler,
@@ -180,7 +197,8 @@ public class FilterHandler
               HttpResponse httpResponse)
         {
             Code.debug("FilterChain: ",pathInContext);
-            _nextFilter=0;
+            _nextPathFilter=0;
+            _nextServletFilter=0;
             _nextHandler=nextHandler;
             _pathInContext=pathInContext;
             _pathParams=pathParams;
@@ -193,18 +211,47 @@ public class FilterHandler
             throws IOException,
                    ServletException
         {
-            while(_nextFilter<_pathFilters.size())
+            // Find the next applicable path filter
+            while(_nextPathFilter<_pathFilters.size())
             {
-                FilterHolder holder=(FilterHolder)_pathFilters.get(_nextFilter++);
+                FilterHolder holder=(FilterHolder)_pathFilters.get(_nextPathFilter++);
                 if (holder.appliesTo(_pathInContext))
                 {
                     Filter filter = holder.getFilter();
-                    Code.debug("doFilter: ",filter);
+                    Code.debug("Path doFilter: ",filter);
                     filter.doFilter(request,response,this);
                     return;
                 }
             }
-            
+
+            // Find the next applicable servlet filter
+            if (_servletFilterMap.size() > 0)
+            {
+                // Find the list of matching filters
+                if (_servletFilters==null)
+                {
+                    Map.Entry entry=_servletHandler.getHolderEntry(_pathInContext);
+                    if (entry!=null)
+                    {
+                        ServletHolder servletHolder=(ServletHolder)entry.getValue();
+                        _servletFilters=_servletFilterMap.getValues(servletHolder.getName());
+                    }
+                }
+
+                // goto next filter in the list
+                if (_servletFilters!=null &&
+                    _nextServletFilter<_servletFilters.size())
+                {
+                    FilterHolder holder=(FilterHolder)
+                        _servletFilters.get(_nextServletFilter++);
+                    Filter filter = holder.getFilter();
+                    Code.debug("Servlet doFilter: ",filter);
+                    filter.doFilter(request,response,this);
+                    return;
+                }
+            }
+
+            // Goto the original resource
             _httpContext.handle(_nextHandler,
                                 _pathInContext,
                                 _pathParams,

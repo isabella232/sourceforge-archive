@@ -88,6 +88,7 @@ public class ServletHttpRequest
     private BufferedReader _reader=null;
     private int _inputState=0;
     private ArrayList _mergedParameters;
+    private ServletHolder _servletHolder;
 
     
     /* ------------------------------------------------------------ */
@@ -107,6 +108,18 @@ public class ServletHttpRequest
     ServletHandler getServletHandler()
     {
         return _servletHandler;
+    }
+
+    /* ------------------------------------------------------------ */
+    ServletHolder getServletHolder()
+    {
+        return _servletHolder;
+    }
+    
+    /* ------------------------------------------------------------ */
+    void setServletHolder(ServletHolder servletHolder)
+    {
+        _servletHolder=servletHolder;
     }
     
     /* ------------------------------------------------------------ */
@@ -794,7 +807,9 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return _httpRequest.toString();
+        return
+            getContextPath()+"+"+getServletPath()+"+"+getPathInfo()+"\n"+
+            _httpRequest.toString();
     }
 }
 

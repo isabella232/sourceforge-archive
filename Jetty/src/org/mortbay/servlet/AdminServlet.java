@@ -156,7 +156,7 @@ public class AdminServlet extends HttpServlet
                 {
                     // Handler stop/start
                     int handlerIndex=Integer.parseInt(tok.nextToken());
-                    HttpHandler handler=context.getHandler(handlerIndex);
+                    HttpHandler handler=context.getHttpHandler(handlerIndex);
                     
                     if (start) handler.start();
                     else handler.stop();
@@ -282,10 +282,11 @@ public class AdminServlet extends HttpServlet
                     
                         List hList=new List(List.Ordered);
                         cItem.add(hList);
-                        for(int i5=0;i5<hc.getHandlerSize();i5++)
+                        int handlers = hc.getHttpHandlers().size();
+                        for(int i5=0;i5<handlers;i5++)
                         {
                             String id5=id4+":"+i5;
-                            HttpHandler handler = hc.getHandler(i5);
+                            HttpHandler handler = hc.getHttpHandler(i5);
                             Composite hItem=hList.newItem();
                             hItem.add(lifeCycle(request,
                                                 id5,

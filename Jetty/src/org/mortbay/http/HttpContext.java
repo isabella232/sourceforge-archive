@@ -556,24 +556,6 @@ public class HttpContext implements LifeCycle
     }
 
     /* ------------------------------------------------------------ */
-    /** 
-     */
-    public int getNumHandlers()
-    {
-        return _handlers.size();
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @deprecated 
-     */
-    public int getHandlerSize()
-    {
-        return _handlers.size();
-    }
-    
-    
-    /* ------------------------------------------------------------ */
     /**
      * @deprecated
      */

@@ -218,7 +218,7 @@ public class SecurityHandler extends NullHandler
                 // look for FormAuthenticator
                 try
                 {
-                    Iterator iter = getHttpContext().getHandlers().iterator();
+                    Iterator iter = getHttpContext().getHttpHandlers().iterator();
                     while (iter.hasNext())
                     {
                         HttpHandler handler=(HttpHandler)iter.next();

@@ -248,8 +248,8 @@ public class ResourceHandler extends NullHandler
         try
         {
             resource = baseResource.addPath(pathInContext);
-            Code.debug("\nPATH=",pathInContext,
-                       "\nRESOURCE=",resource);
+            Code.debug("PATH=",pathInContext,
+                       " RESOURCE=",resource);
             
             // check filename
             

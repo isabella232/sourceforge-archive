@@ -86,11 +86,11 @@ public class Demo
             context.addServlet("JSP","*.jsp:*.jsP:*.jSp:*.jSP:*.Jsp:*.JsP:*.JSp:*.JSP",
                                "org.apache.jasper.servlet.JspServlet");
             context.setServingResources(true);
-            context.addHandler(new DumpHandler());
+            context.addHttpHandler(new DumpHandler());
             
             ForwardHandler fh = new ForwardHandler("/dump/forwardedRoot");
             fh.addForward("/forward/*","/dump/forwarded");
-            context.addHandler(0,fh);
+            context.addHttpHandler(0,fh);
             
             context=(ServletHttpContext)server.addContext(null,"/javadoc/*");
             context.setResourceBase("javadoc/");
@@ -102,7 +102,7 @@ public class Demo
                 .put("Path","/bin:/usr/bin:/usr/local/bin");
             
             context=(ServletHttpContext)server.addContext(null,"/");
-            context.addHandler(new ForwardHandler("/jetty/index.html"));
+            context.addHttpHandler(new ForwardHandler("/jetty/index.html"));
             context.setRealm("Jetty Demo Realm");
             context.addAuthConstraint("/admin/*","content-administrator");
             context.setClassPath("servlets/");
@@ -116,7 +116,7 @@ public class Demo
             log.setRetainDays(90);
             log.setAppend(true);
             log.setFlushOn(false);
-            server.setLogSink(log);
+            server.setRequestLogSink(log);
                               
             // Start handlers and listener
             server.start();

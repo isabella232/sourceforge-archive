@@ -125,11 +125,22 @@ public class HttpRequest extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
+    /**
+     * @deprecated use getHttpResponse()
+     */
+    public HttpResponse getResponse()
+    {
+        if (_connection==null)
+            return null;
+        return _connection.getResponse();
+    }
+
+    /* ------------------------------------------------------------ */
     /** Get the HTTP Response.
      * Get the HTTP Response associated with this request.
      * @return associated response
      */
-    public HttpResponse getResponse()
+    public HttpResponse getHttpResponse()
     {
         if (_connection==null)
             return null;

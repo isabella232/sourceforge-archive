@@ -3,6 +3,7 @@ Jetty Versions
 
  + Added Context and Session Event Handling
  + Added FilterHolder
+ + Added FilterHandler
  + Changed HandlerContext to HttpContext
  + Simplified ServletHandler
  + Removed destroy methods

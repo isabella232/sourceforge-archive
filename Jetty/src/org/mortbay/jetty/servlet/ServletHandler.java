@@ -72,7 +72,6 @@ public class ServletHandler
     private static final boolean __Slosh2Slash=File.separatorChar=='\\';
 
     /* ------------------------------------------------------------ */
-    public final static String __SERVLET_HOLDER="org.mortbay.jetty.Holder";
     public final static String __J_URI="org.mortbay.jetty.URI";
     public final static String __J_AUTHENTICATED="org.mortbay.jetty.Auth";
     
@@ -382,24 +381,57 @@ public class ServletHandler
      * @param httpRequest 
      * @return ServletHttpRequest wrapping the passed HttpRequest.
      */
-    public ServletHttpRequest getServletHttpRequest(HttpRequest httpRequest,
-                                            HttpResponse httpResponse)
+    public ServletHttpRequest getServletHttpRequest(String pathInContext,
+                                                    String pathParams,
+                                                    HttpRequest httpRequest,
+                                                    HttpResponse httpResponse)
     {
         // Look for a previously built servlet request.
         ServletHttpRequest servletHttpRequest = (ServletHttpRequest)
             httpRequest.getFacade();
         
         if (servletHttpRequest==null)
-        {
-            servletHttpRequest  = new ServletHttpRequest(this,httpRequest);
-            httpRequest.setFacade(servletHttpRequest);
-            ServletHttpResponse servletHttpResponse =
-                new ServletHttpResponse(servletHttpRequest,httpResponse);
-            httpResponse.setFacade(servletHttpResponse);
-        }
+            servletHttpRequest=newFacades(pathInContext,
+                                          pathParams,
+                                          httpRequest,
+                                          httpResponse,
+                                          getHolderEntry(pathInContext));
         return servletHttpRequest;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    private ServletHttpRequest newFacades(String pathInContext,
+                                          String pathParams,
+                                          HttpRequest httpRequest,
+                                          HttpResponse httpResponse,
+                                          Map.Entry entry)
+    {
+        // Build the request and response.
+        ServletHttpRequest servletHttpRequest  = new ServletHttpRequest(this,httpRequest);
+        httpRequest.setFacade(servletHttpRequest);
+        ServletHttpResponse servletHttpResponse =
+            new ServletHttpResponse(servletHttpRequest,httpResponse);
+        httpResponse.setFacade(servletHttpResponse);
+        
+        // Handle the session ID
+        servletHttpRequest.setSessionId(pathParams);
+        HttpSession session=servletHttpRequest.getSession(false);
+        if (session!=null)
+            ((SessionManager.Session)session).access();
+        
+        // Look for a servlet
+        if (entry!=null)
+        {
+            String servletPathSpec=(String)entry.getKey();            
+            servletHttpRequest.setPaths(PathMap.pathMatch(servletPathSpec,
+                                                          pathInContext),
+                                        PathMap.pathInfo(servletPathSpec,
+                                                         pathInContext));
+            servletHttpRequest.setServletHolder((ServletHolder)entry.getValue());
+        }
+        Code.debug("Servlet request for ",entry);
+        return servletHttpRequest;
+    }
 
     /* ------------------------------------------------------------ */
     HttpSession getHttpSession(String id)
@@ -419,24 +451,6 @@ public class ServletHandler
         _sessionManager.setSessionTimeout(timeoutMinutes);
     }
 
-    /* ------------------------------------------------------------ */
-    /** Strip session from path.
-     * Strip the session ID from a request path.  The session is
-     * accessed in this process.
-     * @param pathInContext The path which may contain the session ID
-     * @param request The request made on the path.
-     * @return The path in the context, stripped of any session ID.
-     */
-    public void setSessionId(String pathParams,
-                             ServletHttpRequest request)
-    {
-        request.setSessionId(pathParams);
-        HttpSession session=request.getSession(false);
-        if (session!=null)
-            ((SessionManager.Session)session).access();
-    }
-    
-
     /* ----------------------------------------------------------------- */
     /** Handle request.
      * @param contextPath 
@@ -451,41 +465,36 @@ public class ServletHandler
                        HttpResponse httpResponse)
          throws IOException
     {
+        if (!isStarted() || _servletMap.size()==0)
+            return;
+        
         try
         {
             ServletHttpRequest request=null;
             ServletHttpResponse response=null;
             
             // handle
-            Code.debug("Looking for servlet at ",pathInContext);
-            
-            ServletHolder holder =(ServletHolder)
-                httpRequest.getAttribute(ServletHandler.__SERVLET_HOLDER);
-            if (holder!=null)
-            {
-                request = getServletHttpRequest(httpRequest,httpResponse);
-                response = request.getServletHttpResponse();
-                setSessionId(pathParams,request);
-            }
+            Code.debug("ServletHandler: ",pathInContext);
+
+            // Do we already have facades?
+            if (httpRequest.getFacade() instanceof ServletHttpRequest)
+                request= (ServletHttpRequest) httpRequest.getFacade();
             else
             {
+                // Return if no servlet match
                 Map.Entry entry=getHolderEntry(pathInContext);
-                if (entry!=null)
-                {
-                    request = getServletHttpRequest(httpRequest,httpResponse);
-                    response = request.getServletHttpResponse();
-                    setSessionId(pathParams,request);
-                    String servletPathSpec=(String)entry.getKey();
-                    holder = (ServletHolder)entry.getValue();
-                    
-                    Code.debug("Pass request to servlet at ",entry);
-                    request.setPaths(PathMap.pathMatch(servletPathSpec,
-                                                       pathInContext),
-                                     PathMap.pathInfo(servletPathSpec,
-                                                      pathInContext));
-                }
+                if (entry==null)
+                    return;
+
+                // create the facade
+                request=newFacades(pathInContext,pathParams,httpRequest,httpResponse,entry);
             }
-            
+
+            // Get the rest of the stuff
+            response = request.getServletHttpResponse();
+            ServletHolder holder = request.getServletHolder();
+
+            // service request
             if (holder!=null)
             {
                 // service request
@@ -540,8 +549,6 @@ public class ServletHandler
     
     /* ------------------------------------------------------------ */
     /** ServletHolder matching path.
-     * In a separate method so that dynamic servlet loading can be
-     * implemented by derived handlers.
      * @param pathInContext Path within context.
      * @return PathMap Entries pathspec to ServletHolder
      */
@@ -641,18 +648,6 @@ public class ServletHandler
     }
     
 
-
-    /* ------------------------------------------------------------ */
-    void mapHolder(String name,ServletHolder holder, String oldName)
-    {
-        synchronized(_nameMap)
-        {
-            if (oldName!=null)
-                _nameMap.remove(oldName);
-            _nameMap.put(name,holder);
-        }
-    }
-    
     /* ------------------------------------------------------------ */
     /** Perform form authentication.
      * Called from SecurityHandler.
@@ -665,7 +660,10 @@ public class ServletHandler
                                      HttpResponse httpResponse)
         throws IOException
     {
-        ServletHttpRequest request = getServletHttpRequest(httpRequest,httpResponse);
+        ServletHttpRequest request = getServletHttpRequest(pathInContext,
+                                                           pathParams,
+                                                           httpRequest,
+                                                           httpResponse);
         ServletHttpResponse response = request.getServletHttpResponse();
 
         // Handle paths

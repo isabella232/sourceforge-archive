@@ -77,7 +77,6 @@ public class WebApplicationContext extends ServletHttpContext
     private ServletHandler _servletHandler;
     private SecurityHandler _securityHandler;
     private Map _tagLibMap=new HashMap(3);
-    private NotFoundHandler _notFoundHandler;
     private String _deploymentDescriptor;
     private String _defaultsDescriptor;
     private String _war;
@@ -240,58 +239,61 @@ public class WebApplicationContext extends ServletHttpContext
         resolveWebApp();
 
         // add security handler first
-        _securityHandler=(SecurityHandler)getHandler(SecurityHandler.class);
+        _securityHandler=(SecurityHandler)getHttpHandler(SecurityHandler.class);
         if (_securityHandler==null)
             _securityHandler=new SecurityHandler();
-        if (getHandlerIndex(_securityHandler)!=0)
+        if (getHttpHandlerIndex(_securityHandler)!=0)
         {
-            removeHandler(_securityHandler);
-            addHandler(0,_securityHandler);
+            removeHttpHandler(_securityHandler);
+            addHttpHandler(0,_securityHandler);
         }
         
         // Add filter Handler
-        _filterHandler = (FilterHandler)getHandler(FilterHandler.class);
+        _filterHandler = (FilterHandler)getHttpHandler(FilterHandler.class);
         if (_filterHandler==null)
         {
             _filterHandler=new FilterHandler();
-            addHandler(_filterHandler);
+            addHttpHandler(_filterHandler);
         }
         
         // Add servlet Handler
-        _servletHandler = (ServletHandler)getHandler(ServletHandler.class);
+        _servletHandler = (ServletHandler)getHttpHandler(ServletHandler.class);
         if (_servletHandler==null)
         {
             _servletHandler=new ServletHandler();
-            addHandler(_servletHandler);
+            addHttpHandler(_servletHandler);
         }
         _servletHandler.setDynamicServletPathSpec("/servlet/*");
 
         // Check order
-        if (getHandlerIndex(_servletHandler)<getHandlerIndex(_filterHandler))
+        if (getHttpHandlerIndex(_servletHandler)<getHttpHandlerIndex(_filterHandler))
         {
-            removeHandler(_servletHandler);
-            addHandler(_servletHandler);
+            removeHttpHandler(_servletHandler);
+            addHttpHandler(_servletHandler);
         }
         
         // Resource Handler
-        ResourceHandler rh = (ResourceHandler)getHandler(ResourceHandler.class);
+        ResourceHandler rh = (ResourceHandler)getHttpHandler(ResourceHandler.class);
         if (rh==null)
         {
             rh=new ResourceHandler();
             rh.setPutAllowed(false);
             rh.setDelAllowed(false);
-            addHandler(rh);
+            addHttpHandler(rh);
         }
 
         // Check order
-        if (getHandlerIndex(rh)<getHandlerIndex(_servletHandler))
+        if (getHttpHandlerIndex(rh)<getHttpHandlerIndex(_servletHandler))
         {
-            removeHandler(rh);
-            addHandler(rh);
+            removeHttpHandler(rh);
+            addHttpHandler(rh);
         }
         
         // Protect WEB-INF
-        addHandler(getHandlerIndex(rh),new WebInfProtect());
+        addHttpHandler(getHttpHandlerIndex(rh),new WebInfProtect());
+
+        // NotFoundHandler
+        addHttpHandler(new NotFoundHandler());
         
         // Do the default configuration
         try
@@ -877,11 +879,6 @@ public class WebApplicationContext extends ServletHttpContext
         String error= node.getString("error-code",false,true);
         if (error==null || error.length()==0)
             error= node.getString("exception-type",false,true);
-        else if (_notFoundHandler==null)
-        {
-            _notFoundHandler=new NotFoundHandler();
-            addHandler(_notFoundHandler);
-        }
         
         String location= node.getString("location",false,true);
         setErrorPage(error,location);

@@ -145,13 +145,13 @@ public class TestRFC2616
         _server=new HttpServer();
         HttpContext context = _server.getContext(null,"/");
 	context.setResourceBase(docRoot.getName());
-        context.addHandler(new TestTEHandler());
-        context.addHandler(new RedirectHandler());
+        context.addHttpHandler(new TestTEHandler());
+        context.addHttpHandler(new RedirectHandler());
         ResourceHandler rh = new ResourceHandler();
-        context.addHandler(rh);   // for testdocs
+        context.addHttpHandler(rh);   // for testdocs
         rh.setHandleGeneralOptionsQuery(false); // dont handle OPTIONS *
-        context.addHandler(new DumpHandler());
-        context.addHandler(new NotFoundHandler());
+        context.addHttpHandler(new DumpHandler());
+        context.addHttpHandler(new NotFoundHandler());
         _server.addListener(this);
         _server.start();
         
@@ -588,9 +588,8 @@ public class TestRFC2616
         try
         {
             TestRFC2616 listener = new TestRFC2616();
-            listener.getHttpServer().getContext("VirtualHost",
-                                                "/path/*")
-                .addHandler(new DumpHandler());
+            listener.getHttpServer().getContext("VirtualHost","/path/*")
+                .addHttpHandler(new DumpHandler());
             listener.getHttpServer().start();
             String response;
             int offset=0;

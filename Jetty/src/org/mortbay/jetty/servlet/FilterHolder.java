@@ -24,7 +24,6 @@ public class FilterHolder
 {
     private Filter _filter;
     private Config _config;
-    private ServletHandler _servletHandler;
     private PathMap _pathSpecs;
     
     /* ---------------------------------------------------------------- */
@@ -75,8 +74,6 @@ public class FilterHolder
         _filter=(Filter)newInstance();
         _config=new Config();
         _filter.init(_config);
-        _servletHandler=(ServletHandler)
-            getHttpHandler().getHttpContext().getHttpHandler(ServletHandler.class);
     }
 
     /* ------------------------------------------------------------ */
@@ -110,7 +107,7 @@ public class FilterHolder
         /* ------------------------------------------------------------ */
         public ServletContext getServletContext()
         {
-            return _servletHandler.getServletContext();
+            return ((FilterHandler)_httpHandler).getServletHandler().getServletContext();
         }
         
         /* -------------------------------------------------------- */
