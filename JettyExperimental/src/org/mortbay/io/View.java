@@ -16,7 +16,7 @@
 package org.mortbay.io;
 
 /**
- * A View on another buffer.  Allows operations that do not change the content or
+ * A View on another buffer.  Allows operations that do not change the _content or
  * indexes of the backing buffer.
  * 
  * @author gregw

@@ -86,7 +86,7 @@ public interface RequestDispatcher {
             throws ServletException, IOException;
 
     /**
-     * Includes the content of a resource (servlet, JSP page,
+     * Includes the _content of a resource (servlet, JSP page,
      * HTML file) in the response. In essence, this method enables
      * programmatic server-side includes.
      *

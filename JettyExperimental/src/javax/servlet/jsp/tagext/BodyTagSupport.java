@@ -140,7 +140,7 @@ public class BodyTagSupport extends TagSupport implements BodyTag {
     /**
      * Get current bodyContent.
      *
-     * @return the body content.
+     * @return the body _content.
      */
     
     public BodyContent getBodyContent() {

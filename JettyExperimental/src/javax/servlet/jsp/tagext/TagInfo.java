@@ -72,7 +72,7 @@ public class TagInfo {
      *
      * @param tagName The name of this tag
      * @param tagClassName The name of the tag handler class
-     * @param bodycontent Information on the body content of these tags
+     * @param bodycontent Information on the body _content of these tags
      * @param infoString The (optional) string information for this tag
      * @param taglib The instance of the tag library that contains us.
      * @param tagExtraInfo The instance providing extra Tag info.  May be null
@@ -112,7 +112,7 @@ public class TagInfo {
      *
      * @param tagName The name of this tag
      * @param tagClassName The name of the tag handler class
-     * @param bodycontent Information on the body content of these tags
+     * @param bodycontent Information on the body _content of these tags
      * @param infoString The (optional) string information for this tag
      * @param taglib The instance of the tag library that contains us.
      * @param tagExtraInfo The instance providing extra Tag info.  May be null
@@ -163,7 +163,7 @@ public class TagInfo {
      *
      * @param tagName The name of this tag
      * @param tagClassName The name of the tag handler class
-     * @param bodycontent Information on the body content of these tags
+     * @param bodycontent Information on the body _content of these tags
      * @param infoString The (optional) string information for this tag
      * @param taglib The instance of the tag library that contains us.
      * @param tagExtraInfo The instance providing extra Tag info.  May be null
@@ -315,7 +315,7 @@ public class TagInfo {
      * If the bodycontent is not defined for this
      * tag, the default of JSP will be returned.
      *
-     * @return the body content string.
+     * @return the body _content string.
      */
 
     public String getBodyContent() {

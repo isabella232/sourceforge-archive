@@ -14,8 +14,8 @@
 //========================================================================
 
 package org.mortbay.thread;
-import org.apache.ugli.ULogger;
 import org.apache.ugli.LoggerFactory;
+import org.apache.ugli.ULogger;
 
 /**
  * @author gregw

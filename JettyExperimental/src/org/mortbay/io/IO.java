@@ -22,9 +22,9 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 
-import org.apache.ugli.ULogger;
 import org.apache.ugli.LoggerFactory;
-import org.mortbay.thread.ThreadPool;
+import org.apache.ugli.ULogger;
+import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.util.LogSupport;
 
 /* ======================================================================== */
@@ -32,7 +32,7 @@ import org.mortbay.util.LogSupport;
  * Provides stream handling utilities in
  * singleton Threadpool implementation accessed by static members.
  */
-public class IO extends ThreadPool
+public class IO extends BoundedThreadPool
 {
     private static ULogger log = LoggerFactory.getLogger(IO.class);
 
@@ -63,7 +63,7 @@ public class IO extends ThreadPool
     }
     
     /* ------------------------------------------------------------------- */
-    static class Job
+    static class Job implements Runnable
     {
         InputStream in;
         OutputStream out;
@@ -84,6 +84,34 @@ public class IO extends ThreadPool
             this.read=read;
             this.write=write;
         }
+        
+        /* ------------------------------------------------------------ */
+        /* 
+         * @see java.lang.Runnable#run()
+         */
+        public void run()
+        {
+            try {
+                if (in!=null)
+                    copy(in,out,-1);
+                else
+                    copy(read,write,-1);
+            }
+            catch(IOException e)
+            {
+                LogSupport.ignore(log,e);
+                try{
+                    if (out!=null)
+                        out.close();
+                    if (write!=null)
+                        write.close();
+                }
+                catch(IOException e2)
+                {
+                    LogSupport.ignore(log,e2);
+                }
+            }
+        }
     }
     
     /* ------------------------------------------------------------------- */
@@ -93,7 +121,7 @@ public class IO extends ThreadPool
     public static void copyThread(InputStream in, OutputStream out)
     {
         try{
-            instance().run(new Job(in,out));
+            instance().dispatch(new Job(in,out));
         }
         catch(Exception e)
         {
@@ -118,7 +146,7 @@ public class IO extends ThreadPool
     {
         try
         {
-            instance().run(new Job(in,out));
+            instance().dispatch(new Job(in,out));
         }
         catch(Exception e)
         {
@@ -243,34 +271,6 @@ public class IO extends ThreadPool
         return file.delete();
     }
     
-    
-    /* ------------------------------------------------------------ */
-    /** Run copy for copyThread()
-     */
-    public void handle(Object o)
-    {
-        Job job=(Job)o;
-        try {
-            if (job.in!=null)
-                copy(job.in,job.out,-1);
-            else
-                copy(job.read,job.write,-1);
-        }
-        catch(IOException e)
-        {
-            LogSupport.ignore(log,e);
-            try{
-                if (job.out!=null)
-                    job.out.close();
-                if (job.write!=null)
-                    job.write.close();
-            }
-            catch(IOException e2)
-            {
-                LogSupport.ignore(log,e2);
-            }
-        }
-    }
 
     /* ------------------------------------------------------------ */
     /** 

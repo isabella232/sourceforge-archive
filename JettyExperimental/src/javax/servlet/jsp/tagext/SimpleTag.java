@@ -37,7 +37,7 @@ import javax.servlet.jsp.JspContext;
  * have the equivalent power of <code>BodyTag</code>, but with a much 
  * simpler lifecycle and interface.</p>
  *
- * <p>To support body content, the <code>setJspBody()</code> 
+ * <p>To support body _content, the <code>setJspBody()</code> 
  * method is provided.  The container invokes the <code>setJspBody()</code> 
  * method with a <code>JspFragment</code> object encapsulating the body of 
  * the tag.  The tag handler implementation can call 
@@ -93,10 +93,10 @@ public interface SimpleTag extends JspTag {
      *     while processing this tag.
      * @throws javax.servlet.jsp.SkipPageException If the page that
      *     (either directly or indirectly) invoked this tag is to
-     *     cease evaluation.  A Simple Tag Handler generated from a 
+     *     cease evaluation.  A Simple Tag EventHandler generated from a 
      *     tag file must throw this exception if an invoked Classic 
-     *     Tag Handler returned SKIP_PAGE or if an invoked Simple
-     *     Tag Handler threw SkipPageException or if an invoked Jsp Fragment
+     *     Tag EventHandler returned SKIP_PAGE or if an invoked Simple
+     *     Tag EventHandler threw SkipPageException or if an invoked Jsp Fragment
      *     threw a SkipPageException.
      * @throws java.io.IOException If there was an error writing to the
      *     output stream.

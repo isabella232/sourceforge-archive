@@ -23,17 +23,18 @@
 
 package javax.servlet.jsp.tagext;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.io.IOException;
-import javax.servlet.jsp.*;
+
+import javax.servlet.jsp.JspWriter;
 
 /**
  * An encapsulation of the evaluation of the body of an action so it is
  * available to a tag handler.  BodyContent is a subclass of JspWriter.
  *
  * <p>
- * Note that the content of BodyContent is the result of evaluation, so
+ * Note that the _content of BodyContent is the result of evaluation, so
  * it will not contain actions and the like, but the result of their
  * invocation.
  * 

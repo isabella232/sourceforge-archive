@@ -22,42 +22,37 @@ package org.mortbay.io;
  *
  */
 public class SimpleBuffers implements Buffers
-{
-    Buffer _big;
-    Buffer _small;
-    boolean _bigOut;
-    boolean _smallOut;
+{   
+    Buffer[] _buffers;
     
     /* ------------------------------------------------------------ */
     /**
      * 
      */
-    public SimpleBuffers(Buffer small,Buffer big)
+    public SimpleBuffers(Buffer[] buffers)
     {
-        _big=big;
-        _small=small;
+        _buffers=buffers;
     }
 
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.io.Buffers#getBuffer(boolean)
      */
-    public Buffer getBuffer(boolean big)
+    public Buffer getBuffer(int size)
     {
-        if (big)
+        if (_buffers!=null)
         {
-            if (_bigOut)
-                Portable.throwIllegalState("Big buffer in use");
-            _bigOut=true;
-            return _big;
+            for (int i=0;i<_buffers.length;i++)
+            {
+                if (_buffers[i]!=null && _buffers[i].capacity()==size)
+                {
+                    Buffer b=_buffers[i];
+                    _buffers[i]=null;
+                    return b;
+                }
+            }
         }
-        else
-        {
-            if (_smallOut)
-                Portable.throwIllegalState("Small buffer in use");
-            _smallOut=true;
-            return _small;
-        }
+        return new ByteArrayBuffer(size);
     }
 
     /* ------------------------------------------------------------ */
@@ -66,16 +61,16 @@ public class SimpleBuffers implements Buffers
      */
     public void returnBuffer(Buffer buffer)
     {
-        if (buffer==_big)
-            _bigOut=false;
-        if (buffer==_small)
-            _smallOut=false;
-        buffer.clear();
+
+        if (_buffers!=null)
+        {
+            for (int i=0;i<_buffers.length;i++)
+            {
+                if (_buffers[i]==null)
+                    _buffers[i]=buffer;
+            }
+        }
     }
     
-    public String toString()
-    {
-        return "[big="+_big+",small="+_small+"]";
-    }
 
 }

@@ -26,7 +26,7 @@ package javax.servlet;
 import java.io.IOException;
 
 /**
- * A filter is an object that performs filtering tasks on either the request to a resource (a servlet or static content), or on the response from a resource, or both.
+ * A filter is an object that performs filtering tasks on either the request to a resource (a servlet or static _content), or on the response from a resource, or both.
  * <br><br>
  * Filters perform filtering in the <code>doFilter</code> method. Every Filter has access to
  * a FilterConfig object from which it can obtain its initialization parameters, a
@@ -72,9 +72,9 @@ public interface Filter {
      * A typical implementation of this method would follow the following pattern:- <br>
      * 1. Examine the request<br>
      * 2. Optionally wrap the request object with a custom implementation to
-     * filter content or headers for input filtering <br>
+     * filter _content or headers for input filtering <br>
      * 3. Optionally wrap the response object with a custom implementation to
-     * filter content or headers for output filtering <br>
+     * filter _content or headers for output filtering <br>
      * 4. a) <strong>Either</strong> invoke the next entity in the chain using the FilterChain object (<code>chain.doFilter()</code>), <br>
      * 4. b) <strong>or</strong> not pass on the request/response pair to the next entity in the filter chain to block the request processing<br>
      * 5. Directly set headers on the response after invocation of the next entity in ther filter chain.

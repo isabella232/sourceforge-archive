@@ -35,7 +35,7 @@ import java.util.Set;
  * requests, or write to a log file.
  *
  * <p>There is one context per "web application" per Java Virtual Machine.  (A
- * "web application" is a collection of servlets and content installed under a
+ * "web application" is a collection of servlets and _content installed under a
  * specific subset of the server's URL namespace such as <code>/catalog</code>
  * and possibly installed via a <code>.war</code> file.)
  *
@@ -162,7 +162,7 @@ public interface ServletContext {
      * <p>Some containers may allow writing to the URL returned by
      * this method using the methods of the URL class.
      *
-     * <p>The resource content is returned directly, so be aware that
+     * <p>The resource _content is returned directly, so be aware that
      * requesting a <code>.jsp</code> page returns the JSP source code.
      * Use a <code>RequestDispatcher</code> instead to include results of
      * an execution.
@@ -192,7 +192,7 @@ public interface ServletContext {
      * This method returns <code>null</code> if no resource exists at
      * the specified path.
      *
-     * <p>Meta-information such as content length and content type
+     * <p>Meta-information such as _content length and _content type
      * that is available via <code>getResource</code>
      * method is lost when using this method.
      *
@@ -353,7 +353,7 @@ public interface ServletContext {
      * which the servlet container is running, including the
      * proper path separators. This method returns <code>null</code>
      * if the servlet container cannot translate the virtual path
-     * to a real path for any reason (such as when the content is
+     * to a real path for any reason (such as when the _content is
      * being made available from a <code>.war</code> archive).
      *
      * @param path a <code>String</code> specifying a virtual path

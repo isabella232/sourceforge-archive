@@ -32,6 +32,7 @@ import java.text.MessageFormat;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.ResourceBundle;
+
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -115,9 +116,9 @@ public abstract class HttpServlet extends GenericServlet
      * <p>When overriding this method, read the request data,
      * write the response headers, get the response's writer or
      * output stream object, and finally, write the response data.
-     * It's best to include content type and encoding. When using
+     * It's best to include _content type and encoding. When using
      * a <code>PrintWriter</code> object to return the response,
-     * set the content type before accessing the
+     * set the _content type before accessing the
      * <code>PrintWriter</code> object.
      *
      * <p>The servlet container must write the headers before
@@ -128,7 +129,7 @@ public abstract class HttpServlet extends GenericServlet
      * {@link javax.servlet.ServletResponse#setContentLength} method),
      * to allow the servlet container to use a persistent connection
      * to return its response to the client, improving performance.
-     * The content length is automatically set if the entire response fits
+     * The _content length is automatically set if the entire response fits
      * inside the response buffer.
      *
      * <p>When using HTTP 1.1 chunked encoding (which means that the response
@@ -252,9 +253,9 @@ public abstract class HttpServlet extends GenericServlet
      * <p>When overriding this method, read the request data,
      * write the response headers, get the response's writer or output
      * stream object, and finally, write the response data. It's best
-     * to include content type and encoding. When using a
+     * to include _content type and encoding. When using a
      * <code>PrintWriter</code> object to return the response, set the
-     * content type before accessing the <code>PrintWriter</code> object.
+     * _content type before accessing the <code>PrintWriter</code> object.
      *
      * <p>The servlet container must write the headers before committing the
      * response, because in HTTP the headers must be sent before the
@@ -264,7 +265,7 @@ public abstract class HttpServlet extends GenericServlet
      * {@link javax.servlet.ServletResponse#setContentLength} method),
      * to allow the servlet container to use a persistent connection
      * to return its response to the client, improving performance.
-     * The content length is automatically set if the entire response fits
+     * The _content length is automatically set if the entire response fits
      * inside the response buffer.
      *
      * <p>When using HTTP 1.1 chunked encoding (which means that the response
@@ -313,11 +314,11 @@ public abstract class HttpServlet extends GenericServlet
      * sending a file by FTP.
      *
      * <p>When overriding this method, leave intact
-     * any content headers sent with the request (including
+     * any _content headers sent with the request (including
      * Content-Length, Content-Type, Content-Transfer-Encoding,
      * Content-Encoding, Content-Base, Content-Language, Content-Location,
      * Content-MD5, and Content-Range). If your method cannot
-     * handle a content header, it must issue an error message
+     * handle a _content header, it must issue an error message
      * (HTTP 501 - Not Implemented) and discard the request.
      * For more information on HTTP 1.1, see RFC 2616
      * <a href="http://www.ietf.org/rfc/rfc2616.txt"></a>.
@@ -692,7 +693,7 @@ public abstract class HttpServlet extends GenericServlet
 /**
  * A response that includes no body, for use in (dumb) "HEAD" support.
  * This just swallows that body, counting the bytes in order to set
- * the content length appropriately.  All other methods delegate directly
+ * the _content length appropriately.  All other methods delegate directly
  * to the HTTP Servlet Response object used to construct this one.
  */
 class NoBodyResponse implements HttpServletResponse {

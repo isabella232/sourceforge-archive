@@ -16,10 +16,8 @@
 package org.mortbay.io.bio;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
 
 import org.mortbay.io.Portable;
 

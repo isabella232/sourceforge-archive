@@ -23,7 +23,7 @@
 
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
+import javax.servlet.jsp.JspException;
 
 /**
  * The IterationTag interface extends Tag by defining one additional
@@ -60,7 +60,7 @@ import javax.servlet.jsp.*;
  *
  * <p><B>Empty and Non-Empty Action</B>
  * <p> If the TagLibraryDescriptor file indicates that the action must
- * always have an empty element body, by a &lt;body-content&gt; entry of 
+ * always have an empty element body, by a &lt;body-_content&gt; entry of 
  * "empty", then the doStartTag() method must return SKIP_BODY.
  *
  * <p>Note that which methods are invoked after the doStartTag() depends on

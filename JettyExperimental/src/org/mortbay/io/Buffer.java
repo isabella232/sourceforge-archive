@@ -20,11 +20,11 @@ package org.mortbay.io;
  * Byte Buffer interface.
  * 
  * This is a byte buffer that is designed to work like a FIFO for bytes. Puts and Gets operate on different
- * pointers into the buffer and the valid content of the buffer is always between the getIndex and the putIndex.
+ * pointers into the buffer and the valid _content of the buffer is always between the getIndex and the putIndex.
  * 
  * This buffer interface is designed to be similar, but not dependant on the java.nio buffers, which may
  * be used to back an implementation of this Buffer. The main difference is that NIO buffer after a put have 
- * their valid content before the position and a flip is required to access that data.
+ * their valid _content before the position and a flip is required to access that data.
  *
  * For this buffer it is always true that:
  *  markValue <= getIndex <= putIndex <= capacity
@@ -309,7 +309,7 @@ public interface Buffer extends Cloneable
     void setPutIndex(int newLimit);
     
     /**
-     * Skip content. The getIndex is updated by min(remaining(), n)
+     * Skip _content. The getIndex is updated by min(remaining(), n)
      * @param n The number of bytes to skip
      * @return the number of bytes skipped.
      */

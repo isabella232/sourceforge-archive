@@ -20,8 +20,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-import org.apache.ugli.ULogger;
 import org.apache.ugli.LoggerFactory;
+import org.apache.ugli.ULogger;
 
 /* ------------------------------------------------------------ */
 /** TYPE Utilities.

@@ -30,8 +30,8 @@ import java.util.Stack;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.ugli.ULogger;
 import org.apache.ugli.LoggerFactory;
+import org.apache.ugli.ULogger;
 import org.mortbay.util.LogSupport;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -149,10 +149,10 @@ public class XmlParser
 
     /* ------------------------------------------------------------ */
     /** Add a ContentHandler.
-     * Add an additional content handler that is triggered on a tag
+     * Add an additional _content handler that is triggered on a tag
      * name. SAX events are passed to the ContentHandler provided from
      * a matching start element to the corresponding end element.
-     * Only a single content handler can be registered against each tag.
+     * Only a single _content handler can be registered against each tag.
      * @param trigger Tag local or q name.
      * @param observer SAX ContentHandler
      */
@@ -387,7 +387,7 @@ public class XmlParser
     /* ------------------------------------------------------------ */
     /** XML Node.
      * Represents an XML element with optional attributes and
-     * ordered content.
+     * ordered _content.
      */
     public static class Node extends AbstractList
     {
@@ -472,7 +472,7 @@ public class XmlParser
         }
         
         /* ------------------------------------------------------------ */
-        /** Get the ith child node or content.
+        /** Get the ith child node or _content.
          * @return Node or String.
          */
  	public Object get(int i)
@@ -563,7 +563,7 @@ public class XmlParser
         
         /* ------------------------------------------------------------ */
         /** Convert to a string.
-         * @param tag If false, only content is shown.
+         * @param tag If false, only _content is shown.
          */
  	public synchronized String toString(boolean tag)
         {
@@ -577,7 +577,7 @@ public class XmlParser
         
         /* ------------------------------------------------------------ */
         /** Convert to a string.
-         * @param tag If false, only content is shown.
+         * @param tag If false, only _content is shown.
          */
  	public synchronized String toString(boolean tag,boolean trim)
         {

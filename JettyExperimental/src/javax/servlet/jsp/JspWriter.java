@@ -368,7 +368,7 @@ abstract public class JspWriter extends java.io.Writer {
     /**
      * Clears the current contents of the buffer. Unlike clear(), this
      * method will not throw an IOException if the buffer has already been
-     * flushed. It merely clears the current content of the buffer and
+     * flushed. It merely clears the current _content of the buffer and
      * returns.
      *
      * @throws IOException		If an I/O error occurs

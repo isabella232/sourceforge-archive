@@ -25,7 +25,9 @@ package javax.servlet.jsp.tagext;
 
 import java.io.IOException;
 import java.io.Writer;
-import javax.servlet.jsp.*;
+
+import javax.servlet.jsp.JspContext;
+import javax.servlet.jsp.JspException;
 
 /**
  * Encapsulates a portion of JSP code in an object that 
@@ -71,8 +73,8 @@ public abstract class JspFragment {
      * @throws javax.servlet.jsp.SkipPageException Thrown if the page
      *     that (either directly or indirectly) invoked the tag handler that
      *     invoked this fragment is to cease evaluation.  The container
-     *     must throw this exception if a Classic Tag Handler returned
-     *     Tag.SKIP_PAGE or if a Simple Tag Handler threw SkipPageException.
+     *     must throw this exception if a Classic Tag EventHandler returned
+     *     Tag.SKIP_PAGE or if a Simple Tag EventHandler threw SkipPageException.
      * @throws java.io.IOException If there was an error writing to the 
      *     stream.
      */

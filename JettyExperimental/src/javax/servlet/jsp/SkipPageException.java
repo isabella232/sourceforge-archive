@@ -29,7 +29,7 @@ package javax.servlet.jsp;
  * the page must not be evaluated.  The result is propagated back to
  * the pagein the case where one tag invokes another (as can be
  * the case with tag files).  The effect is similar to that of a 
- * Classic Tag Handler returning Tag.SKIP_PAGE from doEndTag().
+ * Classic Tag EventHandler returning Tag.SKIP_PAGE from doEndTag().
  * Jsp Fragments may also throw this exception.  This exception
  * should not be thrown manually in a JSP page or tag file - the behavior is
  * undefined.  The exception is intended to be thrown inside 

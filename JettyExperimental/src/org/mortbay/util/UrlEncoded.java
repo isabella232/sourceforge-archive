@@ -19,13 +19,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.ugli.ULogger;
 import org.apache.ugli.LoggerFactory;
+import org.apache.ugli.ULogger;
 
 /* ------------------------------------------------------------ */
 /** Handles coding of MIME  "x-www-form-urlencoded".
  * This class handles the encoding and decoding for either
- * the query string of a URL or the content of a POST HTTP request.
+ * the query string of a URL or the _content of a POST HTTP request.
  *
  * <p><h4>Notes</h4>
  * The hashtable either contains String single values, vectors
@@ -157,7 +157,7 @@ public class UrlEncoded extends MultiMap
 
     /* -------------------------------------------------------------- */
     /* Decoded parameters to Map.
-     * @param content the string containing the encoded parameters
+     * @param _content the string containing the encoded parameters
      * @param url The dictionary to add the parameters to
      */
     public static void decodeTo(String content,MultiMap map)
@@ -169,7 +169,7 @@ public class UrlEncoded extends MultiMap
 
     /* -------------------------------------------------------------- */
     /** Decoded parameters to Map.
-     * @param content the string containing the encoded parameters
+     * @param _content the string containing the encoded parameters
      */
     public static void decodeTo(String content, MultiMap map, String charset)
     {

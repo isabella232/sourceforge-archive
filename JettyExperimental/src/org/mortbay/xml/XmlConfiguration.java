@@ -16,6 +16,7 @@
 package org.mortbay.xml;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -27,10 +28,11 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.ugli.ULogger;
 import org.apache.ugli.LoggerFactory;
+import org.apache.ugli.ULogger;
 import org.mortbay.util.Loader;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.TypeUtil;
@@ -66,6 +68,7 @@ public class XmlConfiguration
     /* ------------------------------------------------------------ */
     private static XmlParser __parser;
     private XmlParser.Node _config;
+    private Map _idMap = new HashMap();
 
     /* ------------------------------------------------------------ */
     private synchronized static void initParser()
@@ -75,33 +78,32 @@ public class XmlConfiguration
             return;
         
         __parser = new XmlParser();
+        URL config13URL=XmlConfiguration.class.getClassLoader()
+            .getResource("org/mortbay/xml/configure_1_3.dtd");
+        __parser.redirectEntity("configure.dtd",config13URL);
+        __parser.redirectEntity("configure_1_3.dtd",config13URL);
+        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_3.dtd", config13URL);
+        __parser.redirectEntity("http://jetty.mortbay.org/configure.dtd", config13URL);
+        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.3//EN", config13URL);
+        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure//EN", config13URL);
+
         URL config12URL=XmlConfiguration.class.getClassLoader()
             .getResource("org/mortbay/xml/configure_1_2.dtd");
-        __parser.redirectEntity("configure.dtd",config12URL);
         __parser.redirectEntity("configure_1_2.dtd",config12URL);
-        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_2.dtd",
-                                config12URL);
-        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.2//EN",
-                                config12URL);
-        
+        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_2.dtd", config12URL);
+        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.2//EN", config12URL);
         
         URL config11URL=XmlConfiguration.class.getClassLoader()
             .getResource("org/mortbay/xml/configure_1_1.dtd");
-        
         __parser.redirectEntity("configure_1_1.dtd",config11URL);
-        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_1.dtd",
-                                config11URL);
-        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.1//EN",
-                                config11URL);
-        
+        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_1.dtd", config11URL);
+        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.1//EN", config11URL);
         
         URL config10URL=XmlConfiguration.class.getClassLoader()
             .getResource("org/mortbay/xml/configure_1_0.dtd");  
         __parser.redirectEntity("configure_1_0.dtd",config10URL);
-        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_0.dtd",
-                                config10URL);
-        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.0//EN",
-                                config10URL);
+        __parser.redirectEntity("http://jetty.mortbay.org/configure_1_0.dtd", config10URL);
+        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.0//EN", config10URL);
     }
     
     /* ------------------------------------------------------------ */
@@ -135,6 +137,24 @@ public class XmlConfiguration
         configuration="<?xml version=\"1.0\"  encoding=\"ISO-8859-1\"?>\n<!DOCTYPE Configure PUBLIC \"-//Mort Bay Consulting//DTD Configure 1.2//EN\" \"http://jetty.mortbay.org/configure_1_2.dtd\">"+
             configuration;
         InputSource source = new InputSource(new StringReader(configuration));
+        synchronized(__parser)
+        {
+            _config = __parser.parse(source);	
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param configuration An input stream containing a complete
+     * e.g. configuration file
+     * @exception SAXException 
+     * @exception IOException 
+     */
+    public XmlConfiguration(InputStream configuration)
+        throws SAXException, IOException
+    {
+        initParser();
+        InputSource source = new InputSource(configuration);
         synchronized(__parser)
         {
             _config = __parser.parse(source);	
@@ -231,6 +251,8 @@ public class XmlConfiguration
                 call(obj,node);
             else if("Get".equals(tag))
                 get(obj,node);
+            else if("New".equals(tag))
+                newObj(obj,node);
             else
                 throw new IllegalStateException("Unknown tag: "+tag);
         }
@@ -417,6 +439,7 @@ public class XmlConfiguration
             oClass = obj.getClass();        
         
         String name=node.getAttribute("name");
+        String id=node.getAttribute("id");
         if(log.isDebugEnabled())log.debug("get "+name);
         
         try
@@ -425,8 +448,8 @@ public class XmlConfiguration
             Method method = oClass.getMethod("get"+
                                              name.substring(0,1).toUpperCase()+
                                              name.substring(1),
-                                             null);
-            obj=method.invoke(obj,null);
+                                             (java.lang.Class[])null);
+            obj=method.invoke(obj,(java.lang.Object[])null);
             configure(obj,node,0);
         }
         catch (NoSuchMethodException nsme)
@@ -442,6 +465,8 @@ public class XmlConfiguration
                 throw nsme;
             }
         }
+        if (id!=null)
+	       _idMap.put(id,obj);
         return obj;
     }
     
@@ -467,6 +492,7 @@ public class XmlConfiguration
                InvocationTargetException,
                IllegalAccessException
     {
+        String id=node.getAttribute("id");
         Class oClass = nodeClass(node);
         if (oClass!=null)
             obj=null;
@@ -522,6 +548,8 @@ public class XmlConfiguration
             {LogSupport.ignore(log,e);}
             if (called)
             {
+		if (id!=null)
+		  _idMap.put(id,obj);
                 configure(n,node,argi);
                 return n;
             }
@@ -529,6 +557,7 @@ public class XmlConfiguration
 
         throw new IllegalStateException("No Method: "+node+" on "+oClass);
     }
+    
     
     /* ------------------------------------------------------------ */
     /* Create a new value object.
@@ -547,6 +576,7 @@ public class XmlConfiguration
                IllegalAccessException
     {
         Class oClass = nodeClass(node);
+        String id=node.getAttribute("id");
         int size=0;
         int argi=node.size();
         for (int i=0;i<node.size();i++)
@@ -594,6 +624,8 @@ public class XmlConfiguration
             {LogSupport.ignore(log,e);}
             if(called)
             {
+                if (id!=null)
+		    _idMap.put(id,n);
                 configure(n,node,argi);
                 return n;
             }
@@ -601,10 +633,9 @@ public class XmlConfiguration
 
         throw new IllegalStateException("No Constructor: "+node+" on "+obj);
     }
-    
-    
+
     /* ------------------------------------------------------------ */
-    /* Create a new value object.
+    /* Create a new array object.
      *
      * @param obj 
      * @param node 
@@ -622,6 +653,7 @@ public class XmlConfiguration
         // Get the type
         Class aClass = java.lang.Object.class;
         String type = node.getAttribute("type");
+        String id=node.getAttribute("id");
         if (type!=null)
         {
             aClass=TypeUtil.fromName(type);
@@ -639,6 +671,8 @@ public class XmlConfiguration
         }
 
         Object array = Array.newInstance(aClass,node.size());
+        if (id!=null)
+	  _idMap.put(id,obj);
 
         for (int i=0;i<node.size();i++)
         {
@@ -648,9 +682,12 @@ public class XmlConfiguration
             XmlParser.Node item = (XmlParser.Node)o;
             if (!item.getTag().equals("Item"))
                 throw new IllegalStateException("Not an Item");
+            id=item.getAttribute("id");
             Object v=value(obj,item);
             if (v!=null)
                 Array.set(array,i,v);
+	    if (id!=null)
+	        _idMap.put(id,v);
         }
         
         return array;
@@ -664,123 +701,127 @@ public class XmlConfiguration
      * strings before being converted to any specified type.
      * @param node 
      */
-    private Object value(Object obj,XmlParser.Node node)
-        throws NoSuchMethodException,
-               ClassNotFoundException,
-               InvocationTargetException,
-               IllegalAccessException
+    private Object value(Object obj, XmlParser.Node node) throws NoSuchMethodException,
+            ClassNotFoundException, InvocationTargetException, IllegalAccessException
     {
+        Object value = null;
+
         // Get the type
         String type = node.getAttribute("type");
-        
-        // handle trivial case
-        if (node.size()==0)
+
+        // Try a ref lookup
+        String ref = node.getAttribute("ref");
+        if (ref != null)
         {
-            if ("String".equals(type))
-                return "";
-            return null;
+            value = _idMap.get(ref);
         }
-
-        // Trim values
-        int first=0;
-        int last=node.size()-1;
-            
-        // Handle default trim type
-        if (type==null || !"String".equals(type))
-        {
-            // Skip leading white
-            Object item=null;
-            while(first<=last )
-            {
-                item=node.get(first);
-                if (!(item instanceof String))
-                    break;
-                item=((String)item).trim();
-                if (((String)item).length()>0)
-                    break;
-                first++;
-            }
-
-            // Skip trailing white
-            while(first<last)
-            {
-                item=node.get(last);
-                if (!(item instanceof String))
-                    break;
-                item=((String)item).trim();
-                if (((String)item).length()>0)
-                    break;
-                last--;
-            }
-
-            // All white, so return null
-            if (first>last)
-                return null;
-        }
-
-        Object value=null;
-        
-        if (first==last)
-            //  Single Item value
-            value=itemValue(obj,node.get(first));
         else
         {
-            // Get the multiple items as a single string
-            StringBuffer buf = new StringBuffer();
-            synchronized(buf)
+            // handle trivial case
+            if (node.size() == 0)
             {
-                for (int i=first;i<=last;i++)
+                if ("String".equals(type)) return "";
+                return null;
+            }
+
+            // Trim values
+            int first = 0;
+            int last = node.size() - 1;
+
+            // Handle default trim type
+            if (type == null || !"String".equals(type))
+            {
+                // Skip leading white
+                Object item = null;
+                while (first <= last)
                 {
-                    Object item = node.get(i);
-                    buf.append(itemValue(obj,item));
+                    item = node.get(first);
+                    if (!(item instanceof String)) break;
+                    item = ((String) item).trim();
+                    if (((String) item).length() > 0) break;
+                    first++;
                 }
-                value=buf.toString();
+
+                // Skip trailing white
+                while (first < last)
+                {
+                    item = node.get(last);
+                    if (!(item instanceof String)) break;
+                    item = ((String) item).trim();
+                    if (((String) item).length() > 0) break;
+                    last--;
+                }
+
+                // All white, so return null
+                if (first > last) return null;
+            }
+
+            if (first == last)
+                //  Single Item value
+                value = itemValue(obj, node.get(first));
+            else
+            {
+                // Get the multiple items as a single string
+                StringBuffer buf = new StringBuffer();
+                synchronized (buf)
+                {
+                    for (int i = first; i <= last; i++)
+                    {
+                        Object item = node.get(i);
+                        buf.append(itemValue(obj, item));
+                    }
+                    value = buf.toString();
+                }
             }
         }
 
         // Untyped or unknown
-        if (value==null )
+        if (value == null)
         {
-            if ("String".equals(type))
-                return "";
+            if ("String".equals(type)) return "";
             return null;
         }
 
-        
         // Try to type the object
-        if (type==null)
+        if (type == null)
         {
-            if (value !=null && value instanceof String)
-                return ((String)value).trim();
+            if (value != null && value instanceof String) return ((String) value).trim();
             return value;
         }
 
-        if ("String".equals(type) || "java.lang.String".equals(type))
-            return value.toString();
+        if ("String".equals(type) || "java.lang.String".equals(type)) return value.toString();
 
         Class pClass = TypeUtil.fromName(type);
-        if (pClass!=null)
-            return TypeUtil.valueOf(pClass,value.toString());
-        
+        if (pClass != null) return TypeUtil.valueOf(pClass, value.toString());
+
         if ("URL".equals(type) || "java.net.URL".equals(type))
         {
-            if (value instanceof URL)
-                return value;
-            try{return new URL(value.toString());}
-            catch(MalformedURLException e)
-            {throw new InvocationTargetException(e);}
-        }
-        
-        if ("InetAddress".equals(type)|| "java.net.InetAddress".equals(type))
-        {
-            if (value instanceof InetAddress)
-                return value;
-            try {return InetAddress.getByName(value.toString());}
-            catch(UnknownHostException e)
-            {throw new InvocationTargetException(e);}
+            if (value instanceof URL) return value;
+            try
+            {
+                return new URL(value.toString());
+            }
+            catch (MalformedURLException e)
+            {
+                throw new InvocationTargetException(e);
+            }
         }
 
-        throw new IllegalStateException("Unknown type "+type);
+        if ("InetAddress".equals(type) || "java.net.InetAddress".equals(type))
+        {
+            if (value instanceof InetAddress) return value;
+            try
+            {
+                return InetAddress.getByName(value.toString());
+            }
+            catch (UnknownHostException e)
+            {
+                throw new InvocationTargetException(e);
+            }
+        }
+
+
+        throw new IllegalStateException("Unknown type " + type);
     }
     
     /* ------------------------------------------------------------ */
@@ -822,5 +863,20 @@ public class XmlConfiguration
         return null;
     }    
     
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public static void main(String[] arg)
+    {
+        try
+        {
+            for (int i=0;i<arg.length;i++)
+                new XmlConfiguration(new URL(arg[i])).newInstance();
+        }
+        catch (Exception e)
+        {
+            log.warn(LogSupport.EXCEPTION,e);
+        }
+    }
 }
 

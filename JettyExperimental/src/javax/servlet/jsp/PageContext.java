@@ -31,9 +31,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-
 import javax.servlet.http.HttpSession;
-
 import javax.servlet.jsp.tagext.BodyContent;
 
 /**
@@ -67,7 +65,7 @@ import javax.servlet.jsp.tagext.BodyContent;
  * <li>a mechanism to expose page directive attributes to the scripting 
  *     environment
  * <li>mechanisms to forward or include the current request to other active 
- *     components in the application
+ *     _components in the application
  * <li>a mechanism to handle errorpage exception processing
  * </ul>
  *

@@ -24,7 +24,7 @@
 package javax.servlet.jsp;
 
 /**
- * Exception to be used by a Tag Handler to indicate some unrecoverable
+ * Exception to be used by a Tag EventHandler to indicate some unrecoverable
  * error.
  * This error is to be caught by the top level of the JSP page and will result
  * in an error page.

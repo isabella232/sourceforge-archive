@@ -27,9 +27,6 @@ package org.mortbay.io;
  */
 public interface Buffers
 {
-    public static final boolean BIG=true;
-    public static final boolean SMALL=false;
-    
-    public Buffer getBuffer(boolean big);
+    public Buffer getBuffer(int size);
     public void returnBuffer(Buffer buffer);
 }

@@ -25,6 +25,7 @@ package javax.servlet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
@@ -341,7 +342,7 @@ public interface ServletRequest {
 
     /**
      * Returns the preferred <code>Locale</code> that the client will
-     * accept content in, based on the Accept-Language header.
+     * accept _content in, based on the Accept-Language header.
      * If the client request doesn't provide an Accept-Language header,
      * this method returns the default locale for the server.
      *

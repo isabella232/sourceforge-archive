@@ -23,18 +23,18 @@
 
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
+import javax.servlet.jsp.JspException;
 
 /**
  * The BodyTag interface extends IterationTag by defining additional
- * methods that let a tag handler manipulate the content of evaluating its body.
+ * methods that let a tag handler manipulate the _content of evaluating its body.
  *
  * <p>
  * It is the responsibility of the tag handler to manipulate the body
- * content.  For example the tag handler may take the body content,
+ * _content.  For example the tag handler may take the body _content,
  * convert it into a String using the bodyContent.getString
  * method and then use it.  Or the tag handler may take the body
- * content and write it out into its enclosing JspWriter using
+ * _content and write it out into its enclosing JspWriter using
  * the bodyContent.writeOut method.
  *
  * <p> A tag handler that implements BodyTag is treated as one that
@@ -87,7 +87,7 @@ import javax.servlet.jsp.*;
  *
  * <p><B>Empty and Non-Empty Action</B>
  * <p> If the TagLibraryDescriptor file indicates that the action must
- * always have an empty element body, by an &lt;body-content&gt; entry 
+ * always have an empty element body, by an &lt;body-_content&gt; entry 
  * of "empty", then the doStartTag() method must return SKIP_BODY.
  * Otherwise, the doStartTag() method may return SKIP_BODY,
  * EVAL_BODY_INCLUDE, or EVAL_BODY_BUFFERED.
@@ -159,7 +159,7 @@ public interface BodyTag extends IterationTag {
      * (and cleared) from some previous invocation.
      *
      * <p>
-     * The BodyContent object is available and with the appropriate content
+     * The BodyContent object is available and with the appropriate _content
      * until after the invocation of the doEndTag method, at which case it
      * may be reused.
      *

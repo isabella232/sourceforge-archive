@@ -23,7 +23,8 @@
 
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
 
 
 /**
@@ -35,7 +36,7 @@ import javax.servlet.jsp.*;
  * only accepts a Tag instance, a classic tag handler (one
  * that implements Tag) cannot have a SimpleTag as its parent.  To remedy
  * this, a TagAdapter is created to wrap the SimpleTag parent, and the
- * adapter is passed to setParent() instead.  A classic Tag Handler can
+ * adapter is passed to setParent() instead.  A classic Tag EventHandler can
  * call getAdaptee() to retrieve the encapsulated SimpleTag instance.
  *
  * @since 2.0

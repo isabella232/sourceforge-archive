@@ -20,8 +20,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.ugli.ULogger;
+
 import org.apache.ugli.LoggerFactory;
+import org.apache.ugli.ULogger;
 
 /* ------------------------------------------------------------ */
 /** URI Holder.

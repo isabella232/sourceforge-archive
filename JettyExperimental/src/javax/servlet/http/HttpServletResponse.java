@@ -24,6 +24,7 @@
 package javax.servlet.http;
 
 import java.io.IOException;
+
 import javax.servlet.ServletResponse;
 
 /**
@@ -123,7 +124,7 @@ public interface HttpServletResponse extends ServletResponse {
      * Sends an error response to the client using the specified
      * status.  The server defaults to creating the
      * response to look like an HTML-formatted server error page
-     * containing the specified message, setting the content type
+     * containing the specified message, setting the _content type
      * to "text/html", leaving cookies and other headers unmodified.
      *
      * If an error-page declaration has been made for the web application
@@ -448,7 +449,7 @@ public interface HttpServletResponse extends ServletResponse {
     /**
      * Status code (406) indicating that the resource identified by the
      * request is only capable of generating response entities which have
-     * content characteristics not acceptable according to the accept
+     * _content characteristics not acceptable according to the accept
      * headers sent in the request.
      */
     public static final int SC_NOT_ACCEPTABLE = 406;

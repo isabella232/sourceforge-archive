@@ -18,7 +18,6 @@ import java.lang.reflect.Method;
 
 import org.apache.ugli.LoggerFactory;
 import org.apache.ugli.ULogger;
-import org.mortbay.http.HttpConnection;
 
 /*-----------------------------------------------------------------------*/
 /** Log Support class.
