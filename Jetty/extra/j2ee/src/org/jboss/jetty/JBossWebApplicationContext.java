@@ -45,7 +45,7 @@ import org.mortbay.xml.XmlParser;
 //------------------------------------------------------------------------------
 public class JBossWebApplicationContext extends J2EEWebApplicationContext
 {
-    protected static Logger _log=Logger.getLogger(JBossWebApplicationContext.class);
+    protected static Logger __log=Logger.getLogger(JBossWebApplicationContext.class);
     protected Jetty _jetty;
     protected WebDescriptorParser _descriptorParser;
     protected WebApplication _webApp;
@@ -87,7 +87,7 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
     /* ------------------------------------------------------------ */
     public void setContextPath(String contextPathSpec)
     {
-        _log=Logger.getLogger(getClass().getName()+"#"+contextPathSpec);
+        __log=Logger.getLogger(getClass().getName()+"#"+contextPathSpec);
         super.setContextPath(contextPathSpec);
     }
     // this is a hack - but we need the session timeout - in case we are
@@ -123,14 +123,14 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
             URL url=(URL)i.next();
             if(!url.getProtocol().equals("file")) // tmp warning
             {
-                _log.warn("JSP classpath: non-'file' protocol: "+url);
+                __log.warn("JSP classpath: non-'file' protocol: "+url);
                 continue;
             }
             try
             {
                 Resource res=Resource.newResource(url);
                 if(res.getFile()==null)
-                    _log.warn("bad classpath entry: "+url);
+                    __log.warn("bad classpath entry: "+url);
                 else
                 {
                     String tmp=res.getFile().getCanonicalPath();
@@ -140,11 +140,11 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
             }
             catch(IOException ioe)
             {
-                _log.warn("JSP Classpath is damaged, can't convert path for :"+url,ioe);
+                __log.warn("JSP Classpath is damaged, can't convert path for :"+url,ioe);
             }
         }
-        if(_log.isTraceEnabled())
-            _log.trace("JSP classpath: "+classpath);
+        if(__log.isTraceEnabled())
+            __log.trace("JSP classpath: "+classpath);
         return classpath;
     }
 
@@ -221,7 +221,7 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
         }
         catch(Exception e)
         {
-            _log.error("could not set up Distributable HttpSession Manager - using local one",e);
+            __log.error("could not set up Distributable HttpSession Manager - using local one",e);
         }
     }
 
@@ -230,9 +230,9 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
         _webApp.setClassLoader(loader);
         _webApp.setName(getDisplayName());
         _webApp.setAppData(this);
-        _log.debug("setting up ENC...");
+        __log.debug("setting up ENC...");
         _descriptorParser.parseWebAppDescriptors(_webApp.getClassLoader(),_webApp.getMetaData());
-        _log.debug("setting up ENC succeeded");
+        __log.debug("setting up ENC succeeded");
     }
 
     // this is really nasty because it builds dependencies between the
@@ -326,8 +326,8 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
                                                                                                // consumed
                                                                                                // it
                 String realmName=getJBossWebApplicationContext().getRealmName();
-                if(_log.isDebugEnabled())
-                    _log.debug("setting Realm: "+realmName);
+                if(__log.isDebugEnabled())
+                    __log.debug("setting Realm: "+realmName);
                 getJBossWebApplicationContext()._realm=new JBossUserRealm(realmName,getJBossWebApplicationContext()._subjAttrName); // we
                                                                                                                                 // init()
                                                                                                                                 // it
