@@ -86,6 +86,7 @@
   <target name="classes" depends="prepare" description="Compile classes">
 
     <mkdir dir="${tmp.src}" />
+
     <copy todir="${tmp.src}">
       <fileset dir="${jetty.src}">
         <include name="javax/**" />
@@ -104,6 +105,16 @@
     <copy todir="${tmp.src}">
       <fileset dir="${src}">
         <include name="**/*.java" />
+        <include name="**/*.properties" />
+        <include name="**/*.config" />
+        <include name="**/*.dtd" />
+        <include name="**/*.xml" />
+      </fileset>
+    </copy>
+
+    <mkdir dir="${classes}" />
+    <copy todir="${classes}">
+      <fileset dir="${tmp.src}">
         <include name="**/*.properties" />
         <include name="**/*.config" />
         <include name="**/*.dtd" />
