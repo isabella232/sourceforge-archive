@@ -5,7 +5,6 @@
 
 package org.mortbay.http;
 
-import java.beans.beancontext.BeanContextSupport;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
@@ -14,6 +13,8 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EventListener;
+import java.util.EventObject;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -55,8 +56,8 @@ import org.mortbay.util.URI;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HttpServer extends BeanContextSupport implements LifeCycle
-{    
+public class HttpServer implements LifeCycle
+{
     /* ------------------------------------------------------------ */
     private static ArrayList __servers = new ArrayList(3);
     private static List __roServers = Collections.unmodifiableList(__servers);
@@ -75,6 +76,8 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     
     private LogSink _requestLogSink;
     private RequestLogFormat _requestLogFormat;
+    private List _eventListeners;
+    private List _components;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -171,10 +174,9 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             if (!listener.isStarted())
                 try{listener.start();}catch(Exception e){mex.add(e);}
         }
-
-        Log.event("Started "+this);
-
+        
         mex.ifExceptionThrowMulti();
+        Log.event("Started "+this);
     }
     
     /* ------------------------------------------------------------ */
@@ -1089,5 +1091,139 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             Code.warning(e);
         }
     }
+
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public class ComponentEvent extends EventObject
+    {
+        private Object component;
+        private ComponentEvent(Object component)
+        {
+            super(HttpServer.this);
+            this.component=component;
+        }
+        public Object getComponent()
+        {
+            return component;
+        }
+    }
     
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public interface ComponentEventListener extends EventListener
+    {
+        public void addComponent(ComponentEvent event);
+        public void removeComponent(ComponentEvent event);
+    }
+    
+    /* ------------------------------------------------------------ */
+    private void add(Object o)
+    {
+        Code.debug("add component: ",o);
+        if (_components==null)
+            _components=new ArrayList();
+        _components.add(o);
+
+        if (_eventListeners!=null)
+        {
+            ComponentEvent event = new ComponentEvent(o);
+            for(int i=0;i<_eventListeners.size();i++)
+            {
+                EventListener listener =
+                    (EventListener)_eventListeners.get(i);
+                if (listener instanceof ComponentEventListener)
+                    ((ComponentEventListener)listener).addComponent(event);
+            }
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    private void remove(Object o)
+    {
+        Code.debug("remove component: ",o);
+        _components.remove(o);
+        if (_eventListeners!=null)
+        {
+            ComponentEvent event = new ComponentEvent(o);
+            for(int i=0;i<_eventListeners.size();i++)
+            {
+                EventListener listener =
+                    (EventListener)_eventListeners.get(i);
+                if (listener instanceof ComponentEventListener)
+                    ((ComponentEventListener)listener).removeComponent(event);
+            }
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    public void addEventListener(EventListener listener)
+    {
+        Code.debug("addEventListener: ",listener);
+        if (_eventListeners==null)
+            _eventListeners=new ArrayList();
+        _eventListeners.add(listener);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void removeEventListener(EventListener listener)
+    {
+        Code.debug("removeEventListener: ",listener);
+        _eventListeners.remove(listener);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Destroy a stopped server.
+     * Remove all components and send notifications to all event listeners.
+     */
+    public void destroy()
+    {
+        if (isStarted())
+            throw new IllegalStateException("Started");
+        if (_listeners!=null)
+            _listeners.clear();
+        _listeners=null;
+        if (_hostMap!=null)
+            _hostMap.clear();
+        _hostMap=null;
+
+
+        if (_components!=null && _eventListeners!=null)
+        {
+            for (int c=0;c<_components.size();c++)
+            {
+                Object o=_components.get(c);
+                
+                if (_eventListeners!=null)
+                {
+                    ComponentEvent event = new ComponentEvent(o);
+                    for(int i=0;i<_eventListeners.size();i++)
+                    {
+                        EventListener listener =
+                            (EventListener)_eventListeners.get(i);
+                        if (listener instanceof ComponentEventListener)
+                            ((ComponentEventListener)listener).removeComponent(event);
+                    }
+                }
+            }
+        }
+        if (_components!=null)
+            _components.clear();
+        _components=null;
+        
+        if (_eventListeners!=null)
+        {
+            ComponentEvent event = new ComponentEvent(this);
+            for(int i=0;i<_eventListeners.size();i++)
+            {
+                EventListener listener =
+                    (EventListener)_eventListeners.get(i);
+                if (listener instanceof ComponentEventListener)
+                    ((ComponentEventListener)listener).removeComponent(event);
+            }
+        }
+        if (_eventListeners!=null)
+            _eventListeners.clear();
+        _eventListeners=null;
+    }
 }

@@ -5,7 +5,6 @@
 
 package org.mortbay.util;
 
-import java.applet.Applet;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -83,40 +82,6 @@ public class Code
     public static Code instance()
     {
         return Singleton.__instance;
-    }
-    
-    /*-------------------------------------------------------------------*/
-    /** Initialize default behaviour from applet parameters.
-     *
-     * Look for applet parameters of the same name as the
-     * system properties used to config Code.
-     */
-    public static void initParamsFromApplet(java.applet.Applet appl)
-    {
-        boolean d = appl.getParameter("DEBUG") != null;
-        setDebug(d);
-        
-        String o = appl.getParameter("DEBUG_OPTIONS");
-        if (o!=null)
-        {
-            setSuppressStack(o.indexOf('S')>=0);
-            setSuppressWarnings(o.indexOf('W')>=0);
-        }
-        else
-        {
-            setSuppressStack(false);
-            setSuppressWarnings(false);
-        }
-
-        String dp = appl.getParameter("DEBUG_PATTERNS");
-        setDebugPatterns(dp);
-        
-        String dt = appl.getParameter("DEBUG_TRIGGERS");
-        setDebugTriggers(dt);
-
-        String v = appl.getParameter("DEBUG_VERBOSE");
-        if (v!=null)
-            setVerbose(Integer.parseInt(v));
     }
     
     /*-------------------------------------------------------------------*/

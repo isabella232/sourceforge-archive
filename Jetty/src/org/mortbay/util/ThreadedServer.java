@@ -377,33 +377,42 @@ abstract public class ThreadedServer extends ThreadPool
     synchronized public void start()
         throws Exception
     {
-        if (isStarted())
+        try
         {
-            Code.warning("Already started on "+_address);
-            return;
+            if (isStarted())
+            {
+                Code.warning("Already started on "+_address);
+                return;
+            }
+            
+            _listen=newServerSocket(_address,
+                                    getMaxThreads()>0?(getMaxThreads()+1):50);
+            if (_address==null)
+                _address=new InetAddrPort(_listen.getInetAddress(),_listen.getLocalPort());
+            else
+            {
+                if(_address.getInetAddress()==null)
+                    _address.setInetAddress(_listen.getInetAddress());
+                if(_address.getPort()==0)
+                    _address.setPort(_listen.getLocalPort());
+            }
+            
+            _soTimeOut=getMaxIdleTimeMs();
+            if (_soTimeOut>=0)
+                _listen.setSoTimeout(_soTimeOut);
+            
+            _acceptor=new Acceptor();
+            _acceptor.start();
+            
+            super.start();
         }
-
-        _listen=newServerSocket(_address,
-                                getMaxThreads()>0?(getMaxThreads()+1):50);
-        if (_address==null)
-            _address=new InetAddrPort(_listen.getInetAddress(),_listen.getLocalPort());
-        else
+        catch(Exception e)
         {
-            if(_address.getInetAddress()==null)
-                _address.setInetAddress(_listen.getInetAddress());
-            if(_address.getPort()==0)
-                _address.setPort(_listen.getLocalPort());
+            Code.warning("Failed to start: "+this);
+            throw e;
         }
-        
-        _soTimeOut=getMaxIdleTimeMs();
-        if (_soTimeOut>=0)
-            _listen.setSoTimeout(_soTimeOut);
-
-        _acceptor=new Acceptor();
-        _acceptor.start();
-        
-        super.start();
     }
+    
 
     /* --------------------------------------------------------------- */
     public void stop()

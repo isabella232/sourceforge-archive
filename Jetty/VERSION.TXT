@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + New event model to decouple from beans container.
  + Better handling of charset in form encoding.
  + Allow POSTs to static resources.
  + Fixed ChunableInputStream.resetStream bug.

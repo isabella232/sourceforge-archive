@@ -323,11 +323,14 @@ Other targets:
   <!-- ==================================================================== -->
   <target name="demo" >
     <java classname="org.mortbay.jetty.Server"
-          classpath="${env.CLASSPATH}:${classpath}"
           dir="${jetty.home}"
           fork="yes"
           failonerror="yes"
           >
+       <classpath>
+         <pathelement path="${env.CLASSPATH}" />
+         <path refid="classpath" />
+       </classpath>
        <jvmarg line="-Djetty.home=${jetty.home} -Djetty.log=${jetty.home}/logs" />
        <arg line="${etc}/admin.xml ${etc}/demo.xml" />
     </java>
@@ -336,11 +339,14 @@ Other targets:
   <!-- ==================================================================== -->
   <target name="run" >
     <java classname="org.mortbay.jetty.Server"
-          classpath="${env.CLASSPATH}:${classpath}"
           dir="${jetty.home}"
           fork="yes"
           failonerror="yes"
           >
+       <classpath>
+         <pathelement path="${env.CLASSPATH}" />
+         <path refid="classpath" />
+       </classpath>
        <jvmarg line="-Djetty.home=${jetty.home} -Djetty.log=${jetty.home}/logs" />
        <arg line="${etc}/admin.xml ${etc}/jetty.xml" />
     </java>
