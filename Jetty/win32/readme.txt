@@ -10,7 +10,7 @@ assuming that Jetty has been unpacked at C:\java\Jetty-3.0.0:
 Jetty can now be run on the console with
 
   cd %JETTY_HOME%
-  java com.mortbay.Jetty.Server etc\jetty.xml
+  java org.mortbay.jetty.Server etc\jetty.xml
 
 
 To run Jetty as a win32 service:

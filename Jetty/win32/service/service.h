@@ -39,7 +39,7 @@ extern "C" {
 // list of service dependencies - "dep1\0dep2\0\0"
 #define SZDEPENDENCIES       "\0\0"
 // Main java class
-#define SZMAINCLASS "com/mortbay/Jetty/Win32/Service"
+#define SZMAINCLASS "org/mortbay/jetty/win32/Service"
 // Service TYPE
 #define SERVICESTARTTYPE SERVICE_AUTO_START 
 // Path to Parameter Key

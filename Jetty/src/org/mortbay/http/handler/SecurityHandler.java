@@ -198,7 +198,7 @@ public class SecurityHandler extends NullHandler
             }
             else
             {
-                // look for ServletHandler
+                // look for FormAuthenticator
                 try
                 {
                     Iterator iter = getHandlerContext().getHandlers().iterator();

@@ -185,19 +185,20 @@ public class CGI extends HttpServlet
         "SERVER_PORT="              + req.getServerPort(),
         "SERVER_PROTOCOL="          + req.getProtocol(),
         "SERVER_SOFTWARE="          + getServletContext().getServerInfo(),
-        "HTTP_ACCEPT="              + req.getHeader("Accept"),
-        "HTTP_ACCEPT_CHARSET="      + req.getHeader("Accept-Charset"),
-        "HTTP_ACCEPT_ENCODING="     + req.getHeader("Accept-Encoding"),
-        "HTTP_ACCEPT_LANGUAGE="     + req.getHeader("Accept-Language"),
-        "HTTP_FORWARDED="           + req.getHeader("Forwarded"),
-        "HTTP_HOST="                + req.getHeader("Host"),
-        "HTTP_PROXY_AUTHORIZATION=" + req.getHeader("Proxy-authorization"),
-        "HTTP_USER_AGENT="          + req.getHeader("User-Agent"),
+        "HTTP_ACCEPT="              + req.getHeader(HttpFields.__Accept),
+        "HTTP_ACCEPT_CHARSET="      + req.getHeader(HttpFields.__AcceptCharset),
+        "HTTP_ACCEPT_ENCODING="     + req.getHeader(HttpFields.__AcceptEncoding),
+        "HTTP_ACCEPT_LANGUAGE="     + req.getHeader(HttpFields.__AcceptLanguage),
+        "HTTP_FORWARDED="           + req.getHeader(HttpFields.__Forwarded),
+        "HTTP_HOST="                + req.getHeader(HttpFields.__Host),
+        "HTTP_PROXY_AUTHORIZATION=" + req.getHeader(HttpFields.__ProxyAuthorization),
+        "HTTP_REFERRER="            + req.getHeader(HttpFields.__Referer),
+        "HTTP_USER_AGENT="          + req.getHeader(HttpFields.__UserAgent),
         
         // found these 2 extra headers in request from Jetty - should
         // they be included ?
-        "HTTP_PRAGMA="              + req.getHeader("Pragma"),
-        "HTTP_COOKIE="              + req.getHeader("Cookie"),
+        "HTTP_PRAGMA="              + req.getHeader(HttpFields.__Pragma),
+        "HTTP_COOKIE="              + req.getHeader(HttpFields.__Cookie),
 
         // these extra ones were from printenv on www.dev.nomura.co.uk
         "HTTPS="                    + (req.isSecure()?"ON":"OFF"),

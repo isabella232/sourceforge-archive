@@ -73,7 +73,7 @@ specified type.
 
 <!--
 Call Element.
-This element maps to an arbitrary call to amethod on the current object,
+This element maps to an arbitrary call to a method on the current object,
 The name attribute and Arg elements are used to select the method.
 
 A Call element can contain a sequence of Arg elements followed by

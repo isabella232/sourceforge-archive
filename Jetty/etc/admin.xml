@@ -1,7 +1,7 @@
 <?xml version="1.0"  encoding="ISO-8859-1"?>
 <!DOCTYPE Configure PUBLIC 
  "-//Mort Bay Consulting//DTD Configure 1.0//EN" 
- "http://jetty.mortbay.org/configure_1_0.dtd">
+ "http://jetty.mortbay.org/configure_1_1.dtd">
 
 <!--
 This is a Jetty HTTP admin server configuration file.  This configuration

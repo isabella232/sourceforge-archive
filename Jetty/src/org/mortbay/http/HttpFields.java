@@ -89,6 +89,7 @@ public class HttpFields
         __AcceptLanguage = "Accept-Language",
         __Authorization = "Authorization",
         __Expect = "Expect",
+        __Forwarded = "Forwarded",
         __From = "From",
         __Host = "Host",
         __IfMatch = "If-Match",
@@ -98,7 +99,7 @@ public class HttpFields
         __IfUnmodifiedSince = "If-Unmodified-Since",
         __KeepAlive = "keep-alive",
         __MaxForwards = "Max-Forwards",
-        __ProxyAuthentication = "Proxy-Authentication",
+        __ProxyAuthorization = "Proxy-Authorization",
         __Range = "Range",
         __RequestRange = "Request-Range",
         __Referer = "Referer",
@@ -231,7 +232,7 @@ public class HttpFields
         new FieldInfo(__Authorization,true,false);
         new FieldInfo(__From,true,false);
         new FieldInfo(__MaxForwards,true,false);
-        new FieldInfo(__ProxyAuthentication,true,false);
+        new FieldInfo(__ProxyAuthenticate,true,false);
         new FieldInfo(__Age,true,false);
         new FieldInfo(__ETag,true,false);
         new FieldInfo(__RetryAfter,true,false);
