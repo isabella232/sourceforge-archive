@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-4.0.6 - 24 October 2002
  + Clear interrupted status in ThreadPool
  + Fixed forward query string handling
  + fixed forward attribute handling for jsp-file servlets
