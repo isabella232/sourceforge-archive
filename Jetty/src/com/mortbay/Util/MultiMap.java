@@ -5,7 +5,7 @@
 
 package com.mortbay.Util;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.util.*;
 
 /* ------------------------------------------------------------ */
@@ -287,8 +287,8 @@ public class MultiMap extends HashMap
         Iterator i = m.entrySet().iterator();
         while(i.hasNext())
         {
-            com.sun.java.util.collections.Map.Entry entry =
-                (com.sun.java.util.collections.Map.Entry)i.next();
+            Map.Entry entry =
+                (Map.Entry)i.next();
             put(entry.getKey(),entry.getValue());
         }        
     }

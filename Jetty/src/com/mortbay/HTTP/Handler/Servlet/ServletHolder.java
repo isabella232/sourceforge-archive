@@ -6,7 +6,7 @@
 
 package com.mortbay.HTTP.Handler.Servlet;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.mortbay.HTTP.*;
 import com.mortbay.Util.*;
 import java.io.*;
@@ -30,59 +30,67 @@ import java.lang.reflect.*;
 public class ServletHolder implements ServletConfig
 {   
     /* ---------------------------------------------------------------- */
+    private ServletHandler _handler;
     private Context _context;
     private boolean _singleThreadModel;
     
     private Class _servletClass=null;
     private Stack _servlets=new Stack();
     private GenericServlet _servlet=null;
-    
+    private String _name=null;    
+    private String _className ;
+    private Map _properties ;
+
     /* ---------------------------------------------------------------- */
     /** Construct a Servlet property mostly from the servers config
      * file.
-     * @param name Servlet name
+     * @param handler ServletHandler 
      * @param className Servlet class name (fully qualified)
-     * @param classPath Servlet class path of directories and jars
-     * @param initParams Map of parameters
      */
-    public ServletHolder(Context context,
+    public ServletHolder(ServletHandler handler,
                          String className)
     {
-	Code.assert(context!=null,"No context");
-	
-	_context    = context;
-        _name = className;
+	_handler=handler;
+	_context=_handler.getContext();
+        setServletName(className);
 	_className=className;
     }
     
     /* ------------------------------------------------------------ */
-    private String _name ;    
     public String getServletName()
     {
 	return _name;
     }
+    
+    /* ------------------------------------------------------------ */
     public void setServletName(String name)
     {
-	_name = name;
+	synchronized(_handler)
+	{
+	    _handler.mapHolder(name,this,_name);
+	    _name=name;
+	}
     }
 
     /* ------------------------------------------------------------ */
-    String _className ;
     public String getClassName()
     {
 	return _className;
     }
+    
+    /* ------------------------------------------------------------ */
     public void setClassName(String className)
     {
 	_className = className;
     }
 
     /* ------------------------------------------------------------ */
-    Map _properties ;
     public Map getProperties()
     {
 	return _properties;
     }
+
+    /* ------------------------------------------------------------ */
     public void setProperties(Map properties)
     {
 	_properties = properties;

@@ -6,7 +6,7 @@
 package com.mortbay.HTTP;
 
 import com.mortbay.Util.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -128,6 +128,14 @@ public class TestRequest
             
 
             // Query params
+            request=getRequest("GET /R1 HTTP/1.0\n"+
+                               "Content-Type: text/plain\n"+
+                               "Content-Length: 5\n"+
+                               "\n"+
+                               "123\015\012");
+            Code.debug("Request: ",request);
+            t.checkEquals(request.getQuery(),null,"No query");
+	    
             request=getRequest("GET /R1?A=1,2,3&B=4&B=5&B=6 HTTP/1.0\n"+
                                "Content-Type: text/plain\n"+
                                "Content-Length: 5\n"+

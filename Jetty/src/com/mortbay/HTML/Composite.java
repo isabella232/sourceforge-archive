@@ -7,7 +7,7 @@ package com.mortbay.HTML;
 import com.mortbay.Util.*;
 import java.io.*;
 import java.util.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /* -------------------------------------------------------------------- */
 /** HTML Composite Element

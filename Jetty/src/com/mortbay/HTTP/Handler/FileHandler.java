@@ -5,7 +5,7 @@
 
 package com.mortbay.HTTP.Handler;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.mortbay.HTTP.*;
 import com.mortbay.Util.*;
 import java.util.*;
@@ -30,40 +30,11 @@ public class FileHandler extends NullHandler
     private CachedFile[] _cache=null;
     private int _nextIn=0;
     private Map _cacheMap=null;
-    
-    
-    /* ------------------------------------------------------------ */
-    boolean _dirAllowed =true;
-    public boolean isDirAllowed()
-    {
-	return _dirAllowed;
-    }
-    public void setDirAllowed(boolean dirAllowed)
-    {
-	_dirAllowed = dirAllowed;
-    }
-    
-    /* ------------------------------------------------------------ */
-    boolean _putAllowed =false;
-    public boolean isPutAllowed()
-    {
-	return _putAllowed;
-    }
-    public void setPutAllowed(boolean putAllowed)
-    {
-	_putAllowed = putAllowed;
-    }
-
-    /* ------------------------------------------------------------ */
-    boolean _delAllowed=false;
-    public boolean isDelAllowed()
-    {
-	return _delAllowed;
-    }
-    public void setDelAllowed(boolean delAllowed)
-    {
-	_delAllowed = delAllowed;
-    }
+    private boolean _dirAllowed =true;
+    private boolean _putAllowed =false;
+    private boolean _delAllowed=false;
+    private int _maxCachedFiles =64;
+    private int _maxCachedFileSize =40960;
 
     
     /* ------------------------------------------------------------ */
@@ -72,33 +43,80 @@ public class FileHandler extends NullHandler
 	_indexFiles.add("index.html");
 	_indexFiles.add("index.htm");
     }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isDirAllowed()
+    {
+	return _dirAllowed;
+    }
+    /* ------------------------------------------------------------ */
+    public void setDirAllowed(boolean dirAllowed)
+    {
+	_dirAllowed = dirAllowed;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isPutAllowed()
+    {
+	return _putAllowed;
+    }
+    /* ------------------------------------------------------------ */
+    public void setPutAllowed(boolean putAllowed)
+    {
+	_putAllowed = putAllowed;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isDelAllowed()
+    {
+	return _delAllowed;
+    }
+    /* ------------------------------------------------------------ */
+    public void setDelAllowed(boolean delAllowed)
+    {
+	_delAllowed = delAllowed;
+    }
+    
+    /* ------------------------------------------------------------ */
     public List getIndexFiles()
     {
 	return _indexFiles;
     }
-    public void setIndexFiles(List indexFiles)
-    {
-	_indexFiles = indexFiles;
-    }
-
     
     /* ------------------------------------------------------------ */
-    int _maxCachedFiles =64;
+    public void setIndexFiles(List indexFiles)
+    {
+	if (indexFiles==null)
+	    _indexFiles=new ArrayList(5);
+	else
+	    _indexFiles = indexFiles;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void addIndexFile(String indexFile)
+    {
+	_indexFiles.add(indexFile);
+    }
+    
+    /* ------------------------------------------------------------ */
     public int getMaxCachedFiles()
     {
 	return _maxCachedFiles;
     }
+
+    /* ------------------------------------------------------------ */
     public void setMaxCachedFiles(int maxCachedFiles_)
     {
 	_maxCachedFiles = maxCachedFiles_;
     }
     
     /* ------------------------------------------------------------ */
-    int _maxCachedFileSize =40960;
     public int getMaxCachedFileSize()
     {
 	return _maxCachedFileSize;
     }
+    
+    /* ------------------------------------------------------------ */
     public void setMaxCachedFileSize(int maxCachedFileSize)
     {
 	_maxCachedFileSize = maxCachedFileSize;

@@ -5,7 +5,7 @@
 
 package com.mortbay.HTTP.Handler.Servlet;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.mortbay.HTTP.*;
 import com.mortbay.HTTP.Handler.NullHandler;
 import com.mortbay.Util.*;
@@ -31,9 +31,12 @@ import javax.servlet.http.*;
 public class ServletHandler extends NullHandler 
 {
     /* ----------------------------------------------------------------- */
-    PathMap _servletMap=new PathMap();    
-    Context _context;
-    
+    private PathMap _servletMap=new PathMap();
+    private Map _nameMap=new HashMap();
+    private Context _context;
+    private boolean _autoReload;
+    private ServletLoader _loader;
+
     /* ----------------------------------------------------------------- */
     /** Construct basic auth handler.
      */
@@ -43,7 +46,10 @@ public class ServletHandler extends NullHandler
     }
     
     /* ------------------------------------------------------------ */
-    private boolean _autoReload ;
+    public Context getContext()
+    {
+	return _context;
+    }
     
     /* ------------------------------------------------------------ */
     public boolean isAutoReload()
@@ -55,9 +61,6 @@ public class ServletHandler extends NullHandler
     {
 	_autoReload = autoReload;
     }
-
-    /* ------------------------------------------------------------ */
-    ServletLoader _loader ;
     
     /* ------------------------------------------------------------ */
     public ServletLoader getServletLoader()
@@ -91,8 +94,8 @@ public class ServletHandler extends NullHandler
         Log.event("ServletHandler started");
 	super.start();
     }
+	
     
-		 
     /* ------------------------------------------------------------ */
     /** 
      * @param path 
@@ -115,7 +118,21 @@ public class ServletHandler extends NullHandler
 	}
     }
 
+    /* ------------------------------------------------------------ */
+    /** Get servlet by name.
+     * @param name 
+     * @return 
+     */
+    public ServletHolder getServletHolder(String name)
+    {
+	return (ServletHolder)_nameMap.get(name);
+    }
     
+    /* ------------------------------------------------------------ */
+    public void addHolder(String pathSpec, ServletHolder holder)
+    {
+	_servletMap.put(pathSpec,holder);
+    }
     
     /* ----------------------------------------------------------------- */
     /** 
@@ -181,6 +198,15 @@ public class ServletHandler extends NullHandler
     }
 
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param path 
+     * @param request 
+     * @param response 
+     * @exception IOException 
+     * @exception ServletException 
+     * @exception UnavailableException 
+     */
     void handle(String path,ServletRequest request, ServletResponse response)
 	throws IOException, ServletException, UnavailableException
     {
@@ -191,8 +217,8 @@ public class ServletHandler extends NullHandler
 	
 	for (int i=0;i<matches.size();i++)
 	{
-	    com.sun.java.util.collections.Map.Entry entry =
-		(com.sun.java.util.collections.Map.Entry)matches.get(i);
+	    Map.Entry entry =
+		(Map.Entry)matches.get(i);
 	    String servletPathSpec=(String)entry.getKey();
 	    ServletHolder holder = (ServletHolder)entry.getValue();
 	    
@@ -224,20 +250,13 @@ public class ServletHandler extends NullHandler
      * @param servletName 
      * @return 
      */
-    protected ServletHolder newServletHolder(String servletClass)
+    public ServletHolder newServletHolder(String servletClass)
 	throws javax.servlet.UnavailableException,
 	       ClassNotFoundException
     {
-	return new ServletHolder(_context,
-				 servletClass);
+	return new ServletHolder(this,servletClass);
     }
-    
-    /* ------------------------------------------------------------ */
-    protected void addHolder(String pathSpec, ServletHolder holder)
-    {
-	_servletMap.put(pathSpec,holder);
-    }
-    
+
     
     /* ------------------------------------------------------------ */
     /** Destroy Handler.
@@ -252,5 +271,16 @@ public class ServletHandler extends NullHandler
             holder.destroy();
         }
     }
-        
+
+
+    /* ------------------------------------------------------------ */
+    void mapHolder(String name,ServletHolder holder, String oldName)
+    {
+	synchronized(_nameMap)
+	{
+	    if (oldName!=null)
+		_nameMap.remove(oldName);
+	    _nameMap.put(name,holder);
+	}
+    }
 }

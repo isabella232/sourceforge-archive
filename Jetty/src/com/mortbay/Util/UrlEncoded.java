@@ -2,7 +2,7 @@
 // $Id$
 package com.mortbay.Util;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import java.util.*;
 import java.net.*;
@@ -72,8 +72,8 @@ public class UrlEncoded extends MultiMap
             String separator="";
             while(i.hasNext())
             {
-                com.sun.java.util.collections.Map.Entry entry =
-                    (com.sun.java.util.collections.Map.Entry)i.next();
+                Map.Entry entry =
+                    (Map.Entry)i.next();
                 
                 String key = entry.getKey().toString();
                 Object value = entry.getValue();

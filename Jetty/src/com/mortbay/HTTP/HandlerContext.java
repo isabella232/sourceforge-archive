@@ -6,7 +6,7 @@
 package com.mortbay.HTTP;
 
 import com.mortbay.Util.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -529,6 +529,18 @@ public class HandlerContext
 
         return type;
     }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param extension 
+     * @param type 
+     */
+    public void setMimeMapping(String extension,String type)
+    {
+	getMimeByExtension("default");
+	_mimeMap.put(extension,type);
+    }
+    
 
     
 }

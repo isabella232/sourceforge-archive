@@ -20,7 +20,7 @@ Request cookies
 Response set-cookies.
 Redirections
 Basic Authentication
-
+Web Applications from directory
 
 ServletHandler
 --------------

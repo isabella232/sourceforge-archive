@@ -6,7 +6,7 @@
 package com.mortbay.HTTP;
 
 import com.mortbay.Util.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -232,8 +232,8 @@ public class HttpServer implements LifeCycle
         Iterator iterator = _listeners.entrySet().iterator();
         while(iterator.hasNext())
         {
-            com.sun.java.util.collections.Map$Entry entry=
-                (com.sun.java.util.collections.Map$Entry) iterator.next();
+            Map.Entry entry=
+                (Map.Entry) iterator.next();
             if (entry.getValue()==listener)
                 iterator.remove();
         }
@@ -363,7 +363,27 @@ public class HttpServer implements LifeCycle
 	contextList.add(context);
     }
     
-
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param host 
+     * @param contextPathSpec 
+     * @param directory 
+     * @exception IOException 
+     */
+    public WebApplicationContext addWebApplication(String host,
+						   String contextPathSpec,
+						   String directory)
+	throws IOException
+    {
+	WebApplicationContext appContext =
+	    new WebApplicationContext(this,directory);
+	addContext(host,contextPathSpec,appContext);
+	Log.event("Web Application "+appContext+" added at "+
+		  (host!=null?(host+":"+contextPathSpec):contextPathSpec));
+	return appContext;
+    }
+    
+    
 
     /* ------------------------------------------------------------ */
     /** Service a request.
@@ -395,8 +415,8 @@ public class HttpServer implements LifeCycle
 		{
 		    for (int i=0;i<contextLists.size();i++)
 		    {
-			com.sun.java.util.collections.Map.Entry entry=
-			    (com.sun.java.util.collections.Map.Entry)
+			Map.Entry entry=
+			    (Map.Entry)
 			    contextLists.get(i);
 			String contextPathSpec=(String)entry.getKey();
 			List contextList = (List)entry.getValue();
@@ -508,15 +528,7 @@ public class HttpServer implements LifeCycle
         {
             String[] newArgs=
 	    {
-		"-context","/",
-		"-fileBase","./FileBase",
-		"-files",
-		"-handler","com.mortbay.HTTP.Handler.NotFoundHandler",
-		"-context","/servlet/*",
-		"-classPath","./servlets",
-		"-fileBase","./FileBase",
-		"-dynamic",
-		"-handler","com.mortbay.HTTP.Handler.NotFoundHandler",
+		"-appContext","/=./webapps/default",
 		"8080",
 	    };
             args=newArgs;
@@ -527,6 +539,10 @@ public class HttpServer implements LifeCycle
                 ("\nUsage - java com.mortbay.HTTP.HttpServer [ options .. ] [[<addr>:]<port> .. ]");
             System.err.println
                 ("\n  [<addr>:]<port>               - Listen on [ address & ] port");
+            System.err.println
+                ("  -appContext [<host>:]<pathSpec>=<directory>  ");
+            System.err.println
+                ("                                - Define web application directory");
             System.err.println
                 ("  -context [<host>:]<pathSpec>  - Define new context. Default=\"/\"");
             System.err.println
@@ -550,18 +566,9 @@ public class HttpServer implements LifeCycle
                 ("  -dump                         - Add a Dump handler to context");
             
             System.err.println
-                ("\nDefault options configure 2 contexts as:");
+                ("\nDefault options:");
             System.err.println
-                ("  -context /\n"+
-		 "  -fileBase .\n"+
-		 "  -servlet /dump,/dump/*=com.mortbay.Servlet.Dump\n"+
-		 "  -files\n"+
-		 "  -dump\n"+
-		 "  -handler com.mortbay.HTTP.Handler.NotFoundHandler\n"+
-		 "  -context /servlet/*\n"+
-		 "  -classPath ./servlets\n"+
-		 "  -dynamic"+
-		 "  -handler com.mortbay.HTTP.Handler.NotFoundHandler\n"+
+                ("  -appContext /=./webapps/default\n"+
 		 "  8080");
             System.exit(1);
         }
@@ -580,7 +587,30 @@ public class HttpServer implements LifeCycle
                 try
                 {
                     // Look for dump handler
-                    if ("-context".equals(args[i]))
+                    if ("-appContext".equals(args[i]))
+		    {
+			String appHost=null;
+			String spec=args[++i];
+			String dir=null;
+                        int c=spec.indexOf(":");
+                        int e=spec.indexOf("="); 
+
+			
+                        if (c>0 && c<e)
+                        {
+			    appHost=spec.substring(0,c);
+			    dir=spec.substring(e+1);
+                            spec=spec.substring(c+1,e);
+                        }
+			else if (e>0)
+			{
+			    dir=spec.substring(e+1);
+                            spec=spec.substring(0,e);
+			}
+			server.addWebApplication(appHost,spec,dir);
+		    }
+                    // Look for context
+                    else if ("-context".equals(args[i]))
 		    {
                         String spec=args[++i];
 			host=null;

@@ -6,7 +6,7 @@
 package com.mortbay.HTTP;
 
 import com.mortbay.Util.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import java.io.*;
 import java.net.*;
@@ -98,8 +98,8 @@ public class PathMap extends HashMap
 	    Iterator iter=entries.iterator();
 	    while(iter.hasNext())
 	    {
-		com.sun.java.util.collections.Map$Entry entry =
-		    (com.sun.java.util.collections.Map$Entry)iter.next();
+		Map.Entry entry =
+		    (Map.Entry)iter.next();
 		if (entry.getKey().equals(prefix))
 		{
 		    // Create a map to the entry
@@ -123,7 +123,7 @@ public class PathMap extends HashMap
      */
     public Object match(String path)
     {
-        com.sun.java.util.collections.Map.Entry entry = getMatch(path);
+        Map.Entry entry = getMatch(path);
         if (entry!=null)
             return entry.getValue();
         return null;
@@ -133,16 +133,16 @@ public class PathMap extends HashMap
     /* --------------------------------------------------------------- */
     /** Get the entry mapped by the best specification.
      * @param path the path.
-     * @return Map$Entry of the best matched  or null.
+     * @return Map.Entry of the best matched  or null.
      */
-    public synchronized com.sun.java.util.collections.Map.Entry getMatch(String path)
+    public synchronized Map.Entry getMatch(String path)
     {
         Object entry;
 
         // try exact match
         entry=_entryMap.get(path);
         if (entry!=null)
-            return (com.sun.java.util.collections.Map.Entry) entry;
+            return (Map.Entry) entry;
         
         // prefix search
         String prefix=path;
@@ -152,7 +152,7 @@ public class PathMap extends HashMap
             prefix=prefix.substring(0,i);
             entry=_prefixMap.get(prefix);
             if (entry!=null)
-                return (com.sun.java.util.collections.Map.Entry) entry;
+                return (Map.Entry) entry;
         }
         
         // Extension search
@@ -162,7 +162,7 @@ public class PathMap extends HashMap
             String extension="*"+path.substring(i);
             entry=_entryMap.get(extension);
             if (entry!=null)
-                return (com.sun.java.util.collections.Map.Entry) entry;
+                return (Map.Entry) entry;
         }
 
         // try exact match upto ';'
@@ -172,7 +172,7 @@ public class PathMap extends HashMap
             prefix=prefix.substring(0,i);
             entry=_entryMap.get(prefix);
             if (entry!=null)
-                return (com.sun.java.util.collections.Map.Entry) entry;
+                return (Map.Entry) entry;
         }
 	
         // try exact match upto '#'
@@ -182,11 +182,11 @@ public class PathMap extends HashMap
             prefix=prefix.substring(0,i);
             entry=_entryMap.get(prefix);
             if (entry!=null)
-                return (com.sun.java.util.collections.Map.Entry) entry;
+                return (Map.Entry) entry;
         }
 	
         // Default
-        return (com.sun.java.util.collections.Map$Entry) _entryMap.get("/");
+        return (Map.Entry) _entryMap.get("/");
     }
     
     /* --------------------------------------------------------------- */

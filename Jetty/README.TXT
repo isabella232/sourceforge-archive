@@ -1,4 +1,7 @@
 
+THIS IS OUT OF DATE SINCE WEB APPS WERE ADDED AND 1.1 SUPPORT DROPPED
+see XXX comments.  Fixed soon....
+
 Jetty 3
 =======  
 Jetty is an Open Source HTTP Servlet Server written in 100% Java. 
@@ -24,9 +27,12 @@ See the VERSION.TXT and FEATURES.TXT files for more detail.
 
 Environment
 ===========
+XXX - NOW ONLY 1.2
 Development has been done in JDK1.1 with the 1.2 Collection classes.
 The compiled classes excluding test harnesses are put into lib/jetty3.jar,
 so the following CLASSPATH is required (or the non unix equivalent):
+
+XXX - NOW need jaxp libraries
 
   CLASSPATH=$JETTY3_HOME/lib/com.mortbay.jetty.jar:$JETTY3_HOME/lib/collections.jar:$JETTY3_HOME/lib/javax.servlet.jar
 
@@ -34,6 +40,7 @@ To compile the source with JDK1.1 the following class path should be used.
 
   CLASSPATH=$JETTY3_HOME/src:$JETTY3_HOME/lib/collections.jar:$JETTY3_HOME/lib/javax.servlet.jar
 
+XXX - not needed now
 To compile with JDK1.2, the com.sun.java.util.collections package
 must be removed by running the bin/useJava2Collections script (the
 distribution includes the results of this in src1.2 directory).

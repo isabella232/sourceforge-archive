@@ -5,7 +5,7 @@
 
 package com.mortbay.Util;
     
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.util.zip.*;
 import java.io.*;
 

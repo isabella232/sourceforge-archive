@@ -5,7 +5,7 @@
 
 package com.mortbay.HTTP.Handler.Servlet;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.mortbay.HTTP.*;
 import com.mortbay.Util.*;
 import java.io.*;

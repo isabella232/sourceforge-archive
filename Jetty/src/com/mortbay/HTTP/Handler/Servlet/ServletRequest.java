@@ -6,7 +6,7 @@
 
 package com.mortbay.HTTP.Handler.Servlet;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.mortbay.HTTP.*;
 import com.mortbay.Util.*;
 import java.io.*;
@@ -555,7 +555,8 @@ class ServletRequest
     /* -------------------------------------------------------------- */
     public int getServerPort()
     {
-        return _httpRequest.getPort();
+	int port = _httpRequest.getPort();
+        return port==0?80:port;
     }
     
     /* -------------------------------------------------------------- */

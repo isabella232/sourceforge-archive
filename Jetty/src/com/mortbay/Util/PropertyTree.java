@@ -5,7 +5,7 @@
 
 package com.mortbay.Util;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.util.Properties;
 import java.io.InputStream;
 import java.io.IOException;

@@ -5,7 +5,7 @@
 
 package com.mortbay.HTTP;
 import com.mortbay.Util.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;

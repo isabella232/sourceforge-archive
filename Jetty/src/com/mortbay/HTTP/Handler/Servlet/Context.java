@@ -5,7 +5,7 @@
 
 package com.mortbay.HTTP.Handler.Servlet;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.mortbay.HTTP.Handler.NullHandler;
 import com.mortbay.HTTP.*;
 import com.mortbay.Util.*;
@@ -39,7 +39,7 @@ public class Context implements ServletContext, HttpSessionContext
 
     /* ------------------------------------------------------------ */
     /**
-     * Implemented by delegation to getAttributeNames.
+     * Implemented by delegation to getAttribute.
      */
     public String getInitParameter(String param)
     {

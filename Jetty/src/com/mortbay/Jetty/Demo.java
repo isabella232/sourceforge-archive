@@ -6,7 +6,7 @@
 package com.mortbay.Jetty;
 
 import com.mortbay.Util.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -36,6 +36,9 @@ public class Demo
 	    
 	    // Configure handlers
 	    HandlerContext context;
+	    server.addWebApplication(null,
+				     "/webapp/*,/webapp",
+				     "./webapps/default");
 	    context=server.getContext(null,"/");
 	    context.setFileBase(".");
 	    context.addServlet("/dump,/dump/*","com.mortbay.Servlet.Dump");

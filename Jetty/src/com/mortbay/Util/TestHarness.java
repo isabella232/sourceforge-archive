@@ -4,7 +4,7 @@
 // ========================================================================
 
 package com.mortbay.Util;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.mortbay.Util.DataClassTest.*;
 import java.io.*;
 import java.net.*;

@@ -4,7 +4,7 @@
 // ========================================================================
 package com.mortbay.Util;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import java.util.*;
 
@@ -169,7 +169,6 @@ public class URI
               case 5:
                   _dirty=false; 
             }
-            
         
             if (_query!=null && _query.length()>0)
                 _parameters.decode(_query);
@@ -278,7 +277,11 @@ public class URI
     public String getQuery()
     {
         if (_dirty)
-            _query = _parameters.encode(_encodeNulls);
+	{
+	    _query = _parameters.encode(_encodeNulls);
+	    if (_query!=null && _query.length()==0)
+		_query=null;
+	}
         return _query;
     }
     
