@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+ + Improve combinations of Security Constraints
+ + Implemented locale encoding mapping.
+
 Jetty-5.0.alpha0 - 16 Jul 2003
  + Compiled against 2.4 servlet spec.
  + Implemented remote/local addr/port methods
