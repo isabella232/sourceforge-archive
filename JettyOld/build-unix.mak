@@ -62,6 +62,7 @@ mkdir-lib-release         : mkdir-lib ; cd lib/release || mkdir lib/release
 mkdir-lib-debug           : mkdir-lib ; cd lib/debug   || mkdir lib/debug
 mkdir-filebase            : ; cd FileBase || mkdir FileBase
 mkdir-jsp                 : mkdir-filebase ; cd FileBase/JSP || mkdir FileBase/JSP
+mkdir-javadoc             : ; cd javadoc || mkdir javadoc
 
 X_CLASSPATH               = export CLASSPATH="src:contrib:."
 X_CLASSPATH_SERVLETS      = export CLASSPATH="lib/release/javax.servlet.jar:contrib:."
@@ -84,8 +85,8 @@ properties-copy-ide       : properties-zip ; cd classes && unzip -oq properties
 properties-copy-debug     : properties-zip ; cd classes/debug && unzip -oq ../properties
 properties-copy-release   : properties-zip ; cd classes/release && unzip -oq ../properties
 properties-zip            : properties-zip-gnujsp properties-zip-javax
-properties-zip-gnujsp     : ; cd contrib && find org/gjt/jsp -name *.properties | zip -@uq ../classes/properties
-properties-zip-javax      : ; cd src     && find javax -name *.properties | zip -@uq ../classes/properties
+properties-zip-gnujsp     : ; cd contrib && find org/gjt/jsp -name \*.properties | zip -@q ../classes/properties.zip
+properties-zip-javax      : ; cd src     && find javax -name \*.properties | zip -@q ../classes/properties
 
 jars-release              : jar-gnujsp-release jar-javax-servlet-release jar-com-mortbay-release
 classes-release           : classes-compile-release properties-copy-release
@@ -106,10 +107,10 @@ jar-com-mortbay-debug     : classes-debug mkdir-lib-debug ; cd classes/debug && 
 site-build                : servlets-compile-demos filebase-copy etc-copy jsp-copy properties-copy-ide
 
 filebase-copy             : filebase-zip ; unzip -oq classes/filebase
-filebase-zip              : mkdir-classes ; cd src/com/mortbay/Jetty && find FileBase -type f | egrep -v "/CVS/" | zip -@uq ../../../../classes/filebase 
+filebase-zip              : mkdir-classes ; cd src/com/mortbay/Jetty && find FileBase -type f | egrep -v "/CVS/" | zip -@q ../../../../classes/filebase 
 
 etc-copy                  : etc-zip ; unzip -oq  classes/etc
-etc-zip                   : mkdir-classes ; cd src/com/mortbay/Jetty && find etc -type f | egrep -v "/CVS/" | zip -@uq ../../../../classes/etc
+etc-zip                   : mkdir-classes ; cd src/com/mortbay/Jetty && find etc -type f | egrep -v "/CVS/" | zip -@q ../../../../classes/etc
 
 jsp-copy                  : mkdir-jsp ; cp contrib/org/gjt/jsp/jsp/*.jsp FileBase/JSP/.
 
@@ -150,4 +151,7 @@ uk.org.gosnell.Servlets
 
 JAVADOC = $(X_CLASSPATH_JAVADOC) && javadoc
 
-docs : ; $(JAVADOC) -d doc $(PACKAGES)
+javadoc-zip  : mkdir-classes ; cd src/javax/servlet && find javadoc -type f | egrep -v "/CVS/" | zip -@q ../../../classes/javadoc 
+javadoc-copy : javadoc-zip ; unzip -oq classes/javadoc
+
+docs : mkdir-javadoc javadoc-copy ; $(JAVADOC) -d javadoc $(PACKAGES)
