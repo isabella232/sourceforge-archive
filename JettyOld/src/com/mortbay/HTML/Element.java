@@ -101,12 +101,15 @@ public abstract class Element
 	    return noAttributes;
 
 	StringBuffer buf = new StringBuffer(128);
-	if(attributes!=null && attributes.length()>0)
-	    buf.append(attributes);
-	
-	if (attributeMap!=null)
+	synchronized(buf)
 	{
-	    synchronized(buf)
+	    if(attributes!=null && attributes.length()>0)
+	    {
+		buf.append(' ');
+		buf.append(attributes);
+	    }
+	
+	    if (attributeMap!=null)
 	    {
 		Enumeration e = attributeMap.keys();
 		while (e.hasMoreElements())
@@ -128,10 +131,32 @@ public abstract class Element
      * The attributes are added to the Element attributes (separated with
      * a space). The attributes are available to the derived class in the
      * protected member String <I>attributes</I>
+     * @deprecated Use attribute(String).
      * @param attributes String of HTML attributes to add to the element.
      * @return This Element so calls can be chained.
      */
     public Element attributes(String attributes)
+    {
+	if (Code.debug() && attributes.indexOf("=")>=0)
+	    Code.warning("Set attribute with old method: "+attributes+
+			 " on " + getClass().getName());
+	
+	if (this.attributes==null)
+	    this.attributes=attributes;
+	else
+	    this.attributes += ' '+attributes;
+	return this;
+    }
+    
+    /* ----------------------------------------------------------------- */
+    /** Add element Attributes
+     * The attributes are added to the Element attributes (separated with
+     * a space). The attributes are available to the derived class in the
+     * protected member String <I>attributes</I>
+     * @param attributes String of HTML attributes to add to the element.
+     * @return This Element so calls can be chained.
+     */
+    public Element attribute(String attributes)
     {
 	if (Code.debug() && attributes.indexOf("=")>=0)
 	    Code.warning("Set attribute with old method: "+attributes+

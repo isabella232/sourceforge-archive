@@ -41,7 +41,7 @@ public class Font extends Block
     {
 	this();
 	size(size);
-	this.attributes(attributes);
+	this.attribute(attributes);
     }
     
     /* ----------------------------------------------------------------- */

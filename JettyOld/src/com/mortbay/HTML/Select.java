@@ -25,7 +25,7 @@ public class Select extends Block
 	attribute("NAME",name);
 	
 	if (multiple)
-	    attributes("MULTIPLE");
+	    attribute("MULTIPLE");
     }
 
     /* ----------------------------------------------------------------- */

@@ -52,7 +52,7 @@ public class Input extends Tag
 	attribute("NAME",name);
 	if (value!=null)
 	    attribute("VALUE",value);
-	attributes(image.attributes());
+	attribute(image.attributes());
     }
     
     /* ----------------------------------------------------------------- */
@@ -61,13 +61,13 @@ public class Input extends Tag
 	super("INPUT");
 	attribute("TYPE","IMAGE");
 	attribute("NAME",name);
-	attributes(image.attributes());
+	attribute(image.attributes());
     }
 
     /* ----------------------------------------------------------------- */
     public Input check()
     {
-	attributes("CHECKED");
+	attribute("CHECKED");
 	return this;
     }
 

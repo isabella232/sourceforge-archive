@@ -45,7 +45,7 @@ public class Table extends Block
     public Table(int border, String attributes)
     {
 	this(border);
-	attributes(attributes);
+	attribute(attributes);
     }
 
     /* ----------------------------------------------------------------- */
@@ -69,7 +69,7 @@ public class Table extends Block
     public Table newRow(String attributes)
     {
 	newRow();
-	row.attributes(attributes);
+	row.attribute(attributes);
 	return this;	
     }
 
@@ -110,7 +110,7 @@ public class Table extends Block
     public Table newCell(String attributes)
     {
 	newCell();
-	cell.attributes(attributes);
+	cell.attribute(attributes);
 	return this;
     }
     
@@ -136,7 +136,7 @@ public class Table extends Block
     public Table addCell(Object o, String attributes)
     {
 	addCell(o);
-	cell.attributes(attributes);
+	cell.attribute(attributes);
 	return this;
     }
 	
@@ -173,7 +173,7 @@ public class Table extends Block
     public Table addHeading(Object o,String attributes)
     {
 	addHeading(o);
-	cell.attributes(attributes);
+	cell.attribute(attributes);
 	return this;
     }
     
