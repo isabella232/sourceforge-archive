@@ -314,11 +314,11 @@ abstract public class ThreadedServer extends ThreadPool
                 socket.setTcpNoDelay(true);
             handleConnection(socket);
         }
-        catch(Exception e){log.warn("Connection problem",e);}
+        catch(Exception e){log.debug("Connection problem",e);}
         finally
         {
             try {socket.close();}
-            catch(Exception e){log.warn("Connection problem",e);}
+            catch(Exception e){log.debug("Connection problem",e);}
         }
     }
     

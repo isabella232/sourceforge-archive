@@ -530,9 +530,7 @@ public class ServletHandler extends AbstractHttpHandler
                 throw (HttpException)th;
             if (th instanceof EOFException)
                 throw (IOException)th;
-            else if (!log.isDebugEnabled() && th instanceof java.io.IOException)
-                log.warn("Exception for "+httpRequest.getURI()+": "+th);
-            else
+            else if (log.isDebugEnabled() || !( th instanceof java.io.IOException))
             {
                 LogSupport.warn(log,"Exception for "+httpRequest.getURI(),th);
                 if(log.isDebugEnabled())log.debug(httpRequest);
