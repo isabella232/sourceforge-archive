@@ -15,8 +15,6 @@ public class TestHarness
     public final static String __CRLF = "\015\012";
     
     /* ------------------------------------------------------------ */
-    /** 
-     */
     static void testDateCache()
     {
         Test t = new Test("com.mortbay.Util.DateCache");
@@ -1159,11 +1157,14 @@ public class TestHarness
             test.checkEquals(server._connections,2,"Steady State");
             test.checkEquals(server._jobs,2,"Steady State");
             test.checkEquals(server.getSize(),3,"Steady State");
-            
-            p1.println("Exit");
+
+            // If you change this to just a CR, you will have to
+            // extend the timings as LineInput may wait 500ms.
+            p1.print("Exit\015\012");
             p1.flush();
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
+            
             test.checkEquals(server._connections,2,"exit job");
             test.checkEquals(server._jobs,1,"exit job");
             test.checkEquals(server.getSize(),3,"exit job");
@@ -1179,10 +1180,11 @@ public class TestHarness
             test.checkEquals(server._jobs,2,"1 idle");
             test.checkEquals(server.getSize(),3,"1 idle");
 
-            p1.println("Exit");
+            p1.print("Exit\015\012");
             p1.flush();
             System.err.print(".");System.err.flush();
             Thread.sleep(100);
+            
             test.checkEquals(server._connections,3,"idle thread");
             test.checkEquals(server._jobs,1,"idle thread");
             test.checkEquals(server.getSize(),3,"idle thread");

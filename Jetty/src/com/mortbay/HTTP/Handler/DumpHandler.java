@@ -122,6 +122,21 @@ public class DumpHandler extends NullHandler
             }
         }
         
+        Collection attributes=request.getAttributeNames();
+        if (attributes!=null && attributes.size()>0)
+        {
+            writer.write("</PRE>\n<H3>Attributes:</H3>\n<PRE>");
+            Iterator a=attributes.iterator();
+            while(a.hasNext())
+            {
+                String attr=a.next().toString();
+                writer.write(attr);
+                writer.write("=");
+                writer.write(request.getAttribute(attr).toString());
+                writer.write("\n");
+            }
+        }
+        
         writer.write("</PRE>\n<H3>Content:</H3>\n<PRE>");
         byte[] content= new byte[4096];
         int len;

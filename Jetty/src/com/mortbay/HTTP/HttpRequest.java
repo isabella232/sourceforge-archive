@@ -52,6 +52,7 @@ public class HttpRequest extends HttpMessage
     private MultiMap _parameters;
     private boolean _handled;
     private Map _cookies;
+    private Map _attributes;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -736,7 +737,43 @@ public class HttpRequest extends HttpMessage
             _cookies.put(n,v);
         }
         return _cookies;
-    }    
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get a request attribute.
+     * @param name 
+     * @return 
+     */
+    public Object getAttribute(String name)
+    {
+        if (_attributes==null)
+            return null;
+        return _attributes.get(name);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set a request attribute.
+     * @param name 
+     * @param attribute 
+     * @return 
+     */
+    public Object setAttribute(String name, Object attribute)
+    {
+        if (_attributes==null)
+            _attributes=new HashMap(11);
+        return _attributes.put(name,attribute);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get Attribute names.
+     * @return 
+     */
+    public Collection getAttributeNames()
+    {
+        if (_attributes==null)
+            return Collections.EMPTY_LIST;
+        return _attributes.keySet();
+    }
     
     /* ------------------------------------------------------------ */
     /** Destroy the request.

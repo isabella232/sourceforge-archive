@@ -13,14 +13,21 @@ import java.text.*;
 import java.io.*;
 
 /* ------------------------------------------------------------ */
-/** 
+/** Basic Authentication Handler.
+ * The usernames and passwords are passed to the handler in a Map.
+ * Authenticated requests have the username set as the
+ * com.mortbay.HTTP.Handler.BasicAuthHandler.User request attribute.
  *
- * @see
  * @version 1.0 Fri Oct 15 1999
  * @author Greg Wilkins (gregw)
  */
 public class BasicAuthHandler extends NullHandler
 {
+    /* ------------------------------------------------------------ */
+    public final static String __UserAttribute =
+        "com.mortbay.HTTP.Handler.BasicAuthHandler.User";
+    
+    /* ------------------------------------------------------------ */
     private String _name;
     private Map _user2password;
 
@@ -70,7 +77,7 @@ public class BasicAuthHandler extends NullHandler
             String user = credentials.substring(0,i);
             String password = credentials.substring(i+1);
             
-            // XXX request.setRemoteUser("Basic",user);
+            request.setAttribute(__UserAttribute,user);
             
             String realPassword=(String)_user2password.get(user);
             if (realPassword!=null && realPassword.equals(password))

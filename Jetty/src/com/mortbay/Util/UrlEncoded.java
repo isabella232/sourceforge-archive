@@ -187,7 +187,7 @@ public class UrlEncoded extends MultiMap
                  do
                  {
                      // Write the part before the %
-                     out.write(encoded.substring(index,marker).getBytes("ISO8859_1"));
+                     out.write(encoded.substring(index,marker).getBytes("UTF8"));
                      
                      try
                      {
@@ -207,7 +207,7 @@ public class UrlEncoded extends MultiMap
 
                  // if there is some at the end then copy it in
                  if (index < encodedLength)
-                     out.write(encoded.substring(index,encodedLength).getBytes("ISO8859_1"));
+                     out.write(encoded.substring(index,encodedLength).getBytes("UTF8"));
                  
                  result = out.toString();
              }

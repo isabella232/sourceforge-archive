@@ -46,7 +46,7 @@ public class LineInput extends FilterInputStream
     private LineBuffer _lineBuffer;
     private String _encoding;
     private boolean _eof=false;
-
+    private int _lfWait;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -128,7 +128,28 @@ public class LineInput extends FilterInputStream
         
         return _byteLimit+_avail-_pos;
     }
+
+    /* ------------------------------------------------------------ */
+    /** Set the time to wait for a LF after a CR.
+     * Default is 500ms.
+     * @param lfWait delay in MS
+     * @return Old wait time.
+     */
+    public int setLFWait(int lfWaitMs)
+    {
+        int old=_lfWait;
+        _lfWait=lfWaitMs;
+        return old;
+    }
     
+    /* ------------------------------------------------------------ */
+    /** Get the time to wait for a LF after a CR.
+     * @return delay in MS
+     */
+    public int getLFWait()
+    {
+        return _lfWait;
+    }
     
     /* ------------------------------------------------------------ */
     /** Read a line ended by CR, LF or CRLF.
@@ -445,11 +466,28 @@ public class LineInput extends FilterInputStream
             // if we have gone past the end of the buffer
             if (_pos==_avail)
             {
+                // If EOF or no more space in the buffer,
+                // return a line.
                 if (_eof || (_mark==0 && _avail==_buf.length))
                 {
                     cr=true;
                     lf=true;
                     break;
+                }
+                
+                // If we have a CR and no more characters are available
+                // wait a bit and if it is still the case
+                // return a line.
+                if (cr && in.available()==0)
+                {
+                    try{Thread.sleep(_lfWait);}
+                    catch(InterruptedException e){Code.ignore(e);}
+                    if (in.available()==0)
+                    {
+                        cr=true;
+                        lf=true;
+                        break;
+                    }
                 }
 
                 _pos=_mark;
