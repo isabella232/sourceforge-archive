@@ -79,7 +79,10 @@ public class IndexServlet extends HttpServlet
 	    OutputStream out = response.getOutputStream();
 	    PrintWriter pout = new PrintWriter(out);
 
-	    String address = request.getServletPath()+request.getPathInfo();
+	    String address = request.getPathInfo()!=null
+		?(request.getServletPath()+request.getPathInfo())
+		:(request.getServletPath());
+
 	    Code.debug("Looking for " + address);
 	    Hashtable pageConfig = (Hashtable)index.getLongestMatch(address);
 	    

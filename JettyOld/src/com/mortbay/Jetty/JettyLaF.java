@@ -70,7 +70,8 @@ public class JettyLaF extends Page
 	{"Demo","/Jetty/Demo"},
 	{"Program","/Jetty/Program"},
 	{"Config","/Jetty/Config"},
-	{"Help",null}
+	{"Help",null},
+	{"Back",null}
     };    
     
 
@@ -204,7 +205,11 @@ public class JettyLaF extends Page
 	    header.add(grid);
 	    header.add(Break.rule);
 
-
+	    // Get referer
+	    String referer = request.getHeader(HttpHeader.Referer);
+	    if (referer!=null && referer.length()>0)
+		properties.put("Back",referer);
+	    
 	    // build footer & finish top right header
 	    footer.add(Break.rule);
 	    footer.nest(new Block(Block.Center));

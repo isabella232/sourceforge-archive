@@ -58,11 +58,13 @@ public class HttpRequest extends HttpHeader
     
     /* ------------------------------------------------------------ */
 
-    public String method=null;
-    public URI uri=null;
-    public String version=null;
+    private String method=null;
+    private URI uri=null;
+    private String version=null;
 
     /* -------------------------------------------------------------- */
+
+    private HttpServer httpServer = null;
     private Socket connection;
     private HttpInputStream in;
     private InetAddrPort address;
@@ -88,17 +90,19 @@ public class HttpRequest extends HttpHeader
     private String pathTranslated = null;
     private String serverName = null;
     private int serverPort = 0;
-    HttpResponse response=null;
+    private HttpResponse response=null;
     
     /* -------------------------------------------------------------- */
     /** Construct received request
      * @param connection The socket the request was received over.
      * @param address the IP address that was listened on for the reqest.
      */
-    public HttpRequest(Socket connection,
+    public HttpRequest(HttpServer httpServer,
+		       Socket connection,
 		       InetAddrPort address)
 	throws IOException
     {
+	this.httpServer=httpServer;
 	this.connection=connection;
 	this.in=new HttpInputStream(connection.getInputStream());
 	this.address=address;
@@ -162,6 +166,14 @@ public class HttpRequest extends HttpHeader
 	version=HttpHeader.HTTP_1_0;
     }
 
+    /* ------------------------------------------------------------ */
+    /** Set associated response 
+     */
+    public void setHttpResponse(HttpResponse response)
+    {
+	this.response=response;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Get associated response 
      * @return response
@@ -559,7 +571,7 @@ public class HttpRequest extends HttpHeader
      */  
     public String getRealPath(String path)
     {
-         return path.replace('/', File.separatorChar);
+	return httpServer.getRealPath(path);
     }
 
     /* -------------------------------------------------------------- */
@@ -796,6 +808,8 @@ public class HttpRequest extends HttpHeader
      */
     public  String getPathInfo()
     {
+	if (pathInfo.length()==0)
+	    return null;
 	return pathInfo;
     }
 
@@ -808,11 +822,14 @@ public class HttpRequest extends HttpHeader
      */
     public  String getPathTranslated()
     {
+	if (pathInfo.length()==0)
+	    return null;
 	if (pathTranslated==null)
-	    return uri.getPath();
+	    pathTranslated=getRealPath(pathInfo);
 	return pathTranslated;
     }
 
+    
     /* -------------------------------------------------------------- */
     /** Get the quesry string of the request
      * @return For the given example, this would return <PRE>

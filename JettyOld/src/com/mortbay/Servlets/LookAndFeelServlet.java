@@ -79,14 +79,24 @@ public class LookAndFeelServlet extends HttpServlet
 		    page.properties().put(key,request.getParameter(key));
 	    }
 
-	    Code.debug("Include file:" + fileBase +
-		       request.getServletPath() +
-		       request.getPathInfo());
 
 	    try{
-		page.add(new Include(fileBase,
-				     request.getServletPath()+
-				     request.getPathInfo()));
+		if (request.getPathInfo()==null)
+		{
+		    Code.debug("Include file:", fileBase,
+			       request.getServletPath());
+		    page.add(new Include(fileBase,
+					 request.getServletPath()));
+		}
+		else
+		{
+		    Code.debug("Include file:" , fileBase,
+			       request.getServletPath(),
+			       request.getPathInfo());
+		    page.add(new Include(fileBase,
+					 request.getServletPath()+
+					 request.getPathInfo()));
+		}
 	    }
 	    catch(FileNotFoundException ioe){
 		return;
@@ -106,3 +116,6 @@ public class LookAndFeelServlet extends HttpServlet
 	}
     }
 };
+
+
+

@@ -492,6 +492,7 @@ public class HttpServer implements ServletContext
      */
     public String getRealPath(String path)
     {
+	Code.debug("Tanslate: ",path);
 	String realPath = path;
 	// Select request handler statck by path
 	HttpHandler[] httpHandlers =
@@ -499,13 +500,16 @@ public class HttpServer implements ServletContext
 	if (httpHandlers != null)
 	{
 	    for (int i = 0; i < httpHandlers.length; i++)
-	    {
-		if (httpHandlers[i] != null) {
+	    {	
+		if (httpHandlers[i] != null)
+		{
 		    realPath = httpHandlers[i].translate(realPath);
-		    break;
+		    Code.debug("translate with ",httpHandlers[i],
+			       " to ",realPath);
 		}
 	    }
 	}
+	
 	return realPath.replace('/', File.separatorChar);
     }
     

@@ -107,7 +107,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	this.out=out;
 	this.httpOut=new HttpOutputStream(out,this);
 	this.request=request;
-	request.response=this;
+	request.setHttpResponse(this);
 	version = HttpHeader.HTTP_1_0;
 	status = Integer.toString(SC_OK);
 	reason = "OK";

@@ -1,10 +1,15 @@
-Release 2.1.4
+Release 2.1.4 - 26 March 1999
   + Fixed problem compiling PathMap under some JDKs.
   + Reduced HTML dependance in HTTP package to allow minimal configuration
   + Tightened license agreement so that binary distributions are required
     to include the license file.
   + HttpRequest attributes implemented.
   + Session max idle time implemented.
+  + pathInfo returns null for zero length pathInfo (as per spec).
+    Sorry if this breaks your servlets - it is a pain!
+  + fixed bug in getRealPath
+  + getPathTranslated now call getRealPath with pathInfo (as per spec).
+  + added Back link to JettyLaf that uses referer.
 
 Release 2.1.3 - 19 March 1999
   + Added support for suffixes to PathMap

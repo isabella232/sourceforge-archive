@@ -75,7 +75,7 @@ public class HttpListener extends ThreadedServer
 		try
 		{	
 		    Code.debug("Waiting for request...");
-		    HttpRequest request = new HttpRequest(connection,address);
+		    HttpRequest request = new HttpRequest(server,connection,address);
 
 		    if (Code.debug())
 			Code.debug("Received HTTP request:"+

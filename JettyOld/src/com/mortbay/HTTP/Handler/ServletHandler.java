@@ -27,7 +27,6 @@ public class ServletHandler extends NullHandler
     /* ----------------------------------------------------------------- */
     PathMap servletMap;
     Hashtable nameMap=null;
-    String fileBase=null;
     
     /* ----------------------------------------------------------------- */
     /** Construct with servlet PathMap
@@ -36,18 +35,6 @@ public class ServletHandler extends NullHandler
     public ServletHandler(PathMap servletMap)
     {
 	this.servletMap=servletMap;
-    }
-    
-    /* ----------------------------------------------------------------- */
-    /** Construct with servlet PathMap
-     * @param servletMap Map of servlet path to ServletHolder instances
-     * @param fileBase Used to calculate translatedPath from path info
-     */
-    public ServletHandler(PathMap servletMap,
-			  String fileBase)
-    {
-	this.servletMap=servletMap;
-	this.fileBase=fileBase;
     }
     
     /* ----------------------------------------------------------------- */
@@ -67,14 +54,6 @@ public class ServletHandler extends NullHandler
 	    Code.debug("Pass request to servlet " + holder);
 
 	    request.setServletPath(path);
-
-	    // handle translated path
-	    if (fileBase!=null)
-	    {
-		String filename = fileBase+request.getPathInfo();
-		File file= new File(filename);
-		request.setPathTranslated(file.getAbsolutePath());
-	    }
 	    
 	    // service request
 	    holder.service(request,response);

@@ -136,7 +136,7 @@ public class HttpHeader
     {
 	com.mortbay.HTTP.HttpInputStream$CharBuffer cbuf;
 	char[] lbuf=null;
-	while ((cbuf=in.readCharBufferLine())!=null)
+	while ((cbuf=in.readCharBufferLine())!=(com.mortbay.HTTP.HttpInputStream$CharBuffer)null)
 	{
 	    // check for empty line to end headers
 	    if (cbuf.size==0)
