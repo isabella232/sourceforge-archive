@@ -42,6 +42,9 @@ ifndef JAVAC
 endif
 JAVA := ${JDK_HOME}/bin/java
 JAVAH := ${JDK_HOME}/bin/javah
+ifndef ARCH
+    ARCH := $(shell uname -s)
+endif
 NATIVEOPTS := -I${JDK_HOME}/include \
  -I${JDK_HOME}/include/${ARCH} \
  -I${JDK_HOME}/include/$(shell echo ${ARCH} | tr A-Z a-z)

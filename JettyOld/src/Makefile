@@ -11,7 +11,7 @@ rall:
 #JAVACOPTIONS :=
 TESTS :=
 ROOTNAME := src
-
+EXCLUDE := BuildSSL.java
 SUBDIRS := javax com
 
 
