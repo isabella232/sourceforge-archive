@@ -35,3 +35,4 @@
 *.tgz -k 'b' -m 'COPY'
 *.war -k 'b' -m 'COPY'
 *.zip -k 'b' -m 'COPY'
+*.class -k 'b' -m 'COPY'
