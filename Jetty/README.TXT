@@ -13,6 +13,12 @@ It is designed to be light weight, high performance, embeddable,
 extensible and flexible, thus making it an ideal platform for serving
 dynamic HTTP requests from any Java application.
 
+Installation
+============
+Jetty is installed simply by untaring the tgz file.
+There are two distributions. The complete distribution has everything
+needed to run and is precompiled. The source distribution has no
+3rd party jars, no demo, no test harnesses and is not pre compiled.
 
 Starting Jetty
 ==============
