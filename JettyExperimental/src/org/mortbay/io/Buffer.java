@@ -1,4 +1,6 @@
 package org.mortbay.io;
+
+
 /**
  * Byte Buffer interface.
  * 
@@ -54,7 +56,7 @@ public interface Buffer
      * Clear the buffer. getIndex=0, putIndex=0.
      */
     void clear();
-    
+
     /**
      * Compact the buffer by discarding bytes before the postion (or mark if set).
      * Bytes from the getIndex (or mark) to the putIndex are moved to the beginning of 
@@ -67,24 +69,6 @@ public interface Buffer
      * @return a <code>Buffer</code> duplicate.
      */
     Buffer duplicate();
-
-    /**
-     * Fill the buffer from the current putIndex to it's capacity from whatever 
-     * byte source is backing the buffer. The putIndex is increased if bytes filled.
-     * @return an <code>int</code> value indicating the number of bytes 
-     * filled or -1 if EOF is reached.
-     */
-    int fill();
-    
-    /**
-     * Flush the buffer from the current getIndex to it's putIndex using whatever byte
-     * sink is backing the buffer. The getIndex is updated with the number of bytes flushed.
-     * 
-     * If the entire contents of the buffer are flushed, then an implicit empty() is done.
-     * 
-     * @return an <code>int</code> value
-     */
-    int flush();
 
     /**
      * Get the byte at the current getIndex and increment it.
@@ -271,6 +255,8 @@ public interface Buffer
      * @return a <code>String</code> value describing the state and contents of the buffer.
      */
     String toDetailString();
+    
+    
     public final static boolean READONLY= true;   
     public final static boolean READWRITE= false;
 }

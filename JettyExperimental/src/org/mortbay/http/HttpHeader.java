@@ -19,14 +19,11 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.Portable;
 import org.mortbay.util.DateCache;
-import org.mortbay.util.LogSupport;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 
@@ -44,8 +41,6 @@ import org.mortbay.util.StringUtil;
  */
 public class HttpHeader
 {
-    private static Log log = LogFactory.getLog(HttpHeader.class);
-        
     /* ------------------------------------------------------------ */
     public final static String __separators = ", \t";    
 
@@ -626,9 +621,7 @@ public class HttpHeader
                 return date.getTime();
             }
             catch(java.lang.Exception e)
-            {
-                LogSupport.ignore(log,e);
-            }
+            {}
         }
         if (val.endsWith(" GMT"))
         {
@@ -640,9 +633,7 @@ public class HttpHeader
                     return date.getTime();
                 }
                 catch(java.lang.Exception e)
-                {
-                    LogSupport.ignore(log,e);
-                }
+                {}
             }
         }
 

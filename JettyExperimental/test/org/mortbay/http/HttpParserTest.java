@@ -3,7 +3,6 @@ package org.mortbay.http;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 import junit.framework.TestCase;
 
@@ -21,7 +20,6 @@ import org.mortbay.io.stream.InputBuffer;
  */
 public class HttpParserTest extends TestCase
 {
-
     /**
      * Constructor for HttpParserTest.
      * @param arg0
@@ -58,8 +56,8 @@ public class HttpParserTest extends TestCase
         String http= "POST /foo HTTP/1.0\015\012" + "\015\012";
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
-        HttpParser parser= new Parser();
-        parser.parse(buffer);
+        HttpParser parser= new Parser(buffer);
+        parser.parse();
         assertEquals("POST", f0);
         assertEquals("/foo", f1);
         assertEquals("HTTP/1.0", f2);
@@ -73,8 +71,8 @@ public class HttpParserTest extends TestCase
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
         f2= null;
-        HttpParser parser= new Parser();
-        parser.parse(buffer);
+        HttpParser parser= new Parser(buffer);
+        parser.parse();
         assertEquals("GET", f0);
         assertEquals("/999", f1);
         assertEquals(null, f2);
@@ -88,8 +86,8 @@ public class HttpParserTest extends TestCase
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
         f2= null;
-        HttpParser parser= new Parser();
-        parser.parse(buffer);
+        HttpParser parser= new Parser(buffer);
+        parser.parse();
         assertEquals("POST", f0);
         assertEquals("/222", f1);
         assertEquals(null, f2);
@@ -110,8 +108,8 @@ public class HttpParserTest extends TestCase
                 + "\015\012";
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
-        HttpParser parser= new Parser();
-        parser.parse(buffer);
+        HttpParser parser= new Parser(buffer);
+        parser.parse();
         assertEquals("GET", f0);
         assertEquals("/", f1);
         assertEquals("HTTP/1.0", f2);
@@ -141,8 +139,8 @@ public class HttpParserTest extends TestCase
                 + "0\015\012";
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
-        HttpParser parser= new Parser();
-        parser.parse(buffer);
+        HttpParser parser= new Parser(buffer);
+        parser.parse();
         assertEquals("GET", f0);
         assertEquals("/chunk", f1);
         assertEquals("HTTP/1.0", f2);
@@ -177,8 +175,8 @@ public class HttpParserTest extends TestCase
 
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
-        HttpParser parser= new Parser();
-        parser.parse(buffer);
+        HttpParser parser= new Parser(buffer);
+        parser.parse();
         assertEquals("GET", f0);
         assertEquals("/mp", f1);
         assertEquals("HTTP/1.0", f2);
@@ -187,7 +185,7 @@ public class HttpParserTest extends TestCase
         assertEquals("value1", val[0]);
         assertEquals("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", content);
 
-        parser.parse(buffer);
+        parser.parse();
         assertEquals("POST", f0);
         assertEquals("/foo", f1);
         assertEquals("HTTP/1.0", f2);
@@ -196,7 +194,7 @@ public class HttpParserTest extends TestCase
         assertEquals("value2", val[0]);
         assertEquals(null, content);
 
-        parser.parse(buffer);
+        parser.parse();
         assertEquals("PUT", f0);
         assertEquals("/doodle", f1);
         assertEquals("HTTP/1.0", f2);
@@ -204,7 +202,6 @@ public class HttpParserTest extends TestCase
         assertEquals("Header3", hdr[0]);
         assertEquals("value3", val[0]);
         assertEquals("0123456789", content);
-
     }
 
     public void testInputStreamParse() throws Exception
@@ -230,7 +227,6 @@ public class HttpParserTest extends TestCase
                 + "0123456789\015\012";
 
         File file= File.createTempFile("test", ".txt");
-        System.out.println("test file = " + file);
         FileOutputStream out= new FileOutputStream(file);
         out.write(http.getBytes());
         out.flush();
@@ -253,36 +249,36 @@ public class HttpParserTest extends TestCase
 
         for (int t= 0; t < tests.length; t++)
         {
-            System.err.println("buffer size = " + tests[t]);
+            String tst="t"+tests[t];
             InputBuffer buffer= new InputBuffer(new FileInputStream(file), tests[t]);
 
-            HttpParser parser= new Parser();
-            parser.parse(buffer);
-            assertEquals("GET", f0);
-            assertEquals("/", f1);
-            assertEquals("HTTP/1.0", f2);
-            assertEquals(1, h);
-            assertEquals("Header1", hdr[0]);
-            assertEquals("value1", val[0]);
-            assertEquals("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", content);
+            HttpParser parser= new Parser(buffer);
+            parser.parse();
+            assertEquals(tst,"GET", f0);
+            assertEquals(tst,"/", f1);
+            assertEquals(tst,"HTTP/1.0", f2);
+            assertEquals(tst,1, h);
+            assertEquals(tst,"Header1", hdr[0]);
+            assertEquals(tst,"value1", val[0]);
+            assertEquals(tst,"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", content);
 
-            parser.parse(buffer);
-            assertEquals("POST", f0);
-            assertEquals("/foo", f1);
-            assertEquals("HTTP/1.0", f2);
-            assertEquals(1, h);
-            assertEquals("Header2", hdr[0]);
-            assertEquals("value2", val[0]);
-            assertEquals(null, content);
+            parser.parse();
+            assertEquals(tst,"POST", f0);
+            assertEquals(tst,"/foo", f1);
+            assertEquals(tst,"HTTP/1.0", f2);
+            assertEquals(tst,1, h);
+            assertEquals(tst,"Header2", hdr[0]);
+            assertEquals(tst,"value2", val[0]);
+            assertEquals(tst,null, content);
 
-            parser.parse(buffer);
-            assertEquals("PUT", f0);
-            assertEquals("/doodle", f1);
-            assertEquals("HTTP/1.0", f2);
-            assertEquals(1, h);
-            assertEquals("Header3", hdr[0]);
-            assertEquals("value3", val[0]);
-            assertEquals("0123456789", content);
+            parser.parse();
+            assertEquals(tst,"PUT", f0);
+            assertEquals(tst,"/doodle", f1);
+            assertEquals(tst,"HTTP/1.0", f2);
+            assertEquals(tst,1, h);
+            assertEquals(tst,"Header3", hdr[0]);
+            assertEquals(tst,"value3", val[0]);
+            assertEquals(tst,"0123456789", content);
         }
     }
 
@@ -296,12 +292,16 @@ public class HttpParserTest extends TestCase
     
     class Parser extends HttpParser
     {
+        Parser(Buffer source)
+        {
+            super(source);
+        }
+        
         public void foundContent(int index, Buffer ref)
         {
             if (index == 0)
                 content= "";
             content= content.substring(0, index) + ref;
-            System.out.println("Content[" + index + "]=" + ref.toDetailString());
         }
 
         public void foundField0(Buffer ref)
@@ -310,25 +310,21 @@ public class HttpParserTest extends TestCase
             hdr= new String[9];
             val= new String[9];
             f0= ref.toString();
-            System.out.println("Field0=" + ref);
         }
 
         public void foundField1(Buffer ref)
         {
             f1= ref.toString();
-            System.out.println("Field1=" + ref);
         }
 
         public void foundField2(Buffer ref)
         {
             f2= ref.toString();
-            System.out.println("Field2=" + ref);
         }
 
         public void foundHttpHeader(Buffer ref)
         {
             hdr[++h]= ref.toString();
-            System.out.println("Header=" + ref);
         }
 
         public void foundHttpValue(Buffer ref)
@@ -337,18 +333,15 @@ public class HttpParserTest extends TestCase
                 val[h]= ref.toString();
             else
                 val[h] += ref.toString();
-            System.out.println("Value='" + ref + "'");
         }
 
         public void headerComplete()
         {
             content= null;
-            System.out.println("Header Complete");
         }
 
         public void messageComplete(int contentLength)
         {
-            System.out.println("Message Complete: " + contentLength);
         }
     }
 }

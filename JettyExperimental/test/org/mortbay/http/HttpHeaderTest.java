@@ -9,10 +9,10 @@ package org.mortbay.http;
 
 import java.util.Enumeration;
 
+import junit.framework.TestCase;
+
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
-
-import junit.framework.TestCase;
 
 /* ------------------------------------------------------------------------------- */
 /**

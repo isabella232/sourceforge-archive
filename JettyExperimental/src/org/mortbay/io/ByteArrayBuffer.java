@@ -1,5 +1,7 @@
 package org.mortbay.io;
 
+import java.io.IOException;
+
 /* ------------------------------------------------------------------------------- */
 /** 
  * 
@@ -21,10 +23,11 @@ public class ByteArrayBuffer extends AbstractBuffer
 
     public ByteArrayBuffer(byte[] bytes, int position, int length, boolean readonly)
     {
-        super(readonly);
+        super(READWRITE);
         _bytes= bytes;
         setPutIndex(position + length);
         setGetIndex(position);
+        this._readOnly=readonly;
     }
 
     public ByteArrayBuffer(int size)
@@ -90,6 +93,10 @@ public class ByteArrayBuffer extends AbstractBuffer
         return _bytes.length;
     }
 
+    public void close()
+        throws IOException
+    {}
+    
     public Buffer duplicate()
     {
         byte[] bytes= new byte[capacity()];
@@ -110,11 +117,19 @@ public class ByteArrayBuffer extends AbstractBuffer
     }
     
     public int fill()
+        throws IOException
     {
         return -1;
     }
 
     public int flush()
+        throws IOException
+    {
+        return -1;
+    }
+
+    public int flush(Buffer header)
+        throws IOException
     {
         return -1;
     }
@@ -130,10 +145,7 @@ public class ByteArrayBuffer extends AbstractBuffer
         setGetIndex(getIndex()+l);
         return l;
     }
-
-    /* 
-     * @see org.mortbay.io.Buffer#isVolatile()
-     */
+    
     public boolean isVolatile()
     {
         return _volatile;

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.mortbay.io.ByteArrayBuffer;
+import org.mortbay.io.InBuffer;
 
 /**
  * @author gregw
@@ -17,7 +18,7 @@ import org.mortbay.io.ByteArrayBuffer;
  * To change the template for this generated type comment go to
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
-public class InputBuffer extends ByteArrayBuffer 
+public class InputBuffer extends ByteArrayBuffer implements InBuffer
 {
 	InputStream _in;
 	
@@ -55,4 +56,10 @@ public class InputBuffer extends ByteArrayBuffer
     
     }
 
+
+    public void close()
+        throws IOException
+    {
+        _in.close();
+    }
 }

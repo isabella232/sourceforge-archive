@@ -2,113 +2,26 @@ package org.mortbay.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
+import org.mortbay.io.InBuffer;
 import org.mortbay.io.Portable;
+import org.mortbay.io.stream.InputBuffer;
 
 /**
- *
+ * An input stream that can process a HTTP stream, extracting
+ * headers, dechunking content and handling persistent connections.
  */
 public class HttpInputStream extends InputStream
 {
-    private Buffer _buffer;
-    private Parser _parser= new Parser();
 
     public HttpInputStream(Buffer buffer)
     {
         _buffer= buffer;
-        _parser= new Parser();
-    }
-    
-    public HttpHeader readHeader()
-        throws IOException
-    {
-        if (_parser.inContentState())
-            Portable.throwIllegalState("in context");
-        while(_parser.inHeaderState())
-            _parser.parseNext(_buffer);
-        return _parser._header;
-    }
-
-    /*
-     * @see java.io.InputStream#read()
-     */
-    public int read() throws IOException
-    {
-        if (_parser.inContentState())
-        {
-            // Do we need to fill the buffer?
-            if (_parser._content==null || !_parser._content.hasContent())
-            {
-                _parser._content=null;
-                _parser.parseNext(_buffer);
-            }
-            
-            if (_parser._content!=null && _parser._content.length()>=1)
-                return _parser._content.get();
-        } 
-        return -1;
-    }
-
-    /* 
-     * @see java.io.InputStream#read(byte[], int, int)
-     */
-    public int read(byte[] b, int off, int len) throws IOException
-    {
-        if (_parser.inContentState())
-        {
-            // Do we need to fill the buffer?
-            if (_parser._content==null || !_parser._content.hasContent())
-            {
-                _parser._content=null;
-                _parser.parseNext(_buffer);
-            }
-            
-            if (_parser._content!=null)
-                return _parser._content.get(b, off, len);
-        }
-        return -1;
-    }
-
-    /* 
-     * @see java.io.InputStream#read(byte[])
-     */
-    public int read(byte[] b) throws IOException
-    {
-        if (_parser.inContentState())
-        {
-            // Do we need to fill the buffer?
-            if (_parser._content==null || !_parser._content.hasContent())
-            {
-                _parser._content=null;
-                _parser.parseNext(_buffer);
-            }
-            
-            if (_parser._content!=null)
-                return _parser._content.get(b, 0, b.length);
-        }
-        return -1;
-    }
-
-    /* 
-     * @see java.io.InputStream#skip(long)
-     */
-    public long skip(long n) throws IOException
-    {
-        if (_parser.inContentState())
-        {
-            // Do we need to fill the buffer?
-            if (_parser._content==null || !_parser._content.hasContent())
-            {
-                _parser._content=null;
-                _parser.parseNext(_buffer);
-            }
-            
-            if (_parser._content!=null)
-                return _parser._content.skip((int)n);
-        }
-        return -1;
+        _parser= new Parser(_buffer);
     }
 
     /* 
@@ -126,27 +39,161 @@ public class HttpInputStream extends InputStream
      */
     public void close() throws IOException
     {
-        // Close of a HTTP stream must consume all the content.
-        // TODO - may be able to do better here but not a really important case
-        while (_parser.inContentState())
-            _parser.parseNext(_buffer);
+        // Either close real stream or consume all the content.
+        if (_parser.getContentLength()==HttpParser.EOF_CONTENT &&
+            _buffer instanceof InBuffer)
+            ((InBuffer)_buffer).close();
+        else
+            while (_parser.inContentState())
+                _parser.parseNext();
+
         _parser._content=null;
+        _parser.setState(HttpParser.STATE_END);
     }
 
-
-    /**
-     * 
+    /*
+     * @see java.io.InputStream#read()
      */
+    public int read() throws IOException
+    {
+        if (_parser.inContentState())
+        {
+            // Do we need to fill the buffer?
+            if (_parser._content==null || !_parser._content.hasContent())
+            {
+                _parser._content=null;
+                _parser.parseNext();
+            }
+            
+            if (_parser._content!=null && _parser._content.length()>=1)
+                return _parser._content.get();
+        } 
+        return -1;
+    }
+
+    /* 
+     * @see java.io.InputStream#read(byte[])
+     */
+    public int read(byte[] b) throws IOException
+    {
+        if (_parser.inContentState())
+        {
+            // Do we need to fill the buffer?
+            if (_parser._content==null || !_parser._content.hasContent())
+            {
+                _parser._content=null;
+                _parser.parseNext();
+            }
+            
+            if (_parser._content!=null)
+                return _parser._content.get(b, 0, b.length);
+        }
+        return -1;
+    }
+
+    /* 
+     * @see java.io.InputStream#read(byte[], int, int)
+     */
+    public int read(byte[] b, int off, int len) throws IOException
+    {
+        if (_parser.inContentState())
+        {
+            // Do we need to fill the buffer?
+            if (_parser._content==null || !_parser._content.hasContent())
+            {
+                _parser._content=null;
+                _parser.parseNext();
+            }
+            
+            if (_parser._content!=null)
+                return _parser._content.get(b, off, len);
+        }
+        return -1;
+    }
+    
+    public HttpHeader readHeader()
+        throws IOException
+    {
+        if (_parser.inContentState())
+            Portable.throwIllegalState("in context");
+            
+        _parser._header.clear();
+        if (_parser.getState()==HttpParser.STATE_END)
+            _parser.parseNext();
+            
+        if (_parser.inHeaderState())
+        {
+            while(_parser.inHeaderState())
+                _parser.parseNext();
+            return _parser._header;
+        }
+        return null;
+    }
+
+    /* 
+     * @see java.io.InputStream#skip(long)
+     */
+    public long skip(long n) throws IOException
+    {
+        if (_parser.inContentState())
+        {
+            // Do we need to fill the buffer?
+            if (_parser._content==null || !_parser._content.hasContent())
+            {
+                _parser._content=null;
+                _parser.parseNext();
+            }
+            
+            if (_parser._content!=null)
+                return _parser._content.skip((int)n);
+        }
+        return -1;
+    }
+
+    public static void main(String[] args)
+        throws Exception
+    {   
+        ServerSocket ss = new ServerSocket(8080);
+        while(true)
+        {
+            Socket socket=ss.accept();
+            InputBuffer in = new InputBuffer(socket.getInputStream(),2048);
+            HttpInputStream input = new HttpInputStream(in);
+            
+            while (true) 
+            {
+                HttpHeader header = input.readHeader();
+                if (header==null)
+                    break;
+                System.err.println(header);
+                byte data[] = new byte[4096];
+                
+                int len;
+                while((len=input.read(data,0,4096))>0)
+                {
+                    System.err.println(len+" of content");
+                }
+                socket.getOutputStream().write("HTTP/1.1 200 OK\015\012Transfer-Encoding: chunked\015\012Content-Type: text/html\015\012\015\0120b\015\012<h1>Hi</h1>\015\0120\015\012\015\012".getBytes());        
+            } 
+        }
+    }   
+    
+    private Buffer _buffer;
+    private Parser _parser;
+
     private static class Parser extends HttpParser
     {
-        boolean _request;
-        HttpHeader _header;
-        Buffer _headerName;
-        Buffer _content;
+        private Parser(Buffer source)
+        {
+            super(source);
+            _header=new HttpHeader();
+        }
+        
+        public void foundContent(int index, Buffer content)
+        {
+            _content=content;
+        }
 
-        /* 
-         * @see org.mortbay.http.HttpParser.Handler#foundField0(org.mortbay.io.Buffer)
-         */
         public void foundField0(Buffer field)
         {
             _header.clear();
@@ -171,9 +218,6 @@ public class HttpInputStream extends InputStream
             _headerName=null;
         }
 
-        /* 
-         * @see org.mortbay.http.HttpParser.Handler#foundField1(org.mortbay.io.Buffer)
-         */
         public void foundField1(Buffer field)
         {
             if (_request)
@@ -182,9 +226,6 @@ public class HttpInputStream extends InputStream
                 _header.setStatus(BufferUtil.toInt(field));
         }
 
-        /* 
-         * @see org.mortbay.http.HttpParser.Handler#foundField2(org.mortbay.io.Buffer)
-         */
         public void foundField2(Buffer field)
         {
             if (_request)
@@ -193,45 +234,27 @@ public class HttpInputStream extends InputStream
                 _header.setReason(field);
         }
 
-        /* 
-         * @see org.mortbay.http.HttpParser.Handler#foundHttpHeader(org.mortbay.io.Buffer)
-         */
         public void foundHttpHeader(Buffer header)
         {
             _headerName=header;
         }
 
-        /* 
-         * @see org.mortbay.http.HttpParser.Handler#foundHttpValue(org.mortbay.io.Buffer)
-         */
         public void foundHttpValue(Buffer value)
         {
             _header.add(_headerName,value);
         }
 
-        /* 
-         * @see org.mortbay.http.HttpParser.Handler#headerComplete()
-         */
         public void headerComplete()
         {
-            // TODO Auto-generated method stub
         }
 
-        /* 
-         * @see org.mortbay.http.HttpParser.Handler#foundContent(int, org.mortbay.io.Buffer)
-         */
-        public void foundContent(int index, Buffer content)
-        {
-            _content=content;
-        }
-
-        /* 
-         * @see org.mortbay.http.HttpParser.Handler#messageComplete(int)
-         */
         public void messageComplete(int contextLength)
         {
-            // TODO Auto-generated method stub
         }
-
+        
+        Buffer _content;
+        HttpHeader _header;
+        Buffer _headerName;
+        boolean _request;
     }
 }

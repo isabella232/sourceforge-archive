@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache;
 import org.mortbay.io.BufferUtil;
+import org.mortbay.io.InBuffer;
 import org.mortbay.io.Portable;
 import org.mortbay.io.stream.InputBuffer;
 
@@ -20,8 +19,6 @@ import org.mortbay.io.stream.InputBuffer;
  */
 public class HttpParser
 {
-    private static Log log= LogFactory.getLog(HttpParser.class);
-
     // Terminal symbols.
     static final byte COLON= (byte)':';
     static final byte SEMI_COLON= (byte)';';
@@ -64,6 +61,8 @@ public class HttpParser
     protected int chunkLength;
     protected int chunkPosition;
     
+    private Buffer source;
+    private Buffer inSource;
     private Buffer header;
     private boolean close=false;
     private boolean content=false;
@@ -71,13 +70,24 @@ public class HttpParser
     /* ------------------------------------------------------------------------------- */
     /** Constructor. 
      */
-    public HttpParser()
-    {}
+    public HttpParser(Buffer source)
+    {
+        this.source=source;
+        if (source instanceof InBuffer)
+            inSource=(InBuffer)source;
+    }
 
     /* ------------------------------------------------------------------------------- */
     public int getState()
     {
         return state;
+    }
+    
+    /* ------------------------------------------------------------------------------- */
+    public void setState(int state)
+    {
+        this.state=state;
+        contentLength=UNKNOWN_CONTENT;
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -90,6 +100,12 @@ public class HttpParser
     public boolean inContentState()
     {
         return state>0;
+    }
+
+    /* ------------------------------------------------------------------------------- */
+    public int getContentLength()
+    {
+        return contentLength;
     }
     
     /* ------------------------------------------------------------------------------- */
@@ -104,28 +120,23 @@ public class HttpParser
      * @param source
      * @return parser state
      */
-    public void parse(Buffer source)
+    public void parse()
 	    throws IOException	
     {
         state= STATE_START;
 
         // continue parsing
         while (state != STATE_END)
-            parseNext(source);
+            parseNext();
     }
 
     /* ------------------------------------------------------------------------------- */
     /** Parse until next Event.
      * 
-     * @param handler
-     * @param buf
-     * @param ctx
      */
-    public void parseNext(Buffer source) 
+    public void parseNext() 
     throws IOException
     {
-		if (log.isTraceEnabled()) log.trace("parseNext s="+state+","+source.toDetailString());
-		
         if (state == STATE_END)
             state= STATE_START;
 
@@ -134,8 +145,9 @@ public class HttpParser
             source.compact();
             if (source.markIndex()==0 && source.putIndex()==source.capacity())
             	throw new IllegalStateException("Buffer too small");
-            int filled= source.fill();
-            if (log.isTraceEnabled()) log.trace("filled="+filled);
+            int filled=-1;
+            if (inSource!=null)
+                filled= ((InBuffer)source).fill();
             if (filled < 0 && state == STATE_EOF_CONTENT)
             {
                 state= STATE_END;
@@ -480,7 +492,6 @@ public class HttpParser
      */
     protected void foundField0(Buffer ref)
     {
-		if(log.isTraceEnabled()) log.trace("foundField0:" + ref.toDetailString());
     }
 
     /**
@@ -488,7 +499,6 @@ public class HttpParser
      */
     protected void foundField1(Buffer ref)
     {
-		if(log.isTraceEnabled()) log.trace("foundField1:" + ref.toDetailString());
     }
 
     /**
@@ -496,7 +506,6 @@ public class HttpParser
      */
     protected void foundField2(Buffer ref)
     {
-		if(log.isTraceEnabled()) log.trace("foundField2:" + ref.toDetailString());
     }
 
     /**
@@ -504,7 +513,6 @@ public class HttpParser
      */
     protected void foundHttpHeader(Buffer ref)
     {
-		if(log.isTraceEnabled()) log.trace("foundHttpHeader:" + ref.toDetailString());
     }
 
     /**
@@ -512,43 +520,18 @@ public class HttpParser
      */
     protected void foundHttpValue(Buffer ref)
     {
-		if(log.isTraceEnabled()) log.trace("foundHttpValue:" + ref.toDetailString());
     }
 
     protected void headerComplete()
     {
-		log.trace("headerComplete:");
     }
     
     protected void foundContent(int index, Buffer ref)
     {
-        if(log.isTraceEnabled()) log.trace("foundContent:" + index+","+ref.toDetailString());
     }
 
     protected void messageComplete(int contextLength)
     {
-        log.trace("messageComplete:" + contextLength);
     }
     
-    
-    public static void main(String[] args)
-    	throws Exception
-    {
-    	System.err.println(log.getClass());
-    	
-    	ServerSocket ss = new ServerSocket(8080);
-    	while(true)
-    	{
-    		Socket socket=ss.accept();
-    		InputBuffer in = new InputBuffer(socket.getInputStream(),2048);
-    		HttpParser parser = new HttpParser();
-    		while (true) 
-    		{
-    			parser.parse(in);
-    			socket.getOutputStream().write("HTTP/1.1 200 OK\015\012Transfer-Encoding: chunked\015\012Content-Type: text/html\015\012\015\0120b\015\012<h1>Hi</h1>\015\0120\015\012\015\012".getBytes());
-    			
-    		} 
-    	}
-    }
-
 }
