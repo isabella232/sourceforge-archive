@@ -90,7 +90,7 @@ public class HttpServer implements LifeCycle,
     private List _listeners = new ArrayList(3);
     private HashMap _realmMap = new HashMap(3);    
     private StringMap _virtualHostMap = new StringMap();
-    private boolean _chunkingForced=false;
+    private boolean _trace=false;
     private RequestLog _requestLog;
     private int _requestsPerGC ;
     private boolean _resolveRemoteHost =false;
@@ -579,6 +579,24 @@ public class HttpServer implements LifeCycle,
     
     
     /* ------------------------------------------------------------ */
+    /** 
+     * @return True if the TRACE method is fully implemented.
+     */
+    public boolean getTrace()
+    {
+        return _trace;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param trace 
+     */
+    public void setTrace(boolean trace)
+    {
+        _trace = trace;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Get the requests per GC.
      * If this is set greater than zero, then the System garbage collector
      * will be invoked after approximately this number of requests.  For
@@ -983,21 +1001,13 @@ public class HttpServer implements LifeCycle,
         return (UserRealm)_realmMap.remove(realmName);
     }    
     
-    /* ------------------------------------------------------------ */
-    public boolean isChunkingForced()
-    {
-        return _chunkingForced;
-    }
     
     /* ------------------------------------------------------------ */
     /** Set Chunking Forced.
-     * By default chunking is not forced on resources of known length.
-     * @param forced If true, chunking is used for all HTTP/1.1
-     * responses, even if a content-length was known.
+     * @deprecated
      */
     public void setChunkingForced(boolean forced)
     {
-         _chunkingForced=forced;
     }
 
     /* ------------------------------------------------------------ */
