@@ -50,7 +50,7 @@ Development has been done in JDK1.2 and the following CLASSPATH is required
 (or the non unix equivalent):
 
   CLASSPATH=\
-    $JETTY_HOME/lib/com.mortbay.jetty.jar:\
+    $JETTY_HOME/lib/org.mortbay.jetty.jar:\
     $JETTY_HOME/lib/javax.servlet.jar:\
     $JETTY_HOME/lib/javax.xml.jaxp.jar:\
     $JETTY_HOME/lib/org.apache.jasper.jar:\
@@ -74,7 +74,7 @@ Running the Demo Server
 A Demo server can be run on port 8080 with the commands:
 
   cd $JETTY_HOME
-  java com.mortbay.Jetty.Demo
+  java org.mortbay.jetty.Demo
 
 You can access this demo with at http://localhost:8080
 The demo also runs a simple admin servlet at http://localhost:8888,
@@ -84,7 +84,7 @@ This demo is configured using the HttpServer API and is a good
 example of coded configuration. The same demo is configured by the
 xml files etc/admin.xml etc/demo.xml and can be run with the command:
 
-  java com.mortbay.Jetty.Server etc/admin.xml etc/demo.xml
+  java org.mortbay.jetty.Server etc/admin.xml etc/demo.xml
 
 
 There is also a Unix start/stop script bin/jetty.sh which can run
@@ -99,25 +99,25 @@ an /etc/init.d script and also looks for xml config files in
 
 Configuring the Server
 ======================
-The class com.mortbay.Jetty.Server reads an xml configuration
-file and configures one or more instances of com.mortbay.HTTP.HttpServer:
+The class org.mortbay.jetty.Server reads an xml configuration
+file and configures one or more instances of org.mortbay.http.HttpServer:
 
-  java com.mortbay.Jetty.Server [configuration.xml]
+  java org.mortbay.jetty.Server [configuration.xml]
 
-The class com.mortbay.HTTP.HttpServer is the main class to be
+The class org.mortbay.http.HttpServer is the main class to be
 configured.  It has a configuration API and a command line API and
 can be run with
 
-  java com.mortbay.HTTP.HttpServer [options | -?]
+  java org.mortbay.http.HttpServer [options | -?]
 
-The com.mortbay.Jetty.Server class is simply an xml configuration
-frontend to com.mortbay.HTTP.HttpServer.
+The org.mortbay.jetty.Server class is simply an xml configuration
+frontend to org.mortbay.http.HttpServer.
 
 Jetty comes with the JAXP 1.1 reference XML parser, which is cromson from
 apache. Use the org.xml.sax.parser property to specify an alternative SAX parser.
 
 The DTDs used by jetty are resolved as resources from the system classpath,
-thus they are stored in com.mortbay.HTTP/web.dtd and com.mortbay.Util.configure.dtd 
+thus they are stored in org.mortbay.http/web.dtd and org.mortbay.util.configure.dtd 
 within the source tree and jar file.  Copies are also placed in etc for reference.
 
 There is also a Jetty extension configuration mechanism for web applications.
@@ -144,11 +144,11 @@ You can run ant for the following targets:
 
 Test Harnesses
 ==============
-The class com.mortbay.HTTP.TestRFC2616 is a test harness linked 
+The class org.mortbay.http.TestRFC2616 is a test harness linked 
 to the RFC document.  This and the other test harnesses can be run with
 
-  java com.mortbay.Util.TestHarness
-  java com.mortbay.HTTP.TestHarness
+  java org.mortbay.util.TestHarness
+  java org.mortbay.http.TestHarness
 
 Note that the test harnesses are not in the jar file, so you will need
 to build all the source and run with the source hierarchy in the CLASSPATH.
@@ -158,9 +158,9 @@ Distribution
 ============
 Jetty distributions and information is available from:
 
-   http://jetty.mortbay.com
+   http://jetty.mortbay.org
    http://sourceforge.net/project/jetty
-   ftp://jetty.mortbay.com/pub
+   ftp://jetty.mortbay.org/pub
    
 
 
@@ -334,7 +334,7 @@ Jetty makes the following interpretations:
  + A security constraint with an auth constraint of NONE grants access.
 
  + On platforms without the / file separator or when the system parameter 
-   com.mortbay.Util.FileResource.checkAliases is true, then the FileResouce class 
+   org.mortbay.util.FileResource.checkAliases is true, then the FileResouce class 
    compares the absolutePath and canonicalPath and treats the resource as not found
    if they do not match.
 
@@ -397,7 +397,7 @@ partial implementation of ranges supported by Jetty.  If you are serving
 PDF files from Jetty, then you will need to configure the HttpServer to
 not force chunking and the ResourceHandler to not accept ranges:
 
-<Configure  class="com.mortbay.HTTP.HttpServer">
+<Configure  class="org.mortbay.http.HttpServer">
   ...
   <Set name="ChunkingForced" type="boolean">false</Set>
   ...
@@ -425,27 +425,11 @@ security).
 
 The minimal server can be run from the command line with 
 
- java -cp com.mortbay.http.jar com.mortbay.HTTP.HttpServer
+ java -cp org.mortbay.http.jar org.mortbay.http.HttpServer
 
 
 Non-Blocking IO.
 ----------------
-The com.mortbay.HTTP.NBIO package provides a SocketListener that
-uses the non-blocking IO library from 
-  http://www.cs.berkeley.edu/~mdw/proj/java-nbio/
-To avoid having threads assigned to Idle connections.   It is 
-HIGHLY EXPERIMENTAL, but appears to work OK at the moment. Feedback
-would be highly appreciated.
-
-To use the NBIO listener, the nbio package must be install on your 
-classpath and ld_library_path as per their instructions. 
-Build the nbio classes into the jetty jars with:
-  ant nbio jars
-
-The etc/nbio.xml file shows how Jetty can be setup to use this listener.
-
-Testing and benchmarking should be done systems with large numbers of 
-connections (idle or otherwise).  It is intended that the number of
-connections may greatly exceed the maximum threads allocated to the 
-listener.
+The Jetty3Extra package provides support for non-blocking IO to
+reduct the thread usage of the Jetty server.
 

@@ -1,10 +1,10 @@
 <?xml version="1.0"  encoding="ISO-8859-1"?>
-<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.1//EN" "http://jetty.mortbay.com/configure_1_1.dtd">
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.1//EN" "http://jetty.mortbay.org/configure_1_1.dtd">
 
 <!--
 This is a Jetty HTTP server configuration file.  This configuration
-uses the generic com.mortbay.XML.XmlConfiguration class to call
-the normal com.mortbay.HTTP.HttpServer configuration API from
+uses the generic org.mortbay.xml.XmlConfiguration class to call
+the normal org.mortbay.http.HttpServer configuration API from
 within an XML script.
 
 The format of this file is described in the configure.dtd file.
@@ -47,25 +47,25 @@ a context without explicit creation of a Handler.
 
 
 This file configures the demo server and is equivalent
-to the com.mortbay.Jetty.Demo class.
+to the org.mortbay.jetty.Demo class.
 
 $Id$
 -->
 
-<Configure class="com.mortbay.HTTP.HttpServer">
+<Configure class="org.mortbay.http.HttpServer">
 
 
   <!-- The following section can be uncommented to control the
        debugging and logging mechanism.  
-  <Set name="Debug" class="com.mortbay.Util.Code" type="boolean">false</Set>
-  <Set name="Verbose" class="com.mortbay.Util.Code" type="int">0</Set>
-  <Set name="DebugPatterns" class="com.mortbay.Util.Code" type="String"></Set>
+  <Set name="Debug" class="org.mortbay.util.Code" type="boolean">false</Set>
+  <Set name="Verbose" class="org.mortbay.util.Code" type="int">0</Set>
+  <Set name="DebugPatterns" class="org.mortbay.util.Code" type="String"></Set>
 
-  <Call name="instance" class="com.mortbay.Util.Log">
+  <Call name="instance" class="org.mortbay.util.Log">
     <Call name="disableLog"/>
     <Call name="add"> 
       <Arg>
-        <New class="com.mortbay.Util.WriterLogSink">
+        <New class="org.mortbay.util.WriterLogSink">
           <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.log</Arg>
           <Set name="RetainDays">90</Set>
           <Set name="Append">true</Set>
@@ -79,7 +79,7 @@ $Id$
   <!-- Configure the listeners -->
   <Call name="addListener">
     <Arg>
-      <New class="com.mortbay.HTTP.SocketListener">
+      <New class="org.mortbay.http.SocketListener">
         <Set name="Port">8080</Set>
         <Set name="MinThreads">5</Set>
         <Set name="MaxThreads">255</Set>
@@ -94,7 +94,7 @@ $Id$
 <!--  Uncomment this to add an SSL listener.
   <Call name="addListener">
     <Arg>
-      <New class="com.mortbay.HTTP.SunJsseListener">
+      <New class="org.mortbay.http.SunJsseListener">
         <Set name="Port">8443</Set>
         <Set name="MinThreads">5</Set>
         <Set name="MaxThreads">255</Set>
@@ -122,7 +122,7 @@ $Id$
 
     <!-- Remove this comment for .htaccess handling
     <Call name="addHandler">
-      <Arg><New class="com.mortbay.HTTP.Handler.HTAccessHandler">
+      <Arg><New class="org.mortbay.http.handler.HTAccessHandler">
 	    <Set name="Default"><SystemProperty name="jetty.home" default="."/>/etc/htaccess</Set>
 	    <Set name="AccessFile">.htaccess</Set></New></Arg>
     </Call>
@@ -131,18 +131,18 @@ $Id$
     <Call name="addServlet">
       <Arg>Dump</Arg>
       <Arg>/dump/*,*.DUMP</Arg>
-      <Arg>com.mortbay.Servlet.Dump</Arg>
+      <Arg>org.mortbay.servlet.Dump</Arg>
       <Put name="InitParam">Value</Put>
     </Call>
     <Call name="addServlet">
       <Arg>Session</Arg>
       <Arg>/session</Arg>
-      <Arg>com.mortbay.Servlet.SessionDump</Arg>
+      <Arg>org.mortbay.servlet.SessionDump</Arg>
     </Call>
     <Call name="addServlet">
       <Arg>Dispatch</Arg>
       <Arg>/Dispatch/*</Arg>
-      <Arg>com.mortbay.Servlet.RequestDispatchTest</Arg>
+      <Arg>org.mortbay.servlet.RequestDispatchTest</Arg>
     </Call>
     <Call name="addServlet">
       <Arg>JSP</Arg>
@@ -154,14 +154,14 @@ $Id$
     <Set name="ServingResources">TRUE</Set>
 
     <Call name="addHandler">
-      <Arg><New class="com.mortbay.HTTP.Handler.DumpHandler"/></Arg>
+      <Arg><New class="org.mortbay.http.handler.DumpHandler"/></Arg>
     </Call>
     <Set name="HttpServerAccess">TRUE</Set>
 
     <Call name="addHandler">
       <Arg type="int">0</Arg>
       <Arg>
-        <New class="com.mortbay.HTTP.Handler.ForwardHandler">
+        <New class="org.mortbay.http.handler.ForwardHandler">
           <Arg>/dump/forwardedRoot</Arg>
           <Call name="addForward"><Arg>/forward/*</Arg><Arg>/dump/forwarded</Arg></Call>
         </New>
@@ -181,7 +181,7 @@ $Id$
     <Call name="addServlet">
       <Arg>Common Gateway Interface</Arg>
       <Arg>/</Arg>
-      <Arg>com.mortbay.Servlet.CGI</Arg>
+      <Arg>org.mortbay.servlet.CGI</Arg>
      <Put name="Path">/bin:/usr/bin:/usr/local/bin</Put>
     </Call>
   </Call>
@@ -196,7 +196,7 @@ $Id$
     <Call name="addHandler">
       <Arg type="int">0</Arg>
       <Arg>
-        <New class="com.mortbay.HTTP.Handler.ForwardHandler">
+        <New class="org.mortbay.http.handler.ForwardHandler">
           <Arg>/jetty/index.html</Arg>
         </New>
       </Arg>
@@ -207,7 +207,7 @@ $Id$
 
   <Call name="addRealm">
     <Arg>
-      <New class="com.mortbay.HTTP.HashUserRealm">
+      <New class="org.mortbay.http.HashUserRealm">
         <Arg>Jetty Demo Realm</Arg>
         <Arg><SystemProperty name="jetty.home" default="."/>/etc/demoRealm.properties</Arg>
       </New>
@@ -215,7 +215,7 @@ $Id$
   </Call>
 
   <Set name="LogSink">
-    <New class="com.mortbay.Util.OutputStreamLogSink">
+    <New class="org.mortbay.util.OutputStreamLogSink">
       <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.request.log</Arg>
       <Set name="RetainDays">90</Set>
       <Set name="Append">true</Set>

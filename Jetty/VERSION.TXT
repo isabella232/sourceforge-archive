@@ -1,6 +1,9 @@
 Jetty3 Versions
 --------------
 
+ - writeInputStream. 
+
+ + Changed to org.mortbay domain names.
  + Form auth login and error pages relative to context path.
  + Fixed handling of rel form authentication URLs
  + Added support for Nonblocking listener.
@@ -9,6 +12,7 @@ Jetty3 Versions
  + Patched Jasper to 3.2.3.
  + Added handlerContext.setClassPaths
  + Fixed bug with non cookie sessions.
+ + Format cookies in HttpFields.
 
 Jetty-3.1.rc8 - 22 Aug 2001
  + Support WEB-INF/web-jetty.xml configuration extension for webapps

@@ -2,7 +2,7 @@
 <BR><BR>
 Class <A HREF="XmlConfiguration.html">XmlConfiguration</A> class implements Jetty's configuration language. The distribution file src/com/mortbay/Util/configure.dtd contains detailed comments about the structure of Jetty config files. Here is some information in a less-technical form.  
 <BR><BR>
-The generic Jetty Server creates a com.mortbay.HTTP.HttpServer&nbsp;<!-- widget ref --> object for each config file listed on the command line, configures it according to the configuration script, and then starts it. 
+The generic Jetty Server creates a org.mortbay.http.HttpServer&nbsp;<!-- widget ref --> object for each config file listed on the command line, configures it according to the configuration script, and then starts it. 
 <BR><BR>
 Under the &lt;Configure> tag a Jetty config file can have &lt;Call>, &lt;Arg>, &lt;Set>, and &lt;New> tags. The configuration interpreter uses the Java reflection facility to let you call any public method of the current object, to supply arguments to
 method calls, set properties of the current object, and create new objects. 

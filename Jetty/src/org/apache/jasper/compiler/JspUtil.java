@@ -60,8 +60,8 @@
  */ 
 package org.apache.jasper.compiler;
 
-import com.mortbay.XML.XmlParser;
-import com.mortbay.Util.Resource;
+import org.mortbay.xml.XmlParser;
+import org.mortbay.util.Resource;
 
 import java.net.URL;
 

@@ -1,0 +1,27 @@
+// ===========================================================================
+// Copyright (c) 1996 Mort Bay Consulting Pty. Ltd. All rights reserved.
+// $Id$
+// ---------------------------------------------------------------------------
+
+package org.mortbay.http;
+
+import org.mortbay.util.Code;
+import java.security.Principal;
+
+
+/* ------------------------------------------------------------ */
+/** User Principal.
+ * Extends the security principal with a method to check if the user is in a
+ * role. 
+ *
+ * @version $Id$
+ * @author Greg Wilkins (gregw)
+ */
+public interface UserPrincipal extends Principal
+{
+    static public String __ATTR="org.mortbay.http.UserPrincipal";
+    
+    public UserRealm getUserRealm();
+    public boolean authenticate(String password);
+    public boolean isUserInRole(String role);
+}

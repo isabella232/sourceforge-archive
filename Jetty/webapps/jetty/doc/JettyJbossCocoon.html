@@ -186,12 +186,12 @@ pause
 &lt;?xml version="1.0"  encoding="ISO-8859-1"?&gt;
 &lt;!DOCTYPE Configure PUBLIC
  "-//Mort Bay Consulting//DTD Configure 1.0//EN"
- "http://jetty.mortbay.com/configure_1_0.dtd"&gt;
+ "http://jetty.mortbay.org/configure_1_0.dtd"&gt;
 
 &lt;!--
 This is a Jetty HTTP server configuration file.  This configuration
-uses the generic com.mortbay.Util.XmlConfiguration class to call
-the normal com.mortbay.HTTP.HttpServer configuration API from
+uses the generic org.mortbay.util.XmlConfiguration class to call
+the normal org.mortbay.http.HttpServer configuration API from
 within an XML script.
 
 The format of this file is described in the configure.dtd file.
@@ -234,15 +234,15 @@ a context without explicit creation of a Handler.
 
 
 This file configures the demo server and is equivalent
-to the com.mortbay.Jetty.Demo class.
+to the org.mortbay.jetty.Demo class.
 
 $ID: $
 --&gt;
 
-&lt;Configure class="com.mortbay.HTTP.HttpServer"&gt;
+&lt;Configure class="org.mortbay.http.HttpServer"&gt;
 &lt;Call name="addListener"&gt;
 &lt;Arg&gt;
-&lt;New class="com.mortbay.HTTP.SocketListener"&gt;
+&lt;New class="org.mortbay.http.SocketListener"&gt;
 &lt;Set name="Port"&gt;8080&lt;/Set&gt;
 &lt;Set name="MinThreads"&gt;5&lt;/Set&gt;
 &lt;Set name="MaxThreads"&gt;255&lt;/Set&gt;
@@ -255,7 +255,7 @@ $ID: $
 &lt;!--  Uncomment this to add an SSL listener.
   &lt;Call name="addListener"&gt;
 &lt;Arg&gt;
-&lt;New class="com.mortbay.HTTP.SunJsseListener"&gt;
+&lt;New class="org.mortbay.http.SunJsseListener"&gt;
 &lt;Set name="Port"&gt;8443&lt;/Set&gt;
 &lt;Set name="MinThreads"&gt;5&lt;/Set&gt;
 &lt;Set name="MaxThreads"&gt;255&lt;/Set&gt;
@@ -281,17 +281,17 @@ name="jetty.home"/&gt;/docroot/&lt;/Set&gt;
 &lt;Call name="addServlet"&gt;
 &lt;Arg&gt;Dump&lt;/Arg&gt;
 &lt;Arg&gt;/dump/*,*.DUMP&lt;/Arg&gt;
-&lt;Arg&gt;com.mortbay.Servlet.Dump&lt;/Arg&gt;
+&lt;Arg&gt;org.mortbay.servlet.Dump&lt;/Arg&gt;
 &lt;/Call&gt;
 &lt;Call name="addServlet"&gt;
 &lt;Arg&gt;Session&lt;/Arg&gt;
 &lt;Arg&gt;/session&lt;/Arg&gt;
-&lt;Arg&gt;com.mortbay.Servlet.SessionDump&lt;/Arg&gt;
+&lt;Arg&gt;org.mortbay.servlet.SessionDump&lt;/Arg&gt;
 &lt;/Call&gt;
 &lt;Call name="addServlet"&gt;
 &lt;Arg&gt;Dispatch&lt;/Arg&gt;
 &lt;Arg&gt;/Dispatch/*&lt;/Arg&gt;
-&lt;Arg&gt;com.mortbay.Servlet.RequestDispatchTest&lt;/Arg&gt;
+&lt;Arg&gt;org.mortbay.servlet.RequestDispatchTest&lt;/Arg&gt;
 &lt;/Call&gt;
 &lt;Call name="addServlet"&gt;
 &lt;Arg&gt;JSP&lt;/Arg&gt;
@@ -300,7 +300,7 @@ name="jetty.home"/&gt;/docroot/&lt;/Set&gt;
 &lt;/Call&gt;
 &lt;Set name="ServingResources"&gt;TRUE&lt;/Set&gt;
 &lt;Call name="addHandler"&gt;
-&lt;Arg&gt;&lt;New class="com.mortbay.HTTP.Handler.DumpHandler"/&gt;&lt;/Arg&gt;
+&lt;Arg&gt;&lt;New class="org.mortbay.http.handler.DumpHandler"/&gt;&lt;/Arg&gt;
 &lt;/Call&gt;
 &lt;Set name="HttpServerAccess"&gt;TRUE&lt;/Set&gt;
 &lt;/Call&gt;
@@ -319,7 +319,7 @@ name="jetty.home"/&gt;/cgi-bin&lt;/Set&gt;
 &lt;Call name="addServlet"&gt;
 &lt;Arg&gt;Common Gateway Interface&lt;/Arg&gt;
 &lt;Arg&gt;/&lt;/Arg&gt;
-&lt;Arg&gt;com.mortbay.Servlet.CGI&lt;/Arg&gt;
+&lt;Arg&gt;org.mortbay.servlet.CGI&lt;/Arg&gt;
 &lt;Put name="Path"&gt;/bin:/usr/bin:/usr/local/bin&lt;/Put&gt;
 &lt;/Call&gt;
 &lt;/Call&gt;
@@ -330,17 +330,17 @@ name="jetty.home"/&gt;/cgi-bin&lt;/Set&gt;
 &lt;Call name="addServlet"&gt;
 &lt;Arg&gt;Forward&lt;/Arg&gt;
 &lt;Arg&gt;/&lt;/Arg&gt;
-&lt;Arg&gt;com.mortbay.Servlet.Forward&lt;/Arg&gt;
+&lt;Arg&gt;org.mortbay.servlet.Forward&lt;/Arg&gt;
 &lt;Put name="/"&gt;/jetty/index.html&lt;/Put&gt;
 &lt;/Call&gt;
 &lt;Call name="addHandler"&gt;
-&lt;Arg&gt;&lt;New class="com.mortbay.HTTP.Handler.NotFoundHandler"/&gt;&lt;/Arg&gt;
+&lt;Arg&gt;&lt;New class="org.mortbay.http.handler.NotFoundHandler"/&gt;&lt;/Arg&gt;
 &lt;/Call&gt;
 &lt;/Call&gt;
 
 &lt;Call name="addRealm"&gt;
 &lt;Arg&gt;
-&lt;New class="com.mortbay.HTTP.HashUserRealm"&gt;
+&lt;New class="org.mortbay.http.HashUserRealm"&gt;
 &lt;Arg&gt;Jetty Demo Realm&lt;/Arg&gt;
 &lt;Arg&gt;&lt;SystemProperty
 name="jetty.home"/&gt;/etc/demoRealm.properties&lt;/Arg&gt;
@@ -349,7 +349,7 @@ name="jetty.home"/&gt;/etc/demoRealm.properties&lt;/Arg&gt;
 &lt;/Call&gt;
 
 &lt;Set name="LogSink"&gt;
-&lt;New class="com.mortbay.Util.WriterLogSink"&gt;
+&lt;New class="org.mortbay.util.WriterLogSink"&gt;
 &lt;Arg&gt;&lt;SystemProperty name="jetty.home"
 default="./logs"/&gt;/yyyy_mm_dd.request.log&lt;/Arg&gt;
 &lt;Set name="RetainDays"&gt;90&lt;/Set&gt;

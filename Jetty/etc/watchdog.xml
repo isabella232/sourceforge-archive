@@ -5,10 +5,10 @@
      jakarta watchdog tests, which must be downloaded separately.
   -->
 
-<Configure class="com.mortbay.HTTP.HttpServer">
+<Configure class="org.mortbay.http.HttpServer">
   <Call name="addListener">
     <Arg>
-      <New class="com.mortbay.HTTP.SocketListener">
+      <New class="org.mortbay.http.SocketListener">
         <Set name="Port">8080</Set>
         <Set name="MinThreads">5</Set>
         <Set name="MaxThreads">255</Set>
@@ -24,7 +24,7 @@
   </Call>
 
   <Set name="LogSink">
-    <New class="com.mortbay.Util.OutputStreamLogSink">
+    <New class="org.mortbay.util.OutputStreamLogSink">
       <Set name="LogDir">./logs</Set>
       <Set name="RetainDays">90</Set>
       <Set name="MultiDay">false</Set>

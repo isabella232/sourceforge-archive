@@ -45,8 +45,8 @@ mini.jetty.jar - Build a minimal HTTP server jar.
   <property name="jetty.webapp.webinf"    value="${jetty.webapp}/WEB-INF"/>
   <property name="jetty.webapp.classes"   value="${jetty.webapp.webinf}/classes"/>
 
-  <property name="jetty.jar"      value="${lib}/com.mortbay.jetty.jar"/>
-  <property name="mini.http.jar"  value="${basedir}/com.mortbay.http.jar"/>
+  <property name="jetty.jar"      value="${lib}/org.mortbay.jetty.jar"/>
+  <property name="mini.http.jar"  value="${basedir}/org.mortbay.http.jar"/>
   <property name="servlet.jar"    value="${lib}/javax.servlet.jar"/>
   <property name="jasper.jar"     value="${lib}/org.apache.jasper.jar"/>
   <property name="jaxp.jar"       value="${lib}/javax.xml.jaxp.jar"/>
@@ -62,10 +62,10 @@ mini.jetty.jar - Build a minimal HTTP server jar.
     <mkdir dir="${classes}" />
     <mkdir dir="${logs}" />
     <mkdir dir="${etc}/dtd" />
-    <copy file="${src}/com/mortbay/XML/configure.dtd" tofile="${etc}/dtd/configure.dtd" />
-    <copy file="${src}/com/mortbay/XML/configure_1_0.dtd" tofile="${etc}/dtd/configure_1_0.dtd" />
-    <copy file="${src}/com/mortbay/XML/configure_1_1.dtd" tofile="${etc}/dtd/configure_1_1.dtd" />
-    <copy file="${src}/com/mortbay/Jetty/Servlet/web.dtd" tofile="${etc}/dtd/web.dtd" />
+    <copy file="${src}/org/mortbay/xml/configure.dtd" tofile="${etc}/dtd/configure.dtd" />
+    <copy file="${src}/org/mortbay/xml/configure_1_0.dtd" tofile="${etc}/dtd/configure_1_0.dtd" />
+    <copy file="${src}/org/mortbay/xml/configure_1_1.dtd" tofile="${etc}/dtd/configure_1_1.dtd" />
+    <copy file="${src}/org/mortbay/jetty/servlet/web.dtd" tofile="${etc}/dtd/web.dtd" />
   </target>
 
 
@@ -101,7 +101,8 @@ mini.jetty.jar - Build a minimal HTTP server jar.
            deprecation="off"
            >
        <include name="**/*.java"/>
-       <exclude name="**/NBIO/*.java"/>
+       <exclude name="**/nbio/*.java"/>
+       <exclude name="com/**/*.java"/>
     </javac>
   </target>
 
@@ -125,17 +126,17 @@ mini.jetty.jar - Build a minimal HTTP server jar.
 
   <target name="jetty.jar" depends="classes,servlet.jar">
     <delete file="${mini.http.jar}" quiet="true"/>
-    <jar jarfile="${jetty.jar}" basedir="${classes}" manifest="${src}/com/mortbay/MANIFEST.MF" >
-       <include name="com/mortbay/**"  />
-       <exclude name="com/mortbay/**/TestHarness*.class" />
-       <exclude name="com/mortbay/Util/DataClass/*" />
-       <exclude name="com/mortbay/Util/TestConfiguration.class" />
-       <exclude name="com/mortbay/Util/PropertyTreeTest.class" />
-       <exclude name="com/mortbay/Util/DictionaryConverterTest*.class" />
-       <exclude name="com/mortbay/HTTP/**/Test*.class" />
-       <exclude name="com/mortbay/HTTP/Http10TestClient.class" />
-       <exclude name="com/mortbay/HTML/Test*.class" />
-       <exclude name="com/mortbay/Jetty/**/Test*.class" />
+    <jar jarfile="${jetty.jar}" basedir="${classes}" manifest="${src}/org/mortbay/MANIFEST.MF" >
+       <include name="org/mortbay/**"  />
+       <exclude name="org/mortbay/**/TestHarness*.class" />
+       <exclude name="org/mortbay/util/DataClass/*" />
+       <exclude name="org/mortbay/util/TestConfiguration.class" />
+       <exclude name="org/mortbay/util/PropertyTreeTest.class" />
+       <exclude name="org/mortbay/util/DictionaryConverterTest*.class" />
+       <exclude name="org/mortbay/http/**/Test*.class" />
+       <exclude name="org/mortbay/http/Http10TestClient.class" />
+       <exclude name="org/mortbay/html/Test*.class" />
+       <exclude name="org/mortbay/jetty/**/Test*.class" />
     </jar>
   </target>
 
@@ -143,17 +144,17 @@ mini.jetty.jar - Build a minimal HTTP server jar.
     <delete file="${jetty.jar}" quiet="true"/>
     <delete file="${servlet.jar}" quiet="true"/>
     <delete file="${jasper.jar}" quiet="true"/>
-    <jar jarfile="${mini.http.jar}" basedir="${classes}" manifest="${src}/com/mortbay/MANIFEST.MF" compress="true">
-       <include name="com/mortbay/Util/**" />
-       <include name="com/mortbay/HTTP/**" />
+    <jar jarfile="${mini.http.jar}" basedir="${classes}" manifest="${src}/org/mortbay/MANIFEST.MF" compress="true">
+       <include name="org/mortbay/util/**" />
+       <include name="org/mortbay/http/**" />
        <include name="javax/servlet/http/Cookie.class" />
        <include name="javax/servlet/http/LocalStrings*.properties" />
-       <exclude name="com/mortbay/**/*Test*" />
-       <exclude name="com/mortbay/Util/DataClass/*" />
-       <exclude name="com/mortbay/HTTP/JsseListener.class" />
-       <exclude name="com/mortbay/HTTP/SunJsseListener.class" />
-       <exclude name="com/mortbay/Util/Converter" />
-       <exclude name="com/mortbay/Util/KeyPairTool.class" />
+       <exclude name="org/mortbay/**/*Test*" />
+       <exclude name="org/mortbay/util/DataClass/*" />
+       <exclude name="org/mortbay/http/JsseListener.class" />
+       <exclude name="org/mortbay/http/SunJsseListener.class" />
+       <exclude name="org/mortbay/util/Converter" />
+       <exclude name="org/mortbay/util/KeyPairTool.class" />
     </jar>
   </target>
 
@@ -172,12 +173,12 @@ mini.jetty.jar - Build a minimal HTTP server jar.
   <target name="webapp" depends="jars">
     <copy todir="${jetty.webapp.classes}">
       <fileset dir="${webappsrc}">
-        <include name="com/mortbay/webapps/jetty/defaultManifest.mf" />
-        <include name="com/mortbay/webapps/jetty/*.properties" />
+        <include name="org/mortbay/webapps/jetty/defaultManifest.mf" />
+        <include name="org/mortbay/webapps/jetty/*.properties" />
       </fileset>
     </copy>
-    <copy file="${jetty.webapp.classes}/com/mortbay/webapps/jetty/JettyIndex.properties" 
-        tofile="${jetty.webapp.classes}/com/mortbay/webapps/jetty/JettyIndex_en.properties" />
+    <copy file="${jetty.webapp.classes}/org/mortbay/webapps/jetty/JettyIndex.properties" 
+        tofile="${jetty.webapp.classes}/org/mortbay/webapps/jetty/JettyIndex_en.properties" />
     <javac srcdir="${webappsrc}"
            destdir="${jetty.webapp.classes}"
            classpath="${jetty.jar};${servlet.jar}"
@@ -185,7 +186,7 @@ mini.jetty.jar - Build a minimal HTTP server jar.
            optimize="off"
            deprecation="off"
            >
-      <include name="com/mortbay/webapps/jetty/*.java" />
+      <include name="org/mortbay/webapps/jetty/*.java" />
     </javac>
     <copy file="LICENSE.html" tofile="${jetty.webapp}/LICENSE.html" />
     <copy file="VERSION.TXT" tofile="${jetty.webapp}/versions.txt" />
@@ -195,7 +196,7 @@ mini.jetty.jar - Build a minimal HTTP server jar.
 
   <target name="javadoc" depends="jars">
     <mkdir dir="${javadoc}"/>
-    <javadoc packagenames="com.mortbay.*,javax.servlet.*,org.apache.jasper.*"
+    <javadoc packagenames="org.mortbay.*,javax.servlet.*,org.apache.jasper.*"
              sourcepath="${src}"
 	     classpath="${classpath}"
              destdir="${javadoc}"
@@ -210,7 +211,7 @@ mini.jetty.jar - Build a minimal HTTP server jar.
 
   <target name="testUtil" depends="jars">
     <property name="classpath" value="${jetty.jar};${servlet.jar}" />
-    <java classname="com.mortbay.Util.TestHarness"
+    <java classname="org.mortbay.util.TestHarness"
           classpath="${classes}"
           fork="yes"
           failonerror="yes"
@@ -219,7 +220,7 @@ mini.jetty.jar - Build a minimal HTTP server jar.
 
   <target name="testXML" depends="jars">
     <property name="classpath" value="${jetty.jar};${servlet.jar}" />
-    <java classname="com.mortbay.XML.TestHarness"
+    <java classname="org.mortbay.xml.TestHarness"
           classpath="${classes};${xml.jar};${jaxp.jar}"
           fork="yes"
           failonerror="yes"
@@ -228,7 +229,7 @@ mini.jetty.jar - Build a minimal HTTP server jar.
 
   <target name="testHTTP" depends="jars">
     <property name="classpath" value="${jetty.jar};${servlet.jar}" />
-    <java classname="com.mortbay.HTTP.TestHarness"
+    <java classname="org.mortbay.http.TestHarness"
           classpath="${classes};${xml.jar};${jaxp.jar}"
           fork="yes"
           failonerror="yes"
@@ -240,7 +241,7 @@ mini.jetty.jar - Build a minimal HTTP server jar.
   <target name="all" depends="prepare,jars,webapp,javadoc,test"/>
 
   <target name="demo" depends="webapp" >
-    <java classname="com.mortbay.Jetty.Server"
+    <java classname="org.mortbay.jetty.Server"
           classpath="${env.CLASSPATH}:${classpath}"
           fork="yes"
           failonerror="yes"

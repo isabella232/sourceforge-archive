@@ -14,10 +14,10 @@ like this:
 <CODE><PRE>
   &lt;?xml version="1.0"  encoding="ISO-8859-1"?>
   &lt;!DOCTYPE Configure SYSTEM "configure.dtd">
-  &lt;Configure class="com.mortbay.HTTP.HttpServer">
+  &lt;Configure class="org.mortbay.http.HttpServer">
 </PRE></CODE>
 The top level tag allows configuration of an object of any type.  For
-Jetty this is normally an object of type com.mortbay.HTTP.HttpServer,
+Jetty this is normally an object of type org.mortbay.http.HttpServer,
 or some subtype.  The configuration interpreter checks that the object
 is an instance of that class named by the "class" attribute.
 <BR><BR><HR>
@@ -31,7 +31,7 @@ help the reader, and do not mention the variable's type.
 First it adds a Listener to the server object with:
 <CODE><PRE>  &lt;Call name="addListener">
     &lt;Arg>
-      &lt;New class="com.mortbay.HTTP.SocketListener">
+      &lt;New class="org.mortbay.http.SocketListener">
         &lt;Set name="Port">8080&lt;/Set>
         &lt;Set name="MinThreads">5&lt;/Set>
         &lt;Set name="MaxThreads">255&lt;/Set>
@@ -45,9 +45,9 @@ for the server. SocketListeners accept normal requests, while
 JsseListeners accept SSL requests.  The threading model of the server
 is controlled by the listener parameters.
 <BR><BR>
-This adds a new listener of class com.mortbay.HTTP.SocketListener to
+This adds a new listener of class org.mortbay.http.SocketListener to
 the HttpServer as if by:
-<CODE><PRE>  listener = server.addListener(new com.mortbay.HTTP.SocketListener());</PRE></CODE>
+<CODE><PRE>  listener = server.addListener(new org.mortbay.http.SocketListener());</PRE></CODE>
 The <Set> tags correspond to:
 <CODE><PRE> listener.setPort(8080);
   listener.setMinThreads(5);
@@ -115,7 +115,7 @@ To this context we add the "Dump" servlet:
 <CODE><PRE>    &lt;Call name="addServlet">
       &lt;Arg>Dump&lt;/Arg>
       &lt;Arg>/dump,/dump/*,/handler/Dump,/handler/Dump/*&lt;/Arg>
-      &lt;Arg>com.mortbay.Servlet.Dump&lt;/Arg>
+      &lt;Arg>org.mortbay.servlet.Dump&lt;/Arg>
     &lt;/Call></PRE></CODE>
 In pseudo-Java, this is:
 <CODE><PRE>    context.addServlet(
@@ -125,9 +125,9 @@ In pseudo-Java, this is:
     );</PRE></CODE>
 The last <Call> adds a non-Servlet Handler to the context:
 <CODE><PRE>    &lt;Call name="addHandler">
-      &lt;Arg>&lt;New class="com.mortbay.HTTP.Handler.NotFoundHandler"/>&lt;/Arg>
+      &lt;Arg>&lt;New class="org.mortbay.http.handler.NotFoundHandler"/>&lt;/Arg>
     &lt;/Call></PRE></CODE>
 As Java:
-<CODE><PRE>    context.addHandler(new com.mortbay.HTTP.Handler.NotFoundHandler());</PRE></CODE><HR>
+<CODE><PRE>    context.addHandler(new org.mortbay.http.handler.NotFoundHandler());</PRE></CODE><HR>
 Return to <A HREF="JettyConfiguration.html">JettyConfiguration</A>.</BODY>
 </HTML>

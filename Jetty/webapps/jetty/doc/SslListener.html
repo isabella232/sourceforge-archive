@@ -341,12 +341,12 @@ an as need be basis.
 <hr>
 <B>Loading Private Key and Certificate into the keystore</B><BR>
 Next, load the key and the cert into a JKS keystore. The class 
-com.mortbay.Util.KeyPairTool is used to load the keys into the
+org.mortbay.util.KeyPairTool is used to load the keys into the
 keystore. It has the following arguments:
 <pre>
-<b>$</b> CLASSPATH=/home/bretts/Jetty3/lib/com.mortbay.jetty.jar:$CLASSPATH
+<b>$</b> CLASSPATH=/home/bretts/Jetty3/lib/org.mortbay.jetty.jar:$CLASSPATH
 <b>$</b> export CLASSPATH
-<b>$</b> java com.mortbay.Util.KeyPairTool
+<b>$</b> java org.mortbay.util.KeyPairTool
 Tool to insert a private key/certificate pair into a keystore.
 Parameters:
  -key        FILENAME, location of private key [MANDATORY]
@@ -366,7 +366,7 @@ While they still appear on the screen, this is a much safer option as they
 do not get saved in shell histories or process listings.
 <pre>
 <b>$</b> /bin/sh
-$ java com.mortbay.Util.KeyPairTool \
+$ java org.mortbay.util.KeyPairTool \
   -key bee.hive.net.clearkey \
   -cert bee.hive.net.crt \
   -storepass testpasswd \
@@ -420,7 +420,7 @@ you can uncomment the following lines:
 <pre>
   &lt;Call name="addListener"&gt;
     &lt;Arg&gt;
-      &lt;New class="com.mortbay.HTTP.SunJsseListener"&gt;
+      &lt;New class="org.mortbay.http.SunJsseListener"&gt;
         &lt;Set name="Port"&gt;8443&lt;/Set&gt;
         &lt;Set name="MinThreads"&gt;5&lt;/Set&gt;
         &lt;Set name="MaxThreads"&gt;255&lt;/Set&gt;
@@ -454,7 +454,7 @@ Change the way you start Jetty to:
 
 For example:
 <pre>
-java -Djetty.ssl.keystore=/home/jetty/keystore  com.mortbay.Jetty.Demo
+java -Djetty.ssl.keystore=/home/jetty/keystore  org.mortbay.jetty.Demo
 
 jetty.ssl.password : testpasswd
 jetty.ssl.keypassword : testpasswd
@@ -484,7 +484,7 @@ from the command and used as the password.
 <p>
 If jetty is given a password that begins with &quot;OBF:&quot; it is
 treated as an obfuscated password. Passwords can be obfuscated by
-running com.mortbay.Util.Password as a main class.
+running org.mortbay.util.Password as a main class.
 <p>
 While these mechanism just exports the security problem from jetty,
 it does allow customized security arrangements to be configured.

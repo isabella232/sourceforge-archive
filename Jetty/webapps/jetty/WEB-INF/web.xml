@@ -3,7 +3,7 @@
   <display-name>Jetty3 Demo</display-name>
   <context-param>
     <param-name>home</param-name>
-    <param-value>http://jetty.mortbay.com</param-value>
+    <param-value>http://jetty.mortbay.org</param-value>
   </context-param>
   <context-param>
     <param-name>admin</param-name>
@@ -12,7 +12,7 @@
 
   <servlet>
     <servlet-name>Jetty Demo Page</servlet-name>
-    <servlet-class>com.mortbay.webapps.jetty.JettyServlet</servlet-class>
+    <servlet-class>org.mortbay.webapps.jetty.JettyServlet</servlet-class>
     <load-on-startup>0</load-on-startup>
   </servlet>
 
@@ -53,8 +53,12 @@
     <location>error404.html</location>
   </error-page>
   <error-page>
-    <exception-type>java.lang.NullPointerException</exception-type>
-    <location>errorNullPointer.html</location>
+    <exception-type>
+       java.lang.NullPointerException
+    </exception-type>
+    <location>
+       errorNullPointer.html
+    </location>
   </error-page>
 
   <security-constraint>
@@ -63,7 +67,7 @@
       <url-pattern>/auth/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
-      <role-name>com.mortbay.HTTP.User</role-name>
+      <role-name>org.mortbay.http.User</role-name>
     </auth-constraint>
     <user-data-constraint>
       <transport-guarantee>NONE</transport-guarantee>
