@@ -223,7 +223,7 @@ public class HttpFields extends HashMap
      */
     public boolean containsKey(Object name)
     {
-        return containsKey(StringUtil.asciiToLowerCase(name.toString()));
+        return super.containsKey(StringUtil.asciiToLowerCase(name.toString()));
     }
     
     /* -------------------------------------------------------------- */
