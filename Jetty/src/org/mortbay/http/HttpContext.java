@@ -741,7 +741,7 @@ public class HttpContext extends ResourceCache
                     try
                     {
                         Resource path = Resource.newResource(urls[j]);
-                        if (LogSupport.isTraceEnabled(log)) log.trace("path "+path);
+                        if (log.isTraceEnabled()) log.trace("path "+path);
                         File file = path.getFile();
                         if (file!=null)
                             paths.add(file.getAbsolutePath());
@@ -764,11 +764,11 @@ public class HttpContext extends ResourceCache
                 String path=tok.nextToken();
                 if (!paths.contains(path))
                 {
-                    if(LogSupport.isTraceEnabled(log))log.trace("PATH="+path);
+                    if(log.isTraceEnabled())log.trace("PATH="+path);
                     paths.add(path);
                 }
                 else
-                    if(LogSupport.isTraceEnabled(log))log.trace("done="+path);			
+                    if(log.isTraceEnabled())log.trace("done="+path);			
             }
         }
         

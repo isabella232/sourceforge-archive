@@ -870,7 +870,7 @@ public class HttpServer implements LifeCycle,
                 List contextLists =contextMap.getMatches(request.getPath());
                 if(contextLists!=null)
                 {
-                    if(LogSupport.isTraceEnabled(log))log.trace("Contexts at "+request.getPath()+": "+contextLists);
+                    if(log.isTraceEnabled())log.trace("Contexts at "+request.getPath()+": "+contextLists);
                     
                     for (int i=0;i<contextLists.size();i++)
                     {

@@ -98,7 +98,7 @@ public class ForwardHandler extends AbstractHttpHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
-        if(LogSupport.isTraceEnabled(log))log.trace("Look for "+pathInContext+" in "+_forward);
+        if(log.isTraceEnabled())log.trace("Look for "+pathInContext+" in "+_forward);
         
         String newPath=null;
         String query=null;

@@ -14,7 +14,6 @@
 // ========================================================================
 
 package org.mortbay.util;
-import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 
@@ -27,8 +26,6 @@ public class LogSupport
     public final static String EXCEPTION= "EXCEPTION ";
     public final static String NOT_IMPLEMENTED= "NOT IMPLEMENTED ";
 
-    private static boolean trace = System.getProperty("TRACE",null)!=null;
-
     /* ------------------------------------------------------------ */
     /**
      * Ignore an exception unless trace is enabled.
@@ -36,18 +33,7 @@ public class LogSupport
      */
     public static void ignore(Log log,Throwable th)
     {
-        if (trace && log.isTraceEnabled()) log.trace(IGNORED,th);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * Is Trace Enabled.
-     * This works around the problem that log4j does not support the trace level.
-     * @return true IFF log.isTraceEnabled() AND ( the system property TRACE is set OR not using log4j )
-     */
-    public static boolean isTraceEnabled(Log log)
-    {
-        return log.isTraceEnabled() && (trace || log.getClass().getName().indexOf("Log4J")>=0);
+        if (log.isTraceEnabled()) log.trace(IGNORED,th);
     }
 
 

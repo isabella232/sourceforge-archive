@@ -165,7 +165,7 @@ public class ModelMBeanImpl
 
                 try{
                     Class mClass=loader.loadClass(mName);
-		    if(LogSupport.isTraceEnabled(log))log.trace("mbeanFor "+o+" mClass="+mClass);
+		    if(log.isTraceEnabled())log.trace("mbeanFor "+o+" mClass="+mClass);
                     mbean=(ModelMBean)mClass.newInstance();
                     mbean.setManagedResource(o,"objectReference");
 		    if(log.isDebugEnabled())log.debug("mbeanFor "+o+" is "+mbean);
@@ -174,7 +174,7 @@ public class ModelMBeanImpl
                 catch(ClassNotFoundException e)
                 {
                     if (e.toString().endsWith("MBean"))
-		    { if(LogSupport.isTraceEnabled(log))log.trace(e.toString());}
+		    { if(log.isTraceEnabled())log.trace(e.toString());}
                     else
                         log.warn(LogSupport.EXCEPTION,e);
                 }
@@ -947,7 +947,7 @@ public class ModelMBeanImpl
             }
 
             String resource=(pkg==null?"mbean":(pkg.replace('.','/')+"/mbean"));
-            if(LogSupport.isTraceEnabled(log))log.trace("Look for: "+resource);
+            if(log.isTraceEnabled())log.trace("Look for: "+resource);
 
             try
             {
@@ -956,7 +956,7 @@ public class ModelMBeanImpl
                                              Locale.getDefault(),
                                              _object.getClass().getClassLoader());
             
-                if(LogSupport.isTraceEnabled(log))log.trace("Bundle "+resource);
+                if(log.isTraceEnabled())log.trace("Bundle "+resource);
                 
                 for (int i=0;i<objectNames.length;i++)
                 {
@@ -974,10 +974,10 @@ public class ModelMBeanImpl
                         if (description!=null && description.length()>0)
                             return description;
                     }
-                    catch(Exception e) { if(LogSupport.isTraceEnabled(log))log.trace(e.toString()); }
+                    catch(Exception e) { if(log.isTraceEnabled())log.trace(e.toString()); }
                 }
             }
-            catch(Exception e) { if(LogSupport.isTraceEnabled(log))log.trace(e.toString()); }
+            catch(Exception e) { if(log.isTraceEnabled())log.trace(e.toString()); }
 
             lookIn=lookIn.getSuperclass();
         }

@@ -224,7 +224,7 @@ public class ResourceCache implements LifeCycle,
             CachedResource cached = (CachedResource)_cache.get(pathInContext);
             if (cached!=null)
             {
-                if(LogSupport.isTraceEnabled(log))log.trace("CACHE HIT: "+cached);
+                if(log.isTraceEnabled())log.trace("CACHE HIT: "+cached);
                 CachedMetaData cmd = (CachedMetaData)cached.getAssociate();
                 if (cmd!=null && cmd.isValid())
                     return cached;
@@ -232,7 +232,7 @@ public class ResourceCache implements LifeCycle,
 
             // Make the resource
             resource=_resourceBase.addPath(_resourceBase.encode(pathInContext));
-            if(LogSupport.isTraceEnabled(log))log.trace("CACHE MISS: "+resource);
+            if(log.isTraceEnabled())log.trace("CACHE MISS: "+resource);
             if (resource==null)
                 return null;
 
@@ -270,7 +270,7 @@ public class ResourceCache implements LifeCycle,
                         _leastRecentlyUsed.invalidate();
 
                     cached=resource.cache();
-                    if(LogSupport.isTraceEnabled(log))log.trace("CACHED: "+resource);
+                    if(log.isTraceEnabled())log.trace("CACHED: "+resource);
                     new CachedMetaData(cached,pathInContext);
                     return cached;
                 }

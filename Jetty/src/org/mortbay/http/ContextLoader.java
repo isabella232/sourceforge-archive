@@ -190,13 +190,13 @@ public class ContextLoader extends URLClassLoader
         boolean tried_parent= false;
         if (c == null && (_java2compliant || isSystemPath(name)) && !isHiddenPath(name))
         {
-            if (LogSupport.isTraceEnabled(log))
+            if (log.isTraceEnabled())
                 log.trace("try loadClass " + name + " from " + _parent);
             tried_parent= true;
             try
             {
                 c= _parent.loadClass(name);
-                if (LogSupport.isTraceEnabled(log))
+                if (log.isTraceEnabled())
                     log.trace("loaded " + c);
             }
             catch (ClassNotFoundException e)
@@ -207,12 +207,12 @@ public class ContextLoader extends URLClassLoader
 
         if (c == null)
         {
-            if (LogSupport.isTraceEnabled(log))
+            if (log.isTraceEnabled())
                 log.trace("try findClass " + name + " from " + _urlClassPath);
             try
             {
                 c= this.findClass(name);
-                if (LogSupport.isTraceEnabled(log))
+                if (log.isTraceEnabled())
                     log.trace("loaded " + c);
             }
             catch (ClassNotFoundException e)
@@ -223,10 +223,10 @@ public class ContextLoader extends URLClassLoader
 
         if (c == null && !tried_parent && !isHiddenPath(name))
         {
-            if (LogSupport.isTraceEnabled(log))
+            if (log.isTraceEnabled())
                 log.trace("try loadClass " + name + " from " + _parent);
             c= _parent.loadClass(name);
-            if (LogSupport.isTraceEnabled(log))
+            if (log.isTraceEnabled())
                 log.trace("loaded " + c);
         }
 
@@ -246,7 +246,7 @@ public class ContextLoader extends URLClassLoader
         boolean tried_parent= false;
         if (_java2compliant || isSystemPath(name))
         {
-            if (LogSupport.isTraceEnabled(log))
+            if (log.isTraceEnabled())
                 log.trace("try getResource " + name + " from " + _parent);
             tried_parent= true;
             url= _parent.getResource(name);
@@ -254,7 +254,7 @@ public class ContextLoader extends URLClassLoader
 
         if (url == null)
         {
-            if (LogSupport.isTraceEnabled(log))
+            if (log.isTraceEnabled())
                 log.trace("try findResource " + name + " from " + _urlClassPath);
             url= this.findResource(name);
 
@@ -268,13 +268,13 @@ public class ContextLoader extends URLClassLoader
 
         if (url == null && !tried_parent)
         {
-            if (LogSupport.isTraceEnabled(log))
+            if (log.isTraceEnabled())
                 log.trace("try getResource " + name + " from " + _parent);
             url= _parent.getResource(name);
         }
 
         if (url != null)
-            if (LogSupport.isTraceEnabled(log))
+            if (log.isTraceEnabled())
                 log.trace("found " + url);
 
         return url;

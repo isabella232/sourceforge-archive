@@ -467,7 +467,7 @@ public class WebApplicationHandler extends ServletHandler
             // Call servlet
             if (servletHolder != null)
             {
-                if (LogSupport.isTraceEnabled(log))
+                if (log.isTraceEnabled())
                     log.trace("call servlet " + servletHolder);
                 servletHolder.handle(request, response);
             }
@@ -498,14 +498,14 @@ public class WebApplicationHandler extends ServletHandler
         public void doFilter(ServletRequest request, ServletResponse response)
             throws IOException, ServletException
         {
-            if (LogSupport.isTraceEnabled(log))
+            if (log.isTraceEnabled())
                 log.trace("doFilter " + _filter);
 
             // pass to next filter
             if (_filter < LazyList.size(_filters))
             {
                 FilterHolder holder= (FilterHolder)LazyList.get(_filters, _filter++);
-                if (LogSupport.isTraceEnabled(log))
+                if (log.isTraceEnabled())
                     log.trace("call filter " + holder);
                 Filter filter= holder.getFilter();
                 filter.doFilter(request, response, this);
@@ -515,7 +515,7 @@ public class WebApplicationHandler extends ServletHandler
             // Call servlet
             if (_servletHolder != null)
             {
-                if (LogSupport.isTraceEnabled(log))
+                if (log.isTraceEnabled())
                     log.trace("call servlet " + _servletHolder);
                 _servletHolder.handle(request, response);
             }

@@ -1006,7 +1006,7 @@ public class HttpConnection
             {
                 if (log.isDebugEnabled())
                 {
-                    if (LogSupport.isTraceEnabled(log)) log.trace(LogSupport.EXCEPTION,e);
+                    if (log.isTraceEnabled()) log.trace(LogSupport.EXCEPTION,e);
                     else if(log.isDebugEnabled())log.debug(e.toString());
                 }
                 _response.destroy();

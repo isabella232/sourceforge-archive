@@ -150,7 +150,7 @@ public class HttpInputStream extends FilterInputStream
         if ((_deChunker!=null && _deChunker._chunkSize>0) ||
             _realIn.getByteLimit()>0)
             throw new IllegalStateException("Unread input");
-        if(LogSupport.isTraceEnabled(log))log.trace("resetStream()");
+        if(log.isTraceEnabled())log.trace("resetStream()");
         in=_realIn;
         if (_deChunker!=null)
             _deChunker.resetStream();

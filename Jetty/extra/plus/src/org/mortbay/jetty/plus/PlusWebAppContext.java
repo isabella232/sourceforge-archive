@@ -165,7 +165,7 @@ public class PlusWebAppContext extends WebApplicationContext
         //create ENC for this webapp 
         Context compCtx =  (Context)_initialCtx.lookup ("java:comp");
         Context envCtx = compCtx.createSubcontext("env");
-        if(LogSupport.isTraceEnabled(log))log.trace(envCtx);
+        if(log.isTraceEnabled())log.trace(envCtx);
 
         //bind UserTransaction
         compCtx.rebind ("UserTransaction", new LinkRef ("javax.transaction.UserTransaction"));

@@ -56,7 +56,7 @@ public class LogImpl implements org.apache.commons.logging.Log
         try{
             _debugOn= System.getProperty("DEBUG") != null;
             setDebugPatterns(System.getProperty("DEBUG_PATTERNS"));
-            setVerbose(Integer.getInteger("DEBUG_VERVOSE",0).intValue());
+            setVerbose(Integer.getInteger("DEBUG_VERBOSE",0).intValue());
         }
         catch (Exception e)
         {

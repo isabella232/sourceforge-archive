@@ -370,7 +370,7 @@ public class MultiPartRequest
             lf=(c==10 || _char==10);
             if (_char==10) _char=-2;  
         }
-        if(LogSupport.isTraceEnabled(log))log.trace(baos.toString());
+        if(log.isTraceEnabled())log.trace(baos.toString());
         return baos.toByteArray();
     }
     
