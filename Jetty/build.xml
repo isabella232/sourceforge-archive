@@ -171,6 +171,7 @@ release     - Cleanup for release
       <include name="com/mortbay/Jetty/JettyServlet.java" />
     </javac>
     <copyfile src="LICENSE.html" dest="${jetty.webapp}/LICENSE.html" />
+    <copyfile src="VERSION.TXT" dest="${jetty.webapp}/version.txt" />
     <jar jarfile="${jetty.war}"
          basedir="${jetty.webapp}" 
          >
