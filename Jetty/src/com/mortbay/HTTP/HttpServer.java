@@ -733,8 +733,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
         {
             if (_notFoundContext==null)
             {
-                _notFoundContext=addContext(null,"/");
-                Log.event("Adding NotFoundHandler to "+_notFoundContext);
+                _notFoundContext=new HandlerContext(this,"/");
                 _notFoundContext.addHandler(new NotFoundHandler());
                 try{_notFoundContext.start();}catch(Exception e){Code.warning(e);}
             }

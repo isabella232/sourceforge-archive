@@ -1,6 +1,7 @@
 Jetty3 Versions
 --------------
 
+ + Don't add notfound context.
  + Many major and minor optimizations
  + Separation of URL params in HttpHandler API.
  + Fixed handling of default mime types
