@@ -41,13 +41,13 @@ public class ResourceHandler extends NullHandler
 {
     /* ----------------------------------------------------------------- */
     private String _allowHeader = null;
-    private CachedFile[] _cache=null;
-    private int _nextIn=0;
+    private CachedFile _mostRecentlyUsed=null;
+    private CachedFile _leastRecentlyUsed=null;
     private Map _cacheMap=null;
-    private boolean _dirAllowed =true;
-    private boolean _putAllowed =false;
+    private boolean _dirAllowed=true;
+    private boolean _putAllowed=false;
     private boolean _delAllowed=false;
-    private int _maxCachedFiles =64;
+    private int _maxCachedFiles=128;
     private int _maxCachedFileSize =40960;
     private Resource _resourceBase=null;
     private boolean _handleGeneralOptionsQuery=true;
@@ -165,16 +165,15 @@ public class ResourceHandler extends NullHandler
             _resourceBase=getHandlerContext().getResourceBase();
 
             Log.event("ResourceHandler started in "+ _resourceBase);
-            if (_maxCachedFiles>0 && _maxCachedFileSize>0 && _cache==null)
-            {
-                _cache=new CachedFile[_maxCachedFiles];
+            _mostRecentlyUsed=null;
+            _leastRecentlyUsed=null;
+            if (_maxCachedFiles>0 && _maxCachedFileSize>0)
                 _cacheMap=new HashMap();
-            }
             super.start();
         }
         catch(Exception e)
         {
-            Code.warning("XXX",e);
+            Code.warning(e);
             throw new Error(e.toString());
         }
     }
@@ -188,9 +187,14 @@ public class ResourceHandler extends NullHandler
     /* ----------------------------------------------------------------- */
     public void destroy()
     {
-        _cache=null;
-        if( _cacheMap != null)
-            _cacheMap.clear();
+        synchronized(_cacheMap)
+        {
+            if( _cacheMap != null)
+                _cacheMap.clear();
+            _cacheMap=null;
+            _mostRecentlyUsed=null;
+            _leastRecentlyUsed=null;
+        }
         super.destroy();
     }
 
@@ -279,23 +283,21 @@ public class ResourceHandler extends NullHandler
         Code.debug("Looking for ",resource);
   
         // Try a cache lookup
-        if (_cache!=null && !endsWithSlash)
+        if (_cacheMap!=null && !endsWithSlash)
         {
             CachedFile cachedFile = null;
             synchronized(_cacheMap)
             {
                 cachedFile= (CachedFile)_cacheMap.get(resource.toString());
 
-                if (cachedFile!=null &&cachedFile.isValid())
-                {
-                    if (!passConditionalHeaders(request,response,cachedFile.resource))
-                        return;
-                }
+                if (cachedFile!=null && cachedFile.isValid() &&
+                    !passConditionalHeaders(request,response,cachedFile.resource))
+                    return;
             }
 
             if (cachedFile != null)
             {
-                Code.debug("Cache hit: "+resource);
+                Code.debug("Cache hit: ",resource);
                 sendData(request, response, cachedFile);
                 return;
             }
@@ -476,7 +478,7 @@ public class ResourceHandler extends NullHandler
             {
                 CachedFile cachedFile=(CachedFile)_cacheMap.get(resource.toString());
                 if (cachedFile!=null)
-                    cachedFile.flush();
+                    cachedFile.invalidate();
             }
 
             // Send response
@@ -640,14 +642,14 @@ public class ResourceHandler extends NullHandler
 
             long first0 = ibr.getFirst(resLength);
             if (first0 >= resLength) {
-                Code.debug("no satisfiable: " + ibr);
+                Code.debug("no satisfiable: ",ibr);
                 continue;   // not satisfiable
             }
 
             if (singleSatisfiableRange == null) {
                 singleSatisfiableRange = ibr;
                 satisfiableRangeCount = 1;
-                Code.debug("first satisfiable range: " + ibr);
+                Code.debug("first satisfiable range: ",ibr);
                 continue;   // found first sat range
             }
 
@@ -655,7 +657,7 @@ public class ResourceHandler extends NullHandler
             if (first0 > (last1 + 1)) {
                 satisfiableRangeCount++;
                 singleSatisfiableRange = null;
-                Code.debug("second (right) satisfiable range: " + ibr);
+                Code.debug("second (right) satisfiable range: ", ibr);
                 break;   // just found second non-overlapping sat range
             }
 
@@ -664,7 +666,7 @@ public class ResourceHandler extends NullHandler
             if (last0 < (first1 - 1)) {
                 satisfiableRangeCount++;
                 singleSatisfiableRange = null;
-                Code.debug("second (left) satisfiable range: " + ibr);
+                Code.debug("second (left) satisfiable range: ", ibr);
                 break;   // just found second non-overlapping sat range
             }
 
@@ -681,7 +683,7 @@ public class ResourceHandler extends NullHandler
                   last = last1;
             }
 
-            Code.debug("merged " + ibr + " into single satisfiable range: " + singleSatisfiableRange);
+            Code.debug("merged ", ibr," into single satisfiable range: ", singleSatisfiableRange);
             singleSatisfiableRange = new InclusiveByteRange(first, last);
         }
 
@@ -780,24 +782,9 @@ public class ResourceHandler extends NullHandler
         SendableResource data = null;
 
         // Can the file be cached?
-        if (_cache!=null && resource.length()>0 &&
+        if (_cacheMap!=null && resource.length()>0 &&
             resource.length()<_maxCachedFileSize)
-        {
-            CachedFile cachedFile = null;
-            synchronized (_cacheMap)
-            {
-                if (_cache[_nextIn]!=null)
-                    _cache[_nextIn].flush();
-                
-                cachedFile=_cache[_nextIn]=new CachedFile();
-                _nextIn=(_nextIn+1)%_cache.length;
-                cachedFile.flush();
-                cachedFile.load(resource);
-                _cacheMap.put(resource.toString(),cachedFile);
-            }
-
-            data = cachedFile;
-        }
+            data = new CachedFile(resource);
         else
             data = new UnCachedFile(resource);
 
@@ -805,7 +792,8 @@ public class ResourceHandler extends NullHandler
         {
             sendData(request, response, data);
         }
-        finally {
+        finally
+        {
             data.requestDone();
         }
     }
@@ -916,7 +904,8 @@ public class ResourceHandler extends NullHandler
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
 
-    private interface SendableResource {
+    private interface SendableResource
+    {
         long getLength();
         String getEncoding();
         void writeHeaders(HttpResponse response, long count)
@@ -940,41 +929,45 @@ public class ResourceHandler extends NullHandler
         long pos = 0;
 
 
-        public String getEncoding() {
+        public String getEncoding()
+        {
             return encoding;
         }
 
-        public long getLength() {
+        public long getLength()
+        {
             return length;
         }
 
-
-        public UnCachedFile(Resource resource) {
+        public UnCachedFile(Resource resource)
+        {
             this.resource = resource;
             encoding = getHandlerContext().getMimeByExtension(resource.getName());
             length = resource.length();
         }
 
-        public void writeBytes(ChunkableOutputStream os, long start, long count) throws IOException {
-
-             if (ris == null || pos > start) {
-                  ris = resource.getInputStream();
-                  pos = 0;
-             }
-
-             if (pos < start) {
-                  ris.skip(start - pos);
-                  pos = start;
-             } 
-
-             os.write(ris, (int) count);
+        public void writeBytes(ChunkableOutputStream os, long start,long count)
+            throws IOException
+        {
+            if (ris == null || pos > start)
+            {
+                ris = resource.getInputStream();
+                pos = 0;
+            }
+            
+            if (pos < start) {
+                ris.skip(start - pos);
+                pos = start;
+            } 
+            
+            os.write(ris, (int) count);
         }
 
         public void writeHeaders(HttpResponse response, long count)
         {
             response.setField(HttpFields.__ContentType,encoding);
             if (length != -1) 
-                 response.setIntField(HttpFields.__ContentLength, (int) count);
+                response.setIntField(HttpFields.__ContentLength, (int) count);
             response.setDateField(HttpFields.__LastModified,resource.lastModified());
             response.setField(HttpFields.__AcceptRanges,"bytes");
         }
@@ -989,8 +982,7 @@ public class ResourceHandler extends NullHandler
             catch (IOException ioe){Code.ignore(ioe);}
         }
 
-    }
-
+    }    
 
     /* ------------------------------------------------------------ */
     /** Holds a cached file.
@@ -1004,17 +996,46 @@ public class ResourceHandler extends NullHandler
         byte[] bytes;
         String encoding;
 
+        CachedFile prev;
+        CachedFile next;
 
         /* ------------------------------------------------------------ */
+        CachedFile(Resource resource)
+            throws IOException
+        {
+            synchronized(_cacheMap)
+            {
+                load(resource);
+                String r=resource.toString();
+                Object old=_cacheMap.get(r);                
+                if (old!=null)
+                    ((CachedFile)old).invalidate();
+                _cacheMap.put(r,this);
+                
+                next=_mostRecentlyUsed;
+                _mostRecentlyUsed=this;
+                if (next!=null)
+                    next.prev=this;
+                else
+                    _leastRecentlyUsed=this;
 
-        public String getEncoding() {
+                if (_cacheMap.size()>_maxCachedFiles)
+                    _leastRecentlyUsed.invalidate();
+            }
+        }
+        
+        
+        /* ------------------------------------------------------------ */
+        public String getEncoding()
+        {
             return encoding;
         }
 
 
         /* ------------------------------------------------------------ */
         public void writeBytes(ChunkableOutputStream os, long startByte, long count) 
-                    throws IOException {
+            throws IOException
+        {
              os.write(bytes, (int) startByte, (int) count);
         }
 
@@ -1023,31 +1044,71 @@ public class ResourceHandler extends NullHandler
         boolean isValid()
             throws IOException
         {
-            if (resource==null)
-                return false;
-
-            // check if the file is still there
-            if (!resource.exists())
+            if (resource==null || !resource.exists() ||
+                lastModified!=resource.lastModified())
             {
-                flush();
+                // The cached file is no longer valid
+                invalidate();
                 return false;
             }
-
-            // check if the file has changed
-            if(lastModified!=resource.lastModified())
+            else
             {
-                // If it is too big
-                if (resource.length()>_maxCachedFileSize)
+                // make it the most recently used
+                use();
+                return true;
+            }
+        }
+
+        /* ------------------------------------------------------------ */
+        public void invalidate()
+        {
+            synchronized(_cacheMap)
+            {
+                lastModified--;
+                _cacheMap.remove(resource.toString());
+
+                if (prev==null)
+                    _mostRecentlyUsed=next;
+                else
+                    prev.next=next;
+                
+                if (next==null)
+                    _leastRecentlyUsed=prev;
+                else
+                    next.prev=prev;
+
+                prev=null;
+                next=null;
+            }
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void use()
+        {
+            synchronized(_cacheMap)
+            {
+                if (_mostRecentlyUsed!=this)
                 {
-                    flush();
-                    return false;
+                    CachedFile tp = prev;
+                    CachedFile tn = next;
+                    
+                    next=_mostRecentlyUsed;
+                    _mostRecentlyUsed=this;
+                    if (next!=null)
+                        next.prev=this;
+                    prev=null;
+                    
+                    // delete it from where it was
+                    if (tp!=null)
+                        tp.next=tn;
+                    if (tn!=null)
+                        tn.prev=tp;
+                    
+                    if (_leastRecentlyUsed==this && tp!=null)
+                        _leastRecentlyUsed=tp;
                 }
-
-                // reload the changed file
-                load(resource);
+                
             }
- 
-            return true;
         }
   
         /* ------------------------------------------------------------ */
@@ -1083,16 +1144,6 @@ public class ResourceHandler extends NullHandler
             in.close();
             encoding=getHandlerContext().getMimeByExtension(resource.getName());
         }
-  
-        /* ------------------------------------------------------------ */
-        void flush()
-        {
-            if (resource!=null)
-            {
-                Code.debug("FLUSH: ",resource);
-                _cacheMap.remove(resource.toString());
-            }
-        }
 
         /* ------------------------------------------------------------ */
         public void requestDone()
@@ -1105,6 +1156,11 @@ public class ResourceHandler extends NullHandler
             return bytes.length;
         }
 
+        /* ------------------------------------------------------------ */
+        public String toString()
+        {
+            return resource.toString();
+        }
     }
 }
 

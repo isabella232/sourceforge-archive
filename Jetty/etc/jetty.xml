@@ -88,6 +88,11 @@ $Id$
       <Arg>/dump/*,/handler/Dump,/handler/Dump/*</Arg>
       <Arg>com.mortbay.Servlet.Dump</Arg>
     </Call>
+    <Call name="addServlet">
+      <Arg>JSP</Arg>
+      <Arg>*.jsp,*.jsP,*.jSp,*.jSP,*.Jsp,*.JsP,*.JSp,*.JSP</Arg>
+      <Arg>org.apache.jasper.servlet.JspServlet</Arg>
+    </Call>
   </Call>
 
   <Set name="LogSink">

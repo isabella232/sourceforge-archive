@@ -2,8 +2,8 @@ Jetty Versions
 --------------
 
 Jetty-3.0.2 - 
- + Fixed flush bug in ResourceHandler FIFO Cache
- + Greatly improved efficiency of ChunkableOutputStream
+ + Replaced ResourceHandler FIFO cache with LRU cache.
+ + Greatly improved buffering in ChunkableOutputStream
  + Padded error bodies for IE bug.
  + Improved HTML.Block efficiency
  + Improved jetty.bat
