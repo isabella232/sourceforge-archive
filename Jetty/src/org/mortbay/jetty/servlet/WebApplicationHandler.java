@@ -194,7 +194,8 @@ public class WebApplicationHandler extends ServletHandler
             _contextAttributeListeners= LazyList.add(_contextAttributeListeners, listener);
         }
 
-        super.addEventListener(listener);
+        if (!known)
+            super.addEventListener(listener);
     }
 
     /* ------------------------------------------------------------ */
