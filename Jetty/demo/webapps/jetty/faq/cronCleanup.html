@@ -15,10 +15,5 @@ directory under the tmp location, named according to the context and port number
     /tmp/Jetty__8080___myContext/
 </PRE>
 <P>
-Your solution to disappearing /tmp content is to either disable the cron job, or (more conscientiously) redefine the top level tmp directory.  You do this by restarting Jetty and setting the system property <code>java.io.tmpdir</code> to a directory other than the system default, eg:
-
-<pre>
-    java -Djava.io.tmpdir="/usr/mytmp" -jar start.jar myconfig.xml
-</pre>
-
-If you're on a Windows environment, then the system default location is typically c:\temp. In the same way as on Unix, you use the <code>java.io.tmpdir</code> property to change this.
+Your solution to disappearing /tmp content is to either disable the cron job, or (more conscientiously) redefine the top level tmp directory. 
+To redefine your temporary directory location see <a href="faq?s=250-Configuration&t=tempdir">this FAQ</a>.
