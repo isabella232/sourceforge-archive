@@ -22,6 +22,13 @@
       <url-pattern>/*</url-pattern>
   </filter-mapping>
 
+  <!--
+  <filter-mapping>
+       <filter-name>Demo Filter</filter-name>
+       <servlet-name>default</servlet-name>
+  </filter-mapping>
+  -->
+
   <servlet>
     <servlet-name>Jetty Demo Page</servlet-name>
     <servlet-class id="xx">org.mortbay.webapps.jetty.JettyServlet</servlet-class>
