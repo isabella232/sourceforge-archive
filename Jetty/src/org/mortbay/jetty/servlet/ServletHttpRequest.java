@@ -248,8 +248,8 @@ public class ServletHttpRequest
                 country = language.substring(dash + 1).trim();
                 language = language.substring(0,dash).trim();
             }
-            langs=LazyList.add(langs,size,
-                               new Locale(language,country));
+            langs=LazyList.ensureSize(langs,size);
+            langs=LazyList.add(langs,new Locale(language,country));
         }
 
         if (LazyList.size(langs)==0)

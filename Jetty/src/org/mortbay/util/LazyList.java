@@ -82,6 +82,39 @@ public class LazyList
         l.add(item);
         return l;    
     }
+
+    /* ------------------------------------------------------------ */
+    /** Add an item to a LazyList 
+     * @param list The list to add to or null if none yet created.
+     * @param index The index to add the item at.
+     * @param item The item to add.
+     * @return The lazylist created or added to.
+     */
+    public static Object add(Object list, int index, Object item)
+    {
+        if (list==null)
+        {
+            if (index>0 || item instanceof List || item==null)
+            {
+                List l = new ArrayList();
+                l.add(index,item);
+                return l;
+            }
+            return item;
+        }
+
+        if (list instanceof List)
+        {
+            ((List)list).add(index,item);
+            return list;
+        }
+
+        List l=new ArrayList();
+        l.add(list);
+        l.add(index,item);
+        return l;    
+    }
+
     
     /* ------------------------------------------------------------ */
     /** Add the contents of a Collection to a LazyList
@@ -113,36 +146,15 @@ public class LazyList
     }
 
     /* ------------------------------------------------------------ */
-    /** Add an item to a LazyList 
-     * @param list The list to add to or null if none yet created.
-     * @param initialSize A size to use when creating the real list
-     * @param item The item to add.
-     * @return The lazylist created or added to.
-     */
-    public static Object add(Object list, int initialSize, Object item)
+    public static Object ensureSize(Object list, int initialSize)
     {
         if (list==null)
-        {
-            if (item instanceof List || item==null)
-            {
-                List l = new ArrayList(initialSize);
-                l.add(item);
-                return l;
-            }
-
-            return item;
-        }
-
-        if (list instanceof List)
-        {
-            ((List)list).add(item);
+            return new ArrayList(initialSize);
+        if (list instanceof ArrayList)
             return list;
-        }
-
-        List l=new ArrayList(initialSize);
+        List l= new ArrayList(initialSize);
         l.add(list);
-        l.add(item);
-        return l;    
+        return list;    
     }
 
     /* ------------------------------------------------------------ */

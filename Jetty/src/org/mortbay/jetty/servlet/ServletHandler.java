@@ -15,7 +15,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -30,10 +29,6 @@ import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionActivationListener;
-import javax.servlet.http.HttpSessionAttributeListener;
-import javax.servlet.http.HttpSessionBindingListener;
-import javax.servlet.http.HttpSessionListener;
 import org.mortbay.http.EOFException;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
@@ -82,7 +77,6 @@ public class ServletHandler extends AbstractHttpHandler
     /* ------------------------------------------------------------ */
     private boolean _usingCookies=true;
     private LogSink _logSink;
-    private SessionManager _sessionManager;
     private boolean _autoInitializeServlets=true;
     
     /* ------------------------------------------------------------ */
@@ -90,8 +84,8 @@ public class ServletHandler extends AbstractHttpHandler
     protected Map _nameMap=new HashMap();
     protected String _formLoginPage;
     protected String _formErrorPage;
+    protected SessionManager _sessionManager;
 
-    protected transient List _sessionListeners;
     protected transient Context _context;
     protected transient ClassLoader _loader;
 
@@ -124,43 +118,7 @@ public class ServletHandler extends AbstractHttpHandler
         if (isStarted())
             throw new IllegalStateException("Started");
 
-        int mii=0;
-        boolean setMii=false;
- 
-        if (getHttpContext()!=null && _sessionManager!=null)
-	{
-            _sessionManager.initialize(null);
-            if (_sessionListeners!=null)
-            {
-                for (Iterator i=_sessionListeners.iterator();i.hasNext();)
-                {
-                    EventListener listener=(EventListener)i.next();
-                    _sessionManager.removeEventListener(listener);
-                }
-            }
-            mii=_sessionManager.getMaxInactiveInterval();
-            setMii=true;
-	}
-
         _sessionManager=sm;
-
-        if (getHttpContext()!=null)
-	{
-            if (_sessionListeners!=null)
-            {
-                for (Iterator i=_sessionListeners.iterator();i.hasNext();)
-                {
-                    EventListener listener=(EventListener)i.next();
-                    _sessionManager.addEventListener(listener);
-                }
-            }
-	    if (_sessionManager!=null)
-            {
-                _sessionManager.initialize(this);
-                if (setMii)
-                    _sessionManager.setMaxInactiveInterval(mii);
-            } 
-        }
     }
     
     /* ------------------------------------------------------------ */
@@ -349,38 +307,6 @@ public class ServletHandler extends AbstractHttpHandler
         }
     }
     
-    /* ------------------------------------------------------------ */
-    public synchronized void addEventListener(EventListener listener)
-        throws IllegalArgumentException
-    {
-        if ((listener instanceof HttpSessionActivationListener) ||
-            (listener instanceof HttpSessionAttributeListener) ||
-            (listener instanceof HttpSessionBindingListener) ||
-            (listener instanceof HttpSessionListener))
-	{
-            _sessionManager.addEventListener(listener);
-            if (_sessionListeners==null)
-                _sessionListeners=new ArrayList(3);
-            _sessionListeners.add(listener);
-	}
-        else 
-            throw new IllegalArgumentException(listener.toString());
-    }
-    
-    /* ------------------------------------------------------------ */
-    public synchronized void removeEventListener(EventListener listener)
-    {
-        if ((listener instanceof HttpSessionActivationListener) ||
-            (listener instanceof HttpSessionAttributeListener) ||
-            (listener instanceof HttpSessionBindingListener) ||
-            (listener instanceof HttpSessionListener))
-        {
-	    _sessionManager.removeEventListener(listener);
-            if (_sessionListeners!=null)
-                _sessionListeners.remove(_sessionListeners.indexOf(listener));
-        }
-    }
-
     /* ------------------------------------------------------------ */
     public boolean isAutoInitializeServlets()
     {

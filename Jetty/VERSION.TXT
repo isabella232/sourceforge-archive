@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-5.0.alpha2
  + Update jakarta examples
  + Correctly setup context classloader in cross context dispatch.
  + Turn off validation without non-xerces errors
@@ -9,7 +10,7 @@ Jetty Versions
  + Put a semi busy loop into proxy tunnels for IE problems
  + MultipartRequest supports multi value headers.
  + XML entity resolution uses URLs not Resources
- + Implemented ServletRequestListeners
+ + Implemented ServletRequestListeners as optional filter.
  + Moved error page mechanism to be webapp only.
 
 Jetty-5.0.alpha1 - 12 August 2003

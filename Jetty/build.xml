@@ -443,7 +443,7 @@
    description="Build everything"/>
 
   <!-- ==================================================================== -->
-  <target name="demo" depends="webapps,javadoc" if="demo.available"
+  <target name="demo" depends="webapps" if="demo.available"
    description="Build and run the demo">
     <java jar="${start.jar}"
           dir="${jetty.home}"

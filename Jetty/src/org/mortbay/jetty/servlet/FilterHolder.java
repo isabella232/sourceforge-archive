@@ -28,7 +28,9 @@ public class FilterHolder
         __REQUEST=1,
         __FORWARD=2,
         __INCLUDE=4,
-        __ERROR=8;
+        __ERROR=8,
+        __ALL=15;
+    
 
     public static int type(String type)
     {

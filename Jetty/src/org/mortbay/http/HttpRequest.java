@@ -766,7 +766,10 @@ public class HttpRequest extends HttpMessage
                             response.setAcceptTrailer(true);
                     }
                     else if (!HttpFields.__Chunked.equalsIgnoreCase(coding))
-                        acceptable=LazyList.add(acceptable,size,coding);
+                    {
+                        acceptable=LazyList.ensureSize(acceptable,size);
+                        acceptable=LazyList.add(acceptable,coding);
+                    }
                 }
                 _te=LazyList.getList(acceptable);
             }
@@ -1107,7 +1110,11 @@ public class HttpRequest extends HttpMessage
     {
         Principal principal=getUserPrincipal();
         if (principal!=null)
-            getHttpResponse().getHttpContext().getRealm().isUserInRole(principal,role);
+        {
+            UserRealm realm=getHttpResponse().getHttpContext().getRealm();
+            if (realm!=null)
+                return realm.isUserInRole(principal,role);
+        }
         return false;
     }
     

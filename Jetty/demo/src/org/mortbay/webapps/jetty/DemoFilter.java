@@ -1,5 +1,5 @@
 // ===========================================================================
-// Copyright (c) 1996 Mort Bay Consulting Pty. Ltd. All rights reserved.
+// Copyright (c) 1996-2003 Mort Bay Consulting Pty. Ltd. All rights reserved.
 // $Id$
 // ---------------------------------------------------------------------------
 
@@ -15,7 +15,7 @@ import javax.servlet.ServletResponse;
 
 import org.mortbay.util.Code;
 
-
+/* ------------------------------------------------------------ */
 public  class DemoFilter implements Filter
 {
     public void init(FilterConfig filterConfig)
@@ -23,7 +23,8 @@ public  class DemoFilter implements Filter
     {
         Code.debug("init:",filterConfig);
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void doFilter(ServletRequest request,
                          ServletResponse response,
                          FilterChain chain)

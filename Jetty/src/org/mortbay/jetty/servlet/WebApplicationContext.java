@@ -23,8 +23,6 @@ import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestEvent;
-import javax.servlet.ServletRequestListener;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
@@ -89,7 +87,6 @@ public class WebApplicationContext
     private transient Map _tagLibMap;
     private transient Object _contextListeners;
     private transient Object _contextAttributeListeners;
-    private transient Object _requestListeners;
     private transient Map _errorPages;
 
     
@@ -534,7 +531,6 @@ public class WebApplicationContext
 
         _contextListeners=null;
         _contextAttributeListeners=null;
-        _requestListeners=null;
         
         // Stop the context
         super.stop();
@@ -592,11 +588,6 @@ public class WebApplicationContext
             _contextAttributeListeners=LazyList.add(_contextAttributeListeners,listener);
         }
         
-        if (listener instanceof ServletRequestListener)
-        {
-            known=true;
-            _requestListeners=LazyList.add(_requestListeners,listener);
-        }
 
         if (!known)
             throw new IllegalArgumentException("Unknown "+listener);
@@ -607,7 +598,6 @@ public class WebApplicationContext
     {
         _contextListeners=LazyList.remove(_contextListeners,listener);
         _contextAttributeListeners=LazyList.remove(_contextAttributeListeners,listener);
-        _requestListeners=LazyList.remove(_requestListeners,listener);
     }
 
     /* ------------------------------------------------------------ */
@@ -1016,21 +1006,26 @@ public class WebApplicationContext
         }
 
         boolean known=false;
-        if ((listener instanceof ServletContextListener) ||
-            (listener instanceof ServletContextAttributeListener))
+        try
         {
-            known=true;
             addEventListener((EventListener)listener);
+            known=true;
+        }
+        catch(Exception e)
+        {
+            Code.ignore(e);
+        }
+
+        try
+        {
+            _webAppHandler.addEventListener((EventListener)listener);
+            known=true;
+        }
+        catch(Exception e)
+        {
+            Code.ignore(e);
         }
         
-        if((listener instanceof HttpSessionActivationListener) ||
-           (listener instanceof HttpSessionAttributeListener) ||
-           (listener instanceof HttpSessionBindingListener) ||
-           (listener instanceof HttpSessionListener))
-        {
-            known=true;
-            _webAppHandler.addEventListener((EventListener)listener);
-        }
         if (!known)
             Code.warning("Unknown: "+listener);
     }
@@ -1323,24 +1318,6 @@ public class WebApplicationContext
         return resource;
     }
 
-    /* ------------------------------------------------------------ */
-    void requestInitialized(ServletRequest request)
-    {
-        ServletRequestEvent event = new ServletRequestEvent(getServletContext(),request);
-        for (int i=0;i<LazyList.size(_requestListeners);i++)
-            ((ServletRequestListener)LazyList.get(_requestListeners,i))
-                        .requestInitialized(event);
-    }
-    
-    /* ------------------------------------------------------------ */
-    void requestDestroyed(ServletRequest request)
-    {
-        ServletRequestEvent event = new ServletRequestEvent(getServletContext(),request);
-        for (int i=LazyList.size(_requestListeners);i-->0;)
-            ((ServletRequestListener)LazyList.get(_requestListeners,i))
-                        .requestDestroyed(event);
-    }
-    
 
     /* ------------------------------------------------------------ */
     /** set error page URI.

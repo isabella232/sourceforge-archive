@@ -55,6 +55,7 @@ public class Dump extends HttpServlet
     public void doGet(HttpServletRequest request, HttpServletResponse response) 
         throws ServletException, IOException
     {
+        request.setAttribute("Dump",this);
         String info=request.getPathInfo();
         if (info!=null && info.endsWith("Exception"))
         {
