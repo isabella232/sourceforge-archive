@@ -558,7 +558,7 @@ public class ServletHttpRequest
                 cookie.setMaxAge(-1);
             
             cookie.setPath(path);
-            _servletHttpResponse.getHttpResponse().addSetCookie(cookie,false);
+            _servletHttpResponse.getHttpResponse().addSetCookie(cookie);
         }
 
         return session;

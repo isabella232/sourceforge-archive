@@ -402,7 +402,7 @@ public class HttpResponse extends HttpMessage
     public void addSetCookie(String name,
                              String value)
     {
-        addSetCookie(new Cookie(name,value),false);
+        _header.addSetCookie(new Cookie(name,value));
     }
     
     /* -------------------------------------------------------------- */
@@ -410,18 +410,9 @@ public class HttpResponse extends HttpMessage
      */
     public void addSetCookie(Cookie cookie)
     {
-        addSetCookie(cookie,false);
+        _header.addSetCookie(cookie);
     }
     
-    /* -------------------------------------------------------------- */
-    /** Add a Set-Cookie field.
-     * @param cookie The cookie.
-     * @param cookie2 If true, use the alternate cookie 2 header
-     */
-    public void addSetCookie(Cookie cookie, boolean cookie2)
-    {
-        _header.addSetCookie(cookie,cookie2);
-    }
 
     /* ------------------------------------------------------------ */
     public void completing()

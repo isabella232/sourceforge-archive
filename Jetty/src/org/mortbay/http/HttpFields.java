@@ -1426,9 +1426,8 @@ public class HttpFields
     /* ------------------------------------------------------------ */
     /** Format a set cookie value
      * @param cookie The cookie.
-     * @param cookie2 If true, use the alternate cookie 2 header
      */
-    public void addSetCookie(Cookie cookie, boolean cookie2)
+    public void addSetCookie(Cookie cookie)
     {
         String name=cookie.getName();
         String value=cookie.getValue();
@@ -1448,9 +1447,9 @@ public class HttpFields
             if (value!=null && value.length()>0)
             {
                 if (version==0)
-                    URI.encodeString(buf,value,"\"; ");
+                    URI.encodeString(buf,value,"\";, ");
                 else
-                    QuotedStringTokenizer.quote(buf,value);
+                    buf.append(QuotedStringTokenizer.quote(value,"\";, "));
             }
 
             if (version>0)
@@ -1504,9 +1503,7 @@ public class HttpFields
             name_value_params = buf.toString();
         }
         put(__Expires,__01Jan1970);
-        add(cookie2
-            ?HttpFields.__SetCookie2:HttpFields.__SetCookie,
-            name_value_params); 
+        add(__SetCookie,name_value_params);
     }
 
     /* ------------------------------------------------------------ */

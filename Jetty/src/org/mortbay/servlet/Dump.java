@@ -131,16 +131,19 @@ public class Dump extends HttpServlet
             }
         }
 
-        if (info != null && info.indexOf("Cookie") >= 0)
+        String cn= request.getParameter("cookie");
+        String cv=request.getParameter("value");
+        String v=request.getParameter("version");
+        if (cn!=null && cv!=null)
         {
-            Cookie cookie= new Cookie("Cookie", info);
-            cookie.setMaxAge(300);
-            cookie.setPath("/");
+            Cookie cookie= new Cookie(cn, cv);
             cookie.setComment("Cookie from dump servlet");
-            if (info.indexOf("Cookie1") >= 0)
-                cookie.setVersion(1);
-            if (info.indexOf("Cookie2") >= 0)
-                cookie.setVersion(2);
+            if (v!=null)
+            {
+                cookie.setMaxAge(300);
+                cookie.setPath("/");
+                cookie.setVersion(Integer.parseInt(v));
+            }
             response.addCookie(cookie);
         }
 
@@ -315,6 +318,24 @@ public class Dump extends HttpServlet
                     }
             }
 
+            table.newRow();
+            table
+                .newHeading()
+                .cell()
+                .nest(new Font(2, true))
+                .add("<BR>Cookies")
+                .attribute("COLSPAN", "2")
+                .left();
+            Cookie[] cookies = request.getCookies();
+            for (int i=0; cookies!=null && i<cookies.length;i++)
+            {
+                Cookie cookie = cookies[i];
+
+                table.newRow();
+                table.addHeading(cookie.getName() + ":&nbsp;").cell().attribute("VALIGN", "TOP").right();
+                table.addCell(cookie.getValue());
+            }
+            
             /* ------------------------------------------------------------ */
             table.newRow();
             table
