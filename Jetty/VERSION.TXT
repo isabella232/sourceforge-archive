@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+Jetty-5.0.0 - 10 September 2004
+
 Jetty-5.0.RC4 - 5 September 2004
  + Fixed configuration of URL alias checking
  + JettyJBoss: Use realm-name from web.xml if present, otherwise use security-domain from jboss-web.xml
