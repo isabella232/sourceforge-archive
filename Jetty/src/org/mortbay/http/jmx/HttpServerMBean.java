@@ -87,6 +87,7 @@ public class HttpServerMBean extends LifeCycleMBean
         defineOperation("removeListener",new String[]{"org.mortbay.http.HttpListener"},IMPACT_ACTION);
         defineOperation("addContext",new String[]{"org.mortbay.http.HttpContext"},IMPACT_ACTION);
         defineOperation("removeContext",new String[]{"org.mortbay.http.HttpContext"},IMPACT_ACTION);
+        defineOperation("addContext",new String[]{"java.lang.String"},IMPACT_ACTION);
         defineOperation("addContext",new String[]{"java.lang.String","java.lang.String"},IMPACT_ACTION);
         
         defineAttribute("requestsPerGC");
