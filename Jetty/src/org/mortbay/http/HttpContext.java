@@ -274,6 +274,7 @@ public class HttpContext implements LifeCycle,
     
     /* ------------------------------------------------------------ */
     /** Add a virtual host alias to this context.
+     * @see setVirtualHosts
      * @param host A hostname. A null host name means any hostname is
      * acceptable. Host names may String representation of IP addresses.
      */
@@ -297,6 +298,7 @@ public class HttpContext implements LifeCycle,
     
     /* ------------------------------------------------------------ */
     /** remove a virtual host alias to this context.
+     * @see setVirtualHosts
      * @param host A hostname. A null host name means any hostname is
      * acceptable. Host names may String representation of IP addresses.
      */
@@ -317,7 +319,12 @@ public class HttpContext implements LifeCycle,
     }
 
     /* ------------------------------------------------------------ */
-    /** 
+    /** Set the virtual hosts for the context.
+     * Only requests that have a matching host header or fully qualified
+     * URL will be passed to that context with a virtual host name.
+     * A context with no virtual host names or a null virtual host name is
+     * available to all requests that are not served by a context with a
+     * matching virtual host name.
      * @param hosts Array of virtual hosts that this context responds to. A
      * null host name or null/empty array means any hostname is acceptable.
      * Host names may String representation of IP addresses.
@@ -338,7 +345,12 @@ public class HttpContext implements LifeCycle,
     }
     
     /* ------------------------------------------------------------ */
-    /** 
+    /** Get the virtual hosts for the context.
+     * Only requests that have a matching host header or fully qualified
+     * URL will be passed to that context with a virtual host name.
+     * A context with no virtual host names or a null virtual host name is
+     * available to all requests that are not served by a context with a
+     * matching virtual host name.
      * @return Array of virtual hosts that this context responds to. A
      * null host name or empty array means any hostname is acceptable.
      * Host names may be String representation of IP addresses.

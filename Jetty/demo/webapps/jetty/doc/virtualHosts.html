@@ -1,28 +1,37 @@
 <HR><B><FONT SIZE="+2">Virtual Hosts</FONT></B><HR>
-<BR><BR>
-Jetty supports the virtual host mechanism of HTTP.  The methods to add a WebApplication or
-a HttpContext all take an optional virtualhost argument.  In the jetty.xml file, this can be
+<BR>
+Many domain names can be mapped to a single TCP/IP address.  If
+different content needs to be served for each different domain, then the virtual
+hosts mechanism needs to be used.
+<P>
+A HttpContext can be registered against one or more virtual host names. Only
+requests that have a matching host header or fully qualified URL will be
+passed to that context.
+<P>
+The setVirtualHosts method can be used to set an array of virtual host names
+on a Context. In the jetty.xml file, this can be
 done with:
 <UL><TT><PRE>
   &lt;Call name="addWebApplication"&gt;
-    &lt;Arg&gt;virtual.host.name&lt;/arg&gt;
     &lt;Arg&gt;/context&lt;/Arg&gt;
-    &lt;Arg&gt;&lt;SystemProperty name="jetty.home" default="."/&gt; "/webapps/myapp"&lt;/Arg&gt;
-    &lt;Arg&gt;&lt;SystemProperty name="jetty.home" default="."/&gt; "/etc/webdefaults.xml" &lt;/Arg&gt;
-    &lt;Arg type="boolean"&gt;false&lt;/Arg&gt;
-  &lt;/Call&gt;
-</PRE></TT></UL>
-If you want more than one virtual name for the webapp, you can add aliases with
+    &lt;Arg&gt;./webapps/myapp&lt;/Arg&gt;
 
-<UL><TT><PRE>
-  &lt;Call name="addHostAlias"&gt;
-   &lt;Arg&gt;virtual.host.name&lt;/arg&gt;
-   &lt;Arg&gt;othername&lt;/arg&gt;
+    &lt;Set name="virtualHosts"&gt;
+      &lt;Array type="java.lang.String"&gt;
+        &lt;Item&gt;www.acme.com&lt;/Item&gt;
+        &lt;Item&gt;acme.com&lt;/Item&gt;
+        &lt;Item&gt;www.wileyc.com&lt;/Item&gt;
+        &lt;Item&gt;184.34.51.125&lt;/Item&gt;
+      &lt;/Array&gt;
+    &lt;/Set&gt;
   &lt;/Call&gt;
+</PRE></UL></TT>
+<P>
+A null virtual host name is the same as not virtual host names and means the
+context is available to requests that do not first match other virtual host contexts. 
+<P>
+If you want different content to be served from different real IP addresses,
+then you do not need virtual hosts. Rather you need multiple instances of
+HttpServer, each with their own listeners and contexts.
 
-  &lt;Call name="addHostAlias"&gt;
-   &lt;Arg&gt;virtual.host.name&lt;/arg&gt;
-   &lt;Arg&gt;192.168.0.1&lt;/arg&gt;
-  &lt;/Call&gt;
-</PRE></TT></UL>
 <BR><BR><HR> Return to <A HREF="index.html">JettyFaq</A><HR>
