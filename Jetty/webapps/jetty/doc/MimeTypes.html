@@ -1,7 +1,19 @@
 <BR><B><FONT SIZE="+2">Defining MIME Types</FONT></B>
 <BR><BR>
-Each HandlerContext&nbsp;<!-- widget ref --> has a MIME type mapping.  To configure the
-MIME mapping for a context, do something like:
+Each HandlerContext&nbsp;<!-- widget ref --> has a MIME type mapping.  
+Default MIME types are set in the org/mortbay/http/mime.properties file
+within the org.mortbay.jetty.jar file.
+<P>
+For WebApplicationContexts, additional MIME type mappings can be added in the
+web.xml file:
+<PRE>
+  &lt;mime-mapping&gt; 
+    &lt;extension&gt;wml&lt;/extension&gt;
+    &lt;mime-type&gt;text/vnd.wap.wml&lt;/mime-type&gt;
+  &lt;/mime-mapping&gt;
+</PRE>
+<P>
+To configure the MIME mapping from a jetty.xml file:
 <BR><BR>
 <CODE><PRE>&lt;Call name="addContext">
   ...

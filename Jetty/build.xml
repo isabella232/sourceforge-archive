@@ -13,18 +13,20 @@ needed to run Jetty's demo application.
 
 Other targets:
 
-clean       - Remove all generated files.
-prepare     - Set up build directory structure.
-servlet     - Buils lthe servlet library.
-jasper      - Builds the Jasper JSP engine library.
-jetty       - Builds the Jetty library.
-jars        - Builds all libraries.
-dist        - Constructs a distribution file with all the source.
-webapp      - Builds the demo web application.
-demo        - Runs the demo web application.
-test        - Runs the Jetty test harnesses.
-release     - Cleanup for release
-mini.jetty.jar - Build a minimal HTTP server jar.
+  clean         - Remove all generated files.
+  prepare       - Set up build directory structure.
+  servlet.jar   - Buils the servlet library.
+  jasper.jar    - Builds the Jasper JSP engine library.
+  jetty.jar     - Builds the Jetty library.
+  jars          - Builds the above three libraries.
+  dist          - Constructs a distribution file with all the source.
+  webapp        - Builds the demo web application.
+  javadoc       - Builds the API documentation.
+  demo          - Runs the demo web application.
+  test          - Runs the Jetty test harnesses.
+  all           - Almost everything.
+  mini.http.jar - Build a minimal HTTP server jar.
+
 -->
 <project name="Jetty3 HTTP Server" default="webapp" basedir=".">
   <property environment="env"/>
