@@ -20,13 +20,13 @@ public class TestFtp
         testCmdReplyStream();
         testFTP();
         
-        Test.report();
+        TestCase.report();
     }
     
     /* ------------------------------------------------------------ */
     static void testCmdReply()
     {
-        Test t = new Test("class CmdReply");
+        TestCase t = new TestCase("class CmdReply");
 
         CmdReply reply= new CmdReply();
 
@@ -73,7 +73,7 @@ public class TestFtp
     /* ------------------------------------------------------------------ */
     static void testCmdReplyStream()
     {
-        Test t = new Test("class CmdReplyStream");
+        TestCase t = new TestCase("class CmdReplyStream");
 
         String inputString =
             "rubbish\n"+
@@ -167,13 +167,13 @@ public class TestFtp
     /* -------------------------------------------------------------------- */
     public static void testFTP()
     {
-        Test test = null;
+        TestCase test = null;
 
         try{
             TestServer server = new TestServer(test);
 
             ///////////////////////////////////////////
-            test = server.test = new Test("FtpAuthenticate");;
+            test = server.test = new TestCase("FtpAuthenticate");;
 
             Ftp ftp = new Ftp(InetAddress.getLocalHost(),
                               server.port,
@@ -182,7 +182,7 @@ public class TestFtp
             test.check(server.connection!=null,"Made command connection");
 
             ///////////////////////////////////////////
-            test = server.test = new Test("FtpGetFile");
+            test = server.test = new TestCase("FtpGetFile");
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             ftp.startGet("TestFileName",bout);
             test.check(true,"Get started");
@@ -196,7 +196,7 @@ public class TestFtp
                              "Get file data");
 
             ///////////////////////////////////////////
-            test = server.test = new Test("FtpPutFile");
+            test = server.test = new TestCase("FtpPutFile");
             bout = new ByteArrayOutputStream();
             Writer writeOut = new OutputStreamWriter(bout);
             writeOut.write("How Now Brown Cow\n");
@@ -214,7 +214,7 @@ public class TestFtp
             test.check(true,"put wait completed");
 
             ///////////////////////////////////////////
-            test = server.test = new Test("FtpAbort");
+            test = server.test = new TestCase("FtpAbort");
             bout = new ByteArrayOutputStream(256);
             ftp.startGet("TestFileName",bout);
             test.check(true,"Get started");
@@ -228,7 +228,7 @@ public class TestFtp
         }
         catch(Exception e){
             if (test==null)
-                test = new Test("Ftp");
+                test = new TestCase("Ftp");
             test.check(false,"Exception "+e);
         }
     }

@@ -33,7 +33,7 @@ all         - everything
   <property name="jetty"          value="${env.JETTY_HOME}"/>
   <property name="jetty.lib"      value="${jetty}/lib"/>
   <property name="jetty.jar"      value="${jetty.lib}/org.mortbay.jetty.jar"/>
-  <property name="classpath"      value="${jetty.jar}"/>
+  <property name="classpath"      value="${jetty.jar};${jetty}/test/classes"/>
 
   <property name="mortbay.ftp.jar" value="${lib}/org.mortbay.ftp.jar"/>
 

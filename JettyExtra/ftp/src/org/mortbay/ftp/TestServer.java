@@ -15,14 +15,14 @@ import java.util.*;
 // ===========================================================================
 class TestServer extends Thread
 {
-    Test test;
+    TestCase test;
     ServerSocket listen=null;
     int port = -1;
     Socket connection;
     LineInput in;
     Writer out;
 
-    TestServer(Test t)
+    TestServer(TestCase t)
     {
         this.test=t;
         start();
@@ -42,9 +42,9 @@ class TestServer extends Thread
                 port = listen.getLocalPort();
                 notifyAll();
             }
-            Code.debug("Test server listening");
+            Code.debug("TestCase server listening");
             connection = listen.accept( );
-            Code.debug("Test server connected");
+            Code.debug("TestCase server connected");
             in = new LineInput(connection.getInputStream());
             out = new OutputStreamWriter(connection.getOutputStream(),"ISO8859_1");
             out.write(CmdReply.codeServiceReady+" OK\n");
@@ -52,20 +52,20 @@ class TestServer extends Thread
 
             // Handle authentication
             String line = in.readLine();
-            Code.debug("Test server got: "+line);
+            Code.debug("TestCase server got: "+line);
             test.checkEquals(line,"USER TestUser","Received USER");
             out.write(CmdReply.codeUsernameNeedsPassword+" Need password\n");
             out.flush();
 
             line = in.readLine();
-            Code.debug("Test server got: "+line);
+            Code.debug("TestCase server got: "+line);
             test.checkEquals(line,"PASS TestPass","Received PASS");
             out.write(CmdReply.codeUserLoggedIn+" OK\n");
             out.flush();
 
             //Handler get file
             line = in.readLine();
-            Code.debug("Test server got: "+line);
+            Code.debug("TestCase server got: "+line);
             test.check(line.startsWith("PORT"),"Received PORT");
             out.write(CmdReply.codeCommandOK+" OK\n");
             out.flush();
@@ -80,7 +80,7 @@ class TestServer extends Thread
             test.check(true,"DataPort Opened");
 
             line = in.readLine();
-            Code.debug("Test server got: "+line);
+            Code.debug("TestCase server got: "+line);
             test.checkEquals(line,"RETR TestFileName","Received RETR");
             out.write(CmdReply.codeFileStatusOK+" Data port opened\n");
             out.flush();
@@ -98,7 +98,7 @@ class TestServer extends Thread
 
             //Handler put file
             line = in.readLine();
-            Code.debug("Test server got: "+line);
+            Code.debug("TestCase server got: "+line);
             test.check(line.startsWith("PORT"),"Received PORT");
             out.write(CmdReply.codeCommandOK+" OK\n");
             out.flush();
@@ -113,7 +113,7 @@ class TestServer extends Thread
             test.check(true,"DataPort Opened");
 
             line = in.readLine();
-            Code.debug("Test server got: "+line);
+            Code.debug("TestCase server got: "+line);
             test.checkEquals(line,"STOR TestFileName","Received STOR");
             out.write(CmdReply.codeFileStatusOK+" Data port opened\n");
             out.flush();
@@ -130,7 +130,7 @@ class TestServer extends Thread
 
             //Handler abort file
             line = in.readLine();
-            Code.debug("Test server got: "+line);
+            Code.debug("TestCase server got: "+line);
             test.check(line.startsWith("PORT"),"Received PORT");
             out.write(CmdReply.codeCommandOK+" OK\n");
             out.flush();
@@ -145,7 +145,7 @@ class TestServer extends Thread
             test.check(true,"DataPort Opened");
 
             line = in.readLine();
-            Code.debug("Test server got: "+line);
+            Code.debug("TestCase server got: "+line);
             test.checkEquals(line,"RETR TestFileName","Received RETR");
             out.write(CmdReply.codeFileStatusOK+" Data port opened\n");
             out.flush();
@@ -154,7 +154,7 @@ class TestServer extends Thread
             dataOut.write("How Now Brown Cow\n");
             dataOut.flush();
             line = in.readLine();
-            Code.debug("Test server got: "+line);
+            Code.debug("TestCase server got: "+line);
             test.check(line.startsWith("ABOR"),"Received ABOR");
 
             dataOut.close();
@@ -165,26 +165,26 @@ class TestServer extends Thread
             line = in.readLine();
             out.write(CmdReply.codeCommandOK+" OK\n");
             out.flush();
-            Code.debug("Test server got: "+line);
+            Code.debug("TestCase server got: "+line);
             test.checkEquals("TYPE I",line,"Received TYPE I");
 
             line = in.readLine();
             out.write(CmdReply.codeCommandOK+" OK\n");
             out.flush();
-            Code.debug("Test server got: "+line);
+            Code.debug("TestCase server got: "+line);
             test.checkEquals("TYPE L 8",line,"Received TYPE L 8");
 
             line = in.readLine();
             out.write(CmdReply.codeCommandOK+" OK\n");
             out.flush();
-            Code.debug("Test server got: "+line);
+            Code.debug("TestCase server got: "+line);
             test.checkEquals("TYPE A C",line,"Received TYPE A C");
 
             Code.debug("Tests completed");
         }
         catch (Exception e){
             test.check(false,"Server failed: "+e);
-            Test.report();
+            TestCase.report();
             System.exit(1);
         }
     }
