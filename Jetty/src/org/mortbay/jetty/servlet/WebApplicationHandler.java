@@ -330,7 +330,7 @@ public class WebApplicationHandler extends ServletHandler
     }
 
     /* ------------------------------------------------------------ */
-    protected synchronized void doStop() throws InterruptedException
+    protected synchronized void doStop() throws Exception
     {
         try
         {

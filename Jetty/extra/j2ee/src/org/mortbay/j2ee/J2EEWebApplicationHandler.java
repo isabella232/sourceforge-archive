@@ -52,6 +52,14 @@ public abstract class J2EEWebApplicationHandler extends WebApplicationHandler
 	_tm=(TransactionManager)_ctx.lookup("java:/TransactionManager");
     }
 
+  protected void doStop()
+      throws Exception
+    {
+	super.doStop();
+	_ctx=null;
+	_tm=null;
+    }
+
   public void handle(String pathInContext,
 		     String pathParams,
 		     HttpRequest httpRequest,

@@ -1135,27 +1135,28 @@ public class HttpContext extends Container
     protected void initClassLoader(boolean forceContextLoader)
         throws MalformedURLException, IOException
     {
+        ClassLoader parent=_parent;
         if (_loader==null)
         {
             // If no parent, then try this threads classes loader as parent
-            if (_parent==null)
-                _parent=Thread.currentThread().getContextClassLoader();
+            if (parent==null)
+                parent=Thread.currentThread().getContextClassLoader();
 
             // If no parent, then try this classes loader as parent
-            if (_parent==null)
-                _parent=this.getClass().getClassLoader();
+            if (parent==null)
+                parent=this.getClass().getClassLoader();
 
             if(log.isDebugEnabled())log.debug("Init classloader from "+_classPath+
-                       ", "+_parent+" for "+this);
+                       ", "+parent+" for "+this);
 
             if (forceContextLoader || _classPath!=null || _permissions!=null)
             {
-                ContextLoader loader=new ContextLoader(this,_classPath,_parent,_permissions);
+                ContextLoader loader=new ContextLoader(this,_classPath,parent,_permissions);
                 loader.setJava2Compliant(_classLoaderJava2Compliant);
                 _loader=loader;
             }
             else
-                _loader=_parent;
+                _loader=parent;
         }
     }
 
@@ -1716,6 +1717,8 @@ public class HttpContext extends Container
             {
                 thread.setContextClassLoader(lastContextLoader);
             }
+            if (_loader instanceof ContextLoader)
+                ((ContextLoader)_loader).destroy();
             _loader=null;
         }
         _resources.flushCache();

@@ -75,6 +75,7 @@ $Id$
   </Call>
 
   <Set name="anonymous">true</Set>
+  <Set name="requestsPerGC">1</Set>
 
 </Configure>
 

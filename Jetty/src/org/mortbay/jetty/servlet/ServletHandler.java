@@ -455,7 +455,7 @@ public class ServletHandler extends Container implements HttpHandler
     
     /* ----------------------------------------------------------------- */
     protected synchronized void doStop()
-        throws InterruptedException
+        throws Exception
     {
         // Sort and Initialize servlets
         ServletHolder[] holders = getServlets();

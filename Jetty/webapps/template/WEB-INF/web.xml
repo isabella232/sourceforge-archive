@@ -20,7 +20,7 @@
   <servlet>
     <servlet-name>Dump</servlet-name>
     <servlet-class>com.acme.DumpServlet</servlet-class>
-    <load-on-startup>0</load-on-startup>
+    <load-on-startup>1</load-on-startup>
   </servlet>
 
   <servlet-mapping>

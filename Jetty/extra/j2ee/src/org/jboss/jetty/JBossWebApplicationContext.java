@@ -65,6 +65,7 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
 
     }
 
+    /* ------------------------------------------------------------ */
     protected void doStart() throws Exception
     {
         if(_jetty.getSupportJSR77())
@@ -88,6 +89,16 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
     }
 
     /* ------------------------------------------------------------ */
+    public void destroy()
+    {
+	_jetty=null;
+	_descriptorParser=null;
+	_webApp=null;
+	_subjAttrName=null;
+	super.destroy();
+    }
+
+    /* ------------------------------------------------------------ */
     public void setContextPath(String contextPathSpec)
     {
         __log=Logger.getLogger(getClass().getName()+"#"+contextPathSpec);
@@ -107,11 +118,11 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
         // force the creation of a context class loader for JBoss
         // web apps
         super.initClassLoader(true);
-        ClassLoader _loader=getClassLoader();
-        if(_loader instanceof org.mortbay.http.ContextLoader)
+        ClassLoader loader=getClassLoader();
+        if(loader instanceof org.mortbay.http.ContextLoader)
         {
             boolean java2ClassLoadingCompliance=this._webApp.getMetaData().getJava2ClassLoadingCompliance();
-            ((org.mortbay.http.ContextLoader)_loader).setJava2Compliant(java2ClassLoadingCompliance);
+            ((org.mortbay.http.ContextLoader)loader).setJava2Compliant(java2ClassLoadingCompliance);
         }
     }
     String _separator=System.getProperty("path.separator");

@@ -314,4 +314,20 @@ public class ContextLoader extends URLClassLoader
                 || name.startsWith("/org/xml/")
                 || name.startsWith("/org/w3c/"));
     }
+
+    /* ------------------------------------------------------------ */
+    public void destroy()
+    {
+        this._parent=null;
+        this._permissions=null;
+        this._urlClassPath=null;
+        try
+        {
+            this.finalize();
+        }
+        catch(Throwable th)
+        {
+            log.warn(LogSupport.EXCEPTION,th);
+        }
+    }
 }
