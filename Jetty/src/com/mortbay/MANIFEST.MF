@@ -4,7 +4,7 @@ Specification-Title:  Jetty HTTP Server
 Specification-Version: 3.1
 Specification-Vendor: Mort Bay Consulting, Pty. Ltd.
 Implementation-Title: Jetty HTTP Server
-Implementation-Version: 3.1.RC5
+Implementation-Version: 3.1.RC6
 Implementation-Vendor: Mort Bay Consulting, Pty. Ltd.
 Package-Version: 1.0.0
 Package-Title: com.mortbay.Jetty
