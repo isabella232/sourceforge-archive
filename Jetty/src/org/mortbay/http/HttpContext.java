@@ -323,12 +323,15 @@ public class HttpContext extends ResourceCache
     {
         List old = new ArrayList(_vhosts);
 
-        for (int i=0;i<hosts.length;i++)
-        {
-            boolean existing=old.remove(hosts[i]);
-            if (!existing)
-                addVirtualHost(hosts[i]);
-        }
+        if (hosts!=null)
+	{
+	    for (int i=0;i<hosts.length;i++)
+	    {
+		boolean existing=old.remove(hosts[i]);
+		if (!existing)
+		    addVirtualHost(hosts[i]);
+	    }
+	}
 
         for (int i=0;i<old.size();i++)
             removeVirtualHost((String)old.get(i));
@@ -406,12 +409,15 @@ public class HttpContext extends ResourceCache
     {
         List old = new ArrayList(_handlers);
 
-        for (int i=0;i<handlers.length;i++)
-        {
-            boolean existing=old.remove(handlers[i]);
-            if (!existing)
-                addHandler(handlers[i]);
-        }
+	if (handlers!=null)
+	{
+	    for (int i=0;i<handlers.length;i++)
+	    {
+		boolean existing=old.remove(handlers[i]);
+		if (!existing)
+		    addHandler(handlers[i]);
+	    }
+	}
 
         for (int i=0;i<old.size();i++)
             removeHandler((HttpHandler)old.get(i));
