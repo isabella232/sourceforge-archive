@@ -10,12 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.ByteArrayPool;
-import org.mortbay.util.ByteBufferOutputStream;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.OutputObserver;
@@ -148,7 +144,7 @@ public class HttpOutputStream
      */
     public void setFilterStream(OutputStream filter)
     {
-        out=filter;
+	out=filter;
     }
     
     /* ------------------------------------------------------------ */
@@ -221,7 +217,6 @@ public class HttpOutputStream
      * If no data has been committed, the buffer output is discarded and
      * the filters may be reinitialized.
      * @exception IllegalStateException
-     * @exception Problem with observer notification.
      */
     public void resetBuffer()
         throws IllegalStateException
