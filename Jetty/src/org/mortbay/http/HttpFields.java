@@ -792,7 +792,7 @@ public class HttpFields
      * @param name the name of the field
      * @param value the value of the field.
      * @exception IllegalArgumentException If the name is a single
-     *            valued field
+     *            valued field and already has a value.
      */
     public void add(String name,String value)
         throws IllegalArgumentException
@@ -803,19 +803,20 @@ public class HttpFields
         FieldInfo info=getFieldInfo(name);
         Field field=getField(info,false);
         Field last=null;
+        int values=-1;
         if (field!=null)
         {
             while(field!=null && field._version==_version)
             {
-                if (info._singleValued)
-                    throw new IllegalArgumentException("Field "+
-                                                       name+
-                                                       " must be single valued");
                 last=field;
                 field=field._next;
+                values++;
             }
         }
 
+        if (values>0 && info._singleValued)
+            throw new IllegalArgumentException("Field "+name+" must be single valued");
+        
         if (field!=null)    
             field.reset(value,_version);
         else

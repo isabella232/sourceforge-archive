@@ -143,7 +143,7 @@ public class ProxyHandler extends AbstractHttpHandler
                 {
                     String val = (String)vals.nextElement();
                     if (val!=null)
-                        response.addField(hdr,val);
+                        connection.addRequestProperty(hdr,val);
                 }
             }           
 
@@ -201,19 +201,18 @@ public class ProxyHandler extends AbstractHttpHandler
             }
             
             // set response headers
+            System.err.println("\n\nresponse:");
             int h=0;
             String hdr=connection.getHeaderFieldKey(h);
-            
-            while(hdr!=null)
+            String val=connection.getHeaderField(h);
+            while(hdr!=null || val!=null)
             {
-                if (!_DontProxyHeaders.containsKey(hdr))
-                {
-                    String val=connection.getHeaderField(h);
-                    if (val!=null)
-                        response.addField(hdr,val);
-                }
+                System.err.println("hdr="+hdr+" val="+val);
+                if (hdr!=null && val!=null && !_DontProxyHeaders.containsKey(hdr))
+                    response.addField(hdr,val);
                 h++;
                 hdr=connection.getHeaderFieldKey(h);
+                val=connection.getHeaderField(h);
             }
             response.setField("Via","1.1 (jetty)");
             
