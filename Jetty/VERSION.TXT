@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Massive reorg of the CVS tree.
  + Incorporate jetty extra and plus into build
  + Integrate with JAAS
  + Apply the append flag of RolloverFileOutputStream constructor.
@@ -13,6 +14,7 @@ Jetty Versions
  + ProxyHandler checks black and white lists for Connect.
  + Merge multivalued parameters in dispatcher.
  + Fixed CRLF bug in MultiPartRequest
+ + Warn if max form content size is reached.
 
 Jetty-4.2.9 - 19 March 2003
  + Conditional headers check after /dir to /dir/ redirection.
