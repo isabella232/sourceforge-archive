@@ -54,8 +54,7 @@ public class JotmService extends TMService
      * 
      * @return TransactionManager
      */
-    public TransactionManager getTransactionManager(
-    )
+    public TransactionManager getTransactionManager()
     {
        if (m_tm == null)
        {
@@ -72,8 +71,7 @@ public class JotmService extends TMService
      * 
      * @return UserTransaction 
      */
-    public UserTransaction getUserTransaction(
-    )
+    public UserTransaction getUserTransaction()
     {
        if (m_tm == null)
        {
@@ -109,20 +107,7 @@ public class JotmService extends TMService
                 throw new IOException("Failed to start JoTM: " + eExc);
             }
 
-            //  Register the user transaction object in JNDI
-            // TODO: This needs to be redone, email from Jeff:
-            // For example, a J2EE app server requires the UserTransaction 
-            // to be available through JNDI with the name 
-            // "java:comp/env/UserTransaction" (ENC requirements). 
-            // What's more, using resource factories, you 
-            // don't even bind UserTransaction object 
-            // (you create instead an object inheriting from 
-            // javax.naming/spi/ObjectFactory which'll return an UserTransaction object).
-            // On the other hand, if an application is not supporting 
-            // ENC, UserTransaction can be available with 
-            // the name "javax.transaction.UserTransaction" (see the JDBC example of JOTM)
-            // I prefer not to mandate a specific use of JOTM so that it can fit into several use cases.
-            
+            //  Register the user transaction and transaction mgr objects in JNDI
             Context ictx = null;
 
             
@@ -140,7 +125,6 @@ public class JotmService extends TMService
             
             try 
             {
-                //ictx.rebind(getJNDI(), m_tm.getUserTransaction());
                 Util.bind(ictx, getJNDI(), m_tm.getUserTransaction());
                 Code.debug("UserTransaction object bound in JNDI with name " + getJNDI());
             }
@@ -152,7 +136,6 @@ public class JotmService extends TMService
  
             try
             {
-                // ictx.rebind(getTransactionManagerJNDI(), m_tm.getTransactionManager());
                 Util.bind(ictx, getTransactionManagerJNDI(), m_tm.getTransactionManager());
                 Code.debug("TransactionManager object bound in JNDI with name " + getTransactionManagerJNDI());
             } 
@@ -182,11 +165,10 @@ public class JotmService extends TMService
                 
                 try 
                 {
-                    //ictx.rebind("XA"+ strDataSourceName, xadsDataSource);
                     Util.bind(ictx, "XA"+ strDataSourceName, xadsDataSource);
                     Code.debug("XA Data source bound in JNDI with name XA" + strDataSourceName);
                     Util.bind(ictx, strDataSourceName, xapdsPoolDataSource);
-                    Code.debug("Data source bound in JNDI with name " + strDataSourceName);
+                    Code.debug("Data Source Pool bound in JNDI with name " + strDataSourceName);
                 } 
                 catch (NamingException e) 
                 {
@@ -194,6 +176,13 @@ public class JotmService extends TMService
                     Code.warning(e);
                     throw e;
                 }
+
+                //set up a transaction manager for the DataSource and Pool
+                //NB: this step is not strictly necessary for Jotm, as the XADataSource
+                //and XAPoolDataSource both use JNDI to lookup a Transaction manager
+                //whenever they themselves are looked up by a client
+                xapdsPoolDataSource.setTransactionManager(tmManager);
+                ((StandardXADataSource)xadsDataSource).setTransactionManager(tmManager);
             }
 
             super.start();
@@ -203,6 +192,9 @@ public class JotmService extends TMService
         else
             Log.event ("JoTM is already running");
     }
+
+
+
     
     /* ------------------------------------------------------------ */
     /** Stop the LifeCycle.
@@ -228,52 +220,40 @@ public class JotmService extends TMService
           Code.warning("No JoTM to stop.");
        }
     }
+
+
+
    
 
-
+    /* ------------------------------------------------------------ */
     /**
-     * Add data source to be managed by this transaction manager.
+     * Add a datasource and a pool for it to the Transaction Mgr
+     *
+     * @param jndiName client lookup jndi of DataSource
+     * @param xaDataSource the DataSource
+     * @param xaPool the Pool
+     * @exception SQLException if an error occurs
+     * @exception NamingException if an error occurs
      */
-    public void addDataSource(
-       String  strDataSourceName,
-       String  strDriverName,
-       String  strUrl,
-       String  strUser,
-       String  strPassword,
-       String  strInitialConnectionCount,
-       String  strMinimalPoolSize,
-       String  strMaximalPoolSize
-    ) throws SQLException,
-             NamingException
+    public void addPooledDataSource (String dsJNDIName, 
+                                     StandardXADataSource xaDataSource, 
+                                     StandardXAPoolDataSource xaPool)
+        throws SQLException, NamingException
     {
-       // create an XA pool datasource with a minimum of 4 objects
-       StandardXAPoolDataSource xapdsPoolDataSource = new StandardXAPoolDataSource(Integer.parseInt(strInitialConnectionCount));
-       try
-       {
-          xapdsPoolDataSource.setMinSize(Integer.parseInt(strMinimalPoolSize));
-          xapdsPoolDataSource.setMaxSize(Integer.parseInt(strMaximalPoolSize));
-       }
-       catch(Exception eExc)
-       {
-          Code.warning(eExc);
-       }
-       xapdsPoolDataSource.setUser(strUser);
-       xapdsPoolDataSource.setPassword(strPassword);
+        // set up username and password for pool
+        xaPool.setUser(xaDataSource.getUser());
+        xaPool.setPassword(xaDataSource.getPassword());
+        
+        // set up the JNDI name of the datasource in the pool
+        xaPool.setDataSourceName ("XA"+dsJNDIName);
 
-       StandardXADataSource xadsDataSource;
+        // add the datasource to the pool
+        xaPool.setDataSource (xaDataSource);
 
-       xadsDataSource = new StandardXADataSource();
-       xadsDataSource.setDriverName(strDriverName);
-       xadsDataSource.setUrl(strUrl);
-       xadsDataSource.setUser(strUser);
-       xadsDataSource.setPassword(strPassword);
+        // add to map of datasources
+        m_mpDataSources.put(dsJNDIName, xaPool);
 
-       // Transaction manager was already created so attach it with DS
-       xapdsPoolDataSource.setDataSourceName("XA"+strDataSourceName);
-       xapdsPoolDataSource.setDataSource(xadsDataSource);
-
-       m_mpDataSources.put(strDataSourceName, xapdsPoolDataSource);
-
-       Code.debug("DataSource " + strDataSourceName + " registered.");
+        Log.event("Pooled data source: " +dsJNDIName+" configured");
     }
+
 }
