@@ -1,6 +1,7 @@
 JettyExtra Versions
 --------------------
 
+JettyExtra-4.0.B2
   + New addWebApplication format
 
 JettyExtra-4.0.B1
