@@ -13,7 +13,7 @@
     <Call name="disableLog"/>
     <Call name="add"> 
       <Arg>
-        <New class="org.mortbay.util.WriterLogSink">
+        <New class="org.mortbay.util.OutputStreamLogSink">
           <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.log</Arg>
           <Set name="RetainDays">90</Set>
           <Set name="Append">true</Set>

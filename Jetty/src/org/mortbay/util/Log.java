@@ -32,9 +32,9 @@ import java.util.StringTokenizer;
  * is added to the list of log sinks.
  * 
  * Some possibilities for LOG_CLASSES are
- *  org.mortbay.util.WriterLogSink - log to System.err, a file whose name is
+ *  org.mortbay.util.OutputStreamLogSink - log to System.err, a file whose name is
  * specified in LOG_FILE, and optionally rollover the logs on a daily basis.
- * See the javadoc for org.mortbay.util.WriterLogSink for information on the
+ * See the javadoc for org.mortbay.util.OutputStreamLogSink for information on the
  * options LOG_DATE_FORMAT, LOG_FILE_BACKUP_FORMAT, LOG_FILE_RETAIN_DAYS,
  * LOG_FILE_DATE_FORMAT and LOG_TIME_ZONE.
  *
