@@ -150,7 +150,7 @@ public class Resource
     {
 	try
 	{
-	    if (checkConnection() && _in!=null )
+	    if (checkConnection() && _in==null )
 		_in = _connection.getInputStream();
 	}
 	catch (IOException e)
