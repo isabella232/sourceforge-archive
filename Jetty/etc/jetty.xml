@@ -70,6 +70,7 @@
   <!-- Add a HTTPS SSL listener on port 8443                           -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- UNCOMMENT TO ACTIVATE
+  -->
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.SunJsseListener">
@@ -90,7 +91,6 @@
       </New>
     </Arg>
   </Call>
-  -->
 
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
