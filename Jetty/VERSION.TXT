@@ -10,6 +10,7 @@ Jetty-5
  + Added filter chain cache
  + Added JSR77 servlet statistic support
  + Refactored webapp context configurations
+ + Added LifeCycle events and generic container.
 
 Jetty-4
  + LineInput handles readers with small internal buffer
