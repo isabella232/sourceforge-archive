@@ -1,14 +1,27 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.0pre0 - 13 October 2002
+ + New ThreadPool implementation.
+ + New Buffering implementation.
+ + Removed Dispatcher dependancy on ServletHttpContext
  + getNamedDispatcher(null) returns containers default servlet.
  + unquote charset in content type
- + Stop/Start filtesr in declaration order.
- + Some AJP13 optimizations.
+ + Stop/Start filters in declaration order.
  + Use "standard" names for default,jsp & invoker servlets.
  + Fixed caching of directories to avoid shared buffers.
  + Fixed bad log dir detection
  + Fix Session invalidation bug
+
+Jetty-4.1.2 - 13 OCtober 2002
+ + getNamedDispatcher(null) returns containers default servlet.
+ + unquote charset in content type
+ + Stop/Start filters in declaration order.
+ + Use "standard" names for default,jsp & invoker servlets.
+ + Fixed caching of directories to avoid shared buffers.
+ + Fixed bad log dir detection
+ + Fix Session invalidation bug
+ + Some AJP13 optimizations.
 
 Jetty-4.1.1 - 30 September 2002
  + Fixed client scripting vulnerability with jasper2.
