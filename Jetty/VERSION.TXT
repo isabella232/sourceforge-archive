@@ -1,8 +1,13 @@
 Jetty Versions
 --------------
+ 
+ + Race in HttpFields cache???
+ + PathMap uses own Map.Entry impl for IBM JVMs 
+ + Use ${jetty.home}/work or WEB-INF/work for temp directories if present
+ + Protect ThreadPool.run() from interrupted exceptions
 
 Jetty-4.2.14 - 4 November 2003
- + respect content length when decoding form content.
+ + Respect content length when decoding form content.
  + JBoss integration uses writer rather than stream for XML config handling
  + Fixed NPE in SSO
  + Expire pages that contain set-cookie as per RFC2109 recommendation
