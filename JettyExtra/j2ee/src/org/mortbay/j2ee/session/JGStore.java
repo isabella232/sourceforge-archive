@@ -84,7 +84,7 @@ public class
   public String getSubClusterName() {return _subClusterName;}
   public void setSubClusterName(String subClusterName) {_subClusterName=subClusterName;}
 
-  protected int _retrievalTimeOut=20000;
+  protected int _retrievalTimeOut=20000; // 20 seconds
   public int getRetrievalTimeOut() {return _retrievalTimeOut;}
   public void setRetrievalTimeOut(int retrievalTimeOut) {_retrievalTimeOut=retrievalTimeOut;}
 
@@ -113,7 +113,7 @@ public class
       setDistributionModeInternal(_distributionMode);
     }
 
-  protected int _distributionTimeOut=0;	// never timeout - risky...
+  protected int _distributionTimeOut=5000;	// 5 seconds
   public int getDistributionTimeOut() {return _distributionTimeOut;}
   public void setDistributionTimeOut(int distributionTimeOut) {_distributionTimeOut=distributionTimeOut;}
 
@@ -227,7 +227,7 @@ public class
   protected void
     publish(String id, String methodName, Class[] argClasses, Object[] argInstances)
     {
-      _log.info("publishing: "+id+" - "+methodName);
+      //      _log.info("publishing: "+id+" - "+methodName);
 
       try
       {
@@ -255,14 +255,14 @@ public class
   public void
     dispatch(String id, String methodName, Class[] argClasses, Object[] argInstances)
     {
-      _log.info("dispatching: "+id+" - "+methodName);
+      //      _log.info("dispatching: "+id+" - "+methodName);
 
       // we should check the context name here, or not bother sending it...
 
       ClassLoader oldLoader=Thread.currentThread().getContextClassLoader();
       try
       {
-	//	Thread.currentThread().setContextClassLoader(_loader);
+	Thread.currentThread().setContextClassLoader(_loader);
 	super.dispatch(id, methodName, argClasses, argInstances);
       }
       finally
@@ -300,7 +300,7 @@ public class
       ClassLoader oldLoader=Thread.currentThread().getContextClassLoader();
       try
       {
-	//	Thread.currentThread().setContextClassLoader(_loader);
+	Thread.currentThread().setContextClassLoader(_loader);
 	_log.info("initialising another store from our current state");
 
 	// this is a bit problematic - since we really need to freeze
@@ -313,6 +313,7 @@ public class
 	  state=new LocalState[_sessions.size()];
 	  int j=0;
 	  for (Iterator i=_sessions.values().iterator(); i.hasNext();)
+	    //	    state[j++]=(LocalState)i.next();
 	    state[j++]=((ReplicatedState)i.next()).getLocalState();
 	}
 
@@ -368,7 +369,10 @@ public class
 	for (int i=0; i<state.length; i++)
 	{
 	  LocalState ls=state[i];
-	  _sessions.put(ls.getId(), new ReplicatedState(this, ls));
+	  _sessions.put(ls.getId(),
+			//ls
+			new ReplicatedState(this, ls)
+			);
 	}
       }
     }

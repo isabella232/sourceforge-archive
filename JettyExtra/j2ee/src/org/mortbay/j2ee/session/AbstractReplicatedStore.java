@@ -75,16 +75,17 @@ abstract public class
     throws Exception
     {
       long creationTime=System.currentTimeMillis();
-      Class[]  argClasses   = {Long.class, Integer.class, Integer.class};
-      Object[] argInstances = {new Long(creationTime), new Integer(maxInactiveInterval), new Integer(_actualMaxInactiveInterval)};
 
       if (!AbstractReplicatedStore.getReplicating())
-	publish(id, "create", argClasses, argInstances);
+      {
+	Class[]  argClasses   = {String.class, Long.TYPE, Integer.TYPE, Integer.TYPE};
+	Object[] argInstances = {id, new Long(creationTime), new Integer(maxInactiveInterval), new Integer(_actualMaxInactiveInterval)};
+	publish(null, "createSession", argClasses, argInstances);
+      }
 
+      createSession(id, creationTime, maxInactiveInterval, _actualMaxInactiveInterval);
       // if we get one - all we have to do is loadState - because we
       // will have just created it...
-
-      dispatch(id, "create", argClasses, argInstances);
       return loadState(id);
     }
 
@@ -119,14 +120,14 @@ abstract public class
     {
       String id=state.getId();
 
-      Class[]  argClasses   = {};
-      Object[] argInstances = {};
-
       if (!AbstractReplicatedStore.getReplicating())
-	publish(id, "destroy", argClasses, argInstances);
+      {
+	Class[]  argClasses   = {String.class};
+	Object[] argInstances = {id};
+	publish(null, "destroySession", argClasses, argInstances);
+      }
 
-      dispatch(id, "destroy", argClasses, argInstances);
-      synchronized (_sessions){_sessions.remove(id);}
+      destroySession(id);
     }
 
   //----------------------------------------
@@ -174,35 +175,27 @@ abstract public class
       try
       {
 	AbstractReplicatedStore.setReplicating(true);
-	// only stuff meant for our context will be dispatched to us
 
-	//      String tmp="(";
-	//      for (int i=2; i<argInstances.length; i++)
-	//	tmp=tmp+argInstances[i]+((i<argInstances.length-1)?", ":"");
-	//      tmp=tmp+")";
-
-	//      _log.info("dispatching call: "+argInstances[1]+"."+methodName+tmp);
-
-	// either this is a class method
-	if (methodName.equals("create"))
+	Object target=null;
+	if (id==null)
 	{
-	  _log.debug("creating replicated session: "+id);
-	  long creationTime=((Long)argInstances[0]).longValue();
-	  int maxInactiveInterval=((Integer)argInstances[1]).intValue();
-	  int actualMaxInactiveInterval=((Integer)argInstances[2]).intValue();
-	  State state=new ReplicatedState(this, id, creationTime, maxInactiveInterval, actualMaxInactiveInterval);
-
-	  synchronized(_sessions) {_sessions.put(id, state);}
-	}
-	else if (methodName.equals("destroy"))
-	{
-	  _log.debug("destroying replicated session: "+id);
-	  synchronized(_sessions) {_sessions.remove(id);}
+	  // either this is a class method
+	  target=this;
 	}
 	else
 	{
 	  // or an instance method..
-	  ((ReplicatedState)_sessions.get(id)).dispatch(methodName, argClasses, argInstances);
+	  target=_sessions.get(id);
+	  //synchronized (_interceptors){o=_interceptors.get(id);}
+	}
+
+	try
+	{
+	  target.getClass().getMethod(methodName, argClasses).invoke(target, argInstances);
+	}
+	catch (Exception e)
+	{
+	  _log.error("this should never happen - code version mismatch ?", e);
 	}
       }
       finally
@@ -210,4 +203,36 @@ abstract public class
 	AbstractReplicatedStore.setReplicating(false);
       }
     }
+
+  public void
+    createSession(String id, long creationTime, int maxInactiveInterval, int actualMaxInactiveInterval)
+    {
+      _log.debug("creating replicated session: "+id);
+      State state=new ReplicatedState(this, id, creationTime, maxInactiveInterval, actualMaxInactiveInterval);
+      synchronized(_sessions) {_sessions.put(id, state);}
+    }
+
+  public void
+    destroySession(String id)
+    {
+      _log.debug("destroying replicated session: "+id);
+      synchronized(_sessions) {_sessions.remove(id);}
+    }
+
+  //----------------------------------------
+  // subscription - Listener management...
+//
+//   protected Map _interceptors=new HashMap();
+//
+//   public void
+//     register(String id, Object o)
+//     {
+//       synchronized (_interceptors) {_interceptors.put(id, o);}
+//     }
+//
+//   public void
+//     deregister(String id)
+//     {
+//       synchronized (_interceptors) {_interceptors.remove(id);}
+//     }
 }

@@ -32,15 +32,27 @@ public class
   protected int    _maxInactiveInterval;
   protected int    _actualMaxInactiveInterval;
 
-  protected long   _creationTime     =System.currentTimeMillis();
-  protected long   _lastAccessedTime =_creationTime;
+  protected long   _creationTime;
+  protected long   _lastAccessedTime;
   protected Map    _attributes;	// allocated lazily
 
+
+  public
+    LocalState(String id, long creationTime, int maxInactiveInterval, int actualMaxInactiveInterval)
+    {
+      _id=id;
+      _creationTime=creationTime;
+      _lastAccessedTime=_creationTime;
+      _maxInactiveInterval=maxInactiveInterval;
+      _actualMaxInactiveInterval=actualMaxInactiveInterval;
+    }
 
   public
     LocalState(String id, int maxInactiveInterval, int actualMaxInactiveInterval)
     {
       _id=id;
+      _creationTime=System.currentTimeMillis();
+      _lastAccessedTime=_creationTime;
       _maxInactiveInterval=maxInactiveInterval;
       _actualMaxInactiveInterval=actualMaxInactiveInterval;
     }

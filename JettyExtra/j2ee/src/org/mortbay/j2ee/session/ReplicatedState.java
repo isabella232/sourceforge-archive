@@ -146,12 +146,12 @@ public class
   public void
     setLastAccessedTime(long time)
     {
-      if (!AbstractReplicatedStore.getReplicating())
-      {
-	Class[] argClasses={Long.TYPE};
-	Object[] argInstances={new Long(time)};
-	_store.publish(_id, "setLastAccessedTime", argClasses, argInstances);
-      }
+//       if (!AbstractReplicatedStore.getReplicating())
+//       {
+// 	Class[] argClasses={Long.TYPE};
+// 	Object[] argInstances={new Long(time)};
+// 	_store.publish(_id, "setLastAccessedTime", argClasses, argInstances);
+//       }
 
       _state.setLastAccessedTime(time);
     }
@@ -159,12 +159,12 @@ public class
   public void
     setMaxInactiveInterval(int interval)
     {
-      if (!AbstractReplicatedStore.getReplicating())
-      {
-	Class[] argClasses={Integer.TYPE};
-	Object[] argInstances={new Integer(interval)};
-	_store.publish(_id, "setMaxInactiveInterval", argClasses, argInstances);
-      }
+//       if (!AbstractReplicatedStore.getReplicating())
+//       {
+// 	Class[] argClasses={Integer.TYPE};
+// 	Object[] argInstances={new Integer(interval)};
+// 	_store.publish(_id, "setMaxInactiveInterval", argClasses, argInstances);
+//       }
 
       _state.setMaxInactiveInterval(interval);
     }
@@ -172,24 +172,24 @@ public class
   public Object
     setAttribute(String name, Object value, boolean returnValue)
     {
-      if (!AbstractReplicatedStore.getReplicating())
-      {
-	// special case to allow double marshalling - works around current limitation in RpcDispatcher...
-	Class[] argClasses={String.class, Object.class, Boolean.TYPE, Boolean.TYPE};
-
-	byte[] tmp=null;
-	try
-	{
-	  tmp=MarshallingInterceptor.marshal(value);
-	}
-	catch(IOException e)
-	{
-	  _log.error("could not marshal arg for publication", e);
-	}
-
-	Object[] argInstances={name, tmp, returnValue?Boolean.TRUE:Boolean.FALSE, Boolean.TRUE};
-	_store.publish(_id, "setAttribute", argClasses, argInstances);
-      }
+//       if (!AbstractReplicatedStore.getReplicating())
+//       {
+// 	// special case to allow double marshalling - works around current limitation in RpcDispatcher...
+// 	Class[] argClasses={String.class, Object.class, Boolean.TYPE, Boolean.TYPE};
+//
+// 	byte[] tmp=null;
+// 	try
+// 	{
+// 	  tmp=MarshallingInterceptor.marshal(value);
+// 	}
+// 	catch(IOException e)
+// 	{
+// 	  _log.error("could not marshal arg for publication", e);
+// 	}
+//
+// 	Object[] argInstances={name, tmp, returnValue?Boolean.TRUE:Boolean.FALSE, Boolean.TRUE};
+// 	_store.publish(_id, "setAttribute", argClasses, argInstances);
+//       }
 
       return _state.setAttribute(name, value, returnValue);
     }
@@ -197,31 +197,31 @@ public class
   public void
     setAttributes(Map attributes)
     {
-      if (!AbstractReplicatedStore.getReplicating())
-      {
-	// special case to allow double marshalling - works around current limitation in RpcDispatcher...
-	Class[] argClasses={Map.class, Boolean.TYPE};
-
-	// marshall all attribute values (into new Map)
-	Map tmp=new HashMap(attributes.size());
-	for (Iterator i=attributes.entrySet().iterator(); i.hasNext();)
-	{
-	  Map.Entry entry=(Map.Entry)i.next();
-	  String key=(String)entry.getKey();
-	  Object val=entry.getValue();
-	  try
-	  {
-	    tmp.put(key,MarshallingInterceptor.marshal(val));
-	  }
-	  catch(IOException e)
-	  {
-	    _log.error("could not marshal arg ("+key+") for publication", e);
-	  }
-	}
-
-	Object[] argInstances={tmp, Boolean.TRUE};
-	_store.publish(_id, "setAttributes", argClasses, argInstances);
-      }
+//       if (!AbstractReplicatedStore.getReplicating())
+//       {
+// 	// special case to allow double marshalling - works around current limitation in RpcDispatcher...
+// 	Class[] argClasses={Map.class, Boolean.TYPE};
+//
+// 	// marshall all attribute values (into new Map)
+// 	Map tmp=new HashMap(attributes.size());
+// 	for (Iterator i=attributes.entrySet().iterator(); i.hasNext();)
+// 	{
+// 	  Map.Entry entry=(Map.Entry)i.next();
+// 	  String key=(String)entry.getKey();
+// 	  Object val=entry.getValue();
+// 	  try
+// 	  {
+// 	    tmp.put(key,MarshallingInterceptor.marshal(val));
+// 	  }
+// 	  catch(IOException e)
+// 	  {
+// 	    _log.error("could not marshal arg ("+key+") for publication", e);
+// 	  }
+// 	}
+//
+// 	Object[] argInstances={tmp, Boolean.TRUE};
+// 	_store.publish(_id, "setAttributes", argClasses, argInstances);
+//       }
 
       _state.setAttributes(attributes);
     }
@@ -229,31 +229,17 @@ public class
   public Object
     removeAttribute(String name, boolean returnValue)
     {
-      if (!AbstractReplicatedStore.getReplicating())
-      {
-	Class[] argClasses={String.class, Boolean.TYPE};
-	Object[] argInstances={name, returnValue?Boolean.TRUE:Boolean.FALSE};
-	_store.publish(_id, "removeAttribute", argClasses, argInstances);
-      }
+//       if (!AbstractReplicatedStore.getReplicating())
+//       {
+// 	Class[] argClasses={String.class, Boolean.TYPE};
+// 	Object[] argInstances={name, returnValue?Boolean.TRUE:Boolean.FALSE};
+// 	_store.publish(_id, "removeAttribute", argClasses, argInstances);
+//       }
 
       return _state.removeAttribute(name, returnValue);
     }
 
   //----------------------------------------
-
-  void
-    dispatch(String methodName, Class[] argClasses, Object[] argInstances)
-    {
-      // only stuff meant for our session will be dispatched to us..
-      try
-      {
-	getClass().getMethod(methodName, argClasses).invoke(this, argInstances);
-      }
-      catch (Exception e)
-      {
-	_log.error("this should never happen - code version mismatch ?", e);
-      }
-    }
 
   public Object
     setAttribute(String name, Object value, boolean returnValue, boolean dummy)
