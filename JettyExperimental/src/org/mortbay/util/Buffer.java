@@ -6,9 +6,8 @@ package org.mortbay.util;
 public interface Buffer
 {
     public final static boolean MUTABLE= true;
-    
     byte[] array();
-        
+       
     int offset();
     void offset(int newOffset);
     
@@ -30,8 +29,11 @@ public interface Buffer
     
 	void put(int offset, byte b);
 	void put(int offset, Buffer src);
-   
-    void move(int offset, int newOffset, int length);
+
+	int fill();
+	int flush();
+	void clear();
+	void compact();
     
      boolean isMutable();
      Buffer immutable();
