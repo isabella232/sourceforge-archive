@@ -192,9 +192,6 @@ public class Dispatcher implements RequestDispatcher
             String oldQ=httpServletRequest.getQueryString();
             if (oldQ!=null && oldQ.length()>0)
             {
-                System.err.println("query="+query);
-                System.err.println("oldQ="+oldQ);
-
                 if (query==null)
                     query=oldQ;
                 else
