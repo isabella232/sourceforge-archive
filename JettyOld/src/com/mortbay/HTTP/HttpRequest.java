@@ -459,8 +459,17 @@ public class HttpRequest extends HttpHeader
 		if (colon>=0)
 		{
 		    if (colon<serverName.length())
-			serverPort=
-			    Integer.parseInt(serverName.substring(colon+1));
+		    {
+			try{
+			    serverPort=Integer
+				.parseInt(serverName.substring(colon+1));
+			}
+			catch(Exception e)
+			{
+			    Code.ignore(e);
+			    serverPort=80;
+			}
+		    }
 		    serverName=serverName.substring(0,colon);
 		}
 		else
