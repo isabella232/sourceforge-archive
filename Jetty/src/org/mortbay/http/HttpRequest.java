@@ -226,6 +226,19 @@ public class HttpRequest extends HttpMessage
     }
     
     /* -------------------------------------------------------------- */
+    /** Write the HTTP request line as it was received.
+     */
+    public void writeRequestLine(Writer writer)
+        throws IOException
+    {
+        writer.write(_method);
+        writer.write(' ');
+        writer.write(_uri!=null?_uri.toString():"null");
+        writer.write(' ');
+        writer.write(_version);
+    }
+    
+    /* -------------------------------------------------------------- */
     /** Write the request header.
      * Places the message in __MSG_SENDING state.
      * @param out Chunkable output stream
@@ -238,16 +251,9 @@ public class HttpRequest extends HttpMessage
             throw new IllegalStateException("Not MSG_EDITABLE");
         
         _state=__MSG_BAD;
-        synchronized(writer)
-        {
-            writer.write(_method);
-            writer.write(' ');
-            writer.write(_uri!=null?_uri.toString():"null");
-            writer.write(' ');
-            writer.write(_version);
-            writer.write(HttpFields.__CRLF);
-            _header.write(writer);
-        }
+        writeRequestLine(writer);
+        writer.write(HttpFields.__CRLF);
+        _header.write(writer);
         _state=__MSG_SENDING;
     }
 
@@ -259,17 +265,6 @@ public class HttpRequest extends HttpMessage
         return _method+" "+_uri+" "+_version;
     }
     
-    /* -------------------------------------------------------------- */
-    /** Append the HTTP request line as it was received.
-     */
-    public void appendRequestLine(StringBuffer buf)
-    {
-        buf.append(_method);
-        buf.append(' ');
-        buf.append(_uri);
-        buf.append(' ');
-        buf.append(_version);
-    }
     
     /* -------------------------------------------------------------- */
     /** Get the HTTP method for this request.

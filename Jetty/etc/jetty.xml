@@ -23,13 +23,9 @@
     <Arg type="boolean">false</Arg>
   </Call>
 
-  <Set name="RequestLogSink">
-    <New class="org.mortbay.util.OutputStreamLogSink">
+  <Set name="RequestLog">
+    <New class="org.mortbay.http.NCSARequestLog">
       <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.request.log</Arg>
-      <Set name="RetainDays">90</Set>
-      <Set name="Append">true</Set>
-      <Set name="flushOn">false</Set>
-      <Set name="logDateFormat">dd/MMM/yyyy:HH:mm:ss ZZZ</Set>
     </New>
   </Set>
 

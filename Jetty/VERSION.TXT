@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+ + Factor out RolloverFileOutputStream from OutputStreamLogSink
+ + Remove request logSink and replace with RequestLog using
+   RolloverFileOutputStream
  + Handle special characters in resource file names better.
  + Welcome file dispatch sets requestURI. 
 

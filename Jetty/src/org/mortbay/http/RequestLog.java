@@ -5,16 +5,18 @@
 
 package org.mortbay.http;
 
+import org.mortbay.util.LifeCycle;
+
 /* ------------------------------------------------------------ */
 /** Abstract HTTP Request Log format
  * @version $Id$
  * @author Tony Thompson
  * @author Greg Wilkins
  */
-public interface RequestLogFormat
+public interface RequestLog extends LifeCycle
 {
-    public String format(HttpRequest request,
-                         HttpResponse response,
-                         int responseLength);
+    public void log(HttpRequest request,
+                    HttpResponse response,
+                    int responseLength);
 }
 

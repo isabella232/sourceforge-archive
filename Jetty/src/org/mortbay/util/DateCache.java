@@ -122,6 +122,12 @@ public class DateCache
         _lastSeconds=-1;
         _lastMinutes=-1;        
     }
+
+    /* ------------------------------------------------------------ */
+    public TimeZone getTimeZone()
+    {
+        return _tzFormat.getTimeZone();
+    }
     
     /* ------------------------------------------------------------ */
     /** Set the timezone.

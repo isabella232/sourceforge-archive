@@ -168,20 +168,13 @@
     </Arg>
   </Call>
 
-  <Set name="RequestLogSink">
-    <New class="org.mortbay.util.OutputStreamLogSink">
+  <Set name="RequestLog">
+    <New class="org.mortbay.http.NCSARequestLog">
       <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.request.log</Arg>
       <Set name="retainDays">90</Set>
       <Set name="append">true</Set>
-      <Set name="flushOn">false</Set>
-    </New>
-  </Set>
-
-  <Set name="RequestLogFormat">
-    <New class="org.mortbay.http.NCSARequestLogFormat">
-        <Arg type="String">dd/MMM/yyyy:HH:mm:ss ZZZ</Arg>
-        <Arg type="String">GMT</Arg>
-        <Arg type="boolean">true</Arg>
+      <Set name="extended">true</Set>
+      <Set name="LogTimeZone">GMT</Set>
     </New>
   </Set>
 

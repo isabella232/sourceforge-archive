@@ -44,20 +44,6 @@ import java.util.TimeZone;
  * <p> If LOG_TIMEZONE is set, it is used to set the timezone of the log date
  * format, otherwise GMT is used.
  *
- * <p> If LOG_FILE_BACKUP_FORMAT is set, it is used as a format string for
- * java.text.SimpleDateFormat and used to suffix the existing log file when
- * it is backed up - log files are backed up when this class starts and finds
- * the log file already exists and append is set to false (append is on by
- * default, so this only needs to be overridden if append is turned
- * off). Default value: HHmmssSSS
- *
- * <p> If LOG_FILE_RETAIN_DAYS is set, it is used to set the number of days
- * after which old log files will be deleted. Default: 31
- *
- * <p> If LOG_FILE_DATE_FORMAT is set, it is used as a format string for
- * java.text.SimpleDateFormat and used to format the date part of the log
- * file name. Default value: yyyy_MM_dd
- *
  * @see org.mortbay.util.Log
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -80,16 +66,9 @@ public class OutputStreamLogSink
     private final static String __indentSeparator =
         __lineSeparator+__indentBase;
     private final static int __lineSeparatorLen =
-        __lineSeparator.length();
-    
-    private final static String YYYY_MM_DD="yyyy_mm_dd";
-    
-    private static SimpleDateFormat __fileBackupFormat =
-        new SimpleDateFormat(System.getProperty("LOG_FILE_BACKUP_FORMAT","HHmmssSSS"));    
+        __lineSeparator.length();    
     
     /*-------------------------------------------------------------------*/
-    private SimpleDateFormat _fileDateFormat = 
-        new SimpleDateFormat(System.getProperty("LOG_FILE_DATE_FORMAT","yyyy_MM_dd"));
     private int _retainDays =Integer.getInteger("LOG_FILE_RETAIN_DAYS",31).intValue();
     
     protected DateCache _dateFormat=
@@ -115,7 +94,6 @@ public class OutputStreamLogSink
     protected boolean _started;
     private String _filename;
     private boolean _append=true;
-    private Thread _rollover;
     protected boolean _flushOn=true;
     protected int _bufferSize=4096;
     
@@ -282,9 +260,9 @@ public class OutputStreamLogSink
     }
     
     /* ------------------------------------------------------------ */
-    public  synchronized void setOutputStream(OutputStream out)
+    public synchronized void setOutputStream(OutputStream out)
     {
-        setFilename(null);
+        _filename=null;
         _buffer.reset();
         _out=out;
     }
@@ -298,54 +276,13 @@ public class OutputStreamLogSink
     /* ------------------------------------------------------------ */
     public  synchronized void setFilename(String filename)
     {
-        try
+        if (filename!=null)
         {
-            if (filename!=null)
-            {
-                filename=filename.trim();
-                if (filename.length()==0)
-                    filename=null;
-            }
-            
-            // Do we need to close the last file?
-            if (filename==null || !filename.equals(_filename))
-            {
-                if (_out!=null && _out!=System.err && _filename!=null)
-                {
-                    try{_out.close();}
-                    catch(Exception e){e.printStackTrace();}
-                    _out=null;
-                }
-                _filename=null;
-                if (_rollover!=null)
-                    _rollover.interrupt();
-                _rollover=null;
-            }
-            
-            // Do we have a new file
-            if (filename !=null && !filename.equals(_filename))
-            {
-                try{
-                    _filename=filename;
-                    if(isStarted())
-                        openFile(filename);
-                }
-                catch(IOException e)
-                {
-                    e.printStackTrace();
-                    _out=null;
-                    _filename=null;
-                    setOutputStream(System.err);
-                }
-            }
+            filename=filename.trim();
+            if (filename.length()==0)
+                filename=null;
         }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-        
-        if (_filename==null && _out==null)
-            _out=System.err;
+        _filename=filename;        
     }
 
     /* ------------------------------------------------------------ */
@@ -364,56 +301,6 @@ public class OutputStreamLogSink
     public void setRetainDays(int retainDays)
     {
         _retainDays = retainDays;
-    }
-
-    /* ------------------------------------------------------------ */
-    /* 
-     * @param filename 
-     */
-    private synchronized void openFile(String filename)
-        throws IOException
-    {
-        try
-        {
-            File file = new File(filename);
-            filename=file.getCanonicalPath();
-            file=new File(filename);
-            File dir= new File(file.getParent());
-            if (!dir.exists() && dir.canWrite())
-                    throw new IOException("Cannot write log directory "+dir);
-            
-            Date now=new Date();
-            
-            // Is this a rollover file?
-            int i=file.getName().toLowerCase().indexOf(YYYY_MM_DD);
-            if (i>=0)
-            {
-                file=new File(dir,
-                              file.getName().substring(0,i)+
-                              _fileDateFormat.format(now)+
-                              file.getName().substring(i+YYYY_MM_DD.length()));
-                if (_rollover==null)
-                    _rollover=new Rollover();
-            }
-            
-            if (file.exists()&&!file.canWrite())
-                throw new IOException("Cannot write log file "+file);
-            
-            if (!_append && file.exists())
-                file.renameTo(new File(file.toString()+"."+__fileBackupFormat.format(now)));
-            
-            _out=new FileOutputStream(file.toString(),_append);
-        
-        if (_rollover!=null && !_rollover.isAlive())
-            _rollover.start();
-        
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-            _out=System.err;
-            throw e;
-        }
     }
     
     /* ------------------------------------------------------------ */
@@ -558,11 +445,23 @@ public class OutputStreamLogSink
      */
     public synchronized void start()
     {
-        if (_filename!=null)
+        if (_started)
+            return;
+        
+        if (_out==null && _filename!=null)
         {
-            try{openFile(_filename);}
+            try
+            {
+                RolloverFileOutputStream rfos=
+                    new RolloverFileOutputStream(_filename,_append,_retainDays);
+                _out=rfos;
+            }
             catch(IOException e){e.printStackTrace();}   
         }
+
+        if (_out==null)
+            _out=System.err;
+        
         _started=true;
     }
     
@@ -576,10 +475,6 @@ public class OutputStreamLogSink
     {
         _started=false;
 
-        if (_rollover!=null)
-            _rollover.interrupt();
-        _rollover=null;
-        
         if (_out!=null)
         {
             try
@@ -591,14 +486,14 @@ public class OutputStreamLogSink
                 }
                 _out.flush();
             }
-            catch(Exception e){Code.ignore(e);}
+            catch(Exception e){if (Code.debug())e.printStackTrace();}
             Thread.yield();
         }
         
-        if (_out!=null && _out!=System.err && _filename!=null)
+        if (_out!=null && _out!=System.err)
         {
             try{_out.close();}
-            catch(Exception e){Code.ignore(e);}
+            catch(Exception e){if (Code.debug())e.printStackTrace();}
         }       
     }
 
@@ -606,100 +501,7 @@ public class OutputStreamLogSink
     public boolean isStarted()
     {
         return _started;
-    }
-    
-    /* ------------------------------------------------------------ */
-    private class Rollover extends Thread
-    {
-        Rollover()
-        {
-            setName("Rollover: "+OutputStreamLogSink.this.hashCode());
-        }
-        
-        public void run()
-        {
-            while(true)
-            {
-                try
-                {
-                    // Cleanup old files:
-                    if (_retainDays>0)
-                    {
-                        Calendar retainDate = Calendar.getInstance();
-                        retainDate.add(Calendar.DATE,-_retainDays);
-                        int borderYear = retainDate.get(java.util.Calendar.YEAR);
-                        int borderMonth = retainDate.get(java.util.Calendar.MONTH) + 1;
-                        int borderDay = retainDate.get(java.util.Calendar.DAY_OF_MONTH);
-
-                        File file= new File(_filename);
-                        File dir = new File(file.getParent());
-                        String fn=file.getName();
-                        int s=fn.toLowerCase().indexOf(YYYY_MM_DD);
-                        String prefix=fn.substring(0,s);
-                        String suffix=fn.substring(s+YYYY_MM_DD.length());
-
-                        String[] logList=dir.list();
-                        for (int i=0;i<logList.length;i++)
-                        {
-                            fn = logList[i];
-                            if(fn.startsWith(prefix)&&fn.indexOf(suffix,prefix.length())>=0)
-                            {        
-                                try
-                                {
-                                    StringTokenizer st = new StringTokenizer
-                                        (fn.substring(prefix.length()),
-                                         "_.");
-                                    int nYear = Integer.parseInt(st.nextToken());
-                                    int nMonth = Integer.parseInt(st.nextToken());
-                                    int nDay = Integer.parseInt(st.nextToken());
-                                    
-                                    if (nYear<borderYear ||
-                                        (nYear==borderYear && nMonth<borderMonth) ||
-                                        (nYear==borderYear &&
-                                         nMonth==borderMonth &&
-                                         nDay<=borderDay))
-                                    {
-                                        Log.event("Log age "+fn);
-                                        new File(dir,fn).delete();
-                                    }
-                                }
-                                catch(Exception e)
-                                {
-                                    if (Code.debug())
-                                        e.printStackTrace();
-                                }
-                            }
-                        }
-                    }
-
-                    // Sleep until midnight
-                    Calendar now = Calendar.getInstance();
-                    GregorianCalendar midnight =
-                        new GregorianCalendar(now.get(Calendar.YEAR),
-                                              now.get(Calendar.MONTH),
-                                              now.get(Calendar.DAY_OF_MONTH),
-                                              23,0);
-                    midnight.add(Calendar.HOUR,1);
-                    long sleeptime=
-                        midnight.getTime().getTime()-
-                        now.getTime().getTime();
-                    Code.debug("Log rollover sleep until "+midnight.getTime());
-                    Thread.sleep(sleeptime);
-
-                    // Update the filename
-                    openFile(_filename);
-                    Log.event("Rolled over "+_filename);
-                }
-                catch(InterruptedIOException e){break;}
-                catch(InterruptedException e){break;}
-                catch(IOException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-            Code.debug("Log rollover exiting");
-        }
-    }
+    }    
 };
 
 

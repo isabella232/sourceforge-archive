@@ -65,17 +65,13 @@ public class HttpServer implements LifeCycle
     /* ------------------------------------------------------------ */
     private HashMap _listeners = new HashMap(3);
     private HttpEncoding _httpEncoding ;
-    private HashMap _realmMap = new HashMap(3);
-    
-    // HttpServer[host->PathMap[contextPath->List[HanderContext]]]
-    // HttpContext[List[HttpHandler]]
+    private HashMap _realmMap = new HashMap(3);    
     private StringMap _hostMap = new StringMap();
     
     private HttpContext _notFoundContext=null;
     private boolean _chunkingForced=false;
     
-    private LogSink _requestLogSink;
-    private RequestLogFormat _requestLogFormat;
+    private RequestLog _requestLog;
     private List _eventListeners;
     private List _components;
     
@@ -128,34 +124,13 @@ public class HttpServer implements LifeCycle
             Code.debug("HANDLER: ",_hostMap);
         }   
 
-        if (_requestLogSink!=null)
+        if (_requestLog!=null && !_requestLog.isStarted())
         {
-            if (!_requestLogSink.isStarted())
-            {
-                try{
-                    _requestLogSink.start();
-                    Log.event("Started "+_requestLogSink);
-                }
-                catch(Exception e){mex.add(e);}
+            try{
+                _requestLog.start();
+                Log.event("Started "+_requestLog);
             }
-
-            if (_requestLogFormat==null)
-            {
-                String logDateFormat="dd/MMM/yyyy:HH:mm:ss ZZZ";
-                try
-                {
-                    // XXX - this shows that the design of LogSink is WRONG!
-                    Method gldf = _requestLogSink.getClass().getMethod("getLogDateFormat",null);
-                    logDateFormat=(String)gldf.invoke(_requestLogSink,null);
-                }
-                catch(Exception e)
-                {
-                    Code.ignore(e);
-                }
-                _requestLogFormat=new NCSARequestLogFormat(logDateFormat,
-                                                           TimeZone.getDefault().getID(),
-                                                           true);
-            }
+            catch(Exception e){mex.add(e);}
         }
         
         Iterator contexts = getHttpContexts().iterator();
@@ -184,7 +159,7 @@ public class HttpServer implements LifeCycle
      */
     public synchronized boolean isStarted()
     {
-        if (_requestLogSink!=null && _requestLogSink.isStarted())
+        if (_requestLog!=null && _requestLog.isStarted())
             return true;
         
         Iterator listeners = getListeners().iterator();
@@ -238,11 +213,12 @@ public class HttpServer implements LifeCycle
                 context.stop();
         }
 
-        if (_requestLogSink!=null)
+        if (_requestLog!=null && _requestLog.isStarted())
         {
-            _requestLogSink.stop();
-            Log.event("Stopped "+_requestLogSink);
+            _requestLog.stop();
+            Log.event("Stoped "+_requestLog);
         }
+
         Log.event("Stopped "+this);
     }
     
@@ -597,65 +573,28 @@ public class HttpServer implements LifeCycle
         }
         return set;
     }
-
-    /* ------------------------------------------------------------ */
-    /** 
-     * @deprecated use getRequestLogSink()
-     */
-    public synchronized LogSink getLogSink()
-    {
-        return getRequestLogSink();
-    }
     
     /* ------------------------------------------------------------ */
-    /**
-     * @deprecated use setRequestLogSink()
-     */
-    public synchronized void setLogSink(LogSink logSink)
+    public RequestLog getRequestLog()
     {
-        setRequestLogSink(logSink);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public synchronized LogSink getRequestLogSink()
-    {
-        return _requestLogSink;
+        return _requestLog;
     }
     
     /* ------------------------------------------------------------ */
     /** Set the request log.
-     * Set the LogSink to be used for the request log.
      * @param logSink 
      */
-    public synchronized void setRequestLogSink(LogSink logSink)
+    public synchronized void setRequestLog(RequestLog log)
     {
         if (isStarted())
             throw new IllegalStateException("Started");
-        if (_requestLogSink!=null)
-            remove(_requestLogSink);
-        _requestLogSink=logSink;
-        if (_requestLogSink!=null)
-            add(_requestLogSink);
+        if (_requestLog!=null)
+            remove(_requestLog);
+        _requestLog=log;
+        if (_requestLog!=null)
+            add(_requestLog);
     }
 
-    /* ------------------------------------------------------------ */
-    public RequestLogFormat getRequestLogFormat()
-    {
-        return _requestLogFormat;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Set the requestLogFormat.
-     * Set the format instance to be used for formatting the request
-     * log. The default requestLogFormat is an extended
-     * NCSARequestLogFormat using the date format of the request
-     * LogSink in the GMT timezone.
-     * @param format 
-     */
-    public void setRequestLogFormat(RequestLogFormat format)
-    {
-        _requestLogFormat=format;
-    }
 
     /* ------------------------------------------------------------ */
     /** Log a request to the request log
@@ -667,11 +606,10 @@ public class HttpServer implements LifeCycle
              HttpResponse response,
              int length)
     {
-        if (_requestLogSink!=null &&
-            _requestLogFormat!=null &&
+        if (_requestLog!=null &&
             request!=null &&
             response!=null)
-            _requestLogSink.log(_requestLogFormat.format(request,response,length));
+            _requestLog.log(request,response,length);
     }
     
     /* ------------------------------------------------------------ */

@@ -27,7 +27,7 @@ public class ByteArrayISO8859Writer extends Writer
     private int _size;
     private ByteArrayOutputStream2 _bout=null;
     private OutputStreamWriter _writer=null;
-    
+
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
@@ -42,6 +42,12 @@ public class ByteArrayISO8859Writer extends Writer
         _buf=new byte[capacity];
     }
 
+    /* ------------------------------------------------------------ */
+    public Object getLock()
+    {
+        return lock;
+    }
+    
     /* ------------------------------------------------------------ */
     public int capacity()
     {
