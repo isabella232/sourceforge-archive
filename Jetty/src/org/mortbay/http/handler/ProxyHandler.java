@@ -41,7 +41,7 @@ import org.mortbay.util.URI;
 public class ProxyHandler extends AbstractHttpHandler
 {
     protected Set _proxyHostsWhiteList;
-    protected Set _proxyHostsBlackList;
+    protected Set _proxyHostsBlackList;    
     
     /* ------------------------------------------------------------ */
     /** Map of leg by leg headers (not end to end).
@@ -383,6 +383,8 @@ public class ProxyHandler extends AbstractHttpHandler
      * that is in the _ProxySchemes map. If a proxy host black list is set,
      * the URI host must not be in the list. If aproxy host white list is
      * set, then the URI host must be in the list.
+     * The port is also check that it is either 80, 443, >1024 or one of the 
+     * allowed CONNECT ports.
      */
     protected URL isProxied(URI uri)
         throws MalformedURLException
@@ -390,6 +392,15 @@ public class ProxyHandler extends AbstractHttpHandler
         // Is this a proxy request?
         String scheme=uri.getScheme();
         String host=uri.getHost();
+
+        // check port
+        int port = uri.getPort();
+        if (port>0 && port <=1024 && port!=80 && port!=443)
+        {
+            Integer p = new Integer(port);
+            if (!_allowedConnectPorts.contains(p))
+                return null;
+        }
 
         // Must be a scheme that can be proxied.
         if (scheme==null || !_ProxySchemes.containsKey(scheme))

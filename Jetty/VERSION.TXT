@@ -7,6 +7,7 @@ Jetty Versions
  + Confidential redirection includes query
  + handle multiple security role references
  + Fixed cookie handling for old cookies and safari
+ + Restricted ports in ProxyHandler.
 
 Jetty-4.2.10pre1 - 2 June 2003
  + Fixed JSP code visibility problem introduced in Jetty-4.2.10pre0
