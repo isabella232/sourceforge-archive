@@ -331,84 +331,27 @@ public class HttpResponse extends HttpMessage
                 message=""+code;
         }
         HttpRequest request=getHttpRequest();
-        Class exClass=(Class)request.getAttribute("javax.servlet.error.exception_type");
              
         // Generate normal error page.
         setStatus(code);
         setReason(UrlEncoded.encodeString(message));
-
+        
         // If we are allowed to have a body 
         if (code!=__204_No_Content &&
             code!=__304_Not_Modified &&
             code!=__206_Partial_Content &&
             code>=200)
         {
-            // Find  error page.
-            String error_page = null;
-            while (error_page==null && exClass!=null && _httpContext!=null)
-            {
-                error_page = _httpContext.getErrorPage(exClass.getName());
-                exClass=exClass.getSuperclass();
-                Code.debug("error page: ",exClass," -> ",error_page);
-            }
-            
-            if (error_page==null && _httpContext!=null)
-            {
-                error_page = _httpContext.getErrorPage(TypeUtil.toString(code));
-                Code.debug("error page: "+code," -> ",error_page);
-            }
-
-            // Handle error page
-            if (error_page!=null)
-            {
-                if (!error_page.startsWith("/"))
-                    error_page="/"+error_page;
-                if (request.getAttribute("javax.servlet.error.status_code")==null)
-                {
-                    // Clear old wrappers
-                    request.setWrapper(null);
-                    setWrapper(null);
-                    
-                    // Set attributes to describe error
-                    request.setAttribute("javax.servlet.error.request_uri",
-                                         getHttpRequest().getEncodedPath());
-                    request.setAttribute("javax.servlet.error.status_code",code_integer);
-                    request.setAttribute("javax.servlet.error.message",message);
-
-                    // Change URI and the method to GET
-                    request.setState(HttpMessage.__MSG_EDITABLE);
-                    request.setMethod(HttpRequest.__GET);
-                    request.getURI().setPath
-                        (URI.addPaths(_httpContext.getContextPath(),error_page));
-                    request.setState(HttpMessage.__MSG_RECEIVED);
-                    // Do a forward to the error page resource.
-                    setContentType(HttpFields.__TextHtml);
-                    String query=null;
-                    int q=error_page.indexOf('?');
-                    if (q>0)
-                    {
-                        query=error_page.substring(q+1);
-                        error_page=error_page.substring(0,q);
-                    }
-                    getHttpContext().handle(error_page,query,request,this);
-                }
-                else
-                    Code.warning("Error "+code+" while serving error page for "+
-                                 request.getAttribute("javax.servlet.error.status_code"));
-            }
-            else
-            {   
-                setContentType(HttpFields.__TextHtml);
-                _mimeType=HttpFields.__TextHtml;
-                _characterEncoding=null;
-                ByteArrayISO8859Writer writer =
-                    new ByteArrayISO8859Writer(((HttpOutputStream)getOutputStream()).getBufferSize());
-                writeErrorPage(writer,code,message);
-                writer.flush();
-                setContentLength(writer.size());
-                writer.writeTo(getOutputStream());
-                writer.destroy();
-            }
+            setContentType(HttpFields.__TextHtml);
+            _mimeType=HttpFields.__TextHtml;
+            _characterEncoding=null;
+            ByteArrayISO8859Writer writer =
+                new ByteArrayISO8859Writer(((HttpOutputStream)getOutputStream()).getBufferSize());
+            writeErrorPage(writer,code,message);
+            writer.flush();
+            setContentLength(writer.size());
+            writer.writeTo(getOutputStream());
+            writer.destroy();
         }
         else if (code!=__206_Partial_Content) 
         {
@@ -417,7 +360,7 @@ public class HttpResponse extends HttpMessage
             _characterEncoding=null;
             _mimeType=null;
         }
-
+        
         commit();
     }
     

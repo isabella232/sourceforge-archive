@@ -10,6 +10,8 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
 import javax.servlet.ServletResponseWrapper;
@@ -23,6 +25,7 @@ import org.mortbay.http.HttpResponse;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.TypeUtil;
 import org.mortbay.util.URI;
 
 /* ------------------------------------------------------------ */
@@ -347,11 +350,43 @@ public class ServletHttpResponse implements HttpServletResponse
     public void sendError(int status, String message)
         throws IOException
     {
-        ServletHolder holder = _servletHttpRequest.getServletHolder();
-        if (holder!=null)
-            _servletHttpRequest.setAttribute("javax.servlet.error.servlet_name",
-                                             holder.getName());
-        _httpResponse.sendError(status,message);
+        // Find  error page.
+        String error_page =
+            _servletHttpRequest.getServletHandler().getErrorPage(status,_servletHttpRequest);
+
+        // Handle error page?
+        if (error_page==null)
+        {
+            // handle normally
+            _httpResponse.sendError(status,message);
+        }
+        else
+        {
+            // handle error page
+            ServletHolder holder = _servletHttpRequest.getServletHolder();
+            if (holder!=null)
+                _servletHttpRequest.setAttribute("javax.servlet.error.servlet_name",
+                                                 holder.getName());
+            _servletHttpRequest.setAttribute("javax.servlet.error.request_uri",
+                                             _servletHttpRequest.getRequestURI());
+            _servletHttpRequest.setAttribute("javax.servlet.error.status_code",
+                                             new Integer(status));
+            _servletHttpRequest.setAttribute("javax.servlet.error.message",message);
+            
+            RequestDispatcher dispatcher=
+                _servletHttpRequest.getServletHandler().getServletContext()
+                .getRequestDispatcher(error_page);
+
+            try
+            {
+                ((Dispatcher)dispatcher).error(_servletHttpRequest,this);
+            }
+            catch(ServletException e)
+            {
+                Code.warning(e);
+                _httpResponse.sendError(status,message); 
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -592,8 +627,3 @@ public class ServletHttpResponse implements HttpServletResponse
 
 
 }
-
-
-
-
-

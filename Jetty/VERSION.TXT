@@ -9,6 +9,8 @@ Jetty Versions
  + Put a semi busy loop into proxy tunnels for IE problems
  + MultipartRequest supports multi value headers.
  + XML entity resolution uses URLs not Resources
+ + Implemented ServletRequestListeners
+ + Moved error page mechanism to be webapp only.
 
 Jetty-5.0.alpha1 - 12 August 2003
  + Switched to mx4j

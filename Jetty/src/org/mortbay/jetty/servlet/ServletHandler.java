@@ -561,7 +561,7 @@ public class ServletHandler extends AbstractHttpHandler
             if (session!=null)
                 ((SessionManager.Session)session).access();
             Code.debug("session=",session);
-
+            
             // Do that funky filter and servlet thang!
             if (servletHolder!=null)
                 dispatch(pathInContext,request,response,servletHolder);
@@ -889,6 +889,13 @@ public class ServletHandler extends AbstractHttpHandler
         else
             response.sendError(HttpResponse.__404_Not_Found);
     }
+
+    /* ------------------------------------------------------------ */
+    String getErrorPage(int status,ServletHttpRequest request)
+    {
+        return null;
+    }
+    
     
     
     /* ------------------------------------------------------------ */

@@ -22,6 +22,9 @@ import javax.servlet.ServletContextAttributeEvent;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestEvent;
+import javax.servlet.ServletRequestListener;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
@@ -39,6 +42,7 @@ import org.mortbay.http.SecurityConstraint;
 import org.mortbay.http.UserRealm;
 import org.mortbay.util.Code;
 import org.mortbay.util.JarResource;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.Log;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
@@ -83,8 +87,10 @@ public class WebApplicationContext
     private transient Set _warnings;
     private transient WebApplicationHandler _webAppHandler;
     private transient Map _tagLibMap;
-    private transient ArrayList _contextListeners;
-    private transient ArrayList _contextAttributeListeners;
+    private transient Object _contextListeners;
+    private transient Object _contextAttributeListeners;
+    private transient Object _requestListeners;
+    private transient Map _errorPages;
 
     
     /* ------------------------------------------------------------ */
@@ -474,8 +480,8 @@ public class WebApplicationContext
                 if (_contextListeners!=null && _webAppHandler!=null)
                 {
                     ServletContextEvent event = new ServletContextEvent(getServletContext());
-                    for (int i=0;i<_contextListeners.size();i++)
-                        try{((ServletContextListener)_contextListeners.get(i))
+                    for (int i=0;i<LazyList.size(_contextListeners);i++)
+                        try{((ServletContextListener)LazyList.get(_contextListeners,i))
                                 .contextInitialized(event);}
                         catch(Exception ex) { mex.add(ex); }
                 }
@@ -520,16 +526,16 @@ public class WebApplicationContext
             if (_webAppHandler!=null)
             {
                 ServletContextEvent event = new ServletContextEvent(getServletContext());
-                for (int i=_contextListeners.size();i-->0;)
-                    ((ServletContextListener)_contextListeners.get(i))
+                for (int i=LazyList.size(_contextListeners);i-->0;)
+                    ((ServletContextListener)LazyList.get(_contextListeners,i))
                         .contextDestroyed(event);
             }
-            _contextListeners.clear();
         }
 
-        if (_contextAttributeListeners!=null)
-            _contextAttributeListeners.clear();
-
+        _contextListeners=null;
+        _contextAttributeListeners=null;
+        _requestListeners=null;
+        
         // Stop the context
         super.stop();
 
@@ -537,6 +543,11 @@ public class WebApplicationContext
         if (_webAppHandler!=null)
             removeHandler(_webAppHandler);
         _webAppHandler=null;
+
+        if (_errorPages!=null)
+            _errorPages.clear();
+        _errorPages=null;
+
     }
     
     /* ------------------------------------------------------------ */
@@ -572,17 +583,19 @@ public class WebApplicationContext
         if (listener instanceof ServletContextListener)
         {
             known=true;
-            if (_contextListeners==null)
-                _contextListeners=new ArrayList(3);
-            _contextListeners.add(listener);
+            _contextListeners=LazyList.add(_contextListeners,listener);
         }
         
         if (listener instanceof ServletContextAttributeListener)
         {
             known=true;
-            if (_contextAttributeListeners==null)
-                _contextAttributeListeners=new ArrayList(3);
-            _contextAttributeListeners.add(listener);
+            _contextAttributeListeners=LazyList.add(_contextAttributeListeners,listener);
+        }
+        
+        if (listener instanceof ServletRequestListener)
+        {
+            known=true;
+            _requestListeners=LazyList.add(_requestListeners,listener);
         }
 
         if (!known)
@@ -592,13 +605,9 @@ public class WebApplicationContext
     /* ------------------------------------------------------------ */
     public synchronized void removeEventListener(EventListener listener)
     {
-        if ((listener instanceof ServletContextListener) &&
-            _contextListeners!=null)
-            _contextListeners.remove(listener);
-        
-        if ((listener instanceof ServletContextAttributeListener) &&
-            _contextAttributeListeners!=null)
-            _contextAttributeListeners.remove(listener);
+        _contextListeners=LazyList.remove(_contextListeners,listener);
+        _contextAttributeListeners=LazyList.remove(_contextAttributeListeners,listener);
+        _requestListeners=LazyList.remove(_requestListeners,listener);
     }
 
     /* ------------------------------------------------------------ */
@@ -613,11 +622,11 @@ public class WebApplicationContext
                 new ServletContextAttributeEvent(getServletContext(),
                                                  name,
                                                  old!=null?old:value);
-            for (int i=0;i<_contextAttributeListeners.size();i++)
+            for (int i=0;i<LazyList.size(_contextAttributeListeners);i++)
             {
                 ServletContextAttributeListener l =
                     (ServletContextAttributeListener)
-                    _contextAttributeListeners.get(i);
+                    LazyList.get(_contextAttributeListeners,i);
                 if (old==null)
                     l.attributeAdded(event);
                 else if (value==null)
@@ -642,11 +651,11 @@ public class WebApplicationContext
             ServletContextAttributeEvent event =
                 new ServletContextAttributeEvent(getServletContext(),
                                                  name,old);
-            for (int i=0;i<_contextAttributeListeners.size();i++)
+            for (int i=0;i<LazyList.size(_contextAttributeListeners);i++)
             {
                 ServletContextAttributeListener l =
                     (ServletContextAttributeListener)
-                    _contextAttributeListeners.get(i);
+                    LazyList.get(_contextAttributeListeners,i);
                 l.attributeRemoved(event);    
             }
         }
@@ -1312,5 +1321,60 @@ public class WebApplicationContext
             throw ioe;
 
         return resource;
-    }    
+    }
+
+    /* ------------------------------------------------------------ */
+    void requestInitialized(ServletRequest request)
+    {
+        ServletRequestEvent event = new ServletRequestEvent(getServletContext(),request);
+        for (int i=0;i<LazyList.size(_requestListeners);i++)
+            ((ServletRequestListener)LazyList.get(_requestListeners,i))
+                        .requestInitialized(event);
+    }
+    
+    /* ------------------------------------------------------------ */
+    void requestDestroyed(ServletRequest request)
+    {
+        ServletRequestEvent event = new ServletRequestEvent(getServletContext(),request);
+        for (int i=LazyList.size(_requestListeners);i-->0;)
+            ((ServletRequestListener)LazyList.get(_requestListeners,i))
+                        .requestDestroyed(event);
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    /** set error page URI.
+     * @param error A string representing an error code or a
+     * exception classname
+     * @param uriInContext
+     */
+    void setErrorPage(String error,String uriInContext)
+    {
+        if (_errorPages==null)
+            _errorPages=new HashMap();
+        _errorPages.put(error,uriInContext);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** get error page URI.
+     * @param error A string representing an error code or a
+     * exception classname
+     * @return URI within context
+     */
+    String getErrorPage(String error)
+    {
+        if (_errorPages==null)
+            return null;
+       return (String) _errorPages.get(error);
+    }
+
+
+    /* ------------------------------------------------------------ */
+    String removeErrorPage(String error)
+    {
+        if (_errorPages==null)
+            return null;
+       return (String) _errorPages.remove(error);
+    }
+    
 }

@@ -26,6 +26,7 @@ import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.TypeUtil;
 
 /* --------------------------------------------------------------------- */
 /** WebApp HttpHandler.
@@ -46,6 +47,7 @@ public class WebApplicationHandler extends ServletHandler
     private boolean _acceptRanges=true;
     
     private transient boolean _started=false;
+    private transient WebApplicationContext _webApplicationContext;
     
     /* ------------------------------------------------------------ */
     public boolean isAcceptRanges()
@@ -130,6 +132,8 @@ public class WebApplicationHandler extends ServletHandler
         Code.debug("Path Filters: ",_pathFilters);
         Code.debug("Servlet Filters: ",_servletFilterMap);
         _started=true;
+        if (getHttpContext() instanceof WebApplicationContext)
+            _webApplicationContext=(WebApplicationContext)getHttpContext();
     }
     
     /* ------------------------------------------------------------ */
@@ -172,9 +176,29 @@ public class WebApplicationHandler extends ServletHandler
         finally
         {
             _started=false;
+            _webApplicationContext=null;
         }
     }
 
+    
+    /* ------------------------------------------------------------ */
+    String getErrorPage(int status,ServletHttpRequest request)
+    {
+        String error_page = null;
+        Class exClass=(Class)request
+            .getAttribute("javax.servlet.error.exception_type");
+        while (error_page==null && exClass!=null && _webApplicationContext!=null)
+        {
+            error_page = _webApplicationContext.getErrorPage(exClass.getName());
+            exClass=exClass.getSuperclass();
+        }
+            
+        if (error_page==null && _webApplicationContext!=null)
+            error_page = _webApplicationContext.getErrorPage(TypeUtil.toString(status));
+
+        return error_page;
+    }
+    
     /* ------------------------------------------------------------ */
     protected void dispatch(String pathInContext,
                             HttpServletRequest request,
@@ -184,43 +208,58 @@ public class WebApplicationHandler extends ServletHandler
                UnavailableException,
                IOException
     {
-        // Determine request type.
-        int requestType=0;
-
-        if (request instanceof Dispatcher.DispatcherRequest)
+        boolean notified=false;
+        try
         {
-            // Handle dispatch to j_security_check
-            HttpContext context= getHttpContext();
-            if (context!=null && context instanceof ServletHttpContext &&
-                pathInContext!=null && pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
+            // Determine request type.
+            int requestType=0;
+
+            if (request instanceof Dispatcher.DispatcherRequest)
             {
-                ServletHttpRequest servletHttpRequest=(ServletHttpRequest)request;
-                ServletHttpResponse servletHttpResponse=(ServletHttpResponse)response;
-                ServletHttpContext servletContext = (ServletHttpContext)context;
+                if (_webApplicationContext!=null &&
+                    ((Dispatcher.DispatcherRequest)request).crossContext())
+                {
+                    notified=true;
+                    _webApplicationContext.requestInitialized(request);
+                }
                 
-                if (!servletContext.jSecurityCheck(pathInContext,
-                                                   servletHttpRequest.getHttpRequest(),
-                                                   servletHttpResponse.getHttpResponse()))
-                    return;
-            }
+                // Handle dispatch to j_security_check
+                HttpContext context= getHttpContext();
+                if (context!=null && context instanceof ServletHttpContext &&
+                    pathInContext!=null && pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
+                {
+                    ServletHttpRequest servletHttpRequest=(ServletHttpRequest)request;
+                    ServletHttpResponse servletHttpResponse=(ServletHttpResponse)response;
+                    ServletHttpContext servletContext = (ServletHttpContext)context;
+                
+                    if (!servletContext.jSecurityCheck(pathInContext,
+                                                       servletHttpRequest.getHttpRequest(),
+                                                       servletHttpResponse.getHttpResponse()))
+                        return;
+                }
         
-            // Forward or include
-            requestType=((Dispatcher.DispatcherRequest)request).getFilterType();
-        }
-        else
-        {
-            // Error or request
-            ServletHttpRequest servletHttpRequest=(ServletHttpRequest)request;
-            ServletHttpResponse servletHttpResponse=(ServletHttpResponse)response;
-            HttpResponse httpResponse=servletHttpResponse.getHttpResponse();
-
-            if (httpResponse.getStatus()!=HttpResponse.__200_OK)
-            {
-                // Error
-                requestType=FilterHolder.__ERROR;
+                // Forward or include
+                requestType=((Dispatcher.DispatcherRequest)request).getFilterType();
+                if (requestType==FilterHolder.__FORWARD)
+                {
+                    // Error
+                    requestType=FilterHolder.__ERROR;
+                }
             }
             else
             {
+                if (_webApplicationContext!=null)
+                {
+                    notified=true;
+                    _webApplicationContext.requestInitialized(request);
+                }
+                
+                // Error or request
+                ServletHttpRequest servletHttpRequest=(ServletHttpRequest)request;
+                ServletHttpResponse servletHttpResponse=(ServletHttpResponse)response;
+                HttpResponse httpResponse=servletHttpResponse.getHttpResponse();
+
+                
                 // Request
                 requestType=FilterHolder.__REQUEST;
                 // protect web-inf and meta-inf
@@ -238,63 +277,69 @@ public class WebApplicationHandler extends ServletHandler
                      httpResponse))
                     return;
             }
-        }
         
-        // Build list of filters
-        Object filters = null;
+            // Build list of filters
+            Object filters = null;
         
-        // Path filters
-        if (pathInContext!=null && _pathFilters.size()>0)
-        {
-            for (int i=0;i<_pathFilters.size();i++)
+            // Path filters
+            if (pathInContext!=null && _pathFilters.size()>0)
             {
-                FilterHolder holder=(FilterHolder)_pathFilters.get(i);
-                if (holder.appliesTo(pathInContext,requestType))
-                    filters=LazyList.add(filters,holder);
-            }
-        }
-        
-        // Servlet filters
-        if (servletHolder!=null && _servletFilterMap.size()>0)
-        {
-            Object o=_servletFilterMap.get(servletHolder.getName());
-            if (o!=null)
-            {
-                if (o instanceof List)
+                for (int i=0;i<_pathFilters.size();i++)
                 {
-                    List list=(List)o;
-                    for (int i=0;i<list.size();i++)
+                    FilterHolder holder=(FilterHolder)_pathFilters.get(i);
+                    if (holder.appliesTo(pathInContext,requestType))
+                        filters=LazyList.add(filters,holder);
+                }
+            }
+        
+            // Servlet filters
+            if (servletHolder!=null && _servletFilterMap.size()>0)
+            {
+                Object o=_servletFilterMap.get(servletHolder.getName());
+                if (o!=null)
+                {
+                    if (o instanceof List)
                     {
-                        FilterHolder holder = (FilterHolder)list.get(i);
+                        List list=(List)o;
+                        for (int i=0;i<list.size();i++)
+                        {
+                            FilterHolder holder = (FilterHolder)list.get(i);
+                            if (holder.appliesTo(requestType))
+                                filters=LazyList.add(filters,holder);
+                        }
+                    }
+                    else
+                    {
+                        FilterHolder holder = (FilterHolder)o;
                         if (holder.appliesTo(requestType))
                             filters=LazyList.add(filters,holder);
-                    }
+                    } 
                 }
-                else
-                {
-                    FilterHolder holder = (FilterHolder)o;
-                    if (holder.appliesTo(requestType))
-                        filters=LazyList.add(filters,holder);
-                } 
             }
-        }
         
-        // Do the handling thang
-        if (LazyList.size(filters)>0)
-        {
-            Chain chain=new Chain(pathInContext,filters,servletHolder);
-            chain.doFilter(request,response);
-        }
-        else
-        {
-            // Call servlet
-            if (servletHolder!=null)
+            // Do the handling thang
+            if (LazyList.size(filters)>0)
             {
-                if (Code.verbose()) Code.debug("call servlet ",servletHolder);
-                servletHolder.handle(request,response);
+                Chain chain=new Chain(pathInContext,filters,servletHolder);
+                chain.doFilter(request,response);
             }
-            else // Not found
-                notFound(request,response);
+            else
+            {
+                // Call servlet
+                if (servletHolder!=null)
+                {
+                    if (Code.verbose()) Code.debug("call servlet ",servletHolder);
+                    servletHolder.handle(request,response);
+                }
+                else // Not found
+                    notFound(request,response);
+            }
+        
+        }
+        finally
+        {
+            if (notified && _webApplicationContext!=null)
+                _webApplicationContext.requestDestroyed(request);
         }
     }
     

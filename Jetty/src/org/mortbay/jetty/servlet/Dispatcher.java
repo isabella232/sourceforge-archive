@@ -133,7 +133,7 @@ public class Dispatcher implements RequestDispatcher
                         ServletResponse servletResponse)
         throws ServletException, IOException     
     {
-        dispatch(servletRequest,servletResponse,true);
+        dispatch(servletRequest,servletResponse,FilterHolder.__INCLUDE);
     }
     
     /* ------------------------------------------------------------ */
@@ -141,13 +141,21 @@ public class Dispatcher implements RequestDispatcher
                         ServletResponse servletResponse)
         throws ServletException,IOException
     {
-        dispatch(servletRequest,servletResponse,false);
+        dispatch(servletRequest,servletResponse,FilterHolder.__FORWARD);
+    }
+    
+    /* ------------------------------------------------------------ */
+    void error(ServletRequest servletRequest,
+                        ServletResponse servletResponse)
+        throws ServletException,IOException
+    {
+        dispatch(servletRequest,servletResponse,FilterHolder.__ERROR);
     }
     
     /* ------------------------------------------------------------ */
     void dispatch(ServletRequest servletRequest,
                   ServletResponse servletResponse,
-                  boolean include)
+                  int filterType)
         throws ServletException,IOException
     {
         HttpServletRequest httpServletRequest=(HttpServletRequest)servletRequest;
@@ -161,11 +169,11 @@ public class Dispatcher implements RequestDispatcher
         // wrap the request and response
         DispatcherRequest request = new DispatcherRequest(httpServletRequest,
                                                           servletHttpRequest,
-                                                          include);
+                                                          filterType);
         DispatcherResponse response = new DispatcherResponse(request,
                                                              httpServletResponse);        
         
-        if (!include)
+        if (filterType!=FilterHolder.__INCLUDE)
             servletResponse.resetBuffer();
         
         // Merge parameters
@@ -216,7 +224,7 @@ public class Dispatcher implements RequestDispatcher
                                  query);
                 _servletHandler.dispatch(_pathInContext,request,response,_holder);
                 
-                if (!include)
+                if (filterType!=FilterHolder.__INCLUDE)
                     response.close();
                 else if (response.isFlushNeeded())
                     response.flushBuffer();
@@ -246,7 +254,7 @@ public class Dispatcher implements RequestDispatcher
     class DispatcherRequest extends HttpServletRequestWrapper
     {
         
-        boolean _include;
+        int _filterType;
         String _contextPath;
         String _servletPath;
         String _pathInfo;
@@ -261,11 +269,11 @@ public class Dispatcher implements RequestDispatcher
         /* ------------------------------------------------------------ */
         DispatcherRequest(HttpServletRequest httpServletRequest,
                           ServletHttpRequest servletHttpRequest,
-                          boolean include)
+                          int filterType)
         {
             super(httpServletRequest);
             _servletHttpRequest=servletHttpRequest;
-            _include=include;
+            _filterType=filterType;
             
             // Is this being dispatched to a different context?
             _xContext=
@@ -289,7 +297,7 @@ public class Dispatcher implements RequestDispatcher
         /* ------------------------------------------------------------ */
         int getFilterType()
         {
-            return _include?FilterHolder.__INCLUDE:FilterHolder.__FORWARD;
+            return _filterType;
         }
 
         /* ------------------------------------------------------------ */
@@ -304,7 +312,7 @@ public class Dispatcher implements RequestDispatcher
         /* ------------------------------------------------------------ */
         public String getRequestURI()
         {
-            if (_include || isNamed())
+            if (_filterType==FilterHolder.__INCLUDE || isNamed())
                 return super.getRequestURI();
             return URI.addPaths(_contextPath,_uriInContext);
         }
@@ -312,7 +320,7 @@ public class Dispatcher implements RequestDispatcher
         /* ------------------------------------------------------------ */
         public StringBuffer getRequestURL()
         {
-            if (_include || isNamed())
+            if (_filterType==FilterHolder.__INCLUDE || isNamed())
                 return super.getRequestURL();
             StringBuffer buf = getRootURL();
             if (_contextPath.length()>0)
@@ -347,25 +355,25 @@ public class Dispatcher implements RequestDispatcher
         /* ------------------------------------------------------------ */
         public String getContextPath()
         {
-            return(_include||isNamed())?super.getContextPath():_contextPath;
+            return(_filterType==FilterHolder.__INCLUDE||isNamed())?super.getContextPath():_contextPath;
         }
         
         /* ------------------------------------------------------------ */
         public String getServletPath()
         {
-            return(_include||isNamed())?super.getServletPath():_servletPath;
+            return(_filterType==FilterHolder.__INCLUDE||isNamed())?super.getServletPath():_servletPath;
         }
         
         /* ------------------------------------------------------------ */
         public String getPathInfo()
         {
-            return(_include||isNamed())?super.getPathInfo():_pathInfo;
+            return(_filterType==FilterHolder.__INCLUDE||isNamed())?super.getPathInfo():_pathInfo;
         }
         
         /* ------------------------------------------------------------ */
         public String getQueryString()
         {
-            return(_include||isNamed())?super.getQueryString():_query;
+            return(_filterType==FilterHolder.__INCLUDE||isNamed())?super.getQueryString():_query;
         }
         
 
@@ -462,7 +470,7 @@ public class Dispatcher implements RequestDispatcher
             if (_attributes!=null && _attributes.containsKey(name))
                 return _attributes.get(name);
                 
-            if (_include && !isNamed())
+            if (_filterType==FilterHolder.__INCLUDE && !isNamed())
             {
                 if (name.equals(__INCLUDE_PATH_INFO))    return _pathInfo;
                 if (name.equals(__INCLUDE_REQUEST_URI))  return URI.addPaths(_contextPath,_uriInContext);
@@ -479,7 +487,7 @@ public class Dispatcher implements RequestDispatcher
                 if (name.equals(__INCLUDE_QUERY_STRING)) return null;
             }
 
-            if (!_include)
+            if (_filterType!=FilterHolder.__INCLUDE)
             {
                 if (name.equals(__FORWARD_PATH_INFO))
                     return _servletHttpRequest.getPathInfo();
@@ -505,7 +513,7 @@ public class Dispatcher implements RequestDispatcher
             while (e.hasMoreElements())
                 set.add(e.nextElement());
             
-            if (_include && !isNamed())
+            if (_filterType==FilterHolder.__INCLUDE && !isNamed())
             {
                 set.add(__INCLUDE_PATH_INFO);
                 set.add(__INCLUDE_REQUEST_URI);
@@ -522,7 +530,7 @@ public class Dispatcher implements RequestDispatcher
                 set.remove(__INCLUDE_QUERY_STRING);
             }
 
-            if (!_include)
+            if (_filterType!=FilterHolder.__INCLUDE)
             {
                 set.add(__FORWARD_PATH_INFO);
                 set.add(__FORWARD_REQUEST_URI);
@@ -579,7 +587,7 @@ public class Dispatcher implements RequestDispatcher
         {
             super(response);
             _request=request;
-            _include=_request._include;
+            _include=_request._filterType==FilterHolder.__INCLUDE;
         }
 
         /* ------------------------------------------------------------ */

@@ -119,7 +119,6 @@ public class HttpContext implements LifeCycle,
     private String _contextName;
     private String _classPath;
     private Map _initParams = new HashMap(11);
-    private Map _errorPages;
     private UserRealm _userRealm;
     private String _realmName;
     private PathMap _constraintMap=new PathMap();
@@ -1329,41 +1328,6 @@ public class HttpContext implements LifeCycle,
     }
 
     /* ------------------------------------------------------------ */
-    /** set error page URI.
-     * @param error A string representing an error code or a
-     * exception classname
-     * @param uriInContext
-     */
-    public void setErrorPage(String error,String uriInContext)
-    {
-        if (_errorPages==null)
-            _errorPages=new HashMap(5);
-        _errorPages.put(error,uriInContext);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** get error page URI.
-     * @param error A string representing an error code or a
-     * exception classname
-     * @return URI within context
-     */
-    public String getErrorPage(String error)
-    {
-        if (_errorPages==null)
-            return null;
-       return (String) _errorPages.get(error);
-    }
-
-
-    /* ------------------------------------------------------------ */
-    public String removeErrorPage(String error)
-    {
-        if (_errorPages==null)
-            return null;
-       return (String) _errorPages.remove(error);
-    }
-
-    /* ------------------------------------------------------------ */
     /** Set the realm name.
      * @param realmName The name to use to retrieve the actual realm
      * from the HttpServer
@@ -1962,10 +1926,6 @@ public class HttpContext implements LifeCycle,
 
         setMimeMap(null);
         _encodingMap=null;
-        if (_errorPages!=null)
-            _errorPages.clear();
-        _errorPages=null;
-
         _permissions=null;
     }
 
