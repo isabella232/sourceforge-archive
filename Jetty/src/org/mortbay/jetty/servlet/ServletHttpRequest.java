@@ -91,7 +91,7 @@ public class ServletHttpRequest
     private int _inputState=0;
     private ServletHolder _servletHolder;
     private String _pathInContext;
-    private HttpServletRequest _wrapper;
+    private ServletRequest _wrapper;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -119,7 +119,7 @@ public class ServletHttpRequest
     }
 
     /* ------------------------------------------------------------ */
-    void setWrapper(HttpServletRequest wrapper)
+    void setWrapper(ServletRequest wrapper)
     {
         if (wrapper == this)
             _wrapper=null;
@@ -132,7 +132,7 @@ public class ServletHttpRequest
      * @return The top most wrapper of the request or this request if
      * there are no wrappers. 
      */
-    HttpServletRequest getWrapper()
+    ServletRequest getWrapper()
     {
         if (_wrapper==null)
             return this;
@@ -719,15 +719,9 @@ public class ServletHttpRequest
     /* -------------------------------------------------------------- */
     public String getRemoteHost()
     {
-        String remoteHost=null;
-        HttpConnection connection = _httpRequest.getHttpConnection();
-        if (connection!=null)
-        {
-            InetAddress addr = connection.getRemoteAddr();
-            if (addr!=null)
-                remoteHost = addr.getHostName();
-        }
-        return remoteHost;
+        if (_httpRequest.getHttpConnection()==null)
+            return null;
+        return _httpRequest.getRemoteHost();
     }
 
     /* -------------------------------------------------------------- */

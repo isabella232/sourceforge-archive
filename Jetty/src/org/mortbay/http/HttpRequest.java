@@ -489,8 +489,22 @@ public class HttpRequest extends HttpMessage
     {
         HttpConnection connection = getHttpConnection();
         if (connection!=null)
-            return connection.getRemoteHost();
+            return connection.getRemoteAddr().getHostAddress();
         return "127.0.0.1";
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getRemoteHost()
+    {
+        HttpConnection connection = getHttpConnection();
+        if (connection!=null)
+            return connection.getRemoteAddr().getHostAddress();
+        return "127.0.0.1";
+
+        // XXX - use the following if you want host names.
+        //          if (connection!=null)
+        //              return connection.getRemoteHost();
+        //          return "localhost";
     }
     
     /* ------------------------------------------------------------ */

@@ -180,8 +180,8 @@ public class Dispatcher implements RequestDispatcher
         ServletHttpResponse servletHttpResponse=servletHttpRequest.getServletHttpResponse();
         HttpRequest httpRequest=servletHttpRequest.getHttpRequest();
         HttpResponse httpResponse=httpRequest.getHttpResponse();
-        HttpServletRequest oldRequestWrapper=servletHttpRequest.getWrapper();
-        HttpServletResponse oldResponseWrapper=servletHttpResponse.getWrapper();
+        ServletRequest oldRequestWrapper=servletHttpRequest.getWrapper();
+        ServletResponse oldResponseWrapper=servletHttpResponse.getWrapper();
         int old_output_state=0;
         
         try

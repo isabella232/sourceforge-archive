@@ -332,15 +332,15 @@ public class FilterHandler
             // Goto the original resource
             ServletHttpRequest servletHttpRequest=  ServletHttpRequest.unwrap(request);
             ServletHttpResponse servletHttpResponse=servletHttpRequest.getServletHttpResponse();
-            HttpServletRequest requestWrapper=      servletHttpRequest.getWrapper();
-            HttpServletResponse responseWrapper=    servletHttpResponse.getWrapper();
+            ServletRequest requestWrapper=      servletHttpRequest.getWrapper();
+            ServletResponse responseWrapper=    servletHttpResponse.getWrapper();
             HttpRequest httpRequest =               servletHttpRequest.getHttpRequest();
             HttpResponse httpResponse =             httpRequest.getHttpResponse();
             
             try
             {
-                servletHttpRequest.setWrapper((HttpServletRequest)request);
-                servletHttpResponse.setWrapper((HttpServletResponse)response);
+                servletHttpRequest.setWrapper((ServletRequest)request);
+                servletHttpResponse.setWrapper((ServletResponse)response);
                 
                 _httpContext.handle(_nextHandler,
                                     _pathInContext,
@@ -400,15 +400,15 @@ public class FilterHandler
                 // Goto the original resource
                 ServletHttpRequest servletHttpRequest=  ServletHttpRequest.unwrap(request);
                 ServletHttpResponse servletHttpResponse=servletHttpRequest.getServletHttpResponse();
-                HttpServletRequest requestWrapper=      servletHttpRequest.getWrapper();
-                HttpServletResponse responseWrapper=    servletHttpResponse.getWrapper();
+                ServletRequest requestWrapper=      servletHttpRequest.getWrapper();
+                ServletResponse responseWrapper=    servletHttpResponse.getWrapper();
                 HttpRequest httpRequest =               servletHttpRequest.getHttpRequest();
                 HttpResponse httpResponse =             httpRequest.getHttpResponse();
             
                 try
                 {
-                    servletHttpRequest.setWrapper((HttpServletRequest)request);
-                    servletHttpResponse.setWrapper((HttpServletResponse)response);
+                    servletHttpRequest.setWrapper((ServletRequest)request);
+                    servletHttpResponse.setWrapper((ServletResponse)response);
                     _httpContext.handle(_nextHandler,
                                         _pathInContext,
                                         null, // Assume path params have

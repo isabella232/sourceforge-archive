@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Handle ServletRequestWrappers for Generic Servlets
+ + Improved handling of UnavailableException
  + Extract WAR files to standard temp directory
  + URI uses UTF8 for % encodings.
  + Added BlueRibbon campaign.

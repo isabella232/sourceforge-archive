@@ -115,16 +115,19 @@ public class HttpConnection
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the Remote address as a String.
+    /** Get the Remote hostname as a String.
      * @return the remote address
      */
     public String getRemoteHost()
     {
+        System.err.println("_remoteHost="+_remoteHost);
         if (_remoteHost==null)
         {
             if (_remoteAddr==null)
-                return "127.0.0.1";
-            _remoteHost=_remoteAddr.getHostAddress();
+                return "localhost";
+            System.err.println("_remoteAddr="+_remoteAddr);
+            _remoteHost=_remoteAddr.getHostName();
+            System.err.println("_remoteHost="+_remoteHost);
         }
         return _remoteHost;
     }

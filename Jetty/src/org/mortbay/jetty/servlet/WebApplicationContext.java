@@ -420,21 +420,29 @@ public class WebApplicationContext extends ServletHttpContext
         }
         
         // Start handlers
-        super.start();
+        Exception ex=null;
+        try {super.start();} catch(Exception e){ex=e;}
 
-        // Context listeners
-        if (_contextListeners!=null && _servletHandler!=null)
+        // Handle context init.
+        if (ex==null || super.isStarted())
         {
-            ServletContextEvent event = new ServletContextEvent(getServletContext());
-            for (int i=0;i<_contextListeners.size();i++)
-                ((ServletContextListener)_contextListeners.get(i))
-                    .contextInitialized(event);
+            // Context listeners
+            if (_contextListeners!=null && _servletHandler!=null)
+            {
+                ServletContextEvent event = new ServletContextEvent(getServletContext());
+                for (int i=0;i<_contextListeners.size();i++)
+                    ((ServletContextListener)_contextListeners.get(i))
+                        .contextInitialized(event);
+            }
+        
+            if (_resourceHandler.isPutAllowed())
+                Log.event("PUT allowed in "+this);
+            if (_resourceHandler.isDelAllowed())
+                Log.event("DEL allowed in "+this);
         }
         
-        if (_resourceHandler.isPutAllowed())
-            Log.event("PUT allowed in "+this);
-        if (_resourceHandler.isDelAllowed())
-            Log.event("DEL allowed in "+this);
+        if (ex!=null)
+            throw ex;
     }
 
     /* ------------------------------------------------------------ */
@@ -602,7 +610,7 @@ public class WebApplicationContext extends ServletHttpContext
                 ServletContextAttributeListener l =
                     (ServletContextAttributeListener)
                     _contextAttributeListeners.get(i);
-                l.attributeReplaced(event);    
+                l.attributeRemoved(event);    
             }
         }
     }

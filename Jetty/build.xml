@@ -332,7 +332,7 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="run"
+  <target name="run" depends="jars"
    description="Run the default configuration">
     <java classname="org.mortbay.jetty.Server"
           dir="${jetty.home}"
@@ -345,6 +345,23 @@ Other targets:
        </classpath>
        <jvmarg line="-Djetty.home=${jetty.home} -Djetty.log=${jetty.home}/logs" />
        <arg line="${etc}/admin.xml ${etc}/jetty.xml" />
+    </java>
+  </target>
+
+  <!-- ==================================================================== -->
+  <target name="watchdog" depends="jars"
+   description="Run the watchdog configuration">
+    <java classname="org.mortbay.jetty.Server"
+          dir="${jetty.home}"
+          fork="yes"
+          failonerror="yes"
+          >
+       <classpath>
+         <pathelement path="${env.CLASSPATH}" />
+         <path refid="classpath" />
+       </classpath>
+       <jvmarg line="-Djetty.home=${jetty.home} -Djetty.log=${jetty.home}/logs" />
+       <arg line="${etc}/admin.xml ${etc}/watchdog.xml" />
     </java>
   </target>
 

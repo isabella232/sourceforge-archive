@@ -41,7 +41,7 @@ public class Holder
                   String className)
     {
         if (name==null || name.length()==0)
-            throw new IllegalArgumentException("No name");
+            throw new IllegalArgumentException("No name for "+className);
         
         if (className==null || className.length()==0)
             throw new IllegalArgumentException("No classname");

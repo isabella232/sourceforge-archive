@@ -570,7 +570,10 @@ public class ServletHandler
             
             httpResponse.getHttpConnection().forceClose();
             if (!httpResponse.isCommitted())
-                httpResponse.sendError(500,th);
+                httpResponse.sendError(th instanceof UnavailableException
+                                       ?HttpResponse.__503_Service_Unavailable
+                                       :HttpResponse.__500_Internal_Server_Error,
+                                       th);
             else
                 Code.debug("Response already committed for handling ",th);
         }
@@ -580,7 +583,7 @@ public class ServletHandler
             Code.debug(httpRequest);
             httpResponse.getHttpConnection().forceClose();
             if (!httpResponse.isCommitted())
-                httpResponse.sendError(500,e);
+                httpResponse.sendError(HttpResponse.__500_Internal_Server_Error,e);
             else
                 Code.debug("Response already committed for handling ",e);
         }
@@ -640,7 +643,10 @@ public class ServletHandler
                         path=PathMap.pathMatch(_dynamicServletPathSpec,path)+'/'+servletClass;
                 
                     Code.debug("Dynamic path=",path);
-                
+
+                    if (servletClass==null || servletClass.length()==0)
+                        return null;
+                    
                     // make a holder
                     ServletHolder holder=new ServletHolder(this,servletClass,servletClass);
                     

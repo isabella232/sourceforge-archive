@@ -16,6 +16,8 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.UnavailableException;
@@ -47,6 +49,8 @@ public class ServletHolder extends Holder
     private Config _config;
     private Map _roleMap;
     private String _path;
+    private long _unavailable;
+    private UnavailableException _unavailableEx;
     
     /* ---------------------------------------------------------------- */
     /** Constructor.
@@ -55,7 +59,7 @@ public class ServletHolder extends Holder
                   String name,
                   String className)
     {
-        super(handler,name,className);
+        super(handler,(name==null)?className:name,className);
     }
 
     /* ---------------------------------------------------------------- */
@@ -66,7 +70,7 @@ public class ServletHolder extends Holder
                   String className,
                   String forcedPath)
     {
-        this(handler,name,className);
+        this(handler,(name==null)?className:name,className);
         _path=forcedPath;
     }
 
@@ -173,6 +177,7 @@ public class ServletHolder extends Holder
     public void start()
         throws Exception
     {
+        _unavailable=0;
         _servletHandler=(ServletHandler)_httpHandler;
             
         super.start();
@@ -184,8 +189,7 @@ public class ServletHolder extends Holder
                                             " is not a javax.servlet.Servlet");
             super.stop();
             throw ex;
-        }
-        
+        }        
 
         if (javax.servlet.SingleThreadModel.class
             .isAssignableFrom(_class))
@@ -195,8 +199,22 @@ public class ServletHolder extends Holder
         {
             _servlet=(Servlet)newInstance();
             _config=new Config();
-            _servlet.init(_config);
-        }
+            try
+            {
+                _servlet.init(_config);
+            }
+            catch(Throwable e)
+            {
+                _servlet=null;
+                _config=null;
+                if (e instanceof Exception)
+                    throw (Exception) e;
+                else if (e instanceof Error)
+                    throw (Error)e;
+                else
+                    throw new ServletException(e);
+            }            
+        }    
     }
 
     /* ------------------------------------------------------------ */
@@ -224,6 +242,15 @@ public class ServletHolder extends Holder
     public synchronized Servlet getServlet()
         throws UnavailableException
     {
+        // Handle previous unavailability
+        if (_unavailable!=0)
+        {
+            if (_unavailable<0 || _unavailable>0 && System.currentTimeMillis()<_unavailable)
+                throw _unavailableEx;
+            _unavailable=0;
+            _unavailableEx=null;
+        }
+        
         try
         {
             if (_servlet==null)
@@ -251,30 +278,39 @@ public class ServletHolder extends Holder
 
             return _servlet;
         }
+        catch(UnavailableException e)
+        {
+            _unavailableEx=e;
+            _unavailable=-1;
+            if (_unavailableEx.getUnavailableSeconds()>0)
+                _unavailable=System.currentTimeMillis()+
+                    1000*_unavailableEx.getUnavailableSeconds();
+            throw _unavailableEx;
+        }
         catch(Exception e)
         {
             Code.warning(e);
-            throw new UnavailableException(e.toString());
+            throw new UnavailableException(_servlet,e.toString());
         }    
     }
     
     /* --------------------------------------------------------------- */
     /** Service a request with this servlet.
      */
-    public void handle(HttpServletRequest request,
-                       HttpServletResponse response)
+    public void handle(ServletRequest request,
+                       ServletResponse response)
         throws ServletException,
                UnavailableException,
                IOException
     {
         if (_class==null)
-            throw new UnavailableException("Servlet class not initialized");
+            throw new UnavailableException("Unknown Servlet class");
         
         Servlet servlet=getServlet();
         
         // Check that we got one in the end
         if (servlet==null)
-            throw new UnavailableException("Could not construct servlet");
+            throw new UnavailableException("Could not instantiate "+_class);
 
         // Service the request
         boolean servlet_error=true;
@@ -284,7 +320,7 @@ public class ServletHolder extends Holder
             if (_path!=null)
             {
                 request.setAttribute("javax.servlet.include.request_uri",
-                                     URI.addPaths(request.getContextPath(),_path));
+                                     URI.addPaths(_servletHandler.getHttpContext().getContextPath(),_path));
                 request.setAttribute("javax.servlet.include.servlet_path",_path);
             }
 
