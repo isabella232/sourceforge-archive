@@ -50,9 +50,6 @@ public class WriterLogSink
         __lineSeparator+__indentBase;
     private static final int __lineSeparatorLen =
         __lineSeparator.length();
-    private static String __indent =
-        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
-
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -122,30 +119,18 @@ public class WriterLogSink
             
             // Log the time stamp
             if (_logTimeStamps)
-            {
-                if (_dateFormat!=null)
-                    _stringBuffer.append(_dateFormat.format(new Date(time)));
-                else
-                {
-                    String mSecs = "0000" + time%1000L;
-                    mSecs = mSecs.substring(mSecs.length() - 3);
-                    _stringBuffer.append(Long.toString(time / 1000L));
-                    _stringBuffer.append('.');
-                    _stringBuffer.append(mSecs);
-                }
-            }
+                _stringBuffer.append(_dateFormat.format(time));
         
-            // Log the label
-            if (_logLabels && frame != null)
-            {
-                _stringBuffer.append(frame.toString());
-                _stringBuffer.append(':');
-            }
-            
             // Log the tag
             if (_logTags)
                 _stringBuffer.append(tag);
 
+            // Log the label
+            if (_logLabels && frame != null)
+            {
+                _stringBuffer.append(frame.toString());
+            }
+            
             
             // Determine the indent string for the message and append it
             // to the buffer. Only put a newline in the buffer if the first
@@ -156,9 +141,10 @@ public class WriterLogSink
             	_stringBuffer.append(indentSeparator);
             _stringBuffer.append(__indentBase);
             
-            if (_logStackSize && frame != null) {
-            	indent = __indent.substring(0,frame._depth)+" ";
-                    _stringBuffer.append(indent);
+            if (_logStackSize && frame != null)
+            {
+                indent = ((frame._depth>9)?">":">>")+frame._depth+"> ";
+                _stringBuffer.append(indent);
             }
             indent = indentSeparator + __indentBase + indent;
             

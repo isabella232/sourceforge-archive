@@ -126,26 +126,21 @@ public class ServletLoader extends ClassLoader
     protected synchronized Class loadClass(String name, boolean resolve)
         throws ClassNotFoundException
     {
-    // First, check if the class has already been loaded
-    Class c = findLoadedClass(name);
-    if (c == null)
-    {
+        Class loadClass = super.loadClass(name,resolve);
+        
         try
         {
-            c = findClass(name);
+            Class pathClass = findClass(name);
+            if(pathClass!=loadClass)
+                Code.warning(name+" in both system and servlet classpaths. System version used.");
         }
         catch (ClassNotFoundException e)
         {
-            if (getParent() != null)
-                c = getParent().loadClass(name);
-            else
-                c = findSystemClass(name);
+            if (Code.verbose(9999))
+                Code.ignore(e);
         }
-    }
-    if (resolve) {
-        resolveClass(c);
-    }
-    return c;
+
+        return loadClass;
     }
 
 
@@ -211,15 +206,15 @@ public class ServletLoader extends ClassLoader
      */
     protected URL findResource(String filename)
     {
-    Code.debug("Load resource ",filename);
-    URL url=null;
-    if (_classPath!=null)
-    {
-        Resource resource=_classPath.getResource(filename);
-        if (resource!=null)
-        url=resource.getURL();
-    }
-    return url;
+        Code.debug("Load resource ",filename);
+        URL url=null;
+        if (_classPath!=null)
+        {
+            Resource resource=_classPath.getResource(filename);
+            if (resource!=null)
+                url=resource.getURL();
+        }
+        return url;
     }
 
 

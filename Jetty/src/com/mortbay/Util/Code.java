@@ -336,7 +336,7 @@ public class Code
 
                 // Add ourselves to the triggerSet
                 if (code._triggerSet.put(trigger,"")==null)
-                    Log.message(Log.CODE_DEBUG, "TRIGGERED ON "+trigger,
+                    Log.message(Log.DEBUG, "TRIGGERED ON "+trigger,
                                 new Frame(1));
 
                 // Turn debug On
@@ -360,7 +360,7 @@ public class Code
 
                 // Remove ourselves to the triggerSet
                 if (code._triggerSet.remove(trigger)!=null)
-                    Log.message(Log.CODE_DEBUG, "TRIGGERED OFF "+trigger,
+                    Log.message(Log.DEBUG, "TRIGGERED OFF "+trigger,
                                 new Frame(1));
 
                 // Turn debug off if no more triggers
@@ -382,7 +382,7 @@ public class Code
     {
         if (!b)
         {
-            Log.message(Log.CODE_ASSERT, m, new Frame(1));
+            Log.message(Log.ASSERT, m, new Frame(1));
             throw new CodeException("ASSERT FAIL: "+m);
         }
     }
@@ -399,7 +399,7 @@ public class Code
     {
         if (o1!=o2 && o1!=null && !o1.equals(o2))
         {
-            Log.message(Log.CODE_ASSERT, o1+ " != "+o2+" : "+m, new Frame(1));
+            Log.message(Log.ASSERT, o1+ " != "+o2+" : "+m, new Frame(1));
             throw new CodeException("ASSERT FAIL: "+m);
         }
     }
@@ -416,7 +416,7 @@ public class Code
     {
         if (o1!=o2)
         {
-            Log.message(Log.CODE_ASSERT, o1+ " != "+o2+" : "+m, new Frame(1));
+            Log.message(Log.ASSERT, o1+ " != "+o2+" : "+m, new Frame(1));
             throw new CodeException("ASSERT FAIL: "+m);
         }
     }
@@ -433,7 +433,7 @@ public class Code
     {
         if (o1!=o2)
         {
-            Log.message(Log.CODE_ASSERT, o1+ " != "+o2+" : "+m, new Frame(1));
+            Log.message(Log.ASSERT, o1+ " != "+o2+" : "+m, new Frame(1));
             throw new CodeException("ASSERT FAIL: "+m);
         }
     }
@@ -450,7 +450,7 @@ public class Code
     {
         if (o1!=o2)
         {
-            Log.message(Log.CODE_ASSERT, o1+ " != "+o2+" : "+m, new Frame(1));
+            Log.message(Log.ASSERT, o1+ " != "+o2+" : "+m, new Frame(1));
             throw new CodeException("ASSERT FAIL: "+m);
         }
     }
@@ -467,7 +467,7 @@ public class Code
     {
         if (sub!=null && (string==null || string.indexOf(sub)==-1))
         {
-            Log.message(Log.CODE_ASSERT, '"'+string+
+            Log.message(Log.ASSERT, '"'+string+
                         "\" does not contain \"" + sub + 
                         "\" : "+m, new Frame(1));
             throw new CodeException("ASSERT FAIL: "+m);
@@ -484,7 +484,7 @@ public class Code
         Code code = instance();
         Frame frame = new Frame(1);
         if (!code._suppressWarnings || code.isDebugOnFor(frame) )
-            Log.message(Log.CODE_WARN, m, frame);
+            Log.message(Log.WARN, m, frame);
     }
     
     /*-------------------------------------------------------------------*/
@@ -498,7 +498,7 @@ public class Code
         Code code = instance();
         Frame frame = new Frame(1);
         if (!code._suppressWarnings || code.isDebugOnFor(frame) )
-            Log.message(Log.CODE_WARN, code.formatThrowable(m,ex), frame);
+            Log.message(Log.WARN, code.formatThrowable(m,ex), frame);
     }
     
     /*-------------------------------------------------------------------*/
@@ -511,7 +511,7 @@ public class Code
         Code code = instance();
         Frame frame = new Frame(1);
         if (!code._suppressWarnings || code.isDebugOnFor(frame) )
-            Log.message(Log.CODE_WARN, code.formatThrowable("",ex), frame);
+            Log.message(Log.WARN, code.formatThrowable("",ex), frame);
     }
     
     /*-------------------------------------------------------------------*/
@@ -521,7 +521,7 @@ public class Code
      */
     public static void fail(String m) 
     {
-        Log.message(Log.CODE_FAIL, m, new Frame(1));
+        Log.message(Log.FAIL, m, new Frame(1));
         throw new CodeException("FAIL: "+m);
     }
 
@@ -534,7 +534,7 @@ public class Code
     public static void fail(String m, Throwable ex) 
     {
         Code code = instance();
-        Log.message(Log.CODE_FAIL, code.formatThrowable(m,ex), new Frame(1));
+        Log.message(Log.FAIL, code.formatThrowable(m,ex), new Frame(1));
         throw new CodeException("FAIL: "+m);
     }
 
@@ -547,7 +547,7 @@ public class Code
     {
         Code code = instance();
         String m=code.formatThrowable("",ex);
-        Log.message(Log.CODE_FAIL, m, new Frame(1));
+        Log.message(Log.FAIL, m, new Frame(1));
         throw new CodeException("FAIL: "+m);
     }
 
@@ -556,7 +556,7 @@ public class Code
      */
     public static void notImplemented() 
     {
-        Log.message(Log.CODE_FAIL, "Not Implemented", new Frame(1));
+        Log.message(Log.FAIL, "Not Implemented", new Frame(1));
         throw new CodeException("Not Implemented");
     }
 
@@ -612,7 +612,7 @@ public class Code
             if (code.isDebugOnFor(frame))
             {
                 frame.complete();
-                Log.message(Log.CODE_DEBUG, m, frame);
+                Log.message(Log.DEBUG, m, frame);
             }
         }
     }
@@ -638,7 +638,7 @@ public class Code
                     buf.append(m);
                     formatObject(buf,ex);
                 }
-                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG, buf.toString(),frame);
             }
         }
     }
@@ -662,7 +662,7 @@ public class Code
                 {   
                     formatObject(buf,ex);
                 }
-                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG, buf.toString(),frame);
             }
         }
     }
@@ -686,7 +686,7 @@ public class Code
                 {   
                     formatObject(buf,o);
                 }
-                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG, buf.toString(),frame);
             }
         }
     }
@@ -710,7 +710,7 @@ public class Code
                 {   
                     formatObject(buf,o);
                 }
-                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG, buf.toString(),frame);
             }
         }
     }
@@ -735,7 +735,7 @@ public class Code
                     formatObject(buf,o1);
                     formatObject(buf,o2);
                 }
-                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG, buf.toString(),frame);
             }
         }
     }
@@ -760,7 +760,7 @@ public class Code
                     formatObject(buf,o1);
                     formatObject(buf,new Long(i));
                 }
-                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG, buf.toString(),frame);
             }
         }
     }
@@ -786,7 +786,7 @@ public class Code
                     formatObject(buf,o2);
                     formatObject(buf,o3);
                 }
-                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG, buf.toString(),frame);
             }
         }
     }
@@ -813,7 +813,7 @@ public class Code
                     formatObject(buf,o3);
                     formatObject(buf,o4);
                 }
-                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG, buf.toString(),frame);
             }
         }
     }
@@ -840,7 +840,7 @@ public class Code
                     formatObject(buf,o2);
                     formatObject(buf,new Long(l2));
                 }
-                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG, buf.toString(),frame);
             }
         }
     }
@@ -869,7 +869,7 @@ public class Code
                     formatObject(buf,o4);
                     formatObject(buf,o5);
                 }
-                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG, buf.toString(),frame);
             }
         }
     }
@@ -898,7 +898,7 @@ public class Code
                     formatObject(buf,o5);
                     formatObject(buf,o6);
                 }
-                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG, buf.toString(),frame);
             }
         }
     }
@@ -928,7 +928,7 @@ public class Code
                     formatObject(buf,o6);
                     formatObject(buf,o7);
                 }
-                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG, buf.toString(),frame);
             }
         }
     }
@@ -959,7 +959,7 @@ public class Code
                     formatObject(buf,o7);
                     formatObject(buf,o8);
                 }
-                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG, buf.toString(),frame);
             }
         }
     }
@@ -984,11 +984,10 @@ public class Code
                     buf.append("IGNORED ");
                     formatObject(buf,ex);
                 }
-                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+                Log.message(Log.DEBUG, buf.toString(),frame);
             }
         }
     }
-    
     
     /*-------------------------------------------------------------------*/
     private boolean isDebugOnFor(Frame frame)

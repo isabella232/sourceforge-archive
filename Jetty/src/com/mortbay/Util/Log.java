@@ -54,12 +54,11 @@ import java.util.StringTokenizer;
 public class Log 
 {
     /*-------------------------------------------------------------------*/
-    public final static String EVENT ="LOG.EVENT";
-    public final static String WARN="LOG.WARN";
-    public final static String CODE_ASSERT="CODE.ASSERT";
-    public final static String CODE_WARN="CODE.WARN";
-    public final static String CODE_FAIL="CODE.FAIL";
-    public final static String CODE_DEBUG="CODE.DEBUG";
+    public final static String DEBUG= "DEBUG    ";
+    public final static String EVENT= "EVENT    ";
+    public final static String WARN=  "WARN!!!! ";
+    public final static String ASSERT="ASSERT!! ";
+    public final static String FAIL=  "FAIL!!!! ";
 
     /*-------------------------------------------------------------------*/
     public static char TIMESTAMP = 't';
@@ -103,14 +102,14 @@ public class Log
         {
             _needInit = false;
                     
-            String logOptions = "tLTs";
-            String logFile = null;
-            String dateFormat = "yyyyMMdd HHmmss.SSS zzz ";
+            String logOptions="tLTs";
+            String logFile;
+            String dateFormat = "yyyyMMddHHmmssSSSzzz ";
             String timezone = "GMT";
             try {
                 logOptions = System.getProperty("LOG_OPTIONS","tLTs");
                 dateFormat = System.getProperty("LOG_DATE_FORMAT",
-                                                "yyyyMMdd HHmmss.SSS zzz ");
+                                                "yyyyMMddHHmmssSSSzzz ");
                 timezone = System.getProperty("LOG_TIMEZONE","GMT");
             }
             catch (Throwable ex)
