@@ -571,9 +571,10 @@ public class TestHarness
             
             uri = new URI("http://host:8080/xxx");
             test.checkEquals(uri.getPath(),"/xxx","path");
-            
-            uri = new URI("http://host:8080/Añez");
-            test.checkEquals(uri.getPath(),"/Añez","root");            
+
+            String anez=UrlEncoded.decodeString("A%F1ez");
+            uri = new URI("http://host:8080/"+anez);
+            test.checkEquals(uri.getPath(),"/"+anez,"root");            
             
             uri = new URI("http://host:8080/Test/URI");
             test.checkEquals(uri.toString(),"http://host:8080/Test/URI","no params");

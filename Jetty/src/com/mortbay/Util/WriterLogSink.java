@@ -453,16 +453,16 @@ public class WriterLogSink
 
             if (_logOneLine)
             {
-                smsg=StringUtil.replace(smsg,"\015\012","¬|");
-                smsg=StringUtil.replace(smsg,"\015","¬");
+                smsg=StringUtil.replace(smsg,"\015\012","<|");
+                smsg=StringUtil.replace(smsg,"\015","<");
                 smsg=StringUtil.replace(smsg,"\012","|");
             }
             else
             {
-                smsg=StringUtil.replace(smsg,"\015\012","¬|");
-                smsg=StringUtil.replace(smsg,"\015","¬|");
-                smsg=StringUtil.replace(smsg,"\012","¬|");
-                smsg=StringUtil.replace(smsg,"¬|",nl);
+                smsg=StringUtil.replace(smsg,"\015\012","<|");
+                smsg=StringUtil.replace(smsg,"\015","<|");
+                smsg=StringUtil.replace(smsg,"\012","<|");
+                smsg=StringUtil.replace(smsg,"<|",nl);
             }
             _stringBuffer.append(smsg);
 

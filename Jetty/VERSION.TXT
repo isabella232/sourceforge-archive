@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+ + Removed special characters from source.
+ + Default log options changed if in debug mode.
+
 Jetty-3.0.0.rc7 - 02 Dec 2000
  + Fixed security problem with lowercase WEB-INF uris on windows.
  + Extended security constraints (see README and WebApp Demo).
