@@ -74,7 +74,7 @@ org.mortbay.jetty.servlet.WebApplicationContext objet
       </Set>
       -->
       <Call name="getSessionManager">
-	  <Set name="useRequestedId">false</Set> <!-- reuse sesssion ids ? -->
+	  <Set name="useRequestedId">true</Set> <!-- reuse sesssion ids ? -->
 	  <Set name="secureCookies">true</Set>   <!-- use secure cookies ? -->
 	  <Set name="httpOnly">true</Set>        <!-- use M$ http only cookies ? -->
 

@@ -30,6 +30,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
@@ -294,6 +295,7 @@ public class Dispatcher implements RequestDispatcher
     /* ------------------------------------------------------------ */
     class DispatcherRequest extends HttpServletRequestWrapper
     {   
+        DispatcherResponse _response;
         int _filterType;
         String _contextPath;
         String _servletPath;
@@ -614,17 +616,17 @@ public class Dispatcher implements RequestDispatcher
                 {
                     log.debug("Ctx dispatch session");
                     
-
-                    if (getAttribute("org.mortbay.jetty.servlet.Dispatcher.shared_session") != null)
-                    	_xSession= super.getSession(create);
-                    else
+                    if (_requestedSessionId==null)
+                        _requestedSessionId=super.getSession(true).getId();
+                    _xSession=_servletHandler.getHttpSession(_requestedSessionId);
+                    if (create && _xSession==null)
                     {
-                        if (_requestedSessionId==null)
-                            _requestedSessionId=super.getSession(true).getId();
-                        _xSession=_servletHandler.getHttpSession(_requestedSessionId);
-                        if (create && _xSession==null)
-                            _xSession=_servletHandler.newHttpSession(this);
+                        _xSession=_servletHandler.newHttpSession(this);
+                        Cookie cookie = _servletHandler.getSessionManager().getSessionCookie(_xSession, isSecure());
+                        if (cookie!=null)
+                            _response.addCookie(cookie);
                     }
+                    
                 }
                 return _xSession;
             }
@@ -696,6 +698,7 @@ public class Dispatcher implements RequestDispatcher
         {
             super(response);
             _request=request;
+            request._response=this;
             _include=_request._filterType==FilterHolder.__INCLUDE;
             
         }

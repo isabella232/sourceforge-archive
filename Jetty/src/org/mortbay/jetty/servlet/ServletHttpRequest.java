@@ -505,8 +505,8 @@ public class ServletHttpRequest
         if (_session != null && ((SessionManager.Session)_session).isValid())
             return _session;
         
-	_session=null;
-
+        _session=null;
+        
         String id = getRequestedSessionId();
         
         if (id != null)
@@ -515,12 +515,12 @@ public class ServletHttpRequest
             if (_session == null && !create)
                 return null;
         }
-
+        
         if (_session == null && create)
         {
             _session=newSession();
         }
-
+        
         return _session;
     }
 
@@ -531,42 +531,9 @@ public class ServletHttpRequest
     HttpSession newSession()
     {
         HttpSession session=_servletHandler.newHttpSession(this);
-
-        if (_servletHandler.isUsingCookies())
-        {
-            Cookie cookie =
-                _servletHandler.getSessionManager().getHttpOnly()
-                ?new HttpOnlyCookie(SessionManager.__SessionCookie,session.getId())
-                :new Cookie(SessionManager.__SessionCookie,session.getId());
-                
-            String path=
-                _servletHandler.getServletContext()
-                .getInitParameter(SessionManager.__SessionPath);
-            if (path==null)
-                path=getContextPath();
-            if (path==null || path.length()==0)
-                path="/";
-            
-            String domain=
-                _servletHandler.getServletContext()
-                .getInitParameter(SessionManager.__SessionDomain);
-            if (domain!=null)
-                cookie.setDomain(domain);
-            
-            String maxAge=
-                _servletHandler.getServletContext()
-                .getInitParameter(SessionManager.__MaxAge);
-            if (maxAge!=null)
-                cookie.setMaxAge(Integer.parseInt(maxAge));
-            else
-                cookie.setMaxAge(-1);
-            
-            cookie.setSecure(isSecure() && _servletHandler.getSessionManager().getSecureCookies());
-            
-            cookie.setPath(path);
+        Cookie cookie=_servletHandler.getSessionManager().getSessionCookie(session,isSecure());
+        if (cookie!=null)
             _servletHttpResponse.getHttpResponse().addSetCookie(cookie);
-        }
-
         return session;
     }
     

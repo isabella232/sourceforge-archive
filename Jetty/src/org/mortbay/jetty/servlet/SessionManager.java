@@ -18,6 +18,7 @@ package org.mortbay.jetty.servlet;
 import java.io.Serializable;
 import java.util.EventListener;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -121,6 +122,14 @@ public interface SessionManager extends LifeCycle, Serializable
     /* ------------------------------------------------------------ */
     public void removeEventListener(EventListener listener);
     
+
+    /* ------------------------------------------------------------ */
+    /** Get a Cookie for a session.
+     * @param session
+     * @return
+     */
+    public Cookie getSessionCookie(HttpSession session,boolean requestIsSecure);
+    
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -132,5 +141,6 @@ public interface SessionManager extends LifeCycle, Serializable
         /* ------------------------------------------------------------ */
         public void access();
     }
-    
+
+
 }

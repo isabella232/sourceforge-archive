@@ -21,12 +21,15 @@ import java.util.ConcurrentModificationException;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionAttributeListener;
@@ -38,6 +41,8 @@ import javax.servlet.http.HttpSessionListener;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.http.HttpOnlyCookie;
+import org.mortbay.http.UserRealm;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
 
@@ -81,6 +86,7 @@ public abstract class AbstractSessionManager implements SessionManager
     protected int _maxSessions = 0;
     protected boolean _secureCookies=false;
     protected boolean _httpOnly=false;
+    protected Set _allIDs;
     
     private transient SessionScavenger _scavenger = null;
     
@@ -107,13 +113,23 @@ public abstract class AbstractSessionManager implements SessionManager
     }
     
     /* ------------------------------------------------------------ */
-    /** 
+    /** Set Use Requested ID.
+     * This option activates a mode where a requested session ID can be used to create a 
+     * new session. This facilitates the sharing of session cookies when cross context
+     * dispatches use sessions.   Requested session IDs are only used if they have not
+     * been used before by this context. This requires a map of all known session IDs to
+     * be kept, which can consume memory.
+     * 
      * @param useRequestedId True if requested session ID are first considered for new
      * session IDs
      */
     public void setUseRequestedId(boolean useRequestedId)
-    {
+    {   
         _useRequestedId = useRequestedId;
+        if (_useRequestedId)
+            _allIDs=new HashSet();
+        else
+            _allIDs=null;
     }
     
     /* ------------------------------------------------------------ */
@@ -169,7 +185,8 @@ public abstract class AbstractSessionManager implements SessionManager
         synchronized(_sessions)
         {
             String id=_useRequestedId?request.getRequestedSessionId():null;
-            while (id==null || id.length()==0 || _sessions.containsKey(id))
+            
+            while (id==null || id.length()==0 || _sessions.containsKey(id) || (_allIDs!=null && _allIDs.contains(id)))
             {
                 long r = _random.nextLong();
                 if (r<0)r=-r;
@@ -201,6 +218,8 @@ public abstract class AbstractSessionManager implements SessionManager
         synchronized(_sessions)
         {
             _sessions.put(session.getId(),session);
+            if (_allIDs!=null)
+                _allIDs.add(session.getId());
             if (_sessions.size () > this._maxSessions)
                 this._maxSessions = _sessions.size ();
         }
@@ -210,9 +229,40 @@ public abstract class AbstractSessionManager implements SessionManager
         for(int i=0;i<_sessionListeners.size();i++)
             ((HttpSessionListener)_sessionListeners.get(i))
             .sessionCreated(event);
+           
         return session;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public Cookie getSessionCookie(HttpSession session,boolean requestIsSecure)
+    {
+        if (_handler.isUsingCookies())
+        {
+            Cookie cookie = _handler.getSessionManager().getHttpOnly()
+                ?new HttpOnlyCookie(SessionManager.__SessionCookie,session.getId())
+                :new Cookie(SessionManager.__SessionCookie,session.getId());    
+            String domain=_handler.getServletContext().getInitParameter(SessionManager.__SessionDomain);
+            String maxAge=_handler.getServletContext().getInitParameter(SessionManager.__MaxAge);
+            String path=_handler.getServletContext().getInitParameter(SessionManager.__SessionPath);
+            if (path==null)
+                path=getUseRequestedId()?"/":_handler.getHttpContext().getContextPath();
+            if (path==null || path.length()==0)
+                path="/";
+            
+            if (domain!=null)
+                cookie.setDomain(domain);       
+            if (maxAge!=null)
+                cookie.setMaxAge(Integer.parseInt(maxAge));
+            else
+                cookie.setMaxAge(-1);
+            
+            cookie.setSecure(requestIsSecure && getSecureCookies());
+            cookie.setPath(path);
+            
+            return cookie;    
+        }
+        return null;
+    }
     
     /* ------------------------------------------------------------ */
     protected abstract Session newSession(HttpServletRequest request);
@@ -357,6 +407,8 @@ public abstract class AbstractSessionManager implements SessionManager
     {
         return _scavenger!=null;
     }
+    
+    
     
     /* ------------------------------------------------------------ */
     public void start()
