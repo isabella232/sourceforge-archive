@@ -74,7 +74,7 @@ public class HttpRequest extends HttpMessage
     /* ------------------------------------------------------------ */
     /** Maximum header line length.
      */
-    public static int __maxLineLength=2048;
+    public static int __maxLineLength=4096;
 
     
     public static final StringMap __methodCache = new StringMap(true);
@@ -224,7 +224,7 @@ public class HttpRequest extends HttpMessage
         }
         while(line_buffer.size==0);
         
-        if (line_buffer.size==__maxLineLength)
+        if (line_buffer.size>=__maxLineLength)
             throw new HttpException(HttpResponse.__414_Request_URI_Too_Large);
         decodeRequestLine(line_buffer.buffer,line_buffer.size);
         _timeStamp=System.currentTimeMillis();

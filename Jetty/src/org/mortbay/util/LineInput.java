@@ -78,7 +78,7 @@ public class LineInput extends FilterInputStream
         super(in);
         _mark=-1;
         if (bufferSize==0)
-            bufferSize=2048;
+            bufferSize=8192;
         _buf=ByteArrayPool.getByteArray(bufferSize);
         _byteBuffer=new ByteBuffer(_buf);
         _lineBuffer=new LineBuffer(bufferSize);
