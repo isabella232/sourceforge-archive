@@ -13,6 +13,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URISyntaxException;
 
 
 /* ------------------------------------------------------------ */
@@ -49,7 +50,7 @@ class FileResource extends URLResource
     
     /* -------------------------------------------------------- */
     FileResource(URL url)
-        throws IOException
+        throws IOException, URISyntaxException
     {
         super(url,null);
         _file =new File(new URI(url.toString()));

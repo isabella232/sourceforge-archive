@@ -61,13 +61,6 @@ public class SecurityHandler extends NullHandler
             throw new IllegalStateException("Handler started");
         _authMethod = method;
     }
-    
-    /* ------------------------------------------------------------ */
-    public void addSecurityConstraint(String pathSpec,
-                                      SecurityConstraint sc)
-    {
-        getHttpContext().addSecurityConstraint(pathSpec,sc);
-    }
 
     /* ------------------------------------------------------------ */
     public void start()
