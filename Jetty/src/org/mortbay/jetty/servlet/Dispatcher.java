@@ -186,7 +186,7 @@ public class Dispatcher implements RequestDispatcher
         DispatcherResponse response = new DispatcherResponse(request,
                                                              httpServletResponse);        
         
-        if (filterType!=FilterHolder.__INCLUDE)
+        if (filterType==FilterHolder.__FORWARD)
             servletResponse.resetBuffer();
         
         // Merge parameters

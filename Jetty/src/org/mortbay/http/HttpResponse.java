@@ -309,14 +309,12 @@ public class HttpResponse extends HttpMessage
     {
         _reason=reason;
     }
-      
     
-    /* ------------------------------------------------------------- */
-    /** Send Error Response.
-     */
-    public void sendError(int code,String message) 
-        throws IOException
-    {        
+
+    /* -------------------------------------------------------------- */
+    public void setStatus(int code,String message)
+    {
+        setStatus(code);
         Integer code_integer=TypeUtil.newInteger(code);
         if (message == null)
         {
@@ -327,10 +325,19 @@ public class HttpResponse extends HttpMessage
         }
         else
             setReason(UrlEncoded.encodeString(message));
-        HttpRequest request=getHttpRequest();
-             
+    }
+      
+    
+    /* ------------------------------------------------------------- */
+    /** Send Error Response.
+     */
+    public void sendError(int code,String message) 
+        throws IOException
+    {        
+        setStatus(code,message);
+        
         // Generate normal error page.
-        setStatus(code);
+        HttpRequest request=getHttpRequest();
         
         // If we are allowed to have a body 
         if (code!=__204_No_Content &&

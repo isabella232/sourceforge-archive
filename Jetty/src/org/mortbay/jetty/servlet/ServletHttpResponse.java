@@ -206,7 +206,7 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void resetBuffer()
     {
-        _httpResponse.reset();
+        ((HttpOutputStream)_httpResponse.getOutputStream()).resetBuffer();
         if (_writer!=null) _writer.reset();
     }
     
@@ -215,6 +215,7 @@ public class ServletHttpResponse implements HttpServletResponse
     {
         resetBuffer();
         _httpResponse.reset();
+        if (_writer!=null) _writer.reset();
     }
     
     /* ------------------------------------------------------------ */
@@ -389,6 +390,8 @@ public class ServletHttpResponse implements HttpServletResponse
         }
         else
         {   
+            _httpResponse.setStatus(status,message);
+            
             if (message == null)
             {
                 message= (String)HttpResponse.__statusMsg.get(TypeUtil.newInteger(status));

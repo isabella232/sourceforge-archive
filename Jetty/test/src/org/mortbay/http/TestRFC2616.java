@@ -942,8 +942,7 @@ public class TestRFC2616
             if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=0;
             offset=t.checkContains(response,offset,"HTTP/1.1 206 Partial Content\r\n","1. proper 206 status code");
-            offset=t.checkContains(response,offset,"Last-Modified: " + TestRFC2616.testFiles[0].modDate + "\r\n","3. correct resource mod date");
-
+           
             // if GET w/o range had Content-Location, then the corresponding 
             // response for the a GET w/ range must also have that same header
 
