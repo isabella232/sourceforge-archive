@@ -6,6 +6,7 @@ Jetty-4.0.0 - 22 March 2002
  + Added IPAddressHandler for IP restrictions
  + Updated contributors.
  + Minor documentation updates.
+ + Jetty.sh cygwin support
  
 Jetty-4.0.RC3 - 20 March 2002
  + Fixed ZZZ offset format to +/-HHMM

@@ -416,12 +416,10 @@ fi
 #####################################################
 # Are we running on Windows? Could be, with Cygwin/NT.
 #####################################################
-if [ -z "$WINBOOTDIR" ] 
-then
-  PATH_SEPARATOR=":" 
-else
-  PATH_SEPARATOR=";" 
-fi
+case "'uname'" in
+CYGWIN*) PATH_SEPARATOR=";";;
+*) PATH_SEPRATATOR=":";;
+esac
 
 
 #####################################################
