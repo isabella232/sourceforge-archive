@@ -16,6 +16,7 @@
 package org.jboss.jetty.jmx;
 
 import java.util.Map;
+import java.util.Set;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
@@ -24,6 +25,7 @@ import javax.management.RuntimeOperationsException;
 import javax.management.modelmbean.InvalidTargetObjectTypeException;
 
 import org.jboss.jetty.JBossWebApplicationContext;
+import org.jboss.jetty.JettyMBean;
 import org.mortbay.jetty.servlet.jmx.WebApplicationContextMBean;
 
 /* ------------------------------------------------------------ */
@@ -36,6 +38,9 @@ public class
   JBossWebApplicationContextMBean
   extends WebApplicationContextMBean
 {
+    
+    private JBossWebApplicationContext _jbwac = null;
+    
   /* ------------------------------------------------------------ */
   /** Constructor.
    * @exception MBeanException
@@ -67,8 +72,8 @@ public class
      InvalidTargetObjectTypeException
      {
        super.setManagedResource(proxyObject, type);
-       JBossWebApplicationContext jbwac=(JBossWebApplicationContext)proxyObject;
-       jbwac.setMBeanPeer(this);
+       _jbwac=(JBossWebApplicationContext)proxyObject;
+       _jbwac.setMBeanPeer(this);
      }
 
    public ObjectName[]
@@ -76,4 +81,12 @@ public class
      {
        return super.getComponentMBeans(components, map);
      }
+   
+   public Set getJsr77ObjectNames ()
+   throws Exception
+   {
+       String webModuleName = _jbwac.getContextPath();
+       ObjectName jettyJsr77Query = new ObjectName (JettyMBean.JBOSS_DOMAIN+":J2EEServer=null,J2EEApplication=null,J2EEWebModule="+(webModuleName.length()==0?"/":webModuleName)+",j2EEType=Servlet,*");
+       return getMBeanServer().queryNames (jettyJsr77Query, null);
+   }
 }

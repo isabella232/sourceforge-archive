@@ -18,6 +18,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.management.ObjectName;
 
@@ -48,6 +49,7 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
     protected WebApplication _webApp;
     protected String _subjAttrName="j_subject";
     protected JBossUserRealm _realm=null;
+    
 
     public JBossWebApplicationContext(Jetty jetty,WebDescriptorParser descriptorParser,WebApplication webApp,
             String warUrl) throws IOException
@@ -61,11 +63,16 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
         _stopGracefully=_jetty.getStopWebApplicationsGracefully();
         // we'll add this when we figure out where to get the TransactionManager...
         //      addHandler(new JBossWebApplicationHandler());
-        setConfiguration(new Configuration(this));
+
     }
 
     public void start() throws Exception
     {
+        if(_jetty.getSupportJSR77())
+            setConfigurationClassNames (new String[]{"org.jboss.jetty.JBossWebApplicationContext$Configuration", "org.mortbay.jetty.servlet.JettyWebConfiguration","org.mortbay.jetty.servlet.jsr77.Configuration"});
+        else
+            setConfigurationClassNames (new String[]{"org.jboss.jetty.JBossWebApplicationContext$Configuration", "org.mortbay.jetty.servlet.JettyWebConfiguration"});
+            
         MultiException e=null;
         try
         {
@@ -240,7 +247,7 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
         if(_mbean==null)
             return; // we can't do anything...
         DeploymentInfo di=_descriptorParser.getDeploymentInfo();
-        // populate JSR77 info...
+        
         di.deployedObject=_mbean.getObjectName();
         List mbeanNames=di.mbeans;
         WebApplicationHandler wah=(WebApplicationHandler)getServletHandler();
@@ -254,13 +261,20 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
             for(int i=0;i<filters.length;i++)
                 components.add(filters[i]);
         components.add(wah.getSessionManager());
+        //make mbeans for all jetty objects
         ObjectName[] names=_mbean.getComponentMBeans(components.toArray(),null);
-        for(int i=0;i<names.length;i++)
+        
+        //      populate JSR77 info...
+        Set jsr77Names = _mbean.getJsr77ObjectNames();
+        Iterator itor = jsr77Names.iterator();
+        while (itor.hasNext())
         {
-            ObjectName name=names[i];
-            if(name!=null)
-                mbeanNames.add(name);
+            ObjectName on = (ObjectName)itor.next();
+            __log.info ("Adding jsr77 mbean="+on.toString());
+        
+            mbeanNames.add(on);
         }
+
     }
     protected JBossWebApplicationContextMBean _mbean;
 
@@ -289,11 +303,12 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
     /* ------------------------------------------------------------ */
     public static class Configuration extends XMLConfiguration
     {
-        public Configuration(WebApplicationContext context)
+        public Configuration()
         {
-            super(context);
+            super();
         }
 
+        
         public JBossWebApplicationContext getJBossWebApplicationContext()
         {
             return (JBossWebApplicationContext)getWebApplicationContext();

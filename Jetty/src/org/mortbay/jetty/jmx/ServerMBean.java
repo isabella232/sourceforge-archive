@@ -94,7 +94,7 @@ public class ServerMBean extends HttpServerMBean
         
         defineAttribute("configuration");
         defineAttribute("rootWebApp");
-        
+        defineAttribute("webApplicationConfigurationClassNames");
         defineOperation("addWebApplication",
                         new String[]{"java.lang.String",
                                      "java.lang.String"},

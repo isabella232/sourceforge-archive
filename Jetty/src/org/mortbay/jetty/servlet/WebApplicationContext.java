@@ -36,6 +36,7 @@ import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.UserRealm;
+import org.mortbay.jetty.Server;
 import org.mortbay.util.JarResource;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.Loader;
@@ -70,7 +71,8 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
     private boolean _extract;
     private boolean _ignorewebjetty;
     private boolean _distributable;
-    private Configuration _configuration;
+    private Configuration[] _configurations;
+    private String[] _configurationClassNames;
 
     private transient Map _resourceAliases;
     private transient Resource _webApp;
@@ -120,7 +122,8 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
         out.writeBoolean(_extract);
         out.writeBoolean(_ignorewebjetty);
         out.writeBoolean(_distributable);
-        out.writeObject(_configuration);
+        
+        out.writeObject(_configurationClassNames);
     }
 
     /* ------------------------------------------------------------ */
@@ -148,21 +151,24 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
         _extract= in.readBoolean();
         _ignorewebjetty= in.readBoolean();
         _distributable= in.readBoolean();
-        _configuration=(Configuration)in.readObject();
+        _configurationClassNames=(String[])in.readObject();
     }
 
-    /* ------------------------------------------------------------ */
-    public void setConfiguration(Configuration configuration)
+    
+    
+    public void setConfigurationClassNames (String[] configurationClassNames)
     {
-        _configuration=configuration;
-    }
-
-    /* ------------------------------------------------------------ */
-    public Configuration getConfiguration()
-    {
-        return _configuration;
+        if (null != configurationClassNames)
+        {
+            _configurationClassNames = new String[configurationClassNames.length];
+            System.arraycopy (configurationClassNames, 0, _configurationClassNames, 0, configurationClassNames.length);
+        }
     }
     
+    public String[] getConfigurationClassNames ()
+    {
+        return _configurationClassNames;
+    }
     
     /* ------------------------------------------------------------ */
     /** 
@@ -353,6 +359,66 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
         _distributable=distributable;
     }
 
+    public Configuration[] getConfigurations ()
+    {
+        return _configurations;
+    }
+    
+    
+    private void loadConfigurations () throws Exception
+    {
+        String[] names = _configurationClassNames;
+        
+        //if this webapp does not have its own set of configurators, use the defaults
+        if (null==names)
+            names = ((Server)getHttpServer()).getWebApplicationConfigurationClassNames();
+        
+        if (null!=names)
+        {
+            //instantiate instances for each
+            Object[] nullArgs = new Object[0];
+            _configurations = new Configuration[names.length];
+            for (int i=0; i< names.length; i++)
+            {
+                _configurations[i] =
+                    (Configuration)Loader.loadClass(WebApplicationContext.class, names[i]).getConstructors()[0].newInstance(nullArgs);
+                if (log.isDebugEnabled()){log.debug("Loaded instance of "+names[i]);};
+            }
+        }
+    }
+    
+    private void configureClassPath() throws Exception
+    {
+        //call each of the instances
+        // first, configure the classpaths
+        for (int i=0; i<_configurations.length;i++)
+        {
+            _configurations[i].setWebApplicationContext(this);
+            _configurations[i].configureClassPath();
+        }
+    }
+    
+    private void configureDefaults() throws Exception
+    {
+        //next, configure default settings
+        for (int i=0;i<_configurations.length;i++)
+        {
+            _configurations[i].setWebApplicationContext(this);
+            _configurations[i].configureDefaults();
+        }
+    }
+    
+    private void configureWebApp () throws Exception
+    {
+        //finally, finish configuring the webapp
+        for (int i=0;i<_configurations.length;i++)
+        {
+            _configurations[i].setWebApplicationContext(this);
+            _configurations[i].configureWebApp();
+        }
+        
+    }
+ 
     /* ------------------------------------------------------------ */
     /** Start the Web Application.
      * @exception IOException 
@@ -376,22 +442,17 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
 
             // Get the handler
             getServletHandler();
-
-            Configuration config = _configuration;
-            if (config==null)
-            {    
-                config = (Configuration)
-                Loader.loadClass(WebApplicationContext.class,"org.mortbay.jetty.servlet.XMLConfiguration").getConstructors()[0].newInstance(new Object[]{this});
-            }
+          
+            loadConfigurations();
             
-            // initialize the classloader
-            config.configureClassPath();
+            // initialize the classloader            
+            configureClassPath();
             initClassLoader(true);
             thread.setContextClassLoader(getClassLoader());
             initialize();
             
             // Do the default configuration
-            config.configureDefaults();
+            configureDefaults();
 
             // Set classpath for Jasper.
             Map.Entry entry= _webAppHandler.getHolderEntry("test.jsp");
@@ -408,7 +469,7 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
             }
             
             // configure webapp
-            config.configureWebApp();
+            configureWebApp();
 
             // If we have servlets, don't init them yet
             _webAppHandler.setAutoInitializeServlets(false);
@@ -708,7 +769,7 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
         return (String)_errorPages.remove(error);
     }
     
-    
+ 
     
     /* ------------------------------------------------------------------------------- */
     /** Base Class for WebApplicationContext Configuration.
@@ -719,24 +780,19 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
      * @version $Revision$
      * @author gregw
      */
-    public static  class Configuration implements Serializable
+    public static interface Configuration extends Serializable
     {
-        private WebApplicationContext _context;
-        
-        public Configuration(WebApplicationContext context)
-        {
-            _context=context;
-        }
-        
-        public WebApplicationContext getWebApplicationContext()
-        {
-            return _context;
-        }
+        /* ------------------------------------------------------------------------------- */
+        /** Set up a context on which to perform the configuration.
+         * @param context
+         */
+        public void setWebApplicationContext (WebApplicationContext context);
 
-        public WebApplicationHandler getWebApplicationHandler()
-        {
-             return _context.getWebApplicationHandler();
-        }
+        /* ------------------------------------------------------------------------------- */
+        /** Get the context on which the configuration is performed.
+         * @return
+         */
+        public WebApplicationContext getWebApplicationContext ();
         
         /* ------------------------------------------------------------------------------- */
         /** Configure ClassPath.
@@ -747,25 +803,9 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
          * @throws Exception
          */
         public  void configureClassPath()
-        throws Exception
-        {
-            Resource webInf=_context.getWebInf();
-            
-            // Add WEB-INF classes and lib classpaths
-            if (webInf != null && webInf.isDirectory())
-            {
-                // Look for classes directory
-                Resource classes= webInf.addPath("classes/");
-                if (classes.exists())
-                    _context.setClassPath(classes.toString());
-                else
-                    _context.setClassPath(null);
+        throws Exception;
+        
 
-                // Look for jars
-                Resource lib= webInf.addPath("lib/");
-                _context.addClassPaths(lib);
-            }
-         }
         
 
         /* ------------------------------------------------------------------------------- */
@@ -776,8 +816,8 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
          * @throws Exception
          */
         public  void configureDefaults()
-        throws Exception
-        {}
+        throws Exception;
+        
 
         /* ------------------------------------------------------------------------------- */
         /** Configure WebApp.
@@ -786,8 +826,8 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
          * @throws Exception
          */
         public  void configureWebApp()
-        throws Exception
-        {}
+        throws Exception;
+        
     }
 
 }

@@ -49,6 +49,7 @@ public class PlusWebAppContext extends WebApplicationContext
     private HashMap _envMap = null;
     private ClassLoader _removeClassLoader=null;
     private boolean _webXmlEnvEntryOverride = true;
+    
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -57,7 +58,7 @@ public class PlusWebAppContext extends WebApplicationContext
     public PlusWebAppContext()
     {
        super();
-       setConfiguration(new Configuration(this));
+     
     }
     
     /* ------------------------------------------------------------ */
@@ -70,7 +71,7 @@ public class PlusWebAppContext extends WebApplicationContext
     )
     {
         super(webApp);
-        setConfiguration(new Configuration(this));
+        
     }
 
     public void setWebXmlEnvEntryOverride (boolean value)
@@ -222,9 +223,9 @@ public class PlusWebAppContext extends WebApplicationContext
     /* ------------------------------------------------------------ */
     public static class Configuration extends XMLConfiguration
     {
-        public Configuration(WebApplicationContext context)
+        public Configuration()
         {
-            super(context);
+          
         }
 
         public PlusWebAppContext getPlusWebAppContext()

@@ -18,7 +18,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Set;
 
+import javax.management.ObjectName;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -27,6 +29,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.jboss.deployment.DeploymentException;
+import org.jboss.deployment.DeploymentInfo;
 import org.jboss.logging.Logger;
 import org.jboss.web.WebApplication;
 import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
@@ -317,6 +320,8 @@ public class Jetty extends org.mortbay.jetty.Server
             {
                 // finally start the app
                 app.start();
+  
+                
                 _log.info("successfully deployed " + warUrl + " to " + contextPath);
             }
             catch (MultiException me)

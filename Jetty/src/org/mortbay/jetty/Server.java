@@ -56,7 +56,7 @@ import org.mortbay.xml.XmlConfiguration;
 public class Server extends HttpServer 
 {
     static Log log = LogFactory.getLog(Server.class);
-
+    private String[] _webAppConfigurationClassNames = new String[]{"org.mortbay.jetty.servlet.XMLConfiguration", "org.mortbay.jetty.servlet.JettyWebConfiguration"};
     private String _configuration;
     private String _rootWebApp;
 
@@ -386,6 +386,27 @@ public class Server extends HttpServer
         return (WebApplicationContext[])wacs.toArray(new WebApplicationContext[wacs.size()]);
     }
 
+    
+    /* ------------------------------------------------------------ */
+    /** setWebApplicationConfigurationClasses
+     * Set up the list of classnames of WebApplicationContext.Configuration
+     * implementations that will be applied to configure every webapp.
+     * The list can be overridden by individual WebApplicationContexts.
+     * @param configurationClasses
+     */
+    public void setWebApplicationConfigurationClassNames (String[] configurationClassNames)
+    {
+        if (configurationClassNames != null)
+        {
+            _webAppConfigurationClassNames = new String[configurationClassNames.length];
+            System.arraycopy(configurationClassNames, 0, _webAppConfigurationClassNames, 0, configurationClassNames.length);
+        }
+    }
+    
+    public String[]  getWebApplicationConfigurationClassNames ()
+    {
+        return _webAppConfigurationClassNames;
+    }
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */

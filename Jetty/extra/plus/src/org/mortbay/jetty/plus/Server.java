@@ -39,9 +39,11 @@ import org.mortbay.util.Resource;
  */
 public class Server extends org.mortbay.jetty.Server 
 {
+    private static final String[] _configClassNames = new String[] {"org.mortbay.jetty.plus.PlusWebAppContext$Configuration", "org.mortbay.jetty.servlet.JettyWebConfiguration"};
     static Log log = LogFactory.getLog(Server.class);
 
     private  ArrayList _serviceList;
+    
 
 
 
@@ -52,7 +54,7 @@ public class Server extends org.mortbay.jetty.Server
     {
        // Don't reset the instance to null since Jetty classes using XML are
        // inialized out of order and it would reset the value to null.
-     
+        setWebApplicationConfigurationClassNames(_configClassNames);
     }
     
     /* ------------------------------------------------------------ */
@@ -65,6 +67,7 @@ public class Server extends org.mortbay.jetty.Server
     ) throws IOException
     {
         super(configuration);
+        setWebApplicationConfigurationClassNames(_configClassNames);
     }
     
     /* ------------------------------------------------------------ */
@@ -77,6 +80,7 @@ public class Server extends org.mortbay.jetty.Server
     ) throws IOException
     {
         super(configuration);
+        setWebApplicationConfigurationClassNames(_configClassNames);
     }
     
     /* ------------------------------------------------------------ */
@@ -89,6 +93,7 @@ public class Server extends org.mortbay.jetty.Server
     ) throws IOException
     {
         super(configuration);
+        setWebApplicationConfigurationClassNames(_configClassNames);
     }
 
 

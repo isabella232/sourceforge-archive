@@ -39,14 +39,15 @@ import org.mortbay.xml.XmlParser;
  * @version $Revision$
  * @author gregw
  */
-public class XMLConfiguration extends WebApplicationContext.Configuration
+public class XMLConfiguration implements WebApplicationContext.Configuration
 {
     private static Log log=LogFactory.getLog(XMLConfiguration.class);
+    private WebApplicationContext _context;
     protected XmlParser xmlParser;
 
-    public XMLConfiguration(WebApplicationContext context)
+    public XMLConfiguration()
     {
-        super(context);
+        
         // Get parser
         xmlParser=new XmlParser();
         //set up cache of DTDs and schemas locally
@@ -81,9 +82,69 @@ public class XMLConfiguration extends WebApplicationContext.Configuration
         xmlParser.redirectEntity("j2ee_web_services_client_1_1.xsd",webservice11xsd);
         xmlParser.redirectEntity("http://www.ibm.com/webservices/xsd/j2ee_web_services_client_1_1.xsd",webservice11xsd);
     }
+    
+    
+    public void setWebApplicationContext (WebApplicationContext context)
+    {
+        _context = context;
+    }
+   
+    
+    public WebApplicationContext getWebApplicationContext()
+    {
+        return _context;
+    }
+
+    public WebApplicationHandler getWebApplicationHandler()
+    {
+         return _context.getWebApplicationHandler();
+    }
+    
+    /* ------------------------------------------------------------------------------- */
+    /** Configure ClassPath.
+     * This method is called before the context ClassLoader is created.  
+     * Paths and libraries should be added to the context using the setClassPath,
+     * addClassPath and addClassPaths methods.  The default implementation looks
+     * for WEB-INF/classes, WEB-INF/lib/*.zip and WEB-INF/lib/*.jar
+     * @throws Exception
+     */
+    public  void configureClassPath()
+    throws Exception
+    {
+        //cannot configure if the context is already started
+        if (_context.isStarted())
+        {
+            if (log.isDebugEnabled()){log.debug("Cannot configure webapp after it is started");};
+            return;
+        }
+        
+        Resource webInf=_context.getWebInf();
+        
+        // Add WEB-INF classes and lib classpaths
+        if (webInf != null && webInf.isDirectory())
+        {
+            // Look for classes directory
+            Resource classes= webInf.addPath("classes/");
+            if (classes.exists())
+                _context.setClassPath(classes.toString());
+            else
+                _context.setClassPath(null);
+
+            // Look for jars
+            Resource lib= webInf.addPath("lib/");
+            _context.addClassPaths(lib);
+        }
+     }
 
     public void configureDefaults() throws Exception
     {
+        //cannot configure if the context is already started
+        if (_context.isStarted())
+        {
+            if (log.isDebugEnabled()){log.debug("Cannot configure webapp after it is started");};
+            return;
+        }
+        
         String defaultsDescriptor=getWebApplicationContext().getDefaultsDescriptor();
         if(defaultsDescriptor!=null&&defaultsDescriptor.length()>0)
         {
@@ -97,6 +158,13 @@ public class XMLConfiguration extends WebApplicationContext.Configuration
 
     public void configureWebApp() throws Exception
     {
+        //cannot configure if the context is already started
+        if (_context.isStarted())
+        {
+            if (log.isDebugEnabled()){log.debug("Cannot configure webapp after it is started");};
+            return;
+        }
+        
         Resource webInf=getWebApplicationContext().getWebInf();
         // handle any WEB-INF descriptors
         if(webInf!=null&&webInf.isDirectory())
@@ -114,30 +182,10 @@ public class XMLConfiguration extends WebApplicationContext.Configuration
                 config=xmlParser.parse(web.getURL());
                 initialize(config);
             }
-            
-            configureJettyWeb();
         }
     }
     
-    protected void configureJettyWeb() throws Exception
-    {
-        Resource webInf=getWebApplicationContext().getWebInf();
-        // handle any WEB-INF descriptors
-        if(webInf!=null&&webInf.isDirectory())
-        {
-            // do jetty.xml file
-            Resource jetty=webInf.addPath("web-jetty.xml");
-            if(!jetty.exists())
-                jetty=webInf.addPath("jetty-web.xml");
-            if(!getWebApplicationContext().isIgnoreWebJetty()&&jetty.exists())
-            {
-                if(log.isDebugEnabled())
-                    log.debug("Configure: "+jetty);
-                XmlConfiguration jetty_config=new XmlConfiguration(jetty.getURL());
-                jetty_config.configure(getWebApplicationContext());
-            }
-        }
-    }
+ 
     
 
     /* ------------------------------------------------------------ */

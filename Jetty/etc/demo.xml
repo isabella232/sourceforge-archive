@@ -197,6 +197,28 @@
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/root</Arg>
   </Call>
 
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Uncomment to configure a list of configurations to be applied   -->
+  <!-- to each webapp context.                                         -->
+  <!-- Note that order is significant. This can be changed per webapp  -->
+  <!-- by calling setConfigurationClassNames() on the webapp context.  -->
+  <!-- The jsr77 configuration is optional - if specified, jsr77       -->
+  <!-- statistics will be enabled.                                     -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!--
+  <Set name="WebApplicationConfigurationClassNames">
+    <Array type="java.lang.String">
+      <Item>org.mortbay.jetty.servlet.XMLConfiguration</Item>
+      <Item>org.mortbay.jetty.servlet.JettyWebConfiguration</Item>
+      <Item>org.mortbay.jetty.servlet.jsr77.Configuration</Item>
+    </Array>
+  </Set>
+ -->
+
+
+
+
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add jetty demo web applications.                                -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

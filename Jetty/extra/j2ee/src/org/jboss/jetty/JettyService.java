@@ -14,10 +14,12 @@ package org.jboss.jetty;
 //------------------------------------------------------------------------------
 
 import java.util.Iterator;
+import java.util.Set;
 
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import javax.management.QueryExp;
 
 import org.jboss.deployment.DeploymentException;
 import org.jboss.deployment.DeploymentInfo;
@@ -76,6 +78,8 @@ public class JettyService
       log.error("exception", (Exception)iter.next());
   }
 
+  
+  
   //----------------------------------------------------------------------------
 
   public ObjectName

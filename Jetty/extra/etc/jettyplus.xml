@@ -212,6 +212,24 @@
   <!-- Configure the Contexts                                          -->
   <!-- =============================================================== -->
 
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Uncomment to configure a list of configurations to be applied   -->
+  <!-- to each webapp context.                                         -->
+  <!-- Note that order is significant. This can be changed per webapp  -->
+  <!-- by calling setConfigurationClassNames() on the webapp context.  -->
+  <!-- The jsr77 configuration is optional. It provides jsr77 stats    -->
+  <!-- for servlets. If you uncomment it, you MUST use the jmx way of  -->
+  <!-- starting JettyPlus.                                             -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <Set name="WebApplicationConfigurationClassNames">
+    <Array type="java.lang.String">
+      <Item>org.mortbay.jetty.plus.PlusWebAppContext$Configuration</Item>
+      <Item>org.mortbay.jetty.servlet.JettyWebConfiguration</Item>
+      <Item>org.mortbay.jetty.servlet.jsr77.Configuration</Item>
+    </Array>
+  </Set>
+
+
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add and configure a specific web application                    -->
@@ -240,7 +258,18 @@
   <Call name="addWebApplication">
       <Arg>/servlets-examples/*</Arg>
       <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/servlets-examples.war</Arg>
+      <!-- Uncomment to set up jsr77 statistics specifically for this webapp -->
+      <!--
+      <Set name="ConfigurationClassNames">
+        <Array type="java.lang.String">
+          <Item>org.mortbay.jetty.plus.PlusWebAppContext$Configuration</Item>
+          <Item>org.mortbay.jetty.servlet.JettyWebConfiguration</Item>
+          <Item>org.mortbay.jetty.servlet.jsr77.Configuration</Item>
+        </Array>
+    </Set>
+    -->
   </Call>
+
   <Call name="addWebApplication">
       <Arg>/jsp-examples/*</Arg>
       <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/jsp-examples.war</Arg>
