@@ -241,22 +241,22 @@ public class TestRFC2616
     /* --------------------------------------------------------------- */
     public static void test()
     {   
-        //test3_3();      /* Date/Time Formats                           */
+        test3_3();      /* Date/Time Formats                           */
         test3_6();      /* Transfer Encodings                          */
-//          test3_9();      /* Quality Values                              */
-//          test4_4();      /* Message Length                              */
-//          test5_2();
-//          test8_1();
-//          test8_2();
-//          test9_2();
-//          test9_4();
-//          test9_8();
-//  	test10_2_7();	/* 206 Partial Content                         */
-//          test10_3();     /* Redirection 3XX                             */
-//          test14_16();    /* Content-Range                               */
-//          test14_35();    /* Byte Ranges                                 */
-//          test14_39();    /* TE                                          */
-//          test19_6();     /* Compatibility with Previous Versions        */
+        test3_9();      /* Quality Values                              */
+        test4_4();      /* Message Length                              */
+        test5_2();
+        test8_1();
+        test8_2();
+        test9_2();
+        test9_4();
+        test9_8();
+  	test10_2_7();	/* 206 Partial Content                         */
+        test10_3();     /* Redirection 3XX                             */
+        test14_16();    /* Content-Range                               */
+        test14_35();    /* Byte Ranges                                 */
+        test14_39();    /* TE                                          */
+        test19_6();     /* Compatibility with Previous Versions        */
     }
 
     

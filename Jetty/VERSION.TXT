@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Fixed ChunableInputStream.resetStream bug.
+ + Ignore IO errors when trying to persist connections.
  + Allow POSTs to static resources.
  + stopJob/killStop in ThreadPool to improve stopping
    ThreadedServer on some platforms.

@@ -506,14 +506,14 @@ public class TestHarness
     {
         try
         {
-                  chunkInTest();
-//                chunkOutTest();
-//                filters();
-//                httpFields();
-//                pathMap();
-
-                  //                TestRequest.test();
-              TestRFC2616.test();
+            chunkInTest();
+            chunkOutTest();
+            filters();
+            httpFields();
+            pathMap();
+            
+            TestRequest.test();
+            TestRFC2616.test();
         }
         catch(Throwable e)
         {
