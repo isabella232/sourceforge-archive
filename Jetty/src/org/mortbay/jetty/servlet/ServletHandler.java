@@ -699,10 +699,8 @@ public class ServletHandler extends AbstractHttpHandler
         try
         {
             Resource resource = getHttpContext().getResource(uriInContext);
-            System.out.println("uri="+uriInContext+" "+resource);
             if (resource!=null)
             {
-                System.out.println(resource.getClass());
                 return resource.getInputStream();
             }
             

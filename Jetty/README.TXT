@@ -348,6 +348,8 @@ An Ant build file is included in build.xml.   Ant is available from
 
     http://jakarta.apache.org/ant/index.html
 
+You will also need the optional ant junit task and the junit jar in the
+lib directory of ant (this is a common setup for ant distributions).
 The ant.properties file can be edited to customize the environment and
 then the following ant targets can be used to build and run Jetty:
 

@@ -95,10 +95,6 @@ the Ant optional tasks from:
   <target name="prepare" depends="classpath">
     <mkdir dir="${test.classes}" />
     <mkdir dir="${test.results}" />
-    <available property="junit.task.available" 
-               classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask" />
-    <available property="junit.available" 
-               classname="junit.framework.Test" />
   </target>
 
   <!-- ==================================================================== -->
@@ -120,7 +116,6 @@ the Ant optional tasks from:
            >
        <classpath>
          <path refid="classpath" />
-         <pathelement path="${junit.jar}" />     
        </classpath>
        <include name="**/*.java"/>
     </javac>
@@ -130,7 +125,7 @@ the Ant optional tasks from:
   <target name="test" depends="junit,testUtil,testXML,testHTTP"/>
 
   <!-- ==================================================================== -->
-  <target name="junit" depends="prepare,check.junit.task,check.junit,classes">
+  <target name="junit" depends="prepare,classes">
     <echo>
 Test results in ${test.results}
     </echo>
@@ -148,24 +143,6 @@ Test results in ${test.results}
         </fileset>
       </batchtest>   
     </junit>
-  </target>
-
-  <!-- ==================================================================== -->
-  <target name="check.junit.task" unless="junit.task.available" >
-    <fail message="
- The &lt;junit&gt; task is not available.
- You need to install the Ant optional tasks .jar in the [ant]/lib directory.
- Please see [jetty]/tests/README.html for more information"
-   />
-  </target>
-
-  <!-- ==================================================================== -->
-  <target name="check.junit" unless="junit.available" >
-    <fail message="
-  The junit .jar is not in the Ant class path.
-  You need to place a copy junit.jar in the [ant]/lib directoy.
-  Please see [jetty]/tests/README.html for more information" 
-    />
   </target>
 
   <!-- ==================================================================== -->
