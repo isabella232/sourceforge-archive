@@ -20,7 +20,6 @@ import java.security.Permissions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -989,7 +988,7 @@ public class HttpContext implements LifeCycle,
             if (loader instanceof URLClassLoader)
             {
                 URL[] urls = ((URLClassLoader)loader).getURLs();
-                for (int j=0;j<urls.length;j++)
+                for (int j=0;urls!=null && j<urls.length;j++)
                 {
                     try
                     {

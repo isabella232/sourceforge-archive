@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.StringTokenizer;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
-import org.mortbay.util.Log;
 import org.mortbay.util.Resource;
 
 /* ------------------------------------------------------------ */
