@@ -63,8 +63,7 @@ class FileResource extends URLResource
     /* ------------------------------------------------------------ */
     private File _file;
     private transient URL _alias=null;
-    private transient boolean _aliasChecked=true;
-    
+    private transient boolean _aliasChecked=false;
 
     /* ------------------------------------------------------------------------------- */
     /** setCheckAliases.
@@ -164,6 +163,8 @@ class FileResource extends URLResource
                 
                 if (abs.length()!=can.length() || !abs.equals(can))
                     _alias=new File(can).toURI().toURL();
+                
+                _aliasChecked=true;
                 
                 if (_alias!=null && log.isDebugEnabled())
                 {
