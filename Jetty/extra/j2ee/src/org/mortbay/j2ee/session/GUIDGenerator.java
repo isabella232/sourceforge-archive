@@ -20,7 +20,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.jboss.logging.Logger;
 
 public class

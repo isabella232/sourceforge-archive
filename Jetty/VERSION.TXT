@@ -13,6 +13,7 @@ Jetty-5.0.0RC0
  + Forced close of connections over stop/start
  + ProxiedFor field support added to NCSARequestLog
  + Updated mx4j to V2
+ + Updated jasper to 5.0.19
 
 Jetty-4.2.20pre0
  + Worked around bad jboss URL handler in XMLParser

@@ -14,9 +14,7 @@ import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.rmi.RemoteException;
 import java.util.HashMap;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionActivationListener;
-import javax.servlet.http.HttpSessionEvent;
+
 import org.jboss.logging.Logger;
 
 //----------------------------------------

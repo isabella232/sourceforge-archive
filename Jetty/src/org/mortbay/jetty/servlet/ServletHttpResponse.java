@@ -27,8 +27,8 @@ import org.mortbay.http.HttpResponse;
 import org.mortbay.util.IO;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.StringUtil;
-import org.mortbay.util.URI;
 import org.mortbay.util.TypeUtil;
+import org.mortbay.util.URI;
 
 /* ------------------------------------------------------------ */
 /** Servlet Response Wrapper.

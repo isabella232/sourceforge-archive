@@ -8,11 +8,8 @@ package org.mortbay.j2ee.session;
 //----------------------------------------
 
 import java.rmi.RemoteException;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
-import javax.servlet.http.HttpSession;
-import org.jboss.logging.Logger;
 
 //----------------------------------------
 

@@ -4,12 +4,10 @@ package org.jboss.jetty.session;
 //----------------------------------------
 
 import java.security.Principal;
-import javax.servlet.http.HttpSession;
+
 import org.jboss.logging.Logger;
 import org.jboss.security.SecurityAssociation;
-import org.mortbay.j2ee.session.Manager;
 import org.mortbay.j2ee.session.AroundInterceptor;
-import org.mortbay.j2ee.session.State;
 
 //----------------------------------------
 

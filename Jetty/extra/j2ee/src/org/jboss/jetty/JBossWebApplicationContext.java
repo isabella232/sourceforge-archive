@@ -15,29 +15,25 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
 import javax.management.ObjectName;
+
 import org.jboss.deployment.DeploymentInfo;
-import org.jboss.jetty.jmx.JBossWebApplicationContextMBean; // TODO
-                                                                                                                      // -
-                                                                                                                      // bad
+import org.jboss.jetty.jmx.JBossWebApplicationContextMBean;
 import org.jboss.jetty.security.JBossUserRealm;
 import org.jboss.logging.Logger;
-import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
 import org.jboss.web.WebApplication;
-import org.mortbay.http.ContextLoader;
+import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
 import org.mortbay.j2ee.J2EEWebApplicationContext;
 import org.mortbay.j2ee.session.AbstractReplicatedStore;
 import org.mortbay.j2ee.session.Manager;
 import org.mortbay.j2ee.session.Store;
-import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.servlet.SessionManager;
-import org.mortbay.jetty.servlet.WebApplicationHandler;
 import org.mortbay.jetty.servlet.WebApplicationContext;
+import org.mortbay.jetty.servlet.WebApplicationHandler;
 import org.mortbay.jetty.servlet.XMLConfiguration;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;

@@ -11,8 +11,7 @@ package org.jboss.jetty;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
+
 import org.mortbay.jetty.jmx.ServerMBean;
 
 public class JettyMBean

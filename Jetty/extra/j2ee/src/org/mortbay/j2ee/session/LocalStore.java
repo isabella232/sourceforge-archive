@@ -7,7 +7,9 @@ package org.mortbay.j2ee.session;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.jboss.logging.Logger;
 
 //----------------------------------------

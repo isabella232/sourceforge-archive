@@ -9,7 +9,9 @@ package org.mortbay.j2ee.session;
 
 import java.util.Timer;
 import java.util.TimerTask;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.jboss.logging.Logger;
 
 //----------------------------------------

@@ -8,9 +8,10 @@ package org.mortbay.j2ee.session;
 //----------------------------------------
 
 import java.rmi.RemoteException;
-import javax.servlet.http.HttpSession;
+
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionEvent;
+
 import org.jboss.logging.Logger;
 
 //----------------------------------------

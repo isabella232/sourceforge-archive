@@ -16,30 +16,31 @@ package org.jboss.jetty;
 
 //------------------------------------------------------------------------------
 
-import java.io.ByteArrayOutputStream;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Hashtable;
+
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+
 import org.jboss.deployment.DeploymentException;
 import org.jboss.logging.Logger;
-import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
 import org.jboss.web.WebApplication;
+import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
+import org.mortbay.j2ee.J2EEWebApplicationContext;
+import org.mortbay.j2ee.session.Manager;
 import org.mortbay.util.MultiException;
 import org.mortbay.xml.XmlConfiguration;
 import org.w3c.dom.Element;
-import org.mortbay.j2ee.J2EEWebApplicationContext;
-import org.mortbay.j2ee.session.Manager;
 
 //------------------------------------------------------------------------------
 

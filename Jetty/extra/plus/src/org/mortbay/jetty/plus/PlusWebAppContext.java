@@ -1,10 +1,12 @@
 package org.mortbay.jetty.plus;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.LinkRef;
+import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,7 +19,6 @@ import org.mortbay.jndi.Util;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.TypeUtil;
 import org.mortbay.xml.XmlParser;
-import java.net.MalformedURLException;
 
 /* ------------------------------------------------------------ */
 public class PlusWebAppContext extends WebApplicationContext

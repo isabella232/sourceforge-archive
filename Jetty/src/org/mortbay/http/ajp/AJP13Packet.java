@@ -16,8 +16,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.ByteArrayPool;
-import org.mortbay.util.StringUtil;
 import org.mortbay.util.LogSupport;
+import org.mortbay.util.StringUtil;
 
 
 /* ------------------------------------------------------------ */

@@ -7,7 +7,6 @@ package org.mortbay.j2ee.session;
 
 //----------------------------------------
 
-import javax.servlet.http.HttpSession;
 
 //----------------------------------------
 

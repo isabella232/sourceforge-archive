@@ -1,9 +1,11 @@
 package org.mortbay.jetty.plus;
 
 import java.io.IOException;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpException;

@@ -5,9 +5,9 @@
 
 package org.mortbay.util.jmx;
 
+import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
-import java.net.URL;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;

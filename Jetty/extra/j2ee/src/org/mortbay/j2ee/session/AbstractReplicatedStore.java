@@ -8,15 +8,10 @@ package org.mortbay.j2ee.session;
 //----------------------------------------
 
 import java.lang.reflect.Method;
-import java.rmi.RemoteException;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map.Entry;
 import java.util.Map;
-import org.jgroups.Message;
-import org.jgroups.blocks.MessageDispatcher;
-import org.jgroups.util.Util;
+
 import org.jboss.logging.Logger;
 
 //----------------------------------------

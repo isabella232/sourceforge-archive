@@ -6,33 +6,26 @@
 package org.mortbay.j2ee.session;
 
 //----------------------------------------
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.rmi.RemoteException;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
+
+import org.jboss.logging.Logger;
 import org.jgroups.Address;
 import org.jgroups.Channel;
 import org.jgroups.JChannel;
-import org.jgroups.MembershipListener; // we are notified of changes to membership list
+import org.jgroups.MembershipListener;
 import org.jgroups.MergeView;
 import org.jgroups.Message;
-import org.jgroups.MessageListener; // we are notified of changes to other state
+import org.jgroups.MessageListener;
 import org.jgroups.View;
 import org.jgroups.blocks.GroupRequest;
-import org.jgroups.blocks.MessageDispatcher;
 import org.jgroups.blocks.MethodCall;
 import org.jgroups.blocks.RpcDispatcher;
-import org.jgroups.util.Util;
-import org.jboss.logging.Logger;
 
 //----------------------------------------
 // what happens if a member drops away for a while then comes back -

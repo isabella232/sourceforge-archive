@@ -14,14 +14,13 @@ package org.jboss.jetty;
 //------------------------------------------------------------------------------
 
 import java.util.Iterator;
+
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+
 import org.jboss.deployment.DeploymentException;
 import org.jboss.deployment.DeploymentInfo;
-import org.jboss.logging.Logger;
-import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
 import org.jboss.web.AbstractWebContainer;
 import org.jboss.web.AbstractWebDeployer;
 import org.jboss.web.WebApplication;

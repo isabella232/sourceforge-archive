@@ -13,6 +13,17 @@
     <load-on-startup>0</load-on-startup>
   </servlet>
 
+  <servlet>
+    <servlet-name>DFT</servlet-name>
+    <servlet-class>org.mortbay.jetty.servlet.Default</servlet-class>
+    <load-on-startup>0</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>DFT</servlet-name>
+    <url-pattern>/test/*</url-pattern>
+  </servlet-mapping>
+
   <servlet-mapping>
     <servlet-name>Dump</servlet-name>
     <url-pattern>/dump/*</url-pattern>

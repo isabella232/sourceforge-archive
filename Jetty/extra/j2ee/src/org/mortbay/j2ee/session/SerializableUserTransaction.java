@@ -6,6 +6,7 @@
 package org.mortbay.j2ee.session;
 
 import java.rmi.RemoteException;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.transaction.UserTransaction;

@@ -19,9 +19,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpFields;
 import org.mortbay.util.LineInput;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringUtil;
-import org.mortbay.util.LogSupport;
 
 /* ------------------------------------------------------------ */
 /** Multipart Form Data request.

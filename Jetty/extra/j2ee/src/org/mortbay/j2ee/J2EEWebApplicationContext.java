@@ -6,11 +6,10 @@
 package org.mortbay.j2ee;
 
 import java.io.IOException;
-import java.util.List;
-import org.mortbay.jetty.servlet.SessionManager;
-import org.mortbay.jetty.servlet.WebApplicationContext;
-import org.mortbay.j2ee.session.Manager;
+
 import org.jboss.logging.Logger;
+import org.mortbay.j2ee.session.Manager;
+import org.mortbay.jetty.servlet.WebApplicationContext;
 
 public class
   J2EEWebApplicationContext

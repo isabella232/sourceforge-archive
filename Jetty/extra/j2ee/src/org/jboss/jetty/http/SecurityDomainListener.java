@@ -8,13 +8,13 @@
 package org.jboss.jetty.http;
 
 import java.io.IOException;
+
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.net.ssl.SSLServerSocketFactory;
 
 import org.jboss.security.SecurityDomain;
 import org.jboss.security.ssl.DomainServerSocketFactory;
-
 import org.mortbay.http.JsseListener;
 
 /** A subclass of JsseListener that uses the KeyStore associated with the

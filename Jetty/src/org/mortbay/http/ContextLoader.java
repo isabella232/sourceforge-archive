@@ -20,8 +20,8 @@ import java.util.StringTokenizer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.IO;
-import org.mortbay.util.Resource;
 import org.mortbay.util.LogSupport;
+import org.mortbay.util.Resource;
 
 /* ------------------------------------------------------------ */
 /** ClassLoader for HttpContext.

@@ -5,11 +5,12 @@
 
 package org.mortbay.j2ee.session;
 
-import java.util.ListIterator;
 import java.util.ArrayList;
-import java.util.List;
-import org.jboss.logging.Logger;
+import java.util.ListIterator;
+
 import javax.servlet.http.HttpSession;
+
+import org.jboss.logging.Logger;
 
 public class
     Container

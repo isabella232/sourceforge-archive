@@ -9,28 +9,29 @@
 
 package org.jboss.jetty.security;
 
+import java.io.Serializable;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
-import java.io.Serializable;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.security.auth.Subject;
-import java.security.Principal;
+
 import org.jboss.logging.Logger;
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.RealmMapping;
 import org.jboss.security.SecurityAssociation;
 import org.jboss.security.SimplePrincipal;
 import org.jboss.security.SubjectSecurityManager;
-import org.mortbay.http.HttpResponse;
-import org.mortbay.http.HttpRequest;
-import org.mortbay.http.UserRealm;
-import org.mortbay.http.SSORealm;
 import org.mortbay.http.HashSSORealm;
+import org.mortbay.http.HttpRequest;
+import org.mortbay.http.HttpResponse;
+import org.mortbay.http.SSORealm;
+import org.mortbay.http.UserRealm;
 import org.mortbay.util.Credential;
 
 /** An implementation of UserRealm that integrates with the JBossSX

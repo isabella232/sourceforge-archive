@@ -6,14 +6,14 @@
 package org.mortbay.jetty.plus.jmx;
 
 import java.io.IOException;
+
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
-import org.mortbay.http.jmx.HttpServerMBean;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.util.LogSupport;
 
 
 /* ------------------------------------------------------------ */

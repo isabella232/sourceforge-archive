@@ -15,9 +15,9 @@ import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.PathMap;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.URI;
 import org.mortbay.util.UrlEncoded;
-import org.mortbay.util.LogSupport;
 
 
 /* ------------------------------------------------------------ */

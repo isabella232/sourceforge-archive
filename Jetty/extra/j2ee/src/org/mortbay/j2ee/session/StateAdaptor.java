@@ -9,9 +9,10 @@ package org.mortbay.j2ee.session;
 
 import java.rmi.RemoteException;
 import java.util.Enumeration;
+
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionContext;
+
 import org.jboss.logging.Logger;
 
 //----------------------------------------

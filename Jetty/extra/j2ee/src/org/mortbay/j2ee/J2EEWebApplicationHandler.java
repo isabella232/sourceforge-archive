@@ -13,11 +13,13 @@ package org.mortbay.j2ee;
 //------------------------------------------------------------------------------
 
 import java.io.IOException;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.transaction.Status;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
+
 import org.jboss.logging.Logger;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
