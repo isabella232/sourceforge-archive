@@ -55,8 +55,20 @@ public class DictionaryConverter implements Converter
 	while (enum.hasMoreElements()){
 	    String field = enum.nextElement().toString();
 	    Object value = from.get(field);
-	    if (value == null) continue;
-	    value = converter.convert(value, enum.getType(), converter);
+	    if (from instanceof PropertyTree){
+		if (value != null)
+		    value = converter.convert(value, enum.getType(),
+					      converter);
+		if (value == null){
+		    PropertyTree tree = (PropertyTree)from;
+		    value = tree.getTree(field);
+		    value = converter.convert(value, enum.getType(),
+					      converter);
+		}
+	    } else {
+		if (value == null) continue;
+		value = converter.convert(value, enum.getType(), converter);
+	    }
 	    if (value == null) continue;
 	    try {
 		boolean done = PropertyEnumeration.set(toFill, field, value);
