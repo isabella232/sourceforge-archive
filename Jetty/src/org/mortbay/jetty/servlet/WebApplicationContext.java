@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.AbstractCollection;
 import java.util.AbstractList;
@@ -392,6 +393,9 @@ public class WebApplicationContext extends ServletHttpContext
             }
         }
 
+        // initialize the classloader (if it has not been so already)
+        initClassLoader();
+        
         // Set classpath for Jasper.
         if (_servletHandler!=null)
         {
@@ -399,23 +403,14 @@ public class WebApplicationContext extends ServletHttpContext
             if (entry!=null)
             {
                 ServletHolder jspHolder = (ServletHolder)entry.getValue();
-                if (jspHolder!=null)
+                if (jspHolder!=null && jspHolder.getInitParameter("classpath")==null)
                 {
-                    initClassLoader();
-                    ClassLoader loader = getClassLoader();
-                    String fileClassPath = (loader instanceof ContextLoader)
-                        ? ((ContextLoader)loader).getFileClassPath()
-                        : getClassPath();
-
-                    if (jspHolder.getInitParameter("classpath")==null)
-                    {
-                        jspHolder.setInitParameter("classpath",fileClassPath);
-                        Code.debug("Set classpath=",fileClassPath," for ",jspHolder);
-                    }
+                    String fileClassPath=getFileClassPath();
+                    jspHolder.setInitParameter("classpath",fileClassPath);
+                    Code.debug("Set classpath=",fileClassPath," for ",jspHolder);
                 }
             }
         }
-        
         
         // Start handlers
         super.start();
@@ -450,6 +445,38 @@ public class WebApplicationContext extends ServletHttpContext
         }
         else
             super.stop();
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get the complete file classpath of webapplication.
+     * This method makes a best effort to return a complete file
+     * classpath for the context.  The default implementation returns
+     * <PRE>
+     *  ((ContextLoader)getClassLoader()).getFileClassPath()+
+     *       System.getProperty("path.separator")+
+     *       System.getProperty("java.class.path");
+     * </PRE>
+     * The default implementation requires the classloader to be
+     * initialized before it is called.
+     * <P>
+     * Derivations may replace this method with a more accurate version.
+     * @return Path of files and directories for loading classes.
+     * @exception IllegalStateException HttpContext.initClassLoader
+     * has not been called.
+     */
+    public String getFileClassPath()
+        throws IllegalStateException
+    {
+        ClassLoader loader = getClassLoader();
+        if (loader==null)
+            throw new IllegalStateException("Context classloader not initialized");
+        String fileClassPath =
+            ((loader instanceof ContextLoader)
+             ? ((ContextLoader)loader).getFileClassPath()
+             : getClassPath())+
+            System.getProperty("path.separator")+
+            System.getProperty("java.class.path");
+        return fileClassPath;
     }
     
     /* ------------------------------------------------------------ */

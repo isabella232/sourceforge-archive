@@ -259,11 +259,15 @@ public class HttpContext implements LifeCycle
 
     /* ------------------------------------------------------------ */
     /** Get the context classpath.
+     * This method only returns the paths that have been set for this
+     * context and does not include any paths from a parent or the
+     * system classloader.
      * Note that this may not be a legal javac classpath.  A file only
      * classpath can be obtained from ContextLoader.getFileClassPath().
      * @return a coma or ';' separated list of class
      * resources. These may be jar files, directories or URLs to jars
      * or directories.
+     * @see org.mortbay.jetty.servlet.WebApplicationContext.getFileClassPath();
      */
     public String getClassPath()
     {
