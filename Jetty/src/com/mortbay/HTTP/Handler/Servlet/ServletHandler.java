@@ -155,9 +155,20 @@ public class ServletHandler extends NullHandler
         while (i.hasNext())
         {
             ServletHolder holder = (ServletHolder)i.next();
-
+            
             if (holder.isInitOnStartup())
                 holder.initialize();
+            else
+            {
+                try
+                {
+                    holder.initializeClass();
+                }
+                catch(UnavailableException e)
+                {
+                    Code.warning(e);
+                }
+            }
         }
         
         super.start();
@@ -228,7 +239,16 @@ public class ServletHandler extends NullHandler
     /* ------------------------------------------------------------ */
     public void addHolder(String pathSpec, ServletHolder holder)
     {
-        _servletMap.put(pathSpec,holder);
+        try
+        {
+            if (isStarted())
+                holder.initializeClass();
+            _servletMap.put(pathSpec,holder);
+        }
+        catch(UnavailableException e)
+        {
+            Code.warning(e);
+        }
     }
     
     

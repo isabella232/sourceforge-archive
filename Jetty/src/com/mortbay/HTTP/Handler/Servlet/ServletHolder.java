@@ -174,7 +174,7 @@ public class ServletHolder
     }
 
     /* ------------------------------------------------------------ */
-    private synchronized void initializeClass()
+    synchronized void initializeClass()
         throws UnavailableException
     {
         try
@@ -363,6 +363,9 @@ public class ServletHolder
                UnavailableException,
                IOException
     {
+        if (_servletClass==null)
+            throw new UnavailableException("Servlet class not initialized");
+        
         Servlet useServlet=null;
 
         // reference pool to protect from reloads
@@ -377,11 +380,7 @@ public class ServletHolder
                 // Create a new one for the pool
                 try
                 {
-                    if (_servletClass==null)
-                        initializeClass();
-
-                    useServlet =
-                            (Servlet) _servletClass.newInstance();
+                    useServlet = (Servlet) _servletClass.newInstance();
                     useServlet.init(_config);
                 }
                 catch(Exception e2)
@@ -407,8 +406,6 @@ public class ServletHolder
                         // no so build it
                         try
                         {
-                            if (_servletClass==null)
-                                initializeClass();
                             useServlet =
                                 (Servlet) _servletClass.newInstance();
                             useServlet.init(_config);

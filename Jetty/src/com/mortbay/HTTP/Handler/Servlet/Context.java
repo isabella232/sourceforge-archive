@@ -639,14 +639,13 @@ public class Context implements ServletContext, HttpSessionContext
         {
             if (invalid) throw new IllegalStateException();
 
-            // Call valueUnbound on all the HttpSessionBindingListeners
-            // To avoid iterator problems, don't actually remove them
-            Iterator iter = _sessions.keySet().iterator();
+            Iterator iter = _values.keySet().iterator();
             while (iter.hasNext())
             {
                 String key = (String)iter.next();
                 Object value = _values.get(key);
                 unbindValue(key, value);
+                iter.remove();
             }
             Context.this._sessions.remove(id);
             invalid=true;
