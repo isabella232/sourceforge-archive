@@ -49,10 +49,10 @@ public class JotmWebAppContext extends WebApplicationContext
     public void start()
         throws Exception
     {
-        super.start();
-
         // Rebind the global UserTransaction for this object
         bindToGlobal("javax.transaction.UserTransaction", "java:comp/UserTransaction");
+
+        super.start();
     }
         
     /* ------------------------------------------------------------ */
