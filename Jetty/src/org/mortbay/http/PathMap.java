@@ -15,6 +15,7 @@ import org.mortbay.util.LazyList;
 import org.mortbay.util.SingletonList;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.URI;
+import org.mortbay.util.Code;
 
 /* ------------------------------------------------------------ */
 /** URI path map to Object.
@@ -115,7 +116,10 @@ public class PathMap extends HashMap
             String spec=tok.nextToken();
             
             if (!spec.startsWith("/") && !spec.startsWith("*."))
-                throw new IllegalArgumentException("PathSpec "+spec+". must start with '/' or '*.'");
+            {
+                Code.warning("PathSpec "+spec+". must start with '/' or '*.'");
+                spec="/"+spec;
+            }
             
             old = super.put(spec,object);
             
