@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + SecurityConstraints not reset by stop() on custom context
+
 Jetty-5.0.beta0 - 22 November 2003
  + Removed support for HTTP trailers
  + PathMap uses own Map.Entry impl for IBM JVMs 

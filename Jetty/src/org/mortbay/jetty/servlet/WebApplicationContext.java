@@ -541,6 +541,8 @@ public class WebApplicationContext
         super.stop();
 
         // clean up
+        clearSecurityConstraints();
+
         if (_webAppHandler!=null)
             removeHandler(_webAppHandler);
         _webAppHandler=null;

@@ -27,6 +27,7 @@ import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.InclusiveByteRange;
 import org.mortbay.http.MultiPartResponse;
+import org.mortbay.http.ResourceCache;
 import org.mortbay.util.CachedResource;
 import org.mortbay.util.IO;
 import org.mortbay.util.LogSupport;
@@ -492,7 +493,7 @@ public class Default extends HttpServlet
             // If we have meta data for the file
             // Try a direct match for most common requests. Avoids
             // parsing the date.
-            HttpContext.ResourceMetaData metaData =
+            ResourceCache.ResourceMetaData metaData =
                 _httpContext.getResourceMetaData(resource);
             if (metaData!=null)
             {
@@ -655,12 +656,11 @@ public class Default extends HttpServlet
             return;
         }
         
-        
         //  multiple non-overlapping valid ranges cause a multipart
         //  216 response which does not require an overall 
         //  content-length header
         //
-        HttpContext.ResourceMetaData metaData =
+        ResourceCache.ResourceMetaData metaData =
             _httpContext.getResourceMetaData(resource);
         String encoding = metaData.getEncoding();
         MultiPartResponse multi = new MultiPartResponse(response.getOutputStream());
@@ -726,7 +726,7 @@ public class Default extends HttpServlet
                                 long count)
         throws IOException
     {
-        HttpContext.ResourceMetaData metaData =
+        ResourceCache.ResourceMetaData metaData =
             _httpContext.getResourceMetaData(resource);
         
         response.setContentType(metaData.getEncoding());
