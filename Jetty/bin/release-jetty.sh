@@ -31,6 +31,7 @@ read Y
     cd $HOME
     unset JETTY_HOME
     [ -d Jetty ] && mv Jetty Jetty.cvs
+    [ -d JettyExtra ] && mv JettyExtra JettyExtra.cvs
     cvs $CVS_ARGS rtag $CVS_BRANCH -F Jetty_$TAG Jetty JettyExtra
     cvs $CVS_ARGS rtag $CVS_BRANCH -r Jetty_$TAG -F JBossJetty_$TAG Jetty JettyExtra/jmx
 
@@ -54,6 +55,9 @@ read Y
     tar xfz /usr/local/archive/Jetty-${VERSION}.tgz
     tar xfz /usr/local/archive/JettyExtra-${VERSION}.tgz
     cp -f DEFAULT/up.sh Jetty-${VERSION}
+
+    [ -d Jetty.cvs ] && mv Jetty.cvs Jetty
+    [ -d JettyExtra.cvs ] && mv JettyExtra.cvs JettyExtra
   
 } 2>&1 | tee /tmp/release-jetty.log
 
