@@ -86,7 +86,7 @@ ServerA./.InetAddrPort	   : 0.0.0.0:8080
 ServerA./.Log./		   : err
 
 ServerA./.Auth./Auth	   : Demo=./etc/RealmDemo.prp
-ServerA./.Auth./Auth	   : Other=./etc/RealmOther.prp
+ServerA./.Auth./Other	   : Other=./etc/RealmOther.prp
 
 ServerA./.Translate./$     : /Jetty
 ServerA./.Translate./Auth% : /

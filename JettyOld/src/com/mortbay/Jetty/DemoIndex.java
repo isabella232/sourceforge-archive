@@ -29,7 +29,7 @@ public class DemoIndex extends IndexServlet
 	section.put(Page.Heading,"<B>Jetty</B><BR>Java HTTP Server");
 	section.put(Page.Section,"Home");
 	section.put("Text",
-		    "Jetty is a HTTP/1.1 Server written entirely in "+
+		    "Jetty is an <A HREF=http://www.opensource.org>Open Source</A> HTTP/1.1 Server written in 100% "+
 		    "Java. It is designed to be embedable, extensible and "+
 		    "flexible, thus making it an ideal platform for serving " +
 		    "dynamic HTTP requests from any Java application.  "+
@@ -76,7 +76,7 @@ public class DemoIndex extends IndexServlet
 	    },
 	    {   "License",
 		"/Jetty/Info/license.html",
-		"Introducing the concept of Guilt-ware"
+		"Open Source License"
 	    }
 	};
 	section.put("Items",infoItems);

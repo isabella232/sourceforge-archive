@@ -4,14 +4,14 @@
 <TABLE><TR><TD>
 Jetty has two main mechanism by which request handling code can
 be added to the server: HttpHandlers and Servlets.
-<P>As the proposed standard, Servlets must be the prefered development
+<P>As the standard, Servlets must be the prefered development
 mechanism.  Applications written to the servlet API should be able to
 run on any server supporting the standard API.
 <P>However, the servlet API does not allow the request to be modified,
 nor does is allow complete access to the input and output streams
 associated with a request.  If these features are required, then
-a HttpHandler can be used as the basis.  Typically HttpHandlers will
-modify or synthensize a request for later handling by a servlet, file
-or forwarded server.
+a HttpHandler can be used as the basis.  Typically HttpHandlers are
+used to add features to the server, rather than an application.
+For example, Servlet handling is provided by a Jetty HttpHandler.  
 </TD></TR></TABLE>
 </BLOCKQUOTE>
