@@ -128,16 +128,11 @@ public class ServletLoader extends ClassLoader
     {
         Class loadClass = super.loadClass(name,resolve);
         
-        try
+        if(loadClass.getClassLoader()!=this)
         {
-            Class pathClass = findClass(name);
-            if(pathClass!=loadClass)
+            byte[] b = loadFromClassPath(name);
+            if(b!=null)
                 Code.warning(name+" in both system and servlet classpaths. System version used.");
-        }
-        catch (ClassNotFoundException e)
-        {
-            if (Code.verbose(9999))
-                Code.ignore(e);
         }
 
         return loadClass;

@@ -23,6 +23,7 @@ dist        - Constructs a distribution file with all the source.
 webapp      - Builds the demo web application.
 run.demo    - Runs the demo web application. 
 test        - Runs the Jetty test harness.
+release     - Cleanup for release
 
 -->
 <project name="Jetty3 Web, Servlet, and JSP server" 
@@ -37,6 +38,7 @@ test        - Runs the Jetty test harness.
   <property name="lib"            value="${basedir}/lib"/>
   <property name="classes"        value="${basedir}/classes"/>
   <property name="javadoc"        value="${basedir}/javadoc"/>
+  <!-- <property name="build.compiler" value="jikes"/> -->
   
   <property name="jetty.webapp"           value="${webapps}/jetty"/>
   <property name="jetty.war"              value="${webapps}/jetty.war"/>
@@ -67,6 +69,7 @@ test        - Runs the Jetty test harness.
     <delete  file="${servlet.jar}"/>
     <delete  file="${jasper.jar}"/>
   </target>
+
   
   <target name="check_packages">
     <!-- available property="prop.name" classname="com.some.Class" / -->
@@ -80,8 +83,9 @@ test        - Runs the Jetty test harness.
     <javac srcdir="${src.dir}" 
            destdir="${classes}"
            classpath="${classpath}"
-           debug="on" optimize="on" 
-           deprecation="on"
+           debug="on" 
+           optimize="on" 
+           deprecation="off"
            >
       <include name="javax/servlet/**/*.java"/> 
     </javac>
@@ -102,8 +106,9 @@ test        - Runs the Jetty test harness.
     <javac srcdir="${src.dir}" 
            destdir="${classes}"
            classpath="${libs}"
-           debug="on" optimize="on" 
-           deprecation="on"
+           debug="on" 
+           optimize="on" 
+           deprecation="off"
            >
       <include name="com/mortbay/**/*.java"/> 
       <exclude name="com/mortbay/Jetty/JettyPage.java" />
@@ -112,8 +117,18 @@ test        - Runs the Jetty test harness.
     </javac>
     <jar jarfile="${jetty.jar}"
          basedir="${classes}" 
-         >
-       <include name="com/mortbay/**"  />
+    >
+       <include name="com/mortbay/**"  />      
+       <exclude name="com/mortbay/**/TestHarness*.class" />
+       <exclude name="com/mortbay/Util/DataClass/*" />
+       <exclude name="com/mortbay/Util/TestConfiguration.class" />
+       <exclude name="com/mortbay/Util/PropertyTreeTest.class" />
+       <exclude name="com/mortbay/Util/DictionaryConverterTest*.class" />
+       <exclude name="com/mortbay/HTTP/TestRFC*.class" />
+       <exclude name="com/mortbay/HTTP/TestRequest.class" />
+       <exclude name="com/mortbay/HTTP/Http10TestClient.class" />
+       <exclude name="com/mortbay/HTTP/Handler/TestTEHandler.class" />
+       <exclude name="com/mortbay/HTML/TestHtml.class" />
     </jar>
   </target>
   
@@ -125,8 +140,9 @@ test        - Runs the Jetty test harness.
     <javac srcdir="${src.dir}" 
            destdir="${classes}"
            classpath="${classpath}"
-           debug="on" optimize="on" 
-           deprecation="on"
+           debug="on" 
+           optimize="on" 
+           deprecation="off"
            >
       <include name="org/apache/jasper/**/*.java"/> 
     </javac>
@@ -148,8 +164,9 @@ test        - Runs the Jetty test harness.
     <javac srcdir="${src.dir}" 
            destdir="${jetty.webapp.classes}"
            classpath="${jetty.jar};${servlet.jar}"
-           debug="on" optimize="on" 
-           deprecation="on" 
+           debug="on" 
+           optimize="on" 
+           deprecation="off" 
            >
       <include name="com/mortbay/Jetty/JettyPage.java" />
       <include name="com/mortbay/Jetty/JettyServlet.java" />
@@ -188,6 +205,10 @@ test        - Runs the Jetty test harness.
           />
   </target>
   
+  <target name="release" depends="prepare,libs,webapp,javadoc">
+    <deltree dir="${classes}"/>
+  </target>
+
   <target name="all" depends="prepare,libs,webapp,javadoc,test"/>
   
   <target name="run.demo" depends="webapp" >
@@ -213,3 +234,14 @@ test        - Runs the Jetty test harness.
 </target>
   
 </project>
+
+
+
+
+
+
+
+
+
+
+
