@@ -60,6 +60,13 @@
 -->
 
   <Call name="addWebApplication">
+    <Arg>/</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/root</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
+    <Arg type="boolean">false</Arg> <!-- dont expand war -->
+  </Call>
+
+  <Call name="addWebApplication">
     <Arg>/jetty/*</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/jetty</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
@@ -76,13 +83,11 @@
   <Call name="addContext">
     <Arg>/demo/*</Arg>
 
-    <!-- Remove this comment for .htaccess handling
     <Call name="addHandler">
       <Arg><New class="org.mortbay.http.handler.HTAccessHandler">
-	    <Set name="Default"><SystemProperty name="jetty.home" default="."/>/etc/htaccess</Set>
-	    <Set name="AccessFile">.htaccess</Set></New></Arg>
+	    <Set name="AccessFile">.htaccess</Set></New>
+      </Arg>
     </Call>
-    -->
 
     <Call name="addServlet">
       <Arg>Dump</Arg>
@@ -113,15 +118,8 @@
       <Arg><New class="org.mortbay.http.handler.DumpHandler"/></Arg>
     </Call>
 
-    <Call name="addHandler">
-      <Arg type="int">0</Arg>
-      <Arg>
-        <New class="org.mortbay.http.handler.ForwardHandler">
-          <Arg>/dump/forwardedRoot</Arg>
-          <Call name="addForward"><Arg>/forward/*</Arg><Arg>/dump/forwarded</Arg></Call>
-        </New>
-      </Arg>
-    </Call>
+    <Set name="ClassPath"><SystemProperty name="jetty.home" default="."/>/demo/servlets/</Set>
+    <Set name="DynamicServletPathSpec">/servlet/*</Set>
   </Call>
 
   <Call name="addContext">
@@ -141,24 +139,8 @@
     </Call>
   </Call>
 
-  <Call name="addContext">
-    <Arg>/</Arg>
-    <Set name="ClassPath"><SystemProperty name="jetty.home" default="."/>/servlets/</Set>
-    <Set name="DynamicServletPathSpec">/servlet/*</Set>
-    <Get name="ServletHandler">
-      <Set name="ServeDynamicSystemServlets" type="boolean">FALSE</Set>
-    </Get>
-    <Call name="addHandler">
-      <Arg type="int">0</Arg>
-      <Arg>
-        <New class="org.mortbay.http.handler.ForwardHandler">
-          <Arg>/jetty/index.html</Arg>
-        </New>
-      </Arg>
-    </Call>
-    <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/etc/dtd/</Set>
-    <Set name="ServingResources">TRUE</Set>
-  </Call>
+
+
 
   <Call name="addRealm">
     <Arg>

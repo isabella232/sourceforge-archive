@@ -359,11 +359,9 @@ public class ResourceHandler extends NullHandler
                     if (index.exists())
                     {
                         // Forward to the index
-                        int last=request.setState(HttpMessage.__MSG_EDITABLE);
-                        String ipath=URI.addPaths(request.getPath(),(String)_indexFiles.get(i));
-                        request.setPath(ipath);
-                        request.setState(last);
-                        getHttpContext().handle(request,response);
+                        String ipath=URI.addPaths(pathInContext,(String)_indexFiles.get(i));
+                        
+                        getHttpContext().handle(0,ipath,null,request,response);
                         return;
                     }
                 }

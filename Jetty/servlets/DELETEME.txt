@@ -1,0 +1,4 @@
+
+Please DELETE this directory.
+
+The contents of this directory have been moved to $JETTY_HOME/demo/servlets

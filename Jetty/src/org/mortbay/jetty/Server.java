@@ -140,6 +140,64 @@ public class Server extends HttpServer
     {
         return new ServletHttpContext(this,contextPathSpec);
     }
+
+
+    /* ------------------------------------------------------------ */
+    /**  Add Web Applications.
+     * Add auto webapplications to the server.  The name of the
+     * webapp directory or war is used as the context name. If a
+     * webapp is called "root" it is added at "/".
+     * @param host Virtual host name or null
+     * @param webapps Directory file name or URL to look for auto webapplication.
+     * @param defaults The defaults xml filename or URL which is
+     * loaded before any in the web app. Must respect the web.dtd.
+     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
+     * @param extractWar If true, WAR files are extracted to a
+     * temporary directory.
+     * @exception IOException 
+     */
+    public void addWebApplications(String host,
+                                   String webapps,
+                                   String defaults,
+                                   boolean extractWar)
+        throws IOException
+    {
+        Resource r=Resource.newResource(webapps);
+        if (!r.exists())
+            throw new IllegalArgumentException("No such webapps resource "+r);
+        
+        if (!r.isDirectory())
+            throw new IllegalArgumentException("Not directory webapps resource "+r);
+        
+        String[] files=r.list();
+        for (int f=0;files!=null && f<files.length;f++)
+        {
+            String app = r.addPath(files[f]).toString();
+            String context=files[f];
+            
+            if (context.equalsIgnoreCase("CVS/") ||
+                context.equalsIgnoreCase("CVS") ||
+                context.startsWith("."))
+                continue;
+            
+            if (context.toLowerCase().endsWith(".war"))
+                context=context.substring(0,context.length()-4);
+            if (context.equalsIgnoreCase("root"))
+            {
+                Log.event("ROOT Context: "+app);
+                context="/";
+            }
+            else
+                context="/"+context;
+
+            addWebApplication(host,
+                              context,
+                              app,
+                              defaults,
+                              extractWar);                  
+        }
+        
+    }
     
     /* ------------------------------------------------------------ */
     /** Add Web Application.
@@ -168,7 +226,7 @@ public class Server extends HttpServer
     /** Add Web Application.
      * @param contextPathSpec The context path spec. Which must be of
      * the form / or /path/*
-     * @param webApp The Web application directory or WAR file.
+     * @param webApp The Web application directory or WAR as file or URL.
      * @param defaults The defaults xml filename or URL which is
      * loaded before any in the web app. Must respect the web.dtd.
      * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml

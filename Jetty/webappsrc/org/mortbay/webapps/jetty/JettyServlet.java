@@ -36,10 +36,7 @@ public class JettyServlet extends HttpServlet
         throws ServletException, IOException
     {	
         String path=request.getServletPath();
-        
-        Resource resource=(Resource)request.getAttribute("JettyResource");
-        if (resource==null)
-            resource =
+        Resource resource=
                 Resource.newResource(getServletContext().getResource(path));
         
         if (resource==null || !resource.exists())
@@ -75,14 +72,13 @@ public class JettyServlet extends HttpServlet
     {
         long lm=-1;
         try{
-            String path=request.getServletPath();
-            
+            String path=request.getServletPath();            
             Resource resource=
                 Resource.newResource(getServletContext().getResource(path));
 
             request.setAttribute("JettyResource",resource);
             
-            if (resource==null || !resource.exists())
+            if (resource!=null && resource.exists())
             {
                 lm=resource.lastModified();
                 if (lm<__minModTime)

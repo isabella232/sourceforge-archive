@@ -84,6 +84,11 @@ Other targets:
     <copy file="${src}/javax/servlet/resources/web-app_2_2.dtd" tofile="${etc}/dtd/web-app_2_2.dtd" />
     <copy file="${src}/javax/servlet/resources/web-app_2_3.dtd" tofile="${etc}/dtd/web-app_2_3.dtd" />
     <copy file="${src}/javax/servlet/resources/web-app_2_3.dtd" tofile="${etc}/dtd/web.dtd" />
+    <copy todir="${webapps}/root">
+      <fileset dir="${etc}/dtd">
+        <include name="*.dtd"/>
+      </fileset>
+    </copy>
   </target>
 
   <!-- ==================================================================== -->
@@ -106,7 +111,11 @@ Other targets:
         <include name="**/*.class"/>
       </fileset>
     </delete>
-
+    <delete quiet="true">
+      <fileset dir="${webapps}/root">
+        <include name="*.dtd"/>
+      </fileset>
+    </delete>
   </target>
 
 

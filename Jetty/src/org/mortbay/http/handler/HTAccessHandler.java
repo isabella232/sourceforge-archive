@@ -42,7 +42,7 @@ import org.mortbay.util.UnixCrypt;
  */
 public class HTAccessHandler extends NullHandler
 {
-    String _default = "./etc/htaccess";
+    String _default = null;
     String _accessFile = ".htaccess";
 
     HashMap _htCache = new HashMap();
@@ -115,6 +115,8 @@ public class HTAccessHandler extends NullHandler
                 if (!resource.exists() || resource.isDirectory())
                     return;
             }
+            if (resource==null)
+                return;
             
             Code.debug("HTACCESS=",resource);
 

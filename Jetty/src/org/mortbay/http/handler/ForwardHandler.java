@@ -116,20 +116,22 @@ public class ForwardHandler extends NullHandler
         if (newPath!=null)
         {
             Code.debug("Forward from ",pathInContext," to ",newPath);
+
+            Code.notImplemented();
             
-            int last=request.setState(HttpMessage.__MSG_EDITABLE);
-            String context=getHttpContext().getContextPath();
-            if (context.length()==1)
-                request.setPath(newPath);
-            else
-                request.setPath(URI.addPaths(context,newPath));
-            if (_handleQueries && query != null){
-                // add forwarded to query string to parameters
-                UrlEncoded.decodeTo(query, request.getParameters());
-            }
-            request.setState(last);
-            getHttpContext().getHttpServer().service(request,response);
-            return;
+//             int last=request.setState(HttpMessage.__MSG_EDITABLE);
+//             String context=getHttpContext().getContextPath();
+//             if (context.length()==1)
+//                 request.setPath(newPath);
+//             else
+//                 request.setPath(URI.addPaths(context,newPath));
+//             if (_handleQueries && query != null){
+//                 // add forwarded to query string to parameters
+//                 UrlEncoded.decodeTo(query, request.getParameters());
+//             }
+//             request.setState(last);
+//             getHttpContext().getHttpServer().service(request,response);
+//             return;
         }
     }
 }

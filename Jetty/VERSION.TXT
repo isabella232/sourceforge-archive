@@ -1,6 +1,11 @@
 Jetty Versions
 --------------
 
+ + Made the root context a webapplication.
+ + Moved demo docroot/servlets to demo directory
+ + added addWebApplications auto discovery
+ + Disabled last forwarding by setPath()
+ + Removed Request set methods (will be replaced)
  + New event model to decouple from beans container.
  + Better handling of charset in form encoding.
  + Allow POSTs to static resources.

@@ -91,6 +91,7 @@ public class HttpRequest extends HttpMessage
     private String _method=null;
     private URI _uri=null;
     private String _host;
+    private String _hostPort;
     private int _port;
     private List _te;
     private MultiMap _parameters;
@@ -323,12 +324,17 @@ public class HttpRequest extends HttpMessage
 
             url.append (scheme);
             url.append ("://");
-            url.append (getHost());
-            if (port>0 && ((scheme.equals ("http") && port != 80)||
-                           (scheme.equals ("https") && port != 443)))
+            if (_hostPort!=null)
+                url.append(_hostPort);
+            else
             {
-                url.append (':');
-                url.append (port);
+                url.append (getHost());
+                if (port>0 && ((scheme.equals ("http") && port != 80)||
+                               (scheme.equals ("https") && port != 443)))
+                {
+                    url.append (':');
+                    url.append (port);
+                }
             }
             url.append(getPath());
             return url;
@@ -345,18 +351,6 @@ public class HttpRequest extends HttpMessage
         return (URI)_uri.clone();
     }
     
-    /* -------------------------------------------------------------- */
-    /** Set the HTTP URI.
-     * @param uri the uri
-     * @exception IllegalStateException Request is not EDITABLE
-     */
-    public void setURI(URI uri)
-    {
-        if (_state!=__MSG_EDITABLE)
-            throw new IllegalStateException("Not EDITABLE");
-        _uri=uri;
-    }
-    
     /* ------------------------------------------------------------ */
     /** Get the request Scheme.
      * The scheme is obtained from an absolute URI.  If the URI in
@@ -370,26 +364,6 @@ public class HttpRequest extends HttpMessage
         if (scheme==null && _connection!=null)
             scheme=_connection.getDefaultScheme();
         return scheme==null?"http":scheme;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Set the request scheme.
-     * If the URI was not previously an absolute URI, the URI host and
-     * port are also set from the HTTP Host Header field.
-     * @param scheme The scheme
-     * @exception IllegalStateException Request is not EDITABLE
-     */
-    public void setScheme(String scheme)
-    {
-        if (_state!=__MSG_EDITABLE)
-            throw new IllegalStateException("Not EDITABLE");
-        
-        if (!_uri.isAbsolute())
-        {
-            _uri.setHost(getHost());
-            _uri.setPort(getPort());
-        }
-        _uri.setScheme(scheme);
     }
     
     /* ------------------------------------------------------------ */
@@ -411,7 +385,8 @@ public class HttpRequest extends HttpMessage
             return _host;
 
         // Return host from header field
-        _host=_header.get(HttpFields.__Host);
+        _hostPort=_header.get(HttpFields.__Host);
+        _host=_hostPort;
         _port=0;
         if (_host!=null)
         {
@@ -448,30 +423,6 @@ public class HttpRequest extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the request host.
-     * If the current uri is absolute, then the URI is updated.
-     * The HTTP Host header field is always updated.
-     * @param host The host
-     * @exception IllegalStateException Request is not EDITABLE
-     */
-    public void setHost(String host)
-        throws IllegalStateException
-    {
-        if (_state!=__MSG_EDITABLE)
-            throw new IllegalStateException("Not EDITABLE");
-        
-        _host=host;
-        if (_uri.isAbsolute())
-            _uri.setHost(host);
-        
-        getPort();
-        if (_port>0)
-            _header.put(HttpFields.__Host,host+":"+_port);
-        else
-            _header.put(HttpFields.__Host,host);
-    }
-    
-    /* ------------------------------------------------------------ */
     /** Get the request port.
      * The port is obtained either from an absolute URI, the HTTP
      * Host header field, the connection or the default.
@@ -491,30 +442,6 @@ public class HttpRequest extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the request port.
-     * If the current uri is absolute, then the URI is updated.
-     * The HTTP Host header field is always updated.
-     * @param port The port
-     * @exception IllegalStateException Request is not EDITABLE
-     */
-    public void setPort(int port)
-        throws IllegalStateException
-    {
-        if (_state!=__MSG_EDITABLE)
-            throw new IllegalStateException("Not EDITABLE");
-        
-        _port=port;
-        if (_uri.isAbsolute())
-            _uri.setPort(port);
-        
-        getHost();
-        if (_port>0)
-            _header.put(HttpFields.__Host,_host+":"+_port);
-        else
-            _header.put(HttpFields.__Host,_host);
-    }
-    
-    /* ------------------------------------------------------------ */
     /** Get the request path.
      * @return 
      */
@@ -523,18 +450,6 @@ public class HttpRequest extends HttpMessage
         return _uri.getPath();
     }
     
-    /* ------------------------------------------------------------ */
-    /** Set the request path.
-     * @param path The path
-     * @exception IllegalStateException Request is not EDITABLE
-     */
-    public void setPath(String path)
-    {
-        if (_state!=__MSG_EDITABLE)
-            throw new IllegalStateException("Not EDITABLE");
-        
-        _uri.setPath(path);
-    }
     
     /* ------------------------------------------------------------ */
     /** Get the request query.
@@ -545,18 +460,6 @@ public class HttpRequest extends HttpMessage
         return _uri.getQuery();
     }
     
-    /* ------------------------------------------------------------ */
-    /** Set the request query.
-     * @param query The query
-     * @exception IllegalStateException Request is not EDITABLE
-     */
-    public void setQuery(String query)
-    {
-        if (_state!=__MSG_EDITABLE)
-            throw new IllegalStateException("Not EDITABLE");
-        
-        _uri.setQuery(query);
-    }
 
     /* ------------------------------------------------------------ */
     public String getRemoteAddr()

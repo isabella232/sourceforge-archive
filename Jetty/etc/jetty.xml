@@ -16,10 +16,11 @@
     </Arg>
   </Call>
 
-  <Call name="addWebApplication">
-    <Arg>/</Arg>
-    <Arg><SystemProperty name="jetty.webapp" default="./webapps/default"/></Arg>
+  <Call name="addWebApplications">
+    <Arg></Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
+    <Arg type="boolean">false</Arg>
   </Call>
 
   <Set name="RequestLogSink">
