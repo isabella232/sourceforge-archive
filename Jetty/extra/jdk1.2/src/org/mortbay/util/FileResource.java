@@ -59,7 +59,7 @@ class FileResource extends URLResource
         super(url,url.openConnection());
 
         Permission perm = _connection.getPermission();
-        _file =new File(perm.getName());
+        _file = new File(perm==null?url.getFile():perm.getName());
     }
     
     /* -------------------------------------------------------- */

@@ -84,7 +84,7 @@ class FileResource extends URLResource
                 // Still can't get the file.  Doh! try good old hack!
                 checkConnection();
                 Permission perm = _connection.getPermission();
-                _file =new File(perm.getName());
+                _file = new File(perm==null?url.getFile():perm.getName());
             }
         }
     }
