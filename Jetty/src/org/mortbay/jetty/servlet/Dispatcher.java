@@ -227,19 +227,7 @@ public class Dispatcher implements RequestDispatcher
                 if (forward)
                     _resourceHandler.handle(_path,null,httpRequest,httpResponse);
                 else
-                {
-                    // XXX - need to use ResourceHandler caching!!!!
-                    InputStream in = _resource.getInputStream();
-                    try
-                    {
-                        int len = (int)_resource.length();
-                        httpResponse.getOutputStream().write(in,len);
-                    }
-                    finally
-                    {
-                        try{in.close();}catch(IOException e){Code.ignore(e);}
-                    }
-                }
+                    _resourceHandler.sendFile(httpRequest,httpResponse,_resource,false);
             }
             else
             {
@@ -261,7 +249,6 @@ public class Dispatcher implements RequestDispatcher
                     }
                     query=encoded.encode();
                 }
-                
                 
                 // Adjust servlet paths
                 servletHttpRequest.setServletHandler(_servletHandler);

@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+ + Added BlueRibbon campaign.
+ + RequestDispatcher uses cached resources for include
+ + Improved HttpResponsse.sendError error page matching.
  + Fixed noaccess auth demo.
  + FORM auth caches UserPrincipal
  + Added isAuthenticated to UserPrincipal

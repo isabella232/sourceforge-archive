@@ -233,6 +233,8 @@ public class JettyPage extends Page
             _table.add("<IMG SRC=\""+context+"/images/sourceforge.png\" WIDTH=88 HEIGHT=31 BORDER=\"0\" alt=\"SourceForge\"></A><P>\n");
         _table.add("</A><P>\n");
 
+        _table.add("<A HREF=\""+context+"/freesoftware.html\"><IMG SRC=\""+context+"/images/effbr.png\" WIDTH=88 HEIGHT=32 BORDER=0 ALT=\"EFF\"></A><P>\n");
+        
         _table.add("&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P><font size=-4 color=\"#606CC0\">Copyright 2001<BR>Mort Bay Consulting.</FONT>");
         
         _table.newCell();

@@ -105,24 +105,28 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="tidy" depends="tidy_jetty,tidy_extra" />
+  <target name="tidy" depends="tidy.jetty,tidy.extra" 
+     description="Remove generated files not needed for running"
+   />
   
-  <target name="tidy_jetty">
+  <target name="tidy.jetty">
     <delete dir="${classes}" quiet="true"/>
     <delete dir="${test.classes}" quiet="true"/>
     <delete file="${mini.http.jar}" quiet="true"/>
     <ant antfile="${test}/build.xml" inheritAll="true" target="tidy"/>
   </target>
   
-  <target name="tidy_extra" if="extra.available" >
+  <target name="tidy.extra" if="extra.available" >
     <ant antfile="${extra}/build.xml" inheritAll="true" target="tidy" />
   </target>
 
 
   <!-- ==================================================================== -->
-  <target name="clean" depends="tidy,clean_jetty,clean_extra" />
+  <target name="clean" depends="tidy,clean.jetty,clean.extra"
+     description="Remove generated files"
+    />
         
-  <target name="clean_jetty" depends="tidy_jetty">
+  <target name="clean.jetty" depends="tidy.jetty">
     <delete dir="${jetty.webapp.classes}" quiet="true"/>
     <delete dir="${javadoc}" quiet="true"/>
     <delete dir="${etc}/dtd" quiet="true"/>
@@ -143,13 +147,14 @@ Other targets:
   </target>
 
 
-  <target name="clean_extra" depends="tidy_extra" if="extra.available" >
+  <target name="clean.extra" depends="tidy.extra" if="extra.available" >
     <ant basedir="${extra}" target="clean"/>
   </target>
 
 
   <!-- ==================================================================== -->
-  <target name="classes" depends="prepare">
+  <target name="classes" depends="prepare"
+   description="Compile the java classes" >
     <copy todir="${classes}">
       <fileset dir="${src}">
         <include name="**/defaultManifest.mf" />
@@ -210,11 +215,14 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="jars" depends="servlet.jar,jetty.jar,jasper.jar">
+  <target name="jars" depends="servlet.jar,jetty.jar,jasper.jar"
+   description="Build the jar files" >
   </target>
 
   <!-- ==================================================================== -->
-  <target name="webapps" depends="webapp.jetty,webapp.examples">
+  <target name="webapps" depends="webapp.jetty,webapp.examples"
+   description="Build the demonstration webapplications"
+   >
     <copy file="${demo.webapps}/jetty/images/jetty_banner.gif" tofile="${webapps}/root/jetty_banner.gif" />
   </target>
 
@@ -276,7 +284,8 @@ Other targets:
 
 
   <!-- ==================================================================== -->
-  <target name="javadoc" depends="jars">
+  <target name="javadoc" depends="jars"
+   description="Build the javadoc">
     <mkdir dir="${javadoc}"/>
     <javadoc packagenames="org.mortbay.*,javax.servlet.*,org.apache.jasper.*"
              sourcepath="${src}"
@@ -292,19 +301,22 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="test" depends="jars">
+  <target name="test" depends="jars"
+   description="Build and run the test harnesses">
     <ant antfile="${test}/build.xml" inheritAll="true" target="test"/>
   </target>
 
   <!-- ==================================================================== -->
-  <target name="all" depends="prepare,jars,webapps,javadoc,test,extra"/>
+  <target name="all" depends="prepare,jars,webapps,javadoc,test,extra"
+   description="Build everything"/>
 
   <target name="extra" depends="prepare"  if="extra.available" >
     <ant dir="${extra}" inheritAll="false" target="all" />
   </target>
 
   <!-- ==================================================================== -->
-  <target name="demo" >
+  <target name="demo" depends="webapps" 
+   description="Build and run the demo">
     <java classname="org.mortbay.jetty.Server"
           dir="${jetty.home}"
           fork="yes"
@@ -320,7 +332,8 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="run" >
+  <target name="run"
+   description="Run the default configuration">
     <java classname="org.mortbay.jetty.Server"
           dir="${jetty.home}"
           fork="yes"

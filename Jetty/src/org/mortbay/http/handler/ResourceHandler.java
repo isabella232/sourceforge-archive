@@ -324,7 +324,7 @@ public class ResourceHandler extends NullHandler
                 if (!passConditionalHeaders(request,response,cachedFile.resource))
                     return;
                 Code.debug("Cache hit: ",resource);
-                sendData(request, response, cachedFile);
+                sendData(request, response, cachedFile, true);
                 return;
             }
         }  
@@ -377,7 +377,7 @@ public class ResourceHandler extends NullHandler
             else if (resource.exists())
             {
                 if (!endsWithSlash)
-                    sendFile(request,response,resource);
+                    sendFile(request,response,resource,true);
             }
             else
                 // don't know what it is
@@ -623,7 +623,8 @@ public class ResourceHandler extends NullHandler
     /* ------------------------------------------------------------ */
     void sendData(HttpRequest request,
                   HttpResponse response,
-                  SendableResource data)
+                  SendableResource data,
+                  boolean writeHeaders)
         throws IOException
     {
         long resLength = data.getLength();
@@ -633,10 +634,11 @@ public class ResourceHandler extends NullHandler
             request.getDotVersion()>0
             ?request.getFieldValues(HttpFields.__Range)
             :null;
-        if ( reqRanges == null || !reqRanges.hasMoreElements())
+        
+        if (!writeHeaders || reqRanges == null || !reqRanges.hasMoreElements())
         {
             //  if there were no ranges, send entire entity
-            data.writeHeaders(request,response, resLength);
+            if (writeHeaders) data.writeHeaders(request,response, resLength);
             data.writeBytes(response.getOutputStream(), 0, resLength);
             request.setHandled(true);
             return;
@@ -741,9 +743,10 @@ public class ResourceHandler extends NullHandler
 
 
     /* ------------------------------------------------------------ */
-    void sendFile(HttpRequest request,
-                  HttpResponse response,
-                  Resource resource)
+    public void sendFile(HttpRequest request,
+                         HttpResponse response,
+                         Resource resource,
+                         boolean writeHeaders)
         throws IOException
     {
         Code.debug("sendFile: ",resource);
@@ -759,7 +762,7 @@ public class ResourceHandler extends NullHandler
 
         try
         {
-            sendData(request, response, data);
+            sendData(request, response, data, writeHeaders);
         }
         finally
         {
@@ -783,7 +786,7 @@ public class ResourceHandler extends NullHandler
                 // Just send it as a file and hope that the URL
                 // formats the directory
                 try{
-                    sendFile(request,response,file);
+                    sendFile(request,response,file,true);
                 }
                 catch(IOException e)
                 {
@@ -884,9 +887,10 @@ public class ResourceHandler extends NullHandler
 
 
     /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     /** Holds an uncached file.  
      */
-
     private class UnCachedFile implements SendableResource {
 
         Resource resource;
@@ -896,16 +900,19 @@ public class ResourceHandler extends NullHandler
         long pos = 0;
 
 
+        /* ------------------------------------------------------------ */
         public String getEncoding()
         {
             return encoding;
         }
 
+        /* ------------------------------------------------------------ */
         public long getLength()
         {
             return length;
         }
 
+        /* ------------------------------------------------------------ */
         public UnCachedFile(Resource resource)
         {
             this.resource = resource;
@@ -915,6 +922,7 @@ public class ResourceHandler extends NullHandler
             length = resource.length();
         }
 
+        /* ------------------------------------------------------------ */
         public void writeBytes(OutputStream os, long start,long count)
             throws IOException
         {
@@ -935,6 +943,7 @@ public class ResourceHandler extends NullHandler
             pos+=count;
         }
 
+        /* ------------------------------------------------------------ */
         public void writeHeaders(HttpRequest request, HttpResponse response, long count)
         {
             response.setField(HttpFields.__ContentType,encoding);
@@ -945,6 +954,7 @@ public class ResourceHandler extends NullHandler
                 response.setField(HttpFields.__AcceptRanges,"bytes");
         }
 
+        /* ------------------------------------------------------------ */
         public void requestDone()
         {
             try
@@ -957,6 +967,8 @@ public class ResourceHandler extends NullHandler
 
     }    
 
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /** Holds a cached file.
      * It is assumed that threads accessing CachedFile have
@@ -1100,7 +1112,7 @@ public class ResourceHandler extends NullHandler
                     response.setIntField(HttpFields.__ContentLength,(int)count);
             }
             response.setField(HttpFields.__LastModified,lastModifiedString);
-
+            
             if (_acceptRanges && request.getDotVersion()>0)
                 response.setField(HttpFields.__AcceptRanges,"bytes");
         }
