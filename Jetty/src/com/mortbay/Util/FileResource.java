@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilePermission;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
@@ -18,16 +19,56 @@ import java.security.Permission;
 
 
 /* ------------------------------------------------------------ */
+/** File Resource.
+ *
+ * Handle resources of implied or explicit file type.
+ * This class can check for aliasing in the filesystem (eg case
+ * insensitivity).  By default this is turned on if the platform does
+ * not have the "/" path separator, or it can be controlled with the
+ * "com.mortbay.Util.FileResource.checkAliases" system parameter.
+ *
+ * If alias checking is turned on, then aliased resources are
+ * treated as if they do not exist, nor can they be created.
+ *
+ * @version $Revision$
+ * @author Greg Wilkins (gregw)
+ */
 class FileResource extends Resource
 {
-    File _file;
+    private static boolean __checkAliases =
+        "true".equalsIgnoreCase(System.getProperty("com.mortbay.Util.FileResource.checkAliases",
+                                                   File.pathSeparatorChar=='/'?"false":"true"));
+    
+    /* ------------------------------------------------------------ */
+    private File _file;
+    private boolean _isAlias;
         
     /* -------------------------------------------------------- */
     FileResource(URL url, URLConnection connection, File file)
     {
         super(url,connection);
         _file=file;
+
+        if (__checkAliases)
+        {
+            try{
+                String abs=_file.getAbsolutePath();
+                String can=_file.getCanonicalPath();
+
+                _isAlias=!abs.equals(can);
+                if (_isAlias && Code.debug())
+                {
+                    Code.debug("ALIAS abs=",abs);
+                    Code.debug("ALIAS can=",can);
+                }
+            }
+            catch(IOException e)
+            {
+                Code.ignore(e);
+            }
+        }
     }
+    
 
     /* -------------------------------------------------------- */
     /**
@@ -35,7 +76,7 @@ class FileResource extends Resource
      */
     public boolean exists()
     {
-        return _file.exists();
+        return _file.exists() && !_isAlias;
     }
         
     /* -------------------------------------------------------- */
@@ -53,7 +94,7 @@ class FileResource extends Resource
      */
     public boolean isDirectory()
     {
-        return _file.isDirectory();
+        return _file.isDirectory() && !_isAlias;
     }
 
     /* --------------------------------------------------------- */
@@ -72,14 +113,7 @@ class FileResource extends Resource
      */
     public String getName()
     {
-        try{
-            return _file.getCanonicalPath();
-        }
-        catch(IOException e)
-        {
-            Code.ignore(e);
-            return _file.getName();
-        }
+        return _file.getAbsolutePath();
     }
         
     /* ------------------------------------------------------------ */
@@ -89,6 +123,8 @@ class FileResource extends Resource
      */
     public File getFile()
     {
+        if (_isAlias)
+            return null;
         return _file;
     }
         
@@ -98,6 +134,8 @@ class FileResource extends Resource
      */
     public InputStream getInputStream() throws IOException
     {
+        if (_isAlias)
+            throw new FileNotFoundException("File is alias:"+getName());
         return new FileInputStream(_file);
     }
         
@@ -108,6 +146,8 @@ class FileResource extends Resource
     public OutputStream getOutputStream()
         throws java.io.IOException, SecurityException
     {
+        if (_isAlias)
+            throw new FileNotFoundException("File is alias:"+getName());
         return new FileOutputStream(_file);
     }
         
@@ -118,6 +158,8 @@ class FileResource extends Resource
     public boolean delete()
         throws SecurityException
     {
+        if (_isAlias)
+            throw new SecurityException("File is alias:"+getName());
         return _file.delete();
     }
 
@@ -128,6 +170,8 @@ class FileResource extends Resource
     public boolean renameTo( Resource dest)
         throws SecurityException
     {
+        if (_isAlias)
+            throw new SecurityException("File is alias:"+getName());
         if( dest instanceof FileResource)
             return _file.renameTo( ((FileResource)dest)._file);
         else

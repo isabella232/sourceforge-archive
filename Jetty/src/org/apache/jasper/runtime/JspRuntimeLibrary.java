@@ -149,8 +149,6 @@ public class JspRuntimeLibrary {
         while ( e.hasMoreElements() ) {
             String name  = (String) e.nextElement();
             String value = request.getParameter(name);
-            if (value == null || value.equals(""))
-                continue;
             introspecthelper(bean, name, value, request, name, true);
         }
     }
@@ -196,8 +194,7 @@ public class JspRuntimeLibrary {
                         createTypedArray (bean, method, values, t); 
                     }
                 } else {
-                    //XXX please check.
-                    if(value == null || value.equals("")) return;
+ 		    if(value == null || (param != null && value.equals(""))) return;
                     Object oval = convert(value, type);
                     if ( oval != null )
                         method.invoke(bean, new Object[] { oval });
@@ -323,7 +320,7 @@ public class JspRuntimeLibrary {
             } else if (t.equals(boolean.class)) {
                 boolean[] tmpval = new boolean[values.length];
                 for (int i = 0 ; i < values.length; i++)
-                    tmpval[i] = Boolean.getBoolean (values[i]);
+ 		    tmpval[i] = (Boolean.valueOf(values[i])).booleanValue();
                 method.invoke (bean, new Object[] {tmpval});
             } else if (t.equals(short.class)) {
                 short[] tmpval = new short[values.length];

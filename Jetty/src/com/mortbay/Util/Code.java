@@ -975,7 +975,7 @@ public class Code
     public static void ignore(Throwable ex)
     {
         Code code = instance();
-        if (code._debugOn && code._verbose>0)
+        if (code._debugOn)
         {
             Frame frame = new Frame(1,true);
             if (code.isDebugOnFor(frame))
@@ -985,7 +985,10 @@ public class Code
                 synchronized(buf)
                 {   
                     buf.append("IGNORED ");
-                    formatObject(buf,ex);
+                    if (code._verbose>0)
+                        formatObject(buf,ex);
+                    else
+                        formatObject(buf,ex.toString());
                 }
                 Log.message(Log.DEBUG, buf.toString(),frame);
             }

@@ -320,6 +320,11 @@ where alternate case or names can be used to get to a resource.
 
  + A security constraint with an auth constraint of NONE grants access.
 
+ + On platforms without the / file separator or when the system parameter 
+   com.mortbay.Util.FileResource.checkAliases is true, then the FileResouce class 
+   compares the absolutePath and canonicalPath and treats the resource as not found
+   if they do not match.
+
 It is strongly recommended that secure WebApplications take following 
 approach.  All access should be denied by default with 
 

@@ -92,8 +92,6 @@ import org.apache.jasper.Constants;
 /**
  * Implementation of the PageContext class from the JSP spec.
  *
- * The removeAttribute method does not work for request scope. Needs fixing.
- *
  * @author Anil K. Vijendran
  * @author Larry Cable
  * @author Hans Bergsten
@@ -286,8 +284,9 @@ public class PageContextImpl extends PageContext {
             break;
 
             case REQUEST_SCOPE:
-                throw new IllegalArgumentException("cant remove Attributes from request scope");
-
+ 		request.removeAttribute(name);
+            break;
+                
             case SESSION_SCOPE:
                 if (session == null)
                     throw new IllegalArgumentException("can't access SESSION_SCOPE without an HttpSession");
@@ -367,7 +366,15 @@ public class PageContextImpl extends PageContext {
     }
 
     public void removeAttribute(String name) {
-        attributes.remove(name);
+ 	try {
+ 	    removeAttribute(name, PAGE_SCOPE);
+ 	    removeAttribute(name, REQUEST_SCOPE);
+ 	    removeAttribute(name, SESSION_SCOPE);
+ 	    removeAttribute(name, APPLICATION_SCOPE);
+ 	} catch (Exception ex) {
+ 	    // we remove as much as we can, and
+ 	    // simply ignore possible exceptions
+ 	}
     }
 
     public JspWriter getOut() {

@@ -5,7 +5,7 @@ while :
 do
   if [ -f build.xml ]
   then
-    ant $*
+    ant -emacs $*
     break;
   else
     pwd

@@ -169,6 +169,9 @@ public class JspReader {
             ? file.getAbsolutePath()
             : context.getRealPath(file.toString());
 
+ 	if (longName == null)
+ 	    throw new FileNotFoundException(file.toString());
+ 
         int fileid = registerSourceFile(longName);
         
         if (fileid == -1)

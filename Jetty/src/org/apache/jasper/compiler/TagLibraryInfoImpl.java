@@ -180,7 +180,7 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
                 
                 // Assume only one entry for location and uri.
                 XmlParser.Node uriElem =  e.get("taglib-uri");
-                String tmpUri = uriElem.toString(false);
+                String tmpUri = uriElem.toString(false,true);
                 
                 if (tmpUri != null)
                 {
@@ -189,7 +189,7 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
                     {
                         match = true;
                         XmlParser.Node locElem = e.get("taglib-location");
-                        tagLoc =  locElem.toString(false);
+                        tagLoc =  locElem.toString(false,true);
                         if (tagLoc != null)
                             tagLoc = tagLoc.trim();
                     }
@@ -227,6 +227,8 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
 	}
 	    
 	// FIXME Take this stuff out when taglib changes are thoroughly tested.
+        // 2000.11.15 commented out the 'copy to work dir' section,
+        // which I believe is what this FIXME comment referred to. (pierred)
 	if (uri.endsWith("jar")) {
 	    
 	    if (!isRelativeURI(uri)) {
@@ -241,6 +243,7 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
 	    this.jarEntries = new Hashtable();
 	    this.ctxt = ctxt;
 	    
+            /* NOT COMPILED
 	    // First copy this file into our work directory! 
 	    {
 		File jspFile = new File(ctxt.getJspFile());
@@ -270,8 +273,7 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
 	    
 	        ctxt.addJar(jarFileName);
 	    }
-	    
-	    
+            */ // END NOT COMPILED
 	    boolean tldFound = false;
 	    ZipEntry entry;
 	    while ((entry = zin.getNextEntry()) != null) {
@@ -353,23 +355,23 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
             XmlParser.Node e = (XmlParser.Node) tmp;
             String tname = e.getTag();
             if (tname.equals("tlibversion")) {
-                String t = e.toString(false);
+                String t = e.toString(false,true);
                 if (t != null)
                     this.tlibversion = t;
             } else if (tname.equals("jspversion")) {
-                String t = e.toString(false);
+                String t = e.toString(false,true);
                 if (t != null)
                     this.jspversion = t;
             } else if (tname.equals("shortname")) {
-                String t = e.toString(false);
+                String t = e.toString(false,true);
                 if (t != null)
                     this.shortname = t;
             } else if (tname.equals("urn")) {
-                String t = e.toString(false);
+                String t = e.toString(false,true);
                 if (t != null)
                     this.urn = t;
             } else if (tname.equals("info")) {
-                String t = e.toString(false);
+                String t = e.toString(false,true);
                 if (t != null)
                     this.info = t;
             } else if (tname.equals("tag"))
@@ -399,23 +401,23 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
 	    XmlParser.Node e = (XmlParser.Node) tmp;
             String tname = e.getTag();
             if (tname.equals("name")) {
-                String t = e.toString(false);
+                String t = e.toString(false,true);
                 if (t != null)
                     name = t;
             } else if (tname.equals("tagclass")) {
-                String t = e.toString(false);
+                String t = e.toString(false,true);
                 if (t != null)
                     tagclass = t;
             } else if (tname.equals("teiclass")) {
-                String t = e.toString(false);
+                String t = e.toString(false,true);
                 if (t != null)
                     teiclass = t;
             } else if (tname.equals("bodycontent")) {
-                String t = e.toString(false);
+                String t = e.toString(false,true);
                 if (t != null)
                     bodycontent = t;
             } else if (tname.equals("info")) {
-                String t = e.toString(false);
+                String t = e.toString(false,true);
                 if (t != null)
                     info = t;
             } else if (tname.equals("attribute"))
@@ -474,19 +476,19 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
 	    XmlParser.Node e = (XmlParser.Node) tmp;
             String tname = e.getTag();
             if (tname.equals("name"))  {
-                String t = e.toString(false);
+                String t = e.toString(false,true);
                 if (t != null)
                     name = t;
             } else if (tname.equals("required"))  {
-                String t = e.toString(false);
+                String t = e.toString(false,true);
                 if (t != null)
                     required = Boolean.valueOf(t).booleanValue();
             } else if (tname.equals("rtexprvalue")) {
-                String t = e.toString(false);
+                String t = e.toString(false,true);
                 if (t != null)
                     rtexprvalue = Boolean.valueOf(t).booleanValue();
             } else if (tname.equals("type")) {
-                String t = e.toString(false);
+                String t = e.toString(false,true);
                 if (t != null)
                     type = t;
             } else 
