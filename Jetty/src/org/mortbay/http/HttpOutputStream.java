@@ -14,10 +14,15 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import org.mortbay.util.ByteArrayISO8859Writer;
+import org.mortbay.util.ByteArrayPool;
 import org.mortbay.util.ByteBufferOutputStream;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.OutputObserver;
+import org.mortbay.util.StringUtil;
+import java.io.Writer;
+import java.io.OutputStreamWriter;
+
 
 /* ---------------------------------------------------------------- */
 /** HTTP Http OutputStream.
@@ -60,16 +65,14 @@ public class HttpOutputStream
     private NullableOutputStream _nullableOut;
     private HttpMessage.HeaderWriter _headerOut;
     private BufferedOutputStream _bufferedOut;
-    private ChunkingOutputStream _chunkingOut;
-    
+    private ChunkingOutputStream _chunkingOut;    
     private boolean _written;
-    
     private ArrayList _observers;
-    
     private int _bytes;
     private int _bufferSize;
     private int _headerReserve;
     private boolean _bufferHeaders;
+    private ISO8859Writer _iso8859writer;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -362,10 +365,16 @@ public class HttpOutputStream
     {
         if (_bufferedOut!=null)
             _bufferedOut.destroy();
+        _bufferedOut=null;
         if (_chunkingOut!=null)
             _chunkingOut.destroy();
+        _chunkingOut=null;
         if (_nullableOut!=null)
             _nullableOut.destroy();
+        _nullableOut=null;
+        if (_iso8859writer!=null)
+            _iso8859writer.destroy();
+        _iso8859writer=null;
     }
     
     /* ------------------------------------------------------------ */
@@ -458,6 +467,15 @@ public class HttpOutputStream
         }
     }
     
+    /* ------------------------------------------------------------ */
+    /** Close the stream.
+     * @exception IOException 
+     */
+    public boolean isClosed()
+        throws IOException
+    {
+        return out==null;
+    }
     
     /* ------------------------------------------------------------ */
     /** Close the stream.
@@ -522,5 +540,188 @@ public class HttpOutputStream
         throws IOException
     {
         IO.copy(in,this,len);
+    }
+
+    /* ------------------------------------------------------------ */
+    public Writer getISO8859Writer()
+    {
+        if (_iso8859writer==null)
+            _iso8859writer=new ISO8859Writer();
+        return _iso8859writer;
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class ISO8859Writer extends Writer
+    {
+        private OutputStreamWriter _writer=null;
+        private boolean _writting=false;
+        private byte[] _buf = ByteArrayPool.getByteArray();
+        
+        /* -------------------------------------------------------- */
+        public Object getLock()
+        {
+            return lock;
+        }
+        
+        /* -------------------------------------------------------- */
+        public void write(char c)
+            throws IOException
+        {
+            if (_writting)
+                _writer.write(c);
+            else if (c>=0&&c<=0x7f)
+                HttpOutputStream.this.write((int)c);
+            else
+            {
+                char[] ca ={c};
+                writeEncoded(ca,0,1);
+            }
+        }
+    
+        /* ------------------------------------------------------------ */
+        public void write(char[] ca)
+            throws IOException
+        {
+            this.write(ca,0,ca.length);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void write(char[] ca,int offset, int length)
+            throws IOException
+        {
+            if (_writting)
+                _writer.write(ca,offset,length);
+            else
+            {
+                HttpOutputStream.this.prepareOutput();
+                int s=0;
+                for (int i=0;i<length;i++)
+                {
+                    char c=ca[offset+i];
+                    if (c>=0&&c<=0x7f)
+                    {
+                        _buf[s++]=(byte)c;
+                        if (s==_buf.length)
+                        {
+                            HttpOutputStream.this.out.write(_buf,0,s);
+                            HttpOutputStream.this._bytes+=s;
+                            s=0;
+                        }
+                    }
+                    else
+                    {
+                        if (s>0)
+                        {
+                            HttpOutputStream.this.out.write(_buf,0,s);
+                            HttpOutputStream.this._bytes+=s;
+                            s=0;
+                        }
+                        writeEncoded(ca,offset+i,length-i);
+                        break;
+                    }
+                }
+                
+                if (s>0)
+                {
+                    HttpOutputStream.this.out.write(_buf,0,s);
+                    HttpOutputStream.this._bytes+=s;
+                    s=0;
+                }
+            }
+        }
+    
+        /* ------------------------------------------------------------ */
+        public void write(String s)
+            throws IOException
+        {
+            this.write(s,0,s.length());
+        }
+    
+        /* ------------------------------------------------------------ */
+        public void write(String str,int offset, int length)
+            throws IOException
+        {
+            if (_writting)
+                _writer.write(str,offset,length);
+            else
+            {
+                int s=0;
+                HttpOutputStream.this.prepareOutput();
+                for (int i=0;i<length;i++)
+                {
+                    char c=str.charAt(offset+i);
+                    if (c>=0&&c<=0x7f)
+                    {
+                        _buf[s++]=(byte)c;
+                        if (s==_buf.length)
+                        {
+                            HttpOutputStream.this.out.write(_buf,0,s);
+                            HttpOutputStream.this._bytes+=s;
+                            s=0;
+                        }
+                    }
+                    else
+                    {
+                        if (s>0)
+                        {
+                            HttpOutputStream.this.out.write(_buf,0,s);
+                            HttpOutputStream.this._bytes+=s;
+                            s=0;
+                        }
+                        char[] chars = str.toCharArray();
+                        writeEncoded(chars,offset+i,chars.length-(offset+i));
+                        break;
+                    }
+                }
+                if (s>0)
+                {
+                    HttpOutputStream.this.out.write(_buf,0,s);
+                    HttpOutputStream.this._bytes+=s;
+                    s=0;
+                }
+            }
+        }
+
+        /* ------------------------------------------------------------ */
+        private void writeEncoded(char[] ca,int offset, int length)
+            throws IOException
+        {
+            if (_writer==null)
+                _writer = new OutputStreamWriter(HttpOutputStream.this,
+                                                 StringUtil.__ISO_8859_1);
+            _writting=true;
+            _writer.write(ca,offset,length);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void flush()
+            throws IOException
+        {
+            if (_writting)
+                _writer.flush();
+            else
+                HttpOutputStream.this.flush();
+            _writting=false;
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void close()
+            throws IOException
+        {
+            if (_writting)
+                _writer.flush();
+            HttpOutputStream.this.close();
+            _writting=false;
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void destroy()
+        {
+            ByteArrayPool.returnByteArray(_buf);
+            _buf=null;
+            _writer=null;
+        }
     }
 }

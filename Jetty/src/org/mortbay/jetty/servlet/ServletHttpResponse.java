@@ -203,6 +203,9 @@ public class ServletHttpResponse implements HttpServletResponse
     public void flushBuffer()
         throws IOException
     {
+        if (((HttpOutputStream)_httpResponse.getOutputStream()).isClosed())
+            return;
+        
         if (_writer!=null)
             _writer.flush();
         if (_out!=null)

@@ -14,6 +14,8 @@ import java.io.Writer;
 import java.io.UnsupportedEncodingException;
 import org.mortbay.util.IO;
 import org.mortbay.util.Code;
+import org.mortbay.util.StringUtil;
+import org.mortbay.http.HttpOutputStream;
 
 
 /* ------------------------------------------------------------ */
@@ -33,7 +35,9 @@ class ServletWriter extends PrintWriter
     /* ------------------------------------------------------------ */
     ServletWriter(OutputStream os)
     {
-        super(new OutputStreamWriter(os));
+        super((os instanceof HttpOutputStream) 
+              ?((HttpOutputStream)os).getISO8859Writer()
+              :new OutputStreamWriter(os));
         this.os=os;
     }
     
@@ -41,7 +45,10 @@ class ServletWriter extends PrintWriter
     ServletWriter(OutputStream os, String encoding)
         throws IOException
     {
-        super(new OutputStreamWriter(os,encoding));
+        super(((os instanceof HttpOutputStream) &&
+               (StringUtil.__ISO_8859_1.equals(encoding)))
+              ?((HttpOutputStream)os).getISO8859Writer()
+              :new OutputStreamWriter(os,encoding));
         this.os=os;
         this.encoding=encoding;
     }
