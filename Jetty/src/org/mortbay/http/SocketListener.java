@@ -41,6 +41,7 @@ public class SocketListener
     private boolean _identifyListener=false;
     private int _bufferSize=8192;
     private int _bufferReserve=512;
+    private int _lowResources=0;
 
     private transient HttpServer _server;
     private transient boolean _isLow=false;
@@ -122,6 +123,26 @@ public class SocketListener
         return _scheme;
     }
 
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the lowResources threshold
+     */
+    public int getLowResources()
+    {
+        return _lowResources=0;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param lowResources The number of idle threads needed to not be in
+     * low resources state.
+     */
+    public void setLowResources(int lowResources)
+    {
+        _lowResources = lowResources;
+    }
+    
     /* ------------------------------------------------------------ */
     /** 
      * @return time in ms that connections will persist if listener is
@@ -290,13 +311,15 @@ public class SocketListener
     /* ------------------------------------------------------------ */
     /** Get the lowOnResource state of the listener.
      * A SocketListener is considered low on resources if the total number of
-     * threads is maxThreads and the number of idle threads is less than minThreads.
+     * the number of idle threads is less than the lowResource value (or minThreads if not set)
      * @return True if low on idle threads. 
      */
     public boolean isLowOnResources()
     {
-        boolean low=(getMaxThreads()-getThreads()+getIdleThreads())<getMinThreads();
-        
+        int spare=getMaxThreads()-getThreads();
+        int lr = _lowResources>0?_lowResources:getMinThreads();
+        boolean low = (spare+getIdleThreads())<lr;
+                
         if (low && !_isLow)
         {
             Log.event("LOW ON THREADS (("+

@@ -38,5 +38,6 @@ public class ThreadedServerMBean extends ThreadPoolMBean
         defineAttribute("host");
         defineAttribute("port");
         defineAttribute("lingerTimeSecs");
+        defineAttribute("acceptQueueSize");
     }    
 }

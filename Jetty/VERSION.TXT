@@ -1,9 +1,10 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.22 - 23 August
  + fixed jaas logout for jetty-jboss integration
  + fixed deployment of ejb-link elements in web.xml for jboss
-
+ + Added parameters for acceptQueueSize and lowResources level.
 
 Jetty-5.0.RC2 - 2 July 2004
  + Fixed DIGEST challenge delimiters
