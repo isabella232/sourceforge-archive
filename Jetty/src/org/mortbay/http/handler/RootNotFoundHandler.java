@@ -72,6 +72,9 @@ public class RootNotFoundHandler extends NotFoundHandler
         
         writer.write("</UL><small><I>The links above may not work if a virtual host is configured</I></small>");
 
+	for (int i=0;i<10;i++)
+	    writer.write("\n<!-- Padding for IE                  -->");
+	
         writer.write("\n</BODY>\n</HTML>\n");
         writer.flush();
         response.setContentLength(writer.size());
