@@ -9,7 +9,7 @@
 #JAVACOPTIONS :=
 TESTS := TestHarness.java
 ROOTNAME := com
-SUBDIRS := STF
+SUBDIRS := STF Gateway
 
 
 include $(JETTY_HOME)/etc/Global.mk
