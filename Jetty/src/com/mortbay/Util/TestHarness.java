@@ -287,6 +287,29 @@ public class TestHarness
             t.check(false,"Exception: "+e);
         }
     }
+    
+    /* ------------------------------------------------------------ */
+    public static void testB64()
+    {
+        Test t = new Test("com.mortbay.Util.B64Code");
+        try{
+            t.checkEquals(B64Code.decode(B64Code.encode("")),"","decode(encode())");
+            t.checkEquals(B64Code.decode(B64Code.encode("a")),"a","decode(encode(a))");
+            t.checkEquals(B64Code.decode(B64Code.encode("ab")),"ab","decode(encode(ab))");
+            t.checkEquals(B64Code.decode(B64Code.encode("abc")),"abc","decode(encode(abc))");
+            t.checkEquals(B64Code.decode(B64Code.encode("abcd")),"abcd","decode(encode(abcd))");
+            t.checkEquals(B64Code.decode(B64Code.encode("\000")),"\000","decode(encode(^@))");
+            t.checkEquals(B64Code.decode(B64Code.encode("a\000")),"a\000","decode(encode(a^@))");
+            t.checkEquals(B64Code.decode(B64Code.encode("ab\000")),"ab\000","decode(encode(ab^@))");
+            t.checkEquals(B64Code.decode(B64Code.encode("abc\000")),"abc\000","decode(encode(abc^@))");
+            t.checkEquals(B64Code.decode(B64Code.encode("abcd\000")),"abcd\000","decode(encode(abcd^@))");
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,"Exception: "+e);
+        }
+    }
 
     /* ------------------------------------------------------------ */
     public static void testBlockingQueue()
@@ -1204,22 +1227,23 @@ public class TestHarness
     {
         try
         {
-             testQuotedStringTokenizer();            
-             testDateCache();
-             testTest();
-             testLog();
-             testFrame();
-             testCode();
-             testDataHelper();
-             testBlockingQueue();
-             testIO();
-             testUrlEncoded();
-             testURI();
-             testLineInput();
-             testThreadPool();
-             testThreadedServer();
-             PropertyTreeTest.test();
-             DictionaryConverterTest.test();
+            testQuotedStringTokenizer();            
+            testDateCache();
+            testTest();
+            testLog();
+            testFrame();
+            testCode();
+            testDataHelper();
+            testBlockingQueue();
+            testIO();
+            testUrlEncoded();
+            testURI();
+            testLineInput();
+            testThreadPool();
+            testThreadedServer();
+            testB64();
+            PropertyTreeTest.test();
+            DictionaryConverterTest.test();
         }
         catch(Throwable th)
         {
