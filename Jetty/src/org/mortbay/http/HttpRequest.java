@@ -7,6 +7,7 @@ package org.mortbay.http;
 
 import org.mortbay.util.Code;
 import org.mortbay.util.LineInput;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
@@ -704,27 +705,33 @@ public class HttpRequest extends HttpMessage
         {
             // Sort the list
             List te=HttpFields.qualityList(tenum);
-
-            // remove trailer and chunked items.
-            ListIterator iter = te.listIterator();
-            while(iter.hasNext())
+            
+            // Process if something there
+            if (te!=null && te.size()>0)
             {
-                String coding= StringUtil.asciiToLowerCase
-                    (HttpFields.valueParameters(iter.next().toString(),null));
+                LazyList acceptable = null;
                 
-                iter.set(coding);
-                if ("trailer".equals(coding))
+                // remove trailer and chunked items.
+                ListIterator iter = te.listIterator();
+                while(iter.hasNext())
                 {
-                    // Allow trailers in the response
-                    HttpResponse response=getResponse();
-                    if (response!=null)
-                        response.setAcceptTrailer(true);
-                    iter.remove();
+                    String coding= StringUtil.asciiToLowerCase
+                        (HttpFields.valueParameters(iter.next().toString(),null));
+                    
+                    if ("trailer".equals(coding))
+                    {
+                        // Allow trailers in the response
+                        HttpResponse response=getResponse();
+                        if (response!=null)
+                            response.setAcceptTrailer(true);
+                    }
+                    else if (!HttpFields.__Chunked.equals(coding))
+                        acceptable=LazyList.add(acceptable,coding);
                 }
-                else if (HttpFields.__Chunked.equals(coding))
-                    iter.remove();
+                _te=LazyList.getList(acceptable);
             }
-            _te=te;
+            else
+                _te=Collections.EMPTY_LIST;
         }
         else
             _te=Collections.EMPTY_LIST;

@@ -59,9 +59,6 @@ public class ServletHandler
     public final static String __JSP_SERVLET="org.apache.jasper.servlet.JspServlet";
     public final static String __SERVLET_REQUEST="org.mortbay.J.S.Request";
     public final static String __SERVLET_HOLDER="org.mortbay.J.S.Holder";
-    public final static String __J_SECURITY_CHECK="j_security_check";
-    public final static String __J_USERNAME="j_username";
-    public final static String __J_PASSWORD="j_password";
     public final static String __J_URI="org.mortbay.J.S.URI";
     public final static String __J_AUTHENTICATED="org.mortbay.J.S.Auth";
     
@@ -621,9 +618,9 @@ public class ServletHandler
             if (user!=null && user.authenticate(password))
             {
                 Code.debug("Form authentication OK for ",username);
-                request.setAttribute(HttpRequest.__AuthType,"FORM");
-                request.setAttribute(HttpRequest.__AuthUser,username);
-                request.setAttribute(UserPrincipal.__ATTR,user);
+                httpRequest.setAttribute(HttpRequest.__AuthType,"FORM");
+                httpRequest.setAttribute(HttpRequest.__AuthUser,username);
+                httpRequest.setAttribute(UserPrincipal.__ATTR,user);
                 session.setAttribute(__J_AUTHENTICATED,__J_AUTHENTICATED);
                 String nuri=(String)session.getAttribute(__J_URI);
                 if (nuri==null)

@@ -1047,12 +1047,61 @@ public class HttpFields
      */
     public static List qualityList(Enumeration enum)
     {
-        if(enum==null)
+        if(enum==null || !enum.hasMoreElements())
             return Collections.EMPTY_LIST;
 
-        LinkedList list = new LinkedList();
-        LinkedList qual = new LinkedList();
+        String value=null;
+        Float quality=null;
+        LinkedList list=null;
+        LinkedList qual=null;
         
+        // Assume that we will only have zero or 1 elements1
+        while(enum.hasMoreElements())
+        {
+            String v=enum.nextElement().toString();
+            Float q=getQuality(v);
+            
+            if (q.floatValue()>=0.001)
+            {
+                // Is this the first OK value?
+                if (value==null)
+                {
+                    value=v;
+                    quality=q;
+                }
+                else
+                {
+                    // we have more than 1 OK value, so build list
+                    list = new LinkedList();
+                    qual = new LinkedList();
+                    if (quality.floatValue()>q.floatValue())
+                    {
+                        list.add(value);
+                        list.add(v);
+                        qual.add(quality);
+                        qual.add(q);
+                    }
+                    else
+                    {
+                        list.add(v);
+                        list.add(value);
+                        qual.add(q);
+                        qual.add(quality);
+                    }
+                    break;
+                }
+            }
+        }
+        
+        // Do we have any values?
+        if (value==null)
+            return Collections.EMPTY_LIST;
+
+        // Do we have only 1 value?
+        if (list==null)
+            return Collections.singletonList(value);
+
+        // Add remaining values
         while(enum.hasMoreElements())
         {
             String v=enum.nextElement().toString();

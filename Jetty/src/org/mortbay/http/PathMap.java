@@ -6,7 +6,9 @@
 package org.mortbay.http;
 
 import org.mortbay.util.StringMap;
+import org.mortbay.util.LazyList;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -51,6 +53,7 @@ public class PathMap extends HashMap
     StringMap _exactMap=new StringMap();
     Map.Entry _prefixDefault=null;
     Map.Entry _default=null;
+    List _defaultSingletonList=null;
     Set _entrySet;
     
     /* --------------------------------------------------------------- */
@@ -119,7 +122,10 @@ public class PathMap extends HashMap
                     else if (spec.startsWith("*."))
                         _suffixMap.put(spec.substring(2),entry);
                     else if (spec.equals("/"))
+                    {    
                         _default=entry;
+                        _defaultSingletonList=Collections.singletonList(_default);
+                    }
                     else
                         _exactMap.put(spec,entry);
                 }
@@ -192,12 +198,12 @@ public class PathMap extends HashMap
     public List getMatches(String path)
     {        
         Map.Entry entry;
-        ArrayList entries= new ArrayList(8);
+        LazyList entries=null;
         
         // try exact match
         entry=_exactMap.getEntry(path,0,path.length());
         if (entry!=null)
-            entries.add(entry.getValue());
+            entries=LazyList.add(entries,entry.getValue());
         
         // prefix search
         int i=path.length();
@@ -205,12 +211,12 @@ public class PathMap extends HashMap
         {
             entry=_prefixMap.getEntry(path,0,i);
             if (entry!=null)
-                entries.add(entry.getValue());
+                entries=LazyList.add(entries,entry.getValue());
         }
         
         // Prefix Default
         if (_prefixDefault!=null)
-            entries.add(_prefixDefault);
+            entries=LazyList.add(entries,_prefixDefault);
         
         // Extension search
         i=0;
@@ -218,13 +224,20 @@ public class PathMap extends HashMap
         {
             entry=_suffixMap.getEntry(path,i+1,path.length()-i-1);
             if (entry!=null)
-                entries.add(entry.getValue());
+                entries=LazyList.add(entries,entry.getValue());
         }
 
         // Default
         if (_default!=null)
-            entries.add(_default);
-        return entries;
+        {
+            // Optimization for just the default
+            if (entries==null)
+                return _defaultSingletonList;
+            
+            entries=LazyList.add(entries,_default);
+        }
+        
+        return LazyList.getList(entries);
     }
 
 
@@ -245,7 +258,10 @@ public class PathMap extends HashMap
             else if (spec.startsWith("*."))
                 _suffixMap.remove(spec.substring(2));
             else if (spec.equals("/"))
+            {
                 _default=null;
+                _defaultSingletonList=null;
+            }
             else
                 _exactMap.remove(spec);
         }
@@ -259,6 +275,7 @@ public class PathMap extends HashMap
         _prefixMap=new StringMap();
         _suffixMap=new StringMap();
         _default=null;
+        _defaultSingletonList=null;
         super.clear();
     }
     

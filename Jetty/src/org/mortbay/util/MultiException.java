@@ -20,7 +20,7 @@ import java.util.List;
  */
 public class MultiException extends Exception
 {
-    private List nested;
+    private LazyList nested;
 
     /* ------------------------------------------------------------ */
     public MultiException()
@@ -31,33 +31,25 @@ public class MultiException extends Exception
     /* ------------------------------------------------------------ */
     public void add(Exception e)
     {
-        if(nested==null)
-            nested=new ArrayList();
-        nested.add(e);
+        nested=LazyList.add(nested,e);
     }
 
     /* ------------------------------------------------------------ */
     public int size()
     {
-        if (nested==null)
-            return 0;
-        return nested.size();
+        return LazyList.size(nested);
     }
     
     /* ------------------------------------------------------------ */
     public List getExceptions()
     {
-        if (nested==null)
-            return Collections.EMPTY_LIST;
-        return Collections.unmodifiableList(nested);
+        return LazyList.getList(nested);
     }
     
     /* ------------------------------------------------------------ */
     public Exception getException(int i)
     {
-        if (nested==null)
-            return null;
-        return (Exception)nested.get(i);
+        return (Exception) LazyList.get(nested,i);
     }
 
     /* ------------------------------------------------------------ */
@@ -70,11 +62,14 @@ public class MultiException extends Exception
     public void ifExceptionThrow()
         throws Exception
     {
-        if (nested!=null)
+        switch (LazyList.size(nested))
         {
-            if (nested.size()==1)
-                throw (Exception)nested.get(0);
-            throw this;
+          case 0:
+              break;
+          case 1:
+              throw (Exception)LazyList.get(nested,0);
+          default:
+              throw this;
         }
     }
     
@@ -87,8 +82,17 @@ public class MultiException extends Exception
     public void ifExceptionThrowMulti()
         throws MultiException
     {
-        if (nested!=null)
+        if (LazyList.size(nested)>0)
             throw this;
+    }
+
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        if (LazyList.size(nested)>0)
+            return "org.mortbay.util.MultiException"+
+                LazyList.getList(nested);
+        return "org.mortbay.util.MultiException[]";
     }
     
 }

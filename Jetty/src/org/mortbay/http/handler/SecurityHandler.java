@@ -53,6 +53,10 @@ public class SecurityHandler extends NullHandler
     /* ------------------------------------------------------------ */
     public interface FormAuthenticator
     {
+        public final static String __J_SECURITY_CHECK="j_security_check";
+        public final static String __J_USERNAME="j_username";
+        public final static String __J_PASSWORD="j_password";
+        
         /* ------------------------------------------------------------ */
         /** 
          * @param shandler 
@@ -208,6 +212,7 @@ public class SecurityHandler extends NullHandler
                         if (handler instanceof FormAuthenticator)
                         {
                             _formAuthenticator=(FormAuthenticator)handler;
+                            Code.debug("FormAuthenticator=",_formAuthenticator);
                             break;
                         }
                     }
@@ -231,19 +236,19 @@ public class SecurityHandler extends NullHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
-        Code.debug("Authenticate "+pathInContext);
-
         // Get all path matches
         List scss =_constraintMap.getMatches(pathInContext);
         if (scss!=null)
-        {            
+        {          
+            Code.debug("Security Constraint on ",pathInContext," against ",scss);
+  
             // for each path match 
             for (int m=0;m<scss.size();m++)
             {
                 // Get all constraints
                 Map.Entry entry=(Map.Entry)scss.get(m);
                 if (Code.verbose())
-                    Code.debug("Auth ",pathInContext," against ",entry);
+                    Code.debug("Check ",pathInContext," against ",entry);
                 
                 List scs = (List)entry.getValue();
                 // for each constraint
@@ -256,8 +261,11 @@ public class SecurityHandler extends NullHandler
                         continue;
 
                     // Does this forbid everything?
-                    if (!sc.isAuthenticated() && !sc.hasDataConstraint())    
+                    if (!sc.isAuthenticated() &&!sc.hasDataConstraint())
+                    {
                         response.sendError(HttpResponse.__403_Forbidden);
+                        return;
+                    }
                     
                     // Does it fail a role check?
                     if (sc.isAuthenticated() &&
@@ -268,14 +276,25 @@ public class SecurityHandler extends NullHandler
                     
                     // Does it fail a data constraint
                     if (sc.hasDataConstraint() &&
-                        "https".equalsIgnoreCase(request.getScheme()))   
+                        !"https".equalsIgnoreCase(request.getScheme()))   
+                    {
                         response.sendError(HttpResponse.__403_Forbidden);
-                        
+                        return;
+                    }
+                    
                     // Matches a constraint that does not fail
                     // anything, so must be OK
-                    return;    
+                    break;    
                 }
             }
+        }
+
+        if (_formAuthenticator!=null &&
+            pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
+        {
+            Code.debug("FORM j_security_check");
+            _formAuthenticator
+                .formAuthenticated(this,pathInContext,pathParams,request,response);
         }
     }
 
