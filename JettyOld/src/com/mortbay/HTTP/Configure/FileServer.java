@@ -33,11 +33,11 @@ public class FileServer extends BaseConfiguration
     public FileServer()
 	 throws IOException
     {
-	this(8080);
+	this(8080, false);
     }
     
     /* -------------------------------------------------------------------- */
-    public FileServer(int port)
+    public FileServer(int port, boolean allowAll)
 	 throws IOException
     {
 	// Listen at a single port on the localhost
@@ -55,11 +55,13 @@ public class FileServer extends BaseConfiguration
 	int h=0;
 
 	// File Handler
-	httpHandlers[h++] = new FileHandler(".");
+	FileHandler fh = new FileHandler(".");
+	fh.setPutAllowed(true);
+	fh.setDeleteAllowed(true);
+	httpHandlers[h++] = fh;
 
 	// NotFound Handler
 	httpHandlers[h++] = new NotFoundHandler();
-	
     }
 
     
@@ -71,10 +73,15 @@ public class FileServer extends BaseConfiguration
     {
 	try{
 	    int port = 8080;
-	    if (args.length==1)
+	    if (args.length > 0)
 		port = Integer.parseInt(args[0]);
 	    
-	    FileServer fileServer = new FileServer(port);
+	    FileServer fileServer;
+	    if (args.length > 1)
+		fileServer = new FileServer(port, true);
+	    else
+		fileServer = new FileServer(port, false);
+
 	    HttpServer httpServer = new HttpServer(fileServer);
 	    httpServer.join();
 	}

@@ -44,7 +44,8 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     public final static String Server ="Server"   ;
     public final static String Expires ="Expires"   ;
     public final static String Location ="Location"   ;
-
+    public final static String Allow = "Allow"   ;
+    
     /* -------------------------------------------------------------- */
     public final static Hashtable __errorCodeMap = new Hashtable();
     static

@@ -39,6 +39,8 @@ public class HttpRequest extends HttpHeader
     public static final String GET="GET";
     public static final String POST="POST";
     public static final String PUT="PUT";
+    public static final String HEAD="HEAD";
+    public static final String DELETE="DELETE";
     public static final byte[] Continue=
 	"HTTP/1.1 100 Continue\015\012\015\012".getBytes();
 
@@ -97,7 +99,7 @@ public class HttpRequest extends HttpHeader
 	    method = requestLine.substring(0,s1);
 	    requestURI = requestLine.substring(s1+1).trim();
 	
-	    int s2=requestURI.indexOf(' ');
+	    int s2=requestURI.lastIndexOf(' ');
 	    if (s2>0)
 	    {
 		version = requestURI.substring(s2+1).toUpperCase().trim();
