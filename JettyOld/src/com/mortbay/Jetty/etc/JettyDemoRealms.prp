@@ -1,6 +1,6 @@
 demo.LABEL                 : Demo Realm
 demo.PATHS                 : /Auth
-demo.PROPERTIES            : ./etc/RealmDemo.prp
+demo.PROPERTIES            : %user.dir%/etc/RealmDemo.prp
 other.LABEL                : Other Realm
 other.PATHS                : /Other
 other.PROPERTY.other       : other

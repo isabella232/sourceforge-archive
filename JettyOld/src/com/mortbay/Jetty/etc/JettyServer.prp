@@ -117,7 +117,7 @@ main.root.Servlet.PROPERTY.SERVLET.gnujsp.ResourceBase       : file:./FileBase/
 main.root.Servlet.PROPERTY.SERVLET.gnujsp.PROPERTY.scratchdir: %user.dir%/etc/jsp     
 main.root.Servlet.PROPERTY.SERVLET.gnujsp.PROPERTY.debug     : true
 main.root.Servlet.PROPERTY.SERVLET.gnujsp.PROPERTY.checkclass: true
-main.root.Servlet.PROPERTY.SERVLET.gnujsp.PROPERTY.compiler  : builtin-javac -classpath %classpath%:%scratchdir%:lib/gnujsp.jar -d %scratchdir% -deprecation %source% 
+main.root.Servlet.PROPERTY.SERVLET.gnujsp.PROPERTY.compiler  : builtin-javac -classpath %classpath%:%scratchdir%:%user.dir%/lib/gnujsp.jar -d %scratchdir% -deprecation %source% 
 
 main.root.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
 
@@ -130,12 +130,3 @@ main.root.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
 main.defaultEx.PATHS			  : /
 main.defaultEx.HANDLERS			  : DefaultEx
 main.defaultEx.DefaultEx.CLASS		  : com.mortbay.HTTP.Handler.DefaultExceptionHandler
-
-
-
-
-
-
-
-
-

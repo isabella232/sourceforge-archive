@@ -91,10 +91,9 @@ SERVLET.gnujsp.ResourceBase         : file:./FileBase/
 SERVLET.gnujsp.PROPERTY.scratchdir  : %user.dir%/etc/jsp     
 SERVLET.gnujsp.PROPERTY.debug       : true
 SERVLET.gnujsp.PROPERTY.checkclass  : true
-SERVLET.gnujsp.PROPERTY.compiler    : builtin-javac -classpath %classpath%:%scratchdir%:lib/gnujsp.jar -d %scratchdir% -deprecation %source% 
+SERVLET.gnujsp.PROPERTY.compiler    : builtin-javac -classpath %classpath%:%scratchdir%:%user.dir%/lib/gnujsp.jar -d %scratchdir% -deprecation %source% 
 
 SERVLET.CgiServlet.AutoReload       : False
 SERVLET.CgiServlet.CLASS            : uk.org.gosnell.Servlets.CgiServlet
 SERVLET.CgiServlet.PATHS            : /cgi-bin
-SERVLET.CgiServlet.CLASSPATH        : %user.dir%/contrib
 SERVLET.CgiServlet.PROPERTY.Roots   : %user.dir%/cgi-bin

@@ -254,7 +254,7 @@ public class HttpRequest extends HttpHeader
             uri.setPath(newuri.getPath());
         servletPath=null;
         pathInfo=newuri.getPath();
-	redirectParams=newuri;
+    redirectParams=newuri;
     }
 
     /* ------------------------------------------------------------ */
@@ -288,8 +288,8 @@ public class HttpRequest extends HttpHeader
      */
     public void setResourcePath(String path)
     {
-	resourcePath=path;
-	redirectParams=null;
+    resourcePath=path;
+    redirectParams=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -303,16 +303,16 @@ public class HttpRequest extends HttpHeader
      */
     public void setResourcePath(URI newuri)
     {
-	if (newuri==null)
-	{
-	    resourcePath=null;
-	    redirectParams=null;
-	}
-	else
-	{
-	    resourcePath=newuri.getPath();
-	    redirectParams=newuri;
-	}
+    if (newuri==null)
+    {
+        resourcePath=null;
+        redirectParams=null;
+    }
+    else
+    {
+        resourcePath=newuri.getPath();
+        redirectParams=newuri;
+    }
     }
 
     /* -------------------------------------------------------------- */
@@ -787,10 +787,10 @@ public class HttpRequest extends HttpHeader
     public String getParameter(String name)
     {
         Object value=null;
-	if (redirectParams!=null)
-	    value = redirectParams.get(name);
-	if (value==null)
-	    value = uri.get(name);
+    if (redirectParams!=null)
+        value = redirectParams.get(name);
+    if (value==null)
+        value = uri.get(name);
         if (value==null && formParameters!=null)
             value = formParameters.get(name);
         if (value==null && cookieParameters!=null)
@@ -808,10 +808,10 @@ public class HttpRequest extends HttpHeader
     {
         Object values=null;
 
-	if (redirectParams!=null)
-	    values = redirectParams.getValues(name);
-	if (values==null)
-	    values = uri.getValues(name);
+    if (redirectParams!=null)
+        values = redirectParams.getValues(name);
+    if (values==null)
+        values = uri.getValues(name);
         if (values==null && formParameters!=null)
             values = formParameters.getValues(name);
         if (values==null && cookieParameters!=null)
@@ -928,7 +928,7 @@ public class HttpRequest extends HttpHeader
     /* -------------------------------------------------------------- */
     /** Returns the character set encoding for the input of this request.
      * Checks the Content-Type header for a charset parameter and return its
-     * value if found or ISO-8859-1 otherwise.
+     * value if found or ISO8859_1 otherwise.
      * @return Character Encoding.
      */
     public String getCharacterEncoding ()
@@ -937,7 +937,50 @@ public class HttpRequest extends HttpHeader
         try {
             int i1 = s.indexOf("charset=",s.indexOf(';')) + 8;
             int i2 = s.indexOf(' ',i1);
-            return (0 < i2) ? s.substring(i1,i2) : s.substring(i1);
+            String charset = (0 < i2) ? s.substring(i1,i2) : s.substring(i1);
+            //
+            // Need to map from HTTP character encoding names into the
+            // character encoding names understood by Java.
+            //
+            // This is a bit of an issue as getCharacterEncoding() is used
+            // for two slightly different purposes:
+            //
+            // 1) Return the character encoding to apply within Java for
+            //    use in translating bytes to/from characters.
+            //
+            // 2) Return a standard HTTP character encoding value.
+            //
+            // As Java does *not* understand all the standard HTTP character
+            // encoding names, we must map from HTTP to Java encoding names.
+            //
+            // See the IANA character encoding registry at:
+            //   http://www.isi.edu/in-notes/iana/assignments/character-sets
+            //
+            // Note that the encoding names supported by Java have changed
+            // (been added to) from release to release.  Use only names that
+            // will be supported by the oldest supported release.
+            //
+            // Some (not all) of the aliases are mapped below.
+            //
+            // TBD - hoist this code into a utility class.
+            //
+            // 2000/10/19 - PLB
+            //
+            if (charset.equalsIgnoreCase("US-ASCII"))       return "ISO8859_1";
+            if (charset.equalsIgnoreCase("ISO-8859-1"))     return "ISO8859_1";
+            if (charset.equalsIgnoreCase("ISO-8859-2"))     return "ISO8859_2";
+            if (charset.equalsIgnoreCase("ISO-8859-3"))     return "ISO8859_3";
+            if (charset.equalsIgnoreCase("ISO-8859-4"))     return "ISO8859_4";
+            if (charset.equalsIgnoreCase("ISO-8859-5"))     return "ISO8859_5";
+            if (charset.equalsIgnoreCase("ISO-8859-6"))     return "ISO8859_6";
+            if (charset.equalsIgnoreCase("ISO-8859-7"))     return "ISO8859_7";
+            if (charset.equalsIgnoreCase("ISO-8859-8"))     return "ISO8859_8";
+            if (charset.equalsIgnoreCase("ISO-8859-9"))     return "ISO8859_9";
+            if (charset.equalsIgnoreCase("ISO-2022-JP"))    return "ISO2022JP";
+            if (charset.equalsIgnoreCase("ISO-2022-KR"))    return "ISO2022KR";
+
+            // If not recognized - hope for the best???
+            return charset;
         }
         catch (Exception e)
         {
@@ -1409,6 +1452,3 @@ public class HttpRequest extends HttpHeader
         sessions.setMaxInactiveInterval(defaultTime);
     }
 }
-
-
-

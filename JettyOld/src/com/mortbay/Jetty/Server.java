@@ -22,10 +22,10 @@ import java.lang.reflect.*;
 
 /* ------------------------------------------------------------ */
 /** A configuration file based Jetty HttpServer.
- * This HttpConfiguration class uses PropertyTree based 
+ * This HttpConfiguration class uses PropertyTree based
  * files to configure and run 1 or more Jetty HttpServer
  * instances.
- * 
+ *
  * The loadConfigurationFile and buildServers static methods
  * construct 1 or more instances of Server that can be started
  * with the startAll method.
@@ -50,12 +50,12 @@ public class Server extends BaseConfiguration
     private static final Hashtable __serverMap = new Hashtable(7);
     private static Properties __globalProperties=null;
     private static int userID=0;
-    
+
     /* ------------------------------------------------------------ */
     private String serverName=null;
     private HttpServer httpServer=null;
 
-    
+
     /* ------------------------------------------------------------ */
     /** Get a JVM wide server property.
      */
@@ -77,7 +77,7 @@ public class Server extends BaseConfiguration
         // load property file
         PropertyTree props = new PropertyTree();
         props.load(new BufferedInputStream(new FileInputStream(filename)));
-        
+
         buildServers(props);
     }
 
@@ -111,7 +111,7 @@ public class Server extends BaseConfiguration
         synchronized(com.mortbay.Jetty.Server.class)
         {
             String serverName="*";
-        
+
             try
             {
                 // Handle general server properties
@@ -120,7 +120,7 @@ public class Server extends BaseConfiguration
                     __globalProperties.getProperty("DefaultPageType");
                 if (pageType!=null && pageType.length()>0)
                     Page.setDefaultPageType(pageType);
-            
+
                 Vector servers =
                     serversTree.getVector("SERVERS",";,");
                 Code.assert(servers != null,
@@ -143,12 +143,12 @@ public class Server extends BaseConfiguration
                 Code.warning("Configuration error for "+serverName);
                 throw e;
             }
-            
+
             // Set user ID if we need to ( UNIX ONLY )
             userID=Integer.parseInt(serversTree.getProperty("SETUID","0"));
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Build and configure a Server from a PropertyTree.
      * A new server is constructed and 1 or more handler stacks are
@@ -176,7 +176,7 @@ public class Server extends BaseConfiguration
      * properties in the original file will be prefixed with "servername.".
      * @param serverName The name of the server.
      * @param serverTree configuration property tree.
-     * @exception Exception 
+     * @exception Exception
      */
     public static void buildServer(String serverName,
                                    PropertyTree serverTree)
@@ -192,10 +192,10 @@ public class Server extends BaseConfiguration
                 Server server = new Server(serverName,
                                            listeners,
                                            serverProperties);
-                
+
                 Code.debug("Configure Server",serverName,
                            " ",serverProperties);
-                
+
                 Vector stacks = serverTree.getVector("STACKS",";,");
                 Code.assert(stacks != null,
                             "Missing mandatory configuration entry: '"+
@@ -231,7 +231,7 @@ public class Server extends BaseConfiguration
                 throw e;
             }
         }
-    }    
+    }
 
     /* ------------------------------------------------------------ */
     /** Get all configured servers.
@@ -241,7 +241,7 @@ public class Server extends BaseConfiguration
     {
         return __serverMap.elements();
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Start all configured servers.
      * If a User ID is configured on a Unix system, a native call
@@ -268,7 +268,7 @@ public class Server extends BaseConfiguration
             setUid.invoke(null,uid);
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Stop all configured servers.
      */
@@ -276,7 +276,7 @@ public class Server extends BaseConfiguration
     {
         Enumeration e = __serverMap.elements();
         while (e.hasMoreElements())
-            ((Server)e.nextElement()).stop(); 
+            ((Server)e.nextElement()).stop();
 
         //  P.Mclachlan <pdm@acm.org> (Sat Jun 19, 1999)
         //    Restore the static variables to their initial
@@ -284,7 +284,7 @@ public class Server extends BaseConfiguration
         __serverMap.clear();
         //  end P.Mclachlan
     }
-    
+
     /* ------------------------------------------------------------ */
     /** shutdown
      * @deprecated Use stopAll.
@@ -293,7 +293,7 @@ public class Server extends BaseConfiguration
     {
         Enumeration e = __serverMap.elements();
         while (e.hasMoreElements())
-            ((Server)e.nextElement()).stop(); 
+            ((Server)e.nextElement()).stop();
 
         //  P.Mclachlan <pdm@acm.org> (Sat Jun 19, 1999)
         //    Restore the static variables to their initial
@@ -301,7 +301,7 @@ public class Server extends BaseConfiguration
         __serverMap.clear();
         //  end P.Mclachlan
     }
-    
+
 
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -334,7 +334,7 @@ public class Server extends BaseConfiguration
      * @param serverName The servers name
      * @param listeners Listener PropertyTree
      * @param properties Server properties
-     * @exception Exception 
+     * @exception Exception
      */
     public Server(String serverName,
 		  PropertyTree listeners,
@@ -353,13 +353,13 @@ public class Server extends BaseConfiguration
                 Code.debug(serverName," properties=",
                            DataClass.toString(properties));
             }
-            
+
             // Set properties for HttpConfiguration
             this.properties=properties;
 
             // Empty path map for handlers
             httpHandlersMap=new PathMap();
-        
+
             // Extract listeners
             Vector listener_classes = new Vector();
             Vector listener_addresses = new Vector();
@@ -372,7 +372,7 @@ public class Server extends BaseConfiguration
 
                 Code.debug("Configuring listener "+listenerName);
                 PropertyTree listenerTree = listeners.getTree(listenerName);
-            
+
                 String className = listenerTree.getProperty("CLASS");
                 Code.assert(className != null,
                             "Missing mandatory configuration entry: '"+
@@ -415,7 +415,7 @@ public class Server extends BaseConfiguration
     {
         return serverName;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Add a handler stack to the server.
      * A stack of handlers is contructed and configured from
@@ -440,7 +440,7 @@ public class Server extends BaseConfiguration
      * "servername.stackname.".
      * @param stackName The name of the handler stack
      * @param stackTree PopertyTree describing the stack
-     * @exception Exception 
+     * @exception Exception
      */
     public synchronized void addHandlerStack(String stackName,
                                              PropertyTree stackTree)
@@ -449,19 +449,19 @@ public class Server extends BaseConfiguration
         Code.debug("Configure Stack ",serverName,
                    ".",stackName,
                    " ",stackTree);
-        
+
         if (stackTree.get("EXCEPTIONS")!=null)
             Code.warning("2.2.0 Style exception configuration in '"+
                          serverName+"."+stackName+
                          "' is not supported");
-        
+
         Vector handlers = stackTree.getVector("HANDLERS",";,");
         Code.assert(handlers != null,
                     "Missing mandatory configuration entry: '"+
                     serverName+"."+stackName+".HANDLERS'");
-        
+
         HttpHandler[] stack= new HttpHandler[handlers.size()];
-        
+
         Vector paths = stackTree.getVector("PATHS",",;");
         Code.assert(paths != null,
                     "Missing mandatory configuration entry: '"+
@@ -469,19 +469,19 @@ public class Server extends BaseConfiguration
 
         for (int d=paths.size();d-->0;)
             httpHandlersMap.put(paths.elementAt(d),stack);
-        
+
         for (int h=0; h<handlers.size();h++)
         {
             String handlerName=(String)handlers.elementAt(h);
             PropertyTree handlerTree = stackTree.getTree(handlerName);
             PropertyTree handlerProperties=properties(handlerTree);
-            
+
             Code.debug("Configure Handler ",serverName,
                        ".",stackName,
                        ".",handlerName,
                        " ",handlerProperties);
 
-            
+
             String className = handlerTree.getProperty("CLASS");
             Code.assert(className != null,
                         "Missing mandatory configuration entry: '"+
@@ -489,7 +489,7 @@ public class Server extends BaseConfiguration
             Class handlerClass = Class.forName(className);
             if (!com.mortbay.HTTP.HttpHandler.class.isAssignableFrom(handlerClass))
                 Code.fail(handlerClass+" is not a com.mortbay.HTTP.HttpHandler");
-            
+
             HttpHandler handlerInstance=null;
             try
             {
@@ -509,7 +509,7 @@ public class Server extends BaseConfiguration
         }
     }
 
-    
+
     /* ------------------------------------------------------------ */
     /** Add an exception handler stack to the server.
      * A stack of exception handlers is contructed and configured from
@@ -529,7 +529,7 @@ public class Server extends BaseConfiguration
      * "servername.stackname.".
      * @param stackName The name of the exception handler stack
      * @param stackTree PopertyTree describing the stack
-     * @exception Exception 
+     * @exception Exception
      */
     public synchronized void addExceptionStack(String stackName,
                                                PropertyTree stackTree)
@@ -538,14 +538,14 @@ public class Server extends BaseConfiguration
         Code.debug("Configure Ex Stack ",serverName,
                    ".",stackName,
                    " ",stackTree);
-        
+
         Vector handlers = stackTree.getVector("HANDLERS",";,");
         Code.assert(handlers != null,
                     "Missing mandatory configuration entry: '"+
                     serverName+"."+stackName+".HANDLERS'");
         ExceptionHandler[] stack
             = new ExceptionHandler[handlers.size()];
-        
+
         Vector paths = stackTree.getVector("PATHS",",;");
         Code.assert(paths != null,
                     "Missing mandatory configuration entry: '"+
@@ -557,12 +557,12 @@ public class Server extends BaseConfiguration
                 exceptionHandlersMap=new PathMap();
             exceptionHandlersMap.put(paths.elementAt(d),stack);
         }
-        
+
         for (int h=0; h<handlers.size();h++)
         {
             String handlerName=(String)handlers.elementAt(h);
             PropertyTree handlerTree = stackTree.getTree(handlerName);
-            
+
             Code.debug("Configure Ex Handler ",serverName,
                        ".",stackName,
                        ".",handlerName);
@@ -574,15 +574,15 @@ public class Server extends BaseConfiguration
             Class handlerClass = Class.forName(className);
             if (!com.mortbay.HTTP.ExceptionHandler.class.isAssignableFrom(handlerClass))
                 Code.fail(handlerClass+" is not a com.mortbay.HTTP.ExceptionHandler");
-            
+
             ExceptionHandler handlerInstance = (com.mortbay.HTTP.ExceptionHandler)
                 handlerClass.newInstance();
-            
+
             stack[h]=handlerInstance;
         }
     }
 
-    
+
     /* ------------------------------------------------------------ */
     /** Start serving.
      */
@@ -593,7 +593,7 @@ public class Server extends BaseConfiguration
         httpServer = new HttpServer(this);
     }
 
-    
+
     /* ------------------------------------------------------------ */
     /** Stop serving.
      */
@@ -605,7 +605,7 @@ public class Server extends BaseConfiguration
 
 
     /* ------------------------------------------------------------ */
-    /** join 
+    /** join
      */
     public void join()
         throws InterruptedException
@@ -618,7 +618,7 @@ public class Server extends BaseConfiguration
     /** Extract property sub tree.
      * Extract sub tree from file name PROPERTIES key merged with property
      * tree below PROPERTY key.
-     * @param props PropertyTree 
+     * @param props PropertyTree
      * @return PropertyTree
      */
     static PropertyTree properties(PropertyTree props)
@@ -637,46 +637,49 @@ public class Server extends BaseConfiguration
             if (!(new File(filename)).exists())
                 // use default filename
                 return properties;
-            
+
         }
         else if ((0 == filename.length()) || filename.equals("NONE"))
             // no PROPERTIES file
             return properties;
-        
+
         Code.debug("Load ",filename);
         properties.load(new BufferedInputStream(new FileInputStream(filename)));
         return properties;
     }
-    
-    
+
+
     /* ------------------------------------------------------------ */
     /** main
-     * @param args optional property file name 
+     * @param args optional property file name
      */
     public static void main(String args[])
     {
-        try
-        {
-            String filename = "JettyServer.prp";
-            if (args.length==1)
-                filename = args[0];
-            else if (!new File(filename).exists())
-                filename = "etc/JettyServer.prp";
-            loadConfigurationFile(filename);  
-        }
-        catch(Throwable e)
-        {
+        try {
+            if (args.length==1) {
+                loadConfigurationFile(args[0]);
+            } else {
+                File cwd = new File(System.getProperty("user.dir"));
+                File etc = new File(cwd,"etc");
+                String filename = "JettyServer.prp";
+                File file = new File(cwd,filename);
+                if (file.exists()) {
+                    loadConfigurationFile(file.getAbsolutePath());
+                } else {
+                    file = new File(etc,filename);
+                    loadConfigurationFile(file.getAbsolutePath());
+                 }
+            }
+        } catch(Throwable e) {
             Code.warning(e);
             System.err.println("Usage - java com.mortbay.Jetty.Server [config.prp]");
                 System.err.println("Default config files are \"JettyServer.prp\", \"etc/JettyServer.prp\".");
                 System.exit(1);
         }
-        
-        try{
+
+        try {
             startAll();
-        }
-        catch(Throwable e)
-        {
+        } catch(Throwable e) {
             Code.warning(e);
         }
     }

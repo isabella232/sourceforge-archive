@@ -26,7 +26,7 @@ import java.util.*;
  * @version 1.0 Sun Jun 27 1999
  * @author Greg Wilkins (gregw)
  */
-public class Demo 
+public class Demo
 {
     /* -------------------------------------------------------- */
     /** Main
@@ -36,10 +36,20 @@ public class Demo
     {
         if (args.length==1)
             Code.warning("Port argument no longer supported. See etc/JettyDemo.prp");
-        File filebase = new File("./FileBase");
-        Code.assert(filebase.isDirectory(),"Demo must be run in $JETTY_HOME");  
-        
-        String demoArgs[] = {"./etc/JettyDemo.prp"};
+
+        String filename = "JettyDemo.prp";
+        {
+            File cwd = new File(System.getProperty("user.dir"));
+            File filebase = new File(cwd,"FileBase");
+            Code.assert(filebase.isDirectory(),"Directory \"" + filebase.getAbsolutePath() + "\" not found!");
+            File etc = new File(cwd,"etc");
+            Code.assert(etc.isDirectory(),"Directory \"" + etc.getAbsolutePath() + "\" not found!");
+            File prp = new File(etc,filename);
+            Code.assert(prp.exists(),"File \"" + prp.getAbsolutePath() + "\" not found!");
+            filename = prp.getAbsolutePath();
+        }
+
+        String demoArgs[] = {filename};
         Server.main(demoArgs);
     }
 }

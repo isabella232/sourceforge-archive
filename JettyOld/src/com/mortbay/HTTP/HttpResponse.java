@@ -661,7 +661,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     /* -------------------------------------------------------------- */
     /** Returns the character set encoding for the input of this request.
      * Checks the Content-Type header for a charset parameter and return its
-     * value if found or ISO-8859-1 otherwise.
+     * value if found or ISO8859_1 otherwise.
      * @return Character Encoding.
      */
     public String getCharacterEncoding ()
@@ -682,6 +682,9 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
         i=encoding.indexOf(' ');
         if (i>0)
             encoding=encoding.substring(0,i);
+
+        // TBD - do the same sort of mapping of character encoding names
+        // as done in HttpRequest.getCharacterEncoding().
 
         return encoding;
     }

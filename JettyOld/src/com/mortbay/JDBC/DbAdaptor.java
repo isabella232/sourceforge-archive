@@ -45,7 +45,7 @@ public class DbAdaptor
 
     /* ------------------------------------------------------------ */
     /** Get the JDBC driver class name for this adaptor.
-     * @return 
+     * @return
      */
     public String getJdbcDriver()
     {
@@ -53,7 +53,7 @@ public class DbAdaptor
                     "Default DbAdaptor must have JDBC driver specified in DbDriver property");
         return dbDriver;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Quote a string value for the database.
      * @param s A string
@@ -77,15 +77,15 @@ public class DbAdaptor
             s = "'" + s + "'";
 
         Code.debug("QUOTE2: ",s);
-        return s;    
+        return s;
     }
 
 
     /* ------------------------------------------------------------ */
     /** Map the a column type to database column type.
-     *    
+     *
      * @param type The column type (see Column)
-     * @return Column type name recognized by underlying database. 
+     * @return Column type name recognized by underlying database.
      */
     public String columnType(int type)
     {
@@ -97,7 +97,7 @@ public class DbAdaptor
               return "INT";
           case Column.REAL:
               return "REAL";
-              
+
           default:
               if (type>Column.textTag)
                   return "VARCHAR("+(type-Column.textTag)+")";
@@ -113,7 +113,7 @@ public class DbAdaptor
      *         to the underlying database (e.g. quoted string for VARCHAR).
      */
     public String formatColumnValue(Column column, Object value)
-    {    
+    {
         if (column.isChar() || column.isText())
             return quote(value.toString());
 
@@ -123,7 +123,7 @@ public class DbAdaptor
                 return value.toString();
             return Integer.toString(column.str2enum(value.toString()));
         }
-        
+
         if (column.isType(Column.DATETIME))
         {
             java.util.Date d=null;
@@ -132,15 +132,19 @@ public class DbAdaptor
             else if (value instanceof Number)
                 d = new java.util.Date(((Number)value).longValue());
             else
-                d=new java.util.Date(value.toString());
+                try {
+                    d = java.text.DateFormat.getDateInstance().parse(value.toString());
+                } catch (java.text.ParseException e) {
+                    d = new java.util.Date();   // if it does not parse??
+                }
 
             return Long.toString(d.getTime()/1000);
         }
-        
+
         return value.toString();
-        
+
     }
-    
+
     /* ------------------------------------------------------------ */
     /** A null value for the column
      * @param column The Column
@@ -148,10 +152,10 @@ public class DbAdaptor
      * java type used to handle the column type.
      */
     public Object nullColumnValue(Column column)
-    {   
+    {
         if (column.isChar() || column.isText())
            return "";
-        
+
         if (column.isEnum())
            return column.enum2str(0);
 
@@ -160,10 +164,10 @@ public class DbAdaptor
 
         if (column.isType(Column.DATETIME))
            return new java.util.Date();
-        
+
         return new Integer(0);
     }
-    
+
 
     /* ------------------------------------------------------------ */
     /** The marker used when creating a table to mark a primary key.
@@ -173,7 +177,7 @@ public class DbAdaptor
     {
         return "NOT NULL";
     }
-    
+
     /* ------------------------------------------------------------ */
     /** The go string
      * @return The string used by the underlying database to trigger
@@ -208,7 +212,7 @@ public class DbAdaptor
         if (pkey) b.append(" )");
         return b.toString();
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Format table columns
      * @param table The table
@@ -216,12 +220,12 @@ public class DbAdaptor
      * inclusion in a CREATE statement.
      */
     public String formatTable(Table table)
-    {   
+    {
         StringBuffer b = new StringBuffer();
         b.append("TABLE ");
         b.append(table.getName());
         b.append(" (\n    ");
-        
+
         for (int i=0;i<table.columns.length;i++)
         {
             if (i>0)
@@ -231,7 +235,7 @@ public class DbAdaptor
 
         b.append(formatKeys(table));
         b.append("\n)");
-        
+
         return b.toString();
     }
 
@@ -248,7 +252,7 @@ public class DbAdaptor
         b.append(go());
         return b.toString();
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Format the index creation statements for a table
      * @param table The Table
@@ -257,7 +261,7 @@ public class DbAdaptor
     public String formatCreateIndex(Table table)
     {
         StringBuffer b = new StringBuffer();
-        
+
         if (table.primaryKey!=null)
         {
             b.append("CREATE UNIQUE INDEX ");
@@ -284,9 +288,9 @@ public class DbAdaptor
                 b.append(table.otherKeys.columns[i].getName());
                 b.append(" ) ");
                 b.append(go());
-            }   
+            }
         }
-        
+
         return b.toString();
     }
 
@@ -300,5 +304,5 @@ public class DbAdaptor
     {
         return "drop table "+table.getName()+go();
     }
-    
+
 }
