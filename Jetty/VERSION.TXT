@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-4.1.0RC4 - 
+Jetty-4.1.0RC4 - 30 August 2002
  + Included IbmJsseListener in the contrib directory.
  + Updated jasper2 to 4.1.10 tag.
  + Reverted to 302 for all redirections as all clients do not understand 303
