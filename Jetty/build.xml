@@ -235,6 +235,16 @@
   <target name="servlet.jar" depends="classes">
     <jar jarfile="${servlet.jar}" basedir="${classes}" >
        <include name="javax/servlet/**" />
+       <manifest>    
+         <attribute name="Sealed" value="true"/>
+         <attribute name="Built-By" value="${user.name}"/>
+         <attribute name="Specification-Title" value="Java API for Servlets"/>
+         <attribute name="Specification-Version" value="2.4"/>
+         <attribute name="Implementation-Version" value="2.4.jetty"/>
+         <attribute name="Package-Title" value="javax.servlet"/>
+         <attribute name="Implementation-Vendor" value="Apache Software Foundation"/>
+         <attribute name="Implementation-Title" value="javax.servlet"/>
+       </manifest>
     </jar>
   </target>
 
