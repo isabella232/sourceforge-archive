@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
  + fixed jaas logout for jetty-jboss integration
+ + fixed deployment of ejb-link elements in web.xml for jboss
 
 
 Jetty-5.0.RC2 - 2 July 2004

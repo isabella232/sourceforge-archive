@@ -422,7 +422,9 @@ public class JettyService
       init(Object containerConfig)
       throws Exception
     {
-      // what should we do here ? :-)
+      //TODO - do better job of passing in config from AbstractWebContainer
+      setLenientEjbLink(JettyService.this.getLenientEjbLink ());
+      setServer(JettyService.this._server);
     }
 
     public void
@@ -444,6 +446,8 @@ public class JettyService
     getDeployer(DeploymentInfo di)
     throws Exception
   {
-    return new JettyDeployer(di);
+    JettyDeployer deployer = new JettyDeployer(di);
+    deployer.init(null);
+    return deployer;
   }
 }
