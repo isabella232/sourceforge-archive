@@ -2076,6 +2076,20 @@ public class HttpContext implements LifeCycle,
     }
 
     /* ------------------------------------------------------------ */
+    /** Get Resource MetaData.
+     * This is a temp method until the resource cache is split out from the HttpContext.
+     * @param resource 
+     * @return Meta data for the resource.
+     */
+    public ResourceMetaData getResourceMetaData(Resource resource)
+    {
+        Object o=resource.getAssociate();
+        if (o instanceof ResourceMetaData)
+            return (ResourceMetaData)o;
+        return new ResourceMetaData(resource);
+    }
+    
+    /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /** MetaData associated with a context Resource.
      */
