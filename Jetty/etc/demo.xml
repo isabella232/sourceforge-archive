@@ -80,19 +80,8 @@ $ID: $
 -->
 
   <Call name="addWebApplication">
-    <Arg>/</Arg>
+    <Arg>/jetty/*</Arg>
     <Arg>file:<SystemProperty name="user.dir"/>/webapps/jetty/</Arg>
-  </Call>
-
-  <Call name="addContext">
-    <Arg>/servlet/wiki/*</Arg>
-    <Set name="ResourceBase">/usr/local/java/wiki/webtrans/samplesite</Set>
-    <Call name="addServlet">
-      <Arg>Wiki</Arg>
-      <Arg>/</Arg>
-      <Arg>org.devtools.wiki.ServletDisplay</Arg>
-      <Put name="configfile">/usr/local/java/wiki/webtrans/wiki.properties</Put>
-    </Call>
   </Call>
 
   <Call name="addContext">
@@ -138,6 +127,8 @@ $ID: $
 
   <Call name="addContext">
     <Arg>/</Arg>
+    <Set name="ResourceBase">./docroot/</Set>
+    <Set name="ServingResources">TRUE</Set>
     <Call name="addHandler">
       <Arg><New class="com.mortbay.HTTP.Handler.NotFoundHandler"/></Arg>
     </Call>

@@ -65,6 +65,8 @@ public class Demo
             context.setServingResources(true);
             
             context=server.addContext(null,"/");
+            context.setResourceBase("./docroot/");
+            context.setServingResources(true);
             context.addHandler(new NotFoundHandler());
 
             // Logger
