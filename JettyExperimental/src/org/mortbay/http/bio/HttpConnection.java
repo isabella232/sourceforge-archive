@@ -6,16 +6,14 @@
  * =============================================================
  */
 
-package org.mortbay.http.server;
+package org.mortbay.http.bio;
 
 import java.io.IOException;
 import java.net.Socket;
 import org.mortbay.http.HttpHeader;
 import org.mortbay.http.HttpHeaderValues;
 import org.mortbay.http.HttpHeaders;
-import org.mortbay.http.HttpInputStream;
 import org.mortbay.http.HttpMethods;
-import org.mortbay.http.HttpOutputStream;
 import org.mortbay.http.HttpStatus;
 import org.mortbay.http.HttpVersions;
 import org.mortbay.http.handler.DumpHandler;

@@ -56,7 +56,8 @@ public class HttpParserTest extends TestCase
         String http= "POST /foo HTTP/1.0\015\012" + "\015\012";
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
-        HttpParser parser= new Parser(buffer);
+        Handler handler = new Handler();
+        HttpParser parser= new HttpParser(buffer,handler);
         parser.parse();
         assertEquals("POST", f0);
         assertEquals("/foo", f1);
@@ -71,7 +72,8 @@ public class HttpParserTest extends TestCase
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
         f2= null;
-        HttpParser parser= new Parser(buffer);
+        Handler handler = new Handler();
+        HttpParser parser= new HttpParser(buffer,handler);
         parser.parse();
         assertEquals("GET", f0);
         assertEquals("/999", f1);
@@ -86,7 +88,8 @@ public class HttpParserTest extends TestCase
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
         f2= null;
-        HttpParser parser= new Parser(buffer);
+        Handler handler = new Handler();
+        HttpParser parser= new HttpParser(buffer,handler);
         parser.parse();
         assertEquals("POST", f0);
         assertEquals("/222", f1);
@@ -108,7 +111,8 @@ public class HttpParserTest extends TestCase
                 + "\015\012";
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
-        HttpParser parser= new Parser(buffer);
+        Handler handler = new Handler();
+        HttpParser parser= new HttpParser(buffer,handler);
         parser.parse();
         assertEquals("GET", f0);
         assertEquals("/", f1);
@@ -139,7 +143,8 @@ public class HttpParserTest extends TestCase
                 + "0\015\012";
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
-        HttpParser parser= new Parser(buffer);
+        Handler handler = new Handler();
+        HttpParser parser= new HttpParser(buffer,handler);
         parser.parse();
         assertEquals("GET", f0);
         assertEquals("/chunk", f1);
@@ -175,7 +180,8 @@ public class HttpParserTest extends TestCase
 
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
-        HttpParser parser= new Parser(buffer);
+        Handler handler = new Handler();
+        HttpParser parser= new HttpParser(buffer,handler);
         parser.parse();
         assertEquals("GET", f0);
         assertEquals("/mp", f1);
@@ -252,7 +258,8 @@ public class HttpParserTest extends TestCase
             String tst="t"+tests[t];
             InputStreamBuffer buffer= new InputStreamBuffer(new FileInputStream(file), tests[t]);
 
-            HttpParser parser= new Parser(buffer);
+            Handler handler = new Handler();
+            HttpParser parser= new HttpParser(buffer,handler);
             parser.parse();
             assertEquals(tst,"GET", f0);
             assertEquals(tst,"/", f1);
@@ -290,13 +297,8 @@ public class HttpParserTest extends TestCase
     String[] val;
     int h;
     
-    class Parser extends HttpParser
-    {
-        Parser(Buffer source)
-        {
-            super(source);
-        }
-        
+    class Handler extends HttpParser.EventHandler
+    {   
         public void foundContent(int index, Buffer ref)
         {
             if (index == 0)
@@ -304,7 +306,7 @@ public class HttpParserTest extends TestCase
             content= content.substring(0, index) + ref;
         }
 
-        public void foundField0(Buffer ref)
+        public void foundStartLineToken0(Buffer ref)
         {
             h= -1;
             hdr= new String[9];
@@ -312,12 +314,12 @@ public class HttpParserTest extends TestCase
             f0= ref.toString();
         }
 
-        public void foundField1(Buffer ref)
+        public void foundStartLineToken1(Buffer ref)
         {
             f1= ref.toString();
         }
 
-        public void foundField2(Buffer ref)
+        public void foundStartLineToken2(Buffer ref)
         {
             f2= ref.toString();
         }

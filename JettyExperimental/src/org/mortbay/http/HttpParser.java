@@ -14,7 +14,7 @@ import org.mortbay.io.Portable;
  * @version $Revision$
  * @author gregw
  */
-public class HttpParser
+public class HttpParser 
 {
     // Terminal symbols.
     static final byte COLON= (byte)':';
@@ -63,15 +63,18 @@ public class HttpParser
     private Buffer header;
     private boolean close=false;
     private boolean content=false;
-
+    private EventHandler handler;
+    
     /* ------------------------------------------------------------------------------- */
     /** Constructor. 
      */
-    public HttpParser(Buffer source)
+    public HttpParser(Buffer source, EventHandler handler)
     {
         this.source=source;
         if (source instanceof InBuffer)
             inSource=(InBuffer)source;
+        
+        this.handler=handler;
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -128,262 +131,256 @@ public class HttpParser
             parseNext();
     }
 
-    /* ------------------------------------------------------------------------------- */
-    /** Parse until next Event.
-     * 
+/* ------------------------------------------------------------------------------- */
+    /**
+     * Parse until next Event.
+     *  
      */
-    public void parseNext() 
-        throws IOException
+    public void parseNext()
+    throws IOException
     {
-        if (state == STATE_END)
-            Portable.throwIllegalState("STATE_END");
-
-        if (state == STATE_CONTENT && contentPosition==contentLength)
+        if (state == STATE_END) 
+        Portable.throwIllegalState("STATE_END");
+        if (state == STATE_CONTENT && contentPosition == contentLength)
         {
-            state= STATE_END;
-            messageComplete(contentPosition);
+            state = STATE_END;
+            handler.messageComplete(contentPosition);
             return;
         }
-        
         if (source.length() == 0)
         {
-            if (source.markIndex()==0 && source.putIndex()==source.capacity())
-            	throw new IllegalStateException("Buffer too small");
-            int filled=-1;
-            if (inSource!=null)
-                filled= ((InBuffer)source).fill();
-            if (filled<0 && state == STATE_EOF_CONTENT)
+            if (source.markIndex() == 0 && source.putIndex() == source.capacity()) 
+            throw new IllegalStateException("Buffer too small");
+            int filled = -1;
+            if (inSource != null) 
+            filled = ((InBuffer) source).fill();
+            if (filled < 0 && state == STATE_EOF_CONTENT)
             {
-                state= STATE_END;
-                messageComplete(contentPosition);
+                state = STATE_END;
+                handler.messageComplete(contentPosition);
                 return;
             }
-            if (filled<0)
-            	throw new IOException("EOF");
+            if (filled < 0) 
+            throw new IOException("EOF");
         }
-
         byte ch;
 
         // Handler header
         while (state < STATE_END && source.length() > 0)
         {
-            ch= source.get();
+            ch = source.get();
             if (eol == CARRIAGE_RETURN && ch == LINE_FEED)
             {
-                eol= LINE_FEED;
+                eol = LINE_FEED;
                 continue;
             }
-            eol= 0;
-
+            eol = 0;
             switch (state)
             {
-                case STATE_START :
-                	contentLength=UNKNOWN_CONTENT;
-                    if (ch > SPACE)
+              case STATE_START:
+                contentLength = UNKNOWN_CONTENT;
+                if (ch > SPACE)
+                {
+                    source.mark();
+                    state = STATE_FIELD0;
+                }
+                break;
+                
+              case STATE_FIELD0:
+                if (ch == SPACE)
+                {
+                    handler.foundStartLineToken0(source.sliceFromMark());
+                    state = STATE_SPACE1;
+                    return;
+                }
+                else if (ch < SPACE)
+                { 
+                throw new RuntimeException(toString(source)); 
+                }
+                break;
+                
+              case STATE_SPACE1:
+                if (ch > SPACE)
+                {
+                    source.mark();
+                    state = STATE_FIELD1;
+                }
+                else if (ch < SPACE) 
+                throw new RuntimeException(toString(source));
+                break;
+                
+              case STATE_FIELD1:
+                if (ch == SPACE)
+                {
+                    handler.foundStartLineToken1(source.sliceFromMark());
+                    state = STATE_SPACE2;
+                    return;
+                }
+                else if (ch < SPACE)
+                {
+                    // HTTP/0.9
+                    handler.foundStartLineToken1(source.sliceFromMark());
+                    handler.headerComplete();
+                    state = STATE_END;
+                    handler.messageComplete(contentPosition);
+                    return;
+                }
+                break;
+                
+              case STATE_SPACE2:
+                if (ch > SPACE)
+                {
+                    source.mark();
+                    state = STATE_FIELD2;
+                }
+                else if (ch < SPACE)
+                {
+                    // HTTP/0.9
+                    handler.headerComplete();
+                    state = STATE_END;
+                    handler.messageComplete(contentPosition);
+                    return;
+                }
+                break;
+                
+              case STATE_FIELD2:
+                if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
+                {
+                    handler.foundStartLineToken2(source.sliceFromMark());
+                    eol = ch;
+                    state = STATE_HEADER;
+                    return;
+                }
+                break;
+                
+              case STATE_HEADER:
+                if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
+                {
+                    if (contentLength == UNKNOWN_CONTENT)
                     {
-                        source.mark();
-                        state= STATE_FIELD0;
+                        if (content)
+                            contentLength = EOF_CONTENT;
+                        else
+                            contentLength = NO_CONTENT;
                     }
-                    break;
-
-                case STATE_FIELD0 :
-                    if (ch == SPACE)
+                    handler.headerComplete();
+                    contentPosition = 0;
+                    eol = ch;
+                    switch (contentLength)
                     {
-                        foundField0(source.sliceFromMark());
-                        state= STATE_SPACE1;
-                        return;
+                    case HttpParser.EOF_CONTENT:
+                        state = STATE_EOF_CONTENT;
+                        break;
+                    case HttpParser.CHUNKED_CONTENT:
+                        state = STATE_CHUNKED_CONTENT;
+                        break;
+                    case HttpParser.NO_CONTENT:
+                        state = STATE_END;
+                        handler.messageComplete(contentPosition);
+                        break;
+                    default:
+                        state = STATE_CONTENT;
+                        break;
                     }
-                    else if (ch < SPACE)
+                    return;
+                }
+                else if (ch == COLON || ch == SPACE || ch == TAB)
+                {
+                    length = -1;
+                    state = STATE_HEADER_VALUE;
+                }
+                else
+                {
+                    length = 1;
+                    source.mark();
+                    state = STATE_HEADER_NAME;
+                }
+                break;
+                
+              case STATE_HEADER_NAME:
+                if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
+                {
+                    if (length > 0)
                     {
-                        throw new RuntimeException(toString(source));
+                        header = HttpHeaders.CACHE.lookup(source.sliceFromMark(length));
+                        handler.foundHttpHeader(header);
                     }
-                    break;
-
-                case STATE_SPACE1 :
-                    if (ch > SPACE)
+                    eol = ch;
+                    state = STATE_HEADER;
+                    return;
+                }
+                else if (ch == COLON)
+                {
+                    if (length > 0)
                     {
-                        source.mark();
-                        state= STATE_FIELD1;
+                        header = HttpHeaders.CACHE.lookup(source.sliceFromMark(length));
+                        handler.foundHttpHeader(header);
                     }
-                    else if (ch < SPACE)
-                        throw new RuntimeException(toString(source));
-                    break;
-
-                case STATE_FIELD1 :
-                    if (ch == SPACE)
+                    length = -1;
+                    state = STATE_HEADER_VALUE;
+                    return;
+                }
+                else if (ch != SPACE && ch != TAB)
+                {
+                    if (length == -1) 
+                    source.mark();
+                    length = source.getIndex() - source.markIndex();
+                }
+                break;
+                
+              case STATE_HEADER_VALUE:
+                if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
+                {
+                    Buffer value = HttpHeaderValues.CACHE.lookup(source.sliceFromMark(length));
+                    if (length > 0)
                     {
-                        foundField1(source.sliceFromMark());
-                        state= STATE_SPACE2;
-                        return;
-                    }
-                    else if (ch < SPACE)
-                    {
-                        // HTTP/0.9
-                        foundField1(source.sliceFromMark());
-                        headerComplete();
-                        state= STATE_END;
-                        messageComplete(contentPosition);
-                        return;
-                    }
-                    break;
-
-                case STATE_SPACE2 :
-                    if (ch > SPACE)
-                    {
-                        source.mark();
-                        state= STATE_FIELD2;
-                    }
-                    else if (ch < SPACE)
-                    {
-                        // HTTP/0.9
-                        headerComplete();
-                        state= STATE_END;
-                        messageComplete(contentPosition);
-                        return;
-                    }
-                    break;
-
-                case STATE_FIELD2 :
-                    if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
-                    {
-                        foundField2(source.sliceFromMark());
-                        eol= ch;
-                        state= STATE_HEADER;
-                        return;
-                    }
-                    break;
-
-                case STATE_HEADER :
-                    if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
-                    {
-                    	if (contentLength==UNKNOWN_CONTENT)
-                    	{
-                    		if (content)
-								contentLength=EOF_CONTENT;
-							else
-								contentLength=NO_CONTENT;
-                    	}                		                       	
-                        headerComplete();
-                        contentPosition= 0;
-                        eol= ch;
-                        switch (contentLength)
+                        int ho = BufferCache.getOrdinal(header);
+                        int vo = BufferCache.getOrdinal(value);
+                        switch (ho)
                         {
-                            case HttpParser.EOF_CONTENT :
-                                state= STATE_EOF_CONTENT;
-                                break;
-                            case HttpParser.CHUNKED_CONTENT :
-                                state= STATE_CHUNKED_CONTENT;
-                                break;
-                            case HttpParser.NO_CONTENT :
-                                state= STATE_END;
-                                messageComplete(contentPosition);
-                                break;
-                            default :
-                                state= STATE_CONTENT;
-                                break;
-                        }
-                        return;
-                    }
-                    else if (ch == COLON || ch == SPACE || ch == TAB)
-                    {
-                        length= -1;
-                        state= STATE_HEADER_VALUE;
-                    }
-                    else
-                    {
-                        length= 1;
-                        source.mark();
-                        state= STATE_HEADER_NAME;
-                    }
-                    break;
-
-                case STATE_HEADER_NAME :
-                    if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
-                    {
-                        if (length > 0)
-                        {
-                        	header=HttpHeaders.CACHE.lookup(source.sliceFromMark(length));
-                            foundHttpHeader(header);
-                        }
-                        eol= ch;
-                        state= STATE_HEADER;
-                        return;
-                    }
-                    else if (ch == COLON)
-                    {
-                        if (length > 0)
-                        {
-							header=HttpHeaders.CACHE.lookup(source.sliceFromMark(length));
-							foundHttpHeader(header);
-                        } 
-                        length= -1;
-                        state= STATE_HEADER_VALUE;
-                        return;
-                    }
-                    else if (ch != SPACE && ch != TAB)
-                    {
-                        if (length == -1)
-                            source.mark();
-                        length= source.getIndex() - source.markIndex();
-                    }
-                    break;
-
-                case STATE_HEADER_VALUE :
-                    if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
-                    {
-                        Buffer value= HttpHeaderValues.CACHE.lookup(source.sliceFromMark(length));
-                        if (length > 0)
-                        {
-                            int ho= BufferCache.getOrdinal(header);
-                            int vo= BufferCache.getOrdinal(value);
-
-                            switch (ho)
+                          case HttpHeaders.CONTENT_LENGTH_ORDINAL:
+                            if (contentLength != CHUNKED_CONTENT)
                             {
-                                case HttpHeaders.CONTENT_LENGTH_ORDINAL :
-                                    if (contentLength!=CHUNKED_CONTENT)
-                                    {
-                                        contentLength= BufferUtil.toInt(value);
-                                        if (contentLength <= 0)
-                                            contentLength= HttpParser.NO_CONTENT;
-                                    }
-                                    break;
-                                case HttpHeaders.CONNECTION_ORDINAL :
-                                    close= (HttpHeaderValues.CLOSE_ORDINAL == vo);
-                                    break;
-
-                                case HttpHeaders.TRANSFER_ENCODING_ORDINAL :
-                                    if (HttpHeaderValues.CHUNKED_ORDINAL == vo)
-                                        contentLength= CHUNKED_CONTENT;
-                                    else
-                                    {
-                                        String c=value.toString();
-                                        if (c.endsWith(HttpHeaderValues.CHUNKED))
-                                            contentLength= CHUNKED_CONTENT;
-                                        else if (c.indexOf(HttpHeaderValues.CHUNKED)>=0)
-                                            throw new IOException("BAD REQUEST");
-                                    }
-                                    break;
-
-                                case HttpHeaders.CONTENT_TYPE_ORDINAL :
-                                    content= true;
-                                    break;
-
+                                contentLength = BufferUtil.toInt(value);
+                                if (contentLength <= 0) 
+                                contentLength = HttpParser.NO_CONTENT;
                             }
-
-                            foundHttpValue(value);
+                            break;
+                            
+                          case HttpHeaders.CONNECTION_ORDINAL:
+                            close = (HttpHeaderValues.CLOSE_ORDINAL == vo);
+                            break;
+                            
+                          case HttpHeaders.TRANSFER_ENCODING_ORDINAL:
+                            if (HttpHeaderValues.CHUNKED_ORDINAL == vo)
+                                contentLength = CHUNKED_CONTENT;
+                            else
+                            {
+                                String c = value.toString();
+                                if (c.endsWith(HttpHeaderValues.CHUNKED))
+                                    contentLength = CHUNKED_CONTENT;
+                                else if (c.indexOf(HttpHeaderValues.CHUNKED) >= 0) 
+                                throw new IOException("BAD REQUEST");
+                            }
+                            break;
+                            
+                          case HttpHeaders.CONTENT_TYPE_ORDINAL:
+                            content = true;
+                            break;
                         }
-                        
-                        eol= ch;
-                        state= STATE_HEADER;
-                        return;
+                        handler.foundHttpValue(value);
                     }
-                    else if (ch != SPACE && ch != TAB)
-                    {
-                        if (length == -1)
-                            source.mark();
-                        length= source.getIndex() - source.markIndex();
-                    }
-                    break;
+                    eol = ch;
+                    state = STATE_HEADER;
+                    return;
+                }
+                else if (ch != SPACE && ch != TAB)
+                {
+                    if (length == -1) 
+                    source.mark();
+                    length = source.getIndex() - source.markIndex();
+                }
+                break;
             }
         }
 
@@ -393,169 +390,174 @@ public class HttpParser
         {
             if (eol == CARRIAGE_RETURN && source.peek() == LINE_FEED)
             {
-                eol= source.get();
+                eol = source.get();
                 continue;
             }
-            eol= 0;
-
+            eol = 0;
             switch (state)
             {
-                case STATE_EOF_CONTENT :
-                    chunk= source.get(-1);
-                    foundContent(contentPosition, chunk);
+              case STATE_EOF_CONTENT:
+                chunk = source.get(-1);
+                handler.foundContent(contentPosition, chunk);
+                contentPosition += chunk.length();
+                return;
+                
+              case STATE_CONTENT:
+                {
+                    int length = source.length();
+                    int remaining = contentLength - contentPosition;
+                    if (remaining == 0)
+                    {
+                        state = STATE_END;
+                        handler.messageComplete(contentPosition);
+                        return;
+                    }
+                    else if (length > remaining) 
+                    length = remaining;
+                    chunk = source.get(length);
+                    handler.foundContent(contentPosition, chunk);
                     contentPosition += chunk.length();
-                    return;
-
-                case STATE_CONTENT :
+                }
+                return;
+                
+              case STATE_CHUNKED_CONTENT:
+                ch = source.peek();
+                if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
+                    eol = source.get();
+                else if (ch <= SPACE)
+                    source.get();
+                else
+                {
+                    chunkLength = 0;
+                    chunkPosition = 0;
+                    state = STATE_CHUNK_SIZE;
+                }
+                break;
+                
+              case STATE_CHUNK_SIZE:
+                ch = source.get();
+                if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
+                {
+                    eol = ch;
+                    if (chunkLength == 0)
                     {
-                        int length= source.length();
-                        int remaining= contentLength - contentPosition;
-                        if (remaining == 0)
-                        {
-                            state= STATE_END;
-                            messageComplete(contentPosition);
-                            return;
-                        }
-                        else if (length > remaining)
-                            length= remaining;
-                        chunk= source.get(length);
-                        foundContent(contentPosition, chunk);
-                        contentPosition += chunk.length();
+                        state = STATE_END;
+                        handler.messageComplete(contentPosition);
+                        return;
                     }
-                    return;
-
-                case STATE_CHUNKED_CONTENT :
-                    ch= source.peek();
-                    if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
-                        eol= source.get();
-                    else if (ch <= SPACE)
-                        source.get();
                     else
+                        state = STATE_CHUNK;
+                }
+                else if (ch <= SPACE || ch == SEMI_COLON)
+                    state = STATE_CHUNK_PARAMS;
+                else if (ch >= '0' && ch <= '9')
+                    chunkLength = chunkLength * 16 + (ch - '0');
+                else if (ch >= 'a' && ch <= 'f')
+                    chunkLength = chunkLength * 16 + (10 + ch - 'a');
+                else if (ch >= 'A' && ch <= 'F')
+                    chunkLength = chunkLength * 16 + (10 + ch - 'A');
+                else
+                    Portable.throwRuntime("bad chunk char: " + ch);
+                break;
+                
+              case STATE_CHUNK_PARAMS:
+                ch = source.get();
+                if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
+                {
+                    eol = ch;
+                    if (chunkLength == 0)
                     {
-                        chunkLength= 0;
-                        chunkPosition= 0;
-                        state= STATE_CHUNK_SIZE;
+                        state = STATE_END;
+                        handler.messageComplete(contentPosition);
+                        return;
                     }
-                    break;
-
-                case STATE_CHUNK_SIZE :
-                    ch= source.get();
-                    if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
-                    {
-                        eol= ch;
-                        if (chunkLength == 0)
-                        {
-                            state= STATE_END;
-                            messageComplete(contentPosition);
-                            return;
-                        }
-                        else
-                            state= STATE_CHUNK;
-                    }
-                    else if (ch <= SPACE || ch == SEMI_COLON)
-                        state= STATE_CHUNK_PARAMS;
-                    else if (ch >= '0' && ch <= '9')
-                        chunkLength= chunkLength * 16 + (ch - '0');
-                    else if (ch >= 'a' && ch <= 'f')
-                        chunkLength= chunkLength * 16 + (10 + ch - 'a');
-                    else if (ch >= 'A' && ch <= 'F')
-                        chunkLength= chunkLength * 16 + (10 + ch - 'A');
                     else
-                        Portable.throwRuntime("bad chunk char: " + ch);
-
-                    break;
-
-                case STATE_CHUNK_PARAMS :
-                    ch= source.get();
-                    if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
+                        state = STATE_CHUNK;
+                }
+                break;
+                
+              case STATE_CHUNK:
+                {
+                    int length = source.length();
+                    int remaining = chunkLength - chunkPosition;
+                    if (remaining == 0)
                     {
-                        eol= ch;
-                        if (chunkLength == 0)
-                        {
-                            state= STATE_END;
-                            messageComplete(contentPosition);
-                            return;
-                        }
-                        else
-                            state= STATE_CHUNK;
+                        state = STATE_CHUNKED_CONTENT;
+                        break;
                     }
-                    break;
-
-                case STATE_CHUNK :
-                    {
-                        int length= source.length();
-                        int remaining= chunkLength - chunkPosition;
-                        if (remaining == 0)
-                        {
-                            state= STATE_CHUNKED_CONTENT;
-                            break;
-                        }
-                        else if (length > remaining)
-                            length= remaining;
-                        chunk= source.get(length);
-                        foundContent(contentPosition, chunk);
-                        contentPosition += chunk.length();
-                        chunkPosition += chunk.length();
-                    }
-                    return;
+                    else if (length > remaining) 
+                    length = remaining;
+                    chunk = source.get(length);
+                    handler.foundContent(contentPosition, chunk);
+                    contentPosition += chunk.length();
+                    chunkPosition += chunk.length();
+                }
+                return;
             }
         }
     }
-    
+
     /* ------------------------------------------------------------------------------- */
     public void reset()
     {
-        state=STATE_START;
-        contentLength=0;
-        contentPosition=0;
-        length=0;
+        state = STATE_START;
+        contentLength = UNKNOWN_CONTENT;
+        contentPosition = 0;
+        length = 0;
+        close=false;
+        content=false;
     }
 
-    /**
-     * This is the method called by parser when the HTTP version is found
-     */
-    protected void foundField0(Buffer ref)
+    public static class EventHandler
     {
-    }
 
-    /**
-     * This is the method called by parser when HTTP response code is found
-     */
-    protected void foundField1(Buffer ref)
-    {
-    }
+        /**
+         * This is the method called by parser when the HTTP request method or response version is
+         * found
+         */
+        public void foundStartLineToken0(Buffer ref)
+        {
+        }
 
-    /**
-     * This is the method called by parser when HTTP response reason is found
-     */
-    protected void foundField2(Buffer ref)
-    {
-    }
+        /**
+         * This is the method called by parser when HTTP requestURI or response code is found
+         */
+        public void foundStartLineToken1(Buffer ref)
+        {
+        }
 
-    /**
-     * This is the method called by parser when A HTTP Header name is found
-     */
-    protected void foundHttpHeader(Buffer ref)
-    {
-    }
+        /**
+         * This is the method called by parser when HTTP request version or response reason is
+         * found
+         */
+        public void foundStartLineToken2(Buffer ref)
+        {
+        }
 
-    /**
-     * This is the method called by parser when a HTTP Header value is found
-     */
-    protected void foundHttpValue(Buffer ref)
-    {
-    }
+        /**
+         * This is the method called by parser when A HTTP Header name is found
+         */
+        public void foundHttpHeader(Buffer ref)
+        {
+        }
 
-    protected void headerComplete()
-    {
-    }
-    
-    protected void foundContent(int index, Buffer ref)
-    {
-    }
+        /**
+         * This is the method called by parser when a HTTP Header value is found
+         */
+        public void foundHttpValue(Buffer ref)
+        {
+        }
 
-    protected void messageComplete(int contextLength)
-    {
+        public void headerComplete()
+        {
+        }
+
+        public void foundContent(int index, Buffer ref)
+        {
+        }
+
+        public void messageComplete(int contextLength)
+        {
+        }
     }
-    
 }

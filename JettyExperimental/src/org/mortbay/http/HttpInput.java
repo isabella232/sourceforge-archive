@@ -9,18 +9,29 @@ import org.mortbay.io.InBuffer;
  * An input class that can process a HTTP stream, extracting headers, dechunking content and
  * handling persistent connections. The class is non-blocking.
  */
-public class HttpInput
+public class HttpInput extends HttpParser.EventHandler
 {
     public final static int EOF=-1,NOP=0,HEADER=1,CONTENT=2;
+    private HttpParser _parser;
+    
     private Buffer _buffer;
+    
+    private Buffer _content;
     private Buffer _parsedContent;
+
+    private boolean _headerParsed;
+    private HttpHeader _header;
     private HttpHeader _parsedHeader;
-    private Parser _parser;
+    
+    private Buffer _headerName;
+    private boolean _messageComplete;
+    private boolean _request;
 
     public HttpInput(Buffer buffer,HttpHeader header)
     {
         _buffer=buffer;
-        _parser=new Parser(_buffer,header);
+        _header=header;
+        _parser=new HttpParser(_buffer,this);
     }
 
     /*
@@ -34,7 +45,7 @@ public class HttpInput
         else
             while(_parser.inContentState())
                 _parser.parseNext();
-        _parser._content=null;
+        _content=null;
         _parser.setState(HttpParser.STATE_END);
     }
 
@@ -47,8 +58,9 @@ public class HttpInput
         _buffer=null;
         _parsedContent=null;
         _parsedHeader=null;
-        if (_parser!=null)
-            _parser.destroy();
+        _content=null;
+        _header=null;
+        _headerName=null;
         _parser=null;
     }
 
@@ -59,7 +71,7 @@ public class HttpInput
 
     public HttpHeader getHttpHeader()
     {
-        return _parser._header;
+        return _header;
     }
 
     public Buffer getParsedContent()
@@ -86,23 +98,23 @@ public class HttpInput
     {
         try
         {
-            if(!_parser._headerComplete&&_parser._content==null&&!_parser._messageComplete)
+            if(!_headerParsed&&_content==null&&!_messageComplete)
                 _parser.parseNext();
-            if(_parser._headerComplete)
+            if(_headerParsed)
             {
-                _parser._headerComplete=false;
-                _parsedHeader=_parser._header;
+                _headerParsed=false;
+                _parsedHeader=_header;
                 return HEADER;
             }
             this._parsedHeader=null;
-            if(_parser._content!=null)
+            if(_content!=null)
             {
-                _parsedContent=_parser._content;
-                _parser._content=null;
+                _parsedContent=_content;
+                _content=null;
                 return CONTENT;
             }
             this._parsedContent=null;
-            if(_parser._messageComplete)
+            if(_messageComplete)
                 return EOF;
             return NOP;
         }
@@ -117,113 +129,77 @@ public class HttpInput
     public void reset()
     {
         _parser.reset();
+        _header.clear();
+        _headerParsed=false;
+        _messageComplete=false;
+        _content=null;
         _parser.setState(HttpParser.STATE_START);
         _parsedHeader=null;
         _parsedContent=null;
     }
 
-
-
-    /* ------------------------------------------------------------------------------- */
-    /* ------------------------------------------------------------------------------- */
-    private class Parser extends HttpParser
+    public void foundContent(int index, Buffer content)
     {
-        Buffer _content;
-        HttpHeader _header;
-        boolean _headerComplete;
-        Buffer _headerName;
-        boolean _messageComplete;
-        boolean _request;
+        _content = content;
+    }
 
-        private Parser(Buffer source,HttpHeader header)
+    public void foundStartLineToken0(Buffer field)
+    {
+        reset();
+
+        // assume this is a request
+        _request = true;
+        Buffer method = HttpMethods.CACHE.get(field);
+        if (method == null)
         {
-            super(source);
-            _header=header;
-        }
-
-        /* ------------------------------------------------------------------------------- */
-        /** destroy.
-         * 
-         */
-        public void destroy()
-        {
-            _content=null;
-            _header=null;
-            _headerName=null;
-        }
-
-        public void foundContent(int index,Buffer content)
-        {
-            _content=content;
-        }
-
-        public void foundField0(Buffer field)
-        {
-            reset();
-
-            // assume this is a request
-            _request=true;
-            Buffer method=HttpMethods.CACHE.get(field);
-            if(method==null)
+            // maybe this is a response?
+            Buffer version = HttpVersions.CACHE.lookup(field);
+            if (version != null)
             {
-                // maybe this is a response?
-                Buffer version=HttpVersions.CACHE.lookup(field);
-                if(version!=null)
-                {
-                    _request=false;
-                    _header.setVersion(version);
-                }
-                else
-                    method=HttpMethods.CACHE.lookup(field).asReadOnlyBuffer();
+                _request = false;
+                _header.setVersion(version);
             }
-            if(method!=null)
-                _header.setMethod(method);
-            _headerName=null;
-        }
-
-        public void foundField1(Buffer field)
-        {
-            if(_request)
-                _header.setURI(field.asReadOnlyBuffer());
             else
-                _header.setStatus(BufferUtil.toInt(field));
+                method = HttpMethods.CACHE.lookup(field).asReadOnlyBuffer();
         }
+        if (method != null) 
+        _header.setMethod(method);
+        _headerName = null;
+    }
 
-        public void foundField2(Buffer field)
-        {
-            if(_request)
-                _header.setVersion(HttpVersions.CACHE.lookup(field).asReadOnlyBuffer());
-            else
-                _header.setReason(field.asReadOnlyBuffer());
-        }
+    public void foundStartLineToken1(Buffer field)
+    {
+        if (_request)
+            _header.setURI(field.asReadOnlyBuffer());
+        else
+            _header.setStatus(BufferUtil.toInt(field));
+    }
 
-        public void foundHttpHeader(Buffer header)
-        {
-            _headerName=header.asReadOnlyBuffer();
-        }
+    public void foundStartLineToken2(Buffer field)
+    {
+        if (_request)
+            _header.setVersion(HttpVersions.CACHE.lookup(field).asReadOnlyBuffer());
+        else
+            _header.setReason(field.asReadOnlyBuffer());
+    }
 
-        public void foundHttpValue(Buffer value)
-        {
-            _header.add(_headerName,value);
-        }
+    public void foundHttpHeader(Buffer header)
+    {
+        _headerName = header.asReadOnlyBuffer();
+    }
 
-        public void headerComplete()
-        {
-            _headerComplete=true;
-        }
+    public void foundHttpValue(Buffer value)
+    {
+        _header.add(_headerName, value);
+    }
 
-        public void messageComplete(int contextLength)
-        {
-            _messageComplete=true;
-        }
+    public void headerComplete()
+    {
+        _headerParsed = true;
+    }
 
-        public void reset()
-        {
-            super.reset();
-            _header.clear();
-            _headerComplete=false;
-            _messageComplete=false;
-            _content=null;
-        }
+    public void messageComplete(int contextLength)
+    {
+        _messageComplete = true;
     }
 }

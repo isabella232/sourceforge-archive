@@ -5,14 +5,14 @@
 * $Id$
 * ============================================== */
 
-package org.mortbay.http.server;
+package org.mortbay.http.bio;
 
 import java.io.IOException;
 
-import org.mortbay.http.server.HttpHandler;
-import org.mortbay.http.server.HttpRequest;
-import org.mortbay.http.server.HttpResponse;
-import org.mortbay.http.server.SocketListener;
+import org.mortbay.http.bio.HttpHandler;
+import org.mortbay.http.bio.HttpRequest;
+import org.mortbay.http.bio.HttpResponse;
+import org.mortbay.http.bio.SocketListener;
 
 /**
  * Temporary Servler class to get things running.

@@ -374,9 +374,11 @@ public class ThreadPool implements LifeCycle, Serializable
      */
     public static class PoolThread extends Thread implements Pool.PondLife
     {
-        ThreadPool _threadPool;
         Pool _pool;
+        ThreadPool _jobPool;
         Object _job;
+        ThreadPool _runPool;
+        Object _run;
         int _id;
         String _name;
 
@@ -410,24 +412,34 @@ public class ThreadPool implements LifeCycle, Serializable
             synchronized (this)
             {
                 _pool= null;
-                if (_job == null)
+                if (_run == null)
                     notify();
                 else
                     interrupt();
             }
         }
+        
         /* ------------------------------------------------------------ */
         public void leavePool()
         {
             synchronized (this)
             {
                 _pool= null;
-                if (_job == null || _threadPool == null)
+                if (_runPool == null || _jobPool == null)
                     notify();
-                else
+                
+                if (_job!=null && _jobPool!=null)
                 {
-                    _threadPool.stopJob(this, _job);
+                    _jobPool.stopJob(this, _job);
                     _job= null;
+                    _jobPool=null;
+                }
+                
+                if (_run!=null && _runPool!=null)
+                {
+                    _runPool.stopJob(this, _run);
+                    _run= null;
+                    _runPool=null;
                 }
             }
         }
@@ -437,7 +449,7 @@ public class ThreadPool implements LifeCycle, Serializable
         {
             synchronized (this)
             {
-                _threadPool= pool;
+                _jobPool= pool;
                 _job= job;
                 notify();
             }
@@ -449,8 +461,9 @@ public class ThreadPool implements LifeCycle, Serializable
          */
         public void run()
         {
-            Object job= null;
-            ThreadPool threadPool= null;
+            _run= null;
+            _runPool= null;
+            
             while (_pool != null && _pool.isStarted())
             {
                 try
@@ -458,25 +471,23 @@ public class ThreadPool implements LifeCycle, Serializable
                     synchronized (this)
                     {
                         // Wait for a job.
-                        if (job == null && _pool != null && _pool.isStarted() && _job == null)
+                        if (_run == null && _pool != null && _pool.isStarted() && _job == null)
                             wait(_pool.getMaxIdleTimeMs());
 
                         if (_job != null)
                         {
-                            job= _job;
+                            // copy job to run fields
+                            _run= _job;
                             _job= null;
+                            _runPool= _jobPool;
+                            _jobPool= null;
                         }
 
-                        if (_threadPool != null)
-                        {
-                            threadPool= _threadPool;
-                            _threadPool= null;
-                        }
                     }
 
-                    // handle
-                    if (job != null)
-                        threadPool.handle(job);
+                    // handle run outside of sync
+                    if (_run != null && _runPool!=null)
+                        _runPool.handle(_run);
                 }
                 catch (InterruptedException e)
                 {}
@@ -484,8 +495,9 @@ public class ThreadPool implements LifeCycle, Serializable
                 {
                     synchronized (this)
                     {
-                        boolean got= job != null;
-                        job= null;
+                        boolean got= _run != null;
+                        _run= null;
+                        _runPool=null;
                         try
                         {
                             if (got && _pool != null)

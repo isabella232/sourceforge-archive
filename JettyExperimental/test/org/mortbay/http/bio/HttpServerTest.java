@@ -2,7 +2,7 @@
  * Created on 10/01/2004
  *
  */
-package org.mortbay.http.server;
+package org.mortbay.http.bio;
 
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;

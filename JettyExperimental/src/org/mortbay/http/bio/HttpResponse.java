@@ -5,10 +5,9 @@
  * $Id$
  * ============================================== */
  
-package org.mortbay.http.server;
+package org.mortbay.http.bio;
 
 import org.mortbay.http.HttpHeader;
-import org.mortbay.http.HttpOutputStream;
 import org.mortbay.io.Portable;
 
 /* ------------------------------------------------------------------------------- */

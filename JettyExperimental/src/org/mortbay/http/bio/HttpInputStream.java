@@ -1,8 +1,10 @@
-package org.mortbay.http;
+package org.mortbay.http.bio;
 
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.mortbay.http.HttpHeader;
+import org.mortbay.http.HttpInput;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Portable;
 

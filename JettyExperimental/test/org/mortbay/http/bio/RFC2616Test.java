@@ -4,7 +4,7 @@
  * To change the template for this generated file go to
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
  */
-package org.mortbay.http.server;
+package org.mortbay.http.bio;
 
 import java.io.IOException;
 import java.util.Date;

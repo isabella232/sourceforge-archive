@@ -3,7 +3,7 @@
 // $Id$
 // ========================================================================
 
-package org.mortbay.http.server;
+package org.mortbay.http.bio;
 import java.io.IOException;
 import java.net.Socket;
 

@@ -5,14 +5,13 @@
  * $Id$
  * ============================================== */
  
-package org.mortbay.http.server;
+package org.mortbay.http.bio;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 
 import org.mortbay.http.HttpHeader;
-import org.mortbay.http.HttpInputStream;
 import org.mortbay.io.Portable;
 
 /* ------------------------------------------------------------------------------- */
@@ -52,7 +51,7 @@ public class HttpRequest extends HttpHeader
     public void setHttpInputStream(HttpInputStream in)
     {
         if (in.getHttpHeader()!=this)
-            Portable.throwIllegalState("not stream for request");
+            Portable.throwIllegalState("not stream for request: "+in.getHttpHeader());
         _in=in;;
     }
     

@@ -11,11 +11,11 @@ import java.io.IOException;
 
 import org.mortbay.http.HttpHeaderValues;
 import org.mortbay.http.HttpHeaders;
-import org.mortbay.http.HttpInputStream;
-import org.mortbay.http.HttpOutputStream;
-import org.mortbay.http.server.HttpHandler;
-import org.mortbay.http.server.HttpRequest;
-import org.mortbay.http.server.HttpResponse;
+import org.mortbay.http.bio.HttpHandler;
+import org.mortbay.http.bio.HttpInputStream;
+import org.mortbay.http.bio.HttpOutputStream;
+import org.mortbay.http.bio.HttpRequest;
+import org.mortbay.http.bio.HttpResponse;
 
 
 public class DumpHandler implements HttpHandler

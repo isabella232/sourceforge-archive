@@ -12,6 +12,6 @@ package org.mortbay.http;
 /**
  * Temporary Servler class to get things running.
  */
-public class HttpServer  extends org.mortbay.http.server.HttpServer
+public class HttpServer  extends org.mortbay.http.bio.HttpServer
 {
 }
