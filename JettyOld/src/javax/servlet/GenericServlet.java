@@ -1,7 +1,7 @@
 /*
  * $Id$
  * 
- * Copyright (c) 1996-1998 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1996-1999 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -76,7 +76,7 @@ public abstract class GenericServlet
      */
 
     public void destroy() {
-
+	log("destroy");
     }
     
     /**
@@ -139,11 +139,11 @@ public abstract class GenericServlet
      * Returns a string that contains information about the servlet,
      * such as its author, version, and copyright.  This method
      * must be overridden in order to return this information.
-     * If it is not overridden, null is returned.
+     * If it is not overridden, an empty string is returned.
      */
 
     public String getServletInfo() {
-	return null;
+	return "";
     }
 
     /**

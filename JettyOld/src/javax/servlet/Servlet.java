@@ -1,7 +1,7 @@
 /*
  * $Id$
  * 
- * Copyright (c) 1995-1998 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1995-1999 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -24,41 +24,23 @@ package javax.servlet;
 import java.io.IOException;
 
 /**
- * This interface is for developing servlets.  A servlet is a body of
- * Java code that is loaded into and runs inside a servlet engine,
- * such as a web server.  It receives and responds to requests from
- * clients.  For example, a client may need information from a
- * database; a servlet can be written that receives the request, gets
- * and processes the data as needed by the client, and then returns it
- * to the client.
- * 
- * <P>All servlets implement this interface.  Servlet writers typically
+ * A Servlet is a small program that runs inside a web server. It
+ * receives and responds to requests from web clients.
+ *
+ * <p>All servlets implement this interface. Servlet writers typically
  * do this by subclassing either GenericServlet, which implements the
  * Servlet interface, or by subclassing GenericServlet's descendent,
- * HttpServlet.  Developers need to directly implement this interface
- * only if their servlets cannot (or choose not to) inherit from
- * GenericServlet or HttpServlet.  For example, RMI or CORBA objects
- * that act as servlets will directly implement this interface.
+ * HttpServlet.
  *
- * <p>The Servlet interface defines methods to initialize a servlet, to
- * receive and respond to client requests, and to destroy a servlet and
- * its resources.  These are known as life-cycle methods, and are called
- * by the network service in the following manner:
- *
+ * <p>The Servlet interface defines methods to initialize a servlet,
+ * to service requests, and to remove a servlet from the server. These
+ * are known as life-cycle methods and are called by the network
+ * service in the following manner:
  * <ol>
  * <li>Servlet is created then <b>init</b>ialized.
  * <li>Zero or more <b>service</b> calls from clients are handled
  * <li>Servlet is <b>destroy</b>ed then garbage collected and finalized
  * </ol>
- *
- * Initializing a servlet involves doing any expensive one-time setup,
- * such as loading configuration data from files or starting helper
- * threads.  Service calls from clients are handled using a request and
- * response paradigm.  They rely on the underlying network transport to
- * provide quality of service guarantees, such as reordering,
- * duplication, message integrity, privacy, etc. Destroying a servlet
- * involves undoing any initialization work and synchronizing
- * persistent state with the current in-memory state.
  * 
  * <p>In addition to the life-cycle methods, the Servlet interface
  * provides for a method for the servlet to use to get any startup
@@ -72,15 +54,18 @@ import java.io.IOException;
 public interface Servlet {
 
     /**
-     * Initializes the servlet. The method is called once,
-     * automatically, by the servlet engine when it loads the servlet.
-     * It is guaranteed to finish before any service requests are
-     * accepted.
-     * 
-     * <p>The init method should save the ServletConfig object so that
-     * it can be returned by the getServletConfig method.  If a fatal
-     * initialization error occurs, the init method should throw an
-     * appropriate "UnavailableException" exception.
+     * Called by the web server when the Servlet is placed into
+     * service. This method is called exactly once by the
+     * host servlet engine after the Servlet object is instantiated
+     * and must successfully complete before any requests can
+     * be routed through the Servlet.
+     *
+     * <p>If a ServletException is thrown during the execution
+     * of this method, a servlet engine may not place the servlet
+     * into service. If the method does not return within a
+     * server defined time-out period, the servlet engine may
+     * assume that the servlet is nonfunctional and may not
+     * place it into service.
      *
      * @see UnavailableException
      * @see javax.servlet.Servlet#getServletConfig()
@@ -92,11 +77,17 @@ public interface Servlet {
     public void init(ServletConfig config) throws ServletException;
 
     /**
-     * Returns a servlet config object, which contains any
+     * Returns a <tt>ServletConfig</tt> object, which contains any
      * initialization parameters and startup configuration for this
      * servlet.  This is the ServletConfig object passed to the init
      * method; the init method should have stored this object so that
      * this method could return it.
+     *
+     * <p>The servlet writer is responsible for storing the
+     * <tt>ServletConfig</tt> object passed to the init method so
+     * it may be accessed via this method. For your convience, the
+     * <tt>GenericServlet</tt> implementation of this interface
+     * already does this.
      *
      * @see javax.servlet.Servlet#init
      */
@@ -104,24 +95,20 @@ public interface Servlet {
     public ServletConfig getServletConfig();
 
     /**
-     * Carries out a single request from the client.  The method
-     * implements a request and response paradigm.  The request object
-     * contains information about the service request, including
-     * parameters provided by the client.  The response object is used
-     * to return information to the client.  The request and response
-     * objects rely on the underlying network transport for quality of
-     * service guarantees, such as reordering, duplication, privacy,
-     * and authentication.
+     * Called by the servlet engine to allow the servlet to respond
+     * to a request. This method can only be called when the servlet
+     * has been properly initialized. The servlet engine may block
+     * pending requests to this servlet until initialization is
+     * complete. Similarly, when a servlet is removed from service
+     * (has its destroy method called), no more requests can be
+     * serviced by this instance of the servlet.
      *
-     * <p>Service requests are not handled until servlet initialization
-     * has completed.  Any requests for service that are received
-     * during initialization block until it is complete.  Note that
-     * servlets typically run inside multi-threaded servers; servers
-     * can handle multiple service requests simultaneously.  It is the
-     * servlet writer's responsibility to synchronize access to any
-     * shared resources, such as network connections or the servlet's
-     * class and instance variables.  Information on multi-threaded
-     * programming in Java can be found in <a
+     * <p>Note that servlets typically run inside of multi threaded
+     * servlet engines that can handle multiple requests simultaneously.
+     * It is the servlet writer's responsibility to synchronize access
+     * to any shared resources, such as network connections or
+     * the servlet's class and instance variables. Information on
+     * multi-threaded programming in Java can be found in <a
      * href="http://java.sun.com/Series/Tutorial/java/threads/multithreaded.html">the
      * Java tutorial on multi-threaded programming</a>.
      *
@@ -135,11 +122,12 @@ public interface Servlet {
 	throws ServletException, IOException;
 
     /**
-     * Returns a string containing information about the servlet,
-     * such as its author, version, and copyright. As this method may
-     * be called to display such information in an administrative tool
-     * that is servlet engine specfic, the string that this method
-     * returns should be plain text and not contain markup.
+     * Allows the servlet to provide information about itself to
+     * the host servlet runner such as author, version, and
+     * copyright. As this method may be called to display such
+     * information in an administrative tool, the string that
+     * this method returns should be plain text and not
+     * composed of markup of any kind (such as HTML, XML, etc).
      *
      * @return String containing servlet information
      */
@@ -147,21 +135,17 @@ public interface Servlet {
     public String getServletInfo();
 
     /**
-     * Cleans up whatever resources are being held (e.g., memory,
-     * file handles, threads) and makes sure that any persistent state
-     * is synchronized with the servlet's current in-memory state.
-     * The method is called once, automatically, by the network
-     * service when it unloads the servlet. After destroy is run, it
-     * cannot be called again until the network service reloads the
-     * servlet.
+     * Called by the servlet engine when the servlet is removed from
+     * service. The servlet engine may not call this method until
+     * all threads within in the servlet's service method have
+     * exited or an engine specified timeout period has passed. After
+     * this method is run, the service method may not be called
+     * by the servlet engine on this instance of the servlet.
      *
-     * <p>When the network service removes a servlet, it calls destroy
-     * after all service calls have been completed, or a
-     * service-specific number of seconds have passed, whichever comes
-     * first.  In the case of long-running operations, there could be
-     * other threads running service requests when destroy is called.
-     * The servlet writer is responsible for making sure that any
-     * threads still in the service method complete.
+     * <p>This method gives the servlet an opprotunity to clean
+     * up whatever resources are being held (e.g., memory, file handles,
+     * thread) and makes sure that any persistent state is
+     * synchronized with the servlet's current in-memory state.
      */
 
     public void destroy();

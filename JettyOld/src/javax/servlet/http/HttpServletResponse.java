@@ -1,7 +1,7 @@
 /*
  * $Id$
  * 
- * Copyright (c) 1995-1998 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1995-1999 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -90,6 +90,9 @@ public interface HttpServletResponse extends ServletResponse {
      * rewriting canont be used with browsers which do not support
      * cookies.
      *
+     * <p>After this method is called, the response should be considered
+     * to be committed and should not be written to.
+     *
      * @param url the url to be encoded.
      * @return the encoded URL if encoding is needed; the unchanged URL
      * otherwise.
@@ -151,7 +154,10 @@ public interface HttpServletResponse extends ServletResponse {
      * to describe the problem.  The page is sent with a default HTML
      * header; the message is enclosed in simple body tags
      * (&lt;body&gt;&lt;/body&gt;).
-     * 
+     *
+     * <p>After using this method, the response should be considered
+     * to be committed and should not be written to.
+     *
      * @param sc the status code
      * @param msg the detail message
      * @exception IOException If an I/O error has occurred.  */

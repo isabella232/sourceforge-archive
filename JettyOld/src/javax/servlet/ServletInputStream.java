@@ -1,7 +1,7 @@
 /*
  * $Id$
  * 
- * Copyright (c) 1995-1998 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1995-1999 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -67,6 +67,7 @@ public abstract class ServletInputStream extends InputStream {
 	    return 0;
 	}
 	int count = 0, c;
+
 	while ((c = read()) != -1) {
 	    b[off++] = (byte)c;
 	    count++;

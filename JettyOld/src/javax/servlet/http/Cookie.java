@@ -1,7 +1,7 @@
 /*
  * $Id$
  * 
- * Copyright (c) 1996-1997 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1996-1999 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -22,15 +22,8 @@
 package javax.servlet.http;
 
 import java.io.IOException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.text.MessageFormat;
-import java.util.Enumeration;
 import java.util.ResourceBundle;
-import java.util.StringTokenizer;
-import java.util.Vector;
-
 
 /**
  * This class represents a "Cookie", as used for session management with
@@ -108,7 +101,6 @@ public class Cookie implements Cloneable {
     private String path;	// ;Path=VALUE ... URLs that see the cookie
     private boolean secure;	// ;Secure ... e.g. use SSL
     private int version = 0;	// ;Version=1 ... means RFC 2109++ style
-
 
     /**
      * Defines a cookie with an initial name/value pair. Names must not
@@ -225,7 +217,6 @@ public class Cookie implements Cloneable {
 	return maxAge;
     }
 
-
     /**
      * This cookie should be presented only with requests beginning
      * with this URL.  Read RFC 2109 for a specification of the default
@@ -339,7 +330,6 @@ public class Cookie implements Cloneable {
     public void setVersion (int v) {
 	version = v;
     }
-
 
     // Note -- disabled for now to allow full Netscape compatibility
     // from RFC 2068, token special case characters

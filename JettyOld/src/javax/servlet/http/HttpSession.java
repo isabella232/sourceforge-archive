@@ -1,7 +1,7 @@
 /*
  * $Id$
  * 
- * Copyright (c) 1997 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1997-1999 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -29,10 +29,8 @@ package javax.servlet.http;
  * Sessions are used to
  * maintain state and user identity across multiple page requests.  
  *
- * <P>A session can be maintained either by using cookies or by URL 
- * rewriting. To expose whether the client supports 
- * cookies, HttpSession 
- * defines an isCookieSupportDetermined method and an isUsingCookies method. 
+ * <p>A session can be maintained either by using cookies or by URL
+ * rewriting.
  *
  * <P>HttpSession defines methods which store these types of data:
  * <UL>

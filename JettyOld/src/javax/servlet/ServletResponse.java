@@ -1,7 +1,7 @@
 /*
  * $Id$
  * 
- * Copyright (c) 1995-1998 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1995-1999 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -66,6 +66,9 @@ public interface ServletResponse {
      * assigned content type, or one which the client understands.
      * If no content type has yet been assigned, it is implicitly
      * set to <em>text/plain</em>
+     *
+     * <p>See RFC 2047 for more infomration about character encoding
+     * and MIME.
      */
 
     public String getCharacterEncoding ();

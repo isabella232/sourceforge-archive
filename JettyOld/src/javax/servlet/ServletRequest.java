@@ -1,7 +1,7 @@
 /*
  * $Id$
  * 
- * Copyright (c) 1995-1998 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1995-1999 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -27,11 +27,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
 
 /**
- * This interface is for getting data from the client to the servlet
- * for a service request.  Network service developers implement the
- * ServletRequest interface.  The methods are then used by servlets
- * when the service method is executed; the ServletRequest object is
- * passed as an argument to the service method.
+ * Defines a servlet engine generated object that enables a servlet
+ * to get information about a client request.
  *
  * <P> Some of the data provided by the ServletRequest object includes
  * parameter names and values, attributes, and an input stream.
@@ -52,47 +49,15 @@ import java.util.Enumeration;
 public interface ServletRequest {
 
     /**
-     * Returns the value of the named attribute of the request, or
-     * null if the attribute does not exist.  This method allows
-     * access to request information not already provided by the other
-     * methods in this interface.  Attribute names should follow the
-     * same convention as package names. 
-     * The following predefined attributes are provided.
-     *
-     * <TABLE BORDER>
-     * <tr>
-     *	<th>Attribute Name</th>
-     *	<th>Attribute Type</th>
-     *	<th>Description</th>
-     *	</tr>
-     *
-     * <tr>
-     *	<td VALIGN=TOP>javax.net.ssl.cipher_suite</td>
-     *	<td VALIGN=TOP>string</td>
-     *	<td>The string name of the SSL cipher suite in use, if the
-     *		request was made using SSL</td>
-     *	</tr>
-     *
-     * <tr>
-     *	<td VALIGN=TOP>javax.net.ssl.peer_certificates</td>
-     *	<td VALIGN=TOP>array of javax.security.cert.X509Certificate</td>
-     *	<td>The chain of X.509 certificates which authenticates the client.
-     *		This is only available when SSL is used with client
-     *		authentication is used.</td>
-     *	</tr>
-     *
-     * <tr>
-     *	<td VALIGN=TOP>javax.net.ssl.session</td>
-     *	<td VALIGN=TOP>javax.net.ssl.SSLSession</td>
-     *	<td>An SSL session object, if the request was made using SSL.</td>
-     *	</tr>
-     *
-     * </TABLE>
-     *
-     * <BR>
-     * <P>The package (and hence attribute) names beginning with java.*,
-     * and javax.* are reserved for use by Javasoft. Similarly, com.sun.*
-     * is reserved for use by Sun Microsystems.
+     * Returns the value of the named attribute of this request.
+     * This method may return null if the attribute does not exist.
+     * This method allows access to request information not already
+     * provided by other methods in this interface or data that
+     * was placed in the request object by other server components.
+     * 
+     * Attribute names should follow the same convention as package names.
+     * Names matching java.*, javax.*, and sun.* are reserved for
+     * definition by this specification or by the reference implementation.
      *
      * @param name the name of the attribute whose value is required
      */
@@ -107,6 +72,8 @@ public interface ServletRequest {
     
     /**
      * Returns the character set encoding for the input of this request.
+     * This method may return null if no character encoding is defined
+     * for this request body.
      */
 
     public String getCharacterEncoding ();
@@ -119,7 +86,7 @@ public interface ServletRequest {
     public int getContentLength();
 
     /**
-     * Returns the Internet Media Type of the request entity data, or
+     * Returns the Internet Media (MIME) Type of the request entity data, or
      * null if not known. Same as the CGI variable CONTENT_TYPE.
      */
 

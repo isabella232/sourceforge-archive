@@ -1,7 +1,7 @@
 /*
  * $Id$
  * 
- * Copyright (c) 1997 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1997-1999 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -99,7 +99,7 @@ public  class UnavailableException extends ServletException {
 	super (msg);
 	this.servlet = servlet;
 	if (seconds <= 0)
-	    seconds = -1;
+	    this.seconds = -1;
 	else
 	    this.seconds = seconds;
 	permanent = false;

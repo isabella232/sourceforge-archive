@@ -1,7 +1,7 @@
 /*
  * $Id$
  * 
- * Copyright (c) 1995-1998 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1995-1999 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -24,17 +24,19 @@ package javax.servlet;
 import java.util.Enumeration;
 
 /**
- * This interface is implemented by services in order to pass
- * configuration information to a servlet when it is first loaded.  A
- * service writer implementing this interface must write methods for the
- * servlet to use to get its initialization parameters and the context
- * in which it is running.
+ * Defines an object that a servlet engine generates to pass
+ * configuration information to a servlet when such servlet
+ * is initialized. The configuration information that this servlet
+ * will have access to is a set of name/value pairs that
+ * describe initialization parameters and the <tt>ServletContext</tt>
+ * object which describes the context within which the servlet
+ * will be running.
  */
 
 public interface ServletConfig {
 
     /**
-     * Returns the context for the servlet.
+     * Returns the <tt>ServletContext</tt> for this servlet.
      */
 
     public ServletContext getServletContext();
