@@ -135,6 +135,7 @@ public class JettyPage extends Page
     
     /* ------------------------------------------------------------ */
     private Section _section ;
+    private Links _links ;
     public Section getSection() {return _section;}
     
     /* ------------------------------------------------------------ */
@@ -146,37 +147,61 @@ public class JettyPage extends Page
         _path=path;
         if (context==null)
             context="";        
-        
+
         addHeader
             ("<link REL=\"STYLESHEET\" TYPE=\"text/css\" HREF=\""+
              context+"/jetty.css\">");
 
         addHeader("<link REL=\"icon\" HREF=\""+context+"/images/jicon.png\" TYPE=\"image/png\">");
         
-        Links links = (Links)__linkMap.match(_path);
-        if (links!=null)
+        addLinkHeader("Author",context,"http://www.mortbay.com");
+        addLinkHeader("Copyright",context,"LICENSE.html");
+        
+        _links = (Links)__linkMap.match(_path);
+        _section = (Section)__pathMap.match(_path);
+        if (_section==null)
         {
-                addHeader("<link REL=\"top\" HREF=\""+context+links._top+"\" >");
-            if (links._up!=null)
-                addHeader("<link REL=\"up\" HREF=\""+context+links._up+"\" >");
-            if (links._links!=null)
+            if("/".equals(_path))
+                _section=__section[0][0];
+            else
+                return;
+        }
+
+        
+        if (_links!=null)
+        {
+            if (path.equals(_links._up))
             {
-                addHeader("<link REL=\"first\" HREF=\""+context+links._links[0]+"\" >");
-                addHeader("<link REL=\"last\" HREF=\""+context+links._links[links._links.length-1]+"\" >");
-                for (int i=0;i<links._links.length;i++)
+                addLinkHeader("top",context,"/");
+                addLinkHeader("up",context,_links._top);
+                addLinkHeader("next",context,_links.get(0));
+            }
+            else
+            {
+                addLinkHeader("top",context,"/");
+                addLinkHeader("up",context,_links._up);
+            }
+
+            if (_links.size()>0)
+            {
+                addLinkHeader("first",context,_links.get(0));
+                addLinkHeader("last",context,_links.get(_links.size()-1));
+                for (int i=0;i<_links.size();i++)
                 {
-                    if (path.equals(links._links[i]))
+                    if (path.equals(_links.get(i)))
                     {
                         if (i>0)
-                            addHeader("<link REL=\"prev\" HREF=\""+context+links._links[i-1]+"\" >");
-                        if (i+1<links._links.length)
-                            addHeader("<link REL=\"next\" HREF=\""+context+links._links[i+1]+"\" >");
-                            
+                            addLinkHeader("prev",context,_links.get(i-1));
+                        if (i+1<_links.size())
+                            addLinkHeader("next",context,_links.get(i+1));
                     }
                 }
             }
         }
-        
+        else
+        {
+            addLinkHeader("top",context,"/");
+        }
         
 
         attribute("text","#000000");
@@ -191,14 +216,6 @@ public class JettyPage extends Page
         attribute("RIGHTMARGIN","0");
         attribute("TOPMARGIN","0");
         
-        _section = (Section)__pathMap.match(_path);
-        if (_section==null)
-        {
-            if("/".equals(_path))
-                _section=__section[0][0];
-            else
-                return;
-        }
         
         title("Jetty: "+_section._key);
         _home=false;
@@ -230,10 +247,21 @@ public class JettyPage extends Page
                 para=true;
             _table.add(para?"<P>":"<BR>");
             para=false;
+            
             if(_section.equals(__section[section][0]))
+            {
+                if (_links==null)
+                {    
+                    if (section>0)
+                        addLinkHeader("prev",context,__section[section-1][0]._uri);
+                    if ((section+1)<__section.length)
+                        addLinkHeader("next",context,__section[section+1][0]._uri);
+                }
+                
                 _table.add("<FONT SIZE=+1><B>"+
                            __section[section][0]._section+
                            "</B></FONT>");
+            }
             else
                 _table.add(__section[section][0]._link);
             
@@ -245,9 +273,19 @@ public class JettyPage extends Page
                 {
                     _table.add("<BR>");
                     if(_section.equals(__section[section][sub]))
+                    {
+                        if (_links==null)
+                        {
+                            addLinkHeader("up",context,__section[section][0]._uri);
+                            if (sub>0)
+                                addLinkHeader("prev",context,__section[section][sub-1]._uri);
+                            if ((sub+1)<__section[section].length)
+                                addLinkHeader("next",context,__section[section][sub+1]._uri);
+                        }
                         _table.add("<FONT SIZE=-1><B>"+
                                    __section[section][sub]._subSection+
                                    "</B></FONT>");
+                    }
                     else
                         _table.add(__section[section][sub]._link);
                 }
@@ -289,7 +327,18 @@ public class JettyPage extends Page
             _table.nest(new Block(Block.Pre));
         
     }
-    
+
+    /* ------------------------------------------------------------ */
+    private void addLinkHeader(String link, String context, String uri)
+    {
+        addHeader(
+            "<link REL=\""+
+            link+
+            "\" HREF=\""+
+            (uri.startsWith("/")?(context+uri):uri)+
+            "\" >");
+    }
+
     /* ------------------------------------------------------------ */
     public void completeSections()
     {
@@ -374,6 +423,20 @@ public class JettyPage extends Page
                 _links[i++]=tok.nextToken();
         }
 
+        int size()
+        {
+            if (_links==null)
+                return 0;
+            return _links.length;
+        }
+
+        String get(int i)
+        {
+            if (_links==null)
+                return null;
+            return _links[i];
+        }
+        
         public String toString()
         {
             StringBuffer buf = new StringBuffer();
