@@ -1025,7 +1025,7 @@ public class HttpConnection
                 context.log(_request,_response,bytes_written);
         }
         
-        return _persistent;
+        return (_tunnel!=null) || _persistent;
     }
 
     /* ------------------------------------------------------------ */
