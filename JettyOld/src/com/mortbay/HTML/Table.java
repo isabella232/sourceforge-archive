@@ -26,7 +26,21 @@ public class Table extends Block
     private Block cell = null;
     private static Hashtable threadNestingMap = null;
     private CompositeFactory cellNestFactory = null;
+    private Block _defaultHead=null;
+    private Block _defaultCell=null;
+    private Block _defaultRow=null;
 
+    /* ----------------------------------------------------------------- */
+    /** Construct Table
+     */
+    public Table()
+    {
+	super("TABLE");
+	if (threadNestingMap!=null)
+	    cellNestFactory = (CompositeFactory)
+		threadNestingMap.get(Thread.currentThread());
+    }
+    
     /* ----------------------------------------------------------------- */
     /** Construct Table
      */
@@ -57,6 +71,12 @@ public class Table extends Block
     {
 	unnest();
 	nest(row = new Block("TR"));
+	if (_defaultRow!=null)
+	{
+	    row.attributes(_defaultRow.attributes());
+	    if (_defaultRow.size()>0)
+		row.add(_defaultRow.contents());
+	}
 	cell=null;
 	return this;
     }
@@ -98,6 +118,12 @@ public class Table extends Block
     public Table newCell()
     {
 	newBlock("TD");
+	if (_defaultCell!=null)
+	{
+	    cell.attributes(_defaultCell.attributes());
+	    if (_defaultCell.size()>0)
+		cell.add(_defaultCell.contents());
+	}
 	return this;
     }
     
@@ -148,6 +174,12 @@ public class Table extends Block
     public Table newHeading()
     {
 	newBlock("TH");
+	if (_defaultHead!=null)
+	{
+	    cell.attributes(_defaultHead.attributes());
+	    if (_defaultHead.size()>0)
+		cell.add(_defaultHead.contents());
+	}
 	return this;
     }
     
@@ -287,7 +319,50 @@ public class Table extends Block
     public void setNestingFactory(CompositeFactory factory)
     {
 	cellNestFactory = factory;
-    }   
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /** Access the default row template.
+     * The Block returned is used as a template for all new rows added
+     * to the table.  Thus if attributes or content are added to the
+     * default row, the these are added to each new row in the table.
+     * @return The default row template
+     */
+    public Block defaultRow()
+    {
+	if (_defaultRow==null)
+	    _defaultRow=new Block("TR");
+	return _defaultRow;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Access the default header cell template.
+     * The Block returned is used as a template for all new header cells added
+     * to the table.  Thus if attributes or content are added to the
+     * default cell, the these are added to each new cell in the table.
+     * @return The default head cell template
+     */
+    public Block defaultHead()
+    {
+	if (_defaultHead==null)
+	    _defaultHead=new Block("TH");
+	return _defaultHead;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Access the default cell template.
+     * The Block returned is used as a template for all new cells added
+     * to the table.  Thus if attributes or content are added to the
+     * default cell, the these are added to each new cell in the table.
+     * @return The default cell template
+     */
+    public Block defaultCell()
+    {
+	if (_defaultCell==null)
+	    _defaultCell=new Block("TD");
+	return _defaultCell;
+    }
 }
 
 

@@ -105,7 +105,8 @@ public abstract class Element
 	{
 	    if(attributes!=null && attributes.length()>0)
 	    {
-		buf.append(' ');
+		if (!attributes.startsWith(" "))
+		    buf.append(' ');
 		buf.append(attributes);
 	    }
 	
@@ -140,6 +141,9 @@ public abstract class Element
 	if (Code.debug() && attributes.indexOf("=")>=0)
 	    Code.warning("Set attribute with old method: "+attributes+
 			 " on " + getClass().getName());
+
+	if (attributes==noAttributes)
+	    return this;
 	
 	if (this.attributes==null)
 	    this.attributes=attributes;
@@ -162,7 +166,9 @@ public abstract class Element
 	    Code.warning("Set attribute with old method: "+attributes+
 			 " on " + getClass().getName());
 	
-	if (this.attributes==null)
+	if (this.attributes==null ||
+	    this.attributes==noAttributes ||
+	    this.attributes.length()==0)
 	    this.attributes=attributes;
 	else
 	    this.attributes += ' '+attributes;
@@ -181,7 +187,13 @@ public abstract class Element
 	    attributeMap=new Hashtable(10);
 	
 	if (value!=null)
-	    attributeMap.put(attribute,"\""+value+'"');
+	{
+	    if (value instanceof String &&
+		((String)value).indexOf(' ')==-1)
+		attributeMap.put(attribute,value);
+	    else
+		attributeMap.put(attribute,"\""+value+'"');
+	}
 	return this;
     }
     

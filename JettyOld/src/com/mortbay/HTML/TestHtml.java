@@ -93,6 +93,22 @@ class TestHtml
 		table.addCell(text2);
 		table.addCell(text3);
 		page.add(table);
+		
+		page.add(rule);
+		table = new Table(2);
+		table.defaultRow().cssID("I1");
+		table.defaultHead().cssID("I2");
+		table.defaultCell().cssID("I3");
+		table.defaultCell().add("<B>");
+		table.newRow();
+		table.addHeading("Heading1");
+		table.addHeading(new Text("Heading2"));
+		table.addHeading(new Text("Heading3"));
+		table.newRow();
+		table.addCell("String1");
+		table.addCell(text2);
+		table.addCell(text3);
+		page.add(table);
 
 		page.add(rule);
 

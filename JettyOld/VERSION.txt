@@ -1,4 +1,9 @@
-release 2.2.6 - 5 Sep 1999
+Release 2.2.7 - 9 Sep 1999
+  + Reverted semantics of getRequestURI() to return untranslated URI.
+  + Added GzipFilter for content encoding.
+  + Added default row, head and cell elements to Table.
+
+Release 2.2.6 - 5 Sep 1999
   + New implementation of ThreadPool, avoids a thread leak problem.
   + Fixed Cookie max age order of magnitude bug.
   + Cookies always available from getCookies.

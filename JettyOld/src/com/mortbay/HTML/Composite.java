@@ -134,7 +134,7 @@ public class Composite extends Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** Write the composite
+    /** Write the composite.
      * The default implementation writes the elements sequentially. May
      * be overridden for more specialized behaviour.
      * @param out Writer to write the element to.
@@ -153,6 +153,26 @@ public class Composite extends Element
 	    else 
 		out.write(element.toString());
 	}
+    }
+    
+    /* ----------------------------------------------------------------- */
+    /** Contents of the composite.
+     */
+    public String contents()
+    {
+	StringBuffer buf = new StringBuffer();
+	synchronized(buf)
+	{
+	    for (int i=0; i <elements.size() ; i++)
+	    {
+		Object element = elements.elementAt(i);
+		if (element==null)
+		    buf.append("null");
+		else 
+		    buf.append(element.toString());
+	    }
+	}
+	return buf.toString();
     }
 
     /* ------------------------------------------------------------ */

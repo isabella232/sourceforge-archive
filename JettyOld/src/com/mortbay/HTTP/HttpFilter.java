@@ -46,7 +46,8 @@ public class HttpFilter extends FilterOutputStream
     }
     
     /* ----------------------------------------------------------------- */
-    /** This method must be implemented by the derived class to indicate
+    /** Check for handling of content type.
+     * This method must be implemented by the derived class to indicate
      * the content types handled by the filter. The default implementation
      * returns true for text content types.
      * Called by activate.
@@ -57,7 +58,8 @@ public class HttpFilter extends FilterOutputStream
     }
     
     /* ----------------------------------------------------------------- */
-    /** Activate is called on a filter by a HttpResponse, normally just
+    /** Activate a filter on a response.
+     * Activate is called on a filter by a HttpResponse, normally just
      * before the response headers are written. If canHandle() returns
      * true, the filter is inserted into the HttpResponse output stream and
      * a thread started to run the filter.

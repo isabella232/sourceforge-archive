@@ -146,6 +146,10 @@ public class DemoIndex extends IndexServlet
 		"/Jetty/Demo/embed.html",
 		"Server-side embedding of a URL fetched document"
 	    },
+	    {   "Content Encoding",
+		"/Jetty/Demo/encode.html",
+		"Encode content with GZIP"
+	    },
 	    {   "Forwarding",
 		"/Jetty/Demo/forward.html",
 		"Forwarding a request to another server"

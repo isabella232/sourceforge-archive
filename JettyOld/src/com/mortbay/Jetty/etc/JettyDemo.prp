@@ -66,7 +66,7 @@ main.PROPERTY.MimeMap			  : ./etc/Mime.prp
 # name.PROPERTIES - file of properties defined for handler "name"
 # ------------------------------------------------------------------------
 main.root.PATHS                           : /
-main.root.HANDLERS			  : Log;Auth;Alias;Filter;Param;Session;Servlet;File;Forward;NotFound
+main.root.HANDLERS			  : Log;Auth;Filter;Alias;Param;Session;Servlet;File;Forward;NotFound
 
 main.root.Log.CLASS			  : com.mortbay.HTTP.Handler.LogHandler
 main.root.Log.PROPERTY.File               : ./log/demo.log
@@ -78,12 +78,14 @@ main.root.Log.PROPERTY.DateFormat         : dd/MMM/yyyy:HH:mm:ss
 main.root.Auth.CLASS			  : com.mortbay.HTTP.Handler.BasicAuthHandler
 main.root.Auth.PROPERTIES		  : ./etc/JettyDemoRealms.prp
 
-main.root.Alias.CLASS			  : com.mortbay.HTTP.Handler.TranslateHandler
-main.root.Alias.PROPERTIES		  : ./etc/JettyDemoAlias.prp
-
 main.root.Filter.CLASS			  : com.mortbay.HTTP.Handler.FilterHandler
 main.root.Filter.PROPERTY.Html.CLASS      : com.mortbay.HTTP.Filter.HtmlFilter
 main.root.Filter.PROPERTY.Html.PATHS      : /
+main.root.Filter.PROPERTY.Gzip.CLASS      : com.mortbay.HTTP.Filter.GzipFilter
+main.root.Filter.PROPERTY.Gzip.PATHS      : /GZ%
+
+main.root.Alias.CLASS			  : com.mortbay.HTTP.Handler.TranslateHandler
+main.root.Alias.PROPERTIES		  : ./etc/JettyDemoAlias.prp
 
 main.root.Param.CLASS			  : com.mortbay.HTTP.Handler.ParamHandler
 main.root.Param.PROPERTY.CookiesAsParameters : False

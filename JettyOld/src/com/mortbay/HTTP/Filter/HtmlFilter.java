@@ -70,6 +70,13 @@ public class HtmlFilter extends HttpFilter
 	}
     }
     
+    /* ----------------------------------------------------------------- */
+    /** Can handle text/html
+     */
+    protected boolean canHandle(String contentType)
+    {
+	return contentType.startsWith("text/html");
+    }
     
     /* ------------------------------------------------------------- */
     /** Modify response on activation.

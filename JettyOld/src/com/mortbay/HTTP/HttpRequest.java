@@ -308,9 +308,7 @@ public class HttpRequest extends HttpHeader
     public void setServletPath(String servletPath)
 	 throws MalformedURLException
     {
-	// XXX - don't set the servlet path if we have a resource path
-	if (resourcePath!=null)
-	    return;
+	String path=getResourcePath();
 	
 	switch (servletPath.charAt(servletPath.length()-1))
 	{
@@ -332,13 +330,22 @@ public class HttpRequest extends HttpHeader
 		   "' in " + uri );
 					
 	this.servletPath=servletPath;
-	String path=uri.getPath();
 
 	if (!path.startsWith(servletPath))
 	    throw new MalformedURLException("Bad servletPath '"+
 					    servletPath+"' for "+uri);
 
 	pathInfo=path.substring(servletPath.length());
+
+//  	System.err.println("uri="+uri.getPath());
+//  	System.err.println("PI="+pathInfo);
+//  	if (uri.getPath().endsWith(pathInfo))
+//  	{
+//  	    this.servletPath=uri.getPath().substring(0,
+//  						     uri.getPath().length()-
+//  						     pathInfo.length());
+//  	    System.err.println("SP="+this.servletPath);
+//  	}
     }
 
     /* ------------------------------------------------------------ */
@@ -360,10 +367,12 @@ public class HttpRequest extends HttpHeader
      */
     public void translateAddress(String pathSpec,String newPath)
     {
-	uri.setPath(PathMap.translate(uri.getPath(),pathSpec,newPath));
+	String path=getResourcePath();
+	path=PathMap.translate(path,pathSpec,newPath);
 	
 	servletPath=null;
-	pathInfo=uri.getPath();
+	pathInfo=path;
+	setResourcePath(path);
     }
     
     /* -------------------------------------------------------------- */
