@@ -1,6 +1,7 @@
 Jetty3 Versions
 --------------
 
+ + Patched Jasper to 3.2.3 standard.
  + Fixed handling of rel form authentication URLs
  + Added support for Nonblocking listener.
  + Added lowResourcePersistTimeMs for more graceful degradation when

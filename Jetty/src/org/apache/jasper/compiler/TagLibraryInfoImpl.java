@@ -361,7 +361,7 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
                 String t = e.toString(false,true);
                 if (t != null)
                     this.shortname = t;
-            } else if (tname.equals("urn")) {
+            } else if (tname.equals("url")) {
                 String t = e.toString(false,true);
                 if (t != null)
                     this.urn = t;

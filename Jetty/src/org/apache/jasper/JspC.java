@@ -172,6 +172,11 @@ public class JspC implements Options { //, JspCompilationContext {
         return true;
     }
  
+    public boolean getClassDebugInfo() {
+        // compile with debug info
+        return false;
+    }
+
     public String getIeClassId() {
         return ieClassId;
     }
@@ -193,6 +198,10 @@ public class JspC implements Options { //, JspCompilationContext {
     public String getJspCompilerPath() {
        // we don't compile, so this is meanlingless
         return null;
+    }
+
+    public String getJavaEncoding() {
+	return "UTF-8";
     }
 
     public String getClassPath() {
