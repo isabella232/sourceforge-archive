@@ -83,7 +83,6 @@ org.mortbay.jetty.servlet.WebApplicationContext objet
     -->
 
     <!-- uncomment to allow shared session IDs for SSO or cross context dispatch 
-    -->
     <Call name="getServletHandler">
       <Call name="getSessionManager">
         <Call name="setUseRequestedId">
@@ -91,5 +90,6 @@ org.mortbay.jetty.servlet.WebApplicationContext objet
         </Call>
       </Call>
     </Call>
+    -->
 
 </Configure>

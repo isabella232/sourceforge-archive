@@ -52,11 +52,13 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
     <init-param><param-name>type</param-name><param-value>ERROR</param-value></init-param>
   </filter>
 
+  <!--
   <filter-mapping>
       <filter-name>Demo REQUEST Filter</filter-name>
       <url-pattern>/*</url-pattern>
       <dispatcher>REQUEST</dispatcher>
   </filter-mapping>
+  -->
 
   <filter-mapping>
       <filter-name>Demo FORWARD Filter</filter-name>
@@ -75,13 +77,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
       <url-pattern>/*</url-pattern>
       <dispatcher>ERROR</dispatcher>
   </filter-mapping>
-
-  <!--
-  <filter-mapping>
-       <filter-name>Demo Filter</filter-name>
-       <servlet-name>default</servlet-name>
-  </filter-mapping>
-  -->
 
 
   <!-- A sample filter that allows servlets to be used as welcome 
@@ -276,10 +271,12 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
     </user-data-constraint>
   </security-constraint>
 
+<!--
   <login-config>
     <auth-method>BASIC</auth-method>
     <realm-name>Jetty Demo Realm</realm-name>
   </login-config>
+-->
 
 <!--
   <login-config>
@@ -288,7 +285,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
   </login-config>
 -->
 
-<!--
   <login-config>
     <auth-method>FORM</auth-method>
     <realm-name>Jetty Demo Realm</realm-name>
@@ -297,7 +293,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
        <form-error-page>/auth/logonError.html?param=test</form-error-page>
     </form-login-config>
   </login-config>
--->
 
   <security-role>
       <role-name>adminRef</role-name>

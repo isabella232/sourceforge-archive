@@ -38,14 +38,14 @@ import org.mortbay.util.LogSupport;
  */
 public class ContextLoader extends URLClassLoader
 {
-    private static Log log = LogFactory.getLog(ContextLoader.class);
+    private static Log log= LogFactory.getLog(ContextLoader.class);
 
-    private boolean _java2compliant=false;
+    private boolean _java2compliant= false;
     private ClassLoader _parent;
     private PermissionCollection _permissions;
     private String _urlClassPath;
-    private boolean _fileClassPathWarning=false;
-    
+    private boolean _fileClassPathWarning= false;
+
     /* ------------------------------------------------------------ */
     /** Constructor.
      * @param classPath Comma separated path of filenames or URLs
@@ -53,87 +53,84 @@ public class ContextLoader extends URLClassLoader
      * with '/'.
      * @exception IOException
      */
-    public ContextLoader(HttpContext context,
-                         		 String classPath,
-                                 ClassLoader parent,
-                                 PermissionCollection permisions)
+    public ContextLoader(HttpContext context, String classPath, ClassLoader parent, PermissionCollection permisions)
         throws MalformedURLException, IOException
     {
-        super(new URL[0],parent);
-        _permissions=permisions;
-        _parent=parent;
-        if (_parent==null)
-            _parent=getSystemClassLoader();
+        super(new URL[0], parent);
+        _permissions= permisions;
+        _parent= parent;
+        if (_parent == null)
+            _parent= getSystemClassLoader();
 
-        if (classPath==null)
+        if (classPath == null)
         {
-            _urlClassPath="";
+            _urlClassPath= "";
         }
         else
         {
-            StringTokenizer tokenizer = new StringTokenizer(classPath,",;");
-            
+            StringTokenizer tokenizer= new StringTokenizer(classPath, ",;");
+
             while (tokenizer.hasMoreTokens())
             {
-                Resource resource = Resource.newResource(tokenizer.nextToken());
-                if(log.isDebugEnabled())log.debug("Path resource="+resource);
-                
+                Resource resource= Resource.newResource(tokenizer.nextToken());
+                if (log.isDebugEnabled())
+                    log.debug("Path resource=" + resource);
+
                 // Resolve file path if possible
-                File file=resource.getFile();
-                
-                if (file!=null)
-                {  
-                    URL url = resource.getURL();
+                File file= resource.getFile();
+
+                if (file != null)
+                {
+                    URL url= resource.getURL();
                     addURL(url);
-                    _urlClassPath=(_urlClassPath==null)
-                        ?url.toString()
-                        :(_urlClassPath+","+url.toString());        
+                    _urlClassPath= (_urlClassPath == null) ? url.toString() : (_urlClassPath + "," + url.toString());
                 }
                 else
                 {
-                    _fileClassPathWarning=true;
-                    
+                    _fileClassPathWarning= true;
+
                     // Add resource or expand jar/
-                    if (!resource.isDirectory() && file==null)
+                    if (!resource.isDirectory() && file == null)
                     {
-                        InputStream in =resource.getInputStream();
-                        File lib=new File(context.getTempDirectory(),"lib");
+                        InputStream in= resource.getInputStream();
+                        File lib= new File(context.getTempDirectory(), "lib");
                         if (!lib.exists())
                         {
                             lib.mkdir();
                             lib.deleteOnExit();
                         }
-                        File jar=File.createTempFile("Jetty-",".jar",lib);
-                        
+                        File jar= File.createTempFile("Jetty-", ".jar", lib);
+
                         jar.deleteOnExit();
-                        if(log.isDebugEnabled())log.debug("Extract "+resource+" to "+jar);
-                        FileOutputStream out = new FileOutputStream(jar);
-                        IO.copy(in,out);
+                        if (log.isDebugEnabled())
+                            log.debug("Extract " + resource + " to " + jar);
+                        FileOutputStream out= new FileOutputStream(jar);
+                        IO.copy(in, out);
                         out.close();
-                        URL url = jar.toURL();
+                        URL url= jar.toURL();
                         addURL(url);
-                        _urlClassPath=(_urlClassPath==null)
-                            ?url.toString()
-                            :(_urlClassPath+","+url.toString());
+                        _urlClassPath=
+                            (_urlClassPath == null) ? url.toString() : (_urlClassPath + "," + url.toString());
                     }
                     else
                     {
-                        URL url = resource.getURL();
+                        URL url= resource.getURL();
                         addURL(url);
-                        _urlClassPath=(_urlClassPath==null)
-                            ?url.toString()
-                            :(_urlClassPath+","+url.toString());
+                        _urlClassPath=
+                            (_urlClassPath == null) ? url.toString() : (_urlClassPath + "," + url.toString());
                     }
                 }
             }
         }
-        
-        
+
         if (log.isDebugEnabled())
         {
-            if(log.isDebugEnabled())log.debug("ClassPath="+_urlClassPath);
-            if(log.isDebugEnabled())log.debug("Permissions="+_permissions);
-            if(log.isDebugEnabled())log.debug("URL="+Arrays.asList(getURLs()));
+            if (log.isDebugEnabled())
+                log.debug("ClassPath=" + _urlClassPath);
+            if (log.isDebugEnabled())
+                log.debug("Permissions=" + _permissions);
+            if (log.isDebugEnabled())
+                log.debug("URL=" + Arrays.asList(getURLs()));
         }
     }
 
@@ -143,7 +140,7 @@ public class ContextLoader extends URLClassLoader
      */
     public void setJava2Compliant(boolean compliant)
     {
-        _java2compliant=compliant;
+        _java2compliant= compliant;
     }
 
     /* ------------------------------------------------------------ */
@@ -151,139 +148,160 @@ public class ContextLoader extends URLClassLoader
     {
         return _java2compliant;
     }
-    
+
     /* ------------------------------------------------------------ */
     public String toString()
     {
-    	if (log.isDebugEnabled())
-	        return "ContextLoader@"+hashCode()+"("+
-    	        _urlClassPath+") / "+_parent.toString();
-		return "ContextLoader@"+hashCode();
+        if (log.isDebugEnabled())
+            return "ContextLoader@" + hashCode() + "(" + _urlClassPath + ") / " + _parent.toString();
+        return "ContextLoader@" + hashCode();
     }
-    
+
     /* ------------------------------------------------------------ */
     public PermissionCollection getPermissions(CodeSource cs)
     {
-        PermissionCollection pc =(_permissions==null)?
-            super.getPermissions(cs):_permissions;
-        if(log.isDebugEnabled())log.debug("loader.getPermissions("+cs+")="+pc);
-        return pc;    
+        PermissionCollection pc= (_permissions == null) ? super.getPermissions(cs) : _permissions;
+        if (log.isDebugEnabled())
+            log.debug("loader.getPermissions(" + cs + ")=" + pc);
+        return pc;
     }
-    
+
     /* ------------------------------------------------------------ */
-    public synchronized Class loadClass(String name)
-        throws ClassNotFoundException
+    public synchronized Class loadClass(String name) throws ClassNotFoundException
     {
-        return loadClass(name,false);
+        return loadClass(name, false);
     }
-    
+
     /* ------------------------------------------------------------ */
-    protected synchronized Class loadClass(String name, boolean resolve)
-        throws ClassNotFoundException
+    protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException
     {
-        Class c = findLoadedClass(name);
-        ClassNotFoundException ex=null;
-        boolean tried_parent=false;
-        if (c==null && (_java2compliant||isSystemPath(name)))
+        Class c= findLoadedClass(name);
+        ClassNotFoundException ex= null;
+        boolean tried_parent= false;
+        if (c == null && (_java2compliant || isSystemPath(name)) && !isHiddenPath(name))
         {
-            if(LogSupport.isTraceEnabled(log))log.trace("try loadClass "+name+" from "+_parent);
-            tried_parent=true;
+            if (LogSupport.isTraceEnabled(log))
+                log.trace("try loadClass " + name + " from " + _parent);
+            tried_parent= true;
             try
             {
-                c=_parent.loadClass(name);
-                if(LogSupport.isTraceEnabled(log))log.trace("loaded "+c);
+                c= _parent.loadClass(name);
+                if (LogSupport.isTraceEnabled(log))
+                    log.trace("loaded " + c);
             }
-            catch(ClassNotFoundException e){ex=e;}
+            catch (ClassNotFoundException e)
+            {
+                ex= e;
+            }
         }
-        
-        if (c==null)    
+
+        if (c == null)
         {
-            if(LogSupport.isTraceEnabled(log))log.trace("try findClass "+name+" from "+_urlClassPath);
+            if (LogSupport.isTraceEnabled(log))
+                log.trace("try findClass " + name + " from " + _urlClassPath);
             try
             {
-                c=this.findClass(name);
-                if(LogSupport.isTraceEnabled(log))log.trace("loaded "+c);
+                c= this.findClass(name);
+                if (LogSupport.isTraceEnabled(log))
+                    log.trace("loaded " + c);
             }
-            catch(ClassNotFoundException e){ex=e;}
+            catch (ClassNotFoundException e)
+            {
+                ex= e;
+            }
         }
-        
-        if (c==null && !tried_parent)
+
+        if (c == null && !tried_parent && !isHiddenPath(name))
         {
-            if(LogSupport.isTraceEnabled(log))log.trace("try loadClass "+name+" from "+_parent);
-            c=_parent.loadClass(name);
-            if(LogSupport.isTraceEnabled(log))log.trace("loaded "+c);
+            if (LogSupport.isTraceEnabled(log))
+                log.trace("try loadClass " + name + " from " + _parent);
+            c= _parent.loadClass(name);
+            if (LogSupport.isTraceEnabled(log))
+                log.trace("loaded " + c);
         }
-        
-        if (c==null)
+
+        if (c == null)
             throw ex;
-        
+
         if (resolve)
             resolveClass(c);
-        
+
         return c;
     }
-    
+
     /* ------------------------------------------------------------ */
     public synchronized URL getResource(String name)
     {
-        URL url = null;
-        boolean tried_parent=false;
-        if (_java2compliant||isSystemPath(name) )
+        URL url= null;
+        boolean tried_parent= false;
+        if (_java2compliant || isSystemPath(name))
         {
-            if(LogSupport.isTraceEnabled(log))log.trace("try getResource "+name+" from "+_parent);
-            tried_parent=true;
-            url=_parent.getResource(name);           
+            if (LogSupport.isTraceEnabled(log))
+                log.trace("try getResource " + name + " from " + _parent);
+            tried_parent= true;
+            url= _parent.getResource(name);
         }
-        
-        if (url==null)    
-        {
-            if(LogSupport.isTraceEnabled(log))log.trace("try findResource "+name+" from "+_urlClassPath);
-            url=this.findResource(name);
 
-            if (url==null && name.startsWith("/"))
+        if (url == null)
+        {
+            if (LogSupport.isTraceEnabled(log))
+                log.trace("try findResource " + name + " from " + _urlClassPath);
+            url= this.findResource(name);
+
+            if (url == null && name.startsWith("/"))
             {
-                if(log.isDebugEnabled())log.debug("HACK leading / off "+name);
-                url=this.findResource(name.substring(1));
+                if (log.isDebugEnabled())
+                    log.debug("HACK leading / off " + name);
+                url= this.findResource(name.substring(1));
             }
         }
-        
-        if (url==null && !tried_parent)
+
+        if (url == null && !tried_parent)
         {
-            if(LogSupport.isTraceEnabled(log))log.trace("try getResource "+name+" from "+_parent);
-            url=_parent.getResource(name); 
+            if (LogSupport.isTraceEnabled(log))
+                log.trace("try getResource " + name + " from " + _parent);
+            url= _parent.getResource(name);
         }
-        
-        if (url!=null)
-            if(LogSupport.isTraceEnabled(log))log.trace("found "+url);
-        
+
+        if (url != null)
+            if (LogSupport.isTraceEnabled(log))
+                log.trace("found " + url);
+
         return url;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public boolean isHiddenPath(String name)
+    {
+        // Arbitrary list that covers the worst security problems.
+        // If you are worried by this, then use a permissions file!
+        return name.equals("org.mortbay.jetty.Server")
+            || name.equals("org.mortbay.http.HttpServer")
+            || name.startsWith("org.mortbay.start.")
+            || name.startsWith("org.mortbay.stop.");
+    }
+
     /* ------------------------------------------------------------ */
     public boolean isSystemPath(String name)
     {
-        return (name.startsWith("java.") ||
-                name.startsWith("javax.servlet.") ||
-                name.startsWith("javax.xml.") ||
-                name.startsWith("org.mortbay.") ||
-                name.startsWith("org.xml.") ||
-                name.startsWith("org.w3c.") ||
-
-                name.startsWith("java/") ||
-                name.startsWith("javax/servlet/") ||
-                name.startsWith("javax/xml/") ||
-                name.startsWith("org/mortbay/") ||
-                name.startsWith("org/xml/") ||
-                name.startsWith("org/w3c/") ||
-                
-                name.startsWith("/java/") ||
-                name.startsWith("/javax/servlet/") ||
-                name.startsWith("/javax/xml/") ||
-                name.startsWith("/org/mortbay/") ||
-                name.startsWith("/org/xml/") ||
-                name.startsWith("/org/w3c/")
-                );
+        return (
+            name.startsWith("java.")
+                || name.startsWith("javax.servlet.")
+                || name.startsWith("javax.xml.")
+                || name.startsWith("org.mortbay.")
+                || name.startsWith("org.xml.")
+                || name.startsWith("org.w3c.")
+                || name.startsWith("java/")
+                || name.startsWith("javax/servlet/")
+                || name.startsWith("javax/xml/")
+                || name.startsWith("org/mortbay/")
+                || name.startsWith("org/xml/")
+                || name.startsWith("org/w3c/")
+                || name.startsWith("/java/")
+                || name.startsWith("/javax/servlet/")
+                || name.startsWith("/javax/xml/")
+                || name.startsWith("/org/mortbay/")
+                || name.startsWith("/org/xml/")
+                || name.startsWith("/org/w3c/"));
     }
 }
-
-
