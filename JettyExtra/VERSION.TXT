@@ -1,6 +1,9 @@
 JettyExtra Versions
 --------------------
 
+JettyExtra-4.0.B1
+  + More mbean meta info.
+
 JettyExtra-4.0.B0
   + Handle null context name in HttpContextMBean
   + Version number same as Jetty release.
