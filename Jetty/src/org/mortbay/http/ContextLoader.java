@@ -54,7 +54,6 @@ public class ContextLoader extends URLClassLoader
     private ClassLoader _parent;
     private PermissionCollection _permissions;
     private String _urlClassPath;
-    private boolean _fileClassPathWarning= false;
 
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -97,8 +96,6 @@ public class ContextLoader extends URLClassLoader
                 }
                 else
                 {
-                    _fileClassPathWarning= true;
-
                     // Add resource or expand jar/
                     if (!resource.isDirectory() && file == null)
                     {
@@ -321,13 +318,5 @@ public class ContextLoader extends URLClassLoader
         this._parent=null;
         this._permissions=null;
         this._urlClassPath=null;
-        try
-        {
-            this.finalize();
-        }
-        catch(Throwable th)
-        {
-            log.warn(LogSupport.EXCEPTION,th);
-        }
     }
 }

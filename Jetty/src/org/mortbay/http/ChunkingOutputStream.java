@@ -121,7 +121,7 @@ public class ChunkingOutputStream
         }
         
         // Complete it if we must.
-        if (_complete & !_completed)
+        if (_complete && !_completed)
         {
             _completed=true;
             if (_chunking)
