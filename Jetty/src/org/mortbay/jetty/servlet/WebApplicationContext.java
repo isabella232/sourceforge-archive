@@ -1082,6 +1082,8 @@ public class WebApplicationContext
                 authenticator=new DigestAuthenticator();
             else if (SecurityConstraint.__CERT_AUTH.equals(m))
                 authenticator=new ClientCertAuthenticator();
+            else if (SecurityConstraint.__CERT_AUTH2.equals(m))
+                authenticator=new ClientCertAuthenticator();
             else
                 Code.warning("UNKNOWN AUTH METHOD: "+m);
 

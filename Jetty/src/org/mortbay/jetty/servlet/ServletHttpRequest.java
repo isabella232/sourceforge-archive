@@ -27,6 +27,7 @@ import javax.servlet.http.HttpSession;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpInputStream;
 import org.mortbay.http.HttpRequest;
+import org.mortbay.http.SecurityConstraint;
 import org.mortbay.util.Code;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.Resource;
@@ -364,7 +365,18 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public String getAuthType()
     {
-        return _httpRequest.getAuthType();
+        String at= _httpRequest.getAuthType();
+        if (at==SecurityConstraint.__BASIC_AUTH)
+            return HttpServletRequest.BASIC_AUTH;
+        if (at==SecurityConstraint.__FORM_AUTH)
+            return HttpServletRequest.FORM_AUTH;
+        if (at==SecurityConstraint.__DIGEST_AUTH)
+            return HttpServletRequest.DIGEST_AUTH;
+        if (at==SecurityConstraint.__CERT_AUTH)
+            return HttpServletRequest.CLIENT_CERT_AUTH;
+        if (at==SecurityConstraint.__CERT_AUTH2)
+            return HttpServletRequest.CLIENT_CERT_AUTH;
+        return at;
     }
 
     /* ------------------------------------------------------------ */

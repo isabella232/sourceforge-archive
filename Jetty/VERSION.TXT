@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.10pre0 - 5 May 2003
  + Moved Log4JLogSink into JettyPlus
  + Added ability to override jetty startup class by using -Djetty.server on runline
  + Incorporate JettyPlus jotm etc into build.
@@ -18,6 +19,8 @@ Jetty Versions
  + Merge multivalued parameters in dispatcher.
  + Fixed CRLF bug in MultiPartRequest
  + Warn if max form content size is reached.
+ + getAuthType returns CLIENT_CERT instead of CLIENT-CERT.
+ + getAuthType maps the HttpServletRequest final strings.
 
 Jetty-4.2.9 - 19 March 2003
  + Conditional headers check after /dir to /dir/ redirection.

@@ -41,7 +41,7 @@ public class FormAuthenticator implements Authenticator
     /* ------------------------------------------------------------ */
     public String getAuthMethod()
     {
-        return SecurityConstraint.__FORM_AUTH;
+        return HttpServletRequest.FORM_AUTH;
     }
 
     /* ------------------------------------------------------------ */
