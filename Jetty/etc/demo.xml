@@ -93,7 +93,6 @@
   <!--  </Set>                                                         -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- UNCOMMENT TO ACTIVATE
-  -->
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.SunJsseListener">
@@ -110,6 +109,7 @@
       </New>
     </Arg>
   </Call>
+  -->
 
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
