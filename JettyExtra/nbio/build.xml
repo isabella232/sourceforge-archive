@@ -23,7 +23,7 @@ demo        - Runs the demo web application.
   <property name="classes"        value="${basedir}/classes"/>
   <property name="javadoc"        value="${basedir}/javadoc"/>
 
-  <property name="build.compiler" value="jikes"/>
+  <!-- property name="build.compiler" value="jikes"/ -->
   <!-- property name="build.compiler" value="classic"/ -->
   <!-- property name="build.compiler" value="modern"/ -->
 

@@ -26,8 +26,8 @@ all         - everything
   <property name="javadoc"        value="${basedir}/javadoc"/>
   <property name="logs"           value="${basedir}/logs"/>
 
-  <property name="build.compiler" value="modern"/>
 <!--
+  <property name="build.compiler" value="modern"/>
   <property name="build.compiler" value="jikes"/>
   <property name="build.compiler" value="classic"/>
 -->
