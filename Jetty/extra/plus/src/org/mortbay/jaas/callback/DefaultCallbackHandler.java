@@ -22,6 +22,7 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 
+import org.mortbay.http.HttpRequest;
 import org.mortbay.util.Password;
 
 
@@ -46,6 +47,13 @@ import org.mortbay.util.Password;
 public class DefaultCallbackHandler extends AbstractCallbackHandler
 {
      
+    private HttpRequest request;
+    
+    public void setRequest (HttpRequest request)
+    {
+        this.request = request;
+    }
+    
     public void handle (Callback[] callbacks)
         throws IOException, UnsupportedCallbackException
     {
@@ -69,6 +77,11 @@ public class DefaultCallbackHandler extends AbstractCallbackHandler
                 }
                 else
                     throw new UnsupportedCallbackException (callbacks[i], "User supplied credentials cannot be converted to char[] for PasswordCallback: try using an ObjectCallback instead");
+            }
+            else if (callbacks[i] instanceof RequestParameterCallback)
+            {
+                RequestParameterCallback callback = (RequestParameterCallback)callbacks[i];
+                callback.setParameterValues(request.getParameterValues(callback.getParameterName()));       
             }
             else
                 throw new UnsupportedCallbackException(callbacks[i]);

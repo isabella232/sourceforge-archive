@@ -249,6 +249,11 @@ public class JAASUserRealm implements UserRealm
                 callbackHandler = (AbstractCallbackHandler)Loader.loadClass(JAASUserRealm.class, callbackHandlerClass).getConstructors()[0].newInstance(new Object[0]);
             }
             
+            if (callbackHandler instanceof DefaultCallbackHandler)
+            {
+                ((DefaultCallbackHandler)callbackHandler).setRequest (request);
+            }
+            
             callbackHandler.setUserName(username);
             callbackHandler.setCredential(credentials);
             
