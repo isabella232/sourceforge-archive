@@ -74,7 +74,7 @@ public class Code
         {
             e.printStackTrace();
             System.err.println("\nERROR: Jetty compiled for java 1.4 and cannot be run on this JVM");
-            System.err.println("       Please remove the org.mortbay.jetty-jdk1.4.jar from the CLASSPATH\n");
+            System.err.println("       Please use the org.mortbay.jetty-jdk1.2.jar instead\n");
             System.exit(1);
         }
     }

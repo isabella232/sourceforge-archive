@@ -235,7 +235,7 @@ public class HttpResponse extends HttpMessage
         if (_header==null)
             throw new IllegalStateException("Response is destroyed");
 
-        if (_dotVersion>=0)
+        if (getHttpRequest().getDotVersion()>=0)
         {
             _state=__MSG_BAD;
             writer.write(_version);

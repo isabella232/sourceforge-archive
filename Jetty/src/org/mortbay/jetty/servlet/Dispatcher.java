@@ -269,7 +269,12 @@ public class Dispatcher implements RequestDispatcher
                 response.flushBuffer();
         }
     }
-        
+
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return "Dispatcher["+_pathSpec+","+_holder+"]";
+    }
         
 
     /* ------------------------------------------------------------ */
@@ -396,13 +401,6 @@ public class Dispatcher implements RequestDispatcher
             return m0;
         }
 
-        /* ------------------------------------------------------------ */
-        public void setAttribute(String name, Object o)
-        {
-            if (isNamed()||!_include)
-                super.setAttribute(name,o);
-        }
-        
         /* ------------------------------------------------------------ */
         public Object getAttribute(String name)
         {

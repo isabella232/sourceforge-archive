@@ -1,11 +1,19 @@
 Jetty Versions
 --------------
 
+Jetty-4.1.B1 
  + Updated mini.http.jar target
  + CGI Servlet, pass all HTTP headers through.
  + CGI Servlet, catch and report program invocation failure status.
  + CGI Servlet, fixed suffix mapping problem.
  + CGI Servlet, set working directory for exec
+ + Support HTTP/0.9 requests again
+ + Reversed order of ServletContextListener.contextDestroyed calls
+ + Moved dynamic servlet handling to Invoker servlet.
+
+Jetty-3.1.9 - 15 July 2002
+ + Allow doHead requests to be forwarded.
+ + Fixed race in ThreadPool for minThreads <= CPUs
 
 Jetty-4.1.B0 - 13 July 2002
  + Added work around of JDK1.4 bug with NIO listener

@@ -137,7 +137,7 @@ Other targets:
         <include name="*.dtd"/>
       </fileset>
     </copy>
-
+    <copy file="${src}/org/mortbay/jetty/servlet/webdefault.xml" tofile="${etc}/webdefault.xml" />
   </target>
   
 

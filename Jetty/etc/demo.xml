@@ -166,6 +166,11 @@
     </Call>
 
     <Call name="addServlet">
+      <Arg>Invoker</Arg>
+      <Arg>/servlet/*</Arg>
+      <Arg>org.mortbay.jetty.servlet.Invoker</Arg>
+    </Call>
+    <Call name="addServlet">
       <Arg>Dump</Arg>
       <Arg>/dump/*:*.DUMP</Arg>
       <Arg>org.mortbay.servlet.Dump</Arg>
@@ -197,7 +202,6 @@
     </Call>
 
     <Set name="ClassPath"><SystemProperty name="jetty.home" default="."/>/demo/servlets/</Set>
-    <Set name="DynamicServletPathSpec">/servlet/*</Set>
   </Call>
 
 

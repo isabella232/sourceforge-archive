@@ -41,19 +41,12 @@ public class Dump extends HttpServlet
 {
     /* ------------------------------------------------------------ */
     String pageType;
-    String initParams="";
 
     /* ------------------------------------------------------------ */
     public void init(ServletConfig config)
          throws ServletException
     {
         super.init(config);
-        Enumeration e=getInitParameterNames();
-        while(e.hasMoreElements())
-        {
-            String name=(String)e.nextElement();
-            initParams+=name+"="+getInitParameter(name)+" ";
-        }
     }
 
     /* ------------------------------------------------------------ */
@@ -175,17 +168,11 @@ public class Dump extends HttpServlet
             table.addCell(""+sreq.getRemoteHost());            
             table.newRow();
             table.addHeading("getRequestedSessionId:&nbsp;").cell().right();
-            table.addCell(""+sreq.getRequestedSessionId());            
-                                  
-            table.newRow();
-            table.addHeading("getInitParams:&nbsp;").cell().right();
-            table.addCell(initParams);            
-                        
+            table.addCell(""+sreq.getRequestedSessionId());                                  
             table.newRow();
             table.addHeading("getLocale:&nbsp;").cell().right();
-            table.addCell(""+sreq.getLocale());            
-            table.newRow();
-            table.addHeading("getLocales:&nbsp;").cell().right();
+            table.addCell(""+sreq.getLocale());
+            
             Enumeration locales = sreq.getLocales();
             table.newCell();
             while(locales.hasMoreElements())
@@ -195,64 +182,6 @@ public class Dump extends HttpServlet
                     table.add(",&nbsp;");
             }
 
-	    /* ------------------------------------------------------------ */
-            table.newRow();
-            table.newHeading()
-                .cell().nest(new Font(2,true))
-                .add("<BR>Request Attributes")
-                .attribute("COLSPAN","2")
-                .left();
-            String name;
-            Enumeration a = sreq.getAttributeNames();
-            while (a.hasMoreElements())
-            {
-                name=(String)a.nextElement();
-                table.newRow();
-                table.addHeading(name+":&nbsp;")
-		    .cell().attribute("VALIGN","TOP").right();
-		table.addCell("<pre>" +
-			      toString(sreq.getAttribute(name))
-			      + "</pre>");
-            }
-            
-            table.newRow();
-            table.newHeading()
-                .cell().nest(new Font(2,true))
-                .add("<BR>Context Attributes")
-                .attribute("COLSPAN","2")
-                .left();
-            a = getServletContext().getAttributeNames();
-            while (a.hasMoreElements())
-            {
-                name=(String)a.nextElement();
-                table.newRow();
-                table.addHeading(name+":&nbsp;")
-		    .cell().attribute("VALIGN","TOP").right();
-                table.addCell("<pre>" +
-			      toString(getServletContext()
-				       .getAttribute(name))
-			      + "</pre>");
-            }
-
-            table.newRow();
-            table.newHeading()
-                .cell().nest(new Font(2,true))
-                .add("<BR>Context Parameters")
-                .attribute("COLSPAN","2")
-                .left();
-            a = getServletContext().getInitParameterNames();
-            while (a.hasMoreElements())
-            {
-                name=(String)a.nextElement();
-                table.newRow();
-                table.addHeading(name+":&nbsp;")
-		    .cell().attribute("VALIGN","TOP").right();
-                table.addCell("<pre>" +
-			      toString(getServletContext()
-				       .getInitParameter(name))
-			      + "</pre>");
-            }
-
             table.newRow();
             table.newHeading()
                 .cell().nest(new Font(2,true))
@@ -260,6 +189,7 @@ public class Dump extends HttpServlet
                 .attribute("COLSPAN","2")
                 .left();
             Enumeration h = sreq.getHeaderNames();
+            String name;
             while (h.hasMoreElements())
             {
                 name=(String)h.nextElement();
@@ -301,6 +231,82 @@ public class Dump extends HttpServlet
                     }
                 }
             }
+            
+	    /* ------------------------------------------------------------ */
+            table.newRow();
+            table.newHeading()
+                .cell().nest(new Font(2,true))
+                .add("<BR>Request Attributes")
+                .attribute("COLSPAN","2")
+                .left();
+            Enumeration a = sreq.getAttributeNames();
+            while (a.hasMoreElements())
+            {
+                name=(String)a.nextElement();
+                table.newRow();
+                table.addHeading(name+":&nbsp;")
+		    .cell().attribute("VALIGN","TOP").right();
+		table.addCell("<pre>" +
+			      toString(sreq.getAttribute(name))
+			      + "</pre>");
+            }
+
+            table.newRow();
+            table.newHeading()
+                .cell().nest(new Font(2,true))
+                .add("<BR>Servlet InitParameters")
+                .attribute("COLSPAN","2")
+                .left();
+            a = getInitParameterNames();
+            while (a.hasMoreElements())
+            {
+                name=(String)a.nextElement();
+                table.newRow();
+                table.addHeading(name+":&nbsp;")
+		    .cell().attribute("VALIGN","TOP").right();
+                table.addCell("<pre>" +
+			      toString(getInitParameter(name))
+			      + "</pre>");
+            }
+            
+            table.newRow();
+            table.newHeading()
+                .cell().nest(new Font(2,true))
+                .add("<BR>Context InitParameters")
+                .attribute("COLSPAN","2")
+                .left();
+            a = getServletContext().getInitParameterNames();
+            while (a.hasMoreElements())
+            {
+                name=(String)a.nextElement();
+                table.newRow();
+                table.addHeading(name+":&nbsp;")
+		    .cell().attribute("VALIGN","TOP").right();
+                table.addCell("<pre>" +
+			      toString(getServletContext()
+				       .getInitParameter(name))
+			      + "</pre>");
+            }
+
+            table.newRow();
+            table.newHeading()
+                .cell().nest(new Font(2,true))
+                .add("<BR>Context Attributes")
+                .attribute("COLSPAN","2")
+                .left();
+            a = getServletContext().getAttributeNames();
+            while (a.hasMoreElements())
+            {
+                name=(String)a.nextElement();
+                table.newRow();
+                table.addHeading(name+":&nbsp;")
+		    .cell().attribute("VALIGN","TOP").right();
+                table.addCell("<pre>" +
+			      toString(getServletContext()
+				       .getAttribute(name))
+			      + "</pre>");
+            }
+
 
             page.add(Break.para);
             

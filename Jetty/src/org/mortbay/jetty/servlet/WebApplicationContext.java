@@ -248,7 +248,6 @@ public class WebApplicationContext extends ServletHttpContext
 
         // Get the handler
         getServletHandler();
-        _webAppHandler.setDynamicServletPathSpec("/servlet/*");
         
         // Do the default configuration
         try
@@ -425,7 +424,7 @@ public class WebApplicationContext extends ServletHttpContext
         if (_contextListeners!=null && _webAppHandler!=null)
         {
             ServletContextEvent event = new ServletContextEvent(getServletContext());
-            for (int i=0;i<_contextListeners.size();i++)
+            for (int i=_contextListeners.size();i-->0;)
                 ((ServletContextListener)_contextListeners.get(i))
                     .contextDestroyed(event);
         }
@@ -823,27 +822,13 @@ public class WebApplicationContext extends ServletHttpContext
             holder.setUserRoleLink(roleName,roleLink);
         }
 
-        // add default mappings
-        String defaultPath="/servlet/"+name+"/*";
-        Code.debug("ServletMapping: ",holder.getName(),"=",defaultPath);
-        _webAppHandler.addServletHolder(defaultPath,holder);
-        if (!className.equals(name))
-        {
-            defaultPath="/servlet/"+className+"/*";
-            Code.debug("ServletMapping: ",holder.getName(),
-                       "=",defaultPath);
-            _webAppHandler.addServletHolder(defaultPath,holder);
-        }
-
         XmlParser.Node run_as = node.get("run-as");
         if (run_as!=null)
         {
             String roleName=run_as.getString("role-name",false,true);
             if (roleName!=null)
                 holder.setRunAs(roleName);
-        }
-        
-        
+        }   
     }
     
     /* ------------------------------------------------------------ */

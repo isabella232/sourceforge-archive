@@ -93,9 +93,6 @@ public class ServletHandler
     private Map _nameMap=new HashMap();
     private Context _context;
     private ClassLoader _loader;
-    private String _dynamicServletPathSpec;
-    private Map _dynamicInitParams ;
-    private boolean _serveDynamicSystemServlets=false;
     private boolean _usingCookies=true;
     private LogSink _logSink;
     private SessionManager _sessionManager;
@@ -183,59 +180,33 @@ public class ServletHandler
     public boolean isAutoReload() { return false; }
     
     /* ------------------------------------------------------------ */
-    public String getDynamicServletPathSpec() { return _dynamicServletPathSpec; }
-
-    /* ------------------------------------------------------------ */
-    public Map getDynamicInitParams() { return _dynamicInitParams; }
-
-    /* ------------------------------------------------------------ */
     public boolean isUsingCookies() { return _usingCookies; }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @return True if dynamic servlets can be on the non-context classpath
-     */
-    public boolean getServeDynamicSystemServlets()
-    { return _serveDynamicSystemServlets; }
-    
-    /* ------------------------------------------------------------ */
     /** Set the dynamic servlet path.
-     * If set, the ServletHandler will dynamically load servlet
-     * classes that have their class names as the path info after the
-     * set path sepcification.
-     * @param dynamicServletPathSpec The path within the context at which
-     * dynamic servlets are launched. eg /servlet/*
+     * @deprecated Use org.mortbay.jetty.servlet.Invoker
      */
     public void setDynamicServletPathSpec(String dynamicServletPathSpec)
     {
-        if (dynamicServletPathSpec!=null &&
-            !dynamicServletPathSpec.equals("/") &&
-            !dynamicServletPathSpec.endsWith("/*"))
-            throw new IllegalArgumentException("dynamicServletPathSpec must end with /*");
-            
-        _dynamicServletPathSpec=dynamicServletPathSpec;
+        Code.warning("setDynamicServletPathSpec is Deprecated.");
     }
     
     /* ------------------------------------------------------------ */
     /** Set dynamic servlet initial parameters.
-     * @param initParams Map passed as initParams to newly created
-     * dynamic servlets.
+     * @deprecated Use org.mortbay.jetty.servlet.Invoker
      */
     public void setDynamicInitParams(Map initParams)
     {
-        _dynamicInitParams = initParams;
+        Code.warning("setDynamicInitParams is Deprecated.");
     }
 
     /* ------------------------------------------------------------ */
     /** Set serving dynamic system servlets.
-     * This is a security option so that you can control what servlets
-     * can be loaded with dynamic discovery.
-     * @param b If set to false, the dynamic servlets must be loaded
-     * by the context classloader.  
+     * @deprecated Use org.mortbay.jetty.servlet.Invoker
      */
     public void setServeDynamicSystemServlets(boolean b)
     {
-        _serveDynamicSystemServlets=b;
+        Code.warning("setServeDynamicSystemServlets is Deprecated.");
     }
     
     /* ------------------------------------------------------------ */
@@ -679,100 +650,7 @@ public class ServletHandler
      */
     public Map.Entry getHolderEntry(String pathInContext)
     {
-        Map.Entry entry =_servletMap.getMatch(pathInContext);
-
-        String servletClass=null;
-        if (_dynamicServletPathSpec!=null)
-            servletClass=PathMap.pathInfo(_dynamicServletPathSpec,pathInContext);
-        
-        // Do we have a match and no chance of a new
-        // dynamci servlet
-        if (entry!=null && servletClass==null)
-            return entry;
-
-        // If it could be a dynamic servlet
-        synchronized(this)
-        {
-            // sychronize and try again.
-            entry =_servletMap.getMatch(pathInContext);
-            if (entry!=null && servletClass==null)
-                return entry;
-            
-            if (servletClass!=null && servletClass.length()>2 &&
-                (entry==null||!PathMap.match(_dynamicServletPathSpec,(String)entry.getKey())))
-            {
-                try
-                {
-                    // OK lets look for a dynamic servlet.
-                    String path=pathInContext;
-                    Code.debug("looking for ",servletClass," in ",
-                               getHttpContext().getClassPath());
-                
-                    // remove prefix
-                    servletClass=servletClass.substring(1);
-                
-                    // remove suffix
-                    int slash=servletClass.indexOf('/');
-                    if (slash>=0)
-                        servletClass=servletClass.substring(0,slash);            
-                    if (servletClass.endsWith(".class"))
-                        servletClass=servletClass.substring(0,servletClass.length()-6);
-                
-                    // work out the actual servlet path
-                    if ("/".equals(_dynamicServletPathSpec))
-                        path='/'+servletClass;
-                    else
-                        path=PathMap.pathMatch(_dynamicServletPathSpec,path)+'/'+servletClass;
-                
-                    Code.debug("Dynamic path=",path);
-
-                    if (servletClass==null || servletClass.length()==0)
-                        return null;
-                    
-                    // make a holder
-                    ServletHolder holder=new ServletHolder(this,servletClass,servletClass);
-                    
-                    // Set params
-                    Map params=getDynamicInitParams();
-                    if (params!=null)
-                        holder.putAll(params);
-                    holder.start();
-                    Object servlet=holder.getServlet();
-
-                    // Check that the class was intended as a dynamic
-                    // servlet
-                    if (!_serveDynamicSystemServlets &&
-                        _loader!=null &&
-                        _loader!=this.getClass().getClassLoader())
-                    {
-                        // This context has a specific class loader.
-                        if (servlet.getClass().getClassLoader()!=_loader)
-                        {
-                            holder.stop();
-                            String msg = "Dynamic servlet "+
-                                servletClass+
-                                " is not loaded from context: "+
-                                getHttpContext().getContextPath();
-                        
-                            Code.warning(msg);
-                            throw new UnavailableException(msg);
-                        }
-                    }
-                
-                    Log.event("Dynamic load '"+servletClass+"' at "+path);
-                    addServletHolder(path+"/*",holder);
-                    addServletHolder(path+".class/*",holder);
-                    
-                    entry=_servletMap.getMatch(pathInContext);
-                }
-                catch(Exception e)
-                {
-                    Code.warning(e);
-                }
-            }
-        }
-        
-        return entry;
+        return _servletMap.getMatch(pathInContext);
     }
     
 
@@ -920,9 +798,15 @@ public class ServletHandler
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private class Context implements ServletContext
+    class Context implements ServletContext
     {
-        /* ------------------------------------------------------------ */
+        /* -------------------------------------------------------- */
+        ServletHandler getServletHandler()
+        {
+            return ServletHandler.this;
+        }
+        
+        /* -------------------------------------------------------- */
         public ServletContext getContext(String uri)
         {        
             ServletHandler handler= (ServletHandler)

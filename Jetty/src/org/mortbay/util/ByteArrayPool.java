@@ -4,7 +4,6 @@
 // ---------------------------------------------------------------------------
 
 package org.mortbay.util;
-import java.util.ArrayList;
 
 /* ------------------------------------------------------------ */
 /** Byte Array Pool
@@ -15,21 +14,29 @@ import java.util.ArrayList;
  */
 public class ByteArrayPool
 {
-    public static final int __POOL_SIZE=20;
-    private static ArrayList _pool = new ArrayList(__POOL_SIZE);
+    public static final int __POOL_SIZE=
+        Integer.getInteger("org.mortbay.util.ByteArrayPool",20).intValue();
+    
+    private static byte[][] __pool = new byte[__POOL_SIZE][];
+    private static int __in;
+    private static int __out;
+    private static int __size;
 
     /* ------------------------------------------------------------ */
     public static synchronized byte[] getByteArray(int size)
     {
-        while (_pool.size()>0)
+        if (__size>0)
         {
-            byte[] b = (byte[])_pool.remove(_pool.size()-1);
-            if (b.length!=size)
+            byte[] b = __pool[__out++];
+            if (__out>=__POOL_SIZE)
+                __out=0;
+            __size--;
+
+            if (b.length==size)
             {
-                Code.warning("Wrong buffer size:"+b.length);
-                continue;
+                return b;
             }
-            return b;
+           
         }
         
         return new byte[size];
@@ -38,7 +45,12 @@ public class ByteArrayPool
     /* ------------------------------------------------------------ */
     public static synchronized void returnByteArray(byte[] b)
     {
-        if (b!=null && _pool.size()<__POOL_SIZE)
-            _pool.add(b);
+        if (__size<__POOL_SIZE)
+        {
+            __pool[__in++]=b;
+            if (__in>=__POOL_SIZE)
+                __in=0;
+            __size++;
+        }
     }
 }
