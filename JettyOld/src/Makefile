@@ -12,7 +12,7 @@ rall:
 TESTS :=
 ROOTNAME := src
 
-SUBDIRS := com
+SUBDIRS := javax com
 
 ifndef MORTBAY_HOME
 MORTBAY_HOME := ${PWD}/..
