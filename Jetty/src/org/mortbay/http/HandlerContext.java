@@ -217,6 +217,19 @@ public class HandlerContext implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
+    /** Register a host mapping for this context.
+     * This method is a shorthand for
+     * <Code>context.getHttpServer()..addContext(hostname,context)</Code>.
+     * The call does not alter the original registration of the
+     * context, nor can it change the context path.
+     * @param hostname 
+     */
+    public void registerHost(String hostname)
+    {
+        _httpServer.addContext(hostname,this);
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Add a virtual host alias to this context.
      * @param host 
      */
@@ -926,7 +939,7 @@ public class HandlerContext implements LifeCycle
             _permissions=new Permissions();
         _permissions.add(permission);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Handler request.
      * Determine the path within the context and then call
