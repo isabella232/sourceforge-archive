@@ -372,10 +372,11 @@ public class WebApplicationContext
             {
                 // Look for classes directory
                 Resource classes = _webInf.addPath("classes/");
-                String classPath="";
                 if (classes.exists())
                     super.setClassPath(classes.toString());
-                
+                else
+                    super.setClassPath(null);
+                    
                 // Look for jars
                 Resource lib = _webInf.addPath("lib/");
                 super.setClassPaths(lib,true);

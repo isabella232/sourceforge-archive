@@ -261,6 +261,12 @@ public class ContextLoader extends URLClassLoader
         {
             if (Code.verbose()) Code.debug("try findResource ",name," from ",_urlClassPath);
             url=this.findResource(name);
+
+            if (url==null && name.startsWith("/"))
+            {
+                Code.debug("HACK leading / off ",name);
+                url=this.findResource(name.substring(1));
+            }
         }
         
         if (url==null && !tried_parent)
