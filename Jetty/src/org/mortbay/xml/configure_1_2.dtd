@@ -50,20 +50,24 @@ New and SystemProperty. If no value type is specified, then white
 space is trimmed out of the value. If it contains multiple value
 elements they are added as strings before being converted to any
 specified type.
+
+A Set with a class attribute is treated as a static set method invocation.
 -->
 <!ELEMENT Set ( %VALUE; )* >
-<!ATTLIST Set %NAMEATTR; %TYPEATTR; >
+<!ATTLIST Set %NAMEATTR; %TYPEATTR; %IMPLIEDCLASSATTR; >
 
 
 <!--
 Get Element.
 This element maps to a call to a get method on the current object.
-The name attribute used to select the get method.
+The name attribute is used to select the get method.
 A Get element can contain Set, Put and/or Call elements which act on the object
 returned by the get call.
+
+A Get with a class attribute is treated as a static get method invocation.
 -->
 <!ELEMENT Get (%CONFIG;)*>
-<!ATTLIST Get %NAMEATTR;>
+<!ATTLIST Get %NAMEATTR; %IMPLIEDCLASSATTR; >
 
 <!--
 Put Element.
@@ -98,7 +102,7 @@ This is equivalent to:
  Object o2 = o1.test("value1");
  o2.setTest("value2");
 
-A Call with a class atribute is treated as a static call.
+A Call with a class attribute is treated as a static call.
 
 -->
 <!ELEMENT Call (Arg*,(%CONFIG;)*)>

@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + DTD allows static "Get" and "Set" methods to be invoked.
+
 Jetty-4.0.0 - 22 March 2002
  + Updated tutorial configure version
  + Added IPAddressHandler for IP restrictions
