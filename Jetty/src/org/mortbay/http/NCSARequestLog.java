@@ -189,14 +189,14 @@ public class NCSARequestLog implements RequestLog
                     else
                     {
                         if (responseLength>9999) 
-                            _buf.write('0'+((status/10000)%10));
+                            _buf.write('0'+((responseLength/10000)%10));
                         if (responseLength>999) 
-                            _buf.write('0'+((status/1000)%10));
+                            _buf.write('0'+((responseLength/1000)%10));
                         if (responseLength>99) 
-                            _buf.write('0'+((status/100)%10));
+                            _buf.write('0'+((responseLength/100)%10));
                         if (responseLength>9) 
-                            _buf.write('0'+((status/10)%10));
-                        _buf.write('0'+(status%10));
+                            _buf.write('0'+((responseLength/10)%10));
+                        _buf.write('0'+(responseLength%10));
                     }
                     _buf.write(' ');
                 }
