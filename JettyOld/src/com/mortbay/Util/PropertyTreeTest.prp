@@ -14,3 +14,4 @@ a.b.*.d         = ambig1
 a.*.c.d         = ambig2
 a.b.*.d.*.d     = ambig3
 a.b.*.d.d       = ambig4
+h.f.*		= hfstar

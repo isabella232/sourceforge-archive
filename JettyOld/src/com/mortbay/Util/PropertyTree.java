@@ -68,9 +68,14 @@ import java.util.StringTokenizer;
 public class PropertyTree extends Properties
 {
     /* ------------------------------------------------------------ */
+    // The leafs of this node
     private Hashtable values = null;
+    // The sub nodes
     private Hashtable subNodes = null;
+    // The default values
     private PropertyTree defaultValues = null;
+    // The leaf default value. This actually never gets set except upon
+    // defaultValues themselves...
     private Object defaultValue = null;
     /* ------------------------------------------------------------ */
     public PropertyTree(){}
@@ -120,6 +125,11 @@ public class PropertyTree extends Properties
 	return node.valuePut(token, value);
     }
     /* ------------------------------------------------------------ */
+    /** Override Hashtable.remove() */
+    public Object remove(Object key){
+	return put(key, null);
+    }
+    /* ------------------------------------------------------------ */
     /* Lookup a value on this node */
     private Object valueGet(String key){
 	Object retv = null;
@@ -129,17 +139,27 @@ public class PropertyTree extends Properties
 	    retv = subNodes.get(key);
 	if (retv == null)
 	    retv = defaultValue;
+	if (retv == null && defaultValues != null)
+	    retv = defaultValues.defaultValue;
 	return retv;
     }
     /* ------------------------------------------------------------ */
     /* Store a value on this node
      * Storing the key "*" will set a defaultValue
+     * Putting null will clear values and subNodes (name or "*")
      */
     private Object valuePut(Object key, Object value){
 	if ("*".equals(key)) {
 	    if (value instanceof PropertyTree){
 		Object retv = defaultValues;
 		defaultValues = (PropertyTree)value;
+		return retv;
+	    } if (value == null) {
+		// Clear everything...
+		Object retv = defaultValues;
+		defaultValues = null;
+		retv = retv == null ? defaultValue : retv;
+		defaultValue = null;
 		return retv;
 	    } else {
 		Object retv = defaultValue;
@@ -151,6 +171,14 @@ public class PropertyTree extends Properties
 	    if (subNodes == null)
 		subNodes = new Hashtable();
 	    return subNodes.put(key, value);
+	} if (value == null) {
+	    // Clear everything...
+	    Object retv = null;
+	    if (values != null)
+		retv = values.remove(key);
+	    if (subNodes != null)
+		retv = subNodes.remove(key);
+	    return retv;
 	} else {
 	    if (values == null)
 		values = new Hashtable();
@@ -219,11 +247,12 @@ public class PropertyTree extends Properties
 		writeKeyValue(prefix, writer, postfix, key,
 			      values.get(key).toString());
 	    }
-	if (defaultValue != null)
-	    writeKeyValue(prefix, writer, postfix, "*",
-			  defaultValue.toString());
-	if (defaultValues != null && defaultValues != this)
+	if (defaultValues != null && defaultValues != this){
+	    if (defaultValues.defaultValue != null)
+		writeKeyValue(prefix, writer, postfix, "*",
+			      defaultValues.defaultValue.toString());
 	    defaultValues.listValues(prefix+"*.", writer, postfix);
+	}
 	if (subNodes != null)
 	    for (Enumeration enum = subNodes.keys(); enum.hasMoreElements();){
 		String key = enum.nextElement().toString();
@@ -297,6 +326,8 @@ public class PropertyTree extends Properties
      * @return null if none.
      */
     public PropertyTree getNode(String name){
+	if (name.equals("*"))
+	    return buildDefault();
 	if (subNodes != null)
 	    return (PropertyTree)subNodes.get(name);
 	return null;

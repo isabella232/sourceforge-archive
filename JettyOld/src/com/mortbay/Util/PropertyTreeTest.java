@@ -48,6 +48,8 @@ public class PropertyTreeTest
 	test.checkEquals(props.get("a.b.x.d.x.d"), "ambig3", "a.b.x.d.x.d");
 	test.checkEquals(props.getProperty("a.b.c"), "2", "getProperty(a.b.c)");
 	test.checkEquals(props.getProperty("a.c", "def"), "def", "getProperty(a.c, def)");
+	test.checkEquals(props.get("h.f.g"), "hfstar", "h.f.g");
+	test.checkEquals(props.get("h.f.g.g"), "hfstar", "h.f.g.g");
 	test.report();
     }
     /* ------------------------------------------------------------ */
