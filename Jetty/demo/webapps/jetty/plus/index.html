@@ -18,6 +18,7 @@ The feature set currently contains:
   <li> <A HREF="http://java.sun.com/products/jndi/">Java Naming and Directory Interface API (JNDI)</A> 
   <li> <A HREF="http://jakarta.apache.org/log4j/docs/">Log4J</A>  
   <li> <A HREF="http://java.sun.com/products/jaas/">Java Authentication and Authorization Service (JAAS)</A>
+  <li> <A HREF="http://java.sun.com/products/javamail/">Java Mail</A>&nbsp; <font color=red><i>New</i></font>
 </ul> 
 
 To use JettyPlus, you must:
@@ -51,7 +52,7 @@ JettyPlus consists of
 <code><b>org.mortbay.jetty.plus.jar</b></code>, ancillary file
 <code><b>org.mortbay.jetty.plus.resource.jar</b></code>, and
 optionally <code><b>org.mortbay.jaas.jar</b></code> as well
-as a number of libraries found in extra/ext. If you use the convenient
+as a number of libraries found in <code><b>extra/ext</b></code>. If you use the convenient
 start.jar method of running Jetty (highly recommended), all necessary jar files will
 automatically be placed on the JVM classpath for you. Otherwise,
 you will need to place the following on the Java classpath in
@@ -60,6 +61,8 @@ addition to the usual Jetty jars:
   <li>org.mortbay.jetty.plus.jar
   <li>org.mortbay.jetty.plus.resource.jar
   <li>org.mortbay.jetty.jaas.jar (if you want to use JAAS)
+  <li>activation.jar
+  <li>mail.jar
   <li>carol.jar 
   <li>commons-cli.jar
   <li>commons-logging.jar
@@ -72,6 +75,8 @@ addition to the usual Jetty jars:
   <li>jts1_0.jar
   <li>log4j.jar
   <li>objectweb-datasource.jar
+  <li>ow_util_log_file.jar
+  <li>ow_util_log_wrp_log4j.jar
   <li>p6spy.jar
   <li>xapool.jar
 </ul>
@@ -139,22 +144,23 @@ To use DataSources in your webapp, you need to:
  transaction service Eg:
 <code><pre>
 &lt;Configure class="org.mortbay.jetty.plus.Server"&gt;
-  &lt;Call name="setTransactionManager"&gt;
+  &lt;Call name="addService"&gt;
     &lt;Arg&gt;
-      &lt;New class="org.mortbay.jetty.plus.JotmService "&gt;
-        &lt;Call name="addDataSource"&gt;
-           &lt;Arg&gt;jdbc/myDB&lt;/Arg&gt;                    <font color=silver>&lt;-- name --&gt;</font>
-           &lt;Arg&gt;org.hsqldb.jdbcDriver&lt;/Arg&gt;        <font color=silver>&lt;-- driver class --&gt;</font>
-           &lt;Arg&gt;jdbc:hsqldb:extra/etc/tmtest&lt;/Arg&gt; <font color=silver>&lt;-- url --&gt;</font>
-           &lt;Arg&gt;sa&lt;/Arg&gt; <font color=silver>&lt;-- username --&gt;</font>
-           &lt;Arg&gt;&lt;/Arg&gt;   <font color=silver>&lt;-- password --&gt;</font>
-           &lt;Arg&gt;8&lt;/Arg&gt; <font color=silver> &lt;-- inital connection pool size --&gt;</font>
-           &lt;Arg&gt;4&lt;/Arg&gt;  <font color=silver>&lt;-- min connection pool size --&gt;</font>
-           &lt;Arg&gt;15&lt;/Arg&gt;<font color=silver> &lt;-- max connection pool size --&gt;</font>
+      &lt;New class="org.mortbay.jetty.plus.JotmService"&gt;
+        &lt;Set name="Name"&gt;TransactionMgr&lt;/Set&gt;
+           &lt;Call name="addDataSource"&gt;
+           &lt;Arg&gt;jdbc/myDB&lt;/Arg&gt;              <font color="silver"> &lt;!-- jndi name </font>
+           &lt;Arg&gt;org.hsqldb.jdbcDriver&lt;/Arg&gt;  <font color="silver"> &lt;!-- driver class  --&gt;</font>
+           &lt;Arg&gt;jdbc:hsqldb:extra/etc/tmtest&lt;/Arg&gt; <font color="silver"> &lt;!-- url --&gt; </font>
+           &lt;Arg&gt;sa&lt;/Arg&gt;                     <font color="silver"> &lt;!-- username --&gt;</font>
+           &lt;Arg&gt;&lt;/Arg&gt;                       <font color="silver"> &lt;!-- password --&gt;</font>
+           &lt;Arg&gt;8&lt;/Arg&gt;                      <font color="silver"> &lt;!-- inital connection pool size --&gt;</font>  
+           &lt;Arg&gt;4&lt;/Arg&gt;                      <font color="silver"> &lt;!-- min connection pool size --&gt;</font> 
+           &lt;Arg&gt;15&lt;/Arg&gt;                     <font color="silver"> &lt;!-- max connection pool size --&gt;</font> 
         &lt;/Call&gt;
-      &lt;/New&gt;
-    &lt;/Arg&gt;
-  &lt;/Call&gt;
+     &lt;/New&gt;
+   &lt;/Arg&gt;
+  &lt;/Call&gt; 
 &lt;Configure&gt;
 </pre></code>
 </li>
@@ -169,15 +175,74 @@ To use DataSources in your webapp, you need to:
 
 </ul>
 
-<H3>JNDI </H3>
-JettyPlus provides JNDI lookups courtesy of <A
-HREF="http://www.objectweb.org/carol/index.html">CAROL</A>. A
-suitable default CAROL properties file is provided for you and
-usually would not need to be changed, however, it is available in
-the <code>org.mortbay.jetty.resource.jar</code>.
+
+
+
+<H3>Mail Service </H3>
+
+A mail service is provided with JettyPlus. This means that you can send email programmatically from servlets, JSPs etc.
 <P>
-JettyPlus supports ENC lookups of &lt;env-entry&gt; tags in the
-web.xml descriptor. All you need to do to effect JNDI lookups in your code is to:
+To use the mail service, you need to:
+<P>
+<ul>
+ <li><B>Step 1:</B>  reference the Mail Service in your <code>web.xml</code>
+ descriptor as a resource. Eg.
+<code><pre>
+  &lt;resource-env-ref&gt;
+    &lt;description&gt;
+      Mail Service
+    &lt;/description&gt;
+    &lt;resource-env-ref-name&gt;
+      mail/Session <font color=silver>&lt;!-- must be same as JNDI name in xml config file (see step 2) --&gt;</font>
+    &lt;/resource-env-ref-name&gt;
+    &lt;resource-env-ref-type&gt;
+      javax.mail.Session
+    &lt;/resource-env-ref-type&gt;
+  &lt;/resource-env-ref&gt;
+</pre></code>
+ </li>
+ <li><B>Step 2:</B> set up the Mail Service in your JettyPlus xml
+ configuration file. Eg:
+<code><pre>
+  &lt;Call name="addService"&gt;
+    &lt;Arg&gt;
+      &lt;New class="org.mortbay.jetty.plus.MailService"&gt;
+        &lt;Set name="Name"&gt;MailService&lt;/Set&gt;
+        &lt;Set name="JNDI"&gt;mail/Session&lt;/Set&gt;
+        <font color="silver">&lt;!-- set up the id of the smtp user                 --&gt;</font>
+        &lt;Set name="User"&gt;XXX&lt;/Set&gt;
+        <font color="silver">&lt;!-- set up the password of the smtp user           --&gt;</font>
+        &lt;Set name="Password"&gt;XXX&lt;/Set&gt;
+        <font color="silver"> &lt;!-- set up the hostname/ip addr of the smtp server --&gt;</font>
+        &lt;Put name="mail.smtp.host"&gt;XXX&lt;/Put&gt;  
+        <font color="silver"> &lt;!-- setup any javax.mail.smtp provider variables   --&gt;</font>
+        &lt;Put name="mail.pop3.user"&gt;zzz&lt;/Put&gt;
+        &lt;Put name="mail.pop3.host"&gt;vvv&lt;/Put&gt;
+        &lt;Put name="mail.from"&gt;me@me&lt;/Put&gt;
+        &lt;Put name="mail.debug"&gt;false&lt;/Put&gt;
+      &lt;/New&gt;
+    &lt;/Arg&gt;
+  &lt;/Call&gt;
+
+<li><B>Step 3:</B>  access it in your code. Eg:
+<code><pre>
+  javax.mail.Session session =
+  (javax.mail.Session)context.lookup("java:comp/env/mail/Session");
+  Message msg = new MimeMessage(session);
+  msg.setFrom(new InternetAddress("me@me.com"));
+  msg.addRecipient(new InternetAddress("you@you.com"));
+  msg.setContent("Hi");
+  Transport.send(msg);
+</code></pre>
+</li>
+
+</ul>
+
+
+
+<H3>JNDI </H3>
+JettyPlus supports JNDI, including ENC lookups of &lt;env-entry&gt; tags in the
+web.xml descriptor. All you need to do to effect JNDI env lookups in your code is to:
 
  <ul>
  <li><B>Step 1:</B>  enter some env entries in your webapp
@@ -205,6 +270,20 @@ method, eg:
 </code></pre>
 </li>
 </ul>
+
+<font color=red><i>New:</i></font>&nbsp; JettyPlus JNDI service is now lenient on leading and trailing <code>"/"</code> elements of JNDI names. This avoids a lot of errors caused by mis-typings. For example, the following are all now equivalent:
+
+<blockquote>
+<code>
+<pre>
+java:comp/env/mything (strictly the correct form according to the spec)
+java:/comp/env/mything
+java:/comp/env/mything/
+</pre>
+</code>
+</blockquote>
+<P>
+
 
 <H3> Log4J </H3>
 The JettyPlus package provides a Jetty <code>org.mortbay.util.LogSink</code> to
@@ -236,6 +315,12 @@ To use Log4J:
   java -Dlog4j.configuration=log4j.xml -jar start.jar config.xml
 </pre></code>
 </ul>
+
+
+
+
+
+
 
 <H3>JAAS</H3>
 JAAS provides a pluggable framework for authenticating and
