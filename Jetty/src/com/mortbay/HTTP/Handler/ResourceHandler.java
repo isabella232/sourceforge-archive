@@ -198,34 +198,42 @@ public class ResourceHandler extends NullHandler
 	    throw new HttpException(HttpResponse.__403_Forbidden);
 	
 	Resource resource = resource(pathSpec,path);
-	Code.debug("PATHSPEC=",pathSpec,
-		   "\nPATH=",path,
-		   "\nRESOURCE=",resource);
-  
-	// check filename
-	boolean endsWithSlash= resource.toString().endsWith("/");
-
-	String method=request.getMethod();
-	if (method.equals(HttpRequest.__GET) ||
-	    method.equals(HttpRequest.__HEAD))
-	    handleGet(request, response, path, resource, endsWithSlash);  
-	else if (method.equals(HttpRequest.__PUT))
-	    handlePut(request, response, path, resource);
-	else if (method.equals(HttpRequest.__DELETE))
-	    handleDelete(request, response, path, resource);
-	else if (method.equals(HttpRequest.__OPTIONS))
-	    handleOptions(response);
-	else if (method.equals(HttpRequest.__MOVE))
-	    handleMove(request, response, pathSpec, path, resource);
-	else
+	try
 	{
-	    Code.debug("Unknown action:"+method);
-	    // anything else...
-	    try{
-		if (resource.exists())
-		    response.sendError(response.__501_Not_Implemented);
+	    Code.debug("PATHSPEC=",pathSpec,
+		       "\nPATH=",path,
+		       "\nRESOURCE=",resource);
+	    
+	    // check filename
+	    boolean endsWithSlash= resource.toString().endsWith("/");
+	    
+	    String method=request.getMethod();
+	    if (method.equals(HttpRequest.__GET) ||
+		method.equals(HttpRequest.__HEAD))
+		handleGet(request, response, path, resource, endsWithSlash);  
+	    else if (method.equals(HttpRequest.__PUT))
+		handlePut(request, response, path, resource);
+	    else if (method.equals(HttpRequest.__DELETE))
+		handleDelete(request, response, path, resource);
+	    else if (method.equals(HttpRequest.__OPTIONS))
+		handleOptions(response);
+	    else if (method.equals(HttpRequest.__MOVE))
+		handleMove(request, response, pathSpec, path, resource);
+	    else
+	    {
+		Code.debug("Unknown action:"+method);
+		// anything else...
+		try{
+		    if (resource.exists())
+			response.sendError(response.__501_Not_Implemented);
+		}
+		catch(Exception e) {Code.ignore(e);}
 	    }
-	    catch(Exception e) {Code.ignore(e);}
+	}
+	finally
+	{
+	    if (resource!=null)
+		resource.release();
 	}
     }
 
@@ -262,8 +270,7 @@ public class ResourceHandler extends NullHandler
 		out.flush();
 		return;
 	    }
-	}
-  
+	}  
  
 	if (resource!=null && resource.exists())
 	{

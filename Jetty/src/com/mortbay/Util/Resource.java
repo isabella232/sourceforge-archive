@@ -262,28 +262,6 @@ public class Resource
 	return null;
     }
 
-    /* ------------------------------------------------------------ */
-    /** 
-     * @param resourceBase 
-     * @param name 
-     * @return 
-     */
-    public static String relative(String resourceBase,String name)
-    {
-	if( name.startsWith( "./"))
-	    name = name.substring( 2);
-	if( resourceBase.endsWith( "/"))
-	    if( name.startsWith( "/"))
-		name = resourceBase + name.substring( 1);
-	    else
-		name = resourceBase + name;
-	else
-	    if( name.startsWith( "/"))
-		name = resourceBase + name;
-	    else
-		name = resourceBase + "/" + name;
-	return name;
-    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -293,9 +271,7 @@ public class Resource
     public Resource relative(String name)
 	throws IOException,MalformedURLException
     {
-	String resourceBase = _url.toExternalForm();
-	name=relative(resourceBase,name);
-	return newResource(new URL(name));
+	return newResource(new URL(_url,name));
     }
 
     /* ------------------------------------------------------------ */

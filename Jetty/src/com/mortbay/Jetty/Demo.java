@@ -60,6 +60,10 @@ public class Demo
 	    context.setResourceBase("./javadoc/");
 	    context.setServingResources(true);
 	    
+//  	    context=server.getContext(null,"/jar/*");
+//  	    context.setResourceBase("jar:file:/home/gregw/Jetty3/test.jar!/");
+//  	    context.addHandler(new ResourceHandler());
+	    
 	    // Start handlers and listener
 	    server.start();
 	}
