@@ -264,26 +264,6 @@ public abstract class HttpMessage
     {
         return _header.getValues(name,separators);
     }
-
-    /* ------------------------------------------------------------ */
-    /* Which fields to set?
-     * If the message is editable, then a header fields are returned.
-     * Otherwise if the message is sending a HTTP/1.1 message,
-     * then a trailer field is returned if it has been set.
-     * @return Header or Trailer fields
-     * @exception IllegalStateException Not editable or sending 1.1
-     *                                  with trailers
-     */
-    protected HttpFields setFields()
-        throws IllegalStateException
-    {
-        if (_state==__MSG_EDITABLE)
-            return _header;
-        
-        throw new IllegalStateException("Can't set fields in "+
-                                        __state[_state]+
-                                        " for "+_version);
-    }
     
 
     /* ------------------------------------------------------------ */
@@ -294,22 +274,20 @@ public abstract class HttpMessage
      * @param name Name of field 
      * @param value New value of field
      * @return Old value of field
-     * @exception IllegalStateException Not editable or sending 1.1
-     *                                  with trailers
      */
     public String setField(String name, String value)
-        throws IllegalStateException
     {
-        HttpFields fields=setFields();
+        if (_state!=__MSG_EDITABLE)
+            return null;
 
         if (HttpFields.__ContentType.equalsIgnoreCase(name))
         {
-            String old=fields.get(name);
+            String old=_header.get(name);
             setContentType(value);
             return old;
         }
-
-        return fields.put(name,value);
+        
+        return _header.put(name,value);
     }    
     
     /* ------------------------------------------------------------ */
@@ -319,14 +297,12 @@ public abstract class HttpMessage
      * field is set.
      * @param name Name of field 
      * @param value New values of field
-     * @exception IllegalStateException Not editable or sending 1.1
-     *                                  with trailers
      */
     public void setField(String name, List value)
-        throws IllegalStateException
     {
-        HttpFields fields=setFields();
-        fields.put(name,value);
+        if (_state!=__MSG_EDITABLE)
+            return;
+        _header.put(name,value);
     }
     
     /* ------------------------------------------------------------ */
@@ -342,8 +318,9 @@ public abstract class HttpMessage
     public void addField(String name, String value)
         throws IllegalStateException
     {
-        HttpFields fields=setFields();
-        fields.add(name,value);
+        if (_state!=__MSG_EDITABLE)
+            return;
+        _header.add(name,value);
     }
     
     /* -------------------------------------------------------------- */
@@ -363,13 +340,12 @@ public abstract class HttpMessage
      * Header or Trailer fields are set depending on message state.
      * @param name the field name
      * @param value the field integer value
-     * @exception IllegalStateException Not editable or sending 1.1
-     *                                  with trailers
      */
     public void setIntField(String name, int value)
-        throws IllegalStateException
     {
-        setFields().put(name, TypeUtil.toString(value));
+        if (_state!=__MSG_EDITABLE)
+            return;
+        _header.put(name, TypeUtil.toString(value));
     }
     
     /* -------------------------------------------------------------- */
@@ -377,13 +353,12 @@ public abstract class HttpMessage
      * Header or Trailer fields are set depending on message state.
      * @param name the field name
      * @param value the field integer value
-     * @exception IllegalStateException Not editable or sending 1.1
-     *                                  with trailers
      */
     public void addIntField(String name, int value)
-        throws IllegalStateException
     {
-        setFields().add(name, TypeUtil.toString(value));
+        if (_state!=__MSG_EDITABLE)
+            return;
+        _header.add(name, TypeUtil.toString(value));
     }
     
     /* -------------------------------------------------------------- */
@@ -404,12 +379,12 @@ public abstract class HttpMessage
      * Header or Trailer fields are set depending on message state.
      * @param name the field name
      * @param date the field date value
-     * @exception IllegalStateException Not editable or sending 1.1
-     *                                  with trailers
      */
     public void setDateField(String name, Date date)
     {
-        setFields().putDateField(name,date);
+        if (_state!=__MSG_EDITABLE)
+            return;
+        _header.putDateField(name,date);
     }
     
     /* -------------------------------------------------------------- */
@@ -417,12 +392,12 @@ public abstract class HttpMessage
      * Header or Trailer fields are set depending on message state.
      * @param name the field name
      * @param date the field date value
-     * @exception IllegalStateException Not editable or sending 1.1
-     *                                  with trailers
      */
     public void addDateField(String name, Date date)
     {
-        setFields().addDateField(name,date);
+        if (_state!=__MSG_EDITABLE)
+            return;
+        _header.addDateField(name,date);
     }
     
     /* -------------------------------------------------------------- */
@@ -430,12 +405,12 @@ public abstract class HttpMessage
      * Header or Trailer fields are set depending on message state.
      * @param name the field name
      * @param date the field date value
-     * @exception IllegalStateException Not editable or sending 1.1
-     *                                  with trailers
      */
     public void setDateField(String name, long date)
     {
-        setFields().putDateField(name,date);
+        if (_state!=__MSG_EDITABLE)
+            return;
+        _header.putDateField(name,date);
     }
     
     /* -------------------------------------------------------------- */
@@ -448,7 +423,9 @@ public abstract class HttpMessage
      */
     public void addDateField(String name, long date)
     {
-        setFields().addDateField(name,date);
+        if (_state!=__MSG_EDITABLE)
+            return;
+        _header.addDateField(name,date);
     }
     
 
@@ -459,14 +436,13 @@ public abstract class HttpMessage
      * field is removed.
      * @param name Name of field 
      * @return Old value of field
-     * @exception IllegalStateException Not editable or sending 1.1
-     *                                  with trailers
      */
     public String removeField(String name)
         throws IllegalStateException
     {
-        HttpFields fields=setFields();
-        return fields.remove(name);
+        if (_state!=__MSG_EDITABLE)
+            return null;
+        return _header.remove(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -540,6 +516,9 @@ public abstract class HttpMessage
      */
     public void setCharacterEncoding(String encoding,boolean setField)
     {
+        if (isCommitted())
+            return;
+        
         if (encoding==null)
         {
             // Clear any encoding.
@@ -547,7 +526,7 @@ public abstract class HttpMessage
             {
                 _characterEncoding=null;
                 if (setField)
-                    setFields().put(HttpFields.__ContentType,_mimeType);
+                    _header.put(HttpFields.__ContentType,_mimeType);
             }
         }
         else
@@ -556,9 +535,9 @@ public abstract class HttpMessage
             _characterEncoding=encoding;
             if (setField && _mimeType!=null)
             {
-                    setFields().put(HttpFields.__ContentType,
-                            _mimeType+";charset="+
-                             QuotedStringTokenizer.quote(_characterEncoding,";= "));
+                    _header.put(HttpFields.__ContentType,
+                            	_mimeType+";charset="+
+                            	QuotedStringTokenizer.quote(_characterEncoding,";= "));
             }
         }
     }
@@ -572,10 +551,13 @@ public abstract class HttpMessage
     /* ------------------------------------------------------------ */
     public void setContentType(String contentType) 
     {
+        if (isCommitted())
+            return;
+        
         if (contentType==null)
         {
             _mimeType=null;
-            setFields().remove(HttpFields.__ContentType);
+            _header.remove(HttpFields.__ContentType);
         }
         else
         {
@@ -614,7 +596,7 @@ public abstract class HttpMessage
                     contentType+=";charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
             }
             
-            setFields().put(HttpFields.__ContentType,contentType);
+            _header.put(HttpFields.__ContentType,contentType);
         }
     }
     
