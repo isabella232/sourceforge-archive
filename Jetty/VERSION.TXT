@@ -1,5 +1,7 @@
 Jetty Versions
 --------------
+
+ + Fixed AJP13 protocol so that request/response header enums are correct.
  + Fixed form auth success redirect after retry, introduced in 4.2.9rc1
  + Trace support is now optional (in AbstractHttpHandler).
  + Deprecated forced chunking.

@@ -143,7 +143,7 @@ public class AJP13Connection extends HttpConnection
     /* ------------------------------------------------------------ */
     public boolean handleNext()
     {
-        AJP13Packet packet=null;
+        AJP13RequestPacket packet=null;
         HttpRequest request = getRequest();
         HttpResponse response = getResponse();
         HttpContext context = null;

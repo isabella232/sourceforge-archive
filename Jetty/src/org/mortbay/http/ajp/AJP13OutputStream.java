@@ -13,8 +13,8 @@ import org.mortbay.http.BufferedOutputStream;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.util.Code;
-
-
+import org.mortbay.http.ajp.AJP13ResponsePacket;
+import org.mortbay.http.ajp.AJP13Packet;
 
 /** OutputStream for AJP13 protocol.
  * 
@@ -24,28 +24,28 @@ import org.mortbay.util.Code;
  */
 public class AJP13OutputStream extends BufferedOutputStream
 {
-    private AJP13Packet _packet;
+    private AJP13ResponsePacket _packet;
     private boolean _complete;
     private boolean _completed;
     private boolean _persistent=true;
-    private AJP13Packet _ajpResponse;
+    private AJP13ResponsePacket _ajpResponse;
 
     /* ------------------------------------------------------------ */
     AJP13OutputStream(OutputStream out,int bufferSize)
     {
         super(out,
               bufferSize,
-              AJP13Packet.__DATA_HDR,
-              AJP13Packet.__DATA_HDR,
+              AJP13ResponsePacket.__DATA_HDR,
+              AJP13ResponsePacket.__DATA_HDR,
               0);
         setFixed(true);
-        _packet=new AJP13Packet(_buf);
+        _packet=new AJP13ResponsePacket(_buf);
         _packet.prepare();
         
         setBypassBuffer(false);
         setFixed(true);
         
-        _ajpResponse=new AJP13Packet(bufferSize);
+        _ajpResponse=new AJP13ResponsePacket(bufferSize);
         _ajpResponse.prepare();
     }
 
@@ -58,7 +58,7 @@ public class AJP13OutputStream extends BufferedOutputStream
         response.setState(HttpMessage.__MSG_SENDING);
         
         _ajpResponse.resetData();
-        _ajpResponse.addByte(AJP13Packet.__SEND_HEADERS);
+        _ajpResponse.addByte(AJP13ResponsePacket.__SEND_HEADERS);
         _ajpResponse.addInt(response.getStatus());
         _ajpResponse.addString(response.getReason());
         
@@ -103,7 +103,7 @@ public class AJP13OutputStream extends BufferedOutputStream
             _completed=true;
             
             _packet.resetData();
-            _packet.addByte(AJP13Packet.__END_RESPONSE);
+            _packet.addByte(AJP13ResponsePacket.__END_RESPONSE);
             _packet.addBoolean(_persistent);
             _packet.setDataSize();
             write(_packet);
@@ -153,14 +153,14 @@ public class AJP13OutputStream extends BufferedOutputStream
 
         if (_buf!=_packet.getBuffer())
         {
-            _packet=new AJP13Packet(_buf);
+            _packet=new AJP13ResponsePacket(_buf);
             _packet.prepare();
         }
 
-        prewrite(_buf,0,AJP13Packet.__DATA_HDR);
+        prewrite(_buf,0,AJP13ResponsePacket.__DATA_HDR);
         _packet.resetData();
-        _packet.addByte(AJP13Packet.__SEND_BODY_CHUNK);
-        _packet.setDataSize(size()-AJP13Packet.__HDR_SIZE);
+        _packet.addByte(AJP13ResponsePacket.__SEND_BODY_CHUNK);
+        _packet.setDataSize(size()-AJP13ResponsePacket.__HDR_SIZE);
     }
     
     /* ------------------------------------------------------------ */
@@ -176,28 +176,28 @@ public class AJP13OutputStream extends BufferedOutputStream
     {
         int sz = size();
         
-        if (sz<=AJP13Packet.__MAX_BUF)
+        if (sz<=AJP13ResponsePacket.__MAX_BUF)
             super.writeTo(out);
         else
         {
             int offset=preReserve();
-            int data=sz-AJP13Packet.__DATA_HDR;
+            int data=sz-AJP13ResponsePacket.__DATA_HDR;
             
-            while (data>AJP13Packet.__MAX_DATA)
+            while (data>AJP13ResponsePacket.__MAX_DATA)
             {   
-                _packet.setDataSize(AJP13Packet.__MAX_BUF-AJP13Packet.__HDR_SIZE);
+                _packet.setDataSize(AJP13ResponsePacket.__MAX_BUF-AJP13ResponsePacket.__HDR_SIZE);
                 if (offset>0)
-                    System.arraycopy(_buf,0,_buf,offset,AJP13Packet.__DATA_HDR);
-                out.write(_buf,offset,AJP13Packet.__MAX_BUF);
+                    System.arraycopy(_buf,0,_buf,offset,AJP13ResponsePacket.__DATA_HDR);
+                out.write(_buf,offset,AJP13ResponsePacket.__MAX_BUF);
                 
-                data-=AJP13Packet.__MAX_DATA;
-                offset+=AJP13Packet.__MAX_DATA;
+                data-=AJP13ResponsePacket.__MAX_DATA;
+                offset+=AJP13ResponsePacket.__MAX_DATA;
             }
             
-            int len=data+AJP13Packet.__DATA_HDR;
-            _packet.setDataSize(len-AJP13Packet.__HDR_SIZE);
+            int len=data+AJP13ResponsePacket.__DATA_HDR;
+            _packet.setDataSize(len-AJP13ResponsePacket.__HDR_SIZE);
             if (offset>0)
-                System.arraycopy(_buf,0,_buf,offset,AJP13Packet.__DATA_HDR);
+                System.arraycopy(_buf,0,_buf,offset,AJP13ResponsePacket.__DATA_HDR);
             out.write(_buf,offset,len);
         }
     }

@@ -9,13 +9,13 @@ package org.mortbay.http.ajp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
+import org.mortbay.http.ajp.AJP13RequestPacket;
 
 public class AJP13InputStream extends InputStream
 {   
     /* ------------------------------------------------------------ */
-    private AJP13Packet _packet;
-    private AJP13Packet _getBodyChunk;
+    private AJP13RequestPacket _packet;
+    private AJP13RequestPacket _getBodyChunk;
     private InputStream _in;
     private OutputStream _out;
     private boolean _gotFirst=false;
@@ -26,12 +26,12 @@ public class AJP13InputStream extends InputStream
     {
         _in=in;
         _out=out;
-        _packet=new AJP13Packet(bufferSize);
-        _getBodyChunk=new AJP13Packet(8);
+        _packet=new AJP13RequestPacket(bufferSize);
+        _getBodyChunk=new AJP13RequestPacket(8);
         _getBodyChunk.addByte((byte)'A');
         _getBodyChunk.addByte((byte)'B');
         _getBodyChunk.addInt(3);
-        _getBodyChunk.addByte(AJP13Packet.__GET_BODY_CHUNK);
+        _getBodyChunk.addByte(AJP13RequestPacket.__GET_BODY_CHUNK);
         _getBodyChunk.addInt(bufferSize);
     }
 
@@ -134,7 +134,7 @@ public class AJP13InputStream extends InputStream
      * only valid until the next call to nextPacket or read().
      * @exception IOException 
      */
-    public AJP13Packet nextPacket()
+    public AJP13RequestPacket nextPacket()
         throws IOException
     {
         if (_packet.read(_in))

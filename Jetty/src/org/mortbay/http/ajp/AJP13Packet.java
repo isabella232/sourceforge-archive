@@ -23,7 +23,7 @@ import org.mortbay.util.StringUtil;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class AJP13Packet
+public abstract class AJP13Packet
 {
     /* ------------------------------------------------------------ */
     public static final int __MAX_BUF=8192;
@@ -65,32 +65,15 @@ public class AJP13Packet
         "SEARCH"
     };
     
-    public static final String[] __header=
-    {
-        "ERROR",
-        "accept",
-        "accept-charset",
-        "accept-encoding",
-        "accept-language",
-        "authorization",
-        "connection",
-        "content-type",
-        "content-length",
-        "cookie",
-        "cookie2",
-        "host",
-        "pragma",
-        "referer",
-        "user-agent"
-    };
+    public  String[] __header;
     
-    private static final HashMap __headerMap = new HashMap();
-    static
-    {
-        for (int  i=1;i<__header.length;i++)
-            __headerMap.put(__header[i],new Integer(0xA000+i));
-    }
+    protected  HashMap __headerMap = new HashMap();
     
+	/**
+	 * Abstract method to populate the header array and hash map.
+	 *  
+	 */
+    abstract public void populateHeaders();
     
     /* ------------------------------------------------------------ */
     private byte[] _buf;
@@ -102,6 +85,7 @@ public class AJP13Packet
     /* ------------------------------------------------------------ */
     public AJP13Packet(byte[] buffer, int len)
     {
+    	populateHeaders();
         _buf=buffer;
         _ownBuffer=false;
         _bytes=len;
@@ -110,6 +94,7 @@ public class AJP13Packet
     /* ------------------------------------------------------------ */
     public AJP13Packet(byte[] buffer)
     {
+		populateHeaders();
         _buf=buffer;
         _ownBuffer=false;
     }
@@ -117,6 +102,7 @@ public class AJP13Packet
     /* ------------------------------------------------------------ */
     public AJP13Packet(int size)
     {
+		populateHeaders();
         _buf=ByteArrayPool.getByteArray(size);
         _ownBuffer=true;
     }
@@ -308,6 +294,7 @@ public class AJP13Packet
         if ((0xFF&_buf[_pos])==0xA0)
         {
             _pos++;
+           
             return __header[_buf[_pos++]];
         }
         return getString();
