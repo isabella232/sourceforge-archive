@@ -524,10 +524,8 @@ public class ThreadPool
                             {
                                 // interrupt was due to accept timeout
                                 // Kill thread if it is in excess of the minimum.
-                                
                                 if (Code.verbose(99))
                                     Code.debug("Idle death: "+thread);
-                                _threadSet.remove(thread);
                                 break;
                             }
                         }
@@ -589,11 +587,10 @@ public class ThreadPool
             }
             finally
             {
-                synchronized(this)
+                synchronized(ThreadPool.this)
                 {
                     if (_threadSet!=null)
                         _threadSet.remove(Thread.currentThread());
-                    this.notify();
                 }
                 if (Code.verbose(9))
                     Code.debug("Stopped thread in ", _name);

@@ -379,16 +379,19 @@ abstract public class ThreadedServer extends ThreadPool
     public void stop()
         throws InterruptedException
     {
-        super.stop();
-        if (_listen!=null)
-        {
-            try{_listen.setSoTimeout(0);}
-            catch(SocketException e){Code.warning(e);}
-            try{
-                _listen.close();
+        try {super.stop();}
+        finally
+        {    
+            if (_listen!=null)
+            {
+                try{_listen.setSoTimeout(0);}
+                catch(SocketException e){Code.warning(e);}
+                try{
+                    _listen.close();
+                }
+                catch(IOException e){Code.warning(e);}
+                _listen=null;
             }
-            catch(IOException e){Code.warning(e);}
-            _listen=null;
         }
     }
     

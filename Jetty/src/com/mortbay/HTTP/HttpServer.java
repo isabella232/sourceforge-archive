@@ -323,6 +323,68 @@ public class HttpServer implements LifeCycle
     }
 
     /* ------------------------------------------------------------ */
+    /** Add a context.
+     * As contexts cannot be publicly created, this may be used to
+     * alias an existing context.
+     * @param host The virtual host or null for all hosts.
+     * @param context 
+     */
+    public void addContext(String host,
+                           HandlerContext context)
+    {
+        PathMap contextMap=(PathMap)_hostMap.get(host);
+        if (contextMap==null)
+        {
+            contextMap=new PathMap(7);
+            _hostMap.put(host,contextMap);
+        }
+
+        String contextPathSpec=context.getContextPath();
+        if (contextPathSpec.length()>1)
+            contextPathSpec+="/*";
+        
+        List contextList = (List)contextMap.get(contextPathSpec);
+        if (contextList==null)
+        {
+            contextList=new ArrayList(1);
+            contextMap.put(contextPathSpec,contextList);
+        }
+
+        contextList.add(context);
+        context.addHost(host);
+
+        Code.debug("Added ",context," for host ",host);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Remove a context or Web application
+     * @param host The virtual host or null for all hosts.
+     * @param contextPathSpec
+     * @param i Index among contexts of same host and pathSpec.
+     * @exception IllegalStateException if context not stopped
+     */
+    public void removeContext(String host, String contextPathSpec, int i)
+        throws IllegalStateException
+    {
+        PathMap contextMap=(PathMap)_hostMap.get(host);
+        if (contextMap!=null)
+        {
+            List contextList = (List)contextMap.get(contextPathSpec);
+            if (contextList!=null)
+            {
+                if (i< contextList.size())
+                {
+                    HandlerContext hc=(HandlerContext)contextList.get(i);
+                    if (hc!=null && hc.isStarted())
+                        throw new IllegalStateException("Context not stopped");
+                    contextList.remove(i);
+                }
+            }
+        }
+    }
+    
+        
+    /* ------------------------------------------------------------ */
     /** 
      * @param host The virtual host or null for all hosts.
      * @param contextPathSpec
@@ -375,40 +437,6 @@ public class HttpServer implements LifeCycle
         return hc;
     }
     
-    /* ------------------------------------------------------------ */
-    /** Add a context.
-     * As contexts cannot be publicly created, this may be used to
-     * alias an existing context.
-     * @param host The virtual host or null for all hosts.
-     * @param context 
-     */
-    public void addContext(String host,
-                           HandlerContext context)
-    {
-        PathMap contextMap=(PathMap)_hostMap.get(host);
-        if (contextMap==null)
-        {
-            contextMap=new PathMap(7);
-            _hostMap.put(host,contextMap);
-        }
-
-        String contextPathSpec=context.getContextPath();
-        if (contextPathSpec.length()>1)
-            contextPathSpec+="/*";
-        
-        List contextList = (List)contextMap.get(contextPathSpec);
-        if (contextList==null)
-        {
-            contextList=new ArrayList(1);
-            contextMap.put(contextPathSpec,contextList);
-        }
-
-        contextList.add(context);
-        context.addHost(host);
-
-        Code.debug("Added ",context," for host ",host);
-    }
-
     
     /* ------------------------------------------------------------ */
     /** 
