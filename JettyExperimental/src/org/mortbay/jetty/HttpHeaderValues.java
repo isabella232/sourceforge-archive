@@ -32,6 +32,7 @@ public class HttpHeaderValues extends BufferCache
         GZIP="gzip",
         IDENTITY="identity",
         KEEP_ALIVE="keep-alive",
+        MESSAGE_HTTP="message/http",
         MULTIPART_BYTERANGES="multipart/byteranges",
         TEXT_HTML="text/html",
         CONTINUE="100-continue",
@@ -48,6 +49,7 @@ public class HttpHeaderValues extends BufferCache
         GZIP_ORDINAL=index++,
         IDENTITY_ORDINAL=index++,
         KEEP_ALIVE_ORDINAL=index++,
+        MESSAGE_HTTP_ORDINAL=index++,
         MULTIPART_BYTERANGES_ORDINAL=index++,
         TEXT_HTML_ORDINAL=index++,
         CONTINUE_ORDINAL=index++;
@@ -63,6 +65,7 @@ public class HttpHeaderValues extends BufferCache
         KEEP_ALIVE_BUFFER=CACHE.add(KEEP_ALIVE,KEEP_ALIVE_ORDINAL),
         TEXT_HTML_BUFFER=CACHE.add(TEXT_HTML,TEXT_HTML_ORDINAL),
         CONTINUE_BUFFER=CACHE.add(CONTINUE, CONTINUE_ORDINAL),
+        MESSAGE_HTTP_BUFFER=CACHE.add(MESSAGE_HTTP, MESSAGE_HTTP_ORDINAL),
         MULTIPART_BYTERANGES_BUFFER=CACHE.add(MULTIPART_BYTERANGES,MULTIPART_BYTERANGES_ORDINAL);
         
     static

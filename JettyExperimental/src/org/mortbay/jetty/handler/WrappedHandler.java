@@ -17,32 +17,32 @@ package org.mortbay.jetty.handler;
 
 import java.io.IOException;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
 
 import org.apache.ugli.LoggerFactory;
 import org.apache.ugli.ULogger;
 import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HandlerCollection;
 import org.mortbay.jetty.HttpConnection;
 
 /* ------------------------------------------------------------ */
-/** AbstractHandlerCollection.
+/** HandlerCollection.
  * @author gregw
  *
  */
-public class AbstractHandlerCollection extends AbstractHandler implements HandlerCollection
+public class WrappedHandler extends AbstractHandler
 {
-    private static ULogger log = LoggerFactory.getLogger(HttpConnection.class);
+    
+    private static ULogger log = LoggerFactory.getLogger(WrappedHandler.class);
 
-    private Handler[] _handlers;
+    private Handler _handler;
 
     /* ------------------------------------------------------------ */
     /**
      * 
      */
-    public AbstractHandlerCollection()
+    public WrappedHandler()
     {
         super();
     }
@@ -51,34 +51,50 @@ public class AbstractHandlerCollection extends AbstractHandler implements Handle
     /**
      * @return Returns the handlers.
      */
-    public Handler[] getHandlers()
+    public Handler getHandler()
     {
-        return _handlers;
+        return _handler;
     }
     
     /* ------------------------------------------------------------ */
     /**
      * @param handlers The handlers to set.
      */
-    public void setHandlers(Handler[] handlers)
+    public void setHandler(Handler handler)
     {
-        _handlers = handlers;
+        _handler = handler;
     }
 
     /* ------------------------------------------------------------ */
     /* 
+     * @see org.mortbay.thread.AbstractLifeCycle#doStart()
+     */
+    protected void doStart() throws Exception
+    {
+        if (_handler!=null)
+            _handler.start();
+        super.doStart();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.thread.AbstractLifeCycle#doStop()
+     */
+    protected void doStop() throws Exception
+    {
+        super.doStop();
+        if (_handler!=null)
+            _handler.stop();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
      * @see org.mortbay.jetty.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public boolean handle(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+    public boolean handle(HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
-        if (_handlers!=null)
-        {
-            for (int i=0;i<_handlers.length;i++)
-            {
-                if (_handlers[i].handle(request,response))
-                    return true;
-            }
-        }    
-        return false;
+        if (_handler==null || !isStarted())
+            return false;
+        return _handler.handle(request,response, dispatch);
     }
 }

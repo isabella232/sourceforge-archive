@@ -17,6 +17,9 @@ package org.mortbay.jetty;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -28,7 +31,6 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
-import org.mortbay.util.URI;
 
 /**
  * @author gregw
@@ -46,14 +48,16 @@ public class HttpConnection
     private EndPoint _endp;
     private Handler _handler;
     
+    private URI _uri;
+    
     private HttpParser _parser;
     private HttpFields _requestFields;
-    private HttpRequest _request;
+    private Request _request;
     private Input _in;
     
     private HttpGenerator _generator;
     private HttpFields _responseFields;
-    private HttpResponse _response;
+    private Response _response;
     private Output _out;
     
     private transient Buffer _content;
@@ -80,8 +84,8 @@ public class HttpConnection
         _parser = new HttpParser(_connector, endpoint, new RequestHandler(), _connector.getHeaderBufferSize(), _connector.getRequestBufferSize());
         _requestFields=new HttpFields();
         _responseFields=new HttpFields();
-        _request=new HttpRequest(this);
-        _response=new HttpResponse(this);
+        _request=new Request(this);
+        _response=new Response(this);
         _generator = new HttpGenerator(_connector,_endp, _connector.getHeaderBufferSize(), _connector.getResponseBufferSize());
         _handler=handler;
     }
@@ -164,7 +168,7 @@ public class HttpConnection
     /**
      * @return Returns the request.
      */
-    public HttpRequest getHttpRequest()
+    public Request getRequest()
     {
         return _request;
     }
@@ -173,7 +177,7 @@ public class HttpConnection
     /**
      * @return Returns the response.
      */
-    public HttpResponse getHttpResponse()
+    public Response getResponse()
     {
         return _response;
     }
@@ -327,7 +331,9 @@ public class HttpConnection
             {
                 try
                 {
-                    _handler.handle(_request, _response);
+                    _request.setPathInfo(_uri.getPath());
+                    _request.setRequestURI(_uri.getRawPath());
+                    _handler.handle(_request, _response, Handler.REQUEST);
                 }
                 catch (ServletException e)
                 {
@@ -361,6 +367,7 @@ public class HttpConnection
             switch (ho)
             {
                 case HttpHeaders.HOST_ORDINAL:
+                    // TODO check if host matched a host in the URI.
                     _host = true;
                     break;
 
@@ -384,23 +391,35 @@ public class HttpConnection
          *      org.mortbay.io.Buffer, org.mortbay.io.Buffer)
          */
         public void startRequest(Buffer method, Buffer uri, Buffer version)
+           throws IOException
         {
-            _request.setMethod(method.toString());
-            
-            URI u=new URI(uri.toString()); // TODO more efficient???
-            _request.setUri(u); 
-            _request.setContextPath("");
-            _request.setServletPath(u.getPath());
-            
-            _version = version == null ? HttpVersions.HTTP_0_9_ORDINAL : HttpVersions.CACHE
-                    .getOrdinal(version);
-            if (_version <= 0) _version = HttpVersions.HTTP_1_0_ORDINAL;
-            _request.setProtocol(HttpVersions.CACHE.get(_version).toString());
-            
             _host = false;
             _expect = UNKNOWN;
             _connection = UNKNOWN;
-            _head = HttpVersions.CACHE.getOrdinal(method) == HttpMethods.HEAD_ORDINAL;  
+            _request.setMethod(method.toString());
+            
+            try	
+            {
+                _uri=new URI(uri.toString()); 
+                _uri=_uri.normalize();
+                _request.setUri(_uri); 
+            
+                _version = version == null ? HttpVersions.HTTP_0_9_ORDINAL : HttpVersions.CACHE
+                        .getOrdinal(version);
+                if (_version <= 0) _version = HttpVersions.HTTP_1_0_ORDINAL;
+                _request.setProtocol(HttpVersions.CACHE.get(_version).toString());
+            
+                _head = HttpMethods.CACHE.getOrdinal(method) == HttpMethods.HEAD_ORDINAL;  
+            }
+            catch (URISyntaxException e)
+            {
+                _parser.reset();
+                // TODO prebuilt response
+                _generator.setResponse(400, null);
+                _responseFields.put(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
+                _generator.complete();
+                return;
+            }
         }
         
         /*

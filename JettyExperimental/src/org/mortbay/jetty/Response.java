@@ -32,13 +32,13 @@ import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
-/** HttpResponse.
+/** Response.
  * @author gregw
  *
  */
-public class HttpResponse implements HttpServletResponse
+public class Response implements HttpServletResponse
 {
-    private static ULogger log = LoggerFactory.getLogger(HttpResponse.class);
+    private static ULogger log = LoggerFactory.getLogger(Response.class);
     
     public static final int
         DISABLED=-1,
@@ -77,7 +77,7 @@ public class HttpResponse implements HttpServletResponse
     /**
      * 
      */
-    HttpResponse(HttpConnection connection)
+    Response(HttpConnection connection)
     {
         _connection=connection;
     }

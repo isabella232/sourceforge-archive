@@ -21,10 +21,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
@@ -32,6 +32,7 @@ import org.mortbay.io.IO;
 import org.mortbay.io.View;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.util.URIUtil;
 
 /* ------------------------------------------------------------ */
 /** FileHandler.
@@ -55,17 +56,17 @@ public class FileHandler extends AbstractHandler
     /* 
      * @see org.mortbay.jetty.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public boolean handle(HttpServletRequest request, HttpServletResponse response)
+    public boolean handle(HttpServletRequest request, HttpServletResponse response, int dispatch)
             throws IOException, ServletException
     {
-        String uri = request.getServletPath();
+        String path = request.getPathInfo();
         
-        
-        Buffer content = (Buffer) _cache.get(uri);
-        
+        Buffer content = (Buffer) _cache.get(path); 
         if (content==null)
         {
-            File file = new File(".",uri);
+            File file = new File(request.getPathTranslated());
+            
+            
             if (file.exists() && !file.isDirectory())
             {
                 if (Boolean.getBoolean("FileNIO") &&  HttpConnection.getCurrentConnection().getConnector().getBuffer(1) instanceof NIOBuffer)
@@ -88,21 +89,21 @@ public class FileHandler extends AbstractHandler
                         content.put(buffer,0,len);
                     }
                 }
-                _cache.put(uri, content);
+                _cache.put(path, content);
             }
         }
         
         
         if (content==null)
         {
-            content = new ByteArrayBuffer("<h1>Hello World: "+uri+"</h1>\n");
+            content = new ByteArrayBuffer("<h1>Hello World: "+path+"</h1>\n");
             response.setContentType("text/html");
         }
-        else if (uri.endsWith(".html"))
+        else if (path.endsWith(".html"))
             response.setContentType("text/html");
-        else if (uri.endsWith(".jpg"))
+        else if (path.endsWith(".jpg"))
             response.setContentType("image/jpeg");
-        else if (uri.endsWith(".gif"))
+        else if (path.endsWith(".gif"))
             response.setContentType("image/gif");
         else 
             response.setContentType("text/plain");
@@ -119,7 +120,7 @@ public class FileHandler extends AbstractHandler
             out.write(content.array(),content.getIndex(),content.length());
         else
         {
-            File file = new File(".",uri);
+            File file = new File(".",path);
             IO.copy(new FileInputStream(file), out);
         }
         

@@ -32,12 +32,28 @@
         <Item>
 	      <New class="org.mortbay.jetty.handler.ContextHandler">
 	        <Set name="contextPath">/test</Set>
-	        <Set name="handlers">
-	          <Array type="org.mortbay.jetty.Handler"> 
-                <Item>
-	              <New class="org.mortbay.jetty.handler.FileHandler"/>
-	            </Item>
-              </Array>
+	        <Set name="resourceBase">./webapps/test</Set>
+	        <Set name="handler">
+	          <New class="org.mortbay.jetty.servlet.ServletHandler">
+	            <Set name="servlets">
+	              <Array type="org.mortbay.jetty.servlet.ServletHolder">
+	                <Item>
+	                  <New class="org.mortbay.jetty.servlet.ServletHolder">
+	                    <Set name="name">Dump</Set>
+	                    <Set name="className">org.mortbay.servlet.DumpServlet</Set>
+	                    <Set name="paths">
+	                     <Array type="java.lang.String">
+	                      <Item>/dump/*</Item>
+	                      <Item>/exact</Item>
+	                      <Item>*.DUMP</Item>
+	                      <Item>/</Item>
+	                     </Array>
+	                    </Set>
+	                  </New>
+	                </Item>
+	              </Array>
+	            </Set>
+	          </New>
             </Set>
           </New>
         </Item>

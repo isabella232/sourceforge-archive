@@ -17,16 +17,16 @@ package org.mortbay.jetty;
 
 import java.io.IOException;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
 
 import org.mortbay.thread.AbstractLifeCycle;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.MultiException;
 
-public class Server extends AbstractLifeCycle implements HandlerCollection, ThreadPool
+public class Server extends AbstractLifeCycle implements Handler, ThreadPool
 {
     private ThreadPool _threadPool;
     private Connector[] _connectors;
@@ -178,7 +178,7 @@ public class Server extends AbstractLifeCycle implements HandlerCollection, Thre
     /* 
      * @see org.mortbay.jetty.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public boolean handle(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+    public boolean handle(HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
         if (_handlers==null || _handlers.length==0)
         {
@@ -189,7 +189,7 @@ public class Server extends AbstractLifeCycle implements HandlerCollection, Thre
         {
             for (int i=0;i<_handlers.length;i++)
             {
-                if (_handlers[i].handle(request,response))
+                if (_handlers[i].handle(request,response, dispatch))
                     return true;
             }
         }    

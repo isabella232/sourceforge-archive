@@ -167,15 +167,10 @@ public class XmlConfiguration
      * If the object is of the approprate class, the XML configuration
      * script is applied to the object.
      * @param obj The object to be configured.
-     * @exception ClassNotFoundException 
-     * @exception NoSuchMethodException 
-     * @exception InvocationTargetException 
+     * @exception Exception 
      */
     public void configure(Object obj)
-        throws ClassNotFoundException,
-               NoSuchMethodException,
-               InvocationTargetException,
-               IllegalAccessException
+        throws Exception
     {
         //Check the class of the object
         Class oClass = nodeClass(_config);
@@ -188,18 +183,10 @@ public class XmlConfiguration
     /** Create a new object and configure it.
      * A new object is created and configured.
      * @return The newly created configured object.
-     * @exception ClassNotFoundException 
-     * @exception NoSuchMethodException 
-     * @exception InvocationTargetException 
-     * @exception InstantiationException 
-     * @exception IllegalAccessException 
+     * @exception Exception 
      */
     public Object newInstance()
-        throws ClassNotFoundException,
-               NoSuchMethodException,
-               InvocationTargetException,
-               InstantiationException,
-               IllegalAccessException
+        throws Exception
     {
         Class oClass = nodeClass(_config);
         Object obj = oClass.newInstance();
@@ -226,15 +213,10 @@ public class XmlConfiguration
      * @param obj 
      * @param cfg 
      * @param i 
-     * @exception ClassNotFoundException 
-     * @exception NoSuchMethodException 
-     * @exception InvocationTargetException 
+     * @exception Exception 
      */
     private void configure(Object obj,XmlParser.Node cfg,int i)
-        throws ClassNotFoundException,
-               NoSuchMethodException,
-               InvocationTargetException,
-               IllegalAccessException
+        throws Exception
     {
         for(;i<cfg.size();i++)
         {  
@@ -243,19 +225,27 @@ public class XmlConfiguration
                 continue;
             XmlParser.Node node = (XmlParser.Node)o;
             
-            String tag=node.getTag();
-            if("Set".equals(tag))
-                set(obj,node);
-            else if("Put".equals(tag))
-                put(obj,node);
-            else if("Call".equals(tag))
-                call(obj,node);
-            else if("Get".equals(tag))
-                get(obj,node);
-            else if("New".equals(tag))
-                newObj(obj,node);
-            else
-                throw new IllegalStateException("Unknown tag: "+tag);
+            try
+            {
+                String tag=node.getTag();
+                if("Set".equals(tag))
+                    set(obj,node);
+                else if("Put".equals(tag))
+                    put(obj,node);
+                else if("Call".equals(tag))
+                    call(obj,node);
+                else if("Get".equals(tag))
+                    get(obj,node);
+                else if("New".equals(tag))
+                    newObj(obj,node);
+                else
+                    throw new IllegalStateException("Unknown tag: "+tag);
+            }
+            catch(Exception e)
+            {
+                log.warn("Config error at "+node,e.toString());
+                throw e;
+            }
         }
     }
     
@@ -271,10 +261,7 @@ public class XmlConfiguration
      * @param node 
      */
     private void set(Object obj,XmlParser.Node node)
-        throws ClassNotFoundException,
-               NoSuchMethodException,
-               InvocationTargetException,
-               IllegalAccessException
+        throws Exception
     {
         String attr=node.getAttribute("name");
         String name = "set"+attr.substring(0,1).toUpperCase()+attr.substring(1);
@@ -398,10 +385,7 @@ public class XmlConfiguration
      * @param node 
      */
     private void put(Object obj,XmlParser.Node node)
-        throws NoSuchMethodException,
-               ClassNotFoundException,
-               InvocationTargetException,
-               IllegalAccessException
+        throws Exception
     {
         if (!(obj instanceof Map))
             throw new IllegalArgumentException("Object for put is not a Map: "+
@@ -423,15 +407,10 @@ public class XmlConfiguration
      * @param obj 
      * @param node 
      * @return 
-     * @exception NoSuchMethodException 
-     * @exception ClassNotFoundException 
-     * @exception InvocationTargetException 
+     * @exception Exception 
      */
     private Object get(Object obj,XmlParser.Node node)
-        throws NoSuchMethodException,
-               ClassNotFoundException,
-               InvocationTargetException,
-               IllegalAccessException
+        throws Exception
     {
         Class oClass = nodeClass(node);
         if (oClass!=null)
@@ -483,15 +462,10 @@ public class XmlConfiguration
      * @param obj 
      * @param node 
      * @return 
-     * @exception NoSuchMethodException 
-     * @exception ClassNotFoundException 
-     * @exception InvocationTargetException 
+     * @exception Exception 
      */
     private Object call(Object obj,XmlParser.Node node)
-        throws NoSuchMethodException,
-               ClassNotFoundException,
-               InvocationTargetException,
-               IllegalAccessException
+        throws Exception
     {
         String id=node.getAttribute("id");
         Class oClass = nodeClass(node);
@@ -566,15 +540,10 @@ public class XmlConfiguration
      * @param obj 
      * @param node 
      * @return 
-     * @exception NoSuchMethodException 
-     * @exception ClassNotFoundException 
-     * @exception InvocationTargetException 
+     * @exception Exception 
      */
     private Object newObj(Object obj,XmlParser.Node node)
-        throws NoSuchMethodException,
-               ClassNotFoundException,
-               InvocationTargetException,
-               IllegalAccessException
+        throws Exception
     {
         Class oClass = nodeClass(node);
         String id=node.getAttribute("id");
@@ -641,15 +610,10 @@ public class XmlConfiguration
      * @param obj 
      * @param node 
      * @return 
-     * @exception NoSuchMethodException 
-     * @exception ClassNotFoundException 
-     * @exception InvocationTargetException 
+     * @exception Exception 
      */
     private Object newArray(Object obj,XmlParser.Node node)
-        throws NoSuchMethodException,
-               ClassNotFoundException,
-               InvocationTargetException,
-               IllegalAccessException
+        throws Exception
     {
         // Get the type
         Class aClass = java.lang.Object.class;
@@ -702,8 +666,8 @@ public class XmlConfiguration
      * strings before being converted to any specified type.
      * @param node 
      */
-    private Object value(Object obj, XmlParser.Node node) throws NoSuchMethodException,
-            ClassNotFoundException, InvocationTargetException, IllegalAccessException
+    private Object value(Object obj, XmlParser.Node node) 
+        throws Exception
     {
         Object value = null;
 
@@ -830,13 +794,10 @@ public class XmlConfiguration
      * @param obj 
      * @param item 
      * @return 
-     * @exception ClassNotFoundException 
+     * @exception Exception 
      */
     private Object itemValue(Object obj, Object item)
-        throws NoSuchMethodException,
-               ClassNotFoundException,
-               InvocationTargetException,
-               IllegalAccessException
+        throws Exception
     {
         // String value
         if (item instanceof String)

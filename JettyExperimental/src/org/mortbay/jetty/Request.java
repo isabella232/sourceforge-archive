@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.URI;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,28 +49,28 @@ import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringUtil;
-import org.mortbay.util.URI;
+import org.mortbay.util.URIUtil;
 import org.mortbay.util.UrlEncoded;
+import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.handler.ContextHandler.Context;
 
 /* ------------------------------------------------------------ */
-/** HttpRequest.
+/** Request.
  * @author gregw
  *
  */
-public class HttpRequest implements HttpServletRequest
+public class Request implements HttpServletRequest
 {
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
     private static ULogger log = LoggerFactory.getLogger(HttpConnection.class);
     private static final int NONE=0, STREAM=1, READER=2;
     
-
     private HttpConnection _connection;
     private EndPoint _endp;
     
     private Map _attributes;
     private String _authType;
     private String _characterEncoding;
-    private String _contextPath;
     private Cookie[] _cookies;
     private String _serverName;
     private String _method;
@@ -79,7 +80,7 @@ public class HttpRequest implements HttpServletRequest
     private String _queryString;
     private String _requestedSessionId;
     private String _requestURI;
-    private String _scheme=URI.HTTP;
+    private String _scheme=URIUtil.HTTP;
     private String _servletPath;
     private URI _uri;
     private Principal _userPrincipal;
@@ -88,12 +89,13 @@ public class HttpRequest implements HttpServletRequest
     private int _inputState;
     private BufferedReader _reader;
     private boolean _dns=false;
+    private ContextHandler.Context _context;
     
     /* ------------------------------------------------------------ */
     /**
      * 
      */
-    HttpRequest(HttpConnection connection)
+    Request(HttpConnection connection)
     {
         _connection=connection;
         _endp=connection.getEndPoint();
@@ -106,7 +108,7 @@ public class HttpRequest implements HttpServletRequest
             _attributes.clear();
         _authType=null;
         _characterEncoding=null;
-        _contextPath=null;
+        _context=null;
         _cookies=null;
         _serverName=null;
         _method=null;
@@ -116,7 +118,7 @@ public class HttpRequest implements HttpServletRequest
         _queryString=null;
         _requestedSessionId=null;
         _requestURI=null;
-        _scheme=URI.HTTP;
+        _scheme=URIUtil.HTTP;
         _servletPath=null;
         _uri=null;
         _userPrincipal=null;
@@ -209,7 +211,9 @@ public class HttpRequest implements HttpServletRequest
      */
     public String getContextPath()
     {
-        return _contextPath;
+        if (_context==null)
+            return "";
+        return _context.getContextPath();
     }
 
     /* ------------------------------------------------------------ */
@@ -456,8 +460,9 @@ public class HttpRequest implements HttpServletRequest
      */
     public String getPathTranslated()
     {
-        // TODO
-        return null;
+        if (_pathInfo==null || _context==null)
+            return null;
+        return _context.getRealPath(_pathInfo);
     }
 
     /* ------------------------------------------------------------ */
@@ -504,8 +509,9 @@ public class HttpRequest implements HttpServletRequest
      */
     public String getRealPath(String path)
     {
-        // TODO Auto-generated method stub
-        return null;
+        if (_context==null)
+            return null;
+        return _context.getRealPath(path);
     }
 
     /* ------------------------------------------------------------ */
@@ -552,8 +558,22 @@ public class HttpRequest implements HttpServletRequest
      */
     public RequestDispatcher getRequestDispatcher(String path)
     {
-        // TODO Auto-generated method stub
-        return null;
+        if (path == null || _context==null)
+            return null;
+
+        // handle relative path
+        if (!path.startsWith("/"))
+        {
+            String relTo=URIUtil.addPaths(_servletPath,_pathInfo);
+            int slash=relTo.lastIndexOf("/");
+            if (slash>1)
+                relTo=relTo.substring(0,slash+1);
+            else
+                relTo="/";
+            path=URIUtil.addPaths(relTo,path);
+        }
+    
+        return _context.getRequestDispatcher(path);
     }
 
     /* ------------------------------------------------------------ */
@@ -571,6 +591,8 @@ public class HttpRequest implements HttpServletRequest
      */
     public String getRequestURI()
     {
+        if (_requestURI==null)
+            _requestURI=_uri.getRawPath();
         return _requestURI;
     }
 
@@ -590,8 +612,8 @@ public class HttpRequest implements HttpServletRequest
             url.append("://");
             url.append(getServerName());
             if (_port>0 && 
-                ((scheme.equalsIgnoreCase(URI.HTTP) && port != 80) || 
-                 (scheme.equalsIgnoreCase(URI.HTTPS) && port != 443)))
+                ((scheme.equalsIgnoreCase(URIUtil.HTTP) && port != 80) || 
+                 (scheme.equalsIgnoreCase(URIUtil.HTTPS) && port != 443)))
             {
                 url.append(':');
                 url.append(_port);
@@ -672,20 +694,20 @@ public class HttpRequest implements HttpServletRequest
      */
     public int getServerPort()
     {
-        if (_port==0)
+        if (_port<=0)
         {
             if (_serverName==null)
                 getServerName();
         
-            if (_port==0 && _serverName!=null && _uri!=null && _uri.isAbsolute())
+            if (_port<=0 && _serverName!=null && _uri!=null && _uri.isAbsolute())
                 _port = _uri.getPort();
             else 
                 _port = _endp==null?0:_endp.getLocalPort();
         }
         
-        if (_port==0)
+        if (_port<=0)
         {
-            if (getScheme().equalsIgnoreCase(URI.HTTPS))
+            if (getScheme().equalsIgnoreCase(URIUtil.HTTPS))
                 return 443;
             return 80;
         }
@@ -698,6 +720,8 @@ public class HttpRequest implements HttpServletRequest
      */
     public String getServletPath()
     {
+        if (_servletPath==null)
+            _servletPath="";
         return _servletPath;
     }
 
@@ -841,17 +865,16 @@ public class HttpRequest implements HttpServletRequest
         {
             // No encoding, so use the existing characters.
             encoding = StringUtil.__ISO_8859_1;
-            _uri.putParametersTo(_parameters);
+            if (_uri!=null && _uri.getQuery()!=null)
+                UrlEncoded.decodeTo(_uri.getQuery(), _parameters);
         }
-        else
+        else if (_uri!=null && _uri.getRawQuery()!=null)
         {
-            // An encoding has been set, so reencode query string.
-            String query = _uri.getQuery();
-            if (query != null) UrlEncoded.decodeTo(query, _parameters, encoding);
+            UrlEncoded.decodeTo(_uri.getRawQuery(), _parameters, encoding);
         }
+        
 
         // handle any _content.
-        
         String content_type = getContentType();
         if (content_type != null && content_type.length() > 0)
         {
@@ -904,6 +927,7 @@ public class HttpRequest implements HttpServletRequest
     {
         _serverName = host;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the uri.
@@ -912,6 +936,7 @@ public class HttpRequest implements HttpServletRequest
     {
         return _uri;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param uri The uri to set.
@@ -919,7 +944,6 @@ public class HttpRequest implements HttpServletRequest
     public void setUri(URI uri)
     {
         _uri = uri;
-        _requestURI=uri.getPath();
     }
     
     /* ------------------------------------------------------------ */
@@ -949,14 +973,6 @@ public class HttpRequest implements HttpServletRequest
         _authType = authType;
     }
     
-    /* ------------------------------------------------------------ */
-    /**
-     * @param contextPath The contextPath to set.
-     */
-    public void setContextPath(String contextPath)
-    {
-        _contextPath = contextPath;
-    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -1043,6 +1059,24 @@ public class HttpRequest implements HttpServletRequest
     public void setUserPrincipal(Principal userPrincipal)
     {
         _userPrincipal = userPrincipal;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param context
+     */
+    public void setContext(Context context)
+    {
+        _context=context;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public Context getContext()
+    {
+        return _context;
     }
 }
 
