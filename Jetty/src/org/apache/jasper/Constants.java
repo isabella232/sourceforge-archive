@@ -202,6 +202,12 @@ public class Constants {
      */
     public static final String getString(String key, Object[] args)
     {
+        if (Code.verbose())
+        {
+            for(int i=0;args!=null && i<args.length;i++)
+                Code.debug(key+" arg["+i+"] = ",args[i]);
+        }
+        
         if (resources == null) 
             initResources();
         
