@@ -18,7 +18,7 @@ import java.io.InputStreamReader;
  * system parameter (defaults to "mortbay") for admin requests. Commands "stop" and
  * "status" are currently supported.
  */
-class Monitor extends Thread
+public class Monitor extends Thread
 {
     private int _port = Integer.getInteger("STOP.PORT",8079).intValue();
     private String _key = System.getProperty("STOP.KEY","mortbay");
