@@ -13,6 +13,7 @@ Jetty-5.0.RC2
  + make choice of override of JNDI ENC entries: config.xml or web.xml 
  + Default servlet may use only pathInfo for resource
  + Fixed session leak in j2ee
+ + Fixed no-role security constraint combination.
 
 Jetty-4.2
  + integrated jetty-jboss with jboss-3.2.4

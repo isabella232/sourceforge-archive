@@ -324,17 +324,24 @@ public class SecurityConstraint implements Cloneable, Serializable
             {
                 if (sc.getAuthenticate())
                 {
-                    if (roles != ANY_ROLE)
+                    if (sc.isAnyRole())
                     {
-                        if (sc.isAnyRole())
-                            roles= ANY_ROLE;
+                        roles= ANY_ROLE;
+                    }
+                    else
+                    {
+                        List scr= sc.getRoles();
+                        if (scr == null || scr.size() == 0)
+                        {
+                            forbidden= true;
+                            break;
+                        }
                         else
                         {
-                            List scr= sc.getRoles();
-                            if (scr == null || scr.size() == 0)
-                                forbidden= true;
-                            else
+                            if (roles != ANY_ROLE)
+                            {
                                 roles= LazyList.addCollection(roles, scr);
+                            }
                         }
                     }
                 }
