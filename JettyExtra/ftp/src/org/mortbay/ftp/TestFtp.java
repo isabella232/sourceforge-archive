@@ -175,7 +175,7 @@ public class TestFtp
             ///////////////////////////////////////////
             test = server.test = new TestCase("FtpAuthenticate");;
 
-            Ftp ftp = new Ftp(InetAddress.getLocalHost(),
+            Ftp ftp = new Ftp(InetAddress.getByName("127.0.0.1"),
                               server.port,
                               "TestUser",
                               "TestPass");

@@ -930,20 +930,35 @@ public class Ftp
 
 
     /* -------------------------------------------------------------------- */
-    /**
-     * 
-     * 
+    /** 
+     * @param remoteName The remote file name
+     * @return Last modified time string.
+     * @exception FtpException For local problems or negative server responses
      */
     public synchronized String getLastModifiedTime(String remoteName)
         throws FtpException, IOException
     {
         waitUntilTransferComplete();
         cmd("MDTM "+remoteName);
+            CmdReply reply = in.waitForCompleteOK();
+         return reply.text;
+     }
+
+    /*--------------------------------------------------------------------*/
+    /** 
+     * @param remoteName The remote file name
+     * @return The size of the remote file
+     * @exception FtpException  For local problems or negative server responses
+     */
+    public synchronized String getSize(String remoteName)
+        throws FtpException, IOException
+    {
+        waitUntilTransferComplete();
+        cmd("SIZE "+remoteName);
         CmdReply reply = in.waitForCompleteOK();
         return reply.text;
     }
-
-
+    
     /* -------------------------------------------------------------------- */
     /**
      * Get a directory listing from the remote server.
