@@ -106,7 +106,7 @@ release     - Cleanup for release
            destdir="${classes}"
            classpath="${libs}"
            debug="on" 
-           optimize="on" 
+           optimize="off" 
            deprecation="off"
            >
       <include name="com/mortbay/**/*.java"/> 

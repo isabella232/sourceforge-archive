@@ -88,7 +88,7 @@ public class PathMap extends HashMap
             String prefix=tok.nextToken();
             
             if (!prefix.startsWith("/") && !prefix.startsWith("*."))
-                throw new IllegalArgumentException("PathSpec must start with '/' or '*.'");
+                throw new IllegalArgumentException("PathSpec "+pathSpec+". must start with '/' or '*.'");
             
             old = super.put(prefix,object);
             

@@ -160,7 +160,7 @@ public class XmlParser
             throws SAXException
         {
             // XXX - for testing
-            characters(buf,offset,len);
+            // characters(buf,offset,len);
         }
 
         /* ------------------------------------------------------------ */
@@ -169,8 +169,6 @@ public class XmlParser
         {
             _context.add(new String(buf,offset,len));
         }
-
-        
         
         /* ------------------------------------------------------------ */
         public void warning(SAXParseException ex)
@@ -367,6 +365,7 @@ public class XmlParser
             }
             return null;
         }
+
         
         /* ------------------------------------------------------------ */
         public void add(int i, Object o)
@@ -400,6 +399,23 @@ public class XmlParser
         }
         
         /* ------------------------------------------------------------ */
+        /** Combined get(tag).toString(tags).
+         * @param tag 
+         * @param tags 
+         * @return 
+         */
+        public String getString(String tag, boolean tags, boolean trim)
+        {
+            Node node=(Node)get(tag);
+            if (node==null)
+                return null;
+            String s =node.toString(tags);
+            if (s!=null && trim)
+                s=s.trim();
+            return s;
+        }
+        
+        /* ------------------------------------------------------------ */
         public synchronized String toString()
         {
             return toString(true);
@@ -417,6 +433,18 @@ public class XmlParser
                 toString(buf,tag);
                 return buf.toString();
             }
+        }
+        
+        /* ------------------------------------------------------------ */
+        /** Convert to a string.
+         * @param tag If false, only content is shown.
+         */
+ 	public synchronized String toString(boolean tag,boolean trim)
+        {
+            String s=toString(tag);
+            if (s!=null && trim)
+                s=s.trim();
+            return s;
         }
         
         /* ------------------------------------------------------------ */

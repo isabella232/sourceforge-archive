@@ -152,92 +152,101 @@ public class WebApplicationContext extends HandlerContext
         throws ClassNotFoundException,UnavailableException
     {
         Iterator iter=config.iterator();
+        XmlParser.Node node=null;
         while (iter.hasNext())
         {
-            Object o = iter.next();
-            if (!(o instanceof XmlParser.Node))
-                continue;
-            
-            XmlParser.Node node=(XmlParser.Node)o;
-            String name=node.getTag();
-
-            if ("display-name".equals(name))
-                initDisplayName(node);
-            else if ("description".equals(name))
+            try
             {
-                Code.warning("Not implemented: "+name);
-                System.err.println(node);
+                Object o = iter.next();
+                if (!(o instanceof XmlParser.Node))
+                    continue;
+                
+                node=(XmlParser.Node)o;
+                String name=node.getTag();
+                
+                if ("display-name".equals(name))
+                    initDisplayName(node);
+                else if ("description".equals(name))
+                {
+                    Code.warning("Not implemented: "+name);
+                    System.err.println(node);
+                }
+                else if ("distributable".equals(name))
+                {
+                    Code.warning("Not implemented: "+name);
+                    System.err.println(node);
+                }
+                else if ("context-param".equals(name))
+                    initContextParam(node);
+                else if ("servlet".equals(name))
+                    initServlet(node);
+                else if ("servlet-mapping".equals(name))
+                    initServletMapping(node);
+                else if ("session-config".equals(name))
+                    initSessionConfig(node);
+                else if ("mime-mapping".equals(name))
+                {
+                    Code.warning("Not implemented: "+name);
+                    System.err.println(node);
+                }
+                else if ("welcome-file-list".equals(name))
+                    initWelcomeFileList(node);
+                else if ("error-page".equals(name))
+                {
+                    Code.warning("Not implemented: "+name);
+                    System.err.println(node);
+                }
+                else if ("taglib".equals(name))
+                {
+                    Code.warning("Not implemented: "+name);
+                    System.err.println(node);
+                }
+                else if ("resource-ref".equals(name))
+                {
+                    Code.warning("Not implemented: "+name);
+                    System.err.println(node);
+                }
+                else if ("security-constraint".equals(name))
+                    initSecurityConstraint(node);
+                else if ("login-config".equals(name))
+                    initLoginConfig(node);
+                else if ("security-role".equals(name))
+                    initSecurityRole(node);
+                else if ("env-entry".equals(name))
+                {
+                    Code.warning("Not implemented: "+name);
+                    System.err.println(node);
+                }
+                else if ("ejb-ref".equals(name))
+                {
+                    Code.warning("Not implemented: "+name);
+                    System.err.println(node);
+                }
+                else
+                {
+                    Code.warning("UNKNOWN TAG: "+name);
+                    System.err.println(node);
+                }
             }
-            else if ("distributable".equals(name))
+            catch(Exception e)
             {
-                Code.warning("Not implemented: "+name);
-                System.err.println(node);
-            }
-            else if ("context-param".equals(name))
-                initContextParam(node);
-            else if ("servlet".equals(name))
-                initServlet(node);
-            else if ("servlet-mapping".equals(name))
-                initServletMapping(node);
-            else if ("session-config".equals(name))
-                initSessionConfig(node);
-            else if ("mime-mapping".equals(name))
-            {
-                Code.warning("Not implemented: "+name);
-                System.err.println(node);
-            }
-            else if ("welcome-file-list".equals(name))
-                initWelcomeFileList(node);
-            else if ("error-page".equals(name))
-            {
-                Code.warning("Not implemented: "+name);
-                System.err.println(node);
-            }
-            else if ("taglib".equals(name))
-            {
-                Code.warning("Not implemented: "+name);
-                System.err.println(node);
-            }
-            else if ("resource-ref".equals(name))
-            {
-                Code.warning("Not implemented: "+name);
-                System.err.println(node);
-            }
-            else if ("security-constraint".equals(name))
-                initSecurityConstraint(node);
-            else if ("login-config".equals(name))
-                initLoginConfig(node);
-            else if ("security-role".equals(name))
-                initSecurityRole(node);
-            else if ("env-entry".equals(name))
-            {
-                Code.warning("Not implemented: "+name);
-                System.err.println(node);
-            }
-            else if ("ejb-ref".equals(name))
-            {
-                Code.warning("Not implemented: "+name);
-                System.err.println(node);
-            }
-            else
-            {
-                Code.warning("UNKNOWN TAG: "+name);
-                System.err.println(node);
+                Code.warning("Configuration problem at "+node,e);
             }
         }
+        
     }
 
     /* ------------------------------------------------------------ */
     private void initDisplayName(XmlParser.Node node)
     {
-        _name=node.toString(false);
+        _name=node.toString(false,true);
     }
     
     /* ------------------------------------------------------------ */
     private void initContextParam(XmlParser.Node node)
     {
-        String name=node.get("param-name").toString(false);
-        String value=node.get("param-value").toString(false);
+        String name=node.getString("param-name",false,true);
+        String value=node.getString("param-value",false,true);
         Code.debug("ContextParam: ",name,"=",value);
 
         setInitParameter(name,value); 
@@ -247,8 +256,15 @@ public class WebApplicationContext extends HandlerContext
     private void initServlet(XmlParser.Node node)
         throws ClassNotFoundException, UnavailableException
     {
-        String name=node.get("servlet-name").toString(false);
-        String className=node.get("servlet-class").toString(false);
+        String name=node.getString("servlet-name",false,true);
+        String className=node.getString("servlet-class",false,true);
+        if (className==null)
+        {
+            Code.warning("Missing servlet-class in "+node);
+            return;
+        }
+        if (name==null)
+            name=className;
         
         ServletHolder holder = _servletHandler.newServletHolder(className);
         holder.setServletName(name);
@@ -257,15 +273,15 @@ public class WebApplicationContext extends HandlerContext
         while(iter.hasNext())
         {
             XmlParser.Node paramNode=(XmlParser.Node)iter.next();
-            String pname=paramNode.get("param-name").toString(false);
-            String pvalue=paramNode.get("param-value").toString(false);
+            String pname=paramNode.getString("param-name",false,true);
+            String pvalue=paramNode.getString("param-value",false,true);
             holder.put(pname,pvalue);
         }
 
         XmlParser.Node startup = node.get("load-on-startup");
         if (startup!=null)
         {
-            String s=startup.toString(false).trim().toLowerCase();
+            String s=startup.toString(false,true).toLowerCase();
             if (s.startsWith("t"))
                 holder.setInitOnStartup(true);
             else
@@ -290,8 +306,8 @@ public class WebApplicationContext extends HandlerContext
         XmlParser.Node securityRef = node.get("security-role-ref");
         if (securityRef!=null)
         {
-            String roleName=securityRef.get("role-name").toString(false);
-            String roleLink=securityRef.get("role-link").toString(false);
+            String roleName=securityRef.getString("role-name",false,true);
+            String roleLink=securityRef.getString("role-link",false,true);
             Code.debug("link role ",roleName," to ",roleLink," for ",this);
             holder.setUserRoleLink(roleName,roleLink);
         }
@@ -306,8 +322,8 @@ public class WebApplicationContext extends HandlerContext
     /* ------------------------------------------------------------ */
     private void initServletMapping(XmlParser.Node node)
     {
-        String name=node.get("servlet-name").toString(false);
-        String pathSpec=node.get("url-pattern").toString(false);
+        String name=node.getString("servlet-name",false,true);
+        String pathSpec=node.getString("url-pattern",false,true);
 
         ServletHolder holder = _servletHandler.getServletHolder(name);
         if (holder==null)
@@ -325,7 +341,7 @@ public class WebApplicationContext extends HandlerContext
         XmlParser.Node tNode=node.get("session-timeout");
         if(tNode!=null)
         {
-            int timeout = Integer.parseInt(tNode.toString(false));
+            int timeout = Integer.parseInt(tNode.toString(false,true));
             _context.setSessionTimeout(timeout);
         }
     }
@@ -340,7 +356,7 @@ public class WebApplicationContext extends HandlerContext
         while(iter.hasNext())
         {
             XmlParser.Node indexNode=(XmlParser.Node)iter.next();
-            String index=indexNode.toString(false);
+            String index=indexNode.toString(false,true);
             Code.debug("Index: ",index);
             rh.addIndexFile(index);
         }
@@ -356,12 +372,12 @@ public class WebApplicationContext extends HandlerContext
         while(iter.hasNext())
         {
             XmlParser.Node role=(XmlParser.Node)iter.next();
-            scBase.addRole(role.toString(false));
+            scBase.addRole(role.toString(false,true));
         }
         XmlParser.Node data=node.get("user-data-constraint");
         if (data!=null)
         {
-            String guarantee = data.toString(false).trim().toUpperCase();
+            String guarantee = data.toString(false,true).toUpperCase();
             if (guarantee==null || guarantee.length()==0 ||
                 "NONE".equals(guarantee))
                 scBase.setDataConstraint(scBase.DC_NONE);
@@ -380,19 +396,20 @@ public class WebApplicationContext extends HandlerContext
         while(iter.hasNext())
         {
             XmlParser.Node collection=(XmlParser.Node)iter.next();
-            String name=collection.get("web-resource-name").toString(false);
+            String name=collection.getString("web-resource-name",false,true);
             SecurityConstraint sc = (SecurityConstraint)scBase.clone();
             sc.setName(name);
             
             Iterator iter2= collection.iterator("http-method");
             while(iter2.hasNext())
-                sc.addMethod(((XmlParser.Node)iter2.next()).toString(false));
+                sc.addMethod(((XmlParser.Node)iter2.next())
+                             .toString(false,true));
 
             iter2= collection.iterator("url-pattern");
             while(iter2.hasNext())
             {
                 String url=
-                    ((XmlParser.Node)iter2.next()).toString(false).trim();
+                    ((XmlParser.Node)iter2.next()).toString(false,true);
                 addSecurityConstraint(url,sc);
             }
         }
@@ -407,10 +424,10 @@ public class WebApplicationContext extends HandlerContext
 
         XmlParser.Node method=node.get("auth-method");
         if (method!=null)
-            sh.setAuthMethod(method.toString(false));
+            sh.setAuthMethod(method.toString(false,true));
         XmlParser.Node name=node.get("realm-name");
         if (name!=null)
-            sh.setAuthRealm(name.toString(false));
+            sh.setAuthRealm(name.toString(false,true));
     }
     
     /* ------------------------------------------------------------ */
