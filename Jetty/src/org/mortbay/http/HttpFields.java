@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,7 +22,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
+
 import javax.servlet.http.Cookie;
+
 import org.mortbay.util.Code;
 import org.mortbay.util.DateCache;
 import org.mortbay.util.LazyList;
@@ -152,7 +153,7 @@ public class HttpFields
                 _inlineValues=inline;
                 
                 _hashCode=__hashCode++;
-                if (__hashCode<__maxCacheSize)
+                if (__hashCode<__maxCacheSize && !__info.containsKey(name))
                 {
                     __info.put(name,this);
                     if (!name.equals(_lname))
