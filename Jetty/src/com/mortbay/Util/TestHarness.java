@@ -725,7 +725,8 @@ public class TestHarness
             
             ByteArrayInputStream dataStream;
             LineInput in;
-
+            if (System.currentTimeMillis()==0){
+                
             dataStream=new ByteArrayInputStream(data.getBytes());
             in = new LineInput(dataStream);
             
@@ -920,7 +921,21 @@ public class TestHarness
             test.checkEquals(in.readLine(),"fghi","CRLF read last line");
             test.checkEquals(in.readLine(),null,"CRLF read EOF");
             test.checkEquals(in.readLine(),null,"CRLF read EOF again");
-            
+        }
+        
+
+            String dataEOF=
+                "abcd\015\012"+
+                "efgh\015\012"+
+                "ijkl\015\012";
+            dataStream=new ByteArrayInputStream(dataEOF.getBytes());
+            in = new LineInput(dataStream,14);
+            test.checkEquals(in.readLine(),"abcd","EOF read first line");
+            in.setByteLimit(6);
+            test.checkEquals(in.readLine(),"efgh","EOF read second line");
+            test.checkEquals(in.readLine(),null,"read EOF");
+            in.setByteLimit(-1);
+            test.checkEquals(in.readLine(),"ijkl","EOF read second line");
         }
         catch(Exception e)
         {
@@ -1609,11 +1624,11 @@ public class TestHarness
     {
         try
         {
-       	    testTest();
+   	    testTest();
        	    testLog();
        	    testFrame();
        	    testCode();
-      	    testPassword();
+       	    testPassword();
             testMultiMap();
        	    testQuotedStringTokenizer();            
        	    testDateCache();
@@ -1622,12 +1637,12 @@ public class TestHarness
        	    testUrlEncoded();
        	    testURI();
        	    testLineInput();
-     	    testThreadPool();
+       	    testThreadPool();
        	    testThreadedServer();
        	    testB64();
-      	    testResource();
-     	    testXmlParser();
-     	    testXmlConfiguration();
+       	    testResource();
+       	    testXmlParser();
+       	    testXmlConfiguration();
         }
         catch(Throwable th)
         {

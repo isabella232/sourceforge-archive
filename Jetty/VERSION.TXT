@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
- 
+
+ + Fixed pipelined request buffer bug.
  + Included new Jetty Logo
  + Implemented web.xml servlet mapping to a JSP
  + Fixed handling of directories without trailing /

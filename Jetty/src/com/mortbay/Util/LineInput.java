@@ -120,8 +120,10 @@ public class LineInput extends FilterInputStream
             }
         }
         else
+        {
             _avail=_contents;
-        
+            _eof=false;
+        }
     }
     
     
@@ -347,7 +349,6 @@ public class LineInput extends FilterInputStream
     public synchronized void mark(int limit)
         throws IllegalArgumentException
     {
-        System.err.println("MARK!");
         if (limit>_buf.length)
             throw new IllegalArgumentException("limit larger than buffer");
         _mark=_pos;
@@ -430,6 +431,18 @@ public class LineInput extends FilterInputStream
                 else if (n==-1)
                     throw new IOException("Premature EOF");
             }
+
+            byte[]b2=new byte[_buf.length];
+            System.arraycopy(_buf,0,b2,0,_buf.length);
+            for (int b=0;b<_buf.length;b++)
+            {
+                if (b2[b]==10)
+                    b2[b]=(byte)'|';
+                if (b2[b]==13)
+                    b2[b]=(byte)'|';
+            }
+            
+            String buf2=new String(b2);
         }
 
         // If we have some characters
