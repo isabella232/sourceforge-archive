@@ -70,7 +70,7 @@ public class Code
     private static final String __lock="LOCK";
     private static final Class[] __noArgs=new Class[0];
     private static final String[] __nestedEx =
-        {"getTargetException","getTargetError","getException"};
+        {"getTargetException","getTargetError","getException","getRootCause"};
 
     /*-------------------------------------------------------------------*/
     /** Shared static instances, reduces object creation at expense

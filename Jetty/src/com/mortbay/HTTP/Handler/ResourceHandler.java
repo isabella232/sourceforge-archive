@@ -7,9 +7,11 @@ import com.mortbay.HTTP.HttpFields;
 import com.mortbay.HTTP.HttpMessage;
 import com.mortbay.HTTP.HttpRequest;
 import com.mortbay.HTTP.HttpResponse;
+import com.mortbay.HTTP.MultiPartResponse;
 import com.mortbay.HTTP.PathMap;
 import com.mortbay.HTTP.InclusiveByteRange;
 import com.mortbay.Util.Code;
+import com.mortbay.Util.IO;
 import com.mortbay.Util.Log;
 import com.mortbay.Util.Resource;
 import com.mortbay.Util.StringUtil;
@@ -51,7 +53,7 @@ public class ResourceHandler extends NullHandler
     private int _maxCachedFileSize =40960;
     private Resource _baseResource=null;
     private boolean _handleGeneralOptionsQuery=true;
-    private boolean _acceptRanges=false;
+    private boolean _acceptRanges=true;
     
     /* ------------------------------------------------------------ */
     List _indexFiles =new ArrayList(2);
@@ -100,6 +102,10 @@ public class ResourceHandler extends NullHandler
     }
     
     /* ------------------------------------------------------------ */
+    /** Set if the handler accepts range requests.
+     * Default is false;
+     * @param ar True if the handler should accept ranges
+     */
     public void setAcceptRanges(boolean ar)
     {
         _acceptRanges=ar;
@@ -610,116 +616,67 @@ public class ResourceHandler extends NullHandler
                   SendableResource data)
         throws IOException
     {
+        long resLength = data.getLength();
+        
         //
         //  see if there are any range headers
         //
-        String reqRanges = request.getField(HttpFields.__Range);
-        List validRanges = null;
-
-        if ( reqRanges != null )
+        List reqRanges = request.getFieldValues(HttpFields.__Range);
+        if ( reqRanges == null || reqRanges.size()==0)
         {
-            ArrayList ranges=new ArrayList(1);
-            ranges.add(reqRanges);
-            validRanges = InclusiveByteRange
-                .parseRangeHeaders(ranges);
-            Code.debug("requested ranges: " + reqRanges + "=" + validRanges);
-        }
-
-        // 
-        //  if there were no valid ranges, send entire entity
-        //
-        long resLength = data.getLength();
-        if (validRanges == null || validRanges.size() == 0) {
+            // 
+            //  if there were no ranges, send entire entity
+            //
             data.writeHeaders(response, resLength);
             data.writeBytes(response.getOutputStream(), 0, resLength);
             request.setHandled(true);
             return;
         }
+            
+        // Parse the ranges
+        List validRanges =InclusiveByteRange.parseRangeHeaders(reqRanges);
+        Code.debug("requested ranges: " + reqRanges + "=" + validRanges);
 
-
-        //
+        
         //  run through the ranges and count satisfiable ranges;
-        //  also try to collapse overlapping or adjacent ranges 
-        //  into a single range
-        //
         ListIterator rit = validRanges.listIterator();
         InclusiveByteRange singleSatisfiableRange = null;
-        int satisfiableRangeCount = 0;
-
         while (rit.hasNext())
         {
             InclusiveByteRange ibr = (InclusiveByteRange) rit.next();
 
-            long first0 = ibr.getFirst(resLength);
-            if (first0 >= resLength) {
-                Code.debug("no satisfiable: ",ibr);
-                continue;   // not satisfiable
+            if (ibr.getFirst()>=resLength || (ibr.getLast()>=0 && ibr.getLast()>=resLength))
+            {
+                Code.warning("not satisfiable: "+ibr);
+                singleSatisfiableRange=null;
+                break;
             }
-
-            if (singleSatisfiableRange == null) {
+            
+            if (singleSatisfiableRange == null)
                 singleSatisfiableRange = ibr;
-                satisfiableRangeCount = 1;
-                Code.debug("first satisfiable range: ",ibr);
-                continue;   // found first sat range
-            }
-
-            long last1 = singleSatisfiableRange.getLast(resLength);
-            if (first0 > (last1 + 1)) {
-                satisfiableRangeCount++;
-                singleSatisfiableRange = null;
-                Code.debug("second (right) satisfiable range: ", ibr);
-                break;   // just found second non-overlapping sat range
-            }
-
-            long first1 = singleSatisfiableRange.getFirst(resLength);
-            long last0 = ibr.getLast(resLength);
-            if (last0 < (first1 - 1)) {
-                satisfiableRangeCount++;
-                singleSatisfiableRange = null;
-                Code.debug("second (left) satisfiable range: ", ibr);
-                break;   // just found second non-overlapping sat range
-            }
-
-            // ranges overlap -> merge the two ranges
-
-            long first = first0;
-            long last  = last0;
-
-            if (first1 < first) {
-                  first = first1;
-            }
-
-            if (last1 > last) {
-                  last = last1;
-            }
-
-            Code.debug("merged ", ibr," into single satisfiable range: ", singleSatisfiableRange);
-            singleSatisfiableRange = new InclusiveByteRange(first, last);
         }
-
-
-        // 
+        
         //  if there are no satisfiable ranges, send 416 response
-        //
-
-        if (satisfiableRangeCount == 0) {
+        if (singleSatisfiableRange == null )
+        {
             Code.debug("no satisfiable ranges");
+            data.writeHeaders(response, resLength);
+            response.setStatus(response.__416_Requested_Range_Not_Satisfiable);
+            response.setReason((String)response.__statusMsg
+                               .get(new Integer(response.__416_Requested_Range_Not_Satisfiable)));
             response.setField(
                        HttpFields.__ContentRange, 
                        InclusiveByteRange.to416HeaderRangeString(resLength)
             );
-            response.sendError(response.__416_Requested_Range_Not_Satisfiable);
+            data.writeBytes(response.getOutputStream(), 0, resLength);
             request.setHandled(true);
             return;
         }
 
-
-        // 
+        
         //  if there is only a single valid range (must be satisfiable 
         //  since were here now), send that range with a 216 response
-        // 
-
-        if (satisfiableRangeCount == 1)
+        if ( validRanges.size()== 1)
         {
             Code.debug("single satisfiable range: " + singleSatisfiableRange);
             long singleLength = singleSatisfiableRange.getSize(resLength);
@@ -730,54 +687,37 @@ public class ResourceHandler extends NullHandler
             response.setField(HttpFields.__ContentRange, 
                               singleSatisfiableRange.toHeaderRangeString(resLength));
             data.writeBytes(response.getOutputStream(), 
-                        singleSatisfiableRange.getFirst(resLength), 
-                        singleLength);
+                            singleSatisfiableRange.getFirst(), 
+                            singleLength);
             request.setHandled(true);
             return;
         }
 
-
-        // 
         //  multiple non-overlapping valid ranges cause a multipart
         //  216 response which does not require an overall 
         //  content-length header
-        // 
-
-        /** this is sample code for what could eventually be the
-         ** complete implementation including multipart responses
-
+        //
         String encoding = data.getEncoding();
         MultiPartResponse multi = new MultiPartResponse(request, response);
+        response.setStatus(response.__206_Partial_Content);
+        response.setReason((String)response.__statusMsg
+                           .get(new Integer(response.__206_Partial_Content)));    
+        response.setField(HttpFields.__ContentType,
+                          "multipart/byteranges; boundary="+multi.getBoundary()); 
         rit = validRanges.listIterator();
-        boolean isFirstMultiPart = true;
-
-        while (rit.hasNext()) {
+        while (rit.hasNext())
+        {
             InclusiveByteRange ibr = (InclusiveByteRange) rit.next();
-            long first = ibr.getFirst(resLength);
-            if (first >= resLength) 
-                continue;   // not satisfiable
-
-            Code.debug("next satisfiable range: " + ibr);
-            if (isFirstMultiPart)
-                isFirstMultiPart = false;
-            else
-                multi.endPart();
-            multi.startNextPart(encoding);
-            data.writeBytes( multi.out, first, ibr.getSize(resLength));
+            String header=HttpFields.__ContentRange+": "+
+                ibr.toHeaderRangeString(resLength);
+            Code.debug("multi range: ",encoding," ",header);
+            multi.startPart(encoding,new String[]{header});
+            data.writeBytes(multi.getOut(), ibr.getFirst(), ibr.getSize(resLength));
         }
-        multi.endLastPart();
-        response.sendError(response.__206_Partial_Content);
+        multi.close();
+
         request.setHandled(true);
 
-
-         ** until this is all implemented, we just pretend we dont
-         ** support ranges for such a request and send the whole 
-         ** enchilada.
-         **/
-
-        data.writeHeaders(response, resLength);
-        data.writeBytes(response.getOutputStream(), 0, resLength);
-        request.setHandled(true);
         return;
     }
 
@@ -921,7 +861,7 @@ public class ResourceHandler extends NullHandler
         String getEncoding();
         void writeHeaders(HttpResponse response, long count)
                                 throws IOException; 
-        void writeBytes(ChunkableOutputStream os, long startByte, long count) 
+        void writeBytes(OutputStream os, long startByte, long count) 
                                 throws IOException; 
         void requestDone();
     }
@@ -957,21 +897,24 @@ public class ResourceHandler extends NullHandler
             length = resource.length();
         }
 
-        public void writeBytes(ChunkableOutputStream os, long start,long count)
+        public void writeBytes(OutputStream os, long start,long count)
             throws IOException
         {
             if (ris == null || pos > start)
             {
+                if (ris != null)
+                    ris.close();
                 ris = resource.getInputStream();
                 pos = 0;
             }
             
-            if (pos < start) {
+            if (pos < start)
+            {
                 ris.skip(start - pos);
                 pos = start;
-            } 
-            
-            os.write(ris, (int) count);
+            }
+            IO.copy(ris,os,(int)count);
+            pos+=count;
         }
 
         public void writeHeaders(HttpResponse response, long count)
@@ -1045,7 +988,7 @@ public class ResourceHandler extends NullHandler
 
 
         /* ------------------------------------------------------------ */
-        public void writeBytes(ChunkableOutputStream os, long startByte, long count) 
+        public void writeBytes(OutputStream os, long startByte, long count) 
             throws IOException
         {
              os.write(bytes, (int) startByte, (int) count);

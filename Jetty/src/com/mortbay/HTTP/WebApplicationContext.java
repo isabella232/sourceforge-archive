@@ -311,10 +311,7 @@ public class WebApplicationContext extends HandlerContext
                 else if ("taglib".equals(name))
                     initTagLib(node);
                 else if ("resource-ref".equals(name))
-                {
-                    Code.warning("Not implemented: "+name);
-                    System.err.println(node);
-                }
+                    Code.debug("No implementation: ",node);
                 else if ("security-constraint".equals(name))
                     initSecurityConstraint(node);
                 else if ("login-config".equals(name))
@@ -322,15 +319,9 @@ public class WebApplicationContext extends HandlerContext
                 else if ("security-role".equals(name))
                     initSecurityRole(node);
                 else if ("env-entry".equals(name))
-                {
-                    Code.warning("Not implemented: "+name);
-                    System.err.println(node);
-                }
+                    Code.debug("No implementation: ",node);
                 else if ("ejb-ref".equals(name))
-                {
-                    Code.warning("Not implemented: "+name);
-                    System.err.println(node);
-                }
+                    Code.debug("No implementation: ",node);
                 else
                 {
                     Code.warning("UNKNOWN TAG: "+name);

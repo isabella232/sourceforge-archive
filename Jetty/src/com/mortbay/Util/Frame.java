@@ -108,6 +108,10 @@ public class Frame
  	// itself and pull that off the stack!
         _lineStart = 0;
  	_lineStart = _stack.indexOf("Frame.<init>(",_lineStart);
+        if (_lineStart==-1)
+            // JIT has inlined Frame constructor
+            _lineStart = _stack.indexOf(__lineSeparator)+__lineSeparatorLen;
+        
         _lineStart = _stack.indexOf(__lineSeparator,_lineStart)+
  	    __lineSeparatorLen;
         for (int i = 0; _lineStart > 0 && i < ignoreFrames; i++)

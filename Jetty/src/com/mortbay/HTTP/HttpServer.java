@@ -73,7 +73,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     private HashMap _hostMap = new HashMap(3);
     
     private HandlerContext _notFoundContext=null;
-    private boolean _chunkingForced=true;
+    private boolean _chunkingForced=false;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -988,6 +988,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     
     /* ------------------------------------------------------------ */
     /** Set Chunking Forced.
+     * By default chunking is not forced on resources of known length.
      * @param forced If true, chunking is used for all HTTP/1.1
      * responses, even if a content-length was known.
      */

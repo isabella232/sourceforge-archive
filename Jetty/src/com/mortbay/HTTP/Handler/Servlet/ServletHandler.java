@@ -295,6 +295,8 @@ public class ServletHandler extends NullHandler
         }
         catch(Exception e)
         {
+            Code.debug(e);
+            
             Throwable th=e;
             if (e instanceof ServletException)
             {
@@ -305,28 +307,25 @@ public class ServletHandler extends NullHandler
                 }
             }
             
-            if (Code.debug())
-            {
-                Code.warning(th);
-                Code.debug(httpRequest);
-            }
-            
             if (th instanceof HttpException)
                 throw (HttpException)th;
             if (th instanceof IOException)
                 throw (IOException)th;
-            if (!(th instanceof UnavailableException) && !Code.debug())
-                Code.warning(th.toString());
-            httpResponse.sendError(503,th);
+            
+            Code.warning("Servlet Exception for "+httpRequest.getURI(),th);
+            Code.debug(httpRequest);
+            
+            httpResponse.getHttpConnection().forceClose();
+            if (!httpResponse.isCommitted())
+                httpResponse.sendError(503,th);
         }
         catch(Error e)
         {
-            if (Code.debug())
-            {
-                Code.warning(e);
-                Code.debug(httpRequest);
-            }
-            httpResponse.sendError(503,e);
+            Code.warning("Servlet Error for "+httpRequest.getURI(),e);
+            Code.debug(httpRequest);
+            httpResponse.getHttpConnection().forceClose();
+            if (!httpResponse.isCommitted())
+                httpResponse.sendError(503,e);
         }
     }
 

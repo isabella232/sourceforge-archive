@@ -114,15 +114,12 @@ can be run with
 The com.mortbay.Jetty.Server class is simply an xml configuration
 frontend to com.mortbay.HTTP.HttpServer.
 
-Jetty comes with the tiny aelfred SAX parser from microstar.com.  This
-is only a partially validating parser, so care must be taken when 
-editing xml files.  If in doubt, use the org.xml.sax.parser property
-to specify an alternative parser (eg jaxp, xerces etc.).
+Jetty comes with the JAXP 1.1 reference XML parser, which is cromson from
+apache. Use the org.xml.sax.parser property to specify an alternative SAX parser.
 
 The DTDs used by jetty are resolved as resources from the system classpath,
-thus they are stored in com.mortbay.HTTP/web.dtd and 
-com.mortbay.Util.configure.dtd within the source tree and jar file.  Copies
-are also placed in etc for reference.
+thus they are stored in com.mortbay.HTTP/web.dtd and com.mortbay.Util.configure.dtd 
+within the source tree and jar file.  Copies are also placed in etc for reference.
 
 
 Building from source

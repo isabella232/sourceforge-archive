@@ -19,31 +19,7 @@ import java.io.Writer;
 
 /* ================================================================ */
 /** Handle a multipart MIME response.
- * <p><h4>Usage</h4>
- * <pre>
- * public class MultiPartCount extends Servlet
- * {
- *     public void init(){}
- *     
- *     public void service(ServletRequest req, ServletResponse res) 
- *        throws Exception 
- *     {
- *        MultiPartResponse multi=new MultiPartResponse(res);
- *        multi.startNextPart("text/plain");
- *        multi.out.write("One\n");
- *        multi.endPart();
- *        Thread.sleep(2000);
- *        multi.startNextPart("text/plain");
- *        multi.out.write("Two\n");
- *        multi.endPart();
- *        Thread.sleep(2000);
- *        multi.startNextPart("text/plain");
- *        multi.out.write("Three\n");
- *        multi.endLastPart();
- *     }
- * }
  *
- * </pre>
  *
  * @version $Id$
  * @author Greg Wilkins
@@ -53,18 +29,22 @@ public class MultiPartResponse
 {
     /* ------------------------------------------------------------ */
     private String boundary =
-    "com.mortbay.HTTP.MultiPartResponse.boundary.";
+        "com.mortbay.HTTP.MultiPartResponse.boundary."+
+        Long.toString(System.currentTimeMillis(),36);
+    public String getBoundary()
+    {
+        return boundary;
+    }
     
-    /* ------------------------------------------------------------ */
-    ServletResponse response=null;
-    InputStream in=null;
-    OutputStream outputStream = null;
-
     /* ------------------------------------------------------------ */    
     /** PrintWriter to write content too.
      */
-    public Writer out = null; 
+    private OutputStream out = null; 
+    public OutputStream getOut() {return out;}
 
+    /* ------------------------------------------------------------ */
+    private boolean inPart=false;
+    
     /* ------------------------------------------------------------ */
     /** MultiPartResponse constructor.
      * @param response The ServletResponse to which this multipart
@@ -74,83 +54,70 @@ public class MultiPartResponse
                              HttpServletResponse response)
          throws IOException
     {
-        this(request,response,true);
+        response.setContentType("multipart/mixed;boundary="+boundary);
+        out=response.getOutputStream();
+        inPart=false;
     }
-
+    
     /* ------------------------------------------------------------ */
     /** MultiPartResponse constructor.
      * @param response The ServletResponse to which this multipart
      *                 response will be sent.
      */
-    public MultiPartResponse(HttpServletRequest request,
-                             HttpServletResponse response,
-                             boolean alwaysExpire)
+    public MultiPartResponse(HttpRequest request,
+                             HttpResponse response)
          throws IOException
     {
-        this.response=response;
-        in = request.getInputStream();
-        out=response.getWriter();
-
-        String ua = request.getHeader(HttpFields.__UserAgent);
-        if (ua!=null && ua.indexOf("MSIE")>0)
-            boundary="MSIE.CANNOT.HANDLE.MULTI.PART.MIME.";
-        
-        boundary+=Long.toString(System.currentTimeMillis(),36);
-        response.setContentType("multipart/mixed;boundary="+boundary);
-        if (alwaysExpire)
-            response.setHeader("Expires","1 Jan 1971");
-
-        out.write("--"+boundary+HttpFields.__CRLF);
-        out.flush();
-
-        if (HttpMessage.__HTTP_1_1.equals(request.getProtocol()))
-            response.setHeader(HttpFields.__Connection,HttpFields.__Close);
-
-    }
-    
+        response.setField(HttpFields.__ContentType,"multipart/mixed;boundary="+boundary);
+        out=response.getOutputStream();
+        inPart=false;
+    }    
 
     /* ------------------------------------------------------------ */
     /** Start creation of the next Content.
      */
-    public void startNextPart(String contentType)
+    public void startPart(String contentType)
          throws IOException
     {
-        out.write("Content-type: "+contentType+
-                  HttpFields.__CRLF+HttpFields.__CRLF);
+        if (inPart)
+            out.write(HttpFields.__CRLF.getBytes());
+        inPart=true;
+        out.write(("--"+boundary+HttpFields.__CRLF).getBytes());
+        out.write(("Content-type: "+contentType+
+                   HttpFields.__CRLF+HttpFields.__CRLF).getBytes());
     }
     
     /* ------------------------------------------------------------ */
-    /** End the current part.
-     * @exception IOException IOException
+    /** Start creation of the next Content.
      */
-    public void endPart()
+    public void startPart(String contentType, String[] headers)
          throws IOException
     {
-        endPart(false);
+        if (inPart)
+            out.write(HttpFields.__CRLF.getBytes());
+        inPart=true;
+        out.write(("--"+boundary+HttpFields.__CRLF).getBytes());
+        out.write(("Content-type: "+contentType+HttpFields.__CRLF).getBytes());
+        for (int i=0;headers!=null && i<headers.length;i++)
+        {
+            out.write(headers[i].getBytes());
+            out.write(HttpFields.__CRLF.getBytes());
+        }
+        out.write(HttpFields.__CRLF.getBytes());
     }
-    
-    /* ------------------------------------------------------------ */
-    /** End the current part and the whole response.
-     * @exception IOException IOException
-     */
-    public void endLastPart()
-         throws IOException
-    {
-        endPart(true);
-    }
-    
+        
     /* ------------------------------------------------------------ */
     /** End the current part.
      * @param lastPart True if this is the last part
      * @exception IOException IOException
      */
-    public void endPart(boolean lastPart)
+    public void close()
          throws IOException
     {
-        out.write(HttpFields.__CRLF+"--"+
-                  boundary+(lastPart?"--":"")+
-                  HttpFields.__CRLF);
-        out.flush();
+        if (inPart)
+            out.write(HttpFields.__CRLF.getBytes());
+        out.write(("--"+boundary+"--"+HttpFields.__CRLF).getBytes());
+        inPart=false;
     }
     
 };

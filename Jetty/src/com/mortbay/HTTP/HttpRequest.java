@@ -715,6 +715,10 @@ public class HttpRequest extends HttpMessage
                     if (content_length<0)
                         Code.warning("No contentLength for "+
                                      HttpFields.__WwwFormUrlEncode);
+                    else if (content_length==0)
+                    {
+                        Code.debug("No form content");
+                    }
                     else
                     {
                         try

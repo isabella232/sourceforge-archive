@@ -469,17 +469,17 @@ public class Context implements ServletContext, HttpSessionContext
     /** Set the default session timeout.
      *  @param  default The timeout in minutes
      */
-    public void setSessionTimeout(int timeoutMinutes)
+    public synchronized void setSessionTimeout(int timeoutMinutes)
     {
         _dftMaxIdleSecs = timeoutMinutes*60;;
 
         // Adjust scavange delay to 25% of timeout
-        scavengeDelay=_dftMaxIdleSecs*250;
-        if (scavengeDelay>60000)
-            scavengeDelay=60000;
+        _scavengeDelay=_dftMaxIdleSecs*250;
+        if (_scavengeDelay>60000)
+            _scavengeDelay=60000;
         
         // Start the session scavenger if we haven't already
-        if (_scavenger == null)
+        if (_scavenger == null && _scavengeDelay>0)
             _scavenger = new SessionScavenger();
     }
 
@@ -551,7 +551,7 @@ public class Context implements ServletContext, HttpSessionContext
     
     /* ------------------------------------------------------------ */
     // how often to check - XXX - make this configurable
-    private int scavengeDelay = 30000;
+    private int _scavengeDelay = 30000;
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -560,9 +560,9 @@ public class Context implements ServletContext, HttpSessionContext
     class SessionScavenger extends Thread
     {
         public void run() {
-            while (true) {
+            while (_scavengeDelay>0) {
                 try {
-                    sleep(scavengeDelay);
+                    sleep(_scavengeDelay);
                     Context.this.scavenge();
                 }
                 catch (InterruptedException ex) { break; }
@@ -597,9 +597,16 @@ public class Context implements ServletContext, HttpSessionContext
         {
             synchronized(com.mortbay.HTTP.Handler.Servlet.Context.class)
             {
-                long idtmp = __nextSessionId;
-                __nextSessionId+=created%4096;
-                this.id=Long.toString(idtmp,30+(int)(created%7));
+                do
+                {
+                    // XXX This needs to be much better!
+                    long idtmp = __nextSessionId;
+                    __nextSessionId+=created%4096;
+                    long newId=idtmp ^(created<<8);
+                    if (newId<0)newId=-newId;
+                    this.id=Long.toString(newId,30+(int)(created%7));
+                }
+                while (_sessions.containsKey(this.id));
             }
             if (_dftMaxIdleSecs>=0)
                 maxIdleMillis=_dftMaxIdleSecs*1000;
@@ -658,6 +665,21 @@ public class Context implements ServletContext, HttpSessionContext
         public void setMaxInactiveInterval(int secs)
         {
             maxIdleMillis = (long)secs * 1000;
+
+            if (maxIdleMillis>0 && maxIdleMillis/4<_scavengeDelay)
+            {
+                synchronized(Context.this)
+                {
+                    // Adjust scavange delay to 25% of timeout
+                    _scavengeDelay=_dftMaxIdleSecs*250;
+                    if (_scavengeDelay>60000)
+                        _scavengeDelay=60000;
+                
+                    // Start the session scavenger if we haven't already
+                    if (_scavenger == null && _scavengeDelay>0)
+                    _scavenger = new SessionScavenger();
+                }
+            }
         }
 
         /* ------------------------------------------------------------- */

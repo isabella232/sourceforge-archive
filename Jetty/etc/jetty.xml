@@ -99,7 +99,7 @@ $Id$
       <Arg>org.apache.jasper.servlet.JspServlet</Arg>
     </Call>
     <Call name="getResourceHandler">
-      <Set name="AcceptRanges" type="boolean">false</Set>
+      <Set name="AcceptRanges" type="boolean">true</Set>
     </Call>
   </Call>
 

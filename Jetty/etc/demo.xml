@@ -112,7 +112,13 @@ $Id$
       <Arg>JSP</Arg>
       <Arg>*.jsp,*.jsP,*.jSp,*.jSP,*.Jsp,*.JsP,*.JSp,*.JSP</Arg>
       <Arg>org.apache.jasper.servlet.JspServlet</Arg>
+    </Call>    
+    <Call name="addServlet">
+      <Arg>Stress</Arg>
+      <Arg>/stress/*</Arg>
+      <Arg>com.mortbay.Servlet.Stress</Arg>
     </Call>
+
     <Set name="ServingResources">TRUE</Set>
     <Call name="addHandler">
       <Arg><New class="com.mortbay.HTTP.Handler.DumpHandler"/></Arg>

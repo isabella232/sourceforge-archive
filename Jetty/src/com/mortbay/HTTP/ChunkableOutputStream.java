@@ -372,7 +372,7 @@ public class ChunkableOutputStream extends FilterOutputStream
 
     /* ------------------------------------------------------------ */
     public void write(byte b[], int off, int len) throws IOException
-    {
+    {          
         if (!_written)
         {
             _written=true;

@@ -1,12 +1,20 @@
 Jetty Versions
 --------------
 
+ + Implemented multi-part ranges so that acrobat is happy.
+ + Simplified multipart response class.
+ + Frame handles more JIT stacks.
+ + Cleaned up handling of exceptions thrown by servlets.
+ + Turned off range handling by default until bugs resolved
+ + Handle zero length POSTs
+ + Start session scavenger if needed.
+
 Jetty-3.1.rc2 - 30 Mar 2001
  + Lifecycle.start() may throw Exception
  + Added MultiException to throw multiple nested exceptions. 
  + Improved logging of nested exceptions.
  + Only one instance of default MIME map.
- + Use reference JAXP1.1 for XML parsing.
+ + Use reference JAXP1.1 for XML parsing.y
  + Version 1.1 of configuration dtd supports New objects.
  + Improved handling of Primitive classes in XmlConfig
  + Renamed getConnection to getHttpConnection

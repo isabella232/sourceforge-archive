@@ -136,6 +136,15 @@ public class HttpConnection
     {
         return _response;
     }
+
+    /* ------------------------------------------------------------ */
+    /** Force the connection to not be persistent.
+     */
+    public void forceClose()
+    {
+        _persistent=false;
+        _close=true;
+    }
     
     /* ------------------------------------------------------------ */
     /** Close the connection.
@@ -430,13 +439,11 @@ public class HttpConnection
     private void exception(Throwable e)
     {
         try{
-            if (Code.debug())
-                Code.warning(_request.toString(),e);
-            else if ( e instanceof IOException )
+            if ( !Code.debug() && e instanceof IOException )
                 // Assume it was the browser closing early
                 Code.ignore(e);
             else
-                Code.warning(e);
+                Code.warning(_request.toString(),e);
             
             _persistent=false;
             if (!_response.isCommitted())
@@ -682,8 +689,11 @@ public class HttpConnection
             {
               case 1:
                   {
+                      if (HttpFields.__Close.equals(_response.getField(HttpFields.__Connection)))
+                          break;
+                      
                       if (_response.getField(HttpFields.__ContentLength)==null ||
-                         _listener.getHttpServer().isChunkingForced())
+                           _listener.getHttpServer().isChunkingForced())
                       {
                           _response.removeField(HttpFields.__ContentLength);
                           _response.setField(HttpFields.__TransferEncoding,
