@@ -555,11 +555,10 @@ public class Context implements ServletContext, HttpSessionContext
         }
         
         /* ------------------------------------------------------------- */
-        public void invalidate()
+        public synchronized void invalidate()
             throws IllegalStateException
         {
             if (invalid) throw new IllegalStateException();
-            invalid=true;
             
             // Call valueUnbound on all the HttpSessionBindingListeners
             // To avoid iterator problems, don't actually remove them
@@ -571,6 +570,7 @@ public class Context implements ServletContext, HttpSessionContext
                 unbindValue(key, value);
             }
             Context.this._sessions.remove(id);
+            invalid=true;
         }
         
         /* ------------------------------------------------------------- */

@@ -435,6 +435,15 @@ abstract public class HttpMessage
     }
     
     /* ------------------------------------------------------------ */
+    /** Get the HTTP header fields.
+     * @return Header or null
+     */
+    public HttpFields getHeader()
+    {
+        return _header;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Get the HTTP chunked trailer (also called trailer).
      * @return Trailer or null
      */

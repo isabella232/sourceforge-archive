@@ -92,40 +92,48 @@ class ServletRequest
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * Returns the preferred <code>Locale</code> that the client will 
-     * accept content in, based on the Accept-Language header.
-     * If the client request doesn't provide an Accept-Language header,
-     * this method returns the default locale for the server.
-     *
-     */
     public Locale getLocale()
     {
-	Code.notImplemented();
-	return null;
+	return (Locale)getLocales().nextElement();
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     *
-     * Returns an <code>Enumeration</code> of <code>Locale</code> objects
-     * indicating, in decreasing order starting with the preferred locale, the
-     * locales that are acceptable to the client based on the Accept-Language
-     * header.
-     * If the client request doesn't provide an Accept-Language header,
-     * this method returns an <code>Enumeration</code> containing one 
-     * <code>Locale</code>, the default locale for the server.
-     *
-     *
-     * @return		an <code>Enumeration</code> of preferred 
-     *                  <code>Locale</code> objects for the client
-     *
-     */
     public Enumeration getLocales()
     {
-	Code.notImplemented();
-	return null;
+	List acceptLanguage =
+	    _httpRequest.getHeader().getValues("Accept-Language");
+
+	// handle no locale
+        if (acceptLanguage == null || acceptLanguage.size()==0)
+	    return
+		Collections.enumeration(Collections.singleton(Locale.getDefault()));
+	
+	
+	// sort the list in quality order
+	acceptLanguage = HttpFields.qualityList(acceptLanguage);
+	
+	if (acceptLanguage.size()==0)
+	    return
+		Collections.enumeration(Collections.singleton(Locale.getDefault()));
+
+	// convert to locals
+	for (int i=0; i<acceptLanguage.size(); i++)
+	{
+	    String language = (String)acceptLanguage.get(i);
+	    String country = "";
+	    int dash = language.indexOf("-");
+	    if (dash > -1)
+	    {
+		country = language.substring(dash + 1).trim();
+		language = language.substring(0,dash).trim();
+	    }
+	    
+	    acceptLanguage.set(i,new Locale(language, country));
+	}
+	
+	return Collections.enumeration(acceptLanguage);
     }
+
     
     /* ------------------------------------------------------------ */
     public String getAuthType()
