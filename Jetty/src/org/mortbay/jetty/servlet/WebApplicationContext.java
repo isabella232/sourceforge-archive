@@ -201,255 +201,260 @@ public class WebApplicationContext extends ServletHttpContext
     {
         if (isStarted())
             return;
-        
-        // Get parser
-        XmlParser xmlParser=new XmlParser();
-        
-        Resource dtd22=Resource.newSystemResource("/javax/servlet/resources/web-app_2_2.dtd");
-        Resource dtd23=Resource.newSystemResource("/javax/servlet/resources/web-app_2_3.dtd");
-        xmlParser.redirectEntity("web-app_2_2.dtd",dtd22);
-        xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN",dtd22);
-        xmlParser.redirectEntity("web.dtd",dtd23);
-        xmlParser.redirectEntity("web-app_2_3.dtd",dtd23);
-        xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN",dtd23);
 
-        // Find the webapp
-        resolveWebApp();
-
-        // add security handler first
-        _securityHandler=(SecurityHandler)getHttpHandler(SecurityHandler.class);
-        if (_securityHandler==null)
-            _securityHandler=new SecurityHandler();
-        if (getHttpHandlerIndex(_securityHandler)!=0)
-        {
-            removeHttpHandler(_securityHandler);
-            addHttpHandler(0,_securityHandler);
-        }        
-        
-        // Protect WEB-INF
-        _webInfHandler=new WebInfProtect();
-        addHttpHandler(1,_webInfHandler);
-        
-        // Add filter Handler
-        _filterHandler = (FilterHandler)getHttpHandler(FilterHandler.class);
-        if (_filterHandler==null)
-        {
-            _filterHandler=new FilterHandler();
-            addHttpHandler(_filterHandler);
-        }
-        
-        // Add servlet Handler
-        _servletHandler = (ServletHandler)getHttpHandler(ServletHandler.class);
-        if (_servletHandler==null)
-        {
-            _servletHandler=new ServletHandler();
-            addHttpHandler(_servletHandler);
-        }
-        _servletHandler.setDynamicServletPathSpec("/servlet/*");
-        
-        // Check order
-        if (getHttpHandlerIndex(_servletHandler)<getHttpHandlerIndex(_filterHandler))
-        {
-            removeHttpHandler(_servletHandler);
-            addHttpHandler(_servletHandler);
-        }
-        
-        // Resource Handler
-        _resourceHandler = (ResourceHandler)getHttpHandler(ResourceHandler.class);
-        if (_resourceHandler==null)
-        {
-            _resourceHandler=new ResourceHandler();
-            _resourceHandler.setPutAllowed(false);
-            _resourceHandler.setDelAllowed(false);
-            addHttpHandler(_resourceHandler);
-        }
-
-        // Check order
-        if (_servletHandler!=null &&
-            getHttpHandlerIndex(_resourceHandler)<getHttpHandlerIndex(_servletHandler))
-        {
-            removeHttpHandler(_resourceHandler);
-            addHttpHandler(_resourceHandler);
-        }
-        
-        // NotFoundHandler
-        _notFoundHandler=(NotFoundHandler)getHttpHandler(NotFoundHandler.class);
-        if (_notFoundHandler==null)
-            _notFoundHandler=new NotFoundHandler();
-        else
-            removeHttpHandler(_notFoundHandler);
-        addHttpHandler(_notFoundHandler);
-
-        // Handle welcome redirection index
-        if (_filterHandler!=null && _resourceHandler!=null)
-            _resourceHandler.setWelcomeRedirectionIndex
-                (getHttpHandlerIndex(_filterHandler)+1);
-        
-        // Do the default configuration
+        // Save exiting context loader
+        Thread thread = Thread.currentThread();
+        ClassLoader lastContextLoader=thread.getContextClassLoader();
         try
         {
-            if (_defaultsDescriptor!=null && _defaultsDescriptor.length()>0)
-            {
-                Resource dftResource= Resource.newSystemResource(_defaultsDescriptor);
-                if (dftResource==null)
-                    dftResource= Resource.newResource(_defaultsDescriptor);
-                
-                _defaultsDescriptor=dftResource.toString();
-                XmlParser.Node defaultConfig =
-                    xmlParser.parse(dftResource.getURL().toString());
-                initialize(defaultConfig);
-            }
-        }
-        catch(IOException e)
-        {
-            Code.warning("Parse error on "+_war,e);
-            throw e;
-        }	
-        catch(Exception e)
-        {
-            Code.warning("Configuration error "+_war,e);
-            throw new IOException("Parse error on "+_war+
-                                  ": "+e.toString());
-        }
-        
-        // Do we have a WEB-INF
-        if (_webInf!=null && _webInf.isDirectory())
-        {
-            // Look for classes directory
-            Resource classes = _webInf.addPath("classes/");
-            String classPath="";
-            if (classes.exists())
-                super.setClassPath(classes.toString());
             
-            // Look for jars
-            Resource lib = _webInf.addPath("lib/");
-            super.setClassPaths(lib,true);            
+            // Get parser
+            XmlParser xmlParser=new XmlParser();
+        
+            Resource dtd22=Resource.newSystemResource("/javax/servlet/resources/web-app_2_2.dtd");
+            Resource dtd23=Resource.newSystemResource("/javax/servlet/resources/web-app_2_3.dtd");
+            xmlParser.redirectEntity("web-app_2_2.dtd",dtd22);
+            xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN",dtd22);
+            xmlParser.redirectEntity("web.dtd",dtd23);
+            xmlParser.redirectEntity("web-app_2_3.dtd",dtd23);
+            xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN",dtd23);
 
-            // do web.xml file
-            Resource web = _webInf.addPath("web.xml");
-            if (!web.exists())
+            // Find the webapp
+            resolveWebApp();
+
+            // add security handler first
+            _securityHandler=(SecurityHandler)getHttpHandler(SecurityHandler.class);
+            if (_securityHandler==null)
+                _securityHandler=new SecurityHandler();
+            if (getHttpHandlerIndex(_securityHandler)!=0)
             {
-                Code.warning("No WEB-INF/web.xml in "+_war+". Serving files and default/dynamic servlets only");
+                removeHttpHandler(_securityHandler);
+                addHttpHandler(0,_securityHandler);
+            }        
+        
+            // Protect WEB-INF
+            _webInfHandler=new WebInfProtect();
+            addHttpHandler(1,_webInfHandler);
+        
+            // Add filter Handler
+            _filterHandler = (FilterHandler)getHttpHandler(FilterHandler.class);
+            if (_filterHandler==null)
+            {
+                _filterHandler=new FilterHandler();
+                addHttpHandler(_filterHandler);
             }
+        
+            // Add servlet Handler
+            _servletHandler = (ServletHandler)getHttpHandler(ServletHandler.class);
+            if (_servletHandler==null)
+            {
+                _servletHandler=new ServletHandler();
+                addHttpHandler(_servletHandler);
+            }
+            _servletHandler.setDynamicServletPathSpec("/servlet/*");
+        
+            // Check order
+            if (getHttpHandlerIndex(_servletHandler)<getHttpHandlerIndex(_filterHandler))
+            {
+                removeHttpHandler(_servletHandler);
+                addHttpHandler(_servletHandler);
+            }
+        
+            // Resource Handler
+            _resourceHandler = (ResourceHandler)getHttpHandler(ResourceHandler.class);
+            if (_resourceHandler==null)
+            {
+                _resourceHandler=new ResourceHandler();
+                _resourceHandler.setPutAllowed(false);
+                _resourceHandler.setDelAllowed(false);
+                addHttpHandler(_resourceHandler);
+            }
+
+            // Check order
+            if (_servletHandler!=null &&
+                getHttpHandlerIndex(_resourceHandler)<getHttpHandlerIndex(_servletHandler))
+            {
+                removeHttpHandler(_resourceHandler);
+                addHttpHandler(_resourceHandler);
+            }
+        
+            // NotFoundHandler
+            _notFoundHandler=(NotFoundHandler)getHttpHandler(NotFoundHandler.class);
+            if (_notFoundHandler==null)
+                _notFoundHandler=new NotFoundHandler();
             else
-            {
-                try
-                {
-                    _deploymentDescriptor=web.toString();
-                    XmlParser.Node config = xmlParser.parse(web.getURL().toString());
-                    initialize(config);
-                }
-                catch(IOException e)
-                {
-                    Code.warning("Parse error on "+_war,e);
-                    throw e;
-                }	
-                catch(Exception e)
-                {
-                    Code.warning("Configuration error "+_war,e);
-                    throw new IOException("Parse error on "+_war+
-                                          ": "+e.toString());
-                }
-            }
+                removeHttpHandler(_notFoundHandler);
+            addHttpHandler(_notFoundHandler);
 
-            // do jetty.xml file
-            Resource jetty = _webInf.addPath("web-jetty.xml");
-            if (!jetty.exists())
-                jetty = _webInf.addPath("jetty-web.xml");
-            if (jetty.exists())
-            {
-                try
-                {
-                    Log.event("Configure: "+jetty);
-                    XmlConfiguration jetty_config=new
-                        XmlConfiguration(jetty.getURL());
-                    jetty_config.configure(this);
-                }
-                catch(IOException e)
-                {
-                    Code.warning("Parse error on "+_war,e);
-                    throw e;
-                }	
-                catch(Exception e)
-                {
-                    Code.warning("Configuration error "+_war,e);
-                    throw new IOException("Parse error on "+_war+
-                                          ": "+e.toString());
-                }
-            }
-        }
-
-        // initialize the classloader (if it has not been so already)
-        initClassLoader(true);
+            // Handle welcome redirection index
+            if (_filterHandler!=null && _resourceHandler!=null)
+                _resourceHandler.setWelcomeRedirectionIndex
+                    (getHttpHandlerIndex(_filterHandler)+1);
         
-        // Set classpath for Jasper.
-        if (_servletHandler!=null)
-        {
-            Map.Entry entry = _servletHandler.getHolderEntry("test.jsp");
-            if (entry!=null)
+            // Do the default configuration
+            try
             {
-                ServletHolder jspHolder = (ServletHolder)entry.getValue();
-                if (jspHolder!=null && jspHolder.getInitParameter("classpath")==null)
+                if (_defaultsDescriptor!=null && _defaultsDescriptor.length()>0)
                 {
-                    String fileClassPath=getFileClassPath();
-                    jspHolder.setInitParameter("classpath",fileClassPath);
-                    Code.debug("Set classpath=",fileClassPath," for ",jspHolder);
-                }
-            }
-        }
-
-        // If we have servlets, don't init them yet
-        if (_servletHandler!=null)
-            _servletHandler.setAutoInitializeServlets(false);
-
-        MultiException mex = new MultiException();
-        
-        // Start handlers
-        try { super.start(); }
-        catch(Exception ex) { mex.add(ex); }
-        
-        // If it actually started
-        if (super.isStarted())
-        {    
-            if (_resourceHandler.isPutAllowed())
-                Log.event("PUT allowed in "+this);
-            if (_resourceHandler.isDelAllowed())
-                Log.event("DEL allowed in "+this);
-            
-            // Context listeners
-            if (_contextListeners!=null && _servletHandler!=null)
-            {
-                //Ensure classloader for context is used
-                Thread thread = Thread.currentThread();
-                ClassLoader lastContextLoader=thread.getContextClassLoader();
-                if (getClassLoader() != null)
-                    thread.setContextClassLoader(getClassLoader());
+                    Resource dftResource= Resource.newSystemResource(_defaultsDescriptor);
+                    if (dftResource==null)
+                        dftResource= Resource.newResource(_defaultsDescriptor);
                 
-                ServletContextEvent event = new ServletContextEvent(getServletContext());
-                for (int i=0;i<_contextListeners.size();i++)
-                    try{((ServletContextListener)_contextListeners.get(i))
-                            .contextInitialized(event);}
-                    catch(Exception ex) { mex.add(ex); }
-                thread.setContextClassLoader(lastContextLoader);
+                    _defaultsDescriptor=dftResource.toString();
+                    XmlParser.Node defaultConfig =
+                        xmlParser.parse(dftResource.getURL().toString());
+                    initialize(defaultConfig);
+                }
             }
-        }
+            catch(IOException e)
+            {
+                Code.warning("Parse error on "+_war,e);
+                throw e;
+            }	
+            catch(Exception e)
+            {
+                Code.warning("Configuration error "+_war,e);
+                throw new IOException("Parse error on "+_war+
+                                      ": "+e.toString());
+            }
         
-        // OK to Initialize servlets now
-        if (_servletHandler!=null && _servletHandler.isStarted())
-        {
-            Thread thread = Thread.currentThread();
-            ClassLoader lastContextLoader=thread.getContextClassLoader();
+            // Do we have a WEB-INF
+            if (_webInf!=null && _webInf.isDirectory())
+            {
+                // Look for classes directory
+                Resource classes = _webInf.addPath("classes/");
+                String classPath="";
+                if (classes.exists())
+                    super.setClassPath(classes.toString());
             
-            try{
-                if (getClassLoader()!=null)
-                    thread.setContextClassLoader(getClassLoader());
-                _servletHandler.initializeServlets();
+                // Look for jars
+                Resource lib = _webInf.addPath("lib/");
+                super.setClassPaths(lib,true);            
+
+                // Setup context classloader
+                initClassLoader(true);
+                thread.setContextClassLoader(getClassLoader());
+            
+                // do web.xml file
+                Resource web = _webInf.addPath("web.xml");
+                if (!web.exists())
+                {
+                    Code.warning("No WEB-INF/web.xml in "+_war+". Serving files and default/dynamic servlets only");
+                }
+                else
+                {
+                    try
+                    {
+                        _deploymentDescriptor=web.toString();
+                        XmlParser.Node config = xmlParser.parse(web.getURL().toString());
+                        initialize(config);
+                    }
+                    catch(IOException e)
+                    {
+                        Code.warning("Parse error on "+_war,e);
+                        throw e;
+                    }	
+                    catch(Exception e)
+                    {
+                        Code.warning("Configuration error "+_war,e);
+                        throw new IOException("Parse error on "+_war+
+                                              ": "+e.toString());
+                    }
+                }
+
+                // do jetty.xml file
+                Resource jetty = _webInf.addPath("web-jetty.xml");
+                if (!jetty.exists())
+                    jetty = _webInf.addPath("jetty-web.xml");
+                if (jetty.exists())
+                {
+                    try
+                    {
+                        Log.event("Configure: "+jetty);
+                        XmlConfiguration jetty_config=new
+                            XmlConfiguration(jetty.getURL());
+                        jetty_config.configure(this);
+                    }
+                    catch(IOException e)
+                    {
+                        Code.warning("Parse error on "+_war,e);
+                        throw e;
+                    }	
+                    catch(Exception e)
+                    {
+                        Code.warning("Configuration error "+_war,e);
+                        throw new IOException("Parse error on "+_war+
+                                              ": "+e.toString());
+                    }
+                }
             }
-            catch(Exception ex) { mex.add(ex); }
-            finally{thread.setContextClassLoader(lastContextLoader);}
-        }
+
+            // initialize the classloader (if it has not been so already)
+            initClassLoader(true);
+            thread.setContextClassLoader(getClassLoader());
         
-        mex.ifExceptionThrow();
+            // Set classpath for Jasper.
+            if (_servletHandler!=null)
+            {
+                Map.Entry entry = _servletHandler.getHolderEntry("test.jsp");
+                if (entry!=null)
+                {
+                    ServletHolder jspHolder = (ServletHolder)entry.getValue();
+                    if (jspHolder!=null && jspHolder.getInitParameter("classpath")==null)
+                    {
+                        String fileClassPath=getFileClassPath();
+                        jspHolder.setInitParameter("classpath",fileClassPath);
+                        Code.debug("Set classpath=",fileClassPath," for ",jspHolder);
+                    }
+                }
+            }
+
+            // If we have servlets, don't init them yet
+            if (_servletHandler!=null)
+                _servletHandler.setAutoInitializeServlets(false);
+
+            MultiException mex = new MultiException();
+        
+            // Start handlers
+            try { super.start(); }
+            catch(Exception ex) { mex.add(ex); }
+        
+            // If it actually started
+            if (super.isStarted())
+            {    
+                if (_resourceHandler.isPutAllowed())
+                    Log.event("PUT allowed in "+this);
+                if (_resourceHandler.isDelAllowed())
+                    Log.event("DEL allowed in "+this);
+            
+                // Context listeners
+                if (_contextListeners!=null && _servletHandler!=null)
+                {
+                
+                    ServletContextEvent event = new ServletContextEvent(getServletContext());
+                    for (int i=0;i<_contextListeners.size();i++)
+                        try{((ServletContextListener)_contextListeners.get(i))
+                                .contextInitialized(event);}
+                        catch(Exception ex) { mex.add(ex); }
+                }
+            }
+        
+            // OK to Initialize servlets now
+            if (_servletHandler!=null && _servletHandler.isStarted())
+            {
+                try{
+                    _servletHandler.initializeServlets();
+                }
+                catch(Exception ex) { mex.add(ex); }
+            }
+        
+            mex.ifExceptionThrow();
+        }
+        finally
+        {
+            //restore context classloader
+            thread.setContextClassLoader(lastContextLoader);
+        }
     }
 
     /* ------------------------------------------------------------ */
