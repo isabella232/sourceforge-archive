@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -43,13 +42,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.ResourceCache.ResourceMetaData;
 import org.mortbay.http.handler.ErrorPageHandler;
-import org.mortbay.util.ComponentListener;
 import org.mortbay.util.Container;
 import org.mortbay.util.EventProvider;
 import org.mortbay.util.IO;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LifeCycle;
-import org.mortbay.util.LifeCycleListener;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
@@ -1544,7 +1541,7 @@ public class HttpContext extends Container
         Object old_scope= null;
         try
         {
-            old_scope= enterContextScope(request, response);
+            old_scope= enterContextScope(request,response);
             HttpHandler[] handlers= getHandlers();
             for (int k= 0; k < handlers.length; k++)
             {

@@ -4,6 +4,8 @@
 // ---------------------------------------------------------------------------
 
 package org.mortbay.webapps.jetty;
+import javax.servlet.ServletContextAttributeEvent;
+import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletRequestAttributeEvent;
@@ -22,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 
 public  class DemoListener
     implements ServletContextListener,
+               ServletContextAttributeListener,
                ServletRequestListener,
                ServletRequestAttributeListener,
                HttpSessionListener,
@@ -114,6 +117,21 @@ public  class DemoListener
                    ((HttpServletRequest)e.getServletRequest())
                    .getRequestURI()+
                    " "+e.getName()+"="+e.getValue());
+    }
+
+    public void attributeAdded(ServletContextAttributeEvent scab)
+    {
+        if(log.isDebugEnabled())log.debug("event contextAttributedAdded: "+scab.getName());
+    }
+
+    public void attributeRemoved(ServletContextAttributeEvent scab)
+    {
+        if(log.isDebugEnabled())log.debug("event contextAttributedRemoved: "+scab.getName());
+    }
+
+    public void attributeReplaced(ServletContextAttributeEvent scab)
+    {
+        if(log.isDebugEnabled())log.debug("event contextAttributedReplaced: "+scab.getName());
     }
 }
 

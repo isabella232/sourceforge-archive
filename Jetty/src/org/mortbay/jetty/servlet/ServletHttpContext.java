@@ -37,6 +37,7 @@ import org.mortbay.http.HttpResponse;
 public class ServletHttpContext extends HttpContext
 {
     private HashMap _localeEncodingMap  = new HashMap();
+    private ServletHandler _servletHandler=null;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -66,13 +67,14 @@ public class ServletHttpContext extends HttpContext
      */
     public synchronized ServletHandler getServletHandler()
     {
-        ServletHandler shandler=(ServletHandler) getHandler(ServletHandler.class);
-        if (shandler==null)
+        if (_servletHandler==null)
+            _servletHandler=(ServletHandler) getHandler(ServletHandler.class);
+        if (_servletHandler==null)
         {
-            shandler=new ServletHandler();
-            addHandler(shandler);
+            _servletHandler=new ServletHandler();
+            addHandler(_servletHandler);
         }
-        return shandler;
+        return _servletHandler;
     }
     
     /* ------------------------------------------------------------ */
@@ -196,5 +198,36 @@ public class ServletHttpContext extends HttpContext
         if (_localeEncodingMap!=null)
             _localeEncodingMap.clear();
         _localeEncodingMap=null;
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.http.HttpContext#enterContextScope(org.mortbay.http.HttpRequest, org.mortbay.http.HttpResponse)
+     */
+    public Object enterContextScope(HttpRequest request, HttpResponse response)
+    {
+        // Make sure servlet wrappers exist for request/response objects
+        ServletHttpRequest srequest = (ServletHttpRequest) request.getWrapper();
+        ServletHttpResponse sresponse = (ServletHttpResponse) response.getWrapper();
+        if (srequest==null)
+        {
+            // Build the request and response.
+            srequest = new ServletHttpRequest(getServletHandler(),null,request);
+            sresponse = new ServletHttpResponse(srequest,response);
+            request.setWrapper(srequest);
+            response.setWrapper(sresponse);
+        }
+        
+        return super.enterContextScope(request,response);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.util.Container#doStop()
+     */
+    protected void doStop() throws Exception
+    {
+        _servletHandler=null;
     }
 }

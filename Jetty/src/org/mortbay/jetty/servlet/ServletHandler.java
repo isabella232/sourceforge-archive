@@ -522,24 +522,11 @@ public class ServletHandler extends Container implements HttpHandler
             return;
         }
 
-        // Look for existing request/response objects
+        // Look for existing request/response objects (from enterScope call)
         ServletHttpRequest request = (ServletHttpRequest) httpRequest.getWrapper();
         ServletHttpResponse response = (ServletHttpResponse) httpResponse.getWrapper();
-        if (request==null)
-        {
-            // Build the request and response.
-            request = new ServletHttpRequest(this,pathInContext,httpRequest);
-            response = new ServletHttpResponse(request,httpResponse);
-            httpRequest.setWrapper(request);
-            httpResponse.setWrapper(response);
-        }
-        else
-        {
-            // Recycled request
-            request.recycle(this,pathInContext);
-            response.recycle();
-        }
-        
+        request.recycle(this,pathInContext);
+        response.recycle();
         
         // Look for the servlet
         Map.Entry servlet=getHolderEntry(pathInContext);
