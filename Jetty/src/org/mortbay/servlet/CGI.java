@@ -4,7 +4,6 @@
 // still lacks a few features - the basic stuff is here though...
 // Copyright 2000 Julian Gosnell <jules_gosnell@yahoo.com> Released
 // under the terms of the Jetty Licence.
-//
 // ========================================================================
 
 // TODO

@@ -157,7 +157,7 @@ public class JettyPage extends Page
         addHeader("<link REL=\"icon\" HREF=\""+context+"/images/jicon.gif\" TYPE=\"image/gif\">");
         
         addLinkHeader("Author",context,"http://www.mortbay.com");
-        addLinkHeader("Copyright",context,"LICENSE.html");
+        addLinkHeader("Copyright",context,"LICENSE.TXT");
         
         _links = (Links)__linkMap.match(_path);
         _selectedSection = (Section)__pathMap.match(_path);

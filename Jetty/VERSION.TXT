@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
 Jetty-5
+ + Changed to apache 2.0 license
  + added extra/etc/start-plus.config to set up main.class for jettyplus
  + maxFormContentLength may be unlimited with <0 value
  + Fixed HTTP tunnel timeout setting.

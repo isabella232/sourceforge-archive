@@ -103,7 +103,7 @@
     <copy todir="${demo.webapps}/root">
       <fileset dir="${etc}/dtd" includes="*.dtd"/>
     </copy>
-    <copy file="LICENSE.html" tofile="${classes}/org/mortbay/LICENSE.html" />
+    <copy file="LICENSE.TXT" tofile="${classes}/org/mortbay/LICENSE.TXT" />
     <copy file="${src}/org/mortbay/jetty/servlet/webdefault.xml" tofile="${etc}/webdefault.xml" />
     <available property="demo.available" type="dir" file="${demo.src}" />
     <echo message="Demo available=${demo.available}" level="info"/>
@@ -138,7 +138,7 @@
     <delete file="${start.jar}" quiet="false"/>
     <delete file="${stop.jar}" quiet="false"/>
     <delete file="${etc}/webdefault.xml" quiet="false"/>
-    <delete file="${demo.webapps}/jetty/LICENSE.html" quiet="false"/>
+    <delete file="${demo.webapps}/jetty/LICENSE.TXT" quiet="false"/>
     <delete file="${demo.webapps}/jetty/versions.txt" quiet="false"/>
     <delete file="${webapps}/javadoc.war"/>
 
@@ -346,7 +346,7 @@
       <include name="**/*.java" />
     </javac>
 
-    <copy file="LICENSE.html" tofile="${jetty.webapp}/LICENSE.html" />
+    <copy file="LICENSE.TXT" tofile="${jetty.webapp}/LICENSE.TXT" />
     <copy file="VERSION.TXT" tofile="${jetty.webapp}/versions.txt" />
     <copy file="README.TXT" tofile="${jetty.webapp}/readme.txt" />
   </target>
@@ -481,7 +481,7 @@
       <tarfileset 
        dir="${basedir}"
        prefix="jetty-${RELEASE.MAJOR.MINOR}/"> 
-        <include name="LICENSE.html"/>
+        <include name="LICENSE.TXT"/>
         <include name="README.TXT"/>
         <include name="VERSION.TXT"/>
         <include name="*.jar"/>       
