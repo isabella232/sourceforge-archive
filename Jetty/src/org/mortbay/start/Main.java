@@ -508,7 +508,10 @@ public class Main
                 else
                     System.err.println(e.toString());
             }
-            start();
+            if (_socket!=null)
+                start();
+            else
+                System.err.println("WARN: Not listening on monitor port: "+_port);
         }
 
         public void run()
