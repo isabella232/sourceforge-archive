@@ -15,6 +15,7 @@ import java.net.URLConnection;
 import java.net.MalformedURLException;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Set;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
@@ -39,6 +40,9 @@ import org.mortbay.util.URI;
  */
 public class ProxyHandler extends AbstractHttpHandler
 {
+    protected Set _proxyHostsWhiteList;
+    protected Set _proxyHostsBlackList;
+    
     /* ------------------------------------------------------------ */
     /** Map of leg by leg headers (not end to end).
      * Should be a set, but more efficient string map is used instead.
@@ -83,6 +87,71 @@ public class ProxyHandler extends AbstractHttpHandler
         _allowedConnectPorts.add(new Integer(443));
         _allowedConnectPorts.add(new Integer(8443));
     }
+
+    /* ------------------------------------------------------------ */
+    /** Get proxy host white list.
+     * @return Array of hostnames and IPs that are proxied,
+     * or an empty array if all hosts are proxied.
+     */
+    public String[] getProxyHostsWhiteList()
+    {
+        if (_proxyHostsWhiteList==null||_proxyHostsWhiteList.size()==0)
+            return new String[0];
+        
+        String [] hosts = new String[_proxyHostsWhiteList.size()];
+        hosts=(String[])_proxyHostsWhiteList.toArray(hosts);
+        return hosts;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set proxy host white list.
+     * @param hosts Array of hostnames and IPs that are proxied, 
+     * or null if all hosts are proxied.
+     */
+    public void setProxyHostsWhiteList(String[] hosts)
+    {
+        if (hosts==null || hosts.length==0)
+            _proxyHostsWhiteList=null;
+        else
+        {
+            _proxyHostsWhiteList=new HashSet();
+            for (int i=0;i<hosts.length;i++)
+                if (hosts[i]!=null && hosts[i].trim().length()>0)
+                    _proxyHostsWhiteList.add(hosts[i]);
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get proxy host black list.
+     * @return Array of hostnames and IPs that are NOT proxied.
+     */
+    public String[] getProxyHostsBlackList()
+    {
+        if (_proxyHostsBlackList==null||_proxyHostsBlackList.size()==0)
+            return new String[0];
+        
+        String [] hosts = new String[_proxyHostsBlackList.size()];
+        hosts=(String[])_proxyHostsBlackList.toArray(hosts);
+        return hosts;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set proxy host black list.
+     * @param hosts Array of hostnames and IPs that are NOT proxied. 
+     */
+    public void setProxyHostsBlackList(String[] hosts)
+    {
+        if (hosts==null || hosts.length==0)
+            _proxyHostsBlackList=null;
+        else
+        {
+            _proxyHostsBlackList=new HashSet();
+            for (int i=0;i<hosts.length;i++)
+                if (hosts[i]!=null && hosts[i].trim().length()>0)
+                    _proxyHostsBlackList.add(hosts[i]);
+        }
+    }
+
     
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,
@@ -283,15 +352,33 @@ public class ProxyHandler extends AbstractHttpHandler
     /** Is URL Proxied.
      * Method to allow derived handlers to select which URIs are proxied and
      * to where.
+     * @param uri The requested URI, which should include a scheme, host and port.
      * @return The URL to proxy to, or null if the passed URI should not be proxied.
      * The default implementation returns the passed uri if it has a schema
-     * that is in the _ProxySchemes map.
+     * that is in the _ProxySchemes map. If a proxy host black list is set,
+     * the URI host must not be in the list. If aproxy host white list is
+     * set, then the URI host must be in the list.
      */
     protected URL isProxied(URI uri)
         throws MalformedURLException
     {
         // Is this a proxy request?
         String scheme=uri.getScheme();
-        return  (scheme!=null && _ProxySchemes.containsKey(scheme))?new URL(uri.toString()):null;
+        String host=uri.getHost();
+
+        // Must be a scheme that can be proxied.
+        if (scheme==null || !_ProxySchemes.containsKey(scheme))
+            return null;
+
+        // Must be in any defined white list
+        if (_proxyHostsWhiteList!=null && !_proxyHostsWhiteList.contains(host))
+            return null;
+
+        // Must not be in any defined black list
+        if (_proxyHostsBlackList!=null && _proxyHostsBlackList.contains(host))
+            return null;
+        
+        // OK return URI as untransformed URL.
+        return new URL(uri.toString());
     }    
 }
