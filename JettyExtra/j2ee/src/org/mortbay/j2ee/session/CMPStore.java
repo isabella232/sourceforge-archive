@@ -113,7 +113,8 @@ public class CMPStore
     if (_home==null)
       throw new IllegalStateException("invalid store");
 
-    CMPState state=(CMPState)PortableRemoteObject.narrow(_home.create(_manager.getContextPath(), id, maxInactiveInterval), CMPState.class);
+    Object tmp=_home.create(_manager.getContextPath(), id, maxInactiveInterval);
+    CMPState state=(CMPState)PortableRemoteObject.narrow(tmp, CMPState.class);
     return state;
   }
 
