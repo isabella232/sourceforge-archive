@@ -29,12 +29,17 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.EventListener;
+import javax.servlet.ServletContext;
+import javax.servlet.Filter;
 import javax.servlet.UnavailableException;
+import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.ServletContextAttributeEvent;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
@@ -79,7 +84,9 @@ public class WebApplicationContext extends ServletHandlerContext
     private String _war;
     private boolean _extract;
     private XmlParser _xmlParser;
-
+    private ArrayList _filters;
+    private ArrayList _contextListeners;
+    private ArrayList _contextAttributeListeners;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -365,14 +372,126 @@ public class WebApplicationContext extends ServletHandlerContext
                 }
             }
         }
+
+        // Start filters
+        if (_filters!=null)
+            for (int i=0;i<_filters.size();i++)
+                ((FilterHolder)_filters.get(i)).start();
+
+        // Start handlers
         super.start();
 
+        // Context listeners
+        if (_contextListeners!=null)
+        {
+            ServletContextEvent event = new ServletContextEvent(_servletHandler.getServletContext());
+            for (int i=0;i<_contextListeners.size();i++)
+                ((ServletContextListener)_contextListeners.get(i))
+                    .contextInitialized(event);
+        }
+        
         if (rh.isPutAllowed())
             Log.event("PUT allowed in "+this);
         if (rh.isDelAllowed())
             Log.event("DEL allowed in "+this);
     }
 
+    /* ------------------------------------------------------------ */
+    public void stop()
+        throws  InterruptedException
+    {
+        if (_filters!=null)
+            for (int i=0;i<_filters.size();i++)
+                ((FilterHolder)_filters.get(i)).stop();
+
+        ServletContextEvent event = new ServletContextEvent(_servletHandler.getServletContext());
+        super.stop();
+        // Context listeners
+        if (_contextListeners!=null)
+        {
+            for (int i=0;i<_contextListeners.size();i++)
+                ((ServletContextListener)_contextListeners.get(i))
+                    .contextDestroyed(event);
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void destroy()
+    {
+        if (_filters!=null)
+            for (int i=0;i<_filters.size();i++)
+                ((FilterHolder)_filters.get(i)).destroy();
+
+        ServletContextEvent event = new ServletContextEvent(_servletHandler.getServletContext());
+        super.destroy();
+        // Context listeners
+        if (_contextListeners!=null)
+        {
+            for (int i=0;i<_contextListeners.size();i++)
+                ((ServletContextListener)_contextListeners.get(i))
+                    .contextDestroyed(event);
+            _contextListeners.clear();
+            _contextListeners=null;
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    public synchronized void addEventListener(EventListener listener)
+        throws IllegalArgumentException
+    {
+        boolean known=false;
+        if (listener instanceof ServletContextListener)
+        {
+            known=true;
+            if (_contextListeners==null)
+                _contextListeners=new ArrayList(3);
+            _contextListeners.add(listener);
+        }
+        
+        if (listener instanceof ServletContextAttributeListener)
+        {
+            known=true;
+            if (_contextAttributeListeners==null)
+                _contextAttributeListeners=new ArrayList(3);
+            _contextAttributeListeners.add(listener);
+        }
+
+        if (!known)
+            throw new IllegalArgumentException("Unknown "+listener);
+    }
+
+    /* ------------------------------------------------------------ */
+    public synchronized void removeEventListener(EventListener listener)
+    {
+        if ((listener instanceof ServletContextListener) &&
+            _contextListeners!=null)
+            _contextListeners.remove(listener);
+        
+        if ((listener instanceof ServletContextAttributeListener) &&
+            _contextAttributeListeners!=null)
+            _contextAttributeListeners.remove(listener);
+    }
+
+    /* ------------------------------------------------------------ */
+    public synchronized void setAttribute(String name, Object value)
+    {
+        Object old = super.getAttribute(name);
+        super.setAttribute(name,value);
+
+        if (_contextAttributeListeners!=null)
+        {
+            
+        }
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    public synchronized void removeAttribute(String name)
+    {
+        Object old = super.getAttribute(name);
+        super.removeAttribute(name);
+    }
+    
     /* ------------------------------------------------------------ */
     public XmlParser getXmlParser()
     {
@@ -489,7 +608,7 @@ public class WebApplicationContext extends ServletHandlerContext
                 else if ("filter".equals(name))
                     initFilter(node);
                 else if ("filter-mapping".equals(name))
-                    Code.warning("Not implemented: "+node);
+                    initFilterMapping(node);
                 else if ("listener".equals(name))
                     initListener(node);
                 else if ("ejb-ref".equals(name))
@@ -553,7 +672,32 @@ public class WebApplicationContext extends ServletHandlerContext
             holder.put(pname,pvalue);
         }
 
-        System.err.println(holder);
+        addFilterHolder(holder);
+    }
+    
+    /* ------------------------------------------------------------ */
+    private void initFilterMapping(XmlParser.Node node)
+    {
+        String name=node.getString("filter-name",false,true);
+        String pathSpec=node.getString("url-pattern",false,true);
+        String servletName=node.getString("url-pattern",false,true);
+        
+        FilterHolder filterHolder = getFilterHolder(name);
+        if (filterHolder==null)
+            Code.warning("No such filter: "+name);
+        else
+        {
+            if (servletName!=null)
+            {
+                ServletHolder holder =
+                    _servletHandler.getServletHolder(name);
+                System.err.println(filterHolder+" --> "+holder);
+            }
+            else
+            {
+                System.err.println(filterHolder+" --> "+pathSpec);
+            }
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -661,15 +805,25 @@ public class WebApplicationContext extends ServletHandlerContext
             Code.warning("Not an EventListener: "+listener);
             return;
         }
+
+        boolean known=false;
         if ((listener instanceof ServletContextListener) ||
-            (listener instanceof ServletContextAttributeListener) ||
-            (listener instanceof HttpSessionActivationListener) ||
-            (listener instanceof HttpSessionAttributeListener) ||
-            (listener instanceof HttpSessionBindingListener) ||
-            (listener instanceof HttpSessionListener))
+            (listener instanceof ServletContextAttributeListener))
+        {
+            known=true;
+            addEventListener((EventListener)listener);
+        }
+        
+        if((listener instanceof HttpSessionActivationListener) ||
+           (listener instanceof HttpSessionAttributeListener) ||
+           (listener instanceof HttpSessionBindingListener) ||
+           (listener instanceof HttpSessionListener))
+        {
+            known=true;
             _servletHandler.addEventListener((EventListener)listener);
-        else
-            Code.warning("Unknown EventListener: "+listener);
+        }
+        if (!known)
+            Code.warning("Unknown: "+listener);
     }
     
     /* ------------------------------------------------------------ */
@@ -884,7 +1038,27 @@ public class WebApplicationContext extends ServletHandlerContext
     }
     
     /* ------------------------------------------------------------ */
+    public synchronized void addFilterHolder(FilterHolder filter)
+    {
+        if (_filters==null)
+            _filters=new ArrayList(3);
+        _filters.add(filter);
+        Code.debug("addFilterHolder "+filter);
+    }
     
+    /* ------------------------------------------------------------ */
+    public FilterHolder getFilterHolder(String name)
+    {
+        if (_filters==null)
+            return null;
+        for (int i=0;i<_filters.size();i++)
+        {
+            FilterHolder holder=(FilterHolder)_filters.get(i);
+            if (holder.getName().equals(name))
+                return holder;
+        }
+        return null;
+    }
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */

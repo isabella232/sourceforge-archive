@@ -34,6 +34,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.MalformedURLException;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -53,8 +54,6 @@ import javax.servlet.UnavailableException;
 import javax.servlet.RequestDispatcher;
 import java.security.Principal;
 
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
@@ -197,33 +196,21 @@ public class ServletHandler
     }
     
     /* ------------------------------------------------------------ */
-    public void addEventListener(EventListener listener)
+    public synchronized void addEventListener(EventListener listener)
         throws IllegalArgumentException
     {
-        boolean known=false;
-        if ((listener instanceof ServletContextListener) ||
-            (listener instanceof ServletContextAttributeListener))
-        {
-            known=true;
-            Code.warning(listener.toString(),new Throwable());
-        }
-        
         if ((listener instanceof HttpSessionActivationListener) ||
             (listener instanceof HttpSessionAttributeListener) ||
             (listener instanceof HttpSessionBindingListener) ||
             (listener instanceof HttpSessionListener))
             _sessionManager.addEventListener(listener);
-        else if (!known)
+        else 
             throw new IllegalArgumentException(listener.toString());
     }
     
     /* ------------------------------------------------------------ */
-    public void removeEventListener(EventListener listener)
+    public synchronized void removeEventListener(EventListener listener)
     {
-        if ((listener instanceof ServletContextListener) ||
-            (listener instanceof ServletContextAttributeListener))    
-            Code.notImplemented();
-
         if ((listener instanceof HttpSessionActivationListener) ||
             (listener instanceof HttpSessionAttributeListener) ||
             (listener instanceof HttpSessionBindingListener) ||
