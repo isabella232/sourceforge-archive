@@ -197,7 +197,7 @@ public class KeyPairTool
 	ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 	
         CertificateFactory certificateFactory
-	    = CertificateFactory.getInstance("X509");
+	    = CertificateFactory.getInstance("X.509");
 
 	ArrayList chain = new ArrayList();
 	while (bais.available() > 0) {
