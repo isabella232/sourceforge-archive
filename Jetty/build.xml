@@ -59,6 +59,7 @@ Other targets:
   <property name="webapps"        value="${basedir}/webapps"/>
   <property name="demo.webapps"   value="${basedir}/demo/webapps"/>
   <property name="demo.src"       value="${basedir}/demo/src"/>
+  <property name="launcher"       value="${basedir}/launcher"/>
   <property name="test"           value="${basedir}/test"/>
   <property name="test.src"       value="${test}/src"/>
   <property name="test.classes"   value="${test}/classes" />
@@ -160,7 +161,9 @@ Other targets:
     <delete dir="${classes1.4}" quiet="true"/>
     <delete dir="${test.classes}" quiet="true"/>
     <delete file="${mini.http.jar}" quiet="true"/>
-    <ant antfile="${test}/build.xml" inheritAll="true" target="tidy"/>
+    <ant antfile="${launcher}/build.xml" inheritAll="false" target="tidy"/>
+    <ant antfile="${test}/build.xml" inheritAll="false" target="tidy"/>
+  
   </target>
   
 
@@ -195,7 +198,8 @@ Other targets:
         <include name="*.dtd"/>
       </fileset>
     </delete>
-    <ant antfile="${test}/build.xml" inheritAll="true" target="clean"/>
+    <ant antfile="${launcher}/build.xml" inheritAll="false" target="clean"/>
+    <ant antfile="${test}/build.xml" inheritAll="false" target="clean"/>
   </target>
 
 
@@ -427,13 +431,19 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
+  <target name="launcher" depends="jars"
+   description="Build the launcher">
+    <ant antfile="${launcher}/build.xml" inheritAll="false" target="jar"/>
+  </target>
+
+  <!-- ==================================================================== -->
   <target name="test" depends="jars"
    description="Build and run the test harnesses">
     <ant antfile="${test}/build.xml" inheritAll="true" target="test"/>
   </target>
 
   <!-- ==================================================================== -->
-  <target name="all" depends="prepare,jars,webapps,javadoc,test"
+  <target name="all" depends="prepare,jars,launcher,webapps,javadoc,test"
    description="Build everything"/>
 
   <!-- ==================================================================== -->
