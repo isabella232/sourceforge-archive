@@ -1,0 +1,18 @@
+#suffix : mime type
+default	: application/octet-stream
+class	: application/octet-stream
+html	: text/html
+htm	: text/html
+txt	: text/plain
+java	: text/plain
+gif	: image/gif
+jpg	: image/jpeg
+jpeg	: image/jpeg
+au	: audio/basic
+snd	: audio/basic
+ra	: audio/x-pn-realaudio
+ram	: audio/x-pn-realaudio
+rm	: audio/x-pn-realaudio
+rpm	: audio/x-pn-realaudio
+mov	: video/quicktime
+jsp	: text/plain
