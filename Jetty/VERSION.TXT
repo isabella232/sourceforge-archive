@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.14RC1 - 19 October 2003
  + Reworked Dispatcher to better support cross context sessions.
  + Added UserRealm.logout and arrange for form auth & session invalidation to call it
  + Allow customization of HttpConnections
