@@ -6,6 +6,7 @@
 package org.mortbay.http;
 
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.Socket;
 
@@ -27,7 +28,7 @@ import org.mortbay.util.LogSupport;
  */
 public class HttpTunnel
 {
-    private static Log log = LogFactory.getLog(HttpTunnel.class);
+    private static Log log= LogFactory.getLog(HttpTunnel.class);
 
     private Socket _socket;
     private Thread _thread;
@@ -39,19 +40,20 @@ public class HttpTunnel
     /** Constructor. 
      */
     protected HttpTunnel()
-    {}
-    
+    {
+    }
+
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param socket The tunnel socket.
      * @param timeoutMs The maximum time to wait for a read on the tunnel. Note that
      * sotimer exceptions are ignored by the tunnel.
      */
-    public HttpTunnel(Socket socket,int timeoutMs)
+    public HttpTunnel(Socket socket, int timeoutMs)
     {
-        _socket=socket;
+        _socket= socket;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** handle method.
      * This method is called by the HttpConnection.handleNext() method if
@@ -61,21 +63,21 @@ public class HttpTunnel
      * @param in 
      * @param out 
      */
-    public void handle(InputStream in,OutputStream out)
+    public void handle(InputStream in, OutputStream out)
     {
-        Copy copy=new Copy();
-        _in=in;
-        _out=out;
+        Copy copy= new Copy();
+        _in= in;
+        _out= out;
         try
         {
-            _thread=Thread.currentThread();
+            _thread= Thread.currentThread();
             copy.start();
-            
-            copydata(_socket.getInputStream(),_out);
+
+            copydata(_socket.getInputStream(), _out);
         }
         catch (Exception e)
         {
-            LogSupport.ignore(log,e);
+            LogSupport.ignore(log, e);
         }
         finally
         {
@@ -85,35 +87,35 @@ public class HttpTunnel
                 _socket.shutdownOutput();
                 _socket.close();
             }
-            catch (Exception e){LogSupport.ignore(log,e);}
+            catch (Exception e)
+            {
+                LogSupport.ignore(log, e);
+            }
             copy.interrupt();
         }
     }
 
-    
     /* ------------------------------------------------------------ */
-    private void copydata(InputStream in, OutputStream out)
-        throws java.io.IOException
+    private void copydata(InputStream in, OutputStream out) throws java.io.IOException
     {
-        long timestamp=0;
-	while (true)
+        long timestamp= 0;
+        while (true)
         {
-	    try
+            try
             {
-		IO.copy(in, out);
-                timestamp=0;
-		return;
-	    }
-            catch (java.net.SocketTimeoutException e)
+                IO.copy(in, out);
+                timestamp= 0;
+                return;
+            }
+            catch (InterruptedIOException e)
             {
-                LogSupport.ignore(log,e);
-                if (timestamp==0)
-                    timestamp=System.currentTimeMillis();
-                else if (_timeoutMs>0 &&
-                         (System.currentTimeMillis()-timestamp)>_timeoutMs)
+                LogSupport.ignore(log, e);
+                if (timestamp == 0)
+                    timestamp= System.currentTimeMillis();
+                else if (_timeoutMs > 0 && (System.currentTimeMillis() - timestamp) > _timeoutMs)
                     throw e;
             }
-	}
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -127,11 +129,11 @@ public class HttpTunnel
         {
             try
             {
-                copydata(_in,_socket.getOutputStream());
+                copydata(_in, _socket.getOutputStream());
             }
             catch (Exception e)
             {
-                LogSupport.ignore(log,e);
+                LogSupport.ignore(log, e);
             }
             finally
             {
@@ -141,7 +143,10 @@ public class HttpTunnel
                     _socket.shutdownInput();
                     _socket.close();
                 }
-                catch (Exception e){LogSupport.ignore(log,e);}
+                catch (Exception e)
+                {
+                    LogSupport.ignore(log, e);
+                }
                 _thread.interrupt();
             }
         }
