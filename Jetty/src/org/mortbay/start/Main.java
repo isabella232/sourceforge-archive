@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 
+import org.mortbay.xml.XmlParser;
+
 /*-------------------------------------------*/
 /**
  * Main start class. This class is intended to be the main class listed in the MANIFEST.MF of the
@@ -199,6 +201,7 @@ public class Main
             {
                 StringTokenizer st=new StringTokenizer(line);
                 String subject=st.nextToken();
+                subject=expand(subject);
                 boolean expression=true;
                 boolean not=false;
                 String condition=null;
@@ -288,7 +291,8 @@ public class Main
                     expression&=not?!eval:eval;
                     not=false;
                 }
-                String file=expand(subject).replace('/',File.separatorChar);
+                
+                String file=subject.replace('/',File.separatorChar);
                 if(_debug)
                     System.err.println((expression?"T ":"F ")+line);
                 if(!expression)
@@ -468,13 +472,7 @@ public class Main
                 _xml.add(args[i]);
             }
             args=(String[])_xml.toArray(args);
-            //check for override of start class
-            String mainClass=System.getProperty("jetty.server");
-            if(mainClass!=null)
-                _classname=mainClass;
-            mainClass=System.getProperty("main.class");
-            if(mainClass!=null)
-                _classname=mainClass;
+
             if(_debug)
                 System.err.println("main.class="+_classname);
             invokeMain(cl,_classname,args);

@@ -80,11 +80,13 @@ To start JettyPlus:
 <a name="jmx">
 <h3>JettyPlus with JMX</h3>
 </a>
-JettyPlus supports JMX for management. As with standard Jetty, to enable the JMX support, you must start JettyPlus with an mlet boot file. This boot file must contain one mlet entry for each Server instance you wish to run, and usually also an entry for a JMX http adaptor. An example is in <code><b>extra/etc/jettyplus.mlet</b></code>
+JettyPlus supports JMX for management. As with standard Jetty, to enable the JMX support, you must start JettyPlus with an jmx config file. This boot
+file must contain one mbean entry for each Server instance you wish to run, and usually also an entry for a JMX http adaptor. An example is in
+<code><b>extra/etc/jettyplus-jmx.xml</b></code>
 <P>
 To start JettyPlus with JMX support:
 <BR>
-  <code><pre>   java -Dstart.class=org.mortbay.util.jmx.Main -DSTART=extra/etc/start-plus.config -jar start.jar extra/etc/jettyplus.mlet</pre></code>
+  <code><pre> java -Dmain.class=org.mortbay.xml.XmlConfiguration -jar start.jar extra/etc/jettyplus-jmx.xml</pre></code>
 <BR>
 If you have copied the example mlet file setup, the JMX http adaptor can be found on port <code><b>8082</b></code>.
 

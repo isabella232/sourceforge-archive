@@ -206,10 +206,9 @@
   <!--                                                                 -->
   <!-- The jsr77 configuration is optional - if specified, jsr77       -->
   <!-- statistics will be enabled. You will also need to build the     -->
-  <!-- extra/jsr77 package, include the jsr77 jars and start Jetty with -->
-  <!-- jmx enabled. To make this easier, the JettyPlus start config     -->
-  <!-- file sets up the classpath correctly. Start like so:             -->
-  <!-- java -Dstart.class=org.mortbay.util.jmx.Main -DSTART=extra/etc/start-plus.config -jar start.jar extra/etc/jettyplus.mlet -->
+  <!-- extra/jsr77 package, include the jsr77 jars and start Jetty with-->
+  <!-- jmx enabled. To make this easier, the JettyPlus start config    -->
+  <!-- file sets up the classpath correctly.                           -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!--
   <Set name="WebApplicationConfigurationClassNames">

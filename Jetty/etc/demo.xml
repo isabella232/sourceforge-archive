@@ -193,10 +193,7 @@
   <!-- can be overridden by calling setConfigurationClassNames() on    -->
   <!-- the webapp context.                                             -->
   <!-- The jsr77 configuration requires additional jars on the         -->
-  <!-- on the classpath and it needs jmx enabled.  To do this start    -->
-  <!-- with a command like:                                            -->
-  <!--   java -DSTART=extra/etc/start-jsr77.config -jar start.jar etc/demo.mlet 
-                                                                       -->
+  <!-- on the classpath and it needs jmx enabled.                      -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Set name="WebApplicationConfigurationClassNames">
     <Array type="java.lang.String">

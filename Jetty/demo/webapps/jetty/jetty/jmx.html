@@ -32,11 +32,11 @@ The JMX classes are included in the main jetty source tree and are built
 if a JMX implementation can be found (The reference implementation is
 included in the ext directory). To start the JMX version of Jetty use:
 <pre>
-  java -Dstart.class=org.mortbay.util.jmx.Main -jar start.jar etc/jetty.mlet
+  java -Dmain.class=org.mortbay.xml.XmlConfiguration -jar start.jar etc/jetty-jmx.xml
 </pre>
 The Jetty demo can be run as JMX enabled with:
 <pre>
-  java -Dstart.class=org.mortbay.util.jmx.Main -jar start.jar etc/demo.mlet
+  java -Dmain.class=org.mortbay.xml.XmlConfiguration -jar start.jar etc/demo-jmx.xml
 </pre>
 
 By default, the mx4j MBean agent is run at <A href="http://localhost:8082">http://localhost:8082</A>.

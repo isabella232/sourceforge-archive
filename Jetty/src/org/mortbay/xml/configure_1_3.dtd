@@ -19,7 +19,7 @@ my be specified if a match is not achieved.
 $Id$
 -->
 
-<!ENTITY % CONFIG "Get|Set|Put|Call|New">
+<!ENTITY % CONFIG "Get|Set|Put|Call|New|Ref">
 <!ENTITY % VALUE "#PCDATA|Call|New|Get|SystemProperty|Array">
 
 <!ENTITY % TYPEATTR "type CDATA #IMPLIED " > <!-- String|Character|Short|Byte|Integer|Long|Boolean|Float|Double|char|short|byte|int|long|boolean|float|double|URL|InetAddress|InetAddrPort| #classname -->
@@ -28,6 +28,7 @@ $Id$
 <!ENTITY % NAMEATTR "name NMTOKEN #REQUIRED" >
 <!ENTITY % DEFAULTATTR "default CDATA #IMPLIED" >
 <!ENTITY % IDATTR "id NMTOKEN #IMPLIED" >
+<!ENTITY % REQUIREDIDATTR "id NMTOKEN #REQUIRED" >
 <!--
 Configure Element.
 This is the root element that specifies the class of object that
@@ -38,7 +39,7 @@ can be configured:
 A Configure element can contain Set, Put or Call elements.
 -->
 <!ELEMENT Configure (%CONFIG;)* >
-<!ATTLIST Configure %CLASSATTR; %IDATTR; >
+<!ATTLIST Configure %IMPLIEDCLASSATTR; %IDATTR; >
 
 
 <!--
@@ -151,6 +152,22 @@ This is equivalent to:
 -->
 <!ELEMENT New (Arg*,(%CONFIG;)*)>
 <!ATTLIST New %CLASSATTR; %IDATTR;>
+
+<!--
+Ref Element.
+This element allows a previously created object to be reference by id.
+
+A Ref element can contain a sequence of Set, Put and/or Call elements 
+which act on the referenced object:
+
+ <Ref id="myobject">
+   <Set name="Test">Value2</Set>
+ </New>
+
+-->
+<!ELEMENT Ref ((%CONFIG;)*)>
+<!ATTLIST Ref %REQUIREDIDATTR;>
+
 
 <!--
 Array Element.

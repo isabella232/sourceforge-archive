@@ -87,7 +87,9 @@ QUESTION: What System Properties can I set for Jetty?
     <td>org.mortbay.xml.XmlParser.NotValidating</td><td>false</td><td>If true, validation is <strong>not</strong> performed on the web.xml file</td>
   </tr>
   <tr>
-    <td>start.class</td><td></td><td>Specifies the name of the class of the Jetty server to invoke by the start.jar mechanism, overriding the default. For standard Jetty the default is org.mortbay.jetty.Server, for JettyPlus it is org.mortbay.jetty.plus.Server. Defaults are specified in a <a href="#START">start.config</a> file. </td>
+    <td>main.class</td><td></td><td>Specifies the name of the class of the Jetty server to invoke by the start.jar mechanism, overriding the default.
+    For standard Jetty the default is org.mortbay.jetty.Server, for JettyPlus it is org.mortbay.jetty.plus.Server. Defaults are specified in a <a
+    href="#START">start.config</a> file. This property used to be called start.class.</td>
   </tr>
   <tr>
     <td>JETTY_NO_SHUTDOWN_HOOK</td><td>false</td><td>If false, a shutdown hook thread is registered with the runtime to stop the server when the runtime is shutdown</td>

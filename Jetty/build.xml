@@ -423,24 +423,6 @@
     </java>
   </target>
 
-
-
-  <!-- ==================================================================== -->
-  <target name="demo.jmx" depends="mortbay.jmx.jar,webapps" if="demo.available"
-   description="Build and run the demo with JMX">   
-    <java classname="org.mortbay.util.jmx.Main"
-          fork="yes"
-          failonerror="yes"
-          >
-       <classpath>
-         <pathelement path="${mortbay.jmx.jar}"/>
-         <path refid="classpath"/>
-       </classpath>
-       <jvmarg line="${jvmarg}" />
-       <arg line="file://${etc}/demo.mlet" />
-    </java>
-  </target>
-
   <!-- ==================================================================== -->
   <target name="run" depends="classpath"
    description="Run Jetty with configuration set by the jetty.run property">
@@ -455,24 +437,6 @@
        </classpath>
        <jvmarg line="${jvmarg}" />
        <arg line="${jetty.run}" />
-    </java>
-  </target>
-
-
-  <!-- ==================================================================== -->
-  <target name="watchdog" depends="jars"
-   description="Run the watchdog configuration">
-    <java classname="org.mortbay.jetty.Server"
-          dir="${jetty.home}"
-          fork="yes"
-          failonerror="yes"
-          >
-       <classpath>
-         <pathelement path="${env.CLASSPATH}" />
-         <path refid="classpath" />
-       </classpath>
-       <jvmarg line="-Dorg.xml.sax.parser=org.apache.xerces.parsers.SAXParser ${jvmarg}" />
-       <arg line="${etc}/admin.xml ${etc}/watchdog.xml" />
     </java>
   </target>
 
@@ -498,7 +462,7 @@
         <include name="etc/LICENSE*"/>   
         <include name="etc/admin.xml"/>  
         <include name="etc/jetty.xml"/>   
-        <include name="etc/jetty.mlet"/>  
+        <include name="etc/jetty-jmx.xml"/>  
         <include name="etc/webdefault.xml"/>   
 	<include name="extra/lib/*-jdk1.2.jar"/>
         <include name="etc/commons-logging.properties"/> 

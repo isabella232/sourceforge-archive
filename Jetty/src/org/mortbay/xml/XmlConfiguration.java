@@ -161,14 +161,21 @@ public class XmlConfiguration
      * @exception ClassNotFoundException
      * @exception NoSuchMethodException
      * @exception InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
     public void configure(Object obj) throws ClassNotFoundException, NoSuchMethodException,
-            InvocationTargetException, IllegalAccessException
+            InvocationTargetException, InstantiationException, IllegalAccessException
     {
         //Check the class of the object
         Class oClass = nodeClass(_config);
-        if (!oClass.isInstance(obj))
+        if (oClass!=null)
+        {
+            if (obj !=null && !oClass.isInstance(obj))
                 throw new IllegalArgumentException("Object is not of type " + oClass);
+            if (obj==null)
+                obj=oClass.newInstance();
+        }
         configure(obj, _config, 0);
     }
 
@@ -187,7 +194,9 @@ public class XmlConfiguration
             InvocationTargetException, InstantiationException, IllegalAccessException
     {
         Class oClass = nodeClass(_config);
-        Object obj = oClass.newInstance();
+        Object obj=null;
+        if (oClass!=null)
+            obj = oClass.newInstance();
         configure(obj, _config, 0);
         return obj;
     }
@@ -210,25 +219,48 @@ public class XmlConfiguration
     private void configure(Object obj, XmlParser.Node cfg, int i) throws ClassNotFoundException,
             NoSuchMethodException, InvocationTargetException, IllegalAccessException
     {
-        for (; i < cfg.size(); i++)
+        XmlParser.Node node=null;
+        try
         {
-            Object o = cfg.get(i);
-            if (o instanceof String) continue;
-            XmlParser.Node node = (XmlParser.Node) o;
-
-            String tag = node.getTag();
-            if ("Set".equals(tag))
-                set(obj, node);
-            else if ("Put".equals(tag))
-                put(obj, node);
-            else if ("Call".equals(tag))
-                call(obj, node);
-            else if ("Get".equals(tag))
-                get(obj, node);
-            else if ("New".equals(tag))
-                newObj(obj, node);
-            else
-                throw new IllegalStateException("Unknown tag: " + tag);
+            for (; i < cfg.size(); i++)
+            {
+                Object o = cfg.get(i);
+                if (o instanceof String) continue;
+                node = (XmlParser.Node) o;
+                
+                String tag = node.getTag();
+                if ("Set".equals(tag))
+                    set(obj, node);
+                else if ("Put".equals(tag))
+                    put(obj, node);
+                else if ("Call".equals(tag))
+                    call(obj, node);
+                else if ("Get".equals(tag))
+                    get(obj, node);
+                else if ("New".equals(tag))
+                    newObj(obj, node);
+                else if ("Ref".equals(tag))
+                    refObj(obj, node);
+                else
+                    throw new IllegalStateException("Unknown tag: " + tag);
+            }
+        }
+        catch (Error e)
+        {
+            log.debug(node);
+            throw e;
+        }
+        catch (Exception e)
+        {
+            log.debug(node);
+            if (e instanceof NoSuchMethodException)
+                throw (NoSuchMethodException)e;
+            if (e instanceof InvocationTargetException)
+                throw (InvocationTargetException)e;
+            if (e instanceof IllegalAccessException)
+                throw (IllegalAccessException)e;
+            if (e instanceof RuntimeException)
+                throw (RuntimeException)e;
         }
     }
 
@@ -465,8 +497,10 @@ public class XmlConfiguration
         Class oClass = nodeClass(node);
         if (oClass != null)
             obj = null;
-        else
+        else if (obj!=null)
             oClass = obj.getClass();
+        if (oClass==null)
+            throw new IllegalArgumentException(node.toString());
 
         int size = 0;
         int argi = node.size();
@@ -519,7 +553,7 @@ public class XmlConfiguration
             }
             if (called)
             {
-                if (id != null) _idMap.put(id, obj);
+                if (id != null) _idMap.put(id, n);
                 configure(n, node, argi);
                 return n;
             }
@@ -600,6 +634,24 @@ public class XmlConfiguration
         throw new IllegalStateException("No Constructor: " + node + " on " + obj);
     }
 
+    /* ------------------------------------------------------------ */
+    /*
+     * Reference an id value object.
+     * 
+     * @param obj @param node @return @exception NoSuchMethodException @exception
+     * ClassNotFoundException @exception InvocationTargetException
+     */
+    private Object refObj(Object obj, XmlParser.Node node) throws NoSuchMethodException,
+            ClassNotFoundException, InvocationTargetException, IllegalAccessException
+    {
+        String id = node.getAttribute("id");
+        obj=_idMap.get(id);
+        if (obj==null)
+            throw new IllegalStateException("No object for id="+id);
+        configure(obj, node, 0);
+        return obj;
+    }
+    
     /* ------------------------------------------------------------ */
     /*
      * Create a new array object.

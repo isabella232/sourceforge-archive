@@ -87,4 +87,4 @@ To run it:
 JMX
 ---
 JettyPlus supports JMX for management. To enable JMX support, you need to create an mlet JMX boot file (see $jetty.home/extra/etc/jettyplus.mlet for an example), then start JettyPlus:
-  java -Dstart.class=org.mortbay.util.jmx.Main -DSTART=extra/etc/start-plus.config -jar start.jar extra/etc/jettyplus.mlet
+  java -Dmain.class=org.mortbay.xml.XmlConfiguration -DSTART=extra/etc/start-plus.config -jar start.jar extra/etc/jettyplus-jmx.xml

@@ -28,7 +28,7 @@ available (default username/password is admin/admin).
 If this server was started via JMX, then a 
 <A href="http://localhost:8082">JMX console UI</a> should be available.
 To start Jetty with JMX use:  <PRE>
-  java -Dstart.class=org.mortbay.util.jmx.Main -jar start.jar etc/jetty.mlet
+  java -Dmain.class=org.mortbay.xml.XmlConfiguration -jar start.jar etc/jetty-jmx.xml
 </PRE>
 
 To start a server using the jars and resource in the extra packages, use:

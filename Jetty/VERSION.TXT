@@ -3,6 +3,8 @@ Jetty Versions
 
  + Moved servlet request wrapping to enterContextScope for geronimo security
  + refixed / mapping for filters
+ + Allow XmlConfiguration to start with no object.
+ + updated to mx4j 3.0.1
 
 Jetty-5.1.3rc3
  + removed accidental enablement of DEBUG for JettyPlus jndi in log4j.properties

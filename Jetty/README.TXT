@@ -55,9 +55,12 @@ The demo server (in the all or extra bundle ) can be run with the commands
 
 
 The JMX variants may be started with 
-   java -Dstart.class=org.mortbay.util.jmx.Main -jar start.jar etc/jetty.mlet 
+
+   java -Dmain.class=org.mortbay.xml.XmlConfiguration -jar start.jar etc/jetty-jmx.xml
+
 or
-   java -Dstart.class=org.mortbay.util.jmx.Main -jar start.jar etc/demo.mlet 
+
+   java -Dmain.class=org.mortbay.xml.XmlConfiguration -jar start.jar etc/demo-jmx.xml
 
 
 
