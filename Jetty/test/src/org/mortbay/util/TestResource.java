@@ -170,7 +170,7 @@ public class TestResource extends junit.framework.TestCase
         data[i++]=new Data(data[tj],"Unkown",!EXISTS,!DIR);
         data[i++]=new Data(data[tj],"/Unkown/",!EXISTS,!DIR);
         
-        data[i++]=new Data(data[tj],"subdir",!EXISTS,!DIR);
+        data[i++]=new Data(data[tj],"subdir",EXISTS,DIR);
         data[i++]=new Data(data[tj],"/subdir/",EXISTS,DIR);
         data[i++]=new Data(data[tj],"alphabet",EXISTS,!DIR,
                            "ABCDEFGHIJKLMNOPQRSTUVWXYZ");

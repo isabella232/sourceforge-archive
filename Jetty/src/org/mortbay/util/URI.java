@@ -54,7 +54,7 @@ public class URI
         _path=uri._path;
         _encodedPath=uri._encodedPath;
         _query=uri._query;
-        if (uri._parameters!=null && _parameters.size()>0)
+        if (uri._parameters!=null && uri._parameters.size()>0)
             _parameters=(UrlEncoded)uri._parameters.clone();
         _dirty=false;
     }
@@ -95,7 +95,7 @@ public class URI
             }
             else
             {
-                for (i=0;i<=maxi;i++)
+                for (i=0;state<3 && i<=maxi;i++)
                 {
                     char c=uri.charAt(i);
                     switch(state)
@@ -121,7 +121,6 @@ public class URI
                               state=5;
                               _path="*";
                               _encodedPath="*";
-                              break;
                           }
                           continue;
                           
@@ -154,7 +153,6 @@ public class URI
                 }
             }
             
-            
             // State 3 - Get path & look for query
             _query=null;
             for (i++;i<=maxi;i++)
@@ -165,6 +163,7 @@ public class URI
                     // Found query
                     _encodedPath=uri.substring(mark,i);
                     _path=decodePath(_encodedPath);
+
                     mark=i+1;
                     state=4;
                     break;
@@ -498,6 +497,7 @@ public class URI
                         buf.append(_port);
                     }
                 }
+
                 buf.append(_encodedPath);
 
                 if (_query!=null && _query.length()>0)

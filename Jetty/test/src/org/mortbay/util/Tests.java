@@ -197,7 +197,7 @@ public class Tests extends junit.framework.TestCase
                                   String thread, String file)
     {
         checkContains(desc+": method", f.getStack(),  method);
-        assertEquals( desc+": depth",  depth,     f.getDepth());
+        assertEquals( desc+": depth",     f.getDepth(),  depth);
         assertEquals( desc+": thread", thread,    f.getThread());
         if (file!=null)
             checkContains(desc+": file",   f.getFile(),   file);
@@ -271,23 +271,23 @@ public class Tests extends junit.framework.TestCase
         throws UnsupportedEncodingException
     {
 	    // Perform basic reversibility tests
-       assertEquals("decode(encode())",       B64Code.decode(B64Code.encode("")),"");
-       assertEquals("decode(encode(a))",      B64Code.decode(B64Code.encode("a")),"a");
-       assertEquals("decode(encode(ab))",     B64Code.decode(B64Code.encode("ab")),"ab");
-       assertEquals("decode(encode(abc))",    B64Code.decode(B64Code.encode("abc")),"abc");
-       assertEquals("decode(encode(abcd))",   B64Code.decode(B64Code.encode("abcd")),"abcd");
-       assertEquals("decode(encode(^@))",     B64Code.decode(B64Code.encode("\000")),"\000");
-       assertEquals("decode(encode(a^@))",    B64Code.decode(B64Code.encode("a\000")),"a\000");
-       assertEquals("decode(encode(ab^@))",   B64Code.decode(B64Code.encode("ab\000")),"ab\000");
-       assertEquals("decode(encode(abc^@))",  B64Code.decode(B64Code.encode("abc\000")),"abc\000");
-       assertEquals("decode(encode(abcd^@))", B64Code.decode(B64Code.encode("abcd\000")),"abcd\000");
+       assertEquals("decode(encode())","",       B64Code.decode(B64Code.encode("")));
+       assertEquals("decode(encode(a))","a",      B64Code.decode(B64Code.encode("a")));
+       assertEquals("decode(encode(ab))","ab",     B64Code.decode(B64Code.encode("ab")));
+       assertEquals("decode(encode(abc))","abc",    B64Code.decode(B64Code.encode("abc")));
+       assertEquals("decode(encode(abcd))","abcd",   B64Code.decode(B64Code.encode("abcd")));
+       assertEquals("decode(encode(^@))","\000",     B64Code.decode(B64Code.encode("\000")));
+       assertEquals("decode(encode(a^@))","a\000",    B64Code.decode(B64Code.encode("a\000")));
+       assertEquals("decode(encode(ab^@))","ab\000",   B64Code.decode(B64Code.encode("ab\000")));
+       assertEquals("decode(encode(abc^@))","abc\000",  B64Code.decode(B64Code.encode("abc\000")));
+       assertEquals("decode(encode(abcd^@))","abcd\000", B64Code.decode(B64Code.encode("abcd\000")));
 
 	    // Encoder compatibility tests
-	    assertEquals("encode(abc)",     "YWJj",         B64Code.encode("abc"));
-	    assertEquals("encode(abcd)",    "YWJjZA==",     B64Code.encode("abcd"));
-	    assertEquals("encode(abcde)",   "YWJjZGU=",     B64Code.encode("abcde"));
-	    assertEquals("encode(abcdef)",  "YWJjZGVm",     B64Code.encode("abcdef"));
-	    assertEquals("encode(abcdefg)", "YWJjZGVmZw==", B64Code.encode("abcdefg"));
+	    assertEquals("encode(abc)",         B64Code.encode("abc"),     "YWJj");
+	    assertEquals("encode(abcd)",     B64Code.encode("abcd"),    "YWJjZA==");
+	    assertEquals("encode(abcde)",     B64Code.encode("abcde"),   "YWJjZGU=");
+	    assertEquals("encode(abcdef)",     B64Code.encode("abcdef"),  "YWJjZGVm");
+	    assertEquals("encode(abcdefg)", B64Code.encode("abcdefg"), "YWJjZGVmZw==");
 
        // Test the reversibility of the full range of 8 bit values
 	    byte[] allValues= new byte[256];
@@ -297,7 +297,7 @@ public class Tests extends junit.framework.TestCase
             String output=B64Code.decode(B64Code.encode(input));
 
             for (int i=0;i<256;i++)
-              assertEquals("DIFF at "+i, (int)input.charAt(i), (int)output.charAt(i));
+              assertEquals("DIFF at "+i, (int)output.charAt(i), (int)input.charAt(i));
 	    assertEquals( "decode(encode(ALL_128_ASCII_VALUES))", output,input);
 
     }
@@ -370,83 +370,83 @@ public class Tests extends junit.framework.TestCase
 
         // No host
         uri = new URI("/");
-        assertEquals("root /", uri.getPath(),"/");
+        assertEquals("root /","/", uri.getPath());
 
         uri = new URI("/Test/URI");
-        assertEquals("no params", uri.toString(),"/Test/URI");
+        assertEquals("no params","/Test/URI", uri.toString());
 
         uri = new URI("/Test/URI?");
-        assertEquals("no params", uri.toString(),"/Test/URI?");
-        uri.getParameters();
-        assertEquals("no params", uri.toString(),"/Test/URI");
+        assertEquals("no params","/Test/URI?", uri.toString());
+        uri.setPath(uri.getPath());
+        assertEquals("no params","/Test/URI", uri.toString());
         
         uri = new URI("/Test/URI?a=1");
-        assertEquals("one param", uri.toString(),"/Test/URI?a=1");
+        assertEquals("one param","/Test/URI?a=1", uri.toString());
     
         uri = new URI("/Test/URI");
         uri.put("b","2 !");
-        assertEquals("add param", uri.toString(),"/Test/URI?b=2+%21");
+        assertEquals("add param","/Test/URI?b=2+%21", uri.toString());
 
         // Host but no port
         uri = new URI("http://host");
-        assertEquals("root host", uri.getPath(),"/");
-        assertEquals("root host", uri.toString(),"http://host/");
+        assertEquals("root host","/", uri.getPath());
+        assertEquals("root host","http://host/", uri.toString());
         
         uri = new URI("http://host/");
-        assertEquals("root host/", uri.getPath(),"/");
+        assertEquals("root host/","/", uri.getPath());
         
         uri = new URI("http://host/Test/URI");
-        assertEquals("no params", uri.toString(),"http://host/Test/URI");
+        assertEquals("no params","http://host/Test/URI", uri.toString());
 
         uri = new URI("http://host/Test/URI?");
-        assertEquals("no params", uri.toString(),"http://host/Test/URI?");
-        uri.getParameters();
-        assertEquals("no params", uri.toString(),"http://host/Test/URI");
+        assertEquals("no params","http://host/Test/URI?", uri.toString());
+        uri.setPath(uri.getPath());
+        assertEquals("no params","http://host/Test/URI", uri.toString());
         
         uri = new URI("http://host/Test/URI?a=1");
-        assertEquals("one param", uri.toString(),"http://host/Test/URI?a=1");
+        assertEquals("one param","http://host/Test/URI?a=1", uri.toString());
     
         uri = new URI("http://host/Test/URI");
         uri.put("b","2 !");
-        assertEquals("add param", uri.toString(),"http://host/Test/URI?b=2+%21");
+        assertEquals("add param","http://host/Test/URI?b=2+%21", uri.toString());
     
         // Host and port and path
         uri = new URI("http://host:8080");
-        assertEquals("root", uri.getPath(),"/");
+        assertEquals("root","/", uri.getPath());
         
         uri = new URI("http://host:8080/");
-        assertEquals("root", uri.getPath(),"/");
+        assertEquals("root","/", uri.getPath());
         
         uri = new URI("http://host:8080/xxx");
-        assertEquals("path", uri.getPath(),"/xxx");
+        assertEquals("path","/xxx", uri.getPath());
 
         String anez=UrlEncoded.decodeString("A%F1ez");
         uri = new URI("http://host:8080/"+anez);
-        assertEquals("root", uri.getPath(),"/"+anez);            
+        assertEquals("root","/"+anez, uri.getPath());            
         
         uri = new URI("http://host:8080/Test/URI");
-        assertEquals("no params", uri.toString(),"http://host:8080/Test/URI");
+        assertEquals("no params","http://host:8080/Test/URI", uri.toString());
 
         uri = new URI("http://host:8080/Test/URI?");
-        assertEquals("no params", uri.toString(),"http://host:8080/Test/URI?");
+        assertEquals("no params","http://host:8080/Test/URI?", uri.toString());
         uri.getParameters();
-        assertEquals("no params", uri.toString(),"http://host:8080/Test/URI");
+        assertEquals("no params","http://host:8080/Test/URI", uri.toString());
         
         uri = new URI("http://host:8080/Test/URI?a=1");
-        assertEquals("one param", uri.toString(),"http://host:8080/Test/URI?a=1");
+        assertEquals("one param","http://host:8080/Test/URI?a=1", uri.toString());
     
         uri = new URI("http://host:8080/Test/URI");
         uri.put("b","2 !");
-        assertEquals("add param", uri.toString(),"http://host:8080/Test/URI?b=2+%21");
+        assertEquals("add param","http://host:8080/Test/URI?b=2+%21", uri.toString());
     
-        assertEquals("protocol", uri.getScheme(),"http");
-        assertEquals("host", uri.getHost(),"host");
-        assertEquals("port", uri.getPort(),8080);
+        assertEquals("protocol","http", uri.getScheme());
+        assertEquals("host","host", uri.getHost());
+        assertEquals("port",8080, uri.getPort());
 
         uri.setScheme("ftp");
         uri.setHost("fff");
         uri.setPort(23);
-        assertEquals("add param", uri.toString(),"ftp://fff:23/Test/URI?b=2+%21");
+        assertEquals("add param","ftp://fff:23/Test/URI?b=2+%21", uri.toString());
         
     
         uri = new URI("/Test/URI?c=1&d=2");
@@ -458,12 +458,19 @@ public class Tests extends junit.framework.TestCase
         assertTrue("merge params e3", s.indexOf("e=3")>0);
 
         uri = new URI("/Test/URI?a=");
-        assertEquals("null param", uri.toString(),"/Test/URI?a=");
+        assertEquals("null param","/Test/URI?a=", uri.toString());
         uri.getParameters();
-        assertEquals("null param", uri.toString(),"/Test/URI?a");
+        assertEquals("null param","/Test/URI?a", uri.toString());
+        
+        uri = new URI("/Test/URI?a+c=1%203");
+        assertEquals("space param","/Test/URI?a+c=1%203", uri.toString());
+        System.err.println(uri.getParameters());
+        assertEquals("space param","1 3", uri.get("a c"));
+        uri.getParameters();
+        assertEquals("space param","/Test/URI?a+c=1+3", uri.toString());
         
         uri = new URI("/Test/Nasty%26%3F%20URI?c=%26&d=+%3F");
-        assertEquals("nasty", uri.getPath(),"/Test/Nasty&? URI");
+        assertEquals("nasty","/Test/Nasty&? URI", uri.getPath());
         uri.setPath("/test/nasty&? URI");
         uri.getParameters();
         assertTrue( "nasty",
@@ -560,12 +567,12 @@ public class Tests extends junit.framework.TestCase
         assertEquals("aaa;JS?A=1+/", URI.addPaths("aaa/;JS?A=1","/"),"aaa/;JS?A=1");
         assertEquals("aaa;JS?A=1+/bbb", URI.addPaths("aaa/;JS?A=1","/bbb"),"aaa/bbb;JS?A=1");
 
-        assertEquals("parent /aaa/bbb/", URI.parentPath("/aaa/bbb/"),"/aaa/");
-        assertEquals("parent /aaa/bbb", URI.parentPath("/aaa/bbb"),"/aaa/");
-        assertEquals("parent /aaa/", URI.parentPath("/aaa/"),"/");
-        assertEquals("parent /aaa", URI.parentPath("/aaa"),"/");
-        assertEquals("parent /", URI.parentPath("/"),null);
-        assertEquals("parent null", URI.parentPath(null),null);
+        assertEquals("parent /aaa/bbb/","/aaa/", URI.parentPath("/aaa/bbb/"));
+        assertEquals("parent /aaa/bbb","/aaa/", URI.parentPath("/aaa/bbb"));
+        assertEquals("parent /aaa/","/", URI.parentPath("/aaa/"));
+        assertEquals("parent /aaa","/", URI.parentPath("/aaa"));
+        assertEquals("parent /",null, URI.parentPath("/"));
+        assertEquals("parent null",null, URI.parentPath(null));
 
         String[][] canonical = 
         {
@@ -628,64 +635,64 @@ public class Tests extends junit.framework.TestCase
     {
           
         UrlEncoded code = new UrlEncoded();
-        assertEquals("Empty", code.size(),0);
+        assertEquals("Empty",0, code.size());
 
         code.clear();
         code.decode("Name1=Value1");
-        assertEquals("simple param size", code.size(),1);
-        assertEquals("simple encode", code.encode(),"Name1=Value1");
-        assertEquals("simple get", code.getString("Name1"),"Value1");
+        assertEquals("simple param size",1, code.size());
+        assertEquals("simple encode","Name1=Value1", code.encode());
+        assertEquals("simple get","Value1", code.getString("Name1"));
         
         code.clear();
         code.decode("Name2=");
-        assertEquals("dangling param size", code.size(),1);
-        assertEquals("dangling encode", code.encode(),"Name2");
-        assertEquals("dangling get", code.getString("Name2"),"");
+        assertEquals("dangling param size",1, code.size());
+        assertEquals("dangling encode","Name2", code.encode());
+        assertEquals("dangling get","", code.getString("Name2"));
     
         code.clear();
         code.decode("Name3");
-        assertEquals("noValue param size", code.size(),1);
-        assertEquals("noValue encode", code.encode(),"Name3");
-        assertEquals("noValue get", code.getString("Name3"),"");
+        assertEquals("noValue param size",1, code.size());
+        assertEquals("noValue encode","Name3", code.encode());
+        assertEquals("noValue get","", code.getString("Name3"));
     
         code.clear();
         code.decode("Name4=Value+4%21");
-        assertEquals("encoded param size", code.size(),1);
-        assertEquals("encoded encode", code.encode(),"Name4=Value+4%21");
-        assertEquals("encoded get", code.getString("Name4"),"Value 4!");
+        assertEquals("encoded param size",1, code.size());
+        assertEquals("encoded encode","Name4=Value+4%21", code.encode());
+        assertEquals("encoded get","Value 4!", code.getString("Name4"));
         
         code.clear();
         code.decode("Name4=Value+4%21%20%214");
-        assertEquals("encoded param size", code.size(),1);
-        assertEquals("encoded encode", code.encode(),"Name4=Value+4%21+%214");
-        assertEquals("encoded get", code.getString("Name4"),"Value 4! !4");
+        assertEquals("encoded param size",1, code.size());
+        assertEquals("encoded encode","Name4=Value+4%21+%214", code.encode());
+        assertEquals("encoded get","Value 4! !4", code.getString("Name4"));
 
         
         code.clear();
         code.decode("Name5=aaa&Name6=bbb");
-        assertEquals("multi param size", code.size(),2);
+        assertEquals("multi param size",2, code.size());
         assertTrue("multi encode "+code.encode(),
                    code.encode().equals("Name5=aaa&Name6=bbb") ||
                    code.encode().equals("Name6=bbb&Name5=aaa")
                    );
-        assertEquals("multi get", code.getString("Name5"),"aaa");
-        assertEquals("multi get", code.getString("Name6"),"bbb");
+        assertEquals("multi get","aaa", code.getString("Name5"));
+        assertEquals("multi get","bbb", code.getString("Name6"));
     
         code.clear();
         code.decode("Name7=aaa&Name7=b%2Cb&Name7=ccc");
         assertEquals("multi encode",
-                        code.encode(),
                          "Name7=aaa&Name7=b%2Cb&Name7=ccc"
-                         );
+                         ,
+                        code.encode());
         assertEquals("list get all", code.getString("Name7"),"aaa,b,b,ccc");
-        assertEquals("list get", code.getValues("Name7").get(0),"aaa");
+        assertEquals("list get","aaa", code.getValues("Name7").get(0));
         assertEquals("list get", code.getValues("Name7").get(1),"b,b");
-        assertEquals("list get", code.getValues("Name7").get(2),"ccc");
+        assertEquals("list get","ccc", code.getValues("Name7").get(2));
 
         code.clear();
         code.decode("Name8=xx%2C++yy++%2Czz");
-        assertEquals("encoded param size", code.size(),1);
-        assertEquals("encoded encode", code.encode(),"Name8=xx%2C++yy++%2Czz");
+        assertEquals("encoded param size",1, code.size());
+        assertEquals("encoded encode","Name8=xx%2C++yy++%2Czz", code.encode());
         assertEquals("encoded get", code.getString("Name8"),"xx,  yy  ,zz");
     }
 }
