@@ -25,6 +25,33 @@ public interface SessionManager extends LifeCycle, Serializable
     public final static String __SessionUrlPrefix = ";"+__SessionId+"=";
 
     /* ------------------------------------------------------------ */
+    /** Session Domain.
+     * If this property is set as a ServletContext InitParam, then it is
+     * used as the domain for session cookies. If it is not set, then
+     * no domain is specified for the session cookie.
+     */
+    public final static String __SessionDomain=
+        "org.mortbay.jetty.servlet.SessionDomain";
+    
+    /* ------------------------------------------------------------ */
+    /** Session Path.
+     * If this property is set as a ServletContext InitParam, then it is
+     * used as the path for the session cookie.  If it is not set, then
+     * the context path is used as the path for the cookie.
+     */
+    public final static String __SessionPath=
+        "org.mortbay.jetty.servlet.SessionPath";
+    
+    /* ------------------------------------------------------------ */
+    /** Session Max Age.
+     * If this property is set as a ServletContext InitParam, then it is
+     * used as the max age for the session cookie.  If it is not set, then
+     * no max age is set.
+     */
+    public final static String __MaxAge=
+        "org.mortbay.jetty.servlet.MaxAge";
+    
+    /* ------------------------------------------------------------ */
     public void initialize(ServletHandler handler);
     
     /* ------------------------------------------------------------ */

@@ -2,6 +2,7 @@
 
 <web-app>
   <display-name>Jetty Demo</display-name>
+
   <context-param>
     <param-name>home</param-name>
     <param-value>http://jetty.mortbay.org</param-value>
@@ -10,6 +11,23 @@
     <param-name>admin</param-name>
     <param-value>mortbay@mortbay.com</param-value>
   </context-param>
+
+  <!-- Context params to control Session Cookies -->
+  <context-param>
+    <param-name>org.mortbay.jetty.servlet.SessionDomain</param-name>
+    <param-value>127.0.0.1</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>org.mortbay.jetty.servlet.SessionPath</param-name>
+    <param-value>/</param-value>
+  </context-param>
+
+  <context-param>
+    <param-name>org.mortbay.jetty.servlet.MaxAge</param-name>
+    <param-value>-1</param-value>
+  </context-param>
+  -->
 
   <filter>
     <filter-name>Demo Filter</filter-name>

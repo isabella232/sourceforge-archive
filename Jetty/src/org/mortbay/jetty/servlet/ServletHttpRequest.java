@@ -424,10 +424,20 @@ public class ServletHttpRequest
                 {
                     if (SessionManager.__SessionId.equals(cookies[i].getName()))
                     {
+                        if (_sessionId!=null)
+                        {
+                            // Multiple jsessionid cookies. Probably due to
+                            // multiple paths and/or domains. Pick the first
+                            // known session or the last defined cookie.
+                            SessionManager manager = _servletHandler.getSessionManager();
+                            if (manager!=null && manager.getHttpSession(_sessionId)!=null)
+                                break;
+                            Code.debug("multiple session cookies");
+                        }
+                        
                         _sessionId=cookies[i].getValue();
                         _sessionIdState = __SESSIONID_COOKIE;
                         Code.debug("Got Session ",_sessionId," from cookie");
-                        break;
                     }
                 }
             }
@@ -503,9 +513,26 @@ public class ServletHttpRequest
             {
                 Cookie cookie =
                     new Cookie(SessionManager.__SessionId,_session.getId());
-                String path=getContextPath();
+                String path=
+                    _servletHandler.getServletContext()
+                    .getInitParameter(SessionManager.__SessionPath);
+                if (path==null)
+                    path=getContextPath();
                 if (path==null || path.length()==0)
                     path="/";
+
+                String domain=
+                    _servletHandler.getServletContext()
+                    .getInitParameter(SessionManager.__SessionDomain);
+                if (domain!=null)
+                    cookie.setDomain(domain);
+
+                String maxAge=
+                    _servletHandler.getServletContext()
+                    .getInitParameter(SessionManager.__MaxAge);
+                if (maxAge!=null)
+                    cookie.setMaxAge(Integer.parseInt(maxAge));
+                
                 cookie.setPath(path);
                 _servletHttpResponse.getHttpResponse().addSetCookie(cookie,false);
                 cookie.setVersion(1);
