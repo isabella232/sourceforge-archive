@@ -41,9 +41,14 @@ import org.mortbay.util.Code;
  */
 public class ServletHttpResponse implements HttpServletResponse
 {
+    public static final int
+        NO_OUT=0,
+        OUTPUTSTREAM_OUT=1,
+        WRITER_OUT=2;
+
     private HttpResponse _httpResponse;
     private ServletHttpRequest _servletHttpRequest;
-    private int _outputState=0;
+    private int _outputState=NO_OUT;
     private ServletOut _out =null;
     private ServletWriter _writer=null;
     private HttpSession _session=null;
@@ -138,7 +143,7 @@ public class ServletHttpResponse implements HttpServletResponse
     {
         if (s<0)
         {
-            _outputState=0;
+            _outputState=NO_OUT;
             if (_writer!=null)
                 _writer.disable();
             _writer=null;
@@ -186,7 +191,7 @@ public class ServletHttpResponse implements HttpServletResponse
     public void setBufferSize(int size)
     {
         ChunkableOutputStream out = _httpResponse.getOutputStream();
-        if (out.isWritten())
+        if (out.isWritten()  || _writer!=null && _writer.isWritten())
             throw new IllegalStateException("Output written");
         out.setBufferCapacity(size);
     }
@@ -196,7 +201,6 @@ public class ServletHttpResponse implements HttpServletResponse
     {
         return _httpResponse.getOutputStream().getBufferCapacity();
     }
-    
     
     /* ------------------------------------------------------------ */
     public void flushBuffer()
@@ -217,6 +221,8 @@ public class ServletHttpResponse implements HttpServletResponse
         if (isCommitted())
             throw new IllegalStateException("committed");
         _httpResponse.getOutputStream().resetBuffer();
+        if (_writer!=null)
+            _writer.reset();
     }
     
     /* ------------------------------------------------------------ */
@@ -483,7 +489,7 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public ServletOutputStream getOutputStream() 
     {
-        if (_outputState!=0 && _outputState!=1)
+        if (_outputState!=NO_OUT && _outputState!=OUTPUTSTREAM_OUT)
             throw new IllegalStateException();
         
         if (_writer!=null)
@@ -496,7 +502,7 @@ public class ServletHttpResponse implements HttpServletResponse
         if (_out==null)
             _out = new ServletOut(_servletHttpRequest.getHttpRequest()
                                   .getOutputStream());  
-        _outputState=1;
+        _outputState=OUTPUTSTREAM_OUT;
         return _out;
     }
 
@@ -504,7 +510,7 @@ public class ServletHttpResponse implements HttpServletResponse
     public PrintWriter getWriter()
         throws java.io.IOException 
     {
-        if (_outputState!=0 && _outputState!=2)
+        if (_outputState!=NO_OUT && _outputState!=WRITER_OUT)
             throw new IllegalStateException();
         /* if there is no writer yet */
         if (_writer==null)
@@ -525,7 +531,7 @@ public class ServletHttpResponse implements HttpServletResponse
             /* construct Writer using correct encoding */
             _writer = new ServletWriter(_httpResponse.getOutputStream(), encoding);
         }                    
-        _outputState=2;
+        _outputState=WRITER_OUT;
         return _writer;
     }
     

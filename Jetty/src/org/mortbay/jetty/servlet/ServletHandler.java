@@ -570,7 +570,7 @@ public class ServletHandler
             
             httpResponse.getHttpConnection().forceClose();
             if (!httpResponse.isCommitted())
-                httpResponse.sendError(503,th);
+                httpResponse.sendError(500,th);
             else
                 Code.debug("Response already committed for handling ",th);
         }
@@ -580,7 +580,7 @@ public class ServletHandler
             Code.debug(httpRequest);
             httpResponse.getHttpConnection().forceClose();
             if (!httpResponse.isCommitted())
-                httpResponse.sendError(503,e);
+                httpResponse.sendError(500,e);
             else
                 Code.debug("Response already committed for handling ",e);
         }

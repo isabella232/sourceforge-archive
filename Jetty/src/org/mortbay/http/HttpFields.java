@@ -740,36 +740,39 @@ public class HttpFields
     public long getDateField(String name)
     {
         String val = valueParameters(get(name),null);
-        if (val!=null)
+        if (val==null)
+            return -1;
+        
+        for (int i=0;i<__dateReceive.length;i++)
         {
+            try{
+                Date date=(Date)__dateReceive[i].parseObject(val);
+                return date.getTime();
+            }
+            catch(java.lang.Exception e)
+            {
+                Code.ignore(e);
+            }
+        }
+        if (val.endsWith(" GMT"))
+        {
+            val=val.substring(0,val.length()-4);
             for (int i=0;i<__dateReceive.length;i++)
             {
                 try{
+                    Code.debug("TRY ",val," against ",__dateReceive[i].toPattern());
                     Date date=(Date)__dateReceive[i].parseObject(val);
+                    Code.debug("GOT ",date);
                     return date.getTime();
                 }
                 catch(java.lang.Exception e)
-                {Code.ignore(e);}
-            }
-            if (val.endsWith(" GMT"))
-            {
-                val=val.substring(0,val.length()-4);
-                for (int i=0;i<__dateReceive.length;i++)
                 {
-                    try{
-                        Code.debug("TRY ",val," against ",__dateReceive[i].toPattern());
-                        Date date=(Date)__dateReceive[i].parseObject(val);
-                        Code.debug("GOT ",date);
-                        return date.getTime();
-                    }
-                    catch(java.lang.Exception e)
-                    {
-                        Code.ignore(e);
-                    }
+                    Code.ignore(e);
                 }
             }
         }
-        return -1;
+
+        throw new IllegalArgumentException("Cannot convert date: "+val);
     }
     
     /* -------------------------------------------------------------- */

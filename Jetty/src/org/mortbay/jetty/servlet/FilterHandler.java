@@ -215,7 +215,12 @@ public class FilterHandler
         }
         finally
         {
-            httpRequest.setHandled(true);
+            if (!httpRequest.isHandled())
+            {
+                try{servletResponse.flushBuffer();}
+                catch(IOException e) {Code.ignore(e);}
+                httpRequest.setHandled(true);
+            }
         }
     }
     
@@ -393,15 +398,29 @@ public class FilterHandler
             else
             {
                 // Goto the original resource
-                HttpRequest httpRequest =
-                    ServletHttpRequest.unwrap(request).getHttpRequest();
-                HttpResponse httpResponse = httpRequest.getHttpResponse();
-                _httpContext.handle(_nextHandler,
-                                    _pathInContext,
-                                    null, // Assume path params have
-                                          // already been processed.
-                                    httpRequest,
-                                    httpResponse);
+                ServletHttpRequest servletHttpRequest=  ServletHttpRequest.unwrap(request);
+                ServletHttpResponse servletHttpResponse=servletHttpRequest.getServletHttpResponse();
+                HttpServletRequest requestWrapper=      servletHttpRequest.getWrapper();
+                HttpServletResponse responseWrapper=    servletHttpResponse.getWrapper();
+                HttpRequest httpRequest =               servletHttpRequest.getHttpRequest();
+                HttpResponse httpResponse =             httpRequest.getHttpResponse();
+            
+                try
+                {
+                    servletHttpRequest.setWrapper((HttpServletRequest)request);
+                    servletHttpResponse.setWrapper((HttpServletResponse)response);
+                    _httpContext.handle(_nextHandler,
+                                        _pathInContext,
+                                        null, // Assume path params have
+                                        // already been processed.
+                                        httpRequest,
+                                        httpResponse);
+                }
+                finally
+                {
+                    servletHttpRequest.setWrapper(requestWrapper);
+                    servletHttpResponse.setWrapper(responseWrapper);
+                }
             }
         }
     }
