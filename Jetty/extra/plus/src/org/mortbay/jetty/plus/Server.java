@@ -8,6 +8,9 @@ package org.mortbay.jetty.plus;
 import java.io.IOException;
 import java.net.URL;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.ListIterator;
 import org.mortbay.jetty.servlet.WebApplicationContext;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
@@ -24,21 +27,18 @@ import org.mortbay.util.MultiException;
  */
 public class Server extends org.mortbay.jetty.Server 
 {
-    /**
-     * Transaction manager used with this Jetty server
-     * Don't reset the instance to null since Jetty classes using XML are
-     * inialized out of order and it would reset the value to null.
-     */
-    private transient TMService m_tm;
+    private  ArrayList _serviceList;
+
+
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
-    public Server (
-    )
+    public Server ()
     {
        // Don't reset the instance to null since Jetty classes using XML are
        // inialized out of order and it would reset the value to null.
+     
     }
     
     /* ------------------------------------------------------------ */
@@ -77,32 +77,25 @@ public class Server extends org.mortbay.jetty.Server
         super(configuration);
     }
 
+
+
     /* ------------------------------------------------------------ */
     /**
-     * Set the transaction manager which will be used
-     * by this server.
-     * @param service transaction manager used by the server
-     */  
-    public void setTransactionManager(
-       TMService service
-    )
-    {
-       if (service == null)
-       {
-          Code.warning("Transaction Manager to set cannot be null");
-       }
-       else
-       {
-          if (m_tm == null)
-          {
-             m_tm = service;
-          }
-          else
-          {
-             Code.warning("Transaction Manager is already set.");
-          }
-       }
+     * Add a Service to a Server. Examples are transaction service,
+     * mail service etc
+     *
+     * @param service eg TMService, MailService
+     */
+    public void addService (Service service)
+    { 
+        if (_serviceList == null)
+            _serviceList = new ArrayList(5);
+
+        _serviceList.add (service);
+        Code.debug ("Service List contains: "+_serviceList.size()+" services");
     }
+
+
 
     /* ------------------------------------------------------------ */
     /** Start all handlers then listeners.
@@ -116,24 +109,23 @@ public class Server extends org.mortbay.jetty.Server
     {
        MultiException mex = new MultiException();
 
-       // Start transaction manager first if we have one
-       if (m_tm != null)
+       //iterate over all the services and start them in order
+       Iterator itor = _serviceList.iterator();
+       while (itor.hasNext())
        {
-          try
-          {
-             m_tm.start();
-          }
-          catch(Exception e)
-          {
-             mex.add(e);
-          }
-       }
-       else
-       {
-          Code.warning("No Transaction Manager to start." + this);
+           try
+           {
+               ((Service)itor.next()).start();
+           }
+           catch (Exception e)
+           {
+               mex.add(e);
+           }
        }
 
        mex.ifExceptionThrowMulti();
+
+
 
        // Now start the rest of Jetty
        super.start();
@@ -151,15 +143,13 @@ public class Server extends org.mortbay.jetty.Server
        // First stop rest of jetty 
        super.stop(graceful);
 
-       // Now stop transaction manager if we have one
-       if (m_tm != null)
+       // now stop all the services, in the reverse order to starting
+       ListIterator listItor = _serviceList.listIterator (_serviceList.size());
+       while (listItor.hasPrevious())
        {
-          m_tm.stop();
+           ((Service)listItor.previous()).stop();
        }
-       else
-       {
-          Code.warning("No Transaction Manager to stop.");
-       }
+
     }
 
     /* ------------------------------------------------------------ */
@@ -250,6 +240,6 @@ public class Server extends org.mortbay.jetty.Server
        String webApp
     )
     {
-        return new JotmWebAppContext(webApp);
+        return new PlusWebAppContext(webApp);
     }
 }

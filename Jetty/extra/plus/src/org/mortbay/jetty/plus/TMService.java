@@ -12,45 +12,45 @@ import org.mortbay.util.LifeCycle;
  * 
  * @author mhalas
  */
-public interface TMService extends LifeCycle
+public abstract class TMService extends AbstractService
 {
+    /**
+     * Default value for UserTransaction JNDI binding. User can
+     * change this by calling setJNDI()
+     */
+    public static final String  DEFAULT_USER_TX_JNDI = "javax.transaction.UserTransaction";
+
+
+    /**
+     * Value for the TransactionManager JNDI binding. This is not
+     * changeable at runtime because other services need to know how to look it up.
+     */
+    protected String _transactionManagerJNDI = "javax.transaction.TransactionManager";
 	
+
+    public TMService ()
+    {
+        //set up the UserTransaction JNDI binding name
+        setJNDI (DEFAULT_USER_TX_JNDI);
+    }
+
     /**
      * returns a <code>TransactionManager</code> object.
      * 
      * @return TransactionManager
      */
-    public TransactionManager getTransactionManager();
+    public abstract TransactionManager getTransactionManager();
     
     /**
      * Returns an <code>UserTransaction</code> object.
      * 
      * @return UserTransaction 
      */
-    public UserTransaction getUserTransaction();
+    public abstract UserTransaction getUserTransaction();
+
     
-    /* ------------------------------------------------------------ */
-    /** Start the LifeCycle.
-     * @exception Exception An arbitrary exception may be thrown.
-     */
-    public void start()
-        throws Exception;
-    
-    /* ------------------------------------------------------------ */
-    /** Stop the LifeCycle.
-     * The LifeCycle may wait for current activities to complete
-     * normally, but it can be interrupted.
-     * @exception InterruptedException Stopping a lifecycle is rarely atomic
-     * and may be interrupted by another thread.  If this happens
-     * InterruptedException is throw and the component will be in an
-     * indeterminant state and should probably be discarded.
-     */
-    public void stop()
-        throws InterruptedException;
-   
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return True if the LifeCycle has been started. 
-     */
-    public boolean isStarted();
+    public String getTransactionManagerJNDI ()
+    {
+        return _transactionManagerJNDI;
+    }
 }

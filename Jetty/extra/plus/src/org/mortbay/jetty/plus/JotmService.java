@@ -14,7 +14,7 @@ import javax.sql.XADataSource;
 
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
-import org.mortbay.util.LifeCycle;
+
 
 import org.enhydra.jdbc.standard.StandardXADataSource;
 import org.enhydra.jdbc.pool.StandardXAPoolDataSource;
@@ -24,9 +24,12 @@ import org.enhydra.jdbc.pool.StandardXAPoolDataSource;
  * 
  * @author mhalas
  */
-public class JotmService implements TMService
+public class JotmService extends TMService
 {
-    /**
+   
+    public static final String DEFAULT_SERVICE_NAME = "JotmService";
+
+   /**
      * Instance of JOTM transaction manager. 
      */
     protected org.objectweb.transaction.jta.TMService m_tm;
@@ -36,13 +39,14 @@ public class JotmService implements TMService
      */
     protected Map m_mpDataSources;
     
-    public JotmService(
-    )
+    public JotmService()
     {
        m_tm = null;
        // We can use HashMap because it will be only read
        // since all global data sources are created on startup
        m_mpDataSources = new HashMap();
+
+       setName (DEFAULT_SERVICE_NAME);
     }
 		 
     /**
@@ -85,112 +89,114 @@ public class JotmService implements TMService
     /** Start the LifeCycle.
      * @exception Exception An arbitrary exception may be thrown.
      */
-    public void start(
-    ) throws Exception
+    public void start()
+        throws Exception
     {
-       Log.event("Starting JoTM transaction manager.");
+        if (!isStarted())
+        {
+            
+            Log.event("Starting JoTM transaction manager.");
+            
+            // Start the transaction manager
+            try
+            {
+                if (m_tm == null)
+                    m_tm = new org.objectweb.jotm.Jotm(true, true);
+            }
+            catch(Exception eExc)
+            {
+                Code.warning(eExc);
+                throw new IOException("Failed to start JoTM: " + eExc);
+            }
 
-       // Start the transaction manager
-       try
-       {
-          m_tm = new org.objectweb.jotm.Jotm(true, true);
-       }
-       catch(Exception eExc)
-       {
-          Code.warning(eExc);
-          throw new IOException("Failed to start JoTM: " + eExc);
-       }
+            //  Register the user transaction object in JNDI
+            // TODO: This needs to be redone, email from Jeff:
+            // For example, a J2EE app server requires the UserTransaction 
+            // to be available through JNDI with the name 
+            // "java:comp/env/UserTransaction" (ENC requirements). 
+            // What's more, using resource factories, you 
+            // don't even bind UserTransaction object 
+            // (you create instead an object inheriting from 
+            // javax.naming/spi/ObjectFactory which'll return an UserTransaction object).
+            // On the other hand, if an application is not supporting 
+            // ENC, UserTransaction can be available with 
+            // the name "javax.transaction.UserTransaction" (see the JDBC example of JOTM)
+            // I prefer not to mandate a specific use of JOTM so that it can fit into several use cases.
+            
+            Context ictx = null;
 
-       //  Register the user transaction object in JNDI
-       // TODO: This needs to be redone, email from Jeff:
-       // For example, a J2EE app server requires the UserTransaction 
-       // to be available through JNDI with the name 
-       // "java:comp/env/UserTransaction" (ENC requirements). 
-       // What's more, using resource factories, you 
-       // don't even bind UserTransaction object 
-       // (you create instead an object inheriting from 
-       // javax.naming/spi/ObjectFactory which'll return an UserTransaction object).
-       // On the other hand, if an application is not supporting 
-       // ENC, UserTransaction can be available with 
-       // the name "javax.transaction.UserTransaction" (see the JDBC example of JOTM)
-       // I prefer not to mandate a specific use of JOTM so that it can fit into several use cases.
-
-       Context ictx = null;
-       String  userTransactionName = "javax.transaction.UserTransaction";
-       String  transactionManagerName = "javax.transaction.TransactionManager";
-
-       try 
-       {
-          ictx = new InitialContext();
-       } 
-       catch (NamingException e) 
-       {
-          Code.warning(e);
-          throw new IOException("No initial context: "+e);
-       }
-
-       try 
-       {
-          if (userTransactionName != null) 
-          {
-             ictx.rebind(userTransactionName, m_tm.getUserTransaction());
-             Code.debug("UserTransaction object bound in JNDI with name " + userTransactionName);
-          }
-       }
-       catch (NamingException e) 
-       {
-          Code.warning(e);
-          throw new IOException("UserTransaction rebind failed :" + e.getExplanation());
-       }
+            
+            try 
+            {
+                ictx = new InitialContext();
+            } 
+            catch (NamingException e) 
+            {
+                Code.warning(e);
+                throw new IOException("No initial context: "+e);
+            }
+            
+            try 
+            {
+                ictx.rebind(getJNDI(), m_tm.getUserTransaction());
+                Code.debug("UserTransaction object bound in JNDI with name " + getJNDI());
+            }
+            catch (NamingException e) 
+            {
+                Code.warning(e);
+                throw new IOException("UserTransaction rebind failed :" + e.getExplanation());
+            }
  
-       try
-       {
-          if (transactionManagerName != null) 
-          {
-             ictx.rebind(transactionManagerName, m_tm.getTransactionManager());
-             Code.debug("TransactionManager object bound in JNDI with name " + transactionManagerName);
-          }
-       } 
-       catch (NamingException e) 
-       {
-          Code.warning(e);
-          throw new IOException("TransactionManager rebind failed :" + e.getExplanation());
-       }
+            try
+            {
+                ictx.rebind(getTransactionManagerJNDI(), m_tm.getTransactionManager());
+                Code.debug("TransactionManager object bound in JNDI with name " + getTransactionManagerJNDI());
+            } 
+            catch (NamingException e) 
+            {
+                Code.warning(e);
+                throw new IOException("TransactionManager rebind failed :" + e.getExplanation());
+            }
+            
+            
+            // Now take any existing data sources and register them with this
+            // transaction manager and JNDI
+            XADataSource xadsDataSource;
+            Iterator             itrDataSources;
+            TransactionManager   tmManager;
+            Map.Entry            meDataSource;
+            String               strDataSourceName;
+            
+            tmManager = m_tm.getTransactionManager();
+            for (itrDataSources = m_mpDataSources.entrySet().iterator();
+                 itrDataSources.hasNext();)
+            {
+                meDataSource = (Map.Entry)itrDataSources.next();
+                strDataSourceName = (String)meDataSource.getKey();
+                StandardXAPoolDataSource xapdsPoolDataSource = (StandardXAPoolDataSource)meDataSource.getValue();
+                xadsDataSource = xapdsPoolDataSource.getDataSource();
+                
+                try 
+                {
+                    ictx.rebind("XA"+ strDataSourceName, xadsDataSource);
+                    Code.debug("XA Data source bound in JNDI with name XA" + strDataSourceName);
+                    ictx.rebind(strDataSourceName, xapdsPoolDataSource);
+                    Code.debug("Data source bound in JNDI with name " + strDataSourceName);
+                } 
+                catch (NamingException e) 
+                {
+                    Code.debug("Data source rebind failed :" + e.getExplanation());
+                    Code.warning(e);
+                    throw e;
+                }
+            }
 
-
-       // Now take any existing data sources and register them with this
-       // transaction manager and JNDI
-       XADataSource xadsDataSource;
-       Iterator             itrDataSources;
-       TransactionManager   tmManager;
-       Map.Entry            meDataSource;
-       String               strDataSourceName;
-
-       tmManager = m_tm.getTransactionManager();
-       for (itrDataSources = m_mpDataSources.entrySet().iterator();
-            itrDataSources.hasNext();)
-       {
-          meDataSource = (Map.Entry)itrDataSources.next();
-          strDataSourceName = (String)meDataSource.getKey();
-          StandardXAPoolDataSource xapdsPoolDataSource = (StandardXAPoolDataSource)meDataSource.getValue();
-          xadsDataSource = xapdsPoolDataSource.getDataSource();
-
-          try 
-          {
-             ictx.rebind("XA"+ strDataSourceName, xadsDataSource);
-             Code.debug("XA Data source bound in JNDI with name XA" + strDataSourceName);
-             ictx.rebind(strDataSourceName, xapdsPoolDataSource);
-             Code.debug("Data source bound in JNDI with name " + strDataSourceName);
-          } 
-          catch (NamingException e) 
-          {
-             Code.debug("Data source rebind failed :" + e.getExplanation());
-             Code.warning(e);
-             throw e;
-          }
-       }
-
-       Log.event("JoTM is running.");
+            super.start();
+            
+            Log.event("JoTM is running.");
+        }
+        else
+            Log.event ("JoTM is already running");
     }
     
     /* ------------------------------------------------------------ */
@@ -205,10 +211,11 @@ public class JotmService implements TMService
     public void stop(
     ) throws InterruptedException
     {
-       if (m_tm != null)
+       if (!isStarted())
        {
           Log.event("Stopping JoTM...");
           m_tm.stop();
+          super.stop();
           Log.event("JoTM is stopped.");
        }
        else
@@ -217,15 +224,7 @@ public class JotmService implements TMService
        }
     }
    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return True if the LifeCycle has been started. 
-     */
-    public boolean isStarted(
-    )
-    {
-       return (m_tm != null);
-    }
+
 
     /**
      * Add data source to be managed by this transaction manager.
