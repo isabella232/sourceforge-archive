@@ -191,8 +191,8 @@ public class WebApplicationHandler extends ServletHandler
         {
             // Handle dispatch to j_security_check
             HttpContext context= getHttpContext();
-            if (context instanceof ServletHttpContext &&
-                pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
+            if (context!=null && context instanceof ServletHttpContext &&
+                pathInContext!=null && pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
             {
                 ServletHttpRequest servletHttpRequest=(ServletHttpRequest)request;
                 ServletHttpResponse servletHttpResponse=(ServletHttpResponse)response;
