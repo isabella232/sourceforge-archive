@@ -10,6 +10,7 @@ import com.mortbay.Util.StringUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.InterruptedIOException;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -123,10 +124,15 @@ public class HttpConnection
     public void close()
         throws IOException
     {
-        _inputStream.close();
-        _outputStream.close();
-        if (_handlingThread!=null)
-            _handlingThread.interrupt();
+        try{
+            _outputStream.close();
+            _inputStream.close();
+        }
+        finally
+        {
+            if (_handlingThread!=null)
+                _handlingThread.interrupt();
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -333,13 +339,22 @@ public class HttpConnection
                 {
                     _response.commit();
                     _outputStream.flush();
-                    Thread.sleep(50);// XXX - ???
-                    _outputStream.close();
                 }
                     
                 if (Code.debug())
                     Code.debug("RESPONSE:\n",_response); 
             } 
+            catch (InterruptedIOException e)
+            {
+                exception(e);
+                _persistent=false;
+                try
+                {
+                    _response.commit();
+                    _outputStream.flush();
+                }
+                catch (IOException e2){exception(e2);}
+            }
             catch (Exception e)     {exception(e);}
             catch (Error e)         {exception(e);}
             finally
@@ -355,7 +370,7 @@ public class HttpConnection
                 _request=null;;
                 _response=null;
             }    
-        }while(_persistent);
+        }while(_persistent && !_handlingThread.interrupted());
         
         _handlingThread=null; 
         try{

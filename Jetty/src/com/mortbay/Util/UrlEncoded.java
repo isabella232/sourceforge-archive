@@ -100,11 +100,11 @@ public class UrlEncoded extends MultiMap
                         result.append(separator);
                         separator="&";
                         result.append(URLEncoder.encode(key));
-                        value=values.get(v);
-                        if (value!=null)
+                        String val=(String)values.get(v);
+                        if (val!=null && val.length()>0)
                         {
                             result.append('=');
-                            result.append(URLEncoder.encode(value.toString()));
+                            result.append(URLEncoder.encode(val));
                         }
                         else if (equalsForNullValue)
                             result.append('=');
@@ -113,13 +113,16 @@ public class UrlEncoded extends MultiMap
                 else
                 {
                     // Encode single item
+                    String val=value.toString();
                     result.append(separator);
                     separator="&";
                     result.append(URLEncoder.encode(key));
-                    result.append('=');
-                    result.append(URLEncoder.encode(value.toString()));
+                    if (equalsForNullValue || val.length()>0)
+                    {
+                        result.append('=');
+                        result.append(URLEncoder.encode(val));
+                    }
                 }
-
             }
             return result.toString();
         }
@@ -151,13 +154,13 @@ public class UrlEncoded extends MultiMap
                 if (i<0)
                 {
                     name=decodeString(token);
-                    value=null;
+                    value="";
                 }
                 else
                 {
                     name=decodeString(token.substring(0,i++));
                     if (i>=token.length())
-                        value=null;
+                        value="";
                     else
                         value = decodeString(token.substring(i));
                 }

@@ -8,7 +8,10 @@
 <H1>WebApp JSP Snoop page</H1>
 
 <H2>Context information</H2>
+<PRE>
 ClassLoader=<%= this.getClass().getClassLoader() %>
+<!-- MinModTime =<%= ""+com.mortbay.Jetty.JettyServlet.__minModTime %> -->
+</PRE>
 
 <H2>Request information</H2>
 

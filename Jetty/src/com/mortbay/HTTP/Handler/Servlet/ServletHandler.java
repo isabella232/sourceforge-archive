@@ -5,6 +5,7 @@
 
 package com.mortbay.HTTP.Handler.Servlet;
 
+import com.mortbay.HTTP.ContextLoader;
 import com.mortbay.HTTP.Handler.NullHandler;
 import com.mortbay.HTTP.HandlerContext;
 import com.mortbay.HTTP.HttpException;
@@ -25,6 +26,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.List;
@@ -96,12 +98,13 @@ public class ServletHandler extends NullHandler
     
     /* ----------------------------------------------------------------- */
     public synchronized void start()
-    {
+    {        
         // Initialize classloader
         _loader=getHandlerContext().getClassLoader();
         
         // Initialize servlets
-        Iterator i = _servletMap.values().iterator();
+        // XXX - the Set here could be used to sort init order!
+        Iterator i = new HashSet(_servletMap.values()).iterator();
         while (i.hasNext())
         {
             ServletHolder holder = (ServletHolder)i.next();
@@ -110,7 +113,7 @@ public class ServletHandler extends NullHandler
             
             // XXX - This is horrible - got to find a better way.
             if (holder.getClassName().equals("org.apache.jasper.servlet.JspServlet"))
-            {
+            {                
                 ClassLoader jettyLoader=getHandlerContext().getClassLoader();
                 ClassLoader jasperLoader=(ClassLoader)
                     _context.getAttribute("org.apache.tomcat.classloader");
@@ -120,6 +123,28 @@ public class ServletHandler extends NullHandler
                     _context.setAttribute("org.apache.tomcat.classloader",
                                           jettyLoader);
                 }
+
+                String classpath = holder.getInitParameter("classpath");
+                String ctxClasspath =(jettyLoader instanceof ContextLoader)
+                    ?((ContextLoader)jettyLoader).getFileClassPath()
+                    :getHandlerContext().getClassPath();
+                String tomcatpath=(String)
+                    _context.getAttribute("org.apache.tomcat.jsp_classpath");
+
+                if (classpath==null && tomcatpath!=null)
+                {
+                    classpath=tomcatpath;
+                    Code.debug("Fiddle classpath for Jasper: "+classpath);
+                    holder.setInitParameter("classpath",classpath);
+                }
+                
+                if ((classpath==null || classpath.length()==0) &&
+                    ctxClasspath!=null && ctxClasspath.length()>0)
+                {
+                    classpath=ctxClasspath;
+                    Code.debug("Fiddle classpath for Jasper: "+classpath);
+                    holder.setInitParameter("classpath",classpath);
+                }            
             }
         }
         

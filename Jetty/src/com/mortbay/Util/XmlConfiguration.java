@@ -62,10 +62,15 @@ public class XmlConfiguration
                 if (__parser==null)
                 {
                     __parser = new XmlParser();
+                    Resource configResource=Resource.newSystemResource
+                        ("com/mortbay/Util/configure.dtd");    
                     __parser.redirectEntity
-                        ("configure.dtd",
-                         Resource.newSystemResource
-                         ("com/mortbay/Util/configure.dtd"));
+                        ("configure.dtd",configResource);   
+                    __parser.redirectEntity
+                        ("configure_1_0.dtd",configResource);
+                    __parser.redirectEntity
+                        ("http://jetty.mortbay.com/configure_1_0.dtd",
+                         configResource);
                 }
             }
         }

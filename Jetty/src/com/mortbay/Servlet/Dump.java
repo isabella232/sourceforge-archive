@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
 /**
  * This is an example of a simple Servlet
  */
@@ -197,7 +196,15 @@ public class Dump extends HttpServlet
                 table.addHeading(name+":&nbsp;").cell().right();
                 table.addCell(sreq.getParameter(name));
                 String[] values = sreq.getParameterValues(name);
-                if (values!=null && values.length>1)
+                if (values==null)
+                {
+                    table.newRow();
+                    table.addHeading(name+" Values:&nbsp;")
+                        .cell().right();
+                    table.addCell("NULL!!!!!!!!!");
+                }
+                else
+                if (values.length>1)
                 {
                     for (int i=0;i<values.length;i++)
                     {

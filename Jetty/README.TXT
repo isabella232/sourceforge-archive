@@ -156,6 +156,35 @@ The mailing lists are the best place to start:
 
 
 
+NOTES
+=====
+
+Classpaths Handling.
+--------------------
+If a context has it's own classpath set, then a ContextLoader
+is created with tha classpath set.  A ContextLoader is a specialize
+URLClassLoader so any Resource/URL/File combination may be used to
+specify a path.   This classloader has the ServletHandlers classloader
+set as it parent, so normal Java2 loader hierarchy semantics are 
+followed.
+
+Note that if the context is a packed WAR file, then the elements
+of the classpath are likely to be jar:file URLs.
+
+
+JSP Classpaths
+--------------
+The context classloader is passed to the Jasper JspServlet and
+is used as the parent loader of the JspLoader.
+A file classpath is also passed for used by the JSP compiler. Note
+that if the context is a packed WAR file, then there is no 
+reasonable file based classpath that can be passed to the compiler.
+
+If this proves to be a problem for you, then unpack your WAR files 
+(which is what most other containers do by default anyway).
+
+
+
 
 
 

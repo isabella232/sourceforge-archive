@@ -1,6 +1,12 @@
 Jetty Versions
 --------------
 
+ + Pass file based classpath to JspServlet (see README).
+ + Prevented multiple init of ServletHolder
+ + ErlEncoding treats params without values as empty rather than null.
+ + Accept public DTD for XmlConfiguration (old style still supported).
+ + Cleaned up non persistent connection close.
+
 Jetty-3.0.0.rc1 - 22 Oct 2000
  + Added simple admin servlet.
  + Added CGI to demo
@@ -12,6 +18,11 @@ Jetty-3.0.0.rc1 - 22 Oct 2000
  + Partial handling of 0.9 requests.
  + removed Thread.destroy() calls.
  + Cleaned up exception handling.
+
+Jetty-2.4.8 23 Oct 2000
+ + Fixed bug with 304 replies with bodies.
+ + Improved win32 make files.
+ + Fixed closing socket problem
 
 Jetty-3.0.B05 - 18 Oct 2000
  + Improved null returns to get almost clean watchdog test.

@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class JettyServlet extends HttpServlet
 {
-    static long __minModTime = System.currentTimeMillis();
+    public static long __minModTime = System.currentTimeMillis();
     
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest request,

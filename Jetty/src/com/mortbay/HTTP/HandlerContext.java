@@ -909,53 +909,17 @@ public class HandlerContext implements LifeCycle
         _loader=null;
         if (_parent!=null || _classPath!=null ||  this.getClass().getClassLoader()!=null)
         {
-            URL[] path=null;    
-            try{
-                // If no parent, then try this classes loader as parent
-                if (_parent==null)
-                    _parent=this.getClass().getClassLoader();
-                
-                Code.debug("Init classloader from "+_classPath+
-                           ", "+_parent+" for "+this);
+            // If no parent, then try this classes loader as parent
+            if (_parent==null)
+                _parent=this.getClass().getClassLoader();
             
-                // look for additional classpath
-                if (_classPath!=null)
-                {
-                    StringTokenizer tokenizer =
-                        new StringTokenizer(_classPath,",;");
-                    path = new URL[tokenizer.countTokens()];
-                    int i=0;
-                    while (tokenizer.hasMoreTokens())
-                    {
-                        Resource resource =
-                            Resource.newResource(tokenizer.nextToken());
-                        if (resource.isDirectory() || resource.getFile()!=null)
-                            path[i++]=resource.getURL();
-                        else
-                        {
-                            // XXX - this is a jar in a jar, so we must
-                            // extract it - probably should be to an in memory
-                            // structure, but this will do for now.
-                            // XXX - Need to do better with the temp dir
-                            InputStream in =resource.getInputStream();
-                            File file=File.createTempFile("Jetty",".zip");
-                            file.deleteOnExit();
-                            Code.debug("Extract ",resource," to ",file);
-                            FileOutputStream out = new FileOutputStream(file);
-                            IO.copy(in,out);
-                            out.close();
-                            path[i++]=file.toURL();
-                        }
-                    }
-                }
-            }
-            catch(Exception e){Code.warning(e);}
-            catch(Error e){Code.warning(e);}
+            Code.debug("Init classloader from "+_classPath+
+                       ", "+_parent+" for "+this);
             
-            if (path==null || path.length==0 || path[0]==null)
+            if (_classPath==null || _classPath.length()==0)
                 _loader=_parent;
             else
-                _loader=new ContextLoader(_classPath,path,_parent);
+                _loader=new ContextLoader(_classPath,_parent);
             _attributes.put(__ClassLoader,_loader);
         }
         

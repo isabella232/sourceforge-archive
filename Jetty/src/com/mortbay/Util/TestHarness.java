@@ -508,13 +508,13 @@ public class TestHarness
             code.decode("Name2=");
             test.checkEquals(code.size(),1,"dangling param size");
             test.checkEquals(code.encode(),"Name2","dangling encode");
-            test.checkEquals(code.getString("Name2"),null,"dangling get");
+            test.checkEquals(code.getString("Name2"),"","dangling get");
         
             code.clear();
             code.decode("Name3");
             test.checkEquals(code.size(),1,"noValue param size");
             test.checkEquals(code.encode(),"Name3","noValue encode");
-            test.checkEquals(code.getString("Name3"),null,"noValue get");
+            test.checkEquals(code.getString("Name3"),"","noValue get");
         
             code.clear();
             code.decode("Name4=Value+4%21");
