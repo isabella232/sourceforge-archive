@@ -51,7 +51,9 @@ public class HttpRequestDispatcher implements javax.servlet.RequestDispatcher
         HttpRequest req = (HttpRequest) request;
         HttpResponse res = (HttpResponse) response;
         req.setRequestPath(_path);
+	req.getHttpResponse().preReDispatch();
         _server.handle(req,res);
+	req.getHttpResponse().postReDispatch();
     }
     
 
@@ -68,8 +70,11 @@ public class HttpRequestDispatcher implements javax.servlet.RequestDispatcher
     {
         HttpRequest req = (HttpRequest) request;
         HttpResponse res = (HttpResponse) response;
+	Code.debug("Include ",_path);
+	req.getHttpResponse().preReDispatch();
         req.setResourcePath(_path);
         _server.handle(req,res);
+	req.getHttpResponse().postReDispatch();
     }
     
 };

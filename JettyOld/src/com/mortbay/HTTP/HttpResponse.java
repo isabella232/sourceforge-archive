@@ -726,4 +726,16 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
         super.destroy();
     }
     
+    boolean preReDispatchHandled=false;
+    void preReDispatch()
+    {
+	preReDispatchHandled=handled;
+	handled=false;
+    }
+    
+    void postReDispatch()
+    {
+	handled=preReDispatchHandled;
+    }
+
 }
