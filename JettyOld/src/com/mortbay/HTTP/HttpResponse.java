@@ -370,7 +370,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     void flush()
 	throws IOException
     {
-	if (outputState==3)
+	if (outputState==2)
 	    writer.flush();
 	else
 	    httpOut.flush();

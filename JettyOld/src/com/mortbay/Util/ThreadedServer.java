@@ -22,45 +22,45 @@ import java.lang.InterruptedException;
  * The properties THREADED_SERVER_MIN_THREADS and THREADED_SERVER_MAX_THREADS
  * can be set to control the number of threads created.
  * <P>
- * Currently these settings effect all threaded servers in the same JVM
- * and cannot be individually altered.
- *
  * @version $Id$
  * @author Greg Wilkins
  */
 abstract public class ThreadedServer
-    extends ThreadPool
     implements Runnable 
 {    
     /* ------------------------------------------------------------ */
     static int __maxThreads =
-	Integer.getInteger("THREADED_SERVER_MAX_THREADS",0).intValue();
+	Integer.getInteger("THREADED_SERVER_MAX_THREADS",255).intValue();
     
     /* ------------------------------------------------------------ */
     static int __minThreads =
-	Integer.getInteger("THREADED_SERVER_MIN_THREADS",0).intValue();
+	Integer.getInteger("THREADED_SERVER_MIN_THREADS",1).intValue();
 
     /* ------------------------------------------------------------------- */
-    private Thread serverThread = null;
-    private InetAddress address = null;
-    private int port=0;
+    private InetAddrPort address = null;    
     ServerSocket listen = null;
-    private int listenPriorityDelta=0;
+
+    private Hashtable _threadSet;
+    private int _maxThreads = __maxThreads;
+    private int _minThreads = __minThreads;
+    private int _maxIdleTimeMs=0;
+    private String _name="ThreadedServer";
+    private int _threadId=0;
+    private int _accepting=0;
+    private boolean _running=false;
     
     /* ------------------------------------------------------------------- */
     /* Construct on any free port.
      */
     public ThreadedServer() 
-    {
-	super(__minThreads,__maxThreads,null,0);
-    }
+    {}
     
     /* ------------------------------------------------------------------- */
     /* Construct on any free port.
      */
     public ThreadedServer(String name) 
     {
-	super(__minThreads,__maxThreads,name,0);
+	_name=name;
     }
 
     /* ------------------------------------------------------------------- */
@@ -69,8 +69,7 @@ abstract public class ThreadedServer
     public ThreadedServer(int port)
 	 throws java.io.IOException
     {
-	super(__minThreads,__maxThreads,"Port:"+port,0);
-	setAddress(null,port);
+	setAddress(new InetAddrPort(null,port));
     }
     
     /* ------------------------------------------------------------------- */
@@ -79,9 +78,7 @@ abstract public class ThreadedServer
     public ThreadedServer(InetAddress address, int port) 
 	 throws java.io.IOException
     {
-	super(__minThreads,__maxThreads,
-	      ((address==null)?"Port:":(address.toString()+":"))+port,0);
-	setAddress(address,port);
+	setAddress(new InetAddrPort(address,port));
     }
     
     /* ------------------------------------------------------------------- */
@@ -90,8 +87,7 @@ abstract public class ThreadedServer
     public ThreadedServer(InetAddrPort address) 
 	 throws java.io.IOException
     {
-	super(__minThreads,__maxThreads,address.toString(),0);
-	setAddress(address.getInetAddress(),address.getPort());
+	setAddress(address);
     }
     
     /* ------------------------------------------------------------ */
@@ -108,27 +104,10 @@ abstract public class ThreadedServer
 			  int maxIdleTime) 
 	 throws java.io.IOException
     {
-	super(minThreads,maxThreads,address.toString(),maxIdleTime);
-	setAddress(address.getInetAddress(),address.getPort());
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Handle a job.
-     * Implementation of ThreadPool handle method.
-     * @param job 
-     */
-    final protected void handle(Object job)
-    {
-	Socket s=(Socket)job;
-	try
-	{
-	    handleConnection(s);
-	    s.close();
-	}
-	catch(java.io.IOException e)
-	{
-	    Code.ignore(e);
-	}
+	_minThreads=minThreads==0?1:minThreads;
+	_maxThreads=maxThreads==0?__maxThreads:maxThreads;
+	_maxIdleTimeMs=maxIdleTime;
+	setAddress(address);
     }
     
     /* ------------------------------------------------------------------- */
@@ -167,8 +146,22 @@ abstract public class ThreadedServer
 	catch ( Exception e ){
 	    Code.warning("Connection problem",e);
 	}
+	finally
+	{
+	    try {connection.close();}
+	    catch ( Exception e ){Code.warning("Connection problem",e);}
+	    connection=null;
+	}
     }
   
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return IP Address and port
+     */
+    public InetAddrPort getInetAddrPort()
+    {
+	return address;
+    }
     
     /* ------------------------------------------------------------ */
     /** 
@@ -177,7 +170,7 @@ abstract public class ThreadedServer
      */
     public InetAddress address()
     {
-	return address;
+	return address.getInetAddress();
     }
     
     /* ------------------------------------------------------------ */
@@ -186,7 +179,7 @@ abstract public class ThreadedServer
      */
     public InetAddress getInetAddress()
     {
-	return address;
+	return address.getInetAddress();
     }
     
     /* ------------------------------------------------------------ */
@@ -196,7 +189,7 @@ abstract public class ThreadedServer
      */
     public int port()
     {
-	return port;
+	return address.getPort();
     }
     
     /* ------------------------------------------------------------ */
@@ -205,7 +198,25 @@ abstract public class ThreadedServer
      */
     public int getPort()
     {
-	return port;
+	return address.getPort();
+    }
+
+    /* ------------------------------------------------------------ */
+    public int getSize()
+    {
+	return _threadSet.size();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public int getMinSize()
+    {
+	return _minThreads;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public int getMaxSize()
+    {
+	return _maxThreads;
     }
     
     /* ------------------------------------------------------------------- */
@@ -213,50 +224,91 @@ abstract public class ThreadedServer
 					int port) 
 	 throws java.io.IOException
     {
+	setAddress(new InetAddrPort(address,port));
+    }
+    
+    
+    /* ------------------------------------------------------------------- */
+    public synchronized void setAddress(InetAddrPort address) 
+	 throws java.io.IOException
+    {
 	this.address = address;
-	this.port = port;
-	if (serverThread!=null && serverThread.isAlive())
+	if (_threadSet!=null && _running)
 	{
+	    Code.debug( "Restart for ", address );
 	    stop();
 	    start();
 	}
     }
 
+    
     /* ------------------------------------------------------------------- */
     /* Start the ThreadedServer listening
      */
-    final public void start()
+    final synchronized public void start()
 	 throws java.io.IOException
     {
-	Code.debug( "Start Listener for " + address + ":" + port );
-	
-	listen = address==null
-	    ? new ServerSocket( port )
-	    : new ServerSocket( port, 50, address);
-	port = listen.getLocalPort();
-	    
-	if( serverThread == null )
+	Code.debug( "Start Listener for ", address );
+
+	// Open the server socket
+	if (address==null)
 	{
-	    serverThread = new Thread( this, "ThreadedServer" );
-	    serverThread.start();
+	    listen=new ServerSocket(0);
+	    address=new InetAddrPort(listen.getInetAddress(),
+				     listen.getLocalPort());
+	}
+	else
+	listen = new ServerSocket( address.getPort(),
+				   _maxThreads>0?(_maxThreads+1):__maxThreads,
+				   address.getInetAddress());
+
+	// Set any idle timeout
+	if (_maxIdleTimeMs>0)
+	    listen.setSoTimeout(_maxIdleTimeMs);
+	_accepting=0;
+
+	// Start the threads
+	_running=true;
+	_threadSet=new Hashtable(_maxThreads+_maxThreads/2+13);
+	for (int i=0;i<_minThreads;i++)
+	{
+	    Thread thread=new Thread( this, _name+"-"+(_threadId++));
+	    _threadSet.put(thread,thread);
+	    thread.start();
 	}
     }
   
     /* ------------------------------------------------------------------- */
-    final public void stop() 
+    final synchronized public void stop() 
     {
-	if (Code.debug())
-	    Code.debug("Stop listening on ",listen,new Throwable());
+	Code.debug("Stop listening on ",listen);
+
+	if (_threadSet==null)
+	    return;
 	
-	if( serverThread != null ) 
+	_running=false;
+	
+	// interrupt the threads
+	Enumeration enum=_threadSet.keys();
+	while(enum.hasMoreElements())
 	{
-	    Thread thread=serverThread;
-	    serverThread = null;
-	    thread.interrupt( );
-	    Thread.yield();
+	    Thread thread=(Thread)enum.nextElement();
+	    thread.interrupt();
+	}
+	Thread.yield();
+
+	// Stop any still running
+	enum=_threadSet.keys();
+	while(enum.hasMoreElements())
+	{
+	    Thread thread=(Thread)enum.nextElement();
 	    if (thread.isAlive())
 		thread.stop( );
 	}
+	_threadSet.clear();
+	_threadSet=null;
+
+	// Close the port
 	if (listen!=null)
 	{
 	    try
@@ -276,52 +328,114 @@ abstract public class ThreadedServer
     final public void join() 
 	throws java.lang.InterruptedException
     {
-	if( serverThread != null )
-	    serverThread.join();
+	while(_threadSet!=null && _threadSet.size()>0)
+	{
+	    Thread thread=null;
+	    synchronized(this)
+	    {
+		Enumeration enum=_threadSet.keys();
+		if(enum.hasMoreElements())
+		    thread=(Thread)enum.nextElement();
+	    }
+	    if (thread!=null)
+		thread.join();
+	}
     }
   
   
     /* ------------------------------------------------------------------- */
     final public void run( ) 
     {
-	Code.debug( "Listener running on " + listen );
-	if (listenPriorityDelta!=0)
-	{
-	    Code.debug( "Listener priority delta = " + listenPriorityDelta );
-	    serverThread.setPriority(serverThread.getPriority()+
-				     listenPriorityDelta);
-	}
+	Thread thread=Thread.currentThread();
+	String name=thread.getName();
+	int runs=0;
 	
-	if (getSize()>0)
-	{
-	    Code.debug( "Min Threads = " + getMinSize() );
-	    Code.debug( "Max Threads = " + getMaxSize() );
-	}
-	
-	// While the thread is running . . .
+	Code.debug( "Listen on ", listen );
 	try{
-	    while( serverThread != null ) 
+	    while(_running) 
 	    {
+		Socket connection=null;
 		// Accept an incoming connection
 		try 
 		{
-		    final Socket connection = listen.accept();
-		    Code.debug( "Connection: ",connection );
-		    run(connection);
+		    // increment accepting count
+		    synchronized(this){_accepting++;}		    
+		    
+		    // wait for a connection
+		    connection=listen.accept();
 		}
-		catch ( Exception e )
+		catch ( InterruptedIOException e )
 		{
-		    if (serverThread!=null)
-			Code.warning("Listen problem",e);
-		    else
-			Code.debug(e);
+		    synchronized(this)
+		    {
+			if (_threadSet.size()>_minThreads)
+			{
+			    Code.debug("Idle death: "+thread);
+			    if (_threadSet!=null)
+				_threadSet.remove(thread);
+			    break;
+			}
+		    }
+		}
+		catch ( IOException e )
+		{
+		    Code.warning(e);
+		}
+		finally
+		{
+		    // If not more threads accepting - start one
+		    synchronized(this)
+		    {
+			if (--_accepting==0 &&
+			    _threadSet.size()<_maxThreads &&
+			    _running)
+			{
+			    Thread newThread=
+				new Thread( this, _name+"-"+(_threadId++));
+			    _threadSet.put(newThread,newThread);
+			    newThread.start();
+			}
+		    }
+		}
+
+		// handle the connection
+		if (connection!=null)
+		{
+		    try
+		    {
+			if (Code.debug())
+			{
+			    thread.setName(name+"/"+runs++);
+			    if (Code.verbose())
+				Code.debug("Handling ",connection);
+			}
+			handleConnection(connection);
+			connection.close();
+		    }
+		    catch ( Exception e )
+		    {
+			Code.warning(e);
+		    }
+		    finally
+		    {
+			connection=null;
+		    }
 		}
 	    }
 	}
 	finally
 	{
+	    synchronized(this)
+	    {
+		if (_threadSet!=null)
+		    _threadSet.remove(Thread.currentThread());
+	    }
 	    Code.debug("Stopped listening on " + listen);
 	}
     }
 }
+
+
+
+
 

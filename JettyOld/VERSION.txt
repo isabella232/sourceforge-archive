@@ -1,4 +1,5 @@
-Release 2.3.Beta3 - 20 June 1999
+Release 2.3.Beta3 - 22 June 1999
+  + Reimplemented ThreadedServer to improve and balance performance.
   + Added file cache to FileHandler
   + Implemented effecient version of 
     ServletContext.getResourceAsStream() that does not open a 
@@ -12,6 +13,8 @@ Release 2.3.Beta3 - 20 June 1999
   + Added alternate constructors to HTML.Include for InputStream.
   + Server.shutdown() clears configuration so that server may 
     be restarted in same virtual machine.
+  + Improved Block.write.
+  + Fixed bug in HttpResponse flush.
 
 Release 2.2.Beta2 - 12 June 1999
   + Added all write methods to HttpOutputStream$SwitchOutputStream

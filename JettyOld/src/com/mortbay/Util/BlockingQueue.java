@@ -118,7 +118,7 @@ public class BlockingQueue
 	    if(++head==maxSize)
 		head=0;
 	    if (size==maxSize)
-		notifyAll();
+		elements.notifyAll();
 	    size--;
 	    return o;
 	}
@@ -147,7 +147,7 @@ public class BlockingQueue
 		head=0;
 
 	    if (size==maxSize)
-		notifyAll();
+		elements.notifyAll();
 	    size--;
 	    
 	    return o;
