@@ -12,7 +12,7 @@ Other targets:
   clean              - Remove all generated files.
   prepare            - Set up build directory structure.
   run.jaas.demo      - run the JAAS demo webapp
-  run.tm.demo        - run the tm demo webapp
+  run.jettyplus.demo        - run the jettyplus demo webapp
 
 -->
 
@@ -25,9 +25,9 @@ Other targets:
   <property file="../build.package.properties" />
 
   <!-- ==================================================================== -->
-  <property name="tm.webapp"             value="${demo.webapps}/tm"/>
-  <property name="tm.webapp.webinf"      value="${tm.webapp}/WEB-INF"/>
-  <property name="tm.webapp.classes"     value="${tm.webapp.webinf}/classes"/>
+  <property name="jettyplus.webapp"             value="${demo.webapps}/jettyplus"/>
+  <property name="jettyplus.webapp.webinf"      value="${jettyplus.webapp}/WEB-INF"/>
+  <property name="jettyplus.webapp.classes"     value="${jettyplus.webapp.webinf}/classes"/>
   <property name="jaas.webapp"           value="${demo.webapps}/jaas"/>
   <property name="jaas.webapp.webinf"    value="${jaas.webapp}/WEB-INF"/>
   <property name="jaas.webapp.classes"   value="${jaas.webapp.webinf}/classes"/>
@@ -228,14 +228,14 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <!-- build.tm.webapp                                                      -->
+  <!-- build.jettyplus.webapp                                                      -->
   <!-- ==================================================================== -->
-  <target name="build.tm.webapp" 
+  <target name="build.jettyplus.webapp" 
           depends="jars" 
-	  description="tm demo webapp">
-    <mkdir dir="${tm.webapp.classes}"/>
+	  description="JettyPlus demo webapp">
+    <mkdir dir="${jettyplus.webapp.classes}"/>
     <javac srcdir="${demo.src}"
-           destdir="${tm.webapp.classes}"
+           destdir="${jettyplus.webapp.classes}"
            debug="${javac.debug}"
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}">
@@ -243,17 +243,17 @@ Other targets:
         <path refid="classpath" />
 	<pathelement location="${package.jar}"/>
       </classpath>
-      <include name="**/tm/**.java" />
+      <include name="**/jettyplus/**.java" />
     </javac>
   </target>
 
   <!-- ==================================================================== -->
-  <!-- tm   demo webapp                                                     -->
+  <!-- JettyPlus demo webapp                                                -->
   <!-- ==================================================================== -->
-  <target name="run.tm.demo" depends="build.tm.webapp"> 
+  <target name="run.jettyplus.demo" depends="build.jettyplus.webapp" 
+          description="Run a JettyPlus webapp demo"> 
      <java fork="true" jar="${jetty.home}/start.jar" dir="${jetty.home}"> 
        <jvmarg value="-DDEBUG"/>
-       <jvmarg value="-Dlog4j.debug"/>
        <jvmarg value="-Dlog4j.configuration=log4j.xml"/>
        <jvmarg value="-Djetty.server=org.mortbay.jetty.plus.Server"/>
        <arg value="${etc}/jettyplus.xml"/>

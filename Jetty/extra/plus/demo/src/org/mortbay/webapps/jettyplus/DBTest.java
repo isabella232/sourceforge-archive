@@ -3,7 +3,7 @@
 // $Id$ 
 // ======================================================================
 
-package org.mortbay.webapps.tm;
+package org.mortbay.webapps.jettyplus;
 
 import java.io.PrintStream;
 import java.sql.Connection;

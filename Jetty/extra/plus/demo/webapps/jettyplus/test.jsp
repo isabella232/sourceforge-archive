@@ -13,7 +13,7 @@ the value unchanged.
 <P>
 
     <%
-      org.mortbay.webapps.tm.DBTest test = new org.mortbay.webapps.tm.DBTest();   
+      org.mortbay.webapps.jettyplus.DBTest test = new org.mortbay.webapps.jettyplus.DBTest();   
      
       int fooValue = test.readFoo();
     %>

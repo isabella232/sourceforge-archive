@@ -88,8 +88,8 @@
   <!-- + Set Virtual Hosts. A Null host or empty array means all hosts -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Call name="addWebApplication">
-    <Arg>/tm</Arg>
-    <Arg><SystemProperty name="jetty.home"/>/extra/plus/demo/webapps/tm</Arg>
+    <Arg>/jettyplus</Arg>
+    <Arg><SystemProperty name="jetty.home"/>/extra/plus/demo/webapps/jettyplus</Arg>
   </Call>
 
   <!-- =============================================================== -->

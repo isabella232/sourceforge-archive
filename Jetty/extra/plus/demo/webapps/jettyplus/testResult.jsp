@@ -6,7 +6,7 @@
     <h1>JettyPlus Demo</h1>
 
     <%
-      org.mortbay.webapps.tm.DBTest test = new org.mortbay.webapps.tm.DBTest();   
+      org.mortbay.webapps.jettyplus.DBTest test = new org.mortbay.webapps.jettyplus.DBTest();   
       test.doIt(request.getParameter("completion")); 
     %>
     
@@ -15,6 +15,6 @@
     foo is now: <B><%= test.readFoo() %></B>
     
 <P>
-    <A HREF="/tm/test.jsp"> Go again</A>
+    <A HREF="/jettyplus/test.jsp"> Go again</A>
   </body>
 </html>
