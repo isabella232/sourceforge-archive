@@ -136,18 +136,16 @@ public class HttpFields
     {
         String _name;
         String _lname;
-        boolean _singleValued;
         boolean _inlineValues;
         int _hashCode;
         static int __hashCode;
         
-        FieldInfo(String name, boolean single, boolean inline)
+        FieldInfo(String name, boolean inline)
         {
             synchronized(FieldInfo.class)
             {
                 _name=name;
                 _lname=StringUtil.asciiToLowerCase(name);
-                _singleValued=single;
                 _inlineValues=inline;
                 
                 _hashCode=__hashCode++;
@@ -162,7 +160,7 @@ public class HttpFields
 
         public String toString()
         {
-            return "["+_name+","+_hashCode+","+_singleValued+","+_inlineValues+"]";
+            return "["+_name+","+_hashCode+","+_inlineValues+"]";
         }
 
         public int hashCode()
@@ -192,56 +190,56 @@ public class HttpFields
     {
         // Initialize FieldInfo's with special values.
         // In order of most frequently used.
-        new FieldInfo(__Host,true,false);
+        new FieldInfo(__Host,false);
         
-        new FieldInfo(__KeepAlive,false,false);
-        new FieldInfo(__Connection,false,false);
+        new FieldInfo(__KeepAlive,false);
+        new FieldInfo(__Connection,false);
         
-        new FieldInfo(__Cookie,false,false);
+        new FieldInfo(__Cookie,false);
         
-        new FieldInfo(__Accept,false,false);
-        new FieldInfo(__AcceptLanguage,false,false);
-        new FieldInfo(__AcceptEncoding,false,false);
-        new FieldInfo(__AcceptCharset,false,false);
-        new FieldInfo(__CacheControl,false,false);
-        new FieldInfo(__SetCookie,false,false);
-        new FieldInfo(__SetCookie2,false,false);
+        new FieldInfo(__Accept,false);
+        new FieldInfo(__AcceptLanguage,false);
+        new FieldInfo(__AcceptEncoding,false);
+        new FieldInfo(__AcceptCharset,false);
+        new FieldInfo(__CacheControl,false);
+        new FieldInfo(__SetCookie,false);
+        new FieldInfo(__SetCookie2,false);
         
-        new FieldInfo(__Date,true,false);
-        new FieldInfo(__TransferEncoding,false,true);
-        new FieldInfo(__ContentEncoding,false,true);
-        new FieldInfo(__ContentLength,true,false);
-        new FieldInfo(__Expires,true,false);
-        new FieldInfo(__Expect,true,false);
+        new FieldInfo(__Date,false);
+        new FieldInfo(__TransferEncoding,true);
+        new FieldInfo(__ContentEncoding,true);
+        new FieldInfo(__ContentLength,false);
+        new FieldInfo(__Expires,false);
+        new FieldInfo(__Expect,false);
         
-        new FieldInfo(__Referer,true,false);
-        new FieldInfo(__TE,false,false);
-        new FieldInfo(__UserAgent,true,false);
+        new FieldInfo(__Referer,false);
+        new FieldInfo(__TE,false);
+        new FieldInfo(__UserAgent,false);
         
-        new FieldInfo(__IfModifiedSince,true,false);
-        new FieldInfo(__IfRange,true,false);
-        new FieldInfo(__IfUnmodifiedSince,true,false);
+        new FieldInfo(__IfModifiedSince,false);
+        new FieldInfo(__IfRange,false);
+        new FieldInfo(__IfUnmodifiedSince,false);
 
-        new FieldInfo(__Location,true,false);
-        new FieldInfo(__Server,true,false);
-        new FieldInfo(__ServletEngine,false,false);
+        new FieldInfo(__Location,false);
+        new FieldInfo(__Server,false);
+        new FieldInfo(__ServletEngine,false);
         
-        new FieldInfo(__AcceptRanges,false,false);
-        new FieldInfo(__Range,true,false);
-        new FieldInfo(__RequestRange,true,false);
+        new FieldInfo(__AcceptRanges,false);
+        new FieldInfo(__Range,false);
+        new FieldInfo(__RequestRange,false);
         
-        new FieldInfo(__ContentLocation,true,false);
-        new FieldInfo(__ContentMD5,true,false);
-        new FieldInfo(__ContentRange,true,false);
-        new FieldInfo(__ContentType,true,false);
-        new FieldInfo(__LastModified,true,false);
-        new FieldInfo(__Authorization,true,false);
-        new FieldInfo(__From,true,false);
-        new FieldInfo(__MaxForwards,true,false);
-        new FieldInfo(__ProxyAuthenticate,true,false);
-        new FieldInfo(__Age,true,false);
-        new FieldInfo(__ETag,true,false);
-        new FieldInfo(__RetryAfter,true,false);
+        new FieldInfo(__ContentLocation,false);
+        new FieldInfo(__ContentMD5,false);
+        new FieldInfo(__ContentRange,false);
+        new FieldInfo(__ContentType,false);
+        new FieldInfo(__LastModified,false);
+        new FieldInfo(__Authorization,false);
+        new FieldInfo(__From,false);
+        new FieldInfo(__MaxForwards,false);
+        new FieldInfo(__ProxyAuthenticate,false);
+        new FieldInfo(__Age,false);
+        new FieldInfo(__ETag,false);
+        new FieldInfo(__RetryAfter,false);
 
         
     }
@@ -251,7 +249,7 @@ public class HttpFields
     {
         FieldInfo info = (FieldInfo)__info.get(name);
         if (info==null)
-            info = new FieldInfo(name,false,false);
+            info = new FieldInfo(name,false);
         return info;
     }
     
@@ -260,7 +258,7 @@ public class HttpFields
     {
         Map.Entry entry = __info.getEntry(name,offset,length);
         if (entry==null)
-            return new FieldInfo(new String(name,offset,length),false,false);
+            return new FieldInfo(new String(name,offset,length),false);
 
         return (FieldInfo) entry.getValue();
     }
@@ -815,9 +813,6 @@ public class HttpFields
             }
         }
 
-        if (values>0 && info._singleValued)
-            throw new IllegalArgumentException("Field "+name+" must be single valued");
-        
         if (field!=null)    
             field.reset(value,_version);
         else
@@ -1060,11 +1055,6 @@ public class HttpFields
                 {
                     while(field!=null && field._version==_version)
                     {
-                        if (info._singleValued)
-                        {
-                            Code.debug("Ignored duplicate single value header: ",field);
-                            continue line;
-                        }
                         last=field;
                         field=field._next;
                     }
@@ -1394,14 +1384,9 @@ public class HttpFields
         {
             String name = (String)enum.nextElement();
             FieldInfo info=getFieldInfo(name);
-            if( info._singleValued ) 
-                put(name,fields.get(name));
-            else
-            {
-                Enumeration values = fields.getValues(name);
-                while(values.hasMoreElements())
-                    add(name,(String)values.nextElement());
-            }
+            Enumeration values = fields.getValues(name);
+            while(values.hasMoreElements())
+                add(name,(String)values.nextElement());
         }
     }
 

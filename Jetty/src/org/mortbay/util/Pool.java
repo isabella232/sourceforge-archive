@@ -251,7 +251,7 @@ public class Pool
         synchronized(this)
         {
             // Wait if none available.
-            if (_running>0 && _available==0 && _size==_pondLife.length && timeoutMs>=0)
+            if (_running>0 && _available==0 && _size==_pondLife.length && timeoutMs>0)
                 wait(timeoutMs);
 
             // If still running

@@ -45,6 +45,7 @@ public class SunJsseListener extends JsseListener
     private String _keystore_type = DEFAULT_KEYSTORE_TYPE;
     private String _keystore_provider_name = DEFAULT_KEYSTORE_PROVIDER_NAME;
     private String _keystore_provider_class = DEFAULT_KEYSTORE_PROVIDER_CLASS;
+    private boolean _useDefaultTrustStore = false;
 
     /* ------------------------------------------------------------ */
     static
@@ -100,19 +101,45 @@ public class SunJsseListener extends JsseListener
     {
         return _keystore_provider_name;
     }
-    
+
     /* ------------------------------------------------------------ */
     public String getKeystoreProviderClass()
     {
         return _keystore_provider_class;
     }
-    
+
     /* ------------------------------------------------------------ */
     public void setKeystoreProviderClass(String classname)
     {
         _keystore_provider_class = classname;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Gets the default trust store flag.
+     *
+     * @return true if the default truststore will be used to initialize the
+     * TrustManager, false otherwise.
+     */
+    public boolean getUseDefaultTrustStore()
+    {
+        return _useDefaultTrustStore;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Set a flag to determine if the default truststore should be used to
+     * initialize the TrustManager.  The default truststore will typically be
+     * the ${JAVA_HOME}/jre/lib/security/cacerts.
+     *
+     * @param flag if true, the default truststore will be used.  If false, the
+     * configured keystore will be used as the truststore.
+     */
+    public void setUseDefaultTrustStore(boolean flag)
+    {
+        _useDefaultTrustStore = flag;
+    }
+
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @exception IOException 
@@ -194,7 +221,12 @@ public class SunJsseListener extends JsseListener
         KeyManager[] kma = km.getKeyManagers();                        
         
         TrustManagerFactory tm = TrustManagerFactory.getInstance("SunX509","SunJSSE");
-        tm.init( ks ); 
+        if (_useDefaultTrustStore) {
+            tm.init( (KeyStore)null );
+        } else {
+            tm.init( ks );
+        }
+
         TrustManager[] tma = tm.getTrustManagers();
         
         SSLContext sslc = SSLContext.getInstance( "SSL" ); 

@@ -201,13 +201,11 @@ public class ProxyHandler extends AbstractHttpHandler
             }
             
             // set response headers
-            System.err.println("\n\nresponse:");
             int h=0;
             String hdr=connection.getHeaderFieldKey(h);
             String val=connection.getHeaderField(h);
             while(hdr!=null || val!=null)
             {
-                System.err.println("hdr="+hdr+" val="+val);
                 if (hdr!=null && val!=null && !_DontProxyHeaders.containsKey(hdr))
                     response.addField(hdr,val);
                 h++;

@@ -154,8 +154,7 @@ public class FilterHolder
             .isAssignableFrom(_class))
         {
             super.stop();
-            throw new IllegalStateException("Servlet class "+_class+
-                                            " is not a javax.servlet.Filter");
+            throw new IllegalStateException(_class+" is not a javax.servlet.Filter");
         }
 
         _filter=(Filter)newInstance();
