@@ -8,12 +8,14 @@ package com.mortbay.HTTP;
 import com.mortbay.HTTP.Handler.ResourceHandler;
 import com.mortbay.HTTP.Handler.SecurityHandler;
 import com.mortbay.HTTP.Handler.NotFoundHandler;
+import com.mortbay.HTTP.Handler.NullHandler;
 import com.mortbay.HTTP.Handler.Servlet.Context;
 import com.mortbay.HTTP.Handler.Servlet.ServletHandler;
 import com.mortbay.HTTP.Handler.Servlet.ServletHolder;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.Resource;
 import com.mortbay.Util.XmlParser;
+import com.mortbay.Util.StringUtil;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URL;
@@ -91,6 +93,9 @@ public class WebApplicationContext extends HandlerContext
         // ResourcePath
         super.setResourceBase(_webApp);
 
+        // Protect WEB-INF
+        addHandler(new WebInfProtect());
+        
         // Resource Handler
         setServingResources(true);
         ResourceHandler rh = getResourceHandler();
@@ -129,9 +134,6 @@ public class WebApplicationContext extends HandlerContext
             Code.warning("No WEB-INF in "+_webAppName+". Serving files only.");
         else
         {
-            // protect it with NotFoundServlet
-            _servletHandler.addServlet("/WEB-INF/*","com.mortbay.Servlet.NotFoundServlet");
-             
             // Look for classes directory
             Resource classes = _webApp.addPath("WEB-INF/classes/");
             String classPath="";
@@ -540,6 +542,24 @@ public class WebApplicationContext extends HandlerContext
     public Map getTagLibMap()
     {
         return _tagLibMap;
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class WebInfProtect extends NullHandler
+    {
+        public void handle(String pathInContext,
+                           HttpRequest request,
+                           HttpResponse response)
+            throws HttpException, IOException
+        {
+            if(StringUtil.asciiToLowerCase(pathInContext).startsWith("/web-inf/"))
+            {
+                response.sendError(HttpResponse.__404_Not_Found);
+            }
+        }
     }
     
 }

@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Fixed security problem with lowercase WEB-INF uris on windows.
  + Set thread context classloader during handler start/stop calls.
  + Don't set MIME-Version in response.
  + Allow dynamic servlets to be served from /
