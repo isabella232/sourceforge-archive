@@ -653,7 +653,7 @@ public class HttpOutputStream
                         _buf[s++]=(byte)c;
                         if (s==_buf.length)
                         {
-                            HttpOutputStream.this.out.write(_buf,0,s);
+                            HttpOutputStream.this.getFilterStream().write(_buf,0,s);
                             HttpOutputStream.this._bytes+=s;
                             s=0;
                         }
@@ -662,7 +662,7 @@ public class HttpOutputStream
                     {
                         if (s>0)
                         {
-                            HttpOutputStream.this.out.write(_buf,0,s);
+                            HttpOutputStream.this.getFilterStream().write(_buf,0,s);
                             HttpOutputStream.this._bytes+=s;
                             s=0;
                         }
@@ -673,7 +673,7 @@ public class HttpOutputStream
                 
                 if (s>0)
                 {
-                    HttpOutputStream.this.out.write(_buf,0,s);
+                    HttpOutputStream.this.getFilterStream().write(_buf,0,s);
                     HttpOutputStream.this._bytes+=s;
                     s=0;
                 }
@@ -705,7 +705,7 @@ public class HttpOutputStream
                         _buf[s++]=(byte)c;
                         if (s==_buf.length)
                         {
-                            HttpOutputStream.this.out.write(_buf,0,s);
+                            HttpOutputStream.this.getFilterStream().write(_buf,0,s);
                             HttpOutputStream.this._bytes+=s;
                             s=0;
                         }
@@ -714,7 +714,7 @@ public class HttpOutputStream
                     {
                         if (s>0)
                         {
-                            HttpOutputStream.this.out.write(_buf,0,s);
+                            HttpOutputStream.this.getFilterStream().write(_buf,0,s);
                             HttpOutputStream.this._bytes+=s;
                             s=0;
                         }
@@ -725,7 +725,7 @@ public class HttpOutputStream
                 }
                 if (s>0)
                 {
-                    HttpOutputStream.this.out.write(_buf,0,s);
+                    HttpOutputStream.this.getFilterStream().write(_buf,0,s);
                     HttpOutputStream.this._bytes+=s;
                     s=0;
                 }
