@@ -633,10 +633,10 @@ public class ServletHandler extends AbstractHttpHandler
      * @exception UnavailableException 
      * @exception IOException 
      */
-    void dispatch(String pathInContext,
-                  HttpServletRequest request,
-                  HttpServletResponse response,
-                  ServletHolder servletHolder)
+    protected void dispatch(String pathInContext,
+                            HttpServletRequest request,
+                            HttpServletResponse response,
+                            ServletHolder servletHolder)
         throws ServletException,
                UnavailableException,
                IOException

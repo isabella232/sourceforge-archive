@@ -176,10 +176,10 @@ public class WebApplicationHandler extends ServletHandler
     }
 
     /* ------------------------------------------------------------ */
-    void dispatch(String pathInContext,
-                  HttpServletRequest request,
-                  HttpServletResponse response,
-                  ServletHolder servletHolder)
+    protected void dispatch(String pathInContext,
+                            HttpServletRequest request,
+                            HttpServletResponse response,
+                            ServletHolder servletHolder)
         throws ServletException,
                UnavailableException,
                IOException
