@@ -192,8 +192,7 @@ public class HashUserRealm
     
     /* ------------------------------------------------------------ */
     public void disassociate(UserPrincipal user)
-    {
-    }
+    {}
     
     /* ------------------------------------------------------------ */
     public UserPrincipal pushRole(UserPrincipal user, String role)
@@ -267,6 +266,10 @@ public class HashUserRealm
         return userSet!=null && userSet.contains(user.getName());
     }
 
+    /* ------------------------------------------------------------ */
+    public void logout(UserPrincipal user)
+    {}
+    
     /* ------------------------------------------------------------ */
     public String toString()
     {

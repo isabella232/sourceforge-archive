@@ -150,4 +150,9 @@ public class JAASUserRealm implements UserRealm
         return user;
     }
 
+    public void logout(UserPrincipal user)
+    {
+        System.err.println("LOGOUT!!!");
+    }
+    
 }

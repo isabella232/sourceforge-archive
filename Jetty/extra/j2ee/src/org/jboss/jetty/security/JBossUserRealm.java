@@ -409,6 +409,10 @@ public class JBossUserRealm
     return user;
   }
 
+  public void 
+    logout(UserPrincipal user)
+  {}
+    
   public String
     getName()
   {

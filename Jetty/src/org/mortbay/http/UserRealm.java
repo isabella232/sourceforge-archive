@@ -71,4 +71,11 @@ public interface UserRealm
      */
     public UserPrincipal popRole(UserPrincipal user);
     
+    /* ------------------------------------------------------------ */
+    /** Logout a role.
+     * This method is called for authentication mechanisms that have a concept
+     * of logout (which is only FORM). Most Authenticaton mechanisms need not
+     * do anything with this method.
+     */
+    public void logout(UserPrincipal user);
 }
