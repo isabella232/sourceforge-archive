@@ -44,11 +44,7 @@ public class Dump extends HttpServlet
 	throws ServletException, IOException
     {	
         sres.setContentType("text/html");
-        OutputStream out = sres.getOutputStream();
-
-	out.write("<H1>This is a Ü</H1>".getBytes());
-	
-	PrintWriter pout = new PrintWriter(out);
+	PrintWriter pout = sres.getWriter();
 
 	Page page=null;
 
