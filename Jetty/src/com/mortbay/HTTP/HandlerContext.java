@@ -338,6 +338,22 @@ public class HandlerContext implements LifeCycle
             throw new IllegalArgumentException(resourceBase+":"+e.toString());
         }
     }
+
+    /* ------------------------------------------------------------ */
+    /** Get a Resource from the context.
+     * The resource base must be set
+     * @param path A path to be applied to the resource base
+     * @return A Resource or null if no resourceBasse is set.
+     */
+    public Resource getResource(String path)
+        throws IOException
+    {
+        if (_resourceBase==null)
+            return null;
+        if (path==null)
+            return _resourceBase;
+        return _resourceBase.addPath(path);
+    }
     
     /* ------------------------------------------------------------ */
     /** Get the base resource.

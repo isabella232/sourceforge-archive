@@ -172,7 +172,7 @@ public class XmlParser
         public void startElement (String uri, String localName, String qName, Attributes attrs)
             throws SAXException
         {
-            String name=uri==null?qName:localName;
+            String name=(uri==null || uri.equals(""))?qName:localName;
             Node node= new Node(_context,name,attrs);
             _context.add(node);
             _context=node;
@@ -336,8 +336,13 @@ public class XmlParser
             {
                 _attrs=new Attribute[attrs.getLength()];
                 for (int i = 0; i <attrs.getLength(); i++)
-                    _attrs[i]=new Attribute(attrs.getLocalName(i),
+		{
+		    String name = attrs.getLocalName(i);
+		    if ( name==null || name.equals("") )
+			name = attrs.getQName(i);
+                    _attrs[i]=new Attribute(name,
                                             attrs.getValue(i));
+                }                    
             }
         }
         

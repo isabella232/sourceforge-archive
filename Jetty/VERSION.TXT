@@ -1,6 +1,10 @@
 Jetty Versions
 --------------
 
+ + Win32 Service uses Jetty.Server instead of HttpServer.
+ + Added getResource to HandleContext.
+ + WebApps initialize resourceBase before start.
+ + Fixed XmlParser to handle xerces1.3 OK
  + Added Get element to the XmlConfiguration class.
  + Added Static calls to the XmlConfiguration class.
  + Added debug and logging config example to demo.xml

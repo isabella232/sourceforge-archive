@@ -6,6 +6,7 @@
 // ========================================================================
 
 package com.mortbay.Jetty.Win32;
+import com.mortbay.Jetty.Server;
 import com.mortbay.HTTP.HttpServer;
 import com.mortbay.HTTP.HttpServer;
 import com.mortbay.Util.Code;
@@ -95,7 +96,7 @@ public class Service
                 {
                     try
                     {
-                        HttpServer server = new HttpServer();
+                        Server server = new Server();
                         Resource config = Resource.newResource((String)_configs.get(i));
                         XmlConfiguration xml=new XmlConfiguration(config.getURL());
                         xml.configure(server);

@@ -50,6 +50,7 @@ public class WebApplicationContext extends ServletHandlerContext
     /* ------------------------------------------------------------ */
     private String _name;
     private Resource _webApp;
+    private Resource _webInf;
     private ServletHandler _servletHandler;
     private SecurityHandler _securityHandler;
     private Context _context;
@@ -147,8 +148,53 @@ public class WebApplicationContext extends ServletHandlerContext
         _war=webApp;
         _defaultsDescriptor=defaults;
         _extract=extractWar;
+        _webApp=null;
+        resolveWebApp();
     }
 
+
+    /* ------------------------------------------------------------ */
+    private void resolveWebApp()
+        throws IOException
+    {
+        if (_webApp==null)
+        {
+            // Set dir or WAR
+            _webApp = Resource.newResource(_war);
+            if (_webApp.exists() && !_webApp.isDirectory())
+            {
+                _webApp = Resource.newResource("jar:"+_webApp+"!/");
+                if (_webApp.exists())
+                    _war=_webApp.toString();
+            }
+            if (!_webApp.exists()) {
+                Code.warning("Web application not found "+_war);
+                throw new java.io.FileNotFoundException(_war);
+            }
+            
+            // Expand
+            if (_extract && _webApp instanceof JarResource)
+            {
+                File tempDir=File.createTempFile("Jetty-",".war");
+                if (tempDir.exists())
+                    tempDir.delete();
+                tempDir.mkdir();
+                tempDir.deleteOnExit();
+                Log.event("Extract "+_war+" to "+tempDir);
+                ((JarResource)_webApp).extract(tempDir,true);
+                _webApp=Resource.newResource(tempDir.getCanonicalPath());
+            }
+            
+            Resource _webInf = _webApp.addPath("WEB-INF/");
+            if (!_webInf.exists() || !_webInf.isDirectory())
+                _webInf=null;
+            
+            // ResourcePath
+            super.setBaseResource(_webApp);
+        }
+    }
+
+    
     /* ------------------------------------------------------------ */
     /** Start the Web Application.
      * @exception IOException 
@@ -163,31 +209,8 @@ public class WebApplicationContext extends ServletHandlerContext
         xmlParser.redirectEntity("web-app_2_2.dtd",dtd);
         xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN",dtd);
 
-        // Set dir or WAR
-        Resource _webApp = Resource.newResource(_war);
-        if (_webApp.exists() && !_webApp.isDirectory())
-        {
-            _webApp = Resource.newResource("jar:"+_webApp+"!/");
-            if (_webApp.exists())
-                _war=_webApp.toString();
-        }
-        if (!_webApp.exists()) {
-            Code.warning("Web application not found "+_war);
-            throw new java.io.FileNotFoundException(_war);
-        }
-
-        // Expand
-        if (_extract && _webApp instanceof JarResource)
-        {
-            File tempDir=File.createTempFile("Jetty-",".war");
-            if (tempDir.exists())
-                tempDir.delete();
-            tempDir.mkdir();
-            tempDir.deleteOnExit();
-            Log.event("Extract "+_war+" to "+tempDir);
-            ((JarResource)_webApp).extract(tempDir,true);
-            _webApp=Resource.newResource(tempDir.getCanonicalPath());
-        }
+        // Find the webapp
+        resolveWebApp();
 
         // add security handler first
         _securityHandler=new SecurityHandler();
@@ -203,9 +226,6 @@ public class WebApplicationContext extends ServletHandlerContext
         }
         _servletHandler.setDynamicServletPathSpec("/servlet/*");
         _context=_servletHandler.getContext();
-            
-        // ResourcePath
-        super.setBaseResource(_webApp);
 
         // Protect WEB-INF
         addHandler(new WebInfProtect());
@@ -242,7 +262,7 @@ public class WebApplicationContext extends ServletHandlerContext
         
         // Do we have a WEB-INF
         Resource _webInf = _webApp.addPath("WEB-INF/");
-        if (!_webInf.exists() || !_webInf.isDirectory())
+        if (_webInf==null)
         {
             Code.warning("No WEB-INF in "+_war+". Serving files only.");
         }
