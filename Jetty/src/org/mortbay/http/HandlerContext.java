@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -62,7 +61,6 @@ import java.security.Permission;
  */
 public class HandlerContext implements LifeCycle
 {
-    
     private final static Map __dftMimeMap = new HashMap();
     private final static Map __encodings = new HashMap();
     static
@@ -92,8 +90,6 @@ public class HandlerContext implements LifeCycle
     private ClassLoader _loader;
     private Resource _resourceBase;
     private boolean _started;
-    private LogSink _logSink;
-    private LogSink _useLogSink;
 
     private Map _attributes = new HashMap(11);
     private Map _initParams = new HashMap(11);
@@ -109,8 +105,7 @@ public class HandlerContext implements LifeCycle
     private Map _resourceAliases;
     private Map _errorPages;
 
-    private PermissionCollection _permissions;
-    private DateCache _logDateCache;
+    private PermissionCollection _permissions;    
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -1089,35 +1084,6 @@ public class HandlerContext implements LifeCycle
         // Prepare a multi exception
         MultiException mx = new MultiException();
 
-        // Start the log sink
-        if (_logSink==null)
-            _useLogSink=_httpServer.getLogSink();
-        else
-        {
-            _useLogSink=_logSink;
-            if (!_logSink.isStarted())
-            {
-                try{_logSink.start();}
-                catch(Exception e){mx.add(e);}
-            }
-        }
-
-        // Setup the log date formatter.
-        if (_useLogSink!=null)
-        {
-            String logDateFormat="dd/MMM/yyyy:HH:mm:ss";
-            try
-            {
-                // XXX - this shows that the design of LogSink is WRONG!
-                Method gldf = _useLogSink.getClass().getMethod("getLogDateFormat",null);
-                logDateFormat=(String)gldf.invoke(_useLogSink,null);
-            }
-            catch(Exception e)
-            {
-                Code.ignore(e);
-            }
-            _logDateCache=new DateCache(logDateFormat);
-        }    
 
         // start the context itself
         _started=true;
@@ -1207,10 +1173,6 @@ public class HandlerContext implements LifeCycle
                     catch(Exception e){Code.warning(e);}
                 }
             }
-
-            _useLogSink=null;
-            if (_logSink!=null)
-                _logSink.stop();
         }
         finally
         {
@@ -1245,9 +1207,7 @@ public class HandlerContext implements LifeCycle
                     catch(Exception e){Code.warning(e);}
                 }
             }
-            
-            if (_httpServer!=null && _logSink!=null)
-                _httpServer.remove(_logSink);
+
         }
         finally
         {
@@ -1272,7 +1232,6 @@ public class HandlerContext implements LifeCycle
         _contextPath=null;
         _name=null;
         _redirectNullPath=false;
-        _logSink=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -1362,34 +1321,30 @@ public class HandlerContext implements LifeCycle
      * if setStatsOn(false). 
      */
     public int getResponses5xx() {return _responses5xx;}
+
     
     /* ------------------------------------------------------------ */
+    /** 
+     * @deprecated use HttpServer.getRequestLogSink() 
+     */
     public synchronized LogSink getLogSink()
     {
-        return _logSink;
+        return null;
     }
     
+    
     /* ------------------------------------------------------------ */
-    /** Set the request log for the context.
-     * Set the LogSink to be used for the request log for this
-     * context. The log is written in the combined format.
-     * @param logSink If null, the HttpServers logSink is used.
+    /**
+     * @deprecated use HttpServersetRequestLogSink()
      */
     public synchronized void setLogSink(LogSink logSink)
     {
-        if (isStarted())
-            throw new IllegalStateException("Started");
-
-        if (_httpServer!=null && _logSink!=null)
-            _httpServer.remove(_logSink);
-        _logSink=logSink;
-        if (_httpServer!=null && _logSink!=null)
-            _httpServer.add(_logSink);
+        Log.warning("HandlerContext.setLogSink not supported. Use HttpServer.setLogSink");
     }
+    
         
     /* ------------------------------------------------------------ */
     /** Log a request and response.
-     * The log is written in combined format.
      * @param request 
      * @param response 
      */
@@ -1415,56 +1370,8 @@ public class HandlerContext implements LifeCycle
                 }
             }
         }
-        
-        if (_useLogSink!=null && request!=null && response!=null)
-        {
-            StringBuffer buf = new StringBuffer(256);
-    
-            synchronized(buf)
-            {
-                buf.setLength(0);
-                buf.append(request.getRemoteAddr());
-                buf.append(" - ");
-                String user = (String)request.getAttribute(HttpRequest.__AuthUser);
-                buf.append((user==null)?"-":user);
-                buf.append(" [");
-                _logDateCache.format(System.currentTimeMillis(),buf);
-                buf.append("] \"");
-                request.appendRequestLine(buf);
-                buf.append("\" ");
-                buf.append(response.getStatus());
-                if (length>=0)
-                {
-                    buf.append(' ');
-                    buf.append(length);
-                    buf.append(' ');
-                }
-                else
-                    buf.append(" - ");
-                
-                String referer = request.getField(HttpFields.__Referer);
-                if(referer==null)
-                    buf.append("- ");
-                else
-                {
-                    buf.append('"');
-                    buf.append(referer);
-                    buf.append("\" ");
-                }
-                
-                String agent = request.getField(HttpFields.__UserAgent);
-                    
-                if(agent==null)
-                    buf.append('-');
-                else
-                {
-                    buf.append('"');
-                    buf.append(agent);
-                    buf.append('"');
-                }
-                
-                _useLogSink.log(buf.toString());
-            }
-        }
+
+        if (_httpServer!=null)
+            _httpServer.log(request,response,length);
     }
 }

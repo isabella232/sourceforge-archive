@@ -11,8 +11,7 @@ import org.mortbay.http.HttpServer;
 import org.mortbay.http.HttpServer;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
-import org.mortbay.util.WriterLogSink;
-import org.mortbay.util.FileLogSink;
+import org.mortbay.util.OutputStreamLogSink;
 import org.mortbay.util.Resource;
 import org.mortbay.xml.XmlConfiguration;
 import java.io.File;
@@ -45,7 +44,7 @@ public class Service
 {
     /* ------------------------------------------------------------ */
     static String serviceLogFile=
-    System.getProperty("SERVICE_LOG_FILE","logs"+File.separator+"service.log");
+    System.getProperty("SERVICE_LOG_FILE","logs"+File.separator+"yyyy_mm_dd.service.log");
     
     /* ------------------------------------------------------------ */
     public static final int SERVICE_CONTROL_STOP = 1;
@@ -207,9 +206,10 @@ public class Service
         try
         {
             if (Code.debug())
-                Log.instance().add(new WriterLogSink());
+                Log.instance().add(new OutputStreamLogSink());
                              
-	    FileLogSink sink= new FileLogSink(serviceLogFile);
+	    OutputStreamLogSink sink= new OutputStreamLogSink(serviceLogFile);
+            sink.start();
             Log.instance().add(sink);
         }
         catch(Exception e)

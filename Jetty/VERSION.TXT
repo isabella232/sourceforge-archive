@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Added RequestLogFormat to allow extensible request logs.
  + Support the ZZZ timezone offset format in DateCache
  + HTAccessHandler made stricter on misconfiguration
  + Generate session unbind events on a context.stop()

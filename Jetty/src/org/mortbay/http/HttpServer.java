@@ -27,6 +27,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
+import java.lang.reflect.Method;
 import java.beans.beancontext.BeanContextSupport;
 
 
@@ -61,7 +63,6 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     /* ------------------------------------------------------------ */
     private HashMap _listeners = new HashMap(3);
     private HttpEncoding _httpEncoding ;
-    private LogSink _logSink;
     private HashMap _realmMap = new HashMap(3);
     
     // HttpServer[host->PathMap[contextPath->List[HanderContext]]]
@@ -70,6 +71,9 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     
     private HandlerContext _notFoundContext=null;
     private boolean _chunkingForced=false;
+    
+    private LogSink _requestLogSink;
+    private RequestLogFormat _requestLogFormat;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -120,13 +124,34 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             Code.debug("HANDLER: ",_hostMap);
         }   
 
-        if (_logSink!=null && !_logSink.isStarted())
+        if (_requestLogSink!=null)
         {
-            try{
-                _logSink.start();
-                Log.event("Started "+_logSink);
+            if (!_requestLogSink.isStarted())
+            {
+                try{
+                    _requestLogSink.start();
+                    Log.event("Started "+_requestLogSink);
+                }
+                catch(Exception e){mex.add(e);}
             }
-            catch(Exception e){mex.add(e);}
+
+            if (_requestLogFormat==null)
+            {
+                String logDateFormat="dd/MMM/yyyy:HH:mm:ss ZZZ";
+                try
+                {
+                    // XXX - this shows that the design of LogSink is WRONG!
+                    Method gldf = _requestLogSink.getClass().getMethod("getLogDateFormat",null);
+                    logDateFormat=(String)gldf.invoke(_requestLogSink,null);
+                }
+                catch(Exception e)
+                {
+                    Code.ignore(e);
+                }
+                _requestLogFormat=new NCSARequestLogFormat(logDateFormat,
+                                                           TimeZone.getDefault().getID(),
+                                                           true);
+            }
         }
         
         Iterator contexts = getHandlerContexts().iterator();
@@ -156,7 +181,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
      */
     public synchronized boolean isStarted()
     {
-        if (_logSink!=null && _logSink.isStarted())
+        if (_requestLogSink!=null && _requestLogSink.isStarted())
             return true;
         
         Iterator listeners = getListeners().iterator();
@@ -210,10 +235,10 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
                 context.stop();
         }
 
-        if (_logSink!=null)
+        if (_requestLogSink!=null)
         {
-            _logSink.stop();
-            Log.event("Stopped "+_logSink);
+            _requestLogSink.stop();
+            Log.event("Stopped "+_requestLogSink);
         }
         Log.event("Stopped "+this);
     }
@@ -257,10 +282,10 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
 	    _listeners=null;
 	}
 	
-        if (_logSink!=null)
+        if (_requestLogSink!=null)
         {
-            remove(_logSink);
-            _logSink.destroy();
+            remove(_requestLogSink);
+            _requestLogSink.destroy();
         }
     }
 
@@ -623,31 +648,81 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     }
 
     /* ------------------------------------------------------------ */
+    /** 
+     * @deprecated use getRequestLogSink()
+     */
     public synchronized LogSink getLogSink()
     {
-        return _logSink;
+        return getRequestLogSink();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @deprecated use setRequestLogSink()
+     */
+    public synchronized void setLogSink(LogSink logSink)
+    {
+        setRequestLogSink(logSink);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public synchronized LogSink getRequestLogSink()
+    {
+        return _requestLogSink;
     }
     
     /* ------------------------------------------------------------ */
     /** Set the request log.
-     * Set the LogSink to be used for the request log. The log is
-     * written in the combined format.
+     * Set the LogSink to be used for the request log.
      * @param logSink 
      */
-    public synchronized void setLogSink(LogSink logSink)
+    public synchronized void setRequestLogSink(LogSink logSink)
     {
         if (isStarted())
             throw new IllegalStateException("Started");
-        
-        if (_logSink!=null)
-            remove(_logSink);
-
-        _logSink=logSink;
-        
-        if (_logSink!=null)
-            add(_logSink);
+        if (_requestLogSink!=null)
+            remove(_requestLogSink);
+        _requestLogSink=logSink;
+        if (_requestLogSink!=null)
+            add(_requestLogSink);
     }
-        
+
+    /* ------------------------------------------------------------ */
+    public RequestLogFormat getRequestLogFormat()
+    {
+        return _requestLogFormat;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the requestLogFormat.
+     * Set the format instance to be used for formatting the request
+     * log. The default requestLogFormat is an extended
+     * NCSARequestLogFormat using the date format of the request
+     * LogSink in the GMT timezone.
+     * @param format 
+     */
+    public void setRequestLogFormat(RequestLogFormat format)
+    {
+        _requestLogFormat=format;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Log a request to the request log
+     * @param request The request.
+     * @param response The response generated.
+     * @param length The length of the body.
+     */
+    void log(HttpRequest request,
+             HttpResponse response,
+             int length)
+    {
+        if (_requestLogSink!=null &&
+            _requestLogFormat!=null &&
+            request!=null &&
+            response!=null)
+            _requestLogSink.log(_requestLogFormat.format(request,response,length));
+    }
+    
     /* ------------------------------------------------------------ */
     /** Service a request.
      * Handle the request by passing it to the HttpHandler contained in

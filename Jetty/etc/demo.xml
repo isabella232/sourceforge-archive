@@ -1,56 +1,6 @@
 <?xml version="1.0"  encoding="ISO-8859-1"?>
 <!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.1//EN" "http://jetty.mortbay.org/configure_1_1.dtd">
 
-<!--
-This is a Jetty HTTP server configuration file.  This configuration
-uses the generic org.mortbay.xml.XmlConfiguration class to call
-the normal org.mortbay.jetty.Server configuration API from
-within an XML script.
-
-The format of this file is described in the configure.dtd file.
-
-The API that can be called by this file is described in the
-Javadoc for Jetty.
-
-The following concepts must be understood when configuring
-a server:
-
-Listener: is a network interface object that
-accepts HTTP requests for the server. SocketListeners accept
-normal requests, while JsseListeners accept SSL requests.
-The threading model of the server is controlled by the
-listener parameters.
-
-WebApplication: is a bundled collection of resources,
-servlets and configuration that can provide a unified
-WWW application.  It is part of the 2.2 servlet standard.
-The contents of the application are configured by the
-web.xml deployment descriptor within the application.
-The configuration of the application within Jetty requires
-on the context of the application to be set.
-
-Context: is a grouping of server resources that share
-the same URL path prefix, class path and resource base.
-A Web application is an example of a specific context.
-Generic contexts may have arbitrary request handlers
-added to them.  All contexts have a path specification
-(frequently the default "/") and an option virtual
-host alias.
-
-Handler:  Handlers are the objects that actually
-service the HTTP requests. Examples of Handlers include
-ServletHandler, ResourceHandler and NotFoundHandler.
-Handlers are contained within Contexts, which provide
-conveniance methods for the common handlers so
-that servlet and file serving may be configured for
-a context without explicit creation of a Handler.
-
-This file configures the demo server and is equivalent
-to the org.mortbay.jetty.Demo class.
-
-$Id$
--->
-
 <Configure class="org.mortbay.jetty.Server">
 
   <!-- The following section can be uncommented to control the
@@ -213,13 +163,20 @@ $Id$
     </Arg>
   </Call>
 
-  <Set name="LogSink">
+  <Set name="RequestLogSink">
     <New class="org.mortbay.util.OutputStreamLogSink">
       <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.request.log</Arg>
-      <Set name="RetainDays">90</Set>
-      <Set name="Append">true</Set>
+      <Set name="retainDays">90</Set>
+      <Set name="append">true</Set>
       <Set name="flushOn">false</Set>
-      <Set name="logDateFormat">dd/MMM/yyyy:HH:mm:ss ZZZ</Set>
+    </New>
+  </Set>
+
+  <Set name="RequestLogFormat">
+    <New class="org.mortbay.http.NCSARequestLogFormat">
+        <Arg type="String">dd/MMM/yyyy:HH:mm:ss ZZZ</Arg>
+        <Arg type="String">GMT</Arg>
+        <Arg type="boolean">true</Arg>
     </New>
   </Set>
 
