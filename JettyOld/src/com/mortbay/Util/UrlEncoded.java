@@ -173,7 +173,6 @@ public class UrlEncoded extends Hashtable
                     value =
                         substring.substring(i,substring.length()).trim();
                     value = decode(value);
-                    value = StringUtil.replace(value,"\015\n","\n");
                 }
             }
             
