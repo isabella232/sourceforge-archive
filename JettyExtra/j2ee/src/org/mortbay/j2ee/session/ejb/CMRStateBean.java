@@ -54,13 +54,13 @@ import org.mortbay.j2ee.session.interfaces.CMRStatePK;
  *
  *   @jboss:table-name "JETTY_HTTPSESSION_CMRState"
  *   @jboss:create-table create="true"
- *   @jboss:remove-table remove="true"
+ *   @jboss:remove-table remove="false"
  *   @jboss:container-configuration name="Sharing CMP 2.x EntityBean"
  *
  */
 
 public abstract class CMRStateBean
-  implements EntityBean, org.mortbay.j2ee.session.State
+  implements EntityBean
 {
   Category _log=Category.getInstance(getClass().getName());
 

@@ -19,12 +19,6 @@ public class ValidationInterceptor
 {
   protected Category _log=Category.getInstance(getClass().getName());
 
-  public
-    ValidationInterceptor(Manager manager, HttpSession session, State state)
-  {
-    super(session, state);
-  }
-
   protected void before() throws IllegalStateException {if (_running) checkValid();}
   protected void after() {}
 
@@ -42,7 +36,7 @@ public class ValidationInterceptor
     boolean valid=false;
     try
     {
-      valid=_state.isValid();
+      valid=getState().isValid();
     }
     catch (java.rmi.NoSuchObjectException ignore)
     {
@@ -54,7 +48,7 @@ public class ValidationInterceptor
     }
    catch (Exception e)
     {
-      _log.error("couldn't determine validity of HttpSession: "+_session, e);
+      _log.error("couldn't determine validity of HttpSession: "+getSession(), e);
     }
 
     if (!valid)
@@ -63,4 +57,6 @@ public class ValidationInterceptor
       throw new IllegalStateException("invalid HttpSession");
     }
   }
+
+  //  public Object clone() { return this; } // Stateless
 }
