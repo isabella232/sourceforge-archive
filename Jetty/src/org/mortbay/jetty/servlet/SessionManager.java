@@ -21,8 +21,22 @@ import org.mortbay.util.LifeCycle;
 public interface SessionManager extends LifeCycle, Serializable
 {
     /* ------------------------------------------------------------ */
-    public final static String __SessionId  = "JSESSIONID";
-    public final static String __SessionUrlPrefix = ";"+__SessionId+"=";
+    /** Session cookie name.
+     * Defaults to JSESSIONID, but can be set with the
+     * org.mortbay.jetty.servlet.SessionCookie system property.
+     */
+    public final static String __SessionCookie=
+        System.getProperty("org.mortbay.jetty.servlet.SessionCookie","JSESSIONID");
+    
+    /* ------------------------------------------------------------ */
+    /** Session URL parameter name.
+     * Defaults to jsessionid, but can be set with the
+     * org.mortbay.jetty.servlet.SessionURL system property.
+     */
+    public final static String __SessionURL = 
+        System.getProperty("org.mortbay.jetty.servlet.SessionURL","jsessionid");
+
+    final static String __SessionUrlPrefix=";"+__SessionURL+"=";
 
     /* ------------------------------------------------------------ */
     /** Session Domain.

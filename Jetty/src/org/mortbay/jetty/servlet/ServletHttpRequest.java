@@ -422,7 +422,7 @@ public class ServletHttpRequest
             {
                 for (int i=0;i<cookies.length;i++)
                 {
-                    if (SessionManager.__SessionId.equalsIgnoreCase(cookies[i].getName()))
+                    if (SessionManager.__SessionCookie.equalsIgnoreCase(cookies[i].getName()))
                     {
                         if (_sessionId!=null)
                         {
@@ -444,10 +444,10 @@ public class ServletHttpRequest
         }
             
         // check if there is a url encoded session param.
-        if (pathParams!=null && pathParams.startsWith(SessionManager.__SessionId))
+        if (pathParams!=null && pathParams.startsWith(SessionManager.__SessionURL))
         {
             String id =
-                pathParams.substring(SessionManager.__SessionId.length()+1);
+                pathParams.substring(SessionManager.__SessionURL.length()+1);
             Code.debug("Got Session ",id," from URL");
             
             if (_sessionId==null)
@@ -514,7 +514,7 @@ public class ServletHttpRequest
             if (_servletHandler.isUsingCookies())
             {
                 Cookie cookie =
-                    new Cookie(SessionManager.__SessionId,_session.getId());
+                    new Cookie(SessionManager.__SessionCookie,_session.getId());
                 String path=
                     _servletHandler.getServletContext()
                     .getInitParameter(SessionManager.__SessionPath);
