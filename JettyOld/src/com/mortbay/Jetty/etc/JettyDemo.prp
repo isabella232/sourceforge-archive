@@ -30,7 +30,8 @@ PROPERTY.DefaultPageType		  : com.mortbay.Jetty.JettyLaF
 #                       com.mortbay.HTTP.HttpServer or a decendant.
 # LISTENER.name.CLASS - HttpListener classname or decendant
 # LISTENER.name.ADDRS - List of addresses and ports to listen on
-# STACKS              - List of handler stack names.
+# STACKS              - List of request handler stack names.
+# EXCEPTIONS          - List of exception handler stack names.
 # PROPERTY.*          - Properties for this server
 # PROPERTIES          - File of properties for this server.
 #
@@ -47,6 +48,7 @@ main.CLASS				  : com.mortbay.HTTP.HttpServer
 main.LISTENER.all.CLASS                   : com.mortbay.HTTP.HttpListener
 main.LISTENER.all.ADDRS                   : 0.0.0.0:8080;127.0.0.1:8888
 main.STACKS				  : root;files
+main.EXCEPTIONS                           : defaultEx;terseEx;
 main.PROPERTY.SessionMaxInactiveInterval  : 3600
 main.PROPERTY.MinListenerThreads	  : 3
 main.PROPERTY.MaxListenerThreads	  : 20
@@ -54,18 +56,17 @@ main.PROPERTY.MaxListenerThreadIdleMs	  : 60000
 main.PROPERTY.MimeMap			  : ./etc/Mime.prp
 
 
+
 # ======================================================================== 
 # Define the handler instances handler stack "root" in server "main"
 # PATHS           - List of PathMap path specifiactions for this stack
 # HANDLERS        - List of handler names for this stack.
-# EXCEPTIONS      - List of exception handler names for this stack.
 # name.CLASS      - The classname for the handler "name"
 # name.PROPERTY.* - Properties defined for handler "name"
 # name.PROPERTIES - file of properties defined for handler "name"
 # ------------------------------------------------------------------------
 main.root.PATHS                           : /
 main.root.HANDLERS			  : Log;Auth;Alias;Filter;Param;Session;Servlet;File;Forward;NotFound
-main.root.EXCEPTIONS			  : Default
 
 main.root.Log.CLASS			  : com.mortbay.HTTP.Handler.LogHandler
 main.root.Log.PROPERTY.File               : ./log/demo.log
@@ -104,7 +105,21 @@ main.root.Forward.PROPERTY.FORWARD.proxy.URL   : http://localhost:8081
 
 main.root.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
 
-main.root.Default.CLASS			  : com.mortbay.HTTP.Handler.DefaultExceptionHandler
+
+# ======================================================================== 
+# Exception handler stacks 'default' and 'terse' for server 'main'
+# HANDLERS        - List of exception handler names for each stack.
+# PATHS           - List of PathMap path specifiactions for each stack
+# name.CLASS      - The classname for the handler "name"
+# ------------------------------------------------------------------------
+main.defaultEx.PATHS			  : /servlets;/Jetty
+main.defaultEx.HANDLERS			  : DefaultEx
+main.defaultEx.DefaultEx.CLASS		  : com.mortbay.HTTP.Handler.DefaultExceptionHandler
+main.terseEx.PATHS			  : /
+main.terseEx.HANDLERS			  : TerseEx
+main.terseEx.TerseEx.CLASS		  : com.mortbay.HTTP.Handler.TerseExceptionHandler
+
+
 
 # ======================================================================== 
 # Define the  handler stack "files" in server "main"
@@ -125,8 +140,6 @@ main.files.File.PROPERTY.FILES.Software.DIRECTORY: .
 main.files.File.PROPERTY.FILES.Servlet.PATHS     : /javadoc/javax/servlet
 main.files.File.PROPERTY.FILES.Servlet.DIRECTORY : ./src/javax/servlet/javadoc
 main.files.NotFound.CLASS		         : com.mortbay.HTTP.Handler.NotFoundHandler
-
-
 
 # ======================================================================== 
 # Define the server instance named "proxy"

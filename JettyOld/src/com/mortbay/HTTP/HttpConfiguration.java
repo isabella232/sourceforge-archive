@@ -25,13 +25,21 @@ import java.util.*;
  */
 public interface HttpConfiguration 
 {
-    // The name of the default session max idle time attribute
+    /** Property name for the default session max idle time */
     public static final String SessionMaxInactiveInterval = 
         "SessionMaxInactiveInterval";
     
+    /** Property name for the minimum listener threads */
     public static final String MinListenerThreads="MinListenerThreads";
+    
+    /** Property name for the maximum listener threads */
     public static final String MaxListenerThreads="MaxListenerThreads";
+    
+    /** Property name for the maximum listener idle time */
     public static final String MaxListenerThreadIdleMs="MaxListenerThreadIdleMs";
+    
+    /** Property name for the getResource url base (eg. "file:" */
+    public static final String ResourceBase="ResourceBase";
     
 
     /* ------------------------------------------------------------ */

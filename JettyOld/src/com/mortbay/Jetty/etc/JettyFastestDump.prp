@@ -22,7 +22,6 @@ main.LISTENER.all.ADDRS                   : 0.0.0.0:8080
 # ------------------------------------------------------------------------
 main.root.PATHS					     : /
 main.root.HANDLERS				     : File;Param;Dynamic;Servlet;NotFound
-main.root.EXCEPTIONS				     : Default
 
 main.root.File.CLASS				     : com.mortbay.HTTP.Handler.FileHandler
 main.root.File.PROPERTY.AllowPut		     : False
@@ -47,7 +46,6 @@ main.root.Servlet.PROPERTY.SERVLET.Dump.CHUNK	     : True
 
 main.root.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
 
-main.root.Default.CLASS			  : com.mortbay.HTTP.Handler.DefaultExceptionHandler
 
 
 

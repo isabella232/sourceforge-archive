@@ -19,7 +19,6 @@ main.LISTENER.all.ADDRS                   : 0.0.0.0:8080
 # ------------------------------------------------------------------------
 main.root.PATHS                           : /
 main.root.HANDLERS			  : Log;Auth;Alias;Filter;File;Param;Session;Dynamic;Servlet;NotFound
-main.root.EXCEPTIONS			  : Default
 
 main.root.Log.CLASS			  : com.mortbay.HTTP.Handler.LogHandler
 main.root.Log.PROPERTY.File               : ./log/demo.log
@@ -64,7 +63,6 @@ main.root.Servlet.PROPERTY.SERVLET.Dump.CHUNK	     : True
 
 main.root.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
 
-main.root.Default.CLASS			  : com.mortbay.HTTP.Handler.DefaultExceptionHandler
 
 
 

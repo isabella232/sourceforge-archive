@@ -29,8 +29,9 @@
 *.*.File.CLASS		  : com.mortbay.HTTP.Handler.FileHandler
 *.*.Forward.CLASS	  : com.mortbay.HTTP.Handler.ForwardHandler
 *.*.NotFound.CLASS	  : com.mortbay.HTTP.Handler.NotFoundHandler
-*.*.Default.CLASS	  : com.mortbay.HTTP.Handler.DefaultExceptionHandler
 *.*.Proxy.CLASS		  : com.mortbay.HTTP.Handler.ProxyHandler
+*.*.DefaultEx.CLASS	  : com.mortbay.HTTP.Handler.DefaultExceptionHandler
+*.*.TerseEx.CLASS	  : com.mortbay.HTTP.Handler.TerseExceptionHandler
 
 # ======================================================================== 
 # Default Servlet CLASS definitions
@@ -41,8 +42,7 @@
 *.*.Servlet.PROPERTY.SERVLET.PropertyTree.CLASS: com.mortbay.Servlets.PropertyTreeEditor
 *.*.Servlet.PROPERTY.SERVLET.Config.CLASS      : com.mortbay.Servlets.ConfigDump
 *.*.Servlet.PROPERTY.SERVLET.Debug.CLASS       : com.mortbay.Servlets.DebugServlet
-*.*.Servlet.PROPERTY.SERVLET.Laf.CLASS	       : com.mortbay.Servlets.LookAndFeelServlet
-
+*.*.Servlet.PROPERTY.SERVLET.Laf.CLASS	       : com.mortbay.Servlets.LookAndFeelServlet	       
 # ======================================================================== 
 # Default ServletHandler Properties
 # ------------------------------------------------------------------------
@@ -63,6 +63,7 @@
 *.*.File.PROPERTY.Indexes	    : index.html;index.htm
 *.*.File.PROPERTY.MaxCachedFiles    : 100
 *.*.File.PROPERTY.MaxCachedFileSize : 8192
+
 
 # ======================================================================== 
 # Define the server instances to be configured by this file:
@@ -85,6 +86,7 @@ PROPERTY.DefaultPageType		  : com.mortbay.Jetty.JettyLaF
 # LISTENER.name.CLASS - HttpListener classname or decendant
 # LISTENER.name.ADDRS - List of addresses and ports to listen on
 # STACKS              - List of handler stack names.
+# EXCEPTIONS          - List of exception handler stack names.
 # PROPERTY.*          - Properties for this server
 # PROPERTIES          - File of properties for this server.
 #
@@ -100,6 +102,7 @@ PROPERTY.DefaultPageType		  : com.mortbay.Jetty.JettyLaF
 main.LISTENERS                            : all
 main.LISTENER.all.ADDRS                   : 0.0.0.0:8080;127.0.0.1:8888
 main.STACKS				  : root;files
+main.EXCEPTIONS                           : defaultEx
 main.PROPERTY.SessionMaxInactiveInterval  : 3600
 main.PROPERTY.MinListenerThreads	  : 3
 main.PROPERTY.MaxListenerThreads	  : 20
@@ -117,7 +120,6 @@ main.PROPERTY.MimeMap			  : ./etc/Mime.prp
 # ------------------------------------------------------------------------
 main.root.PATHS                           : /
 main.root.HANDLERS			  : Log;Auth;Alias;Filter;Param;Session;Servlet;File;Forward;NotFound
-main.root.EXCEPTIONS			  : Default
 main.root.Log.PROPERTY.File               : ./log/demo.log
 main.root.Log.PROPERTY.Append             : False
 main.root.Log.PROPERTY.LongForm           : True
@@ -169,6 +171,16 @@ main.root.Forward.PROPERTY.FORWARD.proxy.PATHS : http
 main.root.Forward.PROPERTY.FORWARD.proxy.URL   : http://localhost:8081
 
 
+# ======================================================================== 
+# Exception handler stacks 'default' and 'terse' for server 'main'
+# HANDLERS        - List of exception handler names for each stack.
+# PATHS           - List of PathMap path specifiactions for each stack
+# name.CLASS      - The classname for the handler "name"
+# ------------------------------------------------------------------------
+main.defaultEx.PATHS			  : /
+main.defaultEx.HANDLERS			  : DefaultEx
+main.defaultEx.DefaultEx.CLASS		  : com.mortbay.HTTP.Handler.DefaultExceptionHandler
+
 
 # ======================================================================== 
 # Define the  handler stack "files" in server "main"
@@ -184,13 +196,11 @@ main.files.File.PROPERTY.FILES.Servlet.PATHS     : /javadoc/javax/servlet
 main.files.File.PROPERTY.FILES.Servlet.DIRECTORY : ./src/javax/servlet/javadoc
 
 
-
 # ======================================================================== 
 # Define the server instance named "proxy"
 # ------------------------------------------------------------------------
 proxy.STACKS				  : root
 proxy.LISTENER.all.ADDRS                  : 0.0.0.0:8081
-
 
 # ======================================================================== 
 # Define the  handler stack "root" in server "proxy"

@@ -50,7 +50,19 @@ public class HtmlFilter extends HttpFilter
     int state=0;
     StringBuffer tagBuf = new StringBuffer(128);
     byte[] ba={0};
+
     
+    /* ------------------------------------------------------------- */
+    /** Modify response on activation.
+     * Remove content length and last modified headers, as they
+     * are possibly incorrect after filtering.
+     */
+    protected void activate()
+    {
+	response.setHeader(HttpHeader.ContentLength, null);
+	response.setHeader("Last-Modified", null);
+    }
+
     /* ------------------------------------------------------------- */
     public void write(byte[]  b)
 	 throws IOException

@@ -1,4 +1,4 @@
-Release 2.2.1 - 16 July 1999
+Release 2.2.1 - 18 July 1999
   + Comma separate header fields.
   + Protect against duplicate single valued headers.
   + Less verbose debug in PropertyTree
@@ -7,9 +7,15 @@ Release 2.2.1 - 16 July 1999
   + Response with SC_BAD_REQUEST rather than close in more 
     circumstances
   + Handle continuation lines in HttpHeader.
+  + HtmlFilter resets last-modified and content-length headers.
   + Implemented com.mortbay.Util.IO as a ThreadPool
-  + Fixed ExceptionHandler configuration
+  + Decoupled ExceptionHandler configuration from Handler stacks.
+    Old config style will produce warning and Default behavior.
+    See new config file format for changes.
   + Added TerseExceptionHandler 
+  + Added optional resourceBase property to HttpConfiguration. This
+    is used as a URL prefix in the getResource API and was suggested
+    by the JSERV and Tomcat implementors.
 
 Release 2.2.0 - 1 July 1999
   + Improved feature description page.
@@ -38,7 +44,6 @@ Release 2.2.Beta4 - 29 June 1999
   + Expanded Mime.prp file
   + Added property handling to ServletHandler to read JRUN
     servlet configuration files.
-
 
 Release 2.2.Beta3 - 22 June 1999
   + Re-implemented ThreadedServer to improve and balance performance.

@@ -147,12 +147,15 @@ public class Server extends BaseConfiguration
      * PropertyTree, such as: <PRE>
      * CLASS                   : com.mortbay.HTTP.HttpServer
      * STACKS                  : stackname1;stackname2;...
+     * EXCEPTIONS              : exstackname1;exstackname2;...
      * PROPERTY.ServerProperty : ServerValue
      * PROPERTIES              : FileOfServerProperties.
      * LISTENER.name.CLASS     : com.mortbay.HTTP.HttpListener
      * LISTENER.name.ADDRS     : 0.0.0.0:8080
      * stackname1.*            : *
      * stackname2.*            : *
+     * exstackname1.*          : *
+     * exstackname2.*          : *
      * </PRE>
      * The server is constructed by passing it the server
      * properties and the listener PropertyTree.  Then for each
@@ -190,6 +193,14 @@ public class Server extends BaseConfiguration
 		    stackName=(String)stacks.elementAt(k);
 		    PropertyTree stackTree = serverTree.getTree(stackName);
 		    server.addHandlerStack(stackName,stackTree);
+		}
+
+		stacks = serverTree.getVector("EXCEPTIONS",";,");
+		for (int k=0; stacks!=null && k<stacks.size();k++)
+		{
+		    stackName=(String)stacks.elementAt(k);
+		    PropertyTree stackTree = serverTree.getTree(stackName);
+		    server.addExceptionStack(stackName,stackTree);
 		}
 	    }
 	    catch (Error e)
@@ -372,13 +383,11 @@ public class Server extends BaseConfiguration
      * a PropertyTree with a structure like:<PRE>
      * PATHS                   : pathSpec;pathSpec;...
      * HANDLERS                : handlername1;handlername2;...
-     * EXCEPTIONS              : exceptionname1;...
      * handlername1.CLASS      : package.handler1class
      * handlername1.PROPERTY.* : *
      * handlername1.PROPERTIES : handler1PropertyFile.prp
      * handlername2.*          : *
      * ...
-     * exceptionname1.CLASS    : package.exceptionHandlerClass
      * </PRE>
      * The stack of handlers is constructed in the order specified
      * by the HANDLERS parameter and registered at each of the
@@ -402,6 +411,11 @@ public class Server extends BaseConfiguration
 	Code.debug("Configure Stack ",serverName,
 		   ".",stackName,
 		   " ",stackProperties);
+	
+	if (stackTree.get("EXCEPTIONS")!=null)
+	    Code.warning("2.2.0 Style exception configuration in '"+
+			 serverName+"."+stackName+
+			 "' is not supported");
 	
 	Vector handlers = stackTree.getVector("HANDLERS",";,");
 	HttpHandler[] stack= new HttpHandler[handlers.size()];
@@ -442,55 +456,71 @@ public class Server extends BaseConfiguration
 	    }
 	    stack[h]=handlerInstance;
 	}
- 	// Put in the exception handling stacks if needed
- 	Vector exceptionHandlers = stackTree.getVector("EXCEPTIONS",";,");
- 	if (exceptionHandlers.size() > 0)
- 	{
- 	    ExceptionHandler[] exceptionStack
- 	      = new ExceptionHandler[exceptionHandlers.size()];
- 
- 	    exceptionHandlersMap = new PathMap();
- 
- 	    // Add the handler array to all the paths
- 	    for (int d=paths.size();d-->0;)
- 		exceptionHandlersMap.put(paths.elementAt(d),exceptionStack);
- 	
- 	    for (int ehi=0; ehi<exceptionHandlers.size();ehi++)
- 	    {
- 		String handlerName=(String)exceptionHandlers.elementAt(ehi);
- 		PropertyTree handlerTree = stackTree.getTree(handlerName);
- 		PropertyTree handlerProperties=properties(handlerTree);
- 	    
- 		Code.debug("Configure ExceptionHandler ",serverName,
- 			   ".",stackName,
- 			   ".",handlerName,
- 			   " ",handlerProperties);
- 
- 		Class handlerClass=Class.forName(handlerTree.getProperty("CLASS"));
- 		if (!com.mortbay.HTTP.ExceptionHandler.class.isAssignableFrom(handlerClass))
- 		    Code.fail(handlerClass+" is not a com.mortbay.HTTP.ExceptionHandler");
- 	    
- 		ExceptionHandler handlerInstance=null;
- 		try
- 		  {
- 		      Class[] typeArgs = {};
- 		      Constructor handlerConstructor =
- 			handlerClass.getConstructor(typeArgs);
- 		      Object[] arg = {};
- 		      handlerInstance = (com.mortbay.HTTP.ExceptionHandler)
- 			handlerConstructor.newInstance(arg);
- 		  }
- 		catch(NoSuchMethodException nsme)
- 		  {
- 		      handlerInstance
- 			= (ExceptionHandler) handlerClass.newInstance();
- 		  }
- 		exceptionStack[ehi]=handlerInstance;
- 	    }
- 	}
     }
 
     
+    /* ------------------------------------------------------------ */
+    /** Add an exception handler stack to the server.
+     * A stack of exception handlers is contructed and configured from
+     * a PropertyTree with a structure like:<PRE>
+     * PATHS                   : pathSpec;pathSpec;...
+     * HANDLERS                : handlername1;handlername2;...
+     * handlername1.CLASS      : package.handler1class
+     * handlername1.PROPERTY.* : *
+     *      * ...
+     * </PRE>
+     * The stack of handlers is constructed in the order specified
+     * by the HANDLERS parameter and registered at each of the
+     * PathMap path specifications listed in PATHS.
+     *
+     * Note that if this method is called from buildServer, then all
+     * properties in the original file will be prefixed with
+     * "servername.stackname.".
+     * @param stackName The name of the exception handler stack
+     * @param stackTree PopertyTree describing the stack
+     * @exception Exception 
+     */
+    public synchronized void addExceptionStack(String stackName,
+					       PropertyTree stackTree)
+	throws Exception
+    {
+	PropertyTree stackProperties=properties(stackTree);
+	Code.debug("Configure Ex Stack ",serverName,
+		   ".",stackName,
+		   " ",stackProperties);
+	
+	Vector handlers = stackTree.getVector("HANDLERS",";,");
+	ExceptionHandler[] stack
+	    = new ExceptionHandler[handlers.size()];
+	
+	Vector paths = stackTree.getVector("PATHS",",;");
+	for (int d=paths.size();d-->0;)
+	{
+	    if (exceptionHandlersMap==null)
+		exceptionHandlersMap=new PathMap();
+	    exceptionHandlersMap.put(paths.elementAt(d),stack);
+	}
+	
+	for (int h=0; h<handlers.size();h++)
+	{
+	    String handlerName=(String)handlers.elementAt(h);
+	    PropertyTree handlerTree = stackTree.getTree(handlerName);
+	    
+	    Code.debug("Configure Ex Handler ",serverName,
+		       ".",stackName,
+		       ".",handlerName);
+
+	    Class handlerClass=Class.forName(handlerTree.getProperty("CLASS"));
+	    if (!com.mortbay.HTTP.ExceptionHandler.class.isAssignableFrom(handlerClass))
+		Code.fail(handlerClass+" is not a com.mortbay.HTTP.ExceptionHandler");
+	    
+	    ExceptionHandler handlerInstance = (com.mortbay.HTTP.ExceptionHandler)
+		handlerClass.newInstance();
+	    
+	    stack[h]=handlerInstance;
+	}
+    }
+
     /* ------------------------------------------------------------ */
     /** Start serving.
      */

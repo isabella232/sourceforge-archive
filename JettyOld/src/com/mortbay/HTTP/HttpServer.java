@@ -77,7 +77,7 @@ public class HttpServer implements ServletContext
     private PathMap httpHandlersMap;
     private PathMap exceptionHandlersMap;
     private Hashtable servletHandlerMap = new Hashtable(10);
-    
+    private String resourceBase=null;
 	    	
     /* -------------------------------------------------------------------- */
     /** Construct, must be configured later
@@ -197,12 +197,15 @@ public class HttpServer implements ServletContext
 		throw ioe;
 	    }
 	}
+	
 	int maxSessionIdle = 
 	    Integer.parseInt(p.getProperty(HttpConfiguration.SessionMaxInactiveInterval,"0"));
 	if (maxSessionIdle > 0)
 	    HttpRequest.setSessionMaxInactiveInterval(maxSessionIdle);
 	
-
+	resourceBase=p.getProperty(HttpConfiguration.ResourceBase);
+	if (resourceBase!=null && resourceBase.trim().length()==0)
+	    resourceBase=null;
     }
 
     /* -------------------------------------------------------------------- */
@@ -426,13 +429,15 @@ public class HttpServer implements ServletContext
     public URL getResource(String path)
 	throws MalformedURLException
     {
-	// XXX This is probably very inefficient, but it is
-	// a stupid API anyway.
-	return new URL("http",
-		       listeners[0].getAddress().getInetAddress()
-		       .getHostAddress(),
-		       listeners[0].getPort(),
-		       path);	       
+	if (resourceBase==null)
+	    // Loop request back to this server
+	    return new URL("http",
+			   listeners[0].getAddress().getInetAddress()
+			   .getHostAddress(),
+			   listeners[0].getPort(),
+			   path);
+	else
+	    return new URL(resourceBase+path);
     }
 
     /* ------------------------------------------------------------ */
@@ -446,8 +451,17 @@ public class HttpServer implements ServletContext
     public InputStream getResourceAsStream(String path)
     {
 	try {
-	    final HttpRequest request = new HttpRequest(this,"GET",path);
-	    return request.handleRequestLocally();
+	    if (resourceBase==null)
+	    {
+		// Get request from this context
+		HttpRequest request = new HttpRequest(this,"GET",path);
+		return request.handleRequestLocally();
+	    }
+	    else
+	    {
+		URL url = getResource(path);
+		return url.openStream();
+	    }
 	}
 	catch (Exception e)
 	{
