@@ -1053,8 +1053,8 @@ public class TestRFC2616
                             "Location: /dump",
                             "redirected");
             t.checkContains(response,offset,
-                            "Connection: close",
-                            "connection close");
+                            "Content-Length: 0",
+                            "Content-Length: 0");
             
             
             // HTTP/1.1
@@ -1074,7 +1074,7 @@ public class TestRFC2616
                             "Location: /dump",
                             "redirected");
             t.checkContains(response,offset,
-                            "Transfer-Encoding: chunked",
+                            "Content-Length: 0",
                             "content length");
             
             offset=t.checkContains(response,offset,
