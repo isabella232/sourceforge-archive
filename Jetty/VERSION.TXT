@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.10 - 4 July 2003
  + Allow multiple security-role-ref elements per servlet.
  + Handle Proxy-Connection better
  + Cleaned up alias handling.
