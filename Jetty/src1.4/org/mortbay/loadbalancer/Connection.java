@@ -34,12 +34,20 @@ public class Connection
         _clientQ.setReverse(_serverQ);
         _serverQ.setReverse(_clientQ);
     }
+
+    /* ------------------------------------------------------------ */
+    public SocketChannel getClientSocketChannel()
+    {
+        return _clientQ._channel;
+    }
     
     /* ------------------------------------------------------------ */
     public synchronized void client2server(SelectionKey key)
         throws IOException
     {
         _serverQ.read(key);
+        if (!isAllocated())
+            _listener.getPolicy().allocate(this,_serverQ);
     }
     
     /* ------------------------------------------------------------ */
@@ -67,9 +75,12 @@ public class Connection
     /* ------------------------------------------------------------ */
     public synchronized void connected(SocketChannel channel,
                                        Selector selector)
+        throws IOException
     {
         _serverQ._channel=channel;
         _serverQ._selector=selector;
+        if (!_serverQ.isEmpty())
+            _serverQ.writeWakeup(null);
     }
     
     /* ------------------------------------------------------------ */
@@ -80,6 +91,15 @@ public class Connection
         server.connect(this);            
     }
 
+    /* ------------------------------------------------------------ */
+    public boolean isAllocated()
+    {
+        return _server!=null &&
+            _serverQ!=null &&
+            _serverQ._channel!=null &&
+            _serverQ._channel.isOpen();
+    }
+    
     /* ------------------------------------------------------------ */
     public void close()
     {
@@ -160,7 +180,7 @@ public class Connection
                 throw new IllegalStateException("Full");
 
             // Are we using the queue
-            if (!isEmpty())
+            if (!isEmpty() || _channel==null)
             {
                 System.err.println("QUEUE! "+buffer);
                 queue(buffer);
@@ -211,7 +231,7 @@ public class Connection
             boolean was_full = isFull();
             
             System.err.println("was_full=="+was_full+
-                               "isEmpty()=="+isEmpty());
+                               "\nisEmpty()=="+isEmpty());
             
             // While we have buffers to write
             while (!isEmpty())
@@ -236,7 +256,7 @@ public class Connection
                     break;
             }
 
-            if (isEmpty())
+            if (key!=null&& isEmpty())
             {
                 System.err.println("All written");
                 key.interestOps(~SelectionKey.OP_WRITE&key.interestOps());

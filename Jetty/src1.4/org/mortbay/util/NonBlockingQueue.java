@@ -12,7 +12,6 @@ public class NonBlockingQueue
     private Object[] _queue;
     private int _pos, _size;
 
-
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param capacity 
@@ -22,6 +21,12 @@ public class NonBlockingQueue
         _queue=new Object[capacity];
         _pos=0;
         _size=0;
+    }
+
+    /* ------------------------------------------------------------ */
+    public int size()
+    {
+        return _size;
     }
     
     /* ------------------------------------------------------------ */

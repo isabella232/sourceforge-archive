@@ -56,6 +56,12 @@ public class Listener extends LifeCycleThread
     }
     
     /* ------------------------------------------------------------ */
+    public Policy getPolicy()
+    {
+        return _policy;
+    }
+    
+    /* ------------------------------------------------------------ */
     public InetSocketAddress getInetSocketAddress()
     {
         return _address;
@@ -153,7 +159,6 @@ public class Listener extends LifeCycleThread
                                        this,
                                        socket_channel,
                                        16);
-                    _policy.allocate(connection);
                     socket_channel.register(_selector,
                                             SelectionKey.OP_READ,
                                             connection);
