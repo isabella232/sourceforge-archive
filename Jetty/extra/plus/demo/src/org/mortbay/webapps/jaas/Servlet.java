@@ -60,49 +60,68 @@ public class Servlet extends HttpServlet
                        HttpServletResponse response) 
         throws ServletException, IOException
     {
-        response.setContentType ("text/html");
-        Writer writer = response.getWriter();
-        writer.write ("<HTML><TITLE>JAAS Authentication and Authorization Test</TITLE>");
-        
-        //must have been authenticated or we wouldn't get here
-        JAASUserPrincipal userPrincipal = (JAASUserPrincipal)request.getUserPrincipal();
-        writer.write ("<BODY><H1> Congratulations "+userPrincipal.getName()+" you are AUTHENTICATED</H1>");
-        
-       
+	String action = request.getParameter ("action");
+	if ((action != null) && (action.equalsIgnoreCase ("logout")))
+	{
+            request.getSession().invalidate();
+            response.setContentType ("text/html");
+            Writer writer = response.getWriter();
+            writer.write ("<HTML><TITLE>JAAS Authentication and Authorization Test</TITLE>");
+            writer.write ("<BODY><H1>Logout successfull</H1>");
+            writer.write ("You should now not be able to access any pages that require authentication unless you log back in again.");
+            writer.write ("<A HREF=\"/jaas/auth.html\">Try it</A>");
+            writer.write ("</BODY></HTML>");
 
-        try
-        {
-            Object o = Subject.doAsPrivileged(userPrincipal.getSubject(),
-                                              new PrivilegedExceptionAction ()
-                                              {
-                                                  public Object run ()
-                                                      throws Exception
+	}
+	else
+	{
+            response.setContentType ("text/html");
+            Writer writer = response.getWriter();
+            writer.write ("<HTML><TITLE>JAAS Authentication and Authorization Test</TITLE>");
+            
+            //must have been authenticated or we wouldn't get here
+            JAASUserPrincipal userPrincipal = (JAASUserPrincipal)request.getUserPrincipal();
+            writer.write ("<BODY><H1> Congratulations "+userPrincipal.getName()+" you are AUTHENTICATED</H1>");
+            
+            
+            
+            try
+            {
+                Object o = Subject.doAsPrivileged(userPrincipal.getSubject(),
+                                                  new PrivilegedExceptionAction ()
                                                   {
-                                                     AccessController.checkPermission (new SecurityPermission("mySecurityPermission"));
-                                                     return new Boolean(true);
-                                                  }
-                                                  
-                                              },
-                                              null);
-            
-            
-            //authorization success if we get here
-            writer.write ("<H1>Congratulations "+userPrincipal.getName()+" you are AUTHORIZED</h1>");
-            
-        }
-        catch (PrivilegedActionException e)
-        {
-            writer.write ("<H1> Commiserations "+ userPrincipal.getName()+" you are NOT AUTHORIZED</H1>");
-            writer.write (e.toString());
-            
-        }
-        catch (SecurityException e)
-        {
-            writer.write ("<H1> Commiserations "+ userPrincipal.getName()+" you are NOT AUTHORIZED</H1>");
-            writer.write(e.toString());
-        }
+                                                      public Object run ()
+                                                      throws Exception
+                                                      {
+                                                          AccessController.checkPermission (new SecurityPermission("mySecurityPermission"));
+                                                          return new Boolean(true);
+                                                      }
+                                                      
+                                                  },
+                                                  null);
+                
+                
+                //authorization success if we get here
+                writer.write ("<H1>Congratulations "+userPrincipal.getName()+" you are AUTHORIZED</h1>");
+                
+            }
+            catch (PrivilegedActionException e)
+            {
+                writer.write ("<H1> Commiserations "+ userPrincipal.getName()+" you are NOT AUTHORIZED</H1>");
+                writer.write (e.toString());
+                
+            }
+            catch (SecurityException e)
+            {
+                writer.write ("<H1> Commiserations "+ userPrincipal.getName()+" you are NOT AUTHORIZED</H1>");
+                writer.write(e.toString());
+            }
 
-        writer.write ("</BODY></HTML>");
+            writer.write ("<A HREF=\"/jaas/doit?action=logout\">Logout</A>");
+            
+            writer.write ("</BODY></HTML>");
+	}
+
         
     }
     
