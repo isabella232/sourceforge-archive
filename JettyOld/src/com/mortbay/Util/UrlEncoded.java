@@ -217,11 +217,21 @@ public class UrlEncoded extends Hashtable
 	    
 	    result.append(encoded.substring (index, marker));
 	    
-	    // convert the 2 hex chars following the % into a byte,
-	    // which will be a character
-	    result.append((char)(Integer.parseInt
-				 (encoded.substring(marker+1,marker+3),16)));
-	    index = marker+3;  
+	    try
+	    {
+		// convert the 2 hex chars following the % into a byte,
+		// which will be a character
+		result.append((char)(Integer.parseInt
+				     (encoded.substring(marker+1,marker+3),16)));
+		index = marker+3;  
+	    }
+	    catch (Exception e)
+	    {
+		//conversion failed so ignore this %
+		if (Code.verbose()) Code.warning(e);
+		result.append ('%');
+		index = marker+1;
+	    }
 	}
 
 	// if no encoded characters return the original

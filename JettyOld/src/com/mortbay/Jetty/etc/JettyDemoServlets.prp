@@ -9,6 +9,7 @@ SERVLET.Dump.PROPERTY.AttrX	    : ValueX
 SERVLET.Dump.PROPERTY.AttrY	    : ValueY
 SERVLET.Dump.PROPERTY.AttrZ	    : ValueZ
 SERVLET.Dump.PROPERTIES		    : ./etc/JettyDemoDump.prp
+SERVLET.Dump.Initialize		    : True
 
 SERVLET.Session.CLASS		    : com.mortbay.Servlets.SessionDump
 SERVLET.Session.PATHS		    : /SessionDump

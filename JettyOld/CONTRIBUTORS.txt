@@ -17,11 +17,9 @@ Authors & Testers:
   Juancarlo Añez <juancarlo@modelistica.com>
   Nikos Anerousis <nikos@research.att.com>
   Donovan Kolbly <kolbly@mcc.com>
-  plus a few more in the pipe line ...
+  Ernest Leipold <everlongh@hotmail.com>
 
-Sponsors:
-  Mort Bay Consulting.   http://www.mortbay.com
-  Optimus http://www.optimus.com.au
-  Intelligent Switched Systems http://www.iswitched.com
+  Plus a few more in the pipe line (tell me if your one of them...)
+
 
 

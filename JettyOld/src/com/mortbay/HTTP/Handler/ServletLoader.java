@@ -124,7 +124,19 @@ public class ServletLoader extends ClassLoader
 		if (source instanceof java.util.zip.ZipFile)
 		{
 		    ZipFile zip = (ZipFile)source;
+
 		    ZipEntry entry = zip.getEntry(filename);
+		    if (entry==null)
+		    {
+			// Try alternate file separator for jars prepared
+			// on other architectures.
+			if (File.separatorChar=='/')
+			    filename=name.replace('.','\\')+".class";
+			else
+			    filename=name.replace('.','/')+".class";
+			entry = zip.getEntry(filename);
+		    }
+		    
 		    if (entry!=null)
 		    {
 			Code.debug("Loading ",entry," from ",zip.getName());

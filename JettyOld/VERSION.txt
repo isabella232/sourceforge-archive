@@ -1,3 +1,21 @@
+
+Release 2.1.Beta0 - 30 May 1999
+  + Servlet loader handles jar files with different files separator.
+  + ThreadedServer gently shutsdown.
+  + Handle malformed % characters in URLs.
+  + Included and improved version of Threadpool for significant 
+    performance improvement under high load.
+  + HttpRequest.getCookies returns empty array rather than null for no
+    cookies.
+  + Added HttpResponse.requestHandled() method to avoid bug with 
+    servlet doHead method.
+  + Added Page.rewind() method to allow a page to be written multiple 
+    times
+  + Added "Initialize" attribute to servlet configuration to allow
+    servlet to be initialized when loaded.
+  + LogHandler changed to support only a single outfile and optional
+    append.
+
 Release 2.1.Alpha1 - 7 May 1999
   + ServletHolder can auto reload servlets
   + Dynamic servlets can have autoReload configured 

@@ -285,6 +285,16 @@ public class Page extends Composite
     }
     
     /* ------------------------------------------------------------ */
+    /* Reset the page status to not written.
+     * This is useful if you want to send a page more than once.
+     */
+     public void rewind()
+    {
+	writtenHtmlHead = false;
+	writtenBodyTag = false;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Access the page properties.  It is upto a derived Page class
      * to interpret these properties.
      */

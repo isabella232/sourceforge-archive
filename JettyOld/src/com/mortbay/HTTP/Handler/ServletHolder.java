@@ -49,6 +49,7 @@ public class ServletHolder implements ServletConfig
     private int requests=0;
     private boolean reloading=false;
     private boolean autoReload=false;
+    boolean initializeWhenServerSet=false;
 
     /* ---------------------------------------------------------------- */
     /** Construct a Servlet property mostly from the servers config
@@ -213,9 +214,20 @@ public class ServletHolder implements ServletConfig
 	}
 	
     }
+
+    /* ------------------------------------------------------------ */
+    /** Set Initialize flag.
+     * If set to true, the servlet is initialized when setServer is
+     * called.
+     * @param initialize Initialize at load time if true. 
+     */
+    void setInitialize(boolean initialize)
+    {
+	this.initializeWhenServerSet=initialize;
+    }
     
     /* ---------------------------------------------------------------- */
-    /** Set server
+    /** Set server.
      */
     void setServer(HttpServer server)
 	 throws ServletException,
@@ -226,6 +238,9 @@ public class ServletHolder implements ServletConfig
 	Code.assert(this.server==null || this.server==server,
 		    "Can't put ServletHolder in multiple servers");
 	this.server = server;
+
+	if (initializeWhenServerSet)
+	    getServlet();
     }
 
     /* ------------------------------------------------------------ */
@@ -240,16 +255,14 @@ public class ServletHolder implements ServletConfig
 	try{
 	    if (servlet==null)
 	    {
-		synchronized (ServletHolder.class)
+		GenericServlet newServlet =
+		    newServlet = (GenericServlet)
+		    servletClass.newInstance();
+		newServlet.init(this);
+		synchronized (this)
 		{
 		    if (servlet==null)
-		    {
-			GenericServlet newServlet =
-			    newServlet = (GenericServlet)
-			    servletClass.newInstance();
-			newServlet.init(this);
 			servlet=newServlet;
-		    }
 		}
 	    }
 	    return servlet;
@@ -393,7 +406,7 @@ public class ServletHolder implements ServletConfig
 		if (servlet == null)
 		{
 		    // no so get a lock on the class
-		    synchronized(ServletHolder.class)
+		    synchronized(this)
 		    {
 			// check if still not ready
 			if (servlet == null)

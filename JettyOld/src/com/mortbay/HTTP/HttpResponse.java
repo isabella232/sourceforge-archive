@@ -89,6 +89,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     private boolean chunkByDefault=false;
     private boolean doNotClose=false;
     private int outputState=0;
+    private boolean handled=false;
     
     /* -------------------------------------------------------------- */
     /** Construct a response
@@ -104,7 +105,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	version = HttpHeader.HTTP_1_0;
 	status = Integer.toString(SC_OK);
 	reason = "OK";
-	setContentType("text/html");
+	setHeader(ContentType,"text/html");
 	setHeader(MIME_Version,"1.0");
 	
 	// XXX - need to automate setting this with getServerInfo
@@ -204,6 +205,15 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     }
     
     /* -------------------------------------------------------------- */
+    /** Return true if the headers have already been written for this
+     * response
+     */
+    public boolean requestHandled()
+    {
+	return handled;
+    }
+    
+    /* -------------------------------------------------------------- */
     /** If the headers have not alrady been written, write them.
      * If any HttpFilters have been added activate them before writing.
      */
@@ -276,6 +286,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	    // Write the headers
 	    Code.debug("Write Headers");
 	    headersWritten=true;
+	    handled=true;
 	    out.write(getResponseLine().getBytes());
 	    out.write(__CRLF);
 	    if (cookies!=null)
@@ -323,6 +334,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	{
 	    Code.assert(!headersWritten(),"Headers already written");
 	    headersWritten=true;
+	    handled=true;
 	    if (observable!=null)
 		observable.notifyObservers(this);
 	}
@@ -354,6 +366,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	return httpOut;
     }
 
+    /* ------------------------------------------------------------- */
     void flush()
 	throws IOException
     {
@@ -362,6 +375,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	else
 	    httpOut.flush();
     }
+
     
     /* -------------------------------------------------------------- */
     /* ServletResponse methods -------------------------------------- */
@@ -373,6 +387,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     public void setContentLength(int len)
     {
 	setHeader(ContentLength,Integer.toString(len));
+	handled=true;
     }
 
     /* ------------------------------------------------------------- */
@@ -381,6 +396,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     public void setContentType(String type)
     {
 	setHeader(ContentType,type);
+	handled=true;
     }
 
 
@@ -391,6 +407,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public synchronized ServletOutputStream getOutputStream()
     {
+	handled=true;
 	if (outputState!=0 && outputState!=1)
 	    throw new IllegalStateException();
 	outputState=1;
@@ -410,6 +427,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public void setStatus(int code,String msg)
     {
+	handled=true;
 	status=Integer.toString(code);
 	reason=(String)__errorCodeMap.get(new Integer(code));
 	if (reason==null)
@@ -423,6 +441,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public void setStatus(int code)
     {
+	handled=true;
 	status=Integer.toString(code);
 	String msg = (String)__errorCodeMap.get(new Integer(code));
 	reason=(msg!=null)?msg:status;

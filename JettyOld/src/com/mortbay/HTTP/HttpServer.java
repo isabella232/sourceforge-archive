@@ -281,7 +281,7 @@ public class HttpServer implements ServletContext
 		    if (Code.verbose())
 			Code.debug("Handler: ",handler);
 		    handler.handle(request,response);
-		    handled=response.headersWritten();
+		    handled=response.requestHandled();
 		    if (Code.verbose())
 		    {
 			if (handled)

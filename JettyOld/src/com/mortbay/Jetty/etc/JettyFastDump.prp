@@ -15,7 +15,6 @@ main.PROPERTY.MimeMap			  : ./etc/Mime.prp
 main.LISTENER.all.CLASS                   : com.mortbay.HTTP.HttpListener
 main.LISTENER.all.ADDRS                   : 0.0.0.0:8080
 
-
 # ------------------------------------------------------------------------
 main.root.HOSTS				  :
 main.root.PATHS                           : /
@@ -23,9 +22,10 @@ main.root.HANDLERS			  : Log;Auth;Alias;Filter;File;Param;Session;Dynamic;Servle
 main.root.EXCEPTIONS			  : Default
 
 main.root.Log.CLASS			  : com.mortbay.HTTP.Handler.LogHandler
+main.root.Log.PROPERTY.File               : ./log/demo.log
+main.root.Log.PROPERTY.Append		  : False
 main.root.Log.PROPERTY.LongForm           : True
 main.root.Log.PROPERTY.CountContentLength : True
-main.root.Log.PROPERTY.Log./              : err
 
 main.root.Auth.CLASS			  : com.mortbay.HTTP.Handler.BasicAuthHandler
 main.root.Auth.PROPERTY.demo.LABEL	  : Demo Realm 

@@ -56,6 +56,14 @@ abstract public class ThreadedServer implements Runnable
     {
 	_threadPool=new ThreadPool(__maxThreads);
     }
+    
+    /* ------------------------------------------------------------------- */
+    /* Construct on any free port.
+     */
+    public ThreadedServer(String name) 
+    {
+	_threadPool=new ThreadPool(__maxThreads,name);
+    }
 
     /* ------------------------------------------------------------------- */
     /** Construct for specific port
@@ -63,7 +71,8 @@ abstract public class ThreadedServer implements Runnable
     public ThreadedServer(int port)
 	 throws java.io.IOException
     {
-	_threadPool=new ThreadPool(__maxThreads);
+	String name="Port:"+port;
+	_threadPool=new ThreadPool(__maxThreads,name);
 	setAddress(null,port);
     }
     
@@ -73,7 +82,8 @@ abstract public class ThreadedServer implements Runnable
     public ThreadedServer(InetAddress address, int port) 
 	 throws java.io.IOException
     {
-	_threadPool=new ThreadPool(__maxThreads);
+	String name=((address==null)?"Port:":(address.toString()+":"))+port;
+	_threadPool=new ThreadPool(__maxThreads,name);
 	setAddress(address,port);
     }
     
@@ -83,7 +93,8 @@ abstract public class ThreadedServer implements Runnable
     public ThreadedServer(InetAddrPort address) 
 	 throws java.io.IOException
     {
-	_threadPool=new ThreadPool(__maxThreads);
+	String name=address.toString();
+	_threadPool=new ThreadPool(__maxThreads,name);
 	setAddress(address.getInetAddress(),address.getPort());
     }
     
@@ -94,7 +105,8 @@ abstract public class ThreadedServer implements Runnable
 			  int threadPoolSize) 
 	 throws java.io.IOException
     {
-	_threadPool = new ThreadPool(threadPoolSize);
+	String name=address.toString();
+	_threadPool = new ThreadPool(threadPoolSize,name);
 	setAddress(address.getInetAddress(),address.getPort());
     }
     
@@ -212,18 +224,26 @@ abstract public class ThreadedServer implements Runnable
     /* ------------------------------------------------------------------- */
     final public void stop() 
     {
-	Code.debug("Stop listening on "+listen,new Throwable());
+	if (Code.debug())
+	    Code.debug("Stop listening on ",listen,new Throwable());
+	
 	if( serverThread != null ) 
 	{
-	    serverThread.stop( );
+	    Thread thread=serverThread;
 	    serverThread = null;
+	    thread.interrupt( );
+	    Thread.yield();
+	    if (thread.isAlive())
+		thread.stop( );
 	}
 	if (listen!=null)
 	{
-	    try{
+	    try
+	    {
 		listen.close();
 	    }
-	    catch(IOException e){
+	    catch(IOException e)
+	    {
 		Code.debug("Ignored",e);
 	    }
 	    listen=null;
@@ -233,7 +253,7 @@ abstract public class ThreadedServer implements Runnable
   
     /* ------------------------------------------------------------------- */
     final public void join() 
-    throws java.lang.InterruptedException
+	throws java.lang.InterruptedException
     {
 	if( serverThread != null )
 	    serverThread.join();
@@ -269,10 +289,13 @@ abstract public class ThreadedServer implements Runnable
 			}
 		    };
 		    _threadPool.run(handler);
-		} 
+		}
 		catch ( Exception e )
 		{
-		    Code.warning("Listen problem",e);
+		    if (serverThread!=null)
+			Code.warning("Listen problem",e);
+		    else
+			Code.debug(e);
 		}
 	    }
 	}
@@ -282,3 +305,4 @@ abstract public class ThreadedServer implements Runnable
 	}
     }
 }
+

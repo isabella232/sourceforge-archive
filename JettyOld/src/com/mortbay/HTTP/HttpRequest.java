@@ -888,6 +888,10 @@ public class HttpRequest extends HttpHeader
     /* -------------------------------------------------------------- */
     public javax.servlet.http.Cookie getCookies()[]
     {
+	if (cookies==null)
+	{
+	    cookies=new javax.servlet.http.Cookie[0];
+	}
 	return cookies;
     }
     

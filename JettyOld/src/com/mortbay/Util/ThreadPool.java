@@ -25,106 +25,88 @@ import com.mortbay.Base.Code;
  * </pre>
  *
  * @version 1.0 Sun Feb 21 1999
- * @author Greg Wilkins (gregw)
+ * @author Greg Wilkins <gregw@mortbay.com>
+ * @author Juancarlo Añez <juancarlo@modelistica.com>
  */
 public class ThreadPool
 {
-    private int _size=0;
-    private boolean waitForThread=true;
-    private Stack _threads = new Stack();
-    private int _nthreads=0;
+    private String _name="PoolThread";
+    private int _maxThreads=0;
+    private int _nThreads=0;
+    private BlockingQueue jobs = new BlockingQueue();
+    private int _maxIdleTimeMs=0;
     
     /* ------------------------------------------------------------ */
     public ThreadPool()
+    {}
+    
+    /* ------------------------------------------------------------ */
+    public ThreadPool(int maxThreads)
     {
-	_size=0;
+	_maxThreads=maxThreads;
     }
     
     /* ------------------------------------------------------------ */
-    public ThreadPool(int size)
+    public ThreadPool(int maxThreads, String name)
     {
-	_size=size;
+	_maxThreads=maxThreads;
+	_name=name;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public ThreadPool(int maxThreads, String name, int maxIdleTimeMs)
+    {
+	_maxThreads=maxThreads;
+	_maxIdleTimeMs=maxIdleTimeMs;
+	_name=name;
     }
 
     /* ------------------------------------------------------------ */
     public int getSize()
     {
-	return _size;
+	return _nThreads;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public int getMaxSize()
+    {
+	return _maxThreads;
     }
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param runnable 
      */
-    public void run(Runnable runnable)
+    public synchronized void run(Runnable runnable)
     {
-	synchronized(_threads)
+	// Place job on job queue
+	jobs.put(runnable);
+
+	// Give the pool a chance to consume the job
+	Thread.yield();
+	
+	// If there are jobs in the queue and we are not at our
+	// maximum number of threads, create a new thread
+	if (jobs.size()>0 && _maxThreads==0 || _nThreads<_maxThreads)
 	{
-	    try
-	    {
-		while (true)
-		{
-		    // Try to use an idle thread
-		    if (!_threads.empty())
-		    {
-			try {
-			    PoolThread thread=(PoolThread)_threads.pop();
-			    if (thread!=null)
-				thread.run(runnable);
-			    break;
-			}
-			catch (EmptyStackException ese)
-			{Code.warning(ese);}
-		    }
-		    // Else try to use a new thread 
-		    else if(_size==0 || _nthreads<_size)
-		    {
-			new PoolThread(runnable);
-			break;
-		    }
-		    // Wait for an idle thread
-		    else
-			_threads.wait();
-		}
-	    }
-	    catch (InterruptedException ie)
-	    {Code.ignore(ie);}
+	    new PoolThread();
 	}
     }
+	
     
     /* ------------------------------------------------------------ */
     /** A Thread in the pool
      */
     class PoolThread extends Thread
     {
-	private Runnable _runnable=null;
-
-	/* ------------------------------------------------------------ */
-	public PoolThread(Runnable runnable)
-	{
-	    super("PoolThread");
-	    _runnable=runnable;
-	    Code.debug("New ",_runnable);
-	    start();
-	}
-	
 	/* ------------------------------------------------------------ */
 	public PoolThread()
 	{
-	    super("PoolThread");
-	    Code.debug("New ");
-	    start();
-	}
-
-	/* ------------------------------------------------------------ */
-	public void run(Runnable runnable)
-	{
-	    Code.debug("Run ",runnable);
-	    synchronized(this)
-	    {
-		_runnable=runnable;
-		notify();
-	    }
+	    super();
+	    super.setName(_name+"-"+_nThreads);
+	    Code.debug("New ",this);
+	    setDaemon(true);
+	    this.start();
 	}
 
 	/* ------------------------------------------------------------ */
@@ -134,50 +116,36 @@ public class ThreadPool
 	{
 	    try
 	    {
-		// Increment count of total threads
-		synchronized(_threads)
+		synchronized(ThreadPool.this)
 		{
-		    Code.debug("New thread ",this);
-		    _nthreads++;
+		    Code.debug("Starting PoolThread: ",this);
+		    _nThreads++;
 		}
-		synchronized(this)
+		
+		while(true)
 		{
-		    while (true)
-		    {
-			// wait for a job
-			while (_runnable==null)
-			{
-			    Code.debug("Thread ",this," Waiting for job ...");
-			    wait();
-			}
-
-			// do the job
-			Code.debug("Thread: ",this," Handling ",_runnable);
-			_runnable.run();
-			_runnable=null;
-
-			// place ourselves on stack of idle threads
-			synchronized(_threads)
-			{
-			    _threads.push(this);
-			    _threads.notify();
-			}
-		    }
+		    Runnable job =(_maxIdleTimeMs>0)
+			?((Runnable) jobs.get(_maxIdleTimeMs))
+			:((Runnable) jobs.get());
+		    if (job == null)
+			break;
+		    
+		    if (Code.verbose())
+			Code.debug("Thread: ",this," Handling ",job);
+		    job.run();
 		}
 	    }
-	    catch (InterruptedException e)
+	    catch(InterruptedException e)
 	    {
-		Code.ignore(e);
+		Code.debug(e);
 	    }
 	    finally
 	    {
-		// Decrement total thread count
-		synchronized(_threads)
+		synchronized(ThreadPool.this)
 		{
-		    Code.debug("Ending thread ",this);
-		    _nthreads--;
-		    _threads.notify();
-		} 
+		    _nThreads--;
+		    Code.debug("Exiting PoolThread: ",this);;
+		}
 	    }
 	}
     }

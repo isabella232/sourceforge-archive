@@ -13,7 +13,7 @@ import java.net.*;
 public class TestHarness
 {
     /* ------------------------------------------------------------ */
-    public static void test()
+    public static void testDataHelper()
     {
 	Test t = new Test("com.mortbay.Util.DataHelper");
 	try{
@@ -47,16 +47,65 @@ public class TestHarness
 	    t.check(false,"Exception: "+e);
 	}
     }
+
+    /* ------------------------------------------------------------ */
+    public static void testBlockingQueue()
+	throws Exception
+    {
+	Test t = new Test("com.mortbay.Util.BlockingQueue");
+
+	final BlockingQueue bq=new BlockingQueue();
+	t.checkEquals(bq.size(),0,"empty");
+	bq.put("A");
+	t.checkEquals(bq.size(),1,"size");
+	t.checkEquals(bq.get(),"A","A");
+	t.checkEquals(bq.size(),0,"size");
+	bq.put("B");
+	bq.put("C");
+	bq.put("D");
+	t.checkEquals(bq.size(),3,"size");
+	t.checkEquals(bq.get(),"B","B");
+	t.checkEquals(bq.size(),2,"size");
+	bq.put("E");
+	t.checkEquals(bq.size(),3,"size");
+	t.checkEquals(bq.get(),"C","C");
+	t.checkEquals(bq.get(),"D","D");
+	t.checkEquals(bq.get(),"E","E");
+
+	new Thread(new Runnable()
+		   {
+		       public void run(){
+			   try{Thread.sleep(1000);}
+			   catch(InterruptedException e){}
+			   bq.put("F");
+		       }
+		   }
+		   ).start();  
+	
+	t.checkEquals(bq.get(),"F","F");
+	t.checkEquals(bq.get(100),null,"null");
+    }
     
     /* ------------------------------------------------------------ */
     /** main
      */
     public static void main(String[] args)
     {
-	test();
-	UrlEncoded.test();
-	URI.test();
-	Test.report();
+	try{
+	    testDataHelper();
+	    testBlockingQueue();
+	    UrlEncoded.test();
+	    URI.test();
+	}
+	catch(Throwable th)
+	{
+	    Code.warning(th);
+	    Test t = new Test("com.mortbay.Util.TestHarness");
+	    t.check(false,th.toString());
+	}
+	finally
+	{
+	    Test.report();
+	}
     }
-
 };

@@ -18,8 +18,6 @@ import javax.servlet.*;
 /** log handler
  * <p>This Handler logs all requests to Writers in a "standard" format
  * <p>
- * The log handler is configured with PathMap mapping from
- * a path to a writer.
  * <h3>Notes</h3>
  * As dynamic pages often do not have Content-Length set, the log handler
  * has the option of installing a output filter to count the
@@ -34,9 +32,10 @@ import javax.servlet.*;
 public class LogHandler extends NullHandler implements Observer
 {
     /* ----------------------------------------------------------------- */
-    PathMap loggers;
     boolean countContentLength;
-    boolean longForm;	
+    boolean longForm;
+    Writer out;
+    Hashtable outMap=new Hashtable();
     
     /* ----------------------------------------------------------------- */
     /** Constructor from properties.
@@ -49,16 +48,14 @@ public class LogHandler extends NullHandler implements Observer
     
     /* ----------------------------------------------------------------- */
     /** Constructor
-     * @param loggers PathMap of path to Writer to write log to.
      * @param countContentLength if true the output is filtered for the
      *        content size.
      * @param longForm if true, output is in the long form aka Netscape
      */
-    public LogHandler(PathMap loggers,
-		      boolean countContentLength,
+    public LogHandler(boolean countContentLength,
 		      boolean longForm)
     {
-	this.loggers=loggers;
+	out=new OutputStreamWriter(System.out);
 	this.countContentLength=countContentLength;
 	this.longForm=longForm;
     }
@@ -67,7 +64,9 @@ public class LogHandler extends NullHandler implements Observer
     /** Configure from properties.
      * Format of properties is expected to be that of a PropertyTree with
      * the following root nodes:
-     * <BR>Log - A property tree mapping keys to log sinks.
+     * <BR>File - The filename of the log. "err" and "out" are special
+     * file names that log to System.err and System.out.
+     * <BR>Append - Boolean, if true append to the log file.
      * <BR>LongForm - Boolean, if true the log is the long format
      * <BR>CountContentLength - Boolean, if true count the bytes of 
      * replies without a content length header (expensive).
@@ -80,26 +79,26 @@ public class LogHandler extends NullHandler implements Observer
 	    tree = (PropertyTree)properties;
 	else
 	    tree = new PropertyTree(properties);
-
-	loggers=new PathMap();
 	
-	Properties logs = tree.getTree("Log");
-	Enumeration e = logs.keys();
-	while (e.hasMoreElements())
+	String logFilename = tree.getProperty("File");
+	boolean append = tree.getBoolean("Append");	
+	countContentLength=tree.getBoolean("CountContentLength");
+	longForm=tree.getBoolean("LongForm");
+
+	if ("out".equals(logFilename))
+	    out=new OutputStreamWriter(System.out);
+	else if ("err".equals(logFilename))
+	    out=new OutputStreamWriter(System.err);
+	else
 	{
-	    String logPath = e.nextElement().toString();
-	    String log = logs.getProperty(logPath);
-	    
-	    OutputStreamWriter out = null;
-	    if ("out".equals(log))
-		out=new OutputStreamWriter(System.out);
-	    else if ("err".equals(log))
-		out=new OutputStreamWriter(System.err);
-	    else
+	    out = (Writer)outMap.get(logFilename);
+	    if (out==null)
 	    {
 		try
 		{
-		    out=new OutputStreamWriter(new FileOutputStream(log));
+		    out=new OutputStreamWriter
+			(new FileOutputStream(logFilename,append));
+		    outMap.put(logFilename,out);
 		}
 		catch(IOException ex)
 		{
@@ -107,11 +106,7 @@ public class LogHandler extends NullHandler implements Observer
 		    out=new OutputStreamWriter(System.err);
 		}
 	    }
-	    loggers.put(logPath,out);
 	}
-	
-	countContentLength=tree.getBoolean("CountContentLength");
-	longForm=tree.getBoolean("LongForm");
     }
     
     /* ----------------------------------------------------------------- */
@@ -131,25 +126,20 @@ public class LogHandler extends NullHandler implements Observer
 	HttpRequest request = response.getRequest();
 	
 	String path = request.getResourcePath();
-	Writer writer = (Writer)loggers.getLongestMatch(path);
-	
-	if (writer != null)
-	{
 		
-	    try{
-		if (countContentLength)
-		    new LogFilter(this,writer).activateOn(response);
-		else
-		{
-		    int cl = 
-			response.getIntHeader(HttpHeader.ContentLength);
-		    log(writer,response,cl);
-		}
+	try{
+	    if (countContentLength)
+		new LogFilter(this,out).activateOn(response);
+	    else
+	    {
+		int cl = 
+		    response.getIntHeader(HttpHeader.ContentLength);
+		log(out,response,cl);
 	    }
-	    catch(IOException e){
-		Code.debug("Convert to RuntimeException",e);
-		throw new RuntimeException(e.toString());
-	    }
+	}
+	catch(IOException e){
+	    Code.debug("Convert to RuntimeException",e);
+	    throw new RuntimeException(e.toString());
 	}
     }
 

@@ -1,5 +1,10 @@
 # ========================================================================
-# Sample configuration file for com.mortbay.Jetty.Server
+# Sample configuration file for com.mortbay.Jetty.Server21
+#
+# THIS IS AN OLD FILE FORMAT AND IS ONLY HERE FOR HISTORICAL REASONS
+#
+# Server21 has been deprecated.
+#
 # ------------------------------------------------------------------------
 # All configurations lines are of the general format:
 #   <server>.<stack>.<option>[.<path>] : value

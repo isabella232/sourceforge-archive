@@ -64,7 +64,6 @@ public class Server21 extends BaseConfiguration
 	PathMap dirMap= new PathMap();
 	boolean dirAllowPut = false;
 	boolean dirAllowDelete = false;
-	PathMap logMap = new PathMap();
 	PathMap authMap = new PathMap();
 	PathMap transMap = new PathMap();
 	PathMap filterMap = new PathMap();
@@ -213,16 +212,7 @@ public class Server21 extends BaseConfiguration
     public void addLog(String stack, String path, String log)
 	throws IOException
     {
-	Code.debug(serverName,".addLog: ",log," at ",path);
-	OutputStreamWriter out = null;
-	if ("out".equals(log))
-	    out=new OutputStreamWriter(System.out);
-	else if ("err".equals(log))
-	    out=new OutputStreamWriter(System.err);
-	else
-	    out=new OutputStreamWriter(new FileOutputStream(log));
-	
-	getStack(stack).logMap.put(path,out);
+	Code.warning("Log no longer supported in Server21");
     }
 
     /* ------------------------------------------------------------ */
@@ -325,11 +315,7 @@ public class Server21 extends BaseConfiguration
 	    int h=0;
 
 	    // Session handler
-	    httpHandlers[h++] = new SessionHandler();
-	    
-	    // Log Handler
-	    if (stack.logMap.size()>0)
-		httpHandlers[h++] = new LogHandler(stack.logMap,true, true);
+	    httpHandlers[h++] = new SessionHandler();	    
 
 	    // Auth Handler
 	    if (stack.authMap.size()>0)

@@ -22,9 +22,10 @@ main.root.HANDLERS			  : Log;Auth;Alias;Filter;Param;Session;Servlet;File;Forwar
 main.root.EXCEPTIONS			  : Default
 
 main.root.Log.CLASS			  : com.mortbay.HTTP.Handler.LogHandler
+main.root.Log.PROPERTY.File               : ./log/demo.log
+main.root.Log.PROPERTY.Append             : False
 main.root.Log.PROPERTY.LongForm           : True
 main.root.Log.PROPERTY.CountContentLength : False
-main.root.Log.PROPERTY.Log./              : err
 
 main.root.Auth.CLASS			  : com.mortbay.HTTP.Handler.BasicAuthHandler
 main.root.Auth.PROPERTIES		  : ./etc/JettyDemoRealms.prp
@@ -81,9 +82,8 @@ proxy.LISTENER.all.ADDRS                  : 0.0.0.0:8081
 proxy.root.HANDLERS			  : Log;Proxy;NotFound
 proxy.root.PATHS			  : /
 proxy.root.Log.CLASS			  : com.mortbay.HTTP.Handler.LogHandler
-proxy.root.Log.PROPERTY./                 : out
-proxy.root.Log.PROPERTY.http              : out
-proxy.root.Log.PROPERTY.ftp               : out
+proxy.root.Log.PROPERTY.File              : ./log/demo.log
+proxy.root.Log.PROPERTY.Append            : True
 
 proxy.root.Proxy.CLASS			  : com.mortbay.HTTP.Handler.ProxyHandler
 proxy.root.Proxy.PROPERTY.PATHS           : /;http;ftp

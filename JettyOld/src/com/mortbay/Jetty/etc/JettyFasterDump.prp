@@ -23,9 +23,10 @@ main.root.HANDLERS			  : Log;Auth;File;Param;Session;Dynamic;Servlet;NotFound
 main.root.EXCEPTIONS			  : Default
 
 main.root.Log.CLASS			  : com.mortbay.HTTP.Handler.LogHandler
+main.root.Log.PROPERTY.File               : ./etc/demo.log
+main.root.Log.PROPERTY.Append		  : False
 main.root.Log.PROPERTY.LongForm           : False
 main.root.Log.PROPERTY.CountContentLength : False
-main.root.Log.PROPERTY.Log./              : err
 
 main.root.Auth.CLASS			  : com.mortbay.HTTP.Handler.BasicAuthHandler
 main.root.Auth.PROPERTY.demo.LABEL	  : Demo Realm 

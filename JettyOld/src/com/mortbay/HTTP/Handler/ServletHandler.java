@@ -56,12 +56,13 @@ public class ServletHandler extends NullHandler
      * Properties treated as a PropertyTree with the following fields: <PRE>
      * PATHS : /servlet/:/SERVLET/    # URL Paths for dynamic servlet loading
      * CLASSPATH : ./servlets:        # CLASS Paths for dynamic servlet loading
-     * AutoReloadDynamicServlets: True# Should dynamic servlets auto reload 
+     * AutoReloadDynamicServlets: True# Should dynamic servlets auto reload
      * SERVLET.name.CLASS: className  # Class of servlet
      * SERVLET.name.PATHS: /path      # Servlet path
      * SERVLET.name.CHUNK: False      # Should servlet HTTP/1.1 chunk by default
      * SERVLET.name.PROPERTY.key:val  # Servlet property
      * SERVLET.name.PROPERTIES: file  # File of servlet properties
+     * SERVLET.name.Initialize: False # Initialize when loaded. 
      * </PRE>
      * @param properties Configuration.
      */
@@ -112,10 +113,10 @@ public class ServletHandler extends NullHandler
 		
 		boolean chunk = servletTree.getBoolean("CHUNK");
 		servletHolder.setChunkByDefault(chunk);
-		
 		Vector paths = servletTree.getVector("PATHS",",;");
 		for (int p=paths.size();p-->0;)
 		    servletMap.put(paths.elementAt(p),servletHolder);
+		servletHolder.setInitialize(servletTree.getBoolean("Initialize"));
 	    }
 	    catch(ClassNotFoundException e)
 	    {
@@ -131,9 +132,7 @@ public class ServletHandler extends NullHandler
 	 throws Exception
     {
 	String address = request.getResourcePath();
-
 	String pathSpec=servletMap.matchSpec(address);
-
 
 	// try a known servlet
 	if (pathSpec != null)
