@@ -1,0 +1,49 @@
+<BR><B><FONT SIZE="+2">Using Jetty with Avalon Phoenix</FONT></B><HR>
+<BR><BR>
+<H3>Jetty-Phoenix</H3>
+
+Jetty-Phoenix is an integration of Jetty into the 
+<A href="http://jakarta.apache.org/avalon/phoenix/index.html">Phoenix</A>
+application  container. Phoenix is part of the <A
+href="http://jakarta.apache.org/avalon">Avalon</A> project, which defines an
+application framework for component based application development, which is
+similar to EJB but removes much of the limitations imposed by EJB.
+
+The port allows the Jetty web server to be used as a service within a Phoenix
+application. Servelets deployed 
+within Jetty can access other services by retrieving the ServiceManager from
+the HttpSession by getting the attribute 
+WebServer.SERVICE_MANAGER. This will allow the serlvet to access any services 
+that have been defined for 
+the servlet.
+
+The configuration for Jetty is extracted from the services configuration as
+per Avalon standards. Details of the 
+configuraion options can be found in the Javadoc for the code.
+
+<H3>Use</H3>
+
+Jetty-Phoenix requires the Jetty libraries, as well as the Phoenix libraries in order to work. A sample ant bui
+ld script and configuration files are provided to assist in creating applications that work with Jetty-Phoenix.
+
+The basic process to install is to place the Jetty and Jetty-Phoenix libraries in the lib path that will be inc
+luded in the phoenix sar file (sar files are Jar files that are used for installing phoenix applications). Make
+ sure that the web service is defined in the deployment descriptor files, perform the ant install and then foll
+ow the standard phoenix startup procedure.
+
+<H3>Notes</H3>
+<UL>
+<LI>At this point in time there is still alot of work to do in order to make full use of the Jetty product, but the
+ port is sufficient to make most applications work.
+<LI>A Jetty Phoenix bundle is available on the Jetty sourceforge page. The
+source is being integrated into the Phoenix CVS and the latest version will
+be found there
+</UL>
+
+<H3>Queries</H3>
+Any queries about this port can be sent to Howard Henson (hhenson@aosl.co.za)
+
+<BR><BR><HR>
+Return to <A HREF="index.html">JettyFaq</A><HR>
+</BODY>
+</HTML>
