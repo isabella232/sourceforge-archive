@@ -154,7 +154,7 @@ public class Server extends BaseConfiguration
 	throws IOException, ServletException
     {
 	Code.debug(serverName,".addServlet: ",servlet," at ",path);
-
+		   
 	ServletHolder holder = (ServletHolder)servletHolders.get(name);
 	if (holder==null)
 	{
@@ -162,7 +162,8 @@ public class Server extends BaseConfiguration
 	    if (paramFile!=null)
 		params.load(new BufferedInputStream(
 				new FileInputStream(paramFile)));
-	    holder=new ServletHolder(name,servlet,params);
+		holder=new ServletHolder(name,servlet,params);
+	    
 	    servletHolders.put(name,holder);
 	}
 
@@ -544,10 +545,9 @@ public class Server extends BaseConfiguration
 	    // Join all severs
 	    e = server_map.elements();
 	    while (e.hasMoreElements())
-		((Server)e.nextElement()).join();
-	    
+		((Server)e.nextElement()).join();   
 	}
-	catch(Exception e){
+	catch(Throwable e){
 	    Code.warning(e);
 	}
     }

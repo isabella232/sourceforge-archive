@@ -11,5 +11,6 @@ TESTS :=
 ROOTNAME := javax
 SUBDIRS := http
 
-include $(JETTY_HOME)/etc/Global.mk
+CLASSFILES += $(wildcard *.properties *.class)
 
+include $(JETTY_HOME)/etc/Global.mk
