@@ -1,17 +1,20 @@
-a.b.c		= 2
-a.*.c		= 4
-a		= foo
-*.d		= wow
-e.*		= all
-e.*.d		= except
-e.b.c		= these
-a.*.j.k.l	= complex1
-a.*.k.l		= complex2
-*.k.l           = complex3
-a.*.j.*.l	= complex4
-a.*.j.x.y.z.l	= complex5
-a.b.*.d         = ambig1
-a.*.c.d         = ambig2
-a.b.*.d.*.d     = ambig3
-a.b.*.d.d       = ambig4
-h.f.*		= hfstar
+a               = 1
+a.b             = 2
+a.B             = 3
+a.b.c           = 4
+a.b.C           = 5
+a.B.c           = 6
+a.B.C           = 7
+
+*               = 10
+*.y.z           = 11
+x.*.z		= 12
+x.y.*		= 13
+x.y.z		= 14
+*.*		= 15
+
+A.*.*.D.E       = 20
+A.*.C.*.E       = 21
+*.B.C.D.*       = 22
+*.B.*.D.E       = 23
+A.B.C.D.E       = 24

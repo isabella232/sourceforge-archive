@@ -1,11 +1,24 @@
 
-Release 2.2.0 - 22 June 1999
+Release 2.2.Beta4 - 29 June 1999
   + FileHandler flushes files from cache in DELETE method.
   + ThreadedServer.stop() now waits until all threads are stopped.
   + Options "allowDir" added to FileHandler.
   + Added getGlobalProperty to Jetty.Server and used this to
     configure default page type.
   + Updated README.txt
+  + Restructured com.mortbay.Jetty.Server for better clarity and
+    documentation.
+  + Added comments to configuration files.
+  + Made ServerSocket and accept call generic in ThreadedServer for
+    SSL listeners.
+  + Altered meaning of * in PropertyTree to assist in abbreviated
+    configuration files.
+  + Added JettyMinimalDemo.prp as an example of an abbreviated
+    configuration.
+  + Expanded Mime.prp file
+  + Added property handling to ServletHandler to read JRUN
+    servlet configuration files.
+
 
 Release 2.2.Beta3 - 22 June 1999
   + Re-implemented ThreadedServer to improve and balance performance.

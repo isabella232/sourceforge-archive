@@ -79,6 +79,7 @@ public class Server extends BaseConfiguration
 	
 	buildServers(props);
     }
+
     /* ------------------------------------------------------------ */
     /** Configure 1 or more Server instances.
      * Build server instances from the contents of the
@@ -204,9 +205,7 @@ public class Server extends BaseConfiguration
 		throw e;
 	    }
 	}
-    }
-
-    
+    }    
 
     /* ------------------------------------------------------------ */
     /** Get all configured servers.
@@ -490,12 +489,6 @@ public class Server extends BaseConfiguration
 	if (properties==null)
 	    properties=new PropertyTree();
 
-	System.err.println("\nPROPERTY:");
-	Enumeration e=properties.getRealNodes();
-	while(e.hasMoreElements())
-	    System.err.println(e.nextElement());
-	
-
 	String filename = props.getProperty("PROPERTIES");
 	if (filename!=null&&filename.length()>0)
 	{
@@ -503,10 +496,6 @@ public class Server extends BaseConfiguration
 	    properties.load(new BufferedInputStream(new FileInputStream(filename)));
 	}
 	
-	System.err.println("PROPERTIES("+filename+"):");
-	e=properties.getRealNodes();
-	while(e.hasMoreElements())
-	    System.err.println(e.nextElement());
 	return properties;
     }
     

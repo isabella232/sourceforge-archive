@@ -242,6 +242,42 @@ abstract public class ThreadedServer
     }
 
     
+    /* ------------------------------------------------------------ */
+    /** New server socket.
+     * Creates a new servers socket. May be overriden by derived class
+     * to create specialist serversockets (eg SSL).
+     * @param address Address and port
+     * @param acceptQueueSize Accept queue size
+     * @return The new ServerSocket
+     * @exception java.io.IOException 
+     */
+    protected ServerSocket newServerSocket(InetAddrPort address,
+					   int acceptQueueSize)
+	 throws java.io.IOException
+    {
+	if (address==null)
+	    return new ServerSocket(0,acceptQueueSize);
+
+	return new ServerSocket(address.getPort(),
+				acceptQueueSize,
+				address.getInetAddress());
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Accept socket connection.
+     * May be overriden by derived class
+     * to create specialist serversockets (eg SSL).
+     * @param serverSocket
+     * @return Accepted Socket
+     * @exception java.io.IOException 
+     */
+    protected Socket accept(ServerSocket serverSocket)
+	 throws java.io.IOException
+    {
+	return serverSocket.accept();
+    }
+    
+    
     /* ------------------------------------------------------------------- */
     /* Start the ThreadedServer listening
      */
@@ -250,18 +286,10 @@ abstract public class ThreadedServer
     {
 	Code.debug( "Start Listener for ", address );
 
-	// Open the server socket
-	if (address==null)
-	{
-	    listen=new ServerSocket(0);
-	    address=new InetAddrPort(listen.getInetAddress(),
-				     listen.getLocalPort());
-	}
-	else
-	listen = new ServerSocket( address.getPort(),
-				   _maxThreads>0?(_maxThreads+1):__maxThreads,
-				   address.getInetAddress());
-
+	listen=newServerSocket(address,_maxThreads>0?(_maxThreads+1):__maxThreads);
+	address=new InetAddrPort(listen.getInetAddress(),
+				 listen.getLocalPort());
+	
 	// Set any idle timeout
 	if (_maxIdleTimeMs>0)
 	    listen.setSoTimeout(_maxIdleTimeMs);
@@ -388,7 +416,7 @@ abstract public class ThreadedServer
 		    synchronized(this){_accepting++;}		    
 		    
 		    // wait for a connection
-		    connection=listen.accept();
+		    connection=accept(listen);
 		}
 		catch ( InterruptedIOException e )
 		{

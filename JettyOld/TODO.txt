@@ -1,7 +1,4 @@
 Things to do before final release of Jetty 2.2.0:
- + Jrun configuration support
- + Comments in config files
- + Minimal demo config file
  + Better info and feature description pages
 
 Other things to do:

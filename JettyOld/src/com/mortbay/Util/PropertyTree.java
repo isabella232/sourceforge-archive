@@ -31,20 +31,9 @@ import java.util.StringTokenizer;
  * easy to have nested sets of values in the same properties file and iterate
  * over nested keys.
  *
- * <p>The "*" can also be used as a default key and when matched, its value
- * will be returned if there is no explicitly matching key.
- * <br>E.G<pre>
- * a.b.* = foo      # Match anything starting in "a.b"
- * *.c = bar        # Match anything ending in "c"
- * a.*.c = flob     # Match anything starting in "a" that ends in a "c"
- * * = blob         # Match anything
- * </pre>
- * All the standard Properties methods work as usual, but keys such as
- * "a.b.c" can be used to retrieve nested values. 
- * <p>
- * PropertyTree produces debug output about put if debug verbosity is
- * greater than 9. If it is greater than 19, gets are also in the debug.
- * <p>
+ * Wildcard nodes can be defined with "*" so that keys such as
+ * "aa.*.cc", will match gets such as "aa.bb.cc", "aa.X.cc", etc. 
+ *
  * To aid in constructing and saving Properties files,
  * <code>getConverter</code> will convert Dictionaries into PropertyTrees
  * recursively.
@@ -92,98 +81,6 @@ public class PropertyTree extends Properties
     {
 	load(properties);
     }
-
-    /* ------------------------------------------------------------ */
-    private PropertyTree(PropertyTree parent,String node)
-    {
-	if (Code.verbose()) Code.debug("Subtree at ",node);
-	this.prefix=node+".";
-
-	// make list of prefixes
-	Vector tokens=parent.getTokens(node);
-	String[] prefixes=new String[tokens.size()];
-	for (int i=0;i<tokens.size();i++)
-	    prefixes[i]=((i>0)?prefixes[i-1]:"")+tokens.elementAt(i)+".";
-
-	// make list of wild prefixes
-	String[] wilds=new String[tokens.size()];
-	for (int i=1;i<wilds.length;i++)
-	    wilds[i]=prefixes[i-1]+"*";
-	wilds[0]="*";
-
-	if (Code.verbose(9))
-	{
-	    Code.debug("prefixes=",DataClass.toString(prefixes));
-	    Code.debug("wilds=",DataClass.toString(wilds));
-	}
-
-	boolean wildPrefix = prefix.endsWith("*.");
-	
-	Hashtable keyMap = new Hashtable(parent.size()+3);
-	Enumeration e = parent.keys();
-	while (e.hasMoreElements())
-	{
-	    String k=(String)e.nextElement();
-	    
-	    if (k.startsWith(prefix) && !prefix.startsWith("*"))
-	    {
-		Object v=parent.get(k);
-		
-		String tk=k.substring(prefix.length());
-		keyMap.put(tk,k);
-		put(tk,v);
-		if (Code.verbose(99)) Code.debug("map key ",tk,"-->",k);
-
-		if (wildPrefix)
-		{
-		    String wk="*."+tk;
-		    String ok=(String)keyMap.get(wk);
-		    if (ok==null || k.length()>ok.length())
-		    {
-			keyMap.put(wk,k);
-			put(wk,v);
-			if (Code.verbose(99)) Code.debug("map new wild ",wk,"-->",k);
-		    }
-		}
-		
-		continue;
-	    }
-
-	    for (int i=wilds.length;i-->0;)
-	    {
-		if (k.startsWith(wilds[i]))
-		{
-		    String tk=k.substring(wilds[i].length());
-		    String wk="*"+tk;
-		    if (tk.length()>0)
-			tk=tk.substring(1);
-		    String ok=(String)keyMap.get(wk);
-		    if (ok==null || k.length()>ok.length())
-		    {
-			Object v=parent.get(k);
-			
-			keyMap.put(wk,k);
-			put(wk,v);
-			if (Code.verbose(99)) Code.debug("map wild ",wk,"-->",k);
-
-			if (tk.length()==0)
-			    continue;
-			
-			ok=(String)keyMap.get(tk);
-			if (ok==null || k.length()>ok.length())
-			{
-			    keyMap.put(tk,k);
-			    put(tk,v);
-			    if (Code.verbose(99))Code.debug("map exwild ",tk,"-->",k);
-			}
-		    }
-		    continue;
-		}
-	    }
-	}
-	this.parent=parent;
-    }
-    
 
     /* ------------------------------------------------------------ */
     public void load(InputStream in)
@@ -477,6 +374,9 @@ public class PropertyTree extends Properties
     /* ------------------------------------------------------------ */
     private String getTokenKey(Node node, Vector tokens, int index)
     {
+	if (Code.verbose(999))
+	    Code.debug(tokens," "+index," ",node);
+	
 	String key=null;
 	if (tokens.size()==index)
 	    key=node.key;
@@ -488,9 +388,13 @@ public class PropertyTree extends Properties
 		key=getTokenKey(subNode,tokens,index+1);
 
 	    // if no key, try wild expansions
-	    subNode=(Node)node.get("*");
-	    while (subNode!=null && key==null && index<tokens.size())
-		key=getTokenKey(subNode,tokens,++index);
+	    if (key==null)
+	    {
+		subNode=(Node)node.get("*");
+		if (subNode!=null)
+		    key=getTokenKey(subNode,tokens,index+1);	
+	    }
+	    
 	}
 	return key;
     }
@@ -498,7 +402,7 @@ public class PropertyTree extends Properties
     /* ------------------------------------------------------------ */
     private String parentKey(String key)
     {
-	return StringUtil.replace(prefix+key,"*.*","*");    
+	return prefix+key;    
     } 
     
     /* ------------------------------------------------------------ */
@@ -552,6 +456,71 @@ public class PropertyTree extends Properties
 		return pt;
 	    }
 	};
+    }
+    
+    /* ------------------------------------------------------------ */
+    private PropertyTree(PropertyTree parent,String node)
+    {
+	this.prefix=node+".";
+	Vector tokens=getTokens(node);
+	Hashtable keyMap = new Hashtable(parent.size()+13);
+	findKeys(keyMap,parent.rootNode,tokens,0,null);
+	Enumeration e=keyMap.keys();
+	while(e.hasMoreElements())
+	{
+	    String subKey=(String)e.nextElement();
+	    String key=(String)keyMap.get(subKey);
+	    put(subKey,parent.get(key));
+	}
+	this.parent=parent;
+    }
+    
+    /* ------------------------------------------------------------ */
+    private void findKeys(Hashtable keyMap,
+			  Node node,
+			  Vector tokens,
+			  int index,
+			  String key)
+    {
+	if (Code.debug())
+	    System.err.println(key+" "+tokens+" "+index+" "+node);
+
+	// Is this a match?
+	if (tokens.size()==index)
+	    expandNode(keyMap,node,key.length()+1);
+	else
+	{
+	    // expand named nodes
+	    Node subNode=(Node)node.get(tokens.elementAt(index));
+	    if (subNode!=null)
+		findKeys(keyMap,subNode,tokens,index+1,
+			(key==null)
+			 ?((String)tokens.elementAt(index))
+			 :(key+"."+tokens.elementAt(index)) );
+	    
+	    // expand wild cards
+	    subNode=(Node)node.get("*");
+	    if (subNode!=null)
+		findKeys(keyMap,subNode,tokens,index+1,
+			(key==null)?"*":(key+".*") );
+	}
+    }
+
+    /* ------------------------------------------------------------ */
+    private void expandNode(Hashtable keyMap, Node node, int keyLength)
+    {
+	Enumeration e=node.elements();
+	while(e.hasMoreElements())
+	{
+	    Node n = (Node)e.nextElement();
+	    if (n.key!=null)
+	    {
+		String subKey=n.key.substring(keyLength);
+		if (!keyMap.containsKey(subKey))
+		    keyMap.put(subKey,n.key);
+	    }
+	    expandNode(keyMap,n,keyLength);
+	}
     }
 };
 
