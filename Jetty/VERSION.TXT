@@ -25,6 +25,7 @@ Jetty-4.2.4rc0
  + Improved setBufferSize handling
  + Code logs objects rather than strings.
  + Better access to session manager.
+ + Fixed isSecure and getScheme for SSL over AJP13
 
 Jetty-4.2.3 - 2 December 2002
  + Removed aggressive threadpool shrinkage to avoid deadlock on SMP machines. 
