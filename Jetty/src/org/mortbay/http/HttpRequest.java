@@ -830,13 +830,16 @@ public class HttpRequest extends HttpMessage
                         try
                         {
                             int max=content_length;
-                            if (max<0)
-                                max=__maxFormContentSize;
-                            else if (__maxFormContentSize>0 && max>__maxFormContentSize)
-                            {
-                                log.warn("Form content truncated");
-                                max=__maxFormContentSize;
-                            }
+			    if (__maxFormContentSize>0)
+			    {
+				if (max<0)
+				    max=__maxFormContentSize;
+				else if (max>__maxFormContentSize)
+				{
+				    log.warn("Form content truncated");
+				    max=__maxFormContentSize;
+				}
+			    }
 
                             // Read the content
                             ByteArrayOutputStream2 bout =
