@@ -28,6 +28,7 @@
 # SERVLET.name.Loader     - The implmentation of ServletLoader to use to load
 #                           the "name" servlet.
 # SERVLET.name.AutoReload - Should the servlet be reloaded automatically.
+# SERVLET.name.ResourceBase-ResourceBase for servlet.
 # ------------------------------------------------------------------------
 
 PATHS				    : /servlet/;/SERVLET/;/Servlet/
@@ -83,19 +84,12 @@ SERVLET.Index.CLASS		    : com.mortbay.Jetty.DemoIndex
 SERVLET.Dispatch.CLASS		    : com.mortbay.Servlets.Dispatch
 SERVLET.Dispatch.PATHS		    : /Dispatch%
 
-SERVLET.gnujsp.PATHS		    : /jsp/*.jsp
-SERVLET.gnujsp.CLASS		    : org.gjt.jsp.JSPServlet
+SERVLET.gnujsp.PATHS		    : *.jsp
+SERVLET.gnujsp.CLASS		    : org.gjt.jsp.JspServlet
 SERVLET.gnujsp.CLASSPATH            : ./lib/gnujsp.jar
-SERVLET.gnujsp.PROPERTY.repository  : ./jsp
-SERVLET.gnujsp.PROPERTY.pagebase    : ./FileBase/jsp/
-SERVLET.gnujsp.PROPERTY.compiler    : javac -classpath %classpath%:%repository% -d %repository% -deprecation %source%
-
-SERVLET.gnujsp10.PATHS		    : /jsp10/*.jsp
-SERVLET.gnujsp10.CLASS		    : org.gjt.jsp10.JSP10Servlet
-SERVLET.gnujsp10.CLASSPATH          : ./lib/gnujsp10.jar
-SERVLET.gnujsp10.PROPERTY.scratchdir: ./jsp10     
-SERVLET.gnujsp10.PROPERTY.resourcebase: /JSP10
-SERVLET.gnujsp10.PROPERTY.debug     : true
-SERVLET.gnujsp10.PROPERTY.compiler  : builtin-javac -classpath %classpath%:%repository%:./lib/gnujsp10.jar -d %repository% -deprecation %source%
-
+SERVLET.gnujsp.ResourceBase         : file:./FileBase/
+SERVLET.gnujsp.PROPERTY.scratchdir  : ./etc/jsp     
+SERVLET.gnujsp.PROPERTY.debug       : true
+SERVLET.gnujsp.PROPERTY.checkclass  : true
+SERVLET.gnujsp.PROPERTY.compiler    : builtin-javac -classpath %classpath%:%scratchdir%:./lib/gnujsp.jar -d %scratchdir% -deprecation %source% 
 

@@ -153,17 +153,9 @@ main.root.Servlet.PROPERTY.SERVLET.Laf.PATHS		    : /Jetty/Demo/;/Jetty/Info/;/J
 main.root.Servlet.PROPERTY.SERVLET.Laf.PROPERTY.ResourceBase: /laf
 main.root.Servlet.PROPERTY.SERVLET.Index.PATHS		    : /Jetty|;/Jetty/Info|;/Jetty/Demo|;/Jetty/Program|;/Jetty/Config|
 main.root.Servlet.PROPERTY.SERVLET.Index.CLASS		    : com.mortbay.Jetty.DemoIndex
-main.root.Servlet.PROPERTY.SERVLET.gnujsp.PATHS		    : /jsp/*.jsp
-main.root.Servlet.PROPERTY.SERVLET.gnujsp.CLASS		    : org.gjt.jsp.JSPServlet
-main.root.Servlet.PROPERTY.SERVLET.gnujsp.CLASSPATH         : ./lib/gnujsp.jar
-main.root.Servlet.PROPERTY.SERVLET.gnujsp.PROPERTY.repository: ./jsp
-main.root.Servlet.PROPERTY.SERVLET.gnujsp.PROPERTY.pagebase : ./FileBase/jsp/
-main.root.Servlet.PROPERTY.SERVLET.gnujsp.PROPERTY.compiler : javac -classpath %classpath%:%repository% -d %repository% -deprecation %source%
 # ------------------------------------------------------------------------
 main.root.File.PROPERTY.FILES.FileBase.PATHS     : /;/FileBase%
 main.root.File.PROPERTY.FILES.FileBase.DIRECTORY : ./FileBase
-main.root.File.PROPERTY.FILES.jsp.PATHS          : /JSP/
-main.root.File.PROPERTY.FILES.jsp.DIRECTORY      : ./FileBase/jsp
 # ------------------------------------------------------------------------
 main.root.Forward.PROPERTY.FORWARD.demo.PATHS  : /Forward%
 main.root.Forward.PROPERTY.FORWARD.demo.URL    : http://localhost:8080

@@ -378,6 +378,10 @@ by default, which allows persistent connections to be used in more
 situations. Please see the ServletHandler class for information
 on turning Chunking on by default.
 
+Jetty 2 supports HTTP/1.1 as defined in RFC2068.  This has now been
+replaced with RFC2616 and Jetty 3 is currently under development with 
+to support this.
+
 
 Running the Jetty Demo under MacOS
 ----------------------------------
@@ -394,6 +398,13 @@ javax.servlet.jar) to the "Additions to class path" box.
 - Click Save Settings. Save the settings as an application in the Jetty 2.2
 folder (the same folder that contains the etc and FileBase folders).
 - Double-click the application you just created to start the server.
+
+
+Virtual Hosts
+-------------
+The handler com.mortbay.HTTP.Handler.VirtualHostHandler handles 
+virtual hosts by performing a path prefix translation. This is not
+a complete solution but works in many cases.
 
 
 Building Jetty

@@ -1,11 +1,18 @@
+Release 2.4.0 - 24th March 2000 LATEST
+  + Upgraded to gnujsp 1.0.0
+  + Added per servlet resourceBase configuration.
+  + Absolute URIs are returned by getRequestURI (if sent by browser). 
+  + Improved parsing of stack trace in debug mode.
+  + Implemented full handling of cookie max age.
   + Moved SetUID native code to contrib hierarchy
   + Form parameters only decoded for POSTs
   + RequestDispatcher handles URI parameters
   + Fixed bug with RequestDispatcher.include()
   + Fixed caste problem in UrlEncoded
   + Fixed null pointer in ThreadedServer with stopAll
+  + Added VirtualHostHandler for virtual host handling
 
-Release 2.3.5 - 25th January 2000 LATEST 
+Release 2.3.5 - 25th January 2000 
   + Fixed nasty bug with HTTP/1.1 redirects.
   + ProxyHandler sends content for POSTs etc.
   + Force locale of date formats to US.

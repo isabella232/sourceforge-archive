@@ -74,6 +74,7 @@ public class ServletHandler extends NullHandler
      * SERVLET.name.Initialize: False # Initialize when loaded.
      * SERVLET.name.AutoReload: False # Auto reload servlet.
      * SERVLET.name.Loader: className # ServletLoader for servlet
+     * SERVLET.name.ResourceBase: uri # ResourceBase for servlet.
      *
      * </PRE>
      * @param properties Configuration.
@@ -126,6 +127,7 @@ public class ServletHandler extends NullHandler
                 String servletClass = servletTree.getProperty("CLASS");
                 String servletClassPath = servletTree.getProperty("CLASSPATH");
                 String servletLoaderName = servletTree.getProperty("Loader");
+                String servletResBase = servletTree.getProperty("ResourceBase");
                 Properties servletProperties = getProperties(servletTree);
                 ServletHolder servletHolder=
                     new ServletHolder(servletLoaderName,
@@ -133,7 +135,9 @@ public class ServletHandler extends NullHandler
                                       servletClass,
                                       servletClassPath,
                                       servletProperties);
-                
+                if(servletResBase!=null)
+                    servletHolder.setResourceBase(servletResBase);
+
                 boolean chunk = servletTree.getBoolean("CHUNK",false);
                 servletHolder.setChunkByDefault(chunk);
                 Vector paths = servletTree.getVector("PATHS",",;");

@@ -52,6 +52,9 @@ public class ServletHolder implements ServletConfig
     private boolean reloading=false;
     private boolean autoReload=false;
     boolean initializeWhenServerSet=false;
+    private ServletContext context;
+    private String resourceBase=null;
+
 
     /* ---------------------------------------------------------------- */
     /** Construct a Servlet property mostly from the servers config
@@ -358,6 +361,28 @@ public class ServletHolder implements ServletConfig
      */
     public ServletContext getServletContext()
     {
+        if (context!=null)
+            return context;
+        if (resourceBase!=null){
+            if (resourceBase.startsWith("file:..")){
+                Code.notImplemented();
+            }
+            if (resourceBase.startsWith("file:.")){
+                Code.debug("Hack to allow file:./ bases");
+                resourceBase=
+                    "file:"+
+                    System.getProperty("user.dir")+
+                    resourceBase.substring(6);
+            }
+            
+            try{
+            System.err.println(resourceBase);
+            System.err.println(new URL(resourceBase));
+            System.err.println(System.getProperties());
+            }catch(Exception e){Code.warning(e);}
+            context= new ServletContextWrapper(server,resourceBase);
+            return context;
+        }
         return server;
     }
 
@@ -527,6 +552,12 @@ public class ServletHolder implements ServletConfig
     public String toString()
     {
         return name;
+    }
+    
+    /* ------------------------------------------------------------ */
+    void setResourceBase(String rb)
+    {
+        resourceBase=rb;
     }
     
 }

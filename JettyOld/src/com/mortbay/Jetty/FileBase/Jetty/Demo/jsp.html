@@ -1,33 +1,24 @@
 <!-- -*- html-helper -*- -->
 <h1>Java Server Pages</h1>
-Jetty comes with versions 0.9 and 1.0 of the <A HREF=http://www.xs4all.nl/~vincentp/>GNUJSP</A> implementation of
+Jetty comes with versions 1.0 of the <A HREF=http://www.xs4all.nl/~vincentp/>GNUJSP</A> implementation of
 <A HREF=http://java.sun.com/products/jsp/>Java Server Pages</A> installed.
 JSP allows dynamic content to be added to HTML pages with special tags that
-allow java code to be compiled and called.  The GNUJSP 1.0 version is a
-modified snapshot 19990918-2300, but appears stable and implements the
-JSP1.0 API.
+allow java code to be compiled and called.  
 <P>
-The links below are some jsp examples. The GNUJSP 1.0 README is also listed
+The links below are some jsp examples. 
 below:
 <TABLE><TR><TD ALIGN=left>
 <B>JSP 1.0:</B>
 <UL>
-  <LI><A HREF=/jsp10/<!=SESSION>date.jsp>Date</A>. View the <A HREF=/JSP10/date.jsp>source</A>.
-  <LI><A HREF=/jsp10/<!=SESSION>snoop.jsp>Snoop</A>. View the <A HREF=/JSP10/snoop.jsp>source</A>.
-</UL>
-</TD></TR></TABLE>
-<TABLE><TR><TD ALIGN=left>
-<B>JSP 0.9:</B>
-<UL>
-  <LI><A HREF=/jsp/<!=SESSION>date.jsp>Date</A>. View the <A HREF=/JSP/date.jsp>source</A>.
-  <LI><A HREF=/jsp/<!=SESSION>snoop.jsp>Snoop</A>. View the <A HREF=/JSP/snoop.jsp>source</A>.
-  <LI><A HREF=/jsp/<!=SESSION>session.jsp>Session</A>. View the <A HREF=/JSP/session.jsp>source</A>.
+  <LI><A HREF=/JSP/<!=SESSION>hello.jsp>Hello</A>.
+  <LI><A HREF=/JSP/<!=SESSION>date.jsp>Date</A>.
+  <LI><A HREF=/JSP/<!=SESSION>snoop.jsp>Snoop</A>.
 </UL>
 </TD></TR></TABLE>
 <P>
 <TABLE BORDER=1 CELLPADDING=4><TR><TD>
 <PRE>
-<!=com.mortbay.HTTP.Filter.HtmlFilter.includePreFile(out,"contrib/org/gjt/jsp10","README")>
+<!=com.mortbay.HTTP.Filter.HtmlFilter.includePreFile(out,"contrib/org/gjt/jsp","README")>
 </PRE>
 </TD></TR>
 </TABLE>

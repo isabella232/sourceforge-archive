@@ -19,8 +19,4 @@ MaxCachedFiles           : 100
 MaxCachedFileSize        : 8192
 FILES.FileBase.PATHS     : /;/FileBase%
 FILES.FileBase.DIRECTORY : ./FileBase
-FILES.jsp.PATHS          : /JSP/
-FILES.jsp.DIRECTORY      : ./FileBase/jsp
-FILES.jsp10.PATHS          : /JSP10/
-FILES.jsp10.DIRECTORY      : ./FileBase/jsp10
 
