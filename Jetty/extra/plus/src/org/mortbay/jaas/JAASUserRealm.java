@@ -298,10 +298,10 @@ public class JAASUserRealm implements UserRealm
             
             if (info == null)
                 Log.warning ("Logout called for user="+user+" who is NOT in the authentication cache");
-            
-            info.getLoginContext().logout();
-	    userMap.remove (key);
+            else 
+                info.getLoginContext().logout();
 
+	    userMap.remove (key);
 	    Log.event (user+" has been LOGGED OUT");
         }
         catch (LoginException e)
