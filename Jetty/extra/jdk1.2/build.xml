@@ -97,6 +97,7 @@
         <exclude name="org/mortbay/util/Resource.java" />
         <exclude name="org/mortbay/util/FileResource.java" />
         <exclude name="org/mortbay/http/handler/ProxyHandler.java" />
+        <exclude name="org/mortbay/servlet/ProxyServlet.java" />
       </fileset>
     </copy>
 
