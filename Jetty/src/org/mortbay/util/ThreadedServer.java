@@ -50,6 +50,7 @@ abstract public class ThreadedServer extends ThreadPool
     private int _soTimeOut=-1;
     private int _lingerTimeSecs=30;
     private boolean _tcpNoDelay=true;
+    private int _acceptQueueSize=-1;
     
     private transient Acceptor _acceptor=null;  
     private transient ServerSocket _listen = null;
@@ -422,8 +423,12 @@ abstract public class ThreadedServer extends ThreadPool
     {
         if (_listen==null)
         {
-            _listen=newServerSocket(_address,
-                                    (getMaxThreads()>0?(getMaxThreads()+1):50));
+            int queue=_acceptQueueSize;
+            if (queue<0)
+                queue=getMaxThreads()>0?getMaxThreads()+1:50;
+                
+            _listen=newServerSocket(_address,queue);
+            
             if (_address==null)
                 _address=new InetAddrPort(_listen.getInetAddress(),_listen.getLocalPort());
             else
@@ -621,5 +626,23 @@ abstract public class ThreadedServer extends ThreadPool
                 }
             }
         }
+    }
+    
+    /**
+     * @return Returns the acceptQueueSize or -1 if not set.
+     */
+    public int getAcceptQueueSize()
+    {
+        return _acceptQueueSize;
+    }
+    
+    /**
+     * The size of the queue for unaccepted connections.
+     * If not set, will default to greater of maxThreads or 50. 
+     * @param acceptQueueSize The acceptQueueSize to set.
+     */
+    public void setAcceptQueueSize(int acceptQueueSize)
+    {
+        _acceptQueueSize = acceptQueueSize;
     }
 }
