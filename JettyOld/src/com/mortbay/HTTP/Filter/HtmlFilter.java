@@ -192,7 +192,7 @@ public class HtmlFilter extends HttpFilter
 	}
 
 	// write what we have got that is OK
-	if (end>off)
+	if (end>=off)
 	    out.write(buf,off,end-off+1);
     }
     
