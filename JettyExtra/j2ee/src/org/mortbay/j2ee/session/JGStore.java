@@ -313,8 +313,7 @@ public class
 	  state=new LocalState[_sessions.size()];
 	  int j=0;
 	  for (Iterator i=_sessions.values().iterator(); i.hasNext();)
-	    //	    state[j++]=(LocalState)i.next();
-	    state[j++]=((ReplicatedState)i.next()).getLocalState();
+	    state[j++]=(LocalState)i.next();
 	}
 
 	Object[] data={new Long(System.currentTimeMillis()), state};
@@ -369,10 +368,7 @@ public class
 	for (int i=0; i<state.length; i++)
 	{
 	  LocalState ls=state[i];
-	  _sessions.put(ls.getId(),
-			//ls
-			new ReplicatedState(this, ls)
-			);
+	  _sessions.put(ls.getId(), ls);
 	}
       }
     }

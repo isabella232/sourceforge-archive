@@ -113,23 +113,7 @@ public class Manager
     if (_store!=null)
       _store.setManager(this);
   }
-  //----------------------------------------
-  protected Medium _medium = null;
 
-  public Medium
-    getMedium()
-  {
-    return _medium;
-  }
-
-  public void
-    setMedium(Medium medium)
-  {
-    _medium=medium;
-
-    if (_medium!=null)
-      _medium.setManager(this);
-  }
   //----------------------------------------
 
   public Object
@@ -143,18 +127,6 @@ public class Manager
     if (store!=null)
       m.setStore((Store)store.clone());
 
-    // deep-copy Medium attribute - each Manager gets it's own Medium instance
-    try
-    {
-      Medium medium=getMedium();
-      if (medium!=null)
-	m.setMedium((Medium)medium.clone());
-    }
-    catch (CloneNotSupportedException e)
-    {
-      // should never happen
-      e.printStackTrace();
-    }
     // Stateless Interceptors may be shared between Contexts...
     m.setInterceptorStack(getInterceptorStack());
 
@@ -210,16 +182,6 @@ public class Manager
 	try{_store.start();}catch(Exception e2){_log.error("could not start Store", e2);}
       }
 
-      try
-      {
-	if (_medium!=null)
-	  _medium.start();
-      }
-      catch (Exception e)
-      {
-	_log.warn("Faulty Medium", e);
-      }
-
       boolean isDaemon=true;
       _scavenger=new Timer(isDaemon);
       long delay=getScavengerPeriod()*1000;
@@ -264,13 +226,6 @@ public class Manager
       _scavenger.cancel();
       _scavenger=null;
       scavenge();
-
-      if (_medium!=null)
-      {
-	_medium.stop();
-	_medium.destroy();
-	setMedium(null);
-      }
 
       _store.stop();
       _store.destroy();
@@ -501,7 +456,7 @@ public class Manager
 	{
 	  si=(StateInterceptor)s;
 	  s=si.getState();	// next interceptor
-	  if (si instanceof ValidationInterceptor)
+	  if (si instanceof ValidatingInterceptor)
 	    si.stop();
 	}
       }

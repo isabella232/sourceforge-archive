@@ -84,6 +84,7 @@ abstract public class
       }
 
       createSession(id, creationTime, maxInactiveInterval, _actualMaxInactiveInterval);
+
       // if we get one - all we have to do is loadState - because we
       // will have just created it...
       return loadState(id);
@@ -141,7 +142,7 @@ abstract public class
       synchronized (_sessions)
       {
 	for (Iterator i=_sessions.entrySet().iterator(); i.hasNext();)
- 	  if (!((ReplicatedState)((Map.Entry)i.next()).getValue()).isValid(_scavengerExtraTime))
+ 	  if (!((LocalState)((Map.Entry)i.next()).getValue()).isValid(_scavengerExtraTime))
 	  {
 	    _log.info("scavenging state");
 	    i.remove();
@@ -185,8 +186,7 @@ abstract public class
 	else
 	{
 	  // or an instance method..
-	  target=_sessions.get(id);
-	  //synchronized (_interceptors){o=_interceptors.get(id);}
+	  synchronized (_subscribers){target=_subscribers.get(id);}
 	}
 
 	try
@@ -208,8 +208,14 @@ abstract public class
     createSession(String id, long creationTime, int maxInactiveInterval, int actualMaxInactiveInterval)
     {
       _log.debug("creating replicated session: "+id);
-      State state=new ReplicatedState(this, id, creationTime, maxInactiveInterval, actualMaxInactiveInterval);
+      State state=new LocalState(id, creationTime, maxInactiveInterval, actualMaxInactiveInterval);
       synchronized(_sessions) {_sessions.put(id, state);}
+
+      if (AbstractReplicatedStore.getReplicating())
+      {
+	//	_log.info("trying to promote replicated session");
+	getManager().getHttpSession(id); // should cause creation of corresponding InterceptorStack
+      }
     }
 
   public void
@@ -221,18 +227,20 @@ abstract public class
 
   //----------------------------------------
   // subscription - Listener management...
-//
-//   protected Map _interceptors=new HashMap();
-//
-//   public void
-//     register(String id, Object o)
-//     {
-//       synchronized (_interceptors) {_interceptors.put(id, o);}
-//     }
-//
-//   public void
-//     deregister(String id)
-//     {
-//       synchronized (_interceptors) {_interceptors.remove(id);}
-//     }
+
+  protected Map _subscribers=new HashMap();
+
+  public void
+    subscribe(String id, Object o)
+    {
+      //      _log.info("subscribing: "+id);
+      synchronized (_subscribers) {_subscribers.put(id, o);}
+    }
+
+  public void
+    unsubscribe(String id)
+    {
+      //      _log.info("unsubscribing: "+id);
+      synchronized (_subscribers) {_subscribers.remove(id);}
+    }
 }

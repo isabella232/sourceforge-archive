@@ -171,12 +171,15 @@ Jules
   <New class="org.mortbay.j2ee.session.Manager">
    <Set name="interceptorStack">
     <Array type="org.mortbay.j2ee.session.StateInterceptor">
+<!--
      <Item><New class="org.mortbay.j2ee.session.DebugInterceptor"/></Item>
-     <Item><New class="org.mortbay.j2ee.session.ValidationInterceptor"/></Item>
+-->
+     <Item><New class="org.mortbay.j2ee.session.ValidatingInterceptor"/></Item>
      <Item><New class="org.mortbay.j2ee.session.TypeCheckingInterceptor"/></Item>
      <Item><New class="org.mortbay.j2ee.session.BindingInterceptor"/></Item>
-     <Item><New class="org.mortbay.j2ee.session.MarshallingInterceptor"/></Item>
-     <Item><New class="org.mortbay.j2ee.session.SynchronizationInterceptor"/></Item>
+     <Item><New class="org.mortbay.j2ee.session.SynchronizingInterceptor"/></Item>
+     <Item><New class="org.mortbay.j2ee.session.PublishingInterceptor"/></Item>
+     <Item><New class="org.mortbay.j2ee.session.SubscribingInterceptor"/></Item>
     </Array>
    </Set>
    <Set name="store">
