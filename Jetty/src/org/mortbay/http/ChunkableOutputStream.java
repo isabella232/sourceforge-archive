@@ -410,6 +410,7 @@ public class ChunkableOutputStream extends FilterOutputStream
         int capacity=_buffer.getSpareCapacity();
         if (_chunking)
             capacity=capacity-__CHUNK_RESERVE;
+
         while (len>capacity)
         {
             _bytes+=capacity;

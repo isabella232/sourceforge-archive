@@ -22,6 +22,7 @@ public class ByteBufferOutputStream extends OutputStream
     private int _start;
     private int _end;
     private int _reserve;
+    private boolean _resized;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -166,7 +167,8 @@ public class ByteBufferOutputStream extends OutputStream
     /* ------------------------------------------------------------ */
     public void destroy()
     {
-        ByteArrayPool.returnByteArray(_buf);
+        if (!_resized)
+            ByteArrayPool.returnByteArray(_buf);
     }
 
     /* ------------------------------------------------------------ */
@@ -199,10 +201,15 @@ public class ByteBufferOutputStream extends OutputStream
     {
         if ((_end+n)>_buf.length)
         {
-            Code.warning("New buf for ensure: "+_end+"+"+n+">"+_buf.length);
-            byte[] buf = new byte[(_buf.length+n)*4/3];
+            int bl = ((_end+n+1023)/1024)*1024;
+            byte[] buf = new byte[bl];
+            Code.debug("New buf for ensure: "+_end+"+"+n+">"+_buf.length+
+                         " --> "+buf.length);
             System.arraycopy(_buf,_start,buf,_start,_end-_start);
+            if (!_resized)
+                ByteArrayPool.returnByteArray(_buf);
             _buf=buf;
+            _resized=true;
         }
     }
 }
