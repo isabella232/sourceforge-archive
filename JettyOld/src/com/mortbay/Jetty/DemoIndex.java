@@ -33,8 +33,8 @@ public class DemoIndex extends IndexServlet
 		    "Java. It is designed to be embedable, extensible and "+
 		    "flexible, thus making it an ideal platform for serving " +
 		    "dynamic HTTP requests from any Java application.  "+
-		    "Jetty supports the javax.servlet API defined "+
-		    "by JavaSoft plus many more features.");
+		    "Jetty supports the <A HREF=/javadoc/javax/servlet/overview-summary.html>javax.servlet&nbsp;API</A> defined "+
+		    "by <A HREF=http://www.javasoft.com>JavaSoft</A> plus many more features.");
 	String [][] jettyItems =
 	{
 	    {   "General Information",
@@ -190,9 +190,13 @@ public class DemoIndex extends IndexServlet
 		"/Jetty/Program/generatedVtemplate.html",
 		"HTML generation and HTML authoring"
 	    },
-	    {   "API Documentation",
+	    {   "Jetty API Documentation",
 		"/javadoc/packages.html",
 		"The generated class reference documentation."
+	    },
+	    {   "Servlet API Documentation",
+		"/javadoc/javax/servlet/overview-summary.html",
+		"The class reference for the standard API."
 	    }
 	};
 	section.put("Items",progItems);

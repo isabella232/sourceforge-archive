@@ -33,7 +33,14 @@ public class Dump extends HttpServlet
     }
 
     /* ------------------------------------------------------------ */
-    public void service(HttpServletRequest sreq, HttpServletResponse sres) 
+    public void doPost(HttpServletRequest sreq, HttpServletResponse sres) 
+	throws ServletException, IOException
+    {
+	doGet(sreq,sres);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void doGet(HttpServletRequest sreq, HttpServletResponse sres) 
 	throws ServletException, IOException
     {
         sres.setContentType("text/html");

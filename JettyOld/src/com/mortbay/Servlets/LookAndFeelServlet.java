@@ -13,6 +13,7 @@ import java.io.*;
 import java.util.*;
 
 
+/* ---------------------------------------------------------------- */
 /** LookAndFeel Servlet
  * <p> The LookAndFeel Servlet serves file based pages as the body of html
  * pages which it wraps in a certain LookAndFeel. The LookAnd Feel it uses is
@@ -55,8 +56,8 @@ public class LookAndFeelServlet extends HttpServlet
     }
 
     /* ------------------------------------------------------------ */
-    public void service(HttpServletRequest request,
-			HttpServletResponse response) 
+    public void doGet(HttpServletRequest request,
+		      HttpServletResponse response) 
 	 throws ServletException, IOException
     {
 	try{

@@ -123,7 +123,9 @@ ServerA./.Directory.allowDelete : false
 ServerA./.Forward./Forward%: http://localhost:8080
 ServerA./.Forward.http     : http://localhost:8081
 
+ServerA./javadoc%.Log./		   : err
 ServerA./javadoc%.Directory./: .
+ServerA./javadoc%.Directory./javadoc/javax/servlet%: src/javax/servlet/javadoc
 
 # ------------------------------------------------------------------------
 ServerP./.InetAddrPort	   : localhost:8081

@@ -1,5 +1,9 @@
-Release 2.1.2 - 
+Release 2.1.2 - 9 March 1999
+  + JSDK 2.1.1
+  + API documentation for JSDK 2.1.1
   + Cascading style sheet HTML element added.
+  + Fixed trailing / bug in FileHandler (again!).
+  + Converted most servlets to HttpServlets using do Methods.
 
 Release 2.1.1 - 5 March 1999
   + Reduced number of calls to getRemoteHost for optimization

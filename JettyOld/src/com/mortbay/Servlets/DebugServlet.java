@@ -30,12 +30,52 @@ public class DebugServlet extends HttpServlet
     }
 
     /* ------------------------------------------------------------ */
-    public void service(HttpServletRequest request,
-			HttpServletResponse reponse) 
+    public void doPost(HttpServletRequest request,
+			HttpServletResponse response) 
 	throws ServletException, IOException
     {
-        reponse.setContentType("text/html");
-        OutputStream out = reponse.getOutputStream();
+	if ("Set Options".equals(request.getParameter("Action")))
+	{
+	    Code.setDebug("on".equals(request.getParameter("D")));
+	    Code.setSuppressWarnings("on".equals(request.getParameter("W")));
+	    Code.setSuppressStack("on".equals(request.getParameter("S")));
+	    String v=request.getParameter("V");
+	    if (v!=null && v.length()>0)
+		Code.setVerbose(Integer.parseInt(v));
+	    else
+		Code.setVerbose(0);
+	    Code.setDebugPatterns(request.getParameter("P"));
+	    Code.setDebugTriggers(request.getParameter("T"));
+
+	    String lo="";
+	    if ("on".equals(request.getParameter("Lt")))
+		lo+=Log.TIMESTAMP;
+	    if ("on".equals(request.getParameter("LL")))
+		lo+=Log.LABEL;
+	    if ("on".equals(request.getParameter("LT")))
+		lo+=Log.TAG;
+	    if ("on".equals(request.getParameter("Ls")))
+		lo+=Log.STACKSIZE;
+	    if ("on".equals(request.getParameter("LS")))
+		lo+=Log.STACKTRACE;
+	    if ("on".equals(request.getParameter("LO")))
+		lo+=Log.ONELINE;
+	    Log.instance().setOptions(lo);
+		
+	    Code.warning("Debug options changed");
+	    Code.debug("Debug options changed");
+	}
+	    
+	doGet(request,response);
+    }
+	
+    /* ------------------------------------------------------------ */
+    public void doGet(HttpServletRequest request,
+			HttpServletResponse response) 
+	throws ServletException, IOException
+    {
+        response.setContentType("text/html");
+        OutputStream out = response.getOutputStream();
 	PrintWriter pout = new PrintWriter(out);
 
 	Page page=null;
@@ -45,38 +85,6 @@ public class DebugServlet extends HttpServlet
 	    page.title("Debug Servlet");
 
 	    page.add("This form displays and sets the debug and log options<P>");
-	    if ("Set Options".equals(request.getParameter("Action")))
-	    {
-		Code.setDebug("on".equals(request.getParameter("D")));
-		Code.setSuppressWarnings("on".equals(request.getParameter("W")));
-		Code.setSuppressStack("on".equals(request.getParameter("S")));
-		String v=request.getParameter("V");
-		if (v!=null && v.length()>0)
-		    Code.setVerbose(Integer.parseInt(v));
-		else
-		    Code.setVerbose(0);
-		Code.setDebugPatterns(request.getParameter("P"));
-		Code.setDebugTriggers(request.getParameter("T"));
-
-		String lo="";
-		if ("on".equals(request.getParameter("Lt")))
-		    lo+=Log.TIMESTAMP;
-		if ("on".equals(request.getParameter("LL")))
-		    lo+=Log.LABEL;
-		if ("on".equals(request.getParameter("LT")))
-		    lo+=Log.TAG;
-		if ("on".equals(request.getParameter("Ls")))
-		    lo+=Log.STACKSIZE;
-		if ("on".equals(request.getParameter("LS")))
-		    lo+=Log.STACKTRACE;
-		if ("on".equals(request.getParameter("LO")))
-		    lo+=Log.ONELINE;
-		Log.instance().setOptions(lo);
-		
-		Code.warning("Debug options changed");
-		Code.debug("Debug options changed");
-	    }
-	    
     	    TableForm tf = new TableForm(request.getRequestURI());
 	    page.add(tf);
 

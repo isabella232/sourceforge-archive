@@ -6,8 +6,8 @@ import javax.servlet.http.*;
 
 public class UploadServlet extends HttpServlet
 {
-    public void service(HttpServletRequest request,
-			HttpServletResponse response)
+    public void doPost(HttpServletRequest request,
+		       HttpServletResponse response)
 	 throws java.io.IOException
     {
 	Page page = Page.getPage(Page.getDefaultPageType(),request);

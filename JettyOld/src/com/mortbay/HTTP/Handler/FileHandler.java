@@ -141,7 +141,7 @@ public class FileHandler extends NullHandler
                    " METHOD=",request.getMethod());
 	
 	// check filename
-	boolean endsWithSlash= filename.endsWith(File.separator);
+	boolean endsWithSlash= uri.endsWith("/");
 	if (endsWithSlash)
 	    filename = filename.substring(0,filename.length()-1);
 	

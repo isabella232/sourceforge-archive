@@ -41,8 +41,7 @@ public class IndexServlet extends HttpServlet
 
     /* ------------------------------------------------------------ */
     public IndexServlet()
-    {
-    }
+    {}
 
     /* ------------------------------------------------------------ */
     protected IndexServlet(PathMap index)
@@ -72,8 +71,8 @@ public class IndexServlet extends HttpServlet
     }
 
     /* ------------------------------------------------------------ */
-    public void service(HttpServletRequest request,
-			HttpServletResponse response) 
+    public void doGet(HttpServletRequest request,
+		      HttpServletResponse response) 
 	 throws ServletException, IOException
     {
 	try{
@@ -126,7 +125,9 @@ public class IndexServlet extends HttpServlet
 		}
 		else
 		{
-		    page.add(new Link(items[i][1],items[i][0]));
+		    Block block = new Block(Block.Bold);
+		    block.add(new Link(items[i][1],items[i][0]));
+		    page.add(block);
 		    page.add(Break.line);
 		    page.add(items[i][2]);
 		    page.add(Break.para);
