@@ -1085,6 +1085,10 @@ public class ServletHandler
             if (__Slosh2Slash)
                 path=path.replace('\\','/');
         
+            path=URI.canonicalPath(path);
+            if (path==null)
+                return null;
+
             Resource baseResource=_httpContext.getBaseResource();
             if (baseResource==null )
                 return null;

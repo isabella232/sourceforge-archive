@@ -73,8 +73,6 @@ public class JarResource extends Resource
     public File getFile()
         throws IOException
     {
-        if (_urlString.endsWith("!/"))
-            return super.getFile();
         return null;
     }
     

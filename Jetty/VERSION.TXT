@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+Jetty-4.0.5 - 31 July 2002
+ + Fixed getRealPath for packed war files.
  + Reversed order of ServletContextListener.contextDestroyed calls
  + Fixed getRequestURI for RD.forward to return new URI.
 
