@@ -300,21 +300,20 @@ public class WebApplicationContext extends HandlerContext
         {
             String s=startup.toString(false,true).toLowerCase();
             if (s.startsWith("t"))
-                holder.setInitOnStartup(true);
+            {
+                Code.warning("Deprecated boolean load-on-startup.  Please use integer");
+                holder.setInitOrder(1);
+            }
             else
             {
                 try
                 {
                     int order=Integer.parseInt(s);
-                    if (order>0)
-                    {
-                        holder.setInitOnStartup(true);
-                        if (order>1)
-                            Code.warning("Startup ordering not implemented");
-                    }
+                    holder.setInitOrder(order);
                 }
                 catch(Exception e)
                 {
+                    Code.warning("Cannot parse load-on-startup "+s+". Please use integer");
                     Code.ignore(e);
                 }
             }

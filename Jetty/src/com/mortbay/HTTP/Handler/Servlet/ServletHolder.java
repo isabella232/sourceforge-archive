@@ -6,6 +6,7 @@
 package com.mortbay.HTTP.Handler.Servlet;
 
 import com.mortbay.Util.Code;
+import com.mortbay.HTTP.ContextLoader;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.Collections;
@@ -36,6 +37,7 @@ import javax.servlet.UnavailableException;
  */
 public class ServletHolder
     extends AbstractMap
+    implements Comparable
 {
     /* ---------------------------------------------------------------- */
     private ServletHandler _handler;
@@ -48,7 +50,7 @@ public class ServletHolder
     private String _name=null;
     private String _className ;
     private Map _initParams ;
-    private boolean _initOnStartup =false;
+    private int _initOrder=-1;
     private Config _config;
     private Map _roleMap;
 
@@ -97,23 +99,66 @@ public class ServletHolder
         _className = className;
     }
 
-
     /* ------------------------------------------------------------ */
+    /**
+     * @deprecated Use getInitORder()
+     */
     public boolean isInitOnStartup()
     {
-        return _initOnStartup;
+        return _initOrder>=0;
     }
 
     /* ------------------------------------------------------------ */
+    /** 
+     * @deprecated Use setInitOrder(int)
+     */
     public void setInitOnStartup(boolean b)
     {
-        _initOnStartup = b;
+        _initOrder=b?0:-1;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public int getInitOrder()
+    {
+        return _initOrder;
     }
 
+    /* ------------------------------------------------------------ */
+    /** Set the initialize order.
+     * Holders with order<0, are initialized on use. Those with
+     * order>=0 are initialized in increasing order when the handler
+     * is started.
+     */
+    public void setInitOrder(int order)
+    {
+        _initOrder = order;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Comparitor by init order.
+     */
+    public int compareTo(Object o)
+    {
+        if (o instanceof ServletHolder)
+        {
+            ServletHolder sh= (ServletHolder)o;
+            if (sh==this)
+                return 0;
+            if (sh._initOrder<_initOrder)
+                return 1;
+            if (sh._initOrder>_initOrder)
+                return -1;
+            return _className.compareTo(sh._className);
+        }
+        return 1;
+    }
+    
+    
     /* ------------------------------------------------------------ */
     public void initialize()
     {
-        try{
+        try
+        {
             getServlet();
         }
         catch(javax.servlet.UnavailableException e)
@@ -129,6 +174,42 @@ public class ServletHolder
     {
         try
         {
+            // XXX - This is horrible - got to find a better way.
+            if (getClassName().equals("org.apache.jasper.servlet.JspServlet"))
+            {                
+                ClassLoader jettyLoader=_handler.getHandlerContext().getClassLoader();
+                ClassLoader jasperLoader=(ClassLoader)
+                    _context.getAttribute("org.apache.tomcat.classloader");
+                if (jettyLoader!=null && jasperLoader==null)
+                {
+                    Code.debug("Fiddle classloader for Jasper: "+jettyLoader);
+                    _context.setAttribute("org.apache.tomcat.classloader",
+                                          jettyLoader);
+                }
+
+                String classpath = getInitParameter("classpath");
+                String ctxClasspath =(jettyLoader instanceof ContextLoader)
+                    ?((ContextLoader)jettyLoader).getFileClassPath()
+                    :_handler.getHandlerContext().getClassPath();
+                String tomcatpath=(String)
+                    _context.getAttribute("org.apache.tomcat.jsp_classpath");
+
+                if (classpath==null && tomcatpath!=null)
+                {
+                    classpath=tomcatpath;
+                    Code.debug("Fiddle classpath for Jasper: "+classpath);
+                    setInitParameter("classpath",classpath);
+                }
+                
+                if ((classpath==null || classpath.length()==0) &&
+                    ctxClasspath!=null && ctxClasspath.length()>0)
+                {
+                    classpath=ctxClasspath;
+                    Code.debug("Fiddle classpath for Jasper: "+classpath);
+                    setInitParameter("classpath",classpath);
+                }            
+            }
+            
             ClassLoader loader=_context.getHandler().getClassLoader();
             Code.debug("Servlet loader ",loader);
             if (loader==null)

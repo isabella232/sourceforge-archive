@@ -1,8 +1,8 @@
 Jetty Versions
 --------------
  
-Jetty-3.0.0.rc5 - 9 Nov 2000
- + Default encoding set by mime type if not explicitly set.
+Jetty-3.0.0.rc5 - 11 Nov 2000
+ + Default writer encoding set by mime type if not explicitly set.
  + Relax webapp rules, accept no web.xml or no WEB-INF
  + Pass flush through ServletOut
  + Avoid jprobe race warnings in DateCache 
@@ -10,6 +10,9 @@ Jetty-3.0.0.rc5 - 9 Nov 2000
  + Servlet exceptions cause 503 unavailable rather than 500 server error
  + RequestDispatcher can dispatch static resources.
  + Merged DynamicHandler into ServletHandler.
+ + Added debug form to Admin servlet.
+ + Implemented servlet load ordering.
+ + Moved JSP classpath hack to ServletHolder
 
 Jetty-3.0.0.rc4 - 6 Nov 2000
  + Provide default JettyIndex.properties

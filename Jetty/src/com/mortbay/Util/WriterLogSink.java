@@ -26,7 +26,10 @@ public class WriterLogSink
     implements LogSink
 {
     /*-------------------------------------------------------------------*/
+    protected String _logDateFormat=null;
+    protected String _logTimezone=null;
     protected DateCache _dateFormat=null;
+    
     protected boolean _logTimeStamps=true;
     protected boolean _logLabels=true;
     protected boolean _logTags=true;
@@ -83,19 +86,101 @@ public class WriterLogSink
                            boolean logStackTrace,
                            boolean logOneLine)
     {
-        dateFormat=dateFormat.replace('+',' ');
-        _dateFormat = new DateCache(dateFormat);
-        _dateFormat.getFormat().setTimeZone(TimeZone.getTimeZone(timezone));
-        
+        setLogDateFormat(dateFormat);
+        setLogTimezone(timezone);
         _logTimeStamps      = logTimeStamps;
         _logLabels          = logLabels;
         _logTags            = logTags;
         _logStackSize       = logStackSize;
         _logStackTrace      = logStackTrace;
         _logOneLine         = logOneLine;
-    }    
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getLogDateFormat()
+    {
+        return _logDateFormat;
+    }
+    /* ------------------------------------------------------------ */
+    public void setLogDateFormat(String logDateFormat)
+    {
+        _logDateFormat = logDateFormat.replace('+',' ');
+        _dateFormat = new DateCache(_logDateFormat);
+    }
+    /* ------------------------------------------------------------ */
+    public String getLogTimezone()
+    {
+        return _logTimezone;
+    }
+    /* ------------------------------------------------------------ */
+    public void setLogTimezone(String logTimezone)
+    {
+        _logTimezone=logTimezone;
+        if (_dateFormat!=null)
+            _dateFormat.getFormat().setTimeZone(TimeZone.getTimeZone(logTimezone));
+    }
+    /* ------------------------------------------------------------ */
+    public boolean isLogTimeStamps()
+    {
+        return _logTimeStamps;
+    }
+    /* ------------------------------------------------------------ */
+    public void setLogTimeStamps(boolean logTimeStamps)
+    {
+        _logTimeStamps = logTimeStamps;
+    }
+    /* ------------------------------------------------------------ */
+    public boolean isLogLabels()
+    {
+        return _logLabels;
+    }
+    /* ------------------------------------------------------------ */
+    public void setLogLabels(boolean logLabels)
+    {
+        _logLabels = logLabels;
+    }
+    /* ------------------------------------------------------------ */
+    public boolean isLogTags()
+    {
+        return _logTags;
+    }
+    /* ------------------------------------------------------------ */
+    public void setLogTags(boolean logTags)
+    {
+        _logTags = logTags;
+    }
+    /* ------------------------------------------------------------ */
+    public boolean isLogStackSize()
+    {
+        return _logStackSize;
+    }
+    /* ------------------------------------------------------------ */
+    public void setLogStackSize(boolean logStackSize)
+    {
+        _logStackSize = logStackSize;
+    }
+    /* ------------------------------------------------------------ */
+    public boolean isLogStackTrace()
+    {
+        return _logStackTrace;
+    }
+    /* ------------------------------------------------------------ */
+    public void setLogStackTrace(boolean logStackTrace)
+    {
+        _logStackTrace = logStackTrace;
+    }
+    /* ------------------------------------------------------------ */
+    public boolean isLogOneLine()
+    {
+        return _logOneLine;
+    }
+    /* ------------------------------------------------------------ */
+    public void setLogOneLine(boolean logOneLine)
+    {
+        _logOneLine = logOneLine;
+    }
 
-
+    
     /* ------------------------------------------------------------ */
     /** Log a message.
      * This method formats the log information as a string and calls

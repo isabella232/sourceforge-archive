@@ -284,8 +284,6 @@ public class HttpResponse extends HttpMessage
     public void sendError(HttpException exception) 
         throws IOException
     {
-        _header.put(HttpFields.__ContentType,HttpFields.__TextHtml);
-        
         int code=exception.getCode();
         String message=exception.getMessage();
         if (message==null)
@@ -299,7 +297,9 @@ public class HttpResponse extends HttpMessage
 
         if (code!=204 && code!=304 && code>=200)
         {
-            _header.put(HttpFields.__ContentType,"text/html");
+            _header.put(HttpFields.__ContentType,HttpFields.__TextHtml);
+            _mimeType=HttpFields.__TextHtml;
+            _characterEncoding=null;
 
             byte[] buf =
                 ("<HTML>\n<HEAD>\n<TITLE>Error "+code+
@@ -318,6 +318,8 @@ public class HttpResponse extends HttpMessage
         {
             _header.remove(HttpFields.__ContentType);
             _header.remove(HttpFields.__ContentLength);
+            _characterEncoding=null;
+            _mimeType=null;
         }
         commit();
     }
@@ -339,7 +341,9 @@ public class HttpResponse extends HttpMessage
 
         if (code!=204 && code!=304 && code>=200)
         {
-            _header.put(HttpFields.__ContentType,"text/html");
+            _header.put(HttpFields.__ContentType,HttpFields.__TextHtml);
+            _mimeType=HttpFields.__TextHtml;
+            _characterEncoding=null;
 
             byte[] buf =
                 ("<HTML>\n<HEAD>\n<TITLE>Error "+code+
@@ -358,6 +362,8 @@ public class HttpResponse extends HttpMessage
         {
             _header.remove(HttpFields.__ContentType);
             _header.remove(HttpFields.__ContentLength);
+            _characterEncoding=null;
+            _mimeType=null;
         }
         commit();
     }

@@ -90,7 +90,6 @@ public class Log
         return __instance;
     }
     
-    
     /*-------------------------------------------------------------------*/
     /** Default initialization is used the first time we have to log
      *	unless a sink has been added with add(). _needInit allows us to
@@ -231,6 +230,14 @@ public class Log
         _needInit = false;
     }
     
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return 
+     */
+    public LogSink[] getLogSinks()
+    {
+        return _sinks;
+    }
     
     /* ------------------------------------------------------------ */
     /** No logging.
@@ -242,7 +249,8 @@ public class Log
             for (int s=_sinks.length;s-->0;)
             {
                 try{
-                    _sinks[s].stop();
+                    if (_sinks[s]!=null)
+                        _sinks[s].stop();
                 }
                 catch(InterruptedException e)
                 {
@@ -281,6 +289,8 @@ public class Log
             return;
         for (int s=_sinks.length;s-->0;)
         {
+            if (_sinks[s]==null)
+                continue;
             if (!_sinks[s].isStarted())
                 _sinks[s].start();
             _sinks[s].log(tag,msg,frame,time);

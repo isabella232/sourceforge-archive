@@ -27,6 +27,7 @@ import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.List;
@@ -150,50 +151,15 @@ public class ServletHandler extends NullHandler
         // Initialize classloader
         _loader=getHandlerContext().getClassLoader();
         
-        // Initialize servlets
-        // XXX - the Set here could be used to sort init order!
-        Iterator i = new HashSet(_servletMap.values()).iterator();
+        // Sort and Initialize servlets
+        Iterator i = new TreeSet(_servletMap.values()).iterator();
         while (i.hasNext())
         {
             ServletHolder holder = (ServletHolder)i.next();
-            if (holder.isInitOnStartup())
+
+
+            if (holder.getInitOrder()>=0)
                 holder.initialize();
-            
-            // XXX - This is horrible - got to find a better way.
-            if (holder.getClassName().equals("org.apache.jasper.servlet.JspServlet"))
-            {                
-                ClassLoader jettyLoader=getHandlerContext().getClassLoader();
-                ClassLoader jasperLoader=(ClassLoader)
-                    _context.getAttribute("org.apache.tomcat.classloader");
-                if (jettyLoader!=null && jasperLoader==null)
-                {
-                    Code.debug("Fiddle classloader for Jasper: "+jettyLoader);
-                    _context.setAttribute("org.apache.tomcat.classloader",
-                                          jettyLoader);
-                }
-
-                String classpath = holder.getInitParameter("classpath");
-                String ctxClasspath =(jettyLoader instanceof ContextLoader)
-                    ?((ContextLoader)jettyLoader).getFileClassPath()
-                    :getHandlerContext().getClassPath();
-                String tomcatpath=(String)
-                    _context.getAttribute("org.apache.tomcat.jsp_classpath");
-
-                if (classpath==null && tomcatpath!=null)
-                {
-                    classpath=tomcatpath;
-                    Code.debug("Fiddle classpath for Jasper: "+classpath);
-                    holder.setInitParameter("classpath",classpath);
-                }
-                
-                if ((classpath==null || classpath.length()==0) &&
-                    ctxClasspath!=null && ctxClasspath.length()>0)
-                {
-                    classpath=ctxClasspath;
-                    Code.debug("Fiddle classpath for Jasper: "+classpath);
-                    holder.setInitParameter("classpath",classpath);
-                }            
-            }
         }
         
         super.start();

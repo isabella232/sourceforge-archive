@@ -9,6 +9,7 @@ import com.mortbay.HTML.Break;
 import com.mortbay.HTML.Composite;
 import com.mortbay.HTML.Heading;
 import com.mortbay.HTML.Element;
+import com.mortbay.HTML.Block;
 import com.mortbay.HTML.Font;
 import com.mortbay.HTML.Link;
 import com.mortbay.HTML.List;
@@ -17,6 +18,9 @@ import com.mortbay.HTML.TableForm;
 import com.mortbay.HTML.Target;
 import com.mortbay.HTTP.Handler.Servlet.ServletHandler;
 import com.mortbay.Util.Code;
+import com.mortbay.Util.Log;
+import com.mortbay.Util.LogSink;
+import com.mortbay.Util.WriterLogSink;
 import com.mortbay.Util.LifeCycle;
 import java.io.IOException;
 import java.io.Writer;
@@ -53,7 +57,7 @@ public class AdminServlet extends HttpServlet
     
     /* ------------------------------------------------------------ */
     private String doAction(HttpServletRequest request,
-                         HttpServletResponse response) 
+                            HttpServletResponse response) 
         throws ServletException, IOException
     {
         boolean start="Start".equals(request.getParameter("A"));
@@ -61,20 +65,20 @@ public class AdminServlet extends HttpServlet
 
         StringTokenizer tok=new StringTokenizer(id,":");
         int tokens=tok.countTokens();
-
+        String target=null;
+        
         try{
+            target=tok.nextToken();
             HttpServer server=(HttpServer)
-                _servers.get(Integer.parseInt(tok.nextToken()));
+                _servers.get(Integer.parseInt(target));
             
             if (tokens==1)
             {
                 // Server stop/start
                 if (start) server.start();
                 else server.stop();
-                return id;
             }
-
-            if (tokens==3)
+            else if (tokens==3)
             {
                 // Listener stop/start
                 String l=tok.nextToken()+":"+tok.nextToken();
@@ -87,39 +91,39 @@ public class AdminServlet extends HttpServlet
                     {
                         if (start) listener.start();
                         else listener.stop();
-                        return id;
                     }
                 }
             }
-
-            String host=tok.nextToken();
-            if ("null".equals(host))
-                host=null;
-
-            String contextPath=tok.nextToken();
-            if (contextPath.length()>1)
-                contextPath+="/*";
-            int contextIndex=Integer.parseInt(tok.nextToken());
-            HandlerContext
-                context=server.getContext(host,contextPath,contextIndex);
-            
-            if (tokens==4)
+            else
             {
-                // Context stop/start
-                if (start) context.start();
-                else context.stop();
-                return id;
-            }
-            
-            if (tokens==5)
-            {
-                // Handler stop/start
-                int handlerIndex=Integer.parseInt(tok.nextToken());
-                HttpHandler handler=context.getHandler(handlerIndex);
+                String host=tok.nextToken();
+                if ("null".equals(host))
+                    host=null;
                 
-                if (start) handler.start();
-                else handler.stop();
-                return id;
+                String contextPath=tok.nextToken();
+                target+=":"+host+":"+contextPath;
+                if (contextPath.length()>1)
+                    contextPath+="/*";
+                int contextIndex=Integer.parseInt(tok.nextToken());
+                target+=":"+contextIndex;
+                HandlerContext
+                    context=server.getContext(host,contextPath,contextIndex);
+                
+                if (tokens==4)
+                {
+                    // Context stop/start
+                    if (start) context.start();
+                    else context.stop();
+                }
+                else if (tokens==5)
+                {
+                    // Handler stop/start
+                    int handlerIndex=Integer.parseInt(tok.nextToken());
+                    HttpHandler handler=context.getHandler(handlerIndex);
+                    
+                    if (start) handler.start();
+                    else handler.stop();
+                }
             }
         }
         catch(Exception e)
@@ -130,7 +134,8 @@ public class AdminServlet extends HttpServlet
         {
             Code.warning(e);
         }
-        return null;
+        
+        return target;
     }
     
     /* ------------------------------------------------------------ */
@@ -159,7 +164,14 @@ public class AdminServlet extends HttpServlet
         page.attribute("vlink","#606CC0");
         page.attribute("alink","#606CC0");
 
-        page.add(new Heading(1,getServletInfo()));
+        page.add(new Block(Block.Bold).add(new Font(3,true).add(getServletInfo())));
+        page.add(Break.rule);
+        page.add(new Link(request.getServletPath()+"/#Components","Components"));
+        page.add(Break.line);
+        page.add(new Link(request.getServletPath()+"/#Debug","Debug"));
+        page.add(Break.rule);
+        page.add(new Target("Components"));
+        page.add(new Heading(3,"Components:"));
 
         List sList=new List(List.Ordered);
         page.add(sList);
@@ -252,12 +264,88 @@ public class AdminServlet extends HttpServlet
             }
             sItem.add("<P>");
         }
+
+
+        page.add(Break.rule);
+        page.add(new Target("Debug"));
+        page.add(new Heading(3,"Debug:"));
+
+        Log log = Log.instance();
+        boolean logStackTrace=false;
+        boolean logOneLine=false;
+        LogSink[] sinks = log.getLogSinks();
+        for (int s=0;sinks!=null && s<sinks.length;s++)
+        {
+            if (sinks[s]==null || !(sinks[s] instanceof WriterLogSink))
+                continue;
+            logStackTrace=logStackTrace||((WriterLogSink)sinks[s]).isLogStackTrace();
+            logOneLine=logOneLine||((WriterLogSink)sinks[s]).isLogOneLine();
+        }
         
+        TableForm tf = new TableForm(request.getRequestURI());
+        page.add(tf);
+        
+        tf.addCheckbox("D","Debug On",Code.getDebug());
+        tf.addTextField("V","Verbosity Level",6,""+Code.getVerbose());
+        tf.addTextField("P","Debug Patterns",40,Code.getDebugPatterns());
+        tf.addTextField("T","Debug Triggers",40,Code.getDebugTriggers());
+        tf.addCheckbox("LS","Log Stack",logStackTrace);
+        tf.addCheckbox("OL","Log One Line",logOneLine);
+        tf.addCheckbox("W","Suppress Warnings",Code.getSuppressWarnings());
+        tf.addCheckbox("S","Suppress Stacks",Code.getSuppressStack());
+        tf.addButton("Action","Set Debug Options");
+        
+        response.setContentType("text/html");
+        response.setHeader("Pragma", "no-cache");
+        response.setHeader("Cache-Control", "no-cache,no-store");
         Writer writer=response.getWriter();
         page.write(writer);
         writer.flush();
     }
 
+    /* ------------------------------------------------------------ */
+    public void doPost(HttpServletRequest request,
+                        HttpServletResponse response) 
+        throws ServletException, IOException
+    {
+        String target=null;
+        if ("Set Debug Options".equals(request.getParameter("Action")))
+        {
+            Code.setDebug("on".equals(request.getParameter("D")));
+            Code.setSuppressWarnings("on".equals(request.getParameter("W")));
+            Code.setSuppressStack("on".equals(request.getParameter("S")));
+            String v=request.getParameter("V");
+            if (v!=null && v.length()>0)
+                Code.setVerbose(Integer.parseInt(v));
+            else
+                Code.setVerbose(0);
+            Code.setDebugPatterns(request.getParameter("P"));
+            Code.setDebugTriggers(request.getParameter("T"));
+
+
+
+            Log log = Log.instance();
+            LogSink[] sinks = log.getLogSinks();
+            boolean logStackTrace="on".equals(request.getParameter("LS"));
+            boolean logOneLine="on".equals(request.getParameter("OL"));
+            for (int s=0;sinks!=null && s<sinks.length;s++)
+            {
+                if (sinks[s]==null || ! (sinks[s] instanceof WriterLogSink))
+                    continue;
+                ((WriterLogSink)sinks[s]).setLogStackTrace(logStackTrace);
+                ((WriterLogSink)sinks[s]).setLogOneLine(logOneLine);
+            }
+
+            
+            target="Debug";
+        }
+
+        response.sendRedirect(request.getContextPath()+
+                              request.getServletPath()+"/"+
+                              Long.toString(System.currentTimeMillis(),36)+
+                              (target!=null?("#"+target):""));
+    }
+    
     /* ------------------------------------------------------------ */
     private Element lifeCycle(HttpServletRequest request,
                               String id,

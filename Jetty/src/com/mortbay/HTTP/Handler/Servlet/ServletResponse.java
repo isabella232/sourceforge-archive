@@ -208,43 +208,41 @@ public class ServletResponse implements HttpServletResponse
                           
         /* get current MIME type from Content-Type header */                  
         String type=_httpResponse.getField(HttpFields.__ContentType);
-        if (type==null) { /* servlet did not set Content-Type yet */
-            /* so lets assume default one */
+        if (type==null)
+        {
+            // servlet did not set Content-Type yet
+            // so lets assume default one
             type="application/octet-stream";
         }
-        /* If there is already charset parameter in content-type,
-           we will leave it alone as it is already correct.
-           This allows for both setContentType() and setLocale() to be called.
-           It makes some sense for text/* MIME types to try to guess output encoding 
-           based on language code from locale when charset parameter is not present.
-           Guessing is not a problem because when encoding matters, setContentType()
-           should be called with charset parameter in MIME type.
-           
-           JH: I think guessing should be exterminated as it makes no sense.
-        */
-        if (type.startsWith("text/") && (type.indexOf(" charset=") == -1)) {
+        else if (type.startsWith("text/") && _httpResponse.getCharacterEncoding()==null)
+            /* If there is already charset parameter in content-type,
+               we will leave it alone as it is already correct.
+               This allows for both setContentType() and setLocale() to be called.
+               It makes some sense for text/ MIME types to try to guess output encoding 
+               based on language code from locale when charset parameter is not present.
+               Guessing is not a problem because when encoding matters, setContentType()
+               should be called with charset parameter in MIME type.
+              
+               JH: I think guessing should be exterminated as it makes no sense.
+            */
+        {
             /* pick up encoding from map based on languge code */
             String charset = (String)__charSetMap.get(lang);
-            if (charset != null) {
-                /* we have some guess */
-                if (type.indexOf(";")==-1) {
-                    /* there were no parameters */
-                    type = type+"; charset="+charset;
-                } else {
-                    /* there may already be some parameters, lets put it at the end */
-                    type = type+" charset="+charset;
-        }   }   }        
+            if (charset != null)
+            {
+                type = ((type.indexOf(";")==-1)?"; charset=":" charset=")+
+                    charset;
+            }
+        }        
         /* lets put updated MIME type back */
         setHeader(HttpFields.__ContentType,type);
     }
-
     
     /* ------------------------------------------------------------ */
     public Locale getLocale()
     {
         return _locale;
     }
-    
     
     /* ------------------------------------------------------------ */
     public void addCookie(Cookie cookie) 
@@ -466,15 +464,9 @@ public class ServletResponse implements HttpServletResponse
             if (encoding==null && _servletRequest!=null)
             {
                 /* implementation of educated defaults */
-                String type =
-                    _httpResponse.getField(HttpFields.__ContentType);
-                
-                /* get only MIME type/subtype from complete Content-Type */
-                int split = type.indexOf(';');
-                if (split != -1)
-                    type = type.substring(0,split);
+                String mimeType = _httpResponse.getMimeType();                
                 encoding = _servletRequest.getContext().getServletHandler()
-                    .getHandlerContext().getEncodingByMimeType(type);
+                    .getHandlerContext().getEncodingByMimeType(mimeType);
             }
             if (encoding==null)
                 // get last resort hardcoded default
@@ -483,7 +475,7 @@ public class ServletResponse implements HttpServletResponse
             /* construct Writer using correct encoding */
             try
             {
-                _writer = new PrintWriter(new OutputStreamWriter(_servletRequest.getHttpRequest().getOutputStream(), encoding ));
+                _writer = new PrintWriter(new OutputStreamWriter(_httpResponse.getOutputStream(), encoding ));
             }
             catch (java.io.UnsupportedEncodingException e)
             {

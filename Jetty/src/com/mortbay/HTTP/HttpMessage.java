@@ -63,6 +63,8 @@ abstract public class HttpMessage
     protected HttpFields _trailer;
     protected boolean _acceptTrailer;
     protected HttpConnection _connection;
+    protected String _characterEncoding;
+    protected String _mimeType;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -247,8 +249,40 @@ abstract public class HttpMessage
         throws IllegalStateException
     {
         HttpFields fields=setFields();
+
+        if (HttpFields.__ContentType.equals(name))
+            setMimeAndEncoding(value);
+        
         return (String) fields.put(name,value);
     }
+
+    /* ------------------------------------------------------------ */
+    /** Set the mimeType and CharacterEncodings.
+     * Normally called from setField("Content-Type",type);
+     * @param contentType A mimetype with optional char encoding param.
+     */
+    protected void setMimeAndEncoding(String contentType)
+    {
+        _characterEncoding=null;
+        _mimeType=contentType;
+        if (contentType!=null)
+        {
+            int i0=contentType.indexOf(';');
+            if (i0>=0)
+            {
+                _mimeType=contentType.substring(0,i0).trim();
+                int i1 = contentType.indexOf("charset=",i0);
+                if (i1>=0)
+                {
+                    i1+=8;
+                    int i2 = contentType.indexOf(' ',i1);
+                    _characterEncoding = (0 < i2)
+                        ? contentType.substring(i1,i2) : contentType.substring(i1);
+                }
+            }
+        }
+    }
+    
     
     /* ------------------------------------------------------------ */
     /** Set a multi-value field value.
@@ -486,28 +520,23 @@ abstract public class HttpMessage
     
     /* -------------------------------------------------------------- */
     /** Character Encoding.
+     * The character encoding is extracted from the ContentType field
+     * when set.
      * @return Character Encoding or null
      */
     public String getCharacterEncoding()
     {
-        String encoding=null;
-        String s = _header.get(HttpFields.__ContentType);
-        if (s!=null)
-        {
-            int i0=s.indexOf(';');
-            if (i0>=0)
-            {
-                int i1 = s.indexOf("charset=",i0);
-                if (i1>=0)
-                {
-                    i1+=8;
-                    int i2 = s.indexOf(' ',i1);
-                    encoding = (0 < i2) ? s.substring(i1,i2) : s.substring(i1);
-                }
-            }
-        }            
-
-        return encoding;
+        return _characterEncoding;
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Mime Type.
+     * The mime type is extracted from the contenttype field when set.
+     * @return Content type without parameters
+     */
+    public String getMimeType()
+    {
+        return _mimeType;
     }
     
     /* ------------------------------------------------------------ */
@@ -524,6 +553,8 @@ abstract public class HttpMessage
         _trailer=null;
         _acceptTrailer=false;
         _connection=connection;
+        _mimeType=null;
+        _characterEncoding=null;
     }
     
     /* ------------------------------------------------------------ */
@@ -532,10 +563,9 @@ abstract public class HttpMessage
      */
     public void destroy()
     {
+        recycle(null);
         if (_header!=null)
             _header.destroy();
-        if (_trailer!=null)
-            _trailer.destroy();
         _header=null;
         _trailer=null;
     }

@@ -218,8 +218,6 @@ The following WebApplication tags are not implemented:
   <env-entry>
   <ejb-ref>
 
-  <load-on-startup>  - ordering is not supported.
-
 
 Run script
 ----------
