@@ -61,10 +61,10 @@ import org.mortbay.util.LogSupport;
 public abstract class AbstractSessionManager implements SessionManager
 {
     private static Log log = LogFactory.getLog(AbstractSessionManager.class);
-
+    
     /* ------------------------------------------------------------ */
     public final static int __distantFuture = 60*60*24*7*52*20;
-
+    
     /* ------------------------------------------------------------ */
     public final static boolean __24SessionDestroyed=
         Boolean.getBoolean("org.mortbay.jetty.servlet.AbstractSessionManager.24SessionDestroyed");
@@ -83,7 +83,7 @@ public abstract class AbstractSessionManager implements SessionManager
     protected transient ServletHandler _handler;
     protected int _minSessions = 0;
     protected int _maxSessions = 0;
-
+    
     private transient SessionScavenger _scavenger = null;
     
     /* ------------------------------------------------------------ */
@@ -97,7 +97,7 @@ public abstract class AbstractSessionManager implements SessionManager
     {
         _random=random;
     }
-
+    
     /* ------------------------------------------------------------ */
     /** 
      * @return True if requested session ID are first considered for new
@@ -107,7 +107,7 @@ public abstract class AbstractSessionManager implements SessionManager
     {
         return _useRequestedId;
     }
-
+    
     /* ------------------------------------------------------------ */
     /** 
      * @param useRequestedId True if requested session ID are first considered for new
@@ -129,32 +129,32 @@ public abstract class AbstractSessionManager implements SessionManager
     {
         return Collections.unmodifiableMap(_sessions);
     }
-
-   /* ------------------------------------------------------------ */
-   public int getSessions ()
-   {
-      return _sessions.size ();
-   }
-
-   /* ------------------------------------------------------------ */
-   public int getMinSessions ()
-   {
-      return _minSessions;
-   }
-
-   /* ------------------------------------------------------------ */
-   public int getMaxSessions ()
-   {
-      return _maxSessions;
-   }
-
-   /* ------------------------------------------------------------ */
-   public void resetStats ()
-   {
-      _minSessions =  _sessions.size ();
-      _maxSessions = _sessions.size ();
-   }
-
+    
+    /* ------------------------------------------------------------ */
+    public int getSessions ()
+    {
+        return _sessions.size ();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public int getMinSessions ()
+    {
+        return _minSessions;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public int getMaxSessions ()
+    {
+        return _maxSessions;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void resetStats ()
+    {
+        _minSessions =  _sessions.size ();
+        _maxSessions = _sessions.size ();
+    }
+    
     /* ------------------------------------------------------------ */
     /* new Session ID.
      * If the request has a requestedSessionID which is unique, that is used.
@@ -194,7 +194,7 @@ public abstract class AbstractSessionManager implements SessionManager
             return (HttpSession)_sessions.get(id);
         }
     }
-
+    
     /* ------------------------------------------------------------ */
     public HttpSession newHttpSession(HttpServletRequest request)
     {
@@ -204,18 +204,18 @@ public abstract class AbstractSessionManager implements SessionManager
         {
             _sessions.put(session.getId(),session);
             if (_sessions.size () > this._maxSessions)
-               this._maxSessions = _sessions.size ();
+                this._maxSessions = _sessions.size ();
         }
         
         HttpSessionEvent event=new HttpSessionEvent(session);
         
         for(int i=0;i<_sessionListeners.size();i++)
             ((HttpSessionListener)_sessionListeners.get(i))
-                .sessionCreated(event);
+            .sessionCreated(event);
         return session;
     }
     
-
+    
     /* ------------------------------------------------------------ */
     protected abstract Session newSession(HttpServletRequest request);
     
@@ -229,7 +229,7 @@ public abstract class AbstractSessionManager implements SessionManager
     {
         return _workerName;
     }
-
+    
     /* ------------------------------------------------------------ */
     /** Set the workname.
      * If set, the workername is dot appended to the session ID
@@ -301,11 +301,11 @@ public abstract class AbstractSessionManager implements SessionManager
     
     /* ------------------------------------------------------------ */
     public void addEventListener(EventListener listener)
-        throws IllegalArgumentException
+    throws IllegalArgumentException
     {
         
         // TODO - this needs to be checked.
-         
+        
         boolean known =false;
         if (listener instanceof HttpSessionAttributeListener)
         {
@@ -317,7 +317,7 @@ public abstract class AbstractSessionManager implements SessionManager
             _sessionListeners.add(listener);
             known=true;
         }
-
+        
         if (!known)
             throw new IllegalArgumentException("Unknown listener "+listener);
     }
@@ -339,7 +339,7 @@ public abstract class AbstractSessionManager implements SessionManager
     
     /* ------------------------------------------------------------ */
     public void start()
-        throws Exception
+    throws Exception
     {
         if (_random==null)
         {
@@ -391,9 +391,9 @@ public abstract class AbstractSessionManager implements SessionManager
         ClassLoader old_loader = thread.getContextClassLoader();
         try
         {
-	    if (_handler==null)
-		return;
-
+            if (_handler==null)
+                return;
+            
             ClassLoader loader = _handler.getClassLoader();
             if (loader!=null)
                 thread.setContextClassLoader(loader);
@@ -435,7 +435,7 @@ public abstract class AbstractSessionManager implements SessionManager
                 }
                 finally {Thread.currentThread().setPriority(oldPriority);}
             }
-
+            
             // Remove the stale sessions
             for (int i = LazyList.size(stale); i-->0;)
             {
@@ -457,7 +457,7 @@ public abstract class AbstractSessionManager implements SessionManager
         }
     }
     
-
+    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* -------------------------------------------------------------- */
@@ -490,16 +490,16 @@ public abstract class AbstractSessionManager implements SessionManager
                 log.debug("Session scavenger exited");
             }
         }
-
+        
         SessionScavenger()
         {
             super("SessionScavenger");
             setDaemon(true);
         }
-
+        
     }   // SessionScavenger
-
-
+    
+    
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -513,7 +513,7 @@ public abstract class AbstractSessionManager implements SessionManager
         long _accessed=_created;
         long _maxIdleMs = _dftMaxIdleSecs*1000;
         String _id;
-
+        
         /* ------------------------------------------------------------- */
         protected Session(HttpServletRequest request)
         {
@@ -521,17 +521,17 @@ public abstract class AbstractSessionManager implements SessionManager
             if (_dftMaxIdleSecs>=0)
                 _maxIdleMs=_dftMaxIdleSecs*1000;
         }
-
+        
         /* ------------------------------------------------------------ */
         protected abstract Map newAttributeMap();
-
+        
         /* ------------------------------------------------------------ */
         public void access()
         {
             _newSession=false;
             _accessed=System.currentTimeMillis();
         }
-
+        
         /* ------------------------------------------------------------ */
         public boolean isValid()
         {
@@ -546,45 +546,45 @@ public abstract class AbstractSessionManager implements SessionManager
         
         /* ------------------------------------------------------------- */
         public String getId()
-            throws IllegalStateException
+        throws IllegalStateException
         {
             return _id;
         }
-
+        
         /* ------------------------------------------------------------- */
         public long getCreationTime()
-            throws IllegalStateException
+        throws IllegalStateException
         {
             if (_invalid) throw new IllegalStateException();
             return _created;
         }
-
+        
         /* ------------------------------------------------------------- */
         public long getLastAccessedTime()
-            throws IllegalStateException
+        throws IllegalStateException
         {
             if (_invalid) throw new IllegalStateException();
             return _accessed;
         }
-
+        
         /* ------------------------------------------------------------- */
         public int getMaxInactiveInterval()
         {
             if (_invalid) throw new IllegalStateException();
             return (int)(_maxIdleMs / 1000);
         }
-
+        
         /* ------------------------------------------------------------- */
         /**
          * @deprecated
          */
         public HttpSessionContext getSessionContext()
-            throws IllegalStateException
+        throws IllegalStateException
         {
             if (_invalid) throw new IllegalStateException();
             return SessionContext.NULL_IMPL;
         }
-
+        
         /* ------------------------------------------------------------- */
         public void setMaxInactiveInterval(int secs)
         {
@@ -592,22 +592,22 @@ public abstract class AbstractSessionManager implements SessionManager
             if (_maxIdleMs>0 && (_maxIdleMs/10)<_scavengePeriodMs)
                 AbstractSessionManager.this.setScavengePeriod((secs+9)/10);
         }
-
+        
         /* ------------------------------------------------------------- */
         public synchronized void invalidate()
-            throws IllegalStateException
+        throws IllegalStateException
         {
             if (_invalid) throw new IllegalStateException();
-
+            
             
             if(__24SessionDestroyed && _sessionListeners != null)
             {        
                 HttpSessionEvent event = new HttpSessionEvent(this);
                 for(int i=0;i<_sessionListeners.size();i++)
                     ((HttpSessionListener)_sessionListeners.get(i)).
-                        sessionDestroyed(event);
+                    sessionDestroyed(event);
             }
-                    
+            
             if (_values!=null)
             {
                 Iterator iter = _values.keySet().iterator();
@@ -626,8 +626,8 @@ public abstract class AbstractSessionManager implements SessionManager
                         for(int i=0;i<_sessionAttributeListeners.size();i++)
                         {
                             ((HttpSessionAttributeListener)
-                             _sessionAttributeListeners.get(i))
-                                .attributeRemoved(event);
+                                    _sessionAttributeListeners.get(i))
+                                    .attributeRemoved(event);
                         }
                     }
                 }
@@ -636,27 +636,27 @@ public abstract class AbstractSessionManager implements SessionManager
             synchronized (AbstractSessionManager.this)
             {
                 _invalid=true;
-                _sessions.remove(_id);
+                _sessions.remove(getId());
                 
                 if(!__24SessionDestroyed && _sessionListeners != null)
                 {
                     HttpSessionEvent event = new HttpSessionEvent(this);
                     for(int i=0;i<_sessionListeners.size();i++)
                         ((HttpSessionListener)_sessionListeners.get(i)).
-                            sessionDestroyed(event);       
+                        sessionDestroyed(event);       
                 }
             } 
         }
-
+        
         /* ------------------------------------------------------------- */
         public boolean isNew()
-            throws IllegalStateException
+        throws IllegalStateException
         {
             if (_invalid) throw new IllegalStateException();
             return _newSession;
         }
-
-
+        
+        
         /* ------------------------------------------------------------ */
         public synchronized Object getAttribute(String name)
         {
@@ -665,15 +665,15 @@ public abstract class AbstractSessionManager implements SessionManager
                 return null;
             return _values.get(name);
         }
-
+        
         /* ------------------------------------------------------------ */
         public synchronized Enumeration getAttributeNames()
         {
             if (_invalid) throw new IllegalStateException();
             List names = _values==null?Collections.EMPTY_LIST:new ArrayList(_values.keySet());
-	    return Collections.enumeration(names);
+            return Collections.enumeration(names);
         }
-
+        
         /* ------------------------------------------------------------ */
         public synchronized void setAttribute(String name, Object value)
         {
@@ -681,7 +681,7 @@ public abstract class AbstractSessionManager implements SessionManager
             if (_values==null)
                 _values=newAttributeMap();
             Object oldValue = _values.put(name,value);
-
+            
             if (value==null || !value.equals(oldValue))
             {
                 unbindValue(name, oldValue);
@@ -691,7 +691,7 @@ public abstract class AbstractSessionManager implements SessionManager
                 {
                     HttpSessionBindingEvent event =
                         new HttpSessionBindingEvent(this,name,
-                                                    oldValue==null?value:oldValue);
+                                oldValue==null?value:oldValue);
                     
                     for(int i=0;i<_sessionAttributeListeners.size();i++)
                     {
@@ -709,7 +709,7 @@ public abstract class AbstractSessionManager implements SessionManager
                 }
             }
         }
-
+        
         /* ------------------------------------------------------------ */
         public synchronized void removeAttribute(String name)
         {
@@ -736,25 +736,25 @@ public abstract class AbstractSessionManager implements SessionManager
                 }
             }
         }
-
+        
         /* ------------------------------------------------------------- */
         /**
          * @deprecated 	As of Version 2.2, this method is
          * 		replaced by {@link #getAttribute}
          */
         public Object getValue(String name)
-            throws IllegalStateException
+        throws IllegalStateException
         {
             return getAttribute(name);
         }
-
+        
         /* ------------------------------------------------------------- */
         /**
          * @deprecated 	As of Version 2.2, this method is
          * 		replaced by {@link #getAttributeNames}
          */
         public synchronized String[] getValueNames()
-            throws IllegalStateException
+        throws IllegalStateException
         {
             if (_invalid) throw new IllegalStateException();
             if (_values==null)
@@ -762,46 +762,46 @@ public abstract class AbstractSessionManager implements SessionManager
             String[] a = new String[_values.size()];
             return (String[])_values.keySet().toArray(a);
         }
-
+        
         /* ------------------------------------------------------------- */
         /**
          * @deprecated 	As of Version 2.2, this method is
          * 		replaced by {@link #setAttribute}
          */
         public void putValue(java.lang.String name,
-                             java.lang.Object value)
-            throws IllegalStateException
+                java.lang.Object value)
+        throws IllegalStateException
         {
             setAttribute(name,value);
         }
-
+        
         /* ------------------------------------------------------------- */
         /**
          * @deprecated 	As of Version 2.2, this method is
          * 		replaced by {@link #removeAttribute}
          */
         public void removeValue(java.lang.String name)
-            throws IllegalStateException
+        throws IllegalStateException
         {
             removeAttribute(name);
         }
-
+        
         /* ------------------------------------------------------------- */
         /** If value implements HttpSessionBindingListener, call valueBound() */
         private void bindValue(java.lang.String name, Object value)
         {
             if (value!=null && value instanceof HttpSessionBindingListener)
                 ((HttpSessionBindingListener)value)
-                    .valueBound(new HttpSessionBindingEvent(this,name));            
+                .valueBound(new HttpSessionBindingEvent(this,name));            
         }
-
+        
         /* ------------------------------------------------------------- */
         /** If value implements HttpSessionBindingListener, call valueUnbound() */
         private void unbindValue(java.lang.String name, Object value)
         {
             if (value!=null && value instanceof HttpSessionBindingListener)
                 ((HttpSessionBindingListener)value)
-                    .valueUnbound(new HttpSessionBindingEvent(this,name));
+                .valueUnbound(new HttpSessionBindingEvent(this,name));
         }
     }
 }
