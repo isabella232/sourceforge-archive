@@ -1,0 +1,16 @@
+<BR><B><FONT SIZE="+2">Does Jetty Support WAR files?</FONT></B><HR>
+Yes. Jetty supports WAR files and can run most features without
+unpacking the WAR file.
+<BR><BR>
+If the WAR file contains jars or zips, these are extracted to
+temporary locations.
+<BR><BR>
+If the WAR file contains JSPs which are compiled against
+classes also in the WAR file, then compilation fails as the
+java compiler cannot handle URL classpaths (eg jar:file:/my.war!/WEB-INF/classes).   In this situation, the
+user should unpack the war file manually before running.
+<BR><BR><HR>
+Return to <A HREF="JettyFaq.html">JettyFaq</A><HR>
+<BR><BR>
+</BODY>
+</HTML>

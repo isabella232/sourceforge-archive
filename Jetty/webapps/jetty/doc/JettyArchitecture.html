@@ -1,0 +1,31 @@
+<BR><B><FONT SIZE="+2">Jetty Architecture</FONT></B><HR>
+These are just notes.  A nice annotated diagram is on its way...
+<BR><BR>
+<UL><LI> JVM contains one or more HttpServer instances.
+<BR><BR>
+</LI><LI> HttpServer contains one or more HttpListener instances.
+</LI><LI> HttpServer contains one or more HandlerContext instances organized as an
+  ordered list at each context path.
+</LI><LI> HttpServer contains zero or more UserRealm instances.
+<BR><BR>
+</LI><LI> HandlerContext is registered at one and only one context pattern (eg.   
+  /context/*).
+</LI><LI> HandlerContext contains one or more HttpHandler instances organized
+  in the order they were added.
+<BR><BR>
+</LI><LI> ResourceHandler is a HttpHandler that serves files.
+</LI><LI> ServletHandler is a HttpHandler that serves configured Servlets by mapping
+  a pathspec within the context (eg *.xxx, / or /XX/* ) to a ServletHolder
+</LI><LI> DynamicHandler is a ServletHandler that uses class names in URLs to
+  configure servlets.
+</LI><LI> SecurityHandler is a HttpHandler that is mapped to UserRealm by name. 
+<BR><BR>
+</LI><LI> A WebApplication is a HandlerContext that uses a web.xml file to 
+  initialize a ResourceHandler and a ServletHandler.
+<BR><BR>
+</LI><LI> A ServletContext is mapped to the HandlerContext, thus context
+  initParams and attributes are in a context scope. </LI></UL><HR>
+Return to <A HREF="index.html">JettyDoc</A>&nbsp;<!-- widget ref --><HR>
+<BR><BR>
+</BODY>
+</HTML>

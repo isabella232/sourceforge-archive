@@ -1,0 +1,17 @@
+<BR><B><FONT SIZE="+2">What is a Dynamic Servet?</FONT></B><HR>
+A dynamic servlet is a servlet that is loaded by the container using
+a segment of the URI as a classname.  For example if a dynamic servlet
+handler is within the context /servlet/* then a URI such as
+/servlet/com.acme.Servlet/info will be mapped as follows: 
+<CODE><PRE>ContextPath&nbsp;<!-- widget ref -->: /servlet
+ServletPath&nbsp;<!-- widget ref -->: /com.acme.Servlet
+<A HREF="PathInfo.html">PathInfo</A>: /info</PRE></CODE>
+When first hit, the classpath of the context is searched for a 
+servlet class com.acme.Servlet.  If found it is loaded and initialized.
+<BR><BR>
+Note that the alternative to a <A HREF="DynamicServlet.html">DynamicServlet</A> is a ConfiguredServlet&nbsp;<!-- widget ref --> and
+both types of servlet may AutoReloading&nbsp;<!-- widget ref -->.
+<BR><BR><HR>
+Return to the <A HREF="JettyFaq.html">JettyFaq</A><HR>
+</BODY>
+</HTML>

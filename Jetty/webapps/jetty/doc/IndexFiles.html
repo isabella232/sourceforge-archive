@@ -1,0 +1,34 @@
+<BR>The built-in ResourceHandler&nbsp;<!-- widget ref -->, which handles static content
+and directory indexing, also supports index files.  The list
+of index filenames is initialized to index.htm and index.html,
+but you can configure in additional filenames.  The
+ResourceHandler&nbsp;<!-- widget ref --> searches the directory for any filename
+in the list, and the most recently added takes precedence.
+<BR><BR>
+Here is an example of a ResourceHandler&nbsp;<!-- widget ref --> that accepts index.jsp
+as an index file.
+<BR><BR>
+<CODE><PRE>&lt;Call name="addHandler">
+  &lt;Arg>
+    &lt;New class="com.mortbay.HTTP.Handler.ResourceHandler&nbsp;<!-- widget ref -->">
+      &lt;Call name="addIndexFile">&lt;Arg>index.jsp&lt;/Arg>&lt;/Call>
+    &lt;/New>
+  &lt;/Arg>
+&lt;/Call></PRE></CODE>
+<BR><BR>
+To add an index file to an existing handler within a context
+use something like the following:
+<BR><BR>
+<CODE><PRE>&lt;Call name="addContext">
+     &lt;Arg>/context/*&lt;/Arg>
+     &lt;Set name="ResourceBase">./docroot/&lt;/Set>
+     &lt;Set name="ServingResources">TRUE&lt;/Set>
+     &lt;Call name="getResourceHandler">
+       &lt;Call name="addIndexFile">
+         &lt;Arg>index.jsp&lt;/Arg>
+       &lt;/Call>
+     &lt;/Call>
+ &lt;/Call></PRE></CODE><HR>
+Return to <A HREF="JettyConfiguration.html">JettyConfiguration</A>.
+</BODY>
+</HTML>

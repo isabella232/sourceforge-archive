@@ -1,0 +1,523 @@
+<html>
+<head><title>Using Jetty and JSSE</title>
+</head>
+<h1>Using Jetty and JSSE</h1>
+
+<p>This is an overview of how to use Jetty with JSSE as an SSL 
+implementation.  The 1.0 release of JSSE contains both a framework
+for third party providers and a reference implementation.
+These instructions detail how to use the reference implementation
+and have been tested against keys generated from the sun keytool
+utility and 1024 and 2048 bit RSA keys from openssl
+
+There are four steps to use Jetty and JSSE:
+<ol>
+ <li><a href="#demo">Try the SSL Demo</a></li>
+ <li><a href="#getkeys">Get a private key and cert.</a></li>
+ <li><a href="#loadkeys">Load the private key and cert into a Sun JKS keystore.</a></li>
+ <li><a href="#usekeys">Configure Jetty to use JSSE and the keystore.</a></li>
+</ol>
+
+<p>
+This document also contains an <a href="#environment">environment
+description with version numbers</a> and a list of <a href="issues">outstanding issues</a>.
+
+<P><HR><P>
+
+<h2><a name="getkeys">Step 1: Get the private key and cert.</a></h2>
+
+<p>
+If you have a pre-existing key and certificate for an apache server which you are fond of then you should skip to the section on <a href="#loadkeys">Loading OpenSSL Generated Keys</a>. Otherwise read on...
+
+<p>
+
+<P><B><a name="sunkeypair">Sun Key/Certificate Pair</a></B><BR>
+
+In order to generate the certificate with the reference implementation 
+you need to install JSSE as a security provider for JDK.  You can do 
+this by editing $JDK12/jre/lib/security/java.security and adding the 
+following lines:
+<pre>
+      security.provider.2=com.sun.net.ssl.internal.ssl.Provider
+</pre>
+This is assuming that JSSE is the only additional provider you want
+installed.  Note that all Jetty JSSE classes manually install  this
+provider as needed, so you should probably remove this line after
+the certificate has been generated, as it will interfere with other
+providers (see loading OpenSSL keypairs below). 
+
+<p>
+A new key and with a self signed certificate can be generated and loaded
+using the standard Sun jdk keytool utility with a command like:
+<pre>
+  keytool -genkey -keyalg RSA -storepass testpasswd -keypass testpasswd
+</pre>
+
+<p> If you want to have a certificate that has been signed by one of
+the trusted root CA's you should follow the instruction in the keytool
+documentation for generation of a certificate signing request, csr,
+and how to import the signed certificate received from the CA. (-certreq and -import)
+
+<p> At this point you are ready to skip down and
+<a href="#usekeys">Configure Jetty to use JSSE and the keystore.</a>
+
+
+<P><B><a name="opensslkeypair">OpenSSL Key/Certificate Pair</a></B><BR>
+The procedure to get a key and certificate for use with OpenSSL
+is described in <a href="http://www.thawte.com/">Thawte's</a> <a href="http://www.thawte.com/certs/server/keygen/apachessl.html">Apache SSL Key and CSR Generation Instructions.</a>
+
+<p><b>NOTE: You probably only want to follow these steps if you want
+to reuse an existing certificate that was being used with another
+webserver such as apache. If you are just testing or you have no
+pre-existing keys/certs then just generate yourself a
+<a href="#sunkeypair">Sun Key/Certificate Pair.</a></b>
+
+
+
+<p> Here is a log of me following a simplified version of those instructions.
+<pre>
+<b>$</b> mkdir keytest
+<b>$</b> cd keytest
+<b>$</b> openssl genrsa -des3 -rand file1:file2:file3 1024 > beehive[D[D[D[D.hive.net.key
+235890 semi-random bytes loaded
+Generating RSA private key, 1024 bit long modulus
+...............................++++++
+...............................................++++++
+e is 65537 (0x10001)
+Enter PEM pass phrase:
+Verifying password - Enter PEM pass phrase:
+<b>$</b> openssl req -new -key bee.hive.net.key > bee.hive.net.csr
+Using configuration from /usr/share/ssl/openssl.cnf
+Enter PEM pass phrase:
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:
+State or Province Name (full name) [Some-State]:
+Locality Name (eg, city) []:
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:
+Organizational Unit Name (eg, section) []:
+Common Name (eg, YOUR name) []:bee.hive.net
+Email Address []:postmaster@bee.hive.net
+
+Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []:challenge
+An optional company name []:
+
+<b>$</b> cat bee.hive.net.csr
+-----BEGIN CERTIFICATE REQUEST-----
+MIIB3zCCAUgCAQAwgYQxCzAJBgNVBAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRl
+MSEwHwYDVQQKExhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQxFTATBgNVBAMTDGJl
+ZS5oaXZlLm5ldDEmMCQGCSqGSIb3DQEJARYXcG9zdG1hc3RlckBiZWUuaGl2ZS5u
+ZXQwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAKE3ChwybfDMtDBm54mWKpHQ
+wQ5Dla0JC4SSlP4xhq6J2j5MpXWM1CgpqJWwYqr4tEFrD0kMOUZDby6R5nC3iuSt
+bIlWx6xztzKI6Jngg8wM2FRwlMbZIfUvmgJ6abvknE0VRSEm4RRCQehnk7FCz1aa
+W8esCm9r+9vXvULhGXAhAgMBAAGgGjAYBgkqhkiG9w0BCQcxCxMJY2hhbGxlbmdl
+MA0GCSqGSIb3DQEBBAUAA4GBAHtvSlMrKaiP5Yfn/WgbaLUbEXlf/9DX2EIWVI4p
+QTpHApt/DQLdYNXs2stzXNOfZNGtmhATvvfOOLTZYxqn3l/qYeiAJMDU2q2yc7YU
+i3yvGO2HVbRlB2vbtdFG6CzzaA/nszi+ZXQ07ltOUX7B0WMZLyHt/lUFMH3Rc7qF
+CRw2
+-----END CERTIFICATE REQUEST-----
+</pre>
+<p>Use a browser to paste the above into the a form for submission to the CA. I used  <a href="https://www.thawte.com/cgi/server/test.exe">Thawte's Test Certificate CA</a>. Place the result into a suitably named file as follows:
+<pre>
+<b>$</b> cat > bee.hive.net.crt 
+-----BEGIN CERTIFICATE-----
+MIICqjCCAhOgAwIBAgIDPLWSMA0GCSqGSIb3DQEBBAUAMIGHMQswCQYDVQQGEwJa
+QTEiMCAGA1UECBMZRk9SIFRFU1RJTkcgUFVSUE9TRVMgT05MWTEdMBsGA1UEChMU
+VGhhd3RlIENlcnRpZmljYXRpb24xFzAVBgNVBAsTDlRFU1QgVEVTVCBURVNUMRww
+GgYDVQQDExNUaGF3dGUgVGVzdCBDQSBSb290MB4XDTAwMDgxMjEwMzYxMloXDTAx
+MDgxMjEwMzYxMlowgYQxCzAJBgNVBAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRl
+MSEwHwYDVQQKExhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQxFTATBgNVBAMTDGJl
+ZS5oaXZlLm5ldDEmMCQGCSqGSIb3DQEJARYXcG9zdG1hc3RlckBiZWUuaGl2ZS5u
+ZXQwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAKE3ChwybfDMtDBm54mWKpHQ
+wQ5Dla0JC4SSlP4xhq6J2j5MpXWM1CgpqJWwYqr4tEFrD0kMOUZDby6R5nC3iuSt
+bIlWx6xztzKI6Jngg8wM2FRwlMbZIfUvmgJ6abvknE0VRSEm4RRCQehnk7FCz1aa
+W8esCm9r+9vXvULhGXAhAgMBAAGjJTAjMBMGA1UdJQQMMAoGCCsGAQUFBwMBMAwG
+A1UdEwEB/wQCMAAwDQYJKoZIhvcNAQEEBQADgYEAhSvgL8nliB29TcOFakQ2i5kq
+VMwVaxWSFBv2oyxW4/p1/7IMUYBTjIDx0wurkbY9I+iJ2rVfLKYtqmU/94oRQnkB
+FrTXTweQPhJSdjvSaZj3QAQBwca6gYcy3mrGCiOHHe/rkN+Yo0FnDyutqmsqs7oB
+eHL4df28CBXV6tva77g=
+-----END CERTIFICATE-----
+</pre>
+
+
+<p> Sanity Check
+<p>
+<pre>
+<b>$</b> openssl rsa -text -in bee.hive.net.key
+read RSA key
+Enter PEM pass phrase:
+Private-Key: (1024 bit)
+modulus:
+    00:cf:e5:0c:5e:1c:07:26:24:fb:f0:22:a3:f1:c0:
+    8f:21:5a:97:6a:86:3e:b9:ba:65:02:0f:39:32:7a:
+    df:72:e2:d7:20:00:76:97:1e:1b:f5:cf:ce:bf:dd:
+    b0:89:19:e4:a7:69:12:08:51:53:a2:b1:61:a3:0a:
+    9f:00:38:14:c3:5a:2c:d8:63:88:57:ce:13:5f:23:
+    65:9e:5c:fd:ab:b3:ba:01:b1:fb:af:7a:cc:ec:bc:
+    aa:3e:e7:49:07:d8:6a:80:2e:f8:91:93:f4:b9:cb:
+    60:2b:a0:de:a7:b1:dd:a9:81:fc:d4:5e:70:7a:79:
+    69:9c:4b:e6:34:56:e0:c9:17
+publicExponent: 65537 (0x10001)
+privateExponent:
+    00:ae:60:a6:46:0d:e6:65:35:62:69:62:f4:f6:e3:
+    98:6a:d6:ac:e8:fa:1f:84:f3:f6:a3:8a:97:64:63:
+    32:28:10:63:77:81:4b:f7:a7:96:b6:51:8f:4e:da:
+    29:a8:66:22:a7:d5:76:fd:a9:11:a9:06:76:2a:26:
+    cf:85:84:84:cc:6f:71:ba:93:cd:6c:d5:08:fe:c6:
+    d2:07:d6:64:f4:33:83:b0:49:8f:f8:ee:43:72:1c:
+    fb:02:37:51:a1:ca:cc:1c:27:ec:bf:7a:f2:d9:db:
+    a1:d1:54:93:bd:f0:9d:77:80:95:77:89:8b:88:2c:
+    7b:a3:61:4d:e4:b4:37:9d:e1
+prime1:
+    00:f6:3f:9d:64:51:b7:67:ea:ca:88:24:d3:75:c8:
+    45:b9:3a:99:9f:65:dc:a9:e6:bd:58:29:bf:7f:03:
+    91:b5:87:50:20:08:35:17:d1:c1:6e:1d:89:4d:e4:
+    50:c2:ee:0b:ec:95:9e:5b:b7:a2:4d:0c:99:70:a1:
+    94:67:27:45:f1
+prime2:
+    00:d8:20:9d:9e:d3:d2:17:7e:46:5c:42:3c:e3:fd:
+    d7:9b:6e:20:15:60:d4:45:c6:2f:63:fe:67:48:53:
+    34:29:c7:bf:b7:a4:d5:07:33:d1:f2:4a:5d:68:72:
+    42:75:a2:19:67:59:a8:96:36:ae:bc:38:0d:c8:38:
+    3b:80:c6:57:87
+exponent1:
+    5d:bd:51:b9:02:b2:82:c8:8a:58:d1:4b:fe:26:43:
+    04:84:1e:3e:e3:93:e0:c9:89:82:aa:41:cf:a4:18:
+    2f:b6:56:f6:1a:a9:bb:6b:89:ea:d5:2b:93:8f:3a:
+    7f:3a:07:28:04:bc:c7:c5:5b:ef:60:c0:78:73:c9:
+    fe:8a:a0:c1
+exponent2:
+    00:b8:29:72:a5:f8:10:b9:7c:1c:30:59:30:d1:85:
+    67:c7:45:db:88:db:ed:85:57:0e:e2:c1:d0:f8:4c:
+    0d:d2:dc:26:7d:31:b3:64:63:bf:ae:19:b7:e6:5c:
+    16:4d:6e:46:ff:4d:e2:dd:bc:d2:c0:07:73:96:fc:
+    73:97:93:6a:d9
+coefficient:
+    7c:02:a7:76:e0:4b:f2:25:5b:aa:7c:a8:a5:cd:97:
+    77:ce:39:e4:37:ec:2d:2d:4e:d0:bc:cf:e1:2b:dd:
+    c6:22:25:b7:66:f4:53:c9:ec:88:29:2f:cc:17:23:
+    15:ea:32:87:bb:7d:14:e7:c7:b9:a3:2e:05:1a:e6:
+    d9:8f:d5:07
+writing RSA key
+-----BEGIN RSA PRIVATE KEY-----
+MIICXQIBAAKBgQDP5QxeHAcmJPvwIqPxwI8hWpdqhj65umUCDzkyet9y4tcgAHaX
+Hhv1z86/3bCJGeSnaRIIUVOisWGjCp8AOBTDWizYY4hXzhNfI2WeXP2rs7oBsfuv
+eszsvKo+50kH2GqALviRk/S5y2AroN6nsd2pgfzUXnB6eWmcS+Y0VuDJFwIDAQAB
+AoGBAK5gpkYN5mU1Ymli9PbjmGrWrOj6H4Tz9qOKl2RjMigQY3eBS/enlrZRj07a
+KahmIqfVdv2pEakGdiomz4WEhMxvcbqTzWzVCP7G0gfWZPQzg7BJj/juQ3Ic+wI3
+UaHKzBwn7L968tnbodFUk73wnXeAlXeJi4gse6NhTeS0N53hAkEA9j+dZFG3Z+rK
+iCTTdchFuTqZn2Xcqea9WCm/fwORtYdQIAg1F9HBbh2JTeRQwu4L7JWeW7eiTQyZ
+cKGUZydF8QJBANggnZ7T0hd+RlxCPOP915tuIBVg1EXGL2P+Z0hTNCnHv7ek1Qcz
+0fJKXWhyQnWiGWdZqJY2rrw4Dcg4O4DGV4cCQF29UbkCsoLIiljRS/4mQwSEHj7j
+k+DJiYKqQc+kGC+2VvYaqbtrierVK5OPOn86BygEvMfFW+9gwHhzyf6KoMECQQC4
+KXKl+BC5fBwwWTDRhWfHRduI2+2FVw7iwdD4TA3S3CZ9MbNkY7+uGbfmXBZNbkb/
+TeLdvNLAB3OW/HOXk2rZAkB8Aqd24EvyJVuqfKilzZd3zjnkN+wtLU7QvM/hK93G
+IiW3ZvRTyeyIKS/MFyMV6jKHu30U58e5oy4FGubZj9UH
+-----END RSA PRIVATE KEY-----
+
+<b>$</b> openssl x509 -text -in bee.hive.net.crt
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 2388339 (0x247173)
+        Signature Algorithm: md5WithRSAEncryption
+        Issuer: C=ZA, ST=FOR TESTING PURPOSES ONLY, O=Thawte Certification, \
+                OU=TEST TEST TEST, CN=Thawte Test CA Root
+        Validity
+            Not Before: Nov 28 23:28:17 2000 GMT
+            Not After : Nov 13 23:28:17 2001 GMT
+        Subject: C=AU, ST=Some-State, O=Internet Widgits Pty Ltd, \
+                 CN=bee.hive.net/Email=postmaster@bee.hive.net
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:cf:e5:0c:5e:1c:07:26:24:fb:f0:22:a3:f1:c0:
+                    8f:21:5a:97:6a:86:3e:b9:ba:65:02:0f:39:32:7a:
+                    df:72:e2:d7:20:00:76:97:1e:1b:f5:cf:ce:bf:dd:
+                    b0:89:19:e4:a7:69:12:08:51:53:a2:b1:61:a3:0a:
+                    9f:00:38:14:c3:5a:2c:d8:63:88:57:ce:13:5f:23:
+                    65:9e:5c:fd:ab:b3:ba:01:b1:fb:af:7a:cc:ec:bc:
+                    aa:3e:e7:49:07:d8:6a:80:2e:f8:91:93:f4:b9:cb:
+                    60:2b:a0:de:a7:b1:dd:a9:81:fc:d4:5e:70:7a:79:
+                    69:9c:4b:e6:34:56:e0:c9:17
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Extended Key Usage: 
+                TLS Web Server Authentication
+            X509v3 Basic Constraints: critical
+                CA:FALSE
+    Signature Algorithm: md5WithRSAEncryption
+        00:c2:08:54:0d:a5:62:a0:9c:54:03:bc:e8:3a:a0:24:7a:c4:
+        ee:2d:18:d9:52:50:12:48:2b:0b:7d:b9:17:71:68:d0:f0:b1:
+        9b:16:31:68:4e:a0:0e:8a:37:72:2d:c7:ab:82:94:d2:9a:5e:
+        06:a8:1d:0c:91:b1:bd:b3:eb:ae:2f:fe:0a:e0:61:26:b0:0f:
+        73:fb:31:26:32:43:19:43:ed:a1:3d:b6:5a:75:01:0a:4a:e3:
+        8f:53:16:18:bd:6b:26:da:e9:72:8a:94:bb:f5:e0:79:36:74:
+        f1:98:5f:ba:6c:32:c8:b0:45:e0:af:78:eb:d2:d9:46:15:52:
+        cd:f7
+-----BEGIN CERTIFICATE-----
+MIICqjCCAhOgAwIBAgIDJHFzMA0GCSqGSIb3DQEBBAUAMIGHMQswCQYDVQQGEwJa
+QTEiMCAGA1UECBMZRk9SIFRFU1RJTkcgUFVSUE9TRVMgT05MWTEdMBsGA1UEChMU
+VGhhd3RlIENlcnRpZmljYXRpb24xFzAVBgNVBAsTDlRFU1QgVEVTVCBURVNUMRww
+GgYDVQQDExNUaGF3dGUgVGVzdCBDQSBSb290MB4XDTAwMTEyODIzMjgxN1oXDTAx
+MTExMzIzMjgxN1owgYQxCzAJBgNVBAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRl
+MSEwHwYDVQQKExhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQxFTATBgNVBAMTDGJl
+ZS5oaXZlLm5ldDEmMCQGCSqGSIb3DQEJARYXcG9zdG1hc3RlckBiZWUuaGl2ZS5u
+ZXQwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAM/lDF4cByYk+/Aio/HAjyFa
+l2qGPrm6ZQIPOTJ633Li1yAAdpceG/XPzr/dsIkZ5KdpEghRU6KxYaMKnwA4FMNa
+LNhjiFfOE18jZZ5c/auzugGx+696zOy8qj7nSQfYaoAu+JGT9LnLYCug3qex3amB
+/NRecHp5aZxL5jRW4MkXAgMBAAGjJTAjMBMGA1UdJQQMMAoGCCsGAQUFBwMBMAwG
+A1UdEwEB/wQCMAAwDQYJKoZIhvcNAQEEBQADgYEAAMIIVA2lYqCcVAO86DqgJHrE
+7i0Y2VJQEkgrC325F3Fo0PCxmxYxaE6gDoo3ci3Hq4KU0ppeBqgdDJGxvbPrri/+
+CuBhJrAPc/sxJjJDGUPtoT22WnUBCkrjj1MWGL1rJtrpcoqUu/XgeTZ08Zhfumwy
+yLBF4K9469LZRhVSzfc=
+-----END CERTIFICATE-----
+
+</pre>
+
+
+<P><HR><P>
+<h2><a name="loadkeys">Step 2: Load the private key and cert into a Sun JKS keystore.</a></h2>
+
+If a sun provider key/certificate pair was generated, then they are already 
+loaded into the JKS keystore and this step can be 
+<a href="#usekeys">skipped</A>.
+
+<p>
+During this step you will be doing a few exposed things from a security 
+point of view, so only do this in a secure directory on a secure machine. 
+Remember to clean up properly.
+
+<P><B>Crypto Provider</B><BR>
+<p>
+The JSSE provider is not able to load openSSL key pairs into a keystore,
+so another provider is temporarily required - purely to load the keys with.
+Get your hands on a copy of the Bouncy Castle 
+Crypto Package from <a href="http://www.bouncycastle.org/">The Legion of 
+the Bouncy Castle</a>. Other JCE 1.2 providers may work too but at the 
+moment this is the one that has been succesfully tested. You will only need 
+it for the key loading stage so install it on your safe machine somewhere.
+<p>
+To perform these step, you do not need to have any providers registered
+in the JRE java.security file. In fact having the JSSE reference
+provider registered will cause errors in the following step.
+To use the bouncy castle provider, their classes directory must be
+in your classpath, for example:
+<PRE>
+  export CLASSPATH=$CLASSPATH:/usr/local/java/bouncycastle/jce-jdk12-10b3/classes
+</PRE>
+You can test the bouncy castle installation by running the following
+test harnesses:
+<PRE>
+  java org.bouncycastle.crypto.test.RegressionTest
+  java org.bouncycastle.jce.provider.test.RegressionTest
+</PRE>
+
+<P><B>Extracting your Private Key</B><BR>
+Firstly you will need to decrypt the private key. Do this using openssl like this:
+<pre>
+<b>$</b> openssl rsa -in bee.hive.net.key -out bee.hive.net.clearkey -outform DER
+read RSA key
+Enter PEM pass phrase:
+writing RSA key
+</pre>
+If this fails, check that the sun security provider is not registered in 
+the java.security file.  It only needs to be registered their if you are
+generating your keys with sun's keytool. Jetty registers the provider on
+an as need be basis. 
+<P>
+<B>REMEMBER TO DELETE YOU CLEAR KEY WHEN YOU COMPLETE THE NEXT STEP</B>
+
+
+<P>
+<hr>
+<B>Loading Private Key and Certificate into the keystore</B><BR>
+Next, load the key and the cert into a JKS keystore. The class 
+com.mortbay.Util.KeyPairTool is used to load the keys into the
+keystore. It has the following arguments:
+<pre>
+<b>$</b> java com.mortbay.Util.KeyPairTool
+Tool to insert a private key/certificate pair into a keystore.
+Parameters:
+ -key        FILENAME, location of private key [MANDATORY]
+ -cert       FILENAME, location of certificate [MANDATORY]
+ -keystore   FILENAME, location of keystore,   [~/.keystore]
+ -storetype  STRING,   name/type of keystore,  [jks]
+ -alias      NAME,     alias used to store key [mykey]
+ -provider   NAME,     name of provider class  [...BouncyCastleProvider]
+
+The keystore and key passwords will be prompted for or can be
+set with the following JVM system properties:
+  jetty.ssl.password  
+  jetty.ssl.keypassword
+</pre>
+If passwords are not provided as properties, they are prompted for.
+While they still appear on the screen, this is a much safer option as they
+do not get saved in shell histories or process listings.
+<pre>
+<b>$</b> /bin/sh
+$ java com.mortbay.Util.KeyPairTool \
+  -key bee.hive.net.clearkey \
+  -cert bee.hive.net.crt \
+  -storepass testpasswd \
+  -keystore mykeystore
+Loaded the private key...
+Loaded the public key...
+Will create keystore: keypair.keystore
+Keys have been written to keystore
+</pre>
+<p>
+<B><font color=red> Remember to clean up!</font></B> a simple way to do this if you want to which is a bit better than just removing the file is to overwrite it first. e.g.
+<pre>
+<b>$</b> man man > bee.hive.net.clearkey
+<b>$</b> cat /var/log/messages | compress > bee.hive.net.clearkey
+<b>$</b> man ls > bee.hive.net.clearkey
+<b>$</b> rm bee.hive.net.clearkey
+</pre>
+<p> 
+You now have a keystore with your keypair stashed away in it.   If you
+ignored the previous step, you also have your private key in the clear in
+your file system - SO CLEAN UP! This is your last warning.
+<p>
+You can use the jdk-1.2 keytool to manipulate the key/cert now that it is in
+there. You can use it to change the password for instance.
+<pre>
+<b>$</b> keytool -storepasswd
+Enter keystore password:  testpasswd
+New keystore password:  newpasswd
+Re-enter new keystore password:  newpasswd
+
+keytool -list
+Enter keystore password:  newpasswd
+
+Keystore type: jks
+Keystore provider: SUN
+
+Your keystore contains 1 entry:
+
+mykey, Sat Aug 12 21:11:19 GMT+10:00 2000, keyEntry,
+Certificate fingerprint (MD5): 1A:DA:C0:35:F0:A3:EC:AD:AB:D8:5F:48:78:A0:CB:90
+<b>$</b> 
+</pre>
+
+<P><HR><P>
+<h2><a name="usekeys">Step 3: Configure Jetty to use JSSE and the keystore.</a></h2>
+<p>Assuming you already have a functioning Jetty Server:
+
+<p>
+Add the SunJsseListener as a HttpListeners, e.g. In the demo.xml file 
+you can uncomment the following lines:
+<pre>
+  &lt;Call name="addListener"&gt;
+    &lt;Arg&gt;
+      &lt;New class="com.mortbay.HTTP.SunJsseListener"&gt;
+        &lt;Set name="Port"&gt;8443&lt;/Set&gt;
+        &lt;Set name="MinThreads"&gt;5&lt;/Set&gt;
+        &lt;Set name="MaxThreads"&gt;255&lt;/Set&gt;
+        &lt;Set name="MaxIdleTimeMs"&gt;50000&lt;/Set&gt;
+	&lt;Set name="Password"&gt;secretPassword&lt;/Set&gt;
+	&lt;Set name="KeyPassword"&gt;verySecretPassword&lt;/Set&gt;
+      &lt;/New&gt;
+    &lt;/Arg&gt;
+  &lt;/Call&gt;
+</pre>
+<p> 
+
+Remember that the default port for https is 443 not 80, so change 80 to 443 if you want to be able to use URL's without explicit port numbers. For a production site it normally makes sense to have a HttpListener on port 80 and a SunJsseListener on port 443.
+
+<p>
+Choose a private directory with restricted access to keep your keystore
+in. Even though it has a password on it, the password may be configured 
+into the runtime environment so is vulnerable to theft.
+
+<p>
+Change the way you start Jetty to:
+<ul>
+ <li> Include con.sun.net.ssl.jar in the classpath.
+      Remember you no longer need bouncycastle in you classpath.</li>
+ <li> Provide the path to the keystore file as the jetty.ssl.keystore property </li>
+ <li> Provide the keystore and key passwords, either as the
+      jetty.ssl.password and jetty.ssl.keypassword properties or 
+      typed at a prompt.
+</li>
+</ul>
+
+For example:
+<pre>
+java -Djetty.ssl.keystore=/home/jetty/keystore  com.mortbay.Jetty.Demo
+
+jetty.ssl.password : testpasswd
+jetty.ssl.keypassword : testpasswd
+
+</pre>
+<p>
+You may then access the SSL port with a URL like:
+
+  https://yourhost:8443/Dump
+
+If you get an javax.net.ssl.SSLException, check that you have 
+remembered the s in https.
+
+<P>
+<hr>
+<B>Password Issues</B><BR>
+The passwords can also be set on the command line as system properties, but
+remember that putting your password on the command line is a security risk.
+They can also be set as properties within the config file, but
+this risks accidental discovery by developers.
+<P>
+If jetty is given a password that begins with &quot;EXEC:&quot;, then
+the rest of the password is treated as a command and run with
+java.lang.Runtime.exec.  The password name (eg. jetty.ssl.password) 
+is written to the input of the command and a line of output is read
+from the command and used as the password.
+<p>
+If jetty is given a password that begins with &quot;OBF:&quot; it is
+treated as an obfuscated password. Passwords can be obfuscated by
+running com.mortbay.Util.Password as a main class.
+<p>
+While these mechanism just exports the security problem from jetty,
+it does allow customized security arrangements to be configured.
+
+<p>
+<hr>
+<h1><a name="issues"> Outstanding Issues. </a></h1>
+<p> The following issues are outstanding:
+<ul>
+ <li> Reading passwords from prompts should turn echo off.</li>
+ <li> Better recommendations for keystore location and permissions. </li>
+ <li> Jetty is not yet ready to insist on client certificates. </li>
+ <li> This page should be broken up with separate pages for Sun keytool and openssl key generation. </li>
+ <li> A list of common problems and there solutions would be helpful. </li>
+</ul>
+
+<p>
+<hr>
+<h1><a name="environment"> Environment and version information. </a></h1>
+<p> The environment this procedure was developed in was:
+<ul>
+ <li> Red Hat Linux 6.2 x86 with openssl-0.9.5a-2.i386.rpm installed </li>
+ <li> Solaris 2.5.7 with OpenSSL 0.9.4 09 Aug 1999 </li>
+ <li> Bouncy Castle Crypto Library, Release 1.0 Beta 3 </li>
+ <li> Jetty-3.0.B0 </li>
+ <li> Sun JavaTM Secure Socket Extension (JSSE) 1.0.1 - Globally Exportable release (Non domestic US version) </li>
+ <li>Sun JDK - java version "1.2.2" Classic VM (build 1.2.2_006, green threads, nojit)
+</ul>
+<p>
+<hr>
+Written by Brett Sealey. 13th August 2000.<br>
+Updated by Greg Wilkins. 14th August 2000.<br>
+Last updated: 14th March 2001
+<hr>
+I told you to clean up your clear-text private key - if you haven't then do it NOW!
+</body>
+</html>
+
