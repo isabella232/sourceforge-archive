@@ -98,6 +98,7 @@ ServerA./.Filter./	   : com.mortbay.HTTP.Filter.HtmlFilter
 
 ServerA./.Servlet./Dump%            : Dump=com.mortbay.Servlets.Dump?./etc/ParamDemo.prp
 ServerA./.Servlet./Session          : Session=com.mortbay.Servlets.SessionDump
+ServerA./.Servlet./PropertyTree     : PropertyTree=com.mortbay.Servlets.PropertyTreeEditor
 ServerA./.Servlet./Config$          : Config=com.mortbay.Servlets.ConfigDump
 ServerA./.Servlet./Debug$           : Debug=com.mortbay.Servlets.DebugServlet
 ServerA./.Servlet./Hello            : Hello=HelloWorldServlet

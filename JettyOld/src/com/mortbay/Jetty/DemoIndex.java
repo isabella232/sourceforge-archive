@@ -158,6 +158,16 @@ public class DemoIndex extends IndexServlet
 		"Debugging",
 		"/Debug",
 		"Servlet to set debug output"
+	    },
+	    {
+		"Servlet Dispatch",
+		"/Jetty/Demo/servletdispatch.html",
+		"Servlet utility class for URL to Object mapping"
+	    },
+	    {
+		"Property Trees",
+		"/Jetty/Demo/propertytree.html",
+		"Nested Properties objects with wildcard default values"
 	    }
 	};
 	section.put("Items",demoItems);
