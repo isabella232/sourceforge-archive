@@ -718,10 +718,15 @@ public class HttpConnection
                         break;
                     case 1:
                         {
+                            // Nobble the OutputStream for HEAD requests
+                            if (HttpRequest.__HEAD.equals(_request.getMethod()))
+                                _outputStream.nullOutput();
+
                             // force chunking on.
                             _response.setField(HttpFields.__TransferEncoding,
                                                HttpFields.__Chunked);
                             _outputStream.setChunking();
+
                         }
                         break;
                         

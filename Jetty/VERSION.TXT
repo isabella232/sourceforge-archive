@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Added skeleton JMX MBean for jetty plus
+
 Jetty-5.0.beta1 - 24 December 2003
  + SecurityConstraints not reset by stop() on custom context
  + Fixed UnixCrypt handling in HTAccessHandler
