@@ -809,7 +809,7 @@ public class HttpRequest extends HttpMessage
                 try
                 {
                     byte[]qbytes=query.getBytes(StringUtil.__ISO_8859_1);
-                    UrlEncoded.decodeTo(qbytes,_parameters,encoding);
+                    UrlEncoded.decodeTo(qbytes,0,qbytes.length,_parameters,encoding);
                 }
                 catch(Exception e)
                 {
@@ -858,7 +858,7 @@ public class HttpRequest extends HttpMessage
                             byte[] content=bout.getBuf();
 
                             // Add form params to query params
-                            UrlEncoded.decodeTo(content,_parameters,encoding);
+                            UrlEncoded.decodeTo(content,0,bout.getCount(),_parameters,encoding);
                         }
                         catch (EOFException e)
                         {

@@ -221,9 +221,9 @@ public class UrlEncoded extends MultiMap
     /** Decoded parameters to Map.
      * @param data the byte[] containing the encoded parameters
      */
-    public static void decodeTo(byte[] data, MultiMap map, String charset)
+    public static void decodeTo(byte[] data, int offset, int length, MultiMap map, String charset)
     {
-        if (data == null || data.length == 0)
+        if (data == null || length == 0)
             return;
 
         if (charset==null)
@@ -233,29 +233,30 @@ public class UrlEncoded extends MultiMap
         {
             try
             {
-                int    ix = 0;
-                int    ox = 0;
+                int    ix = offset;
+                int    end = offset+length;
+                int    ox = offset;
                 String key = null;
                 String value = null;
-                while (ix < data.length)
+                while (ix < end)
                 {
                     byte c = data[ix++];
                     switch ((char) c)
                     {
                       case '&':
-                          value = new String(data, 0, ox, charset);
+                          value = new String(data, offset, ox, charset);
                           if (key != null)
                           {
                               map.add(key,value);
                               key = null;
                           }
-                          ox = 0;
+                          ox = offset;
                           break;
                       case '=':
                           if (key!=null)
                               break;
-                          key = new String(data, 0, ox, charset);
-                          ox = 0;
+                          key = new String(data, offset, ox, charset);
+                          ox = offset;
                           break;
                       case '+':
                           data[ox++] = (byte)' ';
@@ -271,7 +272,7 @@ public class UrlEncoded extends MultiMap
                 }
                 if (key != null)
                 {
-                    value = new String(data, 0, ox, charset);
+                    value = new String(data, offset, ox, charset);
                     map.add(key,value);
                 }
             }
