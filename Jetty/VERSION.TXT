@@ -1,8 +1,12 @@
 
-Jetty-3.0.A2 - 12 Oct 1999
+Jetty-3.0.A2 - 13 Oct 1999
    + UTF8 handling on raw output stream.
    + Reduced flushing on writing response.
-y
+   + Fixed LineInput problem with repeated CRs
+   + Cleaned up Util TestHarness.
+   + Prevent entity content for responses 100-199,203,304
+   + Added cookie support and demo.
+
 Jetty-3.0.A1 - 12 Oct 1999
    + LineInput uses own buffering and uses character encodings.
    + Added MultiMap for common handling of multiple valued parameters.

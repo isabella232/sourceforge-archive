@@ -49,7 +49,6 @@ abstract public class HttpMessage
     protected int _state;
     protected String _version;
     protected HttpFields _header;
-    protected Map _cookies;
     protected HttpFields _trailer;
     protected boolean _acceptTrailer;
     protected HttpConnection _connection;

@@ -171,10 +171,7 @@ public class HttpResponse extends HttpMessage
             writer.write(status);
             writer.write(getReason());
             writer.write(HttpFields.__CRLF);
-            if (_cookies!=null)
-                _header.write(writer,(HttpFields)_cookies); //XXX
-            else
-                _header.write(writer);
+            _header.write(writer);
         }
         _state=__MSG_SENDING;
     }
@@ -241,22 +238,26 @@ public class HttpResponse extends HttpMessage
         _header.put(HttpFields.__ContentType,HttpFields.__TextHtml);
         String message=exception.getMessage();
         String reason=exception.getReason();
-        
-        setStatus(exception.getCode());
+
+        int code=exception.getCode();
+        setStatus(code);
         setReason(reason);
 
-        ChunkableOutputStream out=getOutputStream();
-        Writer writer=out.getRawWriter();
-        synchronized(writer)
+        if (code!=204 && code!=304 && code>=200)
         {
-            writer.write("<HTML>\n<HEAD>\n<TITLE>Error ");
-            writer.write(exception.getCode()+" "+reason+"</TITLE>\n");
-            writer.write("<BODY>\n<H2>HTTP ERROR: ");
-            writer.write(exception.getCode() +" "+reason + "</H2>\n");
-            if (message!=null)
-                writer.write(message);
-            writer.write("\n</BODY>\n</HTML>\n");
-            out.writeRawWriter();
+            ChunkableOutputStream out=getOutputStream();
+            Writer writer= new OutputStreamWriter(out,"UTF8");
+            synchronized(writer)
+            {
+                writer.write("<HTML>\n<HEAD>\n<TITLE>Error ");
+                writer.write(exception.getCode()+" "+reason+"</TITLE>\n");
+                writer.write("<BODY>\n<H2>HTTP ERROR: ");
+                writer.write(exception.getCode() +" "+reason + "</H2>\n");
+                if (message!=null)
+                    writer.write(message);
+                writer.write("\n</BODY>\n</HTML>\n");
+                writer.flush();
+            }
         }
         commit();
     }
@@ -277,18 +278,21 @@ public class HttpResponse extends HttpMessage
         String reason = (String)__statusMsg.get(new Integer(code));
         setReason(reason);
 
-        ChunkableOutputStream out=getOutputStream();
-        Writer writer=out.getRawWriter();
-        synchronized(writer)
+        if (code!=204 && code!=304 && code>=200)
         {
-            writer.write("<HTML>\n<HEAD>\n<TITLE>Error ");
-            writer.write(code+" "+reason+"</TITLE>\n");
-            writer.write("<BODY>\n<H2>HTTP ERROR: ");
-            writer.write(code +" "+reason + "</H2>");
-            if (message!=null)
-                writer.write(message);
-            writer.write("</BODY>\n</HTML>\n");
-            out.writeRawWriter();
+            ChunkableOutputStream out=getOutputStream();
+            Writer writer=new OutputStreamWriter(out,"UTF8");
+            synchronized(writer)
+            {
+                writer.write("<HTML>\n<HEAD>\n<TITLE>Error ");
+                writer.write(code+" "+reason+"</TITLE>\n");
+                writer.write("<BODY>\n<H2>HTTP ERROR: ");
+                writer.write(code +" "+reason + "</H2>");
+                if (message!=null)
+                    writer.write(message);
+                writer.write("</BODY>\n</HTML>\n");
+                writer.flush();
+            }
         }
         commit();
     }
@@ -321,6 +325,89 @@ public class HttpResponse extends HttpMessage
         commit();
     }
 
+
+    /* -------------------------------------------------------------- */
+    /** Add a Set-Cookie field.
+     */
+    public void addSetCookie(String name,
+                             String value)
+    {
+        addSetCookie(name,value,null,"/",null,false);
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Add a Set-Cookie field. 
+     * @param name The cookie name
+     * @param value The cookie value which must not contain ';'.
+     * @param domain The domain, which must be a subdomain of the server.
+     *        If null is passed the default of this domain is used.
+     * @param path The path the cookie applies to.
+     *        If null is passed the default of "/" is used.
+     * @param expires the Date the cookie expires on.
+     *        If null is passed the cookie expires with the browser session.
+     * @param secure if true the cookie is flagged secure.
+     */
+    public void addSetCookie(String name,
+                             String value,
+                             String domain,
+                             String path,
+                             Date expires,
+                             boolean secure)
+    {
+        // Check arguments
+        if (name==null || name.length()==0)
+            throw new IllegalArgumentException("Bad cookie name");
+        if (value==null || value.length()==0)
+            throw new IllegalArgumentException("Bad cookie value");
+        for(int i = 0; i < name.length(); i++)
+        {
+	    char c = name.charAt(i);
+            if (Character.isWhitespace(c) || c==',' || c==';')
+                throw new IllegalArgumentException("Bad cookie name:'"+name+"'");
+	}
+        if(name.equalsIgnoreCase ("Comment") ||
+           name.equalsIgnoreCase ("Discard") ||
+           name.equalsIgnoreCase ("Domain")  ||
+           name.equalsIgnoreCase ("Expires") ||
+           name.equalsIgnoreCase ("Max-Age") ||
+           name.equalsIgnoreCase ("Path")    ||
+           name.equalsIgnoreCase ("Secure")  ||
+           name.equalsIgnoreCase ("Version"))
+            throw new IllegalArgumentException("Bad cookie name");
+        if (secure)
+            Code.notImplemented();
+
+        
+        // Format value and params
+        StringBuffer buf = new StringBuffer(128);
+        String name_value_params=null;
+        synchronized(buf)
+        {
+            buf.append(name);
+            buf.append('=');
+            buf.append(UrlEncoded.encodeString(value));
+            if (path!=null && path.length()>0)
+            {
+                buf.append(";path=");
+                buf.append(path);
+            }
+            if (domain!=null && domain.length()>0)
+            {
+                buf.append(";domain=");
+                buf.append(domain);
+            }
+            if (expires!=null)
+            {
+                buf.append(";expires=");
+                buf.append(HttpFields.__dateSend.format(expires));
+            }
+        
+            name_value_params=buf.toString();
+        }
+        
+        _header.put(HttpFields.__SetCookie,name_value_params);
+    }
+    
     /* ------------------------------------------------------------ */
     /** Destroy the header.
      * Help the garbage collector by null everything that we can.

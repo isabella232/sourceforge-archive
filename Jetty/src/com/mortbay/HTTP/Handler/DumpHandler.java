@@ -80,7 +80,41 @@ public class DumpHandler extends NullHandler
                 }
             }
         }
-            
+        
+        String set_cookie=request.getParameter("CookieName");
+        if (set_cookie!=null && set_cookie.trim().length()>0)
+        {
+            try{
+                set_cookie=set_cookie.trim();
+                String cv=request.getParameter("CookieVal");
+                Date expires=new Date();
+                expires=new Date(expires.getTime()+(60*60*1000));
+                response.addSetCookie(set_cookie,cv,null,"/",expires,false);
+            }
+            catch(IllegalStateException e)
+            {
+                writer.write("</PRE>\n<H3>BAD Set-Cookie:</H3>\n<PRE>");
+                writer.write(e.toString());
+                Code.warning(e);
+            }
+        }
+        
+        
+        Map cookies=request.getCookies();
+        if (cookies!=null && cookies.size()>0)
+        {
+            writer.write("</PRE>\n<H3>Cookies:</H3>\n<PRE>");
+            Iterator c=cookies.keySet().iterator();
+            while(c.hasNext())
+            {
+                String cookie=c.next().toString();
+                writer.write(cookie);
+                writer.write("=");
+                writer.write(cookies.get(cookie).toString());
+                writer.write("\n");
+            }
+        }
+        
         writer.write("</PRE>\n<H3>Content:</H3>\n<PRE>");
         byte[] buf= new byte[4096];
         int len;

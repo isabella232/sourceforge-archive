@@ -455,6 +455,7 @@ public class LineInput extends FilterInputStream
                 _pos=_mark;
                 fill();
                 _pos=len;
+                cr=false;
                 continue;
             }
 
@@ -468,6 +469,11 @@ public class LineInput extends FilterInputStream
                   break LineLoop;
                 
               case 13:
+                  if (cr)
+                  {
+                      _pos--;
+                      break LineLoop;
+                  }
                   cr = true;
                   break;
                 
@@ -477,34 +483,32 @@ public class LineInput extends FilterInputStream
                       _pos--;
                       break LineLoop;
                   }
-                  else
+                  
+                  len++;
+                  if (len==maxLen)
                   {
-                      len++;
-                      if (len==maxLen)
+                      // look for EOL
+                      if (_mark!=0 && _pos+2>=_avail && _avail<_buf.length)
+                          fill();
+                          
+                      if (_pos<_avail && _buf[_pos]==13)
                       {
-                          // look for EOL
-                          if (_mark!=0 && _pos+2>=_avail && _avail<_buf.length)
-                              fill();
-                          
-                          if (_pos<_avail && _buf[_pos]==13)
-                          {
-                              cr=true;
-                              _pos++;
-                          }
-                          if (_pos<_avail && _buf[_pos]==10)
-                          {
-                              lf=true;
-                              _pos++;
-                          }
-                          
-                          if (!cr && !lf)
-                          {
-                              // fake EOL
-                              lf=true;
-                              cr=true;
-                          }
-                          break LineLoop;
+                          cr=true;
+                          _pos++;
                       }
+                      if (_pos<_avail && _buf[_pos]==10)
+                      {
+                          lf=true;
+                          _pos++;
+                      }
+                      
+                      if (!cr && !lf)
+                      {
+                          // fake EOL
+                          lf=true;
+                          cr=true;
+                      }
+                      break LineLoop;
                   }
                   
                   break;
@@ -516,10 +520,22 @@ public class LineInput extends FilterInputStream
             len=-1;
         }
 
-        if (Code.verbose(1000))
+        if (Code.verbose(500))
         {
             if (len>=0)
-                Code.debug("LINE: "+new String(_buf,_mark,len));
+            {
+                if (Code.verbose(1000))
+                {
+                    Code.debug("LINE: "+new String(_buf,_mark,len)+
+                               "\npos="+_pos+
+                               "\nBUFFER: '"+
+                               new String(_buf,_pos,_contents-_pos)+
+                               "'");
+                }
+                else
+                    Code.debug("LINE: "+new String(_buf,_mark,len)+
+                               "\npos="+_pos);
+            }
             else
                 Code.debug("EOF");
         }

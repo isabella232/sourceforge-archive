@@ -596,7 +596,7 @@ public class HttpFields extends HashMap
     /* -------------------------------------------------------------- */
     /* Write Extra HTTP headers.
      */
-    public void write(Writer writer, HttpFields extra)
+    public void write(Writer writer)
         throws IOException
     {
         synchronized(writer)
@@ -611,19 +611,8 @@ public class HttpFields extends HashMap
                 writer.write(value);
                 writer.write(__CRLF);
             }
-            if (extra!=null)
-                extra.write(writer,null);
-            else
-                writer.write(__CRLF);
-        
+            writer.write(__CRLF);
         }
-    }
-    
-    /* -------------------------------------------------------------- */
-    public void write(Writer writer)
-        throws IOException
-    {
-        write(writer,null);
     }
     
     /* -------------------------------------------------------------- */
@@ -632,7 +621,7 @@ public class HttpFields extends HashMap
         try
         {
             StringWriter writer = new StringWriter();
-            write(writer,null);
+            write(writer);
             return writer.toString();
         }
         catch(Exception e)

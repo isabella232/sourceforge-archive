@@ -21,15 +21,38 @@ public class TestHarness
     {
         Test t = new Test("com.mortbay.Util.DateCache");
         
-        DateCache dc = new DateCache();
+        DateCache dc = new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
         try
         {
-            for (int i=0;i<25;i++)
+            String last=dc.format(System.currentTimeMillis());
+            boolean change=false;
+            for (int i=0;i<15;i++)
             {
                 Thread.sleep(100);
-                System.err.println(dc.format(System.currentTimeMillis()));
+                String date=dc.format(System.currentTimeMillis());
+                t.checkEquals(last.substring(0,17),
+                              date.substring(0,17),"Same Date");
+
+                if (last.substring(17).equals(date.substring(17)))
+                    change=true;
+                else
+                {
+                    int lh=Integer.parseInt(last.substring(17,19));
+                    int dh=Integer.parseInt(date.substring(17,19));
+                    int lm=Integer.parseInt(last.substring(20,22));
+                    int dm=Integer.parseInt(date.substring(20,22));
+                    int ls=Integer.parseInt(last.substring(23,25));
+                    int ds=Integer.parseInt(date.substring(23,25));
+
+                    // This won't work at midnight!
+                    t.check(ds==ls+1 ||
+                            ds==0 && dm==lm+1 ||
+                            ds==0 && dm==0 && dh==lh+1,
+                            "Time changed");
+                }
+                last=date;
             }
-            t.check(true,"Very poor test harness");
+            t.check(change,"time changed");
         }
         catch(Exception e)
         {
@@ -46,7 +69,7 @@ public class TestHarness
     {
         Test t1 = new Test("Test all pass");
         Test t2 = new Test(Test.SelfFailTest);
-
+        t2.check(false,"THESE TESTS ARE EXPECTED TO FAIL");
         t1.check(true,"Boolean check that passes");
         t2.check(false,"Boolean check that fails");
         t1.checkEquals("Foo","Foo","Object comparison that passes");
@@ -66,8 +89,11 @@ public class TestHarness
     {
         // XXX - this is not even a test harness - poor show!
         Log.instance();
-        Log.message("TAG","MSG",new Frame());
+        System.err.println("\n\nEXPECT TESTTAG: TEST Message");
+        Log.message("TESTTAG","TEST Message",new Frame());
+        System.err.println("\n\nEXPECT: Test event");
         Log.event("Test event");
+        System.err.println("\n\nEXPECT: Test warning");
         Log.warning("Test warning");
     }
 
@@ -117,49 +143,63 @@ public class TestHarness
         // Also not a test harness
         Test t = new Test("com.mortbay.Util.Code");
         Code code = Code.instance();
+
+        System.err.println("RUNNING CODE TESTS. Failures expected and must be visually checked");
         
         code._debugOn=false;
-        Code.debug("message");
+        Code.debug("YOU SHOULD NOT SEE THIS");
         
         code._debugOn=true;
-        Code.debug("message");
-        Code.debug("message",new Throwable());
-        Code.debug("object",new Throwable(),"\n",code);
+        System.err.println("\n\nEXPECT DEBUG: Test debug message");
+        Code.debug("Test debug message");
+        System.err.println("\n\nEXPECT DEBUG: Test debug with stack");
+        Code.debug("Test debug with stack",new Throwable());
+        System.err.println("\n\nEXPECT DEBUG: Test debug with various");
+        Code.debug("Test debug with various",new Throwable(),"\n",code);
         
         code._debugPatterns = new java.util.Vector();
         code._debugPatterns.addElement("ZZZZZ");
         Code.debug("YOU SHOULD NOT SEE THIS");
         Code.debug("YOU SHOULD"," NOT SEE ","THIS");
         
-        code._debugPatterns.addElement("ISS.Base");
-        Code.debug("message");
-        
+        code._debugPatterns.addElement("TestHarness");
+        System.err.println("\n\nEXPECT DEBUG: Test debug pattern");
+        Code.debug("Test debug pattern");
         code._debugPatterns = null;
 
-        Code.warning("warning");
+        System.err.println("\n\nEXPECT WARNING: Test warning");
+        Code.warning("Test warning");
         
         Code.setDebug(false);
         Code.setDebugTriggers("FOO,BAR");
         Code.debug("YOU SHOULD NOT SEE THIS");
         Code.triggerOn("BLAH");
         Code.debug("YOU SHOULD NOT SEE THIS");
+        System.err.println("\n\nEXPECT TRIGGER: ON FOO");
         Code.triggerOn("FOO");
+        System.err.println("\n\nEXPECT DEBUG: triggered");
         Code.debug("triggered");
+        System.err.println("\n\nEXPECT TRIGGER: ON BAR");
         Code.triggerOn("BAR");
+        System.err.println("\n\nEXPECT DEBUG: triggered");
         Code.debug("triggered");
         Code.triggerOn("FOO");
+        System.err.println("\n\nEXPECT TRIGGER: OFF FOO");
         Code.triggerOff("FOO");
+        System.err.println("\n\nEXPECT DEBUG: triggered");
         Code.debug("triggered");
+        System.err.println("\n\nEXPECT TRIGGER: OFF BAR");
         Code.triggerOff("BAR");
         Code.debug("YOU SHOULD NOT SEE THIS");
         Code.triggerOff("BLAH");
         Code.debug("YOU SHOULD NOT SEE THIS");
         
-        Code.setDebug(true);
+        Code.setDebug(false);
         
         try
         {
-            Code.fail("fail");
+            System.err.println("\n\nEXPECT FAIL: Fail test");
+            Code.fail("Fail test");
             t.check(false,"fail");
         }
         catch(CodeException e)
@@ -175,16 +215,16 @@ public class TestHarness
             Code.assertEquals(1,1,"equals");
             Code.assertContains("String","rin","contains");         
             
-            Code.assertEquals("foo","bar","assert");
+            System.err.println("\n\nEXPECT ASSERT: Assert fail");
+            Code.assertEquals("foo","bar","assert fail");
             t.check(false,"Assert");
         }
         catch(CodeException e)
         {
+            System.err.println("\n\nEXPECT Warning: <stack>");
             Code.warning(e);
             t.check(true,"Assert");
         }
-        t.check(true,"Output must be visually inspected");
-        Code.setDebug(false);
     }
     
     /* ------------------------------------------------------------ */
@@ -209,7 +249,8 @@ public class TestHarness
                 DataClass.emptyInstance(com.mortbay.Util.DataClassTest.T1.class);
 
             String out = DataClass.toString(t2);
-            System.out.println(out);
+            if (Code.debug())
+                System.out.println(out);
 
             t.checkContains(out,"i = 42;","toString int");
             t.checkContains(out,"check","toString string");
@@ -251,6 +292,8 @@ public class TestHarness
     public static void testBlockingQueue()
         throws Exception
     {
+        System.err.print("Testing BlockingQueue.");
+        System.err.flush();
         final Test t = new Test("com.mortbay.Util.BlockingQueue");
 
         final BlockingQueue bq=new BlockingQueue(5);
@@ -276,6 +319,8 @@ public class TestHarness
                        public void run(){
                            try{
                                Thread.sleep(1000);
+                               System.err.print(".");
+                               System.err.flush();
                                bq.put("F");
                            }
                            catch(InterruptedException e){}
@@ -297,6 +342,8 @@ public class TestHarness
                        public void run(){
                            try{
                                Thread.sleep(500);
+                               System.err.print(".");
+                               System.err.flush();
                                t.checkEquals(bq.get(),"G1","G1");
                            }
                            catch(InterruptedException e){}
@@ -319,6 +366,7 @@ public class TestHarness
         t.checkEquals(bq.get(),"G5","G5");
         t.checkEquals(bq.get(),"G6","G6");
         t.checkEquals(bq.get(100),null,"that's all folks");
+        System.err.println();
     }
     
     /* -------------------------------------------------------------- */
@@ -638,7 +686,7 @@ public class TestHarness
             test.checkEquals(in.readLine(),"fghi","1."+bs+" read last line");
             test.checkEquals(in.readLine(),null,"1."+bs+" read EOF");
             test.checkEquals(in.readLine(),null,"1."+bs+" read EOF again");
-            
+
             bs=3;
             dataStream=new ByteArrayInputStream(data.getBytes());
             in = new LineInput(dataStream,bs);
@@ -739,6 +787,49 @@ public class TestHarness
             test.checkEquals(in.readLine(),null,"1 read EOF");
             test.checkEquals(in.readLine(),null,"1 read EOF again");
 
+            
+            String dataCR=
+                "abcd\015"+
+                "E\015"+
+                "\015"+
+                "fghi";
+            dataStream=new ByteArrayInputStream(dataCR.getBytes());
+            in = new LineInput(dataStream,5);
+            test.checkEquals(in.readLine(),"abcd","CR read first line");
+            test.checkEquals(in.readLine(),"E","CR read line");
+            test.checkEquals(in.readLine(),"","CR blank line");
+            test.checkEquals(in.readLine(),"fghi","CR read last line");
+            test.checkEquals(in.readLine(),null,"CR read EOF");
+            test.checkEquals(in.readLine(),null,"CR read EOF again");
+            
+            String dataLF=
+                "abcd\012"+
+                "E\012"+
+                "\012"+
+                "fghi";
+            dataStream=new ByteArrayInputStream(dataLF.getBytes());
+            in = new LineInput(dataStream,5);
+            test.checkEquals(in.readLine(),"abcd","LF read first line");
+            test.checkEquals(in.readLine(),"E","LF read line");
+            test.checkEquals(in.readLine(),"","LF blank line");
+            test.checkEquals(in.readLine(),"fghi","LF read last line");
+            test.checkEquals(in.readLine(),null,"LF read EOF");
+            test.checkEquals(in.readLine(),null,"LF read EOF again");
+
+            String dataCRLF=
+                "abcd\015\012"+
+                "E\015\012"+
+                "\015\012"+
+                "fghi";
+            dataStream=new ByteArrayInputStream(dataCR.getBytes());
+            in = new LineInput(dataStream,5);
+            test.checkEquals(in.readLine(),"abcd","CRLF read first line");
+            test.checkEquals(in.readLine(),"E","CRLF read line");
+            test.checkEquals(in.readLine(),"","CRLF blank line");
+            test.checkEquals(in.readLine(),"fghi","CRLF read last line");
+            test.checkEquals(in.readLine(),null,"CRLF read EOF");
+            test.checkEquals(in.readLine(),null,"CRLF read EOF again");
+            
         }
         catch(Exception e)
         {
@@ -788,6 +879,7 @@ public class TestHarness
     static void testThreadPool()
     {
         Test test = new Test("com.mortbay.Util.ThreadPool");
+        System.err.print("Testing ThreadPool.");System.err.flush();
         try
         {
             TestThreadPool pool = new TestThreadPool();
@@ -1007,6 +1099,7 @@ public class TestHarness
     static void testThreadedServer()
     {
         Test test = new Test("com.mortbay.Util.ThreadedServer");
+        System.err.print("Testing ThreadedServer.");System.err.flush();
         try
         {
             TestThreadedServer server = new TestThreadedServer();
@@ -1111,22 +1204,22 @@ public class TestHarness
     {
         try
         {
-            testQuotedStringTokenizer();            
-            testDateCache();
-            testTest();
-            testLog();
-            testFrame();
-            testCode();
-            testDataHelper();
-            testBlockingQueue();
-            testIO();
-            testUrlEncoded();
-            testURI();
-            testLineInput();
-            testThreadPool();
-            testThreadedServer();
-            PropertyTreeTest.test();
-            DictionaryConverterTest.test();
+             testQuotedStringTokenizer();            
+             testDateCache();
+             testTest();
+             testLog();
+             testFrame();
+             testCode();
+             testDataHelper();
+             testBlockingQueue();
+             testIO();
+             testUrlEncoded();
+             testURI();
+             testLineInput();
+             testThreadPool();
+             testThreadedServer();
+             PropertyTreeTest.test();
+             DictionaryConverterTest.test();
         }
         catch(Throwable th)
         {

@@ -39,6 +39,10 @@ public class HttpRequest extends HttpMessage
         __CONNECT="CONNECT",
         __MOVE="MOVE";
 
+    /* -------------------------------------------------------------- */
+    private static Map __emptyMap =
+        Collections.unmodifiableMap(new HashMap(1));
+    
     /* ------------------------------------------------------------ */
     private String _method=null;
     private URI _uri=null;
@@ -47,7 +51,8 @@ public class HttpRequest extends HttpMessage
     private List _te;
     private MultiMap _parameters;
     private boolean _handled;
-    
+    private Map _cookies;
+
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
@@ -685,6 +690,46 @@ public class HttpRequest extends HttpMessage
     }
     
 
+    /* -------------------------------------------------------------- */
+    /** Extract received cookies from a header
+     * @param buffer Contains encoded cookies
+     * @return Array of Cookies.
+     */
+    public Map getCookies()
+    {
+        if (_cookies!=null)
+            return _cookies;
+        
+        List cookies = _header.getValues(HttpFields.__Cookie);
+        if (cookies==null || cookies.size()==0)
+        {
+            _cookies=__emptyMap;
+            return _cookies;
+        }
+        
+        _cookies=new HashMap((cookies.size()*3)/2);
+        
+        for (int i=cookies.size();i-->0;)
+        {
+            String c = (String)cookies.get(i);
+            int e = c.indexOf("=");
+            String n;
+            String v;
+            if (e>0)
+            {
+                n=c.substring(0,e).trim();
+                v=c.substring(e+1).trim();
+            }
+            else
+            {
+                n=c.trim();
+                v="";
+            }
+            v=UrlEncoded.decodeString(v);
+            _cookies.put(n,v);
+        }
+        return _cookies;
+    }    
     
     /* ------------------------------------------------------------ */
     /** Destroy the request.

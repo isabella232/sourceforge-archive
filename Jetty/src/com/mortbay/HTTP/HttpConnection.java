@@ -40,10 +40,10 @@ public class HttpConnection
     private Thread _handlingThread;
     
     /* ------------------------------------------------------------ */
-    /** Constructor. XXX
-     * @param listener 
-     * @param in 
-     * @param out 
+    /** Constructor.
+     * @param listener The listener that created this connection.
+     * @param in InputStream to read request(s) from.
+     * @param out OutputputStream to write response(s) to.
      */
     protected HttpConnection(HttpListener listener,
                              InputStream in,
@@ -230,7 +230,12 @@ public class HttpConnection
             if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
                 throw new HttpException(_response.__400_Bad_Request);
             if (Code.debug())
-                Code.debug("Request:",_request.getRequestLine());        
+            {
+                if (Code.verbose(100))
+                    Code.debug("Request:",_request.toString());
+                else
+                    Code.debug("Request:",_request.getRequestLine());
+            }
 
             // Pick response version
             _version=_request.getVersion();
@@ -257,7 +262,7 @@ public class HttpConnection
                 _http1_1=true;
             }
             _response.setVersion(_version);
-            _response.setField(HttpFields.__Server,"Jetty3_XXX");
+            _response.setField(HttpFields.__Server,Version.__Version);
             _response.setField(HttpFields.__MimeVersion,"1.0");
             _response.setCurrentTime(HttpFields.__Date);
 
@@ -634,8 +639,3 @@ public class HttpConnection
         }
     }
 };
-
-
-
-
-
