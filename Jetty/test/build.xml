@@ -114,8 +114,8 @@ the Ant optional tasks from:
   <!-- ==================================================================== -->
   <target name="junit" depends="prepare,check.junit.task,check.junit,classes">
     <delete file="${test.results}/*" quiet="true" />
-    <junit fork="no" printsummary="no" > <!-- haltonerror="yes" haltonfailure="yes" > -->
-      <formatter type="brief" usefile="true" />                  
+    <junit fork="no" printsummary="yes" haltonerror="yes" haltonfailure="yes" >
+      <formatter type="plain" usefile="true" />                  
       <classpath> 
          <path refid="classpath" />
          <pathelement location="${junit.jar}" />     

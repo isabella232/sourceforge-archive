@@ -29,7 +29,7 @@ public interface SessionManager extends LifeCycle
     public HttpSession newHttpSession();
 
     /* ------------------------------------------------------------ */
-    public void setSessionTimeout(int timeoutMinutes);
+    public void setMaxInactiveInterval(int seconds);
 
     /* ------------------------------------------------------------ */
     /** Add an event listener.

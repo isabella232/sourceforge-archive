@@ -472,9 +472,9 @@ public class ServletHandler
     }
 
     /* ------------------------------------------------------------ */
-    void setSessionTimeout(int timeoutMinutes)
+    void setSessionInactiveInterval(int seconds)
     {
-        _sessionManager.setSessionTimeout(timeoutMinutes);
+        _sessionManager.setMaxInactiveInterval(seconds);
     }
 
     /* ----------------------------------------------------------------- */

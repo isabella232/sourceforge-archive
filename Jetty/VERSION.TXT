@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + setCookie always has equals
+
 Jetty-4.0.D2 - 2 Dec 2001
  + Removed most of the old doco, which needs to be 
    rewritten and added again.

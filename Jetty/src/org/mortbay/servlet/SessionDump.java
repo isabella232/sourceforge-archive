@@ -52,6 +52,7 @@ public class SessionDump extends HttpServlet
         String action = request.getParameter("Action");
         String name =  request.getParameter("Name");
         String value =  request.getParameter("Value");
+        String age =  request.getParameter("MaxAge");
 
         String nextUrl = request.getRequestURI()+"?R="+redirectCount++;
         if (action.equals("New Session"))
@@ -65,8 +66,19 @@ public class SessionDump extends HttpServlet
         {
             if (action.equals("Invalidate"))
                 session.invalidate();
-            else if (action.equals("Add"))
+            else if (action.equals("Set"))
+            {   
                 session.setAttribute(name,value);
+                try
+                {
+                    int m = Integer.parseInt(age);
+                    session.setMaxInactiveInterval(m);
+                }
+                catch(Exception e)
+                {
+                    Code.ignore(e);
+                }
+            }
             else if (action.equals("Remove"))
                 session.removeAttribute(name);
         }
@@ -122,8 +134,9 @@ public class SessionDump extends HttpServlet
                 
                 tf.addTextField("Name","Property Name",20,"name");
                 tf.addTextField("Value","Property Value",20,"value");
+                tf.addTextField("MaxAge","MaxAge(s)",5,"");
                 tf.addButtonArea();
-                tf.addButton("Action","Add");
+                tf.addButton("Action","Set");
                 tf.addButton("Action","Remove");
                 tf.addButton("Action","Invalidate");
 

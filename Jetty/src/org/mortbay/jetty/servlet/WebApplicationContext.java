@@ -918,7 +918,7 @@ public class WebApplicationContext extends ServletHttpContext
         if(tNode!=null)
         {
             int timeout = Integer.parseInt(tNode.toString(false,true));
-            _servletHandler.setSessionTimeout(timeout);
+            _servletHandler.setSessionInactiveInterval(timeout*60);
         }
     }
     

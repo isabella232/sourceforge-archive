@@ -25,11 +25,18 @@ import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionContext;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
+import org.mortbay.util.Log;
 import org.mortbay.util.Code;
+import org.mortbay.util.LazyList;
 
 
-
-
+/* ------------------------------------------------------------ */
+/** An in-memory implementation of SessionManager
+ * <p>
+ *
+ * @version $Id$
+ * @author Greg Wilkins (gregw)
+ */
 public class HashSessionManager implements SessionManager
 {
     /* ------------------------------------------------------------ */
@@ -42,7 +49,7 @@ public class HashSessionManager implements SessionManager
     private int _dftMaxIdleSecs = -1;
     private SessionScavenger _scavenger = null;
     private Map _sessions;
-    private int _scavengeDelay = 30000;
+    private int _scavengePeriodMs = 30000;
     private ServletHandler _handler;
 
     private ArrayList _sessionListeners=new ArrayList();
@@ -79,24 +86,45 @@ public class HashSessionManager implements SessionManager
         return session;
     }
 
-    /* -------------------------------------------------------------- */
-    /** Set the default session timeout.
-     *  @param  default The timeout in minutes
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param seconds 
      */
-    public synchronized void setSessionTimeout(int timeoutMinutes)
+    public synchronized void setMaxInactiveInterval(int seconds)
     {
-        _dftMaxIdleSecs = timeoutMinutes*60;;
-
-        // Adjust scavange delay to 25% of timeout
-        _scavengeDelay=_dftMaxIdleSecs*250;
-        if (_scavengeDelay>60000)
-            _scavengeDelay=60000;
+        _dftMaxIdleSecs = seconds;
+        if (_dftMaxIdleSecs>0 && _scavengePeriodMs>_dftMaxIdleSecs*100)
+            setScavangePeriod((_dftMaxIdleSecs+9)/10);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param seconds 
+     */
+    public synchronized void setScavangePeriod(int seconds)
+    {
+        if (seconds==0)
+            seconds=60;
+        
+        int old_period=_scavengePeriodMs;
+        int period = seconds*1000;
+        if (period>60000)
+            period=60000;
+        if (period<1000)
+            period=1000;
         
         // Start the session scavenger if we haven't already
-        if (_scavenger == null && _scavengeDelay>0)
+        if (_scavenger == null && period>0)
             _scavenger = new SessionScavenger();
+        
+        if (period!=old_period)
+        {
+            _scavengePeriodMs=period;
+            _scavenger.interrupt();
+        }
     }
-
+    
+    
     /* ------------------------------------------------------------ */
     public void addEventListener(EventListener listener)
         throws IllegalArgumentException
@@ -174,7 +202,7 @@ public class HashSessionManager implements SessionManager
 
         // Since Hashtable enumeration is not safe over deletes,
         // we build a list of stale sessions, then go back and invalidate them
-        ArrayList staleSessions = null;
+        LazyList stale=null;
 
         // For each session
         try
@@ -185,9 +213,7 @@ public class HashSessionManager implements SessionManager
                 long idleTime = session._maxIdleMs;
                 if (idleTime > 0 && session._accessed + idleTime < now) {
                     // Found a stale session, add it to the list
-                    if (staleSessions == null)
-                        staleSessions = new ArrayList(5);
-                    staleSessions.add(session);
+                    stale=LazyList.add(stale,session);
                 }
             }
         }
@@ -203,7 +229,7 @@ public class HashSessionManager implements SessionManager
             {
                 synchronized(this)
                 {
-                    staleSessions=null;
+                    stale=null;
                     scavenge();
                 }
             }
@@ -211,11 +237,9 @@ public class HashSessionManager implements SessionManager
         }
 
         // Remove the stale sessions
-        if (staleSessions != null)
+        for (int i = LazyList.size(stale); i-->0;)
         {
-            for (int i = staleSessions.size() - 1; i >= 0; --i) {
-                ((Session)staleSessions.get(i)).invalidate();
-            }
+            ((Session)LazyList.get(stale,i)).invalidate();
         }
     }
     
@@ -226,19 +250,34 @@ public class HashSessionManager implements SessionManager
     /** SessionScavenger is a background thread that kills off old sessions */
     class SessionScavenger extends Thread
     {
-        public void run() {
-            while (isStarted())
-            {
-                try {
-                    sleep(_scavengeDelay);
-                    HashSessionManager.this.scavenge();
+        public void run()
+        {
+            int period=-1;
+            try{
+                while (isStarted())
+                {
+                    try {
+                        if (period!=_scavengePeriodMs)
+                        {
+                            Log.event("Session scavenger period = "+_scavengePeriodMs/1000+"s");
+                            period=_scavengePeriodMs;
+                        }
+                        sleep(period>1000?period:1000);
+                        HashSessionManager.this.scavenge();
+                    }
+                    catch (InterruptedException ex){continue;}
+                    catch (Error e) {Code.warning(e);}
+                    catch (Exception e) {Code.warning(e);}
                 }
-                catch (InterruptedException ex) { break; }
-                catch (Exception ex) {Code.warning(ex);}
+            }
+            finally
+            {
+                HashSessionManager.this._scavenger=null;
             }
         }
 
-        SessionScavenger() {
+        SessionScavenger()
+        {
             super("SessionScavenger");
             setDaemon(true);
             this.start();
@@ -257,7 +296,7 @@ public class HashSessionManager implements SessionManager
         boolean _newSession=true;
         long _created=System.currentTimeMillis();
         long _accessed=_created;
-        long _maxIdleMs = -1;
+        long _maxIdleMs = _dftMaxIdleSecs*1000;
         String _id;
         HttpSessionEvent _event;
 
@@ -351,18 +390,8 @@ public class HashSessionManager implements SessionManager
         public void setMaxInactiveInterval(int secs)
         {
             _maxIdleMs = (long)secs * 1000;
-
-            if (_maxIdleMs>0 && _maxIdleMs/4<_scavengeDelay)
-            {
-                synchronized(HashSessionManager.this)
-                {
-                    // Adjust scavange delay to 10% of timeout
-                    _scavengeDelay=_dftMaxIdleSecs*100;
-                    if (_scavengeDelay>60000)
-                        _scavengeDelay=60000;
-                    _scavenger.interrupt();
-                }
-            }
+            if (_maxIdleMs>0 && (_maxIdleMs/10)<_scavengePeriodMs)
+                HashSessionManager.this.setScavangePeriod((secs+9)/10);
         }
 
         /* ------------------------------------------------------------- */

@@ -1147,11 +1147,9 @@ public class HttpFields
         synchronized(buf)
         {
             buf.append(name);
+            buf.append('=');
             if (value!=null && value.length()>0)
-            {
-                buf.append('=');
                 buf.append(UrlEncoded.encodeString(value));
-            }
             
             if (version>0)
             {
