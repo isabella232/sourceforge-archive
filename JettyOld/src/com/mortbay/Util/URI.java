@@ -167,7 +167,7 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
-    /** Clear the URI paramters
+    /** Clear the URI parameters
      */
     public void clearParameters()
     {
@@ -176,8 +176,8 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
-    /** Add encoded paramters
-     * @param encoded A HTTP encoded string of paramters: eg. "a=1&b=2"
+    /** Add encoded parameters
+     * @param encoded A HTTP encoded string of parameters: e.g.. "a=1&b=2"
      */
     public void put(String encoded)
     {
@@ -215,7 +215,7 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
-    /** Add dictionay to the uri query parameters
+    /** Add dictionary to the uri query parameters
      */
     public void put(Dictionary values)
     {

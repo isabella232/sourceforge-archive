@@ -60,7 +60,7 @@ public class Image extends Tag
     /** Set the image size from the header of a GIF file
      * @param dirname The directory name, expected to be in OS format
      * @param pathname The image path name relative to the directory.
-     *                 Expected to be in WWW format (ie with slashes)
+     *                 Expected to be in WWW format (i.e. with slashes)
      *                 and will be converted to OS format.
      */
     public Image setSizeFromGif(String dirname,

@@ -70,7 +70,7 @@ class CmdReply
         codeNeedAccount                   = "332", 
         codeRequestedFileActionPending    = "350", 
         codeServiceNotAvailable           = "421", 
-        codeDataConnectinProblem          = "425", 
+        codeDataConnectionProblem         = "425", 
         codeTransferAborted               = "426", 
         codeFileUnavailableTransient      = "450", 
         codeLocalError                    = "451", 
@@ -182,34 +182,34 @@ class CmdReply
 
 	reply.code="100";
 	t.check(reply.preliminary(),"100 preliminary");
-	t.check(reply.positive(),"100 postive");
+	t.check(reply.positive(),"100 positive");
 	t.check(!reply.transferComplete(),"100 not complete");
 	t.check(reply.isType(CmdReply.d1Syntax),"100 is Syntax");
 
 	reply.code="210";
 	t.check(!reply.preliminary(),"210 not preliminary");
-	t.check(reply.positive(),"210 postive");
+	t.check(reply.positive(),"210 positive");
 	t.check(reply.transferComplete(),"210 complete");
 	t.check(reply.isType(CmdReply.d1Information),"210 is Information");
 	t.check(!reply.isType(CmdReply.d1Syntax),"210 is notSyntax");
 
 	reply.code="320";
 	t.check(!reply.preliminary(),"320 not preliminary");
-	t.check(reply.positive(),"320 postive");
+	t.check(reply.positive(),"320 positive");
 	t.check(!reply.transferComplete(),"320 not complete");
 	t.check(reply.isType(CmdReply.d1Connections),"320 is Connections");
 	t.check(!reply.isType(CmdReply.d1Syntax),"320 is notSyntax");
 
 	reply.code="430";
 	t.check(!reply.preliminary(),"430 not preliminary");
-	t.check(!reply.positive(),"430 not postive");
+	t.check(!reply.positive(),"430 not positive");
 	t.check(!reply.transferComplete(),"430 not complete");
 	t.check(reply.isType(CmdReply.d1Authentication),"430 is Authentication");
 	t.check(!reply.isType(CmdReply.d1Syntax),"430 is notSyntax");
 
 	reply.code="540";
 	t.check(!reply.preliminary(),"540 not preliminary");
-	t.check(!reply.positive(),"540 not postive");
+	t.check(!reply.positive(),"540 not positive");
 	t.check(reply.transferComplete(),"540 complete");
 	t.check(reply.isType(CmdReply.d1Unspecified),"540 is Unspecified");
 	t.check(!reply.isType(CmdReply.d1Syntax),"540 is notSyntax");

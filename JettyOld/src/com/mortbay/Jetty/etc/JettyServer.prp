@@ -50,7 +50,7 @@
 #              | 'err' for standard error
 #
 # ------------------------------------------------------------------------
-# Declare a authenticaton realm 
+# Declare a authentication realm 
 #   <server>.<stack>.Auth.<path>: <realmname>=<realmfile>
 # where
 #   <realmname> - Name of the realm

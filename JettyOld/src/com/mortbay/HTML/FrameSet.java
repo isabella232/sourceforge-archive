@@ -34,7 +34,7 @@ public class FrameSet extends Page
     Hashtable frameMap=null;
     
     /* ------------------------------------------------------------ */
-    /** FrameSet contructor
+    /** FrameSet constructor
      * @param colSpec Comma separated list of column widths specified
      *                as pixels, percentage or '*' for variable
      */

@@ -29,13 +29,13 @@ import java.lang.reflect.Array;
  * called again to call out to another function on a lower level object.
  *
  * There is no requirement for the ServletDispatch method to dispatch to a
- * Servlet Object - It can dispatch calls to any Object (althoug one
+ * Servlet Object - It can dispatch calls to any Object (although one
  * implementing ServletDispatchHandler is often best...).
  *
  * The matching method has its signature checked before it is called. The
  * parameters the method takes are checked and the following objects may be
  * taken as parameters: The HttpServletRequest, the HttpServletResponse, The
- * ServletDispath object itself and the context argument passed to the
+ * ServletDispatch object itself and the context argument passed to the
  * dispatch call. These arguments can be accepted in any order. In addition,
  * other parameters can be accepted by the method under certain conditions
  * (see below).

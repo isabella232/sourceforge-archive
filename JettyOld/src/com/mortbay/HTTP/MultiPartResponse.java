@@ -62,7 +62,7 @@ public class MultiPartResponse
     public Writer out = null; 
 
     /* ------------------------------------------------------------ */
-    /** MultiPartResponse contructor
+    /** MultiPartResponse constructor
      * @param response The ServletResponse to which this multipart
      *                 response will be sent.
      */
@@ -74,7 +74,7 @@ public class MultiPartResponse
     }
 
     /* ------------------------------------------------------------ */
-    /** MultiPartResponse contructor
+    /** MultiPartResponse constructor
      * @param response The ServletResponse to which this multipart
      *                 response will be sent.
      */

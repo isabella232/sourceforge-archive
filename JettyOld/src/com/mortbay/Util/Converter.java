@@ -11,7 +11,7 @@ import com.mortbay.Base.Code;
 public interface Converter
 {
     /* ------------------------------------------------------------ */
-    /** Try ande convert a value.
+    /** Try to convert a value.
      * A good check for implementors of this class as a first line is:
      * <pre>
      * if (toConvert.getClass().equals(convertTo)) return toConvert;

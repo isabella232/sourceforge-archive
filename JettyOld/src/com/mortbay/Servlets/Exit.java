@@ -24,7 +24,7 @@ public class Exit extends HttpServlet
     {
 	Code.warning("Exit requested");
 	// XXX - Need to move this servlet to Jetty package to avoid the
-	// cyclic dependancy between packages.
+	// cyclic dependency between packages.
 	com.mortbay.Jetty.Server.shutdown();
     }    
 }

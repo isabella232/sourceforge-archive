@@ -21,7 +21,7 @@ import java.util.*;
 /* ------------------------------------------------------------ */
 /** Basic WWW server configuration.
  * A simple configuration of Jetty for servlet and file serving,
- * which may be driven programatically of from a properties file.
+ * which may be driven from the program or from a properties file.
  * <p>
  *
  * <p><h4>Notes</h4>
@@ -374,7 +374,7 @@ public class Server21 extends BaseConfiguration
     
 
     /* ------------------------------------------------------------ */
-    /** Build a hashtable of Server configurations from a
+    /** Build a Hashtable of Server configurations from a
      * server properties instance
      * @param props The server properties
      * @return Map of server name to server instances.

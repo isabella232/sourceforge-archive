@@ -21,12 +21,13 @@ import java.io.*;
 public class EmbedUrl extends  Element
 {
     /* ----------------------------------------------------------------- */
-    public URL url = null;
-    public InetAddrPort proxy = null;
-    public String replyLine =null;
-    public HttpHeader replyHeader =null;
-    public HttpInputStream replyStream = null;
-
+    private URL url = null;
+    private InetAddrPort proxy = null;
+    private Socket socket=null;
+    HttpRequest request=null;
+    HttpHeader replyHeader=null;
+    HttpInputStream replyStream=null;
+    
     /* ----------------------------------------------------------------- */
     public EmbedUrl(URL url)
     {
@@ -42,62 +43,95 @@ public class EmbedUrl extends  Element
     }
 
     /* ----------------------------------------------------------------- */
-    public HttpHeader readReplyHeader()
+    private void skipHeader()
 	 throws IOException
     {
-	if (replyHeader==null)
-	{
-	    Code.debug("Forward to "+url);
-	    Socket socket=null;	
-	    HttpRequest request=null;
+	Code.debug("Embed "+url);
+	Socket socket=null;	
+	HttpRequest request=null;
 	
-	    if (proxy==null)
-	    {
-		int port = url.getPort();
-		if (port==-1)
-		    port=80;
-		socket= new Socket(url.getHost(),port);
-		request=new HttpRequest(HttpRequest.GET,
-					url.getFile());
-	    }
-	    else
-	    {
-		socket= new Socket(proxy.getInetAddress(),
-				   proxy.getPort());
-		request=new HttpRequest(HttpRequest.GET,
-					url.toString());
-	    }
-
-	    request.write(socket.getOutputStream());   
-	    Code.debug("waiting for forward reply...");
-
-	    replyHeader = new HttpHeader();
-	    replyStream = new HttpInputStream(socket.getInputStream());
-	    replyLine=replyStream.readLine();
-	    Code.debug("got "+replyLine);
-	    replyHeader.read(replyStream);
+	if (proxy==null)
+	{
+	    int port = url.getPort();
+	    if (port==-1)
+		port=80;
+	    socket= new Socket(url.getHost(),port);
 	}
-	return replyHeader;
+	else
+	{
+	    socket= new Socket(proxy.getInetAddress(),
+			       proxy.getPort());
+	}
+	
+	request=new HttpRequest(null,HttpRequest.GET,url.getFile());
+	
+	request.write(socket.getOutputStream());   
+	Code.debug("waiting for forward reply...");
+	
+	replyHeader = new HttpHeader();
+	replyStream = new HttpInputStream(socket.getInputStream());
+	String replyLine=replyStream.readLine();
+	Code.debug("got "+replyLine);
+	replyHeader.read(replyStream);
     }
 
     /* ----------------------------------------------------------------- */
     public void write(OutputStream out)
 	 throws IOException
     {
-	readReplyHeader();
-	IO.copy(replyStream,out);
-	out.flush();
+	try
+	{
+	    skipHeader();
+	    IO.copy(replyStream,out);
+	    out.flush();
+	}
+	finally
+	{
+	    if (socket!=null)
+		socket.close();
+	    if (replyStream!=null)
+		replyStream.close();
+	    if (replyHeader!=null)
+		replyHeader.destroy();
+	    if (request!=null)
+		request.destroy();
+	    
+	    socket=null;
+	    replyStream=null;
+	    replyHeader=null;
+	    request=null;
+	}
     }
     
     /* ----------------------------------------------------------------- */
     public void write(Writer out)
 	 throws IOException
     {
-	readReplyHeader();
-	IO.copy(new InputStreamReader(replyStream),out);
-	out.flush();
+	try
+	{
+	    skipHeader();
+	    IO.copy(new InputStreamReader(replyStream),out);
+	    out.flush();
+	}
+	finally
+	{
+	    if (socket!=null)
+		socket.close();
+	    if (replyStream!=null)
+		replyStream.close();
+	    if (replyHeader!=null)
+		replyHeader.destroy();
+	    if (request!=null)
+		request.destroy();
+	    
+	    socket=null;
+	    replyStream=null;
+	    replyHeader=null;
+	    request=null;
+	}
     }
 }
+
 
 
 

@@ -42,7 +42,7 @@ public class NotFoundHandler extends NullHandler
     
     /* ------------------------------------------------------------ */
     /** Configure from properties.
-     * No configuration paramters for this handler
+     * No configuration parameters for this handler
      * @param properties configuration.
      */
     public void setProperties(Properties properties)

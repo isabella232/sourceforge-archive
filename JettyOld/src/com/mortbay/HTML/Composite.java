@@ -13,9 +13,9 @@ import java.util.*;
  * <p>This class is can be used a either an abstract or concrete
  * holder of other HTML elements.
  * Used directly, it allow multiple HTML Elements to be added which
- * are produced sequenctially.
+ * are produced sequentially.
  * Derived used of Composite may wrap each contain Element in
- * special purpose HTML tags (eg list).
+ * special purpose HTML tags (e.g. list).
  *
  * <p>Notes<br>
  * Elements are added to the Composite either as HTML Elements or as

@@ -12,8 +12,8 @@ import java.lang.reflect.*;
 /* ------------------------------------------------------------ */
 /** Data class Helper
  * <p>
- * This class provides static utlility routines that assist
- * with the creation and output of hierarcies of agregated
+ * This class provides static utility routines that assist
+ * with the creation and output of hierarchies of aggregated
  * classes that contain public data members (what used to be
  * called structures :-).
  *
@@ -62,11 +62,11 @@ public class DataClass
 	    try{
 		instance = instance_class.newInstance();
 	    }
-	    catch (NoSuchMethodError nsm){
-		// Code.ignore(nsm);
+	    catch (NoSuchMethodError nsme){
+		// Code.ignore(nsme);
 	    }
-	    catch (InstantiationException ie){
-		// Code.ignore(nsm);
+	    catch (InstantiationException e){
+		// Code.ignore(e);
 	    }
 	    catch (IllegalAccessException iae){
 		// Code.ignore(iae);
@@ -105,7 +105,7 @@ public class DataClass
 		Class field_type = fields[f].getType();
 	    
 		
-		// if the field is primative, leave it as is.
+		// if the field is primitive, leave it as is.
 		if (field_type.isPrimitive())
 		    continue;
 		
@@ -176,7 +176,7 @@ public class DataClass
 	    }
 	    else 
 	    {
-		// look for at least one fields public datamembers
+		// look for at least one fields public data members
 		Field[] subFields = field_type.getFields();
 		int sf=0;
 		for (sf=0; sf<subFields.length ; sf++)

@@ -184,7 +184,7 @@ public class Ftp
    
    
     /* ------------------------------------------------------------ */
-    /** Set the connetion data type.
+    /** Set the connection data type.
      * The data type is not interpreted by the FTP client.
      * @param type One of Ftp.ASCII, Ftp.EBCDIC or Ftp.IMAGE
      * @exception FtpException For local problems or negative server responses
@@ -200,7 +200,7 @@ public class Ftp
     }
    
     /* ------------------------------------------------------------ */
-    /** Set the connetion data type.
+    /** Set the connection data type.
      * The data type is not interpreted by the FTP client.
      * @param type One of Ftp.ASCII or Ftp.EBCDIC
      * @param param One of Ftp.NON_PRINT, Ftp.TELNET or Ftp.CARRIAGE_CONTROL
@@ -217,7 +217,7 @@ public class Ftp
     }
    
     /* ------------------------------------------------------------ */
-    /** Set the connetion data type to Local.
+    /** Set the connection data type to Local.
      * The data type is not interpreted by the FTP client.
      * @param length Length of word.
      * @exception FtpException For local problems or negative server responses
@@ -260,7 +260,7 @@ public class Ftp
     /* -------------------------------------------------------------------- */
     /** Wait until Transfer is complete.
      * Used to synchronous with an asynchronous transfer.  If any exceptions
-     * occured during the tranfer, the first exception will be thrown by
+     * occurred during the transfer, the first exception will be thrown by
      * this method.  Multiple threads can wait on the one transfer and all
      * will be given a reference to any exceptions.
      * @exception FtpException For local problems or negative server responses
@@ -310,9 +310,9 @@ public class Ftp
     }
 
     /* -------------------------------------------------------------------- */
-    /** Transfer completetion notification.
-     * This protected member can be overiden in a derived class as an
-     * alternate notifcation mechanism for transfer completeion.
+    /** Transfer completion notification.
+     * This protected member can be overridden in a derived class as an
+     * alternate notification mechanism for transfer completion.
      * Default implementation does nothing.
      */
     protected void transferCompleteNotification()
@@ -470,7 +470,7 @@ public class Ftp
 	cmd(portCommand);
 	in.waitForCompleteOK();
 
-	    // Setup the dest server to stor the file
+	    // Setup the dest server to store the file
 	destFtp.cmd("STOR "+destName);
 	    
 	    // start the send

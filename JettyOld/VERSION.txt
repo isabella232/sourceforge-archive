@@ -1,6 +1,20 @@
+Release 2.3.Beta3 - 20 June 1999
+  + Added file cache to FileHandler
+  + Implemented effecient version of 
+    ServletContext.getResourceAsStream() that does not open a 
+    new socket connection (as does getResource()).
+  + LookAndFeelServlet uses getResourceAsStream to get the file
+    to wrap. This allows it to benefit from any caching done and
+    to wrap arbitrary content (not just files).
+  + Fixed file and socket leaks in Include and Embed tags.
+  + Ran dos2unix on all text files
+  + Applied contributed patch of spelling and typo corrections
+  + Added alternate constructors to HTML.Include for InputStream.
+  + Server.shutdown() clears configuration so that server may 
+    be restarted in same virtual machine.
 
 Release 2.2.Beta2 - 12 June 1999
-  + Added all write mehtods to HttpOutputStream$SwitchOutputStream
+  + Added all write methods to HttpOutputStream$SwitchOutputStream
   + Added com.mortbay.Jetty.Server.shutdown() for gentler shutdown
     of server. Called from Exit servlet
   + HttpRequest.getParameterNames() no longer alters the order
@@ -13,7 +27,7 @@ Release 2.2.Beta1 - 7 June 1999
   + Defined abstract ServletLoader, derivations of which can be 
     specified in HttpConfiguration properties. 
   + Implemented all HttpServer attribute methods by mapping to the
-    HttpConfiguration properties.  Dynamic reconfiguratin is NOT
+    HttpConfiguration properties.  Dynamic reconfiguration is NOT
     supported by these methods (but we are thinking about it).
   + Close files after use to avoid "file leak" under heavy load.
   + Fixed missing copyright messages from some contributions
@@ -32,9 +46,9 @@ Release 2.2.Beta1 - 7 June 1999
 
 Release 2.2.Beta0 - 31 May 1999
   + Servlet loader handles jar files with different files separator.
-  + ThreadedServer gently shutsdown.
+  + ThreadedServer gently shuts down.
   + Handle malformed % characters in URLs.
-  + Included and improved version of Threadpool for significant 
+  + Included and improved version of ThreadPool for significant 
     performance improvement under high load.
   + HttpRequest.getCookies returns empty array rather than null for no
     cookies.
@@ -64,7 +78,7 @@ Release 2.2.Alpha0 - 6 May 1999
   + New Server class using PropertyTree for configuration
   + HttpHandlers given setProperties method to configure via Properties.
   + HttpListener class can be configured
-  + Mime suffic mapping can be configured.
+  + Mime suffix mapping can be configured.
   + Removed historic API from sessions
   + Improved SessionDump servlet
   + Fixed date overflow in Cookies
@@ -74,7 +88,7 @@ Release 2.2.Alpha0 - 6 May 1999
   + Added reload method to ServletHolder, but no way to call it yet.
   + Changed options for FileServer
   + Implemented ServletServer
-  + Removed SimpleServleServer
+  + Removed SimpleServletServer
 
 Release 2.1.7 - 22 April 1999
   + Fixed showstopper bug with getReader and getWriter in
@@ -85,7 +99,7 @@ Release 2.1.6 - 21 April 1999
   + Reduced initial size of most hashtables to reduce
     default memory overheads.
   + Throw IllegalStateException as required from gets of 
-    input/output/reader/witer in requests/responses.
+    input/output/reader/writer in requests/responses.
   + New simpler version of PropertyTree
   + Updated PropertyTreeEditor
   + Return EOF from HttpInputStream that has a content length.
@@ -111,7 +125,7 @@ Release 2.1.5 - 15 April 1999
 
 Release 2.1.4 - 26 March 1999
   + Fixed problem compiling PathMap under some JDKs.
-  + Reduced HTML dependance in HTTP package to allow minimal configuration
+  + Reduced HTML dependence in HTTP package to allow minimal configuration
   + Tightened license agreement so that binary distributions are required
     to include the license file.
   + HttpRequest attributes implemented.
@@ -156,7 +170,7 @@ Release 2.1.B1 - 13 February 1999
   + Added video/quicktime to default MIME types.
   + Fixed bug with MultipartRequest.
   + Updated DefaultExceptionHandler.
-  + Updated InetAddrport.
+  + Updated InetAddrPort.
   + Updated URI.
   + Implemented Handler translations and getRealPath.
   + Improved handling of File.separator in FileHandler.
@@ -167,7 +181,7 @@ Release 2.1.B1 - 13 February 1999
 
 Release 2.1.B0 - 30 January 1999
   + Uses JSDK2.1 API, but not all methods implemented.
-  + Added support for PUT, MOVE, DELETE in filehandler
+  + Added support for PUT, MOVE, DELETE in FileHandler
   + FileHandler now sets content length.
   + Added plug gateway classes com.mortbay.Util.Gateway
   + Fixed command line bug with SimpleServletConfig
@@ -192,7 +206,7 @@ Release 2.0.3 - 13 November 1998
   + Fix bug with index files for Jetty.Server. Previously servers
     configured with com.mortbay.Jetty.Server would not handle
     index.html files.  Need to make this configurable in the prp file.
-  + Fixed errors in REAME file: com.mortbay.Jetty.Server was called
+  + Fixed errors in README file: com.mortbay.Jetty.Server was called
     com.mortbay.HTTP.Server
 
 Release 2.0.2 - 1 November 1998
@@ -207,7 +221,7 @@ Release 2.0.1 - 27 October 1998
 
 Release 2.0.0 - 25 October 1998
   + Removed exceptional case from FileHandler redirect.
-  + Removed Chat demo (too many netscape dependancies).
+  + Removed Chat demo (too many netscape dependencies).
   + Fixed Code.formatObject handling of null objects.
   + Added multipart/form-data demo.
 
@@ -222,7 +236,7 @@ Release 2.0.Beta3 - 29 Sep 1998
 
 Release 2.0Beta2 - July 1998
   + Fixed Log Handler for HTTP/1.1
-  + Slight improvement in READMEs
+  + Slight improvement in READMEEs
 
 Release 2.0Beta1 - June 1998
   + Improved performance of Code.debug() calls, significantly
@@ -238,7 +252,7 @@ Release 2.0Beta1 - June 1998
 Release 2.0Alpha2 - May 1998
   + JDK1.2 javax.servlet API
   + Added date format to Log
-  + Added timezome to Log
+  + Added timezone to Log
   + Handle params in getIntHeader and getDateHeader
   + Removed HttpRequest.getByteContent
   + Use javax.servlet.http.HttpUtils.parsePostData
@@ -278,7 +292,7 @@ Release 1.3.4 - Sun 15 Mar 1998
   + ServletHandler now takes an optional file base directory
     name which is used to set the translated path for pathInfo in
     servlet requests.
-  + Dump servlet enhanced to excercise these changes.
+  + Dump servlet enhanced to exercise these changes.
 
 Release 1.3.3
   + Fixed TableForm.addButtonArea bug.
@@ -292,8 +306,8 @@ Release 1.3.2
 Release 1.3.1
   + Minor fixes in SmtpMail
   + ForwardHandler only forwards as http/1.0 (from Tobias.Miller)
-  + Impoved parsing of stack traces
-  + Better handling of InvoicationTargetException in debug
+  + Improved parsing of stack traces
+  + Better handling of InvocationTargetException in debug
   + Minor release adjustments for Tracker
 
 Release 1.3.0

@@ -88,7 +88,7 @@ public class Select extends Block
     /* ----------------------------------------------------------------- */
     /** Add an option
      * @param o The name of the option (displayed in the form)
-     * @param selected Whether the optoin is selected
+     * @param selected Whether the option is selected
      * @param value The value of this option (returned in the form content)
      */
     public Select add(Object o, boolean selected, String value)

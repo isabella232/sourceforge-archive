@@ -127,7 +127,13 @@ public class Server extends BaseConfiguration
     {
         Enumeration e = serverMap.elements();
         while (e.hasMoreElements())
-	    ((Server)e.nextElement()).stop();   
+	    ((Server)e.nextElement()).stop(); 
+
+	//  P.Mclachlan <pdm@acm.org> (Sat Jun 19, 1999)
+	//    Restore the static variables to their initial
+	//    state, ready if we are run again.
+	serverMap.clear();
+	//  end P.Mclachlan
     }
     
     /* ------------------------------------------------------------ */
@@ -140,7 +146,7 @@ public class Server extends BaseConfiguration
     }
 
     /* ------------------------------------------------------------ */
-    /** Build a hashtable of Server configurations from a
+    /** Build a Hashtable of Server configurations from a
      * server properties instance
      * @param props The server properties
      * @return Map of server name to server instances.
@@ -203,11 +209,11 @@ public class Server extends BaseConfiguration
 			HttpHandler handlerInstance=null;
 			try
 			{
-			    Constructor handlerContructor =
+			    Constructor handlerConstructor =
 				handlerClass.getConstructor(propertyArg);
 			    Object[] arg={handlerProperties};
 			    handlerInstance = (com.mortbay.HTTP.HttpHandler)
-				handlerContructor.newInstance(arg);
+				handlerConstructor.newInstance(arg);
 			}
 			catch(NoSuchMethodException nsme)
 			{
@@ -239,7 +245,7 @@ public class Server extends BaseConfiguration
     }
 
     /* ------------------------------------------------------------ */
-    /** Exract property sub tree.
+    /** Extract property sub tree.
      * Extract sub tree from file name PROPERTIES key merged with property
      * tree below PROPERTY key.
      * @param props PropertyTree 

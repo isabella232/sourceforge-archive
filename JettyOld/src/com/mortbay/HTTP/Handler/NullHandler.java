@@ -15,7 +15,7 @@ import java.io.*;
 
 /* --------------------------------------------------------------------- */
 /** Null HttpHandler
- * Conveniance base class with null handlers for all methods
+ * Convenience base class with null handlers for all methods
  *
  * @see Interface.HttpHandler
  * @version $Id$
@@ -64,7 +64,7 @@ public class NullHandler implements HttpHandler
     }
 
     /* ------------------------------------------------------------ */
-    /** Exract property sub tree.
+    /** Extract property sub tree.
      * Extract sub tree from file name PROPERTIES key merged with property
      * tree below PROPERTY key.
      * @param props PropertyTree

@@ -30,7 +30,7 @@ public class DemoIndex extends IndexServlet
 	section.put(Page.Section,"Home");
 	section.put("Text",
 		    "Jetty is an <A HREF=http://www.opensource.org>Open Source</A> HTTP/1.1 Server written in 100% "+
-		    "Java. It is designed to be embedable, extensible and "+
+		    "Java. It is designed to be embeddable, extensible and "+
 		    "flexible, thus making it an ideal platform for serving " +
 		    "dynamic HTTP requests from any Java application.  "+
 		    "Jetty supports the <A HREF=/javadoc/javax/servlet/overview-summary.html>javax.servlet&nbsp;API</A> defined "+

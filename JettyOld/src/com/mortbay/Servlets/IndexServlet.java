@@ -21,8 +21,8 @@ import java.util.*;
  *
  * <p><h4>Notes</h4>
  * <p> The config requires a global setting "HelpUri" for the help that is
- * given for each of the generated pages. This can be overriden in each pages
- * specifiec section.
+ * given for each of the generated pages. This can be overridden in each pages
+ * specific section.
  *
  * <p> The index is described in a nested Hashtable of the form:<PRE>
  * 

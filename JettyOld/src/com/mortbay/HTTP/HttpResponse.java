@@ -17,7 +17,7 @@ import java.net.URL;
 import java.net.MalformedURLException;
 
 /* ------------------------------------------------------------------ */
-/** Hnadling of a HTTP response
+/** Handling of a HTTP response
  * <p> Implements and extends the javax.servlet.http.HttpServletResponse
  * interface.
  * The extensions are for HttpHandler instances that need to modify
@@ -214,7 +214,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     }
     
     /* -------------------------------------------------------------- */
-    /** If the headers have not alrady been written, write them.
+    /** If the headers have not already been written, write them.
      * If any HttpFilters have been added activate them before writing.
      */
     public void writeHeaders() 
@@ -232,7 +232,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 
 	    
 	    // Tell anybody who wants to not headers are complete
-	    // (eg. to activate filters by content-type)
+	    // (e.g.. to activate filters by content-type)
 	    if (observable!=null)
 	    {
 		Code.debug("notify Observers");
@@ -251,7 +251,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 		{
 		    httpOut.setChunking(true);
 		}
-		// if we hve no content length then ...
+		// if we have no content length then ...
 		else if (length==null)
 		{
 		    // if not closing and chunk by default
@@ -541,7 +541,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     /* -------------------------------------------------------------- */
     public java.lang.String encodeRedirectURL(java.lang.String url)
     {
-	//XXX - Dont know what to do different here?
+	//XXX - Don't know what to do different here?
 	return encodeURL(url);
     }
     
@@ -551,10 +551,10 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      * character guards configured in SessionContext.
      * If '/' is in the URL, the encoded session is placed after the last
      * '/', otherwise is is placed at the start of the URL. This encoding
-     * should not disturb any browser interpretation of reletive paths,
+     * should not disturb any browser interpretation of relative paths,
      * file suffixes or URL references.
      * @param url The URL to encode
-     * @return Encoded URL or the origianl URL
+     * @return Encoded URL or the original URL
      */
     public java.lang.String encodeURL(java.lang.String url)
     {

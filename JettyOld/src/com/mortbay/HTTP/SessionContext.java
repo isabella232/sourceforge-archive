@@ -296,7 +296,7 @@ public class SessionContext extends Hashtable
     }
 
     // how often to check - XXX - make this configurable
-    final static int scavangeDelay = 30000;
+    final static int scavengeDelay = 30000;
     
     /* -------------------------------------------------------------- */
     /** SessionScavenger is a background thread that kills off old sessions */
@@ -305,7 +305,7 @@ public class SessionContext extends Hashtable
 	public void run() {
 	    while (true) {
 		try {
-		    sleep(scavangeDelay); 
+		    sleep(scavengeDelay); 
 		} catch (InterruptedException ex) {}
 		SessionContext.this.scavenge();
 	    }

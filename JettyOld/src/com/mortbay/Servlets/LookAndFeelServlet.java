@@ -15,22 +15,22 @@ import java.util.*;
 
 /* ---------------------------------------------------------------- */
 /** LookAndFeel Servlet
- * <p> The LookAndFeel Servlet serves file based pages as the body of html
+ * <p> The LookAndFeel Servlet serves resources as the body of html
  * pages which it wraps in a certain LookAndFeel. The LookAnd Feel it uses is
- * given in the "LookAndFeel" init parameter, but each individual request
+ * given in the "PageType" init parameter, but each individual request
  * must supply a "Heading" query parameter at the minimum. All other query
- * parameters given in the request are passed to the LookAndFeel as
- * LookAndFeel parameters.
+ * parameters given in the request are passed to the Page as
+ * Page parameters.
  *
- * <p> The LookAndFeel Servlet is thus good for using for fomatting help
+ * <p> The LookAndFeel Servlet is thus good for using for formatting help
  * pages in their proper LookAndFeel, since a particular instance of the
  * LookAndFeel Servlet can be configured with the correct LookAndFeel for the
  * referring pages and then the individual requests override parameters with
  * the settings from the referring page.
  *
  * <p><h4>Notes</h4>
- * <p> The page file is described in the request pathInfo, prefixed with a
- * path given in the "FileBase" init parameter. The page heading is in the
+ * <p> The resource is described in the request pathInfo, prefixed with a
+ * path given in the "ResourceBase" init parameter. The page heading is in the
  * "Heading" query parameter. 
  *
  * @version $Id$
@@ -47,9 +47,7 @@ public class LookAndFeelServlet extends HttpServlet
     {
 	super.init(config);
 	
-	fileBase = getInitParameter(Page.FileBase);
-	if (fileBase==null)
-	    fileBase = Page.FileBase;
+	fileBase = getInitParameter("ResourceBase");
 	pageType = getInitParameter(Page.PageType);
 	if (pageType ==null)
 	    pageType=Page.getDefaultPageType();
@@ -78,24 +76,15 @@ public class LookAndFeelServlet extends HttpServlet
 		    page.properties().put(key,request.getParameter(key));
 	    }
 
-
 	    try{
-		if (request.getPathInfo()==null)
-		{
-		    Code.debug("Include file:", fileBase,
-			       request.getServletPath());
-		    page.add(new Include(fileBase,
-					 request.getServletPath()));
-		}
-		else
-		{
-		    Code.debug("Include file:" , fileBase,
-			       request.getServletPath(),
-			       request.getPathInfo());
-		    page.add(new Include(fileBase,
-					 request.getServletPath()+
-					 request.getPathInfo()));
-		}
+		String resource =
+		    (fileBase==null?"":fileBase)+
+		    request.getServletPath()+
+		    (request.getPathInfo()==null?"":request.getPathInfo());
+		
+		Code.debug("Include resource:",resource);
+		page.add(new Include(getServletContext()
+				     .getResourceAsStream(resource)));
 	    }
 	    catch(FileNotFoundException ioe){
 		return;
@@ -115,6 +104,8 @@ public class LookAndFeelServlet extends HttpServlet
 	}
     }
 };
+
+
 
 
 

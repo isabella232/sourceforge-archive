@@ -21,7 +21,7 @@ public class Frame
     String border="";
     
     /* ------------------------------------------------------------ */
-    /** Frame contructor
+    /** Frame constructor
      */
     Frame(){}
     

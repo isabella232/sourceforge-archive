@@ -15,7 +15,7 @@ import java.lang.reflect.*;
  * It uses reflection to determine the validity of the method and class
  * it
  * <H3>Notes</H3>
- * Arguement types supported include:<UL>
+ * Argument types supported include:<UL>
  * <LI>Quoted strings
  * <LI>Instances of Double
  * <LI>Named objects that are looked up against the dictionary
@@ -45,12 +45,12 @@ public class MethodTag
     public Object[] tagArgs;
     
     /* ----------------------------------------------------------------- */
-    /** Contruct tag
-     * With a pathentic parser, with little error handling.
+    /** Construct tag
+     * With a pathetic parser, with little error handling.
      * @param tag String of the form "package.name.class.method(args,...)"
      *        Currently arguments can be named args (see below), longs,
      *        Strings or null.
-     * @param namedArgs Dictionary of named arguements. Arg names in the tag
+     * @param namedArgs Dictionary of named arguments. Arg names in the tag
      *        string are looked up in this Dictionary. Can be null.
      * @param request A HttpRequest.  If the named arguments are not
      *        found in namedArgs, the request parameters are tried.

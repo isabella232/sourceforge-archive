@@ -9,7 +9,7 @@ import java.util.*;
 
 /* -------------------------------------------------------------------- */
 /** A Text Area within a form
- * <p> The text in the textarea is handled by the super class, Text
+ * <p> The text in the TEXTAREA is handled by the super class, Text
  * @see com.mortbay.HTML.Text
  */
 public class TextArea extends Block

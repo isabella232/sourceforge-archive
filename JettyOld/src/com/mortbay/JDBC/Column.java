@@ -57,7 +57,7 @@ public class Column
     
 
     /* ------------------------------------------------------------ */
-    /** Column contructor
+    /** Column constructor
      * @param name The name of the column in the database.
      * @param label A long descriptive name of the column for humans
      * @param type The type of value the column can hold
@@ -75,7 +75,7 @@ public class Column
     }
 
     /* ------------------------------------------------------------ */
-    /** Column contructor for enumerated column
+    /** Column constructor for enumerated column
      * @param name The name of the column in the database.
      * @param label A long descriptive name of the column for humans
      * @param enum An array of string enum descriptors.

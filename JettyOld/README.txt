@@ -26,7 +26,7 @@ to the installed directory path (%JETTY_HOME% on dos/NT/windows).
 
 
 Make sure your CLASSPATH includes all the jar files in
-the $JETTY_HOME/lib directory  eg.
+the $JETTY_HOME/lib directory  e.g.
 
    Unix:
 	CLASSPATH=$CLASSPATH:$JETTY_HOME/lib/javax.servlet.jar
@@ -42,7 +42,7 @@ intended to be embedded in other applications, the primary
 configuration method is to provide an implementation of
 the interface com.mortbay.HTTP.HttpConfiguration.
 
-For conveniance, several implementations of HttpConfiguration
+For convenience, several implementations of HttpConfiguration
 are supplied with the release:
 
   com.mortbay.Jetty.Server
@@ -91,7 +91,7 @@ included with the release:
   JettyMinimalDemo.prp
     This configuration file has the same semantic content as the
     the collection of JettyDemo.prp files, but uses the wildcard
-    facilities of PropertyTree to abbriviate to a minimal file.
+    facilities of PropertyTree to abbreviate to a minimal file.
     [ Not included yet ]
 
   JettyFastDump.prp
@@ -159,7 +159,7 @@ configuration.  Help for this class can be obtained by running
     java com.mortbay.HTTP.Configure.ServletServer -help
 
 To run a servlet called mypackage.myservlet, change directories to 
-the directory that contains the class file hierarchy (ie the parent 
+the directory that contains the class file hierarchy (i.e. the parent 
 directory of mypackage/myservlet.class ). Run the server with:
 
     java com.mortbay.HTTP.Configure.ServletServer 8080 / .
@@ -173,9 +173,9 @@ If the servlet is in a jar file, run the server with
 
     java com.mortbay.HTTP.Configure.ServletServer 8080 / myclasses.jar
 
-The server can be run with a search path for directoris and jar
+The server can be run with a search path for directories and jar
 files from which servlets are loaded. Note that the path syntax
-is platform dependant and the unix for is used here:
+is platform dependent and the unix for is used here:
 
     java com.mortbay.HTTP.Configure.ServletServer 8080 / .:myclasses.jar
 
@@ -271,7 +271,7 @@ servlets and files.
 
 
 
-MISCILLANEOUS
+MISCELLANEOUS
 =============
 
 Servlet Loading
@@ -357,7 +357,7 @@ CONTACTS
 
 SUPPORT
 =======
-Mort Bay provides email support for Jetty. Infomal support is 
+Mort Bay provides email support for Jetty. Informal support is 
 provided on a best effort basis (the better the effort of the 
 reporter, the better the support...). 
 

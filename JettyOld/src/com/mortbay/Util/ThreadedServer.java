@@ -106,7 +106,7 @@ abstract public class ThreadedServer
      * @param address The address to listen on
      * @param minThreads Minimum number of handler threads.
      * @param maxThreads Maximum number of handler threads.
-     * @param maxIdleTime Idle time in Msecs before a handler thread dies.
+     * @param maxIdleTime Idle time in milliseconds before a handler thread dies.
      * @exception java.io.IOException Problem listening to the socket.
      */
     public ThreadedServer(InetAddrPort address,
@@ -140,7 +140,7 @@ abstract public class ThreadedServer
     
     /* ------------------------------------------------------------------- */
     /** Handle new connection
-     * This method should be overriden by the derived class to implement
+     * This method should be overridden by the derived class to implement
      * the required handling.  It is called by a thread created for it and
      * does not need to return until it has finished it's task
      */
@@ -151,7 +151,7 @@ abstract public class ThreadedServer
 
     /* ------------------------------------------------------------------- */
     /** Handle new connection
-     * If access is required to the actual socket, overide this method
+     * If access is required to the actual socket, override this method
      * instead of handleConnection(InputStream in,OutputStream out).
      * The default implementation of this just calls
      * handleConnection(InputStream in,OutputStream out).

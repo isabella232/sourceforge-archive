@@ -16,8 +16,8 @@ import java.io.*;
  * <p>
  * If the request is for a path with basic authentication, then the
  * request is examined for either existing authentication (in which case
- * the remoteUser is set and the request passed throug ) or a basic
- * authenication challenge is sent.
+ * the remoteUser is set and the request passed through ) or a basic
+ * authentication challenge is sent.
  * @see Interface.HttpHandler
  * @version $Id$
  * @author Greg Wilkins
@@ -100,7 +100,7 @@ public class BasicAuthHandler extends NullHandler
 	if (path != null)
 	{
 	    BasicAuthRealm realm = (BasicAuthRealm) realms.get(path);
-	    Code.debug("Authenicate in Realm "+realm.name());
+	    Code.debug("Authenticate in Realm "+realm.name());
 
 	    String credentials =
 		request.getHeader(HttpHeader.Authorization);

@@ -22,7 +22,7 @@ import java.lang.reflect.*;
  * A java method tag is a HTML comment of the form:<br>
  * &lt!=:packageName.className.methodName(arg1,arg2,...)&gt;<br>
  * The MethodTag class is used to create a method call to the
- * static method described.  Arguements that can be passed
+ * static method described.  Arguments that can be passed
  * include:
  * <li>Strings
  * <li>Double instances
@@ -259,31 +259,42 @@ public class HtmlFilter extends HttpFilter
 				String proxyUrlString)
 	 throws IOException
     {
-	EmbedUrl embed=null;
-
-	URL relUrl = new URL("http",
-			     request.getServerName(),
-			     request.getServerPort(),
-			     request.getRequestPath());
-	
-	URL url = new URL(relUrl,urlString);
-
-	if (proxyUrlString!=null && proxyUrlString.length()>0)
+	if (request.isLocalRequest())
 	{
-	    Code.debug("Proxy=",proxyUrlString);
-	    
-	    URL proxyUrl = new URL(proxyUrlString);
-	    InetAddrPort proxy = new InetAddrPort();
-	    proxy.setInetAddress(InetAddress.getByName(proxyUrl.getHost()));
-	    proxy.setPort(proxyUrl.getPort());
-
-	    embed = new EmbedUrl(url,proxy);
+	    HttpRequest eRequest=
+		new HttpRequest(request.getHttpServer(),
+				"GET",
+				urlString);
+	    IO.copy(eRequest.handleRequestLocally(),out);
+	    eRequest.destroy();
 	}
 	else
-	    embed = new EmbedUrl(url);
-
-	embed.write(out);
-    }    
+	{
+	    EmbedUrl embed=null;
+	    URL relUrl = new URL("http",
+				 request.getServerName(),
+				 request.getServerPort(),
+				 request.getRequestPath());
+	    
+	    URL url = new URL(relUrl,urlString);
+	    
+	    if (proxyUrlString!=null && proxyUrlString.length()>0)
+	    {
+		Code.debug("Proxy=",proxyUrlString);
+		
+		URL proxyUrl = new URL(proxyUrlString);
+		InetAddrPort proxy = new InetAddrPort();
+		proxy.setInetAddress(InetAddress.getByName(proxyUrl.getHost()));
+		proxy.setPort(proxyUrl.getPort());
+		
+		embed = new EmbedUrl(url,proxy);
+	    }
+	    else
+		embed = new EmbedUrl(url);
+	    
+	    embed.write(out);
+	}
+    }
 }
 
 

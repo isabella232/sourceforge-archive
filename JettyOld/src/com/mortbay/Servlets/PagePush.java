@@ -16,7 +16,7 @@ import java.io.PrintWriter;
 import java.util.Date;
 
 /** Class to handle pushing of new pages upon changes within the parameters
- * of a maximum and mimimum time period.
+ * of a maximum and minimum time period.
  * <p> The user can specify a minimum and/or maximum time for the makePage
  * method to be called within. Both can be -1, meaning that this is not
  * checked for. The user can call the <code>markChange</code> method to

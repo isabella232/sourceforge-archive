@@ -122,9 +122,9 @@ class TestServer extends Thread
 	    LineInput dataIn = new
 		LineInput(dataConnection.getInputStream());
 	    String input = dataIn.readLine();
-	    test.checkEquals(input,"How Now Brown Cow","recieved file");
+	    test.checkEquals(input,"How Now Brown Cow","received file");
 	    input = dataIn.readLine();
-	    test.checkEquals(input,null,"recieved EOF");
+	    test.checkEquals(input,null,"received EOF");
 
 	    out.write(CmdReply.codeClosingData+" File transfer complete\n");
 	    out.flush();

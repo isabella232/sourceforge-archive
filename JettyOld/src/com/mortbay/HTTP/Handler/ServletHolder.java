@@ -69,7 +69,7 @@ public class ServletHolder implements ServletConfig
      * file.
      * @param name Servlet name
      * @param className Servlet class name (fully qualified)
-     * @param initParams Hashtable of paramters
+     * @param initParams Hashtable of parameters
      */
     public ServletHolder(String name,
 			 String className,
@@ -87,7 +87,7 @@ public class ServletHolder implements ServletConfig
      * @param name Servlet name
      * @param className Servlet class name (fully qualified)
      * @param classPath Servlet class path of directories and jars
-     * @param initParams Hashtable of paramters
+     * @param initParams Hashtable of parameters
      */
     public ServletHolder(String servletLoaderName,
 			 String name,
@@ -148,9 +148,9 @@ public class ServletHolder implements ServletConfig
      * file.
      * @param name Servlet name
      * @param className Servlet class name (fully qualified)
-     * @param initParams Hashtable of paramters
+     * @param initParams Hashtable of parameters
      * @param initialize ignored
-     * @deprecated initilized not used anymore
+     * @deprecated initialize not used anymore
      */
     public ServletHolder(String name,
 			 String className,
@@ -228,7 +228,7 @@ public class ServletHolder implements ServletConfig
 		}
 		servlets=new Stack();
 		
-		// Setup new classloader
+		// Setup new class loader
 		String className=servletClass.getName();
 		
 		loader = newServletLoader();
@@ -278,7 +278,7 @@ public class ServletHolder implements ServletConfig
     /** Get the servlet.
      * The state of the servlet is unknown, specially if using
      * SingleThreadModel
-     * @return The servet
+     * @return The servlet
      */
     public GenericServlet getServlet()
 	throws UnavailableException

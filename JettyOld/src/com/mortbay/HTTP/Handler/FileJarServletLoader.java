@@ -35,8 +35,7 @@ public class FileJarServletLoader extends ServletLoader
     private final static String[] systemClasses =
     {
 	"java.",
-	"javax.",
-	"com.mortbay."
+	"javax."
     };
 
 	
@@ -59,7 +58,7 @@ public class FileJarServletLoader extends ServletLoader
     static class LoadedFile
     {
 	File file;
-	long timeLoaded;
+	long lastModified;
     }
     
     /* ------------------------------------------------------------ */
@@ -95,7 +94,7 @@ public class FileJarServletLoader extends ServletLoader
 		    paths.addElement(new ZipFile(file));
 		    LoadedFile lc=new LoadedFile();
 		    lc.file=file;
-		    lc.timeLoaded=System.currentTimeMillis();
+		    lc.lastModified=System.currentTimeMillis();
 		    loaded.addElement(lc);
 		}
 	    }
@@ -158,7 +157,7 @@ public class FileJarServletLoader extends ServletLoader
 			
 			LoadedFile lc=new LoadedFile();
 			lc.file=file;
-			lc.timeLoaded=System.currentTimeMillis();
+			lc.lastModified=file.lastModified();
 			loaded.addElement(lc);
 			break;
 		    }
@@ -261,8 +260,8 @@ public class FileJarServletLoader extends ServletLoader
     {
 	for (int f=loaded.size();f-->0;)
 	{
-	    LoadedFile lf = (LoadedFile)loaded.elementAt(f);
-	    if (!lf.file.exists() || lf.file.lastModified()>lf.timeLoaded)
+	    LoadedFile lf = (LoadedFile)loaded.elementAt(f);	    
+	    if (!lf.file.exists() || lf.file.lastModified()>lf.lastModified)
 		return true;
 	}
 	return false;	

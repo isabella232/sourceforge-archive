@@ -176,7 +176,7 @@ public class Frame
     }
     
     /* ------------------------------------------------------------ */
-    /** Get a Frame reresenting the function one level up in this frame
+    /** Get a Frame representing the function one level up in this frame
      * @return parent frame or null if none
      */
     public Frame getParent(){

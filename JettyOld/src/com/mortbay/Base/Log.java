@@ -29,7 +29,7 @@ import java.text.*;
  * destination for Log output rather than standard error.
  * <p> If the property LOG_DATE_FORMAT is set, then it is interpreted
  * as a format string for java.text.SimpleDateFormat and used to
- * format the log timestamps. NB. The character '+' is replaced with
+ * format the log timestamps. Note: The character '+' is replaced with
  * space in the date format string.  If LOG_TIMEZONE is set, it is used
  * to set the timezone of the log date format, otherwise GMT is used.
  */
@@ -89,7 +89,7 @@ public class Log
     
     /*-------------------------------------------------------------------*/
     /** Construct the shared instance of Log that decodes the
-     * options setup enviornments properties.
+     * options setup in the environments properties.
      */
     public Log()
     {
@@ -245,11 +245,11 @@ public class Log
 		    __stringBuffer.append(_dateFormat.format(new Date(time)));
 		else
 		{
-		    String msecs = "0000" + time%1000L;
-		    msecs = msecs.substring(msecs.length() - 3);
+		    String mSecs = "0000" + time%1000L;
+		    mSecs = mSecs.substring(mSecs.length() - 3);
 		    __stringBuffer.append(Long.toString(time / 1000L));
 		    __stringBuffer.append('.');
-		    __stringBuffer.append(msecs);
+		    __stringBuffer.append(mSecs);
 		}
 	    }
 	

@@ -42,7 +42,9 @@ public class ThreadPool
     /** Constructor. 
      */
     public ThreadPool()
-    {}
+    {
+	this(0);
+    }
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -72,7 +74,7 @@ public class ThreadPool
     /** Constructor. 
      * @param maxThreads Maximum number of handler threads.
      * @param name  Name of the thread.
-     * @param maxIdleTimeMs Idle time in Msecs before a handler thread dies.
+     * @param maxIdleTimeMs Idle time in milliseconds before a handler thread dies.
      */
     public ThreadPool(int maxThreads, String name, int maxIdleTimeMs)
     {
@@ -89,7 +91,7 @@ public class ThreadPool
      * @param minThreads  Minimum number of handler threads.
      * @param maxThreads Maximum number of handler threads.
      * @param name Name of the thread
-     * @param maxIdleTimeMs Idle time in Msecs before a handler thread dies.
+     * @param maxIdleTimeMs Idle time in milliseconds before a handler thread dies.
      */
     public ThreadPool(int minThreads,
 		      int maxThreads,
@@ -221,6 +223,7 @@ public class ThreadPool
 			((Runnable)job).run();
 		    else
 			ThreadPool.this.handle(job);
+		    Thread.yield();
 		}
 	    }
 	    catch(InterruptedException e)

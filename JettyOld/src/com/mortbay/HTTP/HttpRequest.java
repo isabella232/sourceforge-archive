@@ -64,6 +64,7 @@ public class HttpRequest extends HttpHeader
 
     /* -------------------------------------------------------------- */
 
+    private boolean localRequest=false;
     private HttpServer httpServer = null;
     private Socket connection;
     private HttpInputStream in;
@@ -98,7 +99,7 @@ public class HttpRequest extends HttpHeader
     /** Construct received request.
      * @param httpServer The server for this request.
      * @param connection The socket the request was received over.
-     * @param address the IP address that was listened on for the reqest.
+     * @param address the IP address that was listened on for the request.
      * @exception IOException Problem reading the request header
      */
     public HttpRequest(HttpServer httpServer,
@@ -152,30 +153,47 @@ public class HttpRequest extends HttpHeader
 
     /* -------------------------------------------------------------- */
     /** Construct request to send
+     * @param httpServer The server for this request.
      * @param method The method for this request
      * @param uri The uri for this request.
      */
-    public HttpRequest(String method, String uri)
+    public HttpRequest(HttpServer server, String method, String uri)
     {
+	this.httpServer=server;
 	this.method  = method;
 	this.uri = new URI(uri);
 	pathInfo=this.uri.getPath();
 	version=HttpHeader.HTTP_1_0;
+	protocolHostPort="";
+	localRequest=true;
     }
     
     /* -------------------------------------------------------------- */
     /** Construct request to send
+     * @param httpServer The server for this request.
      * @param method The method for this request
      * @param uri The uri for this request.
      */
-    public HttpRequest(String method, URI uri)
+    public HttpRequest(HttpServer server, String method, URI uri)
     {
+	this.httpServer=server;
 	this.method  = method;
 	this.uri = uri;
 	pathInfo=this.uri.getPath();
 	version=HttpHeader.HTTP_1_0;
+	protocolHostPort="";
+	localRequest=true;
     }
 
+    /* ------------------------------------------------------------ */
+    /** Get local request status
+     * @return true if this is a synthetic local request
+     */
+    public boolean isLocalRequest()
+    {
+	return localRequest;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Set associated response 
      */
@@ -362,7 +380,7 @@ public class HttpRequest extends HttpHeader
 
     /* -------------------------------------------------------------- */
     /** decode Form Parameters
-     * After this call, form paramters may be fetch via the
+     * After this call, form parameters may be fetch via the
      * getParameter() method.
      */
     public void decodeFormParameters()
@@ -388,7 +406,7 @@ public class HttpRequest extends HttpHeader
     
     /* -------------------------------------------------------------- */
     /** decode Form Parameters
-     * After this call, form paramters may be fetch via the
+     * After this call, form parameters may be fetch via the
      * getParameter() method.
      */
     public void decodeCookieParameters()
@@ -440,12 +458,82 @@ public class HttpRequest extends HttpHeader
     }
     
     /* ------------------------------------------------------------- */
-    /** Get the HttpInputStream of the request.
+    /** Get the HttpServer of the request.
      */
-    synchronized HttpInputStream getHttpInputStream()
+    public HttpServer getHttpServer()
+    {
+	return httpServer;
+    }
+    
+    /* ------------------------------------------------------------- */
+    /** Get the HttpInputStream of the request.
+     * It is dangerous to use this unless you know what you are doing.
+     */
+    public HttpInputStream getHttpInputStream()
     {
 	return in;
     }
+
+    /* ------------------------------------------------------------ */
+    private static ThreadPool localThreadPool=null;
+
+    /* ------------------------------------------------------------ */
+    /** Handle a request locally.
+     * This methods dispatches this request to the local server.
+     * It is used by the ServletContext.getResourceAsStream method.
+     * @return InputStream containing content.
+     * @exception IOException 
+     */
+    public InputStream handleRequestLocally()
+	throws IOException
+    {
+	Code.assert(httpServer!=null,"Not constructed with HttpServer");
+	if (localThreadPool==null)
+	    localThreadPool=new ThreadPool(0,"LocalRequest");
+	
+	final PipedInputStream in = new PipedInputStream();
+	final PipedOutputStream out = new PipedOutputStream(in);
+	final HttpResponse response = new HttpResponse(out,this);
+	
+	// run new request in own thread
+	try{
+	    localThreadPool
+		.run(new Runnable()
+		     {
+			 public void run()
+			     {
+				 try{
+				     httpServer.handle(HttpRequest.this,response);
+				     out.close();
+				     response.destroy();
+				 }
+				 catch(IOException e)
+				 {
+				     Code.warning(e);
+				 }
+			     }
+		     });
+	}
+	catch(InterruptedException e)
+	{
+	    Code.warning(e);
+	    return null;
+	}
+	
+	// Get response line
+	HttpInputStream replyStream = new HttpInputStream(in);
+	String replyLine=replyStream.readLine();
+	Code.debug("Resource response: ",replyLine);
+	
+	// Skip header of reply
+	HttpHeader replyHeader = new HttpHeader();
+	replyHeader.read(replyStream);
+	
+	// Return content
+	return replyStream;
+    }
+    
+
     
     /* -------------------------------------------------------------- */
     /* - SERVLET METHODS -------------------------------------------- */
@@ -521,7 +609,7 @@ public class HttpRequest extends HttpHeader
 		else
 		    serverPort=80;
 	    }
-	    else if (address.getInetAddress()!=null)
+	    else if (address!=null && address.getInetAddress()!=null)
 		serverName = address.getInetAddress().getHostName();
 	    
 	    if (serverName==null)
@@ -550,7 +638,7 @@ public class HttpRequest extends HttpHeader
 	if (serverName==null)
 	    getServerName();
 
-	if (serverPort==0)
+	if (address!=null && serverPort==0)
 	    serverPort=address.getPort();
 	
 	return serverPort;
@@ -564,7 +652,9 @@ public class HttpRequest extends HttpHeader
      */
     public  String getRemoteAddr()
     {
-        return connection.getInetAddress().getHostAddress();
+	if (connection!=null)
+	    return connection.getInetAddress().getHostAddress();
+	return "localhost";
     }
     
     /* -------------------------------------------------------------- */
@@ -607,14 +697,13 @@ public class HttpRequest extends HttpHeader
 	return in;
     }
 
-
     /* -------------------------------------------------------------- */
     /**
      * Returns the value of the specified parameter for the request. For
      * example, in an HTTP servlet this would return the value of the
      * specified query string parameter.
      * @param name the parameter name
-     * @return For the given example, getParamter("aaa") would
+     * @return For the given example, getParameter("aaa") would
      * return "123".
      * @deprecated use getParameterValues
      */
@@ -854,7 +943,7 @@ public class HttpRequest extends HttpHeader
 
     
     /* -------------------------------------------------------------- */
-    /** Get the quesry string of the request
+    /** Get the query string of the request
      * @return For the given example, this would return <PRE>
      * aaa=123&bbb=456
      * </PRE>
@@ -865,7 +954,7 @@ public class HttpRequest extends HttpHeader
     }
 
     /* -------------------------------------------------------------- */
-    /** Get the remote user name decoded from authenticatin headers
+    /** Get the remote user name decoded from authentication headers
      * @return For the given example, this would return <PRE>
      * null
      * </PRE>

@@ -96,11 +96,11 @@ class TestTable extends Table
 	    table.deleteRow("gregw");
 	    table.deleteRow("mos");
 	    table.deleteRow("mattw");
-	    t.check(true,"Delete non existant");
+	    t.check(true,"Delete non existent");
 	}
 	catch(Exception e){
 	    e.printStackTrace();
-	    t.check(false,"Delete non existant");
+	    t.check(false,"Delete non existent");
 	}
 
 	try {    

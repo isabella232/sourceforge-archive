@@ -51,7 +51,7 @@ public class HttpFilter extends FilterOutputStream
     /* ----------------------------------------------------------------- */
     /** Activate is called on a filter by a HttpResponse, normally just
      * before the response headers are written. If canHandle() returns
-     * true, the filter is inserted into the HttpRespons output stream and
+     * true, the filter is inserted into the HttpResponse output stream and
      * a thread started to run the filter.
      */
     public final void activateOn(HttpResponse response) 

@@ -11,8 +11,8 @@ import com.mortbay.Base.Code;
 /** Blocking queue
  *
  * XXX temp implementation while waiting for java2 containers.
- * Implemented as circular buffer in a Vector. Sync is on the vector
- * to avoid double synchronization.
+ * Implemented as circular buffer in a Vector. Synchronization is on the
+ * vector to avoid double synchronization.
  *
  * @version 1.0 Fri May 28 1999
  * @author Greg Wilkins (gregw)

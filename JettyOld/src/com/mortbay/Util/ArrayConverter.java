@@ -13,7 +13,7 @@ import java.lang.reflect.Array;
 
 /** Class to convert Vectors and Strings to Arrays.
  * This class will convert Vectors and Strings to arrays. String are
- * converted by parsing them into elements based on a seperator (as passed to
+ * converted by parsing them into elements based on a separator (as passed to
  * the constructor).
  */
 public class ArrayConverter implements Converter

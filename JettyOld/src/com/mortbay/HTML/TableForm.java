@@ -279,7 +279,7 @@ public class TableForm extends Form
 
     /* ----------------------------------------------------------- */
     /** Extend the usage of the current row in the form.  The next
-     * elemented added will be added to the same row as the form and
+     * element added will be added to the same row as the form and
      * not have a label of it's own.
      * @return TableForm, the this pointer so that users can write:<PRE>
      *                    tableForm.extendRow().addField(...)</PRE>

@@ -591,7 +591,7 @@ public class Code
      * be passed to the java VM.  If the property DEBUG_PATTERN is
      * set, it is used as a regular expression on the method, file and
      * thread names to filter debug generation.
-     * <strong>Dont rely on side-effects</strong>
+     * <strong>Do not rely on side-effects</strong>
      * @param m The debug message to log.
      */
     public static void debug(String m)
@@ -610,7 +610,7 @@ public class Code
     
     /*-------------------------------------------------------------------*/
     /** As debug(String)
-     * <strong>Dont rely on side-effects</strong>
+     * <strong>Do not rely on side-effects</strong>
      * @param m The debug message to log.
      * @param ex The Throwable to print the full stack trace of
      */
@@ -636,7 +636,7 @@ public class Code
     
     /*-------------------------------------------------------------------*/
     /** As debug(String)
-     * <strong>Dont rely on side-effects</strong>
+     * <strong>Don Notnot rely on side-effects</strong>
      * @param ex The Throwable to print the full stack trace of
      */
     public static void debug(Throwable ex)
@@ -660,7 +660,7 @@ public class Code
     
     /*-------------------------------------------------------------------*/
     /** As debug(String)
-     * <strong>Dont rely on side-effects</strong>
+     * <strong>Do not rely on side-effects</strong>
      * @param ex The Throwable to print the full stack trace of
      */
     public static void debug(Object o)
@@ -684,7 +684,7 @@ public class Code
     
     /*-------------------------------------------------------------------*/
     /** As debug(String)
-     * <strong>Dont rely on side-effects</strong>
+     * <strong>Do not rely on side-effects</strong>
      * @param ex The Throwable to print the full stack trace of
      */
     public static void debug(Object o1,Object o2)
@@ -709,7 +709,7 @@ public class Code
     
     /*-------------------------------------------------------------------*/
     /** As debug(String)
-     * <strong>Dont rely on side-effects</strong>
+     * <strong>Do not rely on side-effects</strong>
      * @param ex The Throwable to print the full stack trace of
      */
     public static void debug(Object o1,Object o2,Object o3)
@@ -735,7 +735,7 @@ public class Code
     
     /*-------------------------------------------------------------------*/
     /** As debug(String)
-     * <strong>Dont rely on side-effects</strong>
+     * <strong>Do not rely on side-effects</strong>
      * @param ex The Throwable to print the full stack trace of
      */
     public static void debug(Object o1,Object o2,Object o3, Object o4)
@@ -762,7 +762,7 @@ public class Code
     
     /*-------------------------------------------------------------------*/
     /** As debug(String)
-     * <strong>Dont rely on side-effects</strong>
+     * <strong>Do not rely on side-effects</strong>
      * @param ex The Throwable to print the full stack trace of
      */
     public static void debug(Object o1,Object o2,Object o3, Object o4,
@@ -790,7 +790,7 @@ public class Code
     }
     /*-------------------------------------------------------------------*/
     /** As debug(String)
-     * <strong>Dont rely on side-effects</strong>
+     * <strong>Do not rely on side-effects</strong>
      * @param ex The Throwable to print the full stack trace of
      */
     public static void debug(Object o1,Object o2,Object o3, Object o4,
@@ -819,7 +819,7 @@ public class Code
     }
     /*-------------------------------------------------------------------*/
     /** As debug(String)
-     * <strong>Dont rely on side-effects</strong>
+     * <strong>Do not rely on side-effects</strong>
      * @param ex The Throwable to print the full stack trace of
      */
     public static void debug(Object o1,Object o2,Object o3, Object o4,
@@ -849,7 +849,7 @@ public class Code
     }
     /*-------------------------------------------------------------------*/
     /** As debug(String)
-     * <strong>Dont rely on side-effects</strong>
+     * <strong>Do not rely on side-effects</strong>
      * @param ex The Throwable to print the full stack trace of
      */
     public static void debug(Object o1,Object o2,Object o3,Object o4,
@@ -960,7 +960,7 @@ public class Code
 		    {
 			ex=((java.lang.ExceptionInInitializerError)ex)
 			    .getException();
-			__out.println("Initializor Exception:");
+			__out.println("Initializer Exception:");
 			ex.printStackTrace(__out);
 		    }
 		    __out.print("--");

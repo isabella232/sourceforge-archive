@@ -58,7 +58,7 @@ public class Database
     
     
     /* ------------------------------------------------------------ */
-    /** Database contructor
+    /** Database constructor
      * @param properties A hashtable of connection properties, which must
      *                   at least contain DbAdaptor and DbUrl.
      *
@@ -93,9 +93,9 @@ public class Database
     }
     
     /* ------------------------------------------------------------ */
-    /** Database contructor
+    /** Database constructor
      * @param dbAdaptor The full package and class name of the JDBC
-     *                  DbAdpator type to use for this database.
+     *                  DbAdaptor type to use for this database.
      * @param dbUrl    The url of this database
      * @param properties A hashtable of connection properties (or null)
      *
@@ -130,9 +130,9 @@ public class Database
     }
 
     /* ------------------------------------------------------------ */
-    /** Database contructor
+    /** Database constructor
      * @param dbAdaptor The full package and class name of the JDBC
-     *                  DbAdpator type to use for this database.
+     *                  DbAdaptor type to use for this database.
      * @param dbUrl    The url of this database
      *
      * @exception ClassNotFoundException Could not find DbAdaptor or
@@ -156,7 +156,7 @@ public class Database
     /* ------------------------------------------------------------ */
     /** Initialize database
      * @param dbAdaptor The full package and class name of the JDBC
-     *                  DbAdpator type to use for this database.
+     *                  DbAdaptor type to use for this database.
      * @param dbUrl The database URL
      *
      * @exception ClassNotFoundException Could not find DbAdaptor or

@@ -266,7 +266,7 @@ public class HttpTests
 	    "",                           null,  null,      null,
 	};
 
-	HttpRequest r = new HttpRequest("GET","/");
+	HttpRequest r = new HttpRequest(null,"GET","/");
 	
 	try{
 	    for (int i=0; i<rl.length ; i+=4)
@@ -374,10 +374,10 @@ public class HttpTests
 	    test.checkEquals(cin.read(b,0,2),2,"chunk out->in 23");
 	    test.checkEquals(b[0],'b',"chunk out in b");
 	    test.checkEquals(b[1],'c',"chunk out in c");
-	    test.checkEquals(cin.readLine(b,0,100),34,"readline length");
+	    test.checkEquals(cin.readLine(b,0,100),34,"readLine length");
 	    test.checkEquals(new String(b,0,33),
 			     "defghijklmnopqrstuvwxyz0123456789",
-			     "readline");
+			     "readLine");
 	    int chars=0;
 	    while (cin.read()!=-1)
 		chars++;

@@ -100,7 +100,7 @@ public class DataPort extends Thread
     }
     
     /* ------------------------------------------------------------------- */
-    /** Close this dataport and cancel any transfer notification
+    /** Close this DataPort and cancel any transfer notification
      *
      */
     final public void close() 

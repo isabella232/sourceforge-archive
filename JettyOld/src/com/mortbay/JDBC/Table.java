@@ -11,9 +11,9 @@ import java.util.*;
 /** JDBC Table wrapper
  * <p>  
  * The Table class holds Meta data about a JDBC table.  It is used
- * in preferance to JDBC metadata as: <UL>
+ * in preference to JDBC metadata as: <UL>
  * <LI> JDBC MetaData is not always implemented
- * <LI> It can be used to programatically create tables and index's
+ * <LI> It can be used to create tables and indexes from within a program
  * <LI> Some degree of additional DB portability is obtained
  * </UL>
  *
@@ -33,8 +33,8 @@ public class Table extends ColumnGroup
     private DbAdaptor adaptor;
     
     /* ------------------------------------------------------------ */
-    /** Table contructor
-     * @parma name The name of the table
+    /** Table constructor
+     * @param name The name of the table
      * @param columns Array of column descriptors
      * @param database The database to use.
      */
@@ -265,7 +265,7 @@ public class Table extends ColumnGroup
     /** Set the database used by this table. This can only be called if null
      * was passed to the constructor */
     public void database(Database db){
-	Code.assert(database == null,"DB already inited");
+	Code.assert(database == null,"DB already initialised");
 	database = db;
     }
     

@@ -129,7 +129,7 @@ public class UrlEncoded extends Hashtable
     
     
     /* ------------------------------------------------------------ */
-    /** Set a multi valued paramter 
+    /** Set a multi valued parameter 
      * @param key The parameter name
      * @param values Array of string values
      */
@@ -142,7 +142,7 @@ public class UrlEncoded extends Hashtable
     /* -------------------------------------------------------------- */
     /* Add encoded parameters to Dictionary.
      * @param content the string containing the encoded parameters
-     * @param url The dictionary top add the parametes to
+     * @param url The dictionary to add the parameters to
      */
     public static void addParamsTo(String content,UrlEncoded url)
     {
@@ -256,7 +256,7 @@ public class UrlEncoded extends Hashtable
     /* -------------------------------------------------------------- */
     /** Encode Hashtable with % encoding
      * @param equalsForNullValue if True, then an '=' is always used, even
-     * for paramaters without a value. eg. "blah?a=&b=&c=".
+     * for parameters without a value. e.g. "blah?a=&b=&c=".
      */
     public String encode(boolean equalsForNullValue)
     {

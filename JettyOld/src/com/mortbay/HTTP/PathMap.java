@@ -17,10 +17,10 @@ import java.net.MalformedURLException;
  * <p>Notes<br>
  * Paths ending with '$' must match the path absolutely,<BR>
  * Paths ending with '/' must match an exact path element,<BR>
- * Paths ending with '%' match either an absoulte path or exect path element<BR>
- * Paths ending with '|' match either an absoulte path or trailing '/'<BR>
+ * Paths ending with '%' match either an absolute path or exact path element<BR>
+ * Paths ending with '|' match either an absolute path or trailing '/'<BR>
  * Paths may include a * to separate prefix and suffix matches. Suffix
- * matches have precidence.<P>
+ * matches have precedence.<P>
  * All other paths only need to be a prefix to match.
  * <P>
  * <TABLE BORDER=1 CELLPADDING=5>
@@ -113,7 +113,7 @@ import java.net.MalformedURLException;
  * <LI>An exact match /aaa/bbb/ccc.c
  * <LI>A path qualified wildcard /aaa/bbb/*.c
  * <LI>A null path wildcard *.c
- * <LI>A non wild pathspec eg /aaa/bbb%					  
+ * <LI>A non wild pathspec e.g. /aaa/bbb%					  
  * </TABLE>
  * 
  * @version $Id$
@@ -156,7 +156,7 @@ public class PathMap extends Dictionary
     /* --------------------------------------------------------------- */
     /** Add a single path match to the PathMap
      * @param pathSpec The path specification.
-     * @param object Th eobject the path maps to
+     * @param object The object the path maps to
      */
     public Object put(String pathSpec, Object object)
     {
@@ -218,7 +218,7 @@ public class PathMap extends Dictionary
     /* --------------------------------------------------------------- */
     /** Add a single path match to the PathMap
      * @param pathSpec The path specification.
-     * @param object Th eobject the path maps to
+     * @param object The object the path maps to
      */
     public Object put(Object pathSpec, Object object) 
     {

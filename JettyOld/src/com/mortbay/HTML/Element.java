@@ -190,7 +190,7 @@ public abstract class Element
     
     /* ----------------------------------------------------------------- */
     /** left justify
-     * Conveniance method equivalent to attribute("ALIGN","LEFT"). Not
+     * Convenience method equivalent to attribute("ALIGN","LEFT"). Not
      * applicable to all Elements.
      */
     public Element left()
@@ -200,7 +200,7 @@ public abstract class Element
     
     /* ----------------------------------------------------------------- */
     /** right justify
-     * Conveniance method equivalent to attribute("ALIGN","RIGHT"). Not
+     * Convenience method equivalent to attribute("ALIGN","RIGHT"). Not
      * applicable to all Elements.
      */
     public Element right()
@@ -210,7 +210,7 @@ public abstract class Element
     
     /* ----------------------------------------------------------------- */
     /** Center
-     * Conveniance method equivalent to attribute("ALIGN","CENTER"). Not
+     * Convenience method equivalent to attribute("ALIGN","CENTER"). Not
      * applicable to all Elements.
      */
     public Element center()
@@ -220,7 +220,7 @@ public abstract class Element
     
     /* ----------------------------------------------------------------- */
     /** Top align
-     * Conveniance method equivalent to attribute("VALIGN","TOP"). Not
+     * Convenience method equivalent to attribute("VALIGN","TOP"). Not
      * applicable to all Elements.
      */
     public Element top()
@@ -230,7 +230,7 @@ public abstract class Element
     
     /* ----------------------------------------------------------------- */
     /** Bottom align
-     * Conveniance method equivalent to attribute("VALIGN","BOTTOM"). Not
+     * Convenience method equivalent to attribute("VALIGN","BOTTOM"). Not
      * applicable to all Elements.
      */
     public Element bottom()
@@ -240,7 +240,7 @@ public abstract class Element
     
     /* ----------------------------------------------------------------- */
     /** Middle align
-     * Conveniance method equivalent to attribute("VALIGN","MIDDLE"). Not
+     * Convenience method equivalent to attribute("VALIGN","MIDDLE"). Not
      * applicable to all Elements.
      */
     public Element middle()
@@ -250,7 +250,7 @@ public abstract class Element
     
     /* ----------------------------------------------------------------- */
     /** set width
-     * Conveniance method equivalent to attribute("WIDTH",w). Not
+     * Convenience method equivalent to attribute("WIDTH",w). Not
      * applicable to all Elements.
      */
     public Element width(int w)
@@ -261,7 +261,7 @@ public abstract class Element
     
     /* ----------------------------------------------------------------- */
     /** set width
-     * Conveniance method equivalent to attribute("WIDTH",w). Not
+     * Convenience method equivalent to attribute("WIDTH",w). Not
      * applicable to all Elements.
      */
     public Element width(String w)
@@ -278,7 +278,7 @@ public abstract class Element
     
     /* ----------------------------------------------------------------- */
     /** set height
-     * Conveniance method equivalent to attribute("HEIGHT",h). Not
+     * Convenience method equivalent to attribute("HEIGHT",h). Not
      * applicable to all Elements.
      */
     public Element height(int h)
@@ -289,7 +289,7 @@ public abstract class Element
     
     /* ----------------------------------------------------------------- */
     /** set height
-     * Conveniance method equivalent to attribute("HEIGHT",h). Not
+     * Convenience method equivalent to attribute("HEIGHT",h). Not
      * applicable to all Elements.
      */
     public Element height(String h)
@@ -306,7 +306,7 @@ public abstract class Element
     
     /* ----------------------------------------------------------------- */
     /** set size
-     * Conveniance method equivalent to attribute("SIZE",s). Not
+     * Convenience method equivalent to attribute("SIZE",s). Not
      * applicable to all Elements.
      */
     public Element size(int s)
@@ -317,7 +317,7 @@ public abstract class Element
     
     /* ----------------------------------------------------------------- */
     /** set size
-     * Conveniance method equivalent to attribute("SIZE",s). Not
+     * Convenience method equivalent to attribute("SIZE",s). Not
      * applicable to all Elements.
      */
     public Element size(String s)
@@ -334,7 +334,7 @@ public abstract class Element
     
     /* ----------------------------------------------------------------- */
     /** set color
-     * Conveniance method equivalent to attribute("COLOR",color). Not
+     * Convenience method equivalent to attribute("COLOR",color). Not
      * applicable to all Elements.
      */
     public Element color(String color)
@@ -343,8 +343,8 @@ public abstract class Element
     }
     
     /* ----------------------------------------------------------------- */
-    /** set bgcolor
-     * Conveniance method equivalent to attribute("BGCOLOR",color). Not
+    /** set BGCOLOR
+     * Convenience method equivalent to attribute("BGCOLOR",color). Not
      * applicable to all Elements.
      */
     public Element bgColor(String color)

@@ -156,7 +156,7 @@ public class HttpHeader
 	    if (cbuf.size==0)
 		break;
 
-	    // check space in teh lowercase buffer
+	    // check space in the lowercase buffer
 	    char[] buf = cbuf.chars;
 	    if (lbuf==null || lbuf.length < cbuf.size)
 		lbuf= new char[cbuf.chars.length];

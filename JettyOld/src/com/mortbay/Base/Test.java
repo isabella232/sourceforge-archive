@@ -51,7 +51,7 @@ public class Test
     private boolean passed = true;
     
     /*-------------------------------------------------------------------*/
-    /** Test contructor
+    /** Test constructor
      *  @param testCase   the name of the test case
      */
     public Test(String testCase)

@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * nesting of property values. Property keys such as "a.b" and "a.c" cat be
  * retrieved (and set) as normal, but it is possible to retrieve a
  * PropertyTree by get("a"), and then use get("b") and get("c") to achieve
- * the same thing (although most times this is unneccessary). This makes it
+ * the same thing (although most times this is unnecessary). This makes it
  * easy to have nested sets of values in the same properties file and iterate
  * over nested keys.
  *

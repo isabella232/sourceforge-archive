@@ -36,7 +36,7 @@ import java.util.*;
  * <LI>Basic Authentication Handler - Checks username and password on
  * selected paths.
  * <LI>Parameter Handler - Reads form content and adds it to the request
- * parameters. It can also optionaly read cookies and add then to the
+ * parameters. It can also optionally read cookies and add then to the
  * request parameters.
  * <LI>Servlet Handler - Searches for a javax.servlet.http.HttpServlet to
  * handle the request.
@@ -49,7 +49,7 @@ import java.util.*;
  * forwarding, session management defined in the com.mortbay.HTTP.Handler
  * package.  These may be configured in or the user may develop their
  * own handlers. However, servlets should be used for user handling unless
- * the user requires the additional functionality of HttpRequest (typcially
+ * the user requires the additional functionality of HttpRequest (typically
  * for better control of input/output of modification of the request).
  *
  * Exceptions raised by a Handler are handled themselves by a similar
@@ -273,7 +273,7 @@ public class HttpServer implements ServletContext
 	    boolean handled=false;
 	    int h = 0;
 	    try{
-		// Select request handler statck by path
+		// Select request handler stack by path
 		HttpHandler[] httpHandlers = (HttpHandler[])
 		    httpHandlersMap.match(resourcePath);
 
@@ -415,7 +415,11 @@ public class HttpServer implements ServletContext
     }
     
     /* ------------------------------------------------------------ */
-    /** Not implemented
+    /** Get a resource.
+     * This is implemented with a standard URL instance that will make
+     * a socket connection back to the server. This is less than
+     * efficient and a better implementation is provided for
+     * getResourceAsStream.
      * @param path URL path of resource
      * @return null
      * @exception MalformedURLException 
@@ -423,7 +427,7 @@ public class HttpServer implements ServletContext
     public URL getResource(String path)
 	throws MalformedURLException
     {
-	// This is probably very inefficient, but it is
+	// XXX This is probably very inefficient, but it is
 	// a stupid API anyway.
 	return new URL("http",
 		       listeners[0].getAddress().getInetAddress()
@@ -434,27 +438,27 @@ public class HttpServer implements ServletContext
 
     /* ------------------------------------------------------------ */
     /** Get a resource as a Stream.
+     * Creates a simulated request to the local server and returns
+     * the content of the simulated response.
      * @see getResource(String path)
      * @param path URL path of resource
-     * @return null 
+     * @return InputStream
      */
     public InputStream getResourceAsStream(String path)
     {
 	try {
-	    return getResource(path).openStream();
+	    final HttpRequest request = new HttpRequest(this,"GET",path);
+	    return request.handleRequestLocally();
 	}
-	catch (IOException e)
+	catch (Exception e)
 	{
-	    Code.ignore(e);
+	    Code.warning(e);
 	}
 	return null;
     }
     
     /* ------------------------------------------------------------ */
     /** Get a RequestDispatcher.
-     * While implemented, this API is not recommended. The resources
-     * that can be addressed are very restricted and be specially
-     * written. Hopefully this will go away sometime.
      * @param path URL path of resource 
      * @return null
      */
@@ -504,9 +508,9 @@ public class HttpServer implements ServletContext
      */
     public String getRealPath(String path)
     {
-	Code.debug("Tanslate: ",path);
+	Code.debug("Translate: ",path);
 	String realPath = path;
-	// Select request handler statck by path
+	// Select request handler stack by path
 	HttpHandler[] httpHandlers =
 	    (HttpHandler[])httpHandlersMap.match(realPath);
 	if (httpHandlers != null)

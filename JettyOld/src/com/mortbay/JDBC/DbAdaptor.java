@@ -108,7 +108,7 @@ public class DbAdaptor
      * @param column The column to format the value for
      * @param value The value of the column
      * @return A string representing how the value should be presented
-     *         to the underlying database (eg quoted string for VARCHAR).
+     *         to the underlying database (e.g. quoted string for VARCHAR).
      */
     public String formatColumnValue(Column column, Object value)
     {	
@@ -142,7 +142,7 @@ public class DbAdaptor
     /** A null value for the column
      * @param column The Column
      * @return An object which represents a null value for the
-     * jave type used to handle the column type.
+     * java type used to handle the column type.
      */
     public Object nullColumnValue(Column column)
     {	

@@ -33,6 +33,102 @@ public class FileHandler extends NullHandler
     boolean deleteAllowed;
     String allowHeader = null;
 
+    
+    CachedFile[] cache=null;
+    int nextIn=0;
+    Hashtable cacheMap=null;
+    int maxCachedFileSize=40960;
+    
+    /* ------------------------------------------------------------ */
+    /** Holds a cached file.
+     * It is assumed that threads accessing CachedFile have
+     * the parents cacheMap locked. 
+     */
+    private class CachedFile
+    {
+	String filename;
+	File file;
+	long lastModified;
+	byte[] bytes;
+	String encoding;
+
+	/* ------------------------------------------------------------ */
+ 	boolean isValid()
+	    throws IOException
+	{
+	    // check we have a file still
+	    if (file==null)
+		return false;
+	    
+	    // check if the file is still there
+	    if (!file.exists())
+	    {
+		flush();
+		return false;
+	    }
+	    
+	    // check if the file has changed
+	    if( lastModified!=file.lastModified())
+	    {
+		// If it is too big
+		if (file.length()>maxCachedFileSize)
+		{
+		    flush();
+		    return false;
+		}
+		// reload the changed file
+		load(filename,file);
+	    }
+	    return true;
+	}
+	
+	/* ------------------------------------------------------------ */
+ 	byte[] prepare(HttpResponse response)
+	    throws IOException
+	{
+	    Code.debug("HIT: ",filename);
+	    response.setContentType(encoding);
+	    response.setContentLength(bytes.length);
+	    response.setDateHeader("Last-Modified",lastModified);
+	    return bytes;
+	}
+
+	/* ------------------------------------------------------------ */
+ 	void load(String filename,File file)
+	    throws IOException
+	{
+	    this.filename=filename;
+	    this.file=file;
+	    lastModified=file.lastModified();
+	    bytes = new byte[(int)file.length()];
+	    Code.debug("LOAD: ",filename);
+	    InputStream in=new FileInputStream(file);
+	    int read=0;
+	    while (read<bytes.length)
+	    {
+		int len=in.read(bytes,read,bytes.length-read);
+		if (len==-1)
+		    throw new IOException("Unexpected EOF: "+file);
+		read+=len;
+	    }
+	    in.close();
+	    encoding=httpServer.getMimeType(filename);
+	}
+	
+	/* ------------------------------------------------------------ */
+	void flush()
+	{
+	    if (file!=null)
+	    {
+		Code.debug("FLUSH: ",filename);
+		cacheMap.remove(filename);
+		filename=null;
+		file=null;
+	    }
+	}
+    }
+
+    
     /* ----------------------------------------------------------------- */
     /** Construct from properties.
      * @param properties Passed to setProperties
@@ -80,9 +176,11 @@ public class FileHandler extends NullHandler
     /** Configure from Properties.
      * Properties are assumed to be in the format of a PropertyTree
      * like:<PRE>
-     * INDEXS               : index.html,index.htm
-     * PUT                  : False
-     * DELETE               : False
+     * Indexes              : index.html,index.htm
+     * AllowPut             : False
+     * AllowDelete          : False
+     * MaxCachedFiles       : 100
+     * MaxCachedFileSize    : 8192
      * FILES.name.PATHS     : /pathSpec;/list%
      * FILES.name.DIRECTORY : /Directory
      *</PRE>
@@ -107,6 +205,17 @@ public class FileHandler extends NullHandler
 	    indexFiles.addElement("index.html");
 	    indexFiles.addElement("index.htm");
 	}    
+
+	String cf=tree.getProperty("MaxCachedFiles");
+	if (cf!=null&&cf.length()>0)
+	{
+	    int cachedFiles=Integer.parseInt(cf);
+	    cache=new CachedFile[cachedFiles];
+	    cacheMap=new Hashtable(cachedFiles*2-13);
+	    String mf=tree.getProperty("MaxCachedFileSize");
+	    if (mf!=null && mf.length()>0)
+		maxCachedFileSize=Integer.parseInt(mf);
+	}
 	
 	dirMap=new PathMap();
 	Enumeration names = tree.getTree("FILES").getNodes();
@@ -231,34 +340,36 @@ public class FileHandler extends NullHandler
 	throws Exception
     {
 	Code.debug("Looking for ",uri," in ",filename);
-	    
-	File file = new File(filename);
-	if (file.exists())
-	{	    
-	    if (!request.getMethod().equals(HttpRequest.HEAD))
+	
+	// Try a cache lookup
+	if (cache!=null)
+	{
+	    byte[] bytes=null;
+	    synchronized(cacheMap)
 	    {
-		// check any modified headers.
-		long date=0;
-		if ((date=request.
-		     getDateHeader(HttpHeader.IfModifiedSince))>0)
+		CachedFile cachedFile=(CachedFile)cacheMap.get(filename);
+		if (cachedFile!=null &&cachedFile.isValid())
 		{
-		    if (file.lastModified() <= date)
-		    {
-			response.sendError(response.SC_NOT_MODIFIED);
+		    if (!checkGetHeader(request,response,cachedFile.file))
 			return;
-		    }
-		}
-		
-		if ((date=request.
-		     getDateHeader(HttpHeader.IfUnmodifiedSince))>0)
-		{
-		    if (file.lastModified() > date)
-		    {
-			response.sendError(response.SC_PRECONDITION_FAILED);
-			return;
-		    }
+		    bytes=cachedFile.prepare(response);
 		}
 	    }
+	    if (bytes!=null)
+	    {
+		OutputStream out = response.getOutputStream();
+		out.write(bytes);
+		return;
+	    }
+	}
+	
+	// Look for it normally
+	File file = new File(filename);
+	if (file.exists())
+	{
+	    // Check modified dates
+	    if (!checkGetHeader(request,response,file))
+		return;
 		
 	    // check if directory
 	    if (file.isDirectory())
@@ -290,7 +401,7 @@ public class FileHandler extends NullHandler
 					  indexFiles.elementAt(i));
 		    if (index.isFile())
 		    {
-			sendFile(request,response,index);
+			sendFile(request,response,filename,index);
 			indexSent=true;
 			break;
 		    }
@@ -304,15 +415,51 @@ public class FileHandler extends NullHandler
 	    // check if it is a file
 	    else if (file.isFile())
 	    {
-		sendFile(request,response,file);
+		sendFile(request,response,filename,file);
 	    }
 	    else
-		// dont know what it is
+		// don't know what it is
 		Code.warning("Unknown file type");    
 	}
-	file=null;
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /* Check modification date headers.
+     */
+    private boolean checkGetHeader(HttpRequest request,
+				   HttpResponse response,
+				   File file)
+	throws IOException
+    {
+	if (!request.getMethod().equals(HttpRequest.HEAD))
+	{
+	    // check any modified headers.
+	    long date=0;
+	    if ((date=request.
+		 getDateHeader(HttpHeader.IfModifiedSince))>0)
+	    {
+		if (file.lastModified() <= date)
+		{
+		    response.sendError(response.SC_NOT_MODIFIED);
+		    return false;
+		}
+	    }
+	    
+	    if ((date=request.
+		 getDateHeader(HttpHeader.IfUnmodifiedSince))>0)
+	    {
+		if (file.lastModified() > date)
+		{
+		    response.sendError(response.SC_PRECONDITION_FAILED);
+			return false;
+		}
+	    }
+	}
+	return true;
     }
     
+	    
     /* ------------------------------------------------------------ */
     void handlePut(HttpRequest request, HttpResponse response,
 		   String uri, String filename)
@@ -389,6 +536,7 @@ public class FileHandler extends NullHandler
 	    }
 	}
     }
+
     
     /* ------------------------------------------------------------ */
     void handleMove(HttpRequest request, HttpResponse response,
@@ -461,24 +609,57 @@ public class FileHandler extends NullHandler
     }
     
     /* ------------------------------------------------------------ */
-    void sendFile(HttpRequest request,HttpResponse response, File file)
+    void sendFile(HttpRequest request,
+		  HttpResponse response,
+		  String filename,
+		  File file)
 	throws Exception
     {
-	Code.debug("sendFile: "+file.getAbsolutePath());
-	String encoding=httpServer.getMimeType(file.getName());
-	response.setContentType(encoding);
-	int len = (int)file.length();
-	response.setContentLength(len);
-	response.setDateHeader("Last-Modified", file.lastModified());
-	InputStream in = new FileInputStream(file);
-	try
+	Code.debug("sendFile: ",file.getAbsolutePath());
+
+	// Can the file be cached?
+	if (cache!=null && file.length()<maxCachedFileSize)
 	{
-	    response.writeInputStream(in,len);
+	    byte[] bytes=null;
+	    synchronized (cacheMap)
+	    {
+		CachedFile cachedFile=cache[nextIn];
+		if (cachedFile==null)
+		    cachedFile=cache[nextIn]=new CachedFile();
+		nextIn=(nextIn+1)%cache.length;
+		cachedFile.flush();
+		cachedFile.load(filename,file);
+		cacheMap.put(filename,cachedFile);
+		bytes=cachedFile.prepare(response);
+	    }
+	    if (bytes!=null)
+	    {
+		OutputStream out = response.getOutputStream();
+		out.write(bytes);
+		return;
+	    }
 	}
-	finally
+	else
 	{
-	    in.close();
+	    InputStream in=null;
+	    int len=0;
+	    String encoding=httpServer.getMimeType(file.getName());
+	    response.setContentType(encoding);
+	    len = (int)file.length();
+	    response.setContentLength(len);
+	    response.setDateHeader("Last-Modified", file.lastModified());
+	    in = new FileInputStream(file);
+
+	    try
+	    {
+		response.writeInputStream(in,len);
+	    }
+	    finally
+	    {
+		in.close();
+	    }
 	}
+	
     }
 
 

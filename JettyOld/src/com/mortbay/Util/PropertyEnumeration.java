@@ -32,18 +32,18 @@ public class PropertyEnumeration implements Enumeration
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param class_ The Class to Enumerate over
-     * @param setable Include only properties that are settable
+     * @param settable Include only properties that are settable
      * @param useFields Whether to include public fields or not.
      */
     public PropertyEnumeration(Class class_,
-			       boolean setable, boolean useFields)
+			       boolean settable, boolean useFields)
     {
 	Vector names = new Vector();
 	try {
 	    BeanInfo beanInf = Introspector.getBeanInfo(class_);
 	    PropertyDescriptor props[] = beanInf.getPropertyDescriptors();
 	    for (int i = 0; i < props.length; i++){
-		if (setable && props[i].getWriteMethod() == null)
+		if (settable && props[i].getWriteMethod() == null)
 		    continue;
 		String name = props[i].getName();
 		Class type = props[i].getPropertyType();

@@ -98,7 +98,7 @@ public class JettyLaF extends Page
     }
     
     /* ------------------------------------------------------------ */
-    /** Complete Header and footer setion
+    /** Complete Header and footer section
      * Called just before the page is output (after all content added).
      */
     public void completeSections()

@@ -27,7 +27,7 @@ import java.io.*;
  *                                   /     \
  *                                  /       \
  *                                 V         V
- * socket <---  HttpOutputSream.realOut <-- ByteArrayOutputStream chunk
+ * socket <---  HttpOutputStream.realOut <-- ByteArrayOutputStream chunk
  *
  * </PRE>
  * @version $Id$

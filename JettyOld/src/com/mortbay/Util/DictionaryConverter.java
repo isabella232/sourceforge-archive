@@ -11,7 +11,7 @@ import java.util.Dictionary;
 /** Class to convert Dictionary's to complex object types
  * This class tries to convert a Dictionary (Hashtable or Properties etc) to
  * a complex Object. This is done by iterating over all the public settable
- * bean Properties and fileds of an Object and trying to set them from values
+ * bean Properties and fields of an Object and trying to set them from values
  * in the Dictionary. Types in the dictionary will be converted using the
  * context as passed to this Converter, so the user should make sure that
  * this Converter is part of a ConverterSet capable of handling the requires

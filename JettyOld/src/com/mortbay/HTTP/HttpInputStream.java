@@ -10,10 +10,10 @@ import javax.servlet.*;
 import java.io.*;
 
 /** HTTP input stream
- * <p> Implements JavaSofts wierd input stream
+ * <p> Implements JavaSofts weird input stream
  *
  * <p><h4>Notes</h4>
- * <p> Not really required as it only adds a few uneeded methods and
+ * <p> Not really required as it only adds a few unneeded methods and
  * delegates everything else to the stream it was constructed with.
  *
  * @version $Id$

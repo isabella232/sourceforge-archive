@@ -31,7 +31,7 @@ import java.sql.*;
  *         Select.GREATER_THAN,
  *         new Integer(30))
  *  .and()
- *  .where(UserTable,AgeColum,
+ *  .where(UserTable,AgeColumn,
  *         Select.LESS_THAN,
  *         new Integer(50));
  * Enumeration results = statement.query(db);

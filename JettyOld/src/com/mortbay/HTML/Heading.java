@@ -14,7 +14,7 @@ public class Heading extends Block
 {
     /* ----------------------------------------------------------------- */
     /* Construct a heading and add Element, String or Object
-     * @param level The leve of the heading
+     * @param level The level of the heading
      * @param o The Element, String or Object of the heading.
      */
     public Heading(int level,Object o)

@@ -190,8 +190,8 @@ public class Table extends Block
     
 
     /* ------------------------------------------------------------ */
-    /** Set the table cell pading
-     * @param pading the cell padding in pixels
+    /** Set the table cell padding
+     * @param padding the cell padding in pixels
      * @return This table for call chaining
      */
     public Table cellPadding(int padding)
@@ -201,7 +201,7 @@ public class Table extends Block
     }
     
     /* ------------------------------------------------------------ */
-    /** Set horizonatal and vertical spacing
+    /** Set horizontal and vertical spacing
      * @param h horizontal spacing
      * @param v vertical spacing
      * @return This table for call chaining

@@ -11,7 +11,7 @@ import com.mortbay.Base.*;
 
 /* ---------------------------------------------------------------- */
 /** An Applet Block
- * <p> Lets you programmatically set the class name, then optionally, the
+ * <p> Lets you set the class name from the program, and optionally, the
  * size and the codebase.
  *
  * <p> This class uses any attributes set in Element.

@@ -32,18 +32,18 @@ public class  StressTester
     }
 
     static void usage() {
-	System.err.println("StresTester -- stress a WWW server");
-	System.err.println("ussage:");
-	System.err.println("java com.mortbay.Jetty.StressTester <n-threads> <baseURL> <URLfile>");
+	System.err.println("StressTester -- stress a WWW server");
+	System.err.println("usage:");
+	System.err.println("java com.mortbay.Jetty.StressTester <n-threads> <baseURL> <URLFile>");
 	System.err.println();
 	System.exit(1);
     }
 
 
-    void stress(String snthreads, String baseURL, String URLfile) 
+    void stress(String snthreads, String baseURL, String URLFile) 
 	throws Exception 
     {
-	FileReader f = new FileReader(URLfile);
+	FileReader f = new FileReader(URLFile);
 	BufferedReader b = new BufferedReader(f);
       
 	Vector v = new Vector();
@@ -105,7 +105,7 @@ public class  StressTester
 	    Random random = new Random(this.hashCode());
 	    int bytes = 0;
 	    int requests = 0;
-	    for (int iurl = 10*_urls.length;iurl-->0;)
+	    for (int iurl = 5*_urls.length;iurl-->0;)
 	    {
 		requests++;
 		int n = new Float((_urls.length-1) * random.nextFloat()).intValue();

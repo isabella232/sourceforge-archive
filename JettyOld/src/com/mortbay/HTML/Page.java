@@ -24,7 +24,7 @@ import javax.servlet.*;
  * Page defines a set of standard names for many common parameters
  * and sections.
  * <p>
- * PageFactory classes can be staticaly registered with the
+ * PageFactory classes can be statically registered with the
  * Page class and these are used to instantiate Pages in the getPage
  * method.
  * <p>
@@ -48,9 +48,9 @@ public class Page extends Composite
         Header="Header",
         Title="Title",
         Section="Section",
-	HeaderSize="HdrSize",  // HeaderSize string suitable for frameset
+	HeaderSize="HdrSize",  // HeaderSize string suitable for FRAMESET
 	Footer="Footer",
-	FooterSize="FtrSize",  // FooterSize string suitable for frameset
+	FooterSize="FtrSize",  // FooterSize string suitable for FRAMESET
 	Content="Content",
 	ContentSize="CntSize",
 	Margin="Margin",
@@ -295,7 +295,7 @@ public class Page extends Composite
     }
     
     /* ------------------------------------------------------------ */
-    /** Access the page properties.  It is upto a derived Page class
+    /** Access the page properties.  It is up to a derived Page class
      * to interpret these properties.
      */
     public Dictionary properties()
@@ -316,7 +316,7 @@ public class Page extends Composite
 
     /* ------------------------------------------------------------ */
     /** Set a composite as a named section.  Other Page users may
-     * add to the section by calling addTo().  It is upto the section
+     * add to the section by calling addTo().  It is up to the section
      * creator to add the section to the page in it appropriate position.
      */
     public void setSection(String section, Composite composite)
@@ -392,7 +392,7 @@ public class Page extends Composite
      *        registered PageFactories, otherwise the
      *        class name.
      * @param request The request that this page is being created
-     *        for. The request can be used to select or taylor the
+     *        for. The request can be used to select or tailor the
      *        that page and it is also placed in the pages
      *        Request property.
      */
@@ -434,7 +434,7 @@ public class Page extends Composite
      *        registered PageFactories, otherwise the
      *        class name.
      * @param request The request that this page is being created
-     *        for. The request can be used to select or taylor the
+     *        for. The request can be used to select or tailor the
      *        that page and it is also placed in the pages
      *        Request property.
      */

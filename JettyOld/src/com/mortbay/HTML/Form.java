@@ -10,7 +10,7 @@ import java.util.*;
 
 /* -------------------------------------------------------------------- */
 /** HTML Form
- * The speicalized Block can contain HTML Form elements as well as
+ * The specialized Block can contain HTML Form elements as well as
  * any other HTML elements
  */
 public class Form extends Block

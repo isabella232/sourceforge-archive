@@ -11,7 +11,7 @@ import java.util.*;
 import java.io.*;
 
 /* -------------------------------------------------------------------- */
-/** Include File Element
+/** Include File, InputStream or Reader Element
  * <p>This Element includes another file.
  * This class expects that the HTTP directory separator '/' will be used.
  * This will be converted to the local directory separator.
@@ -21,16 +21,15 @@ import java.io.*;
 */
 public class Include extends Element
 {
-    Reader in=null;
+    Reader reader=null;
     
-    /* ---------------------------------------------------------------- */
-    public Include(String fileName)
-	 throws IOException
-    {
-	this(".",fileName);
-    }
-    
-    /* ---------------------------------------------------------------- */
+    /* ------------------------------------------------------------ */
+    /** Constructor.
+     * Include file
+     * @param directory Directory name
+     * @param fileName file name
+     * @exception IOException File not found
+     */
     public Include(String directory,
 		   String fileName)
 	 throws IOException
@@ -44,33 +43,106 @@ public class Include extends Element
 	    fileName  = fileName .replace('/',File.separatorChar);
 	}
 
-	Code.debug("IncludeTag("+directory+","+fileName+")");
+	Code.debug("IncludeTag(",directory,",",fileName,")");
+	includeFile(new File(directory,fileName));
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * Include file.
+     * @param fileName Filename
+     * @exception IOException File not found
+     */
+    public Include(String fileName)
+	throws IOException
+    {
+	if (File.separatorChar != '/')
+	    fileName  = fileName .replace('/',File.separatorChar);
+	Code.debug("IncludeTag(",fileName,")");
+	includeFile(new File(fileName));
+    }
 
-	try{
-	    File file = new File(directory,fileName);
-	    if (file.isDirectory())
-	    {
-		List list = new List(List.Unordered);	
-		String[] ls = file.list();
-		for (int i=0 ; i< ls.length ; i++)
-		    list.add(ls[i]);
-		StringWriter sw = new StringWriter();
-		list.write(sw);
-		in = new StringReader(sw.toString());
-	    }
-	    else
-		in = new BufferedReader(new FileReader(file));
+    /* ------------------------------------------------------------ */
+    /** Constructor.
+     * Include file.
+     * @param file file
+     * @exception IOException File not found
+     */
+    public Include(File file)
+	throws IOException
+    {
+	Code.debug("IncludeTag(",file,")");
+	includeFile(file);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Constructor.
+     * Include InputStream.
+     * @param in stream
+     * @exception IOException
+     */
+    public Include(InputStream in)
+	throws IOException
+    {
+	reader=new InputStreamReader(in);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor.
+     * Include Reader.
+     * @param in reader
+     * @exception IOException
+     */
+    public Include(Reader in)
+	throws IOException
+    {
+	reader=in;
+    }
+    
+    /* ------------------------------------------------------------ */
+    private void includeFile(File file)
+	throws IOException
+    {
+	if (!file.exists())
+	    throw new FileNotFoundException(file.toString());
+	
+	if (file.isDirectory())
+	{
+	    List list = new List(List.Unordered);	
+	    String[] ls = file.list();
+	    for (int i=0 ; i< ls.length ; i++)
+		list.add(ls[i]);
+	    StringWriter sw = new StringWriter();
+	    list.write(sw);
+	    reader = new StringReader(sw.toString());
 	}
-	catch (IOException e){
-	    Code.warning("Bad Include("+directory+","+fileName+")",e);
-	    throw e;
+	else
+	{
+	    reader = new BufferedReader(new FileReader(file));
 	}
     }
     
+
     /* ---------------------------------------------------------------- */
     public void write(Writer out)
 	 throws IOException
     {
-	IO.copy(in,out);
+	try{
+	    IO.copy(reader,out);
+	}
+	finally
+	{
+	    reader.close();
+	    reader=null;
+	}
     }
 }
+
+
+
+
+
+
+
+
+

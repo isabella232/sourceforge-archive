@@ -1,14 +1,14 @@
 # ========================================================================
-# This is a config which allows the neccessary operations for operatin as a
+# This is a config which allows the necessary operations for operating as a
 # Netscape Roaming User Server. This is done by simply allowing the
 # FileHandler to server PUT, DELETE and MOVE.
 #
-# To try this out, set up your netscape as follows:
+# To try this out, set up your netscape browser as follows:
 #    Open Edit->Preferences
 #    Open the "Roaming User" tab
 #    Check "Enable Roaming Access for this User"
 #    Enter the username as "tom" (From the RealmDemo.prp!)
-#    Under "Server Information", Check "HTTP Server" and enter the url:
+#    Under "Server Information", Check "HTTP Server" and enter the URL:
 #       "http://localhost:8080"
 #    Click OK
 #    Exit and restart netscape. Use the password "tom"
@@ -17,7 +17,7 @@
 # 1 users netscape profile (or all the people using it can share the profile,
 # but there WILL be concurrency issues). To serve more, each user would need
 # Their own userid and password in the realm file, their own directory on the
-# server under the fileroot and should use the url
+# server under the FileBase and should use the URL:
 # "http://localhost:8080/$USERID" (netscape does the substitution for you).
 #
 # ------------------------------------------------------------------------
