@@ -709,7 +709,7 @@ public class HttpServer implements LifeCycle,
     public synchronized void stop(boolean graceful)
         throws InterruptedException
     {
-        for (int l=0;l<_listeners.size();l++)
+        for (int l=0;_listeners!=null && l<_listeners.size();l++)
         {
             HttpListener listener =(HttpListener)_listeners.get(l); 
             if (listener.isStarted())
