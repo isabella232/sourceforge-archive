@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.BufferedOutputStream;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.io.OutputStreamWriter;
 import java.util.Locale;
 
 
@@ -41,8 +42,8 @@ public class NCSARequestLog implements RequestLog
     private transient OutputStream _out;
     private transient OutputStream _fileOut;
     private transient DateCache _logDateCache;
-    private transient ByteArrayISO8859Writer _buf;
     private transient PathMap _ignorePathMap;
+    private transient Writer _writer;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -245,7 +246,6 @@ public class NCSARequestLog implements RequestLog
     public void start()
         throws Exception
     {
-        _buf=new ByteArrayISO8859Writer();
         _logDateCache=new DateCache(_logDateFormat,_logLocale);
         _logDateCache.setTimeZoneID(_logTimeZone);
         
@@ -270,6 +270,8 @@ public class NCSARequestLog implements RequestLog
         }
         else
             _ignorePathMap=null;
+
+        _writer=new OutputStreamWriter(_out);
     }
 
     /* ------------------------------------------------------------ */
@@ -281,13 +283,14 @@ public class NCSARequestLog implements RequestLog
     /* ------------------------------------------------------------ */
     public void stop()
     {
+        try{if (_writer!=null)_writer.flush();} catch (IOException e){Code.ignore(e);}
         if (_out!=null && _closeOut)
             try{_out.close();}catch(IOException e){Code.ignore(e);}
         _out=null;
         _fileOut=null;
         _closeOut=false;
-        _buf=null;
         _logDateCache=null;
+        _writer=null;
     }
     
     /* ------------------------------------------------------------ */
@@ -307,54 +310,60 @@ public class NCSARequestLog implements RequestLog
                 return;
 
             // log the rest
-            synchronized(_buf.getLock())
+            if (_fileOut==null)
+                return;
+
+            StringBuffer buf = new StringBuffer(160);
+            
+            buf.append(request.getRemoteAddr());
+            buf.append(" - ");
+            String user = request.getAuthUser();
+            buf.append((user==null)?"-":user);
+            buf.append(" [");
+            buf.append(_logDateCache.format(request.getTimeStamp()));
+            buf.append("] \"");
+            buf.append(request.getMethod());
+            buf.append(' ');
+            buf.append(request.getURI());
+            buf.append(' ');
+            buf.append(request.getVersion());
+            buf.append("\" ");
+            int status=response.getStatus();    
+            buf.append('0'+((status/100)%10));
+            buf.append('0'+((status/10)%10));
+            buf.append('0'+(status%10));
+            if (responseLength>=0)
             {
-                if (_fileOut==null)
-                    return;
-                
-                _buf.write(request.getRemoteAddr());
-                _buf.write(" - ");
-                String user = request.getAuthUser();
-                _buf.write((user==null)?"-":user);
-                _buf.write(" [");
-                _buf.write(_logDateCache.format(request.getTimeStamp()));
-                _buf.write("] \"");
-                request.writeRequestLine(_buf);
-                _buf.write("\" ");
-                int status=response.getStatus();    
-                _buf.write('0'+((status/100)%10));
-                _buf.write('0'+((status/10)%10));
-                _buf.write('0'+(status%10));
-                if (responseLength>=0)
-                {
-                    _buf.write(' ');
-                    if (responseLength>99999)
-                        _buf.write(Integer.toString(responseLength));
-                    else
-                    {
-                        if (responseLength>9999) 
-                            _buf.write('0'+((responseLength/10000)%10));
-                        if (responseLength>999) 
-                            _buf.write('0'+((responseLength/1000)%10));
-                        if (responseLength>99) 
-                            _buf.write('0'+((responseLength/100)%10));
-                        if (responseLength>9) 
-                            _buf.write('0'+((responseLength/10)%10));
-                        _buf.write('0'+(responseLength%10));
-                    }
-                    _buf.write(' ');
-                }
+                buf.append(' ');
+                if (responseLength>99999)
+                    buf.append(Integer.toString(responseLength));
                 else
-                    _buf.write(" - ");
-                
-                if (_extended)
-                    logExtended(request,response,_buf);
-                
-                _buf.write(StringUtil.__LINE_SEPARATOR);
-                _buf.flush();
-                _buf.writeTo(_out);
-                _buf.resetWriter();
+                {
+                    if (responseLength>9999) 
+                        buf.append('0'+((responseLength/10000)%10));
+                    if (responseLength>999) 
+                        buf.append('0'+((responseLength/1000)%10));
+                    if (responseLength>99) 
+                        buf.append('0'+((responseLength/100)%10));
+                    if (responseLength>9) 
+                        buf.append('0'+((responseLength/10)%10));
+                    buf.append('0'+(responseLength%10));
+                }
+                buf.append(' ');
             }
+            else
+                buf.append(" - ");
+
+            String log =buf.toString();
+            synchronized(_writer)
+            {
+                _writer.write(log);
+                if (_extended)
+                    logExtended(request,response,_writer);
+                _writer.write(StringUtil.__LINE_SEPARATOR);
+            }
+            
+
         }
         catch(IOException e)
         {

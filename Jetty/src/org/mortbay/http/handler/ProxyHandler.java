@@ -7,9 +7,13 @@ package org.mortbay.http.handler;
 
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.HttpURLConnection;
 import java.net.Socket;
+import java.util.Enumeration;
 import org.mortbay.http.HttpOutputStream;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
@@ -23,6 +27,7 @@ import org.mortbay.util.IO;
 import org.mortbay.util.URI;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.StringMap;
 
 /* ------------------------------------------------------------ */
 /** Proxy request handler.
@@ -33,6 +38,34 @@ import org.mortbay.util.StringUtil;
  */
 public class ProxyHandler extends AbstractHttpHandler
 {
+    private static final StringMap __DontProxyHeaders = new StringMap();
+    static
+    {
+        Object o = new Object();
+        __DontProxyHeaders.setIgnoreCase(true);
+        __DontProxyHeaders.put("Proxy-Connection",o);
+        __DontProxyHeaders.put(HttpFields.__Connection,o);
+        __DontProxyHeaders.put(HttpFields.__KeepAlive,o);
+        __DontProxyHeaders.put(HttpFields.__TransferEncoding,o);
+        __DontProxyHeaders.put(HttpFields.__TE,o);
+        __DontProxyHeaders.put(HttpFields.__Trailer,o);
+        __DontProxyHeaders.put(HttpFields.__ProxyAuthorization,o);
+        __DontProxyHeaders.put(HttpFields.__ProxyAuthenticate,o);
+        __DontProxyHeaders.put(HttpFields.__Upgrade,o);
+    }
+    
+    private static final StringMap __ProxySchemes = new StringMap();
+    static
+    {
+        Object o = new Object();
+        __ProxySchemes.setIgnoreCase(true);
+        __ProxySchemes.put(HttpMessage.__SCHEME,o);
+        __ProxySchemes.put(HttpMessage.__SSL_SCHEME,o);
+        __ProxySchemes.put("ftp",o);
+    }
+    
+    /* ------------------------------------------------------------ */
+    
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,
                        String pathParams,
@@ -40,151 +73,137 @@ public class ProxyHandler extends AbstractHttpHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
-
-        // XXX we should proxy IF
-        //  1) we have a configured path that we send to a configured
-        //     destination (URL rewritting forbidden by rfc???)
-        //  2) We have a http and the host is not what is configured
-        //     as us
-        //  3) We have a ftp scheme and the FTP client classes are in
-        //     our classpath (should delegate to another class to
-        //     avoid linking hassles).
+        // Is this a proxy request?
+        
         URI uri = request.getURI();
-        if (!"http".equals(uri.getScheme()))
+        String scheme=uri.getScheme();
+        if (scheme==null || !__ProxySchemes.containsKey(scheme))
+            return;
+
+        // Do we proxy this?
+        if (!isProxied(uri))
             return;
         
-        Code.debug("\nPROXY:");
-        Code.debug("pathInContext=",pathInContext);
-        Code.debug("URI=",uri);
-
-        Socket socket=null;
         try
         {
-            String host=uri.getHost();
-            int port =uri.getPort();
-            if (port<=0)
-                port=80;
-            String path=uri.getPath();
-            if (path==null || path.length()==0)
-                path="/";
+            URL url = new URL(uri.toString());
+            Code.debug("PROXY URL=",url);
 
-            if (Code.debug())
+            URLConnection connection = url.openConnection();
+
+            // Set method
+            HttpURLConnection http = null;
+            if (connection instanceof HttpURLConnection)
             {
-                Code.debug("host=",host);
-                Code.debug("port="+port);
-                Code.debug("path=",path);
+                http = (HttpURLConnection)connection;
+                http.setRequestMethod(request.getMethod());
             }
-            
-            // XXX associate this socket with the connection so
-            // that it may be persistent.
-            
-            socket = new Socket(host,port);
-            socket.setSoTimeout(5000); // XXX configure this
-            OutputStream sout=socket.getOutputStream();
-            
-            request.setState(HttpMessage.__MSG_EDITABLE);
-            HttpFields header=request.getHeader();
 
-            // XXX Lets reject range requests at this point!!!!?
-            
-            // XXX need to process connection header????
+            // check connection header
+            connection.setRequestProperty("Via","1.1 (jetty)");
+            String connectionHdr = request.getField(HttpFields.__Connection);
+            if (connectionHdr!=null &&
+                (connectionHdr.equalsIgnoreCase(HttpFields.__KeepAlive)||
+                 connectionHdr.equalsIgnoreCase(HttpFields.__Close)))
+                connectionHdr=null;
 
-            // XXX Handle Max forwards - and maybe OPTIONS/TRACE???
-            
-            // XXX need to encode the path
-
-            header.put("Connection","close");
-            header.add("Via","Via: 1.1 host (Jetty/4.x)");
-
-            // Convert the header to byte array.
-            // Should assoc writer with connection for recycling!
-            ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer();
-            writer.write(request.getMethod());
-            writer.write(' ');
-            writer.write(path);
-            writer.write(' ');
-            writer.write(request.getDotVersion()==0
-                         ?HttpMessage.__HTTP_1_0
-                         :HttpMessage.__HTTP_1_1);
-            writer.write('\015');
-            writer.write('\012');
-            header.write(writer);
-            
-            // Send the request to the next hop.
-            Code.debug("\nreq=\n"+new String(writer.getBuf(),0,writer.size()));
-            writer.writeTo(sout);
-            writer.resetWriter();
-            
-            // XXX If expect 100-continue flush or no body the header now!
-            sout.flush();
-            
-            // XXX cache http versions and do 417
-            
-            // XXX To to copy content with content length or chunked.
-
-
-            // get ready to read the results back
-            LineInput lin = new LineInput(socket.getInputStream());
-            Code.debug("lin="+lin);
-
-            // XXX need to do something about timeouts here
-            String resLine = lin.readLine();
-            if (resLine==null)
-                return; // XXX what should we do?
-            
-            // At this point we are committed to sending a response!!!!
-            request.setHandled(true);
-            header = response.getHeader();
-            header.clear();
-            OutputStream out=response.getOutputStream();
-            
-            // Forward 100 responses
-            while (resLine.startsWith("100"))
+            // copy headers
+            Enumeration enum = request.getFieldNames();
+            while (enum.hasMoreElements())
             {
-                Code.debug("resLine = " + resLine);
-                writer.write(resLine);
-                writer.writeTo(out);
-                out.flush();
-                writer.resetWriter();
+                // XXX could be better than this!
+                String hdr=(String)enum.nextElement();
+                if (__DontProxyHeaders.containsKey(hdr))
+                    continue;
+                if (connectionHdr!=null && connectionHdr.indexOf(hdr)>=0)
+                    continue;
                 
-                resLine = lin.readLine();
-                if (resLine==null)
-                    return; // XXX what should we do?
+                String val=request.getField(hdr);
+                connection.setRequestProperty(hdr,val);
+            }           
+
+            // a little bit of cache control
+            String cache_control = request.getField(HttpFields.__CacheControl);
+            if (cache_control!=null &&
+                (cache_control.indexOf("no-cache")>=0 ||
+                 cache_control.indexOf("no-store")>=0))
+                connection.setUseCaches(false);
+            
+            try
+            {    
+                connection.setDoInput(true);
+                
+                // do input thang!
+                InputStream in=request.getInputStream();
+                if (in.available()>0) // XXX need better tests than this
+                {
+                    connection.setDoOutput(true);
+                    IO.copy(in,connection.getOutputStream());
+                }
+                
+                // Connect
+                connection.connect();    
             }
-
-            // Read Response lne
-            header.read(lin);
-            // Add VIA
-            header.add("Via","Via: 1.1 host (Jetty/4.x)"); // XXX
-            // XXX do the connection based stuff here!
-
-            // return the header
-            writer.write(resLine);
-            writer.write('\015');
-            writer.write('\012');
-            header.write(writer);
-            writer.writeTo(out);
-
-            // return the body
-            // XXX need more content length options here
-            // XXX need to handle prechunked 
-            IO.copy(lin,out);
-        }
-        catch(Exception e)
-        {
-            Code.warning(e);
-        }
-        finally
-        {
-            request.setState(HttpMessage.__MSG_RECEIVED);
-            response.setState(HttpMessage.__MSG_SENT);
-            if (socket!=null)
+            catch (Exception e)
             {
-                try{socket.close();}
-                catch(Exception e){Code.warning(e);}
+                Code.ignore(e);
             }
+            
+            InputStream proxy_in = null;
+
+            // handler status codes etc.
+            if (http!=null)
+            {
+                proxy_in = http.getErrorStream();
+                int code=500;
+                
+                code=http.getResponseCode();
+                System.err.println("code="+code);
+                response.setStatus(code);
+                response.setReason(http.getResponseMessage());
+                System.err.println("reason");
+            }
+            
+            if (proxy_in==null)
+            {
+                try {proxy_in=connection.getInputStream();}
+                catch (Exception e)
+                {
+                    Code.ignore(e);
+                    proxy_in = http.getErrorStream();
+                }
+            }
+            System.err.println("in");
+            
+            // set response headers
+            int h=0;
+            String hdr=connection.getHeaderFieldKey(h);
+            String val=connection.getHeaderField(h);
+            
+            while(hdr!=null || val!=null)
+            {
+                if (hdr!=null && val!=null && !__DontProxyHeaders.containsKey(hdr))
+                    response.setField(hdr,val);
+                h++;
+                hdr=connection.getHeaderFieldKey(h);
+                val=connection.getHeaderField(h);
+            }
+            response.setField("Via","1.1 (jetty)");
+            
+            request.setHandled(true);
+            if (proxy_in!=null)
+                IO.copy(proxy_in,response.getOutputStream());
+            
         }
-        
+        catch (Exception e)
+        {
+            Code.warning("??? ",e);
+        }
         
     }
+    
+    protected boolean isProxied(URI uri)
+    {
+        return true;
+    }    
 }

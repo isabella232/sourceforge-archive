@@ -325,6 +325,12 @@ public class HttpRequest extends HttpMessage
     }
 
     /* ------------------------------------------------------------ */
+    public String getVersion()
+    {
+        return _version;
+    }
+
+    /* ------------------------------------------------------------ */
     /**
      * Reconstructs the URL the client used to make the request.
      * The returned URL contains a protocol, server name, port
