@@ -208,7 +208,8 @@ public class Default extends HttpServlet
                         buf.append(q);
                     }
                     response.setHeader(HttpFields.__Location, URI.addPaths(buf.toString(),"/"));
-                    response.sendError(HttpResponse.__303_See_Other);
+                    response.setStatus(HttpResponse.__303_See_Other);
+                    response.flushBuffer();
                     return;
                 }
   
@@ -244,27 +245,49 @@ public class Default extends HttpServlet
         if (exists && !passConditionalHeaders(request,response,resource))
             return;
 
-        try
+        if (pathInContext.endsWith("/"))
         {
-            int toRead = request.getContentLength();
-            InputStream in = request.getInputStream();
-            OutputStream out = resource.getOutputStream();
-            if (toRead>=0)
-                IO.copy(in,out,toRead);
+            if (!exists)
+            {
+                if (!resource.getFile().mkdirs())
+                    response.sendError(HttpResponse.__403_Forbidden,
+                                       "Directories could not be created");
+                else
+                {
+                    response.setStatus(HttpResponse.__201_Created);
+                    response.flushBuffer();
+                }
+            }
             else
-                IO.copy(in,out);
-            out.close();
-
-            response.setStatus(exists
-                               ?HttpResponse.__200_OK
-                               :HttpResponse.__201_Created);
-            response.flushBuffer();
+            {
+                response.setStatus(HttpResponse.__200_OK);
+                response.flushBuffer();
+            }
         }
-        catch (Exception ex)
+        else
         {
-            Code.warning(ex);
-            response.sendError(HttpResponse.__403_Forbidden,
-                               ex.getMessage());
+            try
+            {
+                int toRead = request.getContentLength();
+                InputStream in = request.getInputStream();
+                OutputStream out = resource.getOutputStream();
+                if (toRead>=0)
+                    IO.copy(in,out,toRead);
+                else
+                    IO.copy(in,out);
+                out.close();
+                
+                response.setStatus(exists
+                                   ?HttpResponse.__200_OK
+                                   :HttpResponse.__201_Created);
+                response.flushBuffer();
+            }
+            catch (Exception ex)
+            {
+                Code.warning(ex);
+                response.sendError(HttpResponse.__403_Forbidden,
+                                   ex.getMessage());
+            }
         }
     }
     
@@ -282,9 +305,13 @@ public class Default extends HttpServlet
         try
         {
             // delete the file
-            resource.delete();
-            // Send response
-            response.sendError(HttpResponse.__204_No_Content);
+            if (resource.delete())
+            {
+                response.setStatus(HttpResponse.__204_No_Content);
+                response.flushBuffer();
+            }
+            else
+                response.sendError(HttpResponse.__403_Forbidden);
         }
         catch (SecurityException sex)
         {
@@ -327,7 +354,8 @@ public class Default extends HttpServlet
      
             Code.debug("Moving "+resource+" to "+newFile);
             resource.renameTo(newFile);
-            response.sendError(HttpResponse.__204_No_Content);
+            response.setStatus(HttpResponse.__204_No_Content);
+            response.flushBuffer();
         }
         catch (Exception ex)
         {
@@ -381,7 +409,8 @@ public class Default extends HttpServlet
             {
                 if (resource.lastModified() <= date)
                 {
-                    response.sendError(HttpResponse.__304_Not_Modified);
+                    response.setStatus(HttpResponse.__304_Not_Modified);
+                    response.flushBuffer();
                     return false;
                 }
             }

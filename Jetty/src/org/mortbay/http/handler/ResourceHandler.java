@@ -236,7 +236,8 @@ public class ResourceHandler extends AbstractHttpHandler
                         buf.append(q);
                     }
                     response.setField(HttpFields.__Location, URI.addPaths(buf.toString(),"/"));
-                    response.sendError(302);
+                    response.setStatus(302);
+                    request.setHandled(true);
                     return;
                 }
   
@@ -299,7 +300,8 @@ public class ResourceHandler extends AbstractHttpHandler
             {
                 if (resource.lastModified() <= date)
                 {
-                    response.sendError(response.__304_Not_Modified);
+                    response.setStatus(response.__304_Not_Modified);
+                    request.setHandled(true);
                     return false;
                 }
             }
@@ -323,27 +325,50 @@ public class ResourceHandler extends AbstractHttpHandler
             !passConditionalHeaders(request,response,resource))
             return;
         
-        try
+        if (pathInContext.endsWith("/"))
         {
-            int toRead = request.getContentLength();
-            InputStream in = request.getInputStream();
-            OutputStream out = resource.getOutputStream();
-            if (toRead>=0)
-                IO.copy(in,out,toRead);
+            if (!exists)
+            {
+                if (!resource.getFile().mkdirs())
+                    response.sendError(response.__403_Forbidden, "Directories could not be created");
+                else
+                {
+                    request.setHandled(true);
+                    response.setStatus(HttpResponse.__201_Created);
+                    response.commit();
+                }
+            }
             else
-                IO.copy(in,out);
-            out.close();
-            request.setHandled(true);
-            response.setStatus(exists
-                               ?HttpResponse.__200_OK
-                               :HttpResponse.__201_Created);
-            response.commit();
+            {
+                request.setHandled(true);
+                response.setStatus(HttpResponse.__200_OK);
+                response.commit();
+            }
         }
-        catch (Exception ex)
+        else
         {
-            Code.warning(ex);
-            response.sendError(response.__403_Forbidden,
-                               ex.getMessage());
+            try
+            {
+                int toRead = request.getContentLength();
+                InputStream in = request.getInputStream();
+                OutputStream out = resource.getOutputStream();
+                if (toRead>=0)
+                    IO.copy(in,out,toRead);
+                else
+                    IO.copy(in,out);
+                out.close();
+                request.setHandled(true);
+                response.setStatus(exists
+                                   ?HttpResponse.__200_OK
+                                   :HttpResponse.__201_Created);
+                response.commit();
+            }
+            catch (Exception ex)
+            {
+                Code.warning(ex);
+                response.sendError(response.__403_Forbidden,
+                                   ex.getMessage());
+            }
         }
     }
 
@@ -363,11 +388,13 @@ public class ResourceHandler extends AbstractHttpHandler
         try
         {
             // delete the file
-            resource.delete();
+            if (resource.delete())
+                response.setStatus(HttpResponse.__204_No_Content);
+            else
+                response.sendError(HttpResponse.__403_Forbidden);
 
             // Send response
             request.setHandled(true);
-            response.sendError(response.__204_No_Content);
         }
         catch (SecurityException sex)
         {
@@ -417,8 +444,8 @@ public class ResourceHandler extends AbstractHttpHandler
             Code.debug("Moving "+resource+" to "+newFile);
             resource.renameTo(newFile);
     
+            response.setStatus(response.__204_No_Content);
             request.setHandled(true);
-            response.sendError(response.__204_No_Content);
         }
         catch (Exception ex)
         {
