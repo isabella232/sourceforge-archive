@@ -114,6 +114,10 @@ public class JarResource extends URLResource
                 FileOutputStream fout = new FileOutputStream(file);
                 IO.copy(jin,fout);
                 fout.close();
+
+                // touch the file.
+                if (entry.getTime()>=0)
+                    file.setLastModified(entry.getTime());
             }
             if (deleteOnExit)
                 file.deleteOnExit();

@@ -278,8 +278,8 @@ public class TestRFC2616
         {
             HttpFields fields = new HttpFields();
 
-            fields.put("D1","Sun, 06 Nov 1994 08:49:37 GMT");
-            fields.put("D2","Sunday, 06-Nov-94 08:49:37 GMT");
+            fields.put("D1","Sun, 6 Nov 1994 08:49:37 GMT");
+            fields.put("D2","Sunday, 6-Nov-94 08:49:37 GMT");
             fields.put("D3","Sun Nov  6 08:49:37 1994");
             Date d1 = new Date(fields.getDateField("D1"));
             Date d2 = new Date(fields.getDateField("D2"));
@@ -290,7 +290,7 @@ public class TestRFC2616
 
             fields.putDateField("Date",d1);
             t.checkEquals(fields.get("Date"),
-                          "Sun, 06 Nov 1994 08:49:37 GMT",
+                          "Sun, 6 Nov 1994 08:49:37 GMT",
                           "3.3.1 RFC 822 preferred");
         }
         catch(Exception e)

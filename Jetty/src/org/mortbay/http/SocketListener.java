@@ -186,11 +186,8 @@ public class SocketListener
         try
         {
             if (_lowResourcePersistTimeMs>0 && isLowOnResources())
-            {
-                _throttled++;
                 socket.setSoTimeout(_lowResourcePersistTimeMs);
-            }
-            else
+            else if (socket.getSoTimeout()!=getMaxIdleTimeMs())
                 socket.setSoTimeout(getMaxIdleTimeMs());
         }
         catch(Exception e)
@@ -233,11 +230,7 @@ public class SocketListener
         try
         {
             if (socket.getSoTimeout()!=getMaxReadTimeMs())
-            {
-                if (_throttled>0)
-                    _throttled--;
                 socket.setSoTimeout(getMaxReadTimeMs());
-            }
         }
         catch(Exception e)
         {
@@ -259,17 +252,12 @@ public class SocketListener
     {
         try
         {
+            Socket socket=(Socket)(connection.getConnection());
+
             if (_lowResourcePersistTimeMs>0 && isLowOnResources())
-            {
-                _throttled++;
-                Socket socket=(Socket)(connection.getConnection());
                 socket.setSoTimeout(_lowResourcePersistTimeMs);
-            }
-            else
-            {
-                Socket socket=(Socket)(connection.getConnection());
+            else if (socket.getSoTimeout()!=getMaxIdleTimeMs())
                 socket.setSoTimeout(getMaxIdleTimeMs());
-            }
         }
         catch(Exception e)
         {

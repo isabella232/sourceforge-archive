@@ -313,8 +313,26 @@ public class ResourceHandler extends AbstractHttpHandler
     {
         if (!request.getMethod().equals(HttpRequest.__HEAD))
         {
-            // check any modified headers.
+            // If we have meta data for the file
+            // Try a direct match for most common requests. Avoids
+            // parsing the date.
+            HttpContext.ResourceMetaData metaData =
+                (HttpContext.ResourceMetaData)resource.getAssociate();
+            if (metaData!=null)
+            {
+                String ifms=request.getField(HttpFields.__IfModifiedSince);
+                String mdlm=metaData.getLastModified();
+                if (ifms!=null && mdlm!=null && ifms.equals(mdlm))
+                {
+                    response.setStatus(HttpResponse.__304_Not_Modified);
+                    request.setHandled(true);
+                    return false;
+                }
+            }
+
+            
             long date=0;
+            // Parse the if[un]modified dates and compare to resource
             
             if ((date=request.getDateField(HttpFields.__IfUnmodifiedSince))>0)
             {

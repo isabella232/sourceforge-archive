@@ -293,10 +293,10 @@ public class HttpFields
 
     /* -------------------------------------------------------------- */
     public final static DateCache __dateCache = 
-        new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'",
+        new DateCache("EEE, d MMM yyyy HH:mm:ss 'GMT'",
                       Locale.US);
     public final static SimpleDateFormat __dateSend = 
-        new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'",
+        new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss 'GMT'",
                              Locale.US);
 
     public final static String __01Jan1970=
@@ -860,7 +860,7 @@ public class HttpFields
         String val = valueParameters(get(name),null);
         if (val==null)
             return -1;
-        
+
         for (int i=0;i<__dateReceive.length;i++)
         {
             try{
