@@ -109,7 +109,8 @@ public class ProxyHandler extends AbstractHttpHandler
             Code.debug("PROXY URL=",url);
 
             URLConnection connection = url.openConnection();
-
+            connection.setAllowUserInteraction(false);
+            
             // Set method
             HttpURLConnection http = null;
             if (connection instanceof HttpURLConnection)

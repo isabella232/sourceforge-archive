@@ -9,7 +9,7 @@ Jetty-4.2.9
  + Cleaned up includes
  + Removed checking for single valued headers.
  + Optional 2.4 behaviour for sessionDestroyed notification.
-
+ + Stop proxy url from doing user interaction.
 
 Jetty-4.2.8_01 - 18 February 2004
  + Patched first release of 4.2.8 with correct version number
