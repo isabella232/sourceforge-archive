@@ -54,7 +54,12 @@ public class Context implements ServletContext, HttpSessionContext
     /* ------------------------------------------------------------ */
     ServletHandler getHandler(){return _handler;}
     HandlerContext getHandlerContext(){return _handlerContext;}
-    void setHandlerContext(HandlerContext hc){_handlerContext=hc;}
+    void setHandlerContext(HandlerContext hc)
+    {
+        _handlerContext=hc;
+        if(_handlerContext!=null)
+            _logSink=(LogSink)_handlerContext.getAttribute(CONTEXT_LOG);
+    }
 
     /* ------------------------------------------------------------ */
     /** Constructor.
