@@ -101,7 +101,7 @@ public abstract class Credential
     }
     
     /* ------------------------------------------------------------ */
-    /** Unix Crypt Credentials
+    /** MD5 Credentials
      */
     public static class MD5 extends Credential
     {
