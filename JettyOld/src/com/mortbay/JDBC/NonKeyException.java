@@ -13,8 +13,8 @@ public class NonKeyException extends Exception
     
     public NonKeyException(Column c)
     {
-	super("Column "+c.getName()+" is not a key column");
-	column=c;
+        super("Column "+c.getName()+" is not a key column");
+        column=c;
     }
 }
 

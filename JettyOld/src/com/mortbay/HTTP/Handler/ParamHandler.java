@@ -30,7 +30,7 @@ public class ParamHandler extends NullHandler
      */
     public ParamHandler(Properties properties)
     {
-	setProperties(properties);
+        setProperties(properties);
     }
     
     /* ----------------------------------------------------------------- */
@@ -46,30 +46,30 @@ public class ParamHandler extends NullHandler
      */
     public void setProperties(Properties properties)
     {
-	PropertyTree tree=null;
-	if (properties instanceof PropertyTree)
-	    tree = (PropertyTree)properties;
-	else
-	    tree = new PropertyTree(properties);
+        PropertyTree tree=null;
+        if (properties instanceof PropertyTree)
+            tree = (PropertyTree)properties;
+        else
+            tree = new PropertyTree(properties);
 
-	includeCookiesAsParameters=tree.getBoolean("CookiesAsParameters");
+        includeCookiesAsParameters=tree.getBoolean("CookiesAsParameters");
     }
     
     /* ----------------------------------------------------------------- */
     public ParamHandler(boolean cookies)
     {
-	this.includeCookiesAsParameters=cookies;
+        this.includeCookiesAsParameters=cookies;
     }
     
     /* ----------------------------------------------------------------- */
     public void handle(HttpRequest request,
-		       HttpResponse response)
-	 throws IOException
+                       HttpResponse response)
+         throws IOException
     {
-	Code.debug("ParamHandler");
-	request.decodeFormParameters();
-	if (includeCookiesAsParameters)
-	    request.cookiesAsParameters();
+        Code.debug("ParamHandler");
+        request.decodeFormParameters();
+        if (includeCookiesAsParameters)
+            request.cookiesAsParameters();
     }
 }
 

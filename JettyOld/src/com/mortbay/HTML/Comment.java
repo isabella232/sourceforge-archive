@@ -18,9 +18,9 @@ public class Comment extends Composite
 {
     /* ----------------------------------------------------------------- */
     public void write(Writer out)
-	 throws IOException
+         throws IOException
     {
-	out.write("<!--\n");
+        out.write("<!--\n");
         super.write(out);
         out.write("\n-->");
     }

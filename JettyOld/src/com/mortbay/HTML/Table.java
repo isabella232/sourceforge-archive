@@ -35,10 +35,10 @@ public class Table extends Block
      */
     public Table()
     {
-	super("TABLE");
-	if (threadNestingMap!=null)
-	    cellNestFactory = (CompositeFactory)
-		threadNestingMap.get(Thread.currentThread());
+        super("TABLE");
+        if (threadNestingMap!=null)
+            cellNestFactory = (CompositeFactory)
+                threadNestingMap.get(Thread.currentThread());
     }
     
     /* ----------------------------------------------------------------- */
@@ -46,11 +46,11 @@ public class Table extends Block
      */
     public Table(int border)
     {
-	super("TABLE");
-	attribute("BORDER",border);
-	if (threadNestingMap!=null)
-	    cellNestFactory = (CompositeFactory)
-		threadNestingMap.get(Thread.currentThread());
+        super("TABLE");
+        attribute("BORDER",border);
+        if (threadNestingMap!=null)
+            cellNestFactory = (CompositeFactory)
+                threadNestingMap.get(Thread.currentThread());
     }
 
     /* ----------------------------------------------------------------- */
@@ -58,8 +58,8 @@ public class Table extends Block
      */
     public Table(int border, String attributes)
     {
-	this(border);
-	attribute(attributes);
+        this(border);
+        attribute(attributes);
     }
 
     /* ----------------------------------------------------------------- */
@@ -69,16 +69,16 @@ public class Table extends Block
      */
     public Table newRow()
     {
-	unnest();
-	nest(row = new Block("TR"));
-	if (_defaultRow!=null)
-	{
-	    row.setAttributesFrom(_defaultRow);
-	    if (_defaultRow.size()>0)
-		row.add(_defaultRow.contents());
-	}
-	cell=null;
-	return this;
+        unnest();
+        nest(row = new Block("TR"));
+        if (_defaultRow!=null)
+        {
+            row.setAttributesFrom(_defaultRow);
+            if (_defaultRow.size()>0)
+                row.add(_defaultRow.contents());
+        }
+        cell=null;
+        return this;
     }
 
     /* ----------------------------------------------------------------- */
@@ -88,9 +88,9 @@ public class Table extends Block
      */
     public Table newRow(String attributes)
     {
-	newRow();
-	row.attribute(attributes);
-	return this;	
+        newRow();
+        row.attribute(attributes);
+        return this;    
     }
 
     /* ----------------------------------------------------------------- */
@@ -100,14 +100,14 @@ public class Table extends Block
      */
     private void newBlock(String m)
     {
-	if (row==null)
-	    newRow();
-	else
-	    row.unnest();
-	row.nest(cell=new Block(m));
+        if (row==null)
+            newRow();
+        else
+            row.unnest();
+        row.nest(cell=new Block(m));
 
-	if (cellNestFactory!=null)
-	    cell.nest(cellNestFactory.newComposite());	
+        if (cellNestFactory!=null)
+            cell.nest(cellNestFactory.newComposite());  
     }
     
     /* ----------------------------------------------------------------- */
@@ -117,14 +117,14 @@ public class Table extends Block
      */
     public Table newCell()
     {
-	newBlock("TD");
-	if (_defaultCell!=null)
-	{
-	    cell.setAttributesFrom(_defaultCell);
-	    if (_defaultCell.size()>0)
-		cell.add(_defaultCell.contents());
-	}
-	return this;
+        newBlock("TD");
+        if (_defaultCell!=null)
+        {
+            cell.setAttributesFrom(_defaultCell);
+            if (_defaultCell.size()>0)
+                cell.add(_defaultCell.contents());
+        }
+        return this;
     }
     
     /* ----------------------------------------------------------------- */
@@ -135,9 +135,9 @@ public class Table extends Block
      */
     public Table newCell(String attributes)
     {
-	newCell();
-	cell.attribute(attributes);
-	return this;
+        newCell();
+        cell.attribute(attributes);
+        return this;
     }
     
     /* ----------------------------------------------------------------- */
@@ -148,9 +148,9 @@ public class Table extends Block
      */
     public Table addCell(Object o)
     {
-	newCell();
-	cell.add(o);
-	return this;
+        newCell();
+        cell.add(o);
+        return this;
     }
 
     /* ----------------------------------------------------------------- */
@@ -161,11 +161,11 @@ public class Table extends Block
      */
     public Table addCell(Object o, String attributes)
     {
-	addCell(o);
-	cell.attribute(attributes);
-	return this;
+        addCell(o);
+        cell.attribute(attributes);
+        return this;
     }
-	
+        
     /* ----------------------------------------------------------------- */
     /* Create a new Heading in the current row.
      * Adds to the table after this call and before next call to newRow,
@@ -173,14 +173,14 @@ public class Table extends Block
      */
     public Table newHeading()
     {
-	newBlock("TH");
-	if (_defaultHead!=null)
-	{
-	    cell.setAttributesFrom(_defaultHead);
-	    if (_defaultHead.size()>0)
-		cell.add(_defaultHead.contents());
-	}
-	return this;
+        newBlock("TH");
+        if (_defaultHead!=null)
+        {
+            cell.setAttributesFrom(_defaultHead);
+            if (_defaultHead.size()>0)
+                cell.add(_defaultHead.contents());
+        }
+        return this;
     }
     
     /* ----------------------------------------------------------------- */
@@ -191,9 +191,9 @@ public class Table extends Block
      */
     public Table addHeading(Object o)
     {
-	newHeading();
-	cell.add(o);
-	return this;
+        newHeading();
+        cell.add(o);
+        return this;
     }
 
     /* ----------------------------------------------------------------- */
@@ -204,9 +204,9 @@ public class Table extends Block
      */
     public Table addHeading(Object o,String attributes)
     {
-	addHeading(o);
-	cell.attribute(attributes);
-	return this;
+        addHeading(o);
+        cell.attribute(attributes);
+        return this;
     }
     
     /* ------------------------------------------------------------ */
@@ -216,8 +216,8 @@ public class Table extends Block
      */
     public Table cellSpacing(int s)
     {
-	attribute("CELLSPACING",s);
-	return this;
+        attribute("CELLSPACING",s);
+        return this;
     }
     
 
@@ -228,8 +228,8 @@ public class Table extends Block
      */
     public Table cellPadding(int padding)
     {
-	attribute("CELLPADDING",padding);
-	return this;
+        attribute("CELLPADDING",padding);
+        return this;
     }
     
     /* ------------------------------------------------------------ */
@@ -240,11 +240,11 @@ public class Table extends Block
      */
     public Table spacing(int h, int v)
     {
-	if (h>=0)
-	    attribute("HSPACE",h);
-	if (v>=0)
-	    attribute("VSPACE",v);
-	return this;
+        if (h>=0)
+            attribute("HSPACE",h);
+        if (v>=0)
+            attribute("VSPACE",v);
+        return this;
     }
 
     /* ----------------------------------------------------------------- */
@@ -255,7 +255,7 @@ public class Table extends Block
      */
     public Block row()
     {
-	return row;
+        return row;
     }
     
     /* ----------------------------------------------------------------- */
@@ -266,7 +266,7 @@ public class Table extends Block
      */
     public Block cell()
     {
-	return cell;
+        return cell;
     }
     
     /* ----------------------------------------------------------------- */
@@ -280,13 +280,13 @@ public class Table extends Block
      */
     public static void setCellNestingFactory(CompositeFactory factory)
     {
-	if (threadNestingMap==null)
-	    threadNestingMap= new Hashtable();
-	
-	if (factory == null)
-	    threadNestingMap.remove(Thread.currentThread());
-	else
-	    threadNestingMap.put(Thread.currentThread(),factory);
+        if (threadNestingMap==null)
+            threadNestingMap= new Hashtable();
+        
+        if (factory == null)
+            threadNestingMap.remove(Thread.currentThread());
+        else
+            threadNestingMap.put(Thread.currentThread(),factory);
     }
     
     /* ----------------------------------------------------------------- */
@@ -299,13 +299,13 @@ public class Table extends Block
      */
     public static void setThreadNestingFactory(CompositeFactory factory)
     {
-	if (threadNestingMap==null)
-	    threadNestingMap= new Hashtable();
-	
-	if (factory == null)
-	    threadNestingMap.remove(Thread.currentThread());
-	else
-	    threadNestingMap.put(Thread.currentThread(),factory);
+        if (threadNestingMap==null)
+            threadNestingMap= new Hashtable();
+        
+        if (factory == null)
+            threadNestingMap.remove(Thread.currentThread());
+        else
+            threadNestingMap.put(Thread.currentThread(),factory);
     }
     
     /* ----------------------------------------------------------------- */
@@ -318,7 +318,7 @@ public class Table extends Block
      */
     public void setNestingFactory(CompositeFactory factory)
     {
-	cellNestFactory = factory;
+        cellNestFactory = factory;
     }
 
     
@@ -331,9 +331,9 @@ public class Table extends Block
      */
     public Block defaultRow()
     {
-	if (_defaultRow==null)
-	    _defaultRow=new Block("TR");
-	return _defaultRow;
+        if (_defaultRow==null)
+            _defaultRow=new Block("TR");
+        return _defaultRow;
     }
     
     /* ------------------------------------------------------------ */
@@ -345,9 +345,9 @@ public class Table extends Block
      */
     public Block defaultHead()
     {
-	if (_defaultHead==null)
-	    _defaultHead=new Block("TH");
-	return _defaultHead;
+        if (_defaultHead==null)
+            _defaultHead=new Block("TH");
+        return _defaultHead;
     }
     
     /* ------------------------------------------------------------ */
@@ -359,9 +359,9 @@ public class Table extends Block
      */
     public Block defaultCell()
     {
-	if (_defaultCell==null)
-	    _defaultCell=new Block("TD");
-	return _defaultCell;
+        if (_defaultCell==null)
+            _defaultCell=new Block("TD");
+        return _defaultCell;
     }
 }
 

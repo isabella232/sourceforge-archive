@@ -33,7 +33,7 @@ AutoReloadDynamicServlets	    : True
 Loader                              : com.mortbay.HTTP.Handler.FileJarServletLoader
 
 SERVLET.Dump.CLASS		    : com.mortbay.Servlets.Dump
-SERVLET.Dump.PATHS		    : /Dump%;*.DUMP
+SERVLET.Dump.PATHS		    : /Dump%;*.DUMP;/ddd/*.dump
 SERVLET.Dump.CHUNK		    : True
 SERVLET.Dump.PROPERTY.AttrX	    : ValueX
 SERVLET.Dump.PROPERTY.AttrY	    : ValueY
@@ -83,8 +83,12 @@ SERVLET.gnujsp.PROPERTY.repository  : ./jsp
 SERVLET.gnujsp.PROPERTY.pagebase    : ./FileBase/jsp/
 SERVLET.gnujsp.PROPERTY.compiler    : javac -classpath %classpath%:%repository% -d %repository% -deprecation %source%
 
-
-
-
+SERVLET.gnujsp10.PATHS		    : /jsp10/*.jsp
+SERVLET.gnujsp10.CLASS		    : org.gjt.jsp10.JSP10Servlet
+SERVLET.gnujsp10.CLASSPATH          : ./lib/gnujsp10.jar
+SERVLET.gnujsp10.PROPERTY.scratchdir: ./jsp10     
+SERVLET.gnujsp10.PROPERTY.resourcebase: /JSP10
+SERVLET.gnujsp10.PROPERTY.debug     : true
+SERVLET.gnujsp10.PROPERTY.compiler  : builtin-javac -classpath %classpath%:%repository%:./lib/gnujsp10.jar -d %repository% -deprecation %source%
 
 

@@ -51,17 +51,17 @@ public class Block extends Composite
      */
     public Block(String tag)
     {
-	this.tag=tag;
-	if (tag==Left)
-	{
-	    tag=Div;
-	    left();
-	}
-	if (tag==Right)
-	{
-	    tag=Div;
-	    right();
-	}
+        this.tag=tag;
+        if (tag==Left)
+        {
+            tag=Div;
+            left();
+        }
+        if (tag==Right)
+        {
+            tag=Div;
+            right();
+        }
     }
 
     /* ----------------------------------------------------------------- */
@@ -71,18 +71,18 @@ public class Block extends Composite
      */
     public Block(String tag, String attributes)
     {
-	super(attributes);
-	this.tag=tag;
+        super(attributes);
+        this.tag=tag;
     }
-	
+        
     /* ----------------------------------------------------------------- */
     public void write(Writer out)
-	 throws IOException
+         throws IOException
     {
-	out.write('<');
-	out.write(tag);
-	out.write(attributes());
-	out.write('>');
+        out.write('<');
+        out.write(tag);
+        out.write(attributes());
+        out.write('>');
         super.write(out);
         out.write("</");
         out.write(tag);

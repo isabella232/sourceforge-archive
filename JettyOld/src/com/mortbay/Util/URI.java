@@ -34,24 +34,24 @@ public class URI
      */
     public URI(String uri)
     {
-	path = uri;
-	int q;
-	if ((q=uri.indexOf('?'))>=0)
-	{
-	    if ((q+1)<uri.length())
-	    {
-		try{
-		    query=uri.substring(q+1);
-		    parameters.read(uri.substring(q+1));
-		    path=uri.substring(0,q);
-		}
-		catch(IOException e){
-		    Code.ignore(e);
-		}
-	    }
-	    else
-		path=uri.substring(0,q);
-	}
+        path = uri;
+        int q;
+        if ((q=uri.indexOf('?'))>=0)
+        {
+            if ((q+1)<uri.length())
+            {
+                try{
+                    query=uri.substring(q+1);
+                    parameters.read(uri.substring(q+1));
+                    path=uri.substring(0,q);
+                }
+                catch(IOException e){
+                    Code.ignore(e);
+                }
+            }
+            else
+                path=uri.substring(0,q);
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -60,7 +60,7 @@ public class URI
      */
     public String getPath()
     {
-	return path;
+        return path;
     }
     
     /* ------------------------------------------------------------ */
@@ -69,7 +69,7 @@ public class URI
      */
     public void setPath(String path)
     {
-	this.path=path;
+        this.path=path;
     }
     
     /* ------------------------------------------------------------ */
@@ -79,7 +79,7 @@ public class URI
      */
     public String path()
     {
-	return path;
+        return path;
     }
 
     /* ------------------------------------------------------------ */
@@ -89,7 +89,7 @@ public class URI
      */
     public void path(String path)
     {
-	this.path=path;
+        this.path=path;
     }
     
     
@@ -99,9 +99,9 @@ public class URI
      */
     public String getQuery()
     {
-	if (modified)
-	    query = parameters.encode(encodeNulls);
-	return query;
+        if (modified)
+            query = parameters.encode(encodeNulls);
+        return query;
     }
     
     /* ------------------------------------------------------------ */
@@ -111,9 +111,9 @@ public class URI
      */
     public String query()
     {
-	if (modified)
-	    query = parameters.encode(encodeNulls);
-	return query;
+        if (modified)
+            query = parameters.encode(encodeNulls);
+        return query;
     }
     
     /* ------------------------------------------------------------ */
@@ -122,7 +122,7 @@ public class URI
      */
     public void encodeNulls(boolean b)
     {
-	this.encodeNulls=b;
+        this.encodeNulls=b;
     }
     
     
@@ -133,7 +133,7 @@ public class URI
      */
     public Dictionary queryContent()
     {
-	return parameters;
+        return parameters;
     }
 
     /* ------------------------------------------------------------ */
@@ -143,8 +143,8 @@ public class URI
      */
     public Dictionary parameters()
     {
-	modified=true;
-	return parameters;
+        modified=true;
+        return parameters;
     }
     
     /* ------------------------------------------------------------ */
@@ -153,7 +153,7 @@ public class URI
      */
     public Enumeration getParameterNames()
     {
-	return parameters.keys();
+        return parameters.keys();
     }
     
     /* ------------------------------------------------------------ */
@@ -162,8 +162,8 @@ public class URI
      */
     public Dictionary getParameters()
     {
-	modified=true;
-	return parameters;
+        modified=true;
+        return parameters;
     }
     
     /* ------------------------------------------------------------ */
@@ -171,8 +171,8 @@ public class URI
      */
     public void clearParameters()
     {
-	modified=true;
-	parameters.clear();
+        modified=true;
+        parameters.clear();
     }
     
     /* ------------------------------------------------------------ */
@@ -181,13 +181,13 @@ public class URI
      */
     public void put(String encoded)
     {
-	try{
-	    UrlEncoded params = new UrlEncoded(encoded);
-	    put(params);
-	}
-	catch(IOException e){
-	    Code.ignore(e);
-	}
+        try{
+            UrlEncoded params = new UrlEncoded(encoded);
+            put(params);
+        }
+        catch(IOException e){
+            Code.ignore(e);
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -197,9 +197,9 @@ public class URI
      */
     public void put(String name, String value)
     {
-	modified=true;
-	if (name!=null && value!=null)
-	    parameters.put(name,value);
+        modified=true;
+        if (name!=null && value!=null)
+            parameters.put(name,value);
     }
     
     /* ------------------------------------------------------------ */
@@ -209,9 +209,9 @@ public class URI
      */
     public void put(String name, String[] values)
     {
-	modified=true;
-	if (name!=null && values!=null)
-	    parameters.putValues(name,values);
+        modified=true;
+        if (name!=null && values!=null)
+            parameters.putValues(name,values);
     }
     
     /* ------------------------------------------------------------ */
@@ -219,13 +219,13 @@ public class URI
      */
     public void put(Dictionary values)
     {
-	modified=true;
-	Enumeration keys= values.keys();
-	while(keys.hasMoreElements())
-	{
-	    Object key = keys.nextElement();
-	    parameters.put(key,values.get(key));
-	}
+        modified=true;
+        Enumeration keys= values.keys();
+        while(keys.hasMoreElements())
+        {
+            Object key = keys.nextElement();
+            parameters.put(key,values.get(key));
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -233,7 +233,7 @@ public class URI
      */
     public String get(String name)
     {
-	return (String)parameters.get(name);
+        return (String)parameters.get(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -241,7 +241,7 @@ public class URI
      */
     public String[] getValues(String name)
     {
-	return parameters.getValues(name);
+        return parameters.getValues(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -249,8 +249,8 @@ public class URI
      */
     public void remove(String name)
     {
-	modified=true;
-	parameters.remove(name);
+        modified=true;
+        parameters.remove(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -258,12 +258,12 @@ public class URI
      */
     public String toString()
     {
-	String result = path;
-	if (modified)
-	    query();
-	if (query!=null && query.length()>0)
-	    result+="?"+query;
-	return result;
+        String result = path;
+        if (modified)
+            query();
+        if (query!=null && query.length()>0)
+            result+="?"+query;
+        return result;
     }
 
 }

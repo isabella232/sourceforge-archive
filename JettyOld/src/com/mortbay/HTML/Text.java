@@ -20,28 +20,28 @@ public class Text extends Composite
     /* ----------------------------------------------------------------- */
     public Text(String s)
     {
-	add(s);
+        add(s);
     }
 
     /* ----------------------------------------------------------------- */
     public Text(String[] s)
     {
-	add(s);
+        add(s);
     }
 
     /* ----------------------------------------------------------------- */
     public Text add(String[] s)
     {
-	for (int i=0;i<s.length;i++)
-	    add(s[i]);
-	return this;
+        for (int i=0;i<s.length;i++)
+            add(s[i]);
+        return this;
     }
 
     /* ----------------------------------------------------------------- */
     public Text add(Vector v)
     {
-	for (int i=0;i<v.size();i++)
-	    add(v.elementAt(i));
-	return this;
+        for (int i=0;i<v.size();i++)
+            add(v.elementAt(i));
+        return this;
     }
 }

@@ -30,10 +30,10 @@ public class BlockingQueue
      */
     public BlockingQueue(int maxSize)
     {
-	this.maxSize=maxSize;
-	if (maxSize==0)
-	    this.maxSize=255;
-	elements = new Object[this.maxSize];
+        this.maxSize=maxSize;
+        if (maxSize==0)
+            this.maxSize=255;
+        elements = new Object[this.maxSize];
     }
 
     /* ------------------------------------------------------------ */
@@ -42,7 +42,7 @@ public class BlockingQueue
      */
     public int size()
     {
-	return size;
+        return size;
     }
     
     /* ------------------------------------------------------------ */
@@ -51,7 +51,7 @@ public class BlockingQueue
      */
     public int maxSize()
     {
-	return maxSize;
+        return maxSize;
     }
     
   
@@ -60,19 +60,19 @@ public class BlockingQueue
      * @param o Object
      */
     public void put(Object o)
-	throws InterruptedException
+        throws InterruptedException
     {
-	synchronized(elements)
-	{
-	    while (size==maxSize)
-		elements.wait();
+        synchronized(elements)
+        {
+            while (size==maxSize)
+                elements.wait();
 
-	    elements[tail]=o;
-	    if(++tail==maxSize)
-		tail=0;
-	    size++;
-	    elements.notify();
-	}
+            elements[tail]=o;
+            if(++tail==maxSize)
+                tail=0;
+            size++;
+            elements.notify();
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -82,23 +82,23 @@ public class BlockingQueue
      * @exception InterruptedException Timeout expired or otherwise interrupted
      */
     public void put(Object o, int timeout)
-	throws InterruptedException
+        throws InterruptedException
     {
-	synchronized(elements)
-	{
-	    if (size==maxSize)
-	    {
-		elements.wait(timeout);
-		if (size==maxSize)
-		    throw new InterruptedException("Timed out");
-	    }
-	    
-	    elements[tail]=o;
-	    if(++tail==maxSize)
-		tail=0;
-	    size++;
-	    elements.notify();
-	}
+        synchronized(elements)
+        {
+            if (size==maxSize)
+            {
+                elements.wait(timeout);
+                if (size==maxSize)
+                    throw new InterruptedException("Timed out");
+            }
+            
+            elements[tail]=o;
+            if(++tail==maxSize)
+                tail=0;
+            size++;
+            elements.notify();
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -107,24 +107,24 @@ public class BlockingQueue
      * @return The next object in the queue.
      */
     public Object get()
-	throws InterruptedException
+        throws InterruptedException
     {
-	synchronized(elements)
-	{
-	    while (size==0)
-		elements.wait();
-	    
-	    Object o = elements[head];
-	    if(++head==maxSize)
-		head=0;
-	    if (size==maxSize)
-		elements.notifyAll();
-	    size--;
-	    return o;
-	}
+        synchronized(elements)
+        {
+            while (size==0)
+                elements.wait();
+            
+            Object o = elements[head];
+            if(++head==maxSize)
+                head=0;
+            if (size==maxSize)
+                elements.notifyAll();
+            size--;
+            return o;
+        }
     }
     
-	
+        
     /* ------------------------------------------------------------ */
     /** Get from queue.
      * Block for timeout if there are no objects to get.
@@ -132,26 +132,26 @@ public class BlockingQueue
      * @return The next object in the queue, or null if timedout.
      */
     public Object get(long timeout)
-	throws InterruptedException
-    {	
-	synchronized(elements)
-	{
-	    if (size==0)
-		elements.wait(timeout);
-	    
-	    if (size==0)
-		return null;
-	    
-	    Object o = elements[head];
-	    if(++head==maxSize)
-		head=0;
+        throws InterruptedException
+    {   
+        synchronized(elements)
+        {
+            if (size==0)
+                elements.wait(timeout);
+            
+            if (size==0)
+                return null;
+            
+            Object o = elements[head];
+            if(++head==maxSize)
+                head=0;
 
-	    if (size==maxSize)
-		elements.notifyAll();
-	    size--;
-	    
-	    return o;
-	}
+            if (size==maxSize)
+                elements.notifyAll();
+            size--;
+            
+            return o;
+        }
     }
 }
 

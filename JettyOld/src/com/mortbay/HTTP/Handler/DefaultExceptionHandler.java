@@ -25,65 +25,65 @@ public class DefaultExceptionHandler implements ExceptionHandler
      * @param exception Any exception thrown by another HttpHandler.
      */
     public void handle(HttpRequest request,
-		       HttpResponse response,
-		       Exception exception)
-	throws Exception
+                       HttpResponse response,
+                       Exception exception)
+        throws Exception
     {
-	// Send exception response
-	try
-	{
-	    if (exception instanceof java.io.IOException)
-		Code.debug(exception);
-	    else
-		Code.warning(exception);
-	    if (!response.headersWritten())
-		response.setStatus(HttpResponse.SC_INTERNAL_SERVER_ERROR);
-	    
-	    PrintWriter pout=null;
-	    try{
-		pout=new PrintWriter(response.getOutputStream());
-	    }
-	    catch(IllegalStateException ise)
-	    {
-		Code.ignore(ise);
-		pout=new PrintWriter(response.getWriter());
-	    }
+        // Send exception response
+        try
+        {
+            if (exception instanceof java.io.IOException)
+                Code.debug(exception);
+            else
+                Code.warning(exception);
+            if (!response.headersWritten())
+                response.setStatus(HttpResponse.SC_INTERNAL_SERVER_ERROR);
+            
+            PrintWriter pout=null;
+            try{
+                pout=new PrintWriter(response.getOutputStream());
+            }
+            catch(IllegalStateException ise)
+            {
+                Code.ignore(ise);
+                pout=new PrintWriter(response.getWriter());
+            }
 
-	    pout.println("<HTML><HEAD><TITLE>Exception</TITLE>");
-	    
-	    if ( exception instanceof javax.servlet.ServletException )
-	    {
-		pout.println("<BODY><H2>");
-		pout.println(exception.toString());
-		pout.println("</H2><br><PRE>");
-		exception.printStackTrace(pout);
-		exception.printStackTrace(pout);
-		pout.println("</PRE>");
-	    
-		javax.servlet.ServletException se =
-		    (javax.servlet.ServletException)exception;
-		if ( se.getRootCause() != null )
-		    exception = (Exception)se.getRootCause();
-	    }
+            pout.println("<HTML><HEAD><TITLE>Exception</TITLE>");
+            
+            if ( exception instanceof javax.servlet.ServletException )
+            {
+                pout.println("<BODY><H2>");
+                pout.println(exception.toString());
+                pout.println("</H2><br><PRE>");
+                exception.printStackTrace(pout);
+                exception.printStackTrace(pout);
+                pout.println("</PRE>");
+            
+                javax.servlet.ServletException se =
+                    (javax.servlet.ServletException)exception;
+                if ( se.getRootCause() != null )
+                    exception = (Exception)se.getRootCause();
+            }
 
-	    if (exception!=null)
-	    {
-		pout.println("<BODY><H2>");
-		pout.println(exception.toString());
-		pout.println("</H2><br><PRE>");
-		exception.printStackTrace(pout);
-		pout.println("</PRE>");
-	    }
-	    
-	    pout.println("</BODY></HTML>");
-	    pout.flush();
-	}
-	catch (Exception e2)
-	{
-	    Code.debug("Exception creating error page",exception);
-	}
+            if (exception!=null)
+            {
+                pout.println("<BODY><H2>");
+                pout.println(exception.toString());
+                pout.println("</H2><br><PRE>");
+                exception.printStackTrace(pout);
+                pout.println("</PRE>");
+            }
+            
+            pout.println("</BODY></HTML>");
+            pout.flush();
+        }
+        catch (Exception e2)
+        {
+            Code.debug("Exception creating error page",exception);
+        }
     }    
 }
-	
+        
 
 

@@ -32,8 +32,8 @@ public class HttpRequestDispatcher implements javax.servlet.RequestDispatcher
      */
     HttpRequestDispatcher(HttpServer server, String path)
     {
-	_server = server;
-	_path = path;
+        _server = server;
+        _path = path;
     }
 
     
@@ -45,13 +45,13 @@ public class HttpRequestDispatcher implements javax.servlet.RequestDispatcher
      * @exception IOException 
      */
     public void forward(ServletRequest request,
-			ServletResponse response)
-	throws ServletException,IOException
+                        ServletResponse response)
+        throws ServletException,IOException
     {
-	HttpRequest req = (HttpRequest) request;
-	HttpResponse res = (HttpResponse) response;
-	req.setRequestPath(_path);
-	_server.handle(req,res);
+        HttpRequest req = (HttpRequest) request;
+        HttpResponse res = (HttpResponse) response;
+        req.setRequestPath(_path);
+        _server.handle(req,res);
     }
     
 
@@ -63,13 +63,13 @@ public class HttpRequestDispatcher implements javax.servlet.RequestDispatcher
      * @exception IOException 
      */
     public void include(ServletRequest request,
-			ServletResponse response)
-	throws ServletException, IOException     
+                        ServletResponse response)
+        throws ServletException, IOException     
     {
-	HttpRequest req = (HttpRequest) request;
-	HttpResponse res = (HttpResponse) response;
-	req.setResourcePath(_path);
-	_server.handle(req,res);
+        HttpRequest req = (HttpRequest) request;
+        HttpResponse res = (HttpResponse) response;
+        req.setResourcePath(_path);
+        _server.handle(req,res);
     }
     
 };

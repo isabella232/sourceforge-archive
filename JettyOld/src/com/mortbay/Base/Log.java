@@ -69,7 +69,7 @@ public class Log
     private static Log __instance=null;
 
     private static String __indent =
-	">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
+        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
 
     /*-------------------------------------------------------------------*/
     /** Shared static instances, reduces object creation at expense
@@ -78,16 +78,16 @@ public class Log
     
     /*-------------------------------------------------------------------*/
     public static Log instance()
-    {	
-	if (__instance==null)
-	{
-	    synchronized(com.mortbay.Base.Log.class)
-	    {
-		if (__instance==null)
-		    new Log();
-	    }
-	}
-	return __instance;
+    {   
+        if (__instance==null)
+        {
+            synchronized(com.mortbay.Base.Log.class)
+            {
+                if (__instance==null)
+                    new Log();
+            }
+        }
+        return __instance;
     }    
     
     /*-------------------------------------------------------------------*/
@@ -96,22 +96,22 @@ public class Log
      */
     public Log()
     {
-	__instance = this;
-	String logOptions = null;
-	String logFile = null;
-	String dateFormat = null;
-	String timezone = null;
-	try {
-	    logOptions = System.getProperty("LOG_OPTIONS");
-	    logFile = System.getProperty("LOG_FILE");
-	    dateFormat = System.getProperty("LOG_DATE_FORMAT");
-	    timezone = System.getProperty("LOG_TIMEZONE");
-	}
-	catch (Exception ex){
-	    System.err.println("Exception from getProperty - probably running in applet\nUse Log.initParamsFromApplet or Log.setOptions to control debug output.");
-	}
+        __instance = this;
+        String logOptions = null;
+        String logFile = null;
+        String dateFormat = null;
+        String timezone = null;
+        try {
+            logOptions = System.getProperty("LOG_OPTIONS");
+            logFile = System.getProperty("LOG_FILE");
+            dateFormat = System.getProperty("LOG_DATE_FORMAT");
+            timezone = System.getProperty("LOG_TIMEZONE");
+        }
+        catch (Exception ex){
+            System.err.println("Exception from getProperty - probably running in applet\nUse Log.initParamsFromApplet or Log.setOptions to control debug output.");
+        }
 
-	setOptions(logOptions,logFile,dateFormat,timezone);
+        setOptions(logOptions,logFile,dateFormat,timezone);
     }
 
     /* ------------------------------------------------------------ */
@@ -123,11 +123,11 @@ public class Log
      */
     public static void initParamsFromApplet(java.applet.Applet appl)
     {
-	String lo = appl.getParameter("LOG_OPTIONS");
-	String lf = appl.getParameter("LOG_FILE");
-	String df = appl.getParameter("LOG_DATE_FORMAT");
-	String tz = appl.getParameter("LOG_TIMEZONE");
-	instance().setOptions(lo,lf,df,tz);
+        String lo = appl.getParameter("LOG_OPTIONS");
+        String lf = appl.getParameter("LOG_FILE");
+        String df = appl.getParameter("LOG_DATE_FORMAT");
+        String tz = appl.getParameter("LOG_TIMEZONE");
+        instance().setOptions(lo,lf,df,tz);
     }
 
     /* ------------------------------------------------------------ */
@@ -139,40 +139,40 @@ public class Log
      * @param timezone Time zone for timestamps
      */
     public void setOptions(String logOptions,
-			   String logFile,
-			   String dateFormat,
-			   String timezone)
+                           String logFile,
+                           String dateFormat,
+                           String timezone)
     {
-	setOptions(logOptions);
+        setOptions(logOptions);
 
-	if (dateFormat!=null && dateFormat.trim().length()>0)
-	{
-	    dateFormat=dateFormat.replace('+',' ');
-	    _dateFormat = new DateCache(dateFormat);
-	    if (timezone==null || timezone.length()==0)
-		timezone="GMT";
-	    _dateFormat.getFormat().setTimeZone(TimeZone.getTimeZone(timezone));
-	}
-	else
-	    _dateFormat=new DateCache("yyyyMMdd HHmmss.SSS zzz ");
-	
-	try {
-	    if (logFile==null)
-		_out=new PrintWriter(System.err);
-	    else
-	    {
-		try {
-		    FileOutputStream fos = new FileOutputStream(logFile);
-		    _out = new PrintWriter(fos, true);
-		} catch (Exception ex){
-		    Code.fail("Error writing to LOG_FILE:"+logFile, ex);
-		    System.exit(1);
-		}
-	    }
-	} catch (Exception ex){
-	    System.err.println("Log problem!");
-	    ex.printStackTrace();
-	}
+        if (dateFormat!=null && dateFormat.trim().length()>0)
+        {
+            dateFormat=dateFormat.replace('+',' ');
+            _dateFormat = new DateCache(dateFormat);
+            if (timezone==null || timezone.length()==0)
+                timezone="GMT";
+            _dateFormat.getFormat().setTimeZone(TimeZone.getTimeZone(timezone));
+        }
+        else
+            _dateFormat=new DateCache("yyyyMMdd HHmmss.SSS zzz ");
+        
+        try {
+            if (logFile==null)
+                _out=new PrintWriter(System.err);
+            else
+            {
+                try {
+                    FileOutputStream fos = new FileOutputStream(logFile);
+                    _out = new PrintWriter(fos, true);
+                } catch (Exception ex){
+                    Code.fail("Error writing to LOG_FILE:"+logFile, ex);
+                    System.exit(1);
+                }
+            }
+        } catch (Exception ex){
+            System.err.println("Log problem!");
+            ex.printStackTrace();
+        }
     }
 
 
@@ -182,7 +182,7 @@ public class Log
      */
     public void disableLog()
     {
-	_out=null;
+        _out=null;
     }
     
     /*-------------------------------------------------------------------*/
@@ -193,25 +193,25 @@ public class Log
      */
     public void setOptions(String logOptions)
     {
-	_logOptions = logOptions;
-	
-	if (logOptions != null)
-	{
-	    _logTimeStamps	= (logOptions.indexOf(TIMESTAMP) >= 0);
-	    _logLabels 		= (logOptions.indexOf(LABEL) >= 0);
-	    _logTags 		= (logOptions.indexOf(TAG) >= 0);
-	    _logStackSize 	= (logOptions.indexOf(STACKSIZE) >= 0);
-	    _logStackTrace 	= (logOptions.indexOf(STACKTRACE) >= 0);
-	    _logOneLine         = (logOptions.indexOf(ONELINE) >= 0);
-	} else {
-	    _logTimeStamps	= true;
-	    _logLabels		= true;
-	    _logTags		= true;
-	    _logStackSize	= true;
-	    _logStackTrace	= false;
-	    _logOneLine		= false;
-	    _logOptions         = "tLTs";
-	}
+        _logOptions = logOptions;
+        
+        if (logOptions != null)
+        {
+            _logTimeStamps      = (logOptions.indexOf(TIMESTAMP) >= 0);
+            _logLabels          = (logOptions.indexOf(LABEL) >= 0);
+            _logTags            = (logOptions.indexOf(TAG) >= 0);
+            _logStackSize       = (logOptions.indexOf(STACKSIZE) >= 0);
+            _logStackTrace      = (logOptions.indexOf(STACKTRACE) >= 0);
+            _logOneLine         = (logOptions.indexOf(ONELINE) >= 0);
+        } else {
+            _logTimeStamps      = true;
+            _logLabels          = true;
+            _logTags            = true;
+            _logStackSize       = true;
+            _logStackTrace      = false;
+            _logOneLine         = false;
+            _logOptions         = "tLTs";
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -220,16 +220,16 @@ public class Log
      */
     public String getOptions()
     {
-	return _logOptions;
+        return _logOptions;
     }
     
     /*-------------------------------------------------------------------*/
     public static synchronized void message(String tag,
-					    String msg,
-					    Frame frame)
+                                            String msg,
+                                            Frame frame)
     {
-	long time = System.currentTimeMillis();
-	instance().message(tag,msg,frame,time);
+        long time = System.currentTimeMillis();
+        instance().message(tag,msg,frame,time);
     }
     
     /* ------------------------------------------------------------ */
@@ -240,56 +240,56 @@ public class Log
      * @param time The time stamp of the message.
      */
     public void message(String tag,
-			String msg,
-			Frame frame,
-			long time)
+                        String msg,
+                        Frame frame,
+                        long time)
     {
-	if (_out==null)
-	    return;
-	
-	// Lock static buffer
-	synchronized(__stringBuffer)
-	{
-	    __stringBuffer.setLength(0);
-	    
-	    // Log the time stamp
-	    if (_logTimeStamps)
-	    {
-		if (_dateFormat!=null)
-		    __stringBuffer.append(_dateFormat.format(new Date(time)));
-		else
-		{
-		    String mSecs = "0000" + time%1000L;
-		    mSecs = mSecs.substring(mSecs.length() - 3);
-		    __stringBuffer.append(Long.toString(time / 1000L));
-		    __stringBuffer.append('.');
-		    __stringBuffer.append(mSecs);
-		}
-	    }
-	
-	    // Log the label
-	    if (_logLabels)
-	    {
-		__stringBuffer.append(frame.toString());
-		__stringBuffer.append(':');
-	    }
-	    
-	    // Log the tag
-	    if (_logTags)
-		__stringBuffer.append(tag);
+        if (_out==null)
+            return;
+        
+        // Lock static buffer
+        synchronized(__stringBuffer)
+        {
+            __stringBuffer.setLength(0);
+            
+            // Log the time stamp
+            if (_logTimeStamps)
+            {
+                if (_dateFormat!=null)
+                    __stringBuffer.append(_dateFormat.format(new Date(time)));
+                else
+                {
+                    String mSecs = "0000" + time%1000L;
+                    mSecs = mSecs.substring(mSecs.length() - 3);
+                    __stringBuffer.append(Long.toString(time / 1000L));
+                    __stringBuffer.append('.');
+                    __stringBuffer.append(mSecs);
+                }
+            }
+        
+            // Log the label
+            if (_logLabels)
+            {
+                __stringBuffer.append(frame.toString());
+                __stringBuffer.append(':');
+            }
+            
+            // Log the tag
+            if (_logTags)
+                __stringBuffer.append(tag);
 
-	    
-	    // Determine the indent string for the message
-	    String indent = _logOneLine?"\\n ":"\n  ";
-	    if (_logStackSize)
-		indent += __indent.substring(0,frame._depth)+" ";
-	    __stringBuffer.append(indent);
-	    
-	    // Add stack frame to message
-	    if (_logStackTrace)
-		msg = msg + "\n" + frame._stack;
+            
+            // Determine the indent string for the message
+            String indent = _logOneLine?"\\n ":"\n  ";
+            if (_logStackSize)
+                indent += __indent.substring(0,frame._depth)+" ";
+            __stringBuffer.append(indent);
+            
+            // Add stack frame to message
+            if (_logStackTrace)
+                msg = msg + "\n" + frame._stack;
 
-	    // Log indented message
+            // Log indented message
             int i=0;
             int last=0; 
             while ((i=msg.indexOf(__lineSeparator,i))>=last)
@@ -304,7 +304,7 @@ public class Log
 
             _out.println(__stringBuffer.toString());
             _out.flush();
-	}
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -312,7 +312,7 @@ public class Log
      */
     public static void event(String message, int stackDepth)
     {
-	Log.message(Log.EVENT,message,new Frame(stackDepth));
+        Log.message(Log.EVENT,message,new Frame(stackDepth));
     }
     
     /* ------------------------------------------------------------ */
@@ -320,7 +320,7 @@ public class Log
      */
     public static void event(String message)
     {
-	Log.message(Log.EVENT,message,new Frame(1));
+        Log.message(Log.EVENT,message,new Frame(1));
     }
     
     /* ------------------------------------------------------------ */
@@ -328,7 +328,7 @@ public class Log
      */
     public static void warning(String message, int stackDepth)
     {
-	Log.message(Log.WARN,message,new Frame(1));
+        Log.message(Log.WARN,message,new Frame(1));
     }
     
     /* ------------------------------------------------------------ */
@@ -336,7 +336,7 @@ public class Log
      */
     public static void warning(String message)
     {
-	Log.message(Log.WARN,message,new Frame(1));
+        Log.message(Log.WARN,message,new Frame(1));
     }
 }
 

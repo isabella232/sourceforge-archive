@@ -28,61 +28,61 @@ public class Frame
     /* ------------------------------------------------------------ */
     public Frame border(boolean threeD, int width, String color)
     {
-	border=" FRAMEBORDER="+(threeD?"yes":"no");
-	if (width>=0)
-	    border+=" BORDER="+width;
+        border=" FRAMEBORDER="+(threeD?"yes":"no");
+        if (width>=0)
+            border+=" BORDER="+width;
 
-	if (color!=null)
-	    border+=" BORDERCOLOR="+color;
-	return this;
+        if (color!=null)
+            border+=" BORDERCOLOR="+color;
+        return this;
     }
     /* ------------------------------------------------------------ */
     public Frame name(String name,String src)
     {
-	this.name=name;
-	this.src=src;
-	return this;
+        this.name=name;
+        this.src=src;
+        return this;
     }
     
     /* ------------------------------------------------------------ */
     public Frame src(String s)
     {
-	src=s;
-	return this;
+        src=s;
+        return this;
     }
     
     /* ------------------------------------------------------------ */
     public Frame name(String n)
     {
-	name=n;
-	return this;
+        name=n;
+        return this;
     }
 
     /* ------------------------------------------------------------ */
     public Frame scrolling(boolean s)
     {
-	scrolling=s?"yes":"no";
-	return this;
+        scrolling=s?"yes":"no";
+        return this;
     }
     
     /* ------------------------------------------------------------ */
     public Frame resize(boolean r)
     {
-	resize=r?"":" NORESIZE";
-	return this;
+        resize=r?"":" NORESIZE";
+        return this;
     }
     
     /* ----------------------------------------------------------------- */
     void write(Writer out)
-	 throws IOException
+         throws IOException
     {
-	out.write("<FRAME SCROLLING="+scrolling+resize+border);
-	
-	if(src!=null)
-	    out.write(" SRC="+src);
-	if(name!=null)
-	    out.write(" NAME="+name);
-	out.write(">");
+        out.write("<FRAME SCROLLING="+scrolling+resize+border);
+        
+        if(src!=null)
+            out.write(" SRC="+src);
+        if(name!=null)
+            out.write(" NAME="+name);
+        out.write(">");
     }
 };
 

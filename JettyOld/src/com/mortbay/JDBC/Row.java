@@ -39,12 +39,12 @@ public class Row
      */
     private Row(Table table, boolean initValues)
     {
-	this.table=table;
-	values = new Object[table.columns.length];
+        this.table=table;
+        values = new Object[table.columns.length];
 
-	if (initValues)
-	    for (int i=0;i<values.length;i++)
-		values[i]=table.columns[i].nullValue();
+        if (initValues)
+            for (int i=0;i<values.length;i++)
+                values[i]=table.columns[i].nullValue();
     }
     
     /* ------------------------------------------------------------ */
@@ -52,7 +52,7 @@ public class Row
      */
     Row(Table table)
     {
-	this(table,true);
+        this(table,true);
     }
     
     /* ------------------------------------------------------------ */
@@ -61,25 +61,25 @@ public class Row
      * ResultSet.
      */
     Row(Table table, java.sql.ResultSet rs)
-	 throws java.sql.SQLException
+         throws java.sql.SQLException
     {
         this(table,false);
     
-	for (int i=0;i<values.length;i++)
-	{
-	    values[i]=rs.getObject(i+1);
+        for (int i=0;i<values.length;i++)
+        {
+            values[i]=rs.getObject(i+1);
 
-	    Column c = table.columns[i];
-		
-	    if (c.isType(Column.DATETIME))
-		values[i]=
-		    new java.util.Date(1000*((Integer)values[i]).longValue());
-	    if (c.isEnum())
-		values[i]=c.enum2str(Integer.parseInt(values[i].toString()));
-	}
-	exists=true;
+            Column c = table.columns[i];
+                
+            if (c.isType(Column.DATETIME))
+                values[i]=
+                    new java.util.Date(1000*((Integer)values[i]).longValue());
+            if (c.isEnum())
+                values[i]=c.enum2str(Integer.parseInt(values[i].toString()));
+        }
+        exists=true;
 
-	Code.debug("new Row: "+toString());
+        Code.debug("new Row: "+toString());
     }
     
 
@@ -88,9 +88,9 @@ public class Row
      */
     public Object get(int i)
     {
-	if (values[i]==null)
-	   return table.columns[i].nullValue();
-	return values[i];
+        if (values[i]==null)
+           return table.columns[i].nullValue();
+        return values[i];
     }
 
     /* ------------------------------------------------------------ */
@@ -98,10 +98,10 @@ public class Row
      */
     public Object get(String column)
     {
-	int i = table.index(column);
-	if (values[i]==null)
-	   return table.columns[i].nullValue();
-	return values[i];
+        int i = table.index(column);
+        if (values[i]==null)
+           return table.columns[i].nullValue();
+        return values[i];
     }
 
     /* ------------------------------------------------------------ */
@@ -109,15 +109,15 @@ public class Row
      */
     public Object[] get(ColumnGroup columns)
     {
-	if (columns.equals(table))
-	{
-	    return values;
-	}
+        if (columns.equals(table))
+        {
+            return values;
+        }
 
-	Object[] v = new Object[columns.columns.length];
-	for (int i=0 ; i< columns.columns.length; i++)
-	    v[i]=values[table.index(columns.columns[i].getName())];
-	return v;
+        Object[] v = new Object[columns.columns.length];
+        for (int i=0 ; i< columns.columns.length; i++)
+            v[i]=values[table.index(columns.columns[i].getName())];
+        return v;
     }
 
     /* ------------------------------------------------------------ */
@@ -125,11 +125,11 @@ public class Row
      */
     public void set(int i, Object value)
     {
-    	Code.debug("Set "+table.columns[i].getName()+"='"+value+"'");
-	if (value==null)
-	   values[i]=table.columns[i].nullValue();
-	else
-	   values[i]=value;
+        Code.debug("Set "+table.columns[i].getName()+"='"+value+"'");
+        if (value==null)
+           values[i]=table.columns[i].nullValue();
+        else
+           values[i]=value;
     }
 
     /* ------------------------------------------------------------ */
@@ -137,7 +137,7 @@ public class Row
      */
     public void set(String column,Object value)
     {
-	set(table.index(column),value);
+        set(table.index(column),value);
     }
     
     /* ------------------------------------------------------------ */
@@ -145,24 +145,24 @@ public class Row
      */
     public void set(Object[] newValues)
     {
-	set(table,newValues);
+        set(table,newValues);
     }
-	
+        
     /* ------------------------------------------------------------ */
     /** Set value by column Group
      */
     public void set(ColumnGroup columns, Object[] newValues)
     {
-	if (columns.equals(table))
-	{
-	    for (int i=0; i<columns.columns.length; i++)
-		values[i]=newValues[i];
-	}
-	else	
-	{
-	    for (int i=0; i<columns.columns.length; i++)
-		values[table.index(columns.columns[i].getName())]=newValues[i];
-	}
+        if (columns.equals(table))
+        {
+            for (int i=0; i<columns.columns.length; i++)
+                values[i]=newValues[i];
+        }
+        else    
+        {
+            for (int i=0; i<columns.columns.length; i++)
+                values[table.index(columns.columns[i].getName())]=newValues[i];
+        }
     }
 
     
@@ -170,49 +170,49 @@ public class Row
     /** Commit the row to the database
      */
     public void update()
-	 throws SQLException
+         throws SQLException
     {
-	String update = "";
+        String update = "";
 
-	Code.debug("Update: ",this);
-	if (exists)
-	{
-	    Code.assert(table.primaryKey!=null && table.otherCols!=null,
-			"Table not suitable for update");
+        Code.debug("Update: ",this);
+        if (exists)
+        {
+            Code.assert(table.primaryKey!=null && table.otherCols!=null,
+                        "Table not suitable for update");
 
-	    Object[] keyValues   =new Object[table.primaryKey.columns.length];
-	    Object[] nonKeyValues=new Object[table.columns.length-
-					    table.primaryKey.columns.length];
+            Object[] keyValues   =new Object[table.primaryKey.columns.length];
+            Object[] nonKeyValues=new Object[table.columns.length-
+                                            table.primaryKey.columns.length];
 
-	    int kv=0;
-	    int nkv=0;
-	    for (int i=0;i<values.length;i++)
-	    {
-		Column c = table.columns[i];
-		if (c.isPrimary())
-		    keyValues[kv++]=values[i];
-		else
-		    nonKeyValues[nkv++]=values[i];
-	    }
-	    
-	    update =
-		"UPDATE " + table.getName() +
-		" SET " + table.otherCols.toString(nonKeyValues,", ") +
-		" WHERE " + table.primaryKey.toString(keyValues," AND ");
-	    Code.debug("Update Existing Row: ",update);
-	}
-	else
-	{
-	    update =
-		"INSERT INTO " + table.getName() +
-		" VALUES( " + table.toValuesString(values) +
-		" )";
-	    
-	    Code.debug("Update New Row: ",update);
-	    exists=true;
-	}
-	
-	table.getDatabase().update(update);
+            int kv=0;
+            int nkv=0;
+            for (int i=0;i<values.length;i++)
+            {
+                Column c = table.columns[i];
+                if (c.isPrimary())
+                    keyValues[kv++]=values[i];
+                else
+                    nonKeyValues[nkv++]=values[i];
+            }
+            
+            update =
+                "UPDATE " + table.getName() +
+                " SET " + table.otherCols.toString(nonKeyValues,", ") +
+                " WHERE " + table.primaryKey.toString(keyValues," AND ");
+            Code.debug("Update Existing Row: ",update);
+        }
+        else
+        {
+            update =
+                "INSERT INTO " + table.getName() +
+                " VALUES( " + table.toValuesString(values) +
+                " )";
+            
+            Code.debug("Update New Row: ",update);
+            exists=true;
+        }
+        
+        table.getDatabase().update(update);
     }
 
     /* ------------------------------------------------------------ */
@@ -222,7 +222,7 @@ public class Row
      */
     public void setNew()
     {
-	exists=false;
+        exists=false;
     }
     
     /* ------------------------------------------------------------ */
@@ -230,22 +230,22 @@ public class Row
      */
     public Table getTable()
     {
-	return table;
+        return table;
     }
-	
+        
     /* ------------------------------------------------------------ */
     /** @return The database for this row
      */
     public Database getDatabase()
     {
-	return table.getDatabase();
+        return table.getDatabase();
     }
-	
+        
     /* ------------------------------------------------------------ */
     /** Rough dump of the Row as a String
      */
     public String toString()
     {
-	return table.toString(values,", ");
-    }	
+        return table.toString(values,", ");
+    }   
 };

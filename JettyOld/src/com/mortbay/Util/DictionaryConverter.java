@@ -21,61 +21,61 @@ public class DictionaryConverter implements Converter
 {
     /* ------------------------------------------------------------ */
     public Object convert(Object toConvert, Class convertTo,
-			  Converter context)
+                          Converter context)
     {
-	if (toConvert.getClass().equals(convertTo))
-	    // Already correct type!
-	    return toConvert;
-	// Make sure we have a dictionary
-	if (!(toConvert instanceof Dictionary))
-	    return null;
-	// Check its not a primitive type
-	Class[] primitives = ConverterSet.PrimitiveConverter.getPrimitives();
-	for (int i = 0; i < primitives.length; i++)
-	    if (primitives[i].equals(convertTo)) return null;
-	// Get an instance
-	Object obj = null;
-	try {
-	    obj = convertTo.newInstance();
-	} catch (Exception ex){
-	    Code.debug("While instantiating "+convertTo.getName(), ex);
-	    return null;
-	}
-	Converter converter = context == null ? this : context;
-	Dictionary dict = (Dictionary)toConvert;
-	fillObject(obj, dict, converter);
-	return obj;
+        if (toConvert.getClass().equals(convertTo))
+            // Already correct type!
+            return toConvert;
+        // Make sure we have a dictionary
+        if (!(toConvert instanceof Dictionary))
+            return null;
+        // Check its not a primitive type
+        Class[] primitives = ConverterSet.PrimitiveConverter.getPrimitives();
+        for (int i = 0; i < primitives.length; i++)
+            if (primitives[i].equals(convertTo)) return null;
+        // Get an instance
+        Object obj = null;
+        try {
+            obj = convertTo.newInstance();
+        } catch (Exception ex){
+            Code.debug("While instantiating "+convertTo.getName(), ex);
+            return null;
+        }
+        Converter converter = context == null ? this : context;
+        Dictionary dict = (Dictionary)toConvert;
+        fillObject(obj, dict, converter);
+        return obj;
     }
     /* ------------------------------------------------------------ */
     public static void fillObject(Object toFill, Dictionary from,
-				  Converter converter)
+                                  Converter converter)
     {
-	PropertyEnumeration enum =
-	    new PropertyEnumeration(toFill.getClass(), true, true);
-	while (enum.hasMoreElements()){
-	    String field = enum.nextElement().toString();
-	    Object value = from.get(field);
-	    if (from instanceof PropertyTree){
-		if (value != null)
-		    value = converter.convert(value, enum.getType(),
-					      converter);
-		if (value == null){
-		    PropertyTree tree = (PropertyTree)from;
-		    value = tree.getTree(field);
-		    value = converter.convert(value, enum.getType(),
-					      converter);
-		}
-	    } else {
-		if (value == null) continue;
-		value = converter.convert(value, enum.getType(), converter);
-	    }
-	    if (value == null) continue;
-	    try {
-		boolean done = PropertyEnumeration.set(toFill, field, value);
-	    } catch (Exception ex){
-		Code.debug("While setting value "+field+"="+value, ex);
-	    }
-	}
+        PropertyEnumeration enum =
+            new PropertyEnumeration(toFill.getClass(), true, true);
+        while (enum.hasMoreElements()){
+            String field = enum.nextElement().toString();
+            Object value = from.get(field);
+            if (from instanceof PropertyTree){
+                if (value != null)
+                    value = converter.convert(value, enum.getType(),
+                                              converter);
+                if (value == null){
+                    PropertyTree tree = (PropertyTree)from;
+                    value = tree.getTree(field);
+                    value = converter.convert(value, enum.getType(),
+                                              converter);
+                }
+            } else {
+                if (value == null) continue;
+                value = converter.convert(value, enum.getType(), converter);
+            }
+            if (value == null) continue;
+            try {
+                boolean done = PropertyEnumeration.set(toFill, field, value);
+            } catch (Exception ex){
+                Code.debug("While setting value "+field+"="+value, ex);
+            }
+        }
     }
     /* ------------------------------------------------------------ */
 };

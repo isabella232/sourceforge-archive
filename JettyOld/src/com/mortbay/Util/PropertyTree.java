@@ -44,12 +44,12 @@ public class PropertyTree extends Properties
     /* ------------------------------------------------------------ */
     class Node extends Hashtable
     {
-	Node() {super(13);}
-	public String key=null;
-	public String toString()
-	{
-	    return  "["+key+":"+super.toString()+"]";
-	}
+        Node() {super(13);}
+        public String key=null;
+        public String toString()
+        {
+            return  "["+key+":"+super.toString()+"]";
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -71,7 +71,7 @@ public class PropertyTree extends Properties
      */
     public PropertyTree(boolean trimLoadValues)
     {
-	trim=trimLoadValues;
+        trim=trimLoadValues;
     }
     
     /* ------------------------------------------------------------ */
@@ -80,107 +80,107 @@ public class PropertyTree extends Properties
      */
     public PropertyTree(Properties properties)
     {
-	load(properties);
+        load(properties);
     }
 
     /* ------------------------------------------------------------ */
     public void load(InputStream in)
-	throws IOException
+        throws IOException
     {
-	Properties parser = new Properties();
-	parser.load(in);
-	load(parser);
+        Properties parser = new Properties();
+        parser.load(in);
+        load(parser);
     }
 
     /* ------------------------------------------------------------ */
     public void load(Properties properties)
     {
-	Enumeration e=properties.keys();
-	while (e.hasMoreElements())
-	{
-	    Object k=e.nextElement();
-	    String v=(String)properties.get(k);
-	    put(k,trim?v.trim():v);    
-	}
+        Enumeration e=properties.keys();
+        while (e.hasMoreElements())
+        {
+            Object k=e.nextElement();
+            String v=(String)properties.get(k);
+            put(k,trim?v.trim():v);    
+        }
     }
     
     /* ------------------------------------------------------------ */
     /** Override Hashtable.get() */
     public synchronized Object get(Object key)
     {
-	Object realKey=key;
-	Object value=super.get(realKey);
-	if (value==null)
-	{
-	    realKey=getTokenKey(key.toString());
-	    if (realKey!=null)
-		value=super.get(realKey);
-	}
-	
-	if (Code.verbose(19)) Code.debug("Get ",realKey,"(",key,")=",value);
-	return value;
+        Object realKey=key;
+        Object value=super.get(realKey);
+        if (value==null)
+        {
+            realKey=getTokenKey(key.toString());
+            if (realKey!=null)
+                value=super.get(realKey);
+        }
+        
+        if (Code.verbose(19)) Code.debug("Get ",realKey,"(",key,")=",value);
+        return value;
     }
 
     /* ------------------------------------------------------------ */
     /** Override Properties.getProperty() */
     public String getProperty(String key)
     {
-	return (String)get(key);
+        return (String)get(key);
     }
     
     /* ------------------------------------------------------------ */
     /** Override Hashtable.put() */
     public synchronized Object put(Object key, Object value)
     {
-	if (Code.verbose(9)) Code.debug("Put ",key,"=",value);
-	String keyStr=key.toString();
-	putTokenKey(keyStr,keyStr);
-	Object v=null;
-	if (parent!=null)
-	    v=parent.put(parentKey((String)key),value);
-	
-	return super.put(key,value);
+        if (Code.verbose(9)) Code.debug("Put ",key,"=",value);
+        String keyStr=key.toString();
+        putTokenKey(keyStr,keyStr);
+        Object v=null;
+        if (parent!=null)
+            v=parent.put(parentKey((String)key),value);
+        
+        return super.put(key,value);
     }
 
     /* ------------------------------------------------------------ */
     public Object setProperty(String key,String value)
     {
-	return (String)put(key,value);
+        return (String)put(key,value);
     }
     
     /* ------------------------------------------------------------ */
     /** Override Hashtable.remove() */
     public synchronized Object remove(Object key)
     {
-	if (parent!=null)
-	    parent.remove(parentKey((String)key));
-	
-	Object value=super.get(key);
-	if (value!=null)
-	{
-	    if (Code.verbose(9)) Code.debug("Remove ",key);
-	    putTokenKey(key.toString(),null);
-	    return super.remove(key);
-	}
+        if (parent!=null)
+            parent.remove(parentKey((String)key));
+        
+        Object value=super.get(key);
+        if (value!=null)
+        {
+            if (Code.verbose(9)) Code.debug("Remove ",key);
+            putTokenKey(key.toString(),null);
+            return super.remove(key);
+        }
 
-	String realKey=getTokenKey(key.toString());
-	if (realKey!=null)
-	{
-	    if (Code.verbose(9)) Code.debug("Remove ",realKey,"(",key,")");
-	    putTokenKey(realKey,null);
-	    return super.remove(realKey);
-	}
-	return null;
+        String realKey=getTokenKey(key.toString());
+        if (realKey!=null)
+        {
+            if (Code.verbose(9)) Code.debug("Remove ",realKey,"(",key,")");
+            putTokenKey(realKey,null);
+            return super.remove(realKey);
+        }
+        return null;
     }   
     
     /* ------------------------------------------------------------ */
     /** From Properties */
     public synchronized void save(OutputStream out,String header)
     {
-	PrintWriter writer = new PrintWriter(new OutputStreamWriter(out));
-	writer.print("# ");
-	writer.println(header);
-	list(writer);
+        PrintWriter writer = new PrintWriter(new OutputStreamWriter(out));
+        writer.print("# ");
+        writer.println(header);
+        list(writer);
     }
     
     /* ------------------------------------------------------------ */
@@ -192,29 +192,29 @@ public class PropertyTree extends Properties
      */
     public PropertyTree getTree(String key)
     {
-	if (prefix!=null && prefix.endsWith("*.") && key.startsWith("*"))
-	    return this;
-	return new PropertyTree(this,key);
+        if (prefix!=null && prefix.endsWith("*.") && key.startsWith("*"))
+            return this;
+        return new PropertyTree(this,key);
     }
     
     /* ------------------------------------------------------------ */
     public Enumeration propertyNames()
     {
-	return keys();
+        return keys();
     }
 
     /* ------------------------------------------------------------ */
     public Enumeration elements()
     {
-	final Enumeration keys=keys();
-	return new Enumeration(){
-	    public boolean hasMoreElements(){
-		return keys.hasMoreElements();
-	    }
-	    public Object nextElement(){
-		return get(keys.nextElement());
-	    }
-	};	
+        final Enumeration keys=keys();
+        return new Enumeration(){
+            public boolean hasMoreElements(){
+                return keys.hasMoreElements();
+            }
+            public Object nextElement(){
+                return get(keys.nextElement());
+            }
+        };      
     }
     
     
@@ -224,7 +224,7 @@ public class PropertyTree extends Properties
      */
     public Enumeration getNodes()
     {
-	return getNodes("");
+        return getNodes("");
     }
     
     /* ------------------------------------------------------------ */
@@ -234,18 +234,18 @@ public class PropertyTree extends Properties
      */
     public Enumeration getNodes(String key)
     {
-	Vector tokens=getTokens(key);
-	Node node=rootNode;
-	int index=0;
-	while(index<tokens.size())
-	{
-	    Node subNode = (Node)node.get(tokens.elementAt(index));
-	    if (subNode==null)
-		return null;
-	    node=subNode;
-	    index++;
-	}
-	return node.keys();
+        Vector tokens=getTokens(key);
+        Node node=rootNode;
+        int index=0;
+        while(index<tokens.size())
+        {
+            Node subNode = (Node)node.get(tokens.elementAt(index));
+            if (subNode==null)
+                return null;
+            node=subNode;
+            index++;
+        }
+        return node.keys();
     }
     
     
@@ -256,7 +256,7 @@ public class PropertyTree extends Properties
      */
     public Enumeration getRealNodes()
     {
-	return getRealNodes("");
+        return getRealNodes("");
     }
     
     /* ------------------------------------------------------------ */
@@ -267,33 +267,33 @@ public class PropertyTree extends Properties
      */
     public Enumeration getRealNodes(String key)
     {
-	if (!key.endsWith(".") && key.length()>0)
-	    key+=".";
-	    
-	// find the root tree.
-	PropertyTree tree=this;
-	while (tree.parent!=null)
-	{
-	    key=tree.prefix+key;
-	    tree=tree.parent;
-	}
-	
-	// find not wild keys
-	Hashtable keySet=new Hashtable(tree.size()*2);
-	Enumeration e= tree.keys();
-	while (e.hasMoreElements())
-	{
-	    String k=(String)e.nextElement();
-	    if (!k.startsWith(key))
-		continue;
-	    String s=k.substring(key.length());
-	    int d=s.indexOf(".");
-	    if (d>=0)
-		s=s.substring(0,d);
-	    keySet.put(s,s);
-	}
-	
-	return keySet.keys();
+        if (!key.endsWith(".") && key.length()>0)
+            key+=".";
+            
+        // find the root tree.
+        PropertyTree tree=this;
+        while (tree.parent!=null)
+        {
+            key=tree.prefix+key;
+            tree=tree.parent;
+        }
+        
+        // find not wild keys
+        Hashtable keySet=new Hashtable(tree.size()*2);
+        Enumeration e= tree.keys();
+        while (e.hasMoreElements())
+        {
+            String k=(String)e.nextElement();
+            if (!k.startsWith(key))
+                continue;
+            String s=k.substring(key.length());
+            int d=s.indexOf(".");
+            if (d>=0)
+                s=s.substring(0,d);
+            keySet.put(s,s);
+        }
+        
+        return keySet.keys();
     }
     
     /* ------------------------------------------------------------ */
@@ -304,25 +304,25 @@ public class PropertyTree extends Properties
      */
     public Vector getVector(String key, String separators)
     {
-	String values=getProperty(key);
-	if (values==null)
-	    return null;
+        String values=getProperty(key);
+        if (values==null)
+            return null;
 
-	Vector v=new Vector();
-	StringTokenizer tok=new StringTokenizer(values,separators);
-	while(tok.hasMoreTokens())
-	    v.addElement(tok.nextToken());
-	return v;
+        Vector v=new Vector();
+        StringTokenizer tok=new StringTokenizer(values,separators);
+        while(tok.hasMoreTokens())
+            v.addElement(tok.nextToken());
+        return v;
     }
     
     /* ------------------------------------------------------------ */
     public boolean getBoolean(String key)
     {
-	String value=getProperty(key);
-	if (value==null || value.length()==0)
-	    return false;
+        String value=getProperty(key);
+        if (value==null || value.length()==0)
+            return false;
 
-	return "1tTyYoO".indexOf(value.charAt(0))>=0;
+        return "1tTyYoO".indexOf(value.charAt(0))>=0;
     }
     
     /* ------------------------------------------------------------ */
@@ -338,92 +338,92 @@ public class PropertyTree extends Properties
     /* ------------------------------------------------------------ */
     public Object clone()
     {
-	PropertyTree pt = new PropertyTree();
-	Enumeration e = keys();
-	while(e.hasMoreElements())
-	{
-	    String k = (String)e.nextElement();
-	    pt.put(k,get(k));
-	}
-	return pt;
+        PropertyTree pt = new PropertyTree();
+        Enumeration e = keys();
+        while(e.hasMoreElements())
+        {
+            String k = (String)e.nextElement();
+            pt.put(k,get(k));
+        }
+        return pt;
     }
     
     /* ------------------------------------------------------------ */
     private void putTokenKey(String key,String tokenKey)
     {
-	Vector tokens=getTokens(key);
-	Node node=rootNode;
-	int index=0;
-	while(index<tokens.size())
-	{
-	    Node subNode = (Node)node.get(tokens.elementAt(index));
-	    if (subNode==null)
-	    {
-		subNode=new Node();
-		node.put(tokens.elementAt(index),subNode);
-	    }
-	    node=subNode;
-	    index++;
-	}
-	node.key=tokenKey;
+        Vector tokens=getTokens(key);
+        Node node=rootNode;
+        int index=0;
+        while(index<tokens.size())
+        {
+            Node subNode = (Node)node.get(tokens.elementAt(index));
+            if (subNode==null)
+            {
+                subNode=new Node();
+                node.put(tokens.elementAt(index),subNode);
+            }
+            node=subNode;
+            index++;
+        }
+        node.key=tokenKey;
     }    
 
     /* ------------------------------------------------------------ */
     private String getTokenKey(String key)
     {
-	Vector tokens=getTokens(key);
-	String tokenKey=getTokenKey(rootNode,tokens,0);
-	if (Code.verbose(9)) Code.debug(key,"-->",tokenKey);
-	return tokenKey;
+        Vector tokens=getTokens(key);
+        String tokenKey=getTokenKey(rootNode,tokens,0);
+        if (Code.verbose(9)) Code.debug(key,"-->",tokenKey);
+        return tokenKey;
     }
     
     /* ------------------------------------------------------------ */
     private String getTokenKey(Node node, Vector tokens, int index)
     {
-	if (Code.verbose(999))
-	    Code.debug(tokens," "+index," ",node);
-	
-	String key=null;
-	if (tokens.size()==index)
-	    key=node.key;
-	else
-	{
-	    // expand named nodes
-	    Node subNode=(Node)node.get(tokens.elementAt(index));
-	    if (subNode!=null)
-		key=getTokenKey(subNode,tokens,index+1);
+        if (Code.verbose(999))
+            Code.debug(tokens," "+index," ",node);
+        
+        String key=null;
+        if (tokens.size()==index)
+            key=node.key;
+        else
+        {
+            // expand named nodes
+            Node subNode=(Node)node.get(tokens.elementAt(index));
+            if (subNode!=null)
+                key=getTokenKey(subNode,tokens,index+1);
 
-	    // if no key, try wild expansions
-	    if (key==null)
-	    {
-		subNode=(Node)node.get("*");
-		if (subNode!=null)
-		    key=getTokenKey(subNode,tokens,index+1);	
-	    }
-	    
-	}
-	return key;
+            // if no key, try wild expansions
+            if (key==null)
+            {
+                subNode=(Node)node.get("*");
+                if (subNode!=null)
+                    key=getTokenKey(subNode,tokens,index+1);    
+            }
+            
+        }
+        return key;
     }
    
     /* ------------------------------------------------------------ */
     private String parentKey(String key)
     {
-	return prefix+key;    
+        return prefix+key;    
     } 
     
     /* ------------------------------------------------------------ */
     /** Turn the key into a list of tokens */
     private static Vector getTokens(String key)
     {
-	if (key != null)
-	{
-	    Vector v = new Vector(10);
-	    StringTokenizer tokens = new StringTokenizer(key.toString(), ".");
-	    while (tokens.hasMoreTokens())
-		v.addElement(tokens.nextToken());
-	    return v;
-	}
-	return null;
+        if (key != null)
+        {
+            Vector v = new Vector(10);
+            StringTokenizer tokens = new StringTokenizer(key.toString(), ".");
+            while (tokens.hasMoreTokens())
+                v.addElement(tokens.nextToken());
+            return v;
+        }
+        return null;
     }
     
     /* ------------------------------------------------------------ */
@@ -432,101 +432,101 @@ public class PropertyTree extends Properties
      */
     public static Converter getConverter()
     {
-	return new Converter(){
-	    public Object convert(Object toConvert, Class convertTo,
-				  Converter context) {
-		if (toConvert.getClass().equals(convertTo))
-		    // Already correct type!
-		    return toConvert;
-		try {
-		    if (!convertTo.equals(Class.forName(
-					"com.mortbay.Util.PropertyTree")))
-			return null;
-		} catch (Exception ex){}
-		// Make sure we have a dictionary
-		if (!(toConvert instanceof Dictionary))
-		    return null;
-		// Check if already OK
-		if (toConvert instanceof PropertyTree)
-		    return toConvert;
-		PropertyTree pt = new PropertyTree();
-		Dictionary dict = (Dictionary)toConvert;
-		Converter converter = context == null ? this : context;
-		for (Enumeration enum = dict.keys(); enum.hasMoreElements();){
-		    Object key = enum.nextElement();
-		    Object value = dict.get(key);
-		    Object converted =
-			converter.convert(value, getClass(), converter);
-		    pt.put(key, converted == null ? value : converted);
-		}
-		return pt;
-	    }
-	};
+        return new Converter(){
+            public Object convert(Object toConvert, Class convertTo,
+                                  Converter context) {
+                if (toConvert.getClass().equals(convertTo))
+                    // Already correct type!
+                    return toConvert;
+                try {
+                    if (!convertTo.equals(Class.forName(
+                                        "com.mortbay.Util.PropertyTree")))
+                        return null;
+                } catch (Exception ex){}
+                // Make sure we have a dictionary
+                if (!(toConvert instanceof Dictionary))
+                    return null;
+                // Check if already OK
+                if (toConvert instanceof PropertyTree)
+                    return toConvert;
+                PropertyTree pt = new PropertyTree();
+                Dictionary dict = (Dictionary)toConvert;
+                Converter converter = context == null ? this : context;
+                for (Enumeration enum = dict.keys(); enum.hasMoreElements();){
+                    Object key = enum.nextElement();
+                    Object value = dict.get(key);
+                    Object converted =
+                        converter.convert(value, getClass(), converter);
+                    pt.put(key, converted == null ? value : converted);
+                }
+                return pt;
+            }
+        };
     }
     
     /* ------------------------------------------------------------ */
     private PropertyTree(PropertyTree parent,String node)
     {
-	this.prefix=node+".";
-	Vector tokens=getTokens(node);
-	Hashtable keyMap = new Hashtable(parent.size()+13);
-	findKeys(keyMap,parent.rootNode,tokens,0,null);
-	Enumeration e=keyMap.keys();
-	while(e.hasMoreElements())
-	{
-	    String subKey=(String)e.nextElement();
-	    String key=(String)keyMap.get(subKey);
-	    put(subKey,parent.get(key));
-	}
-	this.parent=parent;
+        this.prefix=node+".";
+        Vector tokens=getTokens(node);
+        Hashtable keyMap = new Hashtable(parent.size()+13);
+        findKeys(keyMap,parent.rootNode,tokens,0,null);
+        Enumeration e=keyMap.keys();
+        while(e.hasMoreElements())
+        {
+            String subKey=(String)e.nextElement();
+            String key=(String)keyMap.get(subKey);
+            put(subKey,parent.get(key));
+        }
+        this.parent=parent;
     }
     
     /* ------------------------------------------------------------ */
     private void findKeys(Hashtable keyMap,
-			  Node node,
-			  Vector tokens,
-			  int index,
-			  String key)
+                          Node node,
+                          Vector tokens,
+                          int index,
+                          String key)
     {
-	if (Code.verbose(19))
-	    Code.debug(key," ",tokens," "+index," ",node);
+        if (Code.verbose(19))
+            Code.debug(key," ",tokens," "+index," ",node);
 
-	// Is this a match?
-	if (tokens.size()==index)
-	    expandNode(keyMap,node,key.length()+1);
-	else
-	{
-	    // expand named nodes
-	    Node subNode=(Node)node.get(tokens.elementAt(index));
-	    if (subNode!=null)
-		findKeys(keyMap,subNode,tokens,index+1,
-			(key==null)
-			 ?((String)tokens.elementAt(index))
-			 :(key+"."+tokens.elementAt(index)) );
-	    
-	    // expand wild cards
-	    subNode=(Node)node.get("*");
-	    if (subNode!=null)
-		findKeys(keyMap,subNode,tokens,index+1,
-			(key==null)?"*":(key+".*") );
-	}
+        // Is this a match?
+        if (tokens.size()==index)
+            expandNode(keyMap,node,key.length()+1);
+        else
+        {
+            // expand named nodes
+            Node subNode=(Node)node.get(tokens.elementAt(index));
+            if (subNode!=null)
+                findKeys(keyMap,subNode,tokens,index+1,
+                        (key==null)
+                         ?((String)tokens.elementAt(index))
+                         :(key+"."+tokens.elementAt(index)) );
+            
+            // expand wild cards
+            subNode=(Node)node.get("*");
+            if (subNode!=null)
+                findKeys(keyMap,subNode,tokens,index+1,
+                        (key==null)?"*":(key+".*") );
+        }
     }
 
     /* ------------------------------------------------------------ */
     private void expandNode(Hashtable keyMap, Node node, int keyLength)
     {
-	Enumeration e=node.elements();
-	while(e.hasMoreElements())
-	{
-	    Node n = (Node)e.nextElement();
-	    if (n.key!=null)
-	    {
-		String subKey=n.key.substring(keyLength);
-		if (!keyMap.containsKey(subKey))
-		    keyMap.put(subKey,n.key);
-	    }
-	    expandNode(keyMap,n,keyLength);
-	}
+        Enumeration e=node.elements();
+        while(e.hasMoreElements())
+        {
+            Node n = (Node)e.nextElement();
+            if (n.key!=null)
+            {
+                String subKey=n.key.substring(keyLength);
+                if (!keyMap.containsKey(subKey))
+                    keyMap.put(subKey,n.key);
+            }
+            expandNode(keyMap,n,keyLength);
+        }
     }
 };
 

@@ -26,12 +26,12 @@ public class Cookies
     
     /* -------------------------------------------------------------- */
     public final static SimpleDateFormat __dateSend = 
-	new SimpleDateFormat("EEE, dd-MMM-yyyy HH:mm:ss 'GMT'");
+        new SimpleDateFormat("EEE, dd-MMM-yyyy HH:mm:ss 'GMT'");
     static
     {
-	TimeZone tz = TimeZone.getTimeZone("GMT");
-	tz.setID("GMT");
-	__dateSend.setTimeZone(tz);
+        TimeZone tz = TimeZone.getTimeZone("GMT");
+        tz.setID("GMT");
+        __dateSend.setTimeZone(tz);
     }
     
     /* -------------------------------------------------------------- */
@@ -39,9 +39,9 @@ public class Cookies
      */
     public void setCookie(Cookie cookie)
     {
-	String key = StringUtil
-	    .asciiToLowerCase((cookie.getName()+';'+cookie.getPath()));
-	cookies.put(key,cookie);
+        String key = StringUtil
+            .asciiToLowerCase((cookie.getName()+';'+cookie.getPath()));
+        cookies.put(key,cookie);
     }
     
     /* -------------------------------------------------------------- */
@@ -50,9 +50,9 @@ public class Cookies
      * Cookie setting are unique for a given name & path pair.
      */
     public void setCookie(String name,
-			  String value)
+                          String value)
     {
-	setCookie(name,value,null,"/",null,false);
+        setCookie(name,value,null,"/",null,false);
     }
     
     /* -------------------------------------------------------------- */
@@ -69,88 +69,88 @@ public class Cookies
      * @param secure if true the cookie is flagged secure.
      */
     public void setCookie(String name,
-			  String value,
-			  String domain,
-			  String path,
-			  Date expires,
-			  boolean secure)
+                          String value,
+                          String domain,
+                          String path,
+                          Date expires,
+                          boolean secure)
     {
-	Code.assert(name!=null && name.length()>0,
-		    "Bad cookie name passed");
-	Code.assert(value!=null && value.length()>0,
-		    "Bad cookie value passed");
-	
-	if (path==null)
-	    path="/";
-	
-	String key = StringUtil.asciiToLowerCase(name+';'+path);
+        Code.assert(name!=null && name.length()>0,
+                    "Bad cookie name passed");
+        Code.assert(value!=null && value.length()>0,
+                    "Bad cookie value passed");
+        
+        if (path==null)
+            path="/";
+        
+        String key = StringUtil.asciiToLowerCase(name+';'+path);
 
-	Cookie cookie = new Cookie(name,value);
-	cookie.setPath(path);
-	if (domain!=null)
-	    cookie.setDomain(domain);
-	
-	if (expires!=null)
-	{
-	    int maxAge = (int)
-		((System.currentTimeMillis()-expires.getTime())/1000);
-	    cookie.setMaxAge(maxAge);
-	}
+        Cookie cookie = new Cookie(name,value);
+        cookie.setPath(path);
+        if (domain!=null)
+            cookie.setDomain(domain);
+        
+        if (expires!=null)
+        {
+            int maxAge = (int)
+                ((System.currentTimeMillis()-expires.getTime())/1000);
+            cookie.setMaxAge(maxAge);
+        }
 
-	cookies.put(key,cookie);
+        cookies.put(key,cookie);
     }
 
     /* -------------------------------------------------------------- */
     public String toString()
     {
-	StringBuffer buf = new StringBuffer(128);
-	Enumeration e = cookies.elements();
-	String s = "";
-	
-	while (e.hasMoreElements())
-	{
-	    buf.append(s);
-	    s=HttpHeader.CRLF;
+        StringBuffer buf = new StringBuffer(128);
+        Enumeration e = cookies.elements();
+        String s = "";
+        
+        while (e.hasMoreElements())
+        {
+            buf.append(s);
+            s=HttpHeader.CRLF;
 
-	    Cookie cookie = (Cookie)e.nextElement();
-	    buf.append(HttpHeader.SetCookie);
-	    buf.append(": ");
-	    buf.append(toString(cookie));
-	}
-	return buf.toString();
+            Cookie cookie = (Cookie)e.nextElement();
+            buf.append(HttpHeader.SetCookie);
+            buf.append(": ");
+            buf.append(toString(cookie));
+        }
+        return buf.toString();
     }
 
     /* -------------------------------------------------------------- */
     public static String toString(Cookie cookie)
     {
-    	StringBuffer buf = new StringBuffer(128);
-	buf.append(cookie.getName());
-	buf.append('=');
-	buf.append(cookie.getValue());
+        StringBuffer buf = new StringBuffer(128);
+        buf.append(cookie.getName());
+        buf.append('=');
+        buf.append(cookie.getValue());
 
-	String s = cookie.getPath();
-	if (s!=null && s.length()>0)
-	{
-	    buf.append("; path=");
-	    buf.append(s);
-	}
+        String s = cookie.getPath();
+        if (s!=null && s.length()>0)
+        {
+            buf.append("; path=");
+            buf.append(s);
+        }
 
-	s = cookie.getDomain();
-	if (s!=null && s.length()>0)
-	{
-	    buf.append("; domain=");
-	    buf.append(s);
-	}
+        s = cookie.getDomain();
+        if (s!=null && s.length()>0)
+        {
+            buf.append("; domain=");
+            buf.append(s);
+        }
 
-	int maxAge = cookie.getMaxAge();
-	if (maxAge>0)
-	{
-	    buf.append("; expires=");
-	    Date date = new Date(System.currentTimeMillis()+1000L*maxAge);
-	    buf.append(__dateSend.format(date));
-	}
-	
-	return buf.toString();
+        int maxAge = cookie.getMaxAge();
+        if (maxAge>0)
+        {
+            buf.append("; expires=");
+            Date date = new Date(System.currentTimeMillis()+1000L*maxAge);
+            buf.append(__dateSend.format(date));
+        }
+        
+        return buf.toString();
     }
     
     /* -------------------------------------------------------------- */
@@ -160,34 +160,34 @@ public class Cookies
      */
     public static Cookie[] decode(String buffer)
     {
-	if (buffer!=null)
-	{
-	    Vector cv = new Vector();
-	    StringTokenizer tok = new StringTokenizer(buffer,";");
-	    while (tok.hasMoreTokens())
-	    {
-		String c = tok.nextToken();
-		int e = c.indexOf("=");
-		String n;
-		String v;
-		if (e>0)
-		{
-		    n=c.substring(0,e).trim();
-		    v=c.substring(e+1).trim();
-		}
-		else
-		{
-		    n=c.trim();
-		    v=UrlEncoded.noValue;
-		}
-		v=UrlEncoded.decode(v);
-		cv.addElement(new Cookie(n,v));
-	    }
-	    Cookie[] cookies = new Cookie[cv.size()];
-	    cv.copyInto(cookies);
-	    return cookies;
-	}
-	return null;
+        if (buffer!=null)
+        {
+            Vector cv = new Vector();
+            StringTokenizer tok = new StringTokenizer(buffer,";");
+            while (tok.hasMoreTokens())
+            {
+                String c = tok.nextToken();
+                int e = c.indexOf("=");
+                String n;
+                String v;
+                if (e>0)
+                {
+                    n=c.substring(0,e).trim();
+                    v=c.substring(e+1).trim();
+                }
+                else
+                {
+                    n=c.trim();
+                    v=UrlEncoded.noValue;
+                }
+                v=UrlEncoded.decode(v);
+                cv.addElement(new Cookie(n,v));
+            }
+            Cookie[] cookies = new Cookie[cv.size()];
+            cv.copyInto(cookies);
+            return cookies;
+        }
+        return null;
     }    
 }
 

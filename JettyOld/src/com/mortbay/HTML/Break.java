@@ -25,7 +25,7 @@ public class Break extends Tag
      */
     public Break()
     {
-	this(Line);
+        this(Line);
     }
     
     /* ---------------------------------------------------------------- */
@@ -34,7 +34,7 @@ public class Break extends Tag
      */
     public Break(String type)
     {
-	super(type);
+        super(type);
     }
     
     /* ---------------------------------------------------------------- */

@@ -34,10 +34,10 @@ public class FileJarServletLoader extends ServletLoader
      */
     private final static String[] systemClasses =
     {
-	"java.",
-	"javax."
+        "java.",
+        "javax."
     };
-	
+        
     /* ------------------------------------------------------------ */
     /* Is the class a system class.
      * Check if the class is from java, javax or the com.mortbay
@@ -47,17 +47,17 @@ public class FileJarServletLoader extends ServletLoader
      */
     private static boolean isSystemClass(String name)
     {
-	for (int i=systemClasses.length;i-->0;)
-	    if (name.startsWith(systemClasses[i]))
-		return true;
-	return false;
+        for (int i=systemClasses.length;i-->0;)
+            if (name.startsWith(systemClasses[i]))
+                return true;
+        return false;
     }
 
     /* ------------------------------------------------------------ */
     static class LoadedFile
     {
-	File file;
-	long lastModified;
+        File file;
+        long lastModified;
     }
     
     /* ------------------------------------------------------------ */
@@ -70,38 +70,38 @@ public class FileJarServletLoader extends ServletLoader
      * @param servletClassPath 
      */
     public FileJarServletLoader(String servletClassPath)
-	throws IOException
+        throws IOException
     {
-	StringTokenizer tokenizer =
-	    new StringTokenizer(servletClassPath,File.pathSeparator);
-	while (tokenizer.hasMoreTokens())
-	{
-	    String filename=tokenizer.nextToken();
-	    File file=new File(filename);
-	    try
-	    {
-		// see if the path element exists
-		if (!file.exists())
-		    throw new FileNotFoundException(filename);
-		file = new File(file.getCanonicalPath());
-		if (file.isDirectory())
-		    // add to the list if it is a directory.
-		    paths.addElement(file.getCanonicalPath());
-		else
-		{
-		    // Assume it is a zip file
-		    paths.addElement(new ZipFile(file));
-		    LoadedFile lc=new LoadedFile();
-		    lc.file=file;
-		    lc.lastModified=System.currentTimeMillis();
-		    loaded.addElement(lc);
-		}
-	    }
-	    catch(IOException e)
-	    {
-		Code.warning("Problem with "+file,e);
-	    }
-	}
+        StringTokenizer tokenizer =
+            new StringTokenizer(servletClassPath,File.pathSeparator);
+        while (tokenizer.hasMoreTokens())
+        {
+            String filename=tokenizer.nextToken();
+            File file=new File(filename);
+            try
+            {
+                // see if the path element exists
+                if (!file.exists())
+                    throw new FileNotFoundException(filename);
+                file = new File(file.getCanonicalPath());
+                if (file.isDirectory())
+                    // add to the list if it is a directory.
+                    paths.addElement(file.getCanonicalPath());
+                else
+                {
+                    // Assume it is a zip file
+                    paths.addElement(new ZipFile(file));
+                    LoadedFile lc=new LoadedFile();
+                    lc.file=file;
+                    lc.lastModified=System.currentTimeMillis();
+                    loaded.addElement(lc);
+                }
+            }
+            catch(IOException e)
+            {
+                Code.warning("Problem with "+file,e);
+            }
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -109,67 +109,67 @@ public class FileJarServletLoader extends ServletLoader
      */
     private InputStream getStreamFromPath(String filename)
     {
-	Code.debug("Load ",filename);
-	InputStream in=null;
-	int length=0;
-	
-	// For each potential path
-	for (int p=0;p<paths.size();p++)
-	{
-	    try
-	    {
-		Object source = paths.elementAt(p);
-		if (source instanceof java.util.zip.ZipFile)
-		{
-		    ZipFile zip = (ZipFile)source;
+        Code.debug("Load ",filename);
+        InputStream in=null;
+        int length=0;
+        
+        // For each potential path
+        for (int p=0;p<paths.size();p++)
+        {
+            try
+            {
+                Object source = paths.elementAt(p);
+                if (source instanceof java.util.zip.ZipFile)
+                {
+                    ZipFile zip = (ZipFile)source;
 
-		    ZipEntry entry = zip.getEntry(filename);
-		    if (entry==null)
-		    {
-			// Try alternate file separator for jars prepared
-			// on other architectures.
-			String alt=null;
-			if (File.separatorChar=='/')
-			    alt=filename.replace('/','\\');
-			else
-			    alt=filename.replace(File.separatorChar,'/');
-			entry = zip.getEntry(alt);
-		    }
-		    
-		    if (entry!=null)
-		    {
-			Code.debug("Loading ",entry," from ",zip.getName());
-			in = zip.getInputStream(entry);
-			length=(int)entry.getSize();
-			break;
-		    }
-		}
-		else
-		{
-		    String dir = (String)source;
-		    File file = new File(dir+File.separator+filename);
-		    if (file.exists())
-		    {
-			Code.debug("Loading ",filename);
-			in = new FileInputStream(file);
-			length=(int)file.length();
-			
-			LoadedFile lc=new LoadedFile();
-			lc.file=file;
-			lc.lastModified=file.lastModified();
-			loaded.addElement(lc);
-			break;
-		    }
-		}
-	    }
-	    catch(Exception e)
-	    {
-		if (Code.verbose())
-		    Code.debug(e);
-	    }
-	}
-	
-	return in;
+                    ZipEntry entry = zip.getEntry(filename);
+                    if (entry==null)
+                    {
+                        // Try alternate file separator for jars prepared
+                        // on other architectures.
+                        String alt=null;
+                        if (File.separatorChar=='/')
+                            alt=filename.replace('/','\\');
+                        else
+                            alt=filename.replace(File.separatorChar,'/');
+                        entry = zip.getEntry(alt);
+                    }
+                    
+                    if (entry!=null)
+                    {
+                        Code.debug("Loading ",entry," from ",zip.getName());
+                        in = zip.getInputStream(entry);
+                        length=(int)entry.getSize();
+                        break;
+                    }
+                }
+                else
+                {
+                    String dir = (String)source;
+                    File file = new File(dir+File.separator+filename);
+                    if (file.exists())
+                    {
+                        Code.debug("Loading ",filename);
+                        in = new FileInputStream(file);
+                        length=(int)file.length();
+                        
+                        LoadedFile lc=new LoadedFile();
+                        lc.file=file;
+                        lc.lastModified=file.lastModified();
+                        loaded.addElement(lc);
+                        break;
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                if (Code.verbose())
+                    Code.debug(e);
+            }
+        }
+        
+        return in;
     }
     
     /* ------------------------------------------------------------ */
@@ -177,33 +177,33 @@ public class FileJarServletLoader extends ServletLoader
      */
     private Class loadClassFromPath(String name)
     {
-	String filename = name.replace('.',File.separatorChar)+".class";
+        String filename = name.replace('.',File.separatorChar)+".class";
 
-	// Try for class
-	InputStream in=getStreamFromPath(filename);
-	if (in!=null)
-	{
-	    try{
-		ByteArrayOutputStream out =
-		    new ByteArrayOutputStream(8192);
-		com.mortbay.Util.IO.copy(in,out);
-		
-		byte data[] = out.toByteArray();
-		return defineClass(name,data,0,data.length);
-	    }
-	    catch(Exception e)
-	    {
-		if (Code.verbose(9))
-		    Code.ignore(e);
-	    }
-	    finally
-	    {
-		try{in.close();}
-		catch(Exception e){Code.ignore(e);}
-	    }
-	}
-	
-	return null;
+        // Try for class
+        InputStream in=getStreamFromPath(filename);
+        if (in!=null)
+        {
+            try{
+                ByteArrayOutputStream out =
+                    new ByteArrayOutputStream(8192);
+                com.mortbay.Util.IO.copy(in,out);
+                
+                byte data[] = out.toByteArray();
+                return defineClass(name,data,0,data.length);
+            }
+            catch(Exception e)
+            {
+                if (Code.verbose(9))
+                    Code.ignore(e);
+            }
+            finally
+            {
+                try{in.close();}
+                catch(Exception e){Code.ignore(e);}
+            }
+        }
+        
+        return null;
     }
 
 
@@ -215,7 +215,7 @@ public class FileJarServletLoader extends ServletLoader
      */
     public InputStream getResourceAsStream(String filename)
     {
-	return getStreamFromPath(filename);
+        return getStreamFromPath(filename);
     }
     
 
@@ -229,51 +229,51 @@ public class FileJarServletLoader extends ServletLoader
      */
     synchronized
     public Class loadClass(String name)
-	throws ClassNotFoundException
+        throws ClassNotFoundException
     {
-	Class c;
-	
-	//remove the .class
-	if (name.endsWith(".class"))
-	    name = name.substring(0,name.lastIndexOf('.'));
-	
-	// Look for a cached class
-	c=(Class)cache.get(name);
-	if (c!=null)
-	    return c;
+        Class c;
+        
+        //remove the .class
+        if (name.endsWith(".class"))
+            name = name.substring(0,name.lastIndexOf('.'));
+        
+        // Look for a cached class
+        c=(Class)cache.get(name);
+        if (c!=null)
+            return c;
 
-	try
-	{
-	    // get the package name
-	    String packageName="";
-	    if (name.indexOf(".")>=0)
-		packageName=name.substring(0,name.lastIndexOf('.'));
-	    
-	    // Check permission
-	    SecurityManager sm=System.getSecurityManager();
-	    if (sm!=null)
-		sm.checkPackageAccess(packageName);
-	    
-	    // Look for a system class
-	    if (isSystemClass(name))
-		// If it is a system class it must be found here or fail
-		return findSystemClass(name);
-	    
-	    // Load & define
-	    c=loadClassFromPath(name);
-	    
-	    // Try the system class for additional CLASSPATH entries.
-	    // classes found here can't be reloaded.
-	    if (c==null)
-		return findSystemClass(name);
-	}
-	finally
-	{
-	    if (c!=null)
-		cache.put(name,c);
-	}
-	
-	return c;
+        try
+        {
+            // get the package name
+            String packageName="";
+            if (name.indexOf(".")>=0)
+                packageName=name.substring(0,name.lastIndexOf('.'));
+            
+            // Check permission
+            SecurityManager sm=System.getSecurityManager();
+            if (sm!=null)
+                sm.checkPackageAccess(packageName);
+            
+            // Look for a system class
+            if (isSystemClass(name))
+                // If it is a system class it must be found here or fail
+                return findSystemClass(name);
+            
+            // Load & define
+            c=loadClassFromPath(name);
+            
+            // Try the system class for additional CLASSPATH entries.
+            // classes found here can't be reloaded.
+            if (c==null)
+                return findSystemClass(name);
+        }
+        finally
+        {
+            if (c!=null)
+                cache.put(name,c);
+        }
+        
+        return c;
     }
 
 
@@ -284,13 +284,13 @@ public class FileJarServletLoader extends ServletLoader
      */
     synchronized public boolean isModified()
     {
-	for (int f=loaded.size();f-->0;)
-	{
-	    LoadedFile lf = (LoadedFile)loaded.elementAt(f);	    
-	    if (!lf.file.exists() || lf.file.lastModified()>lf.lastModified)
-		return true;
-	}
-	return false;	
+        for (int f=loaded.size();f-->0;)
+        {
+            LoadedFile lf = (LoadedFile)loaded.elementAt(f);        
+            if (!lf.file.exists() || lf.file.lastModified()>lf.lastModified)
+                return true;
+        }
+        return false;   
     }
     
 };

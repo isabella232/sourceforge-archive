@@ -36,58 +36,58 @@ public class PropertyEnumeration implements Enumeration
      * @param useFields Whether to include public fields or not.
      */
     public PropertyEnumeration(Class class_,
-			       boolean settable, boolean useFields)
+                               boolean settable, boolean useFields)
     {
-	Vector names = new Vector();
-	try {
-	    BeanInfo beanInf = Introspector.getBeanInfo(class_);
-	    PropertyDescriptor props[] = beanInf.getPropertyDescriptors();
-	    for (int i = 0; i < props.length; i++){
-		if (settable && props[i].getWriteMethod() == null)
-		    continue;
-		String name = props[i].getName();
-		Class type = props[i].getPropertyType();
-		if (type != null){
-		    names.addElement(name);
-		    types.put(name, type);
-		}
-	    }
-	} catch (Exception ex){
-	    Code.debug("While BeanIntrospecting", ex);
-	}
-	if (useFields){
-	    Field fields[] = class_.getFields();
-	    for (int i = 0; i < fields.length; i++){
-		int mod = fields[i].getModifiers();
-		if (!Modifier.isStatic(mod) && !Modifier.isFinal(mod)){
-		    String name = fields[i].getName();
-		    Class type = fields[i].getType();
-		    names.addElement(name);
-		    types.put(name, type);
-		}
-	    }
-	}
-	enum = names.elements();
+        Vector names = new Vector();
+        try {
+            BeanInfo beanInf = Introspector.getBeanInfo(class_);
+            PropertyDescriptor props[] = beanInf.getPropertyDescriptors();
+            for (int i = 0; i < props.length; i++){
+                if (settable && props[i].getWriteMethod() == null)
+                    continue;
+                String name = props[i].getName();
+                Class type = props[i].getPropertyType();
+                if (type != null){
+                    names.addElement(name);
+                    types.put(name, type);
+                }
+            }
+        } catch (Exception ex){
+            Code.debug("While BeanIntrospecting", ex);
+        }
+        if (useFields){
+            Field fields[] = class_.getFields();
+            for (int i = 0; i < fields.length; i++){
+                int mod = fields[i].getModifiers();
+                if (!Modifier.isStatic(mod) && !Modifier.isFinal(mod)){
+                    String name = fields[i].getName();
+                    Class type = fields[i].getType();
+                    names.addElement(name);
+                    types.put(name, type);
+                }
+            }
+        }
+        enum = names.elements();
     }
     /* ------------------------------------------------------------ */
     public boolean hasMoreElements() {
-	return enum.hasMoreElements();
+        return enum.hasMoreElements();
     }
     /* ------------------------------------------------------------ */
     public Object nextElement() {
-	return (current = enum.nextElement().toString());
+        return (current = enum.nextElement().toString());
     }
     /* ------------------------------------------------------------ */
     /** Get the type of the current property/field
      */
     public Class getType(){
-	return (Class)types.get(current);
+        return (Class)types.get(current);
     }
     /* ------------------------------------------------------------ */
     /** Get the type of the named property/field
      */
     public Class getType(String name){
-	return (Class)types.get(name);
+        return (Class)types.get(name);
     }
     /* ------------------------------------------------------------ */
     /** utility method for transparently setting a property or field
@@ -100,41 +100,41 @@ public class PropertyEnumeration implements Enumeration
      * @exception IllegalAccessException If the field is not public
      */
     public static boolean set(Object obj, String name, Object value)
-	throws IllegalArgumentException,
-	       InvocationTargetException,
-	       IllegalAccessException
+        throws IllegalArgumentException,
+               InvocationTargetException,
+               IllegalAccessException
     {
-	Code.debug("Set "+name+" on "+obj+"="+value+"("+value.getClass().getName()+")");
-	try {
-	    BeanInfo beanInf = Introspector.getBeanInfo(obj.getClass());
-	    PropertyDescriptor props[] = beanInf.getPropertyDescriptors();
-	    for (int i = 0; i < props.length; i++){
-		if (!name.equals(props[i].getName()))
-		    continue;
-		Method method = props[i].getWriteMethod();
-		if (method == null) return false; // no set method
-		Object params[] = new Object[1];
-		params[0] = value;
-		method.invoke(obj, params);
-		return true;
-	    }
-	} catch (IntrospectionException ex){
-	    Code.debug("While BeanIntrospecting", ex);
-	}
-	Field field = null;
-	try {
-	    field = obj.getClass().getField(name);
-	} catch (Exception ex){
-	    Code.debug("Looking up field:"+name, ex);
-	    return false;
-	}
-	int mod = field.getModifiers();
-	if (!Modifier.isStatic(mod) && !Modifier.isFinal(mod)){
-	    field.set(obj, value);
-	    return true;
-	} else
-	    Code.debug("Field "+name+" static or final");
-	return false;
+        Code.debug("Set "+name+" on "+obj+"="+value+"("+value.getClass().getName()+")");
+        try {
+            BeanInfo beanInf = Introspector.getBeanInfo(obj.getClass());
+            PropertyDescriptor props[] = beanInf.getPropertyDescriptors();
+            for (int i = 0; i < props.length; i++){
+                if (!name.equals(props[i].getName()))
+                    continue;
+                Method method = props[i].getWriteMethod();
+                if (method == null) return false; // no set method
+                Object params[] = new Object[1];
+                params[0] = value;
+                method.invoke(obj, params);
+                return true;
+            }
+        } catch (IntrospectionException ex){
+            Code.debug("While BeanIntrospecting", ex);
+        }
+        Field field = null;
+        try {
+            field = obj.getClass().getField(name);
+        } catch (Exception ex){
+            Code.debug("Looking up field:"+name, ex);
+            return false;
+        }
+        int mod = field.getModifiers();
+        if (!Modifier.isStatic(mod) && !Modifier.isFinal(mod)){
+            field.set(obj, value);
+            return true;
+        } else
+            Code.debug("Field "+name+" static or final");
+        return false;
     }
     /* ------------------------------------------------------------ */
 };

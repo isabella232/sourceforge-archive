@@ -31,104 +31,104 @@ public class EmbedUrl extends  Element
     /* ----------------------------------------------------------------- */
     public EmbedUrl(URL url)
     {
-	this.url=url;
+        this.url=url;
     }
 
     /* ----------------------------------------------------------------- */
     public EmbedUrl(URL url,
-		    InetAddrPort proxy)
+                    InetAddrPort proxy)
     {
-	this.url=url;
-	this.proxy=proxy;
+        this.url=url;
+        this.proxy=proxy;
     }
 
     /* ----------------------------------------------------------------- */
     private void skipHeader()
-	 throws IOException
+         throws IOException
     {
-	Code.debug("Embed "+url);
-	Socket socket=null;	
-	HttpRequest request=null;
-	
-	if (proxy==null)
-	{
-	    int port = url.getPort();
-	    if (port==-1)
-		port=80;
-	    socket= new Socket(url.getHost(),port);
-	}
-	else
-	{
-	    socket= new Socket(proxy.getInetAddress(),
-			       proxy.getPort());
-	}
-	
-	request=new HttpRequest(null,HttpRequest.GET,url.getFile());
-	
-	request.write(socket.getOutputStream());   
-	Code.debug("waiting for forward reply...");
-	
-	replyHeader = new HttpHeader();
-	replyStream = new HttpInputStream(socket.getInputStream());
-	String replyLine=replyStream.readLine();
-	Code.debug("got "+replyLine);
-	replyHeader.read(replyStream);
+        Code.debug("Embed "+url);
+        Socket socket=null;     
+        HttpRequest request=null;
+        
+        if (proxy==null)
+        {
+            int port = url.getPort();
+            if (port==-1)
+                port=80;
+            socket= new Socket(url.getHost(),port);
+        }
+        else
+        {
+            socket= new Socket(proxy.getInetAddress(),
+                               proxy.getPort());
+        }
+        
+        request=new HttpRequest(null,HttpRequest.GET,url.getFile());
+        
+        request.write(socket.getOutputStream());   
+        Code.debug("waiting for forward reply...");
+        
+        replyHeader = new HttpHeader();
+        replyStream = new HttpInputStream(socket.getInputStream());
+        String replyLine=replyStream.readLine();
+        Code.debug("got "+replyLine);
+        replyHeader.read(replyStream);
     }
 
     /* ----------------------------------------------------------------- */
     public void write(OutputStream out)
-	 throws IOException
+         throws IOException
     {
-	try
-	{
-	    skipHeader();
-	    IO.copy(replyStream,out);
-	    out.flush();
-	}
-	finally
-	{
-	    if (socket!=null)
-		socket.close();
-	    if (replyStream!=null)
-		replyStream.close();
-	    if (replyHeader!=null)
-		replyHeader.destroy();
-	    if (request!=null)
-		request.destroy();
-	    
-	    socket=null;
-	    replyStream=null;
-	    replyHeader=null;
-	    request=null;
-	}
+        try
+        {
+            skipHeader();
+            IO.copy(replyStream,out);
+            out.flush();
+        }
+        finally
+        {
+            if (socket!=null)
+                socket.close();
+            if (replyStream!=null)
+                replyStream.close();
+            if (replyHeader!=null)
+                replyHeader.destroy();
+            if (request!=null)
+                request.destroy();
+            
+            socket=null;
+            replyStream=null;
+            replyHeader=null;
+            request=null;
+        }
     }
     
     /* ----------------------------------------------------------------- */
     public void write(Writer out)
-	 throws IOException
+         throws IOException
     {
-	try
-	{
-	    skipHeader();
-	    IO.copy(new InputStreamReader(replyStream),out);
-	    out.flush();
-	}
-	finally
-	{
-	    if (socket!=null)
-		socket.close();
-	    if (replyStream!=null)
-		replyStream.close();
-	    if (replyHeader!=null)
-		replyHeader.destroy();
-	    if (request!=null)
-		request.destroy();
-	    
-	    socket=null;
-	    replyStream=null;
-	    replyHeader=null;
-	    request=null;
-	}
+        try
+        {
+            skipHeader();
+            IO.copy(new InputStreamReader(replyStream),out);
+            out.flush();
+        }
+        finally
+        {
+            if (socket!=null)
+                socket.close();
+            if (replyStream!=null)
+                replyStream.close();
+            if (replyHeader!=null)
+                replyHeader.destroy();
+            if (request!=null)
+                request.destroy();
+            
+            socket=null;
+            replyStream=null;
+            replyHeader=null;
+            request=null;
+        }
     }
 }
 

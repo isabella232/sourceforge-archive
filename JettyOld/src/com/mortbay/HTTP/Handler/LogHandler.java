@@ -44,7 +44,7 @@ public class LogHandler extends NullHandler implements Observer
      */
     public LogHandler(Properties properties)
     {
-	setProperties(properties);
+        setProperties(properties);
     }
     
     /* ----------------------------------------------------------------- */
@@ -54,11 +54,11 @@ public class LogHandler extends NullHandler implements Observer
      * @param longForm if true, output is in the long form aka Netscape
      */
     public LogHandler(boolean countContentLength,
-		      boolean longForm)
+                      boolean longForm)
     {
-	out=new OutputStreamWriter(System.out);
-	this.countContentLength=countContentLength;
-	this.longForm=longForm;
+        out=new OutputStreamWriter(System.out);
+        this.countContentLength=countContentLength;
+        this.longForm=longForm;
     }
 
     /* ------------------------------------------------------------ */
@@ -77,50 +77,50 @@ public class LogHandler extends NullHandler implements Observer
      */
     public void setProperties(Properties properties)
     {
-	PropertyTree tree=null;
-	if (properties instanceof PropertyTree)
-	    tree = (PropertyTree)properties;
-	else
-	    tree = new PropertyTree(properties);
-	
-	String logFilename = tree.getProperty("File");
-	boolean append = tree.getBoolean("Append");	
-	countContentLength=tree.getBoolean("CountContentLength");
-	longForm=tree.getBoolean("LongForm");
-	String dateFormat=tree.getProperty("DateFormat");
-	if (dateFormat!=null && dateFormat.length()>0)
-	    dateCache=new DateCache(dateFormat);
+        PropertyTree tree=null;
+        if (properties instanceof PropertyTree)
+            tree = (PropertyTree)properties;
+        else
+            tree = new PropertyTree(properties);
+        
+        String logFilename = tree.getProperty("File");
+        boolean append = tree.getBoolean("Append");     
+        countContentLength=tree.getBoolean("CountContentLength");
+        longForm=tree.getBoolean("LongForm");
+        String dateFormat=tree.getProperty("DateFormat");
+        if (dateFormat!=null && dateFormat.length()>0)
+            dateCache=new DateCache(dateFormat);
 
-	if ("out".equals(logFilename))
-	    out=new OutputStreamWriter(System.out);
-	else if ("err".equals(logFilename))
-	    out=new OutputStreamWriter(System.err);
-	else
-	{
-	    out = (Writer)outMap.get(logFilename);
-	    if (out==null)
-	    {
-		try
-		{
-		    out=new OutputStreamWriter
-			(new FileOutputStream(logFilename,append));
-		    outMap.put(logFilename,out);
-		}
-		catch(IOException ex)
-		{
-		    Code.warning(ex);
-		    out=new OutputStreamWriter(System.err);
-		}
-	    }
-	}
+        if ("out".equals(logFilename))
+            out=new OutputStreamWriter(System.out);
+        else if ("err".equals(logFilename))
+            out=new OutputStreamWriter(System.err);
+        else
+        {
+            out = (Writer)outMap.get(logFilename);
+            if (out==null)
+            {
+                try
+                {
+                    out=new OutputStreamWriter
+                        (new FileOutputStream(logFilename,append));
+                    outMap.put(logFilename,out);
+                }
+                catch(IOException ex)
+                {
+                    Code.warning(ex);
+                    out=new OutputStreamWriter(System.err);
+                }
+            }
+        }
     }
     
     /* ----------------------------------------------------------------- */
     public void handle(HttpRequest request,
-		       HttpResponse response)
-	 throws Exception
+                       HttpResponse response)
+         throws Exception
     {
-	response.addObserver(this);
+        response.addObserver(this);
     }
   
     /* ----------------------------------------------------------------- */
@@ -128,93 +128,93 @@ public class LogHandler extends NullHandler implements Observer
      */
     public void update(Observable o, Object arg)
     {
-	HttpResponse response = (HttpResponse)arg;
-	HttpRequest request = response.getRequest();
-	
-	String path = request.getResourcePath();
-		
-	try{
-	    if (countContentLength)
-		new LogFilter(this,out).activateOn(response);
-	    else
-	    {
-		int cl = 
-		    response.getIntHeader(HttpHeader.ContentLength);
-		log(out,response,cl);
-	    }
-	}
-	catch(IOException e){
-	    Code.debug("Convert to RuntimeException",e);
-	    throw new RuntimeException(e.toString());
-	}
+        HttpResponse response = (HttpResponse)arg;
+        HttpRequest request = response.getRequest();
+        
+        String path = request.getResourcePath();
+                
+        try{
+            if (countContentLength)
+                new LogFilter(this,out).activateOn(response);
+            else
+            {
+                int cl = 
+                    response.getIntHeader(HttpHeader.ContentLength);
+                log(out,response,cl);
+            }
+        }
+        catch(IOException e){
+            Code.debug("Convert to RuntimeException",e);
+            throw new RuntimeException(e.toString());
+        }
     }
 
     /* ------------------------------------------------------------- */
     void log(Writer out, HttpResponse response, long length)
-	 throws IOException
+         throws IOException
     {
-	HttpRequest request = response.getRequest();
+        HttpRequest request = response.getRequest();
 
-	String log=null;
-	
-	String bytes = ((length>=0)?Long.toString(length):"-");
-	String user = request.getRemoteUser();
-	if (user==null)
-	    user = "-";
-	
-	if (longForm)
-	{
-	    String referer = request.getHeader(HttpHeader.Referer);
-	    if (referer==null)
-		referer="-";
-	    else
-		referer="\""+referer+"\"";
+        String log=null;
+        
+        String bytes = ((length>=0)?Long.toString(length):"-");
+        String user = request.getRemoteUser();
+        if (user==null)
+            user = "-";
+        
+        if (longForm)
+        {
+            String referer = request.getHeader(HttpHeader.Referer);
+            if (referer==null)
+                referer="-";
+            else
+                referer="\""+referer+"\"";
 
-	    String agent = request.getHeader(HttpHeader.UserAgent);
-	    if (agent==null)
-		agent="-";
-	    else
-		agent="\""+agent+"\"";
-	    
-	    log= request.getRemoteAddr()+
-		" - "+
-		user +
-		" [" +
-		(dateCache==null
-		 ?response.getHeader(response.Date)
-		 :dateCache.format(System.currentTimeMillis()))+
-		"] \""+
-		request.getRequestLine()+
-		"\" "+
-		referer +
-		" " +
-		response.getStatus()+
-		" " +
-		bytes +
-		" - " +
-		agent +
-		"\n";
-	}
-	else
-	{
-	    log= request.getRemoteAddr()+
-		" - "+
-		user +
-		" [" +
-		response.getHeader(response.Date)+
-		"] \""+
-		request.getRequestLine()+
-		"\" "+
-		response.getStatus()+
-		" " +
-		bytes +
-		"\n";
-	}
-	
-	synchronized(out){
-	    out.write(log);
-	    out.flush();
-	}
+            String agent = request.getHeader(HttpHeader.UserAgent);
+            if (agent==null)
+                agent="-";
+            else
+                agent="\""+agent+"\"";
+            
+            log= request.getRemoteAddr()+
+                " - "+
+                user +
+                " [" +
+                (dateCache==null
+                 ?response.getHeader(response.Date)
+                 :dateCache.format(System.currentTimeMillis()))+
+                "] \""+
+                request.getRequestLine()+
+                "\" "+
+                referer +
+                " " +
+                response.getStatus()+
+                " " +
+                bytes +
+                " - " +
+                agent +
+                "\n";
+        }
+        else
+        {
+            log= request.getRemoteAddr()+
+                " - "+
+                user +
+                " [" +
+                response.getHeader(response.Date)+
+                "] \""+
+                request.getRequestLine()+
+                "\" "+
+                response.getStatus()+
+                " " +
+                bytes +
+                "\n";
+        }
+        
+        synchronized(out){
+            out.write(log);
+            out.flush();
+        }
     }
 }
 
@@ -234,45 +234,45 @@ class LogFilter extends HttpFilter
     /* ------------------------------------------------------------- */
     LogFilter(LogHandler log,Writer writer)
     {
-	this.log=log;
-	this.writer=writer;
+        this.log=log;
+        this.writer=writer;
     }
 
     /* ------------------------------------------------------------- */
     protected boolean canHandle(String contentType)
     {
-	return true;
+        return true;
     }
 
     /* ------------------------------------------------------------- */
     public void write(byte[]  b)
-	 throws IOException
+         throws IOException
     {
-	count+=b.length;
-	out.write(b,0,b.length);
+        count+=b.length;
+        out.write(b,0,b.length);
     }
     
     /* ------------------------------------------------------------- */
     public void write(byte  b[], int  off, int  len)
-	 throws IOException
+         throws IOException
     {
-	count+=len;
-	out.write(b,off,len);
+        count+=len;
+        out.write(b,off,len);
     }
     
     /* ------------------------------------------------------------- */
     public void write(int  b)
-	 throws IOException
+         throws IOException
     {
-	count++;
-	out.write(b);
+        count++;
+        out.write(b);
     }
 
     /* ------------------------------------------------------------- */
     public void close()
-	 throws IOException
+         throws IOException
     {
-	log.log(writer,response,count);
-	out.close();
+        log.log(writer,response,count);
+        out.close();
     }
 }

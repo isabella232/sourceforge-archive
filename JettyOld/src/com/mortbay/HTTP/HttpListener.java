@@ -28,9 +28,9 @@ public class HttpListener extends ThreadedServer
     /* ------------------------------------------------------------ */
     public static Class[] ConstructArgs =
     {
-	com.mortbay.Util.InetAddrPort.class,
-	com.mortbay.HTTP.HttpServer.class,
-	Integer.TYPE,Integer.TYPE,Integer.TYPE
+        com.mortbay.Util.InetAddrPort.class,
+        com.mortbay.HTTP.HttpServer.class,
+        Integer.TYPE,Integer.TYPE,Integer.TYPE
     };
     
     /* ------------------------------------------------------------ */
@@ -40,7 +40,7 @@ public class HttpListener extends ThreadedServer
     /* ------------------------------------------------------------ */
     public InetAddrPort getAddress()
     {
-	return address;
+        return address;
     }
     
     /* ------------------------------------------------------------ */
@@ -52,10 +52,10 @@ public class HttpListener extends ThreadedServer
      * @param server  The HttpServer to pass requests to.
      */     
     public HttpListener(InetAddrPort address,
-			HttpServer server)
-	throws IOException
+                        HttpServer server)
+        throws IOException
     {
-	this(address,server,0,0,0);
+        this(address,server,0,0,0);
     }
     
     
@@ -72,23 +72,23 @@ public class HttpListener extends ThreadedServer
      * @exception IOException 
      */
     public HttpListener(InetAddrPort address,
-			HttpServer server,
-			int minThreads,
-			int maxThreads,
-			int maxIdleTimeMs)
-	throws IOException
+                        HttpServer server,
+                        int minThreads,
+                        int maxThreads,
+                        int maxIdleTimeMs)
+        throws IOException
     {
-	super(address,minThreads,maxThreads,maxIdleTimeMs);
-	if (address.getPort()==0)
-	{
-	    address.setPort(80);
-	    super.setAddress(address.getInetAddress(),address.getPort());
-	}
-	
-	this.address=address;
-	this.server=server;
+        super(address,minThreads,maxThreads,maxIdleTimeMs);
+        if (address.getPort()==0)
+        {
+            address.setPort(80);
+            super.setAddress(address.getInetAddress(),address.getPort());
+        }
+        
+        this.address=address;
+        this.server=server;
 
-	Log.event("HttpListener started on "+this.address);
+        Log.event("HttpListener started on "+this.address);
     }
     
     /* ------------------------------------------------------------ */
@@ -99,85 +99,85 @@ public class HttpListener extends ThreadedServer
     public void handleConnection(Socket connection)
     {
 
-	try
-	{
-	    while(true)
-	    {
-		HttpRequest request = null;
-		HttpResponse response = null;
-		
-		try
-		{	
-		    Code.debug("Waiting for request...");
-		    request = new HttpRequest(server,connection,address);
+        try
+        {
+            while(true)
+            {
+                HttpRequest request = null;
+                HttpResponse response = null;
+                
+                try
+                {       
+                    Code.debug("Waiting for request...");
+                    request = new HttpRequest(server,connection,address);
 
-		    if (Code.debug())
-			Code.debug("Received HTTP request:",
-				   request.getMethod(),
-				   " ",
-				   request.getRequestURI());
-	    
-		    response=new HttpResponse(connection.getOutputStream(),
-					      request);
+                    if (Code.debug())
+                        Code.debug("Received HTTP request:",
+                                   request.getMethod(),
+                                   " ",
+                                   request.getRequestURI());
+            
+                    response=new HttpResponse(connection.getOutputStream(),
+                                              request);
 
-		    server.handle(request,response);
+                    server.handle(request,response);
 
-		    response.complete();
-		
-		    if (HttpHeader.HTTP_1_0.equals(request.getProtocol()))
-			break;
-		    if (HttpHeader.Close
-			.equals(response.getHeader(HttpHeader.Connection)))
-		    {
-			Code.debug("Closing persistent connection");
-			break;
-		    }
-		}
-		catch (HeadException e)
-		{
-		    Code.ignore(e);
-		}
-		catch (Exception e)
-		{
-		    Code.debug(e);
-		    
-		    // If no respones - must have a request error
-		    if (response==null)
-		    {
-			// try to write BAD_REQUEST
-			response=new HttpResponse(connection.getOutputStream(),
-						  null);
-			response.setHeader(HttpHeader.Connection,
-					   HttpHeader.Close);
-			response.sendError(HttpResponse.SC_BAD_REQUEST);
-			break;
-		    }
-		}
-		finally
-		{
-		    if (request!=null)
-			request.destroy();
-		    if (response!=null)
-			response.destroy();
-		}
-	    }
-	}
-	catch (Exception e)
-	{
-	    Code.debug("Request problem:",e);
-	}
-	finally
-	{
-	    try{
-		connection.close();
-	    }
-	    catch (IOException e){
-		Code.ignore(e);
-	    }
-	    catch (Exception e){
-		Code.warning("Request problem:",e);
-	    }
-	}
+                    response.complete();
+                
+                    if (HttpHeader.HTTP_1_0.equals(request.getProtocol()))
+                        break;
+                    if (HttpHeader.Close
+                        .equals(response.getHeader(HttpHeader.Connection)))
+                    {
+                        Code.debug("Closing persistent connection");
+                        break;
+                    }
+                }
+                catch (HeadException e)
+                {
+                    Code.ignore(e);
+                }
+                catch (Exception e)
+                {
+                    Code.debug(e);
+                    
+                    // If no respones - must have a request error
+                    if (response==null)
+                    {
+                        // try to write BAD_REQUEST
+                        response=new HttpResponse(connection.getOutputStream(),
+                                                  null);
+                        response.setHeader(HttpHeader.Connection,
+                                           HttpHeader.Close);
+                        response.sendError(HttpResponse.SC_BAD_REQUEST);
+                        break;
+                    }
+                }
+                finally
+                {
+                    if (request!=null)
+                        request.destroy();
+                    if (response!=null)
+                        response.destroy();
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Code.debug("Request problem:",e);
+        }
+        finally
+        {
+            try{
+                connection.close();
+            }
+            catch (IOException e){
+                Code.ignore(e);
+            }
+            catch (Exception e){
+                Code.warning("Request problem:",e);
+            }
+        }
     }
 };
 

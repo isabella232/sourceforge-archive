@@ -30,7 +30,7 @@ public interface HttpHandler
 {
     /* ----------------------------------------------------------------- */
     public void setProperties(Properties properties)
-	throws IllegalStateException, IOException;
+        throws IllegalStateException, IOException;
     
     /* ----------------------------------------------------------------- */
     /** Constructor
@@ -38,28 +38,28 @@ public interface HttpHandler
      * @param response The HTTP response to be used.
      */
     public void handle(HttpRequest request,
-		       HttpResponse response)
-	 throws Exception;
+                       HttpResponse response)
+         throws Exception;
     
     /* ----------------------------------------------------------------- */
-    /**	Translate a path string.
+    /** Translate a path string.
      * Used by getRealPath method. 
      * @return the translated path
      */
-    public String translate(String path);	 
-	 
+    public String translate(String path);        
+         
     /* ----------------------------------------------------------------- */
     /** Return enumeration of servlet Names within this handler or
      * null if no servlets   
      */
     public Enumeration servletNames();
-	
+        
     /* ----------------------------------------------------------------- */
     /** Return servlet by Name within this handler or
      * null if no servlets   
      */
     public Servlet servlet(String name);
-	
+        
     /* ------------------------------------------------------------ */
     /** Set server.
      * This method will be called when the configuration is given to
@@ -68,7 +68,7 @@ public interface HttpHandler
      * instances.
      */
     public void setServer(HttpServer server)
-	throws Exception;
+        throws Exception;
 
     /* ------------------------------------------------------------ */
     /** Destroy Handler.
@@ -76,7 +76,7 @@ public interface HttpHandler
      */
     public void destroy();
 }
-	    
+            
 
 
 

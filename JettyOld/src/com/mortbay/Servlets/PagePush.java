@@ -50,60 +50,60 @@ public abstract class PagePush
      * @param footer Should the Page footer be printed?
      */
     protected PagePush(long minTime, long maxTime,
-		       String lookAndFeelName,
-		       boolean header, boolean footer)
+                       String lookAndFeelName,
+                       boolean header, boolean footer)
     {
-	this.minTime = minTime;
-	this.maxTime = maxTime;
-	this.lookAndFeelName = lookAndFeelName;
-	this.header = header;
-	this.footer = footer;
+        this.minTime = minTime;
+        this.maxTime = maxTime;
+        this.lookAndFeelName = lookAndFeelName;
+        this.header = header;
+        this.footer = footer;
     }
     /* ------------------------------------------------------------ */
     /** Notify the object that something has changed */
     protected synchronized void markChange(){
-	change = true;
-	if (!inMinTime) notify();
+        change = true;
+        if (!inMinTime) notify();
     }
     /* ------------------------------------------------------------ */
     /** Called by the user to initiate the pushing of pages.
      * This calls fillPage immediately before going into a timing pattern.
      */
     public synchronized void serve(HttpServletRequest req,
-				   HttpServletResponse res)
-	throws Exception
+                                   HttpServletResponse res)
+        throws Exception
     {
-	MultiPartResponse multi = new MultiPartResponse(req,res);
-	while (!finished){
-	    multi.startNextPart("text/html");
-	    PrintWriter pout = new PrintWriter(multi.out);
-	    Page page = Page.getPage(lookAndFeelName, req, res);
-	    fillPage(req, page);
-	    if (header && footer)
-		page.write(pout);
-	    else {
-		if (header)
-		    page.write(pout, Page.Header, true);
-		page.write(pout, Page.Content, true);
-		if (footer)
-		    page.write(pout, Page.Footer, true);
-	    }
-	    pout.flush();
-	    if (!finished){
-		multi.endPart();
-		change = false;
-		if (minTime > 0){
-		    inMinTime = true;
-		    wait(minTime);
-		    inMinTime = false;
-		}
-		if (!change && maxTime > 0)
-		    wait(maxTime);
-		else if (!change)
-		    wait();
-	    }
-	}
-	multi.endLastPart();
+        MultiPartResponse multi = new MultiPartResponse(req,res);
+        while (!finished){
+            multi.startNextPart("text/html");
+            PrintWriter pout = new PrintWriter(multi.out);
+            Page page = Page.getPage(lookAndFeelName, req, res);
+            fillPage(req, page);
+            if (header && footer)
+                page.write(pout);
+            else {
+                if (header)
+                    page.write(pout, Page.Header, true);
+                page.write(pout, Page.Content, true);
+                if (footer)
+                    page.write(pout, Page.Footer, true);
+            }
+            pout.flush();
+            if (!finished){
+                multi.endPart();
+                change = false;
+                if (minTime > 0){
+                    inMinTime = true;
+                    wait(minTime);
+                    inMinTime = false;
+                }
+                if (!change && maxTime > 0)
+                    wait(maxTime);
+                else if (!change)
+                    wait();
+            }
+        }
+        multi.endLastPart();
     }
     /* ------------------------------------------------------------ */
     public abstract void fillPage(HttpServletRequest req, Page page);

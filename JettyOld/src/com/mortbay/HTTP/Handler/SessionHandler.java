@@ -26,7 +26,7 @@ public class SessionHandler extends NullHandler
      */
     public SessionHandler(Properties properties)
     {
-	setProperties(properties);
+        setProperties(properties);
     }
     
     /* ------------------------------------------------------------ */
@@ -46,18 +46,18 @@ public class SessionHandler extends NullHandler
     
     /* ----------------------------------------------------------------- */
     public void handle(HttpRequest request,
-		       HttpResponse response)
-	 throws Exception
+                       HttpResponse response)
+         throws Exception
     {
-	HttpSession session = request.getSession(false);
-	if (session!=null)
-	    SessionContext.access(session);
+        HttpSession session = request.getSession(false);
+        if (session!=null)
+            SessionContext.access(session);
     }
 
     /* ----------------------------------------------------------------- */
     public static Dictionary session(HttpServletRequest request)
     {
-	return (Dictionary)request.getSession(true);
+        return (Dictionary)request.getSession(true);
     }
     
 }

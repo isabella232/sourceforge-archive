@@ -31,177 +31,177 @@ public abstract class RelationalTable extends Table
 
     
     public RelationalTable (String name, Column[] cols, Database dtb,
-			    Hashtable deleteRelations,
-			    Hashtable nullRelations,
-			    Vector deleteRelationsVec,
-			    Vector nullRelationsVec,
-			    int deleteMethod,
-			    String columnName,
-			    Object deleteValue)
+                            Hashtable deleteRelations,
+                            Hashtable nullRelations,
+                            Vector deleteRelationsVec,
+                            Vector nullRelationsVec,
+                            int deleteMethod,
+                            String columnName,
+                            Object deleteValue)
     {
-	super (name, cols, dtb);
-	AllDeleteRelations = deleteRelations;
-	AllNullRelations = nullRelations;
-	AllDeleteRelationsVec = deleteRelationsVec;
-	AllNullRelationsVec = nullRelationsVec;
-	this.deleteMethod = deleteMethod;
-	fakeDeleteColumnName = columnName;
-	fakeDeleteColumnValue = deleteValue;
-	dtb = dtb;
+        super (name, cols, dtb);
+        AllDeleteRelations = deleteRelations;
+        AllNullRelations = nullRelations;
+        AllDeleteRelationsVec = deleteRelationsVec;
+        AllNullRelationsVec = nullRelationsVec;
+        this.deleteMethod = deleteMethod;
+        fakeDeleteColumnName = columnName;
+        fakeDeleteColumnValue = deleteValue;
+        dtb = dtb;
     }
 
         
     public void setDeleteRelationWith (RelationalTable tbl,
-				       ColumnGroup cols)
+                                       ColumnGroup cols)
     {
-	if (AllDeleteRelations != null)
-	    AllDeleteRelations.put (tbl, cols);
-	if (AllDeleteRelationsVec != null)
-	    AllDeleteRelationsVec.addElement(tbl);
-	
+        if (AllDeleteRelations != null)
+            AllDeleteRelations.put (tbl, cols);
+        if (AllDeleteRelationsVec != null)
+            AllDeleteRelationsVec.addElement(tbl);
+        
     } 
 
     
     public void setNullRelationWith (RelationalTable tbl,
-				     ColumnGroup cols)
+                                     ColumnGroup cols)
     {
-	if (AllNullRelations != null)
-	    AllNullRelations.put (tbl, cols);
-	
-	if (AllNullRelationsVec != null)
-	    AllNullRelationsVec.addElement(tbl);
+        if (AllNullRelations != null)
+            AllNullRelations.put (tbl, cols);
+        
+        if (AllNullRelationsVec != null)
+            AllNullRelationsVec.addElement(tbl);
     } 
 
 
     
     public void delete (Object[] val)
-	 throws SQLException
+         throws SQLException
     {
-	try
-	{
-	    callNullRelations(val);
-	    callDeleteRelations(val);
-	}
-	catch (SQLException e)
-	{
-	    throw e;
-	}
-	
+        try
+        {
+            callNullRelations(val);
+            callDeleteRelations(val);
+        }
+        catch (SQLException e)
+        {
+            throw e;
+        }
+        
     }
 
     
     public void callDeleteRelations (Object[] values)
-	 throws SQLException
+         throws SQLException
     {
-	if ((AllDeleteRelationsVec != null) && (AllDeleteRelations != null))
-	{
-	    for (int i = 0 ; i < AllDeleteRelationsVec.size(); i ++)
-	    {
-		RelationalTable tbl =
-		(RelationalTable)AllDeleteRelationsVec.elementAt(i);
+        if ((AllDeleteRelationsVec != null) && (AllDeleteRelations != null))
+        {
+            for (int i = 0 ; i < AllDeleteRelationsVec.size(); i ++)
+            {
+                RelationalTable tbl =
+                (RelationalTable)AllDeleteRelationsVec.elementAt(i);
 
-		ColumnGroup cols = (ColumnGroup)AllDeleteRelations.get(tbl);
-		
-		try
-		{
-		    tbl.deleteRelation (cols, values);
-		}
-		catch (SQLException e)
-		{
-		    throw e;
-		}
-	    }
-	}
+                ColumnGroup cols = (ColumnGroup)AllDeleteRelations.get(tbl);
+                
+                try
+                {
+                    tbl.deleteRelation (cols, values);
+                }
+                catch (SQLException e)
+                {
+                    throw e;
+                }
+            }
+        }
     }
 
     
     public void callNullRelations (Object[] values)
-	 throws SQLException
+         throws SQLException
     {
-	if ((AllNullRelationsVec != null) && (AllNullRelations != null))
-	{
-	    for (int i = 0 ; i < AllNullRelationsVec.size(); i ++)
-	    {
-		RelationalTable tbl = (RelationalTable)AllNullRelationsVec.elementAt(i);
-		ColumnGroup cols = (ColumnGroup)AllNullRelations.get(tbl);
-		
-		
-		try
-		{
-		    tbl.nullRelation (cols, values);
-		}
-		catch (SQLException e)
-		{
-		    throw e;
-		}
-	    }
-	    
-	}
+        if ((AllNullRelationsVec != null) && (AllNullRelations != null))
+        {
+            for (int i = 0 ; i < AllNullRelationsVec.size(); i ++)
+            {
+                RelationalTable tbl = (RelationalTable)AllNullRelationsVec.elementAt(i);
+                ColumnGroup cols = (ColumnGroup)AllNullRelations.get(tbl);
+                
+                
+                try
+                {
+                    tbl.nullRelation (cols, values);
+                }
+                catch (SQLException e)
+                {
+                    throw e;
+                }
+            }
+            
+        }
     }
 
 
     
     private void deleteRelation(ColumnGroup cols, Object[] values)
-	 throws SQLException
+         throws SQLException
     {
-	try
-	{
-	   
-	    
-	    if (deleteMethod == REAL_DELETE)
-		deleteRows (cols, values);
-	    else
-	    {
-		RowEnumeration rows = getRows(cols, values);
-		
-		
-		
-		while (rows.hasMoreElements())
-		{
-		    Row r = rows.nextRow();
-		    
-		    r.set(fakeDeleteColumnName, fakeDeleteColumnValue);
-		    r.update();
-		    // TrackerDB.commit(); - done by caller.
-		}
-	    }
-	}
-	catch (SQLException e)
-	{
-	    throw e;
-	}
-	
-	
+        try
+        {
+           
+            
+            if (deleteMethod == REAL_DELETE)
+                deleteRows (cols, values);
+            else
+            {
+                RowEnumeration rows = getRows(cols, values);
+                
+                
+                
+                while (rows.hasMoreElements())
+                {
+                    Row r = rows.nextRow();
+                    
+                    r.set(fakeDeleteColumnName, fakeDeleteColumnValue);
+                    r.update();
+                    // TrackerDB.commit(); - done by caller.
+                }
+            }
+        }
+        catch (SQLException e)
+        {
+            throw e;
+        }
+        
+        
     }
     
 
     private void nullRelation(ColumnGroup cols, Object[] values)
-	 throws SQLException
+         throws SQLException
     {
-	try
-	{
-	    RowEnumeration rows = getRows(cols, values);
-	    
-	    
-	    
-	    while (rows.hasMoreElements())
-	    {
-				
-		Row r = rows.nextRow();
-		
-		for (int i = 0; i < cols.columns.length ; i ++)
-		{
-		    r.set(cols.columns[i].getName(), new Integer(0));
-		}
-		r.update();
-		//TrackerDB.commit(); - done by caller
-	    }
-	    
-	}
-	catch (SQLException e)
-	{
-	    throw e;
-	}
-	
+        try
+        {
+            RowEnumeration rows = getRows(cols, values);
+            
+            
+            
+            while (rows.hasMoreElements())
+            {
+                                
+                Row r = rows.nextRow();
+                
+                for (int i = 0; i < cols.columns.length ; i ++)
+                {
+                    r.set(cols.columns[i].getName(), new Integer(0));
+                }
+                r.update();
+                //TrackerDB.commit(); - done by caller
+            }
+            
+        }
+        catch (SQLException e)
+        {
+            throw e;
+        }
+        
     }
 }

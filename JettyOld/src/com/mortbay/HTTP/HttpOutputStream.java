@@ -38,33 +38,33 @@ public class HttpOutputStream extends ServletOutputStream
     /* ------------------------------------------------------------ */
     final static byte[] __CRLF={(byte)'\015',(byte)'\12'};
     final static byte[] __EOF ={(byte)'0',(byte)';',(byte)'\015',
-				(byte)'\012',(byte)'\015',(byte)'\012'};
+                                (byte)'\012',(byte)'\015',(byte)'\012'};
 
     /* ------------------------------------------------------------ */
     class SwitchOutputStream extends FilterOutputStream
     {
-	SwitchOutputStream(OutputStream out)
-	{
-	    super(out);
-	}
-	void switchStream(OutputStream out)
-	{
-	    this.out=out;
-	}
-	OutputStream getOutputStream()
-	{
-	    return this.out;
-	}	
-	public void write(byte[]  b)
-	    throws IOException
-	{
-	    this.out.write(b,0,b.length);
-	}
-	public void write(byte  buf[], int  off, int  len)
-	    throws IOException
-	{
-	    this.out.write(buf,off,len);
-	}
+        SwitchOutputStream(OutputStream out)
+        {
+            super(out);
+        }
+        void switchStream(OutputStream out)
+        {
+            this.out=out;
+        }
+        OutputStream getOutputStream()
+        {
+            return this.out;
+        }       
+        public void write(byte[]  b)
+            throws IOException
+        {
+            this.out.write(b,0,b.length);
+        }
+        public void write(byte  buf[], int  off, int  len)
+            throws IOException
+        {
+            this.out.write(buf,off,len);
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -78,27 +78,27 @@ public class HttpOutputStream extends ServletOutputStream
     
     /* ------------------------------------------------------------ */
     public HttpOutputStream(OutputStream out,
-			    HttpResponse response)
+                            HttpResponse response)
     {
-	this.realOut = new BufferedOutputStream(out);
-	this.switchOut = new SwitchOutputStream(realOut);
-	this.out= switchOut;
-	this.response = response;
-	writtenHeaders=(response==null);
+        this.realOut = new BufferedOutputStream(out);
+        this.switchOut = new SwitchOutputStream(realOut);
+        this.out= switchOut;
+        this.response = response;
+        writtenHeaders=(response==null);
     }
 
     /* ------------------------------------------------------------ */
     public OutputStream getOutputStream()
     {
-	return out;
+        return out;
     }
     
     /* ------------------------------------------------------------ */
     public OutputStream replaceOutputStream(OutputStream newOut)
     {
-	OutputStream oldOut = out;
-	out=newOut;
-	return oldOut;
+        OutputStream oldOut = out;
+        out=newOut;
+        return oldOut;
     }
 
     
@@ -107,117 +107,117 @@ public class HttpOutputStream extends ServletOutputStream
      * @param on 
      */
     public void setChunking(boolean on)
-	throws IOException
+        throws IOException
     {
-	flush();
-	switchOut.switchStream(on?chunk:realOut);
+        flush();
+        switchOut.switchStream(on?chunk:realOut);
     }
     
     /* ------------------------------------------------------------ */
     public void write(int b) throws IOException
     {
-	if (!writtenHeaders)
-	{
-	    writtenHeaders=true;
-	    response.writeHeaders();
-	}
-	out.write(b);
-	if (chunk.size()>4000)
-	    flush();
+        if (!writtenHeaders)
+        {
+            writtenHeaders=true;
+            response.writeHeaders();
+        }
+        out.write(b);
+        if (chunk.size()>4000)
+            flush();
     }
 
     /* ------------------------------------------------------------ */
     public void write(byte b[]) throws IOException
     {
-	if (!writtenHeaders)
-	{
-	    writtenHeaders=true;
-	    response.writeHeaders();
-	}
-	out.write(b);
-	if (chunk.size()>4000)
-	    flush();
+        if (!writtenHeaders)
+        {
+            writtenHeaders=true;
+            response.writeHeaders();
+        }
+        out.write(b);
+        if (chunk.size()>4000)
+            flush();
     }
 
     /* ------------------------------------------------------------ */
     public void write(byte b[], int off, int len) throws IOException
     {
-	if (!writtenHeaders)
-	{
-	    writtenHeaders=true;
-	    response.writeHeaders();
-	}
-	out.write(b,off,len);
-	if (chunk.size()>4000)
-	    flush();
+        if (!writtenHeaders)
+        {
+            writtenHeaders=true;
+            response.writeHeaders();
+        }
+        out.write(b,off,len);
+        if (chunk.size()>4000)
+            flush();
     }
 
     /* ------------------------------------------------------------ */
     public void flush() throws IOException
     {
-	if (!writtenHeaders)
-	{
-	    writtenHeaders=true;
-	    response.writeHeaders();
-	}
-	out.flush();
-	if (chunk.size()>0)
-	{
-	    String size = Integer.toString(chunk.size(),16);
-	    byte[] b = size.getBytes();
-	    realOut.write(b);
-	    realOut.write(';');
-	    realOut.write(__CRLF);
-	    chunk.writeTo(realOut);
-	    chunk.reset();
-	    realOut.write(__CRLF);
-	}
-	realOut.flush();
+        if (!writtenHeaders)
+        {
+            writtenHeaders=true;
+            response.writeHeaders();
+        }
+        out.flush();
+        if (chunk.size()>0)
+        {
+            String size = Integer.toString(chunk.size(),16);
+            byte[] b = size.getBytes();
+            realOut.write(b);
+            realOut.write(';');
+            realOut.write(__CRLF);
+            chunk.writeTo(realOut);
+            chunk.reset();
+            realOut.write(__CRLF);
+        }
+        realOut.flush();
     }
 
     /* ------------------------------------------------------------ */
     public void close() throws IOException
     {
-	try {
-	    flush();
+        try {
+            flush();
 
-	    // close filters
-	    out.close();
-	    
-	    // If chunking
-	    if (switchOut.getOutputStream()==chunk)
-	    {
-		// send last chunk and revert to normal output
-		realOut.write(__EOF);
-		realOut.flush();
-		switchOut.switchStream(realOut);
-	    }
-	}
-	catch (IOException e)
-	{
-	    Code.ignore(e);
-	}
+            // close filters
+            out.close();
+            
+            // If chunking
+            if (switchOut.getOutputStream()==chunk)
+            {
+                // send last chunk and revert to normal output
+                realOut.write(__EOF);
+                realOut.flush();
+                switchOut.switchStream(realOut);
+            }
+        }
+        catch (IOException e)
+        {
+            Code.ignore(e);
+        }
     }
     
     /* ------------------------------------------------------------ */
     public  void print(String string)
-	 throws IOException
+         throws IOException
     {
-	write(string.getBytes());
+        write(string.getBytes());
     }
 
     /* ------------------------------------------------------------ */
     public  void print(int i)
         throws IOException
     {
-	write(Integer.toString(i).getBytes());
+        write(Integer.toString(i).getBytes());
     }
 
     /* ------------------------------------------------------------ */
     public void print(long i)
         throws IOException
     {
-	write(Long.toString(i).getBytes());
+        write(Long.toString(i).getBytes());
     }
 
     /* ------------------------------------------------------------ */
@@ -232,7 +232,7 @@ public class HttpOutputStream extends ServletOutputStream
     public void println(int i)
         throws IOException
     {
-	write(Integer.toString(i).getBytes());
+        write(Integer.toString(i).getBytes());
         write(__CRLF);
     }
 
@@ -240,7 +240,7 @@ public class HttpOutputStream extends ServletOutputStream
     public void println(long i)
         throws IOException
     {
-	write(Long.toString(i).getBytes());
+        write(Long.toString(i).getBytes());
         write(__CRLF);
     }
 

@@ -25,18 +25,18 @@ import java.util.*;
  *     public void service(ServletRequest req, ServletResponse res) 
  *        throws Exception 
  *     {
- * 	  MultiPartResponse multi=new MultiPartResponse(res);
- * 	  multi.startNextPart("text/plain");
- * 	  multi.out.write("One\n");
- * 	  multi.endPart();
- * 	  Thread.sleep(2000);
- * 	  multi.startNextPart("text/plain");
- * 	  multi.out.write("Two\n");
- * 	  multi.endPart();
- * 	  Thread.sleep(2000);
- * 	  multi.startNextPart("text/plain");
- * 	  multi.out.write("Three\n");
- * 	  multi.endLastPart();
+ *        MultiPartResponse multi=new MultiPartResponse(res);
+ *        multi.startNextPart("text/plain");
+ *        multi.out.write("One\n");
+ *        multi.endPart();
+ *        Thread.sleep(2000);
+ *        multi.startNextPart("text/plain");
+ *        multi.out.write("Two\n");
+ *        multi.endPart();
+ *        Thread.sleep(2000);
+ *        multi.startNextPart("text/plain");
+ *        multi.out.write("Three\n");
+ *        multi.endLastPart();
  *     }
  * }
  *
@@ -67,10 +67,10 @@ public class MultiPartResponse
      *                 response will be sent.
      */
     public MultiPartResponse(HttpServletRequest request,
-			     HttpServletResponse response)
-	 throws IOException
+                             HttpServletResponse response)
+         throws IOException
     {
-	this(request,response,true);
+        this(request,response,true);
     }
 
     /* ------------------------------------------------------------ */
@@ -79,29 +79,29 @@ public class MultiPartResponse
      *                 response will be sent.
      */
     public MultiPartResponse(HttpServletRequest request,
-			     HttpServletResponse response,
-			     boolean alwaysExpire)
-	 throws IOException
+                             HttpServletResponse response,
+                             boolean alwaysExpire)
+         throws IOException
     {
-	this.response=response;
-	in = request.getInputStream();
-	outputStream=response.getOutputStream();
-	out=new OutputStreamWriter(response.getOutputStream());
+        this.response=response;
+        in = request.getInputStream();
+        outputStream=response.getOutputStream();
+        out=new OutputStreamWriter(response.getOutputStream());
 
-	String ua = request.getHeader(HttpHeader.UserAgent);
-	if (ua!=null && ua.indexOf("MSIE")>0)
-	    boundary="MSIE.CANNOT.HANDLE.MULTI.PART.MIME.";
-	
-	boundary+=Long.toString(System.currentTimeMillis(),36);
-	response.setContentType("multipart/mixed;boundary="+boundary);
-	if (alwaysExpire)
-	    response.setHeader("Expires","1 Jan 1971");
+        String ua = request.getHeader(HttpHeader.UserAgent);
+        if (ua!=null && ua.indexOf("MSIE")>0)
+            boundary="MSIE.CANNOT.HANDLE.MULTI.PART.MIME.";
+        
+        boundary+=Long.toString(System.currentTimeMillis(),36);
+        response.setContentType("multipart/mixed;boundary="+boundary);
+        if (alwaysExpire)
+            response.setHeader("Expires","1 Jan 1971");
 
-	out.write("--"+boundary+HttpHeader.CRLF);
-	out.flush();
+        out.write("--"+boundary+HttpHeader.CRLF);
+        out.flush();
 
-	if (HttpHeader.HTTP_1_1.equals(request.getProtocol()))
-	    response.setHeader(HttpHeader.Connection,HttpHeader.Close);
+        if (HttpHeader.HTTP_1_1.equals(request.getProtocol()))
+            response.setHeader(HttpHeader.Connection,HttpHeader.Close);
 
     }
     
@@ -110,10 +110,10 @@ public class MultiPartResponse
     /** Start creation of the next Content
      */
     public void startNextPart(String contentType)
-	 throws IOException
+         throws IOException
     {
-	out.write("Content-type: "+contentType+
-		  HttpHeader.CRLF+HttpHeader.CRLF);
+        out.write("Content-type: "+contentType+
+                  HttpHeader.CRLF+HttpHeader.CRLF);
     }
     
     /* ------------------------------------------------------------ */
@@ -121,9 +121,9 @@ public class MultiPartResponse
      * @exception IOException IOException
      */
     public void endPart()
-	 throws IOException
+         throws IOException
     {
-	endPart(false);
+        endPart(false);
     }
     
     /* ------------------------------------------------------------ */
@@ -131,9 +131,9 @@ public class MultiPartResponse
      * @exception IOException IOException
      */
     public void endLastPart()
-	 throws IOException
+         throws IOException
     {
-	endPart(true);
+        endPart(true);
     }
     
     /* ------------------------------------------------------------ */
@@ -142,12 +142,12 @@ public class MultiPartResponse
      * @exception IOException IOException
      */
     public void endPart(boolean lastPart)
-	 throws IOException
+         throws IOException
     {
-	out.write(HttpHeader.CRLF+"--"+
-		  boundary+(lastPart?"--":"")+
-		  HttpHeader.CRLF);
-	out.flush();
+        out.write(HttpHeader.CRLF+"--"+
+                  boundary+(lastPart?"--":"")+
+                  HttpHeader.CRLF);
+        out.flush();
     }
     
 };

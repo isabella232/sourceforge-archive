@@ -46,32 +46,32 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     public final static Hashtable __errorCodeMap = new Hashtable();
     static
     {
-	// Build error code map using reflection
-	try
-	{
-	    Field[] fields = javax.servlet.http.HttpServletResponse.class
-		.getDeclaredFields();
-	    for (int f=fields.length; f-->0 ;)
-	    {
-		int m = fields[f].getModifiers();
-		if (!Modifier.isFinal(m) || !Modifier.isStatic(m))
-		    continue;
+        // Build error code map using reflection
+        try
+        {
+            Field[] fields = javax.servlet.http.HttpServletResponse.class
+                .getDeclaredFields();
+            for (int f=fields.length; f-->0 ;)
+            {
+                int m = fields[f].getModifiers();
+                if (!Modifier.isFinal(m) || !Modifier.isStatic(m))
+                    continue;
 
-		if (!fields[f].getType().equals(Integer.TYPE))
-		    continue;
+                if (!fields[f].getType().equals(Integer.TYPE))
+                    continue;
 
-		if (fields[f].getName().startsWith("SC_"))
-		{
-		    String error = fields[f].getName().substring(3);
-		    error = error.replace('_',' ');
-		    __errorCodeMap.put(fields[f].get(null),error);
-		}
-	    }
-	}
-	catch (Exception e)
-	{
-	    Code.warning(e);
-	}
+                if (fields[f].getName().startsWith("SC_"))
+                {
+                    String error = fields[f].getName().substring(3);
+                    error = error.replace('_',' ');
+                    __errorCodeMap.put(fields[f].get(null),error);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Code.warning(e);
+        }
     }
     
     /* -------------------------------------------------------------- */
@@ -100,48 +100,48 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public HttpResponse(OutputStream out, HttpRequest request)
     {
-	this.out=out;
-	this.httpOut=new HttpOutputStream(out,this);
-	this.request=request;
-	if (request!=null)
-	    request.setHttpResponse(this);
-	version = HttpHeader.HTTP_1_0;
-	status = Integer.toString(SC_OK);
-	reason = "OK";
-	setHeader(ContentType,"text/html");
-	setHeader(MIME_Version,"1.0");
-	
-	// XXX - need to automate setting this with getServerInfo
-	setHeader(Server,Version.__jetty);
-	setDateHeader(Date,System.currentTimeMillis());
+        this.out=out;
+        this.httpOut=new HttpOutputStream(out,this);
+        this.request=request;
+        if (request!=null)
+            request.setHttpResponse(this);
+        version = HttpHeader.HTTP_1_0;
+        status = Integer.toString(SC_OK);
+        reason = "OK";
+        setHeader(ContentType,"text/html");
+        setHeader(MIME_Version,"1.0");
+        
+        // XXX - need to automate setting this with getServerInfo
+        setHeader(Server,Version.__jetty);
+        setDateHeader(Date,System.currentTimeMillis());
 
-	if (request!=null &&
-	    HttpHeader.Close.equals(request.getHeader(HttpHeader.Connection)))
-	    setHeader(HttpHeader.Connection,HttpHeader.Close);
+        if (request!=null &&
+            HttpHeader.Close.equals(request.getHeader(HttpHeader.Connection)))
+            setHeader(HttpHeader.Connection,HttpHeader.Close);
     }
     
     /* -------------------------------------------------------------- */
     public String getVersion()
     {
-	return version;
+        return version;
     }
     
     /* -------------------------------------------------------------- */
     public void setVersion(String version)
     {
-	this.version=version;
+        this.version=version;
     }
     
     /* -------------------------------------------------------------- */
     public String getStatus()
     {
-	return status;
+        return status;
     }
     
     /* -------------------------------------------------------------- */
     public String getReason()
     {
-	return reason;
+        return reason;
     }
     
     /* -------------------------------------------------------------- */
@@ -149,19 +149,19 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public HttpRequest getRequest()
     {
-	return request;
+        return request;
     }
     
     /* -------------------------------------------------------------- */
     public String getResponseLine()
     {
-	return version + " "+status + " " + reason;
+        return version + " "+status + " " + reason;
     }
 
     /* -------------------------------------------------------------- */
     public void setChunkByDefault(boolean chunk)
     {
-	chunkByDefault=chunk;
+        chunkByDefault=chunk;
     }
     
     /* -------------------------------------------------------------- */
@@ -173,17 +173,17 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public void addObserver(Observer o)
     {
-	if (observable==null)
-	    observable=new Observed();
-	Code.debug("Added Observer "+o);
-	observable.addObserver(o);
+        if (observable==null)
+            observable=new Observed();
+        Code.debug("Added Observer "+o);
+        observable.addObserver(o);
     }
     
     /* -------------------------------------------------------------- */
     public void deleteObserver(Observer o)
     {
-	if (observable!=null)
-	    observable.deleteObserver(o);
+        if (observable!=null)
+            observable.deleteObserver(o);
     }
 
     /* -------------------------------------------------------------- */
@@ -192,11 +192,11 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      * of the response
      */
     public void complete()
-	throws IOException
+        throws IOException
     {
-	if (!doNotClose)
-	    httpOut.close();
-	doNotClose=false;
+        if (!doNotClose)
+            httpOut.close();
+        doNotClose=false;
     }
     
     /* -------------------------------------------------------------- */
@@ -205,7 +205,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public boolean headersWritten()
     {
-	return headersWritten;
+        return headersWritten;
     }
     
     /* -------------------------------------------------------------- */
@@ -214,7 +214,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public boolean requestHandled()
     {
-	return handled;
+        return handled;
     }
     
     /* -------------------------------------------------------------- */
@@ -222,88 +222,88 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      * If any HttpFilters have been added activate them before writing.
      */
     public void writeHeaders() 
-	throws IOException
+        throws IOException
     {
-	if (!headersWritten)
-	{
-	    // Add Date if not already there
-	    if (getHeader(HttpHeader.Date)==null)
-	    {
-		int s = Integer.parseInt(status);
-		if (s<100 || s>199)
-		    setDateHeader(HttpHeader.Date,new Date().getTime());
-	    }
+        if (!headersWritten)
+        {
+            // Add Date if not already there
+            if (getHeader(HttpHeader.Date)==null)
+            {
+                int s = Integer.parseInt(status);
+                if (s<100 || s>199)
+                    setDateHeader(HttpHeader.Date,new Date().getTime());
+            }
 
-	    
-	    // Tell anybody who wants to not headers are complete
-	    // (e.g.. to activate filters by content-type)
-	    if (observable!=null)
-	    {
-		Code.debug("notify Observers");
-		observable.notifyObservers(this);
-	    }
-	    
-	    // Should we chunk or close
-	    if (HttpHeader.HTTP_1_1.equals(version))
-	    {
-		String encoding = getHeader(HttpHeader.TransferEncoding);
-		String connection =getHeader(Connection);
-		String length = getHeader(HttpHeader.ContentLength);
-		    
-		// chunk if we are told to
-		if (encoding!=null && encoding.equals(HttpHeader.Chunked))
-		{
-		    httpOut.setChunking(true);
-		}
-		// if we have no content length then ...
-		else if (length==null)
-		{
-		    // if not closing and chunk by default
-		    if (!(HttpHeader.Close.equals(connection))
-			&& chunkByDefault)
-		    {
-			// need to chunk
-			setHeader(HttpHeader.TransferEncoding,
-				  HttpHeader.Chunked);
-			httpOut.setChunking(true);
-		    }
-		    else
-		    {
-			// have to close to mark the end
-			setHeader(Connection,HttpHeader.Close);
-		    }
-		}
-		else
-		{
-		    // We have a content length, so we will not be
-		    // chunking, but we can be persistent, so we must
-		    // hide the next close.
-		    doNotClose=true;
-		}
-	    }
-	    else
-	    {
-		setHeader(Connection,HttpHeader.Close);
-	    }
-	    
-	    
-	    // Write the headers
-	    Code.debug("Write Headers");
-	    headersWritten=true;
-	    handled=true;
-	    out.write(getResponseLine().getBytes());
-	    out.write(__CRLF);
-	    if (cookies!=null)
-		super.write(out,cookies.toString());
-	    else
-		super.write(out);
+            
+            // Tell anybody who wants to not headers are complete
+            // (e.g.. to activate filters by content-type)
+            if (observable!=null)
+            {
+                Code.debug("notify Observers");
+                observable.notifyObservers(this);
+            }
+            
+            // Should we chunk or close
+            if (HttpHeader.HTTP_1_1.equals(version))
+            {
+                String encoding = getHeader(HttpHeader.TransferEncoding);
+                String connection =getHeader(Connection);
+                String length = getHeader(HttpHeader.ContentLength);
+                    
+                // chunk if we are told to
+                if (encoding!=null && encoding.equals(HttpHeader.Chunked))
+                {
+                    httpOut.setChunking(true);
+                }
+                // if we have no content length then ...
+                else if (length==null)
+                {
+                    // if not closing and chunk by default
+                    if (!(HttpHeader.Close.equals(connection))
+                        && chunkByDefault)
+                    {
+                        // need to chunk
+                        setHeader(HttpHeader.TransferEncoding,
+                                  HttpHeader.Chunked);
+                        httpOut.setChunking(true);
+                    }
+                    else
+                    {
+                        // have to close to mark the end
+                        setHeader(Connection,HttpHeader.Close);
+                    }
+                }
+                else
+                {
+                    // We have a content length, so we will not be
+                    // chunking, but we can be persistent, so we must
+                    // hide the next close.
+                    doNotClose=true;
+                }
+            }
+            else
+            {
+                setHeader(Connection,HttpHeader.Close);
+            }
+            
+            
+            // Write the headers
+            Code.debug("Write Headers");
+            headersWritten=true;
+            handled=true;
+            out.write(getResponseLine().getBytes());
+            out.write(__CRLF);
+            if (cookies!=null)
+                super.write(out,cookies.toString());
+            else
+                super.write(out);
 
-	    // Handle HEAD
-	    if (request!=null && request.getMethod().equals("HEAD"))
-		// Fake a break in the HttpOutputStream
-		throw HeadException.instance;
-	    
-	}
+            // Handle HEAD
+            if (request!=null && request.getMethod().equals("HEAD"))
+                // Fake a break in the HttpOutputStream
+                throw HeadException.instance;
+            
+        }
     }
     
     /* ------------------------------------------------------------- */
@@ -315,9 +315,9 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      *        to read and write
      */
     public void writeInputStream(InputStream stream,long length)
-	throws IOException
+        throws IOException
     {
-	writeInputStream(stream,length,false);
+        writeInputStream(stream,length,false);
     }
     
     /* ------------------------------------------------------------- */
@@ -329,22 +329,22 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      *        HTTP headers which replace those set in this HttpResponse.
      */
     public void writeInputStream(InputStream stream,
-				 long length,
-				 boolean streamIncludesHeaders)
-	throws IOException
+                                 long length,
+                                 boolean streamIncludesHeaders)
+        throws IOException
     {
-	Code.debug("writeInputStream:"+length);
-	if (streamIncludesHeaders)
-	{
-	    Code.assert(!headersWritten(),"Headers already written");
-	    headersWritten=true;
-	    handled=true;
-	    if (observable!=null)
-		observable.notifyObservers(this);
-	}
-	
-	if (stream!=null)
-	    IO.copy(stream,getOutputStream(),length);
+        Code.debug("writeInputStream:"+length);
+        if (streamIncludesHeaders)
+        {
+            Code.assert(!headersWritten(),"Headers already written");
+            headersWritten=true;
+            handled=true;
+            if (observable!=null)
+                observable.notifyObservers(this);
+        }
+        
+        if (stream!=null)
+            IO.copy(stream,getOutputStream(),length);
     }
     
     
@@ -356,9 +356,9 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public Cookies getCookies()
     {
-	if (cookies==null)
-	    cookies=new Cookies();
-	return cookies;
+        if (cookies==null)
+            cookies=new Cookies();
+        return cookies;
     }
     
 
@@ -367,17 +367,17 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     synchronized HttpOutputStream getHttpOutputStream()
     {
-	return httpOut;
+        return httpOut;
     }
 
     /* ------------------------------------------------------------- */
     void flush()
-	throws IOException
+        throws IOException
     {
-	if (outputState==2)
-	    writer.flush();
-	else
-	    httpOut.flush();
+        if (outputState==2)
+            writer.flush();
+        else
+            httpOut.flush();
     }
 
     
@@ -390,8 +390,8 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public void setContentLength(int len)
     {
-	setHeader(ContentLength,Integer.toString(len));
-	handled=true;
+        setHeader(ContentLength,Integer.toString(len));
+        handled=true;
     }
 
     /* ------------------------------------------------------------- */
@@ -399,8 +399,8 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public void setContentType(String type)
     {
-	setHeader(ContentType,type);
-	handled=true;
+        setHeader(ContentType,type);
+        handled=true;
     }
 
 
@@ -411,11 +411,11 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public synchronized ServletOutputStream getOutputStream()
     {
-	handled=true;
-	if (outputState!=0 && outputState!=1)
-	    throw new IllegalStateException();
-	outputState=1;
-	return httpOut;
+        handled=true;
+        if (outputState!=0 && outputState!=1)
+            throw new IllegalStateException();
+        outputState=1;
+        return httpOut;
     }
     
     /* -------------------------------------------------------------- */
@@ -431,11 +431,11 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public void setStatus(int code,String msg)
     {
-	handled=true;
-	status=Integer.toString(code);
-	reason=(String)__errorCodeMap.get(new Integer(code));
-	if (reason==null)
-	    reason=msg;
+        handled=true;
+        status=Integer.toString(code);
+        reason=(String)__errorCodeMap.get(new Integer(code));
+        if (reason==null)
+            reason=msg;
     }
 
     /* ------------------------------------------------------------- */
@@ -445,10 +445,10 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public void setStatus(int code)
     {
-	handled=true;
-	status=Integer.toString(code);
-	String msg = (String)__errorCodeMap.get(new Integer(code));
-	reason=(msg!=null)?msg:status;
+        handled=true;
+        status=Integer.toString(code);
+        String msg = (String)__errorCodeMap.get(new Integer(code));
+        reason=(msg!=null)?msg:status;
     }
       
     /* ------------------------------------------------------------- */
@@ -460,22 +460,22 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      * @exception IOException If an I/O error has occurred.
      */
     public void sendError(int code,String msg) 
-	throws IOException
+        throws IOException
     {
-	setContentType("text/html");
-	setStatus(code,msg);
-	writeHeaders();
+        setContentType("text/html");
+        setStatus(code,msg);
+        writeHeaders();
 
-	if (writer!=null)
-	    writer.flush();
-	outputState=0;
-	PrintWriter out = getWriter();
-	out.println("<HTML><HEAD><TITLE>Error "+code+"</TITLE>");
-	out.println("<BODY><H2>HTTP ERROR: "+
-		    code +
-		    " " + msg + "</H2>");       
-	out.println("</BODY>\n</HTML>");
-	out.flush();
+        if (writer!=null)
+            writer.flush();
+        outputState=0;
+        PrintWriter out = getWriter();
+        out.println("<HTML><HEAD><TITLE>Error "+code+"</TITLE>");
+        out.println("<BODY><H2>HTTP ERROR: "+
+                    code +
+                    " " + msg + "</H2>");       
+        out.println("</BODY>\n</HTML>");
+        out.flush();
     }
       
     /* ------------------------------------------------------------- */
@@ -486,13 +486,13 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      * @exception IOException If an I/O error has occurred.
      */
     public void sendError(int code) 
-	throws IOException
+        throws IOException
     {
-	String msg = (String)__errorCodeMap.get(new Integer(code));
-	if (msg==null)
-	    sendError(code,"UNKNOWN ERROR CODE");
-	else
-	    sendError(code,msg);
+        String msg = (String)__errorCodeMap.get(new Integer(code));
+        if (msg==null)
+            sendError(code,"UNKNOWN ERROR CODE");
+        else
+            sendError(code,msg);
     }
     
     /* ------------------------------------------------------------- */
@@ -503,25 +503,25 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      * @exception IOException If an I/O error has occurred.
      */
     public void sendRedirect(String location)
-	throws IOException
+        throws IOException
     {
-	setHeader(Location,location);
-	setStatus(SC_MOVED_TEMPORARILY);
-	writeHeaders();
+        setHeader(Location,location);
+        setStatus(SC_MOVED_TEMPORARILY);
+        writeHeaders();
     }
     
     /* -------------------------------------------------------------- */
     public boolean containsHeader(String headerKey)
     {
-	return getHeader(headerKey)!=null;
+        return getHeader(headerKey)!=null;
     }
 
     /* -------------------------------------------------------------- */
     public void addCookie(javax.servlet.http.Cookie cookie)
     {
-	if (cookies==null)
-	    cookies=new Cookies();
-	cookies.setCookie(cookie);
+        if (cookies==null)
+            cookies=new Cookies();
+        cookies.setCookie(cookie);
     }
 
     /* -------------------------------------------------------------- */
@@ -530,7 +530,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public java.lang.String encodeRedirectUrl(java.lang.String url)
     {
-	return encodeRedirectURL(url);
+        return encodeRedirectURL(url);
     }
     
     /* -------------------------------------------------------------- */
@@ -539,14 +539,14 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public java.lang.String encodeUrl(java.lang.String url)
     {
-	return encodeURL(url);
+        return encodeURL(url);
     }
     
     /* -------------------------------------------------------------- */
     public java.lang.String encodeRedirectURL(java.lang.String url)
     {
-	//XXX - Don't know what to do different here?
-	return encodeURL(url);
+        //XXX - Don't know what to do different here?
+        return encodeURL(url);
     }
     
     /* ------------------------------------------------------------ */
@@ -562,58 +562,58 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public java.lang.String encodeURL(java.lang.String url)
     {
-	// should not encode if cookies in evidence
-	if (request==null || request.isRequestedSessionIdFromCookie())
-	    return url;
-	
-	// get session;
-	if (session==null && !noSession)
-	{
-	    session=request.getSession(false);
-	    noSession=(session==null);
-	}
+        // should not encode if cookies in evidence
+        if (request==null || request.isRequestedSessionIdFromCookie())
+            return url;
+        
+        // get session;
+        if (session==null && !noSession)
+        {
+            session=request.getSession(false);
+            noSession=(session==null);
+        }
 
-	// no session or no url
-	if (session == null || url==null)
-	    return url;
+        // no session or no url
+        if (session == null || url==null)
+            return url;
 
-	// invalid session
-	String id = session.getId();
-	if (id == null)
-	    return url;
+        // invalid session
+        String id = session.getId();
+        if (id == null)
+            return url;
 
-	// insert the id
-	int from= url.length()-1;
-	if (from<0)
-	    return SessionContext.SessionUrlPrefix + id +
-		SessionContext.SessionUrlSuffix;	    
-	
-	int hook = url.indexOf('?');
-	if (hook>=0 && hook<from)
-	    from=hook;
-	int hash = url.indexOf('#');
-	if (hash>=0 && hash<from)
-	    from=hash;
-	    
-	int slash = url.lastIndexOf('/',from);
-	if (slash==-1)
-	{
-	    url =
-		SessionContext.SessionUrlPrefix + id +
-		SessionContext.SessionUrlSuffix + url;    
-	}
-	else
-	{
-	    url =
-		url.substring(0,slash+1) +
-		SessionContext.SessionUrlPrefix + id +
-		SessionContext.SessionUrlSuffix + 
-		url.substring(slash+1); 
-	}
-	
-	
-	// Must be a partial url...
-	return url;
+        // insert the id
+        int from= url.length()-1;
+        if (from<0)
+            return SessionContext.SessionUrlPrefix + id +
+                SessionContext.SessionUrlSuffix;            
+        
+        int hook = url.indexOf('?');
+        if (hook>=0 && hook<from)
+            from=hook;
+        int hash = url.indexOf('#');
+        if (hash>=0 && hash<from)
+            from=hash;
+            
+        int slash = url.lastIndexOf('/',from);
+        if (slash==-1)
+        {
+            url =
+                SessionContext.SessionUrlPrefix + id +
+                SessionContext.SessionUrlSuffix + url;    
+        }
+        else
+        {
+            url =
+                url.substring(0,slash+1) +
+                SessionContext.SessionUrlPrefix + id +
+                SessionContext.SessionUrlSuffix + 
+                url.substring(slash+1); 
+        }
+        
+        
+        // Must be a partial url...
+        return url;
     }
     
     /* -------------------------------------------------------------- */
@@ -624,35 +624,35 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public String getCharacterEncoding ()
     {
-	String encoding = getHeader(ContentType);
-	if (encoding==null || encoding.length()==0)
-	    return "ISO-8859-1";
-	
-	int i=encoding.indexOf(';');
-	if (i<0)
-	    return "ISO-8859-1";
-	
-	i=encoding.indexOf("charset=",i);
-	if (i<0 || i+8>=encoding.length())
-	    return "ISO-8859-1";
-	    
-	encoding=encoding.substring(i+8);
-	i=encoding.indexOf(' ');
-	if (i>0)
-	    encoding=encoding.substring(0,i);
-	
-	return encoding;
+        String encoding = getHeader(ContentType);
+        if (encoding==null || encoding.length()==0)
+            return "ISO-8859-1";
+        
+        int i=encoding.indexOf(';');
+        if (i<0)
+            return "ISO-8859-1";
+        
+        i=encoding.indexOf("charset=",i);
+        if (i<0 || i+8>=encoding.length())
+            return "ISO-8859-1";
+            
+        encoding=encoding.substring(i+8);
+        i=encoding.indexOf(' ');
+        if (i>0)
+            encoding=encoding.substring(0,i);
+        
+        return encoding;
     }
     
     /* -------------------------------------------------------------- */
     public synchronized java.io.PrintWriter getWriter()
     {
-	if (outputState!=0 && outputState!=2)
-	    throw new IllegalStateException();
-	if (writer==null)
-	    writer=new PrintWriter(new OutputStreamWriter(getOutputStream()));
-	outputState=2;
-	return writer;
+        if (outputState!=0 && outputState!=2)
+            throw new IllegalStateException();
+        if (writer==null)
+            writer=new PrintWriter(new OutputStreamWriter(getOutputStream()));
+        outputState=2;
+        return writer;
     }    
 
     /* ------------------------------------------------------------ */
@@ -661,22 +661,22 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public void destroy()
     {
-	version=null;
-	status=null;
-	reason=null;
-	httpOut=null;
-	out=null;
-	writer=null;
-	cookies=null;
-	session=null;
-	if (filters!=null)
-	{
-	    filters.removeAllElements();
-	    filters=null;
-	}
-	request=null;
-	observable=null;
-	super.destroy();
+        version=null;
+        status=null;
+        reason=null;
+        httpOut=null;
+        out=null;
+        writer=null;
+        cookies=null;
+        session=null;
+        if (filters!=null)
+        {
+            filters.removeAllElements();
+            filters=null;
+        }
+        request=null;
+        observable=null;
+        super.destroy();
     }
     
 }

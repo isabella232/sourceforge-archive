@@ -23,7 +23,7 @@ public class DumpFilterOutputStream extends SummaryFilterOutputStream
      */
     public DumpFilterOutputStream(OutputStream out)
     {
-	super(out,null,0);
+        super(out,null,0);
     }
     
     /* ------------------------------------------------------------ */
@@ -31,9 +31,9 @@ public class DumpFilterOutputStream extends SummaryFilterOutputStream
      * @param out 
      */
     public DumpFilterOutputStream(OutputStream out,
-				  String name)
+                                  String name)
     {
-	super(out,name,0);
+        super(out,name,0);
     }
 
 };

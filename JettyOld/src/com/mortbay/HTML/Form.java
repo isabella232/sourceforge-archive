@@ -23,7 +23,7 @@ public class Form extends Block
      */
     public Form()
     {
-	super("FORM");
+        super("FORM");
     }
 
     /* ----------------------------------------------------------------- */
@@ -32,8 +32,8 @@ public class Form extends Block
      */
     public Form(String submitURL)
     {
-	super("FORM");
-	action(submitURL);
+        super("FORM");
+        action(submitURL);
     }
 
     /* ----------------------------------------------------------------- */
@@ -42,8 +42,8 @@ public class Form extends Block
      */
     public Form action(String submitURL)
     {
-	attribute("ACTION",submitURL);
-	return this;
+        attribute("ACTION",submitURL);
+        return this;
     }
     
     /* ----------------------------------------------------------------- */
@@ -51,8 +51,8 @@ public class Form extends Block
      */
     public Form target(String t)
     {
-	attribute("TARGET",t);
-	return this;
+        attribute("TARGET",t);
+        return this;
     }
     
     /* ----------------------------------------------------------------- */
@@ -60,23 +60,23 @@ public class Form extends Block
      */
     public Form method(String m)
     {
-	method=m;
-	return this;
+        method=m;
+        return this;
     }
     
     /* ------------------------------------------------------------ */
     /** Set the form encoding type
      */
     public Form encoding(String encoding){
-	attribute("ENCTYPE", encoding);
-	return this;
+        attribute("ENCTYPE", encoding);
+        return this;
     }
     /* ----------------------------------------------------------------- */
     public void write(Writer out)
-	 throws IOException
+         throws IOException
     {
-	attribute("METHOD",method);
-	super.write(out);
+        attribute("METHOD",method);
+        super.write(out);
     }
 }
 

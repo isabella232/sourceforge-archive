@@ -35,17 +35,17 @@ public class HttpHeader
     public final static String LastModified="Last-Modified";
     public final static String[] SingleValued=
     {
-	"age", "authorization", "content-length", "content-location", "content-md5",
-	"content-range", "content-type", "date", "etag", "expires", "from", "host",
+        "age", "authorization", "content-length", "content-location", "content-md5",
+        "content-range", "content-type", "date", "etag", "expires", "from", "host",
         "if-modified-since", "if-range", "if-unmodified-since", "last-modified",
-	"location", "max-forwards", "proxy-authorization", "range", "referer",
-	"retry-after", "server", "user-agent"
+        "location", "max-forwards", "proxy-authorization", "range", "referer",
+        "retry-after", "server", "user-agent"
     };
     public final static Hashtable __singleValuedMap=new Hashtable(37);
     static
     {
-	for (int i=0;i<SingleValued.length;i++)
-	    __singleValuedMap.put(SingleValued[i],SingleValued[i]);
+        for (int i=0;i<SingleValued.length;i++)
+            __singleValuedMap.put(SingleValued[i],SingleValued[i]);
     }
     
     public final static String CRLF = "\015\012";
@@ -58,39 +58,39 @@ public class HttpHeader
 
     /* -------------------------------------------------------------- */
     public final static DateCache __dateSend = 
-	new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
+        new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
     public final static SimpleDateFormat __dateReceive[] =
     {
-	new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz"),
-	new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss"),
-	new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss zzz"),
-	new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss"),
-	new SimpleDateFormat("EEE MMM dd yyyy HH:mm:ss zzz"),
-	new SimpleDateFormat("EEE MMM dd yyyy HH:mm:ss"),
-	new SimpleDateFormat("EEE MMM-dd-yyyy HH:mm:ss zzz"),
-	new SimpleDateFormat("EEE MMM-dd-yyyy HH:mm:ss"),
-	new SimpleDateFormat("dd MMM yyyy HH:mm:ss zzz"),
-	new SimpleDateFormat("dd MMM yyyy HH:mm:ss"),
-	new SimpleDateFormat("dd-MMM-yy HH:mm:ss zzz"),
-	new SimpleDateFormat("dd-MMM-yy HH:mm:ss"),
-	new SimpleDateFormat("MMM dd HH:mm:ss yyyy zzz"),
-	new SimpleDateFormat("MMM dd HH:mm:ss yyyy"),
-	new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy zzz"),
-	new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy"),
-	new SimpleDateFormat("EEE, MMM dd HH:mm:ss yyyy zzz"),
-	new SimpleDateFormat("EEE, MMM dd HH:mm:ss yyyy"),
-	new SimpleDateFormat("EEE, dd-MMM-yy HH:mm:ss zzz"),
-	new SimpleDateFormat("EEE, dd-MMM-yy HH:mm:ss"),
-	new SimpleDateFormat("EEE dd-MMM-yy HH:mm:ss zzz"),
-	new SimpleDateFormat("EEE dd-MMM-yy HH:mm:ss"),
+        new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz"),
+        new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss"),
+        new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss zzz"),
+        new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss"),
+        new SimpleDateFormat("EEE MMM dd yyyy HH:mm:ss zzz"),
+        new SimpleDateFormat("EEE MMM dd yyyy HH:mm:ss"),
+        new SimpleDateFormat("EEE MMM-dd-yyyy HH:mm:ss zzz"),
+        new SimpleDateFormat("EEE MMM-dd-yyyy HH:mm:ss"),
+        new SimpleDateFormat("dd MMM yyyy HH:mm:ss zzz"),
+        new SimpleDateFormat("dd MMM yyyy HH:mm:ss"),
+        new SimpleDateFormat("dd-MMM-yy HH:mm:ss zzz"),
+        new SimpleDateFormat("dd-MMM-yy HH:mm:ss"),
+        new SimpleDateFormat("MMM dd HH:mm:ss yyyy zzz"),
+        new SimpleDateFormat("MMM dd HH:mm:ss yyyy"),
+        new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy zzz"),
+        new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy"),
+        new SimpleDateFormat("EEE, MMM dd HH:mm:ss yyyy zzz"),
+        new SimpleDateFormat("EEE, MMM dd HH:mm:ss yyyy"),
+        new SimpleDateFormat("EEE, dd-MMM-yy HH:mm:ss zzz"),
+        new SimpleDateFormat("EEE, dd-MMM-yy HH:mm:ss"),
+        new SimpleDateFormat("EEE dd-MMM-yy HH:mm:ss zzz"),
+        new SimpleDateFormat("EEE dd-MMM-yy HH:mm:ss"),
     };
     static
     {
-	TimeZone tz = TimeZone.getTimeZone("GMT");
-	tz.setID("GMT");
-	__dateSend.getFormat().setTimeZone(tz);
-	for(int i=0;i<__dateReceive.length;i++)
-	    __dateReceive[i].setTimeZone(tz);
+        TimeZone tz = TimeZone.getTimeZone("GMT");
+        tz.setID("GMT");
+        __dateSend.getFormat().setTimeZone(tz);
+        for(int i=0;i<__dateReceive.length;i++)
+            __dateReceive[i].setTimeZone(tz);
     }
     
     /* -------------------------------------------------------------- */
@@ -104,7 +104,7 @@ public class HttpHeader
      */
     public Enumeration getHeaderNames()
     {
-	return keys.elements();
+        return keys.elements();
     }
     
     /* -------------------------------------------------------------- */
@@ -115,7 +115,7 @@ public class HttpHeader
      */
     public String getHeader(String key)
     {
-	return (String)keyMap.get(StringUtil.asciiToLowerCase(key));
+        return (String)keyMap.get(StringUtil.asciiToLowerCase(key));
     }
     
     /* -------------------------------------------------------------- */
@@ -127,14 +127,14 @@ public class HttpHeader
      */
     String getHeaderNoParams(String key)
     {
-	String val = getHeader(key);
-	if (val!=null)
-	{
-	    int sc=val.indexOf(';');
-	    if (sc>0)
-		val=val.substring(0,sc);
-	}
-	return val;
+        String val = getHeader(key);
+        if (val!=null)
+        {
+            int sc=val.indexOf(';');
+            if (sc>0)
+                val=val.substring(0,sc);
+        }
+        return val;
     }
     
     /* -------------------------------------------------------------- */
@@ -142,19 +142,19 @@ public class HttpHeader
      */
     public void setHeader(String key,String value)
     {
-	String lkey = StringUtil.asciiToLowerCase(key);
+        String lkey = StringUtil.asciiToLowerCase(key);
 
-	if (value==null)
-	{
-	    keyMap.remove(lkey);
-	    keys.removeElement(key);
-	    keys.removeElement(lkey);
-	}
-	else
-	{
-	    if (keyMap.put(lkey,value)==null)
-		keys.addElement(key);
-	}
+        if (value==null)
+        {
+            keyMap.remove(lkey);
+            keys.removeElement(key);
+            keys.removeElement(lkey);
+        }
+        else
+        {
+            if (keyMap.put(lkey,value)==null)
+                keys.addElement(key);
+        }
     }
 
     /* -------------------------------------------------------------- */
@@ -163,121 +163,121 @@ public class HttpHeader
     public void read(HttpInputStream in)
     throws IOException
     {
-	com.mortbay.HTTP.HttpInputStream$CharBuffer cbuf;
-	char[] lbuf=null;
-	String last=null;
-	while ((cbuf=in.readCharBufferLine())!=(com.mortbay.HTTP.HttpInputStream$CharBuffer)null)
-	{
-	    // check for empty line to end headers
-	    if (cbuf.size==0)
-		break;
+        com.mortbay.HTTP.HttpInputStream$CharBuffer cbuf;
+        char[] lbuf=null;
+        String last=null;
+        while ((cbuf=in.readCharBufferLine())!=(com.mortbay.HTTP.HttpInputStream$CharBuffer)null)
+        {
+            // check for empty line to end headers
+            if (cbuf.size==0)
+                break;
 
-	    // check space in the lowercase buffer
-	    char[] buf = cbuf.chars;
-	    if (lbuf==null || lbuf.length < cbuf.size)
-		lbuf= new char[cbuf.chars.length];
+            // check space in the lowercase buffer
+            char[] buf = cbuf.chars;
+            if (lbuf==null || lbuf.length < cbuf.size)
+                lbuf= new char[cbuf.chars.length];
 
-	    // setup loop state machine
-	    int state=0;
-	    int i1=-1;
-	    int i2=-1;
-	    String key=null;
-	    String lkey=null;
+            // setup loop state machine
+            int state=0;
+            int i1=-1;
+            int i2=-1;
+            String key=null;
+            String lkey=null;
 
-	    // loop for all chars in buffer
-	    for (int i=0;i<cbuf.size;i++)
-	    {
-		char c=buf[i];
+            // loop for all chars in buffer
+            for (int i=0;i<cbuf.size;i++)
+            {
+                char c=buf[i];
 
-		switch(state)
-		{
-		  case 0: // leading white
-		      if (c==' ' || c=='	')
-		      {
-			  // continuation line
-			  state=2;
-			  continue;
-		      }
-		      state=1;
-		      i1=i;
-		      i2=i-1;
-		  case 1: // reading key
-		      if (c==':')
-		      {
-			  key=new String(buf,i1,i2-i1+1);
-			  lkey=new String(lbuf,i1,i2-i1+1);  
-			  state=2;
-			  i1=i;i2=i-1;
-			  continue;
-		      }
-		      if (c>='A'&&c<='Z')
-		      {
-			  lbuf[i]=(char)(('a'-'A')+c);
-			  i2=i;
-		      }
-		      else
-		      {
-			  lbuf[i]=c;
-			  if (c!=' ' && c!='	')
-			      i2=i;
-		      }
-		      continue;
+                switch(state)
+                {
+                  case 0: // leading white
+                      if (c==' ' || c=='        ')
+                      {
+                          // continuation line
+                          state=2;
+                          continue;
+                      }
+                      state=1;
+                      i1=i;
+                      i2=i-1;
+                  case 1: // reading key
+                      if (c==':')
+                      {
+                          key=new String(buf,i1,i2-i1+1);
+                          lkey=new String(lbuf,i1,i2-i1+1);  
+                          state=2;
+                          i1=i;i2=i-1;
+                          continue;
+                      }
+                      if (c>='A'&&c<='Z')
+                      {
+                          lbuf[i]=(char)(('a'-'A')+c);
+                          i2=i;
+                      }
+                      else
+                      {
+                          lbuf[i]=c;
+                          if (c!=' ' && c!='    ')
+                              i2=i;
+                      }
+                      continue;
 
-		  case 2: // skip whitespace after :
-		      if (c==' ' || c=='	')
-			  continue;
-		      state=3;
-		      i1=i;
-		      i2=i-1;
+                  case 2: // skip whitespace after :
+                      if (c==' ' || c=='        ')
+                          continue;
+                      state=3;
+                      i1=i;
+                      i2=i-1;
 
-		  case 3: // looking for last non-white
-		      if (c!=' ' && c!='	')
-			  i2=i;
-		}
-		continue;
-	    }
-	    
-	    if (lkey==null || lkey.length()==0)
-	    {
-		if (state>=2 && last!=null)
-		{
-		    // Continuation line
-		    String existing=(String)keyMap.get(last);
-		    StringBuffer sb = new StringBuffer(existing);
-		    sb.append(' ');
-		    sb.append(buf,i1,i2-i1+1);
-		    keyMap.put(last,sb.toString());
-		}
-		continue;
-	    }
-	    
-	    // Handle repeated headers
-	    String existing=(String)keyMap.get(lkey);
-	    if (existing!=null)
-	    {
-		if (__singleValuedMap.containsKey(lkey))
-		{
-		    Code.warning("Ignored duplicate single value header: "+
-				 key);
-		    
-		    // XXX Don't throw here as IE4 breaks the rules
-		    // throw new IOException("Duplicate single value headers");
-		}
-		else
-		{
-		    StringBuffer sb = new StringBuffer(existing);
-		    sb.append(',');
-		    sb.append(buf,i1,i2-i1+1);
-		    keyMap.put(lkey,sb.toString());
-		}
-	    }
-	    else
-	    {
-		keyMap.put(lkey,new String(buf,i1,i2-i1+1));
-		keys.addElement(key);
-		last=lkey;
-	    }
-	}
+                  case 3: // looking for last non-white
+                      if (c!=' ' && c!='        ')
+                          i2=i;
+                }
+                continue;
+            }
+            
+            if (lkey==null || lkey.length()==0)
+            {
+                if (state>=2 && last!=null)
+                {
+                    // Continuation line
+                    String existing=(String)keyMap.get(last);
+                    StringBuffer sb = new StringBuffer(existing);
+                    sb.append(' ');
+                    sb.append(buf,i1,i2-i1+1);
+                    keyMap.put(last,sb.toString());
+                }
+                continue;
+            }
+            
+            // Handle repeated headers
+            String existing=(String)keyMap.get(lkey);
+            if (existing!=null)
+            {
+                if (__singleValuedMap.containsKey(lkey))
+                {
+                    Code.warning("Ignored duplicate single value header: "+
+                                 key);
+                    
+                    // XXX Don't throw here as IE4 breaks the rules
+                    // throw new IOException("Duplicate single value headers");
+                }
+                else
+                {
+                    StringBuffer sb = new StringBuffer(existing);
+                    sb.append(',');
+                    sb.append(buf,i1,i2-i1+1);
+                    keyMap.put(lkey,sb.toString());
+                }
+            }
+            else
+            {
+                keyMap.put(lkey,new String(buf,i1,i2-i1+1));
+                keys.addElement(key);
+                last=lkey;
+            }
+        }
     }
 
     
@@ -285,7 +285,7 @@ public class HttpHeader
     /* Write Extra HTTP headers.
      */
     protected void write(OutputStream out, String extra)
-	throws IOException
+        throws IOException
     {
         OutputStreamWriter writer = new OutputStreamWriter(out);
         synchronized(out)   // Lock on the same object writer.write will use
@@ -318,21 +318,21 @@ public class HttpHeader
     protected void write(OutputStream out)
     throws IOException
     {
-	write(out,null);
+        write(out,null);
     }
     
     /* -------------------------------------------------------------- */
     public String toString()
     {
-	try
-	{
-	    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-	    write(bos);
-	    return bos.toString();
-	}
-	catch(Exception e)
-	{}
-	return null;
+        try
+        {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            write(bos);
+            return bos.toString();
+        }
+        catch(Exception e)
+        {}
+        return null;
     }
    
     /* -------------------------------------------------------------- */
@@ -343,12 +343,12 @@ public class HttpHeader
      */
     public  int getIntHeader(String name)
     {
-	String val = getHeaderNoParams(name);
-	if (val!=null)
-	{
-	    return Integer.parseInt(val);
-	}
-	return -1;
+        String val = getHeaderNoParams(name);
+        if (val!=null)
+        {
+            return Integer.parseInt(val);
+        }
+        return -1;
     }
     
     /* -------------------------------------------------------------- */
@@ -359,37 +359,37 @@ public class HttpHeader
      */
     public long getDateHeader(String name)
     {
-	String val = getHeaderNoParams(name);
-	if (val!=null)
-	{
-	    for (int i=0;i<__dateReceive.length;i++)
-	    {
-		try{
-		    Date date=(Date)__dateReceive[i].parseObject(val);
-		    return date.getTime();
-		}
-		catch(java.lang.Exception e)
-		{}
-	    }
-	    if (val.endsWith(" GMT"))
-	    {
-		val=val.substring(0,val.length()-4);
-		for (int i=0;i<__dateReceive.length;i++)
-		{
-		    try{
-			Code.debug("TRY ",val," against ",__dateReceive[i].toPattern());
-			Date date=(Date)__dateReceive[i].parseObject(val);
-			Code.debug("GOT ",date);
-			return date.getTime();
-		    }
-		    catch(java.lang.Exception e)
-		    {
-			Code.ignore(e);
-		    }
-		}
-	    }
-	}
-	return -1;
+        String val = getHeaderNoParams(name);
+        if (val!=null)
+        {
+            for (int i=0;i<__dateReceive.length;i++)
+            {
+                try{
+                    Date date=(Date)__dateReceive[i].parseObject(val);
+                    return date.getTime();
+                }
+                catch(java.lang.Exception e)
+                {}
+            }
+            if (val.endsWith(" GMT"))
+            {
+                val=val.substring(0,val.length()-4);
+                for (int i=0;i<__dateReceive.length;i++)
+                {
+                    try{
+                        Code.debug("TRY ",val," against ",__dateReceive[i].toPattern());
+                        Date date=(Date)__dateReceive[i].parseObject(val);
+                        Code.debug("GOT ",date);
+                        return date.getTime();
+                    }
+                    catch(java.lang.Exception e)
+                    {
+                        Code.ignore(e);
+                    }
+                }
+            }
+        }
+        return -1;
     }
     
     /* -------------------------------------------------------------- */
@@ -400,7 +400,7 @@ public class HttpHeader
      */
     public void setIntHeader(String name, int value)
     {
-	setHeader(name, Integer.toString(value));
+        setHeader(name, Integer.toString(value));
     }
 
     /* -------------------------------------------------------------- */
@@ -411,7 +411,7 @@ public class HttpHeader
      */
     public void setDateHeader(String name, long date)
     {
-	setHeader(name, __dateSend.format(date));
+        setHeader(name, __dateSend.format(date));
     }
 
 
@@ -421,16 +421,16 @@ public class HttpHeader
      */
     public void destroy()
     {
-	if (keyMap!=null)
-	{
-	    keyMap.clear();
-	    keyMap=null;
-	}
-	if (keys!=null)
-	{
-	    keys.removeAllElements();
-	    keys=null;
-	}
+        if (keyMap!=null)
+        {
+            keyMap.clear();
+            keyMap=null;
+        }
+        if (keys!=null)
+        {
+            keys.removeAllElements();
+            keys=null;
+        }
     }
 }
 

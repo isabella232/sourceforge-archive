@@ -33,19 +33,19 @@ public class TableForm extends Form
      */
     public TableForm(String target)
     {
-	super(target);
-	newTable();
-	super.add(hidden);
+        super(target);
+        newTable();
+        super.add(hidden);
     }
 
     /* ----------------------------------------------------------- */
     /** Add an informational section
      */
     public void addText(String label,
-			String value)
+                        String value)
     {
-	Element e = new Text(value);
-	addField(label,e);
+        Element e = new Text(value);
+        addField(label,e);
     }
 
     /* ----------------------------------------------------------- */
@@ -54,14 +54,14 @@ public class TableForm extends Form
      * @param label The label for the element in the table.
      */
     public Input addTextField(String tag, 
-			      String label,
-			      int length,
-			      String value)
+                              String label,
+                              int length,
+                              String value)
     {
-	Input i = new Input(Input.Text,tag,value);
-	i.setSize(length);
-	addField(label,i);
-	return i;
+        Input i = new Input(Input.Text,tag,value);
+        i.setSize(length);
+        addField(label,i);
+        return i;
     }
 
     /* ----------------------------------------------------------- */
@@ -70,15 +70,15 @@ public class TableForm extends Form
      * @param label The label for the element in the table.
      */
     public TextArea addTextArea(String tag, 
-				String label,
-				int width,
-				int height,
-				String value)
+                                String label,
+                                int width,
+                                int height,
+                                String value)
     {
-	TextArea ta = new TextArea(tag,value);
-	ta.setSize(width,height);
-	addField(label,ta);
-	return ta;
+        TextArea ta = new TextArea(tag,value);
+        ta.setSize(width,height);
+        addField(label,ta);
+        return ta;
     }
 
     /* ----------------------------------------------------------- */
@@ -87,11 +87,11 @@ public class TableForm extends Form
      * @param label The label for the element in the table.
      */
     public void addInfoField(String tag, 
-			     String label,
-			     String value)
+                             String label,
+                             String value)
     {
-	addText(label,value);
-	addHiddenField(tag,value);
+        addText(label,value);
+        addHiddenField(tag,value);
     }
 
     /* ----------------------------------------------------------- */
@@ -99,10 +99,10 @@ public class TableForm extends Form
      * @param tag The form name of the element
      */
     public void addHiddenField(String tag, 
-			       String value)
+                               String value)
     {
-	Element e = new Input(Input.Hidden,tag,value);
-	hidden.add(e);
+        Element e = new Input(Input.Hidden,tag,value);
+        hidden.add(e);
     }
 
     /* ----------------------------------------------------------- */
@@ -111,12 +111,12 @@ public class TableForm extends Form
      * @param label The label for the element in the table.
      */
     public void addPassword(String tag,
-			    String label,
-			    int length)
+                            String label,
+                            int length)
     {
-	Input i = new Input(Input.Password,tag);
-	i.setSize(length);
-	addField(label,i);
+        Input i = new Input(Input.Password,tag);
+        i.setSize(length);
+        addField(label,i);
     }
 
     /* ----------------------------------------------------------- */
@@ -125,13 +125,13 @@ public class TableForm extends Form
      * @param label The label for the element in the table.
      */
     public void addCheckbox(String tag,
-			    String label,
-			    boolean checked)
+                            String label,
+                            boolean checked)
     {
-	Input cb = new Input(Input.Checkbox,tag);
-	addField(label,cb);
-	if (checked)
-	    cb.check();
+        Input cb = new Input(Input.Checkbox,tag);
+        addField(label,cb);
+        if (checked)
+            cb.check();
     }
 
     /* ----------------------------------------------------------- */
@@ -140,14 +140,14 @@ public class TableForm extends Form
      * @param label The label for the element in the table.
      */
     public Select addSelect(String tag,
-			    String label,
-			    boolean multiple,
-			    int size)
+                            String label,
+                            boolean multiple,
+                            int size)
     {
-	Select s = new Select(tag,multiple);
-	s.setSize(size);
-	addField(label,s);
-	return s;
+        Select s = new Select(tag,multiple);
+        s.setSize(size);
+        addField(label,s);
+        return s;
     }
 
     /* ----------------------------------------------------------- */
@@ -156,16 +156,16 @@ public class TableForm extends Form
      * @param label The label for the element in the table.
      */
     public Select addSelect(String tag,
-			    String label,
-			    boolean multiple,
-			    int size,
-			    Enumeration values)
+                            String label,
+                            boolean multiple,
+                            int size,
+                            Enumeration values)
     {
-	Select s = addSelect(tag,label,multiple,size);
-	s.setSize(size);
-	while (values.hasMoreElements())
-	    s.add(values.nextElement().toString());
-	return s;
+        Select s = addSelect(tag,label,multiple,size);
+        s.setSize(size);
+        while (values.hasMoreElements())
+            s.add(values.nextElement().toString());
+        return s;
     }
     
     /* ----------------------------------------------------------- */
@@ -176,8 +176,8 @@ public class TableForm extends Form
      */
     public void addButtonArea(String label)
     {
-	buttons=new Composite();
-	addField(label,buttons);
+        buttons=new Composite();
+        addField(label,buttons);
     }
     
     /* ----------------------------------------------------------- */
@@ -188,8 +188,8 @@ public class TableForm extends Form
      */
     public void addButtonArea()
     {
-	buttons=new Composite();
-	addField(null,buttons);
+        buttons=new Composite();
+        addField(null,buttons);
     }
     
     /* ----------------------------------------------------------- */
@@ -201,15 +201,15 @@ public class TableForm extends Form
      */
     public void addButtonRow()
     {
-	buttons=new Composite();
-	
-	if (!extendRow)
-	{
-	    column.newRow();
-	    column.addCell(buttons).left().middle();
-	    column.cell().attribute("COLSPAN","2");
-	}
-	extendRow=false;
+        buttons=new Composite();
+        
+        if (!extendRow)
+        {
+            column.newRow();
+            column.addCell(buttons).left().middle();
+            column.cell().attribute("COLSPAN","2");
+        }
+        extendRow=false;
     }
     
     /* ----------------------------------------------------------- */
@@ -221,13 +221,13 @@ public class TableForm extends Form
      */
     public void buttonsAtBottom()
     {
-	if (bottomButtons!=null)
-	    buttons=bottomButtons;
-	else
-	{
-	    buttons=new Composite();
-	    bottomButtons=buttons;
-	}
+        if (bottomButtons!=null)
+            buttons=bottomButtons;
+        else
+        {
+            buttons=new Composite();
+            bottomButtons=buttons;
+        }
     }
 
     /* ----------------------------------------------------------- */
@@ -236,17 +236,17 @@ public class TableForm extends Form
      * @param label The label for the Button
      */
     public Input addButton(String tag,
-			   String label)
+                           String label)
     {
-	if (buttons==null)
-	    buttonsAtBottom();
-	Input e = new Input(Input.Submit,tag,label);
+        if (buttons==null)
+            buttonsAtBottom();
+        Input e = new Input(Input.Submit,tag,label);
 
-	if (extendRow)
-	    addField(null,e);
-	else
-	    buttons.add(e);
-	return e;
+        if (extendRow)
+            addField(null,e);
+        else
+            buttons.add(e);
+        return e;
     }
 
     /* ----------------------------------------------------------- */
@@ -256,31 +256,31 @@ public class TableForm extends Form
      */
     public void addReset(String label)
     {
-	if (buttons==null)
-	    buttonsAtBottom();
-	Element e = new Input(Input.Reset,"Reset",label);
-	if (extendRow)
-	    addField(null,e);
-	else
-	    buttons.add(e);
+        if (buttons==null)
+            buttonsAtBottom();
+        Element e = new Input(Input.Reset,"Reset",label);
+        if (extendRow)
+            addField(null,e);
+        else
+            buttons.add(e);
     }
 
     // ------------------------------------------------------------
     /** Use the given attributes on the next addXXX */
     public void useAttributes(String attr){
-	fieldAttributes = attr;
+        fieldAttributes = attr;
     }
     
     // ------------------------------------------------------------
     /** Get the internal table */
     public Table table(){
-	return column;
+        return column;
     }
     
     // ------------------------------------------------------------
     /** Get the internal table */
     public Table outerTable(){
-	return table;
+        return table;
     }
 
     /* ----------------------------------------------------------- */
@@ -292,8 +292,8 @@ public class TableForm extends Form
      */
     public TableForm extendRow()
     {
-	extendRow=true;
-	return this;
+        extendRow=true;
+        return this;
     }
 
     /* ----------------------------------------------------------- */
@@ -302,30 +302,30 @@ public class TableForm extends Form
      */
     public void addField(String label,Element field)
     {
-	if (label==null)
-	    label="&nbsp";
-	else
-	    label="<FONT SIZE=+1><B>"+label+":</B></FONT>";
+        if (label==null)
+            label="&nbsp";
+        else
+            label="<FONT SIZE=+1><B>"+label+":</B></FONT>";
 
-	if (extendRow)
-	{
-	    column.add(field);
-	    extendRow=false;
-	}
-	else
-	{
-	    column.newRow();
-	    column.addCell(label);
-	    column.cell().right();
-	
-	    if (fieldAttributes != null)
-	    {
-		column.addCell(field,fieldAttributes);
-		fieldAttributes = null;
-	    }
-	    else
-		column.addCell(field);
-	}
+        if (extendRow)
+        {
+            column.add(field);
+            extendRow=false;
+        }
+        else
+        {
+            column.newRow();
+            column.addCell(label);
+            column.cell().right();
+        
+            if (fieldAttributes != null)
+            {
+                column.addCell(field,fieldAttributes);
+                fieldAttributes = null;
+            }
+            else
+                column.addCell(field);
+        }
     }
     
     /* ----------------------------------------------------------- */
@@ -333,9 +333,9 @@ public class TableForm extends Form
      */
     public void addColumn()
     {
-	column = new Table(0);
-	table.addCell(column).top();
-	columns++;
+        column = new Table(0);
+        table.addCell(column).top();
+        columns++;
     }
     
     /* ----------------------------------------------------------- */
@@ -343,11 +343,11 @@ public class TableForm extends Form
      */
     public void addColumn(int spacing)
     {
-	table.addCell("&nbsp","WIDTH="+spacing);
-	column = new Table(0);
-	table.addCell(column);
-	table.cell().top();
-	columns++;
+        table.addCell("&nbsp","WIDTH="+spacing);
+        column = new Table(0);
+        table.addCell(column);
+        table.cell().top();
+        columns++;
     }
     
     /* ------------------------------------------------------------ */
@@ -355,11 +355,11 @@ public class TableForm extends Form
      */
     public void newColumns()
     {
-	column = new Table(0);
-	columns = 1;
-	table.newRow();
-	table.addCell(column);
-	table.cell().top();
+        column = new Table(0);
+        columns = 1;
+        table.newRow();
+        table.addCell(column);
+        table.cell().top();
     }
 
     /* ------------------------------------------------------------ */
@@ -371,7 +371,7 @@ public class TableForm extends Form
      */
     public void setColumnSpan(int span)
     {
-	table.cell().attribute("COLSPAN",""+span);
+        table.cell().attribute("COLSPAN",""+span);
     }
     
     /* ----------------------------------------------------------- */
@@ -381,23 +381,23 @@ public class TableForm extends Form
      * tables. */
     public void newTable()
     {
-	table = new Table(0);
-	column = new Table(0);
-	columns = 1;
-	super.add(table);
-	table.newRow();
-	table.addCell(column).top();	
+        table = new Table(0);
+        column = new Table(0);
+        columns = 1;
+        super.add(table);
+        table.newRow();
+        table.addCell(column).top();    
     }
     
     /* ----------------------------------------------------------- */
     public void write(Writer out)
-	throws IOException
+        throws IOException
     {
-	if (bottomButtons!=null)
-	{
-	    table.newRow();
-	    table.addCell(bottomButtons).attribute("COLSPAN",columns);
-	}
-	super.write(out);
+        if (bottomButtons!=null)
+        {
+            table.newRow();
+            table.addCell(bottomButtons).attribute("COLSPAN",columns);
+        }
+        super.write(out);
     } 
 }

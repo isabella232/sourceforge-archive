@@ -94,124 +94,124 @@ public class HttpServer implements ServletContext
     /** Construct and configure
      */
     public HttpServer(HttpConfiguration config)
-	 throws Exception
+         throws Exception
     {
-	configure(config);
+        configure(config);
     }
     
     /* -------------------------------------------------------------------- */
     /** Configure and start the server
      */
     public synchronized void configure(HttpConfiguration config)
-	 throws Exception
+         throws Exception
     {
-	close();
-	
-	this.config=config;
-	exceptionHandlersMap=config.exceptionHandlersMap();
-	httpHandlersMap=config.httpHandlersMap();
+        close();
+        
+        this.config=config;
+        exceptionHandlersMap=config.exceptionHandlersMap();
+        httpHandlersMap=config.httpHandlersMap();
 
-	Hashtable handlerSet = new Hashtable(20);
+        Hashtable handlerSet = new Hashtable(20);
 
-	// for all handler stacks
-	Enumeration e = httpHandlersMap.keys();
-	while (e.hasMoreElements())
-	{
-	    String handlersPath = (String) e.nextElement();
-	    Code.debug("Check configured handlers for path "+handlersPath);
-	    HttpHandler[] httpHandlers = null;
-	    try
-	    {
-		httpHandlers =
-		    (HttpHandler[]) httpHandlersMap.get(handlersPath);
-	    }
-	    catch (ClassCastException cce)
-	    {
-		Code.fail("httpHandlersMap does not map to HttpHandlers[] for "+
-			  handlersPath,
-			  cce);
-	    }
+        // for all handler stacks
+        Enumeration e = httpHandlersMap.keys();
+        while (e.hasMoreElements())
+        {
+            String handlersPath = (String) e.nextElement();
+            Code.debug("Check configured handlers for path "+handlersPath);
+            HttpHandler[] httpHandlers = null;
+            try
+            {
+                httpHandlers =
+                    (HttpHandler[]) httpHandlersMap.get(handlersPath);
+            }
+            catch (ClassCastException cce)
+            {
+                Code.fail("httpHandlersMap does not map to HttpHandlers[] for "+
+                          handlersPath,
+                          cce);
+            }
 
-	    // For all handlers
-	    for (int h=httpHandlers.length;h-->0;)
-	    {
-		HttpHandler handler = httpHandlers[h];
-		if (handler==null)
-		    continue;
-		
-		if (handlerSet.put(handler,handler)==null)
-		{
-		    // First time this handler has been seen so ...
-		    // set the server
-		    try{
-			httpHandlers[h].setServer(this);
-		    }
-		    catch (java.io.IOException ioe){
-			Code.fail("HttpHander "+httpHandlers[h]+
-				  " could not setServer",ioe);
-			throw ioe;
-		    }
+            // For all handlers
+            for (int h=httpHandlers.length;h-->0;)
+            {
+                HttpHandler handler = httpHandlers[h];
+                if (handler==null)
+                    continue;
+                
+                if (handlerSet.put(handler,handler)==null)
+                {
+                    // First time this handler has been seen so ...
+                    // set the server
+                    try{
+                        httpHandlers[h].setServer(this);
+                    }
+                    catch (java.io.IOException ioe){
+                        Code.fail("HttpHander "+httpHandlers[h]+
+                                  " could not setServer",ioe);
+                        throw ioe;
+                    }
 
-		    // Setup servletHandlerMap
-		    Enumeration s = handler.servletNames();
-		    while (s!=null && s.hasMoreElements())
-			servletHandlerMap.put(s.nextElement(),handler);
-		}
-	    }
-	    
-	}
+                    // Setup servletHandlerMap
+                    Enumeration s = handler.servletNames();
+                    while (s!=null && s.hasMoreElements())
+                        servletHandlerMap.put(s.nextElement(),handler);
+                }
+            }
+            
+        }
 
-	Code.assert(httpHandlersMap.get("/")!=null,
-		    "No mapping for / in httpHandlersMap");
-	
-	Code.assert(exceptionHandlersMap.get("/")!=null,
-		    "No mapping for / in exceptionHandlersMap");
+        Code.assert(httpHandlersMap.get("/")!=null,
+                    "No mapping for / in httpHandlersMap");
+        
+        Code.assert(exceptionHandlersMap.get("/")!=null,
+                    "No mapping for / in exceptionHandlersMap");
 
-	Properties p = config.getProperties();
-	int minThreads =
-	    Integer.parseInt(p.getProperty(HttpConfiguration
-					   .MinListenerThreads,"0"));
-	int maxThreads =
-	    Integer.parseInt(p.getProperty(HttpConfiguration
-					   .MaxListenerThreads,"0"));
-	int maxThreadIdle =
-	    Integer.parseInt(p.getProperty(HttpConfiguration
-					   .MaxListenerThreadIdleMs,"0"));
-	
-	InetAddrPort[] addresses = config.addresses();
-	Class[] classes = config.listenerClasses();
-	listeners = new HttpListener[addresses.length];
-	for (int a=addresses.length; a-->0; )
-	{
-	    try{
-		Constructor c = classes[a].getConstructor(HttpListener.ConstructArgs);
-		Object[] args = {
-		    addresses[a],
-		    this,
-		    new Integer(minThreads),
-		    new Integer(maxThreads),
-		    new Integer(maxThreadIdle),
-		};
-		listeners[a] = (HttpListener) c.newInstance(args);
-		listeners[a].start();
-	    }
-	    catch (java.io.IOException ioe){
-		Code.warning("HttpServer couldn't listen on "+addresses[a],
-			     ioe);
-		throw ioe;
-	    }
-	}
-	
-	int maxSessionIdle = 
-	    Integer.parseInt(p.getProperty(HttpConfiguration.SessionMaxInactiveInterval,"0"));
-	if (maxSessionIdle > 0)
-	    HttpRequest.setSessionMaxInactiveInterval(maxSessionIdle);
-	
-	resourceBase=p.getProperty(HttpConfiguration.ResourceBase);
-	if (resourceBase!=null && resourceBase.trim().length()==0)
-	    resourceBase=null;
+        Properties p = config.getProperties();
+        int minThreads =
+            Integer.parseInt(p.getProperty(HttpConfiguration
+                                           .MinListenerThreads,"0"));
+        int maxThreads =
+            Integer.parseInt(p.getProperty(HttpConfiguration
+                                           .MaxListenerThreads,"0"));
+        int maxThreadIdle =
+            Integer.parseInt(p.getProperty(HttpConfiguration
+                                           .MaxListenerThreadIdleMs,"0"));
+        
+        InetAddrPort[] addresses = config.addresses();
+        Class[] classes = config.listenerClasses();
+        listeners = new HttpListener[addresses.length];
+        for (int a=addresses.length; a-->0; )
+        {
+            try{
+                Constructor c = classes[a].getConstructor(HttpListener.ConstructArgs);
+                Object[] args = {
+                    addresses[a],
+                    this,
+                    new Integer(minThreads),
+                    new Integer(maxThreads),
+                    new Integer(maxThreadIdle),
+                };
+                listeners[a] = (HttpListener) c.newInstance(args);
+                listeners[a].start();
+            }
+            catch (java.io.IOException ioe){
+                Code.warning("HttpServer couldn't listen on "+addresses[a],
+                             ioe);
+                throw ioe;
+            }
+        }
+        
+        int maxSessionIdle = 
+            Integer.parseInt(p.getProperty(HttpConfiguration.SessionMaxInactiveInterval,"0"));
+        if (maxSessionIdle > 0)
+            HttpRequest.setSessionMaxInactiveInterval(maxSessionIdle);
+        
+        resourceBase=p.getProperty(HttpConfiguration.ResourceBase);
+        if (resourceBase!=null && resourceBase.trim().length()==0)
+            resourceBase=null;
 
-	__servers.addElement(this);
+        __servers.addElement(this);
     }
 
     /* -------------------------------------------------------------------- */
@@ -219,16 +219,16 @@ public class HttpServer implements ServletContext
      */
     public HttpConfiguration configuration()
     {
-	return config;
+        return config;
     }
-	
+        
     /* ------------------------------------------------------------------- */
     /** Close the HttpServer and all its listeners.
      * @deprecated Use stop
      */
     public void close()
     {
-	stop();
+        stop();
     }
     
     /* ------------------------------------------------------------------- */
@@ -238,33 +238,33 @@ public class HttpServer implements ServletContext
      */
     public synchronized void stop()
     {
-	__servers.removeElement(this);
-	servletHandlerMap.clear();
+        __servers.removeElement(this);
+        servletHandlerMap.clear();
 
-	if (listeners!=null)
-	{
-	    for (int c=listeners.length;c-->0;)
-		listeners[c].stop();
-	    listeners=null;
-	}
+        if (listeners!=null)
+        {
+            for (int c=listeners.length;c-->0;)
+                listeners[c].stop();
+            listeners=null;
+        }
 
-	// Destroy handlers
-	if (httpHandlersMap!=null)
-	{
-	    Enumeration e = httpHandlersMap.elements();
-	    while (e.hasMoreElements())
-	    {
-		HttpHandler[] stack = (HttpHandler[])e.nextElement();
-		for (int i=0;i<stack.length;i++)
-		    if (stack[i]!=null)
-			stack[i].destroy();
-	    }
-	}
-	    
-	httpHandlersMap=null;
-	exceptionHandlersMap=null;
+        // Destroy handlers
+        if (httpHandlersMap!=null)
+        {
+            Enumeration e = httpHandlersMap.elements();
+            while (e.hasMoreElements())
+            {
+                HttpHandler[] stack = (HttpHandler[])e.nextElement();
+                for (int i=0;i<stack.length;i++)
+                    if (stack[i]!=null)
+                        stack[i].destroy();
+            }
+        }
+            
+        httpHandlersMap=null;
+        exceptionHandlersMap=null;
 
-	config=null;
+        config=null;
     }
 
     /* ------------------------------------------------------------------- */
@@ -272,15 +272,15 @@ public class HttpServer implements ServletContext
      */
     public static void stopAll()
     {
-	HttpServer[] servers=null;
-	synchronized(__servers)
-	{
-	    servers=new HttpServer[__servers.size()];
-	    __servers.copyInto(servers);
-	}
+        HttpServer[] servers=null;
+        synchronized(__servers)
+        {
+            servers=new HttpServer[__servers.size()];
+            __servers.copyInto(servers);
+        }
 
-	for(int i=0;i<servers.length;i++)
-	    servers[i].stop();
+        for(int i=0;i<servers.length;i++)
+            servers[i].stop();
     }
     
     
@@ -288,13 +288,13 @@ public class HttpServer implements ServletContext
     /** join the HttpServer and all its listeners.
      */
     public synchronized void join()
-	 throws InterruptedException
+         throws InterruptedException
     {
-	if (listeners!=null)
-	{
-	    for (int c=listeners.length;c-->0;)
-		listeners[c].join();
-	}
+        if (listeners!=null)
+        {
+            for (int c=listeners.length;c-->0;)
+                listeners[c].join();
+        }
     }
 
     /* ------------------------------------------------------------------- */
@@ -303,108 +303,108 @@ public class HttpServer implements ServletContext
      */
     void handle(HttpRequest request, HttpResponse response)
     {
-	try {
-	    
-	    if (request.getProtocol().equals(HttpHeader.HTTP_1_1))
-	    {
-		// Set response version.
-		response.setVersion(HttpHeader.HTTP_1_1);
+        try {
+            
+            if (request.getProtocol().equals(HttpHeader.HTTP_1_1))
+            {
+                // Set response version.
+                response.setVersion(HttpHeader.HTTP_1_1);
 
-		// insist on Host header
-		if (request.getHeader(HttpHeader.Host)==null)
-		{
-		    response.sendError(HttpResponse.SC_BAD_REQUEST);
-		    return;
-		}
-	    }
+                // insist on Host header
+                if (request.getHeader(HttpHeader.Host)==null)
+                {
+                    response.sendError(HttpResponse.SC_BAD_REQUEST);
+                    return;
+                }
+            }
 
-	    // Give request to handlers
-	    String resourcePath = request.getResourcePath();
-	    Exception exception=null;
-	    boolean handled=false;
-	    int h = 0;
-	    try{
-		// Select request handler stack by path
-		HttpHandler[] httpHandlers = (HttpHandler[])
-		    httpHandlersMap.match(resourcePath);
+            // Give request to handlers
+            String resourcePath = request.getResourcePath();
+            Exception exception=null;
+            boolean handled=false;
+            int h = 0;
+            try{
+                // Select request handler stack by path
+                HttpHandler[] httpHandlers = (HttpHandler[])
+                    httpHandlersMap.match(resourcePath);
 
-		// Try all handlers in the stack
-		while (httpHandlers!=null &&
-		       !handled && h<httpHandlers.length)
-		{
-		    HttpHandler handler=httpHandlers[h++];
-		    if (handler==null)
-			continue;
-		   
-		    if (Code.verbose())
-			Code.debug("Handler: ",handler);
-		    handler.handle(request,response);
-		    handled=response.requestHandled();
-		    if (Code.verbose())
-		    {
-			if (handled)
-			    Code.debug("Request was handled by "+handler);
-			else
-			    Code.debug("Request NOT handled by "+handler);
-		    }
-		}
-		if (handled)
-		    Code.debug("Handled by "+httpHandlers[h-1]);
-	    }
-	    catch (HeadException e)
-	    {
-		handled=true;
-		Code.ignore(e);
-	    }
-	    catch (Exception e1)
-	    {
-		exception=e1;
-		Code.debug("Exception in HttpHandler "+h,exception);
+                // Try all handlers in the stack
+                while (httpHandlers!=null &&
+                       !handled && h<httpHandlers.length)
+                {
+                    HttpHandler handler=httpHandlers[h++];
+                    if (handler==null)
+                        continue;
+                   
+                    if (Code.verbose())
+                        Code.debug("Handler: ",handler);
+                    handler.handle(request,response);
+                    handled=response.requestHandled();
+                    if (Code.verbose())
+                    {
+                        if (handled)
+                            Code.debug("Request was handled by "+handler);
+                        else
+                            Code.debug("Request NOT handled by "+handler);
+                    }
+                }
+                if (handled)
+                    Code.debug("Handled by "+httpHandlers[h-1]);
+            }
+            catch (HeadException e)
+            {
+                handled=true;
+                Code.ignore(e);
+            }
+            catch (Exception e1)
+            {
+                exception=e1;
+                Code.debug("Exception in HttpHandler "+h,exception);
 
-		// Select exception handler stack by path
-		ExceptionHandler[] exceptionHandlers = (ExceptionHandler[])
-		    exceptionHandlersMap.match(resourcePath);
-		
-		// try all handlers in the stack
-		int e=0;
-		while(exceptionHandlers!=null &&
-		      !handled && e<exceptionHandlers.length)
-		{
-		    Code.debug("Try ExceptionHandler "+e);
-		    try {
-			exceptionHandlers[e++].handle(request,response,exception);
-			handled=response.headersWritten();
-		    }
-		    catch (IOException e2){
-			Code.debug("IO problem");
-			throw e2;
-		    }	
-		    catch (Exception e2){
-			exception=e2;
-			Code.debug("HttpHandler "+h,e2);
-		    }
-		}
-	    }
+                // Select exception handler stack by path
+                ExceptionHandler[] exceptionHandlers = (ExceptionHandler[])
+                    exceptionHandlersMap.match(resourcePath);
+                
+                // try all handlers in the stack
+                int e=0;
+                while(exceptionHandlers!=null &&
+                      !handled && e<exceptionHandlers.length)
+                {
+                    Code.debug("Try ExceptionHandler "+e);
+                    try {
+                        exceptionHandlers[e++].handle(request,response,exception);
+                        handled=response.headersWritten();
+                    }
+                    catch (IOException e2){
+                        Code.debug("IO problem");
+                        throw e2;
+                    }   
+                    catch (Exception e2){
+                        exception=e2;
+                        Code.debug("HttpHandler "+h,e2);
+                    }
+                }
+            }
 
-	    if (handled)
-	    {
-		response.flush();
-	    }
-	    else
-	    {
-		if (exception!=null)
-		    Code.warning("request exception not handled: "+request,
-				 exception);
-		else
-		{
-		    Code.warning("request not handled: "+request);
-		    response.setStatus(response.SC_NOT_FOUND);
-		}
-	    }
-	}
-	catch (IOException e){
-	    Code.debug("request aborted: "+request,e);
-	}
+            if (handled)
+            {
+                response.flush();
+            }
+            else
+            {
+                if (exception!=null)
+                    Code.warning("request exception not handled: "+request,
+                                 exception);
+                else
+                {
+                    Code.warning("request not handled: "+request);
+                    response.setStatus(response.SC_NOT_FOUND);
+                }
+            }
+        }
+        catch (IOException e){
+            Code.debug("request aborted: "+request,e);
+        }
     }
     
 
@@ -423,7 +423,7 @@ public class HttpServer implements ServletContext
      */
     public Servlet getServlet(String name)
     {
-	return null;
+        return null;
     }
 
     /* ---------------------------------------------------------------- */
@@ -435,7 +435,7 @@ public class HttpServer implements ServletContext
      */
     public Enumeration getServlets()
     {
-	return null;
+        return null;
     }
     
     /* ---------------------------------------------------------------- */
@@ -444,25 +444,25 @@ public class HttpServer implements ServletContext
      */
     public Enumeration getServletNames()
     {
-	return null;
+        return null;
     }
 
     /* ---------------------------------------------------------------- */
     public ServletContext getContext(String url)
     {
-	return this;
+        return this;
     }
 
     /* ---------------------------------------------------------------- */
     public int getMajorVersion()
     {
-	return 2;
+        return 2;
     }
     
     /* ---------------------------------------------------------------- */
     public int getMinorVersion()
     {
-	return 1;
+        return 1;
     }
     
     /* ------------------------------------------------------------ */
@@ -476,17 +476,17 @@ public class HttpServer implements ServletContext
      * @exception MalformedURLException 
      */
     public URL getResource(String path)
-	throws MalformedURLException
+        throws MalformedURLException
     {
-	if (resourceBase==null)
-	    // Loop request back to this server
-	    return new URL("http",
-			   listeners[0].getAddress().getInetAddress()
-			   .getHostAddress(),
-			   listeners[0].getPort(),
-			   path);
-	else
-	    return new URL(resourceBase+path);
+        if (resourceBase==null)
+            // Loop request back to this server
+            return new URL("http",
+                           listeners[0].getAddress().getInetAddress()
+                           .getHostAddress(),
+                           listeners[0].getPort(),
+                           path);
+        else
+            return new URL(resourceBase+path);
     }
 
     /* ------------------------------------------------------------ */
@@ -499,24 +499,24 @@ public class HttpServer implements ServletContext
      */
     public InputStream getResourceAsStream(String path)
     {
-	try {
-	    if (resourceBase==null)
-	    {
-		// Get request from this context
-		HttpRequest request = new HttpRequest(this,"GET",path);
-		return request.handleRequestLocally();
-	    }
-	    else
-	    {
-		URL url = getResource(path);
-		return url.openStream();
-	    }
-	}
-	catch (Exception e)
-	{
-	    Code.warning(e);
-	}
-	return null;
+        try {
+            if (resourceBase==null)
+            {
+                // Get request from this context
+                HttpRequest request = new HttpRequest(this,"GET",path);
+                return request.handleRequestLocally();
+            }
+            else
+            {
+                URL url = getResource(path);
+                return url.openStream();
+            }
+        }
+        catch (Exception e)
+        {
+            Code.warning(e);
+        }
+        return null;
     }
     
     /* ------------------------------------------------------------ */
@@ -526,7 +526,7 @@ public class HttpServer implements ServletContext
      */
     public RequestDispatcher getRequestDispatcher(String path)
     {
-	return new HttpRequestDispatcher(this,path);
+        return new HttpRequestDispatcher(this,path);
     }
     
     /* ---------------------------------------------------------------- */
@@ -536,7 +536,7 @@ public class HttpServer implements ServletContext
      */
     public void log(String message)
     {
-	config.log(message);
+        config.log(message);
     }
     
     /* ---------------------------------------------------------------- */
@@ -547,7 +547,7 @@ public class HttpServer implements ServletContext
      */
     public void log(String message, Throwable th)
     {
-	Code.warning(message,th);
+        Code.warning(message,th);
     }
     
     /* ---------------------------------------------------------------- */
@@ -558,7 +558,7 @@ public class HttpServer implements ServletContext
      */
     public void log(Exception e, String message)
     {
-	Code.warning(message,e);
+        Code.warning(message,e);
     }
 
     /* ---------------------------------------------------------------- */
@@ -570,25 +570,25 @@ public class HttpServer implements ServletContext
      */
     public String getRealPath(String path)
     {
-	Code.debug("Translate: ",path);
-	String realPath = path;
-	// Select request handler stack by path
-	HttpHandler[] httpHandlers =
-	    (HttpHandler[])httpHandlersMap.match(realPath);
-	if (httpHandlers != null)
-	{
-	    for (int i = 0; i < httpHandlers.length; i++)
-	    {	
-		if (httpHandlers[i] != null)
-		{
-		    realPath = httpHandlers[i].translate(realPath);
-		    Code.debug("translate with ",httpHandlers[i],
-			       " to ",realPath);
-		}
-	    }
-	}
-	
-	return realPath.replace('/', File.separatorChar);
+        Code.debug("Translate: ",path);
+        String realPath = path;
+        // Select request handler stack by path
+        HttpHandler[] httpHandlers =
+            (HttpHandler[])httpHandlersMap.match(realPath);
+        if (httpHandlers != null)
+        {
+            for (int i = 0; i < httpHandlers.length; i++)
+            {   
+                if (httpHandlers[i] != null)
+                {
+                    realPath = httpHandlers[i].translate(realPath);
+                    Code.debug("translate with ",httpHandlers[i],
+                               " to ",realPath);
+                }
+            }
+        }
+        
+        return realPath.replace('/', File.separatorChar);
     }
     
 
@@ -599,7 +599,7 @@ public class HttpServer implements ServletContext
      */
     public String getMimeType(String file)
     {
-	return config.getMimeType(file);
+        return config.getMimeType(file);
     }
 
 
@@ -610,7 +610,7 @@ public class HttpServer implements ServletContext
      */
     public String getServerInfo()
     {
-	return Version.__jetty;
+        return Version.__jetty;
     }
 
     /* ---------------------------------------------------------------- */
@@ -629,7 +629,7 @@ public class HttpServer implements ServletContext
      */
     public Object getAttribute(String name)
     {
-	return config.getProperty(name);
+        return config.getProperty(name);
     }
     
     /* ---------------------------------------------------------------- */
@@ -640,7 +640,7 @@ public class HttpServer implements ServletContext
      */
     public Enumeration getAttributeNames()
     {
-	return config.getProperties().keys();
+        return config.getProperties().keys();
     }
     
     /* ---------------------------------------------------------------- */
@@ -651,7 +651,7 @@ public class HttpServer implements ServletContext
      */
     public void setAttribute(String name, Object value)
     {
-	config.getProperties().put(name,value);
+        config.getProperties().put(name,value);
     }
     
     /* ---------------------------------------------------------------- */
@@ -662,7 +662,7 @@ public class HttpServer implements ServletContext
      */
     public void removeAttribute(String name)
     {
-	config.getProperties().remove(name);
+        config.getProperties().remove(name);
     }
     
     /* -------------------------------------------------------------------- */
@@ -670,27 +670,27 @@ public class HttpServer implements ServletContext
      */
     public static void main(String args[])
     {
-	String configName = null;
-	if (args.length!=1)
-	{
-	    System.err.println("Usage - java com.mortbay.HTTP.HttpServer [configClassName]");
-	    configName="com.mortbay.Jetty.Demo";
-	    System.err.println("Using "+configName);
-	}
-	else
-	    configName=args[0];
-	
-	Code.debug("Running HttpServer with "+configName);
-	
-	try{	    
-	    HttpConfiguration config = (HttpConfiguration)
-		Class.forName(configName).newInstance();
-	    HttpServer httpServer = new HttpServer(config);
-	    httpServer.join();
-	}
-	catch(Exception e){
-	    Code.warning("Demo Failed",e);
-	}
+        String configName = null;
+        if (args.length!=1)
+        {
+            System.err.println("Usage - java com.mortbay.HTTP.HttpServer [configClassName]");
+            configName="com.mortbay.Jetty.Demo";
+            System.err.println("Using "+configName);
+        }
+        else
+            configName=args[0];
+        
+        Code.debug("Running HttpServer with "+configName);
+        
+        try{        
+            HttpConfiguration config = (HttpConfiguration)
+                Class.forName(configName).newInstance();
+            HttpServer httpServer = new HttpServer(config);
+            httpServer.join();
+        }
+        catch(Exception e){
+            Code.warning("Demo Failed",e);
+        }
     }   
 }
 

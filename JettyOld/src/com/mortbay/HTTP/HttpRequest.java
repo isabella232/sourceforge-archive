@@ -44,10 +44,10 @@ public class HttpRequest extends HttpHeader
     public static final String MOVE="MOVE";
     public static final String OPTIONS="OPTIONS";
     public static final byte[] Continue=
-	"HTTP/1.1 100 Continue\015\012\015\012".getBytes();
+        "HTTP/1.1 100 Continue\015\012\015\012".getBytes();
 
     private static final SessionContext sessions =
-	new SessionContext();
+        new SessionContext();
     private static final Enumeration __NoAttributes = new Vector().elements();
 
     /* -------------------------------------------------------------- */
@@ -104,49 +104,49 @@ public class HttpRequest extends HttpHeader
      * @exception IOException Problem reading the request header
      */
     public HttpRequest(HttpServer httpServer,
-		       Socket connection,
-		       InetAddrPort address)
-	throws IOException
+                       Socket connection,
+                       InetAddrPort address)
+        throws IOException
     {
-	this.httpServer=httpServer;
-	this.connection=connection;
-	this.in=new HttpInputStream(connection.getInputStream());
-	this.address=address;
+        this.httpServer=httpServer;
+        this.connection=connection;
+        this.in=new HttpInputStream(connection.getInputStream());
+        this.address=address;
 
-	// Decode request header
-	com.mortbay.HTTP.HttpInputStream$CharBuffer cb = in.readCharBufferLine();
-	if (cb==null)
-	    throw new IOException("EOF");
-	decodeRequestLine(cb.chars,cb.size);
-	
-	// Build URI
-	pathInfo=uri.getPath();
+        // Decode request header
+        com.mortbay.HTTP.HttpInputStream$CharBuffer cb = in.readCharBufferLine();
+        if (cb==null)
+            throw new IOException("EOF");
+        decodeRequestLine(cb.chars,cb.size);
+        
+        // Build URI
+        pathInfo=uri.getPath();
 
-	// Handle version
-	if (HTTP_1_1.equals(version))
-	{
-	    // reset HTTP/1.1 version for faster matching
-	    version=HTTP_1_1;
-	    // send continue
-	    OutputStream out=connection.getOutputStream();
-	    out.write(Continue);
-	    out.flush();
-	}
-	
-	// Read headers
-	super.read(in);
+        // Handle version
+        if (HTTP_1_1.equals(version))
+        {
+            // reset HTTP/1.1 version for faster matching
+            version=HTTP_1_1;
+            // send continue
+            OutputStream out=connection.getOutputStream();
+            out.write(Continue);
+            out.flush();
+        }
+        
+        // Read headers
+        super.read(in);
 
-	if (Chunked.equals(getHeader(TransferEncoding)))
-	{
-	    setHeader(ContentLength,null);
-	    this.in.chunking(true);
-	}
-	else 
-	{
-	    int content_length=getContentLength();
-	    if (content_length>=0)
-		in.setContentLength(content_length);
-	}
+        if (Chunked.equals(getHeader(TransferEncoding)))
+        {
+            setHeader(ContentLength,null);
+            this.in.chunking(true);
+        }
+        else 
+        {
+            int content_length=getContentLength();
+            if (content_length>=0)
+                in.setContentLength(content_length);
+        }
     }
 
     /* -------------------------------------------------------------- */
@@ -157,13 +157,13 @@ public class HttpRequest extends HttpHeader
      */
     public HttpRequest(HttpServer server, String method, String uri)
     {
-	this.httpServer=server;
-	this.method  = method;
-	this.uri = new URI(uri);
-	pathInfo=this.uri.getPath();
-	version=HttpHeader.HTTP_1_0;
-	protocolHostPort="";
-	localRequest=true;
+        this.httpServer=server;
+        this.method  = method;
+        this.uri = new URI(uri);
+        pathInfo=this.uri.getPath();
+        version=HttpHeader.HTTP_1_0;
+        protocolHostPort="";
+        localRequest=true;
     }
     
     /* -------------------------------------------------------------- */
@@ -174,13 +174,13 @@ public class HttpRequest extends HttpHeader
      */
     public HttpRequest(HttpServer server, String method, URI uri)
     {
-	this.httpServer=server;
-	this.method  = method;
-	this.uri = uri;
-	pathInfo=this.uri.getPath();
-	version=HttpHeader.HTTP_1_0;
-	protocolHostPort="";
-	localRequest=true;
+        this.httpServer=server;
+        this.method  = method;
+        this.uri = uri;
+        pathInfo=this.uri.getPath();
+        version=HttpHeader.HTTP_1_0;
+        protocolHostPort="";
+        localRequest=true;
     }
 
     /* ------------------------------------------------------------ */
@@ -189,7 +189,7 @@ public class HttpRequest extends HttpHeader
      */
     public boolean isLocalRequest()
     {
-	return localRequest;
+        return localRequest;
     }
     
     /* ------------------------------------------------------------ */
@@ -197,7 +197,7 @@ public class HttpRequest extends HttpHeader
      */
     public void setHttpResponse(HttpResponse response)
     {
-	this.response=response;
+        this.response=response;
     }
     
     /* ------------------------------------------------------------ */
@@ -206,7 +206,7 @@ public class HttpRequest extends HttpHeader
      */
     public HttpResponse getHttpResponse()
     {
-	return response;
+        return response;
     }
     
     /* -------------------------------------------------------------- */
@@ -218,9 +218,9 @@ public class HttpRequest extends HttpHeader
      */
     public String getRequestPath()
     {
-	if (uri==null)
-	    return null;
-	return uri.getPath();
+        if (uri==null)
+            return null;
+        return uri.getPath();
     }
     
     /* -------------------------------------------------------------- */
@@ -231,10 +231,10 @@ public class HttpRequest extends HttpHeader
      */
     public void setRequestPath(String path)
     {
-	if (uri!=null)
-	    uri.setPath(path);
-	servletPath=null;
-	pathInfo=path;
+        if (uri!=null)
+            uri.setPath(path);
+        servletPath=null;
+        pathInfo=path;
     }
     
     /* ------------------------------------------------------------ */
@@ -252,9 +252,9 @@ public class HttpRequest extends HttpHeader
      */
     public String getResourcePath()
     {
-	if (resourcePath != null)
-	    return resourcePath;
-	return getRequestPath();
+        if (resourcePath != null)
+            return resourcePath;
+        return getRequestPath();
     }
     
     /* ------------------------------------------------------------ */
@@ -268,7 +268,7 @@ public class HttpRequest extends HttpHeader
      */
     public void setResourcePath(String path)
     {
-	resourcePath=path;
+        resourcePath=path;
     }
     
     /* -------------------------------------------------------------- */
@@ -276,9 +276,9 @@ public class HttpRequest extends HttpHeader
      */
     public  String getRequestLine()
     {
-	if (requestLine==null)
-	    requestLine=method+" "+protocolHostPort+uri+" "+version;
-	return requestLine;
+        if (requestLine==null)
+            requestLine=method+" "+protocolHostPort+uri+" "+version;
+        return requestLine;
     }
 
     /* ------------------------------------------------------------ */
@@ -287,7 +287,7 @@ public class HttpRequest extends HttpHeader
      */
     public String getVersion()
     {
-	return version;
+        return version;
     }
     
 
@@ -297,7 +297,7 @@ public class HttpRequest extends HttpHeader
      */
     public void setPathTranslated(String pathTranslated)
     {
-	this.pathTranslated=pathTranslated;
+        this.pathTranslated=pathTranslated;
     }
     
     /* -------------------------------------------------------------- */
@@ -306,46 +306,46 @@ public class HttpRequest extends HttpHeader
      * has been called.
      */
     public void setServletPath(String servletPath)
-	 throws MalformedURLException
+         throws MalformedURLException
     {
-	String path=getResourcePath();
-	
-	switch (servletPath.charAt(servletPath.length()-1))
-	{
-	  case '|':
-	  case '%':
-	  case '$':
-	  case '*':
-	      servletPath=servletPath.substring(0,servletPath.length()-1);
-	      break;
-	  default:
-	      int s = servletPath.indexOf("*");
-	      if (s==0)
-		  servletPath="";
-	      else if (s>=0)
-		  servletPath=servletPath.substring(0,s);
-	}
-	
-	Code.debug("SetServletPath '"+servletPath+
-		   "' in " + uri );
-					
-	this.servletPath=servletPath;
+        String path=getResourcePath();
+        
+        switch (servletPath.charAt(servletPath.length()-1))
+        {
+          case '|':
+          case '%':
+          case '$':
+          case '*':
+              servletPath=servletPath.substring(0,servletPath.length()-1);
+              break;
+          default:
+              int s = servletPath.indexOf("*");
+              if (s==0)
+                  servletPath="";
+              else if (s>=0)
+                  servletPath=servletPath.substring(0,s);
+        }
+        
+        Code.debug("SetServletPath '"+servletPath+
+                   "' in " + uri );
+                                        
+        this.servletPath=servletPath;
 
-	if (!path.startsWith(servletPath))
-	    throw new MalformedURLException("Bad servletPath '"+
-					    servletPath+"' for "+uri);
+        if (!path.startsWith(servletPath))
+            throw new MalformedURLException("Bad servletPath '"+
+                                            servletPath+"' for "+uri);
 
-	pathInfo=path.substring(servletPath.length());
+        pathInfo=path.substring(servletPath.length());
 
-//  	System.err.println("uri="+uri.getPath());
-//  	System.err.println("PI="+pathInfo);
-//  	if (uri.getPath().endsWith(pathInfo))
-//  	{
-//  	    this.servletPath=uri.getPath().substring(0,
-//  						     uri.getPath().length()-
-//  						     pathInfo.length());
-//  	    System.err.println("SP="+this.servletPath);
-//  	}
+//      System.err.println("uri="+uri.getPath());
+//      System.err.println("PI="+pathInfo);
+//      if (uri.getPath().endsWith(pathInfo))
+//      {
+//          this.servletPath=uri.getPath().substring(0,
+//                                                   uri.getPath().length()-
+//                                                   pathInfo.length());
+//          System.err.println("SP="+this.servletPath);
+//      }
     }
 
     /* ------------------------------------------------------------ */
@@ -354,7 +354,7 @@ public class HttpRequest extends HttpHeader
      */
     public void setVersion(String version)
     {
-	this.version=version;
+        this.version=version;
     }
     
     /* -------------------------------------------------------------- */
@@ -368,17 +368,17 @@ public class HttpRequest extends HttpHeader
      * otherwise only the resource path is affected.
      */
     public void translateAddress(String pathSpec,
-				 String newPath,
-				 boolean translateURI)
+                                 String newPath,
+                                 boolean translateURI)
     {
-	String path=getResourcePath();
-	path=PathMap.translate(path,pathSpec,newPath);
-	
-	servletPath=null;
-	pathInfo=path;
-	setResourcePath(path);
-	if (translateURI)
-	    uri.setPath(getResourcePath());
+        String path=getResourcePath();
+        path=PathMap.translate(path,pathSpec,newPath);
+        
+        servletPath=null;
+        pathInfo=path;
+        setResourcePath(path);
+        if (translateURI)
+            uri.setPath(getResourcePath());
     }
     
     /* -------------------------------------------------------------- */
@@ -386,8 +386,8 @@ public class HttpRequest extends HttpHeader
      */
     public void setRemoteUser(String authType, String name)
     {
-	this.authType=authType;
-	remoteUser=name;
+        this.authType=authType;
+        remoteUser=name;
     }
     
 
@@ -397,24 +397,24 @@ public class HttpRequest extends HttpHeader
      * getParameter() method.
      */
     public void decodeFormParameters()
-	 throws IOException
+         throws IOException
     {
-	if (formParameters!=null)
-	    return;
-	
-	String contentType = getContentType();
-	if (contentType!=null &&
-	    contentType.equals(HttpHeader.WwwFormUrlEncode))
-	{
-	    int contentLength = getContentLength();
-	    if (contentLength<0)
-		Code.warning("No contentLength for "+
-			     HttpHeader.WwwFormUrlEncode);
-	    else
-		formParameters =
-		    javax.servlet.http.HttpUtils
-		    .parsePostData(contentLength,getInputStream());
-	}
+        if (formParameters!=null)
+            return;
+        
+        String contentType = getContentType();
+        if (contentType!=null &&
+            contentType.equals(HttpHeader.WwwFormUrlEncode))
+        {
+            int contentLength = getContentLength();
+            if (contentLength<0)
+                Code.warning("No contentLength for "+
+                             HttpHeader.WwwFormUrlEncode);
+            else
+                formParameters =
+                    javax.servlet.http.HttpUtils
+                    .parsePostData(contentLength,getInputStream());
+        }
     }
     
     /* -------------------------------------------------------------- */
@@ -423,13 +423,13 @@ public class HttpRequest extends HttpHeader
      * getParameter() method
      */
     public void cookiesAsParameters()
-	 throws IOException
+         throws IOException
     {
-	getCookies();
-	cookieParameters=new Hashtable(11);
-	for (int i=0;cookies!=null && i<cookies.length; i++)
-	    cookieParameters.put(cookies[i].getName(),
-				 cookies[i].getValue());
+        getCookies();
+        cookieParameters=new Hashtable(11);
+        for (int i=0;cookies!=null && i<cookies.length; i++)
+            cookieParameters.put(cookies[i].getName(),
+                                 cookies[i].getValue());
     }
     
     
@@ -437,16 +437,16 @@ public class HttpRequest extends HttpHeader
     /** Write the request header to an output stream
      */ 
     public void write(OutputStream out)
-	throws IOException
+        throws IOException
     {
-	out.write(method.getBytes());
-	out.write(' ');
-	out.write(uri.toString().getBytes());
-	out.write(' ');
-	out.write(version.getBytes());
-	out.write(__CRLF);
-	super.write(out);
-	out.flush();
+        out.write(method.getBytes());
+        out.write(' ');
+        out.write(uri.toString().getBytes());
+        out.write(' ');
+        out.write(version.getBytes());
+        out.write(__CRLF);
+        super.write(out);
+        out.flush();
     }
 
     /* -------------------------------------------------------------- */
@@ -456,7 +456,7 @@ public class HttpRequest extends HttpHeader
      */
     public void putParameter(String name, String value)
     {
-	uri.put(name,value);
+        uri.put(name,value);
     }
     
     /* -------------------------------------------------------------- */
@@ -465,7 +465,7 @@ public class HttpRequest extends HttpHeader
      */
     public void putParameterValues(String name, String[] values)
     {
-	uri.put(name,values);
+        uri.put(name,values);
     }
     
     /* ------------------------------------------------------------- */
@@ -473,7 +473,7 @@ public class HttpRequest extends HttpHeader
      */
     public HttpServer getHttpServer()
     {
-	return httpServer;
+        return httpServer;
     }
     
     /* ------------------------------------------------------------- */
@@ -482,7 +482,7 @@ public class HttpRequest extends HttpHeader
      */
     public HttpInputStream getHttpInputStream()
     {
-	return in;
+        return in;
     }
 
     /* ------------------------------------------------------------ */
@@ -496,52 +496,52 @@ public class HttpRequest extends HttpHeader
      * @exception IOException 
      */
     public InputStream handleRequestLocally()
-	throws IOException
+        throws IOException
     {
-	Code.assert(httpServer!=null,"Not constructed with HttpServer");
-	if (localThreadPool==null)
-	    localThreadPool=new ThreadPool(0,"LocalRequest");
-	
-	final PipedInputStream in = new PipedInputStream();
-	final PipedOutputStream out = new PipedOutputStream(in);
-	final HttpResponse response = new HttpResponse(out,this);
-	
-	// run new request in own thread
-	try{
-	    localThreadPool
-		.run(new Runnable()
-		     {
-			 public void run()
-			     {
-				 try{
-				     httpServer.handle(HttpRequest.this,response);
-				     out.close();
-				     response.destroy();
-				 }
-				 catch(IOException e)
-				 {
-				     Code.warning(e);
-				 }
-			     }
-		     });
-	}
-	catch(InterruptedException e)
-	{
-	    Code.warning(e);
-	    return null;
-	}
-	
-	// Get response line
-	HttpInputStream replyStream = new HttpInputStream(in);
-	String replyLine=replyStream.readLine();
-	Code.debug("Resource response: ",replyLine);
-	
-	// Skip header of reply
-	HttpHeader replyHeader = new HttpHeader();
-	replyHeader.read(replyStream);
-	
-	// Return content
-	return replyStream;
+        Code.assert(httpServer!=null,"Not constructed with HttpServer");
+        if (localThreadPool==null)
+            localThreadPool=new ThreadPool(0,"LocalRequest");
+        
+        final PipedInputStream in = new PipedInputStream();
+        final PipedOutputStream out = new PipedOutputStream(in);
+        final HttpResponse response = new HttpResponse(out,this);
+        
+        // run new request in own thread
+        try{
+            localThreadPool
+                .run(new Runnable()
+                     {
+                         public void run()
+                             {
+                                 try{
+                                     httpServer.handle(HttpRequest.this,response);
+                                     out.close();
+                                     response.destroy();
+                                 }
+                                 catch(IOException e)
+                                 {
+                                     Code.warning(e);
+                                 }
+                             }
+                     });
+        }
+        catch(InterruptedException e)
+        {
+            Code.warning(e);
+            return null;
+        }
+        
+        // Get response line
+        HttpInputStream replyStream = new HttpInputStream(in);
+        String replyLine=replyStream.readLine();
+        Code.debug("Resource response: ",replyLine);
+        
+        // Skip header of reply
+        HttpHeader replyHeader = new HttpHeader();
+        replyHeader.read(replyStream);
+        
+        // Return content
+        return replyStream;
     }
     
 
@@ -558,7 +558,7 @@ public class HttpRequest extends HttpHeader
      */
     public  int getContentLength()
     {
-	return getIntHeader(ContentLength);
+        return getIntHeader(ContentLength);
     }
 
     /* -------------------------------------------------------------- */
@@ -570,7 +570,7 @@ public class HttpRequest extends HttpHeader
      */
     public String getContentType()
     {
-	return getHeaderNoParams(ContentType);
+        return getHeaderNoParams(ContentType);
     }
 
    
@@ -584,7 +584,7 @@ public class HttpRequest extends HttpHeader
      */
     public  String getProtocol()
     {
-	return version;
+        return version;
     }
     
     /* -------------------------------------------------------------- */
@@ -594,48 +594,48 @@ public class HttpRequest extends HttpHeader
      * </PRE>
      */
     public String getServerName()
-    {	
-	if (serverName==null)
-	{
-	    serverName=getHeader(Host);
-	    if (serverName!=null && serverName.length()>0)
-	    {
-		int colon=serverName.indexOf(':');
-		if (colon>=0)
-		{
-		    if (colon<serverName.length())
-		    {
-			try{
-			    serverPort=Integer
-				.parseInt(serverName.substring(colon+1));
-			}
-			catch(Exception e)
-			{
-			    Code.ignore(e);
-			    serverPort=80;
-			}
-		    }
-		    serverName=serverName.substring(0,colon);
-		}
-		else
-		    serverPort=80;
-	    }
-	    else if (address!=null && address.getInetAddress()!=null)
-		serverName = address.getInetAddress().getHostName();
-	    
-	    if (serverName==null)
-	    {
-		try {serverName=InetAddress.getLocalHost().getHostName();}
-		catch(java.net.UnknownHostException ignore){
-		}
-	    }
-	    
-	    int slash = serverName.indexOf("/");
-	    if (slash>=0)
-		serverName=serverName.substring(slash+1);
-	}
-	
-	return serverName;
+    {   
+        if (serverName==null)
+        {
+            serverName=getHeader(Host);
+            if (serverName!=null && serverName.length()>0)
+            {
+                int colon=serverName.indexOf(':');
+                if (colon>=0)
+                {
+                    if (colon<serverName.length())
+                    {
+                        try{
+                            serverPort=Integer
+                                .parseInt(serverName.substring(colon+1));
+                        }
+                        catch(Exception e)
+                        {
+                            Code.ignore(e);
+                            serverPort=80;
+                        }
+                    }
+                    serverName=serverName.substring(0,colon);
+                }
+                else
+                    serverPort=80;
+            }
+            else if (address!=null && address.getInetAddress()!=null)
+                serverName = address.getInetAddress().getHostName();
+            
+            if (serverName==null)
+            {
+                try {serverName=InetAddress.getLocalHost().getHostName();}
+                catch(java.net.UnknownHostException ignore){
+                }
+            }
+            
+            int slash = serverName.indexOf("/");
+            if (slash>=0)
+                serverName=serverName.substring(slash+1);
+        }
+        
+        return serverName;
     }
     
     /* -------------------------------------------------------------- */
@@ -646,13 +646,13 @@ public class HttpRequest extends HttpHeader
      */
     public int getServerPort()
     {
-	if (serverName==null)
-	    getServerName();
+        if (serverName==null)
+            getServerName();
 
-	if (address!=null && serverPort==0)
-	    serverPort=address.getPort();
-	
-	return serverPort;
+        if (address!=null && serverPort==0)
+            serverPort=address.getPort();
+        
+        return serverPort;
     }
     
     /* -------------------------------------------------------------- */
@@ -663,9 +663,9 @@ public class HttpRequest extends HttpHeader
      */
     public  String getRemoteAddr()
     {
-	if (connection!=null)
-	    return connection.getInetAddress().getHostAddress();
-	return "localhost";
+        if (connection!=null)
+            return connection.getInetAddress().getHostAddress();
+        return "localhost";
     }
     
     /* -------------------------------------------------------------- */
@@ -676,12 +676,12 @@ public class HttpRequest extends HttpHeader
      */
     public  String getRemoteHost()
     {
-	String remoteHost=null;
+        String remoteHost=null;
 
-	if (connection!=null)
-	    remoteHost = connection.getInetAddress().getHostName();
-	
-	return remoteHost;
+        if (connection!=null)
+            remoteHost = connection.getInetAddress().getHostName();
+        
+        return remoteHost;
     }
 
     /** -------------------------------------------------------------- */
@@ -693,7 +693,7 @@ public class HttpRequest extends HttpHeader
      */  
     public String getRealPath(String path)
     {
-	return httpServer.getRealPath(path);
+        return httpServer.getRealPath(path);
     }
 
     /* -------------------------------------------------------------- */
@@ -702,10 +702,10 @@ public class HttpRequest extends HttpHeader
      */
     public synchronized ServletInputStream getInputStream()
     {
-	if (inputState!=0 && inputState!=1)
-	    throw new IllegalStateException();
-	inputState=1;
-	return in;
+        if (inputState!=0 && inputState!=1)
+            throw new IllegalStateException();
+        inputState=1;
+        return in;
     }
 
     /* -------------------------------------------------------------- */
@@ -720,41 +720,41 @@ public class HttpRequest extends HttpHeader
      */
     public String getParameter(String name)
     {
-	Object value = uri.get(name);
-	
-	if (value==null && formParameters!=null)
-	    value = formParameters.get(name);
-	if (value==null && cookieParameters!=null)
-	    value = cookieParameters.get(name);
+        Object value = uri.get(name);
+        
+        if (value==null && formParameters!=null)
+            value = formParameters.get(name);
+        if (value==null && cookieParameters!=null)
+            value = cookieParameters.get(name);
 
-	if (value!=null)
-	{
-	    if (value instanceof String[])
-	    {
-		String[] a = (String[]) value;
-		switch(a.length)
-		{
-		  case 0:
-		      return null;
-		  case 1:
-		      return a[0];
-		  default:
-		      {
-			  StringBuffer buf = new StringBuffer(128);
-			  for (int i=0;i<a.length;i++)
-			  {
-			      if (i!=0)
-				  buf.append(',');
-			      buf.append(a[i]);
-			  }
-			  return buf.toString();
-		      }
-		}
-	    }
-	    
-	    return value.toString();
-	}
-	return null;
+        if (value!=null)
+        {
+            if (value instanceof String[])
+            {
+                String[] a = (String[]) value;
+                switch(a.length)
+                {
+                  case 0:
+                      return null;
+                  case 1:
+                      return a[0];
+                  default:
+                      {
+                          StringBuffer buf = new StringBuffer(128);
+                          for (int i=0;i<a.length;i++)
+                          {
+                              if (i!=0)
+                                  buf.append(',');
+                              buf.append(a[i]);
+                          }
+                          return buf.toString();
+                      }
+                }
+            }
+            
+            return value.toString();
+        }
+        return null;
     }
     
     /* -------------------------------------------------------------- */
@@ -763,20 +763,20 @@ public class HttpRequest extends HttpHeader
      */
     public String[] getParameterValues(String name)
     {
-	Object values=uri.getValues(name);
-	if (values==null && formParameters!=null)
-	    values = formParameters.get(name);
-	if (values==null && cookieParameters!=null)
-	    values = cookieParameters.get(name);
-	
-	if (values!=null && !(values instanceof String[]))
-	{
-	    String[] a = new String[1];
-	    a[0]=values.toString();
-	    return a;
-	}
-	
-	return (String[])values;
+        Object values=uri.getValues(name);
+        if (values==null && formParameters!=null)
+            values = formParameters.get(name);
+        if (values==null && cookieParameters!=null)
+            values = cookieParameters.get(name);
+        
+        if (values!=null && !(values instanceof String[]))
+        {
+            String[] a = new String[1];
+            a[0]=values.toString();
+            return a;
+        }
+        
+        return (String[])values;
     }
 
     /* -------------------------------------------------------------- */
@@ -786,29 +786,29 @@ public class HttpRequest extends HttpHeader
      */
     public Enumeration getParameterNames()
     {
-	if (formParameters==null && cookieParameters==null)
-	    return uri.getParameterNames();
+        if (formParameters==null && cookieParameters==null)
+            return uri.getParameterNames();
 
-	Vector names = new Vector();
-	Enumeration e = uri.getParameters().keys();
-	while (e.hasMoreElements())
-	    names.addElement(e.nextElement());
+        Vector names = new Vector();
+        Enumeration e = uri.getParameters().keys();
+        while (e.hasMoreElements())
+            names.addElement(e.nextElement());
 
-	if (formParameters!=null)
-	{
-	    e = formParameters.keys();
-	    while (e.hasMoreElements())
-		names.addElement(e.nextElement());
-	}
-	
-	if (cookieParameters!=null)
-	{
-	    e = cookieParameters.keys();
-	    while (e.hasMoreElements())
-		names.addElement(e.nextElement());
-	}
-	
-	return names.elements();
+        if (formParameters!=null)
+        {
+            e = formParameters.keys();
+            while (e.hasMoreElements())
+                names.addElement(e.nextElement());
+        }
+        
+        if (cookieParameters!=null)
+        {
+            e = cookieParameters.keys();
+            while (e.hasMoreElements())
+                names.addElement(e.nextElement());
+        }
+        
+        return names.elements();
     }
     
     /* -------------------------------------------------------------- */
@@ -817,7 +817,7 @@ public class HttpRequest extends HttpHeader
      */
     public String getScheme()
     {
-	return "http";
+        return "http";
     }
     
     /* -------------------------------------------------------------- */
@@ -827,27 +827,27 @@ public class HttpRequest extends HttpHeader
      */
     public Object getAttribute(String name)
     {
-	if (attributes == null)
-	    return null;
-	
-	return attributes.get( name );
+        if (attributes == null)
+            return null;
+        
+        return attributes.get( name );
     }
     
     /* -------------------------------------------------------------- */
     public Enumeration getAttributeNames()
     {
-	if (attributes == null)
-	    return __NoAttributes;
-	
-	return attributes.keys();
+        if (attributes == null)
+            return __NoAttributes;
+        
+        return attributes.keys();
     }
     
     /* -------------------------------------------------------------- */
     public void setAttribute(String name, Object o)
-    {	
-	if (attributes == null)
-	    attributes = new Hashtable(11);
-	attributes.put(name, o);
+    {   
+        if (attributes == null)
+            attributes = new Hashtable(11);
+        attributes.put(name, o);
     }
 
     
@@ -864,24 +864,24 @@ public class HttpRequest extends HttpHeader
      */
     public String getCharacterEncoding ()
     {
-	String encoding = getHeader(ContentType);
-	if (encoding==null || encoding.length()==0)
-	    return "ISO-8859-1";
-	
-	int i=encoding.indexOf(';');
-	if (i<0)
-	    return "ISO-8859-1";
-	
-	i=encoding.indexOf("charset=",i);
-	if (i<0 || i+8>=encoding.length())
-	    return "ISO-8859-1";
-	    
-	encoding=encoding.substring(i+8);
-	i=encoding.indexOf(' ');
-	if (i>0)
-	    encoding=encoding.substring(0,i);
-	    
-	return encoding;
+        String encoding = getHeader(ContentType);
+        if (encoding==null || encoding.length()==0)
+            return "ISO-8859-1";
+        
+        int i=encoding.indexOf(';');
+        if (i<0)
+            return "ISO-8859-1";
+        
+        i=encoding.indexOf("charset=",i);
+        if (i<0 || i+8>=encoding.length())
+            return "ISO-8859-1";
+            
+        encoding=encoding.substring(i+8);
+        i=encoding.indexOf(' ');
+        if (i>0)
+            encoding=encoding.substring(0,i);
+            
+        return encoding;
     }
     
     /* -------------------------------------------------------------- */
@@ -895,7 +895,7 @@ public class HttpRequest extends HttpHeader
      */
     public  String getMethod()
     {
-	return method;
+        return method;
     }
     
     /* -------------------------------------------------------------- */
@@ -906,7 +906,7 @@ public class HttpRequest extends HttpHeader
      */
     public  String getRequestURI()
     {
-	return uri.getPath();
+        return uri.getPath();
     }
 
 
@@ -918,7 +918,7 @@ public class HttpRequest extends HttpHeader
      */
     public  String getServletPath()
     {
-	return servletPath;
+        return servletPath;
     }
     
 
@@ -931,9 +931,9 @@ public class HttpRequest extends HttpHeader
      */
     public  String getPathInfo()
     {
-	if (pathInfo.length()==0)
-	    return null;
-	return pathInfo;
+        if (pathInfo.length()==0)
+            return null;
+        return pathInfo;
     }
 
     /* -------------------------------------------------------------- */
@@ -945,11 +945,11 @@ public class HttpRequest extends HttpHeader
      */
     public  String getPathTranslated()
     {
-	if (pathInfo.length()==0)
-	    return null;
-	if (pathTranslated==null)
-	    pathTranslated=getRealPath(pathInfo);
-	return pathTranslated;
+        if (pathInfo.length()==0)
+            return null;
+        if (pathTranslated==null)
+            pathTranslated=getRealPath(pathInfo);
+        return pathTranslated;
     }
 
     
@@ -961,7 +961,7 @@ public class HttpRequest extends HttpHeader
      */
     public  String getQueryString()
     {
-	return uri.getQuery();
+        return uri.getQuery();
     }
 
     /* -------------------------------------------------------------- */
@@ -972,7 +972,7 @@ public class HttpRequest extends HttpHeader
      */
     public  String getRemoteUser()
     {
-	return remoteUser;
+        return remoteUser;
     }
 
     /* -------------------------------------------------------------- */
@@ -983,136 +983,136 @@ public class HttpRequest extends HttpHeader
      */
     public  String getAuthType()
     {
-	return authType;
+        return authType;
     }   
 
 
     /* -------------------------------------------------------------- */
     public javax.servlet.http.Cookie getCookies()[]
     {
-	if (cookies==null)
-	{
-	    String c = getHeader(HttpHeader.Cookie);
-	    if (c!=null)
-		cookies=Cookies.decode(c);
-	    else
-		cookies=new javax.servlet.http.Cookie[0];
-	}
-	return cookies;
+        if (cookies==null)
+        {
+            String c = getHeader(HttpHeader.Cookie);
+            if (c!=null)
+                cookies=Cookies.decode(c);
+            else
+                cookies=new javax.servlet.http.Cookie[0];
+        }
+        return cookies;
     }
     
     /* -------------------------------------------------------------- */
     public String getRequestedSessionId()
     {
-	if (sessionIdState == SESSIONID_NOT_CHECKED)
-	{	   
-	    // Then try cookies
-	    if (sessionId == null)
-	    {
-		getCookies();
-		for (int i=0; cookies!=null && i<cookies.length; i++)
-		{
-		    if (cookies[i].getName().equals(SessionContext.SessionId))
-		    {
-			sessionId=cookies[i].getValue();
-			sessionIdState = SESSIONID_COOKIE;
-			Code.debug("Got Session ",sessionId," from cookie");
-		    }
-		}
-	    }
-	    
-	    // check if there is a url encoded session param.
-	    String path = getRequestPath();
-	    int prefix=path.indexOf(SessionContext.SessionUrlPrefix);
-	    if (prefix!=-1)
-	    {
-		int suffix=path.indexOf(SessionContext.SessionUrlSuffix);
-		if (suffix!=-1 && prefix<suffix)
-		{
-		    // definitely a session id in there!
-		    String id =
-			path.substring(prefix+
-				       SessionContext.SessionUrlPrefix.length(),
-				       suffix);
-		    
-		    Code.debug("Got Session ",id," from URL");
-		    
-		    try
-		    {
-			Long.parseLong(id,36);
-			if (sessionIdState==SESSIONID_NOT_CHECKED)
-			{
-			    sessionId=id;
-			    sessionIdState = SESSIONID_URL;
-			}
-			else if (!id.equals(sessionId))
-			    Code.warning("Mismatched session IDs");
-			
-			// translate our path to drop the prefix off.
-			if (suffix+SessionContext.SessionUrlSuffix.length()
-			    <path.length())
-			    setRequestPath(path.substring(0,prefix)+
-					   path.substring(suffix+
-							  SessionContext.SessionUrlSuffix.length()));
-			else
-			    setRequestPath(path.substring(0,prefix));
-			
-			Code.debug(getRequestPath());
-		    }
-		    catch(NumberFormatException e)
-		    {
-			Code.ignore(e);
-		    }
-		}
-	    }
-	    
-	    if (sessionId == null)
-		sessionIdState = SESSIONID_NONE;
-	}
-	
-	return sessionId;
+        if (sessionIdState == SESSIONID_NOT_CHECKED)
+        {          
+            // Then try cookies
+            if (sessionId == null)
+            {
+                getCookies();
+                for (int i=0; cookies!=null && i<cookies.length; i++)
+                {
+                    if (cookies[i].getName().equals(SessionContext.SessionId))
+                    {
+                        sessionId=cookies[i].getValue();
+                        sessionIdState = SESSIONID_COOKIE;
+                        Code.debug("Got Session ",sessionId," from cookie");
+                    }
+                }
+            }
+            
+            // check if there is a url encoded session param.
+            String path = getRequestPath();
+            int prefix=path.indexOf(SessionContext.SessionUrlPrefix);
+            if (prefix!=-1)
+            {
+                int suffix=path.indexOf(SessionContext.SessionUrlSuffix);
+                if (suffix!=-1 && prefix<suffix)
+                {
+                    // definitely a session id in there!
+                    String id =
+                        path.substring(prefix+
+                                       SessionContext.SessionUrlPrefix.length(),
+                                       suffix);
+                    
+                    Code.debug("Got Session ",id," from URL");
+                    
+                    try
+                    {
+                        Long.parseLong(id,36);
+                        if (sessionIdState==SESSIONID_NOT_CHECKED)
+                        {
+                            sessionId=id;
+                            sessionIdState = SESSIONID_URL;
+                        }
+                        else if (!id.equals(sessionId))
+                            Code.warning("Mismatched session IDs");
+                        
+                        // translate our path to drop the prefix off.
+                        if (suffix+SessionContext.SessionUrlSuffix.length()
+                            <path.length())
+                            setRequestPath(path.substring(0,prefix)+
+                                           path.substring(suffix+
+                                                          SessionContext.SessionUrlSuffix.length()));
+                        else
+                            setRequestPath(path.substring(0,prefix));
+                        
+                        Code.debug(getRequestPath());
+                    }
+                    catch(NumberFormatException e)
+                    {
+                        Code.ignore(e);
+                    }
+                }
+            }
+            
+            if (sessionId == null)
+                sessionIdState = SESSIONID_NONE;
+        }
+        
+        return sessionId;
     }
     
     /* ------------------------------------------------------------ */
     public HttpSession getSession()
     {
-  	HttpSession session = getSession(false);
-  	return (session == null) ? getSession(true) : session;
+        HttpSession session = getSession(false);
+        return (session == null) ? getSession(true) : session;
     }
     
     /* -------------------------------------------------------------- */
     public HttpSession getSession(boolean create)
     {
-	Code.debug("getSession("+create+")");
-	
-	if (session != null && SessionContext.isValid(session))
-	    return session;
-	
-	String id = getRequestedSessionId();
-	
-	if (id != null)
-	{
-	    session=sessions.getSession(id);
-	    if (session == null && !create)
-		return null;
-	}
+        Code.debug("getSession("+create+")");
+        
+        if (session != null && SessionContext.isValid(session))
+            return session;
+        
+        String id = getRequestedSessionId();
+        
+        if (id != null)
+        {
+            session=sessions.getSession(id);
+            if (session == null && !create)
+                return null;
+        }
 
-	if (session == null && create)
-	{
-	    session = sessions.newSession();
-	    Cookie cookie =
-		new Cookie(SessionContext.SessionId,session.getId());
-	    cookie.setPath("/");
-	    response.addCookie(cookie);	
-	}
+        if (session == null && create)
+        {
+            session = sessions.newSession();
+            Cookie cookie =
+                new Cookie(SessionContext.SessionId,session.getId());
+            cookie.setPath("/");
+            response.addCookie(cookie); 
+        }
 
-	return session;
+        return session;
     }
     
     /* -------------------------------------------------------------- */
     public boolean isRequestedSessionIdFromCookie()
     {
-	return sessionIdState == SESSIONID_COOKIE;
+        return sessionIdState == SESSIONID_COOKIE;
     }
     
     /* -------------------------------------------------------------- */
@@ -1121,158 +1121,158 @@ public class HttpRequest extends HttpHeader
      */
     public boolean isRequestedSessionIdFromUrl()
     {
-	return isRequestedSessionIdFromURL();
+        return isRequestedSessionIdFromURL();
     }
     
     /* -------------------------------------------------------------- */
     public boolean isRequestedSessionIdFromURL()
     {
-	return sessionIdState == SESSIONID_URL;
+        return sessionIdState == SESSIONID_URL;
     }
     
     /* -------------------------------------------------------------- */
     public boolean isRequestedSessionIdValid()
     {
-	return sessionId != null && getSession(false) != null;
+        return sessionId != null && getSession(false) != null;
     }
     
     /* -------------------------------------------------------------- */
     public synchronized BufferedReader getReader()
     {
-	if (inputState!=0 && inputState!=2)
-	    throw new IllegalStateException();
-	if (reader==null)
-	    reader=new BufferedReader(new InputStreamReader(getInputStream()));
-	inputState=2;
-	return reader;
+        if (inputState!=0 && inputState!=2)
+            throw new IllegalStateException();
+        if (reader==null)
+            reader=new BufferedReader(new InputStreamReader(getInputStream()));
+        inputState=2;
+        return reader;
     }
 
     /* -------------------------------------------------------------- */
     void decodeRequestLine(char[] buf,int len)
-	throws IOException
+        throws IOException
     {
-	// Search for first space separated chunk
-	int s1=-1,s2=-1,s3=-1;
-	int state=0;
+        // Search for first space separated chunk
+        int s1=-1,s2=-1,s3=-1;
+        int state=0;
     startloop:
-	for (int i=0;i<len;i++)
-	{
-	    char c=buf[i];
-	    switch(state)
-	    {
-	      case 0: // leading white
-		  if (c==' ')
-		      continue;
-		  state=1;
-		  s1=i;
-		  
-	      case 1: // reading method
-		  if (c==' ')
-		      state=2;
-		  else
-		      s2=i;
-		  continue;
-		  
-	      case 2: // skip whitespace after method
-		  s3=i;
-		  if (c!=' ')
-		      break startloop;
-	    }
-	}
+        for (int i=0;i<len;i++)
+        {
+            char c=buf[i];
+            switch(state)
+            {
+              case 0: // leading white
+                  if (c==' ')
+                      continue;
+                  state=1;
+                  s1=i;
+                  
+              case 1: // reading method
+                  if (c==' ')
+                      state=2;
+                  else
+                      s2=i;
+                  continue;
+                  
+              case 2: // skip whitespace after method
+                  s3=i;
+                  if (c!=' ')
+                      break startloop;
+            }
+        }
 
-	// Search for first space separated chunk
-	int e1=-1,e2=-1,e3=-1;
-	state=0;
+        // Search for first space separated chunk
+        int e1=-1,e2=-1,e3=-1;
+        state=0;
     endloop:
-	for (int i=len;i-->0;)
-	{
-	    char c=buf[i];
-	    switch(state)
-	    {
-	      case 0: // leading white
-		  if (c==' ')
-		      continue;
-		  state=1;
-		  e1=i;
-		  
-	      case 1: // reading method
-		  if (c==' ')
-		      state=2;
-		  else
-		      e2=i;
-		  continue;
-		  
-	      case 2: // skip whitespace after method
-		  e3=i;
-		  if (c!=' ')
-		      break endloop;
-	    }
-	}
-	
-	// Check sufficient params
-	if (s3<0 || e1<0 || e3<s2 )
-	    throw new IOException("Bad requestline");
+        for (int i=len;i-->0;)
+        {
+            char c=buf[i];
+            switch(state)
+            {
+              case 0: // leading white
+                  if (c==' ')
+                      continue;
+                  state=1;
+                  e1=i;
+                  
+              case 1: // reading method
+                  if (c==' ')
+                      state=2;
+                  else
+                      e2=i;
+                  continue;
+                  
+              case 2: // skip whitespace after method
+                  e3=i;
+                  if (c!=' ')
+                      break endloop;
+            }
+        }
+        
+        // Check sufficient params
+        if (s3<0 || e1<0 || e3<s2 )
+            throw new IOException("Bad requestline");
 
-	// get method
-	method=new String(buf,s1,s2-s1+1);
-	
-	// get version
-	if (s2!=e3 || s3!=e2)
-	{
-	    for (int i=e1;i<=e2;i++)
-		if (buf[i]>'a'&&buf[i]<'z')
-		    buf[i]=(char)(buf[i]-'a'+'A');
-	    version=new String(buf,e2,e1-e2+1);
-	}
-	else
-	{
-	    // missing version
-	    version=HttpHeader.HTTP_1_0;
-	    e3=e1;
-	}
+        // get method
+        method=new String(buf,s1,s2-s1+1);
+        
+        // get version
+        if (s2!=e3 || s3!=e2)
+        {
+            for (int i=e1;i<=e2;i++)
+                if (buf[i]>'a'&&buf[i]<'z')
+                    buf[i]=(char)(buf[i]-'a'+'A');
+            version=new String(buf,e2,e1-e2+1);
+        }
+        else
+        {
+            // missing version
+            version=HttpHeader.HTTP_1_0;
+            e3=e1;
+        }
 
-	// rebuild requestline
-	StringBuffer rl = new StringBuffer(len);
-	rl.append(buf,s1,s2-s1+2);
-	rl.append(buf,s3,e3-s3+1);
-	rl.append(" ");
-	rl.append(version);
-	requestLine=rl.toString();
+        // rebuild requestline
+        StringBuffer rl = new StringBuffer(len);
+        rl.append(buf,s1,s2-s1+2);
+        rl.append(buf,s3,e3-s3+1);
+        rl.append(" ");
+        rl.append(version);
+        requestLine=rl.toString();
 
-	// handle URI
-	String uris=null;
-	if (buf[s3]!='/')
-	{
-	    // look for //
-	    for (int i=s3;i<e3;i++)
-	    {
-		if (buf[i]=='/')
-		{
-		    if (buf[i+1]!='/')
-			break;
+        // handle URI
+        String uris=null;
+        if (buf[s3]!='/')
+        {
+            // look for //
+            for (int i=s3;i<e3;i++)
+            {
+                if (buf[i]=='/')
+                {
+                    if (buf[i+1]!='/')
+                        break;
 
-		    // look for next /
-		    for (int j=i+2;j<=e3;j++)
-		    {
-			if (buf[j]=='/')
-			{
-			    protocolHostPort=new String(buf,s3,j-s3+1);
-			    uris=new String(buf,j,e3-j+1);
-			    break;
-			}
-		    }
-		    break;
-		}
-	    }
-	}
-	if (uris==null)
-	{
-	    protocolHostPort="";
-	    uris = new String(buf,s3,e3-s3+1);
-	}
-	
-	uri = new URI(uris);
-	Code.debug(requestLine);
+                    // look for next /
+                    for (int j=i+2;j<=e3;j++)
+                    {
+                        if (buf[j]=='/')
+                        {
+                            protocolHostPort=new String(buf,s3,j-s3+1);
+                            uris=new String(buf,j,e3-j+1);
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        if (uris==null)
+        {
+            protocolHostPort="";
+            uris = new String(buf,s3,e3-s3+1);
+        }
+        
+        uri = new URI(uris);
+        Code.debug(requestLine);
     }
 
 
@@ -1282,57 +1282,57 @@ public class HttpRequest extends HttpHeader
      */
     public void destroy()
     {
-	method=null;
-	uri=null;
-	version=null;
-	httpServer=null;
-	connection=null;
-	in=null;
-	address=null;
-	if (formParameters!=null)
-	{
-	    formParameters.clear();
-	    formParameters=null;
-	}
-	if (cookieParameters!=null)
-	{
-	    cookieParameters.clear();
-	    cookieParameters=null;
-	}
-	if (attributes!=null)
-	{
-	    attributes.clear();
-	    attributes=null;
-	}
-	cookies=null;
-	sessionId=null;
-	session=null;
-	sessionIdState=null;
-	requestLine=null;
-	protocolHostPort=null;
-	resourcePath=null;
-	servletPath=null;
-	pathInfo=null;
-	remoteUser=null;
-	authType=null;
-	byteContent=null;
-	pathTranslated=null;
-	serverName=null;
-	response=null;
-	reader=null;
-	super.destroy();
+        method=null;
+        uri=null;
+        version=null;
+        httpServer=null;
+        connection=null;
+        in=null;
+        address=null;
+        if (formParameters!=null)
+        {
+            formParameters.clear();
+            formParameters=null;
+        }
+        if (cookieParameters!=null)
+        {
+            cookieParameters.clear();
+            cookieParameters=null;
+        }
+        if (attributes!=null)
+        {
+            attributes.clear();
+            attributes=null;
+        }
+        cookies=null;
+        sessionId=null;
+        session=null;
+        sessionIdState=null;
+        requestLine=null;
+        protocolHostPort=null;
+        resourcePath=null;
+        servletPath=null;
+        pathInfo=null;
+        remoteUser=null;
+        authType=null;
+        byteContent=null;
+        pathTranslated=null;
+        serverName=null;
+        response=null;
+        reader=null;
+        super.destroy();
     }
     
     
     /* -------------------------------------------------------------- */
     /** Set the default session timeout.
-     *	@param	default	The default timeout in seconds
+     *  @param  default The default timeout in seconds
      */
     public static void setSessionMaxInactiveInterval(int defaultTime)
     {
-    	sessions.setMaxInactiveInterval(defaultTime);
+        sessions.setMaxInactiveInterval(defaultTime);
     }
 }
 
-	   
+           
 

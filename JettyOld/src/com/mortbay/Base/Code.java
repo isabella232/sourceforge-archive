@@ -72,16 +72,16 @@ public class Code
     
     /*-------------------------------------------------------------------*/
     static Code instance()
-    {	
-	if (__instance==null)
-	{
-	    synchronized(__lock)
-	    {
-		if (__instance==null)
-		    new Code();
-	    }
-	}
-	return __instance;
+    {   
+        if (__instance==null)
+        {
+            synchronized(__lock)
+            {
+                if (__instance==null)
+                    new Code();
+            }
+        }
+        return __instance;
     }
     
     /*-------------------------------------------------------------------*/
@@ -92,30 +92,30 @@ public class Code
      */
     public static void initParamsFromApplet(java.applet.Applet appl)
     {
-	boolean d = appl.getParameter("DEBUG") != null;
-	setDebug(d);
-	
-	String o = appl.getParameter("DEBUG_OPTIONS");
-	if (o!=null)
-	{
-	    setSuppressStack(o.indexOf("S")>=0);
-	    setSuppressWarnings(o.indexOf("W")>=0);
-	}
-	else
-	{
-	    setSuppressStack(false);
-	    setSuppressWarnings(false);
-	}
+        boolean d = appl.getParameter("DEBUG") != null;
+        setDebug(d);
+        
+        String o = appl.getParameter("DEBUG_OPTIONS");
+        if (o!=null)
+        {
+            setSuppressStack(o.indexOf("S")>=0);
+            setSuppressWarnings(o.indexOf("W")>=0);
+        }
+        else
+        {
+            setSuppressStack(false);
+            setSuppressWarnings(false);
+        }
 
-	String dp = appl.getParameter("DEBUG_PATTERNS");
-	setDebugPatterns(dp);
-	
-	String dt = appl.getParameter("DEBUG_TRIGGERS");
-	setDebugTriggers(dt);
+        String dp = appl.getParameter("DEBUG_PATTERNS");
+        setDebugPatterns(dp);
+        
+        String dt = appl.getParameter("DEBUG_TRIGGERS");
+        setDebugTriggers(dt);
 
-	String v = appl.getParameter("DEBUG_VERBOSE");
-	if (v!=null)
-	    setVerbose(Integer.parseInt(v));
+        String v = appl.getParameter("DEBUG_VERBOSE");
+        if (v!=null)
+            setVerbose(Integer.parseInt(v));
     }
     
     /*-------------------------------------------------------------------*/
@@ -135,38 +135,38 @@ public class Code
      */
     protected Code()
     {
-	__instance=this;
-	try{
-	    boolean d = System.getProperty("DEBUG") != null;
-	    setDebug(d);
-	
-	    String o = System.getProperty("DEBUG_OPTIONS");
-	    if (o!=null)
-	    {
-		setSuppressStack(!(o.indexOf("S")>=0));
-		setSuppressWarnings(!(o.indexOf("W")>=0));
-	    }
-	    else
-	    {
-		setSuppressStack(false);
-		setSuppressWarnings(false);
-	    }
+        __instance=this;
+        try{
+            boolean d = System.getProperty("DEBUG") != null;
+            setDebug(d);
+        
+            String o = System.getProperty("DEBUG_OPTIONS");
+            if (o!=null)
+            {
+                setSuppressStack(!(o.indexOf("S")>=0));
+                setSuppressWarnings(!(o.indexOf("W")>=0));
+            }
+            else
+            {
+                setSuppressStack(false);
+                setSuppressWarnings(false);
+            }
 
-	    String dp = System.getProperty("DEBUG_PATTERNS");
-	    setDebugPatterns(dp);
+            String dp = System.getProperty("DEBUG_PATTERNS");
+            setDebugPatterns(dp);
 
-	    String dt = System.getProperty("DEBUG_TRIGGERS");
-	    setDebugTriggers(dt);
+            String dt = System.getProperty("DEBUG_TRIGGERS");
+            setDebugTriggers(dt);
 
-	    String v = System.getProperty("DEBUG_VERBOSE");
-	    if (v!=null)
-		setVerbose(Integer.parseInt(v));
-	}
-	catch (Exception e){
-	    System.err.println("Exception from getProperty!\n"+
-			       "Probably running in applet\n"+
-			       "Use Code.initParamsFromApplet or Code.setOption to control debug output.");
-	}
+            String v = System.getProperty("DEBUG_VERBOSE");
+            if (v!=null)
+                setVerbose(Integer.parseInt(v));
+        }
+        catch (Exception e){
+            System.err.println("Exception from getProperty!\n"+
+                               "Probably running in applet\n"+
+                               "Use Code.initParamsFromApplet or Code.setOption to control debug output.");
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -175,7 +175,7 @@ public class Code
      */
     public static void setDebug(boolean debug)
     {
-	instance()._debugOn=debug;
+        instance()._debugOn=debug;
     }
 
     /* ------------------------------------------------------------ */
@@ -184,7 +184,7 @@ public class Code
      */
     public static boolean getDebug()
     {
-	return instance()._debugOn;
+        return instance()._debugOn;
     }
     
     
@@ -194,7 +194,7 @@ public class Code
      */
     public static void setSuppressStack(boolean stack)
     {
-	instance()._suppressStack=stack;
+        instance()._suppressStack=stack;
     }
 
     /* ------------------------------------------------------------ */
@@ -203,7 +203,7 @@ public class Code
      */
     public static boolean getSuppressStack()
     {
-	return instance()._suppressStack;
+        return instance()._suppressStack;
     }
     
 
@@ -213,7 +213,7 @@ public class Code
      */
     public static void setSuppressWarnings(boolean warnings)
     {
-	instance()._suppressWarnings=warnings;
+        instance()._suppressWarnings=warnings;
     }
     
     /* ------------------------------------------------------------ */
@@ -222,7 +222,7 @@ public class Code
      */
     public static boolean getSuppressWarnings()
     {
-	return instance()._suppressWarnings;
+        return instance()._suppressWarnings;
     }
 
     
@@ -232,7 +232,7 @@ public class Code
      */
     public static void setVerbose(int verbose)
     {
-	instance()._verbose=verbose;
+        instance()._verbose=verbose;
     }
 
     /* ------------------------------------------------------------ */
@@ -241,7 +241,7 @@ public class Code
      */
     public static int getVerbose()
     {
-	return instance()._verbose;
+        return instance()._verbose;
     }
     
     /* ------------------------------------------------------------ */
@@ -250,21 +250,21 @@ public class Code
      */
     public static void setDebugPatterns(String patterns)
     {
-	Code code = instance();
-	code._patterns=patterns;
-	if (patterns!=null && patterns.length()>0)
-	{
-	    code._debugPatterns = new Vector();
+        Code code = instance();
+        code._patterns=patterns;
+        if (patterns!=null && patterns.length()>0)
+        {
+            code._debugPatterns = new Vector();
 
-	    StringTokenizer tok = new StringTokenizer(patterns,", \t");
-	    while (tok.hasMoreTokens())
-	    {
-		String pattern = tok.nextToken();
-		code._debugPatterns.addElement(pattern);
-	    }
-	}
-	else
-	    code._debugPatterns = null;
+            StringTokenizer tok = new StringTokenizer(patterns,", \t");
+            while (tok.hasMoreTokens())
+            {
+                String pattern = tok.nextToken();
+                code._debugPatterns.addElement(pattern);
+            }
+        }
+        else
+            code._debugPatterns = null;
     }
 
     /* ------------------------------------------------------------ */
@@ -273,7 +273,7 @@ public class Code
      */
     public static String getDebugPatterns()
     {
-	return instance()._patterns;
+        return instance()._patterns;
     }
 
     /* ------------------------------------------------------------ */
@@ -282,21 +282,21 @@ public class Code
      */
     public static void setDebugTriggers(String triggers)
     {
-	Code code = instance();
-	code._triggers=triggers;
-	if (triggers!=null && triggers.length()>0)
-	{
-	    code._debugTriggers = new Vector();
+        Code code = instance();
+        code._triggers=triggers;
+        if (triggers!=null && triggers.length()>0)
+        {
+            code._debugTriggers = new Vector();
 
-	    StringTokenizer tok = new StringTokenizer(triggers,", \t");
-	    while (tok.hasMoreTokens())
-	    {
-		String trigger = tok.nextToken();
-		code._debugTriggers.addElement(trigger);
-	    }
-	}
-	else
-	    code._debugTriggers = null;
+            StringTokenizer tok = new StringTokenizer(triggers,", \t");
+            while (tok.hasMoreTokens())
+            {
+                String trigger = tok.nextToken();
+                code._debugTriggers.addElement(trigger);
+            }
+        }
+        else
+            code._debugTriggers = null;
     }
 
 
@@ -306,55 +306,55 @@ public class Code
      */
     public static String getDebugTriggers()
     {
-	return instance()._triggers;
+        return instance()._triggers;
     }
 
     /* ------------------------------------------------------------ */
     public static void triggerOn(String trigger)
     {
-	Code code = instance();
-	
-	// Look for a substring match in triggers
-	int i = code._debugTriggers.size();
-	for (;--i>=0;)
-	{
-	    if(trigger.indexOf((String)code._debugTriggers.elementAt(i))>=0)
-	    {
-		// Triggered!!!!
+        Code code = instance();
+        
+        // Look for a substring match in triggers
+        int i = code._debugTriggers.size();
+        for (;--i>=0;)
+        {
+            if(trigger.indexOf((String)code._debugTriggers.elementAt(i))>=0)
+            {
+                // Triggered!!!!
 
-		// Add ourselves to the triggerSet
-		if (code._triggerSet.put(trigger,"")==null)
-		    Log.message(Log.CODE_DEBUG, "TRIGGERED ON "+trigger,
-				new Frame(1));
+                // Add ourselves to the triggerSet
+                if (code._triggerSet.put(trigger,"")==null)
+                    Log.message(Log.CODE_DEBUG, "TRIGGERED ON "+trigger,
+                                new Frame(1));
 
-		// Turn debug On
-		setDebug(true);
-	    }
-	}
+                // Turn debug On
+                setDebug(true);
+            }
+        }
     }
     
     /* ------------------------------------------------------------ */
     public static void triggerOff(String trigger)
     {
-	Code code = instance();
-	
-	// Look for a substring match in triggers
-	int i = code._debugTriggers.size();
-	for (;--i>=0;)
-	{
-	    if(trigger.indexOf((String)code._debugTriggers.elementAt(i))>=0)
-	    {
-		// Triggered!!!!
+        Code code = instance();
+        
+        // Look for a substring match in triggers
+        int i = code._debugTriggers.size();
+        for (;--i>=0;)
+        {
+            if(trigger.indexOf((String)code._debugTriggers.elementAt(i))>=0)
+            {
+                // Triggered!!!!
 
-		// Remove ourselves to the triggerSet
-		if (code._triggerSet.remove(trigger)!=null)
-		    Log.message(Log.CODE_DEBUG, "TRIGGERED OFF "+trigger,
-				new Frame(1));
+                // Remove ourselves to the triggerSet
+                if (code._triggerSet.remove(trigger)!=null)
+                    Log.message(Log.CODE_DEBUG, "TRIGGERED OFF "+trigger,
+                                new Frame(1));
 
-		// Turn debug off if no more triggers
-		setDebug(code._triggerSet.size()>0);
-	    }
-	}
+                // Turn debug off if no more triggers
+                setDebug(code._triggerSet.size()>0);
+            }
+        }
     }
     
     
@@ -368,11 +368,11 @@ public class Code
      */
     public static void assert(boolean b,String m)
     {
-	if (!b)
-	{
-	    Log.message(Log.CODE_ASSERT, m, new Frame(1));
-	    throw new CodeException("ASSERT FAIL: "+m);
-	}
+        if (!b)
+        {
+            Log.message(Log.CODE_ASSERT, m, new Frame(1));
+            throw new CodeException("ASSERT FAIL: "+m);
+        }
     }
 
     /*-------------------------------------------------------------------*/
@@ -385,11 +385,11 @@ public class Code
      */
     public static void assertEquals(Object o1,Object o2,String m)
     {
-	if (o1!=o2 && o1!=null && !o1.equals(o2))
-	{
-	    Log.message(Log.CODE_ASSERT, o1+ " != "+o2+" : "+m, new Frame(1));
-	    throw new CodeException("ASSERT FAIL: "+m);
-	}
+        if (o1!=o2 && o1!=null && !o1.equals(o2))
+        {
+            Log.message(Log.CODE_ASSERT, o1+ " != "+o2+" : "+m, new Frame(1));
+            throw new CodeException("ASSERT FAIL: "+m);
+        }
     }
     
     /*-------------------------------------------------------------------*/
@@ -402,11 +402,11 @@ public class Code
      */
     public static void assertEquals(long o1,long o2,String m)
     {
-	if (o1!=o2)
-	{
-	    Log.message(Log.CODE_ASSERT, o1+ " != "+o2+" : "+m, new Frame(1));
-	    throw new CodeException("ASSERT FAIL: "+m);
-	}
+        if (o1!=o2)
+        {
+            Log.message(Log.CODE_ASSERT, o1+ " != "+o2+" : "+m, new Frame(1));
+            throw new CodeException("ASSERT FAIL: "+m);
+        }
     }
     
     /*-------------------------------------------------------------------*/
@@ -419,11 +419,11 @@ public class Code
      */
     public static void assertEquals(double o1,double o2,String m)
     {
-	if (o1!=o2)
-	{
-	    Log.message(Log.CODE_ASSERT, o1+ " != "+o2+" : "+m, new Frame(1));
-	    throw new CodeException("ASSERT FAIL: "+m);
-	}
+        if (o1!=o2)
+        {
+            Log.message(Log.CODE_ASSERT, o1+ " != "+o2+" : "+m, new Frame(1));
+            throw new CodeException("ASSERT FAIL: "+m);
+        }
     }
 
     /*-------------------------------------------------------------------*/
@@ -436,11 +436,11 @@ public class Code
      */
     public static void assertEquals(char o1,char o2,String m)
     {
-	if (o1!=o2)
-	{
-	    Log.message(Log.CODE_ASSERT, o1+ " != "+o2+" : "+m, new Frame(1));
-	    throw new CodeException("ASSERT FAIL: "+m);
-	}
+        if (o1!=o2)
+        {
+            Log.message(Log.CODE_ASSERT, o1+ " != "+o2+" : "+m, new Frame(1));
+            throw new CodeException("ASSERT FAIL: "+m);
+        }
     }
 
     /*-------------------------------------------------------------------*/
@@ -453,13 +453,13 @@ public class Code
      */
     public static void assertContains(String string,String sub,String m)
     {
-	if (sub!=null && (string==null || string.indexOf(sub)==-1))
-	{
-	    Log.message(Log.CODE_ASSERT, '"'+string+
-			"\" does not contain \"" + sub + 
-			"\" : "+m, new Frame(1));
-	    throw new CodeException("ASSERT FAIL: "+m);
-	}
+        if (sub!=null && (string==null || string.indexOf(sub)==-1))
+        {
+            Log.message(Log.CODE_ASSERT, '"'+string+
+                        "\" does not contain \"" + sub + 
+                        "\" : "+m, new Frame(1));
+            throw new CodeException("ASSERT FAIL: "+m);
+        }
     }
     
     /*-------------------------------------------------------------------*/
@@ -469,10 +469,10 @@ public class Code
      */
     public static void warning(String m)
     {
-	Code code = instance();
-	Frame frame = new Frame(1);
-	if (!code._suppressWarnings || code.isDebugOnFor(frame) )
-	    Log.message(Log.CODE_WARN, m, frame);
+        Code code = instance();
+        Frame frame = new Frame(1);
+        if (!code._suppressWarnings || code.isDebugOnFor(frame) )
+            Log.message(Log.CODE_WARN, m, frame);
     }
     
     /*-------------------------------------------------------------------*/
@@ -483,10 +483,10 @@ public class Code
      */
     public static void warning(String m, Throwable ex)
     {
-	Code code = instance();
-	Frame frame = new Frame(1);
-	if (!code._suppressWarnings || code.isDebugOnFor(frame) )
-	    Log.message(Log.CODE_WARN, code.formatThrowable(m,ex), frame);
+        Code code = instance();
+        Frame frame = new Frame(1);
+        if (!code._suppressWarnings || code.isDebugOnFor(frame) )
+            Log.message(Log.CODE_WARN, code.formatThrowable(m,ex), frame);
     }
     
     /*-------------------------------------------------------------------*/
@@ -496,10 +496,10 @@ public class Code
      */
     public static void warning(Throwable ex)
     {
-	Code code = instance();
-	Frame frame = new Frame(1);
-	if (!code._suppressWarnings || code.isDebugOnFor(frame) )
-	    Log.message(Log.CODE_WARN, code.formatThrowable("",ex), frame);
+        Code code = instance();
+        Frame frame = new Frame(1);
+        if (!code._suppressWarnings || code.isDebugOnFor(frame) )
+            Log.message(Log.CODE_WARN, code.formatThrowable("",ex), frame);
     }
     
     /*-------------------------------------------------------------------*/
@@ -509,8 +509,8 @@ public class Code
      */
     public static void fail(String m) 
     {
-	Log.message(Log.CODE_FAIL, m, new Frame(1));
-	throw new CodeException("FAIL: "+m);
+        Log.message(Log.CODE_FAIL, m, new Frame(1));
+        throw new CodeException("FAIL: "+m);
     }
 
     /*-------------------------------------------------------------------*/
@@ -521,9 +521,9 @@ public class Code
      */
     public static void fail(String m, Throwable ex) 
     {
-	Code code = instance();
-	Log.message(Log.CODE_FAIL, code.formatThrowable(m,ex), new Frame(1));
-	throw new CodeException("FAIL: "+m);
+        Code code = instance();
+        Log.message(Log.CODE_FAIL, code.formatThrowable(m,ex), new Frame(1));
+        throw new CodeException("FAIL: "+m);
     }
 
     /*-------------------------------------------------------------------*/
@@ -533,10 +533,10 @@ public class Code
      */
     public static void fail(Throwable ex) 
     {
-	Code code = instance();
-	String m=code.formatThrowable("",ex);
-	Log.message(Log.CODE_FAIL, m, new Frame(1));
-	throw new CodeException("FAIL: "+m);
+        Code code = instance();
+        String m=code.formatThrowable("",ex);
+        Log.message(Log.CODE_FAIL, m, new Frame(1));
+        throw new CodeException("FAIL: "+m);
     }
 
     /*-------------------------------------------------------------------*/
@@ -544,8 +544,8 @@ public class Code
      */
     public static void notImplemented() 
     {
-	Log.message(Log.CODE_FAIL, "Not Implemented", new Frame(1));
-	throw new CodeException("Not Implemented");
+        Log.message(Log.CODE_FAIL, "Not Implemented", new Frame(1));
+        throw new CodeException("Not Implemented");
     }
 
     /* ------------------------------------------------------------ */
@@ -554,7 +554,7 @@ public class Code
      */
     public static boolean verbose()
     {
-	return instance()._verbose>0;
+        return instance()._verbose>0;
     }
     
     /* ------------------------------------------------------------ */
@@ -564,7 +564,7 @@ public class Code
      */
     public static boolean verbose(int v)
     {
-	return instance()._verbose>=v;
+        return instance()._verbose>=v;
     }
     
     /*-------------------------------------------------------------------*/
@@ -573,13 +573,13 @@ public class Code
      */
     public static boolean debug()
     {
-	Code code = instance();
-	if (code._debugOn)
-	{
-	    Frame frame = new Frame(1,true);
-	    return code.isDebugOnFor(frame);
-	}
-	return false;
+        Code code = instance();
+        if (code._debugOn)
+        {
+            Frame frame = new Frame(1,true);
+            return code.isDebugOnFor(frame);
+        }
+        return false;
     }
     
     /*-------------------------------------------------------------------*/
@@ -593,16 +593,16 @@ public class Code
      */
     public static void debug(String m)
     {
-	Code code = instance();
-	if (code._debugOn)
-	{
-	    Frame frame = new Frame(1,true);
-	    if (code.isDebugOnFor(frame))
-	    {
-		frame.complete();
-		Log.message(Log.CODE_DEBUG, m, frame);
-	    }
-	}
+        Code code = instance();
+        if (code._debugOn)
+        {
+            Frame frame = new Frame(1,true);
+            if (code.isDebugOnFor(frame))
+            {
+                frame.complete();
+                Log.message(Log.CODE_DEBUG, m, frame);
+            }
+        }
     }
     
     /*-------------------------------------------------------------------*/
@@ -613,22 +613,22 @@ public class Code
      */
     public static void debug(String m, Throwable ex)
     {
-	Code code = instance();
-	if (code._debugOn)
-	{
-	    Frame frame = new Frame(1,true);
-	    if (code.isDebugOnFor(frame))
-	    {
-		frame.complete();
-		StringBuffer buf = new StringBuffer(256);
-		synchronized(buf)
-		{
-		    buf.append(m);
-		    formatObject(buf,ex);
-		}
-		Log.message(Log.CODE_DEBUG, buf.toString(),frame);
-	    }
-	}
+        Code code = instance();
+        if (code._debugOn)
+        {
+            Frame frame = new Frame(1,true);
+            if (code.isDebugOnFor(frame))
+            {
+                frame.complete();
+                StringBuffer buf = new StringBuffer(256);
+                synchronized(buf)
+                {
+                    buf.append(m);
+                    formatObject(buf,ex);
+                }
+                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+            }
+        }
     }
     
     /*-------------------------------------------------------------------*/
@@ -638,21 +638,21 @@ public class Code
      */
     public static void debug(Throwable ex)
     {
-	Code code = instance();
-	if (code._debugOn)
-	{
-	    Frame frame = new Frame(1,true);
-	    if (code.isDebugOnFor(frame))
-	    {
-		frame.complete();
-		StringBuffer buf = new StringBuffer(256);
-		synchronized(buf)
-		{   
-		    formatObject(buf,ex);
-		}
-		Log.message(Log.CODE_DEBUG, buf.toString(),frame);
-	    }
-	}
+        Code code = instance();
+        if (code._debugOn)
+        {
+            Frame frame = new Frame(1,true);
+            if (code.isDebugOnFor(frame))
+            {
+                frame.complete();
+                StringBuffer buf = new StringBuffer(256);
+                synchronized(buf)
+                {   
+                    formatObject(buf,ex);
+                }
+                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+            }
+        }
     }
     
     /*-------------------------------------------------------------------*/
@@ -662,21 +662,21 @@ public class Code
      */
     public static void debug(Object o)
     {
-	Code code = instance();
-	if (code._debugOn)
-	{
-	    Frame frame = new Frame(1,true);
-	    if (code.isDebugOnFor(frame))
-	    {
-		frame.complete();
-		StringBuffer buf = new StringBuffer(256);
-		synchronized(buf)
-		{   
-		    formatObject(buf,o);
-		}
-		Log.message(Log.CODE_DEBUG, buf.toString(),frame);
-	    }
-	}
+        Code code = instance();
+        if (code._debugOn)
+        {
+            Frame frame = new Frame(1,true);
+            if (code.isDebugOnFor(frame))
+            {
+                frame.complete();
+                StringBuffer buf = new StringBuffer(256);
+                synchronized(buf)
+                {   
+                    formatObject(buf,o);
+                }
+                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+            }
+        }
     }
     
     /*-------------------------------------------------------------------*/
@@ -686,22 +686,22 @@ public class Code
      */
     public static void debug(Object o1,Object o2)
     {
-	Code code = instance();
-	if (code._debugOn)
-	{
-	    Frame frame = new Frame(1,true);
-	    if (code.isDebugOnFor(frame))
-	    {
-		frame.complete();
-		StringBuffer buf = new StringBuffer(256);
-		synchronized(buf)
-		{   
-		    formatObject(buf,o1);
-		    formatObject(buf,o2);
-		}
-		Log.message(Log.CODE_DEBUG, buf.toString(),frame);
-	    }
-	}
+        Code code = instance();
+        if (code._debugOn)
+        {
+            Frame frame = new Frame(1,true);
+            if (code.isDebugOnFor(frame))
+            {
+                frame.complete();
+                StringBuffer buf = new StringBuffer(256);
+                synchronized(buf)
+                {   
+                    formatObject(buf,o1);
+                    formatObject(buf,o2);
+                }
+                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+            }
+        }
     }
     
     /*-------------------------------------------------------------------*/
@@ -711,23 +711,23 @@ public class Code
      */
     public static void debug(Object o1,Object o2,Object o3)
     {
-	Code code = instance();
-	if (code._debugOn)
-	{
-	    Frame frame = new Frame(1,true);
-	    if (code.isDebugOnFor(frame))
-	    {
-		frame.complete();
-		StringBuffer buf = new StringBuffer(256);
-		synchronized(buf)
-		{   
-		    formatObject(buf,o1);
-		    formatObject(buf,o2);
-		    formatObject(buf,o3);
-		}
-		Log.message(Log.CODE_DEBUG, buf.toString(),frame);
-	    }
-	}
+        Code code = instance();
+        if (code._debugOn)
+        {
+            Frame frame = new Frame(1,true);
+            if (code.isDebugOnFor(frame))
+            {
+                frame.complete();
+                StringBuffer buf = new StringBuffer(256);
+                synchronized(buf)
+                {   
+                    formatObject(buf,o1);
+                    formatObject(buf,o2);
+                    formatObject(buf,o3);
+                }
+                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+            }
+        }
     }
     
     /*-------------------------------------------------------------------*/
@@ -737,24 +737,24 @@ public class Code
      */
     public static void debug(Object o1,Object o2,Object o3, Object o4)
     {
-	Code code = instance();
-	if (code._debugOn)
-	{
-	    Frame frame = new Frame(1,true);
-	    if (code.isDebugOnFor(frame))
-	    {
-		frame.complete();
-		StringBuffer buf = new StringBuffer(256);
-		synchronized(buf)
-		{   
-		    formatObject(buf,o1);
-		    formatObject(buf,o2);
-		    formatObject(buf,o3);
-		    formatObject(buf,o4);
-		}
-		Log.message(Log.CODE_DEBUG, buf.toString(),frame);
-	    }
-	}
+        Code code = instance();
+        if (code._debugOn)
+        {
+            Frame frame = new Frame(1,true);
+            if (code.isDebugOnFor(frame))
+            {
+                frame.complete();
+                StringBuffer buf = new StringBuffer(256);
+                synchronized(buf)
+                {   
+                    formatObject(buf,o1);
+                    formatObject(buf,o2);
+                    formatObject(buf,o3);
+                    formatObject(buf,o4);
+                }
+                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+            }
+        }
     }
     
     /*-------------------------------------------------------------------*/
@@ -763,27 +763,27 @@ public class Code
      * @param ex The Throwable to print the full stack trace of
      */
     public static void debug(Object o1,Object o2,Object o3, Object o4,
-			     Object o5)
+                             Object o5)
     {
-	Code code = instance();
-	if (code._debugOn)
-	{
-	    Frame frame = new Frame(1,true);
-	    if (code.isDebugOnFor(frame))
-	    {
-		frame.complete();
-		StringBuffer buf = new StringBuffer(256);
-		synchronized(buf)
-		{   
-		    formatObject(buf,o1);
-		    formatObject(buf,o2);
-		    formatObject(buf,o3);
-		    formatObject(buf,o4);
-		    formatObject(buf,o5);
-		}
-		Log.message(Log.CODE_DEBUG, buf.toString(),frame);
-	    }
-	}
+        Code code = instance();
+        if (code._debugOn)
+        {
+            Frame frame = new Frame(1,true);
+            if (code.isDebugOnFor(frame))
+            {
+                frame.complete();
+                StringBuffer buf = new StringBuffer(256);
+                synchronized(buf)
+                {   
+                    formatObject(buf,o1);
+                    formatObject(buf,o2);
+                    formatObject(buf,o3);
+                    formatObject(buf,o4);
+                    formatObject(buf,o5);
+                }
+                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+            }
+        }
     }
     /*-------------------------------------------------------------------*/
     /** As debug(String)
@@ -791,28 +791,28 @@ public class Code
      * @param ex The Throwable to print the full stack trace of
      */
     public static void debug(Object o1,Object o2,Object o3, Object o4,
-			     Object o5,Object o6)
+                             Object o5,Object o6)
     {
-	Code code = instance();
-	if (code._debugOn)
-	{
-	    Frame frame = new Frame(1,true);
-	    if (code.isDebugOnFor(frame))
-	    {
-		frame.complete();
-		StringBuffer buf = new StringBuffer(256);
-		synchronized(buf)
-		{   
-		    formatObject(buf,o1);
-		    formatObject(buf,o2);
-		    formatObject(buf,o3);
-		    formatObject(buf,o4);
-		    formatObject(buf,o5);
-		    formatObject(buf,o6);
-		}
-		Log.message(Log.CODE_DEBUG, buf.toString(),frame);
-	    }
-	}
+        Code code = instance();
+        if (code._debugOn)
+        {
+            Frame frame = new Frame(1,true);
+            if (code.isDebugOnFor(frame))
+            {
+                frame.complete();
+                StringBuffer buf = new StringBuffer(256);
+                synchronized(buf)
+                {   
+                    formatObject(buf,o1);
+                    formatObject(buf,o2);
+                    formatObject(buf,o3);
+                    formatObject(buf,o4);
+                    formatObject(buf,o5);
+                    formatObject(buf,o6);
+                }
+                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+            }
+        }
     }
     /*-------------------------------------------------------------------*/
     /** As debug(String)
@@ -820,29 +820,29 @@ public class Code
      * @param ex The Throwable to print the full stack trace of
      */
     public static void debug(Object o1,Object o2,Object o3, Object o4,
-			     Object o5,Object o6,Object o7)
+                             Object o5,Object o6,Object o7)
     {
-	Code code = instance();
-	if (code._debugOn)
-	{
-	    Frame frame = new Frame(1,true);
-	    if (code.isDebugOnFor(frame))
-	    {
-		frame.complete();
-		StringBuffer buf = new StringBuffer(256);
-		synchronized(buf)
-		{   
-		    formatObject(buf,o1);
-		    formatObject(buf,o2);
-		    formatObject(buf,o3);
-		    formatObject(buf,o4);
-		    formatObject(buf,o5);
-		    formatObject(buf,o6);
-		    formatObject(buf,o7);
-		}
-		Log.message(Log.CODE_DEBUG, buf.toString(),frame);
-	    }
-	}
+        Code code = instance();
+        if (code._debugOn)
+        {
+            Frame frame = new Frame(1,true);
+            if (code.isDebugOnFor(frame))
+            {
+                frame.complete();
+                StringBuffer buf = new StringBuffer(256);
+                synchronized(buf)
+                {   
+                    formatObject(buf,o1);
+                    formatObject(buf,o2);
+                    formatObject(buf,o3);
+                    formatObject(buf,o4);
+                    formatObject(buf,o5);
+                    formatObject(buf,o6);
+                    formatObject(buf,o7);
+                }
+                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+            }
+        }
     }
     /*-------------------------------------------------------------------*/
     /** As debug(String)
@@ -850,30 +850,30 @@ public class Code
      * @param ex The Throwable to print the full stack trace of
      */
     public static void debug(Object o1,Object o2,Object o3,Object o4,
-			     Object o5,Object o6,Object o7,Object o8)
+                             Object o5,Object o6,Object o7,Object o8)
     {
-	Code code = instance();
-	if (code._debugOn)
-	{
-	    Frame frame = new Frame(1,true);
-	    if (code.isDebugOnFor(frame))
-	    {
-		frame.complete();
-		StringBuffer buf = new StringBuffer(256);
-		synchronized(buf)
-		{   
-		    formatObject(buf,o1);
-		    formatObject(buf,o2);
-		    formatObject(buf,o3);
-		    formatObject(buf,o4);
-		    formatObject(buf,o5);
-		    formatObject(buf,o6);
-		    formatObject(buf,o7);
-		    formatObject(buf,o8);
-		}
-		Log.message(Log.CODE_DEBUG, buf.toString(),frame);
-	    }
-	}
+        Code code = instance();
+        if (code._debugOn)
+        {
+            Frame frame = new Frame(1,true);
+            if (code.isDebugOnFor(frame))
+            {
+                frame.complete();
+                StringBuffer buf = new StringBuffer(256);
+                synchronized(buf)
+                {   
+                    formatObject(buf,o1);
+                    formatObject(buf,o2);
+                    formatObject(buf,o3);
+                    formatObject(buf,o4);
+                    formatObject(buf,o5);
+                    formatObject(buf,o6);
+                    formatObject(buf,o7);
+                    formatObject(buf,o8);
+                }
+                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+            }
+        }
     }
     
     
@@ -883,101 +883,101 @@ public class Code
      */
     public static void ignore(Throwable ex)
     {
-	Code code = instance();
-	if (code._debugOn)
-	{
-	    Frame frame = new Frame(1,true);
-	    if (code.isDebugOnFor(frame))
-	    {
-		frame.complete();
-		StringBuffer buf = new StringBuffer(256);
-		synchronized(buf)
-		{   
-		    buf.append("Ignored");
-		    formatObject(buf,ex);
-		}
-		Log.message(Log.CODE_DEBUG, buf.toString(),frame);
-	    }
-	}
+        Code code = instance();
+        if (code._debugOn)
+        {
+            Frame frame = new Frame(1,true);
+            if (code.isDebugOnFor(frame))
+            {
+                frame.complete();
+                StringBuffer buf = new StringBuffer(256);
+                synchronized(buf)
+                {   
+                    buf.append("Ignored");
+                    formatObject(buf,ex);
+                }
+                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+            }
+        }
     }
     
     
     /*-------------------------------------------------------------------*/
     private boolean isDebugOnFor(Frame frame)
     {
-	if (_debugOn)
-	{
-	    if (_debugPatterns==null)
-		return true;
-	    else
-	    {
-		int i = _debugPatterns.size();
-		for (;--i>=0;)
-		{
-		    if(frame._where.indexOf((String)_debugPatterns
-					    .elementAt(i))>=0)
-			return true;
-		}
-	    }
-	}
-	return false;
+        if (_debugOn)
+        {
+            if (_debugPatterns==null)
+                return true;
+            else
+            {
+                int i = _debugPatterns.size();
+                for (;--i>=0;)
+                {
+                    if(frame._where.indexOf((String)_debugPatterns
+                                            .elementAt(i))>=0)
+                        return true;
+                }
+            }
+        }
+        return false;
     }
     
     /*-------------------------------------------------------------------*/
     private static void formatObject(StringBuffer buf,Object o)
     {
-	if (o==null)
-	    buf.append("null");
-	else if (o instanceof Throwable)
-	{
-	    Throwable ex = (Throwable) o;
-	    buf.append('\n');
-		
-	    if (Code.instance()._suppressStack)
-	    {
-		buf.append(ex.toString());
-		buf.append("\nNo stack available\n--");
-	    }
-	    else
-	    {
-		synchronized(__writerBuffer)
-		{
-		    __writerBuffer.setLength(0);
-		    ex.printStackTrace(__out);
-		    if (ex instanceof
-			java.lang.reflect.InvocationTargetException)
-		    {
-			ex=((java.lang.reflect.InvocationTargetException)ex)
-			    .getTargetException();
-			__out.println("Target Exception:");
-			ex.printStackTrace(__out);
-		    }
-		    else if (ex instanceof
-			     java.lang.ExceptionInInitializerError)
-		    {
-			ex=((java.lang.ExceptionInInitializerError)ex)
-			    .getException();
-			__out.println("Initializer Exception:");
-			ex.printStackTrace(__out);
-		    }
-		    __out.print("--");
-		    __out.flush();
-		    buf.append(__writerBuffer.toString());
-		}
-	    }
-	}
-	else
-	    buf.append(o.toString());
-	
+        if (o==null)
+            buf.append("null");
+        else if (o instanceof Throwable)
+        {
+            Throwable ex = (Throwable) o;
+            buf.append('\n');
+                
+            if (Code.instance()._suppressStack)
+            {
+                buf.append(ex.toString());
+                buf.append("\nNo stack available\n--");
+            }
+            else
+            {
+                synchronized(__writerBuffer)
+                {
+                    __writerBuffer.setLength(0);
+                    ex.printStackTrace(__out);
+                    if (ex instanceof
+                        java.lang.reflect.InvocationTargetException)
+                    {
+                        ex=((java.lang.reflect.InvocationTargetException)ex)
+                            .getTargetException();
+                        __out.println("Target Exception:");
+                        ex.printStackTrace(__out);
+                    }
+                    else if (ex instanceof
+                             java.lang.ExceptionInInitializerError)
+                    {
+                        ex=((java.lang.ExceptionInInitializerError)ex)
+                            .getException();
+                        __out.println("Initializer Exception:");
+                        ex.printStackTrace(__out);
+                    }
+                    __out.print("--");
+                    __out.flush();
+                    buf.append(__writerBuffer.toString());
+                }
+            }
+        }
+        else
+            buf.append(o.toString());
+        
     }
     
     
     /*-------------------------------------------------------------------*/
     private static String formatThrowable(String msg,Throwable ex)
     {
-	StringBuffer buf = new StringBuffer(msg);
-	formatObject(buf,ex);
-	return buf.toString();
+        StringBuffer buf = new StringBuffer(msg);
+        formatObject(buf,ex);
+        return buf.toString();
     }
     
 };

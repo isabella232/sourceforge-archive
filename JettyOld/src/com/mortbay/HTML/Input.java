@@ -32,63 +32,63 @@ public class Input extends Tag
     /* ----------------------------------------------------------------- */
     public Input(String type,String name)
     {
-	super("INPUT");
-	attribute("TYPE",type);
-	attribute("NAME",name);
+        super("INPUT");
+        attribute("TYPE",type);
+        attribute("NAME",name);
     }
 
     /* ----------------------------------------------------------------- */
     public Input(String type,String name, String value)
     {
-	this(type,name);
-	attribute("VALUE",value);
+        this(type,name);
+        attribute("VALUE",value);
     }
 
     /* ----------------------------------------------------------------- */
     public Input(Image image,String name, String value)
     {
-	super("INPUT");
-	attribute("TYPE","IMAGE");
-	attribute("NAME",name);
-	if (value!=null)
-	    attribute("VALUE",value);
-	attribute(image.attributes());
+        super("INPUT");
+        attribute("TYPE","IMAGE");
+        attribute("NAME",name);
+        if (value!=null)
+            attribute("VALUE",value);
+        attribute(image.attributes());
     }
     
     /* ----------------------------------------------------------------- */
     public Input(Image image,String name)
     {
-	super("INPUT");
-	attribute("TYPE","IMAGE");
-	attribute("NAME",name);
-	attribute(image.attributes());
+        super("INPUT");
+        attribute("TYPE","IMAGE");
+        attribute("NAME",name);
+        attribute(image.attributes());
     }
 
     /* ----------------------------------------------------------------- */
     public Input check()
     {
-	attribute("CHECKED");
-	return this;
+        attribute("CHECKED");
+        return this;
     }
 
     /* ----------------------------------------------------------------- */
     public Input setSize(int size)
     {
-	size(size);
-	return this;
+        size(size);
+        return this;
     }
 
     /* ----------------------------------------------------------------- */
     public Input setMaxSize(int size)
     {
-	attribute("MAXLENGTH",size);
-	return this;
+        attribute("MAXLENGTH",size);
+        return this;
     }
 
     /* ----------------------------------------------------------------- */
     public Input fixed()
     {
-	setMaxSize(size());
-	return this;
+        setMaxSize(size());
+        return this;
     }
 }

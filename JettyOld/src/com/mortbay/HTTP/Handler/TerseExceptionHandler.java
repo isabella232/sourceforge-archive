@@ -32,11 +32,11 @@ public class TerseExceptionHandler implements ExceptionHandler
     public void handle(HttpRequest request, HttpResponse response,
                        Exception exception) throws Exception
     {
-	if (exception instanceof java.io.IOException)
-	    Code.debug(exception);
-	else
-	    Code.warning(exception);
-	
+        if (exception instanceof java.io.IOException)
+            Code.debug(exception);
+        else
+            Code.warning(exception);
+        
         response.sendError(HttpResponse.SC_INTERNAL_SERVER_ERROR,
                            "Server Error");
     }

@@ -11,6 +11,6 @@ public class FtpException extends java.io.IOException
     /* ------------------------------------------------------------------ */
     FtpException(String msg)
     {
-	super(msg);
+        super(msg);
     }
 }

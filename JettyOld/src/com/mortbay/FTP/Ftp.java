@@ -81,11 +81,11 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
     public Ftp(InetAddress hostAddr,
-	       String username, 
-	       String password)
-	 throws FtpException, IOException
+               String username, 
+               String password)
+         throws FtpException, IOException
     {
-	this(hostAddr,defaultPort,username,password);
+        this(hostAddr,defaultPort,username,password);
     }
     
     /* -------------------------------------------------------------------- */
@@ -101,23 +101,23 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
     public Ftp(InetAddress hostAddr, 
-	       int port,
-	       String username, 
-	       String password)
-	 throws FtpException, IOException
+               int port,
+               String username, 
+               String password)
+         throws FtpException, IOException
     {
-	open(hostAddr,port);
-	authenticate(username,password);
+        open(hostAddr,port);
+        authenticate(username,password);
     }
     
     /* -------------------------------------------------------------------- */
     void cmd(String cmd)
-	 throws IOException
+         throws IOException
     {
-	Code.debug("Command="+cmd);
-	out.write(cmd);
-	out.write("\015\012");
-	out.flush();
+        Code.debug("Command="+cmd);
+        out.write(cmd);
+        out.write("\015\012");
+        out.flush();
     }
     
     
@@ -127,9 +127,9 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
     public synchronized void open(InetAddress hostAddr)
-	 throws FtpException, IOException
+         throws FtpException, IOException
     {
-	open(hostAddr,defaultPort);
+        open(hostAddr,defaultPort);
     }
     
     /* -------------------------------------------------------------------- */
@@ -140,18 +140,18 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
     public synchronized void open(InetAddress hostAddr,
-				  int port)
-	 throws FtpException, IOException
+                                  int port)
+         throws FtpException, IOException
     {
-	Code.assert(command==null,"Ftp already opened");
-	
-	if (port==0)
-	    port=defaultPort;
-	command = new Socket(hostAddr,port);
-	in = new CmdReplyStream(command.getInputStream());
-	out= new OutputStreamWriter(command.getOutputStream());
-	in.waitForCompleteOK();
-	Code.debug("Command Port Opened");
+        Code.assert(command==null,"Ftp already opened");
+        
+        if (port==0)
+            port=defaultPort;
+        command = new Socket(hostAddr,port);
+        in = new CmdReplyStream(command.getInputStream());
+        out= new OutputStreamWriter(command.getOutputStream());
+        in.waitForCompleteOK();
+        Code.debug("Command Port Opened");
     }
     
     /* -------------------------------------------------------------------- */
@@ -162,25 +162,25 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
      public synchronized void authenticate(String username, 
-					   String password)
-	 throws FtpException,IOException
+                                           String password)
+         throws FtpException,IOException
     {
-	waitUntilTransferComplete();
-	cmd("USER "+username);
-	CmdReply reply = in.readReply();
-	if (reply.intermediate())
-	{
-	    Code.debug("Sending password");
-	    cmd("PASS "+password);
-	}
-	else if (reply.positive())
-	    Code.debug("No password required");
-	else
-	    throw new FtpReplyException(reply);
+        waitUntilTransferComplete();
+        cmd("USER "+username);
+        CmdReply reply = in.readReply();
+        if (reply.intermediate())
+        {
+            Code.debug("Sending password");
+            cmd("PASS "+password);
+        }
+        else if (reply.positive())
+            Code.debug("No password required");
+        else
+            throw new FtpReplyException(reply);
 
-	in.waitForCompleteOK();
-	Code.debug("Authenticated");
-    }	 
+        in.waitForCompleteOK();
+        Code.debug("Authenticated");
+    }    
    
    
     /* ------------------------------------------------------------ */
@@ -191,12 +191,12 @@ public class Ftp
      * @exception IOException IOException
      */
     public synchronized void setType(char type)
-	 throws FtpException,IOException
+         throws FtpException,IOException
     {
-	waitUntilTransferComplete();
+        waitUntilTransferComplete();
 
-	cmd("TYPE "+type);
-	in.waitForCompleteOK();
+        cmd("TYPE "+type);
+        in.waitForCompleteOK();
     }
    
     /* ------------------------------------------------------------ */
@@ -208,12 +208,12 @@ public class Ftp
      * @exception IOException IOException
      */
     public synchronized void setType(char type, char param)
-	 throws FtpException,IOException
+         throws FtpException,IOException
     {
-	waitUntilTransferComplete();
+        waitUntilTransferComplete();
 
-	cmd("TYPE "+type+' '+param);
-	in.waitForCompleteOK();
+        cmd("TYPE "+type+' '+param);
+        in.waitForCompleteOK();
     }
    
     /* ------------------------------------------------------------ */
@@ -224,12 +224,12 @@ public class Ftp
      * @exception IOException IOException
      */
     public synchronized void setType(int length)
-	 throws FtpException,IOException
+         throws FtpException,IOException
     {
-	waitUntilTransferComplete();
+        waitUntilTransferComplete();
 
-	cmd("TYPE "+Ftp.LOCAL+' '+length);
-	in.waitForCompleteOK();
+        cmd("TYPE "+Ftp.LOCAL+' '+length);
+        in.waitForCompleteOK();
     }
     
     
@@ -243,17 +243,17 @@ public class Ftp
      *            the call to complete is made.
      */
     public synchronized boolean transferComplete()
-	 throws FtpException, IOException
+         throws FtpException, IOException
     {
-	if (transferException!=null)
-	{
-	    if (transferException instanceof FtpException)
-		throw (FtpException)transferException;
-	    if (transferException instanceof IOException)
-		throw (IOException)transferException;
-	    Code.fail("Bad exception type",transferException);
-	}
-	return (transferDataPort==null);
+        if (transferException!=null)
+        {
+            if (transferException instanceof FtpException)
+                throw (FtpException)transferException;
+            if (transferException instanceof IOException)
+                throw (IOException)transferException;
+            Code.fail("Bad exception type",transferException);
+        }
+        return (transferDataPort==null);
     }
     
    
@@ -266,22 +266,22 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
     public synchronized void waitUntilTransferComplete()
-	 throws FtpException,IOException
+         throws FtpException,IOException
     {
-	while (transferDataPort!=null)
-	{
-	    Code.debug("waitUntilTransferComplete...");
-	    try{wait(10000);}catch(InterruptedException e){};
-	}
-	
-	if (transferException!=null)
-	{
-	    if (transferException instanceof FtpException)
-		throw (FtpException)transferException;
-	    if (transferException instanceof IOException)
-		throw (IOException)transferException;
-	    Code.fail("Bad exception type",transferException);
-	}
+        while (transferDataPort!=null)
+        {
+            Code.debug("waitUntilTransferComplete...");
+            try{wait(10000);}catch(InterruptedException e){};
+        }
+        
+        if (transferException!=null)
+        {
+            if (transferException instanceof FtpException)
+                throw (FtpException)transferException;
+            if (transferException instanceof IOException)
+                throw (IOException)transferException;
+            Code.fail("Bad exception type",transferException);
+        }
     }
     
 
@@ -292,21 +292,21 @@ public class Ftp
      */
     synchronized void transferCompleteNotification(Exception dataPortException)
     {
-	Code.debug("Transfer Complete");
-	transferException=dataPortException;
-	try{
-	    if (in!=null)
-		in.waitForCompleteOK();
-	}
-	catch (Exception e){
-	    if (transferException==null)
-		transferException=e;
-	}
-	finally{
-	    transferDataPort=null;
-	    notifyAll();
-	    transferCompleteNotification();
-	}
+        Code.debug("Transfer Complete");
+        transferException=dataPortException;
+        try{
+            if (in!=null)
+                in.waitForCompleteOK();
+        }
+        catch (Exception e){
+            if (transferException==null)
+                transferException=e;
+        }
+        finally{
+            transferDataPort=null;
+            notifyAll();
+            transferCompleteNotification();
+        }
     }
 
     /* -------------------------------------------------------------------- */
@@ -330,10 +330,10 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
     public synchronized void startGet(String remoteName, String localName)
-	 throws FtpException,IOException
+         throws FtpException,IOException
     {
-	FileOutputStream file = new FileOutputStream(localName);
-	startGet(remoteName,file);
+        FileOutputStream file = new FileOutputStream(localName);
+        startGet(remoteName,file);
     }
     
     /* -------------------------------------------------------------------- */
@@ -347,28 +347,28 @@ public class Ftp
      */
     public synchronized void startGet(String remoteName, 
                                       OutputStream destination)
-	 throws FtpException,IOException
+         throws FtpException,IOException
     {
-	waitUntilTransferComplete();
-	
-	transferException=null;
-	transferDataPort = new DataPort(this,destination);
-	try{
-	    cmd(transferDataPort.getFtpPortCommand());
-	    in.waitForCompleteOK();
-	    cmd("RETR "+remoteName);
-	    in.waitForPreliminaryOK();
-	}
-	catch(FtpException e){
-	    transferDataPort.close();
-	    transferDataPort=null;
-	    throw e;
-	}	
-	catch(IOException e){
-	    transferDataPort.close();
-	    transferDataPort=null;
-	    throw e;
-	}	
+        waitUntilTransferComplete();
+        
+        transferException=null;
+        transferDataPort = new DataPort(this,destination);
+        try{
+            cmd(transferDataPort.getFtpPortCommand());
+            in.waitForCompleteOK();
+            cmd("RETR "+remoteName);
+            in.waitForPreliminaryOK();
+        }
+        catch(FtpException e){
+            transferDataPort.close();
+            transferDataPort=null;
+            throw e;
+        }       
+        catch(IOException e){
+            transferDataPort.close();
+            transferDataPort=null;
+            throw e;
+        }       
     }   
     
    
@@ -382,10 +382,10 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
     public synchronized void startPut(String localName, String remoteName)
-	 throws FtpException, IOException
+         throws FtpException, IOException
     {
-	FileInputStream file = new FileInputStream(localName);
-	startPut(file,remoteName);
+        FileInputStream file = new FileInputStream(localName);
+        startPut(file,remoteName);
     }     
     
    
@@ -399,28 +399,28 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
     public synchronized void startPut(InputStream source, String remoteName)
-	 throws FtpException, IOException
+         throws FtpException, IOException
     {
-	waitUntilTransferComplete();
-	
-	transferException=null;
-	transferDataPort = new DataPort(this,source);
-	try{
-	    cmd(transferDataPort.getFtpPortCommand());
-	    in.waitForCompleteOK();
-	    cmd("STOR "+remoteName);
-	    in.waitForPreliminaryOK();
-	}
-	catch(FtpException e){
-	    transferDataPort.close();
-	    transferDataPort=null;
-	    throw e;
-	}	
-	catch(IOException e){
-	    transferDataPort.close();
-	    transferDataPort=null;
-	    throw e;
-	}	
+        waitUntilTransferComplete();
+        
+        transferException=null;
+        transferDataPort = new DataPort(this,source);
+        try{
+            cmd(transferDataPort.getFtpPortCommand());
+            in.waitForCompleteOK();
+            cmd("STOR "+remoteName);
+            in.waitForPreliminaryOK();
+        }
+        catch(FtpException e){
+            transferDataPort.close();
+            transferDataPort=null;
+            throw e;
+        }       
+        catch(IOException e){
+            transferDataPort.close();
+            transferDataPort=null;
+            throw e;
+        }       
     }   
     
    
@@ -438,46 +438,46 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
     public synchronized void sendFile(String srcName,
-				      InetAddress destAddr,
-				      int destPort,
-				      String username, 
-				      String password,
-				      String destName)
-	 throws FtpException,IOException
+                                      InetAddress destAddr,
+                                      int destPort,
+                                      String username, 
+                                      String password,
+                                      String destName)
+         throws FtpException,IOException
     {
-	Code.debug("startSend("+
-		   srcName+','+
-		   destAddr+','+
-		   destPort+','+
-		   username+','+
-		   password+','+
-		   destName+')');
-	
-	waitUntilTransferComplete();
-	
-	// Make connection with other server
-	Ftp destFtp = new Ftp(destAddr,destPort,username,password);
+        Code.debug("startSend("+
+                   srcName+','+
+                   destAddr+','+
+                   destPort+','+
+                   username+','+
+                   password+','+
+                   destName+')');
+        
+        waitUntilTransferComplete();
+        
+        // Make connection with other server
+        Ftp destFtp = new Ftp(destAddr,destPort,username,password);
 
-	// Put it into passive mode
-	destFtp.cmd("PASV");
-	CmdReply reply = destFtp.in.waitForCompleteOK();
+        // Put it into passive mode
+        destFtp.cmd("PASV");
+        CmdReply reply = destFtp.in.waitForCompleteOK();
 
-	// Tell the src server the port
-	String portCommand = "PORT "+
-	    reply.text.substring(reply.text.lastIndexOf("(")+1,
-				 reply.text.lastIndexOf(")"));
-	Code.debug(portCommand);
-	cmd(portCommand);
-	in.waitForCompleteOK();
+        // Tell the src server the port
+        String portCommand = "PORT "+
+            reply.text.substring(reply.text.lastIndexOf("(")+1,
+                                 reply.text.lastIndexOf(")"));
+        Code.debug(portCommand);
+        cmd(portCommand);
+        in.waitForCompleteOK();
 
-	    // Setup the dest server to store the file
-	destFtp.cmd("STOR "+destName);
-	    
-	    // start the send
-	cmd("RETR "+srcName);
-	in.waitForCompleteOK();
-	destFtp.in.waitForCompleteOK();
-	
+            // Setup the dest server to store the file
+        destFtp.cmd("STOR "+destName);
+            
+            // start the send
+        cmd("RETR "+srcName);
+        in.waitForCompleteOK();
+        destFtp.in.waitForCompleteOK();
+        
     }   
     
     
@@ -488,15 +488,15 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
     public synchronized String workingDirectory()
-	 throws FtpException,IOException
+         throws FtpException,IOException
     {
-	waitUntilTransferComplete();
+        waitUntilTransferComplete();
 
-	cmd("PWD");
-	CmdReply reply =in.waitForCompleteOK();
-	Code.debug("PWD="+reply.text);
+        cmd("PWD");
+        CmdReply reply =in.waitForCompleteOK();
+        Code.debug("PWD="+reply.text);
 
-	return reply.text;
+        return reply.text;
     }
     
    
@@ -506,13 +506,13 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
     public synchronized void workingDirectory(String dir)
-	 throws FtpException,IOException
+         throws FtpException,IOException
     {
-	waitUntilTransferComplete();
+        waitUntilTransferComplete();
 
-	cmd("CWD "+dir);
-	CmdReply reply =in.waitForCompleteOK();
-	Code.debug("CWD="+reply.text);
+        cmd("CWD "+dir);
+        CmdReply reply =in.waitForCompleteOK();
+        Code.debug("CWD="+reply.text);
     }
     
     /* -------------------------------------------------------------------- */
@@ -522,15 +522,15 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
     public synchronized void rename(String oldName, String newName)
-	 throws FtpException, IOException
+         throws FtpException, IOException
     {
-	waitUntilTransferComplete();
-	
-	cmd("RNFR "+oldName);
-	in.waitForIntermediateOK();
-	cmd("RNTO "+newName);
-	in.waitForCompleteOK();
-	Code.debug("Renamed");
+        waitUntilTransferComplete();
+        
+        cmd("RNFR "+oldName);
+        in.waitForIntermediateOK();
+        cmd("RNTO "+newName);
+        in.waitForCompleteOK();
+        Code.debug("Renamed");
     }
     
    
@@ -540,12 +540,12 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
     public synchronized void delete(String remoteName)
-	 throws FtpException, IOException
+         throws FtpException, IOException
     {
-	waitUntilTransferComplete();
-	cmd("DELE "+remoteName);
-	in.waitForCompleteOK();
-	Code.debug("Deleted "+remoteName);
+        waitUntilTransferComplete();
+        cmd("DELE "+remoteName);
+        in.waitForCompleteOK();
+        Code.debug("Deleted "+remoteName);
     }
     
    
@@ -554,13 +554,13 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
     public synchronized void abort()
-	 throws FtpException, IOException
+         throws FtpException, IOException
     {
-	cmd("ABOR");
-	if (transferDataPort==null)
-	    in.waitForCompleteOK();
-	else
-	    waitUntilTransferComplete();
+        cmd("ABOR");
+        if (transferDataPort==null)
+            in.waitForCompleteOK();
+        else
+            waitUntilTransferComplete();
     }
     
    
@@ -570,53 +570,53 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
     public synchronized Vector list()
-	 throws FtpException, IOException
+         throws FtpException, IOException
     {
-	Code.debug("list");
-	waitUntilTransferComplete();
+        Code.debug("list");
+        waitUntilTransferComplete();
 
-	ByteArrayOutputStream bout = new ByteArrayOutputStream();
-	transferException=null;
-	transferDataPort = new DataPort(this,bout);
-	try{
-	    cmd(transferDataPort.getFtpPortCommand());
-	    in.waitForCompleteOK();
-	    cmd("NLST");
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        transferException=null;
+        transferDataPort = new DataPort(this,bout);
+        try{
+            cmd(transferDataPort.getFtpPortCommand());
+            in.waitForCompleteOK();
+            cmd("NLST");
             in.waitForPreliminaryOK();
-	    waitUntilTransferComplete();
-	}
-	catch(FtpReplyException e)
-	{
-	    transferDataPort.close();
-	    transferDataPort=null;
-	    // Return null if there was no directory.
-	    if ("550".equals(e.reply.code))
-		return null;
-	    throw e;
-	}
-	catch(FtpException e)
-	{
-	    transferDataPort.close();
-	    transferDataPort=null;
-	    throw e;
-	}	
-	catch(IOException e)
-	{
-	    transferDataPort.close();
-	    transferDataPort=null;
-	    throw e;
-	}
+            waitUntilTransferComplete();
+        }
+        catch(FtpReplyException e)
+        {
+            transferDataPort.close();
+            transferDataPort=null;
+            // Return null if there was no directory.
+            if ("550".equals(e.reply.code))
+                return null;
+            throw e;
+        }
+        catch(FtpException e)
+        {
+            transferDataPort.close();
+            transferDataPort=null;
+            throw e;
+        }       
+        catch(IOException e)
+        {
+            transferDataPort.close();
+            transferDataPort=null;
+            throw e;
+        }
 
-	LineInput in = new LineInput(
-	    new ByteArrayInputStream(bout.toByteArray()));
+        LineInput in = new LineInput(
+            new ByteArrayInputStream(bout.toByteArray()));
 
-	Vector listVector = new Vector();
-	String file;
-	while((file=in.readLine())!=null)
-	    listVector.addElement(file);
+        Vector listVector = new Vector();
+        String file;
+        while((file=in.readLine())!=null)
+            listVector.addElement(file);
 
-	Code.debug("Got list "+listVector.toString());
-	return listVector;
+        Code.debug("Got list "+listVector.toString());
+        return listVector;
     }
     
    
@@ -626,15 +626,15 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
     public synchronized String status()
-	 throws FtpException, IOException
+         throws FtpException, IOException
     {
-	waitUntilTransferComplete();
+        waitUntilTransferComplete();
 
-	cmd("STAT");
-	CmdReply reply =in.waitForCompleteOK();
-	Code.debug("STAT="+reply.text);
+        cmd("STAT");
+        CmdReply reply =in.waitForCompleteOK();
+        Code.debug("STAT="+reply.text);
 
-	return reply.text;
+        return reply.text;
     }
     
     /* -------------------------------------------------------------------- */
@@ -642,21 +642,21 @@ public class Ftp
      * @exception FtpException For local problems or negative server responses
      */
     public synchronized void close()
-	 throws IOException
+         throws IOException
     {
-	if (out!=null)
-	{
-	    cmd("QUIT");
-	    if (command!=null)
-	    {
-		command.close();
-		command=null;
-		in=null;
-		out=null;
-		if (transferDataPort!=null)
-		    transferDataPort.close();
-	    }	
-	}
+        if (out!=null)
+        {
+            cmd("QUIT");
+            if (command!=null)
+            {
+                command.close();
+                command=null;
+                in=null;
+                out=null;
+                if (transferDataPort!=null)
+                    transferDataPort.close();
+            }   
+        }
     }
 
 
@@ -667,229 +667,229 @@ public class Ftp
      * @param out the OutputStream to place the fetched file in
      */
     public void getUrl(String url, OutputStream out)
-	 throws FtpException,IOException
+         throws FtpException,IOException
     {
-	Code.assert(url.startsWith("ftp://"),
-		    "url must be for the form: "+
-		    "ftp://username:password@host:port/path/to/file");
+        Code.assert(url.startsWith("ftp://"),
+                    "url must be for the form: "+
+                    "ftp://username:password@host:port/path/to/file");
 
-	String uri = url.substring(6);
-	if (uri.indexOf("?")>=0)
-	    uri=uri.substring(0,uri.indexOf("?"));
-	
-	StringTokenizer tok = new StringTokenizer(uri,":@/",true);
+        String uri = url.substring(6);
+        if (uri.indexOf("?")>=0)
+            uri=uri.substring(0,uri.indexOf("?"));
+        
+        StringTokenizer tok = new StringTokenizer(uri,":@/",true);
 
-	String user="anonymous";
-	String pass="com.mortbay.FTP@"+InetAddress.getLocalHost().getHostName();
-	String host=null;
-	String port=null;
-	String path=null;
-	
-	String s[]=new String[3];
-	int i=0;
+        String user="anonymous";
+        String pass="com.mortbay.FTP@"+InetAddress.getLocalHost().getHostName();
+        String host=null;
+        String port=null;
+        String path=null;
+        
+        String s[]=new String[3];
+        int i=0;
 
     loop:
-	
-	while(tok.hasMoreTokens())
-	{
-	    String t = tok.nextToken();
-	    if (t.length()==1)
-	    {
-		switch (t.charAt(0))
-		{
-		  case ':':
-		      continue;
-		  case '@':
-		      user=s[0];
-		      pass=s[1];
-		      i=0;
-		      s[0]=null;
-		      s[1]=null;
-		      continue;
-		      
-		  case '/':
-		      host=s[0];
-		      if (i==2)
-			  port=s[1];
-		      try{
-			  path=tok.nextToken(" \n\t");
-		      }
-		      catch(NoSuchElementException e){
-			  path="/";
-		      }
-		      
-		      break loop;
-		}
-	    }
+        
+        while(tok.hasMoreTokens())
+        {
+            String t = tok.nextToken();
+            if (t.length()==1)
+            {
+                switch (t.charAt(0))
+                {
+                  case ':':
+                      continue;
+                  case '@':
+                      user=s[0];
+                      pass=s[1];
+                      i=0;
+                      s[0]=null;
+                      s[1]=null;
+                      continue;
+                      
+                  case '/':
+                      host=s[0];
+                      if (i==2)
+                          port=s[1];
+                      try{
+                          path=tok.nextToken(" \n\t");
+                      }
+                      catch(NoSuchElementException e){
+                          path="/";
+                      }
+                      
+                      break loop;
+                }
+            }
 
-	    s[i++]=t;
-	}
+            s[i++]=t;
+        }
 
-	Code.debug("getUrl=ftp://"+user+
-		   ((pass==null)?"":(":"+pass))+
-		   "@"+host+
-		   ((port==null)?"":(":"+port))+
-		   ((path.startsWith("/"))?path:("/"+path)));
-	
-	close();
-	if (port!=null)
-	    open(InetAddress.getByName(host),Integer.parseInt(port));
-	else
-	    open(InetAddress.getByName(host));
+        Code.debug("getUrl=ftp://"+user+
+                   ((pass==null)?"":(":"+pass))+
+                   "@"+host+
+                   ((port==null)?"":(":"+port))+
+                   ((path.startsWith("/"))?path:("/"+path)));
+        
+        close();
+        if (port!=null)
+            open(InetAddress.getByName(host),Integer.parseInt(port));
+        else
+            open(InetAddress.getByName(host));
 
-	authenticate(user,pass);
-	startGet(path,out);
-	waitUntilTransferComplete();
+        authenticate(user,pass);
+        startGet(path,out);
+        waitUntilTransferComplete();
     }
     
     /* -------------------------------------------------------------------- */
     public static void main(String[] args)
     {
-	try{
-	    if (args.length!=1 &&
-		(args.length<3 || args.length>=4 &&
-		!(args[3].equals("del") ||
-		  args[3].equals("ren") ||
-		  args[3].equals("get") ||
-		  args[3].equals("snd") ||
-		  args[3].equals("put") ||
-		  args[3].equals("url"))))
-	    {
-	        System.err.println("Usage: java com.mortbay.FTP.Ftp host user password [ del|get|put|ren|snd args... ]");
-	        System.err.println("       java com.mortbay.FTP.Ftp ftp://user:pass@host:port/file/path");
-		System.exit(1);
-	    }
+        try{
+            if (args.length!=1 &&
+                (args.length<3 || args.length>=4 &&
+                !(args[3].equals("del") ||
+                  args[3].equals("ren") ||
+                  args[3].equals("get") ||
+                  args[3].equals("snd") ||
+                  args[3].equals("put") ||
+                  args[3].equals("url"))))
+            {
+                System.err.println("Usage: java com.mortbay.FTP.Ftp host user password [ del|get|put|ren|snd args... ]");
+                System.err.println("       java com.mortbay.FTP.Ftp ftp://user:pass@host:port/file/path");
+                System.exit(1);
+            }
 
-	    if (args.length==1)
-	    {
-		Ftp ftp = new Ftp();
-		ftp.getUrl(args[0],System.out);
-	    }
-	    else
-	    {		
-		Ftp ftp = new Ftp(InetAddress.getByName(args[0]),
-				  args[1],args[2]);
-	    
-		//try{
-		//    System.out.println("Status: "+ftp.status());
-		//}catch (Exception ignore){}
-		
-		if (args.length==3)
-		    System.out.println(ftp.list());
-		else
-		{
-		    for (int file=4; file<args.length; file++)
-		    {
-			System.out.println(args[3]+" "+args[file]);
-		    
-			try{
-			    if (args[3].equals("del"))
-				ftp.delete(args[file]);
-			    else if (args[3].equals("ren"))
-				ftp.rename(args[file],args[++file]);
-			    else  if (args[3].equals("get"))
-			    {
-				if (file+1==args.length)
-				    ftp.startGet(args[file],System.out);
-				else
-				    ftp.startGet(args[file],args[++file]);
-			    }
-			    else if (args[3].equals("put")) 
-				ftp.startPut(args[file],args[++file]);
-			    else if (args[3].equals("snd"))
-				ftp.sendFile(args[file],
-					     InetAddress.getByName(args[++file]),
-					     0,
-					     args[1],args[2],
-					     args[++file]);
-			    else if (args[3].equals("url")) 
-				ftp.getUrl(args[++file],System.err);
+            if (args.length==1)
+            {
+                Ftp ftp = new Ftp();
+                ftp.getUrl(args[0],System.out);
+            }
+            else
+            {           
+                Ftp ftp = new Ftp(InetAddress.getByName(args[0]),
+                                  args[1],args[2]);
+            
+                //try{
+                //    System.out.println("Status: "+ftp.status());
+                //}catch (Exception ignore){}
+                
+                if (args.length==3)
+                    System.out.println(ftp.list());
+                else
+                {
+                    for (int file=4; file<args.length; file++)
+                    {
+                        System.out.println(args[3]+" "+args[file]);
+                    
+                        try{
+                            if (args[3].equals("del"))
+                                ftp.delete(args[file]);
+                            else if (args[3].equals("ren"))
+                                ftp.rename(args[file],args[++file]);
+                            else  if (args[3].equals("get"))
+                            {
+                                if (file+1==args.length)
+                                    ftp.startGet(args[file],System.out);
+                                else
+                                    ftp.startGet(args[file],args[++file]);
+                            }
+                            else if (args[3].equals("put")) 
+                                ftp.startPut(args[file],args[++file]);
+                            else if (args[3].equals("snd"))
+                                ftp.sendFile(args[file],
+                                             InetAddress.getByName(args[++file]),
+                                             0,
+                                             args[1],args[2],
+                                             args[++file]);
+                            else if (args[3].equals("url")) 
+                                ftp.getUrl(args[++file],System.err);
                             
-			    ftp.waitUntilTransferComplete(); 
-			}
-			catch(Exception e){
-			    System.err.println(e.toString());
-			    Code.debug(args[3]+" failed",e);
-			}
-		    }
-		}
-	    }
-	}
-	catch(Exception e){
-	    System.err.println(e.toString());
-	    Code.debug("Ftp failed",e);
-	}
-	finally{
-	    Code.debug("Exit main thread");
-	}
+                            ftp.waitUntilTransferComplete(); 
+                        }
+                        catch(Exception e){
+                            System.err.println(e.toString());
+                            Code.debug(args[3]+" failed",e);
+                        }
+                    }
+                }
+            }
+        }
+        catch(Exception e){
+            System.err.println(e.toString());
+            Code.debug("Ftp failed",e);
+        }
+        finally{
+            Code.debug("Exit main thread");
+        }
     }
 
     /* -------------------------------------------------------------------- */
     public static void test()
     {
         Test test = null;
-	
-	try{
-	    TestServer server = new TestServer(test);
+        
+        try{
+            TestServer server = new TestServer(test);
 
-	    ///////////////////////////////////////////
-	    test = server.test = new Test("FtpAuthenticate");;
+            ///////////////////////////////////////////
+            test = server.test = new Test("FtpAuthenticate");;
 
-	    Ftp ftp = new Ftp(InetAddress.getLocalHost(),
-			      server.port,
-			      "TestUser",
-			      "TestPass");
-	    test.check(server.connection!=null,"Made command connection");
+            Ftp ftp = new Ftp(InetAddress.getLocalHost(),
+                              server.port,
+                              "TestUser",
+                              "TestPass");
+            test.check(server.connection!=null,"Made command connection");
 
-	    ///////////////////////////////////////////
-	    test = server.test = new Test("FtpGetFile");
-	    ByteArrayOutputStream bout = new ByteArrayOutputStream();
-	    ftp.startGet("TestFileName",bout);
-	    test.check(true,"Get started");
-	    test.check(!ftp.transferComplete(),"Not yet completed");	    
+            ///////////////////////////////////////////
+            test = server.test = new Test("FtpGetFile");
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            ftp.startGet("TestFileName",bout);
+            test.check(true,"Get started");
+            test.check(!ftp.transferComplete(),"Not yet completed");        
 
-	    ftp.waitUntilTransferComplete();
-	    test.check(true,"Get completed");
-	    test.check(ftp.transferComplete(),"Completed");
-	    
-	    test.checkEquals("How Now Brown Cow\n",bout.toString(),
-			     "Get file data");
+            ftp.waitUntilTransferComplete();
+            test.check(true,"Get completed");
+            test.check(ftp.transferComplete(),"Completed");
+            
+            test.checkEquals("How Now Brown Cow\n",bout.toString(),
+                             "Get file data");
 
-	    ///////////////////////////////////////////
-	    test = server.test = new Test("FtpPutFile");
-	    bout = new ByteArrayOutputStream();
-	    Writer writeOut = new OutputStreamWriter(bout);
-	    writeOut.write("How Now Brown Cow\n");
-	    writeOut.flush();
-	    ByteArrayInputStream src =
-		new ByteArrayInputStream(bout.toByteArray());
-	    
-	    ftp.startPut(src,"TestFileName");
-	    test.check(true,"Put started");
+            ///////////////////////////////////////////
+            test = server.test = new Test("FtpPutFile");
+            bout = new ByteArrayOutputStream();
+            Writer writeOut = new OutputStreamWriter(bout);
+            writeOut.write("How Now Brown Cow\n");
+            writeOut.flush();
+            ByteArrayInputStream src =
+                new ByteArrayInputStream(bout.toByteArray());
+            
+            ftp.startPut(src,"TestFileName");
+            test.check(true,"Put started");
 
-	    Thread.sleep(2000);
-	    test.check(ftp.transferComplete(),"wait completed");
-	    
-	    ftp.waitUntilTransferComplete();
-	    test.check(true,"put wait completed");
+            Thread.sleep(2000);
+            test.check(ftp.transferComplete(),"wait completed");
+            
+            ftp.waitUntilTransferComplete();
+            test.check(true,"put wait completed");
 
-	    ///////////////////////////////////////////
-	    test = server.test = new Test("FtpAbort");
-	    bout = new ByteArrayOutputStream(256);
-	    ftp.startGet("TestFileName",bout);
-	    test.check(true,"Get started");
-	    ftp.abort();
-	    test.check(ftp.transferComplete(),"Aborted");
+            ///////////////////////////////////////////
+            test = server.test = new Test("FtpAbort");
+            bout = new ByteArrayOutputStream(256);
+            ftp.startGet("TestFileName",bout);
+            test.check(true,"Get started");
+            ftp.abort();
+            test.check(ftp.transferComplete(),"Aborted");
 
-	    ftp.setType(Ftp.BINARY);
-	    ftp.setType(8);
-	    ftp.setType(Ftp.ASCII,Ftp.CARRIAGE_CONTROL);
-	    
-	}
-	catch(Exception e){
-	    if (test==null)
-		test = new Test("Ftp");
-	    test.check(false,"Exception "+e);
-	}
+            ftp.setType(Ftp.BINARY);
+            ftp.setType(8);
+            ftp.setType(Ftp.ASCII,Ftp.CARRIAGE_CONTROL);
+            
+        }
+        catch(Exception e){
+            if (test==null)
+                test = new Test("Ftp");
+            test.check(false,"Exception "+e);
+        }
     }
 }

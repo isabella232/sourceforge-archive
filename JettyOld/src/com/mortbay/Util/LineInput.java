@@ -17,18 +17,18 @@ public class LineInput extends InputStream
     // ----------------------------------------------------------------
     public static void main(String args[])
     {
-	LineInput input = new LineInput(System.in);
-	
-	try
-	{
-	    String line;
-	    while ((line=input.readLine())!=null)
-	       System.out.println(line);
-	}
-	catch(Exception e)
-	{
-	    e.printStackTrace();
-	}
+        LineInput input = new LineInput(System.in);
+        
+        try
+        {
+            String line;
+            while ((line=input.readLine())!=null)
+               System.out.println(line);
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -42,7 +42,7 @@ public class LineInput extends InputStream
      */
     public LineInput(InputStream in)
     {
-	this.in = new BufferedInputStream(in);
+        this.in = new BufferedInputStream(in);
     }
     
     
@@ -51,86 +51,86 @@ public class LineInput extends InputStream
      */
     public String readLine() throws IOException
     {
-	StringBuffer buf = new StringBuffer(1024);
+        StringBuffer buf = new StringBuffer(1024);
 
-	int c;	
-	boolean cr = false;
-	boolean lf = false;
+        int c;  
+        boolean cr = false;
+        boolean lf = false;
 
     LineLoop:
-	while ((c=in.read())!=-1)
-	{
-	    if (Code.verbose(100))
-		Code.debug("Read: "+(char)c);
-	    
-	    switch(c)
-	    {
-	      case 10:
-		  lf = true;
-		  break LineLoop;
-		
-	      case 13:
-		  cr = true;
-		  in.mark(2);
-		  break;
-		
-	      default:
-		  if(cr)
-		  {
-		      in.reset();
-		      break LineLoop;
-		  }
-		  else
-		      buf.append((char)c);
-		  break;
-	    }    
-	}
-	
-	if (!(cr||lf))
-	   return null;
+        while ((c=in.read())!=-1)
+        {
+            if (Code.verbose(100))
+                Code.debug("Read: "+(char)c);
+            
+            switch(c)
+            {
+              case 10:
+                  lf = true;
+                  break LineLoop;
+                
+              case 13:
+                  cr = true;
+                  in.mark(2);
+                  break;
+                
+              default:
+                  if(cr)
+                  {
+                      in.reset();
+                      break LineLoop;
+                  }
+                  else
+                      buf.append((char)c);
+                  break;
+            }    
+        }
+        
+        if (!(cr||lf))
+           return null;
 
-	return buf.toString();
+        return buf.toString();
     }
     
     /* ------------------------------------------------------------ */
     /** Read a line ended by CR or CRLF or LF.
      */
     public int readLine(byte b[],
-			int off,
-			int len) throws IOException
+                        int off,
+                        int len) throws IOException
     {
-	int c;	
-	boolean cr = false;
-	boolean lf = false;
-	int r=0;
+        int c;  
+        boolean cr = false;
+        boolean lf = false;
+        int r=0;
 
     LineLoop:
-	while (r<len && (c=in.read())!=-1)
-	{
-	    b[off++]=(byte)c;
-	    r++;
-	    
-	    switch(c)
-	    {
-	      case 10:
-		  lf = true;
-		  break LineLoop;
-		
-	      case 13:
-		  cr = true;
-		  in.mark(2);
-		  break;
-		
-	      default:
-		  if(cr)
-		  {
-		      in.reset();
-		      break LineLoop;
-		  }
-		  break;
-	    }
-	}
-	return r;
+        while (r<len && (c=in.read())!=-1)
+        {
+            b[off++]=(byte)c;
+            r++;
+            
+            switch(c)
+            {
+              case 10:
+                  lf = true;
+                  break LineLoop;
+                
+              case 13:
+                  cr = true;
+                  in.mark(2);
+                  break;
+                
+              default:
+                  if(cr)
+                  {
+                      in.reset();
+                      break LineLoop;
+                  }
+                  break;
+            }
+        }
+        return r;
     }
     
     /* ------------------------------------------------------------ */

@@ -19,13 +19,13 @@ public interface Converter
      * @param toConvert Value to convert
      * @param convertTo Type to convert to
      * @param context The context within which the converter was called.
-     *		      If Converters use other Converters, this is passed as
+     *                If Converters use other Converters, this is passed as
      *                the outermost Converter so that recursive calls have
      *                access to all available Converters. Converter
      *                implementations should pass this if passed null.
      * @return The converted value, or null if not possible
      */
     public Object convert(Object toConvert, Class convertTo,
-			  Converter context);
+                          Converter context);
     /* ------------------------------------------------------------ */
 };

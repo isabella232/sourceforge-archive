@@ -32,75 +32,75 @@ public class RowEnumeration implements Enumeration
     /* ------------------------------------------------------------ */
     public RowEnumeration(Table table,java.sql.ResultSet rs)
     {
-	this.table=table;
-	this.rs=rs;
+        this.table=table;
+        this.rs=rs;
     }
     
     /* ------------------------------------------------------------ */
     public boolean hasMoreElements()
     {
-	if (!nextAlreadyCalled)
-	{
-	    try{
-		hasMore=rs.next();
-	    }
-	    catch(SQLException e){
-		Code.debug(e);
-		hasMore=false;
-	    }    
-	    nextAlreadyCalled=true;
-	}
-	if (hasMore==false)
-	{
-	    try{
-		rs.close();
-	    }
-	    catch(SQLException e){
-		Code.warning(e);
-	    }
-	}
-	
-	return hasMore;
+        if (!nextAlreadyCalled)
+        {
+            try{
+                hasMore=rs.next();
+            }
+            catch(SQLException e){
+                Code.debug(e);
+                hasMore=false;
+            }    
+            nextAlreadyCalled=true;
+        }
+        if (hasMore==false)
+        {
+            try{
+                rs.close();
+            }
+            catch(SQLException e){
+                Code.warning(e);
+            }
+        }
+        
+        return hasMore;
     }
     
     /* ------------------------------------------------------------ */
     public Object nextElement()
-	 throws NoSuchElementException
+         throws NoSuchElementException
     {
-	return nextRow();
+        return nextRow();
     }
-	
+        
     /* ------------------------------------------------------------ */
     public Row nextRow()
-	 throws NoSuchElementException
+         throws NoSuchElementException
     {
-	if (!nextAlreadyCalled)
-	    try{
-		hasMore=rs.next();
-	    }
-	    catch(SQLException e){
-		Code.debug(e);
-		hasMore=false;
-	    }    
-	else
-	    nextAlreadyCalled=false;
+        if (!nextAlreadyCalled)
+            try{
+                hasMore=rs.next();
+            }
+            catch(SQLException e){
+                Code.debug(e);
+                hasMore=false;
+            }    
+        else
+            nextAlreadyCalled=false;
 
-	if (!hasMore)
-	{ 
-	    try{
-		rs.close();
-	    }
-	    catch(SQLException e){
-		Code.warning(e);
-		throw new NoSuchElementException();
-	    }
-	}	
-	try{
-	    return new Row(table,rs);
-	}
-	catch(SQLException e){
-	    throw new NoSuchElementException();
-	}
+        if (!hasMore)
+        { 
+            try{
+                rs.close();
+            }
+            catch(SQLException e){
+                Code.warning(e);
+                throw new NoSuchElementException();
+            }
+        }       
+        try{
+            return new Row(table,rs);
+        }
+        catch(SQLException e){
+            throw new NoSuchElementException();
+        }
     }
     
 };

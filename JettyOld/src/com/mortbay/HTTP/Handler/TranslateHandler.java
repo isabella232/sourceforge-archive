@@ -39,15 +39,15 @@ public class TranslateHandler extends NullHandler
      * @param properties Passed to setProperties
      */
     public TranslateHandler(Properties properties)
-	throws IOException
+        throws IOException
     {
-	setProperties(properties);
+        setProperties(properties);
     }
     
     /* ----------------------------------------------------------------- */
     public TranslateHandler(PathMap translations)
     {
-	this.translations=translations;
+        this.translations=translations;
     }
     
     /* ------------------------------------------------------------ */
@@ -56,55 +56,55 @@ public class TranslateHandler extends NullHandler
      * @exception IOException 
      */
     public void setProperties(Properties properties)
-	throws IOException
+        throws IOException
     {
-	PropertyTree tree=null;
-	if (properties instanceof PropertyTree)
-	    tree = (PropertyTree)properties;
-	else
-	    tree = new PropertyTree(properties);
-	
-	_translateURI=tree.getBoolean("TranslateURI");
-	translations=new PathMap(tree);
-	translations.remove("TranslateURI");
-	Code.debug(translations);
+        PropertyTree tree=null;
+        if (properties instanceof PropertyTree)
+            tree = (PropertyTree)properties;
+        else
+            tree = new PropertyTree(properties);
+        
+        _translateURI=tree.getBoolean("TranslateURI");
+        translations=new PathMap(tree);
+        translations.remove("TranslateURI");
+        Code.debug(translations);
     }
     
     /* ----------------------------------------------------------------- */
     public void handle(HttpRequest request,
-		       HttpResponse response)
-	 throws Exception
-    {	
-	String address = request.getResourcePath();
-	
-	String path=translations.matchSpec(address);
-	while (path != null)
-	{
-	    String translation = (String)translations.get(path);
-	    Code.debug("Translation from "+path+
-		       " to "+translation);
-		
-	    request.translateAddress(path,translation,_translateURI);
+                       HttpResponse response)
+         throws Exception
+    {   
+        String address = request.getResourcePath();
+        
+        String path=translations.matchSpec(address);
+        while (path != null)
+        {
+            String translation = (String)translations.get(path);
+            Code.debug("Translation from "+path+
+                       " to "+translation);
+                
+            request.translateAddress(path,translation,_translateURI);
 
-	    address = request.getResourcePath();
-	    path=translations.matchSpec(address);
-	}
+            address = request.getResourcePath();
+            path=translations.matchSpec(address);
+        }
     }
     
     /* ----------------------------------------------------------------- */
     public String translate(String address)
     {
-	String path=translations.matchSpec(address);
-	while (path != null)
-	{
-	    String translation = (String)translations.get(path);
-	    Code.debug("Translation from "+path+
-		       " to "+translation);
+        String path=translations.matchSpec(address);
+        while (path != null)
+        {
+            String translation = (String)translations.get(path);
+            Code.debug("Translation from "+path+
+                       " to "+translation);
 
-	    address = PathMap.translate(address,path,translation);
-	    path=translations.matchSpec(address);
-	}
-	return address;
+            address = PathMap.translate(address,path,translation);
+            path=translations.matchSpec(address);
+        }
+        return address;
     }
 }
 

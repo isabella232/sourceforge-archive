@@ -19,16 +19,16 @@ public class Script extends Block
      * @param lang Language of Script */
     public Script(String script, String lang)
     {
-	super("SCRIPT");
-	attribute("LANGUAGE",lang);
-	add(script);
+        super("SCRIPT");
+        attribute("LANGUAGE",lang);
+        add(script);
     }
 
     /* ------------------------------------------------------------ */
     /** Construct a JavaScript script element */
     public Script(String script)
     {
-	this(script, javascript);
+        this(script, javascript);
     }
 };
 

@@ -14,7 +14,7 @@ import java.net.*;
 public class InetAddrPort
 {
     private InetAddress _addr=null;
-    private int	_port=0;
+    private int _port=0;
 
     /* ------------------------------------------------------------------- */
     public InetAddrPort()
@@ -26,7 +26,7 @@ public class InetAddrPort
      */
     public InetAddrPort(int port)
     {
-	_port=port;
+        _port=port;
     }
     
     /* ------------------------------------------------------------ */
@@ -36,8 +36,8 @@ public class InetAddrPort
      */
     public InetAddrPort(InetAddress addr, int port)
     {
-	_addr=addr;
-	_port=port;
+        _addr=addr;
+        _port=port;
     }
     
     /* ------------------------------------------------------------ */
@@ -45,19 +45,19 @@ public class InetAddrPort
      * @param inetAddrPort String of the form "addr:port"
      */
     public InetAddrPort(String inetAddrPort)
-	throws java.net.UnknownHostException
+        throws java.net.UnknownHostException
     {
-	int c = inetAddrPort.indexOf(":");
-	if (c>=0)
-	{
-	    String addr=inetAddrPort.substring(0,c);
-	    inetAddrPort=inetAddrPort.substring(c+1);
-	
-	    if (addr.length()>0 && ! "0.0.0.0".equals(addr))
-		this._addr=InetAddress.getByName(addr);
-	}
-	
-	_port = Integer.parseInt(inetAddrPort);	
+        int c = inetAddrPort.indexOf(":");
+        if (c>=0)
+        {
+            String addr=inetAddrPort.substring(0,c);
+            inetAddrPort=inetAddrPort.substring(c+1);
+        
+            if (addr.length()>0 && ! "0.0.0.0".equals(addr))
+                this._addr=InetAddress.getByName(addr);
+        }
+        
+        _port = Integer.parseInt(inetAddrPort); 
     }
     
     /* ------------------------------------------------------------ */
@@ -66,7 +66,7 @@ public class InetAddrPort
      */
     public InetAddress getInetAddress()
     {
-	return _addr;
+        return _addr;
     }
     
     /* ------------------------------------------------------------ */
@@ -75,7 +75,7 @@ public class InetAddrPort
      */
     public void setInetAddress(InetAddress addr)
     {
-	_addr=addr;
+        _addr=addr;
     }
 
     /* ------------------------------------------------------------ */
@@ -84,7 +84,7 @@ public class InetAddrPort
      */
     public int getPort()
     {
-	return _port;
+        return _port;
     }
     
     /* ------------------------------------------------------------ */
@@ -93,16 +93,16 @@ public class InetAddrPort
      */
     public void setPort(int port)
     {
-	_port=port;
+        _port=port;
     }
     
     
     /* ------------------------------------------------------------------- */
     public String toString()
     {
-	if (_addr==null)
-	    return "0.0.0.0:"+_port;
-	return _addr.toString()+':'+_port;
+        if (_addr==null)
+            return "0.0.0.0:"+_port;
+        return _addr.toString()+':'+_port;
     }
 }
 

@@ -35,7 +35,7 @@ public abstract class ServletLoader extends ClassLoader
      * @exception ClassNotFoundException 
      */
     abstract public Class loadClass(String name)
-	throws ClassNotFoundException;
+        throws ClassNotFoundException;
     
 
     /* ------------------------------------------------------------ */
@@ -46,14 +46,14 @@ public abstract class ServletLoader extends ClassLoader
      * @exception ClassNotFoundException 
      */
     public Class loadClass(String name, boolean resolve)
-	throws ClassNotFoundException
+        throws ClassNotFoundException
     {
-	Class c = loadClass(name);
-	
-	// resolve
-	if (resolve)
-	    resolveClass(c);
-	return c;
+        Class c = loadClass(name);
+        
+        // resolve
+        if (resolve)
+            resolveClass(c);
+        return c;
     }
 
     /* ------------------------------------------------------------ */

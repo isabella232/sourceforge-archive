@@ -15,7 +15,7 @@ public interface PageFactory
 {
     /** Construct a new named page for the request */
     public Page getPage(String name,
-			ServletRequest request,
-			ServletResponse response);
+                        ServletRequest request,
+                        ServletResponse response);
 }
 

@@ -19,42 +19,42 @@ public class Font extends Block
     /* ----------------------------------------------------------------- */
     public Font()
     {
-	super("FONT");
+        super("FONT");
     }
     
     /* ----------------------------------------------------------------- */
     public Font(int size)
     {
-	this();
-	size(size);
+        this();
+        size(size);
     }
     
     /* ----------------------------------------------------------------- */
     public Font(int size, boolean relativeSize)
     {
-	this();
-	size(((relativeSize && size>=0)?"+":"")+size);
+        this();
+        size(((relativeSize && size>=0)?"+":"")+size);
     }
     
     /* ----------------------------------------------------------------- */
     public Font(int size,String attributes)
     {
-	this();
-	size(size);
-	this.attribute(attributes);
+        this();
+        size(size);
+        this.attribute(attributes);
     }
     
     /* ----------------------------------------------------------------- */
     public Font(String attributes)
     {
-	super("FONT",attributes);
+        super("FONT",attributes);
     }
     
     /* ----------------------------------------------------------------- */
     public Font face(String face)
     {
-	attribute("FACE",face);
-	return this;
+        attribute("FACE",face);
+        return this;
     }
     
 }

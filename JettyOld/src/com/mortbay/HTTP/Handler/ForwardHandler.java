@@ -41,9 +41,9 @@ public class ForwardHandler extends NullHandler
      * @param properties Passed to setProperties
      */
     public ForwardHandler(Properties properties)
-	throws IOException
+        throws IOException
     {
-	setProperties(properties);
+        setProperties(properties);
     }
     
     /* ----------------------------------------------------------------- */
@@ -54,7 +54,7 @@ public class ForwardHandler extends NullHandler
     {
         this.forwardMap = forwardMap;
         try{
-	    URL url=null;
+            URL url=null;
             Enumeration k = forwardMap.keys();
             while(k.hasMoreElements())
                 url = (URL)(forwardMap.get(k.nextElement()));
@@ -69,9 +69,9 @@ public class ForwardHandler extends NullHandler
      * @param forwardMap Maps path to a URL
      */
     public ForwardHandler(PathMap forwardMap,
-			  InetAddrPort proxy)
+                          InetAddrPort proxy)
     {
-	this(forwardMap);	
+        this(forwardMap);       
         this.proxy=proxy;
     }
 
@@ -88,37 +88,37 @@ public class ForwardHandler extends NullHandler
      * @param properties Configuration.
      */
     public void setProperties(Properties properties)
-	throws IOException
+        throws IOException
     {
-	PropertyTree tree=null;
-	if (properties instanceof PropertyTree)
-	    tree = (PropertyTree)properties;
-	else
-	    tree = new PropertyTree(properties);
-	Code.debug(tree);
+        PropertyTree tree=null;
+        if (properties instanceof PropertyTree)
+            tree = (PropertyTree)properties;
+        else
+            tree = new PropertyTree(properties);
+        Code.debug(tree);
 
-	String proxyStr = tree.getProperty("ProxyAddrPort");
-	if (proxyStr!=null && proxyStr.trim().length()>0)
-	    proxy=new InetAddrPort(proxyStr);
-	
-	forwardMap=new PathMap();
-	Enumeration names = tree.getTree("FORWARD").getNodes();
-	while (names.hasMoreElements())
-	{
-	    String forwardName = names.nextElement().toString();
-	    Code.debug("Configuring forward "+forwardName);
-	    PropertyTree forwardTree = tree.getTree("FORWARD."+forwardName);
-	    URL url = new URL(forwardTree.getProperty("URL"));
-	    
-	    Vector paths = forwardTree.getVector("PATHS",",;");
-	    for (int f=paths.size();f-->0;)
-	    {
-		String path=(String)paths.elementAt(f);
-		Code.debug(path,"-->",url);
-		forwardMap.put(path,url);
-	    }
-	    
-	}    
+        String proxyStr = tree.getProperty("ProxyAddrPort");
+        if (proxyStr!=null && proxyStr.trim().length()>0)
+            proxy=new InetAddrPort(proxyStr);
+        
+        forwardMap=new PathMap();
+        Enumeration names = tree.getTree("FORWARD").getNodes();
+        while (names.hasMoreElements())
+        {
+            String forwardName = names.nextElement().toString();
+            Code.debug("Configuring forward "+forwardName);
+            PropertyTree forwardTree = tree.getTree("FORWARD."+forwardName);
+            URL url = new URL(forwardTree.getProperty("URL"));
+            
+            Vector paths = forwardTree.getVector("PATHS",",;");
+            for (int f=paths.size();f-->0;)
+            {
+                String path=(String)paths.elementAt(f);
+                Code.debug(path,"-->",url);
+                forwardMap.put(path,url);
+            }
+            
+        }    
     }
     
     /* ----------------------------------------------------------------- */
@@ -128,68 +128,68 @@ public class ForwardHandler extends NullHandler
                        HttpResponse response)
          throws IOException
     {
-	String requestPath=request.getResourcePath();
-	String path = forwardMap.longestMatch(requestPath);
-	
+        String requestPath=request.getResourcePath();
+        String path = forwardMap.longestMatch(requestPath);
+        
         if (path!=null)
-	{
-	    String match=PathMap.match(path,requestPath);
-	    URL root = (URL)forwardMap.get(path);
-	    String file = root.getFile();
-	    String newPath=null;
-	    URL url=root;
-	    if (match.startsWith("/"))
-	    {
-		if (match.length()==requestPath.length())
-		    newPath=file;
-		else
-		    newPath=file+requestPath.substring(match.length());
-		Code.debug("Replace "+match +
-			   " in " + requestPath +
-			   " with " + file);
-		url = new URL(root,newPath);
-	    }
+        {
+            String match=PathMap.match(path,requestPath);
+            URL root = (URL)forwardMap.get(path);
+            String file = root.getFile();
+            String newPath=null;
+            URL url=root;
+            if (match.startsWith("/"))
+            {
+                if (match.length()==requestPath.length())
+                    newPath=file;
+                else
+                    newPath=file+requestPath.substring(match.length());
+                Code.debug("Replace "+match +
+                           " in " + requestPath +
+                           " with " + file);
+                url = new URL(root,newPath);
+            }
  
-	    if (url != null)
-	    {
-		Code.debug("Forward to "+url);
-		Socket socket=null;
-	    
-		if (proxy==null)
-		{
-		    int port = url.getPort() ;
-		    socket= new Socket(url.getHost(),port<0?80:port);
-		    if (match.startsWith("/"))
-			request.translateAddress(requestPath,
-						 url.getFile(),
-						 true);
-		}
-		else
-		{
-		    socket= new Socket(proxy.getInetAddress(),
-				       proxy.getPort());
-		    request.translateAddress(requestPath,
-					     url.toString(),
-					     true);
-		}
+            if (url != null)
+            {
+                Code.debug("Forward to "+url);
+                Socket socket=null;
+            
+                if (proxy==null)
+                {
+                    int port = url.getPort() ;
+                    socket= new Socket(url.getHost(),port<0?80:port);
+                    if (match.startsWith("/"))
+                        request.translateAddress(requestPath,
+                                                 url.getFile(),
+                                                 true);
+                }
+                else
+                {
+                    socket= new Socket(proxy.getInetAddress(),
+                                       proxy.getPort());
+                    request.translateAddress(requestPath,
+                                             url.toString(),
+                                             true);
+                }
 
-		try{
-		    Code.debug("Forward to "+url+
-			       " via "+request.getResourcePath());
-		    request.setHeader(HttpHeader.Connection,null);
-		    request.setHeader("Host",null);
-		    request.setVersion(request.HTTP_1_0);
-		    
-		    request.write(socket.getOutputStream());
-		    Code.debug("waiting for forward reply...");
-		    response.writeInputStream(socket.getInputStream(),-1,true);
-		}
-		finally
-		{
-		    socket.close();
-		}
-	    }
-	}
+                try{
+                    Code.debug("Forward to "+url+
+                               " via "+request.getResourcePath());
+                    request.setHeader(HttpHeader.Connection,null);
+                    request.setHeader("Host",null);
+                    request.setVersion(request.HTTP_1_0);
+                    
+                    request.write(socket.getOutputStream());
+                    Code.debug("waiting for forward reply...");
+                    response.writeInputStream(socket.getInputStream(),-1,true);
+                }
+                finally
+                {
+                    socket.close();
+                }
+            }
+        }
     }    
 }
 

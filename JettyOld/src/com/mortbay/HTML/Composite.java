@@ -45,7 +45,7 @@ public class Composite extends Element
      */
     public Composite(String attributes)
     {
-	super(attributes);
+        super(attributes);
     }
 
     /* ----------------------------------------------------------------- */
@@ -57,25 +57,25 @@ public class Composite extends Element
      */
     public Composite add(Object o)
     {
-	if (nest!=null)
-	    nest.add(o);
-	else
-	{
-	    if (o!=null)
-	    {
-		if (o instanceof Element)
-		{
-		    Code.assert(!(o instanceof Page),
-				"Can't insert Page in Composite");
-		    elements.addElement(o);
-		}
-		else if (o instanceof String)
-		    elements.addElement(o);
-		else 
-		    elements.addElement(o.toString());
-	    }
-	}
-	return this;
+        if (nest!=null)
+            nest.add(o);
+        else
+        {
+            if (o!=null)
+            {
+                if (o instanceof Element)
+                {
+                    Code.assert(!(o instanceof Page),
+                                "Can't insert Page in Composite");
+                    elements.addElement(o);
+                }
+                else if (o instanceof String)
+                    elements.addElement(o);
+                else 
+                    elements.addElement(o.toString());
+            }
+        }
+        return this;
     }
     
     /* ----------------------------------------------------------------- */
@@ -88,14 +88,14 @@ public class Composite extends Element
      */
     public Composite nest(Composite c)
     {
-	if (nest!=null)
-	    return nest.nest(c);
-	else
-	{
-	    add(c);
-	    nest=c;
-	}
-	return this;
+        if (nest!=null)
+            return nest.nest(c);
+        else
+        {
+            add(c);
+            nest=c;
+        }
+        return this;
     }
 
     /* ----------------------------------------------------------------- */
@@ -105,11 +105,11 @@ public class Composite extends Element
      */
     public Composite setNest(Composite c)
     {
-	if (nest!=null)
-	    nest.setNest(c);
-	else
-	    nest=c;
-	return this;
+        if (nest!=null)
+            nest.setNest(c);
+        else
+            nest=c;
+        return this;
     }
     
     /* ----------------------------------------------------------------- */
@@ -117,10 +117,10 @@ public class Composite extends Element
      */
     public Composite unnest()
     {
-	if (nest!=null)
-	    nest.unnest();
-	nest = null;
-	return this;
+        if (nest!=null)
+            nest.unnest();
+        nest = null;
+        return this;
     }
 
 
@@ -130,7 +130,7 @@ public class Composite extends Element
      */
     public int size()
     {
-	return elements.size();
+        return elements.size();
     }
     
     /* ----------------------------------------------------------------- */
@@ -140,19 +140,19 @@ public class Composite extends Element
      * @param out Writer to write the element to.
      */
     public void write(Writer out)
-	 throws IOException
+         throws IOException
     {
-	for (int i=0; i <elements.size() ; i++)
-	{
-	    Object element = elements.elementAt(i);
-	  
-	    if (element instanceof Element)
-		((Element)element).write(out);
-	    else if (element==null)
-		out.write("null");
-	    else 
-		out.write(element.toString());
-	}
+        for (int i=0; i <elements.size() ; i++)
+        {
+            Object element = elements.elementAt(i);
+          
+            if (element instanceof Element)
+                ((Element)element).write(out);
+            else if (element==null)
+                out.write("null");
+            else 
+                out.write(element.toString());
+        }
     }
     
     /* ----------------------------------------------------------------- */
@@ -160,19 +160,19 @@ public class Composite extends Element
      */
     public String contents()
     {
-	StringBuffer buf = new StringBuffer();
-	synchronized(buf)
-	{
-	    for (int i=0; i <elements.size() ; i++)
-	    {
-		Object element = elements.elementAt(i);
-		if (element==null)
-		    buf.append("null");
-		else 
-		    buf.append(element.toString());
-	    }
-	}
-	return buf.toString();
+        StringBuffer buf = new StringBuffer();
+        synchronized(buf)
+        {
+            for (int i=0; i <elements.size() ; i++)
+            {
+                Object element = elements.elementAt(i);
+                if (element==null)
+                    buf.append("null");
+                else 
+                    buf.append(element.toString());
+            }
+        }
+        return buf.toString();
     }
 
     /* ------------------------------------------------------------ */
@@ -180,8 +180,8 @@ public class Composite extends Element
      */
     public Composite reset()
     {
-	elements.removeAllElements();
-	return unnest();
+        elements.removeAllElements();
+        return unnest();
     }
     
     /* ----------------------------------------------------------------- */
@@ -189,15 +189,15 @@ public class Composite extends Element
      * most nested composite, write out and empty its contents.
      */
     void flush(Writer out)
-	 throws IOException
+         throws IOException
     {
-	if (nest!=null)
-	    nest.flush(out);
-	else
-	{
-	    write(out);
-	    elements.removeAllElements();
-	}
+        if (nest!=null)
+            nest.flush(out);
+        else
+        {
+            write(out);
+            elements.removeAllElements();
+        }
     }
     
     /* ----------------------------------------------------------------- */
@@ -205,9 +205,9 @@ public class Composite extends Element
      * most nested composite, write out and empty its contents.
      */
     void flush(OutputStream out)
-	 throws IOException
+         throws IOException
     {
-	flush(new OutputStreamWriter(out));
+        flush(new OutputStreamWriter(out));
     }
 
     

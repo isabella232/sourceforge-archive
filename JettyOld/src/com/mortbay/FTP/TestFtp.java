@@ -13,15 +13,15 @@ public class TestFtp
 {
     /* ------------------------------------------------------------------ */
     public static void main(String[] args)
-    {	
-	CmdReply.test();
-	CmdReplyStream.test();
-	Ftp.test();
-	
-	Test.report();
+    {   
+        CmdReply.test();
+        CmdReplyStream.test();
+        Ftp.test();
+        
+        Test.report();
     }
 
-	
+        
 }
 
 

@@ -15,9 +15,9 @@ public class CloudscapeAdaptor extends DbAdaptor
      */
     public CloudscapeAdaptor()
     {
-	dbDriver="COM.cloudscape.core.JDBCDriver";
+        dbDriver="COM.cloudscape.core.JDBCDriver";
     }
-	
+        
     /* ------------------------------------------------------------ */
     /** Quote a string value for the database.
      * @param s A string
@@ -26,15 +26,15 @@ public class CloudscapeAdaptor extends DbAdaptor
      */
     public String quote(String s)
     {
-	int sq = s.indexOf("'");
-	while(sq>=0)
-	{
-	    Code.debug(s);
-	    s=s.substring(0,sq)+"'"+s.substring(sq);
-	    sq=s.indexOf("'",sq+2);
-	}
+        int sq = s.indexOf("'");
+        while(sq>=0)
+        {
+            Code.debug(s);
+            s=s.substring(0,sq)+"'"+s.substring(sq);
+            sq=s.indexOf("'",sq+2);
+        }
 
-	return "'" + s + "'";   
+        return "'" + s + "'";   
     }
 
     /* ------------------------------------------------------------ */
@@ -43,7 +43,7 @@ public class CloudscapeAdaptor extends DbAdaptor
      */
     public String primaryMarker()
     {
-	return "NOT NULL";
+        return "NOT NULL";
     }
     
     
@@ -54,7 +54,7 @@ public class CloudscapeAdaptor extends DbAdaptor
      */
     public String go()
     {
-	return ";\n";
+        return ";\n";
     }
     
 };

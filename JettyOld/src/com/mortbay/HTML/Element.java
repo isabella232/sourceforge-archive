@@ -24,24 +24,24 @@ public abstract class Element
     /* ----------------------------------------------------------------- */
     public static final String
         noAttributes="",
-	ALIGN="ALIGN",
-	LEFT="LEFT",
-	RIGHT="RIGHT",
-	CENTER="CENTER",
-	VALIGN="VALIGN",
-	TOP="TOP",
-	BOTTOM="BOTTOM",
-	MIDDLE="MIDDLE",
-	WIDTH="WIDTH",
-	HEIGHT="HEIGHT",
-	SIZE="SIZE",
-	COLOR="COLOR",
-	BGCOLOR="BGCOLOR",
-	STYLE="STYLE",
-	CLASS="CLASS",
-	ID="ID";
+        ALIGN="ALIGN",
+        LEFT="LEFT",
+        RIGHT="RIGHT",
+        CENTER="CENTER",
+        VALIGN="VALIGN",
+        TOP="TOP",
+        BOTTOM="BOTTOM",
+        MIDDLE="MIDDLE",
+        WIDTH="WIDTH",
+        HEIGHT="HEIGHT",
+        SIZE="SIZE",
+        COLOR="COLOR",
+        BGCOLOR="BGCOLOR",
+        STYLE="STYLE",
+        CLASS="CLASS",
+        ID="ID";
     
-	
+        
     
     /* ----------------------------------------------------------------- */
     /** Dimensions >=0 if set*/
@@ -66,7 +66,7 @@ public abstract class Element
      */
     public Element(String attributes)
     {
-	attributes(attributes);
+        attributes(attributes);
     }
 
     /* ----------------------------------------------------------------- */
@@ -77,7 +77,7 @@ public abstract class Element
      * @param out Writer to write the element to.
      */
     public abstract void write(Writer out)
-	 throws IOException;
+         throws IOException;
 
     /* ----------------------------------------------------------------- */
     /** Write Element to an OutputStream
@@ -87,44 +87,44 @@ public abstract class Element
      * @param out OutputStream to write the element to.
      */
     public void write(OutputStream out)
-	 throws IOException
+         throws IOException
     {
-	Writer writer = new OutputStreamWriter(out);
-	write(writer);
-	writer.flush();
+        Writer writer = new OutputStreamWriter(out);
+        write(writer);
+        writer.flush();
     }
 
     /* ----------------------------------------------------------------- */
     public String attributes()
     {
-	if (attributes==null && attributeMap==null)
-	    return noAttributes;
+        if (attributes==null && attributeMap==null)
+            return noAttributes;
 
-	StringBuffer buf = new StringBuffer(128);
-	synchronized(buf)
-	{
-	    if(attributes!=null && attributes.length()>0)
-	    {
-		if (!attributes.startsWith(" "))
-		    buf.append(' ');
-		buf.append(attributes);
-	    }
-	
-	    if (attributeMap!=null)
-	    {
-		Enumeration e = attributeMap.keys();
-		while (e.hasMoreElements())
-		{
-		    buf.append(' ');
-		    String a = (String)e.nextElement();
-		    buf.append(a);
-		    buf.append('=');
-		    buf.append(attributeMap.get(a).toString());
-		}
-	    }
-	}
+        StringBuffer buf = new StringBuffer(128);
+        synchronized(buf)
+        {
+            if(attributes!=null && attributes.length()>0)
+            {
+                if (!attributes.startsWith(" "))
+                    buf.append(' ');
+                buf.append(attributes);
+            }
+        
+            if (attributeMap!=null)
+            {
+                Enumeration e = attributeMap.keys();
+                while (e.hasMoreElements())
+                {
+                    buf.append(' ');
+                    String a = (String)e.nextElement();
+                    buf.append(a);
+                    buf.append('=');
+                    buf.append(attributeMap.get(a).toString());
+                }
+            }
+        }
 
-	return buf.toString();
+        return buf.toString();
     }
 
     /* ----------------------------------------------------------------- */
@@ -138,24 +138,24 @@ public abstract class Element
      */
     public Element attributes(String attributes)
     {
-	if (Code.debug() && attributes!=null && attributes.indexOf("=")>=0)
-	    Code.warning("Set attribute with old method: "+attributes+
-			 " on " + getClass().getName());
+        if (Code.debug() && attributes!=null && attributes.indexOf("=")>=0)
+            Code.warning("Set attribute with old method: "+attributes+
+                         " on " + getClass().getName());
 
-	if (attributes==null)
-	{
-	    this.attributes=null;
-	    return this;
-	}
-	
-	if (attributes==noAttributes)
-	    return this;
-	
-	if (this.attributes==null)
-	    this.attributes=attributes;
-	else
-	    this.attributes += ' '+attributes;
-	return this;
+        if (attributes==null)
+        {
+            this.attributes=null;
+            return this;
+        }
+        
+        if (attributes==noAttributes)
+            return this;
+        
+        if (this.attributes==null)
+            this.attributes=attributes;
+        else
+            this.attributes += ' '+attributes;
+        return this;
     }
 
     /* ------------------------------------------------------------ */
@@ -165,9 +165,9 @@ public abstract class Element
      */
     public Element setAttributesFrom(Element e)
     {
-	attributes=e.attributes;
-	attributeMap=(Hashtable)e.attributeMap.clone();
-	return this;
+        attributes=e.attributes;
+        attributeMap=(Hashtable)e.attributeMap.clone();
+        return this;
     }
 
     
@@ -182,18 +182,18 @@ public abstract class Element
      */
     public Element attribute(String attributes)
     {
-	if (Code.debug() && attributes!=null && attributes.indexOf("=")>=0)
-	    Code.warning("Set attribute with old method: "+attributes+
-			 " on " + getClass().getName());
-	
-	if (attributes==null ||
-	    this.attributes==null ||
-	    this.attributes==noAttributes ||
-	    this.attributes.length()==0)
-	    this.attributes=attributes;
-	else
-	    this.attributes += ' '+attributes;
-	return this;
+        if (Code.debug() && attributes!=null && attributes.indexOf("=")>=0)
+            Code.warning("Set attribute with old method: "+attributes+
+                         " on " + getClass().getName());
+        
+        if (attributes==null ||
+            this.attributes==null ||
+            this.attributes==noAttributes ||
+            this.attributes.length()==0)
+            this.attributes=attributes;
+        else
+            this.attributes += ' '+attributes;
+        return this;
     }
     
     /* ----------------------------------------------------------------- */
@@ -204,26 +204,26 @@ public abstract class Element
      */
     public Element attribute(String attribute, Object value)
     {
-	if (attributeMap==null)
-	    attributeMap=new Hashtable(10);
-	
-	if (value!=null)
-	{
-	    if (value instanceof String && ((String)value).indexOf('"')!=-1)
-	    {
-		String s=(String)value;
-		int q=0;
-		while((q=s.indexOf('"',q))>=0)
-		{
-		    s=s.substring(0,q)+"&quot;"+s.substring(++q);
-		    q+=6;
-		}
-		value=s;
-	    }
-	    
-	    attributeMap.put(attribute,"\""+value+'"');
-	}
-	return this;
+        if (attributeMap==null)
+            attributeMap=new Hashtable(10);
+        
+        if (value!=null)
+        {
+            if (value instanceof String && ((String)value).indexOf('"')!=-1)
+            {
+                String s=(String)value;
+                int q=0;
+                while((q=s.indexOf('"',q))>=0)
+                {
+                    s=s.substring(0,q)+"&quot;"+s.substring(++q);
+                    q+=6;
+                }
+                value=s;
+            }
+            
+            attributeMap.put(attribute,"\""+value+'"');
+        }
+        return this;
     }
     
     /* ----------------------------------------------------------------- */
@@ -234,11 +234,11 @@ public abstract class Element
      */
     public Element attribute(String attribute, long value)
     {
-	if (attributeMap==null)
-	    attributeMap=new Hashtable(10);
-	
-	attributeMap.put(attribute,Long.toString(value));
-	return this;
+        if (attributeMap==null)
+            attributeMap=new Hashtable(10);
+        
+        attributeMap.put(attribute,Long.toString(value));
+        return this;
     }
 
     /* ----------------------------------------------------------------- */
@@ -248,16 +248,16 @@ public abstract class Element
      */
     public String toString()
     {
-	try{
-	    StringWriter out = new StringWriter();
-	    write(out);
-	    out.flush();
-	    return out.toString();
-	}
-	catch(IOException e){
-	    Code.ignore(e);
-	}
-	return null;	
+        try{
+            StringWriter out = new StringWriter();
+            write(out);
+            out.flush();
+            return out.toString();
+        }
+        catch(IOException e){
+            Code.ignore(e);
+        }
+        return null;    
     }
     
     /* ----------------------------------------------------------------- */
@@ -267,7 +267,7 @@ public abstract class Element
      */
     public Element left()
     {
-	return attribute(ALIGN,LEFT);
+        return attribute(ALIGN,LEFT);
     }
     
     /* ----------------------------------------------------------------- */
@@ -277,7 +277,7 @@ public abstract class Element
      */
     public Element right()
     {
-	return attribute(ALIGN,RIGHT);
+        return attribute(ALIGN,RIGHT);
     }
     
     /* ----------------------------------------------------------------- */
@@ -287,7 +287,7 @@ public abstract class Element
      */
     public Element center()
     {
-	return attribute(ALIGN,CENTER);
+        return attribute(ALIGN,CENTER);
     }
     
     /* ----------------------------------------------------------------- */
@@ -297,7 +297,7 @@ public abstract class Element
      */
     public Element top()
     {
-	return attribute(VALIGN,TOP);
+        return attribute(VALIGN,TOP);
     }
     
     /* ----------------------------------------------------------------- */
@@ -307,7 +307,7 @@ public abstract class Element
      */
     public Element bottom()
     {
-	return attribute(VALIGN,BOTTOM);
+        return attribute(VALIGN,BOTTOM);
     }
     
     /* ----------------------------------------------------------------- */
@@ -317,7 +317,7 @@ public abstract class Element
      */
     public Element middle()
     {
-	return attribute(VALIGN,MIDDLE);
+        return attribute(VALIGN,MIDDLE);
     }
     
     /* ----------------------------------------------------------------- */
@@ -327,8 +327,8 @@ public abstract class Element
      */
     public Element width(int w)
     {
-	width=w;
-	return attribute(WIDTH,w);
+        width=w;
+        return attribute(WIDTH,w);
     }
     
     /* ----------------------------------------------------------------- */
@@ -338,8 +338,8 @@ public abstract class Element
      */
     public Element width(String w)
     {
-	width=-1;
-	return attribute(WIDTH,w);
+        width=-1;
+        return attribute(WIDTH,w);
     }
     
     /* ----------------------------------------------------------------- */
@@ -355,8 +355,8 @@ public abstract class Element
      */
     public Element height(int h)
     {
-	height=h;
-	return attribute(HEIGHT,h);
+        height=h;
+        return attribute(HEIGHT,h);
     }
     
     /* ----------------------------------------------------------------- */
@@ -366,8 +366,8 @@ public abstract class Element
      */
     public Element height(String h)
     {
-	height=-1;
-	return attribute(HEIGHT,h);
+        height=-1;
+        return attribute(HEIGHT,h);
     }
     
     /* ----------------------------------------------------------------- */
@@ -383,8 +383,8 @@ public abstract class Element
      */
     public Element size(int s)
     {
-	size=s;
-	return attribute(SIZE,s);
+        size=s;
+        return attribute(SIZE,s);
     }
     
     /* ----------------------------------------------------------------- */
@@ -394,8 +394,8 @@ public abstract class Element
      */
     public Element size(String s)
     {
-	size=-1;
-	return attribute(SIZE,s);
+        size=-1;
+        return attribute(SIZE,s);
     }
     
     /* ----------------------------------------------------------------- */
@@ -411,7 +411,7 @@ public abstract class Element
      */
     public Element color(String color)
     {
-	return attribute(COLOR,color);
+        return attribute(COLOR,color);
     }
     
     /* ----------------------------------------------------------------- */
@@ -421,7 +421,7 @@ public abstract class Element
      */
     public Element bgColor(String color)
     {
-	return attribute(BGCOLOR,color);
+        return attribute(BGCOLOR,color);
     }
     
     /* ----------------------------------------------------------------- */
@@ -429,7 +429,7 @@ public abstract class Element
      */
     public Element cssClass(String c)
     {
-	return attribute(CLASS,c);
+        return attribute(CLASS,c);
     }
     
     /* ----------------------------------------------------------------- */
@@ -437,7 +437,7 @@ public abstract class Element
      */
     public Element cssID(String id)
     {
-	return attribute(ID,id);
+        return attribute(ID,id);
     }
     
     /* ----------------------------------------------------------------- */
@@ -445,7 +445,7 @@ public abstract class Element
      */
     public Element style(String s)
     {
-	return attribute(STYLE,s);
+        return attribute(STYLE,s);
     }
 }
 

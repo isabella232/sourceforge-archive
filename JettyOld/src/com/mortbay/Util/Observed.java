@@ -15,13 +15,13 @@ public class Observed  extends Observable
 {
     public void notifyObservers(Object arg)
     {
-	setChanged();
-	super.notifyObservers(arg);
+        setChanged();
+        super.notifyObservers(arg);
     }
 
     public void notifyObservers()
     {
-	setChanged();
-	super.notifyObservers(null);
+        setChanged();
+        super.notifyObservers(null);
     }
 }

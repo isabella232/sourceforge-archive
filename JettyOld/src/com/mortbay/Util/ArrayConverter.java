@@ -22,39 +22,39 @@ public class ArrayConverter implements Converter
     String separator = null;
     /* ------------------------------------------------------------ */
     public ArrayConverter(String separator){
-	this.separator = separator;
+        this.separator = separator;
     }
     /* ------------------------------------------------------------ */
     public Object convert(Object toConvert, Class convertTo,
-			  Converter context)
+                          Converter context)
     {
-	if (toConvert == null || toConvert.getClass().equals(convertTo))
-	    // Already correct type!
-	    return toConvert;	
-	if (convertTo.isArray()){
-	    Vector elems = null;
-	    if (toConvert instanceof Vector)
-		elems = (Vector)toConvert;
-	    else {
-		StringTokenizer st =
-		    new StringTokenizer(toConvert.toString(), separator);
-		elems = new Vector();
-		while (st.hasMoreElements())
-		    elems.addElement(st.nextElement());
-	    }
-	    Class typeC = convertTo.getComponentType();
-	    Object res = Array.newInstance(typeC, elems.size());
-	    int i = 0;
-	    Converter converter = context == null ? this : context;
-	    for (Enumeration enum = elems.elements();
-		 enum.hasMoreElements(); i++)
-	    {
-		Array.set(res, i, converter.convert(enum.nextElement(), typeC,
-						    converter));
-	    }
-	    return res;
-	}
-	return null;
+        if (toConvert == null || toConvert.getClass().equals(convertTo))
+            // Already correct type!
+            return toConvert;   
+        if (convertTo.isArray()){
+            Vector elems = null;
+            if (toConvert instanceof Vector)
+                elems = (Vector)toConvert;
+            else {
+                StringTokenizer st =
+                    new StringTokenizer(toConvert.toString(), separator);
+                elems = new Vector();
+                while (st.hasMoreElements())
+                    elems.addElement(st.nextElement());
+            }
+            Class typeC = convertTo.getComponentType();
+            Object res = Array.newInstance(typeC, elems.size());
+            int i = 0;
+            Converter converter = context == null ? this : context;
+            for (Enumeration enum = elems.elements();
+                 enum.hasMoreElements(); i++)
+            {
+                Array.set(res, i, converter.convert(enum.nextElement(), typeC,
+                                                    converter));
+            }
+            return res;
+        }
+        return null;
     }
     /* ------------------------------------------------------------ */
 };

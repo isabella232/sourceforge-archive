@@ -20,14 +20,14 @@ public class Tag extends Element
     /* ---------------------------------------------------------------- */
     public Tag(String tag)
     {
-	this.tag=tag;
+        this.tag=tag;
     }
     
     /* ---------------------------------------------------------------- */
     public void write(Writer out)
-	 throws IOException
+         throws IOException
     {
-	out.write('<'+tag+attributes()+'>');
+        out.write('<'+tag+attributes()+'>');
     }
 }
 

@@ -11,7 +11,7 @@ public class HeadException extends IOException
 {
     private HeadException()
     {
-	super("HEAD Exception");
+        super("HEAD Exception");
     }
 
     public static final HeadException instance = new HeadException();

@@ -38,7 +38,7 @@ public class FilterHandler extends NullHandler
 {
     /* ----------------------------------------------------------------- */
     static Class[] __requestArg = {com.mortbay.HTTP.HttpRequest.class};
-	
+        
     /* ----------------------------------------------------------------- */
     PathMap filterMap = null;
     
@@ -47,9 +47,9 @@ public class FilterHandler extends NullHandler
      * @param properties Passed to setProperties
      */
     public FilterHandler(Properties properties)
-	throws IOException
+        throws IOException
     {
-	setProperties(properties);
+        setProperties(properties);
     }
     
     /* ----------------------------------------------------------------- */
@@ -61,28 +61,28 @@ public class FilterHandler extends NullHandler
      */
     public FilterHandler(PathMap filterMap)
     {
-	this.filterMap = filterMap;
+        this.filterMap = filterMap;
 
-	// check the filters exists
-	try{
-	    Enumeration k = filterMap.keys();
-	    while(k.hasMoreElements())
-	    {
-		Object filter = filterMap.get(k.nextElement());
-		
-		if (filter instanceof Vector)
-		{
-		    Enumeration f = ((Vector)filter).elements();
-		    while (f.hasMoreElements())
-			newFilter(f.nextElement().toString(),null);
-		}
-		else
-		    newFilter(filter.toString(),null);
-	    }
-	}
-	catch (Exception e){
-	    Code.fail("Can't instantiate HttpFilter",e);
-	}
+        // check the filters exists
+        try{
+            Enumeration k = filterMap.keys();
+            while(k.hasMoreElements())
+            {
+                Object filter = filterMap.get(k.nextElement());
+                
+                if (filter instanceof Vector)
+                {
+                    Enumeration f = ((Vector)filter).elements();
+                    while (f.hasMoreElements())
+                        newFilter(f.nextElement().toString(),null);
+                }
+                else
+                    newFilter(filter.toString(),null);
+            }
+        }
+        catch (Exception e){
+            Code.fail("Can't instantiate HttpFilter",e);
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -95,29 +95,29 @@ public class FilterHandler extends NullHandler
      * @param properties Configuration.
      */
     public void setProperties(Properties properties)
-	throws IOException
+        throws IOException
     {
-	PropertyTree tree=null;
-	if (properties instanceof PropertyTree)
-	    tree = (PropertyTree)properties;
-	else
-	    tree = new PropertyTree(properties);
-	Code.debug(tree);
-	
-	filterMap = new PathMap();
+        PropertyTree tree=null;
+        if (properties instanceof PropertyTree)
+            tree = (PropertyTree)properties;
+        else
+            tree = new PropertyTree(properties);
+        Code.debug(tree);
+        
+        filterMap = new PathMap();
 
-	Enumeration names = tree.getRealNodes();
-	while (names.hasMoreElements())
-	{
-	    String filterName = names.nextElement().toString();
-	    if ("*".equals(filterName))
-		continue;
-	    Code.debug("Configuring filter "+filterName);
-	    Vector paths = tree.getVector(filterName+".PATHS",",;");
-	    for (int r=paths.size();r-->0;)
-		filterMap.put(paths.elementAt(r),
-			      tree.getProperty(filterName+".CLASS"));
-	}
+        Enumeration names = tree.getRealNodes();
+        while (names.hasMoreElements())
+        {
+            String filterName = names.nextElement().toString();
+            if ("*".equals(filterName))
+                continue;
+            Code.debug("Configuring filter "+filterName);
+            Vector paths = tree.getVector(filterName+".PATHS",",;");
+            for (int r=paths.size();r-->0;)
+                filterMap.put(paths.elementAt(r),
+                              tree.getProperty(filterName+".CLASS"));
+        }
     }
     
     /* ----------------------------------------------------------------- */
@@ -125,51 +125,51 @@ public class FilterHandler extends NullHandler
      * Add a HttpFilter instance to the response for each matching filter
      */
     public void handle(HttpRequest request,
-		       HttpResponse response)
-	 throws Exception
+                       HttpResponse response)
+         throws Exception
     {
-	Object filter =
-	    filterMap.getLongestMatch(request.getResourcePath());
+        Object filter =
+            filterMap.getLongestMatch(request.getResourcePath());
 
-	if (filter!=null)
-	{    
-	    if (filter instanceof Vector)
-	    {
-		Enumeration f = ((Vector)filter).elements();
-		while (f.hasMoreElements())
-		    response.addObserver(newFilter(f.nextElement().toString(),
-						   request));
-	    }
-	    else
-		response.addObserver(newFilter(filter.toString(),
-					       request));
-	}
+        if (filter!=null)
+        {    
+            if (filter instanceof Vector)
+            {
+                Enumeration f = ((Vector)filter).elements();
+                while (f.hasMoreElements())
+                    response.addObserver(newFilter(f.nextElement().toString(),
+                                                   request));
+            }
+            else
+                response.addObserver(newFilter(filter.toString(),
+                                               request));
+        }
     }
     
     /* ----------------------------------------------------------------- */
     HttpFilter newFilter(String className,HttpRequest request)
-	throws ClassNotFoundException,
-	       ClassCastException,
-	       IllegalAccessException,
-	       InstantiationException
+        throws ClassNotFoundException,
+               ClassCastException,
+               IllegalAccessException,
+               InstantiationException
     {
-	Class filterClass = Class.forName(className);
-	
-	HttpFilter filter = null;
-	try
-	{
-	    java.lang.reflect.Constructor c =
-		filterClass.getConstructor(__requestArg);
-	    Object[] args= {request};
-	    filter=(HttpFilter)c.newInstance(args);
-	}
-	catch(Exception e)
-	{
-	    Code.debug(e);
-	    filter=(HttpFilter)filterClass.newInstance();
-	}
-	
-	return filter;
+        Class filterClass = Class.forName(className);
+        
+        HttpFilter filter = null;
+        try
+        {
+            java.lang.reflect.Constructor c =
+                filterClass.getConstructor(__requestArg);
+            Object[] args= {request};
+            filter=(HttpFilter)c.newInstance(args);
+        }
+        catch(Exception e)
+        {
+            Code.debug(e);
+            filter=(HttpFilter)filterClass.newInstance();
+        }
+        
+        return filter;
     }
 }
 

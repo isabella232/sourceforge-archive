@@ -33,10 +33,10 @@ public class Transaction
      * @exception java.sql.SQLException 
      */
     Transaction(Database db)
-	throws java.sql.SQLException
+        throws java.sql.SQLException
     {
-	connection = db.getConnection();
-	database = db;
+        connection = db.getConnection();
+        database = db;
     }
 
     /* ------------------------------------------------------------ */
@@ -44,18 +44,18 @@ public class Transaction
      */
     public void finalize()
     {
-	try{
-	    if (connection!=null)
-		connection.rollback();
-	}
-	catch(Exception e)
-	{
-	    Code.debug(e);
-	}    
-	finally
-	{
-	    connection=null;
-	}
+        try{
+            if (connection!=null)
+                connection.rollback();
+        }
+        catch(Exception e)
+        {
+            Code.debug(e);
+        }    
+        finally
+        {
+            connection=null;
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -64,7 +64,7 @@ public class Transaction
      */
     public java.sql.Connection getConnection()
     {
-	return connection;
+        return connection;
     }
 
     /* ------------------------------------------------------------ */
@@ -72,16 +72,16 @@ public class Transaction
      * @exception java.sql.SQLException 
      */
     public void commit()
-	 throws java.sql.SQLException
+         throws java.sql.SQLException
     {
-	try{
-	    connection.commit();
-	}
-	finally
-	{
-	    database.recycleConnection(connection);
-	    connection=null;
-	}
+        try{
+            connection.commit();
+        }
+        finally
+        {
+            database.recycleConnection(connection);
+            connection=null;
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -89,16 +89,16 @@ public class Transaction
      * @exception java.sql.SQLException 
      */
     public void rollback()
-	 throws java.sql.SQLException
+         throws java.sql.SQLException
     {
-	try{
-	    connection.rollback();
-	}
-	finally
-	{
-	    database.recycleConnection(connection);
-	    connection=null;
-	}
+        try{
+            connection.rollback();
+        }
+        finally
+        {
+            database.recycleConnection(connection);
+            connection=null;
+        }
     }
 };
 

@@ -26,7 +26,7 @@ public class SummaryFilterOutputStream extends FilterOutputStream
      */
     public SummaryFilterOutputStream(OutputStream out)
     {
-	this(out,null);
+        this(out,null);
     }
     
     /* ------------------------------------------------------------ */
@@ -34,12 +34,12 @@ public class SummaryFilterOutputStream extends FilterOutputStream
      * @param out 
      */
     public SummaryFilterOutputStream(OutputStream out,
-				     String name)
+                                     String name)
     {
-	super(out);
-	if (name==null)
-	    name="to "+out;
-	_msg=" bytes written "+name+":\n";
+        super(out);
+        if (name==null)
+            name="to "+out;
+        _msg=" bytes written "+name+":\n";
     }
     
     /* ------------------------------------------------------------ */
@@ -47,11 +47,11 @@ public class SummaryFilterOutputStream extends FilterOutputStream
      * @param out 
      */
     public SummaryFilterOutputStream(OutputStream out,
-				     String name,
-				     int size)
+                                     String name,
+                                     int size)
     {
-	this(out,name);
-	_size=size;
+        this(out,name);
+        _size=size;
     }
 
     
@@ -61,11 +61,11 @@ public class SummaryFilterOutputStream extends FilterOutputStream
      * @exception IOException 
      */
     public void write(int b)
-	throws IOException
+        throws IOException
     {
-	byte[] ba = new byte[1];
-	ba[0]=(byte)b;
-	write(ba,0,1);
+        byte[] ba = new byte[1];
+        ba[0]=(byte)b;
+        write(ba,0,1);
     }
     
 
@@ -75,9 +75,9 @@ public class SummaryFilterOutputStream extends FilterOutputStream
      * @exception IOException 
      */
     public void write(byte b[])
-	throws IOException
+        throws IOException
     {
-	write(b,0,b.length);
+        write(b,0,b.length);
     }
     
     /* ------------------------------------------------------------ */
@@ -88,29 +88,29 @@ public class SummaryFilterOutputStream extends FilterOutputStream
      * @exception IOException 
      */
     public void write(byte b[],
-		      int off,
-		      int len)
-	throws IOException
+                      int off,
+                      int len)
+        throws IOException
     {
-	out.write(b,off,len);
-	StringBuffer buf=new StringBuffer("=============================================================================\n"+
-					  len+
-					  _msg+
-					  "-----------------------------------------------------------------------------\n");
-	int i=0;
-	for (i=0; (_size==0 || i<_size) && i<len; i++)
-	{
-	    char c = (char)b[i];
-	    if (Character.isISOControl(c) && c!=10 && c!=13)
-		buf.append('.');
-	    else 
-		buf.append(c);
-	}   
-	buf.append((i<len)?"\n...\n":"\n");
-	synchronized(System.err)
-	{
-	    System.err.println(buf.toString());
-	}
+        out.write(b,off,len);
+        StringBuffer buf=new StringBuffer("=============================================================================\n"+
+                                          len+
+                                          _msg+
+                                          "-----------------------------------------------------------------------------\n");
+        int i=0;
+        for (i=0; (_size==0 || i<_size) && i<len; i++)
+        {
+            char c = (char)b[i];
+            if (Character.isISOControl(c) && c!=10 && c!=13)
+                buf.append('.');
+            else 
+                buf.append(c);
+        }   
+        buf.append((i<len)?"\n...\n":"\n");
+        synchronized(System.err)
+        {
+            System.err.println(buf.toString());
+        }
     }
 };
 

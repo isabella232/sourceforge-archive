@@ -13,15 +13,15 @@ import java.io.*;
 public class Style extends Block
 {
     public static final String
-	STYLE = "STYLE",
-	TYPE  = "TYPE",
-	MEDIA = "MEDIA";
+        STYLE = "STYLE",
+        TYPE  = "TYPE",
+        MEDIA = "MEDIA";
     
     public final static String
-	StyleSheet="StyleSheet",
-	AlternateStyleSheet="Alternate StyleSheet",
-	text_css="text/css",
-	screen = "screen";
+        StyleSheet="StyleSheet",
+        AlternateStyleSheet="Alternate StyleSheet",
+        text_css="text/css",
+        screen = "screen";
 
     
     /* ------------------------------------------------------------ */
@@ -29,25 +29,25 @@ public class Style extends Block
      * @param type Format of Style */
     public Style(String style, String type)
     {
-	super(STYLE);
-	if (type!=null)
-	    attribute(TYPE,type);
-	add(style);
+        super(STYLE);
+        if (type!=null)
+            attribute(TYPE,type);
+        add(style);
     }
 
     /* ------------------------------------------------------------ */
     /** Construct a Style element */
     public Style(String style)
     {
-	this(style, text_css);
+        this(style, text_css);
     }
     
     /* ------------------------------------------------------------ */
     /** Construct a Style element */
     public Style()
     {
-	super(STYLE);
-	attribute(TYPE,text_css);
+        super(STYLE);
+        attribute(TYPE,text_css);
     }
     
     /* ------------------------------------------------------------ */
@@ -55,8 +55,8 @@ public class Style extends Block
      */
     public Style media(String m)
     {
-	attribute(MEDIA,m);
-	return this;
+        attribute(MEDIA,m);
+        return this;
     }
     
     /* ------------------------------------------------------------ */
@@ -64,8 +64,8 @@ public class Style extends Block
      */
     public Style comment()
     {
-	nest(new Comment());
-	return this;
+        nest(new Comment());
+        return this;
     }
 
 
@@ -76,8 +76,8 @@ public class Style extends Block
      */
     public Style importStyle(String url)
     {
-	add("@import url("+url+");\n");
-	return this;
+        add("@import url("+url+");\n");
+        return this;
     }
 };
 

@@ -30,10 +30,10 @@ public interface ServletDispatchHandler
      * @return non-null if the request was handled
      */
     public Object defaultDispatch(String method,
-				  ServletDispatch dispatch,
-				  Object context,
-				  HttpServletRequest req,
-				  HttpServletResponse res)
-	throws Exception;
+                                  ServletDispatch dispatch,
+                                  Object context,
+                                  HttpServletRequest req,
+                                  HttpServletResponse res)
+        throws Exception;
     /* ------------------------------------------------------------ */
 };

@@ -60,7 +60,7 @@ public class Server extends BaseConfiguration
      */
     public static String getGlobalProperty(String name)
     {
-	return __globalProperties.getProperty(name);
+        return __globalProperties.getProperty(name);
     }
 
     /* ------------------------------------------------------------ */
@@ -71,13 +71,13 @@ public class Server extends BaseConfiguration
      *            servers.
      */
     public static void loadConfigurationFile(String filename)
-	throws Exception
+        throws Exception
     {
-	// load property file
-	PropertyTree props = new PropertyTree();
-	props.load(new BufferedInputStream(new FileInputStream(filename)));
-	
-	buildServers(props);
+        // load property file
+        PropertyTree props = new PropertyTree();
+        props.load(new BufferedInputStream(new FileInputStream(filename)));
+        
+        buildServers(props);
     }
 
     /* ------------------------------------------------------------ */
@@ -102,44 +102,44 @@ public class Server extends BaseConfiguration
      * @param serversTree The server properties
      */
     public static void buildServers(PropertyTree serversTree)
-	throws Exception
+        throws Exception
     {
-	synchronized(com.mortbay.Jetty.Server.class)
-	{
-	    String serverName="*";
-	
-	    try
-	    {
-		// Handle general server properties
-		__globalProperties=properties(serversTree);
-		String pageType=
-		    __globalProperties.getProperty("DefaultPageType");
-		if (pageType!=null && pageType.length()>0)
-		    Page.setDefaultPageType(pageType);
-	    
-		Vector servers =
-		    serversTree.getVector("SERVERS",";,");
-		Code.assert(servers != null,
-			    "Missing mandatory configuration entry: 'SERVERS'");
-		for (int s=0;s<servers.size();s++)
-		{
-		    serverName=(String)servers.elementAt(s);
-		    PropertyTree serverTree =
-			serversTree.getTree(serverName);
-		    buildServer(serverName,serverTree);
-		}
-	    }
-	    catch (Error e)
-	    {
-		Code.warning("Configuration error for "+serverName);
-		throw e;
-	    }
-	    catch (Exception e)
-	    {
-		Code.warning("Configuration error for "+serverName);
-		throw e;
-	    }
-	}
+        synchronized(com.mortbay.Jetty.Server.class)
+        {
+            String serverName="*";
+        
+            try
+            {
+                // Handle general server properties
+                __globalProperties=properties(serversTree);
+                String pageType=
+                    __globalProperties.getProperty("DefaultPageType");
+                if (pageType!=null && pageType.length()>0)
+                    Page.setDefaultPageType(pageType);
+            
+                Vector servers =
+                    serversTree.getVector("SERVERS",";,");
+                Code.assert(servers != null,
+                            "Missing mandatory configuration entry: 'SERVERS'");
+                for (int s=0;s<servers.size();s++)
+                {
+                    serverName=(String)servers.elementAt(s);
+                    PropertyTree serverTree =
+                        serversTree.getTree(serverName);
+                    buildServer(serverName,serverTree);
+                }
+            }
+            catch (Error e)
+            {
+                Code.warning("Configuration error for "+serverName);
+                throw e;
+            }
+            catch (Exception e)
+            {
+                Code.warning("Configuration error for "+serverName);
+                throw e;
+            }
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -172,58 +172,58 @@ public class Server extends BaseConfiguration
      * @exception Exception 
      */
     public static void buildServer(String serverName,
-				   PropertyTree serverTree)
-	throws Exception
+                                   PropertyTree serverTree)
+        throws Exception
     {
-	synchronized(com.mortbay.Jetty.Server.class)
-	{
-	    String stackName="*";
-	    try
-	    {
-		PropertyTree serverProperties=properties(serverTree);
-		PropertyTree listeners = serverTree.getTree("LISTENER");
-		Server server = new Server(serverName,
-					   listeners,
-					   serverProperties);
-		
-		Code.debug("Configure Server",serverName,
-			   " ",serverProperties);
-		
-		Vector stacks = serverTree.getVector("STACKS",";,");
-		Code.assert(stacks != null,
-			    "Missing mandatory configuration entry: '"+
-			    serverName+".STACKS'");
-		for (int k=0; k<stacks.size();k++)
-		{
-		    stackName=(String)stacks.elementAt(k);
-		    PropertyTree stackTree = serverTree.getTree(stackName);
-		    server.addHandlerStack(stackName,stackTree);
-		}
+        synchronized(com.mortbay.Jetty.Server.class)
+        {
+            String stackName="*";
+            try
+            {
+                PropertyTree serverProperties=properties(serverTree);
+                PropertyTree listeners = serverTree.getTree("LISTENER");
+                Server server = new Server(serverName,
+                                           listeners,
+                                           serverProperties);
+                
+                Code.debug("Configure Server",serverName,
+                           " ",serverProperties);
+                
+                Vector stacks = serverTree.getVector("STACKS",";,");
+                Code.assert(stacks != null,
+                            "Missing mandatory configuration entry: '"+
+                            serverName+".STACKS'");
+                for (int k=0; k<stacks.size();k++)
+                {
+                    stackName=(String)stacks.elementAt(k);
+                    PropertyTree stackTree = serverTree.getTree(stackName);
+                    server.addHandlerStack(stackName,stackTree);
+                }
 
-		stacks = serverTree.getVector("EXCEPTIONS",";,");
-		if (stacks==null)
-		    Code.debug("Missing optional configuration entry: '"+
-			       serverName+".EXCEPTIONS'");
-		for (int k=0; stacks!=null && k<stacks.size();k++)
-		{
-		    stackName=(String)stacks.elementAt(k);
-		    PropertyTree stackTree = serverTree.getTree(stackName);
-		    server.addExceptionStack(stackName,stackTree);
-		}
-	    }
-	    catch (Error e)
-	    {
-		Code.warning("Configuration error for "+serverName+
-			     "."+stackName);
-		throw e;
-	    }
-	    catch (Exception e)
-	    {
-		Code.warning("Configuration error for "+serverName+
-			     "."+stackName);
-		throw e;
-	    }
-	}
+                stacks = serverTree.getVector("EXCEPTIONS",";,");
+                if (stacks==null)
+                    Code.debug("Missing optional configuration entry: '"+
+                               serverName+".EXCEPTIONS'");
+                for (int k=0; stacks!=null && k<stacks.size();k++)
+                {
+                    stackName=(String)stacks.elementAt(k);
+                    PropertyTree stackTree = serverTree.getTree(stackName);
+                    server.addExceptionStack(stackName,stackTree);
+                }
+            }
+            catch (Error e)
+            {
+                Code.warning("Configuration error for "+serverName+
+                             "."+stackName);
+                throw e;
+            }
+            catch (Exception e)
+            {
+                Code.warning("Configuration error for "+serverName+
+                             "."+stackName);
+                throw e;
+            }
+        }
     }    
 
     /* ------------------------------------------------------------ */
@@ -232,18 +232,18 @@ public class Server extends BaseConfiguration
      */
     public static Enumeration servers()
     {
-	return __serverMap.elements();
+        return __serverMap.elements();
     }
     
     /* ------------------------------------------------------------ */
     /** Start all configured servers.
      */
     public static void startAll()
-	throws Exception
+        throws Exception
     {
         Enumeration e = __serverMap.elements();
         while (e.hasMoreElements())
-	    ((Server)e.nextElement()).start();
+            ((Server)e.nextElement()).start();
     }
     
     /* ------------------------------------------------------------ */
@@ -253,13 +253,13 @@ public class Server extends BaseConfiguration
     {
         Enumeration e = __serverMap.elements();
         while (e.hasMoreElements())
-	    ((Server)e.nextElement()).stop(); 
+            ((Server)e.nextElement()).stop(); 
 
-	//  P.Mclachlan <pdm@acm.org> (Sat Jun 19, 1999)
-	//    Restore the static variables to their initial
-	//    state, ready if we are run again.
-	__serverMap.clear();
-	//  end P.Mclachlan
+        //  P.Mclachlan <pdm@acm.org> (Sat Jun 19, 1999)
+        //    Restore the static variables to their initial
+        //    state, ready if we are run again.
+        __serverMap.clear();
+        //  end P.Mclachlan
     }
     
     /* ------------------------------------------------------------ */
@@ -270,13 +270,13 @@ public class Server extends BaseConfiguration
     {
         Enumeration e = __serverMap.elements();
         while (e.hasMoreElements())
-	    ((Server)e.nextElement()).stop(); 
+            ((Server)e.nextElement()).stop(); 
 
-	//  P.Mclachlan <pdm@acm.org> (Sat Jun 19, 1999)
-	//    Restore the static variables to their initial
-	//    state, ready if we are run again.
-	__serverMap.clear();
-	//  end P.Mclachlan
+        //  P.Mclachlan <pdm@acm.org> (Sat Jun 19, 1999)
+        //    Restore the static variables to their initial
+        //    state, ready if we are run again.
+        __serverMap.clear();
+        //  end P.Mclachlan
     }
     
 
@@ -297,11 +297,11 @@ public class Server extends BaseConfiguration
      * Currently the following properties are defined for the
      * server property instance:<PRE>
      * SessionMaxInactiveInterval : Max idle time MS before session death
-     * MinListenerThreads	  : Min listener threads per listener
-     * MaxListenerThreads	  : Max listener threads per listener
-     * MaxListenerThreadIdleMs	  : Max idle time Ms before listen thread
+     * MinListenerThreads         : Min listener threads per listener
+     * MaxListenerThreads         : Max listener threads per listener
+     * MaxListenerThreadIdleMs    : Max idle time Ms before listen thread
      *                              death
-     * MimeMap		          : Property file of MIME mappings
+     * MimeMap                    : Property file of MIME mappings
      *
      * </PRE>
      * Note that if this method is called from buildServer, then all
@@ -314,74 +314,74 @@ public class Server extends BaseConfiguration
      * @exception Exception 
      */
     public Server(String serverName,
-		  PropertyTree listeners,
-		  Properties properties)
-	throws Exception
+                  PropertyTree listeners,
+                  Properties properties)
+        throws Exception
     {
-	synchronized(com.mortbay.Jetty.Server.class)
-	{
-	    this.serverName=serverName;
-	    __serverMap.put(serverName,this);
+        synchronized(com.mortbay.Jetty.Server.class)
+        {
+            this.serverName=serverName;
+            __serverMap.put(serverName,this);
 
-	    if (Code.debug())
-	    {
-		Code.debug(serverName," listeners=",
-			   DataClass.toString(listeners));
-		Code.debug(serverName," properties=",
-			   DataClass.toString(properties));
-	    }
-	    
-	    // Set properties for HttpConfiguration
-	    this.properties=properties;
+            if (Code.debug())
+            {
+                Code.debug(serverName," listeners=",
+                           DataClass.toString(listeners));
+                Code.debug(serverName," properties=",
+                           DataClass.toString(properties));
+            }
+            
+            // Set properties for HttpConfiguration
+            this.properties=properties;
 
-	    // Empty path map for handlers
-	    httpHandlersMap=new PathMap();
-	
-	    // Extract listeners
-	    Vector listener_classes = new Vector();
-	    Vector listener_addresses = new Vector();
-	    Enumeration names = listeners.getRealNodes();
-	    while (names.hasMoreElements())
-	    {
-		String listenerName = names.nextElement().toString();
-		if ("*".equals(listenerName))
-		    continue;
+            // Empty path map for handlers
+            httpHandlersMap=new PathMap();
+        
+            // Extract listeners
+            Vector listener_classes = new Vector();
+            Vector listener_addresses = new Vector();
+            Enumeration names = listeners.getRealNodes();
+            while (names.hasMoreElements())
+            {
+                String listenerName = names.nextElement().toString();
+                if ("*".equals(listenerName))
+                    continue;
 
-		Code.debug("Configuring listener "+listenerName);
-		PropertyTree listenerTree = listeners.getTree(listenerName);
-	    
-		String className = listenerTree.getProperty("CLASS");
-		Code.assert(className != null,
-			    "Missing mandatory configuration entry: '"+
-			    serverName+".LISTENER."+listenerName+".CLASS'");
-		Class listenerClass = Class.forName(className);
+                Code.debug("Configuring listener "+listenerName);
+                PropertyTree listenerTree = listeners.getTree(listenerName);
+            
+                String className = listenerTree.getProperty("CLASS");
+                Code.assert(className != null,
+                            "Missing mandatory configuration entry: '"+
+                            serverName+".LISTENER."+listenerName+".CLASS'");
+                Class listenerClass = Class.forName(className);
 
-		Vector addrs = listenerTree.getVector("ADDRS",",; ");
-		Code.assert(addrs != null,
-			    "Missing mandatory configuration entry: '"+
-			    serverName+".LISTENER."+listenerName+".ADDRS'");
-		for (int a=addrs.size();a-->0;)
-		{
-		    InetAddrPort addr_port =
-			new InetAddrPort(addrs.elementAt(a).toString());
-		    listener_classes.addElement(listenerClass);
-		    listener_addresses.addElement(addr_port);
-		}
-	    }
-	    addresses = new InetAddrPort[listener_addresses.size()];
-	    listener_addresses.copyInto(addresses);
-	    listenerClasses = new Class[listener_classes.size()];
-	    listener_classes.copyInto(listenerClasses);
+                Vector addrs = listenerTree.getVector("ADDRS",",; ");
+                Code.assert(addrs != null,
+                            "Missing mandatory configuration entry: '"+
+                            serverName+".LISTENER."+listenerName+".ADDRS'");
+                for (int a=addrs.size();a-->0;)
+                {
+                    InetAddrPort addr_port =
+                        new InetAddrPort(addrs.elementAt(a).toString());
+                    listener_classes.addElement(listenerClass);
+                    listener_addresses.addElement(addr_port);
+                }
+            }
+            addresses = new InetAddrPort[listener_addresses.size()];
+            listener_addresses.copyInto(addresses);
+            listenerClasses = new Class[listener_classes.size()];
+            listener_classes.copyInto(listenerClasses);
 
-	    // Get mime map
-	    String mimeFile = properties.getProperty("MimeMap");
-	    if (mimeFile!=null && mimeFile.length()>0)
-	    {
-		Properties mimeProps = new Properties();
-		mimeProps.load(new FileInputStream(mimeFile));
-		mimeMap=mimeProps;
-	    }
-	}
+            // Get mime map
+            String mimeFile = properties.getProperty("MimeMap");
+            if (mimeFile!=null && mimeFile.length()>0)
+            {
+                Properties mimeProps = new Properties();
+                mimeProps.load(new FileInputStream(mimeFile));
+                mimeMap=mimeProps;
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -390,7 +390,7 @@ public class Server extends BaseConfiguration
      */
     public String getServerName()
     {
-	return serverName;
+        return serverName;
     }
     
     /* ------------------------------------------------------------ */
@@ -420,70 +420,70 @@ public class Server extends BaseConfiguration
      * @exception Exception 
      */
     public synchronized void addHandlerStack(String stackName,
-					     PropertyTree stackTree)
-	throws Exception
+                                             PropertyTree stackTree)
+        throws Exception
     {
-	Code.debug("Configure Stack ",serverName,
-		   ".",stackName,
-		   " ",stackTree);
-	
-	if (stackTree.get("EXCEPTIONS")!=null)
-	    Code.warning("2.2.0 Style exception configuration in '"+
-			 serverName+"."+stackName+
-			 "' is not supported");
-	
-	Vector handlers = stackTree.getVector("HANDLERS",";,");
-	Code.assert(handlers != null,
-		    "Missing mandatory configuration entry: '"+
-		    serverName+"."+stackName+".HANDLERS'");
-	
-	HttpHandler[] stack= new HttpHandler[handlers.size()];
-	
-	Vector paths = stackTree.getVector("PATHS",",;");
-	Code.assert(paths != null,
-		    "Missing mandatory configuration entry: '"+
-		    serverName+"."+stackName+".PATHS'");
+        Code.debug("Configure Stack ",serverName,
+                   ".",stackName,
+                   " ",stackTree);
+        
+        if (stackTree.get("EXCEPTIONS")!=null)
+            Code.warning("2.2.0 Style exception configuration in '"+
+                         serverName+"."+stackName+
+                         "' is not supported");
+        
+        Vector handlers = stackTree.getVector("HANDLERS",";,");
+        Code.assert(handlers != null,
+                    "Missing mandatory configuration entry: '"+
+                    serverName+"."+stackName+".HANDLERS'");
+        
+        HttpHandler[] stack= new HttpHandler[handlers.size()];
+        
+        Vector paths = stackTree.getVector("PATHS",",;");
+        Code.assert(paths != null,
+                    "Missing mandatory configuration entry: '"+
+                    serverName+"."+stackName+".PATHS'");
 
-	for (int d=paths.size();d-->0;)
-	    httpHandlersMap.put(paths.elementAt(d),stack);
-	
-	for (int h=0; h<handlers.size();h++)
-	{
-	    String handlerName=(String)handlers.elementAt(h);
-	    PropertyTree handlerTree = stackTree.getTree(handlerName);
-	    PropertyTree handlerProperties=properties(handlerTree);
-	    
-	    Code.debug("Configure Handler ",serverName,
-		       ".",stackName,
-		       ".",handlerName,
-		       " ",handlerProperties);
+        for (int d=paths.size();d-->0;)
+            httpHandlersMap.put(paths.elementAt(d),stack);
+        
+        for (int h=0; h<handlers.size();h++)
+        {
+            String handlerName=(String)handlers.elementAt(h);
+            PropertyTree handlerTree = stackTree.getTree(handlerName);
+            PropertyTree handlerProperties=properties(handlerTree);
+            
+            Code.debug("Configure Handler ",serverName,
+                       ".",stackName,
+                       ".",handlerName,
+                       " ",handlerProperties);
 
-	    
-	    String className = handlerTree.getProperty("CLASS");
-	    Code.assert(className != null,
-			"Missing mandatory configuration entry: '"+
-			serverName+"."+stackName+"."+handlerName+".CLASS'");
-	    Class handlerClass = Class.forName(className);
-	    if (!com.mortbay.HTTP.HttpHandler.class.isAssignableFrom(handlerClass))
-		Code.fail(handlerClass+" is not a com.mortbay.HTTP.HttpHandler");
-	    
-	    HttpHandler handlerInstance=null;
-	    try
-	    {
-		Constructor handlerConstructor =
-		    handlerClass.getConstructor(propertyArg);
-		Object[] arg={handlerProperties};
-		handlerInstance = (com.mortbay.HTTP.HttpHandler)
-		    handlerConstructor.newInstance(arg);
-	    }
-	    catch(NoSuchMethodException nsme)
-	    {
-		handlerInstance = (com.mortbay.HTTP.HttpHandler)
-		    handlerClass.newInstance();
-		handlerInstance.setProperties(handlerProperties);
-	    }
-	    stack[h]=handlerInstance;
-	}
+            
+            String className = handlerTree.getProperty("CLASS");
+            Code.assert(className != null,
+                        "Missing mandatory configuration entry: '"+
+                        serverName+"."+stackName+"."+handlerName+".CLASS'");
+            Class handlerClass = Class.forName(className);
+            if (!com.mortbay.HTTP.HttpHandler.class.isAssignableFrom(handlerClass))
+                Code.fail(handlerClass+" is not a com.mortbay.HTTP.HttpHandler");
+            
+            HttpHandler handlerInstance=null;
+            try
+            {
+                Constructor handlerConstructor =
+                    handlerClass.getConstructor(propertyArg);
+                Object[] arg={handlerProperties};
+                handlerInstance = (com.mortbay.HTTP.HttpHandler)
+                    handlerConstructor.newInstance(arg);
+            }
+            catch(NoSuchMethodException nsme)
+            {
+                handlerInstance = (com.mortbay.HTTP.HttpHandler)
+                    handlerClass.newInstance();
+                handlerInstance.setProperties(handlerProperties);
+            }
+            stack[h]=handlerInstance;
+        }
     }
 
     
@@ -509,64 +509,64 @@ public class Server extends BaseConfiguration
      * @exception Exception 
      */
     public synchronized void addExceptionStack(String stackName,
-					       PropertyTree stackTree)
-	throws Exception
+                                               PropertyTree stackTree)
+        throws Exception
     {
-	Code.debug("Configure Ex Stack ",serverName,
-		   ".",stackName,
-		   " ",stackTree);
-	
-	Vector handlers = stackTree.getVector("HANDLERS",";,");
-	Code.assert(handlers != null,
-		    "Missing mandatory configuration entry: '"+
-		    serverName+"."+stackName+".HANDLERS'");
-	ExceptionHandler[] stack
-	    = new ExceptionHandler[handlers.size()];
-	
-	Vector paths = stackTree.getVector("PATHS",",;");
-	Code.assert(paths != null,
-		    "Missing mandatory configuration entry: '"+
-		    serverName+"."+stackName+".PATHS'");
+        Code.debug("Configure Ex Stack ",serverName,
+                   ".",stackName,
+                   " ",stackTree);
+        
+        Vector handlers = stackTree.getVector("HANDLERS",";,");
+        Code.assert(handlers != null,
+                    "Missing mandatory configuration entry: '"+
+                    serverName+"."+stackName+".HANDLERS'");
+        ExceptionHandler[] stack
+            = new ExceptionHandler[handlers.size()];
+        
+        Vector paths = stackTree.getVector("PATHS",",;");
+        Code.assert(paths != null,
+                    "Missing mandatory configuration entry: '"+
+                    serverName+"."+stackName+".PATHS'");
 
-	for (int d=paths.size();d-->0;)
-	{
-	    if (exceptionHandlersMap==null)
-		exceptionHandlersMap=new PathMap();
-	    exceptionHandlersMap.put(paths.elementAt(d),stack);
-	}
-	
-	for (int h=0; h<handlers.size();h++)
-	{
-	    String handlerName=(String)handlers.elementAt(h);
-	    PropertyTree handlerTree = stackTree.getTree(handlerName);
-	    
-	    Code.debug("Configure Ex Handler ",serverName,
-		       ".",stackName,
-		       ".",handlerName);
+        for (int d=paths.size();d-->0;)
+        {
+            if (exceptionHandlersMap==null)
+                exceptionHandlersMap=new PathMap();
+            exceptionHandlersMap.put(paths.elementAt(d),stack);
+        }
+        
+        for (int h=0; h<handlers.size();h++)
+        {
+            String handlerName=(String)handlers.elementAt(h);
+            PropertyTree handlerTree = stackTree.getTree(handlerName);
+            
+            Code.debug("Configure Ex Handler ",serverName,
+                       ".",stackName,
+                       ".",handlerName);
 
-	    String className = handlerTree.getProperty("CLASS");
-	    Code.assert(className != null,
-			"Missing mandatory configuration entry: '"+
-			serverName+"."+stackName+"."+handlerName+".CLASS'");
-	    Class handlerClass = Class.forName(className);
-	    if (!com.mortbay.HTTP.ExceptionHandler.class.isAssignableFrom(handlerClass))
-		Code.fail(handlerClass+" is not a com.mortbay.HTTP.ExceptionHandler");
-	    
-	    ExceptionHandler handlerInstance = (com.mortbay.HTTP.ExceptionHandler)
-		handlerClass.newInstance();
-	    
-	    stack[h]=handlerInstance;
-	}
+            String className = handlerTree.getProperty("CLASS");
+            Code.assert(className != null,
+                        "Missing mandatory configuration entry: '"+
+                        serverName+"."+stackName+"."+handlerName+".CLASS'");
+            Class handlerClass = Class.forName(className);
+            if (!com.mortbay.HTTP.ExceptionHandler.class.isAssignableFrom(handlerClass))
+                Code.fail(handlerClass+" is not a com.mortbay.HTTP.ExceptionHandler");
+            
+            ExceptionHandler handlerInstance = (com.mortbay.HTTP.ExceptionHandler)
+                handlerClass.newInstance();
+            
+            stack[h]=handlerInstance;
+        }
     }
 
     /* ------------------------------------------------------------ */
     /** Start serving.
      */
     public void start()
-	throws Exception
+        throws Exception
     {
-	// initialize the server
-	httpServer = new HttpServer(this);
+        // initialize the server
+        httpServer = new HttpServer(this);
     }
     
     /* ------------------------------------------------------------ */
@@ -574,8 +574,8 @@ public class Server extends BaseConfiguration
      */
     public void stop()
     {
-	if (httpServer != null)
-	    httpServer.stop();
+        if (httpServer != null)
+            httpServer.stop();
     }
 
 
@@ -583,9 +583,9 @@ public class Server extends BaseConfiguration
     /** join 
      */
     public void join()
- 	throws InterruptedException
+        throws InterruptedException
     {
- 	httpServer.join();
+        httpServer.join();
     }
 
 
@@ -597,20 +597,20 @@ public class Server extends BaseConfiguration
      * @return PropertyTree
      */
     static PropertyTree properties(PropertyTree props)
-	throws IOException, FileNotFoundException
+        throws IOException, FileNotFoundException
     {
-	PropertyTree properties= props.getTree("PROPERTY");
-	if (properties==null)
-	    properties=new PropertyTree();
+        PropertyTree properties= props.getTree("PROPERTY");
+        if (properties==null)
+            properties=new PropertyTree();
 
-	String filename = props.getProperty("PROPERTIES");
-	if (filename!=null&&filename.length()>0)
-	{
-	    Code.debug("Load ",filename);
-	    properties.load(new BufferedInputStream(new FileInputStream(filename)));
-	}
-	
-	return properties;
+        String filename = props.getProperty("PROPERTIES");
+        if (filename!=null&&filename.length()>0)
+        {
+            Code.debug("Load ",filename);
+            properties.load(new BufferedInputStream(new FileInputStream(filename)));
+        }
+        
+        return properties;
     }
     
     
@@ -620,28 +620,28 @@ public class Server extends BaseConfiguration
      */
     public static void main(String args[])
     {
-	try{
-	    String filename = "JettyServer.prp";
-	    if (args.length==1)
-		filename = args[0];
-	    else if ( ! new File(filename).exists())
-		filename = "etc/JettyServer.prp";
-	    loadConfigurationFile(filename);  
-	}
-	catch(Throwable e)
-	{
-	    Code.warning(e);
-	    System.err.println("Usage - java com.mortbay.Jetty.Server [config.prp]");
-		System.err.println("Default config files are \"JettyServer.prp\", \"etc/JettyServer.prp\".");
-		System.exit(1);
-	}
-	
-	try{
-	    startAll();
-	}
-	catch(Throwable e)
-	{
-	    Code.warning(e);
-	}
+        try{
+            String filename = "JettyServer.prp";
+            if (args.length==1)
+                filename = args[0];
+            else if ( ! new File(filename).exists())
+                filename = "etc/JettyServer.prp";
+            loadConfigurationFile(filename);  
+        }
+        catch(Throwable e)
+        {
+            Code.warning(e);
+            System.err.println("Usage - java com.mortbay.Jetty.Server [config.prp]");
+                System.err.println("Default config files are \"JettyServer.prp\", \"etc/JettyServer.prp\".");
+                System.exit(1);
+        }
+        
+        try{
+            startAll();
+        }
+        catch(Throwable e)
+        {
+            Code.warning(e);
+        }
     }
 };

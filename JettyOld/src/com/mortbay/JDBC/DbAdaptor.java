@@ -40,7 +40,7 @@ public class DbAdaptor
      */
     public DbAdaptor()
     {
-	dbDriver=System.getProperty("DbDriver");
+        dbDriver=System.getProperty("DbDriver");
     }
 
     /* ------------------------------------------------------------ */
@@ -49,9 +49,9 @@ public class DbAdaptor
      */
     public String getJdbcDriver()
     {
-	Code.assert(dbDriver!=null,
-		    "Default DbAdaptor must have JDBC driver specified in DbDriver property");
-	return dbDriver;
+        Code.assert(dbDriver!=null,
+                    "Default DbAdaptor must have JDBC driver specified in DbDriver property");
+        return dbDriver;
     }
     
     /* ------------------------------------------------------------ */
@@ -62,22 +62,22 @@ public class DbAdaptor
      */
     public String quote(String s)
     {
-	Code.debug("QUOTE1: ",s);
-	boolean sq = s.indexOf("'")>=0;
-	boolean dq = s.indexOf('"')>=0;
+        Code.debug("QUOTE1: ",s);
+        boolean sq = s.indexOf("'")>=0;
+        boolean dq = s.indexOf('"')>=0;
 
-	if (sq)
-	{
-	    if (dq)
-		s = '"' + s.replace('"','\'') + '"';
-	    else
-		s = '"' + s + '"';
-	}
-	else
-	    s = "'" + s + "'";
+        if (sq)
+        {
+            if (dq)
+                s = '"' + s.replace('"','\'') + '"';
+            else
+                s = '"' + s + '"';
+        }
+        else
+            s = "'" + s + "'";
 
-	Code.debug("QUOTE2: ",s);
-	return s;    
+        Code.debug("QUOTE2: ",s);
+        return s;    
     }
 
 
@@ -89,20 +89,20 @@ public class DbAdaptor
      */
     public String columnType(int type)
     {
-	switch (type)
-	{
-	  case Column.INT:
-	  case Column.ENUM:
-	  case Column.DATETIME:
-	      return "INT";
-	  case Column.REAL:
-	      return "REAL";
-	      
-	  default:
-	      if (type>Column.textTag)
-		  return "VARCHAR("+(type-Column.textTag)+")";
-	      return "CHAR("+type+")";
-	}
+        switch (type)
+        {
+          case Column.INT:
+          case Column.ENUM:
+          case Column.DATETIME:
+              return "INT";
+          case Column.REAL:
+              return "REAL";
+              
+          default:
+              if (type>Column.textTag)
+                  return "VARCHAR("+(type-Column.textTag)+")";
+              return "CHAR("+type+")";
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -114,31 +114,31 @@ public class DbAdaptor
      */
     public String formatColumnValue(Column column, Object value)
     {    
-	if (column.isChar() || column.isText())
-	    return quote(value.toString());
+        if (column.isChar() || column.isText())
+            return quote(value.toString());
 
-	if (column.isEnum())
-	{
-	    if (value instanceof Integer)
-		return value.toString();
-	    return Integer.toString(column.str2enum(value.toString()));
-	}
-	
-	if (column.isType(Column.DATETIME))
-	{
-	    java.util.Date d=null;
-	    if (value instanceof java.util.Date)
-		d = (java.util.Date)value;
-	    else if (value instanceof Number)
-		d = new java.util.Date(((Number)value).longValue());
-	    else
-		d=new java.util.Date(value.toString());
+        if (column.isEnum())
+        {
+            if (value instanceof Integer)
+                return value.toString();
+            return Integer.toString(column.str2enum(value.toString()));
+        }
+        
+        if (column.isType(Column.DATETIME))
+        {
+            java.util.Date d=null;
+            if (value instanceof java.util.Date)
+                d = (java.util.Date)value;
+            else if (value instanceof Number)
+                d = new java.util.Date(((Number)value).longValue());
+            else
+                d=new java.util.Date(value.toString());
 
-	    return Long.toString(d.getTime()/1000);
-	}
-	
-	return value.toString();
-	
+            return Long.toString(d.getTime()/1000);
+        }
+        
+        return value.toString();
+        
     }
     
     /* ------------------------------------------------------------ */
@@ -148,20 +148,20 @@ public class DbAdaptor
      * java type used to handle the column type.
      */
     public Object nullColumnValue(Column column)
-    {	
-	if (column.isChar() || column.isText())
-	   return "";
-	
-	if (column.isEnum())
-	   return column.enum2str(0);
+    {   
+        if (column.isChar() || column.isText())
+           return "";
+        
+        if (column.isEnum())
+           return column.enum2str(0);
 
-	if (column.isType(Column.REAL))
-	   return new Double(0);
+        if (column.isType(Column.REAL))
+           return new Double(0);
 
-	if (column.isType(Column.DATETIME))
-	   return new java.util.Date();
-	
-	return new Integer(0);
+        if (column.isType(Column.DATETIME))
+           return new java.util.Date();
+        
+        return new Integer(0);
     }
     
 
@@ -171,7 +171,7 @@ public class DbAdaptor
      */
     public String primaryMarker()
     {
-	return "NOT NULL";
+        return "NOT NULL";
     }
     
     /* ------------------------------------------------------------ */
@@ -181,7 +181,7 @@ public class DbAdaptor
      */
     public String go()
     {
-	return "\ngo\n";
+        return "\ngo\n";
     }
 
     /* ------------------------------------------------------------ */
@@ -192,21 +192,21 @@ public class DbAdaptor
      */
     public String formatKeys(Table table)
     {
-	StringBuffer b = new StringBuffer();
-	boolean pkey = false;
-	String s=",\n    primary key ( ";
-	for (int i=0;i<table.columns.length;i++)
-	{
-	    if (table.columns[i].isPrimary())
-	    {
-		pkey = true;
-		b.append(s);
-		b.append(table.columns[i].getName());
-		s=",";
-	    }
-	}
-	if (pkey) b.append(" )");
-	return b.toString();
+        StringBuffer b = new StringBuffer();
+        boolean pkey = false;
+        String s=",\n    primary key ( ";
+        for (int i=0;i<table.columns.length;i++)
+        {
+            if (table.columns[i].isPrimary())
+            {
+                pkey = true;
+                b.append(s);
+                b.append(table.columns[i].getName());
+                s=",";
+            }
+        }
+        if (pkey) b.append(" )");
+        return b.toString();
     }
     
     /* ------------------------------------------------------------ */
@@ -216,23 +216,23 @@ public class DbAdaptor
      * inclusion in a CREATE statement.
      */
     public String formatTable(Table table)
-    {	
-	StringBuffer b = new StringBuffer();
-	b.append("TABLE ");
-	b.append(table.getName());
-	b.append(" (\n    ");
-	
-	for (int i=0;i<table.columns.length;i++)
-	{
-	    if (i>0)
-		b.append(",\n    ");
-	    b.append(table.columns[i].toString());
-	}
+    {   
+        StringBuffer b = new StringBuffer();
+        b.append("TABLE ");
+        b.append(table.getName());
+        b.append(" (\n    ");
+        
+        for (int i=0;i<table.columns.length;i++)
+        {
+            if (i>0)
+                b.append(",\n    ");
+            b.append(table.columns[i].toString());
+        }
 
-	b.append(formatKeys(table));
-	b.append("\n)");
-	
-	return b.toString();
+        b.append(formatKeys(table));
+        b.append("\n)");
+        
+        return b.toString();
     }
 
     /* ------------------------------------------------------------ */
@@ -242,11 +242,11 @@ public class DbAdaptor
      */
     public String formatCreateTable(Table table)
     {
-	StringBuffer b = new StringBuffer();
-	b.append("CREATE ");
-	b.append(formatTable(table));
-	b.append(go());
-	return b.toString();
+        StringBuffer b = new StringBuffer();
+        b.append("CREATE ");
+        b.append(formatTable(table));
+        b.append(go());
+        return b.toString();
     }
     
     /* ------------------------------------------------------------ */
@@ -256,38 +256,38 @@ public class DbAdaptor
      */
     public String formatCreateIndex(Table table)
     {
-	StringBuffer b = new StringBuffer();
-	
-	if (table.primaryKey!=null)
-	{
-	    b.append("CREATE UNIQUE INDEX ");
-	    b.append(table.getName());
-	    b.append("_primary ON ");
-	    b.append(table.getName());
-	    b.append(" ( ");
-	    b.append(table.primaryKey.toString());
-	    b.append(" ) ");
-	    b.append(go());
-	}
+        StringBuffer b = new StringBuffer();
+        
+        if (table.primaryKey!=null)
+        {
+            b.append("CREATE UNIQUE INDEX ");
+            b.append(table.getName());
+            b.append("_primary ON ");
+            b.append(table.getName());
+            b.append(" ( ");
+            b.append(table.primaryKey.toString());
+            b.append(" ) ");
+            b.append(go());
+        }
 
-	if (table.otherKeys!=null)
-	{
-	    for (int i=0;i<table.otherKeys.columns.length;i++)
-	    {
-		b.append("CREATE INDEX ");
-		b.append(table.getName());
-		b.append("_");
-		b.append(table.otherKeys.columns[i].getName());
-		b.append(" ON ");
-		b.append(table.getName());
-		b.append(" ( ");
-		b.append(table.otherKeys.columns[i].getName());
-		b.append(" ) ");
-		b.append(go());
-	    }	
-	}
-	
-	return b.toString();
+        if (table.otherKeys!=null)
+        {
+            for (int i=0;i<table.otherKeys.columns.length;i++)
+            {
+                b.append("CREATE INDEX ");
+                b.append(table.getName());
+                b.append("_");
+                b.append(table.otherKeys.columns[i].getName());
+                b.append(" ON ");
+                b.append(table.getName());
+                b.append(" ( ");
+                b.append(table.otherKeys.columns[i].getName());
+                b.append(" ) ");
+                b.append(go());
+            }   
+        }
+        
+        return b.toString();
     }
 
 
@@ -298,7 +298,7 @@ public class DbAdaptor
      */
     String dropTable(Table table)
     {
-	return "drop table "+table.getName()+go();
+        return "drop table "+table.getName()+go();
     }
     
 }

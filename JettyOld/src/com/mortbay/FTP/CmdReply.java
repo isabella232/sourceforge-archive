@@ -29,20 +29,20 @@ class CmdReply
     /* First code digit */
     public final static char
         d0PositivePreliminary    = '1',
-	d0PositiveCompletion     = '2',
-	d0PositiveIntermediate   = '3',
-	d0NegativeTransient      = '4',
-	d0NegativePermanent      = '5';
+        d0PositiveCompletion     = '2',
+        d0PositiveIntermediate   = '3',
+        d0NegativeTransient      = '4',
+        d0NegativePermanent      = '5';
     
     /* ------------------------------------------------------------ */
     /* Second code digit */
     public final static char
         d1Syntax           = '0',
-	d1Information      = '1',
-	d1Connections      = '2',
-	d1Authentication   = '3',
-	d1Unspecified      = '4',
-	d1FileSystem       = '5';
+        d1Information      = '1',
+        d1Connections      = '2',
+        d1Authentication   = '3',
+        d1Unspecified      = '4',
+        d1FileSystem       = '5';
 
     /* ------------------------------------------------------------ */
     /* Codes */
@@ -87,68 +87,68 @@ class CmdReply
         codeExceededStorageAllocation     = "552", 
         codeFileNameNotAllowed            = "553";
     
-					  
+                                          
     /* ------------------------------------------------------------ */
-    public String code;			  
-    public String text;			  
+    public String code;                   
+    public String text;                   
 
     /* ------------------------------------------------------------ */
     boolean preliminary()
     {
-	switch (code.charAt(0))
-	{
-	  case d0PositivePreliminary:
-	      return true;
-	  default:
-	      return false;
-	}
+        switch (code.charAt(0))
+        {
+          case d0PositivePreliminary:
+              return true;
+          default:
+              return false;
+        }
     }
 
     /* ------------------------------------------------------------ */
     boolean intermediate()
     {
-	switch (code.charAt(0))
-	{
-	  case d0PositiveIntermediate:
-	      return true;
-	  default:
-	      return false;
-	}
+        switch (code.charAt(0))
+        {
+          case d0PositiveIntermediate:
+              return true;
+          default:
+              return false;
+        }
     }
 
     
     /* ------------------------------------------------------------ */
     boolean positive()
     {
-	switch (code.charAt(0))
-	{
-	  case d0PositivePreliminary:
-	  case d0PositiveCompletion:
-	  case d0PositiveIntermediate:
-	      return true;
-	      
-	  case d0NegativeTransient:
-	  case d0NegativePermanent:
-	  default:
-	      return false;
-	}
+        switch (code.charAt(0))
+        {
+          case d0PositivePreliminary:
+          case d0PositiveCompletion:
+          case d0PositiveIntermediate:
+              return true;
+              
+          case d0NegativeTransient:
+          case d0NegativePermanent:
+          default:
+              return false;
+        }
     }
     
     /* ------------------------------------------------------------ */
     boolean transferComplete()
     {
-	switch (code.charAt(0))
-	{
-	  case d0PositiveCompletion:
-	  case d0NegativePermanent:
-	      return true;
-	      
-	  case d0PositiveIntermediate:
-	  case d0PositivePreliminary:
-	  case d0NegativeTransient:
-	  default:
-	      return false;
-	}
+        switch (code.charAt(0))
+        {
+          case d0PositiveCompletion:
+          case d0NegativePermanent:
+              return true;
+              
+          case d0PositiveIntermediate:
+          case d0PositivePreliminary:
+          case d0NegativeTransient:
+          default:
+              return false;
+        }
     }
 
     
@@ -159,16 +159,16 @@ class CmdReply
      */
     public boolean isType(char type)
     {
-	return (code.length()==3 && code.charAt(1)==type);
+        return (code.length()==3 && code.charAt(1)==type);
     }
     
-	
+        
     /* ------------------------------------------------------------ */
     public String toString()
     {
-	if (text.indexOf('\n')>=0)
-	    return "[Code="+code+",Text=\n"+text+"\n]";
-	return "[Code="+code+",Text="+text+"]";
+        if (text.indexOf('\n')>=0)
+            return "[Code="+code+",Text=\n"+text+"\n]";
+        return "[Code="+code+",Text="+text+"]";
     }
 
     /* ------------------------------------------------------------ */
@@ -176,46 +176,46 @@ class CmdReply
      */
     static void test()
     {
-	Test t = new Test("class CmdReply");
+        Test t = new Test("class CmdReply");
 
-	CmdReply reply= new CmdReply();
+        CmdReply reply= new CmdReply();
 
-	reply.code="100";
-	t.check(reply.preliminary(),"100 preliminary");
-	t.check(reply.positive(),"100 positive");
-	t.check(!reply.transferComplete(),"100 not complete");
-	t.check(reply.isType(CmdReply.d1Syntax),"100 is Syntax");
+        reply.code="100";
+        t.check(reply.preliminary(),"100 preliminary");
+        t.check(reply.positive(),"100 positive");
+        t.check(!reply.transferComplete(),"100 not complete");
+        t.check(reply.isType(CmdReply.d1Syntax),"100 is Syntax");
 
-	reply.code="210";
-	t.check(!reply.preliminary(),"210 not preliminary");
-	t.check(reply.positive(),"210 positive");
-	t.check(reply.transferComplete(),"210 complete");
-	t.check(reply.isType(CmdReply.d1Information),"210 is Information");
-	t.check(!reply.isType(CmdReply.d1Syntax),"210 is notSyntax");
+        reply.code="210";
+        t.check(!reply.preliminary(),"210 not preliminary");
+        t.check(reply.positive(),"210 positive");
+        t.check(reply.transferComplete(),"210 complete");
+        t.check(reply.isType(CmdReply.d1Information),"210 is Information");
+        t.check(!reply.isType(CmdReply.d1Syntax),"210 is notSyntax");
 
-	reply.code="320";
-	t.check(!reply.preliminary(),"320 not preliminary");
-	t.check(reply.positive(),"320 positive");
-	t.check(!reply.transferComplete(),"320 not complete");
-	t.check(reply.isType(CmdReply.d1Connections),"320 is Connections");
-	t.check(!reply.isType(CmdReply.d1Syntax),"320 is notSyntax");
+        reply.code="320";
+        t.check(!reply.preliminary(),"320 not preliminary");
+        t.check(reply.positive(),"320 positive");
+        t.check(!reply.transferComplete(),"320 not complete");
+        t.check(reply.isType(CmdReply.d1Connections),"320 is Connections");
+        t.check(!reply.isType(CmdReply.d1Syntax),"320 is notSyntax");
 
-	reply.code="430";
-	t.check(!reply.preliminary(),"430 not preliminary");
-	t.check(!reply.positive(),"430 not positive");
-	t.check(!reply.transferComplete(),"430 not complete");
-	t.check(reply.isType(CmdReply.d1Authentication),"430 is Authentication");
-	t.check(!reply.isType(CmdReply.d1Syntax),"430 is notSyntax");
+        reply.code="430";
+        t.check(!reply.preliminary(),"430 not preliminary");
+        t.check(!reply.positive(),"430 not positive");
+        t.check(!reply.transferComplete(),"430 not complete");
+        t.check(reply.isType(CmdReply.d1Authentication),"430 is Authentication");
+        t.check(!reply.isType(CmdReply.d1Syntax),"430 is notSyntax");
 
-	reply.code="540";
-	t.check(!reply.preliminary(),"540 not preliminary");
-	t.check(!reply.positive(),"540 not positive");
-	t.check(reply.transferComplete(),"540 complete");
-	t.check(reply.isType(CmdReply.d1Unspecified),"540 is Unspecified");
-	t.check(!reply.isType(CmdReply.d1Syntax),"540 is notSyntax");
-	
-	reply.code="550";
-	t.check(reply.isType(CmdReply.d1FileSystem),"550 is FileSystem");
-	t.check(!reply.isType(CmdReply.d1Syntax),"550 is notSyntax");
+        reply.code="540";
+        t.check(!reply.preliminary(),"540 not preliminary");
+        t.check(!reply.positive(),"540 not positive");
+        t.check(reply.transferComplete(),"540 complete");
+        t.check(reply.isType(CmdReply.d1Unspecified),"540 is Unspecified");
+        t.check(!reply.isType(CmdReply.d1Syntax),"540 is notSyntax");
+        
+        reply.code="550";
+        t.check(reply.isType(CmdReply.d1FileSystem),"550 is FileSystem");
+        t.check(!reply.isType(CmdReply.d1Syntax),"550 is notSyntax");
     }
 }

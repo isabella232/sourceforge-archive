@@ -33,16 +33,16 @@ public class HttpFilter extends FilterOutputStream
     /* ----------------------------------------------------------------- */
     public HttpFilter()
     {
-	super(System.err);
+        super(System.err);
     }
     
     /* ----------------------------------------------------------------- */
     public HttpFilter(HttpRequest request)
     {
-	super(System.err);
-	this.request=request;
-	if(request!=null)
-	    this.response=request.getHttpResponse();
+        super(System.err);
+        this.request=request;
+        if(request!=null)
+            this.response=request.getHttpResponse();
     }
     
     /* ----------------------------------------------------------------- */
@@ -54,7 +54,7 @@ public class HttpFilter extends FilterOutputStream
      */
     protected boolean canHandle(String contentType)
     {
-	return contentType.startsWith("text/");
+        return contentType.startsWith("text/");
     }
     
     /* ----------------------------------------------------------------- */
@@ -65,19 +65,19 @@ public class HttpFilter extends FilterOutputStream
      * a thread started to run the filter.
      */
     public final void activateOn(HttpResponse response) 
-	throws IOException
+        throws IOException
     {
-	if (canHandle(response.getHeader(HttpHeader.ContentType)))
-	{
-	    Code.debug("Activate HttpFilter "+this); 
-	    this.request=response.getRequest();
-	    this.response=response;
-	    HttpOutputStream httpOut = response.getHttpOutputStream();
-	    super.out = httpOut.replaceOutputStream(this);
-	    activate();
-	}
-	else
-	    Code.debug("Can't activate HttpFilter "+this); 
+        if (canHandle(response.getHeader(HttpHeader.ContentType)))
+        {
+            Code.debug("Activate HttpFilter "+this); 
+            this.request=response.getRequest();
+            this.response=response;
+            HttpOutputStream httpOut = response.getHttpOutputStream();
+            super.out = httpOut.replaceOutputStream(this);
+            activate();
+        }
+        else
+            Code.debug("Can't activate HttpFilter "+this); 
     }
 
     /* ------------------------------------------------------------ */
@@ -86,7 +86,7 @@ public class HttpFilter extends FilterOutputStream
      */
     public void test(OutputStream out)
     {
-	super.out=out;
+        super.out=out;
     }
     
     /* ----------------------------------------------------------------- */
@@ -105,13 +105,13 @@ public class HttpFilter extends FilterOutputStream
      */
     public void update(Observable o, Object arg)
     {
-	try{
-	    activateOn((HttpResponse)arg);
-	}
-	catch(IOException e){
-	    Code.debug("Convert to RuntimeException",e);
-	    throw new RuntimeException(e.toString());
-	}
+        try{
+            activateOn((HttpResponse)arg);
+        }
+        catch(IOException e){
+            Code.debug("Convert to RuntimeException",e);
+            throw new RuntimeException(e.toString());
+        }
     }
 }
 

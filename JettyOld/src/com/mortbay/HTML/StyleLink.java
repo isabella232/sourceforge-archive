@@ -17,10 +17,10 @@ import com.mortbay.Base.Code;
 public class StyleLink extends Tag
 {
     public final static String
-	REL="REL",
-	HREF="HREF",
-	TYPE=Style.TYPE,
-	MEDIA=Style.MEDIA;
+        REL="REL",
+        HREF="HREF",
+        TYPE=Style.TYPE,
+        MEDIA=Style.MEDIA;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -28,10 +28,10 @@ public class StyleLink extends Tag
      */
     public StyleLink(String href)
     {
-	super("LINK");
-	attribute(REL,Style.StyleSheet);
-	attribute(HREF,href);
-	attribute(TYPE,Style.text_css);
+        super("LINK");
+        attribute(REL,Style.StyleSheet);
+        attribute(HREF,href);
+        attribute(TYPE,Style.text_css);
     }
     
     /* ------------------------------------------------------------ */
@@ -43,12 +43,12 @@ public class StyleLink extends Tag
      */
     public StyleLink(String rel, String href, String type, String media)
     {
-	super("LINK");
-	attribute(REL,rel==null?Style.StyleSheet:rel);
-	attribute(HREF,href);
-	attribute(TYPE,type==null?Style.text_css:type);
-	if (media!=null)
-	    attribute(MEDIA,media);
+        super("LINK");
+        attribute(REL,rel==null?Style.StyleSheet:rel);
+        attribute(HREF,href);
+        attribute(TYPE,type==null?Style.text_css:type);
+        if (media!=null)
+            attribute(MEDIA,media);
     }
     
 };

@@ -32,7 +32,7 @@ public class Clause
      */
     public Clause ()
     {
-	clause = new StringBuffer();
+        clause = new StringBuffer();
     }
     
     /* ------------------------------------------------------------ */
@@ -41,12 +41,12 @@ public class Clause
      */
     public Clause open ()
     {
-	if (Code.debug())
-	    clause.append("\n(\n");
-	else
-	    clause.append (" ( ");
-	bracketcount++;
-	return this;
+        if (Code.debug())
+            clause.append("\n(\n");
+        else
+            clause.append (" ( ");
+        bracketcount++;
+        return this;
     }
 
     /* ------------------------------------------------------------ */
@@ -55,12 +55,12 @@ public class Clause
      */
     public Clause close ()
     {
-	bracketcount--;
-	if (Code.debug())
-	    clause.append("\n)\n");
-	else
-	    clause.append (" ) ");
-	return this;
+        bracketcount--;
+        if (Code.debug())
+            clause.append("\n)\n");
+        else
+            clause.append (" ) ");
+        return this;
     };
 
     /* ------------------------------------------------------------ */
@@ -69,8 +69,8 @@ public class Clause
      */
     public Clause and ()
     {
-	clause.append (Select.AND);
-	return this;
+        clause.append (Select.AND);
+        return this;
     }
     
     /* ------------------------------------------------------------ */
@@ -79,8 +79,8 @@ public class Clause
      */
     public Clause or ()
     {
-	clause.append (Select.OR);
-	return this;
+        clause.append (Select.OR);
+        return this;
     }    
     
     /* ------------------------------------------------------------ */
@@ -93,11 +93,11 @@ public class Clause
      * @return 
      */
     public Clause where(String operator,
-			Table table, Column column,
-			Object value)
+                        Table table, Column column,
+                        Object value)
     {
-	return where(table,column,
-		     operator,value);
+        return where(table,column,
+                     operator,value);
     }
     
     /* ------------------------------------------------------------ */
@@ -109,13 +109,13 @@ public class Clause
      * @return 
      */
     public Clause where(Table table, Column column,
-			String operator,
-			Object value)
+                        String operator,
+                        Object value)
     {
-	clause.append (Select.qualifyName (table, column));
-	clause.append (operator);
-	clause.append (column.toString(value));
-	return this;
+        clause.append (Select.qualifyName (table, column));
+        clause.append (operator);
+        clause.append (column.toString(value));
+        return this;
     }
     
 
@@ -130,12 +130,12 @@ public class Clause
      * @return
      */
     public Clause where(String operator,
-			Table lhsTable, Column lhsColumn,
-			Table rhsTable, Column rhsColumn)
+                        Table lhsTable, Column lhsColumn,
+                        Table rhsTable, Column rhsColumn)
     {
-	return where(lhsTable,lhsColumn,
-		     operator,
-		     rhsTable,rhsColumn);
+        return where(lhsTable,lhsColumn,
+                     operator,
+                     rhsTable,rhsColumn);
     }
     
     /* ------------------------------------------------------------ */
@@ -148,17 +148,17 @@ public class Clause
      * @return 
      */
     public Clause where(Table lhsTable, Column lhsColumn,
-			String operator,
-			Table rhsTable, Column rhsColumn)
+                        String operator,
+                        Table rhsTable, Column rhsColumn)
     {
-	String expression = null;
-	String left = null;
-	String right = null;
-	
-	clause.append (Select.qualifyName (lhsTable, lhsColumn));
-	clause.append (operator);
-	clause.append (Select.qualifyName (rhsTable, rhsColumn));
-	return this;
+        String expression = null;
+        String left = null;
+        String right = null;
+        
+        clause.append (Select.qualifyName (lhsTable, lhsColumn));
+        clause.append (operator);
+        clause.append (Select.qualifyName (rhsTable, rhsColumn));
+        return this;
     }
     
     /* ------------------------------------------------------------ */
@@ -167,9 +167,9 @@ public class Clause
      */
     public String toString()
     {
-	Code.assert(bracketcount == 0,
-		    "Mismatched braces\n" + clause.toString());
-	return clause.toString();
+        Code.assert(bracketcount == 0,
+                    "Mismatched braces\n" + clause.toString());
+        return clause.toString();
     }
 
 };

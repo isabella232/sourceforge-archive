@@ -85,7 +85,7 @@ public class Select extends Clause
      */
     public Select(boolean distinct)
     {
-	this.isDistinct = distinct;
+        this.isDistinct = distinct;
     }
 
     /* ------------------------------------------------------------ */
@@ -93,7 +93,7 @@ public class Select extends Clause
      */
     public Select ()
     {
-	this (!DISTINCT);
+        this (!DISTINCT);
     }
     
     /* ------------------------------------------------------------ */
@@ -103,13 +103,13 @@ public class Select extends Clause
      */
     public Select select (Table table, Column col)
     {
-	String target = null;
-	target = qualifyName (table, col);
-	
-	// add it into our list of subclauses for the select
-	this.selectClauses.addElement (target);
-	this.resultTargets.addElement (col);
-	return this;
+        String target = null;
+        target = qualifyName (table, col);
+        
+        // add it into our list of subclauses for the select
+        this.selectClauses.addElement (target);
+        this.resultTargets.addElement (col);
+        return this;
     }
 
     /* ------------------------------------------------------------ */
@@ -118,14 +118,14 @@ public class Select extends Clause
      */
     public Select select (Table table)
     {
-	Column[] cols = table.columns;
-	for (int i = 0; (cols != null) && ( i < cols.length); i++)
-	{
-	    String clause = qualifyName(table, cols[i]);
-	    this.selectClauses.addElement(clause);
-	    this.resultTargets.addElement(cols[i]);
-	}
-	return this;
+        Column[] cols = table.columns;
+        for (int i = 0; (cols != null) && ( i < cols.length); i++)
+        {
+            String clause = qualifyName(table, cols[i]);
+            this.selectClauses.addElement(clause);
+            this.resultTargets.addElement(cols[i]);
+        }
+        return this;
     }
 
     /* ------------------------------------------------------------ */
@@ -134,8 +134,8 @@ public class Select extends Clause
      */
     public Select from (Table table)
     {
-	this.fromClauses.addElement (table.getName());
-	return this;
+        this.fromClauses.addElement (table.getName());
+        return this;
     }
 
 
@@ -147,8 +147,8 @@ public class Select extends Clause
      */
     public Select orderBy (Table table, Column column)
     {
-	this.orderByClauses.addElement(qualifyName(table, column));
-	return this;
+        this.orderByClauses.addElement(qualifyName(table, column));
+        return this;
     }
     
     /* ------------------------------------------------------------ */
@@ -157,9 +157,9 @@ public class Select extends Clause
      */
     public Select orderSequence (int descending)
     {
-	if (descending == DESC)
-	    isDescending = true;
-	return this;
+        if (descending == DESC)
+            isDescending = true;
+        return this;
     }
 
     /* ------------------------------------------------------------ */
@@ -170,17 +170,17 @@ public class Select extends Clause
      * @exception java.sql.SQLException 
      */
     public Enumeration query(Database db)
-	throws java.sql.SQLException
+        throws java.sql.SQLException
     {
-	String thequery = toString();
-	
-	// what's it look like??
-	Code.debug (thequery);
+        String thequery = toString();
+        
+        // what's it look like??
+        Code.debug (thequery);
 
-	// Get the answer
-	java.sql.ResultSet rs = db.query(thequery);
+        // Get the answer
+        java.sql.ResultSet rs = db.query(thequery);
 
-	return new Enumerator(rs);
+        return new Enumerator(rs);
     }
 
     /* ------------------------------------------------------------ */
@@ -189,57 +189,57 @@ public class Select extends Clause
      */
     public String toString()
     {
-	StringBuffer thequery = new StringBuffer();
-	Enumeration clauses = null;
-	
-	// select 
-	thequery.append ("SELECT ");
-	if (this.isDistinct)
-	    thequery.append (__DISTINCT);
-	
-	clauses = this.selectClauses.elements();
-	while (clauses.hasMoreElements())
-	{
-	    thequery.append ((String)clauses.nextElement());
-	    if (clauses.hasMoreElements())
-		thequery.append (__SEPARATOR);  
-	}
+        StringBuffer thequery = new StringBuffer();
+        Enumeration clauses = null;
+        
+        // select 
+        thequery.append ("SELECT ");
+        if (this.isDistinct)
+            thequery.append (__DISTINCT);
+        
+        clauses = this.selectClauses.elements();
+        while (clauses.hasMoreElements())
+        {
+            thequery.append ((String)clauses.nextElement());
+            if (clauses.hasMoreElements())
+                thequery.append (__SEPARATOR);  
+        }
 
-	// from
-	thequery.append (" FROM ");
-	clauses = this.fromClauses.elements();
-	while (clauses.hasMoreElements())
-	{
-	    thequery.append ((String)clauses.nextElement());
-	    if (clauses.hasMoreElements())
-		thequery.append(__SEPARATOR);
-	}
+        // from
+        thequery.append (" FROM ");
+        clauses = this.fromClauses.elements();
+        while (clauses.hasMoreElements())
+        {
+            thequery.append ((String)clauses.nextElement());
+            if (clauses.hasMoreElements())
+                thequery.append(__SEPARATOR);
+        }
 
 
-	// where
-	String where = super.toString();
-	if ((where != null) && (!where.equals("")))
-	{
-	    thequery.append (" WHERE ");
-	    thequery.append (where);
-	}
-	
+        // where
+        String where = super.toString();
+        if ((where != null) && (!where.equals("")))
+        {
+            thequery.append (" WHERE ");
+            thequery.append (where);
+        }
+        
 
-	// order by
-	clauses = this.orderByClauses.elements();
-	if (clauses.hasMoreElements())
-	    thequery.append (" ORDER BY ");
-	    	
-	while (clauses.hasMoreElements())
-	{
-	    thequery.append ((String)clauses.nextElement());
-	    if (clauses.hasMoreElements())
-		thequery.append(__SEPARATOR);
-	}
-	if (this.isDescending)
-	    thequery.append(" DESC ");
-	
-	return thequery.toString();
+        // order by
+        clauses = this.orderByClauses.elements();
+        if (clauses.hasMoreElements())
+            thequery.append (" ORDER BY ");
+                
+        while (clauses.hasMoreElements())
+        {
+            thequery.append ((String)clauses.nextElement());
+            if (clauses.hasMoreElements())
+                thequery.append(__SEPARATOR);
+        }
+        if (this.isDescending)
+            thequery.append(" DESC ");
+        
+        return thequery.toString();
     }
     
     /* ------------------------------------------------------------ */
@@ -251,9 +251,9 @@ public class Select extends Clause
      */
     public static String qualifyName (Table table, Column column)
     {
-	String name = null;
-	name = table.getName() + __DOT + column.getName();
-	return name;
+        String name = null;
+        name = table.getName() + __DOT + column.getName();
+        return name;
     }
     
     /* ------------------------------------------------------------ */
@@ -262,90 +262,90 @@ public class Select extends Clause
      */
     class Enumerator implements java.util.Enumeration
     {
-	java.sql.ResultSet resultset = null;
-	boolean nextAlreadyCalled=false;
-	boolean hasMore = false;
+        java.sql.ResultSet resultset = null;
+        boolean nextAlreadyCalled=false;
+        boolean hasMore = false;
 
-	/* -------------------------------------------------------- */
-	public Enumerator (java.sql.ResultSet rs)
-	{
-	    resultset = rs;
-	}
-	
-	/* -------------------------------------------------------- */
-	public boolean hasMoreElements()
-	{
-	    if (!nextAlreadyCalled)
-	    {
-		try
-		{
-		    hasMore=resultset.next();
-		}
-		catch(SQLException e)
-		{
-		    Code.debug(e);
-		    hasMore=false;
-		}    
-		nextAlreadyCalled=true;
-	    }
-	    return hasMore;
-	}
-	
-	/* -------------------------------------------------------- */
-	public Object nextElement()
-	    throws NoSuchElementException
-	{
-	    // go and get the next result set
-	    if (!nextAlreadyCalled)
-	    {
-		try
-		{
-		    hasMore=resultset.next();
-		}
-		catch(SQLException e)
-		{
-		    Code.debug(e);
-		    hasMore=false;
-		}
-	    }
-	    else
-		nextAlreadyCalled=false;
+        /* -------------------------------------------------------- */
+        public Enumerator (java.sql.ResultSet rs)
+        {
+            resultset = rs;
+        }
+        
+        /* -------------------------------------------------------- */
+        public boolean hasMoreElements()
+        {
+            if (!nextAlreadyCalled)
+            {
+                try
+                {
+                    hasMore=resultset.next();
+                }
+                catch(SQLException e)
+                {
+                    Code.debug(e);
+                    hasMore=false;
+                }    
+                nextAlreadyCalled=true;
+            }
+            return hasMore;
+        }
+        
+        /* -------------------------------------------------------- */
+        public Object nextElement()
+            throws NoSuchElementException
+        {
+            // go and get the next result set
+            if (!nextAlreadyCalled)
+            {
+                try
+                {
+                    hasMore=resultset.next();
+                }
+                catch(SQLException e)
+                {
+                    Code.debug(e);
+                    hasMore=false;
+                }
+            }
+            else
+                nextAlreadyCalled=false;
 
-	    if (!hasMore)
-		throw new NoSuchElementException();
-	    try
-	    {
-		// use result set and the tablenames we saved
-		// to turn the result set into a Vector reply
-		Vector onerow = new Vector();
+            if (!hasMore)
+                throw new NoSuchElementException();
+            try
+            {
+                // use result set and the tablenames we saved
+                // to turn the result set into a Vector reply
+                Vector onerow = new Vector();
 
-		// There will be one column in the result set for
-		// each column nominated in a select.
-		Enumeration cols = resultTargets.elements();
-		int i = 0;
-		while (cols.hasMoreElements())
-		{
-		    Column col = (Column)cols.nextElement();
-		    // ResultSet results start from 1
-		    i++;
-		    Object value = resultset.getObject(i);
-		    // Do some shady stuff with converting data types -
-		    // Greg - do something about this.
-		    if (col.isType(Column.DATETIME))
-			value =
-			new java.util.Date(1000*((Integer)value).longValue());
-		    if (col.isEnum())
-			value = col.enum2str(Integer.parseInt(value.toString()));
-		    onerow.addElement(value);
-		}
-		return onerow;
-		
-	    }
-	    catch(SQLException e)
-	    {
-		throw new NoSuchElementException(e.toString());
-	    }
-	}
+                // There will be one column in the result set for
+                // each column nominated in a select.
+                Enumeration cols = resultTargets.elements();
+                int i = 0;
+                while (cols.hasMoreElements())
+                {
+                    Column col = (Column)cols.nextElement();
+                    // ResultSet results start from 1
+                    i++;
+                    Object value = resultset.getObject(i);
+                    // Do some shady stuff with converting data types -
+                    // Greg - do something about this.
+                    if (col.isType(Column.DATETIME))
+                        value =
+                        new java.util.Date(1000*((Integer)value).longValue());
+                    if (col.isEnum())
+                        value = col.enum2str(Integer.parseInt(value.toString()));
+                    onerow.addElement(value);
+                }
+                return onerow;
+                
+            }
+            catch(SQLException e)
+            {
+                throw new NoSuchElementException(e.toString());
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -353,22 +353,22 @@ public class Select extends Clause
      */
     public static void test(Database db)
     {
-	Test t = new Test("com.mortbay.JDBC.Select");
-	TestTable table = new TestTable(db);
-	
-	Select s = new Select();
-	s.select(table, table.NameCol)
-	.from(table)
-	.where(table, table.HeightCol,
-	       Select.GREATER_THAN,
-	       new Integer(150))
-	.and()
-	.where(table, table.HeightCol,
-	       Select.LESS_THAN,
-	       new Integer(200));
+        Test t = new Test("com.mortbay.JDBC.Select");
+        TestTable table = new TestTable(db);
+        
+        Select s = new Select();
+        s.select(table, table.NameCol)
+        .from(table)
+        .where(table, table.HeightCol,
+               Select.GREATER_THAN,
+               new Integer(150))
+        .and()
+        .where(table, table.HeightCol,
+               Select.LESS_THAN,
+               new Integer(200));
 
-	t.checkEquals(s.toString(),
-		      "SELECT TestTable.name FROM TestTable WHERE TestTable.height > 150 AND TestTable.height < 200","Select string");
+        t.checkEquals(s.toString(),
+                      "SELECT TestTable.name FROM TestTable WHERE TestTable.height > 150 AND TestTable.height < 200","Select string");
     }
  
     /* ------------------------------------------------------------ */
@@ -376,8 +376,8 @@ public class Select extends Clause
      */
     public static void main(String[] args)
     {
-	test(new Database());
-	Test.report();
+        test(new Database());
+        Test.report();
     }
 };
 

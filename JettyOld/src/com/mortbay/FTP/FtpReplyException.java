@@ -15,14 +15,14 @@ public class FtpReplyException extends FtpException
     /* ------------------------------------------------------------------ */
     FtpReplyException(CmdReply reply)
     {
-	super(replyDescription(reply));
-	this.reply = reply;
+        super(replyDescription(reply));
+        this.reply = reply;
     }
 
     /* ------------------------------------------------------------------ */
     static String replyDescription(CmdReply reply)
     {
-	Code.assert(reply!=null,"Use FtpCmdStreamException for null reply");
-	return reply.toString();
+        Code.assert(reply!=null,"Use FtpCmdStreamException for null reply");
+        return reply.toString();
     }
 }

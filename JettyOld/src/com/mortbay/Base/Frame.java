@@ -44,16 +44,16 @@ public class Frame
      */
     public Frame()
     {
-	// Dump the stack
-	synchronized(__writerBuffer)
-	{
-	    __writerBuffer.setLength(0);
-	    __throwable.fillInStackTrace();
-	    __throwable.printStackTrace(__out);
-	    __out.flush();
-	    _stack = __writerBuffer.toString();
-	}
-	internalInit(1, false);
+        // Dump the stack
+        synchronized(__writerBuffer)
+        {
+            __writerBuffer.setLength(0);
+            __throwable.fillInStackTrace();
+            __throwable.printStackTrace(__out);
+            __out.flush();
+            _stack = __writerBuffer.toString();
+        }
+        internalInit(1, false);
     }
     
     /*-------------------------------------------------------------------*/
@@ -62,16 +62,16 @@ public class Frame
      */
     public Frame(int ignoreFrames)
     {
-	// Dump the stack
-	synchronized(__writerBuffer)
-	{
-	    __writerBuffer.setLength(0);
-	    __throwable.fillInStackTrace();
-	    __throwable.printStackTrace(__out);
-	    __out.flush();
-	    _stack = __writerBuffer.toString();
-	}
-	internalInit(ignoreFrames+1, false);
+        // Dump the stack
+        synchronized(__writerBuffer)
+        {
+            __writerBuffer.setLength(0);
+            __throwable.fillInStackTrace();
+            __throwable.printStackTrace(__out);
+            __out.flush();
+            _stack = __writerBuffer.toString();
+        }
+        internalInit(ignoreFrames+1, false);
     }
     
     /* ------------------------------------------------------------ */
@@ -81,24 +81,24 @@ public class Frame
      */
     Frame(int ignoreFrames, boolean partial)
     {
-	// Dump the stack
-	synchronized(__writerBuffer)
-	{
-	    __writerBuffer.setLength(0);
-	    __throwable.fillInStackTrace();
-	    __throwable.printStackTrace(__out);
-	    __out.flush();
-	    _stack = __writerBuffer.toString();
-	}
-	internalInit(ignoreFrames+1, partial);
+        // Dump the stack
+        synchronized(__writerBuffer)
+        {
+            __writerBuffer.setLength(0);
+            __throwable.fillInStackTrace();
+            __throwable.printStackTrace(__out);
+            __out.flush();
+            _stack = __writerBuffer.toString();
+        }
+        internalInit(ignoreFrames+1, partial);
     }
     
     /* ------------------------------------------------------------ */
     /** Internal only Constructor. */
     protected Frame(String stack, int ignoreFrames, boolean partial)
     {
-	_stack = stack;
-	internalInit(ignoreFrames, partial);
+        _stack = stack;
+        internalInit(ignoreFrames, partial);
     }
     
     /* ------------------------------------------------------------ */
@@ -128,20 +128,20 @@ public class Frame
      */
     void complete()
     {
-	// trim stack
-	if (_stack != null) 
-	    _stack = _stack.substring(_lineStart);
-	else
-	{
-	    // Handle nulls
-	    if (_method==null)
-		_method= "unknownMethod";
-	    if (_file==null)
-		_file= "UnknownFile";
-	    return;
-	}
+        // trim stack
+        if (_stack != null) 
+            _stack = _stack.substring(_lineStart);
+        else
+        {
+            // Handle nulls
+            if (_method==null)
+                _method= "unknownMethod";
+            if (_file==null)
+                _file= "UnknownFile";
+            return;
+        }
 
-	// calculate stack depth
+        // calculate stack depth
         int i=0-__lineSeparatorLen;
         while ((i=_stack.indexOf(__lineSeparator,i+__lineSeparatorLen))>0)
                 _depth++;
@@ -173,13 +173,13 @@ public class Frame
     /*-------------------------------------------------------------------*/
     public String file()
     {
-	return _file;
+        return _file;
     }
     
     /*-------------------------------------------------------------------*/
     public String toString()
     {
-	return "["+_thread + "]" + _method;
+        return "["+_thread + "]" + _method;
     }
     
     /* ------------------------------------------------------------ */
@@ -187,10 +187,10 @@ public class Frame
      * @return parent frame or null if none
      */
     public Frame getParent(){
-	Frame f = new Frame(_stack, 0, false);
-	if (f._where == null) return null;
-	f._thread = _thread;
-	return f;
+        Frame f = new Frame(_stack, 0, false);
+        if (f._where == null) return null;
+        f._thread = _thread;
+        return f;
     }
     
     

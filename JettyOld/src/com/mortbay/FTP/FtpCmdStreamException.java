@@ -15,13 +15,13 @@ public class FtpCmdStreamException extends FtpException
     /* ------------------------------------------------------------------ */
     FtpCmdStreamException()
     {
-	super("Unexpected close of FTP command channel");
+        super("Unexpected close of FTP command channel");
     }
     
     /* ------------------------------------------------------------------ */
     FtpCmdStreamException(String message, String input)
     {
-	super(message);
-	this.input=input;
+        super(message);
+        this.input=input;
     }
 }

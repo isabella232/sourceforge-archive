@@ -42,18 +42,18 @@ public class Applet extends Block
      */
     public Applet(String className)
     {
-	super("APPLET");
-	add(paramHolder);
-	attribute("CODE",className);
+        super("APPLET");
+        add(paramHolder);
+        attribute("CODE",className);
     }
     
     /* ------------------------------------------------------------ */
     /** Set the dimensions of the Applet */
     public Applet setDimensions(int height, int width)
     {
-	width(width);
-	height(height);
-	return this;
+        width(width);
+        height(height);
+        return this;
     }
     
     /* ------------------------------------------------------------ */
@@ -64,7 +64,7 @@ public class Applet extends Block
      * <p> Defaults to whether debug is turned on in the generating app */
     public Applet setDebug(boolean debug){
         this.debug = debug;
-	return this;
+        return this;
     }
     
     /* ------------------------------------------------------------ */
@@ -75,8 +75,8 @@ public class Applet extends Block
      */
     public Applet setAlternate(Element alt)
     {
-	add(alt);
-	return this;
+        add(alt);
+        return this;
     }
     
     /* ------------------------------------------------------------ */
@@ -86,45 +86,45 @@ public class Applet extends Block
      */
     public Applet setAlternate(String alt)
     {
-	add(alt);
-	return this;
+        add(alt);
+        return this;
     }
     
     /* ------------------------------------------------------------ */
     /** Set the codebase */
     public Applet codeBase(String cb)
     {
-	codeBase = cb;
-	return this;
+        codeBase = cb;
+        return this;
     }
     
     /* ------------------------------------------------------------ */
     public Applet setParam(String name, String value)
     {
-	if (params == null)
-	    params = new Hashtable(10);
-	params.put(name, value);
-	return this;
+        if (params == null)
+            params = new Hashtable(10);
+        params.put(name, value);
+        return this;
     }
     
     /* ------------------------------------------------------------ */
     /** Write out the HTML */
     public void write(Writer out)
-	 throws IOException
+         throws IOException
     {
-	if (codeBase != null)
-	    attribute("CODEBASE",codeBase);
-	
-	if (debug)
-	    paramHolder.add("<PARAM NAME=DEBUG VALUE=yes>");
-	if (params != null)
-	    for (Enumeration enum = params.keys(); enum.hasMoreElements();)
-	    {
-		String key = enum.nextElement().toString();
-		paramHolder.add("<PARAM NAME=\"" + key + "\" VALUE=\"" +
-				params.get(key).toString() + "\">");
-	    }
-	super.write(out);
+        if (codeBase != null)
+            attribute("CODEBASE",codeBase);
+        
+        if (debug)
+            paramHolder.add("<PARAM NAME=DEBUG VALUE=yes>");
+        if (params != null)
+            for (Enumeration enum = params.keys(); enum.hasMoreElements();)
+            {
+                String key = enum.nextElement().toString();
+                paramHolder.add("<PARAM NAME=\"" + key + "\" VALUE=\"" +
+                                params.get(key).toString() + "\">");
+            }
+        super.write(out);
     }
 };
 

@@ -28,16 +28,16 @@ public class BasicAuthRealm extends Properties
      * @exception IOException 
      */
     public BasicAuthRealm(String name,Properties properties)
-	throws IOException
+        throws IOException
     {
-	this.name=name;
-	Enumeration e=properties.keys();
-	while(e.hasMoreElements())
-	{
-	    Object k=e.nextElement();
-	    put(k,properties.get(k));
-	}
-	Code.debug(this);
+        this.name=name;
+        Enumeration e=properties.keys();
+        while(e.hasMoreElements())
+        {
+            Object k=e.nextElement();
+            put(k,properties.get(k));
+        }
+        Code.debug(this);
     }
     
     /* ----------------------------------------------------------------- */
@@ -45,10 +45,10 @@ public class BasicAuthRealm extends Properties
      * @param name The name of the realm
      */
     public BasicAuthRealm(String name,String filename)
-	throws IOException
+        throws IOException
     {
-	this.name=name;
-	load(new FileInputStream(filename));
+        this.name=name;
+        load(new FileInputStream(filename));
     }
     
     /* ----------------------------------------------------------------- */
@@ -57,13 +57,13 @@ public class BasicAuthRealm extends Properties
      */
     public BasicAuthRealm(String name)
     {
-	this.name=name;
+        this.name=name;
     }    
     
     /* ----------------------------------------------------------------- */
     public String name()
     {
-	return name;
+        return name;
     }
 }
 

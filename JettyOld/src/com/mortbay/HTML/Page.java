@@ -48,33 +48,33 @@ public class Page extends Composite
         Header="Header",
         Title="Title",
         Section="Section",
-	HeaderSize="HdrSize",  // HeaderSize string suitable for FRAMESET
-	Footer="Footer",
-	FooterSize="FtrSize",  // FooterSize string suitable for FRAMESET
-	Content="Content",
-	ContentSize="CntSize",
-	Margin="Margin",
-	MarginSize="MrgSize",
-	LeftMargin="Left",
-	LeftMarginSize="LMSize",
-	RightMargin="Right",
-	RightMarginSize="RMSize",
-	Help="Help",
-	Home="Home",
-	Heading="Heading", 
+        HeaderSize="HdrSize",  // HeaderSize string suitable for FRAMESET
+        Footer="Footer",
+        FooterSize="FtrSize",  // FooterSize string suitable for FRAMESET
+        Content="Content",
+        ContentSize="CntSize",
+        Margin="Margin",
+        MarginSize="MrgSize",
+        LeftMargin="Left",
+        LeftMarginSize="LMSize",
+        RightMargin="Right",
+        RightMarginSize="RMSize",
+        Help="Help",
+        Home="Home",
+        Heading="Heading", 
         Up="Up",
-	Prev="Prev",
-	Next="Next",
-	Back="Back",
-	Target="Target",
-	BaseUrl="BaseUrl",
-	FgColour="FgColour",
-	BgColour="BgColour",
-	HighlightColour="HlColour",
-	FileBase="FileBase",
-	PageType="PageType",
-	NoTitle="No Title"
-	;
+        Prev="Prev",
+        Next="Next",
+        Back="Back",
+        Target="Target",
+        BaseUrl="BaseUrl",
+        FgColour="FgColour",
+        BgColour="BgColour",
+        HighlightColour="HlColour",
+        FileBase="FileBase",
+        PageType="PageType",
+        NoTitle="No Title"
+        ;
 
     /* ----------------------------------------------------------------- */
     private static Vector pageFactories = new Vector();
@@ -94,20 +94,20 @@ public class Page extends Composite
     /* ----------------------------------------------------------------- */
     public Page()
     {
-	this(NoTitle);
+        this(NoTitle);
     }
 
     /* ----------------------------------------------------------------- */
     public Page(String title)
     {
-	title(title);
+        title(title);
     }
 
     /* ----------------------------------------------------------------- */
     public Page(String title, String attributes)
     {
-	title(title);
-	attributes(attributes);
+        title(title);
+        attributes(attributes);
     }
 
     /* ----------------------------------------------------------------- */
@@ -116,11 +116,11 @@ public class Page extends Composite
      */
     public Page title(String title)
     {
-	properties.put(Title,title);
-	String heading = (String)properties.get(Heading);
-	if (heading==null||heading.equals(NoTitle))
-	    properties.put(Heading,title);
-	return this;
+        properties.put(Title,title);
+        String heading = (String)properties.get(Heading);
+        if (heading==null||heading.equals(NoTitle))
+            properties.put(Heading,title);
+        return this;
     }
 
     /* ----------------------------------------------------------------- */
@@ -131,9 +131,9 @@ public class Page extends Composite
      */    
     public Page addHeader(Object o)
     {
-	head.add("\n");
-	head.add(o);
-	return this;
+        head.add("\n");
+        head.add(o);
+        return this;
     }
   
     /* ----------------------------------------------------------------- */
@@ -142,8 +142,8 @@ public class Page extends Composite
      */
     public final Page setBackGroundImage(String bg)
     {
-	attribute("BACKGROUND",bg);
-	return this;
+        attribute("BACKGROUND",bg);
+        return this;
     }
   
     /* ----------------------------------------------------------------- */
@@ -152,9 +152,9 @@ public class Page extends Composite
      */
     public final Page setBackGroundColor(String color)
     {
-	properties.put(BgColour,color);
-	attribute("BGCOLOR",color);
-	return this;
+        properties.put(BgColour,color);
+        attribute("BGCOLOR",color);
+        return this;
     }
   
     /* ----------------------------------------------------------------- */
@@ -165,11 +165,11 @@ public class Page extends Composite
      */
     public final Page setBase(String target, String href)
     {
-	base="<BASE " +
-	    ((target!=null)?("TARGET="+target):"") +
-	    ((href!=null)?("HREF="+href):"") +
-	    ">";
-	return this;
+        base="<BASE " +
+            ((target!=null)?("TARGET="+target):"") +
+            ((href!=null)?("HREF="+href):"") +
+            ">";
+        return this;
     }
 
     /* ----------------------------------------------------------------- */
@@ -180,13 +180,13 @@ public class Page extends Composite
      * writeHtmlEnd(out)
      */
     public void write(Writer out)
-	 throws IOException
+         throws IOException
     {
-	writeHtmlHead(out);
-	writeBodyTag(out);
-	writeElements(out);
-	writeHtmlEnd(out);
-	out.flush();
+        writeHtmlHead(out);
+        writeBodyTag(out);
+        writeElements(out);
+        writeHtmlEnd(out);
+        out.flush();
     }
     
     /* ------------------------------------------------------------ */
@@ -194,20 +194,20 @@ public class Page extends Composite
      * Write tags &ltHTML&gt&ltHEAD&gt .... &lt/HEAD&gt
      */
     public void writeHtmlHead(Writer out)
-	 throws IOException
+         throws IOException
     {
-	if (!writtenHtmlHead)
-	{
-	    writtenHtmlHead=true;
-	    completeSections();
-	    out.write("<HTML><HEAD>");
-	    String title=(String)properties.get(Title);
-	    if (title!=null && title.length()>0 && !title.equals(NoTitle))
-		out.write("<TITLE>"+title+"</TITLE>");
-	    head.write(out);
-	    out.write(base);
-	    out.write("\n</HEAD>\n");
-	}
+        if (!writtenHtmlHead)
+        {
+            writtenHtmlHead=true;
+            completeSections();
+            out.write("<HTML><HEAD>");
+            String title=(String)properties.get(Title);
+            if (title!=null && title.length()>0 && !title.equals(NoTitle))
+                out.write("<TITLE>"+title+"</TITLE>");
+            head.write(out);
+            out.write(base);
+            out.write("\n</HEAD>\n");
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -215,32 +215,32 @@ public class Page extends Composite
      * Write tags &ltBODY page attributes&gt.
      */
     public void writeBodyTag(Writer out)
-	 throws IOException
+         throws IOException
     {
-	if (!writtenBodyTag)
-	{
-	    writtenBodyTag = true;	    
-	    out.write("<BODY "+attributes()+">\n");
-	}
+        if (!writtenBodyTag)
+        {
+            writtenBodyTag = true;          
+            out.write("<BODY "+attributes()+">\n");
+        }
     }
 
     /* ------------------------------------------------------------ */
     /** Write end BODY and end HTML tags
      */
     public void writeHtmlEnd(Writer out)
-	 throws IOException
+         throws IOException
     {
-	out.write("</BODY>");
-	out.write("</HTML>");
+        out.write("</BODY>");
+        out.write("</HTML>");
     }
     
     /* ------------------------------------------------------------ */
     /** Write any body elements of the page
      */
     public void writeElements(Writer out)
-	 throws IOException
+         throws IOException
     {
-	super.write(out);
+        super.write(out);
     }
     
     /* ------------------------------------------------------------ */
@@ -253,23 +253,23 @@ public class Page extends Composite
      * then the normal page contents are written.
      */
     public void write(Writer out,
-		      String section,
-		      boolean endHtml)
-	 throws IOException
+                      String section,
+                      boolean endHtml)
+         throws IOException
     {
-	writeHtmlHead(out);
-	writeBodyTag(out);
-	Composite s = getSection(section);
-	if (s==null)
-	{
-	    if (section.equals(Content))
-		writeElements(out);
-	}
-	else
-	    s.write(out);
-	if (endHtml)
-	    writeHtmlEnd(out);
-	out.flush();
+        writeHtmlHead(out);
+        writeBodyTag(out);
+        Composite s = getSection(section);
+        if (s==null)
+        {
+            if (section.equals(Content))
+                writeElements(out);
+        }
+        else
+            s.write(out);
+        if (endHtml)
+            writeHtmlEnd(out);
+        out.flush();
     }
     
     /* ------------------------------------------------------------ */
@@ -278,11 +278,11 @@ public class Page extends Composite
      * explicitly called or called via an eventual call to write()
      */
     public void flush(Writer out)
-	 throws IOException
+         throws IOException
     {
-	writeHtmlHead(out);
-	writeBodyTag(out);
-	super.flush(out);
+        writeHtmlHead(out);
+        writeBodyTag(out);
+        super.flush(out);
     }
     
     /* ------------------------------------------------------------ */
@@ -291,8 +291,8 @@ public class Page extends Composite
      */
      public void rewind()
     {
-	writtenHtmlHead = false;
-	writtenBodyTag = false;
+        writtenHtmlHead = false;
+        writtenBodyTag = false;
     }
     
     /* ------------------------------------------------------------ */
@@ -301,7 +301,7 @@ public class Page extends Composite
      */
     public Dictionary properties()
     {
-	return properties;
+        return properties;
     }
 
     /* ------------------------------------------------------------ */
@@ -312,7 +312,7 @@ public class Page extends Composite
      */
     public FrameSet frameSet()
     {
-	return null;
+        return null;
     }
 
     /* ------------------------------------------------------------ */
@@ -322,7 +322,7 @@ public class Page extends Composite
      */
     public void setSection(String section, Composite composite)
     {
-	sections.put(section,composite);
+        sections.put(section,composite);
     }
     
     /* ------------------------------------------------------------ */
@@ -331,8 +331,8 @@ public class Page extends Composite
      */
     public void addSection(String section, Composite composite)
     {
-	sections.put(section,composite);
-	add(composite);
+        sections.put(section,composite);
+        add(composite);
     }
     
     /* ------------------------------------------------------------ */
@@ -340,7 +340,7 @@ public class Page extends Composite
      */
     public Composite getSection(String section)
     {
-	return (Composite)sections.get(section);
+        return (Composite)sections.get(section);
     }
 
     /* ------------------------------------------------------------ */
@@ -349,11 +349,11 @@ public class Page extends Composite
      */
     public void addTo(String section, Object element)
     {
-	Composite s = (Composite)sections.get(section);
-	if (s==null)
-	    add(element);
-	else
-	    s.add(element);
+        Composite s = (Composite)sections.get(section);
+        if (s==null)
+            add(element);
+        else
+            s.add(element);
     }
     
     /* ------------------------------------------------------------ */
@@ -373,7 +373,7 @@ public class Page extends Composite
      */
     public static void addPageFactory(PageFactory f)
     {
-	pageFactories.addElement(f);
+        pageFactories.addElement(f);
     }
     
     /* ------------------------------------------------------------ */
@@ -381,7 +381,7 @@ public class Page extends Composite
      */
     public static void delPageFactory(PageFactory f)
     {
-	pageFactories.removeElement(f);
+        pageFactories.removeElement(f);
     }
     
     /* ------------------------------------------------------------ */
@@ -398,33 +398,33 @@ public class Page extends Composite
      *        Request property.
      */
     public static Page manufacturePage(String name,
-				       ServletRequest request,
-				       ServletResponse response)
-	 throws ClassNotFoundException,
-		InstantiationException,
-		IllegalAccessException,
-		ClassCastException
+                                       ServletRequest request,
+                                       ServletResponse response)
+         throws ClassNotFoundException,
+                InstantiationException,
+                IllegalAccessException,
+                ClassCastException
     {
-	Code.debug("Search pageFactories for "+name);
-	for ( int f=0; f<pageFactories.size() ; f++)
-	{
-	    PageFactory factory =
-		(PageFactory) pageFactories.elementAt(f);
-	    Page p = factory.getPage(name,request,response);
-	    if (p!=null)
-		return p;
-	}
+        Code.debug("Search pageFactories for "+name);
+        for ( int f=0; f<pageFactories.size() ; f++)
+        {
+            PageFactory factory =
+                (PageFactory) pageFactories.elementAt(f);
+            Page p = factory.getPage(name,request,response);
+            if (p!=null)
+                return p;
+        }
 
-	Code.debug("Try instantiate "+name+" as Page subclass");
-	Class c = (Class)classCache.get(name);
-	if (c==null)
-	    c = Class.forName(name);
-	classCache.put(name,c);
-	Page p =(Page)c.newInstance();
+        Code.debug("Try instantiate "+name+" as Page subclass");
+        Class c = (Class)classCache.get(name);
+        if (c==null)
+            c = Class.forName(name);
+        classCache.put(name,c);
+        Page p =(Page)c.newInstance();
 
-	p.properties().put(Request,request);
-	p.properties().put(Response,response);
-	return p;
+        p.properties().put(Request,request);
+        p.properties().put(Response,response);
+        return p;
     }
     
     /* ------------------------------------------------------------ */
@@ -440,36 +440,36 @@ public class Page extends Composite
      *        Request property.
      */
     public static Page getPage(String name,
-			       ServletRequest request,
-			       ServletResponse response)
+                               ServletRequest request,
+                               ServletResponse response)
     {
-	Page p=null;
-	try{
-	    p = manufacturePage(name,request,response);
-	    if (p!=null)
-	    {
-		
-		return p;
-	    }
-	}
-	catch(ClassNotFoundException e){
-	    Code.debug("getSafePage handled",e);
-	}
-	catch(InstantiationException e){
-	    Code.debug("getSafePage handled",e);
-	}
-	catch(IllegalAccessException e){
-	    Code.debug("getSafePage handled",e);
-	}
-	catch(ClassCastException e){
-	    Code.debug("getSafePage handled",e);
-	}
-	
-	Code.debug("Vanilla Page for "+name);
-	p= new Page();
-	p.properties().put(Request,request);
-	p.properties().put(Response,response);
-	return p;
+        Page p=null;
+        try{
+            p = manufacturePage(name,request,response);
+            if (p!=null)
+            {
+                
+                return p;
+            }
+        }
+        catch(ClassNotFoundException e){
+            Code.debug("getSafePage handled",e);
+        }
+        catch(InstantiationException e){
+            Code.debug("getSafePage handled",e);
+        }
+        catch(IllegalAccessException e){
+            Code.debug("getSafePage handled",e);
+        }
+        catch(ClassCastException e){
+            Code.debug("getSafePage handled",e);
+        }
+        
+        Code.debug("Vanilla Page for "+name);
+        p= new Page();
+        p.properties().put(Request,request);
+        p.properties().put(Response,response);
+        return p;
     }
 
 
@@ -479,7 +479,7 @@ public class Page extends Composite
      */
     public static String getDefaultPageType()
     {
-	return defaultPage;
+        return defaultPage;
     }
     
     /* ------------------------------------------------------------ */
@@ -488,7 +488,7 @@ public class Page extends Composite
      */
     public static void setDefaultPageType(String name)
     {
-	defaultPage=name;
+        defaultPage=name;
     }
     
 }

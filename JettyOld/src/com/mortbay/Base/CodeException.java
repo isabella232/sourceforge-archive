@@ -20,12 +20,12 @@ public class CodeException extends RuntimeException
      */
     public CodeException()
     {
-	super();
+        super();
     }
 
     public CodeException(String msg)
     {
-	super(msg);
+        super(msg);
     }    
 }
 

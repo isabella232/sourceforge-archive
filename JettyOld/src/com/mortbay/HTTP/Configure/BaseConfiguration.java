@@ -43,15 +43,15 @@ public class BaseConfiguration implements HttpConfiguration
     /* ------------------------------------------------------------ */
     public String toString()
     {
-	StringBuffer buf = new StringBuffer(1024);
-	buf.append(DataClass.toString(addresses));
-	buf.append("\n");
-	buf.append(httpHandlersMap);
-	buf.append("\n");
-	buf.append(exceptionHandlersMap);
-	buf.append("\n");
-	buf.append(properties);
-	return buf.toString();
+        StringBuffer buf = new StringBuffer(1024);
+        buf.append(DataClass.toString(addresses));
+        buf.append("\n");
+        buf.append(httpHandlersMap);
+        buf.append("\n");
+        buf.append(exceptionHandlersMap);
+        buf.append("\n");
+        buf.append(properties);
+        return buf.toString();
     }
     
     /* ------------------------------------------------------------ */
@@ -59,7 +59,7 @@ public class BaseConfiguration implements HttpConfiguration
      */
     public InetAddrPort[] addresses()
     {
-	return addresses;
+        return addresses;
     }
 
     /* ------------------------------------------------------------ */
@@ -69,13 +69,13 @@ public class BaseConfiguration implements HttpConfiguration
      */
     public Class[] listenerClasses()
     {
-	if (listenerClasses==null)
-	{
-	    listenerClasses = new Class[addresses.length];
-	    for (int i=listenerClasses.length;i-->0;)
-		listenerClasses[i]=com.mortbay.HTTP.HttpListener.class;
-	}
-	return listenerClasses;
+        if (listenerClasses==null)
+        {
+            listenerClasses = new Class[addresses.length];
+            for (int i=listenerClasses.length;i-->0;)
+                listenerClasses[i]=com.mortbay.HTTP.HttpListener.class;
+        }
+        return listenerClasses;
     }
 
     /* ------------------------------------------------------------ */
@@ -83,7 +83,7 @@ public class BaseConfiguration implements HttpConfiguration
      */
     public PathMap httpHandlersMap()
     {
-	return httpHandlersMap;
+        return httpHandlersMap;
     }
     
     
@@ -92,14 +92,14 @@ public class BaseConfiguration implements HttpConfiguration
      */
     public PathMap exceptionHandlersMap()
     {
-	if (exceptionHandlersMap==null)
-	{
-	    exceptionHandlersMap = new PathMap();
-	    ExceptionHandler[] exceptionHandlers = new ExceptionHandler[1];
-	    exceptionHandlers[0] = new DefaultExceptionHandler();
-	    exceptionHandlersMap.put("/",exceptionHandlers);
-	}
-	return exceptionHandlersMap ;
+        if (exceptionHandlersMap==null)
+        {
+            exceptionHandlersMap = new PathMap();
+            ExceptionHandler[] exceptionHandlers = new ExceptionHandler[1];
+            exceptionHandlers[0] = new DefaultExceptionHandler();
+            exceptionHandlersMap.put("/",exceptionHandlers);
+        }
+        return exceptionHandlersMap ;
     }
     
     /* ------------------------------------------------------------ */
@@ -108,17 +108,17 @@ public class BaseConfiguration implements HttpConfiguration
      */
     public String getMimeType(String file)
     {
-	if (file!=null)
-	{
-	    int i = file.lastIndexOf(".");
-	    if (i>0)
-	    {
-		String ext = file.substring(i+1);
-		if (ext!=null && ext.length()>0)
-		    return getMimeByExtension(ext);
-	    }
-	}
-	return getMimeByExtension("default");
+        if (file!=null)
+        {
+            int i = file.lastIndexOf(".");
+            if (i>0)
+            {
+                String ext = file.substring(i+1);
+                if (ext!=null && ext.length()>0)
+                    return getMimeByExtension(ext);
+            }
+        }
+        return getMimeByExtension("default");
     }
     
     /* ------------------------------------------------------------ */
@@ -128,12 +128,12 @@ public class BaseConfiguration implements HttpConfiguration
      */
     public Object getAttribute(String name)
     {
-	Object attr=null;
-	if (attributes!=null)
-	    attr=attributes.get(name);
-	if (attr==null)
-	    attr=getProperty(name);
-	return attr;
+        Object attr=null;
+        if (attributes!=null)
+            attr=attributes.get(name);
+        if (attr==null)
+            attr=getProperty(name);
+        return attr;
     }
     
     /* ------------------------------------------------------------ */
@@ -142,9 +142,9 @@ public class BaseConfiguration implements HttpConfiguration
      */
     public String getProperty(String name)
     {
-	if (properties==null)
-	    return null;
-	return properties.getProperty(name);
+        if (properties==null)
+            return null;
+        return properties.getProperty(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -153,9 +153,9 @@ public class BaseConfiguration implements HttpConfiguration
      */
     public Properties getProperties()
     {
-	if (properties==null)
-	    properties=new Properties();
-	return properties;
+        if (properties==null)
+            properties=new Properties();
+        return properties;
     }
     
     /* ------------------------------------------------------------ */
@@ -164,7 +164,7 @@ public class BaseConfiguration implements HttpConfiguration
      */
     public void log(String message)
     {
-	Log.event(message,4);
+        Log.event(message,4);
     }
     
     /* ------------------------------------------------------------ */
@@ -175,35 +175,35 @@ public class BaseConfiguration implements HttpConfiguration
      */
     protected String getMimeByExtension(String ext)
     {
-	ext=ext.toLowerCase();
-	
-	if (mimeMap==null)
-	{
-	    mimeMap = new Hashtable();
-	    mimeMap.put("default","application/octet-stream");
-	    mimeMap.put("class","application/octet-stream");
-	    mimeMap.put("html","text/html");
-	    mimeMap.put("htm","text/html");
-	    mimeMap.put("txt","text/plain");
-	    mimeMap.put("java","text/plain");
-	    mimeMap.put("gif","image/gif");
-	    mimeMap.put("jpg","image/jpeg");
-	    mimeMap.put("jpeg","image/jpeg");
-	    mimeMap.put("au","audio/basic");
-	    mimeMap.put("snd","audio/basic");
-	    mimeMap.put("ra","audio/x-pn-realaudio");
-	    mimeMap.put("ram","audio/x-pn-realaudio");
-	    mimeMap.put("rm","audio/x-pn-realaudio");
-	    mimeMap.put("rpm","audio/x-pn-realaudio");
-	    mimeMap.put("mov","video/quicktime");
-	    mimeMap.put("jsp","text/plain");
-	}
-	
-	String type = (String)mimeMap.get(ext);
-	if (type==null)
-	    type = (String)mimeMap.get("default");
+        ext=ext.toLowerCase();
+        
+        if (mimeMap==null)
+        {
+            mimeMap = new Hashtable();
+            mimeMap.put("default","application/octet-stream");
+            mimeMap.put("class","application/octet-stream");
+            mimeMap.put("html","text/html");
+            mimeMap.put("htm","text/html");
+            mimeMap.put("txt","text/plain");
+            mimeMap.put("java","text/plain");
+            mimeMap.put("gif","image/gif");
+            mimeMap.put("jpg","image/jpeg");
+            mimeMap.put("jpeg","image/jpeg");
+            mimeMap.put("au","audio/basic");
+            mimeMap.put("snd","audio/basic");
+            mimeMap.put("ra","audio/x-pn-realaudio");
+            mimeMap.put("ram","audio/x-pn-realaudio");
+            mimeMap.put("rm","audio/x-pn-realaudio");
+            mimeMap.put("rpm","audio/x-pn-realaudio");
+            mimeMap.put("mov","video/quicktime");
+            mimeMap.put("jsp","text/plain");
+        }
+        
+        String type = (String)mimeMap.get(ext);
+        if (type==null)
+            type = (String)mimeMap.get("default");
 
-	return type;
+        return type;
     }
 
 };

@@ -1,5 +1,10 @@
-Contributions, Testing & valuable feedback from:
+Sponsors:
+  Mort Bay Consulting Ltd. Pty. (Australia)     http://www.mortbay.com
+  Mort Bay Consulting Limited. (United Kingdom) http://www.mortbay.com
+  INetU hosting.                                http://www.inetu.net
+  FORGE Information Technology Pty. Ltd.        http://www.forge.com.au
 
+Contributions, Testing & valuable feedback from:
   Greg Wilkins <gregw@mortbay.com>
   Jan Bartel <janb@mortbay.com>
   Matt Watson <mattw@mortbay.com>
@@ -25,11 +30,11 @@ Contributions, Testing & valuable feedback from:
   David Taylor <dtaylor@forge.com.au>
   Dan Finkelstein <danf@yipinet.com>
   klaus spd <klausspd@hotmail.com>
+  Nicholas Christopher <Nicholas.Christopher@worldnet.att.net>
   Plus a few more in the pipe line (tell me if your one of them...)
 
 Copyright holders:
-  Mort Bay Consulting Pty. Ltd. (Australia)    http://www.mortbay.com
-  Mort Bay Consulting Limited (United Kingdom) http://www.mortbay.com
+  Mort Bay Consulting Pty. Ltd. Australia      http://www.mortbay.com
   Optimus Solutions Pty. Ltd.                  http://www.optimus.com.au
   Intelligent Switched Systems, Sydney         http://www.isswitched.com
   Sun Microsystems, Inc.                       http://www.sun.com

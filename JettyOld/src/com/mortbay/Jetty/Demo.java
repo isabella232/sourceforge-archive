@@ -34,12 +34,12 @@ public class Demo
      */
     public static void main(String args[])
     {
-	if (args.length==1)
-	    Code.warning("Port argument no longer supported. See etc/JettyDemo.prp");
-	File filebase = new File("./FileBase");
-	Code.assert(filebase.isDirectory(),"Demo must be run in $JETTY_HOME");	
-	
-	String demoArgs[] = {"./etc/JettyDemo.prp"};
-	Server.main(demoArgs);
+        if (args.length==1)
+            Code.warning("Port argument no longer supported. See etc/JettyDemo.prp");
+        File filebase = new File("./FileBase");
+        Code.assert(filebase.isDirectory(),"Demo must be run in $JETTY_HOME");  
+        
+        String demoArgs[] = {"./etc/JettyDemo.prp"};
+        Server.main(demoArgs);
     }
 }

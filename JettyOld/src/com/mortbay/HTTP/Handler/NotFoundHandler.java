@@ -31,7 +31,7 @@ public class NotFoundHandler extends NullHandler
      */
     public NotFoundHandler(Properties properties)
     {
-	setProperties(properties);
+        setProperties(properties);
     }
     
     /* ------------------------------------------------------------ */
@@ -50,20 +50,20 @@ public class NotFoundHandler extends NullHandler
     
     /* ----------------------------------------------------------------- */
     public void handle(HttpRequest request,
-		       HttpResponse response)
-	 throws Exception
+                       HttpResponse response)
+         throws Exception
     {
-	String method=request.getMethod();
-	if (method.equals(HttpRequest.GET))
-	    response.sendError(response.SC_NOT_FOUND);
-	else if (method.equals(HttpRequest.POST))
-	    response.sendError(response.SC_NOT_FOUND);
-	else if (method.equals(HttpRequest.HEAD))
-	    response.sendError(response.SC_NOT_FOUND);
-	else if (method.equals(HttpRequest.OPTIONS))
-	    response.sendError(response.SC_NOT_FOUND);
-	else
-	    response.sendError(response.SC_METHOD_NOT_ALLOWED);
+        String method=request.getMethod();
+        if (method.equals(HttpRequest.GET))
+            response.sendError(response.SC_NOT_FOUND);
+        else if (method.equals(HttpRequest.POST))
+            response.sendError(response.SC_NOT_FOUND);
+        else if (method.equals(HttpRequest.HEAD))
+            response.sendError(response.SC_NOT_FOUND);
+        else if (method.equals(HttpRequest.OPTIONS))
+            response.sendError(response.SC_NOT_FOUND);
+        else
+            response.sendError(response.SC_METHOD_NOT_ALLOWED);
     }    
 }
 

@@ -31,20 +31,20 @@ public class Include extends Element
      * @exception IOException File not found
      */
     public Include(String directory,
-		   String fileName)
-	 throws IOException
+                   String fileName)
+         throws IOException
     {
-	if (directory==null)
-	    directory=".";
+        if (directory==null)
+            directory=".";
  
-	if (File.separatorChar != '/')
-	{
-	    directory = directory.replace('/',File.separatorChar);
-	    fileName  = fileName .replace('/',File.separatorChar);
-	}
+        if (File.separatorChar != '/')
+        {
+            directory = directory.replace('/',File.separatorChar);
+            fileName  = fileName .replace('/',File.separatorChar);
+        }
 
-	Code.debug("IncludeTag(",directory,",",fileName,")");
-	includeFile(new File(directory,fileName));
+        Code.debug("IncludeTag(",directory,",",fileName,")");
+        includeFile(new File(directory,fileName));
     }
     
     /* ------------------------------------------------------------ */
@@ -54,12 +54,12 @@ public class Include extends Element
      * @exception IOException File not found
      */
     public Include(String fileName)
-	throws IOException
+        throws IOException
     {
-	if (File.separatorChar != '/')
-	    fileName  = fileName .replace('/',File.separatorChar);
-	Code.debug("IncludeTag(",fileName,")");
-	includeFile(new File(fileName));
+        if (File.separatorChar != '/')
+            fileName  = fileName .replace('/',File.separatorChar);
+        Code.debug("IncludeTag(",fileName,")");
+        includeFile(new File(fileName));
     }
 
     /* ------------------------------------------------------------ */
@@ -69,10 +69,10 @@ public class Include extends Element
      * @exception IOException File not found
      */
     public Include(File file)
-	throws IOException
+        throws IOException
     {
-	Code.debug("IncludeTag(",file,")");
-	includeFile(file);
+        Code.debug("IncludeTag(",file,")");
+        includeFile(file);
     }
 
     /* ------------------------------------------------------------ */
@@ -82,9 +82,9 @@ public class Include extends Element
      * @exception IOException
      */
     public Include(InputStream in)
-	throws IOException
+        throws IOException
     {
-	reader=new InputStreamReader(in);
+        reader=new InputStreamReader(in);
     }
     
     /* ------------------------------------------------------------ */
@@ -94,47 +94,47 @@ public class Include extends Element
      * @exception IOException
      */
     public Include(Reader in)
-	throws IOException
+        throws IOException
     {
-	reader=in;
+        reader=in;
     }
     
     /* ------------------------------------------------------------ */
     private void includeFile(File file)
-	throws IOException
+        throws IOException
     {
-	if (!file.exists())
-	    throw new FileNotFoundException(file.toString());
-	
-	if (file.isDirectory())
-	{
-	    List list = new List(List.Unordered);	
-	    String[] ls = file.list();
-	    for (int i=0 ; i< ls.length ; i++)
-		list.add(ls[i]);
-	    StringWriter sw = new StringWriter();
-	    list.write(sw);
-	    reader = new StringReader(sw.toString());
-	}
-	else
-	{
-	    reader = new BufferedReader(new FileReader(file));
-	}
+        if (!file.exists())
+            throw new FileNotFoundException(file.toString());
+        
+        if (file.isDirectory())
+        {
+            List list = new List(List.Unordered);       
+            String[] ls = file.list();
+            for (int i=0 ; i< ls.length ; i++)
+                list.add(ls[i]);
+            StringWriter sw = new StringWriter();
+            list.write(sw);
+            reader = new StringReader(sw.toString());
+        }
+        else
+        {
+            reader = new BufferedReader(new FileReader(file));
+        }
     }
     
 
     /* ---------------------------------------------------------------- */
     public void write(Writer out)
-	 throws IOException
+         throws IOException
     {
-	try{
-	    IO.copy(reader,out);
-	}
-	finally
-	{
-	    reader.close();
-	    reader=null;
-	}
+        try{
+            IO.copy(reader,out);
+        }
+        finally
+        {
+            reader.close();
+            reader=null;
+        }
     }
 }
 

@@ -25,15 +25,15 @@ public class List extends Block
     /* ----------------------------------------------------------------- */
     public List(String type)
     {
-	super(type);
-    }	
+        super(type);
+    }   
     
     /* ----------------------------------------------------------------- */
     public Composite add(Object o)
     {
-	super.add("<LI>");
-	super.add(o);
-	return this;
+        super.add("<LI>");
+        super.add(o);
+        return this;
     }
 }
 

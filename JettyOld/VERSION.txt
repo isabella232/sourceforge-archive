@@ -1,3 +1,10 @@
+Release 2.3.0A -
+  + Added GNUJSP 1.0 for the JSP 1.0 API.
+  + Added "Powered by Jetty" button.
+  + ServerContext available to HtmlFilters via context param
+  + Made session IDs less predictable and removed race.
+  + Added BuildJetty.java file.
+
 Release 2.2.8 - 15 Sep 1999
   + Fixed bug in Element.attribute with empty string values.
   + Made translation of getRequestURI() optional.

@@ -98,10 +98,10 @@ import java.lang.reflect.Array;
  *     // ...
  * }
  * public boolean defaultDispatch(String method,
- *				  ServletDispatch dispatch,
- *				  Object context,
- *				  HttpServletRequest req,
- *				  HttpServletResponse res) {
+ *                                ServletDispatch dispatch,
+ *                                Object context,
+ *                                HttpServletRequest req,
+ *                                HttpServletResponse res) {
  *     // ...
  * }
  * </pre>
@@ -122,14 +122,14 @@ public class ServletDispatch
     private static Converter converter = null;
     /* ------------------------------------------------------------ */
     static {
-	ConverterSet cs = new ConverterSet();
-	// The basic types
-	cs.registerPrimitiveConverters();
-	// For the complex objects
-	cs.register(new DictionaryConverter());
-	// And for multi-value params to arrays
-	cs.register(new ArrayConverter(","));
-	converter = cs;
+        ConverterSet cs = new ConverterSet();
+        // The basic types
+        cs.registerPrimitiveConverters();
+        // For the complex objects
+        cs.register(new DictionaryConverter());
+        // And for multi-value params to arrays
+        cs.register(new ArrayConverter(","));
+        converter = cs;
     }
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -137,8 +137,8 @@ public class ServletDispatch
      * @param res 
      */
     public ServletDispatch(HttpServletRequest req, HttpServletResponse res){
-	this.req = req;
-	this.res = res;
+        this.req = req;
+        this.res = res;
     }
     /* ------------------------------------------------------------ */
     /** Dispatch the servlet request to a named method on the given object
@@ -150,70 +150,70 @@ public class ServletDispatch
      * @exception java.lang.InstantiationException
      */
     public Object dispatch(Object obj, Object context)
-	throws java.lang.reflect.InvocationTargetException,
-	       java.lang.IllegalAccessException,
-	       java.lang.InstantiationException
+        throws java.lang.reflect.InvocationTargetException,
+               java.lang.IllegalAccessException,
+               java.lang.InstantiationException
     {
-	if (path == null)
-	{
-	    path = new Vector();
-	    String pathi = req.getPathInfo();
-	    if (pathi!=null)
-	    {
-		StringTokenizer st = new StringTokenizer(pathi, "/");
-		while (st.hasMoreTokens())
-		    path.addElement(st.nextToken());
-	    }
-	}
-	
-	if (path.size() == 0) 
-	    return doDefaultDispatch(obj, null, context, req, res);
-	String funcName = path.firstElement().toString();
-	processedPath = processedPath + "/" + funcName;
-	path.removeElementAt(0);
-	Method[] methods = obj.getClass().getMethods();
-	int i;
-	for (i = 0; i < methods.length; i++){
-	    if (methods[i].getName().equals(funcName)) break;
-	}
-	if (i == methods.length)
-	    return doDefaultDispatch(obj, funcName, context, req, res);
-	Method method = methods[i];
-	Class paramTypes[] = method.getParameterTypes();
-	Object params[] = new Object[paramTypes.length];
-	for (i = 0; i < paramTypes.length; i++){
-	    if (paramTypes[i].isInstance(this))
-		params[i]  = this;
-	    else if (paramTypes[i].isInstance(req))
-		params[i]  = req;
-	    else if (paramTypes[i].isInstance(res))
-		params[i]  = res;
-	    else if (paramTypes[i].isInstance(context)){
-		params[i] = context;
-	    } else {
-		// Handle an arbitrary param type
-		Object param = paramTypes[i].newInstance();
-		initArgObject(param);
-		params[i] = param;
-	    }
-	}
-	return method.invoke(obj, params);
+        if (path == null)
+        {
+            path = new Vector();
+            String pathi = req.getPathInfo();
+            if (pathi!=null)
+            {
+                StringTokenizer st = new StringTokenizer(pathi, "/");
+                while (st.hasMoreTokens())
+                    path.addElement(st.nextToken());
+            }
+        }
+        
+        if (path.size() == 0) 
+            return doDefaultDispatch(obj, null, context, req, res);
+        String funcName = path.firstElement().toString();
+        processedPath = processedPath + "/" + funcName;
+        path.removeElementAt(0);
+        Method[] methods = obj.getClass().getMethods();
+        int i;
+        for (i = 0; i < methods.length; i++){
+            if (methods[i].getName().equals(funcName)) break;
+        }
+        if (i == methods.length)
+            return doDefaultDispatch(obj, funcName, context, req, res);
+        Method method = methods[i];
+        Class paramTypes[] = method.getParameterTypes();
+        Object params[] = new Object[paramTypes.length];
+        for (i = 0; i < paramTypes.length; i++){
+            if (paramTypes[i].isInstance(this))
+                params[i]  = this;
+            else if (paramTypes[i].isInstance(req))
+                params[i]  = req;
+            else if (paramTypes[i].isInstance(res))
+                params[i]  = res;
+            else if (paramTypes[i].isInstance(context)){
+                params[i] = context;
+            } else {
+                // Handle an arbitrary param type
+                Object param = paramTypes[i].newInstance();
+                initArgObject(param);
+                params[i] = param;
+            }
+        }
+        return method.invoke(obj, params);
     }
     /* ------------------------------------------------------------ */
     /** 
      * @return The part of the request pathInfo that has been processed so
-     *		far in the dispatch process.
+     *          far in the dispatch process.
      */
     public String getProcessedPathInfo(){
-	return processedPath;
+        return processedPath;
     }
     /* ------------------------------------------------------------ */
     /** 
      * @return The part of the request path (including the servlet path) that
-     *		has been processed so far in the dispatch process.
+     *          has been processed so far in the dispatch process.
      */
     public String getProcessedPath(){
-	return req.getServletPath() + processedPath;
+        return req.getServletPath() + processedPath;
     }
     /* ------------------------------------------------------------ */
     /** Initialise an argument from the request parameters
@@ -231,18 +231,18 @@ public class ServletDispatch
      * @return The value for the object
      */
     public static Object parseArg(Object defaultValue, String name,
-				  HttpServletRequest req)
+                                  HttpServletRequest req)
     {
-	try {
-	    String param = req.getParameter(name);
-	    if (param == null) return null;
-	    Object val =
-		converter.convert(param, defaultValue.getClass(), converter);
-	    if (val != null) return val;
-	} catch (Exception ex){
-	    Code.debug(ex);
-	}
-	return defaultValue;
+        try {
+            String param = req.getParameter(name);
+            if (param == null) return null;
+            Object val =
+                converter.convert(param, defaultValue.getClass(), converter);
+            if (val != null) return val;
+        } catch (Exception ex){
+            Code.debug(ex);
+        }
+        return defaultValue;
     }
     /* ------------------------------------------------------------ */
     /** Version of parseArg to handle longs (and short and int)
@@ -252,12 +252,12 @@ public class ServletDispatch
      * @return The value
      */
     public static long parseLongArg(long defaultValue,
-				    String name,
-				    HttpServletRequest req)
+                                    String name,
+                                    HttpServletRequest req)
     {
-	Number n = (Number)parseArg(new Long(1), name, req);
-	if (n == null) return defaultValue;
-	return n.longValue();
+        Number n = (Number)parseArg(new Long(1), name, req);
+        if (n == null) return defaultValue;
+        return n.longValue();
     }
     /* ------------------------------------------------------------ */
     /** Version of parseArg to handle doubles (and floats)
@@ -267,12 +267,12 @@ public class ServletDispatch
      * @return The value
      */
     public static double parseDoubleArg(double defaultValue,
-					String name,
-					HttpServletRequest req)
+                                        String name,
+                                        HttpServletRequest req)
     {
-	Number n = (Number)parseArg(new Double(1.0), name, req);
-	if (n == null) return defaultValue;
-	return n.doubleValue();
+        Number n = (Number)parseArg(new Double(1.0), name, req);
+        if (n == null) return defaultValue;
+        return n.doubleValue();
     }
     /* ------------------------------------------------------------ */
     /** Version of parseArg to handle booleans
@@ -282,12 +282,12 @@ public class ServletDispatch
      * @return The value
      */
     public static boolean parseBooleanArg(boolean defaultValue,
-					String name,
-					HttpServletRequest req)
+                                        String name,
+                                        HttpServletRequest req)
     {
-	Boolean b = (Boolean)parseArg(Boolean.TRUE, name, req);
-	if (b == null) return defaultValue;
-	return b.booleanValue();
+        Boolean b = (Boolean)parseArg(Boolean.TRUE, name, req);
+        if (b == null) return defaultValue;
+        return b.booleanValue();
     }
     /* ------------------------------------------------------------ */
     /** Initialise an arbitrary Object from the request parameters.
@@ -307,45 +307,45 @@ public class ServletDispatch
      * </pre>
      */
     public void initArgObject(Object toInit) {
-	if (paramsHT == null){
-	    paramsHT = new Hashtable();
-	    for (Enumeration enum = req.getParameterNames();
-		 enum.hasMoreElements();)
-	    {
-		Object key = enum.nextElement();
-		paramsHT.put(key, req.getParameter(key.toString()));
-	    }
-	}
-	DictionaryConverter.fillObject(toInit, paramsHT, converter);
+        if (paramsHT == null){
+            paramsHT = new Hashtable();
+            for (Enumeration enum = req.getParameterNames();
+                 enum.hasMoreElements();)
+            {
+                Object key = enum.nextElement();
+                paramsHT.put(key, req.getParameter(key.toString()));
+            }
+        }
+        DictionaryConverter.fillObject(toInit, paramsHT, converter);
     }
     /* ------------------------------------------------------------ */
     private Object doDefaultDispatch(Object obj,
-				     String funcName,
-				     Object context,
-				     HttpServletRequest req,
-				     HttpServletResponse res)
-	throws InvocationTargetException,
-	       IllegalAccessException,
-	       InstantiationException
+                                     String funcName,
+                                     Object context,
+                                     HttpServletRequest req,
+                                     HttpServletResponse res)
+        throws InvocationTargetException,
+               IllegalAccessException,
+               InstantiationException
     {
-	if (obj instanceof ServletDispatchHandler)
-	    try {
-		return ((ServletDispatchHandler)obj).defaultDispatch(funcName,
-								     this,
-								     context,
-								     req,
-								     res);
-	    } catch (InvocationTargetException ex){
-		throw ex;
-	    } catch (IllegalAccessException ex){
-		throw ex;
-	    } catch (InstantiationException ex){
-		throw ex;
-	    } catch (Exception ex){
-		throw new InvocationTargetException(ex);
-	    }
-	else
-	    return null;
+        if (obj instanceof ServletDispatchHandler)
+            try {
+                return ((ServletDispatchHandler)obj).defaultDispatch(funcName,
+                                                                     this,
+                                                                     context,
+                                                                     req,
+                                                                     res);
+            } catch (InvocationTargetException ex){
+                throw ex;
+            } catch (IllegalAccessException ex){
+                throw ex;
+            } catch (InstantiationException ex){
+                throw ex;
+            } catch (Exception ex){
+                throw new InvocationTargetException(ex);
+            }
+        else
+            return null;
     }
     /* ------------------------------------------------------------ */
 };

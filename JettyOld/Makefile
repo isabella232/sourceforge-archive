@@ -28,8 +28,18 @@ SUBDIRS := \
 
 include $(JETTY_HOME)/etc/Global.mk
 
+
+buildJetty:
+	echo "class BuildJetty{" > src/BuildJetty.java
+	echo "Class[] classes={" >> src/BuildJetty.java
+	find src -name '*.java' |\
+	xargs egrep 'public.*class' | cut -d: -f1 | uniq |\
+	sed -e 's/^src./    /' -e 's/\//./g' -e 's/.java$$/.class,/' >> src/BuildJetty.java
+	echo "};}" >> src/BuildJetty.java
+
+
 #help target  jetty-release    Make a release of Jetty
-jetty-release: jetty-jar javax-jar javadoc cleansrc
+jetty-release: buildJetty jetty-jar javax-jar javadoc cleansrc
 	mkdir -p lib
 
 javax-jar:

@@ -15,7 +15,7 @@ public class MsqlAdaptor extends DbAdaptor
      */
     public MsqlAdaptor()
     {
-	dbDriver="com.imaginary.sql.msql.MsqlDriver";
+        dbDriver="com.imaginary.sql.msql.MsqlDriver";
     }
     
     
@@ -26,24 +26,24 @@ public class MsqlAdaptor extends DbAdaptor
      */
     public String quote(String s)
     {
-	StringBuffer b = new StringBuffer();
-	b.append("'");
-	
-	int i=0;
-	int last=-1;
-	
-	while((i=s.indexOf("'",i))!=-1)
-	{	
-	    b.append(s.substring(last+1,i));
-	    b.append("\\'");
-	    last=i++;
-	}
-	if (s.length()>last+1)
-	    b.append(s.substring(last+1));
+        StringBuffer b = new StringBuffer();
+        b.append("'");
+        
+        int i=0;
+        int last=-1;
+        
+        while((i=s.indexOf("'",i))!=-1)
+        {       
+            b.append(s.substring(last+1,i));
+            b.append("\\'");
+            last=i++;
+        }
+        if (s.length()>last+1)
+            b.append(s.substring(last+1));
 
-	b.append("'");
-	s=b.toString();
-	return s;
+        b.append("'");
+        s=b.toString();
+        return s;
     } 
 
     /* ------------------------------------------------------------ */
@@ -53,10 +53,10 @@ public class MsqlAdaptor extends DbAdaptor
      */
     public String columnType(int type)
     {
-	if (type>Column.textTag)
-	    return "TEXT("+(type-Column.textTag)+")";
+        if (type>Column.textTag)
+            return "TEXT("+(type-Column.textTag)+")";
 
-	return super.columnType(type);
+        return super.columnType(type);
     }
     
     /* ------------------------------------------------------------ */
@@ -66,16 +66,16 @@ public class MsqlAdaptor extends DbAdaptor
      */
     public String formatKeys(Table table)
     {
-	return "";
+        return "";
     }
     
-	
+        
     /* ------------------------------------------------------------ */
     /** 
      * @return 
      */
     public String go()
     {
-	return "\n\\g\n";
+        return "\n\\g\n";
     }   
 };

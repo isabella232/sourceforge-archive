@@ -18,25 +18,25 @@ class TestHarness
     /* ------------------------------------------------------------ */
     public static void main(String[] args)
     {
-	try
-	{    
-	    Column.test();
-	    ColumnGroup.test();
-	    Key.test();
-	
-	    Database db = new Database("com.mortbay.JDBC.CloudscapeAdaptor",
-				       "jdbc:cloudscape:/tmp/TestDB");
-	    TestTable.test(db);
-	    MultiTestTable.test(db);
-	}
-	catch(Exception e)
-	{
-	    Code.warning(e);
-	    Test t = new Test("com.mortbay.JDBC");
-	    t.check(false,e.toString());
-	}
-	
-	Test.report();
+        try
+        {    
+            Column.test();
+            ColumnGroup.test();
+            Key.test();
+        
+            Database db = new Database("com.mortbay.JDBC.CloudscapeAdaptor",
+                                       "jdbc:cloudscape:/tmp/TestDB");
+            TestTable.test(db);
+            MultiTestTable.test(db);
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            Test t = new Test("com.mortbay.JDBC");
+            t.check(false,e.toString());
+        }
+        
+        Test.report();
     }
 };
 

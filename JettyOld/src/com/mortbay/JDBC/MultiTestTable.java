@@ -38,7 +38,7 @@ public class MultiTestTable  extends Table
      */
     static Column[] columns =
     {
-	NameCol, EmailCol, LoginCol, PasswordCol, HeightCol, WeightCol
+        NameCol, EmailCol, LoginCol, PasswordCol, HeightCol, WeightCol
     };
 
     /* ------------------------------------------------------------ */
@@ -46,64 +46,64 @@ public class MultiTestTable  extends Table
      */
     public MultiTestTable()
     {
-	super ("MultiTestTable", columns, null);
+        super ("MultiTestTable", columns, null);
     } 
 
     /* ------------------------------------------------------------ */
     public MultiTestTable(Database dtb)
     {
-	super ("MultiTestTable", columns, dtb);
+        super ("MultiTestTable", columns, dtb);
     }
     
     /* ------------------------------------------------------------ */
     static void test(Database db)
     {
-	Test t = new Test("com.mortbay.JDBC.MultiTestTable");
-	MultiTestTable table=null;
-	try {	    
-	    t.check(true,"Open DB");
-	    table = new MultiTestTable(db);
-	    t.check(true,"New Table");
-	    
-	    Row r = table.newRow();
-	    
-	    t.check(true,"Created empty row");
-	
-	    if (r != null)
-	    {
-		Object[] values = 
-		{"Peer Gynt","peter@wolf.com","peer","gynt",
-		 new Integer(1),new Double(2.3)
-		};
+        Test t = new Test("com.mortbay.JDBC.MultiTestTable");
+        MultiTestTable table=null;
+        try {       
+            t.check(true,"Open DB");
+            table = new MultiTestTable(db);
+            t.check(true,"New Table");
+            
+            Row r = table.newRow();
+            
+            t.check(true,"Created empty row");
+        
+            if (r != null)
+            {
+                Object[] values = 
+                {"Peer Gynt","peter@wolf.com","peer","gynt",
+                 new Integer(1),new Double(2.3)
+                };
 
-		r.set(table,values);  
-		r.update ();
-	    }
-	    t.check(true,"added row values");
-	
-	    Object[] keyVal = new Object[2];
-	    keyVal[0] = (Object)new String("Peer Gynt");
-	    keyVal[1] = (Object)new String("peter@wolf.com");
-	    t.check(true,"make a new key value");
+                r.set(table,values);  
+                r.update ();
+            }
+            t.check(true,"added row values");
+        
+            Object[] keyVal = new Object[2];
+            keyVal[0] = (Object)new String("Peer Gynt");
+            keyVal[1] = (Object)new String("peter@wolf.com");
+            t.check(true,"make a new key value");
     
-	
-	    Row rr = table.getRow (keyVal);
-	    t.check(rr!=null,"retrieved a row");
+        
+            Row rr = table.getRow (keyVal);
+            t.check(rr!=null,"retrieved a row");
 
-	    if (rr != null)
-	    {
-		t.checkEquals(rr.get(table.LoginCol.getName()).toString().trim(),
-			      "peer","Retrieved login column");
-		t.checkEquals(rr.get(table.PasswordCol.getName()).toString().trim(),
-			      "gynt","Retrieved password column");
-	    }
-	    
-	}
-	catch (Exception e)
-	{
-	    Code.warning(e);
-	    t.check(false,"Exception");
-	}
+            if (rr != null)
+            {
+                t.checkEquals(rr.get(table.LoginCol.getName()).toString().trim(),
+                              "peer","Retrieved login column");
+                t.checkEquals(rr.get(table.PasswordCol.getName()).toString().trim(),
+                              "gynt","Retrieved password column");
+            }
+            
+        }
+        catch (Exception e)
+        {
+            Code.warning(e);
+            t.check(false,"Exception");
+        }
     }
 }
 

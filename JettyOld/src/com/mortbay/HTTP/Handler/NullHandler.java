@@ -27,40 +27,40 @@ public class NullHandler implements HttpHandler
     protected HttpServer httpServer=null;
 
     public void setProperties(Properties p)
-	throws IOException
+        throws IOException
     {
-	Code.notImplemented();
+        Code.notImplemented();
     }
     
     /* ----------------------------------------------------------------- */
     public void handle(HttpRequest request,
-			 HttpResponse response)
-	 throws Exception
+                         HttpResponse response)
+         throws Exception
     {}
     
     /* ----------------------------------------------------------------- */
     public String translate(String path)
     {
-	return path;
+        return path;
     }
-	 
+         
     /* ----------------------------------------------------------------- */
     public Enumeration servletNames()
     {
-	return null;
+        return null;
     } 
-	
+        
     /* ----------------------------------------------------------------- */
     public Servlet servlet(String name)
     {
-	return null;
+        return null;
     } 
 
     /* ------------------------------------------------------------ */
     public void setServer(HttpServer server)
-	 throws Exception
+         throws Exception
     {
-	httpServer=server;
+        httpServer=server;
     }
 
     /* ------------------------------------------------------------ */
@@ -71,19 +71,19 @@ public class NullHandler implements HttpHandler
      * @return PropertyTree
      */
     protected static PropertyTree getProperties(PropertyTree props)
-	throws IOException, FileNotFoundException
+        throws IOException, FileNotFoundException
     {
-	PropertyTree properties=new PropertyTree();
-	String filename = props.getProperty("PROPERTIES");
-	if (filename!=null&&filename.length()>0)
-	{
-	    Code.debug("Load ",filename);
-	    properties.load(new BufferedInputStream(new FileInputStream(filename)));
-	}
-	PropertyTree property= props.getTree("PROPERTY");
-	if (property!=null)
-	    properties.load(property);
-	return properties;
+        PropertyTree properties=new PropertyTree();
+        String filename = props.getProperty("PROPERTIES");
+        if (filename!=null&&filename.length()>0)
+        {
+            Code.debug("Load ",filename);
+            properties.load(new BufferedInputStream(new FileInputStream(filename)));
+        }
+        PropertyTree property= props.getTree("PROPERTY");
+        if (property!=null)
+            properties.load(property);
+        return properties;
     }
     
     /* ------------------------------------------------------------ */

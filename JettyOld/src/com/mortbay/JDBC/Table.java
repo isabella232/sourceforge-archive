@@ -24,9 +24,9 @@ import java.util.*;
 public class Table extends ColumnGroup
 {
     /* ------------------------------------------------------------ */
-    final public Key primaryKey;
-    final public ColumnGroup otherKeys; // Non primary keys
-    final public ColumnGroup otherCols; // Non primary columns
+    /*final*/ public Key primaryKey;
+    /*final*/ public ColumnGroup otherKeys; // Non primary keys
+    /*final*/ public ColumnGroup otherCols; // Non primary columns
     
     /* ------------------------------------------------------------ */
     private Database database;
@@ -39,72 +39,72 @@ public class Table extends ColumnGroup
      * @param database The database to use.
      */
     public Table(String name,
-		 Column[] columns,
-		 Database database)
+                 Column[] columns,
+                 Database database)
     {
-	super(name,columns);
+        super(name,columns);
 
-	Code.assert(database!=null,"Constructed with null database");
-	this.database=database;
-	this.adaptor=database.getAdaptor();
-	Code.assert(this.adaptor!=null,"Database with null adaptor");
+        Code.assert(database!=null,"Constructed with null database");
+        this.database=database;
+        this.adaptor=database.getAdaptor();
+        Code.assert(this.adaptor!=null,"Database with null adaptor");
 
-	/*
-	 * Find all the keys
-	 */
-	Vector primarys = new Vector();
-	Vector keys = new Vector();
-	Vector others = new Vector();
-	
-	for (int i=0; i<columns.length ; i++)
-	{
-	    columns[i].setAdaptor(adaptor);
-	    if (columns[i].isPrimary())
-		primarys.addElement(columns[i]);
-	    else
-	    {
-		others.addElement(columns[i]);
-		if (columns[i].isKey())
-		    keys.addElement(columns[i]);
-	    }
-	}
-	    
-	/* If we found some primary columns, make a key out of them */
-	if (!primarys.isEmpty())
-	{
-	    Column[] temp = new Column[primarys.size()];
-	    primarys.copyInto(temp);
-	    Key tempKey = null;
-	    try{
-		tempKey = new Key ("primary", temp);
-	    }
-	    catch(NonKeyException nke){
-		Code.ignore(nke);
-	    }
-	    this.primaryKey = tempKey;
-	}
-	else
-	    this.primaryKey=null;
-	
-	/* If we found some key columns, make a key out of them */
-	if (!keys.isEmpty())
-	{
-	    Column[] temp = new Column[keys.size()];
-	    keys.copyInto(temp);
-	    this.otherKeys = new ColumnGroup("otherKeys", temp);
-	}
-	else
-	    this.otherKeys=null;
-	
-	/* If we found some non primary columns, make a key out of them */
-	if (!others.isEmpty())
-	{
-	    Column[] temp = new Column[others.size()];
-	    others.copyInto(temp);
-	    this.otherCols = new ColumnGroup("otherCols", temp);
-	}
-	else
-	    this.otherCols=null;
+        /*
+         * Find all the keys
+         */
+        Vector primarys = new Vector();
+        Vector keys = new Vector();
+        Vector others = new Vector();
+        
+        for (int i=0; i<columns.length ; i++)
+        {
+            columns[i].setAdaptor(adaptor);
+            if (columns[i].isPrimary())
+                primarys.addElement(columns[i]);
+            else
+            {
+                others.addElement(columns[i]);
+                if (columns[i].isKey())
+                    keys.addElement(columns[i]);
+            }
+        }
+            
+        /* If we found some primary columns, make a key out of them */
+        if (!primarys.isEmpty())
+        {
+            Column[] temp = new Column[primarys.size()];
+            primarys.copyInto(temp);
+            Key tempKey = null;
+            try{
+                tempKey = new Key ("primary", temp);
+            }
+            catch(NonKeyException nke){
+                Code.ignore(nke);
+            }
+            this.primaryKey = tempKey;
+        }
+        else
+            this.primaryKey=null;
+        
+        /* If we found some key columns, make a key out of them */
+        if (!keys.isEmpty())
+        {
+            Column[] temp = new Column[keys.size()];
+            keys.copyInto(temp);
+            this.otherKeys = new ColumnGroup("otherKeys", temp);
+        }
+        else
+            this.otherKeys=null;
+        
+        /* If we found some non primary columns, make a key out of them */
+        if (!others.isEmpty())
+        {
+            Column[] temp = new Column[others.size()];
+            others.copyInto(temp);
+            this.otherCols = new ColumnGroup("otherCols", temp);
+        }
+        else
+            this.otherCols=null;
     }    
 
     /* ------------------------------------------------------------ */
@@ -113,7 +113,7 @@ public class Table extends ColumnGroup
      */
     public Database getDatabase()
     {
-	return database;
+        return database;
     }
 
     /* ------------------------------------------------------------ */
@@ -122,13 +122,13 @@ public class Table extends ColumnGroup
      */
     public  DbAdaptor getAdaptor()
     {
-	return adaptor;
+        return adaptor;
     }
 
     /* ------------------------------------------------------------ */
     /** Does this table have a primary key */
     public boolean hasPrimary(){
-	return primaryKey != null;
+        return primaryKey != null;
     }
     
     /* ------------------------------------------------------------ */
@@ -137,8 +137,8 @@ public class Table extends ColumnGroup
      */
     public Row newRow()
     {
-	Code.assert(database!=null,"Null Database");
-	return new Row(this);
+        Code.assert(database!=null,"Null Database");
+        return new Row(this);
     }
     
     /* ------------------------------------------------------------ */
@@ -146,141 +146,141 @@ public class Table extends ColumnGroup
      * Create it if it does not exist.
      */
     public Row getRow(Object primaryValue)
-	 throws SQLException
+         throws SQLException
     {
-	Code.assert(primaryKey!=null,"No Primary Key");
-	Code.assert(primaryKey.columns.length==1,"Too many Primary keys");
+        Code.assert(primaryKey!=null,"No Primary Key");
+        Code.assert(primaryKey.columns.length==1,"Too many Primary keys");
 
-	Object[] value = new Object[1];
-	value[0]=primaryValue;
-	return getRow(value);
+        Object[] value = new Object[1];
+        value[0]=primaryValue;
+        return getRow(value);
     }
 
     /* ------------------------------------------------------------ */
     /** Get a row from the table.
      */
     public Row getRow(Object[] primaryValues)
-	 throws SQLException
+         throws SQLException
     {
-	String query =
-	    "SELECT * FROM " +
-	    getName() +
-	    " WHERE "+
-	    primaryKey.toString(primaryValues," AND ");
-	
-	java.sql.ResultSet rs = database().query(query);
+        String query =
+            "SELECT * FROM " +
+            getName() +
+            " WHERE "+
+            primaryKey.toString(primaryValues," AND ");
+        
+        java.sql.ResultSet rs = database().query(query);
 
-	if (rs.next())
-	{
-	    Row row = new Row(this, rs);
-	    Code.assert(!rs.next(),"multiple rows for primary");
-	    return row;
-	}
-	return null;    
+        if (rs.next())
+        {
+            Row row = new Row(this, rs);
+            Code.assert(!rs.next(),"multiple rows for primary");
+            return row;
+        }
+        return null;    
     }
     
     /* ------------------------------------------------------------ */
     /** Get a rows from the table by non primary key
      */
     public RowEnumeration getRows(ColumnGroup columns, Object[] values)
-	 throws SQLException
+         throws SQLException
     {
-	String where = columns.toString(values," AND ");
-	return getRows(where);
+        String where = columns.toString(values," AND ");
+        return getRows(where);
     }
     
     /* ------------------------------------------------------------ */
     /** Get a rows from the table by arbitrary where clause
      */
     public RowEnumeration getRows(String whereClause)
-	 throws SQLException
+         throws SQLException
     {
-	String query =
-	    "SELECT * FROM " +
-	    getName() +
-	    " WHERE "+
-	    whereClause;
-	
-	java.sql.ResultSet rs = database().query(query);
+        String query =
+            "SELECT * FROM " +
+            getName() +
+            " WHERE "+
+            whereClause;
+        
+        java.sql.ResultSet rs = database().query(query);
 
-	return new RowEnumeration(this,rs);
+        return new RowEnumeration(this,rs);
     }
     
     /* ------------------------------------------------------------ */
     /** Delete a row from the table singular primary key
      */
     public void deleteRow(Object primaryValues)
-	 throws SQLException
+         throws SQLException
     {
-	Object[] pv = new Object[1];
-	pv[0]=primaryValues;
-	String where = primaryKey.toString(pv," AND ");
-	deleteRows(where);
+        Object[] pv = new Object[1];
+        pv[0]=primaryValues;
+        String where = primaryKey.toString(pv," AND ");
+        deleteRows(where);
     }
     
     /* ------------------------------------------------------------ */
     /** Delete a row from the table by primary key values
      */
     public void deleteRows(Object[] primaryValues)
-	 throws SQLException
+         throws SQLException
     {
-	String where = primaryKey.toString(primaryValues," AND ");
-	deleteRows(where);
+        String where = primaryKey.toString(primaryValues," AND ");
+        deleteRows(where);
     }
     
     /* ------------------------------------------------------------ */
     /** Delete a row from the table by column group values
      */
     public void deleteRows(ColumnGroup columns, Object[] values)
-	 throws SQLException
+         throws SQLException
     {
-	String where = columns.toString(values," AND ");
-	deleteRows(where);
+        String where = columns.toString(values," AND ");
+        deleteRows(where);
     }
     
     /* ------------------------------------------------------------ */
     /** Delete a row from the table by arbitrary WHERE clause
      */
     public void deleteRows(String whereClause)
-	 throws SQLException
+         throws SQLException
     {
-	String query =
-	    "DELETE FROM " +
-	    getName() +
-	    " WHERE "+
-	    whereClause;
-	database().update(query);
+        String query =
+            "DELETE FROM " +
+            getName() +
+            " WHERE "+
+            whereClause;
+        database().update(query);
     }
-	
+        
     /* ------------------------------------------------------------ */
     /** @return The database for this table
      */
     public Database database()
     {
-	Code.assert(database!=null,"Null Database");
-	return database;
+        Code.assert(database!=null,"Null Database");
+        return database;
     }
-	
+        
     /* ------------------------------------------------------------ */
     /** Set the database used by this table. This can only be called if null
      * was passed to the constructor */
     public void database(Database db){
-	Code.assert(database == null,"DB already initialised");
-	database = db;
+        Code.assert(database == null,"DB already initialised");
+        database = db;
     }
     
     /* ------------------------------------------------------------ */
     public String create()
     {
-	return
-	    adaptor.formatCreateTable(this) +
-	    adaptor.formatCreateIndex(this);
+        return
+            adaptor.formatCreateTable(this) +
+            adaptor.formatCreateIndex(this);
     }
     
     /* ------------------------------------------------------------ */
     public String drop()
     {
-	return adaptor.dropTable(this) ;
+        return adaptor.dropTable(this) ;
     }
     
     /* ------------------------------------------------------------ */
@@ -288,9 +288,9 @@ public class Table extends ColumnGroup
      */
     public String toString()
     {
-	if (adaptor==null)
-	    return super.toString();
-	return adaptor.formatTable(this);
+        if (adaptor==null)
+            return super.toString();
+        return adaptor.formatTable(this);
     }
 };
 

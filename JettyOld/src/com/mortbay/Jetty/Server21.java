@@ -34,7 +34,7 @@ import java.util.*;
  * configuration file allows for multiple named servers to be
  * included as follows
  * <pre>
- * ServerName./pathOfStack.InetAddrPort	         n.n.n.n:pppp
+ * ServerName./pathOfStack.InetAddrPort          n.n.n.n:pppp
  * ServerName./pathOfStack.Servlet./path         name=package.class[?paramFile]
  * ServerName./pathOfStack.Directory./path       directory/name
  * ServerName./pathOfStack.Directory.allowPut    true|false
@@ -59,16 +59,16 @@ public class Server21 extends BaseConfiguration
     
     private class HandlerStack
     {
-	String path=null;
-	PathMap servletMap= new PathMap();
-	PathMap dirMap= new PathMap();
-	boolean dirAllowPut = false;
-	boolean dirAllowDelete = false;
-	PathMap authMap = new PathMap();
-	PathMap transMap = new PathMap();
-	PathMap filterMap = new PathMap();
-	PathMap forwardMap = new PathMap();
-	boolean proxy = false;
+        String path=null;
+        PathMap servletMap= new PathMap();
+        PathMap dirMap= new PathMap();
+        boolean dirAllowPut = false;
+        boolean dirAllowDelete = false;
+        PathMap authMap = new PathMap();
+        PathMap transMap = new PathMap();
+        PathMap filterMap = new PathMap();
+        PathMap forwardMap = new PathMap();
+        boolean proxy = false;
     }
     
     /* ------------------------------------------------------------ */
@@ -77,29 +77,29 @@ public class Server21 extends BaseConfiguration
      * @exception IOException 
      */
     public Server21(String serverName)
-	 throws IOException
+         throws IOException
     {
-	this.serverName=serverName;
-	
-	// No address yet
-	addresses=new InetAddrPort[0];
-	
+        this.serverName=serverName;
+        
+        // No address yet
+        addresses=new InetAddrPort[0];
+        
     }
 
     /* ------------------------------------------------------------ */
     private HandlerStack getStack(String stack)
     {
-	if (stack==null)
-	    stack="";
-	HandlerStack s = (HandlerStack)stackMap.get(stack);
-	if (s==null)
-	{
-	    Code.debug("New stack: ",stack);
-	    s=new HandlerStack();
-	    s.path=stack;
-	    stackMap.put(stack,s);
-	}
-	return s;
+        if (stack==null)
+            stack="";
+        HandlerStack s = (HandlerStack)stackMap.get(stack);
+        if (s==null)
+        {
+            Code.debug("New stack: ",stack);
+            s=new HandlerStack();
+            s.path=stack;
+            stackMap.put(stack,s);
+        }
+        return s;
     }
     
     /* ------------------------------------------------------------ */
@@ -108,20 +108,20 @@ public class Server21 extends BaseConfiguration
      */
     public void addAddress(InetAddrPort addr)
     {
-	Code.debug(serverName,".addAddress: ",addr);
-	
-	// Expand array
-	InetAddrPort[] new_addresses =
-	    new InetAddrPort[addresses.length+1];
+        Code.debug(serverName,".addAddress: ",addr);
+        
+        // Expand array
+        InetAddrPort[] new_addresses =
+            new InetAddrPort[addresses.length+1];
 
-	// copy old addresses
-	System.arraycopy(addresses,0,new_addresses,0,addresses.length);
-	
-	// add new address
-	new_addresses[addresses.length]=addr;
+        // copy old addresses
+        System.arraycopy(addresses,0,new_addresses,0,addresses.length);
+        
+        // add new address
+        new_addresses[addresses.length]=addr;
 
-	// set new addresses
-	addresses=new_addresses;
+        // set new addresses
+        addresses=new_addresses;
     }
 
     /* ------------------------------------------------------------ */
@@ -132,11 +132,11 @@ public class Server21 extends BaseConfiguration
      * @see com.mortbay.HTTP.PathMap
      */
     public void addServlet(String stack,
-			   String path,
-			   ServletHolder holder)
+                           String path,
+                           ServletHolder holder)
     {
-	Code.debug(serverName,".addServlet: ",holder," at ",path);
-	getStack(stack).servletMap.put(path,holder);
+        Code.debug(serverName,".addServlet: ",holder," at ",path);
+        getStack(stack).servletMap.put(path,holder);
     }
     
     /* ------------------------------------------------------------ */
@@ -148,27 +148,27 @@ public class Server21 extends BaseConfiguration
      * @see com.mortbay.HTTP.PathMap
      */
     public void addServlet(String stack,
-			   String path,
-			   String name,
-			   String servlet,
-			   String paramFile)
-	throws IOException, ServletException, ClassNotFoundException
+                           String path,
+                           String name,
+                           String servlet,
+                           String paramFile)
+        throws IOException, ServletException, ClassNotFoundException
     {
-	Code.debug(serverName,".addServlet: ",servlet," at ",path);
-		   
-	ServletHolder holder = (ServletHolder)servletHolders.get(name);
-	if (holder==null)
-	{
-	    Properties params = new Properties();
-	    if (paramFile!=null)
-		params.load(new BufferedInputStream(
-				new FileInputStream(paramFile)));
-		holder=new ServletHolder(name,servlet,params);
-	    
-	    servletHolders.put(name,holder);
-	}
+        Code.debug(serverName,".addServlet: ",servlet," at ",path);
+                   
+        ServletHolder holder = (ServletHolder)servletHolders.get(name);
+        if (holder==null)
+        {
+            Properties params = new Properties();
+            if (paramFile!=null)
+                params.load(new BufferedInputStream(
+                                new FileInputStream(paramFile)));
+                holder=new ServletHolder(name,servlet,params);
+            
+            servletHolders.put(name,holder);
+        }
 
-	addServlet(stack,path,holder);
+        addServlet(stack,path,holder);
     }
     
     /* ------------------------------------------------------------ */
@@ -179,8 +179,8 @@ public class Server21 extends BaseConfiguration
      */
     public void addDirectory(String stack, String path, String directory)
     {
-	Code.debug(serverName,".addDirectory: ",directory," at ",path);
-	getStack(stack).dirMap.put(path,directory);
+        Code.debug(serverName,".addDirectory: ",directory," at ",path);
+        getStack(stack).dirMap.put(path,directory);
     }
 
     /* ------------------------------------------------------------ */
@@ -189,8 +189,8 @@ public class Server21 extends BaseConfiguration
      * @see com.mortbay.HTTP.Handler.FileHandler
      */
     public void allowPut(String stack, Boolean value){
-	Code.debug(serverName,".allowPut:", value);
-	getStack(stack).dirAllowPut = value.booleanValue();
+        Code.debug(serverName,".allowPut:", value);
+        getStack(stack).dirAllowPut = value.booleanValue();
     }
 
     /* ------------------------------------------------------------ */
@@ -199,8 +199,8 @@ public class Server21 extends BaseConfiguration
      * @see com.mortbay.HTTP.Handler.FileHandler
      */
     public void allowDelete(String stack, Boolean value){
-	Code.debug(serverName,".allowDelete:", value);
-	getStack(stack).dirAllowDelete = value.booleanValue();
+        Code.debug(serverName,".allowDelete:", value);
+        getStack(stack).dirAllowDelete = value.booleanValue();
     }
     
     /* ------------------------------------------------------------ */
@@ -210,9 +210,9 @@ public class Server21 extends BaseConfiguration
      * @see com.mortbay.HTTP.PathMap
      */
     public void addLog(String stack, String path, String log)
-	throws IOException
+        throws IOException
     {
-	Code.warning("Log no longer supported in Server21");
+        Code.warning("Log no longer supported in Server21");
     }
 
     /* ------------------------------------------------------------ */
@@ -223,13 +223,13 @@ public class Server21 extends BaseConfiguration
      * @see com.mortbay.HTTP.PathMap
      */
     public void addAuthRealm(String stack,
-			     String path,
-			     String name,
-			     String filename)
-	throws IOException
+                             String path,
+                             String name,
+                             String filename)
+        throws IOException
     {
-	Code.debug(serverName,".addAuthRealm: ",name," at ",path);
-	getStack(stack).authMap.put(path,new BasicAuthRealm(name,filename));
+        Code.debug(serverName,".addAuthRealm: ",name," at ",path);
+        getStack(stack).authMap.put(path,new BasicAuthRealm(name,filename));
     }
     
     /* ------------------------------------------------------------ */
@@ -241,11 +241,11 @@ public class Server21 extends BaseConfiguration
      * @see com.mortbay.HTTP.PathMap
      */
     public void addTranslation(String stack,
-			       String path,
-			       String translation)
+                               String path,
+                               String translation)
     {    
-	Code.debug(serverName,".addTranslation: ",translation," at ",path);
-	getStack(stack).transMap.put(path,translation);
+        Code.debug(serverName,".addTranslation: ",translation," at ",path);
+        getStack(stack).transMap.put(path,translation);
     }
     
     /* ------------------------------------------------------------ */
@@ -257,12 +257,12 @@ public class Server21 extends BaseConfiguration
      * @see com.mortbay.HTTP.PathMap
      */
     public void addForward(String stack,
-			   String path,
-			   String url)
-	throws MalformedURLException
+                           String path,
+                           String url)
+        throws MalformedURLException
     {    
-	Code.debug(serverName,".addForward: ",url," at ",path);
-	getStack(stack).forwardMap.put(path,new URL(url));
+        Code.debug(serverName,".addForward: ",url," at ",path);
+        getStack(stack).forwardMap.put(path,new URL(url));
     }
     
     /* ------------------------------------------------------------ */
@@ -274,11 +274,11 @@ public class Server21 extends BaseConfiguration
      * @see com.mortbay.HTTP.PathMap
      */
     public void addFilter(String stack,
-			   String path,
-			   String filterClass)
+                           String path,
+                           String filterClass)
     {    
-	Code.debug(serverName,".addFilter: ",filterClass," at ",path);
-	getStack(stack).filterMap.put(path,filterClass);
+        Code.debug(serverName,".addFilter: ",filterClass," at ",path);
+        getStack(stack).filterMap.put(path,filterClass);
     }
 
     /* ------------------------------------------------------------ */
@@ -289,87 +289,87 @@ public class Server21 extends BaseConfiguration
      */
     public void addProxy(String stack)
     {    
-	Code.debug(serverName,".addProxy: ");
-	getStack(stack).proxy=true;
+        Code.debug(serverName,".addProxy: ");
+        getStack(stack).proxy=true;
     }
 
     /* ------------------------------------------------------------ */
     /** Start serving 
      */
     public void start()
-	throws Exception
+        throws Exception
     {
-	// Configure handlers
-	httpHandlersMap=new PathMap();
+        // Configure handlers
+        httpHandlersMap=new PathMap();
 
-	// for each handler stack
-	Enumeration e = stackMap.elements();
-	while (e.hasMoreElements())
-	{
-	    HandlerStack stack = (HandlerStack)e.nextElement();
-	    
-	    // Create full stack of HttpHandlers at stack
-	    HttpHandler[] httpHandlers = new HttpHandler[10];
-	    Code.debug("Stack: ",stack.path);
-	    httpHandlersMap.put(stack.path,httpHandlers);
-	    int h=0;
+        // for each handler stack
+        Enumeration e = stackMap.elements();
+        while (e.hasMoreElements())
+        {
+            HandlerStack stack = (HandlerStack)e.nextElement();
+            
+            // Create full stack of HttpHandlers at stack
+            HttpHandler[] httpHandlers = new HttpHandler[10];
+            Code.debug("Stack: ",stack.path);
+            httpHandlersMap.put(stack.path,httpHandlers);
+            int h=0;
 
-	    // Session handler
-	    httpHandlers[h++] = new SessionHandler();	    
+            // Session handler
+            httpHandlers[h++] = new SessionHandler();       
 
-	    // Auth Handler
-	    if (stack.authMap.size()>0)
-		httpHandlers[h++] = new BasicAuthHandler(stack.authMap);
-	    
-	    // Translation Handler
-	    if (stack.transMap.size()>0)
-		httpHandlers[h++] = new TranslateHandler(stack.transMap);
+            // Auth Handler
+            if (stack.authMap.size()>0)
+                httpHandlers[h++] = new BasicAuthHandler(stack.authMap);
+            
+            // Translation Handler
+            if (stack.transMap.size()>0)
+                httpHandlers[h++] = new TranslateHandler(stack.transMap);
 
-	    // Filter handler
-	    if (stack.filterMap.size()>0)
-		httpHandlers[h++] = new FilterHandler(stack.filterMap);
-	    
-	    // Stuff for servlets
-	    if (stack.servletMap.size()>0)
-	    {
-		// Parameter handler
-		httpHandlers[h++] = new ParamHandler();
-	    
-		// Servlet Handler
-		httpHandlers[h++] = new ServletHandler(stack.servletMap);
-	    }
-	
-	    // File Handler
-	    if (stack.dirMap.size()>0){
-		FileHandler fh = new FileHandler(stack.dirMap);
-		httpHandlers[h++] = fh;
-		fh.setPutAllowed(stack.dirAllowPut);
-		fh.setDeleteAllowed(stack.dirAllowDelete);
-	    }
-	    
-	    // Forward Handler
-	    if (stack.forwardMap.size()>0)
-		httpHandlers[h++] = new ForwardHandler(stack.forwardMap);
+            // Filter handler
+            if (stack.filterMap.size()>0)
+                httpHandlers[h++] = new FilterHandler(stack.filterMap);
+            
+            // Stuff for servlets
+            if (stack.servletMap.size()>0)
+            {
+                // Parameter handler
+                httpHandlers[h++] = new ParamHandler();
+            
+                // Servlet Handler
+                httpHandlers[h++] = new ServletHandler(stack.servletMap);
+            }
+        
+            // File Handler
+            if (stack.dirMap.size()>0){
+                FileHandler fh = new FileHandler(stack.dirMap);
+                httpHandlers[h++] = fh;
+                fh.setPutAllowed(stack.dirAllowPut);
+                fh.setDeleteAllowed(stack.dirAllowDelete);
+            }
+            
+            // Forward Handler
+            if (stack.forwardMap.size()>0)
+                httpHandlers[h++] = new ForwardHandler(stack.forwardMap);
 
-	    // Proxy Handler
-	    if (stack.proxy)
-		httpHandlers[h++] = new ProxyHandler();
-	    
-	    // NotFound Handler
-	    httpHandlers[h++] = new NotFoundHandler();
-	}
+            // Proxy Handler
+            if (stack.proxy)
+                httpHandlers[h++] = new ProxyHandler();
+            
+            // NotFound Handler
+            httpHandlers[h++] = new NotFoundHandler();
+        }
 
-	// initialize the server
-	httpServer = new HttpServer(this);
+        // initialize the server
+        httpServer = new HttpServer(this);
     }
 
     /* ------------------------------------------------------------ */
     /** join 
      */
     public void join()
-	throws InterruptedException
+        throws InterruptedException
     {
-	httpServer.join();
+        httpServer.join();
     }
     
 
@@ -380,148 +380,148 @@ public class Server21 extends BaseConfiguration
      * @return Map of server name to server instances.
      */
     public static Hashtable buildServers(Properties props)
-	throws Exception
+        throws Exception
     {
-	// create server map
-	Hashtable server_map = new Hashtable(); 
-	
-	// For all properties
-	Enumeration e = props.keys();   
-	Vector fields = new Vector();
-	while (e.hasMoreElements())
-	{
-	    String key = (String)e.nextElement();
-	    String value = props.getProperty(key);
+        // create server map
+        Hashtable server_map = new Hashtable(); 
+        
+        // For all properties
+        Enumeration e = props.keys();   
+        Vector fields = new Vector();
+        while (e.hasMoreElements())
+        {
+            String key = (String)e.nextElement();
+            String value = props.getProperty(key);
 
-	    // Extract fields
-	    fields.removeAllElements();
-	    StringTokenizer tok = new StringTokenizer(key,". 	");
-	    while (tok.hasMoreTokens())
-		fields.addElement(tok.nextToken());
-	    
-	    // Extract the server name and handler stack
-	    if (fields.size()<3)
-		throw new Exception("Badly formatted configuration key: "+key);
-	    String name = (String)fields.elementAt(0);
-	    String stack = (String)fields.elementAt(1);
-	    String type = (String)fields.elementAt(2);
-	    String path = null;
-	    if (fields.size() > 3)
-	    {
-		path=(String)fields.elementAt(3);
-		for (int i=4;i<fields.size();i++)
-		    path+="."+fields.elementAt(i);
-	    }
-	    
-	    // Get a server instance for the name
-	    Server21 server=(Server21)server_map.get(name);
-	    if (server==null)
-	    {
-		server = new Server21(name);
-		server_map.put(name,server);
-	    }
+            // Extract fields
+            fields.removeAllElements();
+            StringTokenizer tok = new StringTokenizer(key,".    ");
+            while (tok.hasMoreTokens())
+                fields.addElement(tok.nextToken());
+            
+            // Extract the server name and handler stack
+            if (fields.size()<3)
+                throw new Exception("Badly formatted configuration key: "+key);
+            String name = (String)fields.elementAt(0);
+            String stack = (String)fields.elementAt(1);
+            String type = (String)fields.elementAt(2);
+            String path = null;
+            if (fields.size() > 3)
+            {
+                path=(String)fields.elementAt(3);
+                for (int i=4;i<fields.size();i++)
+                    path+="."+fields.elementAt(i);
+            }
+            
+            // Get a server instance for the name
+            Server21 server=(Server21)server_map.get(name);
+            if (server==null)
+            {
+                server = new Server21(name);
+                server_map.put(name,server);
+            }
 
-	    // handle property
-	    if ("InetAddrPort".equals(type))
-	    {
-		StringTokenizer list = new StringTokenizer(value,", 	");
-		while (list.hasMoreTokens())
-		    server.addAddress(new InetAddrPort(list.nextToken()));
-	    }
-	    else if ("Servlet".equals(type))
-	    {
-		if (path==null)
-		    throw new Exception("Missing path: "+key);
-		
-		int eq = value.indexOf("=");
-		if (eq<0 || eq==value.length())
-		    throw new Exception("Badly formatted servlet value: "+
-					value);
-		String sname=value.substring(0,eq);
-		String cname=value.substring(eq+1);
-		
-		int q=cname.indexOf("?");
-		if (q>0)
-		{
-		    String paramFile = cname.substring(q+1);
-		    cname=cname.substring(0,q);
-		    server.addServlet(stack,path,sname,cname,paramFile);
-		}
-		else
-		    server.addServlet(stack,path,sname,cname,null);
-	    }
-	    else if ("Directory".equals(type))
-	    {
-		if (path==null)
-		    throw new Exception("Missing path: "+key);
-		if (path.equals("allowPut"))
-		    server.allowPut(stack, Boolean.valueOf(value));
-		else if (path.equals("allowDelete"))
-		    server.allowDelete(stack, Boolean.valueOf(value));
-		else 
-		    server.addDirectory(stack,path,value);
-	    }
-	    else if ("Log".equals(type))
-	    {
-		if (path==null)
-		    throw new Exception("Missing path: "+key);
-		server.addLog(stack,path,value);
-	    }
-	    else if ("Auth".equals(type))
-	    {
-		if (path==null)
-		    throw new Exception("Missing path: "+key);
-		
-		int eq = value.indexOf("=");
-		if (eq<0 || eq==value.length())
-		    throw new Exception("Badly formatted auth value: "+
-					value);
-		server.addAuthRealm(stack,path,
-				    value.substring(0,eq),
-				    value.substring(eq+1));
-	    }
-	    else if ("Translate".equals(type))
-	    {
-		if (path==null)
-		    throw new Exception("Missing path: "+key);
-		server.addTranslation(stack,path,value);
-	    }
-	    else if ("Filter".equals(type))
-	    {
-		if (path==null)
-		    throw new Exception("Missing path: "+key);
-		server.addFilter(stack,path,value);
-	    }
-	    else if ("Forward".equals(type))
-	    {
-		if (path==null)
-		    throw new Exception("Missing path: "+key);
-		server.addForward(stack,path,value);
-	    }
-	    else if ("Proxy".equals(type))
-	    {
-		server.addProxy(stack);
-	    }
-	    else if ("DefaultSessionMaxIdleTime".equals(type))
-	    {
-		    // Maximum idle time for HttpSessions before they are timed out, in SECONDS
-		    int maxIdleTime = 0;
-		    try {
-		    	maxIdleTime = Integer.parseInt(value);
-		    } catch (NumberFormatException nfe) {
-		    	Code.warning(nfe);
-		    }
-		    if (maxIdleTime > 0) 
-		    	server.attributes.put(HttpConfiguration.SessionMaxInactiveInterval,
-					      new Integer(maxIdleTime));
-	    }
-	    else
-		Code.warning("Unknown property: "+
-			     name+"."+
-			     key+"="+value);
-	}
+            // handle property
+            if ("InetAddrPort".equals(type))
+            {
+                StringTokenizer list = new StringTokenizer(value,",     ");
+                while (list.hasMoreTokens())
+                    server.addAddress(new InetAddrPort(list.nextToken()));
+            }
+            else if ("Servlet".equals(type))
+            {
+                if (path==null)
+                    throw new Exception("Missing path: "+key);
+                
+                int eq = value.indexOf("=");
+                if (eq<0 || eq==value.length())
+                    throw new Exception("Badly formatted servlet value: "+
+                                        value);
+                String sname=value.substring(0,eq);
+                String cname=value.substring(eq+1);
+                
+                int q=cname.indexOf("?");
+                if (q>0)
+                {
+                    String paramFile = cname.substring(q+1);
+                    cname=cname.substring(0,q);
+                    server.addServlet(stack,path,sname,cname,paramFile);
+                }
+                else
+                    server.addServlet(stack,path,sname,cname,null);
+            }
+            else if ("Directory".equals(type))
+            {
+                if (path==null)
+                    throw new Exception("Missing path: "+key);
+                if (path.equals("allowPut"))
+                    server.allowPut(stack, Boolean.valueOf(value));
+                else if (path.equals("allowDelete"))
+                    server.allowDelete(stack, Boolean.valueOf(value));
+                else 
+                    server.addDirectory(stack,path,value);
+            }
+            else if ("Log".equals(type))
+            {
+                if (path==null)
+                    throw new Exception("Missing path: "+key);
+                server.addLog(stack,path,value);
+            }
+            else if ("Auth".equals(type))
+            {
+                if (path==null)
+                    throw new Exception("Missing path: "+key);
+                
+                int eq = value.indexOf("=");
+                if (eq<0 || eq==value.length())
+                    throw new Exception("Badly formatted auth value: "+
+                                        value);
+                server.addAuthRealm(stack,path,
+                                    value.substring(0,eq),
+                                    value.substring(eq+1));
+            }
+            else if ("Translate".equals(type))
+            {
+                if (path==null)
+                    throw new Exception("Missing path: "+key);
+                server.addTranslation(stack,path,value);
+            }
+            else if ("Filter".equals(type))
+            {
+                if (path==null)
+                    throw new Exception("Missing path: "+key);
+                server.addFilter(stack,path,value);
+            }
+            else if ("Forward".equals(type))
+            {
+                if (path==null)
+                    throw new Exception("Missing path: "+key);
+                server.addForward(stack,path,value);
+            }
+            else if ("Proxy".equals(type))
+            {
+                server.addProxy(stack);
+            }
+            else if ("DefaultSessionMaxIdleTime".equals(type))
+            {
+                    // Maximum idle time for HttpSessions before they are timed out, in SECONDS
+                    int maxIdleTime = 0;
+                    try {
+                        maxIdleTime = Integer.parseInt(value);
+                    } catch (NumberFormatException nfe) {
+                        Code.warning(nfe);
+                    }
+                    if (maxIdleTime > 0) 
+                        server.attributes.put(HttpConfiguration.SessionMaxInactiveInterval,
+                                              new Integer(maxIdleTime));
+            }
+            else
+                Code.warning("Unknown property: "+
+                             name+"."+
+                             key+"="+value);
+        }
 
-	return server_map;
+        return server_map;
     }
     
     
@@ -531,31 +531,31 @@ public class Server21 extends BaseConfiguration
      */
     public static void main(String args[])
     {
-	try{
-	    String filename = "JettyServer21.prp";
-	    if (args.length==1)
-		filename = args[0];
-	    else if ( ! new File(filename).exists())
-		filename = "etc/JettyServer21.prp";
+        try{
+            String filename = "JettyServer21.prp";
+            if (args.length==1)
+                filename = args[0];
+            else if ( ! new File(filename).exists())
+                filename = "etc/JettyServer21.prp";
 
-	    // load property file
-	    Properties props = new Properties();
-	    props.load(new BufferedInputStream(new FileInputStream(filename)));
-	    Hashtable server_map = buildServers(props);
+            // load property file
+            Properties props = new Properties();
+            props.load(new BufferedInputStream(new FileInputStream(filename)));
+            Hashtable server_map = buildServers(props);
 
-	    Code.debug(server_map);
-	
-	    // Start all severs
-	    Enumeration e = server_map.elements();
-	    while (e.hasMoreElements())
-		((Server21)e.nextElement()).start();
-	    // Join all severs
-	    e = server_map.elements();
-	    while (e.hasMoreElements())
-		((Server21)e.nextElement()).join();   
-	}
-	catch(Throwable e){
-	    Code.warning(e);
-	}
+            Code.debug(server_map);
+        
+            // Start all severs
+            Enumeration e = server_map.elements();
+            while (e.hasMoreElements())
+                ((Server21)e.nextElement()).start();
+            // Join all severs
+            e = server_map.elements();
+            while (e.hasMoreElements())
+                ((Server21)e.nextElement()).join();   
+        }
+        catch(Throwable e){
+            Code.warning(e);
+        }
     }
 };

@@ -47,22 +47,22 @@ public class Database
      */
     public Database()
     {
-	try{
-	    init("com.mortbay.JDBC.CloudscapeAdaptor",
-		 "jdbc:cloudscape:/TestDB");
-	}
-	catch(Exception e1)
-	{
-	    try{
-		init("com.mortbay.JDBC.MsqlAdaptor",null);
-	    }
-	    catch(Exception e2)
-	    {
-		Code.warning(e1);
-		Code.fail(e2);
-	    }
-	}
-	
+        try{
+            init("com.mortbay.JDBC.CloudscapeAdaptor",
+                 "jdbc:cloudscape:/TestDB");
+        }
+        catch(Exception e1)
+        {
+            try{
+                init("com.mortbay.JDBC.MsqlAdaptor",null);
+            }
+            catch(Exception e2)
+            {
+                Code.warning(e1);
+                Code.fail(e2);
+            }
+        }
+        
     }
     
     
@@ -80,25 +80,25 @@ public class Database
      * @exception SQLException JDBC driver manager could not open connection
      */
     public Database(Hashtable properties)
-	 throws SQLException,
-	     ClassNotFoundException,
-	     InstantiationException,
-	     IllegalAccessException
+         throws SQLException,
+             ClassNotFoundException,
+             InstantiationException,
+             IllegalAccessException
     {
-	String dbAdaptor = (String) properties.get("DbAdaptor");
-	String dbUrl = (String) properties.get("DbUrl");
-	Code.assert(dbAdaptor!=null && dbUrl!=null,
-		    "Can't find DbAdaptor or DbUrl");
+        String dbAdaptor = (String) properties.get("DbAdaptor");
+        String dbUrl = (String) properties.get("DbUrl");
+        Code.assert(dbAdaptor!=null && dbUrl!=null,
+                    "Can't find DbAdaptor or DbUrl");
 
-	Enumeration e = properties.keys();
-	while (e.hasMoreElements())
-	{
-	    String k=e.nextElement().toString();
-	    if ("DbAdaptor".equals(k) || "DbUrl".equals(k))
-		continue;
-	    this.properties.put(k,properties.get(k).toString());
-	}
-	init(dbAdaptor,dbUrl);
+        Enumeration e = properties.keys();
+        while (e.hasMoreElements())
+        {
+            String k=e.nextElement().toString();
+            if ("DbAdaptor".equals(k) || "DbUrl".equals(k))
+                continue;
+            this.properties.put(k,properties.get(k).toString());
+        }
+        init(dbAdaptor,dbUrl);
     }
     
     /* ------------------------------------------------------------ */
@@ -117,25 +117,25 @@ public class Database
      * @exception SQLException JDBC driver manager could not open connection
      */
     public Database(String dbAdaptor,
-		    String dbUrl,
-		    Hashtable properties)
-	 throws SQLException,
-			ClassNotFoundException,
-			InstantiationException,
-			IllegalAccessException
+                    String dbUrl,
+                    Hashtable properties)
+         throws SQLException,
+                        ClassNotFoundException,
+                        InstantiationException,
+                        IllegalAccessException
     {
-	if (properties!=null)
-	{
-	    Enumeration e = properties.keys();
-	    while (e.hasMoreElements())
-	    {
-		String k=e.nextElement().toString();
-		if ("DbDriver".equals(k) || "DbUrl".equals(k))
-		    continue;
-		this.properties.put(k,properties.get(k).toString());
-	    }
-	}
-	init(dbAdaptor,dbUrl);
+        if (properties!=null)
+        {
+            Enumeration e = properties.keys();
+            while (e.hasMoreElements())
+            {
+                String k=e.nextElement().toString();
+                if ("DbDriver".equals(k) || "DbUrl".equals(k))
+                    continue;
+                this.properties.put(k,properties.get(k).toString());
+            }
+        }
+        init(dbAdaptor,dbUrl);
     }
 
     /* ------------------------------------------------------------ */
@@ -153,15 +153,15 @@ public class Database
      * @exception SQLException JDBC driver manager could not open connection
      */
     public Database(String dbAdaptor,
-		    String dbUrl)
-	 throws SQLException,
-		ClassNotFoundException,
-		InstantiationException,
-		IllegalAccessException
+                    String dbUrl)
+         throws SQLException,
+                ClassNotFoundException,
+                InstantiationException,
+                IllegalAccessException
     {
-	this(dbAdaptor,dbUrl,null);
+        this(dbAdaptor,dbUrl,null);
     }
-	
+        
     /* ------------------------------------------------------------ */
     /** Initialize database
      * @param dbAdaptor The full package and class name of the JDBC
@@ -177,49 +177,49 @@ public class Database
      * @exception SQLException JDBC driver manager could not open connection
      */
     private void init(String dbAdaptor, String dbUrl)
-	throws SQLException,
-	       ClassNotFoundException,
-	       InstantiationException,
-	       IllegalAccessException
+        throws SQLException,
+               ClassNotFoundException,
+               InstantiationException,
+               IllegalAccessException
     {
-	Code.debug ("Created database: "+dbUrl);
-	
-	// Check if adaptor has been constructed before
-	synchronized(adaptorCache)
-	{
-	    adaptor = (DbAdaptor) adaptorCache.get(dbAdaptor);
-	    if (adaptor==null)
-	    {
-		Code.debug("Instantiate JDBC DbAdaptor: "+dbAdaptor);
-		Object o = Class.forName(dbAdaptor).newInstance();
-		if (o instanceof java.sql.Driver)
-		    Code.fail(dbAdaptor +
-			      " is a JDBC driver! Database needs a com.mortbay.JDBC.DbAdaptor class");
+        Code.debug ("Created database: "+dbUrl);
+        
+        // Check if adaptor has been constructed before
+        synchronized(adaptorCache)
+        {
+            adaptor = (DbAdaptor) adaptorCache.get(dbAdaptor);
+            if (adaptor==null)
+            {
+                Code.debug("Instantiate JDBC DbAdaptor: "+dbAdaptor);
+                Object o = Class.forName(dbAdaptor).newInstance();
+                if (o instanceof java.sql.Driver)
+                    Code.fail(dbAdaptor +
+                              " is a JDBC driver! Database needs a com.mortbay.JDBC.DbAdaptor class");
 
-		if (!(o instanceof com.mortbay.JDBC.DbAdaptor))
-		    Code.fail(dbAdaptor +
-			      " is not a com.mortbay.JDBC.DbAdaptor class");
+                if (!(o instanceof com.mortbay.JDBC.DbAdaptor))
+                    Code.fail(dbAdaptor +
+                              " is not a com.mortbay.JDBC.DbAdaptor class");
 
-		adaptor=(DbAdaptor)o;
-		adaptorCache.put(dbAdaptor,adaptor);
-	    }
-	}
+                adaptor=(DbAdaptor)o;
+                adaptorCache.put(dbAdaptor,adaptor);
+            }
+        }
 
-	Code.assert(adaptor!=null,"Must have adaptor");
-	
-	// Check if driver has been constructed before
-	synchronized(driverCache)
-	{
-	    String dbDriver = adaptor.getJdbcDriver();
-	    if (!driverCache.containsKey(dbDriver))
-	    {
-		Code.debug("Instantiate JDBC driver: "+dbDriver);
-		driverCache.put(dbDriver,
-			      Class.forName(dbDriver).newInstance());
-	    }
-	}
-	
-	url=dbUrl;
+        Code.assert(adaptor!=null,"Must have adaptor");
+        
+        // Check if driver has been constructed before
+        synchronized(driverCache)
+        {
+            String dbDriver = adaptor.getJdbcDriver();
+            if (!driverCache.containsKey(dbDriver))
+            {
+                Code.debug("Instantiate JDBC driver: "+dbDriver);
+                driverCache.put(dbDriver,
+                              Class.forName(dbDriver).newInstance());
+            }
+        }
+        
+        url=dbUrl;
     }
     
     /* ------------------------------------------------------------ */
@@ -228,9 +228,9 @@ public class Database
      * @param dbUrl 
      */
     private Database(String dbUrl)
-	 throws SQLException
+         throws SQLException
     {
-	url=dbUrl;
+        url=dbUrl;
     }
 
     /* ------------------------------------------------------------ */
@@ -239,7 +239,7 @@ public class Database
      */
     public  DbAdaptor getAdaptor()
     {
-	return adaptor;
+        return adaptor;
     }
 
     /* ------------------------------------------------------------ */
@@ -248,9 +248,9 @@ public class Database
      * @exception SQLException 
      */
     public com.mortbay.JDBC.Transaction newTransaction()
-	throws SQLException
+        throws SQLException
     {
-	return new Transaction(this);
+        return new Transaction(this);
     }
     
     /* ------------------------------------------------------------ */
@@ -264,21 +264,21 @@ public class Database
      * @exception SQLException 
      */
     public synchronized java.sql.Connection getConnection()
-	 throws SQLException
+         throws SQLException
     {
-	java.sql.Connection connection = null;
-	
-	if (connections.size()>0)
-	{
-	    connection = (java.sql.Connection)connections.pop();
-	    Code.debug("New Connection:"+connection);
-	}
-	else
-	{
-	    connection = DriverManager.getConnection(url,properties);
-	    Code.debug("Recycled Connection:"+connection);
-	}
-	return connection;
+        java.sql.Connection connection = null;
+        
+        if (connections.size()>0)
+        {
+            connection = (java.sql.Connection)connections.pop();
+            Code.debug("New Connection:"+connection);
+        }
+        else
+        {
+            connection = DriverManager.getConnection(url,properties);
+            Code.debug("Recycled Connection:"+connection);
+        }
+        return connection;
     }
 
     /* ------------------------------------------------------------ */
@@ -290,18 +290,18 @@ public class Database
      */
     synchronized void recycleConnection(java.sql.Connection c)
     {
-	boolean closed=true;
-	try{
-	    if (c!=null)
-		closed=c.isClosed();
-	}
-	catch(SQLException sqle)
-	{
-	    closed=true;
-	}
-	
-	if (!closed)
-	    connections.push(c);
+        boolean closed=true;
+        try{
+            if (c!=null)
+                closed=c.isClosed();
+        }
+        catch(SQLException sqle)
+        {
+            closed=true;
+        }
+        
+        if (!closed)
+            connections.push(c);
     }
     
     /* ------------------------------------------------------------ */
@@ -312,9 +312,9 @@ public class Database
      * @return ResultSet containing results of the query.
      */
     public synchronized java.sql.ResultSet query(String query)
-	 throws SQLException
+         throws SQLException
     {
-	return query(null,query);
+        return query(null,query);
     }
 
     /* ------------------------------------------------------------ */
@@ -326,20 +326,20 @@ public class Database
      * @exception SQLException 
      */
     public synchronized java.sql.ResultSet query(Transaction tx,
-						 String query)
-	 throws SQLException
+                                                 String query)
+         throws SQLException
     {
-	Code.debug("Query: ",query);
-	java.sql.Connection connection = null;
-	if (tx==null)
-	    connection = getConnection();
-	else
-	    connection = tx.getConnection();
-	
-	java.sql.Statement s = connection.createStatement();
-	java.sql.ResultSet rs= s.executeQuery(query);
+        Code.debug("Query: ",query);
+        java.sql.Connection connection = null;
+        if (tx==null)
+            connection = getConnection();
+        else
+            connection = tx.getConnection();
+        
+        java.sql.Statement s = connection.createStatement();
+        java.sql.ResultSet rs= s.executeQuery(query);
 
-	return rs;
+        return rs;
     }
     
 
@@ -349,9 +349,9 @@ public class Database
      * @return int number of rows updated
      */
     public int update(String update)
-	 throws SQLException
+         throws SQLException
     {
-	return update(null,update);
+        return update(null,update);
     }
 
 
@@ -363,21 +363,21 @@ public class Database
      * @exception SQLException 
      */
     public int update(Transaction tx,String update)
-	 throws SQLException
+         throws SQLException
     {
-	Code.debug("Update: "+update);
-	
-	java.sql.Connection connection = null;
-	if (tx==null)
-	    connection = getConnection();
-	else
-	    connection = tx.getConnection();
-	Statement s = connection.createStatement();
-	int rows = s.executeUpdate(update);
-	Code.debug("Rows="+rows);
-	s.close();
-	recycleConnection(connection);
-	return rows;
+        Code.debug("Update: "+update);
+        
+        java.sql.Connection connection = null;
+        if (tx==null)
+            connection = getConnection();
+        else
+            connection = tx.getConnection();
+        Statement s = connection.createStatement();
+        int rows = s.executeUpdate(update);
+        Code.debug("Rows="+rows);
+        s.close();
+        recycleConnection(connection);
+        return rows;
     }
     
     
@@ -388,7 +388,7 @@ public class Database
      */
     public String quote(String s)
     {
-	return adaptor.quote(s);
+        return adaptor.quote(s);
     }
 };
 

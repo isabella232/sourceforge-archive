@@ -29,61 +29,61 @@ public class ServletNode
     private String urlPath = null;
     /* ------------------------------------------------------------ */
     public Vector getAddress(){
-	if (address == null) address = new Vector();
-	return address;
+        if (address == null) address = new Vector();
+        return address;
     }
     /* ------------------------------------------------------------ */
     public void addAddressElement(Object elem){
-	getAddress().addElement(elem);
-	urlPath = null;
+        getAddress().addElement(elem);
+        urlPath = null;
     }
     /* ------------------------------------------------------------ */
     public void setAddress(Vector address){
-	this.address = (Vector)address.clone();
-	urlPath = null;
+        this.address = (Vector)address.clone();
+        urlPath = null;
     }
     
     /* ------------------------------------------------------------ */
     public String getPath()
     {
-	if (urlPath == null)
-	    urlPath = (address != null) ? getRelativeUrlPath(0) : "";
-	return urlPath;
+        if (urlPath == null)
+            urlPath = (address != null) ? getRelativeUrlPath(0) : "";
+        return urlPath;
     }
     
     /* ------------------------------------------------------------ */
     public String getUrlPath(HttpServletRequest req)
     {
-	if (urlPath == null)
-	    urlPath = (address != null) ? getRelativeUrlPath(0) : "";
-	return req.getServletPath() + urlPath;
+        if (urlPath == null)
+            urlPath = (address != null) ? getRelativeUrlPath(0) : "";
+        return req.getServletPath() + urlPath;
     }
     
     /* ------------------------------------------------------------ */
     public String getParentUrlPath(HttpServletRequest req, int level)
     {
-	return req.getServletPath() + getRelativeUrlPath(level);
+        return req.getServletPath() + getRelativeUrlPath(level);
     }
     
     /* ------------------------------------------------------------ */
     public String getBaseName()
     {
-	if (address==null || address.size()==0)
-	    return null;
-	return address.lastElement().toString();
+        if (address==null || address.size()==0)
+            return null;
+        return address.lastElement().toString();
     }
     
     /* ------------------------------------------------------------ */
     private String getRelativeUrlPath(int level)
     {
-	StringBuffer sb = new StringBuffer(32);
-	int depth = address.size() - level;
-	for (int i=0;i<depth;i++)
-	{
-	    sb.append("/");
-	    sb.append(address.elementAt(i));
-	}
-	return sb.toString();
+        StringBuffer sb = new StringBuffer(32);
+        int depth = address.size() - level;
+        for (int i=0;i<depth;i++)
+        {
+            sb.append("/");
+            sb.append(address.elementAt(i));
+        }
+        return sb.toString();
     }
     
     /* ------------------------------------------------------------ */

@@ -2,7 +2,6 @@ JETTY - Extensible Java HTTP Server.
 By Mort Bay Consulting Pty. Ltd.  http://www.mortbay.com
 
 
-
 INSTALLATION
 ============
 Jetty comes compiled and ready to go. Unpack the Jetty distribution 
@@ -279,8 +278,13 @@ use and distribute Jetty so long as you:
   + Give Jetty increased distribution by including a full release.
   + Give Jetty increased publicity by including a reference to the
     full release in a public/visible area of the product.
-  + Make other arrangements with the copyright holder(s). ie buy a 
+    The "Powered by Jetty", button is a good way to achieve this.
+  + Make other arrangements with the copyright holder(s). ie. buy a 
     source license. 
+
+At some time in the future, it is likely that new versions of Jetty will
+be released under the apache license (http://www.apache.org), which also
+allows commmercial usage.
 
 
 Why is Jetty Open Source?
@@ -298,8 +302,6 @@ product.  The quality of contributions, refinements and bug fixes that
 we have received from the Jetty user base has allowed Jetty to increase
 in quality of functionality, thus allowing us all to get on with using
 it to develop better and more intersting WWW applications for our clients.
-
-
 
 
 
@@ -372,6 +374,22 @@ javax.servlet.jar) to the "Additions to class path" box.
 folder (the same folder that contains the etc and FileBase folders).
 - Double-click the application you just created to start the server.
 
+
+Building Jetty
+--------------
+Jetty is built using recursive GNU make files, which should be available
+on most platforms.  Help on the makefile setup can be obtained by with the
+command:
+  make help
+
+Not that some build rules use Unix commands which are not portable.  A 
+portable make file is in progress, but until that time the file 
+src/BuildJetty.java is generated with a link to all Jetty classes.
+Thus JDK's dependancy checking can be used to compile Jetty with the
+commands:
+
+  cd $JETTY_HOME/src
+  javac BuildJetty.java
 
 
 
@@ -457,6 +475,7 @@ from making "other arrangements" including commercial ones for
 the non open source use of Jetty.  If you want to avoid your contributions 
 being used in this way, please clearing indicate their copyright and 
 licensing conditions. 
+
 
 
 And remember, it's spelt J-e-t-t-y, but it's pronounced "Jetty".

@@ -17,11 +17,11 @@ public interface ExceptionHandler
      * @param exception Any exception thrown by another HttpHandler.
      */
     abstract public void handle(HttpRequest request,
-				HttpResponse response,
-				Exception exception)
-	throws Exception;
+                                HttpResponse response,
+                                Exception exception)
+        throws Exception;
 }
-	    
+            
 
 
 

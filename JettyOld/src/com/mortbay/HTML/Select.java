@@ -21,11 +21,11 @@ public class Select extends Block
      */
     public Select(String name,boolean multiple)
     {
-	super("SELECT");
-	attribute("NAME",name);
-	
-	if (multiple)
-	    attribute("MULTIPLE");
+        super("SELECT");
+        attribute("NAME",name);
+        
+        if (multiple)
+            attribute("MULTIPLE");
     }
 
     /* ----------------------------------------------------------------- */
@@ -35,26 +35,26 @@ public class Select extends Block
      */
     public Select(String name,boolean multiple, String[] options)
     {
-	this(name,multiple);
-	
-	for (int i=0; i<options.length; i++)
-	    add(options[i]);
+        this(name,multiple);
+        
+        for (int i=0; i<options.length; i++)
+            add(options[i]);
     }
 
     /* ----------------------------------------------------------------- */
     /** Set the number of options to display at once */
     public Select setSize(int size)
     {
-	size(size);
-	return this;
+        size(size);
+        return this;
     }
 
     /* ----------------------------------------------------------------- */
     public Select add(Enumeration e)
     {
-	while (e.hasMoreElements())
-	    add(e.nextElement().toString());
-	return this;
+        while (e.hasMoreElements())
+            add(e.nextElement().toString());
+        return this;
     }
 
     /* ----------------------------------------------------------------- */
@@ -62,14 +62,14 @@ public class Select extends Block
      */
     public Composite add(Object o)
     {
-	if (o instanceof Enumeration)
-	    this.add((Enumeration)o);
-	else
-	{
-	    super.add("<OPTION>");
-	    super.add(o);
-	}
-	return this;
+        if (o instanceof Enumeration)
+            this.add((Enumeration)o);
+        else
+        {
+            super.add("<OPTION>");
+            super.add(o);
+        }
+        return this;
     }
 
     /* ----------------------------------------------------------------- */
@@ -77,12 +77,12 @@ public class Select extends Block
      */
     public Select add(Object o, boolean selected)
     {
-	if (selected)
-	    super.add("<OPTION SELECTED>");
-	else
-	    super.add("<OPTION>");
-	super.add(o);
-	return this;
+        if (selected)
+            super.add("<OPTION SELECTED>");
+        else
+            super.add("<OPTION>");
+        super.add(o);
+        return this;
     }
 
     /* ----------------------------------------------------------------- */
@@ -93,14 +93,14 @@ public class Select extends Block
      */
     public Select add(Object o, boolean selected, String value)
     {
-	if (selected)
-	    super.add("<OPTION SELECTED VALUE=\""+value+"\">");
-	else
-	    super.add("<OPTION VALUE=\""+value+"\">");
-	
-	super.add(o);
-	
-	return this;
+        if (selected)
+            super.add("<OPTION SELECTED VALUE=\""+value+"\">");
+        else
+            super.add("<OPTION VALUE=\""+value+"\">");
+        
+        super.add(o);
+        
+        return this;
     }
     
     /* ----------------------------------------------------------------- */
@@ -112,10 +112,10 @@ public class Select extends Block
       */
     public Select add(String arr[], int selected)
     {
-	for (int i = 0; i < arr.length; i++){
-	    this.add(arr[i], i == selected, Integer.toString(i));
-	}
-	return this;
+        for (int i = 0; i < arr.length; i++){
+            this.add(arr[i], i == selected, Integer.toString(i));
+        }
+        return this;
     }
     
     /* ----------------------------------------------------------------- */
@@ -127,10 +127,10 @@ public class Select extends Block
       */
     public Select add(String arr[], String selected)
     {
-	for (int i = 0; i < arr.length; i++){
-	    this.add(arr[i], arr[i].equals(selected));
-	}
-	return this;
+        for (int i = 0; i < arr.length; i++){
+            this.add(arr[i], arr[i].equals(selected));
+        }
+        return this;
     }
 
     /* ----------------------------------------------------------------- */
@@ -141,21 +141,21 @@ public class Select extends Block
      */
     public static int bitsetFormResult(String result)
     {
-	int i;
-	int from = 0;
-	int res = 0;
-	Code.debug("Result:"+result);
-	String sres = null;
-	while ((i = result.indexOf(' ', from)) != -1){
-	    sres = result.substring(from, i);
-	    res = res | Integer.parseInt(sres);
-	    Code.debug("Match:"+sres+", res="+res);
-	    from = i+1;
-	}
-	sres = result.substring(from);
+        int i;
+        int from = 0;
+        int res = 0;
+        Code.debug("Result:"+result);
+        String sres = null;
+        while ((i = result.indexOf(' ', from)) != -1){
+            sres = result.substring(from, i);
+            res = res | Integer.parseInt(sres);
+            Code.debug("Match:"+sres+", res="+res);
+            from = i+1;
+        }
+        sres = result.substring(from);
         res = res | Integer.parseInt(sres);
-	Code.debug("Match:"+sres+", res="+res);
-	return res;	
+        Code.debug("Match:"+sres+", res="+res);
+        return res;     
     }
 }
 

@@ -43,65 +43,65 @@ public class LookAndFeelServlet extends HttpServlet
     String pageType;
     /* ------------------------------------------------------------ */
     public void init(ServletConfig config)
-	 throws ServletException
+         throws ServletException
     {
-	super.init(config);
-	
-	fileBase = getInitParameter("ResourceBase");
-	pageType = getInitParameter(Page.PageType);
-	if (pageType ==null)
-	    pageType=Page.getDefaultPageType();
+        super.init(config);
+        
+        fileBase = getInitParameter("ResourceBase");
+        pageType = getInitParameter(Page.PageType);
+        if (pageType ==null)
+            pageType=Page.getDefaultPageType();
     }
 
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest request,
-		      HttpServletResponse response) 
-	 throws ServletException, IOException
+                      HttpServletResponse response) 
+         throws ServletException, IOException
     {
-	try{
-	    response.setContentType("text/html");
-	    OutputStream out = response.getOutputStream();
+        try{
+            response.setContentType("text/html");
+            OutputStream out = response.getOutputStream();
 
-	    Page page = Page.getPage(pageType,request,response);
-	    
-	    String referer = request.getHeader("Referer");
-	    if (referer != null)
-		page.properties().put(Page.Back, referer);
-	
-	    Enumeration enum = request.getParameterNames();
-	    while (enum.hasMoreElements())
-	    {
-		String key = enum.nextElement().toString();
-		if (!key.equals(Page.Help))
-		    page.properties().put(key,request.getParameter(key));
-	    }
+            Page page = Page.getPage(pageType,request,response);
+            
+            String referer = request.getHeader("Referer");
+            if (referer != null)
+                page.properties().put(Page.Back, referer);
+        
+            Enumeration enum = request.getParameterNames();
+            while (enum.hasMoreElements())
+            {
+                String key = enum.nextElement().toString();
+                if (!key.equals(Page.Help))
+                    page.properties().put(key,request.getParameter(key));
+            }
 
-	    try{
-		String resource =
-		    (fileBase==null?"":fileBase)+
-		    request.getServletPath()+
-		    (request.getPathInfo()==null?"":request.getPathInfo());
-		
-		Code.debug("Include resource:",resource);
-		page.add(new Include(getServletContext()
-				     .getResourceAsStream(resource)));
-	    }
-	    catch(FileNotFoundException ioe){
-		return;
-	    }
-	    
-	    page.write(out);
-	}
-	catch(RuntimeException e){
-	    throw e;
-	}
-	catch(IOException e){
-	    throw e;
-	}
-	catch(Exception e){
-	    Code.debug("Converted",e);
-	    throw new ServletException(e.toString());
-	}
+            try{
+                String resource =
+                    (fileBase==null?"":fileBase)+
+                    request.getServletPath()+
+                    (request.getPathInfo()==null?"":request.getPathInfo());
+                
+                Code.debug("Include resource:",resource);
+                page.add(new Include(getServletContext()
+                                     .getResourceAsStream(resource)));
+            }
+            catch(FileNotFoundException ioe){
+                return;
+            }
+            
+            page.write(out);
+        }
+        catch(RuntimeException e){
+            throw e;
+        }
+        catch(IOException e){
+            throw e;
+        }
+        catch(Exception e){
+            Code.debug("Converted",e);
+            throw new ServletException(e.toString());
+        }
     }
 };
 
