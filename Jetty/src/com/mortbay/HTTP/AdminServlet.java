@@ -14,6 +14,7 @@ import com.mortbay.HTML.Link;
 import com.mortbay.HTML.List;
 import com.mortbay.HTML.Page;
 import com.mortbay.HTML.TableForm;
+import com.mortbay.HTML.Target;
 import com.mortbay.HTTP.Handler.Servlet.ServletHandler;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.LifeCycle;
@@ -51,7 +52,7 @@ public class AdminServlet extends HttpServlet
     }
     
     /* ------------------------------------------------------------ */
-    public void doAction(HttpServletRequest request,
+    private String doAction(HttpServletRequest request,
                          HttpServletResponse response) 
         throws ServletException, IOException
     {
@@ -70,7 +71,7 @@ public class AdminServlet extends HttpServlet
                 // Server stop/start
                 if (start) server.start();
                 else server.stop();
-                return;
+                return id;
             }
 
             if (tokens==3)
@@ -86,7 +87,7 @@ public class AdminServlet extends HttpServlet
                     {
                         if (start) listener.start();
                         else listener.stop();
-                        return;
+                        return id;
                     }
                 }
             }
@@ -107,7 +108,7 @@ public class AdminServlet extends HttpServlet
                 // Context stop/start
                 if (start) context.start();
                 else context.stop();
-                return;
+                return id;
             }
             
             if (tokens==5)
@@ -118,7 +119,7 @@ public class AdminServlet extends HttpServlet
                 
                 if (start) handler.start();
                 else handler.stop();
-                return;
+                return id;
             }
         }
         catch(Exception e)
@@ -129,6 +130,7 @@ public class AdminServlet extends HttpServlet
         {
             Code.warning(e);
         }
+        return null;
     }
     
     /* ------------------------------------------------------------ */
@@ -138,10 +140,13 @@ public class AdminServlet extends HttpServlet
     {
         if (request.getQueryString()!=null &&
             request.getQueryString().length()>0)
-        {    
-            doAction(request,response);
+        {
+            String target=doAction(request,response);
             response.sendRedirect(request.getContextPath()+
-                                  request.getServletPath());
+                                  request.getServletPath()+
+                                  (request.getPathInfo()!=null
+                                   ?request.getPathInfo():"")+
+                                  (target!=null?("#"+target):""));
             return;
         }
         
@@ -268,6 +273,7 @@ public class AdminServlet extends HttpServlet
                               String name)
     {
         Composite comp=new Composite();
+        comp.add(new Target(id));
         Font font = new Font();
         comp.add(font);
         font.color(lc.isStarted()?"green":"red");

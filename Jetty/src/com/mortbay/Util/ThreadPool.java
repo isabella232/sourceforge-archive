@@ -337,7 +337,7 @@ public class ThreadPool
                    end_wait>System.currentTimeMillis())
                 Thread.yield();
             
-            // Stop any still running
+            // Warn about any still running
             if (_threadSet.size()>0)
             {
                 iter=_threadSet.iterator();
@@ -345,7 +345,13 @@ public class ThreadPool
                 {
                     Thread thread=(Thread)iter.next();
                     if (thread.isAlive())
-                        thread.destroy( );
+                    {
+                        thread.interrupt();
+                        Thread.yield();
+                        thread.stop();
+                        if (thread.isAlive())
+                            Code.warning("Can't stop "+thread);
+                    }
                 }
             }
         }

@@ -14,10 +14,12 @@ import com.mortbay.HTML.Page;
 import com.mortbay.HTML.Select;
 import com.mortbay.HTML.Table;
 import com.mortbay.HTML.TableForm;
+import com.mortbay.HTTP.HttpException;
 import com.mortbay.Util.Code;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Enumeration;
+import javax.servlet.UnavailableException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -52,8 +54,22 @@ public class Dump extends HttpServlet
         throws ServletException, IOException
     {   
         sres.setContentType("text/html");
-        PrintWriter pout = sres.getWriter();
 
+        String pi=sreq.getPathInfo();
+        if (pi!=null)
+        {
+            if ("/ex0".equals(pi))
+                throw new ServletException("test ex0",new Throwable());
+            if ("/ex1".equals(pi))
+                throw new IOException("test ex1");
+            if ("/ex2".equals(pi))
+                throw new UnavailableException("test ex2");
+            if ("/ex3".equals(pi))
+                throw new HttpException(501);
+        }
+        
+        
+        PrintWriter pout = sres.getWriter();
         Page page=null;
 
         try{
@@ -213,6 +229,18 @@ public class Dump extends HttpServlet
     
         page.write(pout);
         pout.flush();
+        if (pi!=null)
+        {
+            if ("/ex4".equals(pi))
+                throw new ServletException("test ex4",new Throwable());
+            if ("/ex5".equals(pi))
+                throw new IOException("test ex5");
+            if ("/ex6".equals(pi))
+                throw new UnavailableException("test ex6");
+            if ("/ex7".equals(pi))
+                throw new HttpException(501);
+        }
+        
     }
 
     /* ------------------------------------------------------------ */

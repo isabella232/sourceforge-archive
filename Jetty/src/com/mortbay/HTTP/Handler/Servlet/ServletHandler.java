@@ -205,19 +205,40 @@ public class ServletHandler extends NullHandler
         }
         catch(Exception e)
         {
-            Code.warning(e);
-            System.err.println(httpRequest);
-            if (e instanceof HttpException)
-                throw (HttpException)e;
-            if (e instanceof IOException)
-                throw (IOException)e;
-            throw new HttpException(500);
+            Throwable th=e;
+            if (e instanceof ServletException)
+            {
+                if (((ServletException)e).getRootCause()!=null)
+                {
+                    Code.debug("Extracting root cause from ",e);
+                    th=((ServletException)e).getRootCause();
+                }
+            }
+            
+            if (Code.debug())
+            {
+                Code.warning(th);
+                Code.debug(httpRequest);
+            }
+            
+            if (th instanceof HttpException)
+                throw (HttpException)th;
+            if (th instanceof IOException)
+                throw (IOException)th;
+            if (th instanceof UnavailableException)
+                throw new HttpException(503,th.toString());
+            if (!Code.debug())
+                Code.warning(th.toString());    
+            throw new HttpException(500,th.toString());
         }
         catch(Error e)
         {
-            Code.warning(e);
-            System.err.println(httpRequest);
-            throw new HttpException(500);
+            if (Code.debug())
+            {
+                Code.warning(e);
+                Code.debug(httpRequest);
+            }
+            throw new HttpException(500,e.toString());
         }
     }
 

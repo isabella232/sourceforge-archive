@@ -152,16 +152,28 @@ public class HttpRequest extends HttpMessage
             throw new HttpException(HttpResponse.__414_Request_URI_Too_Large);
         decodeRequestLine(line_buffer.buffer,line_buffer.size);
         
-        // Read headers
-        _header.read(line_input);
-
-        // Handle version
-        if (__HTTP_1_1.equals(_version))
-            _version=__HTTP_1_1;
-        else if (__HTTP_1_0.equals(_version))
-            _version=__HTTP_1_0;
-        else if (__HTTP_0_9.equals(_version))
+        // Handle version - replace with fast compare
+        if (__HTTP_0_9.equals(_version))
+        {
+            _dotVersion=-1;
             _version=__HTTP_0_9;
+        }
+        else
+        {
+            if (__HTTP_1_1.equals(_version))
+            {
+                _dotVersion=1;
+                _version=__HTTP_1_1;
+            }
+            else if (__HTTP_1_0.equals(_version))
+            {
+                _dotVersion=0;
+                _version=__HTTP_1_0;
+            }
+            
+            // Read headers
+            _header.read(line_input);
+        }
 
         _handled=false;
         _state=__MSG_RECEIVED;
@@ -590,7 +602,7 @@ public class HttpRequest extends HttpMessage
         else
         {
             // missing version
-            _version=__HTTP_1_0;
+            _version=__HTTP_0_9;
             e3=e1;
         }
 
@@ -636,7 +648,7 @@ public class HttpRequest extends HttpMessage
      */
     public List getAcceptableTransferCodings()
     {
-        if (_version.equals(__HTTP_1_0))
+        if (_dotVersion<1)
             return null;
         if (_te!=null)
             return _te;

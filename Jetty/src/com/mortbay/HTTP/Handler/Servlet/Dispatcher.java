@@ -56,6 +56,8 @@ public class Dispatcher implements RequestDispatcher
             {
                 ServletHandler handler=(ServletHandler)
                     _handlerContext.getHandler(i);
+                if (!handler.isStarted())
+                    continue;
 
                 Map.Entry entry=handler.getHolderEntry(_path);
                 if(entry!=null)
@@ -89,6 +91,8 @@ public class Dispatcher implements RequestDispatcher
             {
                 ServletHandler handler=(ServletHandler)
                     _handlerContext.getHandler(i);
+                if (!handler.isStarted())
+                    continue;
                 _holder=handler.getServletHolder(name);
                 break;
             }

@@ -122,6 +122,9 @@ public class HttpServer implements LifeCycle
      */
     public synchronized boolean isStarted()
     {
+        if (_logSink!=null && _logSink.isStarted())
+            return true;
+        
         Iterator listeners = getListeners().iterator();
         while(listeners.hasNext())
         {

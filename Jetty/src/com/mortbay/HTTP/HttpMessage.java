@@ -54,6 +54,7 @@ abstract public class HttpMessage
 
     protected int _state;
     protected String _version;
+    protected int _dotVersion;
     protected HttpFields _header;
     protected HttpFields _trailer;
     protected boolean _acceptTrailer;
@@ -149,6 +150,14 @@ abstract public class HttpMessage
     public String getVersion()
     {
         return _version;
+    }
+    /* ------------------------------------------------------------ */
+    /** Get the protocol version
+     * @return return the version dot (0.9=-1 1.0=0 1.1=1)
+     */
+    public int getDotVersion()
+    {
+        return _dotVersion;
     }
 
     /* ------------------------------------------------------------ */
@@ -433,9 +442,20 @@ abstract public class HttpMessage
                                             "is not EDITABLE");
         version=version.toUpperCase();
         if (version.equals(__HTTP_1_1))
+        {
+            _dotVersion=1;
             _version=__HTTP_1_1;
+        }
         else if (version.equals(__HTTP_1_0))
+        {
+            _dotVersion=0;
             _version=__HTTP_1_0;
+        }
+        else if (version.equals(__HTTP_0_9))
+        {
+            _dotVersion=-1;
+            _version=__HTTP_0_9;
+        }
         else
             throw new IllegalArgumentException("Unknown version");
     }

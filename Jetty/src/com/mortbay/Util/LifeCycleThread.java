@@ -111,7 +111,7 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
             _thread.interrupt();
             Thread.yield();
             if (_thread.isAlive())
-                _thread.destroy();
+                _thread.stop();
             _thread=null;
         }
         _configuration=null;

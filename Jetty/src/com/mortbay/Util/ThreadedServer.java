@@ -104,7 +104,6 @@ abstract public class ThreadedServer extends ThreadPool
         throws UnknownHostException
     {
         setAddress(new InetAddrPort(host,_address==null?0:_address.getPort()));
-        
     }
     
     /* ------------------------------------------------------------ */
@@ -218,35 +217,17 @@ abstract public class ThreadedServer extends ThreadPool
      * handleConnection(InputStream in,OutputStream out).
      */
     protected void handleConnection(Socket connection)
+        throws IOException
     {
-        try
-        {
-            Code.debug("Handle ",connection);
-            InputStream in  = connection.getInputStream();
-            OutputStream out = connection.getOutputStream();
-
-            handleConnection(in,out);
-            out.flush();
-            
-            in=null;
-            out=null;
-        }
-        catch ( Exception e ){
-            Code.warning("Connection problem",e);
-        }
-        finally
-        {
-            try {
-  		if (_lingerTimeSecs>=0)
-  		    connection.setSoLinger(true,_lingerTimeSecs);
-  		else
-  		    connection.setSoLinger(false,0);
-  	    }
-            catch ( Exception e ){Code.ignore(e);}
-            try {connection.close();}
-            catch ( Exception e ){Code.warning("Connection problem",e);}
-            connection=null;
-        }
+        Code.debug("Handle ",connection);
+        InputStream in  = connection.getInputStream();
+        OutputStream out = connection.getOutputStream();
+        
+        handleConnection(in,out);
+        out.flush();
+        
+        in=null;
+        out=null;
     }
     
     /* ------------------------------------------------------------ */
@@ -256,8 +237,26 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public final void handle(Object job)
     {
-        Socket connection =(Socket)job;
-        handleConnection(connection);
+        Socket socket =(Socket)job;
+        try
+        {
+            try {
+  		if (_lingerTimeSecs>=0)
+  		    socket.setSoLinger(true,_lingerTimeSecs);
+  		else
+  		    socket.setSoLinger(false,0);
+  	    }
+            catch ( Exception e ){Code.ignore(e);}
+            
+            handleConnection(socket); 
+
+        }
+        catch ( Exception e ){Code.warning("Connection problem",e);}
+        finally
+        {
+            try {socket.close();}
+            catch ( Exception e ){Code.warning("Connection problem",e);}
+        }
     }
     
     

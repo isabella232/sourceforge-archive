@@ -375,6 +375,15 @@ public class ServletHolder
             useServlet.service(request,response);
             response.flushBuffer();
         }
+        catch(UnavailableException e)
+        {
+            if (_singleThreadModel && useServlet!=null)
+                useServlet.destroy();
+            else
+                destroy();
+            useServlet=null;
+            throw e;
+        }
         finally
         {
             // Return to singleThreaded pool

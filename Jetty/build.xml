@@ -209,7 +209,16 @@ release     - Cleanup for release
   
   <target name="demo" depends="webapp" >
     <java classname="com.mortbay.Jetty.Server"
-          args="etc/demo.xml"
+          args="etc/admin.xml etc/demo.xml"
+          classpath="${libs}"
+          fork="yes"
+          failonerror="yes" 
+          />
+  </target>
+
+  <target name="watchdog" depends="webapp" >
+    <java classname="com.mortbay.Jetty.Server"
+          args="etc/watchdog.xml"
           classpath="${libs}"
           fork="yes"
           failonerror="yes" 

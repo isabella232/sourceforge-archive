@@ -1,6 +1,9 @@
 <?xml version="1.0"  encoding="ISO-8859-1"?>
 <!DOCTYPE Configure SYSTEM "configure.dtd">
 
+<!-- This is a Jetty Config file to run the server with the 
+     jakarta watchdog tests, which must be downloaded separately.
+  -->
 
 <Configure class="com.mortbay.HTTP.HttpServer">
   <Call name="addListener">

@@ -204,19 +204,22 @@ public class HttpResponse extends HttpMessage
                                             " is not EDITABLE");
         if (_header==null)
             throw new IllegalStateException("Response is destroyed");
-        
-        String status=_status+" ";
-        if (Code.verbose())
-            Code.debug("writeHeaders: ",status);
-        _state=__MSG_BAD;
-        synchronized(writer)
+
+        if (_dotVersion>=0)
         {
-            writer.write(_version);
-            writer.write(' ');
-            writer.write(status);
-            writer.write(getReason());
-            writer.write(HttpFields.__CRLF);
-            _header.write(writer);
+            String status=_status+" ";
+            if (Code.verbose())
+                Code.debug("writeHeaders: ",status);
+            _state=__MSG_BAD;
+            synchronized(writer)
+            {
+                writer.write(_version);
+                writer.write(' ');
+                writer.write(status);
+                writer.write(getReason());
+                writer.write(HttpFields.__CRLF);
+                _header.write(writer);
+            }
         }
         _state=__MSG_SENDING;
     }

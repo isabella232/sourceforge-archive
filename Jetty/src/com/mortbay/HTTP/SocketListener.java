@@ -85,18 +85,11 @@ public class SocketListener
      * @param job A Connection.
      */
     public final void handleConnection(Socket socket)
+        throws IOException
     {
-        try
-        {
-            Code.debug("ACCEPT:",socket);
-            socket.setSoLinger(true,30000);
-            HttpConnection connection =
-                new SocketConnection(socket);
-            connection.handle();
-        }
-        catch ( Exception e ){
-            Code.warning("Connection problem",e);
-        }
+        HttpConnection connection =
+            new SocketConnection(socket);
+        connection.handle();
     }
     
     /* ------------------------------------------------------------ */

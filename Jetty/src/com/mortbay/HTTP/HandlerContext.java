@@ -63,6 +63,7 @@ public class HandlerContext implements LifeCycle
     private ClassLoader _parent;
     private ClassLoader _loader;
     private Resource _resourceBase;
+    private boolean _started;
 
     private Map _attributes = new HashMap(11);
     private Map _initParams = new HashMap(11);
@@ -822,6 +823,9 @@ public class HandlerContext implements LifeCycle
                           HttpResponse response)
         throws HttpException, IOException
     {
+        if (!_started)
+            return false;
+        
         String pathInContext = request.getPath();
         String contextPath=null;
         if (_contextPath.length()>1)
@@ -897,6 +901,11 @@ public class HandlerContext implements LifeCycle
      */
     public synchronized void start()
     {
+        if (_httpServer==null)
+            throw new IllegalStateException("No server for "+this);
+        
+        _started=true;
+        
         // setup the context loader
         _loader=null;
         if (_parent!=null || _classPath!=null ||  this.getClass().getClassLoader()!=null)
@@ -950,7 +959,7 @@ public class HandlerContext implements LifeCycle
                 _loader=new ContextLoader(_classPath,path,_parent);
             _attributes.put(__ClassLoader,_loader);
         }
-
+        
         // Start the handlers
         Iterator handlers = _handlers.iterator();
         while(handlers.hasNext())
@@ -966,14 +975,7 @@ public class HandlerContext implements LifeCycle
      */
     public synchronized boolean isStarted()
     {
-        Iterator handlers = _handlers.iterator();
-        while(handlers.hasNext())
-        {
-            HttpHandler handler=(HttpHandler)handlers.next();
-            if (handler.isStarted())
-                return true;
-        }
-        return _loader!=null;
+        return _started;
     }
     
     /* ------------------------------------------------------------ */
@@ -984,6 +986,7 @@ public class HandlerContext implements LifeCycle
     public synchronized void stop()
         throws InterruptedException
     {
+        _started=false;
         Iterator handlers = _handlers.iterator();
         while(handlers.hasNext())
         {
@@ -1003,6 +1006,7 @@ public class HandlerContext implements LifeCycle
      */
     public synchronized void destroy()
     {
+        _started=false;
         Iterator handlers = _handlers.iterator();
         while(handlers.hasNext())
         {

@@ -1,6 +1,7 @@
 Stable 2.4.7
 Dev    3.0.B05
 
+Jetty-3.0.0.rc1 - 22 Oct 2000
  + Added simple admin servlet.
  + Added CGI to demo
  + Added HashUserRealm and cleaned up security constraints
@@ -8,6 +9,9 @@ Dev    3.0.B05
  + Moved and simplified ServletLoader to ContextLoader.
  + Initialize JSP with classloader.
  + All attributes in javax. java. and com.mortbay. name spaces to be set.
+ + Partial handling of 0.9 requests.
+ + removed Thread.destroy() calls.
+ + Cleaned up exception handling.
 
 Jetty-3.0.B05 - 18 Oct 2000
  + Improved null returns to get almost clean watchdog test.

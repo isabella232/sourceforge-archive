@@ -48,7 +48,8 @@ A Demo server can be run on port 8080 with the command:
   java com.mortbay.Jetty.Demo
 
 You can access this demo with at http://localhost:8080
-The demo also runs a simple admin servlet at http://localhost:8888
+The demo also runs a simple admin servlet at http://localhost:8888,
+with user username=admin, password=admin.
 
 This demo is configured using the HttpServer API and is a good
 example of coded configuration. The same demo is configured by the

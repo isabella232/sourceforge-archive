@@ -40,8 +40,7 @@ public class HttpConnection
     private boolean _close;
     private boolean _keepAlive;
     private String _version;
-    private boolean _http1_1;
-    private boolean _http1_0;
+    private int _dotVersion;
     private boolean _outputSetup;
     private HttpRequest _request;
     private HttpResponse _response;
@@ -63,11 +62,7 @@ public class HttpConnection
     {
         _listener=listener;
         _remoteAddr=remoteAddr;
-        if (in instanceof ChunkableInputStream)
-            throw new IllegalArgumentException("InputStream is already chunkable");
         _inputStream=new ChunkableInputStream(in);
-        if (out instanceof ChunkableOutputStream)
-            throw new IllegalArgumentException("OutputStream is already chunkable");
         _outputStream=new ChunkableOutputStream(out);
         _outputStream.addObserver(this);
         _outputSetup=false;
@@ -198,30 +193,216 @@ public class HttpConnection
     public synchronized void handle()
     {
         _handlingThread=Thread.currentThread();
-        try
+        boolean logRequest=false;
+        do
         {
-            while(handleRequest());
+            try
+            {
+                _request = new HttpRequest(this);
+                _response = new HttpResponse(this);
+        
+                // Assume the connection is not persistent,
+                // unless told otherwise.
+                _persistent=false;
+                _close=false;
+                _keepAlive=false;
+                _dotVersion=0;
+                logRequest=false;
+             
+                Code.debug("Wait for request header...");
+                
+                try
+                {
+                    _outputSetup=false;
+                    _request.readHeader(getInputStream());
+                    _listener.customizeRequest(this,_request);
+                }
+                catch(HttpException e){throw e;}
+                catch(IOException e)
+                {
+                    Code.ignore(e);
+                    return;
+                }
+                logRequest=true;
+                    
+                if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
+                    throw new HttpException(_response.__400_Bad_Request);
+                    
+                if (Code.debug())
+                {
+                    _response.setField("Jetty-Request",
+                                       _request.getRequestLine());
+                    Code.debug("REQUEST:\n",_request);
+                }
+                    
+                // Pick response version
+                _version=_request.getVersion();
+                _dotVersion=_request.getDotVersion();
+                
+                if (_dotVersion>1)
+                {
+                    Code.debug("Respond to HTTP/1.X with HTTP/1.1");
+                    _version=HttpMessage.__HTTP_1_1;
+                    _dotVersion=1;
+                }
+                
+                _response.setVersion(_version);
+                _response.setField(HttpFields.__Server,Version.__Version);
+                _response.setField(HttpFields.__MimeVersion,"1.0");
+                _response.setCurrentTime(HttpFields.__Date);
+            
+                // Handle Connection header field
+                List connectionValues =
+                    _request.getFieldValues(HttpFields.__Connection);
+                if (connectionValues!=null)
+                {
+                    Iterator iter = connectionValues.iterator();
+                    while (iter.hasNext())
+                    {
+                        String token=
+                            StringUtil.asciiToLowerCase(iter.next().toString());
+                        // handle close token
+                        if (token.equals(HttpFields.__Close))
+                        {
+                            _close=true;
+                            _response.setField(HttpFields.__Connection,
+                                               HttpFields.__Close);
+                        }
+                        else if (token.equals(HttpFields.__KeepAlive) && _dotVersion==0)
+                            _keepAlive=true;
+                            
+                        // Remove headers for HTTP/1.0 requests
+                        if (_dotVersion==0)
+                            _request.forceRemoveField(token);
+                    }
+                }
+                    
+                // Handle version specifics
+                if (_dotVersion==1)
+                    verifyHTTP_1_1();
+                else if (_dotVersion==0)
+                    verifyHTTP_1_0();
+                else if (_dotVersion!=-1)
+                    throw new HttpException(_response.__505_HTTP_Version_Not_Supported);
+                if (Code.verbose(99))
+                    Code.debug("IN is "+
+                               (_inputStream.isChunking()
+                                ?"chunked":"not chunked")+
+                               " Content-Length="+
+                               _inputStream.getContentLength());
+                    
+                // service the request
+                service(_request,_response);
+            
+                // Complete the request
+                if (_persistent)
+                {
+                    try{
+                        // Read remaining input
+                        while(_inputStream.skip(4096)>0 ||
+                              _inputStream.read()>=0);
+                    }
+                    catch(IOException e)
+                    {
+                        if (_inputStream.getContentLength()>0)
+                            _inputStream.setContentLength(0);
+                        _persistent=false;
+                        throw new HttpException(_response.__400_Bad_Request,
+                                                "Missing Content");
+                    }
+                        
+                    // Check for no more content
+                    if (_inputStream.getContentLength()>0)
+                    {
+                        _inputStream.setContentLength(0);
+                        _persistent=false;
+                        throw new HttpException(_response.__400_Bad_Request,
+                                                "Missing Content");
+                    }
+                        
+                    // Commit the response
+                    if (!_response.isCommitted())
+                        _response.commit();
+                    _inputStream.resetStream();
+                    if (_outputStream.isChunking())
+                        _outputStream.endChunking(); 
+                    else
+                        _outputStream.resetStream();
+                }
+                else
+                {
+                    _response.commit();
+                    _outputStream.flush();
+                    Thread.sleep(50);// XXX - ???
+                    _outputStream.close();
+                }
+                    
+                if (Code.debug())
+                    Code.debug("RESPONSE:\n",_response); 
+            } 
+            catch (Exception e)     {exception(e);}
+            catch (Error e)         {exception(e);}
+            finally
+            {
+                if (logRequest && _httpServer!=null)
+                    _httpServer.log(_request,_response);
+            
+                if (_request!=null)
+                    _request.destroy();
+                if (_response!=null)
+                    _response.destroy();
+            
+                _request=null;;
+                _response=null;
+            }    
+        }while(_persistent);
+        
+        _handlingThread=null; 
+        try{
+            close();
+        }
+        catch (IOException e)
+        {
+            Code.ignore(e);
         }
         catch (Exception e)
         {
             Code.warning(e);
         }
-        finally
-        {
-            _handlingThread=null;
-            try{
-                close();
-            }
-            catch (IOException e)
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @param th 
+     */
+    private void exception(Throwable e)
+    {
+        try{
+            if (Code.debug())
+                Code.warning(_request.toString(),e);
+            else
+                Code.warning(e.toString());
+
+            int error=HttpResponse.__500_Internal_Server_Error;
+            if (e instanceof HttpException)
+                error=((HttpException)e).getCode();
+            
+            _persistent=false;
+            if (!_response.isCommitted())
             {
-                Code.ignore(e);
-            }
-            catch (Exception e)
-            {
-                Code.warning(e);
+                _response.reset();
+                _response.removeField(HttpFields.__TransferEncoding);
+                _response.setField(HttpFields.__Connection,
+                                   HttpFields.__Close);
+                _response.sendError(error);
             }
         }
+        catch(IOException ex)
+        {
+            Code.warning(ex);
+        }
     }
+    
     
     /* ------------------------------------------------------------ */
     /** Service a Request.
@@ -245,243 +426,6 @@ public class HttpConnection
         _httpServer.service(request,response);
     }
     
-    /* ------------------------------------------------------------ */
-    /* Handle a single request off a connection.
-     * @return True if the connection can handle more requests.
-     * @exception IOException Problem with the connection.
-     */
-    private boolean handleRequest()
-        throws IOException
-    {
-        _request = new HttpRequest(this);
-        _response = new HttpResponse(this);
-
-        
-        // Assume the connection is not persistent, unless told otherwise.
-        _persistent=false;
-        _close=false;
-        _keepAlive=false;
-        _http1_0=true;
-        _http1_1=false;
-        boolean logRequest=false;
-        
-        try
-        {       
-            Code.debug("Wait for request header...");
-
-            try
-            {
-                _outputSetup=false;
-                _request.readHeader(getInputStream());
-                _listener.customizeRequest(this,_request);
-            }
-            catch(HttpException e)
-            {
-                throw e;
-            }
-            catch(IOException e)
-            {
-                Code.ignore(e);
-                return false;
-            }
-            logRequest=true;
-            
-            if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
-                throw new HttpException(_response.__400_Bad_Request);
-            
-            if (Code.debug())
-            {
-                _response.setField("Jetty-Request",_request.getRequestLine());
-                Code.debug("REQUEST:\n",_request);
-            }
-            
-            // Pick response version
-            _version=_request.getVersion();
-            if (HttpMessage.__HTTP_0_9.equals(_version))
-            {
-                Code.warning(HttpMessage.__HTTP_0_9);
-                throw new HttpException(_response.__505_HTTP_Version_Not_Supported);
-            }
-            else if (HttpMessage.__HTTP_1_0.equals(_version))
-            {
-                _http1_0=true;
-                _http1_1=false;
-            }
-            else if (HttpMessage.__HTTP_1_1.equals(_version))
-            {
-                _http1_0=false;
-                _http1_1=true;
-            }
-            else if (_version.startsWith(HttpMessage.__HTTP_1_X))
-            {
-                Code.debug("Respond to HTTP/1.X with HTTP/1.1");
-                _version=HttpMessage.__HTTP_1_1;
-                _http1_0=false;
-                _http1_1=true;
-            }
-            _response.setVersion(_version);
-            _response.setField(HttpFields.__Server,Version.__Version);
-            _response.setField(HttpFields.__MimeVersion,"1.0");
-            _response.setCurrentTime(HttpFields.__Date);
-
-            
-            // Handle Connection header field
-            List connectionValues = _request.getFieldValues(HttpFields.__Connection);
-            if (connectionValues!=null)
-            {
-                Iterator iter = connectionValues.iterator();
-                while (iter.hasNext())
-                {
-                    String token=StringUtil.asciiToLowerCase(iter.next().toString());
-                
-                    // handle close token
-                    if (token.equals(HttpFields.__Close))
-                    {
-                        _close=true;
-                        _response.setField(HttpFields.__Connection,
-                                           HttpFields.__Close);
-                    }
-                    else if (token.equals(HttpFields.__KeepAlive) && _http1_0)
-                    {
-                        _keepAlive=true;
-                    }
-                    
-                    // Remove headers for HTTP/1.0 requests
-                    if (HttpMessage.__HTTP_1_0.equals(_version))
-                        _request.forceRemoveField(token);
-                }
-            }
-            
-            // Handle version specifics
-            if (_http1_1)
-                verifyHTTP_1_1();
-            else if (_http1_0)
-                verifyHTTP_1_0();
-            else
-                throw new HttpException(_response.__505_HTTP_Version_Not_Supported);
-            if (Code.verbose(99))
-                Code.debug("IN is "+
-                           (_inputStream.isChunking()?"chunked":"not chunked")+
-                           " Content-Length="+
-                           _inputStream.getContentLength());
-            
-            // service the request
-            service(_request,_response);
-            
-            
-            // Complete the request
-            if (_persistent)
-            {
-                try{
-                    // Read remaining input
-                    while(_inputStream.skip(4096)>0 || _inputStream.read()>=0);
-                }
-                catch(IOException e)
-                {
-                    if (_inputStream.getContentLength()>0)
-                        _inputStream.setContentLength(0);
-                    throw new HttpException(_response.__400_Bad_Request,
-                                            "Missing Content");
-                }
-
-                // Check for no more content
-                if (_inputStream.getContentLength()>0)
-                {
-                    _inputStream.setContentLength(0);
-                    throw new HttpException(_response.__400_Bad_Request,
-                                            "Missing Content");
-                }
-
-                // Commit the response
-                if (!_response.isCommitted())
-                    _response.commit();
-                _inputStream.resetStream();
-                if (_outputStream.isChunking())
-                    _outputStream.endChunking(); 
-                else
-                    _outputStream.resetStream();
-            }
-            else
-            {
-                _response.commit();
-                _outputStream.flush();
-                Thread.sleep(50);
-                _outputStream.close();
-            }
-
-            if (Code.debug())
-                Code.debug("RESPONSE:\n",_response);
-            
-        }
-        catch (HttpException e)
-        {
-            // Handle HTTP Exception by sending error code (if output not
-            // committed) and closing connection.
-            _persistent=false;
-            if (_response.isCommitted())
-            {
-                if (Code.debug())
-                    Code.warning(_request.toString(),e);
-                else
-                    Code.warning(e.toString());
-            }
-            else
-            {
-                _outputStream.resetBuffer();
-                _response.removeField(HttpFields.__TransferEncoding);
-                _response.setField(HttpFields.__Connection,
-                                   HttpFields.__Close);
-                _response.sendError(e);
-            }
-        }
-        catch (Exception e)
-        {
-            // Handle Exception by sending 500 error code (if output not
-            // committed) and closing connection.
-            if (Code.debug())
-                Code.warning(_request.toString(),e);
-            else
-                Code.warning(e.toString());
-            
-            _persistent=false;
-            if (!_response.isCommitted())
-            {
-                _response.reset();
-                _response.removeField(HttpFields.__TransferEncoding);
-                _response.setField(HttpFields.__Connection,
-                                  HttpFields.__Close);
-                _response.sendError(HttpResponse.__500_Internal_Server_Error);
-            }
-        }
-        catch (Error e)
-        {
-            Code.warning(e);
-
-            _persistent=false;
-            if (!_response.isCommitted())
-            {
-                _outputStream.resetBuffer();
-                _response.removeField(HttpFields.__TransferEncoding);
-                _response.setField(HttpFields.__Connection,
-                                  HttpFields.__Close);
-                _response.sendError(HttpResponse.__500_Internal_Server_Error);
-            }
-        }
-        finally
-        {
-            if (logRequest && _httpServer!=null)
-                _httpServer.log(_request,_response);
-            
-            if (_request!=null)
-                _request.destroy();
-            _request=null;
-            if (_response!=null)
-                _response.destroy();
-            _response=null;
-        }
-        
-        return _persistent;
-    }
 
     /* ------------------------------------------------------------ */
     /* Verify HTTP/1.0 request
@@ -693,30 +637,38 @@ public class HttpConnection
         List transfer_coding=_response.getFieldValues(HttpFields.__TransferEncoding);
         if (transfer_coding==null || transfer_coding.size()==0)
         {
-            // Default to chunking for HTTP/1.1
-            if (_http1_1)
+            switch(_dotVersion)
             {
-                _response.removeField(HttpFields.__ContentLength);
-                _response.setField(HttpFields.__TransferEncoding,
-                                   HttpFields.__Chunked);
-                _outputStream.setChunking();
-            }
-            else if (_http1_0)
-            {
-                // If we dont have a content length, we can't be persistent
-                if (!_keepAlive || !_persistent ||
-                    _response.getIntField(HttpFields.__ContentLength)<0)
-                {
-                    _persistent=false;
-                    _response.setField(HttpFields.__Connection,
-                                       HttpFields.__Close);
-                }
-                else if (_keepAlive)
-                    _response.setField(HttpFields.__Connection,
-                                       HttpFields.__KeepAlive);
+              case 1:
+                  {
+                      _response.removeField(HttpFields.__ContentLength);
+                      _response.setField(HttpFields.__TransferEncoding,
+                                         HttpFields.__Chunked);
+                      _outputStream.setChunking();
+                      break;
+                  }
+              case 0:
+                  {
+                      // If we dont have a content length, we can't be
+                      // persistent 
+                      if (!_keepAlive || !_persistent ||
+                          _response.getIntField(HttpFields.__ContentLength)<0)
+                      {
+                          _persistent=false;
+                          _response.setField(HttpFields.__Connection,
+                                             HttpFields.__Close);
+                      }
+                      else if (_keepAlive)
+                          _response.setField(HttpFields.__Connection,
+                                             HttpFields.__KeepAlive);
+                      break;
+                  }
+              default:
+                  _keepAlive=false;
+                  _persistent=false;
             }
         }
-        else if (_http1_0)
+        else if (_dotVersion<1)
         {
             // Error for transfer encoding to be set in HTTP/1.0
             _response.removeField(HttpFields.__TransferEncoding);
@@ -726,7 +678,6 @@ public class HttpConnection
         else
         {
             // Examine and apply transfer encodings
-            
             HashMap coding_params = new HashMap(7);
             for (int i=transfer_coding.size();i-->0;)
             {
@@ -797,7 +748,7 @@ public class HttpConnection
             if(_persistent)
             {
                 _response.setIntField(HttpFields.__ContentLength,0);
-                if (_http1_0)
+                if (_dotVersion==0)
                 {
                     // Netscape does not like empty responses with
                     // keep-alive
