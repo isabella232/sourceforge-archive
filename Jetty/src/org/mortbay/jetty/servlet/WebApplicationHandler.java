@@ -114,6 +114,7 @@ public class WebApplicationHandler extends ServletHandler
         FilterHolder holder= new FilterHolder(this, name, className);
         _filterMap.put(holder.getName(), holder);
         _filters.add(holder);
+        addComponent(holder);
         return holder;
     }
 
@@ -194,8 +195,7 @@ public class WebApplicationHandler extends ServletHandler
             _contextAttributeListeners= LazyList.add(_contextAttributeListeners, listener);
         }
 
-        if (!known)
-            throw new IllegalArgumentException(listener.toString());
+        super.addEventListener(listener);
     }
 
     /* ------------------------------------------------------------ */
@@ -208,6 +208,7 @@ public class WebApplicationHandler extends ServletHandler
         _requestListeners= LazyList.remove(_requestListeners, listener);
         _requestAttributeListeners= LazyList.remove(_requestAttributeListeners, listener);
         _contextAttributeListeners= LazyList.remove(_contextAttributeListeners, listener);
+        super.removeEventListener(listener);
     }
 
     /* ------------------------------------------------------------ */
@@ -257,10 +258,10 @@ public class WebApplicationHandler extends ServletHandler
     }
 
     /* ----------------------------------------------------------------- */
-    public synchronized void start() throws Exception
+    protected synchronized void doStart() throws Exception
     {
         // Start Servlet Handler
-        super.start();
+        super.doStart();
         if (log.isDebugEnabled())
             log.debug("Path Filters: " + _pathFilters);
         if (log.isDebugEnabled())
@@ -329,12 +330,12 @@ public class WebApplicationHandler extends ServletHandler
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized void stop() throws InterruptedException
+    protected synchronized void doStop() throws InterruptedException
     {
         try
         {
             // Stop servlets
-            super.stop();
+            super.doStop();
 
             // Stop filters
             for (int i= _filters.size(); i-- > 0;)
@@ -601,6 +602,19 @@ public class WebApplicationHandler extends ServletHandler
     public void setFilterChainsCached(boolean filterChainsCached)
     {
         _filterChainsCached = filterChainsCached;
+    }
+    
+
+    /* ----------------------------------------------------------------- */
+    public void destroy()
+    {
+        Iterator iter = _filterMap.values().iterator();
+        while (iter.hasNext())
+        {
+            Object sh=iter.next();
+            iter.remove();
+            removeComponent(sh);
+        }
     }
 
     /* ------------------------------------------------------------ */

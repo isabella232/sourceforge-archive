@@ -170,13 +170,6 @@ public class ServletHttpContext extends HttpContext
     }
     
     /* ------------------------------------------------------------ */
-    public void stop()
-        throws InterruptedException
-    {
-        super.stop();
-    }
-    
-    /* ------------------------------------------------------------ */
     public String toString()
     {
         return "Servlet"+super.toString(); 

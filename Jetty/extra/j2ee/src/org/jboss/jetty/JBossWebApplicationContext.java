@@ -60,13 +60,12 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
         _webApp=webApp;
         _subjAttrName=jetty.getSubjectAttributeName();
         // other stuff
-        _stopGracefully=_jetty.getStopWebApplicationsGracefully();
         // we'll add this when we figure out where to get the TransactionManager...
         //      addHandler(new JBossWebApplicationHandler());
 
     }
 
-    public void start() throws Exception
+    protected void doStart() throws Exception
     {
         if(_jetty.getSupportJSR77())
             setConfigurationClassNames (new String[]{"org.jboss.jetty.JBossWebApplicationContext$Configuration", "org.mortbay.jetty.servlet.JettyWebConfiguration","org.mortbay.jetty.servlet.jsr77.Configuration"});
@@ -76,7 +75,7 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
         MultiException e=null;
         try
         {
-            super.start();
+            super.doStart();
         }
         catch(MultiException me)
         {
@@ -282,20 +281,6 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
     {
         _mbean=mbean;
     }
-    //----------------------------------------
-    // lose this when new J2EEWebApplicationContext goes in...
-    protected boolean _stopGracefully=false;
-
-    public boolean getStopGracefully()
-    {
-        return _stopGracefully;
-    }
-
-    public void setStopGracefully(boolean stopGracefully)
-    {
-        _stopGracefully=stopGracefully;
-    }
-
 
 
     /* ------------------------------------------------------------ */

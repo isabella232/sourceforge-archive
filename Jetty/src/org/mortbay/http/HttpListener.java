@@ -23,6 +23,9 @@ import org.mortbay.util.LifeCycle;
 /* ------------------------------------------------------------ */
 /** HTTP Listener.
  * This interface describes the methods of a generic request listener for the HttpServer.
+ * 
+ * This class should probably be called HttpConnector, but it's name predates the 
+ * EventListener API in java.
  *
  * Once a HttpListener is started, it is responsible for listening for new
  * connections. Once a new connection is accepted it should be handled by

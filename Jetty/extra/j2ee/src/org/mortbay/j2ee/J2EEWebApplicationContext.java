@@ -27,8 +27,7 @@ public class
 {
   protected static final Logger _log=Logger.getLogger(J2EEWebApplicationContext.class);
 
-  public
-    J2EEWebApplicationContext(String warUrl)
+  public J2EEWebApplicationContext(String warUrl)
     throws IOException
     {
       super(warUrl);
@@ -40,14 +39,12 @@ public class
 
   protected boolean _distributable=false;
 
-  public boolean
-    getDistributable()
+  public boolean getDistributable()
     {
       return _distributable;
     }
 
-  public void
-    setDistributable(boolean distributable)
+  public void setDistributable(boolean distributable)
     {
       if (_log.isDebugEnabled()) _log.debug("setDistributable "+distributable);
       _distributable=distributable;
@@ -55,42 +52,25 @@ public class
 
   protected Manager _distributableSessionManager;
 
-  public void
-    setDistributableSessionManager(Manager manager)
+  public void setDistributableSessionManager(Manager manager)
     {
       //      _log.info("setDistributableSessionManager "+manager);
       _distributableSessionManager=(Manager)manager;
       _distributableSessionManager.setContext(this);
     }
 
-  public Manager
-    getDistributableSessionManager()
+  public Manager getDistributableSessionManager()
     {
       return _distributableSessionManager;
     }
 
   //----------------------------------------------------------------------------
-
-  protected boolean _stopGracefully=false;
-
-  public void
-    setStopGracefully(boolean stopGracefully)
-    {
-      if (isStarted())
-	throw new IllegalStateException("setStopGracefully() must be called before J2EEWebApplicationContext is started");
-
-      _stopGracefully=stopGracefully;
-    }
-
-  public boolean getStopGracefully() {return _stopGracefully;}
-
-  public void
-    start()
+  protected void doStart()
     throws Exception
-    {
-      if (_stopGracefully && !getStatsOn())
+  {
+      if (getStopGracefully() && !getStatsOn())
 	setStatsOn(true);
 
-      super.start();
-    }
+      super.doStart();
+  }
 }

@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,11 +45,12 @@ import org.mortbay.http.EOFException;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
+import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.PathMap;
 import org.mortbay.http.Version;
-import org.mortbay.http.handler.AbstractHttpHandler;
+import org.mortbay.util.Container;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
@@ -73,7 +75,7 @@ import org.mortbay.util.URI;
  * @version $Id$
  * @author Greg Wilkins
  */
-public class ServletHandler extends AbstractHttpHandler
+public class ServletHandler extends Container implements HttpHandler
 {
     private static Log log = LogFactory.getLog(ServletHandler.class);
 
@@ -95,6 +97,7 @@ public class ServletHandler extends AbstractHttpHandler
     /* ------------------------------------------------------------ */
     private boolean _usingCookies=true;
     private boolean _autoInitializeServlets=true;
+    private String _name;
     
     /* ------------------------------------------------------------ */
     protected PathMap _servletMap=new PathMap();
@@ -107,18 +110,48 @@ public class ServletHandler extends AbstractHttpHandler
     protected transient Context _context;
     protected transient ClassLoader _loader;
     protected transient Log _contextLog;
+    protected transient HttpContext _httpContext;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
     public ServletHandler()
     {}
+
+    /* ------------------------------------------------------------ */
+    public void setName(String name)
+    {
+        _name=name;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getName()
+    {
+        if (_name==null)
+        {
+            _name=this.getClass().getName();
+            if (!log.isDebugEnabled())
+                _name=_name.substring(_name.lastIndexOf('.')+1);
+        }
+        return _name;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public HttpContext getHttpContext()
+    {
+        return _httpContext;
+    }
     
     /* ------------------------------------------------------------ */
     public void initialize(HttpContext context)
     {
         SessionManager sessionManager=getSessionManager();
-        super.initialize(context);
+        
+
+        if (_httpContext!=null&& _httpContext!=context)
+            throw new IllegalStateException("Can't initialize handler for different context");
+        _httpContext=context;
+        
         _context=new Context();
         sessionManager.initialize(this);
     }
@@ -146,6 +179,7 @@ public class ServletHandler extends AbstractHttpHandler
             setMii=true;
             if (getHttpContext()!=null)
                 _sessionManager.initialize(null);
+            removeComponent(_sessionManager);
         }
 
         _sessionManager=sm;
@@ -156,6 +190,7 @@ public class ServletHandler extends AbstractHttpHandler
                 _sessionManager.initialize(this);
             if (setMii)
                 _sessionManager.setMaxInactiveInterval(mii);
+            addComponent(_sessionManager);
         } 
         
         _sessionManager=sm;
@@ -165,7 +200,10 @@ public class ServletHandler extends AbstractHttpHandler
     public SessionManager getSessionManager()
     {
         if (_sessionManager==null)
+        {
             _sessionManager = new HashSessionManager();
+            addComponent(_sessionManager);
+        }
         return _sessionManager;
     }
     
@@ -229,7 +267,8 @@ public class ServletHandler extends AbstractHttpHandler
             throw new IllegalArgumentException("Named servlet already exists: "+name);
         
         ServletHolder holder = new ServletHolder(this,name,servletClass,forcedPath);
-        _nameMap.put(holder.getName(),holder);
+        addServletHolder(holder);
+        
         return holder;
     }
 
@@ -318,21 +357,29 @@ public class ServletHandler extends AbstractHttpHandler
     {
         try
         {
-            ServletHolder existing = (ServletHolder)
-                _nameMap.get(holder.getName());
-            if (existing==null)
-                _nameMap.put(holder.getName(),holder);
-            else if (existing!=holder)
-                throw new IllegalArgumentException("Holder already exists for name: "+holder.getName());
+            addServletHolder(holder);
             
             if (isStarted() && !holder.isStarted())
                 holder.start();
+            
             _servletMap.put(pathSpec,holder);
         }
         catch(Exception e)
         {
             log.warn(LogSupport.EXCEPTION,e);
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    void addServletHolder(ServletHolder holder)
+    {
+        ServletHolder existing = (ServletHolder)
+        _nameMap.get(holder.getName());
+        if (existing==null)
+            _nameMap.put(holder.getName(),holder);
+        else if (existing!=holder)
+            throw new IllegalArgumentException("Holder already exists for name: "+holder.getName());
+        addComponent(holder);
     }
     
     /* ------------------------------------------------------------ */
@@ -348,7 +395,7 @@ public class ServletHandler extends AbstractHttpHandler
     }
     
     /* ----------------------------------------------------------------- */
-    public synchronized void start()
+    protected synchronized void doStart()
         throws Exception
     {
         if (isStarted())
@@ -363,10 +410,6 @@ public class ServletHandler extends AbstractHttpHandler
         
         // Initialize classloader
         _loader=getHttpContext().getClassLoader();
-
-        // start the handler - protected by synchronization until
-        // end of the call.
-        super.start();
 
         if (_autoInitializeServlets)
             initializeServlets();
@@ -411,13 +454,11 @@ public class ServletHandler extends AbstractHttpHandler
     }
     
     /* ----------------------------------------------------------------- */
-    public synchronized void stop()
+    protected synchronized void doStop()
         throws InterruptedException
     {
         // Sort and Initialize servlets
         ServletHolder[] holders = getServlets();
-        
-        super.stop();
         
         // Stop servlets
         for (int i=holders.length; i-->0;)
@@ -922,7 +963,52 @@ public class ServletHandler extends AbstractHttpHandler
         _attributes.remove(name);
     }
     
+
+    /* ----------------------------------------------------------------- */
+    public void handleTrace(HttpRequest request,
+                            HttpResponse response)
+        throws IOException
+    {
+        boolean trace=getHttpContext().getHttpServer().getTrace();
+        
+        // Handle TRACE by returning request header
+        response.setField(HttpFields.__ContentType,
+                          HttpFields.__MessageHttp);
+        if (trace)
+        {
+            OutputStream out = response.getOutputStream();
+            ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer();
+            writer.write(request.toString());
+            writer.flush();
+            response.setIntField(HttpFields.__ContentLength,writer.size());
+            writer.writeTo(out);
+            out.flush();
+        }
+        request.setHandled(true);
+    }
     
+    /* ----------------------------------------------------------------- */
+    public void destroy()
+    {
+        Iterator iter = _nameMap.values().iterator();
+        while (iter.hasNext())
+        {
+            Object sh=iter.next();
+            iter.remove();
+            removeComponent(sh);
+        }
+        
+        if (_sessionManager!=null)
+            removeComponent(_sessionManager);
+        _sessionManager=null;
+        super.destroy();
+    }
+    
+    /* ----------------------------------------------------------------- */
+    protected void finalize() throws Throwable
+    {
+        destroy();
+    }
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */

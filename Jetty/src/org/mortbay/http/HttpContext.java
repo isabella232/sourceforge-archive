@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -40,10 +41,15 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.http.ResourceCache.ResourceMetaData;
 import org.mortbay.http.handler.ErrorPageHandler;
+import org.mortbay.util.ComponentListener;
+import org.mortbay.util.Container;
+import org.mortbay.util.EventProvider;
 import org.mortbay.util.IO;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LifeCycle;
+import org.mortbay.util.LifeCycleListener;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
@@ -76,9 +82,10 @@ import org.mortbay.util.URI;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HttpContext extends ResourceCache
+public class HttpContext extends Container
                          implements LifeCycle,
                                     HttpHandler,
+                                    EventProvider,
                                     Serializable
 {
     private static Log log = LogFactory.getLog(HttpContext.class);
@@ -109,6 +116,7 @@ public class HttpContext extends ResourceCache
     private boolean _statsOn=false;
     private PermissionCollection _permissions;
     private boolean _classLoaderJava2Compliant;
+    private ResourceCache _resources;
 
     /* ------------------------------------------------------------ */
     private String _contextName;
@@ -119,6 +127,7 @@ public class HttpContext extends ResourceCache
     private PathMap _constraintMap=new PathMap();
     private Authenticator _authenticator;
     private RequestLog _requestLog;
+    private Object _eventListeners;
 
 
     private String[] _welcomes=
@@ -131,7 +140,7 @@ public class HttpContext extends ResourceCache
 
 
     /* ------------------------------------------------------------ */
-    private transient boolean _started;
+    private transient boolean _gracefulStop;
     private transient ClassLoader _parent;
     private transient ClassLoader _loader;
     private transient HttpServer _httpServer;
@@ -159,6 +168,8 @@ public class HttpContext extends ResourceCache
     public HttpContext()
     {
         setAttribute(__ErrorHandler,  new ErrorPageHandler()); 
+        _resources=new ResourceCache();
+        addComponent(_resources);
     }
 
     /* ------------------------------------------------------------ */
@@ -179,7 +190,6 @@ public class HttpContext extends ResourceCache
     {
         in.defaultReadObject();
         _statsLock=new Object[0];
-        _cache=new HashMap();
         getHandlers();
         for (int i=0;i<_handlersArray.length;i++)
             _handlersArray[i].initialize(this);
@@ -208,6 +218,19 @@ public class HttpContext extends ResourceCache
     {
         return _httpServer;
     }
+
+    /* ------------------------------------------------------------ */
+    public void setStopGracefully(boolean graceful)
+    {
+	_gracefulStop=graceful;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean getStopGracefully()
+    {
+	return _gracefulStop;
+    }
+
 
     /* ------------------------------------------------------------ */
     public static String canonicalContextPathSpec(String contextPathSpec)
@@ -456,7 +479,8 @@ public class HttpContext extends ResourceCache
         if (context==null)
             handler.initialize(this);
         else if (context!=this)
-            throw new IllegalArgumentException("Handler already initialized in another HttpContext");
+            throw new IllegalArgumentException("Handler in another HttpContext");
+        addComponent(handler);
     }
 
     /* ------------------------------------------------------------ */
@@ -511,6 +535,7 @@ public class HttpContext extends ResourceCache
             try{handler.stop();} catch (InterruptedException e){log.warn(LogSupport.EXCEPTION,e);}
         _handlers.remove(i);
         _handlersArray=null;
+        removeComponent(handler);
         return handler;
     }
 
@@ -523,6 +548,7 @@ public class HttpContext extends ResourceCache
         if (handler.isStarted())
             try{handler.stop();} catch (InterruptedException e){log.warn(LogSupport.EXCEPTION,e);}
         _handlers.remove(handler);
+        removeComponent(handler);
         _handlersArray=null;
     }
 
@@ -617,8 +643,7 @@ public class HttpContext extends ResourceCache
     /* ------------------------------------------------------------ */
     public void flushCache()
     {
-        _cache.clear();
-        System.gc();
+        _resources.flushCache();
     }
 
     /* ------------------------------------------------------------ */
@@ -1334,7 +1359,7 @@ public class HttpContext extends ResourceCache
                        HttpResponse response)
         throws HttpException, IOException
     {
-        if (!_started)
+        if (!isStarted() || _gracefulStop)
             return;
 
         // reject requests by real host
@@ -1548,13 +1573,15 @@ public class HttpContext extends ResourceCache
             (detail?("="+_handlers):"");
     }
 
+    
     /* ------------------------------------------------------------ */
-    public synchronized void start()
+    protected synchronized void doStart()
         throws Exception
     {
         if (isStarted())
             return;
-        super.start();
+        
+        _resources.start();
         
         statsReset();
 
@@ -1562,8 +1589,8 @@ public class HttpContext extends ResourceCache
             throw new IllegalStateException("No server for "+this);
 
         // start the context itself
-        getMimeMap();
-        getEncodingMap();
+        _resources.getMimeMap();
+        _resources.getEncodingMap();
 
         // Setup realm
         if (_userRealm==null && _authenticator!=null)
@@ -1597,11 +1624,9 @@ public class HttpContext extends ResourceCache
         finally
         {
             thread.setContextClassLoader(lastContextLoader);
-            _started=true;
-	    getHandlers();
+            getHandlers();
         }
 
-        log.info("Started "+this);
     }
 
     /* ------------------------------------------------------------ */
@@ -1629,12 +1654,6 @@ public class HttpContext extends ResourceCache
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized boolean isStarted()
-    {
-        return _started && super.isStarted();
-    }
-
-    /* ------------------------------------------------------------ */
     /** Stop the context.
      * @param graceful If true and statistics are on, then this method will wait
      * for requestsActive to go to zero before calling stop()
@@ -1642,25 +1661,31 @@ public class HttpContext extends ResourceCache
     public void stop(boolean graceful)
         throws InterruptedException
     {
-        _started=false;
+	boolean gs=_gracefulStop;
+	try
+	{
+	    _gracefulStop=true;
 
-        // wait for all requests to complete.
-        while (graceful && _statsOn && _requestsActive>0 && _httpServer!=null)
-            try {Thread.sleep(100);}
-            catch (InterruptedException e){throw e;}
-            catch (Exception e){LogSupport.ignore(log,e);}
+	    // wait for all requests to complete.
+	    while (graceful && _statsOn && _requestsActive>0 && _httpServer!=null)
+		try {Thread.sleep(100);}
+		catch (InterruptedException e){throw e;}
+		catch (Exception e){LogSupport.ignore(log,e);}
 
-        stop();
+	    stop();
+	}
+	finally
+	{
+	    _gracefulStop=gs;
+	}
     }
 
     /* ------------------------------------------------------------ */
     /** Stop the context.
      */
-    public void stop()
-        throws InterruptedException
+    protected void doStop()
+        throws Exception
     {
-        _started=false;
-
         if (_httpServer==null)
             throw new InterruptedException("Destroy called");
 
@@ -1693,11 +1718,8 @@ public class HttpContext extends ResourceCache
             }
             _loader=null;
         }
-        _cache.clear();
-        
-        super.stop();
-        
-        log.info("Stopped "+this);
+        _resources.flushCache();
+        _resources.stop();
     }
 
 
@@ -1715,8 +1737,10 @@ public class HttpContext extends ResourceCache
             _httpServer.removeContext(this);
 
         _httpServer=null;
+        
         if (_handlers!=null)
             _handlers.clear();
+        
         _handlers=null;
         _parent=null;
         _loader=null;
@@ -1734,7 +1758,13 @@ public class HttpContext extends ResourceCache
 
         _permissions=null;
         
+        removeComponent(_resources);
+        if (_resources!=null)
+            _resources.destroy();
+        _resources=null;
+        
         super.destroy();
+        
     }
 
 
@@ -1959,6 +1989,166 @@ public class HttpContext extends ResourceCache
     public void initialize(HttpContext context)
     {
         throw new UnsupportedOperationException();
-    }    
+    }   
+
+    /* ------------------------------------------------------------ */
+    /** Add a server event listener.
+     * @param listener ComponentEventListener or LifeCycleEventListener 
+     */
+    public void addEventListener(EventListener listener)
+    	throws IllegalArgumentException
+    {
+        if(log.isDebugEnabled())log.debug("addEventListener: "+listener);
+        if (_eventListeners==null)
+            _eventListeners=new ArrayList();
+        
+        if (listener instanceof ComponentListener ||
+            listener instanceof LifeCycleListener )
+            _eventListeners=LazyList.add(_eventListeners,listener);
+        else
+            throw new IllegalArgumentException("Not handled "+listener);
+    }
     
+    /* ------------------------------------------------------------ */
+    public void removeEventListener(EventListener listener)
+    {
+        if(log.isDebugEnabled())log.debug("removeEventListener: "+listener);
+        _eventListeners=LazyList.remove(_eventListeners,listener);
+    }
+    
+    
+    
+    /**
+     * @return
+     */
+    public Resource getBaseResource()
+    {
+        return _resources.getBaseResource();
+    }
+    /**
+     * @param type
+     * @return
+     */
+    public String getEncodingByMimeType(String type)
+    {
+        return _resources.getEncodingByMimeType(type);
+    }
+    /**
+     * @return
+     */
+    public Map getEncodingMap()
+    {
+        return _resources.getEncodingMap();
+    }
+    /**
+     * @return
+     */
+    public int getMaxCachedFileSize()
+    {
+        return _resources.getMaxCachedFileSize();
+    }
+    /**
+     * @return
+     */
+    public int getMaxCacheSize()
+    {
+        return _resources.getMaxCacheSize();
+    }
+    /**
+     * @param filename
+     * @return
+     */
+    public String getMimeByExtension(String filename)
+    {
+        return _resources.getMimeByExtension(filename);
+    }
+    /**
+     * @return
+     */
+    public Map getMimeMap()
+    {
+        return _resources.getMimeMap();
+    }
+    /**
+     * @param pathInContext
+     * @return
+     * @throws IOException
+     */
+    public Resource getResource(String pathInContext) throws IOException
+    {
+        return _resources.getResource(pathInContext);
+    }
+    /**
+     * @return
+     */
+    public String getResourceBase()
+    {
+        return _resources.getResourceBase();
+    }
+    /**
+     * @param resource
+     * @return
+     */
+    public ResourceMetaData getResourceMetaData(Resource resource)
+    {
+        return _resources.getResourceMetaData(resource);
+    }
+    /**
+     * @param base
+     */
+    public void setBaseResource(Resource base)
+    {
+        _resources.setBaseResource(base);
+    }
+    /**
+     * @param encodingMap
+     */
+    public void setEncodingMap(Map encodingMap)
+    {
+        _resources.setEncodingMap(encodingMap);
+    }
+    /**
+     * @param maxCachedFileSize
+     */
+    public void setMaxCachedFileSize(int maxCachedFileSize)
+    {
+        _resources.setMaxCachedFileSize(maxCachedFileSize);
+    }
+    /**
+     * @param maxCacheSize
+     */
+    public void setMaxCacheSize(int maxCacheSize)
+    {
+        _resources.setMaxCacheSize(maxCacheSize);
+    }
+    /**
+     * @param mimeMap
+     */
+    public void setMimeMap(Map mimeMap)
+    {
+        _resources.setMimeMap(mimeMap);
+    }
+    /**
+     * @param extension
+     * @param type
+     */
+    public void setMimeMapping(String extension, String type)
+    {
+        _resources.setMimeMapping(extension, type);
+    }
+    /**
+     * @param resourceBase
+     */
+    public void setResourceBase(String resourceBase)
+    {
+        _resources.setResourceBase(resourceBase);
+    }
+    /**
+     * @param mimeType
+     * @param encoding
+     */
+    public void setTypeEncoding(String mimeType, String encoding)
+    {
+        _resources.setTypeEncoding(mimeType, encoding);
+    }
 }

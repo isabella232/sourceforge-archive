@@ -37,30 +37,19 @@ import org.mortbay.jetty.servlet.WebApplicationHandler;
 
 //------------------------------------------------------------------------------
 
-public abstract class
-  J2EEWebApplicationHandler
-  extends WebApplicationHandler
+public abstract class J2EEWebApplicationHandler extends WebApplicationHandler
 {
   protected static final Logger _log=Logger.getLogger(J2EEWebApplicationHandler.class);
 
   protected Context            _ctx;
   protected TransactionManager _tm;
 
-  public void
-    start()
+  protected void doStart()
+    throws Exception
     {
-      try
-      {
-	super.start();
-
+	super.doStart();
 	_ctx=new InitialContext();
 	_tm=(TransactionManager)_ctx.lookup("java:/TransactionManager");
-      }
-      catch (Exception e)
-      {
-	_log.error("could not find TransactionManager", e);
-      }
-
     }
 
   public void handle(String pathInContext,
@@ -82,8 +71,7 @@ public abstract class
       //      _log.info("...HANDLE()");
     }
 
-  protected void
-    disassociateTransaction()
+  protected void disassociateTransaction()
     {
       int status=Status.STATUS_NO_TRANSACTION;
       try

@@ -17,6 +17,7 @@ package org.mortbay.http.handler;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -124,8 +124,8 @@ public class Server extends org.mortbay.jetty.Server
      * @exception MultiException A collection of exceptions thrown by
      * start() method of subcomponents of the HttpServer. 
      */
-    public synchronized void start()
-        throws MultiException
+    protected synchronized void doStart()
+        throws Exception
     {
 
        //iterate over all the services and start them in order
@@ -150,7 +150,7 @@ public class Server extends org.mortbay.jetty.Server
 
 
        // Now start the rest of Jetty
-       super.start();
+       super.doStart();
     }
 
     /* ------------------------------------------------------------ */
@@ -159,11 +159,11 @@ public class Server extends org.mortbay.jetty.Server
      * then this method will wait for requestsActive to go to zero
      * before stopping that context.
      */
-    public synchronized void stop(boolean graceful)
+    protected synchronized void doStop()
         throws InterruptedException
     {
        // First stop rest of jetty 
-       super.stop(graceful);
+       super.doStop();
 
        // now stop all the services, in the reverse order to starting
        if (_serviceList!=null && _serviceList.size()>0)

@@ -56,7 +56,8 @@ import org.mortbay.xml.XmlConfiguration;
 public class Server extends HttpServer 
 {
     static Log log = LogFactory.getLog(Server.class);
-    private String[] _webAppConfigurationClassNames = new String[]{"org.mortbay.jetty.servlet.XMLConfiguration", "org.mortbay.jetty.servlet.JettyWebConfiguration"};
+    private String[] _webAppConfigurationClassNames = 
+        new String[]{"org.mortbay.jetty.servlet.XMLConfiguration", "org.mortbay.jetty.servlet.JettyWebConfiguration"};
     private String _configuration;
     private String _rootWebApp;
 
@@ -403,7 +404,7 @@ public class Server extends HttpServer
         }
     }
     
-    public String[]  getWebApplicationConfigurationClassNames ()
+    public String[] getWebApplicationConfigurationClassNames ()
     {
         return _webAppConfigurationClassNames;
     }

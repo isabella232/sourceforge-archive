@@ -142,11 +142,11 @@ public class PlusWebAppContext extends WebApplicationContext
     
     
     /* ------------------------------------------------------------ */
-    public void start()
+    public void doStart()
         throws Exception
     {
         _initialCtx = new InitialContext();
-        super.start();
+        super.doStart();
     }
         
     
@@ -206,10 +206,10 @@ public class PlusWebAppContext extends WebApplicationContext
     /* ------------------------------------------------------------ */
     /* Removes context classloader from log4j repository
      */
-    public void stop()
+    public void doStop()
         throws InterruptedException
     {
-        try { super.stop(); }
+        try { super.doStop(); }
         finally
         {
             org.mortbay.log4j.CRS.remove(_removeClassLoader);

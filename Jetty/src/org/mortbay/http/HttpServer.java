@@ -37,8 +37,15 @@ import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.handler.DumpHandler;
 import org.mortbay.http.handler.NotFoundHandler;
 import org.mortbay.http.handler.ResourceHandler;
+import org.mortbay.util.ComponentEvent;
+import org.mortbay.util.ComponentListener;
+import org.mortbay.util.Container;
+import org.mortbay.util.EventProvider;
 import org.mortbay.util.InetAddrPort;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.LifeCycle;
+import org.mortbay.util.LifeCycleEvent;
+import org.mortbay.util.LifeCycleListener;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
@@ -69,17 +76,19 @@ import org.mortbay.util.URI;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HttpServer implements LifeCycle,
+public class HttpServer extends Container
+                        implements LifeCycle,
+                                   EventProvider,
                                    Serializable
 {
     private static Log log = LogFactory.getLog(HttpServer.class);
-    private static LogSupport logx = new LogSupport();
     
     /* ------------------------------------------------------------ */
     private static WeakHashMap __servers = new WeakHashMap();
     private static Collection __roServers =
         Collections.unmodifiableCollection(__servers.keySet());
     private static String[] __noVirtualHost=new String[1];
+    
     
     /* ------------------------------------------------------------ */
     /** Get HttpServer Collection.
@@ -112,8 +121,9 @@ public class HttpServer implements LifeCycle,
     
     private transient int _gcRequests;
     private transient HttpContext _notFoundContext=null;
-    private transient List _eventListeners;
+    private transient Object _eventListeners;
     private transient List _components;
+    private transient boolean _gracefulStop;
     
     /* ------------------------------------------------------------ */
     private boolean _statsOn=false;
@@ -182,6 +192,17 @@ public class HttpServer implements LifeCycle,
             __servers.put(this,__servers);
     }
 
+    /* ------------------------------------------------------------ */
+    public void setStopGracefully(boolean graceful)
+    {
+	_gracefulStop=graceful;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean getStopGracefully()
+    {
+	return _gracefulStop;
+    }
 
 
     /* ------------------------------------------------------------ */
@@ -330,8 +351,6 @@ public class HttpServer implements LifeCycle,
         return (HttpContext[])contexts.toArray(new HttpContext[contexts.size()]);
     }
 
-
-
     /* ------------------------------------------------------------ */
     /** Add a context.
      * @param context 
@@ -350,7 +369,6 @@ public class HttpServer implements LifeCycle,
         addMappings(context);
         return context;
     }
-
 
     /* ------------------------------------------------------------ */
     /** Remove a context or Web application.
@@ -466,14 +484,13 @@ public class HttpServer implements LifeCycle,
     { 
         HttpContext hc=null;
         contextPathSpec=HttpContext.canonicalContextPathSpec(contextPathSpec);
-
         PathMap contextMap=(PathMap)_virtualHostMap.get(virtualHost);
+        
         if (contextMap!=null)
         {
             List contextList = (List)contextMap.get(contextPathSpec);
             if (contextList!=null && contextList.size()>0)
                 hc=(HttpContext)contextList.get(contextList.size()-1);
-            
         }
         if (hc==null)
             hc=addContext(virtualHost,contextPathSpec);
@@ -490,7 +507,7 @@ public class HttpServer implements LifeCycle,
      */
     public HttpContext getContext(String contextPathSpec)
     {
-	return getContext(null,contextPathSpec);
+        return getContext(null,contextPathSpec);
     }    
  
     /* ------------------------------------------------------------ */
@@ -501,7 +518,7 @@ public class HttpServer implements LifeCycle,
      */
     protected HttpContext newHttpContext()
     {
-        return  new HttpContext();
+        return new HttpContext();
     }
 
     /* ------------------------------------------------------------ */    
@@ -640,7 +657,7 @@ public class HttpServer implements LifeCycle,
     {
         _requestsPerGC = requestsPerGC;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Start all handlers then listeners.
      * If a subcomponent fails to start, it's exception is added to a
@@ -648,10 +665,11 @@ public class HttpServer implements LifeCycle,
      * @exception MultiException A collection of exceptions thrown by
      * start() method of subcomponents of the HttpServer. 
      */
-    public synchronized void start()
-        throws MultiException
+    protected synchronized void doStart()
+        throws Exception
     {
-        log.info("Starting "+Version.__VersionImpl);
+        log.info("Version "+Version.__VersionImpl);
+        
         MultiException mex = new MultiException();
 
         statsReset();
@@ -666,7 +684,6 @@ public class HttpServer implements LifeCycle,
         {
             try{
                 _requestLog.start();
-                log.info("Started "+_requestLog);
             }
             catch(Exception e){mex.add(e);}
         }
@@ -687,20 +704,6 @@ public class HttpServer implements LifeCycle,
         }
 
         mex.ifExceptionThrowMulti();
-        log.info("Started "+this);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public synchronized boolean isStarted()
-    {
-        for (int l=0;l<_listeners.size();l++)
-        {
-            HttpListener listener =(HttpListener)_listeners.get(l);
-            if (listener.isStarted())
-                return true;
-        }
-        
-        return false;
     }
     
     /* ------------------------------------------------------------ */
@@ -709,19 +712,7 @@ public class HttpServer implements LifeCycle,
      * @exception InterruptedException If interrupted, stop may not have
      * been called on everything.
      */
-    public synchronized void stop()
-        throws InterruptedException
-    {
-        stop(false);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Stop all listeners then all contexts.
-     * @param graceful If true and statistics are on for a context,
-     * then this method will wait for requestsActive to go to zero
-     * before stopping that context.
-     */
-    public synchronized void stop(boolean graceful)
+    protected synchronized void doStop()
         throws InterruptedException
     {
         for (int l=0;l<_listeners.size();l++)
@@ -744,7 +735,7 @@ public class HttpServer implements LifeCycle,
         for (int i=0;i<contexts.length;i++)
         {
             HttpContext context=contexts[i];
-            context.stop(graceful);
+            context.stop(_gracefulStop);
         }
 
         if (_notFoundContext!=null)
@@ -755,12 +746,28 @@ public class HttpServer implements LifeCycle,
         _notFoundContext=null;
         
         if (_requestLog!=null && _requestLog.isStarted())
-        {
             _requestLog.stop();
-            log.info("Stopped "+_requestLog);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Stop all listeners then all contexts.
+     * @param graceful If true and statistics are on for a context,
+     * then this method will wait for requestsActive to go to zero
+     * before stopping that context.
+     */
+    public synchronized void stop(boolean graceful)
+        throws InterruptedException
+    {
+        boolean ov=_gracefulStop;
+        try
+        {
+            _gracefulStop=graceful;
+            stop();
         }
-        
-        log.info("Stopped "+this);
+        finally
+        {
+            _gracefulStop=ov;
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -1199,7 +1206,6 @@ public class HttpServer implements LifeCycle,
         }
     }
     
-    
     /* ------------------------------------------------------------ */
     void statsEndRequest(long duration,boolean ok)
     {
@@ -1220,7 +1226,6 @@ public class HttpServer implements LifeCycle,
             }
         }
     }
-    
     
     /* ------------------------------------------------------------ */
     void statsCloseConnection(long duration,int requests)
@@ -1252,17 +1257,13 @@ public class HttpServer implements LifeCycle,
         if (_components==null)
             _components=new ArrayList();
         _components.add(o);
-
-        if (_eventListeners!=null)
+        
+        ComponentEvent event = new ComponentEvent(this,o);
+        for(int i=0;i<LazyList.size(_eventListeners);i++)
         {
-            ComponentEvent event = new ComponentEvent(o);
-            for(int i=0;i<_eventListeners.size();i++)
-            {
-                EventListener listener =
-                    (EventListener)_eventListeners.get(i);
-                if (listener instanceof ComponentEventListener)
-                    ((ComponentEventListener)listener).addComponent(event);
-            }
+            EventListener listener=(EventListener)LazyList.get(_eventListeners,i);
+            if (listener instanceof ComponentListener)
+                ((ComponentListener)listener).addComponent(event);
         }
     }
     
@@ -1270,41 +1271,38 @@ public class HttpServer implements LifeCycle,
     protected void removeComponent(Object o)
     {
         if(log.isDebugEnabled())log.debug("remove component: "+o);
-        if (_components.remove(o) && _eventListeners!=null)
+        ComponentEvent event = new ComponentEvent(this,o);
+        for(int i=0;i<LazyList.size(_eventListeners);i++)
         {
-            ComponentEvent event = new ComponentEvent(o);
-            for(int i=0;i<_eventListeners.size();i++)
-            {
-                EventListener listener =
-                    (EventListener)_eventListeners.get(i);
-                if (listener instanceof ComponentEventListener)
-                    ((ComponentEventListener)listener).removeComponent(event);
-            }
+            EventListener listener=(EventListener)LazyList.get(_eventListeners,i);
+            if (listener instanceof ComponentListener)
+                ((ComponentListener)listener).removeComponent(event);
         }
     }
 
     /* ------------------------------------------------------------ */
     /** Add a server event listener.
-     * Listeners are sent HttpServer.ComponentEvent instances when components
-     * such as listeners and contexts are added to the HttpServer.
-     * @param listener HttpServer.ComponentEventListener
+     * @param listener ComponentEventListener or LifeCycleEventListener 
      */
     public void addEventListener(EventListener listener)
+    	throws IllegalArgumentException
     {
         if(log.isDebugEnabled())log.debug("addEventListener: "+listener);
         if (_eventListeners==null)
             _eventListeners=new ArrayList();
-        if (listener instanceof ComponentEventListener)
-            _eventListeners.add(listener);
+        
+        if (listener instanceof ComponentListener ||
+            listener instanceof LifeCycleListener )
+            _eventListeners=LazyList.add(_eventListeners,listener);
         else
-            log.warn("Not a ComponentEventListener: "+listener);
+            throw new IllegalArgumentException("Not handled "+listener);
     }
     
     /* ------------------------------------------------------------ */
     public void removeEventListener(EventListener listener)
     {
         if(log.isDebugEnabled())log.debug("removeEventListener: "+listener);
-        _eventListeners.remove(listener);
+        _eventListeners=LazyList.remove(_eventListeners,listener);
     }
 
     /* ------------------------------------------------------------ */
@@ -1353,36 +1351,19 @@ public class HttpServer implements LifeCycle,
                 if (o instanceof HttpContext )
                     ((HttpContext)o).destroy();
                 
-                if (_eventListeners!=null)
+                ComponentEvent event = new ComponentEvent(this,o);
+                for(int i=0;i<LazyList.size(_eventListeners);i++)
                 {
-                    ComponentEvent event = new ComponentEvent(o);
-                    for(int i=0;i<_eventListeners.size();i++)
-                    {
-                        EventListener listener =
-                            (EventListener)_eventListeners.get(i);
-                        if (listener instanceof ComponentEventListener)
-                            ((ComponentEventListener)listener).removeComponent(event);
-                    }
+                    EventListener listener=(EventListener)LazyList.get(_eventListeners,i);
+                    if (listener instanceof ComponentListener)
+                        ((ComponentListener)listener).removeComponent(event);
                 }
             }
         }
+        
         if (_components!=null)
             _components.clear();
         _components=null;
-        
-        if (_eventListeners!=null)
-        {
-            ComponentEvent event = new ComponentEvent(this);
-            for(int i=0;i<_eventListeners.size();i++)
-            {
-                EventListener listener =
-                    (EventListener)_eventListeners.get(i);
-                if (listener instanceof ComponentEventListener)
-                    ((ComponentEventListener)listener).removeComponent(event);
-            }
-        }
-        if (_eventListeners!=null)
-            _eventListeners.clear();
         _eventListeners=null;
     }
     
@@ -1442,30 +1423,5 @@ public class HttpServer implements LifeCycle,
         {
             log.warn(LogSupport.EXCEPTION,e);
         }
-    }
-
-
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    public class ComponentEvent extends EventObject
-    {
-        private Object component;
-        ComponentEvent(Object component)
-        {
-            super(HttpServer.this);
-            this.component=component;
-        }
-        public Object getComponent()
-        {
-            return component;
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    public interface ComponentEventListener extends EventListener
-    {
-        public void addComponent(ComponentEvent event);
-        public void removeComponent(ComponentEvent event);
     }
 }

@@ -85,7 +85,7 @@ public class ResourceCache implements LifeCycle,
     /* ------------------------------------------------------------ */
     private transient boolean _started;
 
-    protected transient Map _cache=new HashMap();
+    protected transient Map _cache;
     protected transient int _cacheSize;
     protected transient CachedMetaData _mostRecentlyUsed;
     protected transient CachedMetaData _leastRecentlyUsed;
@@ -96,9 +96,18 @@ public class ResourceCache implements LifeCycle,
      */
     public ResourceCache()
     {
+        _cache=new HashMap();
     }
 
 
+    /* ------------------------------------------------------------ */
+    private void readObject(java.io.ObjectInputStream in)
+        throws IOException, ClassNotFoundException
+    {
+        in.defaultReadObject();
+        _cache=new HashMap();
+    }
+    
     /* ------------------------------------------------------------ */
     /** Set the Resource Base.
      * The base resource is the Resource to use as a relative base

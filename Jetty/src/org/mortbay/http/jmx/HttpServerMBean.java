@@ -27,7 +27,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpServer;
 import org.mortbay.http.Version;
-import org.mortbay.http.HttpServer.ComponentEvent;
+import org.mortbay.util.ComponentEvent;
+import org.mortbay.util.ComponentListener;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.jmx.LifeCycleMBean;
 import org.mortbay.util.jmx.ModelMBeanImpl;
@@ -43,7 +44,7 @@ import org.mortbay.util.jmx.ModelMBeanImpl;
  * @author Greg Wilkins (gregw)
  */
 public class HttpServerMBean extends LifeCycleMBean
-    implements HttpServer.ComponentEventListener
+    implements ComponentListener
 {
     private static Log log = LogFactory.getLog(HttpServerMBean.class);
 

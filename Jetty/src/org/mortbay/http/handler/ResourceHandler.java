@@ -28,6 +28,7 @@ import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
+import org.mortbay.http.ResourceCache;
 import org.mortbay.http.InclusiveByteRange;
 import org.mortbay.http.MultiPartResponse;
 import org.mortbay.util.CachedResource;
@@ -364,8 +365,8 @@ public class ResourceHandler extends AbstractHttpHandler
             // If we have meta data for the file
             // Try a direct match for most common requests. Avoids
             // parsing the date.
-            HttpContext.ResourceMetaData metaData =
-                (HttpContext.ResourceMetaData)resource.getAssociate();
+            ResourceCache.ResourceMetaData metaData =
+                (ResourceCache.ResourceMetaData)resource.getAssociate();
             if (metaData!=null)
             {
                 String ifms=request.getField(HttpFields.__IfModifiedSince);
@@ -573,8 +574,8 @@ public class ResourceHandler extends AbstractHttpHandler
     public void writeHeaders(HttpResponse response,Resource resource, long count)
         throws IOException
     {
-        HttpContext.ResourceMetaData metaData =
-            (HttpContext.ResourceMetaData)resource.getAssociate();
+        ResourceCache.ResourceMetaData metaData =
+            (ResourceCache.ResourceMetaData)resource.getAssociate();
 
         response.setContentType(metaData.getEncoding());
         if (count != -1)
@@ -685,8 +686,8 @@ public class ResourceHandler extends AbstractHttpHandler
         //  216 response which does not require an overall 
         //  content-length header
         //
-        HttpContext.ResourceMetaData metaData =
-            (HttpContext.ResourceMetaData)resource.getAssociate();
+        ResourceCache.ResourceMetaData metaData =
+            (ResourceCache.ResourceMetaData)resource.getAssociate();
         String encoding = metaData.getEncoding();
         MultiPartResponse multi = new MultiPartResponse(response);
         response.setStatus(HttpResponse.__206_Partial_Content);

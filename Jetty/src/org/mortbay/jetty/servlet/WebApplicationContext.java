@@ -155,7 +155,8 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
     }
 
     
-    
+
+    /* ------------------------------------------------------------ */
     public void setConfigurationClassNames (String[] configurationClassNames)
     {
         if (null != configurationClassNames)
@@ -164,7 +165,8 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
             System.arraycopy (configurationClassNames, 0, _configurationClassNames, 0, configurationClassNames.length);
         }
     }
-    
+
+    /* ------------------------------------------------------------ */
     public String[] getConfigurationClassNames ()
     {
         return _configurationClassNames;
@@ -359,13 +361,14 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
         _distributable=distributable;
     }
 
+    /* ------------------------------------------------------------ */
     public Configuration[] getConfigurations ()
     {
         return _configurations;
     }
-    
-    
-    private void loadConfigurations () throws Exception
+
+    /* ------------------------------------------------------------ */
+    protected Configuration[] loadConfigurations() throws Exception
     {
         String[] names = _configurationClassNames;
         
@@ -377,17 +380,21 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
         {
             //instantiate instances for each
             Object[] nullArgs = new Object[0];
-            _configurations = new Configuration[names.length];
+            Configuration[] configurations = new Configuration[names.length];
             for (int i=0; i< names.length; i++)
             {
-                _configurations[i] =
+                configurations[i] =
                     (Configuration)Loader.loadClass(WebApplicationContext.class, names[i]).getConstructors()[0].newInstance(nullArgs);
                 if (log.isDebugEnabled()){log.debug("Loaded instance of "+names[i]);};
             }
+            return configurations;
         }
+        else
+            return new Configuration[0];
     }
-    
-    private void configureClassPath() throws Exception
+
+    /* ------------------------------------------------------------ */
+    protected void configureClassPath() throws Exception
     {
         //call each of the instances
         // first, configure the classpaths
@@ -397,8 +404,9 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
             _configurations[i].configureClassPath();
         }
     }
-    
-    private void configureDefaults() throws Exception
+
+    /* ------------------------------------------------------------ */
+    protected void configureDefaults() throws Exception
     {
         //next, configure default settings
         for (int i=0;i<_configurations.length;i++)
@@ -407,8 +415,9 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
             _configurations[i].configureDefaults();
         }
     }
-    
-    private void configureWebApp () throws Exception
+
+    /* ------------------------------------------------------------ */
+    protected void configureWebApp () throws Exception
     {
         //finally, finish configuring the webapp
         for (int i=0;i<_configurations.length;i++)
@@ -423,7 +432,7 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
     /** Start the Web Application.
      * @exception IOException 
      */
-    public void start() throws Exception
+    protected void doStart() throws Exception
     {
         if (isStarted())
             return;
@@ -443,7 +452,7 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
             // Get the handler
             getServletHandler();
           
-            loadConfigurations();
+            _configurations=loadConfigurations();
             
             // initialize the classloader            
             configureClassPath();
@@ -475,7 +484,7 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
             _webAppHandler.setAutoInitializeServlets(false);
 
             // Start handlers
-            super.start();
+            super.doStart();
 
             mex= new MultiException();
             // If it actually started
@@ -530,7 +539,7 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
      * as they are recreated and configured by any subsequent call to start().
      * @exception InterruptedException 
      */
-    public void stop() throws InterruptedException
+    protected void doStop() throws Exception
     {
         // Context listeners
         if (_contextListeners != null)
@@ -546,7 +555,7 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
         _contextListeners= null;
 
         // Stop the context
-        super.stop();
+        super.doStop();
 
         // clean up
         clearSecurityConstraints();
@@ -560,6 +569,8 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
         _errorPages= null;
 
         _webApp= null;
+        
+        _configurations=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -596,13 +607,14 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
         }
 
         if (!known)
-            throw new IllegalArgumentException("Unknown " + listener);
+            super.addEventListener(listener);
     }
 
     /* ------------------------------------------------------------ */
     public synchronized void removeEventListener(EventListener listener)
     {
         _contextListeners= LazyList.remove(_contextListeners, listener);
+        super.removeEventListener(listener);
     }
 
     /* ------------------------------------------------------------ */
@@ -804,9 +816,6 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
          */
         public  void configureClassPath()
         throws Exception;
-        
-
-        
 
         /* ------------------------------------------------------------------------------- */
         /** Configure Defaults.

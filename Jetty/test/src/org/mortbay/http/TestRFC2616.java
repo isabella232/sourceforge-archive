@@ -139,13 +139,13 @@ public class TestRFC2616
     
     /* --------------------------------------------------------------- */
     public TestRFC2616()
-        throws Exception
+    throws Exception
     {
-	if (testFiles == null) {
-		docRoot = new File(defaultTestRoot);
-		testFiles = initTestFileData(docRoot);
-	}
-	
+        if (testFiles == null) {
+            docRoot = new File(defaultTestRoot);
+            testFiles = initTestFileData(docRoot);
+        }
+        
         setName("Test");
         setMinThreads(1);
         setMaxThreads(10);
@@ -584,9 +584,9 @@ public class TestRFC2616
         try
         {
             TestRFC2616 listener = new TestRFC2616();
-            listener.getHttpServer().getContext("VirtualHost","/path/*")
-                .addHandler(new DumpHandler());
-            listener.getHttpServer().start();
+            HttpContext context=listener.getHttpServer().getContext("VirtualHost","/path/*");
+            context.addHandler(new DumpHandler());
+            context.start();
             String response;
             int offset=0;
 
