@@ -3,28 +3,6 @@
 
 <Configure class="org.mortbay.jetty.Server">
 
-  <!-- The following section can be uncommented to control the
-       debugging and logging mechanism.  
-  <Set name="Debug" class="org.mortbay.util.Code" type="boolean">false</Set>
-  <Set name="Verbose" class="org.mortbay.util.Code" type="int">0</Set>
-  <Set name="DebugPatterns" class="org.mortbay.util.Code" type="String"></Set>
-
-  <Call name="instance" class="org.mortbay.util.Log">
-    <Call name="disableLog"/>
-    <Call name="add"> 
-      <Arg>
-        <New class="org.mortbay.util.OutputStreamLogSink">
-          <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.log</Arg>
-          <Set name="RetainDays">90</Set>
-          <Set name="Append">true</Set>
-          <Call name="start"/> 
-        </New>
-      </Arg>
-    </Call>
-  </Call>
-  -->
-
-
   <!-- Configure the listeners -->
   <Call name="addListener">
     <Arg>

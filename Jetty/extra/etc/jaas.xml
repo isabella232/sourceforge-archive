@@ -1,8 +1,6 @@
 <?xml version="1.0"  encoding="ISO-8859-1"?>
 <!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.2//EN" "http://jetty.mortbay.org/configure_1_2.dtd">
 
-
-
 <!-- =============================================================== -->
 <!-- Configure the Jetty Server                                      -->
 <!-- =============================================================== -->
@@ -10,11 +8,6 @@
 <Configure class="org.mortbay.jetty.Server">
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-    <Set name="Debug" class="org.mortbay.util.Code" type="boolean">true</Set>
-    <Set name="Verbose" class="org.mortbay.util.Code" type="int">0</Set>
-    <Set name="DebugPatterns" class="org.mortbay.util.Code" type="String"></Set>
-
-
 
 
   <!-- =============================================================== -->
