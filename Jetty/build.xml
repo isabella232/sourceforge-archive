@@ -51,6 +51,7 @@
   <property name="jetty.webapp.webinf"    value="${jetty.webapp}/WEB-INF"/>
   <property name="jetty.webapp.classes"   value="${jetty.webapp.webinf}/classes"/>
 
+  <property name="start.jar"       value="${basedir}/start.jar"/>
   <property name="jetty1.2.jar"    value="${lib}/org.mortbay.jetty-jdk1.2.jar"/>
   <property name="jetty1.4.jar"    value="${lib}/org.mortbay.jetty.jar"/>
   <property name="mortbay.jmx.jar" value="${lib}/org.mortbay.jmx.jar"/>
@@ -190,6 +191,7 @@
     <copy todir="${classes}">
       <fileset dir="${src}">
         <include name="**/*.properties" />
+        <include name="**/*.config" />
         <include name="**/*.dtd" />
         <include name="**/*.xml" />
       </fileset>
@@ -247,6 +249,17 @@
     </replace>
   </target>
 
+
+  <!-- ==================================================================== -->
+  <target name="start.jar" depends="classes,manifest">
+    <jar jarfile="${start.jar}" basedir="${classes}" 
+     manifest="${classes}/org/mortbay/start/MANIFEST.MF" >
+       <include name="org/mortbay/start/**" />
+       <exclude name="**/jmx/**" />
+       <exclude name="**/MANIFEST.MF" />
+    </jar>
+  </target>
+  
   <!-- ==================================================================== -->
   <target name="servlet.jar" depends="classes">
     <jar jarfile="${servlet.jar}" basedir="${classes}" >
@@ -259,6 +272,7 @@
     <jar jarfile="${jetty1.2.jar}" basedir="${classes}" 
      manifest="${classes}/org/mortbay/jetty/MANIFEST.MF" >
        <include name="org/mortbay/**"  />
+       <exclude name="org/mortbay/start/**" />
        <include name="org/jboss/**"  />
        <exclude name="**/jmx/**" />
        <exclude name="**/MANIFEST.MF" />
@@ -271,6 +285,7 @@
      manifest="${classes}/org/mortbay/jetty/MANIFEST.MF">
        <fileset dir="${classes}">
          <include name="org/mortbay/**"/>
+         <exclude name="org/mortbay/start/**" />
          <exclude name="**/jmx/**" />
          <exclude name="**/MANIFEST.MF" />
        </fileset>
@@ -315,6 +330,7 @@
        <exclude name="**/MANIFEST.MF" />
        <exclude name="**/jmx" />
        <exclude name="**/ajp" />
+       <exclude name="org/mortbay/start/**" />
     </jar>
   </target>
 
@@ -328,7 +344,7 @@
   </target>
 
   <!-- ==================================================================== -->
-  <target name="jars" depends="servlet.jar,jetty1.2.jar,jetty1.4.jar,jasper.jar,mortbay.jmx.jar"
+  <target name="jars" depends="start.jar,servlet.jar,jetty1.2.jar,jetty1.4.jar,jasper.jar,mortbay.jmx.jar"
    description="Build the jar files" >
   </target>
 
