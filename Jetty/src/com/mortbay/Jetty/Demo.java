@@ -38,7 +38,9 @@ public class Demo
             
             // Configure handlers
             HandlerContext context;
-            server.addWebApplication(null,"/jetty","./webapps/jetty");
+            server.addWebApplication(null,"/jetty",
+                                     "./webapps/jetty",
+                                     "./etc/webdefault.xml");
             
             context=server.getContext(null,"/demo");
             context.setResourceBase("./docroot/");

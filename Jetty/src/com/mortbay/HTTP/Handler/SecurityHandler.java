@@ -87,7 +87,7 @@ public class SecurityHandler extends NullHandler
         }
         scs.add(sc);
         
-        Code.debug("add",pathSpec," : ",sc);
+        Code.debug("added ",sc," at ",pathSpec);
     }
     
     /* ------------------------------------------------------------ */
@@ -96,11 +96,8 @@ public class SecurityHandler extends NullHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
-        if (!isStarted())
-            return;
-
         // Get all path matches
-        List scss =_constraintMap.getMatches(request.getPath());
+        List scss =_constraintMap.getMatches(pathInContext);
         if (scss!=null)
         {
             // for each path match 
@@ -240,7 +237,3 @@ public class SecurityHandler extends NullHandler
     }
     
 }
-
-
-
-

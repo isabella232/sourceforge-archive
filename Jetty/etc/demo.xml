@@ -82,6 +82,7 @@ $ID: $
   <Call name="addWebApplication">
     <Arg>/jetty</Arg>
     <Arg>file:<SystemProperty name="user.dir"/>/webapps/jetty/</Arg>
+    <Arg><SystemProperty name="user.dir"/>/etc/webdefault.xml/</Arg>
   </Call>
 
   <Call name="addContext">

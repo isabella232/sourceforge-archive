@@ -50,7 +50,7 @@ public class HandlerContext
     private Map _attributes = new HashMap(11);
     private Map _mimeMap;
     
-    private List _hosts;
+    private List _hosts=new ArrayList(2);
     private String _contextPath;
     private String _name;
     private boolean _redirectNullPath=true;
@@ -59,28 +59,23 @@ public class HandlerContext
     /** Constructor. 
      * @param httpServer 
      */
-    HandlerContext(HttpServer httpServer)
+    HandlerContext(HttpServer httpServer,String contextPath)
     {
         _httpServer=httpServer;
-
+        _contextPath=contextPath;
+        _name=contextPath;
     }
     
     /* ------------------------------------------------------------ */
-    void setContextPath(String host,String contextPath)
+    void addHost(String host)
     {
-        if (_contextPath!=null && !_contextPath.equals(contextPath))
-            throw new IllegalArgumentException("HandlerContext cannot be registered at "+contextPath+" and "+_contextPath);
+        // Note that null hosts are also added.
+        _hosts.add(host);
 
-        _contextPath=contextPath;
-        
-        if (host!=null)
-        {
-            if (_hosts==null)
-                _hosts=new ArrayList(3);
-            _hosts.add(host);
-        }
-
-        _name = ((_hosts!=null)?(_hosts.toString()+":"):"")+_contextPath;
+        _name = ((host!=null ||_hosts.size()>1)
+                 ?(_hosts.toString()+":")
+                 :"")+
+            _contextPath;
     }
 
     /* ------------------------------------------------------------ */
@@ -737,14 +732,11 @@ public class HandlerContext
     {
         return "Context["+_name+"]"; 
     }
+    
+    /* ------------------------------------------------------------ */
+    public String toString(boolean detail)
+    {
+        return "Context["+_name+"]" +
+            (detail?("="+_handlers):""); 
+    }
 }
-
-
-
-
-
-
-
-
-
-

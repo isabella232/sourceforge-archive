@@ -320,7 +320,7 @@ public class HttpServer implements LifeCycle
      */
     public HandlerContext addContext(String host, String contextPath)
     {
-        HandlerContext hc = new HandlerContext(this);
+        HandlerContext hc = new HandlerContext(this,contextPath);
         addContext(host,contextPath,hc);
         return hc;
     }
@@ -418,7 +418,7 @@ public class HttpServer implements LifeCycle
         }
 
         contextList.add(context);
-        context.setContextPath(host,contextPath);    
+        context.addHost(host);    
     }
 
     
@@ -426,13 +426,15 @@ public class HttpServer implements LifeCycle
     /** 
      * @param contextPath 
      * @param directory 
+     * @param defaultResource resource of default xml file or null.
      * @exception IOException 
      */
     public WebApplicationContext addWebApplication(String contextPath,
-                                                   String directory)
+                                                   String directory,
+                                                   String defaultResource)
         throws IOException
     {
-        return addWebApplication(null,contextPath,directory);
+        return addWebApplication(null,contextPath,directory,defaultResource);
     }
     
     /* ------------------------------------------------------------ */
@@ -440,20 +442,25 @@ public class HttpServer implements LifeCycle
      * @param host 
      * @param contextPath 
      * @param directory 
+     * @param defaultResource resource of default xml file or null.
+     * @return 
      * @exception IOException 
      */
     public WebApplicationContext addWebApplication(String host,
                                                    String contextPath,
-                                                   String directory)
+                                                   String directory,
+                                                   String defaultResource)
         throws IOException
     {
         WebApplicationContext appContext =
-            new WebApplicationContext(this,directory);
+            new WebApplicationContext(this,
+                                      contextPath,
+                                      directory,
+                                      defaultResource);
         addContext(host,contextPath,appContext);
         Log.event("Web Application "+appContext+" added");
         return appContext;
-    }    
-    
+    }
  
     /* ------------------------------------------------------------ */
     /** 
@@ -598,12 +605,11 @@ public class HttpServer implements LifeCycle
     public ServletHandler findServletHandler(String uri,
                                              List hosts)
     {
-        int nh=hosts==null?0:hosts.size();
+        
 
-        for (int h=0; h<=nh ; h++)
+        for (int h=0; h<=hosts.size() ; h++)
         {
-            String host = (String)
-                ((hosts!=null && h<nh)?hosts.get(h):null);
+            String host = (String)hosts.get(h);
             
             PathMap contextMap=(PathMap)_hostMap.get(host);
             if (contextMap!=null)

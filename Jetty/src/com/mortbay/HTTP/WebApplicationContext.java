@@ -35,15 +35,21 @@ public class WebApplicationContext extends HandlerContext
     private ServletHandler _servletHandler;
     private Context _context;
     
+    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param httpServer 
-     * @param directory 
+     * @param webApp 
+     * @param defaults 
+     * @exception IOException 
      */
-    WebApplicationContext(HttpServer httpServer, String webApp)
+    WebApplicationContext(HttpServer httpServer,
+                          String contextPath,
+                          String webApp,
+                          String defaults)
         throws IOException
     {
-        super(httpServer);
+        super(httpServer,contextPath);
 
         // Get parser
         XmlParser xmlParser=new XmlParser();
@@ -86,6 +92,9 @@ public class WebApplicationContext extends HandlerContext
                 }
             }
 
+            // add security handler first
+            addHandler(new SecurityHandler());
+            
             // Set the classpath
             if (classPath.length()>0)
                 super.setClassPath(classPath);
@@ -103,15 +112,15 @@ public class WebApplicationContext extends HandlerContext
             rh.setPutAllowed(true);
             rh.setDelAllowed(true);
             
-            XmlParser.Node config = xmlParser.parse(web.getURL().toString());
-
-            // Standard constraint
-            SecurityConstraint sc=new SecurityConstraint();
-            sc.setName("WEB-INF");
-            sc.addRole("com.mortbay.jetty.WebApplicationContext");
-            addSecurityConstraint("/WEB-INF/*",sc);
-            addSecurityConstraint("/WEB-INF",sc);
+            if (defaults!=null)
+            {
+                Resource dftResource= Resource.newResource(defaults);
+                XmlParser.Node defaultConfig =
+                    xmlParser.parse(dftResource.getURL().toString());
+                initialize(defaultConfig);
+            }
             
+            XmlParser.Node config = xmlParser.parse(web.getURL().toString());
             initialize(config);
         }
         catch(IOException e)

@@ -1,6 +1,7 @@
 Stable 2.4.7
-Dev    3.0.B03
+Dev    3.0.B04
 
+Jetty-3.0.B04 - 12 Oct 2000
  + Restricted context mapping to simple model for servlets.
  + Fixed problem with session ID in paths
  + Added modified version of JasperB3.2 for JSP
@@ -8,6 +9,7 @@ Dev    3.0.B03
  + Merged and renamed third party jars.
  + Do not try multiple servlets for a request.
  + Implemented Context.getContext(uri)
+ + Added webdefault.xml for web applications.
 
 Jetty-3.0.B03 - 9th Oct 2000
  + Expanded import package.*; lines
