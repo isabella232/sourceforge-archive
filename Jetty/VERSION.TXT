@@ -1,6 +1,10 @@
 Jetty Versions
 --------------
 
+ + Handle mime suffixes containing dots. 
+ + Added gz tgz tar.gz .z mime mappings.
+ + Fixed default mimemap initialization bug
+
 Jetty-3.0.0.rc2 - 29 Oct 2000
  + Replaced ISO-8859-1 literals with StringUtil static
  + Pass file based classpath to JspServlet (see README).
