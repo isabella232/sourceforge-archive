@@ -20,20 +20,40 @@ There are two distributions. The complete distribution has everything
 needed to run and is precompiled. The source distribution has no
 3rd party jars, no demo, no test harnesses and is not pre compiled.
 
+
 Starting Jetty
 ==============
 
-Jetty can be started by 
+In order to start Jetty the following steps must be taken: 
 
- + Setting the classpath to the appropriate jars in $JETTY_HOME/lib 
- + Adding to the classpath any jars from $JETTY_HOME/ext that your 
-   java environment does not provide.
- + If using JSPs, add the tools.jar from your JRE lib and ant.jar from jakarta-ant-1.5
-   to the classpath.
- + Running "java org.mortbay.jetty.Server <configfile>"
+ 1) Setting the classpath to the appropriate jars in $JETTY_HOME/lib 
+ 
+ 2) Adding to the classpath any jars from $JETTY_HOME/ext that your 
+    java environment does not provide.
+ 
+ 3) If using JSPs, add the tools.jar from your JRE lib and ant.jar from jakarta-ant-1.5
+    to the classpath.
+ 
+ 4) Running "java org.mortbay.jetty.Server <configfile>"
 
 
-Various methods are presented below that automate this process.
+Several different mechanisms have been provided to automate this process
+and you should pick the one that best suits your environment.
+
+
+Jetty start.jar 
+===============
+
+The start.jar file in the Jetty distribution may be run with
+
+  java -jar start.jar <configfile> ...
+
+For example
+
+  java -jar start.jar etc/admin.xml etc/demo.xml
+
+For more details see $JETTY_HOME/launcher/README.txt
+
 
 
 JDK 1.4 Quick start
