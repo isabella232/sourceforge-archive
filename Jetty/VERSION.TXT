@@ -1,5 +1,7 @@
 Jetty Versions
 --------------
+
+ + Fixed setDate thread safety
  
 Jetty-4.2.15 - 24 Dec 2003
  + SecurityConstraints not reset by stop() on custom context
