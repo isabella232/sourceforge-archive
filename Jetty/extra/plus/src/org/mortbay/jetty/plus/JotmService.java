@@ -11,7 +11,7 @@ import javax.naming.NamingException;
 import javax.transaction.UserTransaction;
 import javax.transaction.TransactionManager;
 import javax.sql.XADataSource;
-
+import org.mortbay.jndi.Util;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
 
@@ -129,6 +129,8 @@ public class JotmService extends TMService
             try 
             {
                 ictx = new InitialContext();
+                Code.debug("InitialContext instanceof "+ictx.getClass().getName());
+                Code.debug("java.naming.factory.initial="+System.getProperty("java.naming.factory.initial"));
             } 
             catch (NamingException e) 
             {
@@ -138,7 +140,8 @@ public class JotmService extends TMService
             
             try 
             {
-                ictx.rebind(getJNDI(), m_tm.getUserTransaction());
+                //ictx.rebind(getJNDI(), m_tm.getUserTransaction());
+                Util.bind(ictx, getJNDI(), m_tm.getUserTransaction());
                 Code.debug("UserTransaction object bound in JNDI with name " + getJNDI());
             }
             catch (NamingException e) 
@@ -149,7 +152,8 @@ public class JotmService extends TMService
  
             try
             {
-                ictx.rebind(getTransactionManagerJNDI(), m_tm.getTransactionManager());
+                // ictx.rebind(getTransactionManagerJNDI(), m_tm.getTransactionManager());
+                Util.bind(ictx, getTransactionManagerJNDI(), m_tm.getTransactionManager());
                 Code.debug("TransactionManager object bound in JNDI with name " + getTransactionManagerJNDI());
             } 
             catch (NamingException e) 
@@ -178,9 +182,10 @@ public class JotmService extends TMService
                 
                 try 
                 {
-                    ictx.rebind("XA"+ strDataSourceName, xadsDataSource);
+                    //ictx.rebind("XA"+ strDataSourceName, xadsDataSource);
+                    Util.bind(ictx, "XA"+ strDataSourceName, xadsDataSource);
                     Code.debug("XA Data source bound in JNDI with name XA" + strDataSourceName);
-                    ictx.rebind(strDataSourceName, xapdsPoolDataSource);
+                    Util.bind(ictx, strDataSourceName, xapdsPoolDataSource);
                     Code.debug("Data source bound in JNDI with name " + strDataSourceName);
                 } 
                 catch (NamingException e) 

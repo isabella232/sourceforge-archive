@@ -18,6 +18,7 @@ import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 import javax.naming.spi.ObjectFactory;
 import org.mortbay.jetty.plus.AbstractService;
+import org.mortbay.jndi.Util;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
 
@@ -32,7 +33,7 @@ import org.mortbay.util.Log;
  */
 public class MailService extends AbstractService implements Map
 {
-    public static final String DEFAULT_MAIL_JNDI = "java:Mail";
+    public static final String DEFAULT_MAIL_JNDI = "mail/Session";
     protected Properties _sessionProperties;
     protected String _user;
     protected String _password;
@@ -57,10 +58,7 @@ public class MailService extends AbstractService implements Map
     };
 
 
-    // this cannot have constructor args, plus the class will be instantiated
-    //anew each time - need some way of the object factory returning the precreated
-    //Session
-
+   
     public static class SessionObjectFactory implements ObjectFactory 
     {
         protected static HashMap _sessionMap = new HashMap();
@@ -103,6 +101,8 @@ public class MailService extends AbstractService implements Map
         setJNDI (DEFAULT_MAIL_JNDI);
         _sessionProperties = new Properties();
     }
+
+
 
 
     public void setUser (String user)
@@ -185,7 +185,7 @@ public class MailService extends AbstractService implements Map
         return _sessionProperties.entrySet();
     }
 
-    //looks a bit dangerous
+   
     public boolean equals(Object o)
     {
         return _sessionProperties.equals(o);
@@ -208,12 +208,13 @@ public class MailService extends AbstractService implements Map
         if (!isStarted())
         {
 
-            MailAuthenticator authenticator = new MailAuthenticator (getUser(), getPassword());            Code.debug("Mail authenticator: user="+getUser());
+            MailAuthenticator authenticator = new MailAuthenticator (getUser(), getPassword());            
+            Code.debug("Mail authenticator: user="+getUser());
 
             // create a Session object
             Session session = Session.getInstance (_sessionProperties, authenticator);
             
-            Code.debug ("Created Session");
+            Code.debug ("Created Session="+session+" with ClassLoader="+session.getClass().getClassLoader());
 
             // create an ObjectFactory for Session as Session isn't serializable            
             StringRefAddr refAddr = new StringRefAddr ("xx", getJNDI());
@@ -224,9 +225,15 @@ public class MailService extends AbstractService implements Map
                                                  null);
             // bind to JNDI
             InitialContext initialCtx = new InitialContext();
-            initialCtx.rebind (getJNDI(), reference);
+           
+            Util.bind(initialCtx, getJNDI(), reference);
             
             Code.debug ("Bound reference to "+getJNDI());
+
+            //look up the Session object to test
+            Object o = initialCtx.lookup (getJNDI());
+            Code.debug ("Looked up Session="+o+" from classloader="+o.getClass().getClassLoader());
+
             super.start();
             Log.event ("Mail Service started");
         }
@@ -234,7 +241,7 @@ public class MailService extends AbstractService implements Map
             Log.warning ("MailService is already started");
     }
     
-    
+   
     
     public void stop()
         throws InterruptedException

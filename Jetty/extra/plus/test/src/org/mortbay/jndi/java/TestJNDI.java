@@ -71,6 +71,11 @@ public class TestJNDI extends TestCase
         //set the current thread's classloader
         currentThread.setContextClassLoader(childLoader1);
         
+        InitialContext initCtxA = new InitialContext();
+        initCtxA.bind ("blah", "123");
+        assertEquals ("123", initCtxA.lookup("blah"));
+
+        
         InitialContext initCtx = new InitialContext();
         Context sub0 = (Context)initCtx.lookup("java:");
         try

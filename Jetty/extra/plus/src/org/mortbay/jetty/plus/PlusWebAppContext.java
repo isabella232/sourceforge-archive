@@ -13,6 +13,7 @@ import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.jetty.servlet.WebApplicationContext;
+import org.mortbay.jndi.Util;
 import org.mortbay.xml.XmlParser;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
@@ -68,7 +69,7 @@ public class PlusWebAppContext extends WebApplicationContext
             String name=node.getString("env-entry-name",false,true);
             Object value= TypeUtil.valueOf(node.getString("env-entry-type",false,true),
                                            node.getString("env-entry-value",false,true));
-            bind (envCtx, name, value);
+            Util.bind (envCtx, name, value);
         }
         else if ("resource-ref".equals(element))
         {
@@ -88,7 +89,7 @@ public class PlusWebAppContext extends WebApplicationContext
             Object o = _initialCtx.lookup (name);
             
             Code.debug ("Found Object in global namespace: "+o.toString());
-            bind (envCtx, name,  new LinkRef(name));
+            Util.bind (envCtx, name,  new LinkRef(name));
         }
         else if ("resource-env-ref".equals(element))
         {
@@ -103,7 +104,7 @@ public class PlusWebAppContext extends WebApplicationContext
             String name=node.getString("resource-env-ref-name",false,true);
             
             Code.debug ("Linking resource-env-ref java:comp/env/"+name +" to global "+name);
-            bind (envCtx, name, new LinkRef(name));
+            Util.bind (envCtx, name, new LinkRef(name));
         }
         else if ("ejb-ref".equals(element) ||
                  "ejb-local-ref".equals(element) ||
@@ -152,7 +153,8 @@ public class PlusWebAppContext extends WebApplicationContext
      * @param obj the object to be bound
      * @exception NamingException if an error occurs
      */
-    public void bind (Context ctx, String nameStr, Object obj)
+    /*
+      public void bind (Context ctx, String nameStr, Object obj)
         throws NamingException
     {
         Name name = ctx.getNameParser("").parse(nameStr);
@@ -182,5 +184,5 @@ public class PlusWebAppContext extends WebApplicationContext
         subCtx.rebind (name.get(name.size() - 1), obj);
         Code.debug ("Bound object to "+name.get(name.size() - 1));
     }
-
+    */
 }

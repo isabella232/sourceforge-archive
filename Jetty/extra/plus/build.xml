@@ -253,9 +253,8 @@ Other targets:
   <target name="run.jettyplus.demo" depends="build.jettyplus.webapp" 
           description="Run a JettyPlus webapp demo"> 
      <java fork="true" jar="${jetty.home}/start.jar" dir="${jetty.home}"> 
-       <jvmarg value="-DDEBUG" />
        <jvmarg value="-Dlog4j.configuration=log4j.xml"/>
-       <jvmarg value="-Djetty.server=org.mortbay.jetty.plus.Server"/>
+       <jvmarg value="-Djetty.server=org.mortbay.jetty.plus.Server"/>      
        <arg value="${etc}/jettyplus.xml"/>
      </java>
   </target>
