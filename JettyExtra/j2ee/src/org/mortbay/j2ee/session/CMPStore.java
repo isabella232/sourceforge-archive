@@ -35,19 +35,6 @@ public class CMPStore
     CMPStore(Manager manager)
   {
     _manager=manager;
-
-    // jndi lookups here
-    try
-    {
-      _jndiContext=new InitialContext();
-      Object o=_jndiContext.lookup(_name);
-      _home=(CMPStateHome)PortableRemoteObject.narrow(o, CMPStateHome.class);
-      _log.info("Support for CMP-based Distributed HttpSessions loaded: "+_home);
-    }
-    catch (NamingException e)
-    {
-      _log.warn("support for CMP-based Distributed HttpSessions does not appear to be loaded",e);
-    }
   }
 
   public void
@@ -59,7 +46,14 @@ public class CMPStore
   // Store LifeCycle
   public void
     start()
+    throws Exception
   {
+    // jndi lookups here
+    _jndiContext=new InitialContext();
+    Object o=_jndiContext.lookup(_name);
+    _home=(CMPStateHome)PortableRemoteObject.narrow(o, CMPStateHome.class);
+    _log.info("Support for CMP-based Distributed HttpSessions loaded successfully: "+_home);
+
     synchronized (getClass())
     {
       if (_scavengerCount++==0)

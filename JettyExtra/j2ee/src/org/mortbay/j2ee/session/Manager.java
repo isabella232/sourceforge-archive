@@ -159,7 +159,17 @@ public class Manager
       _store.setScavengerPeriod(_distributableScavengePeriod);
       _store.setScavengerExtraTime(_distributableScavengeOffset);
       _store.setActualMaxInactiveInterval(_actualMaxInactiveInterval);
-      _store.start();
+
+      try
+      {
+	_store.start();
+      }
+      catch (Throwable t)
+      {
+	_log.warn("distributed Store ("+_store.getClass().getName()+") failed to initialise", t);
+	_log.warn("falling back to a local session implementation - NO HTTPSESSION DISTRIBUTION");
+	_store=new LocalStore(this);
+      }
       boolean isDaemon=true;
       _scavenger=new Timer(isDaemon);
       _scavenger.scheduleAtFixedRate(new Scavenger() ,0,_localScavengePeriod*1000);

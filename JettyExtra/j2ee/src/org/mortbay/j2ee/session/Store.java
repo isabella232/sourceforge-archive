@@ -22,7 +22,7 @@ public interface
   Store
 {
   // Store LifeCycle
-  void start();
+  void start() throws Exception;
   void stop();
   void destroy();	// corresponds to ctor
 
