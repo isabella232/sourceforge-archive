@@ -71,7 +71,7 @@ import org.apache.jasper.Constants;
 import org.xml.sax.Attributes;
 
 /**
- * Generator for <jsp:setProperty .../>
+ * Generator for jsp:setProperty.
  *
  * @author Mandar Raje
  * @author Danno Ferrin

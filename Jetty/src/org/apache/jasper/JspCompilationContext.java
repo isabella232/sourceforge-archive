@@ -112,14 +112,16 @@ public interface JspCompilationContext {
     public boolean isErrorPage();
     
     /**
-     * What is the scratch directory we are generating code into?
+     * The scratch directory to generate code into.
+     *
      * FIXME: In some places this is called scratchDir and in some
      * other places it is called outputDir.
      */
     public String getOutputDir();
     
     /**
-     * What is the scratch directory we are generating code into?
+     * The scratch directory to generate code into for javac.
+     *
      * FIXME: In some places this is called scratchDir and in some
      * other places it is called outputDir.
      */
@@ -154,8 +156,9 @@ public interface JspCompilationContext {
     public boolean keepGenerated();
 
     /**
-     * What's the content type of this JSP? Content type includes
-     * content type and encoding. 
+     * The content type of this JSP.
+     *
+     * Content type includes content type and encoding. 
      */
     public String getContentType();
 
@@ -194,7 +197,7 @@ public interface JspCompilationContext {
     /**
      * Gets a resource as a stream, relative to the meanings of this
      * context's implementation.
-     *@returns a null if the resource cannot be found or represented 
+     * @return a null if the resource cannot be found or represented 
      *         as an InputStream.
      */
     public java.io.InputStream getResourceAsStream(String res);
@@ -214,7 +217,7 @@ public interface JspCompilationContext {
      * Get the 'location' of the TLD associated with 
      * a given taglib 'uri'.
      * 
-     * @returns An array of two Strings. The first one is
+     * @return An array of two Strings. The first one is
      * real path to the TLD. If the path to the TLD points
      * to a jar file, then the second string is the
      * name of the entry for the TLD in the jar file.

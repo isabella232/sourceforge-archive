@@ -108,7 +108,8 @@ public class CharDataGenerator
 		sb.append("\\\\");
 		break;
 	    case '\r':
-		continue;
+		sb.append("\\r");
+		break;
 		/*
 		  case '\'':
 		  sb.append('\\');
@@ -116,7 +117,7 @@ public class CharDataGenerator
 		  break;
 		*/
 	    case '\n':
-		sb.append("\\r\\n");
+		sb.append("\\n");
 		break;
 	    case '\t':
 		sb.append("\\t");

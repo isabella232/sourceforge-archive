@@ -83,7 +83,6 @@ import java.security.PermissionCollection;
 import java.security.Policy;
 import java.security.PrivilegedAction;
 
-import org.apache.jasper.JasperError;
 import org.apache.jasper.JasperException;
 import org.apache.jasper.Constants;
 import org.apache.jasper.Options;
@@ -101,7 +100,7 @@ import org.apache.jasper.logging.DefaultLogger;
 import org.apache.jasper.logging.JasperLogger;
 
 /**
- * The JSP engine (a.k.a Jasper)! 
+ * The JSP engine (a.k.a Jasper).
  *
  * The servlet container is responsible for providing a
  * URLClassLoader for the web application context Jasper
@@ -474,9 +473,6 @@ public class JspServlet extends HttpServlet {
             serviceJspFile(request, response, jspUri, null, precompile);
 	} catch (RuntimeException e) {
 	    throw e;
-        } catch (JasperError ex) {
-            response.setContentType("text/html");
-            response.getWriter().print(ex.getMessage());
 	} catch (ServletException e) {
 	    throw e;
 	} catch (IOException e) {

@@ -77,6 +77,12 @@ import org.apache.jasper.JasperException;
 import org.apache.jasper.Constants;
 import org.apache.jasper.JspCompilationContext;
 
+/**
+ * JSP Comment Generator
+ *
+ * @author Mandar Raje [Patch submitted by Yury Kamen]
+ */
+
 public interface CommentGenerator {
     
     /**
@@ -86,8 +92,6 @@ public interface CommentGenerator {
      * @param start Start position of the block
      * @param stop End position of the block
      * @exception JasperException
-     *
-     * @author Mandar Raje [Patch submitted by Yury Kamen]
      */
     void generateStartComment(Generator generator, ServletWriter out, Mark start, Mark stop) throws JasperException;
 

@@ -62,7 +62,7 @@
 package org.apache.jasper.compiler;
 
 /**
- * Generator to deal with JSP expressions: <%= ... %> stuff. 
+ * Generator to deal with JSP expressions: &lt;%= ... %&gt; stuff. 
  *
  * @author Anil K. Vijendran
  */

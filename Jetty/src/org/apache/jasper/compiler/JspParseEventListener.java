@@ -78,7 +78,6 @@ import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryInfo;
 import javax.servlet.jsp.tagext.ValidationMessage;
 
-import org.apache.jasper.JasperError;
 import org.apache.jasper.JasperException;
 import org.apache.jasper.Constants;
 import org.apache.jasper.JspCompilationContext;
@@ -1134,16 +1133,17 @@ public class JspParseEventListener implements ParseEventListener {
                        new Object[]{tli.getShortName()}));
                 errMessage.append("</h3>");
                 for (int i = 0; i < errors.length; i++) {
-                    errMessage.append("<p>");
-                    errMessage.append(errors[i].getId());
-                    errMessage.append(": ");
+                    String id = errors[i].getId();
+                    if (id != null) {
+                        errMessage.append(errors[i].getId());
+                        errMessage.append(": ");
+                    }
                     errMessage.append(errors[i].getMessage());
-                    errMessage.append("</p>");
                 }
             }
         }
 	if (hasErrors)
-            throw new JasperError(errMessage.toString());
+            throw new JasperException(errMessage.toString());
     }
 
     /**

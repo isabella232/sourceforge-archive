@@ -179,7 +179,8 @@ public class CommandLineContext implements JspCompilationContext {
     }
     
     /**
-     * What is the scratch directory we are generating code into?
+     * The scratch directory to generate code into.
+     *
      * FIXME: In some places this is called scratchDir and in some
      * other places it is called outputDir.
      */
@@ -188,7 +189,8 @@ public class CommandLineContext implements JspCompilationContext {
     }
     
     /**
-     * What is the scratch directory we are generating code into?
+     * The scratch directory to generate code into for javac.
+     *
      * FIXME: In some places this is called scratchDir and in some
      * other places it is called outputDir.
      */
@@ -214,35 +216,34 @@ public class CommandLineContext implements JspCompilationContext {
     
     /**
      * The package name for the generated class.
+     * The final package is assembled from the one specified in -p, and
+     * the one derived from the path to jsp file.
      */
     public String getServletPackageName() {
-        //get the path to the jsp file
-        int indexOfSlash = getJspFile().lastIndexOf(File.separatorChar);
+        //Get the path to the jsp file.  Note that the jspFile, by the
+	//time it gets here, would have been normalized to use '/'
+	//as file separator.
+
+	int indexOfSlash = getJspFile().lastIndexOf('/');
         String pathName;
         if (indexOfSlash != -1) {
             pathName = getJspFile().substring(0, indexOfSlash);
         } else {
-            pathName = File.separator;
+            pathName = "/";
         }
-        //Assemble the package name from the base package name speced on
+
+        //Assemble the package name from the base package name specified on
         //the command line and the package name derived from the path to
         //the jsp file
         String packageName = "";
-        if (servletPackageName != null && !servletPackageName.equals("")) {
+        if (servletPackageName != null) {
             packageName = servletPackageName;
         }
-        if (packageName.equals("")) {
-            packageName = pathName.replace(File.separatorChar, '.');
-        } else {
-            packageName += pathName.replace(File.separatorChar, '.');
-        }
-        //strip off any leading '.' in the package name
-        if (!packageName.equals("") && packageName.charAt(0) == '.') {
-            packageName = packageName.substring(1);
-        }
-        return packageName;
+        packageName += pathName.replace('/', '.');
+
+        return CommandLineCompiler.manglePackage(packageName);
     }
-     
+
     /**
      * Full path name of the Java file into which the servlet is being
      * generated. 
@@ -259,8 +260,9 @@ public class CommandLineContext implements JspCompilationContext {
     }
 
     /**
-     * What's the content type of this JSP? Content type includes
-     * content type and encoding. 
+     * The content type of this JSP.
+     *
+     * Content type includes content type and encoding. 
      */
     public String getContentType() {
         return contentType;
@@ -341,7 +343,7 @@ public class CommandLineContext implements JspCompilationContext {
     /**
      * Gets a resource as a stream, relative to the meanings of this
      * context's implementation.
-     *@returns a null if the resource cannot be found or represented 
+     * @return a null if the resource cannot be found or represented 
      *         as an InputStream.
      */
     public java.io.InputStream getResourceAsStream(String res) {

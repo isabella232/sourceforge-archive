@@ -510,12 +510,14 @@ public abstract class Logger {
     }
 
     /**
-     * If we are timestamping at all, what format do we use to print
-     * the timestamp? See java.text.SimpleDateFormat.
+     * If we are timestamping at all, what format to use when
+     * printing the timestamp.
      *
      * Default = "yyyy-MM-dd hh:mm:ss". Special case: "msec" => raw
      * number of msec since epoch, very efficient but not
      * user-friendly
+     *
+     * @see java.text.SimpleDateFormat
      **/
     public void setTimestampFormat(String value)
     {

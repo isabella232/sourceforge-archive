@@ -137,7 +137,7 @@ public interface Options {
      * web.xml or implicitely via the uri tag in the TLD 
      * of a taglib deployed in a jar file (WEB-INF/lib).
      *
-     * @returns the instance of the TldLocationsCache
+     * @return the instance of the TldLocationsCache
      * for the web-application.
      */
     public TldLocationsCache getTldLocationsCache();

@@ -66,7 +66,7 @@ package org.apache.jasper.compiler;
 
 
 /**
- * Generator for <% .... %> stuff. 
+ * Generator for &lt;% .... %&gt; stuff. 
  *
  * @author Anil K. Vijendran
  */

@@ -71,7 +71,7 @@ import org.apache.jasper.Constants;
 import org.xml.sax.Attributes;
 
 /**
- * Generator for <jsp:include.../>
+ * Generator for jsp:include.
  *
  *
  * @author Anil K. Vijendran

@@ -70,7 +70,7 @@ import org.apache.jasper.Constants;
 import org.xml.sax.Attributes;
 
 /**
- * Generator for <jsp:getProperty.../>
+ * Generator for jsp:getProperty.
  *
  * @author Mandar Raje
  * @author Danno Ferrin

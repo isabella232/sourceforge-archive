@@ -187,7 +187,9 @@ public class JspEngineContext implements JspCompilationContext {
     
     /**
      * What class loader to use for loading classes while compiling
-     * this JSP? I don't think this is used right now -- akv. 
+     * this JSP.
+     *
+     * I don't think this is used right now -- akv. 
      */
     public ClassLoader getClassLoader() {
         return Thread.currentThread().getContextClassLoader();
@@ -202,7 +204,8 @@ public class JspEngineContext implements JspCompilationContext {
     }
     
     /**
-     * What is the scratch directory we are generating code into?
+     * Get the scratch directory to place generated code.
+     *
      * FIXME: In some places this is called scratchDir and in some
      * other places it is called outputDir.
      */
@@ -211,7 +214,8 @@ public class JspEngineContext implements JspCompilationContext {
     }
     
     /**
-     * What is the scratch directory we are generating code into?
+     * Get the scratch directory to place generated code for javac.
+     *
      * FIXME: In some places this is called scratchDir and in some
      * other places it is called outputDir.
      */
@@ -258,8 +262,9 @@ public class JspEngineContext implements JspCompilationContext {
     }
 
     /**
-     * What's the content type of this JSP? Content type includes
-     * content type and encoding. 
+     * Get the content type of this JSP.
+     *
+     * Content type includes content type and encoding. 
      */
     public String getContentType() {
         return contentType;
@@ -352,7 +357,7 @@ public class JspEngineContext implements JspCompilationContext {
     /**
      * Gets a resource as a stream, relative to the meanings of this
      * context's implementation.
-     *@returns a null if the resource cannot be found or represented 
+     * @return a null if the resource cannot be found or represented 
      *         as an InputStream.
      */
     public java.io.InputStream getResourceAsStream(String res)

@@ -543,7 +543,7 @@ public class BodyContentImpl extends BodyContent {
      * Note: this is after evaluation!!  There are no scriptlets,
      * etc in this stream.
      *
-     * @returns the value of this BodyJspWriter as a Reader
+     * @return the value of this BodyJspWriter as a Reader
      */
     public Reader getReader() {
         return new CharArrayReader (cb, 0, nextChar);
@@ -554,7 +554,7 @@ public class BodyContentImpl extends BodyContent {
      * Note: this is after evaluation!!  There are no scriptlets,
      * etc in this stream.
      *
-     * @returns the value of the BodyJspWriter as a String
+     * @return the value of the BodyJspWriter as a String
      */
     public String getString() {
         return new String(cb, 0, nextChar);

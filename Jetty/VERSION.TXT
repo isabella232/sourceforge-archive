@@ -2,6 +2,7 @@ Jetty Versions
 --------------
  
 Jetty-4.0.1 - 18 April 2002
+ + Updated Jasper to CVS snapshot from Apr 18 18:50:59 BST 2002
  + Pass pathParams via welcome file forward for jsessionid
  + Extended facade interfaces to HttpResponse.sendError
  + Moved basic auth handling to HttpRequest

@@ -67,7 +67,7 @@ import org.apache.jasper.logging.Logger;
 
 /**
  * JspCompiler is an implementation of Compiler with a funky code
- * mangling and code generation scheme!
+ * mangling and code generation scheme.
  *
  * The reason that it is both a sub-class of compiler and an implementation
  * of mangler is because the isOutDated method that is overridden and the

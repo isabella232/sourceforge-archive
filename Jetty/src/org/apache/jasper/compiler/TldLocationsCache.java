@@ -290,7 +290,7 @@ public class TldLocationsCache {
      * Get the 'location' of the TLD associated with 
      * a given taglib 'uri'.
      * 
-     * @returns An array of two Strings. The first one is
+     * @return An array of two Strings. The first one is
      * real path to the TLD. If the path to the TLD points
      * to a jar file, then the second string is the
      * name of the entry for the TLD in the jar file.

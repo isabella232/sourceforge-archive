@@ -84,23 +84,28 @@ public final class EmbededServletOptions implements Options {
     public boolean keepGenerated = true;
 
     /**
-     * Do you want support for "large" files? What this essentially
-     * means is that we generated code so that the HTML data in a JSP
-     * file is stored separately as opposed to those constant string
-     * data being used literally in the generated servlet. 
+     * Flag support for "large" files.
+     *
+     * What this essentially means is that we generated code so that
+     * the HTML data in a JSP file is stored separately as opposed
+     * to those constant string data being used literally in the
+     * generated servlet. 
      */
     public boolean largeFile = false;
     
     /**
-     * Do you want support for "mapped" files? This will generate
-     * servlet that has a print statement per line of the JSP file.
-     * This seems like a really nice feature to have for debugging.
+     * Flag support for "mapped" files.
+     *
+     * This will generate servlet that has a print statement per
+     * line of the JSP file. This seems like a really nice feature
+     * to have for debugging.
      */
     public boolean mappedFile = false;
     
     /**
-     * Do you want stack traces and such displayed in the client's
-     * browser? If this is false, such messages go to the standard
+     * Flag to display stack traces in the client's browser.
+     *
+     * If this is false, such messages go to the standard
      * error or a log file if the standard error is redirected. 
      */
     public boolean sendErrorToClient = false;
