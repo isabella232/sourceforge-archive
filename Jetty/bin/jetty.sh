@@ -59,11 +59,20 @@
 #   first available of /var/run, /usr/var/run, and /tmp if not set.
 #   
 
+usage()
+{
+    echo "Usage: $0 {start|stop|run|restart|check} [ CONFIGS ... ] "
+    exit 1
+}
+
+[ $# -gt 0 ] || usage
+
 TMPJ=/tmp/j$$
 
 ##################################################
 # Get the action & configs
 ##################################################
+
 ACTION=$1
 shift
 ARGS="$*"
@@ -489,8 +498,8 @@ case "$ACTION" in
         ;;
 
 *)
-        echo "Usage: $0 {start|stop|run|restart|check} [ CONFIGS ... ] "
-        exit 1
+        usage
+	;;
 esac
 
 exit 0
