@@ -1,5 +1,5 @@
 
-Release 2.4.6 - 15th Aug 2000 
+Release 2.4.6 - 16th Aug 2000 
   + Turn Linger off before closing sockets, to allow restart.
   + JsseListener & SunJsseListener added and documented
   + com.mortbay.Util.KeyPairTool added to handle openSSL SSL keys.

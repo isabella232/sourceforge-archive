@@ -452,7 +452,7 @@ abstract public class ThreadedServer
         try{
             long end_wait=System.currentTimeMillis()+5000;
             while (_threadSet.size()>0 && end_wait>System.currentTimeMillis())
-                wait(5000);
+                this.wait(5000);
 
             // Stop any still running
             if (_threadSet.size()>0)
@@ -469,7 +469,7 @@ abstract public class ThreadedServer
                 while(_threadSet.size()>0)
                 {
                     Code.debug("waiting for threads to stop...");
-                    wait(5000);
+                    this.wait(5000);
                 }
             }
         }
@@ -607,7 +607,7 @@ abstract public class ThreadedServer
             {
                 if (_threadSet!=null)
                     _threadSet.remove(thread);
-                notify();
+                this.notify();
             }
 	    if (_threadSet!=null)
 		Code.debug("Stopped listening on " + listen+
