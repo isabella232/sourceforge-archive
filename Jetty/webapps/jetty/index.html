@@ -88,25 +88,13 @@ Jetty has a <A HREF="/jetty/JsseSSL.html">SunJsseListener</A> which uses Sun's J
 
 <A NAME="Modular"></A>
 <BR>&nbsp;<H3>Modular Architecture</H3>
-Jetty request handling is based on stacks of abstracted request handlers.
-All Jetty features are provided by modular request handlers that are stacked
-together to provide an  optimal set of handlers or new handlers
-may be written for server extensions.
-Current Handlers provided with Jetty include:<UL>
-  <LI>Logging.
-  <LI>Basic Authentication.
-  <LI>Sessions.
-  <LI>Translates.
-  <LI>Response Filtering.
-  <LI>Servlet Handling.
-  <LI>File Serving.
-  <LI>Request Forwarding.
-  <LI>Proxy Server.
-  <LI>Forms, querries & Cookies.
-</UL>
-Key classes within Jetty are dynamicaly loaded so that they may be replaced
-with alternate or extended implementations. For example SSL handling is
-provided by extending the standard HttpListener class.
+Jetty request handling is based on collections of abstracted request listeners
+and handlers. All Jetty features are provided by specializations of these
+abstract components.   This allows Jetty's behaviour to be extended and/or
+enhanced by the addition of extra listeners and handlers.
+<P>
+The <A HREF="http://sourceforge.net/project/showfiles.php?group_id=7322">Jetty3Extra</A> repository contains extension such as
+JMX configuration and SASL authentication. 
 
 <A NAME="Embeddable"></A>
 <BR>&nbsp;<H3>Embeddable</H3>

@@ -63,7 +63,7 @@ public class Demo
             // Configure handlers
             server.addWebApplication(null,
                                      "/jetty/*",
-                                     "webapps/jetty.war",
+                                     "webapps/jetty",
                                      "etc/webdefault.xml",
                                      false);
             

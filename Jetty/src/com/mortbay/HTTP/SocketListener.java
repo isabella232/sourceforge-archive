@@ -94,7 +94,6 @@ public class SocketListener
      * Implementation of ThreadPool.handle(), calls handleConnection.
      * @param job A Connection.
      */
-//    public final void handleConnection(Socket socket)
     public void handleConnection(Socket socket)
         throws IOException
     {

@@ -18,29 +18,25 @@ prepare     - Set up build directory structure.
 servlet     - Buils lthe servlet library.
 jasper      - Builds the Jasper JSP engine library.
 jetty       - Builds the Jetty library.
-libs        - Builds all libraries.
+jars        - Builds all libraries.
 dist        - Constructs a distribution file with all the source.
 webapp      - Builds the demo web application.
 demo        - Runs the demo web application.
-test        - Runs the Jetty test harness.
+test        - Runs the Jetty test harnesses.
 release     - Cleanup for release
 
 -->
-<project name="Jetty3 Web, Servlet, and JSP server"
-  default="webapp"
-  basedir=".">
-
-  <property name="app.name"       value="Jetty3" />
-  <property name="version"        value="3.0.0" />
-
-  <property name="src.dir"        value="${basedir}/src" />
+<project name="Jetty3 HTTP Server" default="webapp" basedir=".">
+  <property name="src"            value="${basedir}/src" />
   <property name="webapps"        value="${basedir}/webapps"/>
+  <property name="webappsrc"      value="${basedir}/webappsrc"/>
   <property name="lib"            value="${basedir}/lib"/>
   <property name="classes"        value="${basedir}/classes"/>
   <property name="javadoc"        value="${basedir}/javadoc"/>
   <property name="logs"           value="${basedir}/logs"/>
   <property name="build.compiler" value="jikes"/>
   <!-- property name="build.compiler" value="classic"/ -->
+  <!-- property name="build.compiler" value="modern"/ -->
 
   <property name="jetty.webapp"           value="${webapps}/jetty"/>
   <property name="jetty.war"              value="${webapps}/jetty.war"/>
@@ -52,24 +48,24 @@ release     - Cleanup for release
   <property name="jasper.jar"     value="${lib}/org.apache.jasper.jar"/>
   <property name="xml.jar"        value="${lib}/com.microstar.xml.jar"/>
   <property name="jsse.jar"       value="${lib}/com.sun.net.ssl.jar"/>
-<!--
-  <property name="libs"           value="${xml.jar};${jsse.jar};${jasper.jar};${servlet.jar};${jetty.jar}"/>
--->
-  <property name="sasl.jar"      value="${lib}/javax-sasl.jar"/>
-  <property name="libs"           value="${sasl.jar};${xml.jar};${jsse.jar};${jasper.jar};${servlet.jar};${jetty.jar}"/>
+
+  <property name="classpath"      value="${xml.jar};${jsse.jar};${jasper.jar};${servlet.jar};${jetty.jar}"/>
+
 
   <target name="prepare">
     <mkdir dir="${jetty.webapp.classes}"/>
     <mkdir dir="${javadoc}" />
     <mkdir dir="${classes}" />
     <mkdir dir="${logs}" />
-    <copy file="${src.dir}/com/mortbay/Util/configure.dtd" tofile="${basedir}/etc/configure.dtd" />
-    <copy file="${src.dir}/com/mortbay/HTTP/web.dtd" tofile="${basedir}/etc/web.dtd" />
+    <copy file="${src}/com/mortbay/Util/configure.dtd" tofile="${basedir}/etc/configure.dtd" />
+    <copy file="${src}/com/mortbay/HTTP/web.dtd" tofile="${basedir}/etc/web.dtd" />
   </target>
+
 
   <target name="tidy">
     <delete dir="${classes}"/>
   </target>
+
 
   <target name="clean" depends="tidy">
     <delete dir="${jetty.webapp.classes}"/>
@@ -80,55 +76,37 @@ release     - Cleanup for release
   </target>
 
 
-  <target name="check_packages">
-    <!-- available property="prop.name" classname="com.some.Class" / -->
-  </target>
-
-  <target name="servlet" depends="prepare">
+  <target name="classes" depends="prepare">
     <copy todir="${classes}">
-      <fileset dir="${src.dir}">
-        <include name="javax/servlet/**/defaultManifest.mf" />
-        <include name="javax/servlet/**/*.properties" />
+      <fileset dir="${src}">
+        <include name="**/defaultManifest.mf" />
+        <include name="**/*.properties" />
+        <include name="**/*.dtd" />
       </fileset>
     </copy>
-    <javac srcdir="${src.dir}"
+    <javac srcdir="${src}"
            destdir="${classes}"
            classpath="${classpath}"
-           debug="on"
-           optimize="off"
+           debug="off"
+           optimize="on"
            deprecation="off"
            >
-      <include name="javax/servlet/**/*.java"/>
+       <include name="**/*.java"/>
+       <exclude name="com/mortbay/webapps/**" />
     </javac>
+  </target>
+
+
+  <target name="servlet.jar" depends="classes">
     <jar jarfile="${servlet.jar}" basedir="${classes}" >
        <include name="javax/servlet/**" />
     </jar>
   </target>
 
-  <target name="jetty" depends="prepare,servlet">
-    <copy todir="${classes}">
-      <fileset dir="${src.dir}">
-        <include name="com/mortbay/**/defaultManifest.mf" />
-        <include name="com/mortbay/**/*.dtd" />
-        <include name="com/mortbay/**/*.properties" />
-        <exclude name="com/mortbay/webapps/**" />
-      </fileset>
-    </copy>
-    <javac srcdir="${src.dir}"
-           destdir="${classes}"
-           classpath="${libs}"
-           debug="on"
-           optimize="off"
-           deprecation="off"
-           >
-      <include name="com/mortbay/**/*.java"/>
-      <exclude name="com/mortbay/Jetty/JMX/**" />
-      <exclude name="com/mortbay/webapps/**" />
-    </javac>
-    <jar jarfile="${jetty.jar}" basedir="${classes}" manifest="${src.dir}/com/mortbay/MANIFEST.MF" >
+
+  <target name="jetty.jar" depends="classes,servlet.jar">
+    <jar jarfile="${jetty.jar}" basedir="${classes}" manifest="${src}/com/mortbay/MANIFEST.MF" >
        <include name="com/mortbay/**"  />
-       <exclude name="com/mortbay/webapps/**" />
-       <exclude name="com/mortbay/Jetty/JMX/**" />
        <exclude name="com/mortbay/**/TestHarness*.class" />
        <exclude name="com/mortbay/Util/DataClass/*" />
        <exclude name="com/mortbay/Util/TestConfiguration.class" />
@@ -141,76 +119,28 @@ release     - Cleanup for release
     </jar>
   </target>
 
-  <target name="jmx" depends="libs,webapp">
-    <delete file="${jetty.jar}"/>
-    <copy todir="${classes}">
-      <fileset dir="${src.dir}">
-        <include name="com/mortbay/Jetty/JMX/**/defaultManifest.mf" />
-        <include name="com/mortbay/Jetty/JMX/**/*.dtd" />
-        <include name="com/mortbay/Jetty/JMX/**/*.properties" />
-        <exclude name="com/mortbay/webapps/**" />
-      </fileset>
-    </copy>
-    <copy file="${src.dir}/com/mortbay/Jetty/JMX/jetty.mlet" tofile="${basedir}/etc/jetty.mlet" />
-    <javac srcdir="${src.dir}"
-           destdir="${classes}"
-           classpath="${libs}"
-           debug="on"
-           optimize="off"
-           deprecation="off"
-           >
-      <include name="com/mortbay/Jetty/JMX/**/*.java"/>
-    </javac>
-    <jar jarfile="${jetty.jar}" basedir="${classes}" manifest="${src.dir}/com/mortbay/MANIFEST.MF" >
-       <include name="com/mortbay/**"  />
-       <exclude name="com/mortbay/webapps/**" />
-       <exclude name="com/mortbay/**/TestHarness*.class" />
-       <exclude name="com/mortbay/Util/DataClass/*" />
-       <exclude name="com/mortbay/Util/TestConfiguration.class" />
-       <exclude name="com/mortbay/Util/PropertyTreeTest.class" />
-       <exclude name="com/mortbay/Util/DictionaryConverterTest*.class" />
-       <exclude name="com/mortbay/HTTP/**/Test*.class" />
-       <exclude name="com/mortbay/HTTP/Http10TestClient.class" />
-       <exclude name="com/mortbay/HTML/Test*.class" />
-       <exclude name="com/mortbay/Jetty/**/Test*.class" />
-    </jar>
-  </target>
 
-  <target name="jasper" depends="prepare">
-    <copy todir="${classes}">
-      <fileset dir="${src.dir}">
-        <include name="org/apache/jasper/**/defaultManifest.mf" />
-        <include name="org/apache/**/*.dtd" />
-        <include name="org/apache/jasper/**/*.properties" />
-      </fileset>
-    </copy>
-    <javac srcdir="${src.dir}"
-           destdir="${classes}"
-           classpath="${classpath}"
-           debug="on"
-           optimize="off"
-           deprecation="off"
-           >
-      <include name="org/apache/jasper/**/*.java"/>
-    </javac>
+  <target name="jasper.jar" depends="classes">
     <jar jarfile="${jasper.jar}"
          basedir="${classes}"  >
        <include name="org/apache/jasper/**"  />
     </jar>
   </target>
 
-  <target name="libs" depends="servlet,jetty,jasper">
+
+  <target name="jars" depends="servlet.jar,jetty.jar,jasper.jar">
   </target>
 
-  <target name="webapp" depends="libs">
+  <target name="webapp" depends="jars">
     <copy todir="${jetty.webapp.classes}">
-      <fileset dir="${src.dir}">
+      <fileset dir="${webappsrc}">
         <include name="com/mortbay/webapps/jetty/defaultManifest.mf" />
         <include name="com/mortbay/webapps/jetty/*.properties" />
       </fileset>
     </copy>
-    <copy file="${jetty.webapp.classes}/com/mortbay/webapps/jetty/JettyIndex.properties" tofile="${jetty.webapp.classes}/com/mortbay/webapps/jetty/JettyIndex_en.properties" />
-    <javac srcdir="${src.dir}"
+    <copy file="${jetty.webapp.classes}/com/mortbay/webapps/jetty/JettyIndex.properties" 
+        tofile="${jetty.webapp.classes}/com/mortbay/webapps/jetty/JettyIndex_en.properties" />
+    <javac srcdir="${webappsrc}"
            destdir="${jetty.webapp.classes}"
            classpath="${jetty.jar};${servlet.jar}"
            debug="on"
@@ -219,37 +149,27 @@ release     - Cleanup for release
            >
       <include name="com/mortbay/webapps/jetty/*.java" />
     </javac>
-    <javac srcdir="${src.dir}"
-           destdir="${basedir}/servlets"
-           classpath="${jetty.jar};${servlet.jar}"
-           debug="on"
-           optimize="off"
-           deprecation="off"
-           >
-      <include name="com/mortbay/webapps/*.java" />
-    </javac>
     <copy file="LICENSE.html" tofile="${jetty.webapp}/LICENSE.html" />
     <copy file="VERSION.TXT" tofile="${jetty.webapp}/versions.txt" />
-    <jar jarfile="${jetty.war}"
-         basedir="${jetty.webapp}" >
-    </jar>
+    <!-- jar jarfile="${jetty.war}" basedir="${jetty.webapp}"/ -->
   </target>
 
-  <target name="javadoc" depends="libs">
+
+  <target name="javadoc" depends="jars">
     <mkdir dir="${javadoc}"/>
     <javadoc packagenames="com.mortbay.*,javax.servlet.*,org.apache.jasper.*"
-             sourcepath="${src.dir}"
+             sourcepath="${src}"
              destdir="${javadoc}"
              author="true"
              version="true"
              public="true"
-             windowtitle="${app.name} API"
-             doctitle="${app.name}"
+             windowtitle="${ant.project.name} API"
+             doctitle="${ant.project.name}"
              bottom="Copyright &#169; 2000 Mortbay Consulting Pty. Ltd. All Rights Reserved.">
     </javadoc>
   </target>
 
-  <target name="test1" depends="jetty">
+  <target name="testUtil" depends="classes">
     <property name="classpath" value="${jetty.jar};${servlet.jar}" />
     <java classname="com.mortbay.Util.TestHarness"
           classpath="${classes};${xml.jar}"
@@ -258,7 +178,7 @@ release     - Cleanup for release
           />
   </target>
 
-  <target name="test2" depends="jetty">
+  <target name="testHTTP" depends="classes">
     <property name="classpath" value="${jetty.jar};${servlet.jar}" />
     <java classname="com.mortbay.HTTP.TestHarness"
           classpath="${classes};${xml.jar}"
@@ -267,43 +187,19 @@ release     - Cleanup for release
           />
   </target>
 
-  <target name="test" depends="test1,test2" />
+  <target name="test" depends="testUtil,testHTTP" />
 
-  <target name="all" depends="prepare,libs,webapp,javadoc,test"/>
+  <target name="all" depends="prepare,jars,webapp,javadoc,test"/>
 
   <target name="demo" depends="webapp" >
     <java classname="com.mortbay.Jetty.Server"
-          classpath="${libs}"
+          classpath="${classpath}"
           fork="yes"
           failonerror="yes"
           >
        <jvmarg line="-Djetty.home=. -Djetty.log=." />
        <arg line="etc/admin.xml etc/demo.xml" />
     </java>
-  </target>
-
-  <target name="watchdog" depends="webapp" >
-    <java classname="com.mortbay.Jetty.Server"
-          classpath="${libs}"
-          fork="yes"
-          failonerror="yes"
-          >
-       <arg line="etc/watchdog.xml" />
-    </java>
-  </target>
-
-  <target name="dist" depends="all" >
-    <property name="tarfile" value="Jetty-${version}.tar" />
-    <delete  file="${tarfile}"/>
-    <tar tarfile="${tarfile}"
-         basedir="${basedir}">
-         <exclude name="${tarfile}" />
-         <exclude name="**/CVS/*" />
-         <exclude name="classes/**/*" />
-    </tar>
-    <delete  file="${tarfile}.gz"/>
-    <gzip zipfile="${tarfile}.gz" src="${tarfile}" />
-    <delete  file="${tarfile}"/>
   </target>
 
 </project>

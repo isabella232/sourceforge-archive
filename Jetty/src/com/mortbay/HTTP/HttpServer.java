@@ -822,13 +822,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
                             ServletHandler handler =
                                 context.getServletHandler();
 
-                            String pathInContext=
-                                PathMap.pathInfo(contextPath,uri);
-                            
-                            Code.debug("Look for ",uri," in ",handler,
-                                       " via ",contextPath);
-                            
-                            if (handler.getHolderEntry(pathInContext)!=null)
+                            if (handler!=null)
                                 return handler;
                         }
                     }   

@@ -1,6 +1,13 @@
 Jetty Versions
 --------------
 
+ + Cleaned up build.xml script
+ + Moved JMX and SASL handling to Jetty3Extra
+ + Fixed problem with ServletContext.getContext(uri)
+ + Minimal handling of Servlet.log before initialization.
+ + Various SSL cleanups
+ + Resource handler strips URL params like JSESSION.
+
 Jetty-3.1.rc0 - 23 Feb 2001
  + Added JMX management framework.
  + Use Thread context classloader as default context loader parent.

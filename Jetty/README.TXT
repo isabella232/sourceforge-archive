@@ -155,17 +155,9 @@ Distribution
 Jetty distributions and information is available from:
 
    http://jetty.mortbay.com
-   http://sourceforge.net/projects/jetty
+   http://sourceforge.net/project/jetty
    ftp://jetty.mortbay.com/pub
    
-
-Documentation
-=============
-Jetty is currently under documented, but this is improving.  The
-documentation is currently being hosted and developed as a Wiki site.
-For details see:
-
-  http://jetty.mortbay.com:8080/wiki/JettyWiki
 
 
 How to Contribute
@@ -183,6 +175,13 @@ The mailing lists are the best place to start:
 
 NOTES
 =====
+
+Jetty3Extra
+-----------
+
+Extra jetty functionality is available via the Jetty3Extra
+package.  This include JMX and SASL support.
+
 
 Classpaths Handling.
 --------------------

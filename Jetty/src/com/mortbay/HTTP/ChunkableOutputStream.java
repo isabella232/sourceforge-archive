@@ -421,7 +421,8 @@ public class ChunkableOutputStream extends FilterOutputStream
             if (_nulled)
             {
                 // Just write the contents of the rawWriter
-                _rawWriterBuffer.writeTo(_realOut);
+                if (null != _rawWriterBuffer)
+                    _rawWriterBuffer.writeTo(_realOut);
             }
             else
             {

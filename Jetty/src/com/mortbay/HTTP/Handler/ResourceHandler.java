@@ -223,6 +223,10 @@ public class ResourceHandler extends NullHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
+        // Strip any path params
+        if (pathInContext!=null && pathInContext.indexOf(";")>0)
+            pathInContext=pathInContext.substring(0,pathInContext.indexOf(";"));
+        
         // Extract and check filename
         pathInContext=Resource.canonicalPath(pathInContext);
         if (pathInContext==null)
@@ -709,18 +713,19 @@ public class ResourceHandler extends NullHandler
         //  since were here now), send that range with a 216 response
         // 
 
-        if (satisfiableRangeCount == 1) {
+        if (satisfiableRangeCount == 1)
+        {
             Code.debug("single satisfiable range: " + singleSatisfiableRange);
             long singleLength = singleSatisfiableRange.getSize(resLength);
             data.writeHeaders(response, singleLength);
-            response.setField(
-                       HttpFields.__ContentRange, 
-                       singleSatisfiableRange.toHeaderRangeString(resLength)
-            );
+            response.setStatus(response.__206_Partial_Content);
+            response.setReason((String)response.__statusMsg
+                               .get(new Integer(response.__206_Partial_Content)));
+            response.setField(HttpFields.__ContentRange, 
+                              singleSatisfiableRange.toHeaderRangeString(resLength));
             data.writeBytes(response.getOutputStream(), 
                         singleSatisfiableRange.getFirst(resLength), 
                         singleLength);
-            response.sendError(response.__206_Partial_Content);
             request.setHandled(true);
             return;
         }

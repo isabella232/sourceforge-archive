@@ -436,8 +436,7 @@ public class HttpConnection
                 // Assume it was the browser closing early
                 Code.ignore(e);
             else
-                Code.warning(e.toString());
-
+                Code.warning(e);
             
             _persistent=false;
             if (!_response.isCommitted())

@@ -297,7 +297,12 @@ public abstract class GenericServlet
      */
      
     public void log(String msg) {
-	getServletContext().log(getServletName() + ": "+ msg);
+        ServletContext context = getServletContext();
+        if (context==null)
+            System.err.println("GenericServlet.log(pre-init): "+
+                               getServletName()+": "+msg);
+        else
+            context.log(getServletName() + ": "+ msg);
     }
    
    
