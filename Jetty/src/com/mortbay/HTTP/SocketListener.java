@@ -68,8 +68,8 @@ public class SocketListener
     public void stop()
         throws InterruptedException
     {
-        Log.event("Stopping SocketListener on "+getInetAddrPort());
         super.stop();
+        Log.event("Stopped SocketListener on "+getInetAddrPort());
     }
     
     /* --------------------------------------------------------------- */

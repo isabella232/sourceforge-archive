@@ -11,6 +11,7 @@ import com.mortbay.HTTP.HttpHandler;
 import com.mortbay.HTTP.HttpRequest;
 import com.mortbay.HTTP.HttpResponse;
 import com.mortbay.Util.Code;
+import com.mortbay.Util.Log;
 import java.io.IOException;
 
 /* ------------------------------------------------------------ */
@@ -27,11 +28,27 @@ abstract public class NullHandler implements HttpHandler
     private boolean _destroyed=true;
     private HandlerContext _context;
     private String _name;
+
+    /* ------------------------------------------------------------ */
+    public void setName(String name)
+    {
+        _name=name;
+    }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
+    public String getName()
+    {
+        if (_name==null)
+        {
+            _name=this.getClass().getName();
+            if (!Code.debug())
+                _name=_name.substring(_name.lastIndexOf(".")+1);
+        }
+        return _name;
+    }
+    
+    
+    /* ------------------------------------------------------------ */
     public HandlerContext getHandlerContext()
     {
         return _context;
@@ -39,24 +56,14 @@ abstract public class NullHandler implements HttpHandler
     
     /* ------------------------------------------------------------ */
     /** Initialize with a HandlerContext.
-     * The first time it is called, initialize() is called after setting the context.
      * @param configuration Must be the HandlerContext of the handler
      */
-    public final void initialize(Object configuration)
+    public void initialize(HandlerContext context)
     {
         if (_context==null)
-        {
-            _context=(HandlerContext) configuration;
-            initialize();
-        }
-        else if (_context!=configuration)
+            _context=context;
+        else if (_context!=context)
             throw new IllegalStateException("Can't initialize handler for different context");
-    }
-    
-    
-    /* ------------------------------------------------------------ */
-    public void initialize()
-    {
     }
     
     /* ----------------------------------------------------------------- */
@@ -64,12 +71,14 @@ abstract public class NullHandler implements HttpHandler
     {
         _started=true;
         _destroyed=false;
+        Log.event("Started "+this);
     }
     
     /* ----------------------------------------------------------------- */
     public void stop()
     {
         _started=false;
+        Log.event("Stopped "+this);
     }
     
     /* ----------------------------------------------------------------- */
@@ -78,6 +87,7 @@ abstract public class NullHandler implements HttpHandler
         _started=false;
         _destroyed=true;
         _context=null;
+        Log.event("Destroyed "+this);
     }
 
     /* ----------------------------------------------------------------- */
@@ -90,24 +100,12 @@ abstract public class NullHandler implements HttpHandler
     public boolean isDestroyed()
     {
         return _destroyed;
-    }
-    
-    
+    }    
     
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        if(_name==null)
-        {
-            _name=this.getClass().getName();
-            if (!Code.debug())
-            {
-                int i=_name.lastIndexOf(".");
-                _name=_name.substring(i+1);
-            }
-            _name+=" in "+_context;
-        }
-        return _name;
+        return getName()+" in "+_context;
     }    
 
 }

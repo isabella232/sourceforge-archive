@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -40,6 +41,10 @@ import java.util.Set;
 public class HttpServer implements LifeCycle
 {    
     /* ------------------------------------------------------------ */
+    private static ArrayList __servers = new ArrayList(3);
+    private static List __roServers = Collections.unmodifiableList(__servers);
+    
+    /* ------------------------------------------------------------ */
     private HashMap _listeners = new HashMap(3);
     private HttpEncoding _httpEncoding ;
     private LogSink _logSink;
@@ -55,8 +60,11 @@ public class HttpServer implements LifeCycle
     /** Constructor. 
      */
     public HttpServer()
-    {}
+    {
+        __servers.add(this);
+    }
 
+    
     /* ------------------------------------------------------------ */
     /** 
      * @return 
@@ -78,12 +86,6 @@ public class HttpServer implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    public void initialize(Object config)
-    {
-        Code.notImplemented();
-    }
-    
-    /* ------------------------------------------------------------ */
     /** Start all handlers then listeners.
      */
     public synchronized void start()
@@ -93,13 +95,16 @@ public class HttpServer implements LifeCycle
             Code.debug("LISTENERS: ",_listeners);
             Code.debug("HANDLER: ",_hostMap);
         }   
+
+        if (_logSink!=null)
+            _logSink.start();
         
-        Iterator handlers = getHandlers().iterator();
-        while(handlers.hasNext())
+        Iterator contexts = getHandlerContexts().iterator();
+        while(contexts.hasNext())
         {
-            HttpHandler handler=(HttpHandler)handlers.next();
-            if (!handler.isStarted())
-                handler.start();
+            HandlerContext context=(HandlerContext)contexts.next();
+            if (!context.isStarted())
+                context.start();
         }
         
         Iterator listeners = getListeners().iterator();
@@ -117,14 +122,6 @@ public class HttpServer implements LifeCycle
      */
     public synchronized boolean isStarted()
     {
-        Iterator handlers = getHandlers().iterator();
-        while(handlers.hasNext())
-        {
-            HttpHandler handler=(HttpHandler)handlers.next();
-            if (handler.isStarted())
-                return true;
-        }
-        
         Iterator listeners = getListeners().iterator();
         while(listeners.hasNext())
         {
@@ -132,6 +129,14 @@ public class HttpServer implements LifeCycle
             if (listener.isStarted())
                 return true;
         }
+        Iterator contexts = getHandlerContexts().iterator();
+        while(contexts.hasNext())
+        {
+            HandlerContext context=(HandlerContext)contexts.next();
+            if (context.isStarted())
+                return true;
+        }
+        
         return false;
     }
     
@@ -150,22 +155,26 @@ public class HttpServer implements LifeCycle
             if (listener.isStarted())
             {
                 try{listener.stop();}
-                catch(Exception e){Code.warning(e);}
+                catch(Exception e)
+                {
+                    if (Code.debug())
+                        Code.warning(e);
+                    else
+                        Code.warning(e.toString());
+                }
             }
         }
         
-        Iterator handlers = getHandlers().iterator();
-        while(handlers.hasNext())
+        Iterator contexts = getHandlerContexts().iterator();
+        while(contexts.hasNext())
         {
-            HttpHandler handler=(HttpHandler)handlers.next();
-            if (handler.isStarted())
-            {
-                try{handler.stop();}
-                catch(Exception e){Code.warning(e);}
-            }
+            HandlerContext context=(HandlerContext)contexts.next();
+            if (context.isStarted())
+                context.stop();
         }
 
-        setLogSink(null);
+        if (_logSink!=null)
+            _logSink.stop();
     }
 
     
@@ -175,49 +184,34 @@ public class HttpServer implements LifeCycle
      */
     public synchronized void destroy()
     {
+        __servers.remove(this);
         Iterator listeners = getListeners().iterator();
         while(listeners.hasNext())
         {
             HttpListener listener =(HttpListener)listeners.next();
-            {
-                try{listener.destroy();}
-                catch(Exception e){Code.warning(e);}
-            }
+            try{listener.destroy();}
+            catch(Exception e){Code.warning(e);}
         }
         
-        Iterator handlers = getHandlers().iterator();
-        while(handlers.hasNext())
+        Iterator contexts = getHandlerContexts().iterator();
+        while(contexts.hasNext())
         {
-            HttpHandler handler=(HttpHandler)handlers.next();
-            {
-                try{handler.destroy();}
-                catch(Exception e){Code.warning(e);}
-            }
+            HandlerContext context=(HandlerContext)contexts.next();
+            try{context.destroy();}
+            catch(Exception e){Code.warning(e);}
         }
 
         _hostMap.clear();
+        _hostMap=null;
         _listeners.clear();
+        _listeners=null;
+        setLogSink(null);
     }
 
     /* ------------------------------------------------------------ */
     public synchronized boolean isDestroyed()
     {
-        Iterator handlers = getHandlers().iterator();
-        while(handlers.hasNext())
-        {
-            HttpHandler handler=(HttpHandler)handlers.next();
-            if (!handler.isDestroyed())
-                return false;
-        }
-        
-        Iterator listeners = getListeners().iterator();
-        while(listeners.hasNext())
-        {
-            HttpListener listener =(HttpListener)listeners.next();
-            if (!listener.isDestroyed())
-                return false;
-        }
-        return true;
+        return _hostMap==null;
     }
     
     /* ------------------------------------------------------------ */
@@ -460,7 +454,7 @@ public class HttpServer implements LifeCycle
     /** 
      * @return Collection of all handler.
      */
-    public Set getHandlers()
+    public synchronized Set getHandlers()
     {
         HashSet set = new HashSet(33);
         Iterator maps=_hostMap.values().iterator();
@@ -477,6 +471,27 @@ public class HttpServer implements LifeCycle
                     HandlerContext context = (HandlerContext) contexts.next();
                     set.addAll(context.getHandlers());
                 }
+            }
+        }
+        return set;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Collection of all handler.
+     */
+    public synchronized Set getHandlerContexts()
+    {
+        HashSet set = new HashSet(33);
+        Iterator maps=_hostMap.values().iterator();
+        while (maps.hasNext())
+        {
+            PathMap pm=(PathMap)maps.next();
+            Iterator lists=pm.values().iterator();
+            while(lists.hasNext())
+            {
+                List list=(List)lists.next();
+                set.addAll(list);
             }
         }
         return set;
@@ -762,4 +777,18 @@ public class HttpServer implements LifeCycle
             Code.warning(e);
         }
     }
+
+    
+    /* ------------------------------------------------------------ */
+    static List getHttpServerList()
+    {
+        return __roServers;
+    }
+
+    /* ------------------------------------------------------------ */
+    Map getHostMap()
+    {
+        return _hostMap;
+    }
+    
 }

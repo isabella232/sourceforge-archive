@@ -126,7 +126,6 @@ abstract public class ThreadedServer extends ThreadPool
             :new InetAddrPort(_address.getInetAddress(),port));
     }
 
-
     /* ------------------------------------------------------------ */
     /** 
      * @param ms 
@@ -369,8 +368,6 @@ abstract public class ThreadedServer extends ThreadPool
         catch(IOException e)
         {
             Code.warning(e);
-            destroy();
-            throw new Error(e.toString());
         }        
     }
 
@@ -413,6 +410,13 @@ abstract public class ThreadedServer extends ThreadPool
     {
         throw new IllegalStateException("Can't run jobs on ThreadedServer");
     }
+
+
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return getName()+"@"+getInetAddrPort();
+    }   
 }
 
 

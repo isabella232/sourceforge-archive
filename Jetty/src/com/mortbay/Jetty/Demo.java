@@ -10,6 +10,7 @@ import com.mortbay.HTTP.Handler.NotFoundHandler;
 import com.mortbay.HTTP.HandlerContext;
 import com.mortbay.HTTP.HashUserRealm;
 import com.mortbay.HTTP.HttpServer;
+import com.mortbay.HTTP.SecurityConstraint;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.InetAddrPort;
 import com.mortbay.Util.RolloverFileLogSink;
@@ -27,10 +28,32 @@ public class Demo
     public static void main(String[] arg)
     {
         try
-        {    
+        {
+            HandlerContext context;
+
+            // Realm
+            HashUserRealm realm=
+                new HashUserRealm("Jetty Demo Realm",
+                                  "./etc/demoRealm.properties");
+            
+            // Admin server
+            HttpServer admin = new HttpServer();
+            admin.addRealm(realm);
+            admin.addListener(new InetAddrPort("127.0.0.1:8888"));
+            context=admin.addContext(null,"/");
+            context.setRealm("Jetty Demo Realm");
+            context.addSecurityConstraint
+                ("/",
+                 new SecurityConstraint("admin",
+                                        "content-administrator"));
+            context.addServlet("Admin","/","com.mortbay.HTTP.AdminServlet");
+            context.addHandler(new NotFoundHandler());
+            admin.start();
+            
             // Make server
             HttpServer server = new HttpServer();
-
+            server.addRealm(realm);
+            
             if (arg.length==0)
                 server.addListener(new InetAddrPort(8080));
             else
@@ -38,7 +61,6 @@ public class Demo
                     server.addListener(new InetAddrPort(arg[l]));
             
             // Configure handlers
-            HandlerContext context;
             server.addWebApplication(null,"/jetty/*",
                                      "./webapps/jetty.war",
                                      "./etc/webdefault.xml");
@@ -73,15 +95,16 @@ public class Demo
                 .put("Path","/bin:/usr/bin:/usr/local/bin");
             
             context=server.addContext(null,"/");
+            context.setRealm("Jetty Demo Realm");
+            context.addSecurityConstraint
+                ("/admin/*",
+                 new SecurityConstraint("admin",
+                                        "content-administrator"));
             context.addServlet("Forward","/","com.mortbay.Servlet.Forward")
                 .put("/","/jetty/index.html");
+            context.addServlet("Admin","/admin/*","com.mortbay.HTTP.AdminServlet");
             context.addHandler(new NotFoundHandler());
             
-            // Realm
-            HashUserRealm realm=
-                new HashUserRealm("Jetty Demo Realm",
-                                  "./etc/demoRealm.properties");
-            server.addRealm(realm);
             
             // Logger
             RolloverFileLogSink log = new RolloverFileLogSink();
@@ -93,6 +116,9 @@ public class Demo
                               
             // Start handlers and listener
             server.start();
+
+
+            
         }
         catch(Exception e)
         {
@@ -100,3 +126,4 @@ public class Demo
         }
     }
 }
+

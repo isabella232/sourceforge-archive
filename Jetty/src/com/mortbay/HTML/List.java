@@ -27,12 +27,34 @@ public class List extends Block
     }   
     
     /* ----------------------------------------------------------------- */
+    /** 
+     * @param o The item
+     * @return This List.
+     */
     public Composite add(Object o)
     {
         super.add("<LI>");
         super.add(o);
         return this;
     }
+    
+    /* ----------------------------------------------------------------- */
+    /** 
+     * @return The new Item composite
+     */
+    public Composite newItem()
+    {
+        super.add("<LI>");
+        Composite composite=new Composite();
+        super.add(composite);
+        return composite;
+    }
+
+    
 }
+
+
+
+
 
 

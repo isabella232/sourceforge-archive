@@ -55,7 +55,7 @@ public class ThreadPool
     private int _maxThreads = __maxThreads;
     private int _minThreads = __minThreads;
     private int _maxIdleTimeMs=0;
-    private String _name="ThreadPool";
+    private String _name;
     private int _threadId=0;
     private HashSet _idleSet=new HashSet();
     private boolean _running=false;
@@ -100,6 +100,11 @@ public class ThreadPool
      */
     public String getName()
     {
+        if (_name==null)
+        {
+            _name=getClass().getName();
+            _name=_name.substring(_name.lastIndexOf(".")+1);
+        }
         return _name;
     }
 

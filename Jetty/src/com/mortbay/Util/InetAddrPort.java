@@ -81,8 +81,11 @@ public class InetAddrPort
      */
     public InetAddrPort(InetAddrPort address)
     {
-        _addr=address._addr;
-        _port=address._port;
+        if (address!=null)
+        {
+            _addr=address._addr;
+            _port=address._port;
+        }
     }
     
     /* ------------------------------------------------------------ */

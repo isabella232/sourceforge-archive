@@ -11,19 +11,16 @@ package com.mortbay.Util;
  * software component. Implementations should respect
  * the following state table:<PRE>
  * State: Destroyed (initial state)
- *    initialize() -> Stopped
  *    start()      -> Started
  *    stop()       -> Stopped
  *    destroy()    -> Destroyed
  *
  * State: Stopped
- *    initialize() -> Destroyed -> Stopped
  *    start()      -> Started
  *    stop()       -> Stopped
  *    destroy()    -> Destroyed
  *
  * State: Started
- *    initialize() -> Destroyed -> Stopped
  *    start()      -> Started
  *    stop()       -> Stopped
  *    destroy()    -> Destroyed
@@ -34,13 +31,6 @@ package com.mortbay.Util;
  */
 public interface LifeCycle
 {
-    /* ------------------------------------------------------------ */
-    /** Initialize LifeCycle.
-     * @param init 
-     */
-    public void initialize(Object init)
-        throws InterruptedException;
-    
     /* ------------------------------------------------------------ */
     /** Start the LifeCycle.
      */

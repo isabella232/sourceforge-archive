@@ -450,7 +450,7 @@ public class WebApplicationContext extends HandlerContext
     public String toString()
     {
         if (_name!=null)
-            return _name+"@"+_webAppName;
+            return "WebApp:"+_name+"@"+_webAppName;
         return _webAppName;
     }
     

@@ -95,7 +95,7 @@ public class ServletHandler extends NullHandler
     }
     
     /* ----------------------------------------------------------------- */
-    public void start()
+    public synchronized void start()
     {
         // Initialize classloader
         _loader=getHandlerContext().getClassLoader();
@@ -109,9 +109,22 @@ public class ServletHandler extends NullHandler
                 holder.initialize();
         }
         
-        Log.event("ServletHandler started: "+this);
         super.start();
     }   
+    
+    /* ----------------------------------------------------------------- */
+    public synchronized void stop()
+    {
+        _loader=null;
+        // Stop servlets
+        Iterator i = _servletMap.values().iterator();
+        while (i.hasNext())
+        {
+            ServletHolder holder = (ServletHolder)i.next();
+            holder.destroy();
+        }
+        super.stop();
+    }
     
     
     /* ------------------------------------------------------------ */
@@ -141,7 +154,6 @@ public class ServletHandler extends NullHandler
             ServletHolder holder =
                 newServletHolder(servletClass);
             addHolder(pathSpec,holder);
-
             
             return holder;
         }

@@ -98,11 +98,19 @@ public class SecurityHandler extends NullHandler
     /* ------------------------------------------------------------ */
     public void start()
     {
-        _realm = getHandlerContext().getHttpServer()
-            .getRealm(_realmName);
-        if (_realm==null)
-            throw new IllegalStateException("Unknown realm: "+_realmName);
-        super.start();
+        if (_realmName!=null && _realmName.length()>0)
+        {
+            _realm = getHandlerContext().getHttpServer()
+                .getRealm(_realmName);
+            super.start();
+            if (_realm==null)
+                Code.warning("Unknown realm: "+_realmName+" for "+this);
+        }
+        else if (_constraintMap.size()>0)
+        {
+            Code.warning("No Realm set for "+this);
+            super.start();
+        }
     }
     
     /* ------------------------------------------------------------ */

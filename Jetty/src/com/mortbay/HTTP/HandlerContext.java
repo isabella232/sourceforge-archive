@@ -15,6 +15,7 @@ import com.mortbay.Util.Code;
 import com.mortbay.Util.IO;
 import com.mortbay.Util.Resource;
 import com.mortbay.Util.StringUtil;
+import com.mortbay.Util.LifeCycle;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -22,13 +23,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 import java.util.List;
 import java.util.Map;
-
 
 /* ------------------------------------------------------------ */
 /** Context for a collection of HttpHandlers.
@@ -48,7 +49,7 @@ import java.util.Map;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HandlerContext
+public class HandlerContext implements LifeCycle
 {
     public final static String
         __ResourceBase="com.mortbay.HTTP.HandlerContext.resourceBase",
@@ -58,7 +59,6 @@ public class HandlerContext
     
     private HttpServer _httpServer;
     private List _handlers=new ArrayList(3);
-    private ServletHandler _servletHandler;
     private String _classPath;
     private ClassLoader _parent;
     private ClassLoader _loader;
@@ -108,448 +108,6 @@ public class HandlerContext
         _httpServer=httpServer;
         _name=_contextPath;
     }
-    
-    /* ------------------------------------------------------------ */
-    void addHost(String host)
-    {
-        // Note that null hosts are also added.
-        _hosts.add(host);
-
-        _name = ((host!=null ||_hosts.size()>1)
-                 ?(_hosts.toString()+":")
-                 :"")+
-            _contextPath;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return List of virtual hosts that this context is registered in.
-     */
-    public List getHosts()
-    {
-        return _hosts;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return The context prefix
-     */
-    public String getContextPath()
-    {
-        return _contextPath;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public HttpServer getHttpServer()
-    {
-        return _httpServer;
-    }
-
-    /* ------------------------------------------------------------ */
-    public String getClassPath()
-    {
-        return _classPath;
-    }
-     
-    /* ------------------------------------------------------------ */
-    /** Sets the class path for the context.
-     * Also sets the com.mortbay.HTTP.HandlerContext.classPath attribute.
-     * A class path is only required for a context if it uses classes
-     * that are not in the system class path, or if class reloading is
-     * to be performed.
-     * @param fileBase 
-     */
-    public void setClassPath(String classPath)
-    {
-        _classPath = classPath;
-        _loader=null;
-        _attributes.put(__ClassPath,classPath);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get the classloader.
-     * If no classloader has been set and the context has been loaded
-     * normally, then null is returned.
-     * If no classloader has been set and the context was loaded from
-     * a classloader, that loader is returned.
-     * If a classloader has been set and no classpath has been set then
-     * the set classloader is returned.
-     * If a classloader and a classpath has been set, then a new
-     * URLClassloader initialized on the classpath with the set loader as a
-     * partent is return.
-     * @return Classloader or null.
-     */
-    public synchronized ClassLoader getClassLoader()
-    {
-        if (_loader==null && (_parent!=null ||
-                              _classPath!=null ||
-                              this.getClass().getClassLoader()!=null))
-        {
-            
-            URL[] path=null;    
-            try{
-                // If no parent, then try this classes loader as parent
-                if (_parent==null)
-                    _parent=this.getClass().getClassLoader();
-                
-                Code.debug("Init classloader from "+_classPath+
-                           ", "+_parent+" for "+this);
-            
-                // look for additional classpath
-                if (_classPath!=null)
-                {
-                    StringTokenizer tokenizer =
-                        new StringTokenizer(_classPath,",;");
-                    path = new URL[tokenizer.countTokens()];
-                    int i=0;
-                    while (tokenizer.hasMoreTokens())
-                    {
-                        Resource resource =
-                            Resource.newResource(tokenizer.nextToken());
-                        if (resource.isDirectory() || resource.getFile()!=null)
-                            path[i++]=resource.getURL();
-                        else
-                        {
-                            // XXX - this is a jar in a jar, so we must
-                            // extract it - probably should be to an in memory
-                            // structure, but this will do for now.
-                            // XXX - Need to do better with the temp dir
-                            InputStream in =resource.getInputStream();
-                            File file=File.createTempFile("Jetty",".zip");
-                            file.deleteOnExit();
-                            Code.debug("Extract ",resource," to ",file);
-                            FileOutputStream out = new FileOutputStream(file);
-                            IO.copy(in,out);
-                            out.close();
-                            path[i++]=file.toURL();
-                        }
-                    }
-                }
-            }
-            catch(Exception e){Code.warning(e);}
-            catch(Error e){Code.warning(e);}
-            
-            if (path==null || path.length==0 || path[0]==null)
-                _loader=_parent;
-            else
-                _loader=new ContextLoader(_classPath,path,_parent);
-            _attributes.put(__ClassLoader,_loader);
-        }
-        
-        return _loader;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Set the class loader.
-     * If a classpath is also set, this classloader is treated as
-     * a parent loader to a URLClassLoader initialized with the
-     * classpath.
-     * Also sets the com.mortbay.HTTP.HandlerContext.classLoader
-     * attribute.
-     * @param loader 
-     */
-    public void setClassLoader(ClassLoader loader)
-    {
-        _parent=loader;
-        _loader=null;
-        _attributes.put(__ClassLoader,loader);
-    }
-   
-    /* ------------------------------------------------------------ */
-    public Resource getResourceBase()
-    {
-        return _resourceBase;
-    }
-
-    
-    /* ------------------------------------------------------------ */
-    public void setResourceBase(Resource resourceBase)
-    {
-        Code.debug("resourceBase=",resourceBase," for ", this);
-        _resourceBase=resourceBase;
-        _attributes.put(__ResourceBase,_resourceBase.toString());
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * If a relative file is passed, it is converted to a file
-     * URL based on the current working directory.
-     * Also sets the com.mortbay.HTTP.resouceBase context attribute
-     * @param resourceBase A URL prefix or directory name.
-     */
-    public void setResourceBase(String resourceBase)
-    {
-        try{
-            _resourceBase=Resource.newResource(resourceBase);
-            _attributes.put(__ResourceBase,
-                            _resourceBase.toString());
-            Code.debug("resourceBase=",_resourceBase," for ", this);
-        }
-        catch(IOException e)
-        {
-            Code.debug(e);
-            throw new IllegalArgumentException(resourceBase+":"+e.toString());
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    public Map getMimeMap()
-    {
-        return _mimeMap;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * Also sets the com.mortbay.HTTP.mimeMap context attribute
-     * @param mimeMap 
-     */
-    public void setMimeMap(Map mimeMap)
-    {
-        _mimeMap = mimeMap;
-        _attributes.put(__MimeMap,_mimeMap);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get all handlers
-     * @return 
-     */
-    public List getHandlers()
-    {
-        return _handlers;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Gent the number of handlers.
-     * @return 
-     */
-    public int getHandlerSize()
-    {
-        return _handlers.size();
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get handler by index.
-     * @param i 
-     * @return 
-     */
-    public HttpHandler getHandler(int i)
-    {
-        return (HttpHandler)_handlers.get(i);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Get a handler by class.
-     * @param handlerClass 
-     * @return The first handler that is an instance of the handlerClass
-     */
-    public synchronized HttpHandler getHandler(Class handlerClass)
-    {
-        for (int h=0;h<_handlers.size();h++)
-        {
-            HttpHandler handler = (HttpHandler)_handlers.get(h);
-            if (handlerClass.isInstance(handler))
-                return handler;
-        }
-        return null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Set a handler.
-     * @param i 
-     * @param handler 
-     */
-    public void setHandler(int i,HttpHandler handler)
-    {
-        _handlers.set(i,handler);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Add a HttpHandler to the context.
-     * @param handler 
-     */
-    public void addHandler(HttpHandler handler)
-    {
-        _handlers.add(handler);
-        try
-        {
-            handler.initialize(this);
-        }
-        catch(InterruptedException e)
-        {
-            Code.warning(e);
-        }
-    }    
-
-
-    /* ------------------------------------------------------------ */
-    /** Add a servlet to the context.
-     * If no ServletHandler is found in the context, a new one is added.
-     * @param name The name of the servlet.
-     * @param pathSpec The pathspec within the context
-     * @param className The classname of the servlet.
-     * @return The ServletHolder.
-     * @exception ClassNotFoundException 
-     * @exception InstantiationException 
-     * @exception IllegalAccessException 
-     */
-    public synchronized ServletHolder addServlet(String pathSpec,
-                                                 String className)
-        throws ClassNotFoundException,
-               InstantiationException,
-               IllegalAccessException
-    {
-        return addServlet(className,pathSpec,className);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Add a servlet to the context.
-     * If no ServletHandler is found in the context, a new one is added.
-     * @param name The name of the servlet.
-     * @param pathSpec The pathspec within the context
-     * @param className The classname of the servlet.
-     * @return The ServletHolder.
-     * @exception ClassNotFoundException 
-     * @exception InstantiationException 
-     * @exception IllegalAccessException 
-     */
-    public synchronized ServletHolder addServlet(String name,
-                                                 String pathSpec,
-                                                 String className)
-        throws ClassNotFoundException,
-               InstantiationException,
-               IllegalAccessException
-    {
-        if (_servletHandler==null)
-        {
-            _servletHandler=getServletHandler();
-            if (_servletHandler==null)
-            {
-                _servletHandler=new ServletHandler();
-                addHandler(_servletHandler);
-            }
-        }
-        return _servletHandler.addServlet(name,pathSpec,className);
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isServingServlets()
-    {
-        return getServletHandler()!=null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public ServletHandler getServletHandler()
-    {
-        return (ServletHandler)
-            getHandler(com.mortbay.HTTP.Handler.Servlet.ServletHandler.class);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Setup context for serving dynamic servlets.
-     * @param serve If true and there is no DynamicHandler instance in the
-     * context, a dynamicHandler is added. If false, all DynamicHandler
-     * instances are removed from the context.
-     */
-    public synchronized void setServingDynamicServlets(boolean serve)
-    {
-        HttpHandler handler = (DynamicHandler)
-            getHandler(com.mortbay.HTTP.Handler.Servlet.DynamicHandler.class);
-        if (serve)
-        {
-            if (handler==null)
-                addHandler(new DynamicHandler());
-        }
-        else if (handler!=null)
-            _handlers.remove(handler);
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isServingDynamicServlets()
-    {
-        return getDynamicHandler()!=null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public DynamicHandler getDynamicHandler()
-    {
-        return (DynamicHandler)
-            getHandler(com.mortbay.HTTP.Handler.Servlet.DynamicHandler.class);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Setup context for serving Resources as files.
-     * @param serve If true and there is no ResourceHandler instance in the
-     * context, a ResourceHandler is added. If false, all ResourceHandler
-     * instances are removed from the context.
-     */
-    public synchronized void setServingResources(boolean serve)
-    {
-        ResourceHandler handler = (ResourceHandler)
-            getHandler(com.mortbay.HTTP.Handler.ResourceHandler.class);
-        if (serve)
-        {
-            if (handler==null)
-                addHandler(new ResourceHandler());
-        }
-        else while (handler!=null)
-        {
-            _handlers.remove(handler);
-            handler = (ResourceHandler)
-                getHandler(com.mortbay.HTTP.Handler.ResourceHandler.class);
-        }
-    }
-    
-
-    /* ------------------------------------------------------------ */
-    public boolean isServingResources()
-    {
-        return getResourceHandler()!=null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public ResourceHandler getResourceHandler()
-    {
-        return (ResourceHandler)
-            getHandler(com.mortbay.HTTP.Handler.ResourceHandler.class);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public SecurityHandler getSecurityHandler()
-    {
-        return (SecurityHandler)
-            getHandler(com.mortbay.HTTP.Handler.SecurityHandler.class);
-    }
-
-    /* ------------------------------------------------------------ */
-    public void addSecurityConstraint(String pathSpec,
-                                      SecurityConstraint sc)
-    {
-        SecurityHandler sh=getSecurityHandler();
-        if (sh==null)
-        {
-            sh=new SecurityHandler();
-            _handlers.add(0,sh);
-        }
-        sh.addSecurityConstraint(pathSpec,sc);
-    }
-
-
-    /* ------------------------------------------------------------ */
-    /** 
-     * @param username 
-     * @param password 
-     */
-    public  void addUser(String username, String password)
-    {
-        SecurityHandler sh=getSecurityHandler();
-        if (sh==null)
-        {
-            sh=new SecurityHandler();
-            _handlers.add(0,sh);
-        }
-        sh.addUser(username,password);
-    }
-
     
     /* ------------------------------------------------------------ */
     /** Set context init parameter.
@@ -624,7 +182,6 @@ public class HandlerContext
         }
         else
             _attributes.put(name,value);
-
     }
 
     
@@ -649,6 +206,423 @@ public class HandlerContext
             _attributes.remove(name);
     }
     
+    /* ------------------------------------------------------------ */
+    /** Add a virtual host alias to this context.
+     * @param host 
+     */
+    void addHost(String host)
+    {
+        // Note that null hosts are also added.
+        _hosts.add(host);
+
+        _name = ((host!=null ||_hosts.size()>1)
+                 ?(_hosts.toString()+":")
+                 :"")+
+            _contextPath;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return List of virtual hosts that this context is registered in.
+     */
+    public List getHosts()
+    {
+        return _hosts;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return The context prefix
+     */
+    public String getContextPath()
+    {
+        return _contextPath;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public HttpServer getHttpServer()
+    {
+        return _httpServer;
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getClassPath()
+    {
+        return _classPath;
+    }
+     
+    /* ------------------------------------------------------------ */
+    /** Sets the class path for the context.
+     * Also sets the com.mortbay.HTTP.HandlerContext.classPath attribute.
+     * A class path is only required for a context if it uses classes
+     * that are not in the system class path, or if class reloading is
+     * to be performed.
+     * @param fileBase 
+     */
+    public void setClassPath(String classPath)
+    {
+        _classPath=classPath;
+        _attributes.put(__ClassPath,classPath);
+        if (isStarted())
+            Code.warning("classpath set while started");
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get the classloader.
+     * If no classloader has been set and the context has been loaded
+     * normally, then null is returned.
+     * If no classloader has been set and the context was loaded from
+     * a classloader, that loader is returned.
+     * If a classloader has been set and no classpath has been set then
+     * the set classloader is returned.
+     * If a classloader and a classpath has been set, then a new
+     * URLClassloader initialized on the classpath with the set loader as a
+     * partent is return.
+     * @return Classloader or null.
+     */
+    public synchronized ClassLoader getClassLoader()
+    {
+        
+        return _loader;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the class loader.
+     * If a classpath is also set, this classloader is treated as
+     * a parent loader to a URLClassLoader initialized with the
+     * classpath.
+     * Also sets the com.mortbay.HTTP.HandlerContext.classLoader
+     * attribute.
+     * @param loader 
+     */
+    public void setClassLoader(ClassLoader loader)
+    {
+        _parent=loader;
+        if (isStarted())
+            Code.warning("classpath set while started");
+        _attributes.put(__ClassLoader,loader);
+    }
+   
+    /* ------------------------------------------------------------ */
+    public Resource getResourceBase()
+    {
+        return _resourceBase;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setResourceBase(Resource resourceBase)
+    {
+        Code.debug("resourceBase=",resourceBase," for ", this);
+        _resourceBase=resourceBase;
+        _attributes.put(__ResourceBase,_resourceBase.toString());
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * If a relative file is passed, it is converted to a file
+     * URL based on the current working directory.
+     * Also sets the com.mortbay.HTTP.resouceBase context attribute
+     * @param resourceBase A URL prefix or directory name.
+     */
+    public void setResourceBase(String resourceBase)
+    {
+        try{
+            _resourceBase=Resource.newResource(resourceBase);
+            _attributes.put(__ResourceBase,
+                            _resourceBase.toString());
+            Code.debug("resourceBase=",_resourceBase," for ", this);
+        }
+        catch(IOException e)
+        {
+            Code.debug(e);
+            throw new IllegalArgumentException(resourceBase+":"+e.toString());
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Map getMimeMap()
+    {
+        return _mimeMap;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * Also sets the com.mortbay.HTTP.mimeMap context attribute
+     * @param mimeMap 
+     */
+    public void setMimeMap(Map mimeMap)
+    {
+        _mimeMap = mimeMap;
+        _attributes.put(__MimeMap,_mimeMap);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get all handlers
+     * @return 
+     */
+    public List getHandlers()
+    {
+        return _handlers;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Gent the number of handlers.
+     * @return 
+     */
+    public int getHandlerSize()
+    {
+        return _handlers.size();
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /** Add a handler.
+     * @param i The position in the handler list
+     * @param handler The handler.
+     */
+    public synchronized void addHandler(int i,HttpHandler handler)
+    {
+        _handlers.add(i,handler);
+        handler.initialize(this);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add a HttpHandler to the context.
+     * @param handler 
+     */
+    public synchronized void addHandler(HttpHandler handler)
+    {
+        addHandler(_handlers.size(),handler);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get handler by index.
+     * @param i 
+     * @return 
+     */
+    public HttpHandler getHandler(int i)
+    {
+        return (HttpHandler)_handlers.get(i);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get a handler by class.
+     * @param handlerClass 
+     * @return The first handler that is an instance of the handlerClass
+     */
+    public synchronized HttpHandler getHandler(Class handlerClass)
+    {
+        for (int h=0;h<_handlers.size();h++)
+        {
+            HttpHandler handler = (HttpHandler)_handlers.get(h);
+            if (handlerClass.isInstance(handler))
+                return handler;
+        }
+        return null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Remove a handler.
+     * The handler must be stopped before being removed.
+     * @param i 
+     */
+    public synchronized HttpHandler removeHandler(int i)
+    {
+        HttpHandler handler = getHandler(i);
+        if (handler.isStarted())
+            throw new IllegalStateException("Handler is started");
+        return (HttpHandler)_handlers.remove(i);
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    /** Add a servlet to the context.
+     * Conveniance method.
+     * If no ServletHandler is found in the context, a new one is added.
+     * @param name The name of the servlet.
+     * @param pathSpec The pathspec within the context
+     * @param className The classname of the servlet.
+     * @return The ServletHolder.
+     * @exception ClassNotFoundException 
+     * @exception InstantiationException 
+     * @exception IllegalAccessException 
+     */
+    public synchronized ServletHolder addServlet(String pathSpec,
+                                                 String className)
+        throws ClassNotFoundException,
+               InstantiationException,
+               IllegalAccessException
+    {
+        return addServlet(className,pathSpec,className);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add a servlet to the context.
+     * If no ServletHandler is found in the context, a new one is added.
+     * @param name The name of the servlet.
+     * @param pathSpec The pathspec within the context
+     * @param className The classname of the servlet.
+     * @return The ServletHolder.
+     * @exception ClassNotFoundException 
+     * @exception InstantiationException 
+     * @exception IllegalAccessException 
+     */
+    public synchronized ServletHolder addServlet(String name,
+                                                 String pathSpec,
+                                                 String className)
+        throws ClassNotFoundException,
+               InstantiationException,
+               IllegalAccessException
+    {
+        return getServletHandler().addServlet(name,pathSpec,className);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get the context ServletHandler.
+     * Conveniance method. If no ServletHandler exists, a new one is added to
+     * the context.
+     * @return ServletHandler
+     */
+    public synchronized ServletHandler getServletHandler()
+    {
+        ServletHandler servletHandler= (ServletHandler)
+            getHandler(com.mortbay.HTTP.Handler.Servlet.ServletHandler.class);
+        if (servletHandler==null)
+        {
+            servletHandler=new ServletHandler();
+            addHandler(servletHandler);
+        }
+        return servletHandler;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the context Dynamic Servlet Handler.
+     * Conveniance method. If no dynamicHandler exists, a new one is added to
+     * the context.
+     * @return DynamicHandler
+     */
+    public DynamicHandler getDynamicHandler()
+    {
+        DynamicHandler dynamicHandler= (DynamicHandler)
+            getHandler(com.mortbay.HTTP.Handler.Servlet.DynamicHandler.class);
+        if (dynamicHandler==null)
+        {
+            dynamicHandler=new DynamicHandler();
+            addHandler(dynamicHandler);
+        }
+        return dynamicHandler;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the context ResourceHandler.
+     * Conveniance method. If no ResourceHandler exists, a new one is added to
+     * the context.
+     * @return ResourceHandler
+     */
+    public ResourceHandler getResourceHandler()
+    {
+        ResourceHandler resourceHandler= (ResourceHandler)
+            getHandler(com.mortbay.HTTP.Handler.ResourceHandler.class);
+        if (resourceHandler==null)
+        {
+            resourceHandler=new ResourceHandler();
+            addHandler(resourceHandler);
+        }
+        return resourceHandler;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the context SecurityHandler.
+     * Conveniance method. If no SecurityHandler exists, a new one is added to
+     * the context.
+     * @return SecurityHandler
+     */
+    public SecurityHandler getSecurityHandler()
+    {
+        SecurityHandler securityHandler= (SecurityHandler)
+            getHandler(com.mortbay.HTTP.Handler.SecurityHandler.class);
+        if (securityHandler==null)
+        {
+            securityHandler=new SecurityHandler();
+            addHandler(securityHandler);
+        }
+        return securityHandler;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Setup context for serving dynamic servlets.
+     * Conveniance method.  A Dynamic servlet is one which is mapped from a
+     * URL containing the class name of the servlet - which is dynamcially
+     * loaded when the first request is received.
+     * @param serve If true and there is no DynamicHandler instance in the
+     * context, a dynamicHandler is added. If false, all DynamicHandler
+     * instances are removed from the context.
+     */
+    public synchronized void setServingDynamicServlets(boolean serve)
+    {
+        HttpHandler handler = (DynamicHandler)
+            getHandler(com.mortbay.HTTP.Handler.Servlet.DynamicHandler.class);
+        if (serve)
+        {
+            if (handler==null)
+                getDynamicHandler();
+        }
+        else if (handler!=null)
+            _handlers.remove(handler);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Setup context for serving Resources as files.
+     * Conveniance method.
+     * @param serve If true and there is no ResourceHandler instance in the
+     * context, a ResourceHandler is added. If false, all ResourceHandler
+     * instances are removed from the context.
+     */
+    public synchronized void setServingResources(boolean serve)
+    {
+        ResourceHandler handler = (ResourceHandler)
+            getHandler(com.mortbay.HTTP.Handler.ResourceHandler.class);
+        if (serve)
+        {
+            if (handler==null)
+                getResourceHandler();
+        }
+        else while (handler!=null)
+        {
+            _handlers.remove(handler);
+            handler = (ResourceHandler)
+                getHandler(com.mortbay.HTTP.Handler.ResourceHandler.class);
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the SecurityHandler realm.
+     * Conveniance method.
+     * If a SecurityHandler is not in the context, one is created
+     * as the 0th handler.
+     * @param realmName 
+     */
+    public void setRealm(String realmName)
+    {
+        SecurityHandler sh=getSecurityHandler();
+        sh.setRealm(realmName);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add a security constraint.
+     * Conveniance method.
+     * If a SecurityHandler is not in the context, one is created
+     * as the 0th handler.
+     * @param pathSpec 
+     * @param sc 
+     */
+    public void addSecurityConstraint(String pathSpec,
+                                      SecurityConstraint sc)
+    {
+        SecurityHandler sh=getSecurityHandler();
+        sh.addSecurityConstraint(pathSpec,sc);
+    }
+
     /* ------------------------------------------------------------ */
     /** 
      * @param filename 
@@ -908,13 +882,159 @@ public class HandlerContext
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "Context["+_name+"]"; 
+        return "HandlerContext["+_name+"]"; 
     }
     
     /* ------------------------------------------------------------ */
     public String toString(boolean detail)
     {
-        return "Context["+_name+"]" +
+        return "HandlerContext["+_name+"]" +
             (detail?("="+_handlers):""); 
     }
+    
+    /* ------------------------------------------------------------ */
+    /** Start all handlers then listeners.
+     */
+    public synchronized void start()
+    {
+        // setup the context loader
+        _loader=null;
+        if (_parent!=null || _classPath!=null ||  this.getClass().getClassLoader()!=null)
+        {
+            URL[] path=null;    
+            try{
+                // If no parent, then try this classes loader as parent
+                if (_parent==null)
+                    _parent=this.getClass().getClassLoader();
+                
+                Code.debug("Init classloader from "+_classPath+
+                           ", "+_parent+" for "+this);
+            
+                // look for additional classpath
+                if (_classPath!=null)
+                {
+                    StringTokenizer tokenizer =
+                        new StringTokenizer(_classPath,",;");
+                    path = new URL[tokenizer.countTokens()];
+                    int i=0;
+                    while (tokenizer.hasMoreTokens())
+                    {
+                        Resource resource =
+                            Resource.newResource(tokenizer.nextToken());
+                        if (resource.isDirectory() || resource.getFile()!=null)
+                            path[i++]=resource.getURL();
+                        else
+                        {
+                            // XXX - this is a jar in a jar, so we must
+                            // extract it - probably should be to an in memory
+                            // structure, but this will do for now.
+                            // XXX - Need to do better with the temp dir
+                            InputStream in =resource.getInputStream();
+                            File file=File.createTempFile("Jetty",".zip");
+                            file.deleteOnExit();
+                            Code.debug("Extract ",resource," to ",file);
+                            FileOutputStream out = new FileOutputStream(file);
+                            IO.copy(in,out);
+                            out.close();
+                            path[i++]=file.toURL();
+                        }
+                    }
+                }
+            }
+            catch(Exception e){Code.warning(e);}
+            catch(Error e){Code.warning(e);}
+            
+            if (path==null || path.length==0 || path[0]==null)
+                _loader=_parent;
+            else
+                _loader=new ContextLoader(_classPath,path,_parent);
+            _attributes.put(__ClassLoader,_loader);
+        }
+
+        // Start the handlers
+        Iterator handlers = _handlers.iterator();
+        while(handlers.hasNext())
+        {
+            HttpHandler handler=(HttpHandler)handlers.next();
+            if (!handler.isStarted())
+                handler.start();
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Start all handlers then listeners.
+     */
+    public synchronized boolean isStarted()
+    {
+        Iterator handlers = _handlers.iterator();
+        while(handlers.hasNext())
+        {
+            HttpHandler handler=(HttpHandler)handlers.next();
+            if (handler.isStarted())
+                return true;
+        }
+        return _loader!=null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Stop all listeners then handlers.
+     * @exception InterruptedException If interrupted, stop may not have
+     * been called on everything.
+     */
+    public synchronized void stop()
+        throws InterruptedException
+    {
+        Iterator handlers = _handlers.iterator();
+        while(handlers.hasNext())
+        {
+            HttpHandler handler=(HttpHandler)handlers.next();
+            if (handler.isStarted())
+            {
+                try{handler.stop();}
+                catch(Exception e){Code.warning(e);}
+            }
+        }
+        _loader=null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Stop all listeners then handlers.
+     * All the handlers are unmapped and the listeners removed.
+     */
+    public synchronized void destroy()
+    {
+        Iterator handlers = _handlers.iterator();
+        while(handlers.hasNext())
+        {
+            HttpHandler handler=(HttpHandler)handlers.next();
+            {
+                try{handler.destroy();}
+                catch(Exception e){Code.warning(e);}
+            }
+        }
+        
+        _httpServer=null;
+        _handlers.clear();
+        _handlers=null;
+        _classPath=null;
+        _parent=null;
+        _loader=null;
+        _resourceBase=null;
+        _attributes.clear();
+        _attributes=null;
+        _initParams.clear();
+        _initParams=null;
+        _mimeMap=null;
+        _hosts.clear();
+        _hosts=null;
+        _contextPath=null;
+        _name=null;
+        _redirectNullPath=false;
+    }
+
+    /* ------------------------------------------------------------ */
+    public synchronized boolean isDestroyed()
+    {
+        return _handlers==null;
+    }    
 }

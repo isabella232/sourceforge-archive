@@ -26,8 +26,26 @@ public class SecurityConstraint
     private List _roles;
     private int _dataConstraint=DC_NONE;
 
+
     /* ------------------------------------------------------------ */
     /** Constructor. 
+     */
+    public SecurityConstraint()
+    {}
+
+    /* ------------------------------------------------------------ */
+    /** Conveniance Constructor. 
+     * @param name 
+     * @param role 
+     */
+    public SecurityConstraint(String name,String role)
+    {
+        setName(name);
+        addRole(role);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
      * @param name 
      */
     public void setName(String name)

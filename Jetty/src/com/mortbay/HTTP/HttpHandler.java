@@ -17,10 +17,13 @@ import java.io.IOException;
 public interface HttpHandler extends LifeCycle
 {
     /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
+    public String getName();
+    
+    /* ------------------------------------------------------------ */
     public HandlerContext getHandlerContext();
+
+    /* ------------------------------------------------------------ */
+    public void initialize(HandlerContext context);
     
     /* ------------------------------------------------------------ */
     /** Start the handler.
