@@ -63,16 +63,12 @@
   <Call name="addWebApplication">
     <Arg>/</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/root</Arg>
-    <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
-    <Arg type="boolean">false</Arg> <!-- dont expand war -->
   </Call>
+
 
   <Call name="addWebApplication">
     <Arg>/jetty/*</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/jetty</Arg>
-    <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
-    <Arg type="boolean">false</Arg> <!-- dont expand war -->
-
     <!-- uncomment this section to add a session manager with a SecureRandom generator
     <Call name="getServletHandler">
       <Set name="sessionManager">
@@ -87,8 +83,7 @@
   <Call name="addWebApplication">
     <Arg>/examples/*</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/examples</Arg>
-    <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
-    <Arg type="boolean">false</Arg> <!-- dont expand war -->
+    <Set name="extractWAR">false</Set>
   </Call>
 
   <Call name="addContext">

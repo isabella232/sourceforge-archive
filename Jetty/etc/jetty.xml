@@ -21,8 +21,6 @@
   <Call name="addWebApplication">
     <Arg>/</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/root</Arg>
-    <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
-
      <Call name="getServletHandler">
        <Call name="getSessionManager">
          <Call name="setMaxInactiveInterval">
@@ -30,16 +28,12 @@
          </Call>
        </Call>
      </Call>
-
-
   </Call>
 
   <!-- Uncomment this section to  configure all webapplications found in the webapps directory 
   <Call name="addWebApplications">
     <Arg></Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/</Arg>
-    <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
-    <Arg type="boolean">false</Arg>
   </Call>
   -->
 

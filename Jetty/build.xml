@@ -161,6 +161,7 @@ Other targets:
         <include name="**/defaultManifest.mf" />
         <include name="**/*.properties" />
         <include name="**/*.dtd" />
+        <include name="**/*.xml" />
       </fileset>
     </copy>
     <javac srcdir="${src}"

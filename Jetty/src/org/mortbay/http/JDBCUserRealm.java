@@ -74,7 +74,8 @@ public class JDBCUserRealm extends HashUserRealm
     /** Constructor. 
      * @param name Realm name
      * @param config Filename or url of JDBC connection properties file.
-     * @exception IOException, SQLException
+     * @exception IOException 
+     * @exception ClassNotFoundException 
      */
     public JDBCUserRealm(String name, String config)
         throws IOException, ClassNotFoundException

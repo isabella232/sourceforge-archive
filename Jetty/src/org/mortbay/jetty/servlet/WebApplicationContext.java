@@ -86,34 +86,14 @@ public class WebApplicationContext extends ServletHttpContext
     private ResourceHandler _resourceHandler;
     private Map _tagLibMap=new HashMap(3);
     private String _deploymentDescriptor;
-    private String _defaultsDescriptor;
+    private String _defaultsDescriptor="org/mortbay/jetty/servlet/webdefault.xml";
     private String _war;
     private boolean _extract;
-    private XmlParser _xmlParser;
     private ArrayList _contextListeners;
     private ArrayList _contextAttributeListeners;
     private Set _warnings;
     
     /* ------------------------------------------------------------ */
-    /** Constructor.
-     * This constructor should be used if the XmlParser needs to be
-     * customized before initialization of the web application.
-     * The XmlParser can be customized with the addition of observers
-     * for specific tag types (eg ejb-ref).
-     * @param httpServer The HttpServer for this context
-     * @param contextPathSpec The context path spec. Which must be of
-     * the form / or /path/* 
-     * @deprecated                      
-     */
-    protected WebApplicationContext(HttpServer httpServer,
-                                 String contextPathSpec)
-    {
-        super(httpServer,contextPathSpec);
-        _xmlParser= new XmlParser();
-        Code.warning("DEPRECATED CONSTRUCTOR");
-    }
-
-    /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param httpServer The HttpServer for this context
      * @param contextPathSpec The context path spec. Which must be of
@@ -122,69 +102,17 @@ public class WebApplicationContext extends ServletHttpContext
      * @param defaults The defaults xml filename or URL which is
      * loaded before any in the web app. Must respect the web.dtd.
      * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
-     * @exception IOException 
-     */
-    WebApplicationContext(HttpServer httpServer,
-                          String contextPathSpec,
-                          String webApp,
-                          String defaults)
-        throws IOException
-    {
-        super(httpServer,contextPathSpec);
-        _xmlParser= new XmlParser();
-        initialize(webApp,defaults,false);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Constructor. 
-     * @param httpServer The HttpServer for this context
-     * @param contextPathSpec The context path spec. Which must be of
-     * the form / or /path/*
-     * @param webApp The Web application directory or WAR file.
-     * @param defaults The defaults xml filename or URL which is
-     * loaded before any in the web app. Must respect the web.dtd.
-     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
-     * @param extractWar If true, WAR files are extracted to the
-     * webapp subdirectory of the contexts temporary directory.
      * @exception IOException 
      */
     public WebApplicationContext(HttpServer httpServer,
                                  String contextPathSpec,
-                                 String webApp,
-                                 String defaults,
-                                 boolean extractWar)
+                                 String webApp)
         throws IOException
     {
         super(httpServer,contextPathSpec);
-        _xmlParser= new XmlParser();
-        initialize(webApp,defaults,extractWar);
+        _war=webApp;
     }
     
-    /* ------------------------------------------------------------ */
-    /** Initialize.
-     * This method can be called directly if the null constructor was
-     * used. This style of construction allows the XmlParser to be
-     * configured with observers before initialization.
-     * @param webApp The Web application directory or WAR file.
-     * @param defaults The defaults xml filename or URL which is
-     * loaded before any in the web app. Must respect the web.dtd.
-     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
-     * @param extractWar If true, WAR files are extracted to the
-     * webapp subdirectory of the contexts temporary directory.
-     * @exception IOException 
-     */
-    public void initialize(String webApp,
-                           String defaults,
-                           boolean extractWar)
-        throws IOException
-    {
-        _war=webApp;
-        _defaultsDescriptor=defaults;
-        _extract=extractWar;
-        _webApp=null;
-        resolveWebApp();
-    }
-
 
     /* ------------------------------------------------------------ */
     private void resolveWebApp()
@@ -238,7 +166,7 @@ public class WebApplicationContext extends ServletHttpContext
         throws Exception
     {
         // Get parser
-        XmlParser xmlParser=_xmlParser==null?(new XmlParser()):_xmlParser;
+        XmlParser xmlParser=new XmlParser();
         
         Resource dtd22=Resource.newSystemResource("/javax/servlet/resources/web-app_2_2.dtd");
         Resource dtd23=Resource.newSystemResource("/javax/servlet/resources/web-app_2_3.dtd");
@@ -320,7 +248,10 @@ public class WebApplicationContext extends ServletHttpContext
         {
             if (_defaultsDescriptor!=null && _defaultsDescriptor.length()>0)
             {
-                Resource dftResource= Resource.newResource(_defaultsDescriptor);
+                Resource dftResource= Resource.newSystemResource(_defaultsDescriptor);
+                if (dftResource==null)
+                    dftResource= Resource.newResource(_defaultsDescriptor);
+                
                 _defaultsDescriptor=dftResource.toString();
                 XmlParser.Node defaultConfig =
                     xmlParser.parse(dftResource.getURL().toString());
@@ -581,12 +512,6 @@ public class WebApplicationContext extends ServletHttpContext
         }
     }
     
-    /* ------------------------------------------------------------ */
-    public XmlParser getXmlParser()
-    {
-        return _xmlParser;
-    }
-
     /* ------------------------------------------------------------ */
     public String getDisplayName()
     {

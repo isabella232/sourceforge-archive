@@ -195,9 +195,13 @@ public abstract class AbstractSessionManager implements SessionManager
     public void start()
         throws Exception
     {
-        Log.event("Initializing random session key: "+_random);
         if (_random==null)
+        {
+            Log.event("New random session seed");
             _random=new Random();
+        }
+        else
+            Log.event("Initializing random session key: "+_random);
         _random.nextLong();
         
         if (_sessions==null)

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.ArrayList;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpServer;
 import org.mortbay.jetty.servlet.ServletHttpContext;
@@ -142,6 +143,58 @@ public class Server extends HttpServer
     }
 
 
+    
+    /* ------------------------------------------------------------ */
+    /** Add Web Application.
+     * @param contextPathSpec The context path spec. Which must be of
+     * the form / or /path/*
+     * @param webApp The Web application directory or WAR file.
+     * @return The WebApplicationContext
+     * @exception IOException 
+     */
+    public WebApplicationContext addWebApplication(String contextPathSpec,
+                                                   String webApp)
+        throws IOException
+    {
+        return addWebApplication(null,contextPathSpec,webApp);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add Web Application.
+     * @param virtualHost Virtual host name or null
+     * @param contextPathSpec The context path spec. Which must be of
+     * the form / or /path/*
+     * @param webApp The Web application directory or WAR file.
+     * @return The WebApplicationContext
+     * @exception IOException 
+     */
+    public WebApplicationContext addWebApplication(String virtualHost,
+                                                   String contextPathSpec,
+                                                   String webApp)
+        throws IOException
+    {
+        WebApplicationContext appContext =
+            new WebApplicationContext(this,contextPathSpec,webApp);
+        addContext(virtualHost,appContext);
+        Log.event("Web Application "+appContext+" added");
+        return appContext;
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /**  Add Web Applications.
+     * Add auto webapplications to the server.  The name of the
+     * webapp directory or war is used as the context name. If a
+     * webapp is called "root" it is added at "/".
+     * @param webapps Directory file name or URL to look for auto webapplication.
+     * @exception IOException 
+     */
+    public WebApplicationContext[] addWebApplications(String webapps)
+        throws IOException
+    {
+        return addWebApplications(null,webapps);
+    }
+    
     /* ------------------------------------------------------------ */
     /**  Add Web Applications.
      * Add auto webapplications to the server.  The name of the
@@ -149,19 +202,12 @@ public class Server extends HttpServer
      * webapp is called "root" it is added at "/".
      * @param host Virtual host name or null
      * @param webapps Directory file name or URL to look for auto webapplication.
-     * @param defaults The defaults xml filename or URL which is
-     * loaded before any in the web app. Must respect the web.dtd.
-     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
-     * @param extractWar If true, WAR files are extracted to the
-     * webapp subdirectory of the contexts temporary directory.
      * @exception IOException 
      */
-    public void addWebApplications(String host,
-                                   String webapps,
-                                   String defaults,
-                                   boolean extractWar)
+    public WebApplicationContext[] addWebApplications(String host,String webapps)
         throws IOException
     {
+        ArrayList wacs = new ArrayList();
         Resource r=Resource.newResource(webapps);
         if (!r.exists())
             throw new IllegalArgumentException("No such webapps resource "+r);
@@ -192,37 +238,15 @@ public class Server extends HttpServer
             else
                 context="/"+context;
 
-            addWebApplication(host,
-                              context,
-                              app,
-                              defaults,
-                              extractWar);                  
+            WebApplicationContext wac= addWebApplication(host,
+                                                         context,
+                                                         app);
+            wacs.add(wac);
         }
-        
+
+        return (WebApplicationContext[])wacs.toArray(new WebApplicationContext[wacs.size()]);
     }
-    
-    /* ------------------------------------------------------------ */
-    /** Add Web Application.
-     * @param contextPathSpec The context path spec. Which must be of
-     * the form / or /path/*
-     * @param webApp The Web application directory or WAR file.
-     * @param defaults The defaults xml filename or URL which is
-     * loaded before any in the web app. Must respect the web.dtd.
-     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
-     * @return The WebApplicationContext
-     * @exception IOException 
-     */
-    public WebApplicationContext addWebApplication(String contextPathSpec,
-                                                   String webApp,
-                                                   String defaults)
-        throws IOException
-    {
-        return addWebApplication(null,
-                                 contextPathSpec,
-                                 webApp,
-                                 defaults,
-                                 false);
-    }
+
     
     /* ------------------------------------------------------------ */
     /** Add Web Application.
@@ -236,6 +260,7 @@ public class Server extends HttpServer
      * webapp subdirectory of the contexts temporary directory.
      * @return The WebApplicationContext
      * @exception IOException 
+     * @deprecated use addWebApplicaton(host,path,webapp)
      */
     public WebApplicationContext addWebApplication(String contextPathSpec,
                                                    String webApp,
@@ -250,9 +275,10 @@ public class Server extends HttpServer
                                  extractWar);
     }
     
+    
     /* ------------------------------------------------------------ */
     /**  Add Web Application.
-     * @param host Virtual host name or null
+     * @param virtualHost Virtual host name or null
      * @param contextPathSpec The context path spec. Which must be of
      * the form / or /path/*
      * @param webApp The Web application directory or WAR file.
@@ -262,25 +288,24 @@ public class Server extends HttpServer
      * @param extractWar If true, WAR files are extracted to the
      * webapp subdirectory of the contexts temporary directory.
      * @return The WebApplicationContext
-     * @exception IOException 
+     * @exception IOException
+     * @deprecated use addWebApplicaton(host,path,webapp)
      */
-    public WebApplicationContext addWebApplication(String host,
+    public WebApplicationContext addWebApplication(String virtualHost,
                                                    String contextPathSpec,
                                                    String webApp,
                                                    String defaults,
                                                    boolean extractWar)
         throws IOException
     {
+        Log.warning("DEPRECATED: use addWebApplicaton(host,path,webapp)");
         WebApplicationContext appContext =
-            new WebApplicationContext(this,
-                                      contextPathSpec,
-                                      webApp,
-                                      defaults,
-                                      extractWar);
-        addContext(host,appContext);
-        Log.event("Web Application "+appContext+" added");
+            addWebApplication(virtualHost,contextPathSpec,webApp);
+        appContext.setDefaultsDescriptor(defaults);
+        appContext.setExtractWAR(extractWar);        
         return appContext;
     }
+
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */

@@ -67,23 +67,20 @@ Instructions for running Watchdog on Linux
   <Call name="addWebApplication">
     <Arg>/servlet-tests/*</Arg>
     <Arg>webapps/servlet-tests.war</Arg>
-    <Arg>etc/webdefault.xml/</Arg>
-    <Arg type="boolean">true</Arg>
+    <Set name="extractWAR">true</Set>
   </Call>
 
   <Call name="addWebApplication">
     <Arg>/servlet-compat/*</Arg>
     <Arg>webapps/servlet-compat.war</Arg>
-    <Arg>etc/webdefault.xml/</Arg>
-    <Arg type="boolean">true</Arg>
+    <Set name="extractWAR">true</Set>
   </Call>
 
   <Call name="addWebApplication">
     <Arg></Arg>
     <Arg>/jsp-tests/*</Arg>
     <Arg>webapps/jsp-tests.war</Arg>
-    <Arg>etc/webdefault.xml/</Arg>
-    <Arg type="boolean">true</Arg>
+    <Set name="extractWAR">true</Set>
   </Call>
 
   <Set name="RequestLog">
