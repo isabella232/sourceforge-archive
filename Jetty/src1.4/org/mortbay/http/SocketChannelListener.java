@@ -40,7 +40,6 @@ public class SocketChannelListener
 {
     private InetSocketAddress _address;
     private String _scheme=HttpMessage.__SCHEME;
-    private int _maxReadTimeMs=0;
     private int _lingerTimeSecs=30;
     private String _integralScheme=HttpMessage.__SSL_SCHEME;
     private String _confidentialScheme=HttpMessage.__SSL_SCHEME;
@@ -183,14 +182,11 @@ public class SocketChannelListener
 
     /* ------------------------------------------------------------ */
     /** Set Max Read Time.
-     * Setting this to a none zero value results in setSoTimeout being
-     * called for all accepted sockets.  This causes an
-     * InterruptedIOException if a read blocks for this period of time.
-     * @param ms Max read time in ms or 0 for no limit.
+     * @deprecated use maxIdleTime.
      */
     public void setMaxReadTimeMs(int ms)
     {
-        _maxReadTimeMs=ms;
+        Code.warning("setMaxReadTimeMs is deprecated. Use setMaxIdleTimeMs");
     }
     
     /* ------------------------------------------------------------ */
@@ -199,7 +195,7 @@ public class SocketChannelListener
      */
     public int getMaxReadTimeMs()
     {
-        return _maxReadTimeMs;
+        return getMaxIdleTimeMs();
     }
     
     /* ------------------------------------------------------------ */
@@ -588,8 +584,8 @@ public class SocketChannelListener
                                     Socket socket = sc.socket();
                                 
                                     try {
-                                        if (_maxReadTimeMs>=0)
-                                            socket.setSoTimeout(_maxReadTimeMs);
+                                        if (getMaxIdleTimeMs()>=0)
+                                            socket.setSoTimeout(getMaxIdleTimeMs());
                                         if (_lingerTimeSecs>=0)
                                             socket.setSoLinger(true,_lingerTimeSecs);
                                         else

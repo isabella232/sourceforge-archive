@@ -34,7 +34,6 @@ abstract public class ThreadedServer extends ThreadPool
     /* ------------------------------------------------------------------- */
     private InetAddrPort _address = null;  
     private int _soTimeOut=-1;
-    private int _maxReadTimeMs=0;
     private int _lingerTimeSecs=30;
     
     private transient Acceptor _acceptor=null;  
@@ -210,14 +209,11 @@ abstract public class ThreadedServer extends ThreadPool
     
     /* ------------------------------------------------------------ */
     /** Set Max Read Time.
-     * Setting this to a none zero value results in setSoTimeout being
-     * called for all accepted sockets.  This causes an
-     * InterruptedIOException if a read blocks for this period of time.
-     * @param ms Max read time in ms or 0 for no limit.
+     * @deprecated. maxIdleTime is used instead.
      */
     public void setMaxReadTimeMs(int ms)
     {
-        _maxReadTimeMs=ms;
+        Code.warning("setMaxReadTimeMs is deprecated. Use setMaxIdleTimeMs()");
     }
     
     /* ------------------------------------------------------------ */
@@ -226,7 +222,7 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public int getMaxReadTimeMs()
     {
-        return _maxReadTimeMs;
+        return getMaxIdleTimeMs();
     }
     
     /* ------------------------------------------------------------ */
@@ -349,8 +345,8 @@ abstract public class ThreadedServer extends ThreadPool
             s=_listen.accept();
             
             try {
-                if (_maxReadTimeMs>=0)
-                    s.setSoTimeout(_maxReadTimeMs);
+                if (getMaxIdleTimeMs()>=0)
+                    s.setSoTimeout(getMaxIdleTimeMs());
   		if (_lingerTimeSecs>=0)
   		    s.setSoLinger(true,_lingerTimeSecs);
   		else

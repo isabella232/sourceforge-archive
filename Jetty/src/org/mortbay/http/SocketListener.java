@@ -20,8 +20,7 @@ import org.mortbay.util.ThreadedServer;
  * derived. Specifically: <PRE>
  * MinThreads    - Minumum threads waiting to service requests.
  * MaxThread     - Maximum thread that will service requests.
- * MaxIdleTimeMs - Time for an idle thread to wait for a request.
- * MaxReadTimeMs - Time that a read on a request can block.
+ * MaxIdleTimeMs - Time for an idle thread to wait for a request or read.
  * LowResourcePersistTimeMs - time in ms that connections will persist if listener is
  *                            low on resources. 
  * </PRE>
@@ -229,8 +228,8 @@ public class SocketListener
     {
         try
         {
-            if (socket.getSoTimeout()!=getMaxReadTimeMs())
-                socket.setSoTimeout(getMaxReadTimeMs());
+            if (socket.getSoTimeout()!=getMaxIdleTimeMs())
+                socket.setSoTimeout(getMaxIdleTimeMs());
         }
         catch(Exception e)
         {
