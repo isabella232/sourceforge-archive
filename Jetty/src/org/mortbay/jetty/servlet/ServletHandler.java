@@ -97,6 +97,8 @@ public class ServletHandler
     private LogSink _logSink;
     private SessionManager _sessionManager;
     private boolean _autoInitializeServlets=true;
+    private String _formLoginPage;
+    private String _formErrorPage;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -120,6 +122,14 @@ public class ServletHandler
         sessionManager.initialize(this);
     }
 
+    /* ------------------------------------------------------------ */
+    public void formAuthInit(String formLoginPage,
+                             String formErrorPage)
+    {
+        _formLoginPage=formLoginPage;
+        _formErrorPage=formErrorPage;
+    }
+    
     /* ------------------------------------------------------------ */
     public void setSessionManager(SessionManager sm)
     {
@@ -752,15 +762,21 @@ public class ServletHandler
     
 
     /* ------------------------------------------------------------ */
+    public String getAuthMethod()
+    {
+        return _formErrorPage!=null?"FORM":"BASIC";
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Perform form authentication.
      * Called from SecurityHandler.
-     * @return true if authenticated.
+     * @return UserPrincipal if authenticated else null.
      */
-    public boolean formAuthenticated(SecurityHandler shandler,
-                                     String pathInContext,
-                                     String pathParams,
-                                     HttpRequest httpRequest,
-                                     HttpResponse httpResponse)
+    public UserPrincipal authenticated(UserRealm realm,
+                                       String pathInContext,
+                                       String pathParams,
+                                       HttpRequest httpRequest,
+                                       HttpResponse httpResponse)
         throws IOException
     {
         HttpServletRequest request = getHttpServletRequest(pathInContext,
@@ -782,8 +798,7 @@ public class ServletHandler
             String username = request.getParameter(__J_USERNAME);
             String password = request.getParameter(__J_PASSWORD);
             
-            UserPrincipal user =
-                shandler.getUserRealm().getUser(username);
+            UserPrincipal user = realm.getUser(username);
             if (user!=null && user.authenticate(password,httpRequest))
             {
                 Code.debug("Form authentication OK for ",username);
@@ -794,7 +809,7 @@ public class ServletHandler
                 String nuri=(String)session.getAttribute(__J_URI);
                 if (nuri==null)
                     response.sendRedirect(URI.addPaths(request.getContextPath(),
-                                                       shandler.getErrorPage()));
+                                                       _formErrorPage));
                 else
                     response.sendRedirect(nuri);
             }
@@ -802,11 +817,11 @@ public class ServletHandler
             {
                 Code.debug("Form authentication FAILED for ",username);
                 response.sendRedirect(URI.addPaths(request.getContextPath(),
-                                                   shandler.getErrorPage()));
+                                                   _formErrorPage));
             }
             
             // Security check is always false, only true after final redirection.
-            return false;
+            return null;
         }
 
         // Check if the session is already authenticated.
@@ -819,7 +834,7 @@ public class ServletHandler
                 httpRequest.setAttribute(HttpRequest.__AuthType,"FORM");
                 httpRequest.setAttribute(HttpRequest.__AuthUser,user.getName());
                 httpRequest.setAttribute(UserPrincipal.__ATTR,user);
-                return true;
+                return user;
             }
         }
         
@@ -828,8 +843,8 @@ public class ServletHandler
             uri+="?"+httpRequest.getQuery();
         session.setAttribute(__J_URI, URI.addPaths(request.getContextPath(),uri));
         response.sendRedirect(URI.addPaths(request.getContextPath(),
-                                           shandler.getLoginPage()));
-        return false;
+                                           _formLoginPage));
+        return null;
     }
 
 

@@ -29,7 +29,9 @@ import org.mortbay.util.StringUtil;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HttpResponse extends HttpMessage.Implementation
+public class HttpResponse
+    extends HttpMessage.Implementation
+    implements HttpMessage.Response
 { 
       public final static int
           __100_Continue = 100,
@@ -506,7 +508,7 @@ public class HttpResponse extends HttpMessage.Implementation
     /* ------------------------------------------------------------ */
     /** Recycle the response.
      */
-    public void recycle(HttpConnection connection)
+    void recycle(HttpConnection connection)
     {
         super.recycle(connection);
         _status=__200_OK;
@@ -549,6 +551,15 @@ public class HttpResponse extends HttpMessage.Implementation
             request.setHandled(true);
     }
 
+    /* ------------------------------------------------------------ */
+    public void sendBasicAuthenticationChallenge(UserRealm realm)
+        throws IOException
+    {
+        setField(HttpFields.__WwwAuthenticate,
+                 "basic realm=\""+realm.getName()+'"');
+        sendError(__401_Unauthorized);
+    }
+    
 }
 
 

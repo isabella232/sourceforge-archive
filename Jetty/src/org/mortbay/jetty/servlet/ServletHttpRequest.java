@@ -300,7 +300,7 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public boolean isSecure()
     {
-        return "https".equals(_httpRequest.getScheme());
+        return "https".equalsIgnoreCase(_httpRequest.getScheme());
     }
     
     /* ------------------------------------------------------------ */
@@ -782,7 +782,7 @@ public class ServletHttpRequest
      * This facade allows the ServletHttpRequest to be treated as a
      * HttpMessage by HttpHandlers.
      */
-    public class Facade implements HttpMessage
+    public class Facade implements HttpMessage.Request
     {
         public ServletHttpRequest getServletHttpRequest()
         {return ServletHttpRequest.this;}

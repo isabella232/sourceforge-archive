@@ -5,6 +5,7 @@
 
 package org.mortbay.http;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -23,6 +24,26 @@ import org.mortbay.util.LazyList;
 public class SecurityConstraint
     implements Cloneable
 {
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public interface Authenticator
+    {
+        /* ------------------------------------------------------------ */
+        /** Authenticate.
+         * @return UserPrincipal if authenticated else null 
+         * @exception IOException 
+         */
+        public UserPrincipal authenticated(UserRealm realm,
+                                           String pathInContext,
+                                           String pathParams,
+                                           HttpRequest request,
+                                           HttpResponse response)
+        throws IOException;
+
+        public String getAuthMethod();
+    };
+    
     /* ------------------------------------------------------------ */
     public final static int
         DC_NONE=0,
@@ -234,5 +255,88 @@ public class SecurityConstraint
             ","+(_dataConstraint==DC_NONE
                  ?"NONE}"
                  :(_dataConstraint==DC_INTEGRAL?"INTEGRAL}":"CONFIDENTIAL}"));
+    }
+
+
+    /* ------------------------------------------------------------ */
+    public static int check(List constraints,
+                            Authenticator authenticator,
+                            UserRealm realm,
+                            String pathInContext,
+                            String pathParams,
+                            HttpRequest request,
+                            HttpResponse response)
+        throws HttpException, IOException
+    {
+        // for each constraint
+        for (int c=0;c<constraints.size();c++)
+        {
+            SecurityConstraint sc=(SecurityConstraint)constraints.get(c);
+
+            // Check the method applies
+            if (!sc.forMethod(request.getMethod()))
+                continue;
+                    
+            // Does this forbid everything?
+            if (sc.isForbidden())
+            {
+                response.sendError(HttpResponse.__403_Forbidden);
+                return -1;
+            }
+                    
+            // Does it fail a role check?
+            if (sc.isAuthenticate())
+            {
+                UserPrincipal user = null;
+                if (authenticator==null)
+                    response.sendError(HttpResponse.__500_Internal_Server_Error);
+                else
+                    user=authenticator.authenticated(realm,
+                                                     pathInContext,
+                                                     pathParams,
+                                                     request,
+                                                     response);
+                if (user==null)
+                    return -1; // Auth challenge or redirection already sent
+                
+                if (!sc.isAnyRole())
+                {
+                    List roles=sc.getRoles();
+                    boolean inRole=false;
+                    for (int r=roles.size();r-->0;)
+                        if (user.isUserInRole(roles.get(r).toString()))
+                        {
+                            inRole=true;
+                            break;
+                        }
+                    if (!inRole)
+                    {
+                        Code.warning("AUTH FAILURE: role for "+user.getName());
+                        if ("BASIC".equalsIgnoreCase(authenticator.getAuthMethod()))
+                            response.sendBasicAuthenticationChallenge(realm);
+                        else
+                            response.sendError(HttpResponse.__403_Forbidden,
+                                               "User not in required role");
+                        return -1; // role failed.
+                    }
+                }
+            }
+                
+            // Does it fail a data constraint
+            if (sc.hasDataConstraint() &&
+                sc.getDataConstraint() > SecurityConstraint.DC_NONE &&
+                !"https".equalsIgnoreCase(request.getScheme()))   
+            {
+                response.sendError(HttpResponse.__403_Forbidden);
+                return -1;
+            }
+            
+            // Matches a constraint that does not fail
+            // anything, so must be OK
+            return 1;
+        }
+
+        // Didn't actually match any constraint.
+        return 0;
     }
 }

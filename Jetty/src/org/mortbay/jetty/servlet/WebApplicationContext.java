@@ -412,7 +412,6 @@ public class WebApplicationContext extends ServletHttpContext
                 Log.event("PUT allowed in "+this);
             if (_resourceHandler.isDelAllowed())
                 Log.event("DEL allowed in "+this);
-                
             
             // Context listeners
             if (_contextListeners!=null && _servletHandler!=null)
@@ -425,7 +424,7 @@ public class WebApplicationContext extends ServletHttpContext
             }
         }
         
-        // Initialize servlets
+        // OK to Initialize servlets now
         if (_servletHandler!=null && _servletHandler.isStarted())
         {
             Thread thread = Thread.currentThread();
@@ -439,7 +438,7 @@ public class WebApplicationContext extends ServletHttpContext
             catch(Exception ex) { mex.add(ex); }
             finally{thread.setContextClassLoader(lastContextLoader);}
         }
-
+        
         mex.ifExceptionThrow();
     }
 

@@ -596,7 +596,7 @@ public class ServletHttpResponse implements HttpServletResponse
      * This facade allows the ServletHttpResponse to be treated as a
      * HttpMessage by HttpHandlers.
      */
-    public class Facade implements HttpMessage
+    public class Facade implements HttpMessage.Response
     {
         public ServletHttpResponse getServletHttpResponse()
         {return ServletHttpResponse.this;}
@@ -658,6 +658,10 @@ public class ServletHttpResponse implements HttpServletResponse
         public Object setAttribute(String name, Object attribute){throw new UnsupportedOperationException();}
         public Enumeration getAttributeNames(){throw new UnsupportedOperationException();}
         public void removeAttribute(String name){throw new UnsupportedOperationException();}
+        public void sendError(int code) throws IOException
+        {((HttpServletResponse)getWrapper()).sendError(code);}
+        public void sendError(int code,String msg) throws IOException
+        {((HttpServletResponse)getWrapper()).sendError(code,msg);}
     }
 
     

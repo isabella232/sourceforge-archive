@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import javax.servlet.http.Cookie;
+import org.mortbay.util.B64Code;
 import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LazyList;
@@ -47,7 +48,9 @@ import org.mortbay.util.UrlEncoded;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HttpRequest extends HttpMessage.Implementation
+public class HttpRequest
+    extends HttpMessage.Implementation
+    implements HttpMessage.Request
 {
     /* ------------------------------------------------------------ */
     /** Request METHODS.
@@ -277,19 +280,6 @@ public class HttpRequest extends HttpMessage.Implementation
         return _method;
     }
     
-    /* -------------------------------------------------------------- */
-    /** Set the HTTP method for this request.
-     * @param method the method
-     * @exception IllegalStateException Request is not EDITABLE
-     */
-    public void setMethod(String method)
-        throws IllegalStateException
-    {
-        if (_state!=__MSG_EDITABLE)
-            throw new IllegalStateException("Not EDITABLE");
-        _method=method;
-    }
-
 
     /* ------------------------------------------------------------ */
     /**
@@ -500,11 +490,6 @@ public class HttpRequest extends HttpMessage.Implementation
         if (connection!=null)
             return connection.getRemoteAddr().getHostAddress();
         return "127.0.0.1";
-
-        // XXX - use the following if you want host names.
-        //          if (connection!=null)
-        //              return connection.getRemoteHost();
-        //          return "localhost";
     }
     
     /* ------------------------------------------------------------ */
@@ -630,7 +615,7 @@ public class HttpRequest extends HttpMessage.Implementation
      * @param name The field name
      * @return The old value or null.
      */
-    public Object forceRemoveField(String name)
+    Object forceRemoveField(String name)
     {
         if (Code.verbose(99))
             Code.debug("force remove ",name);
@@ -959,7 +944,7 @@ public class HttpRequest extends HttpMessage.Implementation
     /* ------------------------------------------------------------ */
     /** Recycle the request.
      */
-    public void recycle(HttpConnection connection)
+    void recycle(HttpConnection connection)
     {
         super.recycle(connection);
         _method=null;
@@ -988,5 +973,52 @@ public class HttpRequest extends HttpMessage.Implementation
         if (_attributes!=null)
             _attributes.clear();
         super.destroy();
-    }  
+    }
+
+
+    
+    /* ------------------------------------------------------------ */
+    /** BASIC Authentication.
+     * The following attributes are set to indicate authentication:
+     * org.mortbay.http.HttpRequest.AuthType
+     * org.mortbay.http.HttpRequest.AuthUser
+     * org.mortbay.http.UserPrincipal
+     * 
+     * @param realm The UserRealm to authenticate within.
+     * @return A UserPrincipal if authenticated, else null
+     * @exception IOException 
+     */
+    public UserPrincipal basicAuthenticated(UserRealm realm)
+        throws IOException
+    {
+        String credentials = getField(HttpFields.__Authorization);
+        
+        if (credentials!=null )
+        {
+            Code.debug("Credentials: "+credentials);
+            credentials = credentials.substring(credentials.indexOf(' ')+1);
+            credentials = B64Code.decode(credentials,StringUtil.__ISO_8859_1);
+            int i = credentials.indexOf(':');
+            String username = credentials.substring(0,i);
+            String password = credentials.substring(i+1);
+
+            if (realm!=null)
+            {
+                UserPrincipal user = realm.getUser(username);
+                if (user!=null && user.authenticate(password,this))
+                {
+                    setAttribute(__AuthType,"BASIC");
+                    setAttribute(__AuthUser,username);
+                    setAttribute(UserPrincipal.__ATTR,user);
+                    return user;
+                }
+                
+                Code.warning("AUTH FAILURE: user "+username);
+            }
+        }
+        
+        Code.debug("Unauthorized in "+realm.getName());
+        
+        return null;
+    }
 }

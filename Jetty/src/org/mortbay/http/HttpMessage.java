@@ -27,12 +27,23 @@ import org.mortbay.util.Code;
  * header fields, content and optional trailer fields, while managing the
  * state of the message.
  *
- * The interface contains common methods for
- * HttpMessage.Implementation, javax.servlet.http.HttpServletRequest
- * and javax.servlet.http.HttpServletResponse, thus handlers that are
- * written to the HttpMessage interface can use the
- * Implementation.getFacade() method to work against alternate
- * implmementations such as servlet requests and responses.
+ * To handle the filter/wrapper requirements of the 2.3 servlet spec,
+ * this class has been partially abstracted into interfaces which are
+ * used as facades.  This allows handlers to work on normal or servlet
+ * requests.  This solution is not optimal and too complex, thus it is
+ * planned replaced it in the next few releases as follows:<UL>
+ * <LI>Protocol handling will be moved from specific HttpHandlers to
+ * the HttpRequest and HttpResponse classes.  The handlers will be
+ * used only to configure the protocol handling.
+ * <LI>The Security, Filter, Servlet, Resource and NotFound handlers
+ * will be merged as filters into a new ServletContainerHandler.
+ * Reusing HttpHandler protocol code will no longer be an issue as it
+ * will have been moved out of HttpHandlers.
+ * <LI>A new lightweight ServletHandler will be written under the
+ * org.mortbay.http.handler.servlet package.  This will run standalone
+ * servlets  that do not use request or response wrapping and are not
+ * within a full webapplication.
+ * </UL>
  *
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -109,6 +120,27 @@ public interface HttpMessage
         "SENT"
     };
 
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public interface Request extends HttpMessage
+    {
+        // XXX get Path
+    }
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public interface Response extends HttpMessage
+    {
+        public void sendError(int code) 
+            throws IOException;
+        public void sendError(int code,String message) 
+            throws IOException;
+        // XXX set status
+    }
+    
+    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -723,7 +755,7 @@ public interface HttpMessage
         /* ------------------------------------------------------------ */
         /** Recycle the message.
          */
-        public void recycle(HttpConnection connection)
+        void recycle(HttpConnection connection)
         {
             _state=__MSG_EDITABLE;
             _version=null;

@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
-
+ 
+Jetty-4.0.1
+ + Extended facade interfaces to HttpResponse.sendError
+ + Moved basic auth handling to HttpRequest
  + AbstractSessionManager sets contextClassLoader for scavanging
  + Set thread context classloader for webapp load-on-startup inits
  + Added extract arg to addWebApplications

@@ -36,11 +36,14 @@ public class NotFoundHandler extends NullHandler
     {
         Code.debug("Not Found");
 
+        HttpMessage.Response facade = (HttpMessage.Response)
+            response.getHttpMessage();
+        
         // Not found GET request
         String method=request.getMethod();
         if (method.equals(HttpRequest.__GET))
         {
-            response.sendError(response.__404_Not_Found,
+            facade.sendError(response.__404_Not_Found,
                                "Could not find resource for "+
                                request.getPath());
         }
@@ -52,10 +55,8 @@ public class NotFoundHandler extends NullHandler
                  method.equals(HttpRequest.__DELETE) ||
                  method.equals(HttpRequest.__MOVE)   )
         {
-            response.sendError(response.__404_Not_Found);
+            facade.sendError(response.__404_Not_Found);
         }
-
-
         
         else if (method.equals(HttpRequest.__OPTIONS))
         {
@@ -63,13 +64,13 @@ public class NotFoundHandler extends NullHandler
             if ("*".equals(request.getPath()))
             {
                 // 9.2
-                response.setIntField(HttpFields.__ContentLength,0);
-                response.setField(HttpFields.__Allow,
+                facade.setIntField(HttpFields.__ContentLength,0);
+                facade.setField(HttpFields.__Allow,
                                   "GET, HEAD, POST, PUT, DELETE, MOVE, OPTIONS, TRACE");
-                response.sendError(response.__200_OK);
+                facade.sendError(response.__200_OK);
             }
             else
-                response.sendError(response.__404_Not_Found);
+                facade.sendError(response.__404_Not_Found);
         }
 
         
@@ -80,9 +81,9 @@ public class NotFoundHandler extends NullHandler
         else
         {
             // Unknown METHOD
-            response.setField(HttpFields.__Allow,
+            facade.setField(HttpFields.__Allow,
                               "GET, HEAD, POST, PUT, DELETE, MOVE, OPTIONS, TRACE");
-            response.sendError(response.__405_Method_Not_Allowed);
+            facade.sendError(response.__405_Method_Not_Allowed);
         }
     }
 }
