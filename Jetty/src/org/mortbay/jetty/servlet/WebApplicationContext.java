@@ -363,7 +363,8 @@ public class WebApplicationContext
             // initialize the classloader
             initClassLoader(true);
             thread.setContextClassLoader(getClassLoader());
-            
+            initialize();
+
             // Do the default configuration
             if (_defaultsDescriptor!=null && _defaultsDescriptor.length()>0)
             {
@@ -658,6 +659,19 @@ public class WebApplicationContext
     public boolean getExtractWAR()
     {
         return _extract;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Initialize is called by the start method after the contexts classloader
+     * has been initialied, but before the defaults descriptor has been applied.
+     * The default implementation does nothing.
+     *
+     * @exception Exception if an error occurs
+     */
+    protected void initialize()
+        throws Exception
+    {
     }
 
     /* ------------------------------------------------------------ */
