@@ -25,11 +25,9 @@ import java.util.jar.JarFile;
  */
 public class TestHarness
 {
-    public final static String __CRLF = "\015\012";
     public static String __userDir =
         System.getProperty("user.dir",".");
     public static URL __userURL=null;
-    private static String __relDir="";
     static
     {
         try{
@@ -43,14 +41,7 @@ public class TestHarness
                 FilePermission perm = (FilePermission)
                     __userURL.openConnection().getPermission();
                 __userDir=new File(perm.getName()).getCanonicalPath();
-                __relDir="test/src/org/mortbay/util/".replace('/',
-                                                         File.separatorChar);
             }
-
-//             System.err.println("User Dir="+__userDir);
-//             System.err.println("Rel  Dir="+__relDir);
-//             System.err.println("User URL="+__userURL);
-            
         }
         catch(Exception e)
         {
@@ -402,7 +393,7 @@ public class TestHarness
                 "E\015\012"+
                 "\015\012"+
                 "fghi";
-            dataStream=new ByteArrayInputStream(dataCR.getBytes());
+            dataStream=new ByteArrayInputStream(dataCRLF.getBytes());
             in = new LineInput(dataStream,5);
             test.checkEquals(in.readLine(),"abcd","CRLF read first line");
             test.checkEquals(in.readLine(),"E","CRLF read line");
