@@ -291,7 +291,6 @@ public class ChunkableInputStream extends FilterInputStream
         public void close()
             throws IOException
         {
-            Code.debug("Close");
             _chunkSize=-1;
         }
  

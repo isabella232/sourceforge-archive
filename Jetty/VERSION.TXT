@@ -10,6 +10,8 @@ Jetty-4.1.0RC6 - 14 September 2002
  + Extended Session API to pass request for jvmRoute handling
  + Fixed problem with AJP 304 responses.
  + Improved look and feel of demo
+ + Cleaned up old debug.
+ + Added redirect to welcome file option.
 
 Jetty-4.1.0RC5 - 8 September 2002
  + AJP13Listener caught up with HttpConnection changes.
