@@ -161,6 +161,20 @@ public class Service
     }
 
     /* ------------------------------------------------------------ */
+    public static void stopAndDestroy(String[] arg)
+    {
+        if (arg==null || arg.length==0)
+        {
+            stopAll();
+            destroyAll();
+        }
+        else
+        {
+            Code.notImplemented();
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
     public static void main(String[] arg)
     {
         String opt;	

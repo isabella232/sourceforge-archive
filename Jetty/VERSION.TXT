@@ -9,7 +9,8 @@ Jetty-4.1.D3 - 5 July 2002
  + Allow filter init to access servlet context methods.
  + Keep notFoundContext out of context mapping lists.
  + mod_jk FAQ
- + Fixed close problem with load balancer
+ + Fixed close problem with load balancer.
+ + Stopped RD.includes closing response.
  + RD.forward changes getRequestURI.
  + NCSARequestLog can log to stderr
 
