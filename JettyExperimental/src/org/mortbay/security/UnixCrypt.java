@@ -15,6 +15,9 @@
 
 package org.mortbay.security;
 
+import org.mortbay.util.StringUtil;
+
+
 /* ------------------------------------------------------------ */
 /** Unix Crypt.
  * Implements the one way cryptography used by Unix systems for
@@ -444,7 +447,8 @@ public class UnixCrypt extends Object
             rsltblock >>= 6;
         }
 
-        return new String(cryptresult, 0x00, 0, 13);
+        return StringUtil.toUTF8String(cryptresult,0,13);
+        
     }
 
     public static void main(String[] arg)

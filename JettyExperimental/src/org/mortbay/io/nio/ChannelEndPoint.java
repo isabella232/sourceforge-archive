@@ -119,7 +119,7 @@ public class ChannelEndPoint implements EndPoint
         {
             NIOBuffer nbuf = (NIOBuffer)buf;
             ByteBuffer bbuf=nbuf.getByteBuffer();
-            
+
             // TODO synchronize or duplicate?
             synchronized(nbuf)
             {
@@ -131,11 +131,19 @@ public class ChannelEndPoint implements EndPoint
                 }
                 finally
                 {
-                    buffer.setGetIndex(bbuf.position());
+                    if (!buffer.isImmutable())
+                        buffer.setGetIndex(bbuf.position());
                     bbuf.position(0);
                     bbuf.limit(bbuf.capacity());
                 }
             }
+        }
+        else if (buffer.array()!=null)
+        {
+            ByteBuffer b = ByteBuffer.wrap(buffer.array(), buffer.getIndex(), buffer.length());
+            len=_channel.write(b);
+            if (!buffer.isImmutable())
+                buffer.setGetIndex(b.position());
         }
         else
         {
@@ -214,7 +222,8 @@ public class ChannelEndPoint implements EndPoint
                                 }
                                 finally
                                 {
-                                    buffer.setGetIndex(bbuf2.position());
+                                    if (!trailer.isImmutable())
+                                        trailer.setGetIndex(bbuf2.position());
                                     bbuf2.position(0);
                                     bbuf2.limit(bbuf2.capacity());
                                 }
@@ -223,8 +232,10 @@ public class ChannelEndPoint implements EndPoint
                     }
                     finally
                     {
-                        header.setGetIndex(bbuf0.position());
-                        buffer.setGetIndex(bbuf1.position());
+                        if (!header.isImmutable())
+                            header.setGetIndex(bbuf0.position());
+                        if (!buffer.isImmutable())
+                            buffer.setGetIndex(bbuf1.position());
                        
                         bbuf0.position(0);
                         bbuf1.position(0);

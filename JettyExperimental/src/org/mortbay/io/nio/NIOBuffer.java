@@ -15,7 +15,13 @@
 
 package org.mortbay.io.nio;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 
 import org.mortbay.io.AbstractBuffer;
 import org.mortbay.io.Buffer;
@@ -48,6 +54,20 @@ public class NIOBuffer extends AbstractBuffer
 
     }
     
+    /**
+     * @param file
+     */
+    public NIOBuffer(File file) throws IOException
+    {
+        super(READONLY,NON_VOLATILE);
+        FileInputStream fis = new FileInputStream(file);
+        FileChannel fc = fis.getChannel();
+        _buf = fc.map(FileChannel.MapMode.READ_ONLY, 0, file.length());
+        setGetIndex(0);
+        setPutIndex((int)file.length());
+        _access=IMMUTABLE;
+    }
+
     public byte[] array()
     {
         if (!_buf.hasArray())
@@ -75,7 +95,7 @@ public class NIOBuffer extends AbstractBuffer
         try
         {
             _buf.position(index);
-            _buf.get(b,offset,length);
+            _buf.get(b,offset,l);
         }
         finally
         {
@@ -156,7 +176,7 @@ public class NIOBuffer extends AbstractBuffer
         }
     }
     
-    ByteBuffer getByteBuffer()
+    public ByteBuffer getByteBuffer()
     {
         return _buf;
     }

@@ -110,7 +110,8 @@ public class StreamEndPoint implements EndPoint
         int length=buffer.length();
         if (length>0)
             _out.write(buffer.array(),buffer.getIndex(),length);
-        buffer.clear();
+        if (!buffer.isImmutable())
+            buffer.clear();
         return length;
     }
 
@@ -152,7 +153,20 @@ public class StreamEndPoint implements EndPoint
         
         length=buffer.length();
         if (length>0)
-            _out.write(buffer.array(),buffer.getIndex(),length);
+        {
+            if (buffer.array()!=null)
+                _out.write(buffer.array(),buffer.getIndex(),length);
+            else
+            {
+                // TODO horrid hack
+                byte[] b = new byte[2048];
+                while (buffer.length()>0)
+                {
+                    int len = buffer.get(b,0,2048);
+                    _out.write(b,0,len);
+                }
+            }
+        }
        
         total+=length;
         if (!buffer.isImmutable())

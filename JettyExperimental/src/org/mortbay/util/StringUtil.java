@@ -15,6 +15,8 @@
 
 package org.mortbay.util;
 
+import java.io.UnsupportedEncodingException;
+
 // ====================================================================
 /** Fast String Utilities.
  *
@@ -50,6 +52,9 @@ public class StringUtil
             }        
         }
     }
+    
+    public final static String __UTF8="UTF-8";
+    
     
     private static char[] lowercases = {
           '\000','\001','\002','\003','\004','\005','\006','\007',
@@ -293,6 +298,20 @@ public class StringUtil
             if (buf[offset+i]!=s.charAt(i))
                 return false;
         return true;
+    }
+
+    /* ------------------------------------------------------------ */
+    public static String toUTF8String(byte[] b,int offset,int length)
+    {
+        try
+        {
+            return new String(b,offset,length,__UTF8);
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
     
 }

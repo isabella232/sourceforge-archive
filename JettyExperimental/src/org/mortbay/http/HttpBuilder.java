@@ -392,7 +392,6 @@ public class HttpBuilder implements HttpTokens
                 // Can we bypass the buffer?
                 if (_endp!=null && _bypass>0 && content.length()>_bypass)
                 {
-                    System.err.println("bypassing");
                     if (_buffer.length()>0)
                         len=_endp.flush(_buffer,content,null);
                     else
@@ -405,15 +404,13 @@ public class HttpBuilder implements HttpTokens
 
         _contentWritten+=len;
         
-        if (last)
+        // Handle the last buffer
+        if (last && len==_buffer.length())
         {
-            if (_contentLength>0)
+            if (_contentLength>0 && _contentWritten<_contentLength)
             {
-                while(_contentWritten<_contentLength)
-                {
-                    _buffer.put(SPACE);
-                    _contentWritten++;
-                }
+                // TODO ???
+                _close=true;
             }
             _state=STATE_END;
 

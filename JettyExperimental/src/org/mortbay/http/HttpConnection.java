@@ -15,13 +15,17 @@
 
 package org.mortbay.http;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
+import org.mortbay.io.View;
 import org.mortbay.io.nio.NIOBuffer;
 
 /**
@@ -38,22 +42,28 @@ public class HttpConnection extends HttpParser.Handler
     private EndPoint _endpoint;
 
     EndPoint _endp;
-    HttpServer _server;
+    HttpListener _listener;
     HttpParser _parser;
     HttpBuilder _builder;
 
+    transient String _url;
     transient int _version = UNKNOWN;
     transient boolean _head = false;
     transient boolean _host = false;
     transient int _expect = UNKNOWN;
     transient int _connection = UNKNOWN;
+    transient View _view;
+    
+    // TODO hack!
+    HashMap _cache = new HashMap();
+    
 
     /**
      *  
      */
-    public HttpConnection(HttpServer server, EndPoint endpoint)
+    public HttpConnection(HttpListener listener, EndPoint endpoint)
     {
-        _server = server;
+        _listener = listener;
         _endp = endpoint;
         _endpoint = endpoint;
         _parser = new HttpParser(null, endpoint, this);
@@ -67,13 +77,21 @@ public class HttpConnection extends HttpParser.Handler
             // check read buffer buffers
             if (_parser.isState(HttpParser.STATE_START))
             {
-                if (_parser.getBuffer() == null) _parser.setBuffer(_server.getBuffer());
+                if (_parser.getBuffer() == null) _parser.setBuffer(_listener.getBuffer());
             }
 
             if (!_parser.isState(HttpParser.STATE_END)) _parser.parseAvailable();
 
-            // TODO finish output
-
+            // TODO more here???
+            if (_view!=null && _view.length()>0)
+            {
+                _builder.content(_view, true);
+                if (_view.length()==0)
+                {
+                    _builder.complete();
+                    _view=null;
+                }
+            }
         }
         finally
         {
@@ -81,13 +99,13 @@ public class HttpConnection extends HttpParser.Handler
             {
                 if (_parser.isState(HttpParser.STATE_END) && _parser.getBuffer() != null)
                 {
-                    _server.returnBuffer(_parser.getBuffer());
+                    _listener.returnBuffer(_parser.getBuffer());
                     _parser.setBuffer(null);
                 }
                 
                 if (_builder.isState(HttpBuilder.STATE_END) && _builder.getBuffer() != null)
                 {
-                    _server.returnBuffer(_builder.getBuffer());
+                    _listener.returnBuffer(_builder.getBuffer());
                     _builder.setBuffer(null);
                 }
             }
@@ -108,11 +126,10 @@ public class HttpConnection extends HttpParser.Handler
      */
     public void startRequest(Buffer method, Buffer url, Buffer version)
     {
-        System.err.println(method + " " + url + " " + version);
-
         _version = version == null ? HttpVersions.HTTP_0_9_ORDINAL : HttpVersions.CACHE
                 .getOrdinal(version);
         if (_version <= 0) _version = HttpVersions.HTTP_1_0_ORDINAL;
+        _url=url.toString();
         _host = false;
         _expect = UNKNOWN;
         _connection = UNKNOWN;
@@ -135,8 +152,6 @@ public class HttpConnection extends HttpParser.Handler
      */
     public void parsedHeader(Buffer name, Buffer value)
     {
-        System.out.println(name + ": " + value);
-
         int ho = HttpHeaders.CACHE.getOrdinal(name);
         switch (ho)
         {
@@ -159,8 +174,6 @@ public class HttpConnection extends HttpParser.Handler
      */
     public void headerComplete() throws IOException
     {
-        System.out.println();
-
         if (_parser.getState() == HttpParser.STATE_END)
         {
             // Reuse input buffer
@@ -170,7 +183,7 @@ public class HttpConnection extends HttpParser.Handler
         else
         {
             // get builder buffer from pool
-            _builder.setBuffer(_server.getBuffer());
+            _builder.setBuffer(_listener.getBuffer());
         }
 
         switch (_version)
@@ -240,14 +253,33 @@ public class HttpConnection extends HttpParser.Handler
 
             _builder.header(HttpHeaders.CONTENT_TYPE_BUFFER, HttpHeaderValues.TEXT_HTML_BUFFER);
 
-            ByteArrayBuffer content = new ByteArrayBuffer("<h1>Hello World</h1>\n" + "" + "");
-            NIOBuffer ncontent = new NIOBuffer(4096, true);
-            ncontent.put(content);
-
-            _builder.content(content, true);
+            
+            Buffer content = (Buffer) _cache.get(_url);
+            
+            if (content==null)
+            {
+                File file = new File(".",_url);
+                if (file.exists() && !file.isDirectory())
+                {
+                    content = new NIOBuffer(file);
+                    ByteBuffer bbuf = ((NIOBuffer)content).getByteBuffer();
+                    _cache.put(_url, content);
+                }
+            }
+            
+            if (content==null)
+                content = new ByteArrayBuffer("<h1>Hello World: "+_url+"</h1>\n" + "" + "");
+            
+            _view = new View(content);
+            _builder.content(_view, true);
 
         }
-        _builder.complete();
+        
+        if (_view.length()==0)
+        {
+            _builder.complete();
+            _view=null;
+        }
 
     }
 

@@ -16,7 +16,6 @@
 package org.mortbay.http.nio;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
@@ -29,10 +28,11 @@ import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.http.AbstractHttpListener;
 import org.mortbay.http.HttpServer;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.nio.ChannelEndPoint;
-import org.mortbay.thread.LifeCycle;
+import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.util.LogSupport;
 import org.mortbay.http.HttpConnection;
 
@@ -42,22 +42,13 @@ import org.mortbay.http.HttpConnection;
  * @version $Revision$
  * @author gregw
  */
-public class SocketChannelListener implements LifeCycle 
+public class SocketChannelListener extends AbstractHttpListener
 {
     private static Log log= LogFactory.getLog(SocketChannelListener.class);
 
-    private String _host;
-    private int _port=8080;
-    
-    private long _maxIdleTime=30000;  // TODO Configure
-    private long _soLingerTime=1000;  // TODO Configure
-    
-    private transient InetSocketAddress _address;
-    private transient HttpServer _server;
     private transient ServerSocketChannel _acceptChannel;
     private transient SelectionKey _acceptKey;
     private transient Selector _selector;
-    private transient SelectorThread _selectorThread;
     private transient ArrayList _keyChanges=new ArrayList();
     
     
@@ -69,267 +60,136 @@ public class SocketChannelListener implements LifeCycle
     {
     }
 
-    /* ------------------------------------------------------------------------------- */
-    /*
-     * @see org.mortbay.http.HttpListener#getHttpServer()
-     */
-    public HttpServer getHttpServer()
+    public void open() throws IOException
     {
-        return _server;
-    }
-    
-    public void setHttpServer(HttpServer server)
-    {
-        _server=server;
-    }
-    
-    /* ------------------------------------------------------------------------------- */
-    /**
-     */
-    public void setHost(String host) 
-    {
-        _host=host;
+        if (_acceptChannel==null)
+        {
+            // Create a new server socket and set to non blocking mode
+            _acceptChannel= ServerSocketChannel.open();
+            _acceptChannel.configureBlocking(false);
+
+            // Bind the server socket to the local host and port
+            _acceptChannel.socket().bind(getAddress());
+
+            // create a selector;
+            _selector= Selector.open();
+
+            // Register accepts on the server socket with the selector.
+            _acceptKey=_acceptChannel.register(_selector, SelectionKey.OP_ACCEPT);
+        }
     }
 
-    /* ------------------------------------------------------------------------------- */
-    /*
-     */
-    public String getHost()
+    public void close() throws IOException
     {
-        return _host;
-    }
+        if (_acceptChannel != null)
+            _acceptChannel.close();
+        _acceptChannel=null;
 
-    /* ------------------------------------------------------------------------------- */
-    /*
-     * @see org.mortbay.http.HttpListener#setPort(int)
-     */
-    public void setPort(int port)
-    {
-        _port=port;
-    }
-
-    /* ------------------------------------------------------------------------------- */
-    /*
-     * @see org.mortbay.http.HttpListener#getPort()
-     */
-    public int getPort()
-    {
-        return _port;
-    }
-
-
-    /* ------------------------------------------------------------ */
-    public void start() throws Exception
-    {
-        if (isStarted())
-            throw new IllegalStateException("Started");
-
-        // resolve address
-        _address=(_host==null)?new InetSocketAddress(_port):new InetSocketAddress(_host,_port);
-        
-        // Create a new server socket and set to non blocking mode
-        _acceptChannel= ServerSocketChannel.open();
-        _acceptChannel.configureBlocking(false);
-
-        // Bind the server socket to the local host and port
-        _acceptChannel.socket().bind(_address);
-
-        // Read the address back from the server socket to fix issues
-        // with listeners on anonymous ports
-        _address= (InetSocketAddress)_acceptChannel.socket().getLocalSocketAddress();
-
-        // create a selector;
-        _selector= Selector.open();
-
-        // Register accepts on the server socket with the selector.
-        _acceptKey=_acceptChannel.register(_selector, SelectionKey.OP_ACCEPT);
-
-        // Start selector thread
-        _selectorThread = new SelectorThread();
-        _selectorThread.start();
-
-        log.info("Started SocketChannelListener on " + getHost()+":"+getPort());
-    }
-    
-
-    /* ------------------------------------------------------------ */
-    /*
-     */
-    public boolean isStarted()
-    {
-        return _selector!=null && _selector.isOpen();
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void stop() throws InterruptedException
-    {
-        if (_selectorThread != null)
-            _selectorThread.stopSelection();
-            
-        log.info("Stopped SocketChannelListener on " + getHost()+":"+getPort());
-    }
-
-    /* ------------------------------------------------------------ */
-    public SocketChannel accept()
-    	throws IOException
-    {   
-        SocketChannel channel = _acceptChannel.accept();
-        channel.configureBlocking(false);
-
-        Socket socket=channel.socket();
         try
         {
-            if (_maxIdleTime >= 0)
-                socket.setSoTimeout((int)_maxIdleTime);
-            if (_soLingerTime >= 0)
-                socket.setSoLinger(true, (int)_soLingerTime/1000);
-            else
-                socket.setSoLinger(false, 0);
+            if (_selector != null)
+                _selector.close();
         }
-        catch (Exception e)
+        catch (IOException e)
         {
             LogSupport.ignore(log, e);
         }
-        
-        return channel;
+
+        _selector= null;
     }
 
     /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private class SelectorThread extends Thread
-    {
-        boolean _running= false;
+    public void accept()
+    	throws IOException
+    {      
+        // Give other threads a chance to process last loop.
+        Thread.yield();
+        
+        // Make any key changes required
 
-        /* ------------------------------------------------------------ */
-        public void run()
-        {   
+        synchronized(_keyChanges)
+        {
+            for (int i=0;i<_keyChanges.size();i++)
+            {
+                try
+                {
+                    Connection c = (Connection)_keyChanges.get(i);
+                    if (c._interestOps>=0)
+                        c._key.interestOps(c._interestOps);
+                    else
+                        c._key.cancel();
+                }
+                catch(CancelledKeyException e)
+                {
+                    log.warn("???",e);
+                }
+            }
+            _keyChanges.clear();
+        }
+        
+        
+        // SELECT for things to do!
+        _selector.select(_maxIdleTime);
+        
+        // Look for things to do
+        Iterator iter= _selector.selectedKeys().iterator();
+        while (iter.hasNext())
+        {
+            SelectionKey key= (SelectionKey)iter.next();
+            iter.remove();
+            
             try
             {
-                _running= true;
-                while (_running)
-                {   
-                    // Give other threads a chance to process last loop.
-                    Thread.yield();
-                    
-                    // Make any key changes required
-
-                    synchronized(_keyChanges)
+                if (!key.isValid())
+                {
+                    key.cancel();
+                    continue;
+                }
+                
+                if (key.equals(_acceptKey))
+                {
+                    if (key.isAcceptable())
                     {
-                        for (int i=0;i<_keyChanges.size();i++)
-                        {
-                            try
-                            {
-                                Connection c = (Connection)_keyChanges.get(i);
-                                if (c._interestOps>=0)
-                                    c._key.interestOps(c._interestOps);
-                                else
-                                    c._key.cancel();
-                            }
-                            catch(CancelledKeyException e)
-                            {
-                                log.warn("???",e);
-                            }
-                        }
-                        _keyChanges.clear();
-                    }
-                    
-                    
-                    // SELECT for things to do!
-                    _selector.select(_maxIdleTime);
-                    
-                    // Look for things to do
-                    Iterator iter= _selector.selectedKeys().iterator();
-                    while (iter.hasNext())
-                    {
-                        SelectionKey key= (SelectionKey)iter.next();
-                        iter.remove();
-                        
-                        try
-                        {
-                            if (!key.isValid())
-                            {
-                                key.cancel();
-                                continue;
-                            }
-                            
-                            if (key.equals(_acceptKey))
-                            {
-                                if (key.isAcceptable())
-                                {
-                                    SocketChannel channel = accept();
-                                    SelectionKey newKey = channel.register(_selector, SelectionKey.OP_READ);
-                                    Connection connection=new Connection(channel,newKey);
-                                }
-                            }
-                            else
-                            {
-                                Connection connection = (Connection)key.attachment();
-                                if (connection!=null)
-                                    connection.dispatch();
-                                
-                            }
-                            
-                            key= null;
-                       
-                        }
-                        catch (CancelledKeyException e)
-                        {
-                            LogSupport.ignore(log,e);
-                            key.cancel();
-                            continue;   
-                        }
-                        catch (Exception e)
-                        {
-                            if (_running)
-                                log.warn("selector", e);
-                            if (key != null && key!=_acceptKey)
-                                key.interestOps(0);
-                        }
+                        SocketChannel channel = _acceptChannel.accept();
+                        channel.configureBlocking(false);
+                        Socket socket=channel.socket();
+                        configure(socket);
+                        SelectionKey newKey = channel.register(_selector, SelectionKey.OP_READ);
+                        Connection connection=new Connection(channel,newKey);
                     }
                 }
+                else
+                {
+                    Connection connection = (Connection)key.attachment();
+                    if (connection!=null)
+                        connection.dispatch();
+                    
+                }
+                
+                key= null;
+           
             }
-            catch(Exception e)
+            catch (CancelledKeyException e)
             {
-                log.error("select ",e);
+                LogSupport.ignore(log,e);
+                key.cancel();
+                continue;   
             }
-            finally
+            catch (Exception e)
             {
-                log.info("Stopping " + this.getName());
-
-                try
-                {
-                    if (_acceptChannel != null)
-                        _acceptChannel.close();
-                }
-                catch (IOException e)
-                {
-                    LogSupport.ignore(log, e);
-                }
-                try
-                {
-                    if (_selector != null)
-                        _selector.close();
-                }
-                catch (IOException e)
-                {
-                    LogSupport.ignore(log, e);
-                }
-
-                _selector= null;
-                _acceptChannel= null;
-                _selectorThread= null;
+                if (isStarted())
+                    log.warn("selector", e);
+                if (key != null && key!=_acceptKey)
+                    key.interestOps(0);
             }
-        }
-
-        void stopSelection()
-        {
-            _running=false;
-            _selector.wakeup();
-            Thread.yield();
-        }
+        }   
     }
 
+    /* ------------------------------------------------------------------------------- */
+    protected Buffer newBuffer(int size)
+    {
+        return new NIOBuffer(size, true);
+    }
 
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */
@@ -343,15 +203,16 @@ public class SocketChannelListener implements LifeCycle
         int _interestOps;
         
         
-        Connection(SocketChannel channel,SelectionKey key)
+        Connection(SocketChannel channel,SelectionKey key) 
         {
             super(channel);
-            _connection = new HttpConnection(_server,this);
+            _connection = new HttpConnection(SocketChannelListener.this,this);
             key.attach(this);
             _key=key;
+            dispatch();
         }
         
-        void dispatch() throws InterruptedException
+        void dispatch() 
         {
             synchronized(this)
             {
@@ -367,7 +228,7 @@ public class SocketChannelListener implements LifeCycle
             
             try
             {
-                _server.dispatch(this);
+                getHttpServer().dispatch(this);
             }
             catch(InterruptedException e)
             {
@@ -390,6 +251,8 @@ public class SocketChannelListener implements LifeCycle
                 {
                     int ops = _key.interestOps();
                     _interestOps=SelectionKey.OP_READ | (_writable?0:SelectionKey.OP_WRITE);
+                    
+                    _writable=true;
                     
                     if (_interestOps!=ops)
                     {
@@ -426,11 +289,11 @@ public class SocketChannelListener implements LifeCycle
          */
         public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
         {
+            int l0 = (header!=null?header.length():0) +
+                     (buffer!=null?buffer.length():0) +
+                     (trailer!=null?trailer.length():0);
             int l = super.flush(header, buffer, trailer);
-            _writable=
-                (header==null || header.length()==0) &&
-                 buffer.length()==0 &&
-                (trailer==null || trailer.length()==0);
+            _writable=l0==l;
             return l;
         }
         
@@ -438,8 +301,9 @@ public class SocketChannelListener implements LifeCycle
          */
         public int flush(Buffer buffer) throws IOException
         {
+            int l0=buffer.length();
             int l = super.flush(buffer);
-            _writable=buffer.length()==0;
+            _writable=l==l0;
             return l;
         }
         
@@ -457,7 +321,12 @@ public class SocketChannelListener implements LifeCycle
             {
                 // TODO - better than this
                 if ("BAD".equals(e.getMessage()))
+                {
                     log.warn("BAD Request");
+                    log.debug("BAD",e);
+                }
+                else if ("EOF".equals(e.getMessage()))
+                    log.debug("EOF",e);
                 else
                     log.warn("IO",e);
                 _key.cancel();
@@ -489,11 +358,6 @@ public class SocketChannelListener implements LifeCycle
         SocketChannelListener scl = new SocketChannelListener();
         scl.setHttpServer(server);
         scl.start();
-        scl._selectorThread.join();
-        
+        scl.join();
     }
-    
-    
-
-    
 }
