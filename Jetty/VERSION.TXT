@@ -1,6 +1,10 @@
 Jetty Versions
 --------------
 
+ + Fixed problem setting the size of chunked buffers.
+ + Removed unused Servlet and Servlet-Engine headers.
+ + Fixed servletpath on invoker for named servlets.
+
 Jetty-4.2.0rc0 - 24 October 2002
  + Greg's birthday release!
  + Added embedded iso8859 writer to HttpOutputStream.

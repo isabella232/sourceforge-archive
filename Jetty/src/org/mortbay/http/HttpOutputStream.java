@@ -192,9 +192,20 @@ public class HttpOutputStream
         {
             _bufferSize=capacity;
             if (_bufferedOut!=null)
+            {
+                boolean fixed=_chunkingOut.isFixed();
+                _bufferedOut.setFixed(false);
                 _bufferedOut.ensureSpareCapacity(capacity);
+                _bufferedOut.setFixed(fixed);
+            }
+            
             if (_chunkingOut!=null)
+            {
+                boolean fixed=_chunkingOut.isFixed();
+                _chunkingOut.setFixed(false);
                 _chunkingOut.ensureSpareCapacity(capacity);
+                _chunkingOut.setFixed(fixed);
+            }
         }
         catch (IOException e){Code.warning(e);}
     }

@@ -364,6 +364,7 @@ public class HttpFields
             _prev=null;
         }
         
+        
         /* ------------------------------------------------------------ */
         public boolean equals(Object o)
         {
@@ -375,6 +376,15 @@ public class HttpFields
         {
             _info=null;
             _value=null;
+            _next=null;
+            _prev=null;
+        }
+        
+        /* ------------------------------------------------------------ */
+        void reset(FieldInfo info, String value)
+        {
+            _info=info;
+            _value=value;
             _next=null;
             _prev=null;
         }

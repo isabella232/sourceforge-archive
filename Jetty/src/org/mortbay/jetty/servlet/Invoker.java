@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
 import org.mortbay.util.URI;
+import javax.servlet.http.HttpServletRequestWrapper;
 
 /* ------------------------------------------------------------ */
 /**  Dynamic Servlet Invoker.  
@@ -112,7 +113,7 @@ public class Invoker extends HttpServlet
         RequestDispatcher rd = getServletContext().getNamedDispatcher(servletClass);
         if (rd!=null)
         {
-            rd.forward(request,response);
+            rd.forward(new NamedRequest(request,servletClass),response);
             return;
         }
         
@@ -170,6 +171,35 @@ public class Invoker extends HttpServlet
                 rd.forward(request,response);
             else
                 response.sendError(404);
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    class NamedRequest extends HttpServletRequestWrapper
+    {
+        String _servletPath;
+        String _pathInfo;
+        
+        /* ------------------------------------------------------------ */
+        NamedRequest(HttpServletRequest request,String name)
+        {
+            super(request);
+            _servletPath=URI.addPaths(request.getServletPath(),name);
+            _pathInfo=request.getPathInfo().substring(name.length()+1);
+            if (_pathInfo.length()==0)
+                _pathInfo=null;
+        }
+        
+        /* ------------------------------------------------------------ */
+        public String getServletPath()
+        {
+            return _servletPath;
+        }
+        
+        /* ------------------------------------------------------------ */
+        public String getPathInfo()
+        {
+            return _pathInfo;
         }
     }
 }

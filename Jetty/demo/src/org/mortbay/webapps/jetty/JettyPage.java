@@ -31,7 +31,7 @@ public class JettyPage extends Page
     {
         try
         {
-            if (InetAddress.getLocalHost().getHostName().indexOf("jetty")>0)
+            if (InetAddress.getLocalHost().getHostName().indexOf("jetty")>=0)
             {
                 Log.event("Real Jetty Site");
                 __realSite=true;
