@@ -1,3 +1,6 @@
+
+Release 2.3.5 - 25th January 2000 LATEST 
+  + Fixed nasty bug with HTTP/1.1 redirects.
   + Force locale of date formats to US.
   + Fixed expires bug in Cookies
   + Added configuration option to turn off Keep-Alive in HTTP/1.0
@@ -5,7 +8,7 @@
   + Allow properties to be configured for dynamic servlets.
   + Added contrib/com/kiwiconsulting/jetty JSSE SSL adaptor to release.
 
-Release 2.3.4 - 18th January 2000 LATEST
+Release 2.3.4 - 18th January 2000
   + include from linux rather than genunix for native builds
   + Fixed IllegalStateException handling in DefaultExceptionHandler
   + MethodTag.invoke() is now public.

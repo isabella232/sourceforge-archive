@@ -85,7 +85,7 @@ public class HttpHeader
         "EEE dd-MMM-yy HH:mm:ss zzz",
         "EEE dd-MMM-yy HH:mm:ss",
     };
-    public final static SimpleDateFormat __dateReceive[];
+    public static SimpleDateFormat __dateReceive[];
     static
     {
         TimeZone tz = TimeZone.getTimeZone("GMT");

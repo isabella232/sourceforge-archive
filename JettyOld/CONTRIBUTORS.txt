@@ -36,6 +36,8 @@ Contributions, Testing & valuable feedback from:
   Adam Klatzkin <Adam.Klatzkin@bentley.com>
   Adnan Musi <adnan.musi-@ssmb.com.au>
   Jason Weinstein <jasonw@reticular.com>
+  Nathan Meyers <nmeyers@javalinux.net>
+
 
   Plus a few more in the pipe line (tell me if your one of them...)
 

@@ -226,6 +226,8 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     {
         if (headersWritten)
             return;
+        Code.debug("Write Headers");
+        headersWritten=true;
         
         // Add Date if not already there
         if (getHeader(HttpHeader.Date)==null)
@@ -315,8 +317,6 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
             
             
         // Write the headers
-        Code.debug("Write Headers");
-        headersWritten=true;
         handled=true;
         OutputStreamWriter writer = new OutputStreamWriter(out,"ISO-8859-1");
         synchronized(writer)

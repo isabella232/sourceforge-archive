@@ -134,7 +134,7 @@ public class ServletHandler extends NullHandler
                                       servletClassPath,
                                       servletProperties);
                 
-                boolean chunk = servletTree.getBoolean("CHUNK");
+                boolean chunk = servletTree.getBoolean("CHUNK",false);
                 servletHolder.setChunkByDefault(chunk);
                 Vector paths = servletTree.getVector("PATHS",",;");
                 for (int p=paths.size();p-->0;)
