@@ -25,6 +25,8 @@ import java.net.*;
 public class Dispatcher implements RequestDispatcher
 {
     Context _context;
+    HandlerContext _handlerContext;
+    List _holders=new ArrayList(8);
     String _path;
     String _query;
     
@@ -34,10 +36,29 @@ public class Dispatcher implements RequestDispatcher
      * @param server 
      * @param URL 
      */
-    Dispatcher(Context context, String path)
+    Dispatcher(Context context, String pathInContext, String query)
+	throws IllegalStateException
     {
+	_path = pathInContext;
+	_query=query;
+	
 	_context = context;
-	_path = path;
+	_handlerContext = _context.getHandler().getHandlerContext();
+
+	for(int i=_handlerContext.getHandlerSize();i-->0;)
+	{
+	    if (_handlerContext.getHandler(i) instanceof ServletHandler)
+	    {
+		ServletHandler handler=(ServletHandler)
+		    _handlerContext.getHandler(i);
+
+		List matches=handler.holderMatches(_path);
+		_holders.addAll(matches);
+	    }
+	}
+	
+	if (_holders.size()==0)
+	    throw new IllegalStateException("No servlet handlers in context");
     }
 
     
@@ -57,16 +78,50 @@ public class Dispatcher implements RequestDispatcher
 	    
 	if (servletRequest.getHttpRequest().isCommitted())
 	    throw new IllegalStateException("Request is committed");
-	    
-	Code.notImplemented();
 
-	// The path of the new request is the forward path
-	// context must be the same, info is recalculate.
-	    
 	// merge query string
+	MultiMap parameters = servletRequest.getParameters();
+	if (_query!=null && _query.length()>0)
+	{
+	    UrlEncoded.decodeTo(_query,parameters);
+	    servletRequest.setParameters(parameters);
 
-	// pass the request to the new servlet.
+	    String oldQ=servletRequest.getQueryString();
+	    if (oldQ!=null && oldQ.length()>0)
+		_query=oldQ+'&'+_query;
+	}
 
+	// Try each holder in turn until request is handled.
+	
+	for (int i=0;i<_holders.size();i++)
+	{
+	    Map.Entry entry =
+		(Map.Entry)_holders.get(i);
+	    
+	    // The path of the new request is the forward path
+	    // context must be the same, info is recalculate.
+	    String servletPathSpec=(String)entry.getKey();
+	    ServletHolder holder = (ServletHolder)entry.getValue();
+	    
+	    Code.debug("Try forward request to ",entry);
+	    servletRequest.setPaths(PathMap.pathMatch(servletPathSpec,
+						      _path),
+				    PathMap.pathInfo(servletPathSpec,
+						     _path),
+				    _query);
+	    
+	    // try service request
+	    holder.handle(servletRequest,servletResponse);
+	    
+	    // Break if the response has been updated
+	    if (servletResponse.isDirty())
+	    {
+		Code.debug("Forwarded to ",entry);
+		if (!servletResponse.isCommitted())
+		    servletResponse.commit();
+		break;
+	    }
+	}
     }
 	
 	

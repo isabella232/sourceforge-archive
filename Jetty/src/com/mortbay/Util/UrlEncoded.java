@@ -282,4 +282,13 @@ public class UrlEncoded extends MultiMap
             return new String(encoded,0,n);
         }
     }
+
+
+    /* ------------------------------------------------------------ */
+    /** 
+     */
+    public Object clone()
+    {
+	return new UrlEncoded(this);
+    }
 }

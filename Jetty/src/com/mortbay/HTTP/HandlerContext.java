@@ -138,6 +138,15 @@ public class HandlerContext
     }
 
     /* ------------------------------------------------------------ */
+    /** Gent the number of handlers.
+     * @return 
+     */
+    public int getHandlerSize()
+    {
+	return _handlers.size();
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Get handler by index.
      * @param i 
      * @return 

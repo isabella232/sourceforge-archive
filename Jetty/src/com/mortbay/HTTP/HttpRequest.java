@@ -707,6 +707,17 @@ public class HttpRequest extends HttpMessage
         }
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return 
+     */
+    public MultiMap getParameters()
+    {
+        if (_parameters==null)
+            extractParameters();
+	return _parameters;
+    }
+    
     
     /* ------------------------------------------------------------ */
     /** Get the set of parameter names

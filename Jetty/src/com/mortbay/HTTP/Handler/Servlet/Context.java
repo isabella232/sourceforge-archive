@@ -146,12 +146,29 @@ public class Context implements ServletContext, HttpSessionContext
     }
     
     /* ------------------------------------------------------------ */
-    public RequestDispatcher getRequestDispatcher(String path)
+    public RequestDispatcher getRequestDispatcher(String uriInContext)
     {
-	if (path == null || !path.startsWith("/"))
+	if (uriInContext == null || !uriInContext.startsWith("/"))
             return null;
 
-	return new Dispatcher(this,path);
+	try
+	{
+	    String pathInContext=uriInContext;
+	    String query=null;
+	    int q=0;
+	    if ((q=pathInContext.indexOf("?"))>0)
+	    {
+		pathInContext=uriInContext.substring(0,q);
+		query=uriInContext.substring(q+1);
+	    }
+	    
+	    return new Dispatcher(this,pathInContext,query);
+	}
+	catch(Exception e)
+	{
+	    Code.ignore(e);
+	    return null;
+	}
     }
     
     /* ------------------------------------------------------------ */

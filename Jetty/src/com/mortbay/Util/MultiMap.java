@@ -21,6 +21,7 @@ import java.util.*;
  * @author Greg Wilkins (gregw)
  */
 public class MultiMap extends HashMap
+    implements Cloneable
 {
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -46,7 +47,26 @@ public class MultiMap extends HashMap
         super((map.size()*3)/2);
         putAll(map);
     }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param map Copy contents of this map.
+     */
+    public MultiMap(MultiMap map)
+    {
+        super(map);
+	
+	Iterator i = map.entrySet().iterator();
+        while(i.hasNext())
+	{
+            Map.Entry entry =
+                (Map.Entry)i.next();
+	    if (entry.getValue() instanceof List)
+		entry.setValue(new ArrayList((List)entry.getValue()));
+	}
+    }
 
+    
     /* ------------------------------------------------------------ */
     /** Get multiple values.
      * Single valued entries are converted to singleton lists.
@@ -292,4 +312,15 @@ public class MultiMap extends HashMap
             put(entry.getKey(),entry.getValue());
         }        
     }
+
+    /* ------------------------------------------------------------ */
+    /** Clone MultiMap.
+     * Medium depth clone of map and lists, but not values.
+     * @return cloned MultiMap
+     */
+    public Object clone()
+    {
+	return new MultiMap(this);
+    }
+    
 }

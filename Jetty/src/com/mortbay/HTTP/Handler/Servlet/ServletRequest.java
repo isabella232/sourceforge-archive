@@ -41,6 +41,7 @@ class ServletRequest
     private String _contextPath=null;
     private String _servletPath=null;
     private String _pathInfo=null;
+    private String _query=null;
     private String _pathTranslated=null;
     private String _sessionId=null;
     private HttpSession _session=null;
@@ -49,6 +50,7 @@ class ServletRequest
     private BufferedReader _reader=null;
     private int _inputState=0;
     private Context _context;
+    private MultiMap _parameters;
 
     
     /* ------------------------------------------------------------ */
@@ -65,12 +67,19 @@ class ServletRequest
     }
 
     /* ------------------------------------------------------------ */
-    void setServletPath(String servletPath,String pathInfo)
+    void setPaths(String servletPath,String pathInfo)
     {
         _servletPath=servletPath;
 	_pathInfo=pathInfo;
     }
     
+    /* ------------------------------------------------------------ */
+    void setPaths(String servletPath,String pathInfo,String query)
+    {
+        _servletPath=servletPath;
+	_pathInfo=pathInfo;
+	_query=query;
+    }
     
     /* ------------------------------------------------------------ */
     HttpRequest getHttpRequest()
@@ -254,7 +263,9 @@ class ServletRequest
     /* ------------------------------------------------------------ */
     public String getQueryString()
     {
-        return _httpRequest.getQuery();
+	if (_query==null)
+	    _query =_httpRequest.getQuery();
+	return _query;
     }
     
     /* ------------------------------------------------------------ */
@@ -501,21 +512,41 @@ class ServletRequest
     }
     
     /* -------------------------------------------------------------- */
+    MultiMap getParameters()
+    {
+	if (_parameters!=null)
+	    return _parameters;
+	return _httpRequest.getParameters();
+    }
+    
+    /* -------------------------------------------------------------- */
+    void setParameters(MultiMap parameters)
+    {
+	_parameters=parameters;
+    }
+    
+    /* -------------------------------------------------------------- */
     public String getParameter(String name)
     {
+	if (_parameters!=null)
+	    return _parameters.getString(name);
         return _httpRequest.getParameter(name);
     }
     
     /* -------------------------------------------------------------- */
     public Enumeration getParameterNames()
     {
+	if (_parameters!=null)
+	    return Collections.enumeration(_parameters.keySet());
         return Collections.enumeration(_httpRequest.getParameterNames());
     }
     
     /* -------------------------------------------------------------- */
     public String[] getParameterValues(String name)
     {
-        List v = _httpRequest.getParameterValues(name);
+	List v = (_parameters!=null)
+	    ? _parameters.getValues(name)
+	    : _httpRequest.getParameterValues(name);
         if (v==null)
             return null;
 	String[]a=new String[v.size()];

@@ -198,8 +198,7 @@ public class ServletHandler extends NullHandler
 	    {
 		contextPath=PathMap.pathMatch(contextPathSpec,path);
 		path=PathMap.pathInfo(contextPathSpec,path);
-	    }
-	    
+	    }	    
 	    
 	    // Build servlet request and response
 	    ServletRequest request =
@@ -220,22 +219,36 @@ public class ServletHandler extends NullHandler
     }
 
 
+    
+    /* ------------------------------------------------------------ */
+    /** List of ServletHolders matching path. 
+     * @param pathInContext Path within context.
+     * @return List of PathMap Entries pathspec to ServletHolder
+     */
+    List holderMatches(String pathInContext)
+    {
+	return _servletMap.getMatches(pathInContext);
+    }
+    
+
     /* ------------------------------------------------------------ */
     /** 
-     * @param path 
+     * @param pathInContext 
      * @param request 
      * @param response 
      * @exception IOException 
      * @exception ServletException 
      * @exception UnavailableException 
      */
-    void handle(String path,ServletRequest request, ServletResponse response)
+    void handle(String pathInContext,
+		ServletRequest request,
+		ServletResponse response)
 	throws IOException, ServletException, UnavailableException
     {
-	Code.debug("Looking for servlet at ",path);
+	Code.debug("Looking for servlet at ",pathInContext);
 	HttpResponse httpResponse=response.getHttpResponse();
 	
-	List matches=_servletMap.getMatches(path);
+	List matches=holderMatches(pathInContext);
 	
 	for (int i=0;i<matches.size();i++)
 	{
@@ -245,8 +258,10 @@ public class ServletHandler extends NullHandler
 	    ServletHolder holder = (ServletHolder)entry.getValue();
 	    
 	    Code.debug("Pass request to servlet at ",entry);
-	    request.setServletPath(PathMap.pathMatch(servletPathSpec,path),
-				   PathMap.pathInfo(servletPathSpec,path));
+	    request.setPaths(PathMap.pathMatch(servletPathSpec,
+					       pathInContext),
+			     PathMap.pathInfo(servletPathSpec,
+					      pathInContext));
 	    
 	    // Check session stuff
 	    HttpSession session=null;

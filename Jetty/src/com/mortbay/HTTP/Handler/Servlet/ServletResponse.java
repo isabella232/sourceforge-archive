@@ -57,6 +57,12 @@ public class ServletResponse implements HttpServletResponse
     {
 	return _httpResponse.isCommitted();
     }
+    
+    /* ------------------------------------------------------------ */
+    boolean isDirty()
+    {
+	return _httpResponse.isDirty();
+    }
 
     /* ------------------------------------------------------------ */
     public void setBufferSize(int size)

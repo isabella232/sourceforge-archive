@@ -54,7 +54,7 @@ public class Dump extends HttpServlet
             table.newRow();
             table.newHeading()
                 .cell().nest(new Font(2,true))
-                .add("<BR>Interface javax.servlet.* Request Methods")
+                .add("Interface javax.servlet.* Request Methods")
                 .attribute("COLSPAN","2")
                 .left();
 

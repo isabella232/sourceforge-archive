@@ -1,6 +1,8 @@
 Stable 2.4.6
 Dev    3.0.B02
 
+ + Implemented request dispatch forwarding.
+ + Redo dynamic servlets handling
  + Improved Log rollover.
  + Simplified path translation and real path calculation.
  + Catch stop and destroy exceptions in HttpServer.stop()

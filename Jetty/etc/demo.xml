@@ -98,6 +98,11 @@ $ID: $
       <Arg>/session</Arg>
       <Arg>com.mortbay.Servlet.SessionDump</Arg>
     </Call>
+    <Call name="addServlet">
+      <Arg>Dispatch</Arg>
+      <Arg>/Dispatch,/Dispatch/*</Arg>
+      <Arg>com.mortbay.Servlet.RequestDispatchTest</Arg>
+    </Call>
     <Call name="addHandler">
       <Arg><New class="com.mortbay.HTTP.Handler.DumpHandler"/></Arg>
     </Call>
