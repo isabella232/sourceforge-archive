@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- $Revision$ $Date$ -->
+
+<project>
+  
+  <pomVersion>3</pomVersion>
+
+  
+  <!-- ===================== -->
+  <!-- Module Identification -->
+  <!-- ===================== -->
+
+  <name>Jetty Experimental</name>
+  <id>jetty</id>
+  <groupId>jetty</groupId>
+
+  <organization>
+    <name>Mort Bay Consulting</name>
+    <url>http://www.mortbay.com</url>
+    <logo>http://www.mortbay.com/mortbay/images/mb_next.gif</logo>
+  </organization>
+
+  <inceptionYear>1995</inceptionYear>
+  <logo>http://jetty.mortbay.org/jetty/images/powered.gif</logo>
+  <description>Java HTTP Server and Servlet Container</description>
+  <shortDescription>Java HTTP Server and Servlet Container</shortDescription>
+  <url>http://jetty.mortbay.org</url>
+  <issueTrackingUrl>http://sourceforge.net/tracker/?group_id=7322</issueTrackingUrl>
+
+  <siteAddress>ftp.mortbay.org</siteAddress>
+  <siteDirectory>/pub</siteDirectory> 
+  <distributionDirectory>/pub</distributionDirectory>
+
+  <mailingLists>
+    <mailingList>
+      <name>Jetty Discuss List</name>
+      <archive>http://lists.sourceforge.net/lists/listinfo/jetty-discuss</archive>
+    </mailingList>
+    <mailingList>
+      <name>Jetty Support List</name>
+      <archive>http://lists.sourceforge.net/lists/listinfo/jetty-support</archive>
+    </mailingList>
+    <mailingList>
+      <name>Jetty Announce List</name>
+      <archive>http://lists.sourceforge.net/lists/listinfo/jetty-announce</archive>
+    </mailingList>
+
+  </mailingLists>
+
+
+  <!-- ======== -->
+  <!-- Versions -->
+  <!-- ======== -->
+
+  <currentVersion>EXP</currentVersion>
+
+  <versions>
+    <version>
+      <id>0.0.alpha0</id>
+      <name>0.0.alpha0</name>
+      <tag>HEAD</tag>
+    </version>
+  </versions>
+
+
+  <!-- ========== -->
+  <!-- Developers -->
+  <!-- ========== -->
+  
+  <developers>
+    <developer>
+      <name>Greg Wilkins</name>
+      <id>gregw</id>
+      <email>gregw@apache.org</email>
+      <organization></organization>
+    </developer>
+
+    <developer>
+      <name>Jan Bartel</name>
+      <id>janb</id>
+      <email>janb@apache.org</email>
+      <organization></organization>
+    </developer>
+
+    <developer>
+      <name>Jules Golsnell</name>
+      <id>jules</id>
+      <email>jules@apache.org</email>
+      <organization></organization>
+    </developer>
+  </developers>
+  
+  
+  <!-- ============ -->
+  <!-- Contributors -->
+  <!-- ============ -->
+  
+  <contributors>
+  </contributors>
+
+
+  <!-- =================== -->
+  <!-- Build Specification -->
+  <!-- =================== -->
+
+  <build>
+    <nagEmailAddress>mortbay@mortbay.com</nagEmailAddress>
+    <sourceDirectory>${basedir}/src</sourceDirectory>
+    <unitTestSourceDirectory>${basedir}/test</unitTestSourceDirectory>
+    
+    <resources>
+      <resource>
+        <directory>${basedir}/src</directory>
+        <includes>
+          <include>**/*.properties</include>
+         </includes>
+      </resource>
+      <resource>
+        <directory>${basedir}/resources</directory>
+        <includes>
+          <include>**/*</include>
+         </includes>
+      </resource>
+    </resources>
+    
+    <unitTest>
+      <includes>
+        <include>**/*Test.java</include>
+      </includes>
+      <excludes>
+        <exclude>**/Abstract*.java</exclude>
+      </excludes>
+    </unitTest>
+  </build>
+
+
+  <!-- ======= -->
+  <!-- Reports -->
+  <!-- ======= -->
+  
+  <reports>
+    <report>maven-license-plugin</report>
+    <report>maven-checkstyle-plugin</report>
+    <report>maven-pmd-plugin</report>
+    <report>maven-jdepend-plugin</report>
+    <report>maven-changelog-plugin</report>
+    <report>maven-statcvs-plugin</report>
+    <report>maven-file-activity-plugin</report>
+    <report>maven-developer-activity-plugin</report>
+    <report>maven-jxr-plugin</report>
+    <report>maven-javadoc-plugin</report>
+    <report>maven-junit-report-plugin</report>
+    <report>maven-clover-plugin</report>
+  </reports>
+  
+</project>
+
+
+

@@ -113,20 +113,6 @@ public class LazyList
     }
 
     
-    /* ------------------------------------------------------------ */
-    /** Add the contents of a Collection to a LazyList
-     * @param list The list to add to or null if none yet created.
-     * @param collection The Collection whose contents should be added.
-     * @return The lazylist created or added to.
-     * @deprecated Use addCollection
-     */
-    protected Object add(Object list, Collection collection)
-    {
-        Iterator i=collection.iterator();
-        while(i.hasNext())
-            list=LazyList.add(list,i.next());
-        return list;
-    }
     
     /* ------------------------------------------------------------ */
     /** Add the contents of a Collection to a LazyList
@@ -143,15 +129,25 @@ public class LazyList
     }
 
     /* ------------------------------------------------------------ */
+    /** Ensure the capcity of the underlying list.
+     * 
+     */
     public static Object ensureSize(Object list, int initialSize)
     {
         if (list==null)
             return new ArrayList(initialSize);
         if (list instanceof ArrayList)
-            return list;
+        {
+            ArrayList ol=(ArrayList)list;
+            if (ol.size()>initialSize)
+                return ol;
+            ArrayList nl = new ArrayList(initialSize);
+            nl.addAll((ArrayList)list);
+            return nl;
+        }
         List l= new ArrayList(initialSize);
         l.add(list);
-        return list;    
+        return l;    
     }
 
     /* ------------------------------------------------------------ */
