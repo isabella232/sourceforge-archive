@@ -18,7 +18,6 @@ application server (such as <A HREF="/jetty/jboss/index.html">JettyJBoss</A> and
 <P>
 The feature set currently contains:
 
-
 <ul>
   <li> <A HREF="http://java.sun.com/j2ee/transactions.html">Java
   Transaction API (JTA)</A> and Resource references, eg <A HREF="http://java.sun.com/j2se/1.4.1/docs/api/javax/sql/package-summary.html">DataSources</A> 
@@ -28,39 +27,27 @@ The feature set currently contains:
   <li> <A HREF="http://java.sun.com/products/javamail/">Java Mail</A>&nbsp; 
 </ul> 
 
-To use JettyPlus, you must:
-<ul>
-  <li> Configure the <code>org.mortbay.jetty.plus.Server</code>
+<h3>Configuration</h3>
+To use JettyPlus, you must configure the <code>org.mortbay.jetty.plus.Server</code>
   class in your xml configuration file rather than the standard
   <code>org.mortbay.jetty.Server</code> class, eg:
 <BR>
   <code><pre>  &lt;Configure class="org.mortbay.jetty.plus.Server"&gt;</code></pre>
-  </li>
-
-  <li> Reference this class on the runline:
-<BR>
-  <code><pre>   java -DSTART=extra/etc/start.config -Dmain.class=org.mortbay.jetty.plus.Server -jar start.jar config.xml
-  </pre></code>
-If you prefer, instead of specifying the class on the runline,
-you can edit the <code>start.config</code> file inside
-<code>extra/etc/start.config</code> and change the line:
-  <code><pre>
-             # The main class to run
-             org.mortbay.jetty.Server.class  
-
-             to
- 
-             org.mortbay.jetty.plus.Server.class
-  </pre></code>
-  </li>
-</ul>
 <P>
-JettyPlus consists of <code><b>org.mortbay.jetty.plus.jar</b></code>,  <code><b>org.mortbay.jaas.jar</b></code> as well
-as a number of libraries found in <code><b>extra/ext</b></code> and property files found in <code><b>extra/resources</b></code>. If you use the convenient
-start.jar method of running Jetty (highly recommended), all necessary jar and property files will
-automatically be placed on the JVM classpath for you. Otherwise,
-you will need to place the following on the Java classpath in
-addition to the usual Jetty jars:
+You may also need to provide configuration for JettyPlus <a href="#feature-config">features</a> that you want to use.
+
+
+<h3>Starting JettyPlus</h3>
+To start JettyPlus:
+<BR>
+  <code><pre>   java -DSTART=extra/etc/start-plus.config -jar start.jar config.xml</code></pre>
+  </li>
+
+<h3>More Information ...</h3>
+If you use the convenient <code>start.jar</code> method of running Jetty as described above (<i>highly recommended!</i>), all necessary jar and property files will be <i>automatically</i> be placed on the JVM classpath for you.
+<p>
+<i>Otherwise</i>, you need to set up the the classpath yourself. JettyPlus consists of <code><b>org.mortbay.jetty.plus.jar</b></code>,  <code><b>org.mortbay.jaas.jar</b></code> as well
+as a number of libraries found in <code><b>extra/ext</b></code> and property files found in <code><b>extra/resources</b></code>. 
 <ul>
   <li>all property files in extra/resources</li>
   <li>org.mortbay.jetty.plus.jar
@@ -86,7 +73,7 @@ The <code>extra/plus/README.TXT</code> file in the source distribution
 contains more information on the JettyPlus package, including
 instructions on how to run the JettyPlus demonstration webapps.
 <P>
-<h2>Features</H2>
+<A name="feature-config"><h2>Features</H2></a>
 <H3>Transactions and DataSources</H3>
 Thanks to the integration of the <A HREF="http://jotm.objectweb.org">JOTM</A> and <A
 HREF="http://xapool.experlog.com/">XAPool</A> packages
@@ -515,4 +502,4 @@ authenticate web users and authorize them against webapp security
 constraints. It can also be used for authorization with a Java
 security manager and permission policy file. For information on
 how to accomplish this, build and run the JAAS demo in <code>extra/plus</code>
-as instructed in the README.TXT file in the source distribution.
+as instructed in the <code>extra/plus/README.TXT</code> file in the source distribution.
