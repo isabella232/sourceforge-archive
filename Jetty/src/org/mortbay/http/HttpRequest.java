@@ -1149,6 +1149,8 @@ public class HttpRequest extends HttpMessage
             
         if (_userPrincipal==__NOT_CHECKED)
         {
+            _userPrincipal=__NO_USER;
+            
             // Try a lazy authentication
             HttpContext context=getHttpResponse().getHttpContext();
             if (context!=null)
@@ -1169,9 +1171,7 @@ public class HttpRequest extends HttpMessage
                     }
                 }
             }
-            if (_userPrincipal==null || _userPrincipal==__NOT_CHECKED)
-                _userPrincipal=__NO_USER;
-
+            
             if (_userPrincipal==__NO_USER)
                 return null;
         }
