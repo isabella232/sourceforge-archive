@@ -1,8 +1,10 @@
 Jetty Versions
 --------------
 
+ + AJP13Listener caught up with HttpConnection changes.
  + Added commandPrefix init param to CGI
  + Applied patch to jasper to fix the JspC problem.
+ + More cleanup in ThreadPool for idle death.
 
 Jetty-4.1.0RC4 - 30 August 2002
  + Included IbmJsseListener in the contrib directory.
