@@ -12,7 +12,7 @@
     <param-value>mortbay@mortbay.com</param-value>
   </context-param>
 
-  <!-- Context params to control Session Cookies -->
+  <!-- Context params to control Session Cookies
   <context-param>
     <param-name>org.mortbay.jetty.servlet.SessionDomain</param-name>
     <param-value>127.0.0.1</param-value>
