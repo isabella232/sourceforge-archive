@@ -408,7 +408,7 @@ public class ServletHttpResponse implements HttpServletResponse
         if (url==null)
             throw new IllegalArgumentException();
         
-        if (url.indexOf(":/")<0)
+        if (!url.startsWith("http:/")&&!url.startsWith("https:/"))
         {
             StringBuffer buf = _servletHttpRequest.getHttpRequest().getRootURL();
             
