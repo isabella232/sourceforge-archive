@@ -82,6 +82,7 @@ public class WebApplicationHandler extends ServletHandler
     protected transient FilterHolder jsr154FilterHolder;
     protected transient JSR154Filter jsr154Filter;
     protected transient HashMap _chainCache[];
+    protected transient HashMap _namedChainCache[];
 
     /* ------------------------------------------------------------ */
     public boolean isAcceptRanges()
@@ -277,12 +278,18 @@ public class WebApplicationHandler extends ServletHandler
         
         if (_filterChainsCached)
         {
-            _chainCache=new HashMap[FilterHolder.__ERROR+1];
-            _chainCache[FilterHolder.__REQUEST]=new HashMap();
-            _chainCache[FilterHolder.__FORWARD]=new HashMap();
-            _chainCache[FilterHolder.__INCLUDE]=new HashMap();
-            _chainCache[FilterHolder.__ERROR]=new HashMap();
+            _chainCache = getChainCache();
+            _namedChainCache = getChainCache();
         }
+    }
+
+    private HashMap[] getChainCache() {
+         HashMap[] _chainCache=new HashMap[FilterHolder.__ERROR+1];
+        _chainCache[FilterHolder.__REQUEST]=new HashMap();
+        _chainCache[FilterHolder.__FORWARD]=new HashMap();
+        _chainCache[FilterHolder.__INCLUDE]=new HashMap();
+        _chainCache[FilterHolder.__ERROR]=new HashMap();
+        return _chainCache;
     }
 
     /* ------------------------------------------------------------ */
@@ -468,32 +475,95 @@ public class WebApplicationHandler extends ServletHandler
         
         // Build and/or cache filter chain
         FilterChain chain=null;
-        if (_filterChainsCached && _chainCache[requestType].containsKey(pathInContext))
+        if (pathInContext != null) {
+            chain = getChainForPath(requestType, pathInContext, servletHolder);
+        } else {
+            chain = getChainForName(requestType, servletHolder);
+        }
+
+        if (log.isDebugEnabled()) log.debug("chain="+chain);
+        
+        // Do the handling thang
+        if (chain!=null)
+            chain.doFilter(request, response);
+        else if (servletHolder != null)
+            servletHolder.handle(request, response);    
+        else // Not found
+            notFound(request, response);
+    }
+
+    private FilterChain getChainForName(int requestType, ServletHolder servletHolder) {
+        if (servletHolder == null) {
+            throw new IllegalStateException("Named dispatch must be to an explicitly named servlet");
+        }
+        if (_filterChainsCached && _namedChainCache[requestType].containsKey(servletHolder.getName()))
         {
-            chain=(FilterChain)_chainCache[requestType].get(pathInContext);
+            return (FilterChain)_namedChainCache[requestType].get(servletHolder.getName());
         }
         else
         {
             // Build list of filters
             Object filters= null;
-            
-            // Path filters
-            if (pathInContext != null)
-            {
-                for (int i= 0; i < _pathFilters.size(); i++)
-                {
-                    FilterMapping mapping = (FilterMapping)_pathFilters.get(i);
-                    if (mapping.appliesTo(pathInContext, requestType))
-                        filters= LazyList.add(filters, mapping.getHolder());
-                }
-            } 
-            else if (jsr154Filter!=null)
+
+            if (jsr154Filter!=null)
             {
                 // Slight hack for Named servlets
                 // TODO query JSR how to apply filter to all dispatches
                 filters=LazyList.add(filters,jsr154FilterHolder);
             }
-            
+
+            // Servlet filters
+            if (_servletFilterMap.size() > 0)
+            {
+                Object o= _servletFilterMap.get(servletHolder.getName());
+                for (int i=0; i<LazyList.size(o);i++)
+                {
+                    FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
+                    if (mapping.appliesTo(null,requestType))
+                        filters=LazyList.add(filters,mapping.getHolder());
+                }
+            }
+
+            if (LazyList.size(filters) > 0)
+            {
+                if (_filterChainsCached)
+                {
+                    FilterChain chain = null;
+                    chain= new CachedChain(filters, servletHolder);
+                    _namedChainCache[requestType].put(servletHolder.getName(),chain);
+                    return chain;
+                }
+                else
+                    return new Chain(filters, servletHolder);
+            }
+            else if (_filterChainsCached)
+            {
+                _namedChainCache[requestType].put(servletHolder.getName(),null);
+                return null;
+            }
+            else {
+                return null;
+            }
+        }
+    }
+
+    private FilterChain getChainForPath(int requestType, String pathInContext, ServletHolder servletHolder) {
+        if (_filterChainsCached && _chainCache[requestType].containsKey(pathInContext))
+        {
+            return (FilterChain)_chainCache[requestType].get(pathInContext);
+        }
+        else
+        {
+            // Build list of filters
+            Object filters= null;
+
+            // Path filters
+            for (int i= 0; i < _pathFilters.size(); i++)
+            {
+                FilterMapping mapping = (FilterMapping)_pathFilters.get(i);
+                if (mapping.appliesTo(pathInContext, requestType))
+                    filters= LazyList.add(filters, mapping.getHolder());
+            }
             // Servlet filters
             if (servletHolder != null && _servletFilterMap.size() > 0)
             {
@@ -505,32 +575,30 @@ public class WebApplicationHandler extends ServletHandler
                         filters=LazyList.add(filters,mapping.getHolder());
                 }
             }
-        
+
             if (LazyList.size(filters) > 0)
             {
                 if (_filterChainsCached)
                 {
+                    FilterChain chain = null;
                     chain= new CachedChain(filters, servletHolder);
                     _chainCache[requestType].put(pathInContext,chain);
+                    return chain;
                 }
                 else
-                    chain= new Chain(filters, servletHolder);
-            } 
+                    return new Chain(filters, servletHolder);
+            }
             else if (_filterChainsCached)
+            {
                 _chainCache[requestType].put(pathInContext,null);
+                return null;
+            }
+            else {
+                return null;
+            }
         }
-        
-        if (log.isDebugEnabled()) log.debug("chain="+chain);
-        
-        // Do the handling thang
-        if (chain!=null)
-            chain.doFilter(request, response);
-        else if (servletHolder != null)
-            servletHolder.handle(request, response);    
-        else // Not found
-            notFound(request, response);
     }
-    
+
 
     /* ------------------------------------------------------------ */
     public synchronized void setContextAttribute(String name, Object value)
