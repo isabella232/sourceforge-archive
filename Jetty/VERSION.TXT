@@ -2,6 +2,7 @@ Jetty3 Versions
 --------------
 
 Jetty-3.1.rc7 -
+ + Remove old context path specs
  + Added UML diagrams to Jetty architecture documentation.
  + Use Enumerations to reduce conversions for servlet API.
  + Optimized HttpField handling to reduce object creatiyon.
