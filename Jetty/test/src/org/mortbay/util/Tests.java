@@ -481,6 +481,7 @@ public class Tests extends junit.framework.TestCase
             {"/aaa/../bbb/","/bbb/"},
             {"/aaa/./../bbb/","/bbb/"},
             {"/aaa//../bbb/","/aaa/bbb/"},
+            {"/aaa/..//bbb/","//bbb/"},
             {"/aaa/bbb/ccc/../../ddd/","/aaa/ddd/"},
             {"./bbb/","bbb/"},
             {"./aaa/../bbb/","bbb/"},
@@ -508,6 +509,7 @@ public class Tests extends junit.framework.TestCase
             {"",""},
             {"..",null},
             {"./..",null},
+            {"//..","/"},
             {"aaa/../..",null},
             {"/foo/bar/../../..",null},
             {"/../foo",null},
@@ -517,7 +519,8 @@ public class Tests extends junit.framework.TestCase
             {"a/.","a/"},
             {"a/..",""},
             {"a/../..",null},
-            {"/foo/../bar//","/bar//"}
+            {"/foo/../bar//","/bar//"},
+            {"//../a/../bb/../ccc/../test///..","/test//"},
         };
 
         for (int t=0;t<canonical.length;t++)

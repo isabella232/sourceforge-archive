@@ -835,15 +835,14 @@ public class URI
         int end=path.length();
         int queryIdx=path.indexOf('?');
         int start = path.lastIndexOf('/', (queryIdx > 0 ? queryIdx : end));
-        boolean seen_path_element=false;
 
     search:
-        while (end>=0)
+        while (end>0)
         {
             switch(end-start)
             {
               case 2: // possible single dot
-                  if ((start==-1 &&!seen_path_element) || path.charAt(start+1)!='.')
+                  if (path.charAt(start+1)!='.')
                       break;
                   break search;
               case 3: // possible double dot
@@ -851,8 +850,6 @@ public class URI
                       break;
                   break search;
             }
-            if ((end-start)>=2)
-                seen_path_element=true;
             
             end=start;
             start=path.lastIndexOf('/',end-1);
@@ -867,17 +864,24 @@ public class URI
         int delEnd=-1;
         int skip=0;
         
-        while (end>=0)
+        while (end>0)
         {
             switch(end-start)
             {
               case 2: // possible single dot
-                  if (buf.charAt(start+1)!='.' || (start==-1 && !seen_path_element))
+                  if (buf.charAt(start+1)!='.')
                   {
                       if (skip>0 && --skip==0)
+                      {   
                           delStart=start>=0?start:0;
+                          if(delStart>0 && delEnd==buf.length() && buf.charAt(delEnd-1)=='.')
+                              delStart++;
+                      }
                       break;
                   }
+                  
+                  if(start<0 && buf.length()>2 && buf.charAt(1)=='/' && buf.charAt(2)=='/')
+                      break;
                   
                   if(delEnd<0)
                       delEnd=end;
@@ -889,6 +893,9 @@ public class URI
                           delEnd++;
                       break;
                   }
+                  if (end==buf.length())
+                      delStart++;
+                  
                   end=start--;
                   while (start>=0 && buf.charAt(start)!='/')
                       start--;
@@ -898,7 +905,10 @@ public class URI
                   if (buf.charAt(start+1)!='.' || buf.charAt(start+2)!='.')
                   {
                       if (skip>0 && --skip==0)
-                          delStart=start>=0?start:0;
+                      {   delStart=start>=0?start:0;
+                      	  if(delStart>0 && delEnd==buf.length() && buf.charAt(delEnd-1)=='.')
+                      	      delStart++;
+                      }
                       break;
                   }
                   
@@ -907,7 +917,6 @@ public class URI
                       delEnd=end;
 
                   skip++;
-                  
                   end=start--;
                   while (start>=0 && buf.charAt(start)!='/')
                       start--;
@@ -915,12 +924,16 @@ public class URI
 
               default:
                   if (skip>0 && --skip==0)
+                  {
                       delStart=start>=0?start:0;
-            }            
-
+                      if(delEnd==buf.length() && buf.charAt(delEnd-1)=='.')
+                          delStart++;
+                  }
+            }     
+            
             // Do the delete
             if (skip<=0 && delStart>=0 && delStart>=0)
-            {
+            {  
                 buf.delete(delStart,delEnd);
                 delStart=delEnd=-1;
                 if (skip>0)
@@ -939,10 +952,6 @@ public class URI
         // Do the delete
         if (delEnd>=0)
             buf.delete(delStart,delEnd);
-
-        // If it was a dir, keep it a dir
-        if (path.endsWith("."))
-            buf.append('/');
 
         return buf.toString();
     }
