@@ -8,13 +8,10 @@ package org.mortbay.xml;
 import java.io.File;
 import java.io.FilePermission;
 import java.net.URL;
-import java.net.URLConnection;
-import java.security.Permission;
-import java.util.HashMap;
 import org.mortbay.util.Code;
+import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.Resource;
 import org.mortbay.util.TestCase;
-import org.mortbay.util.InetAddrPort;
 
 
 

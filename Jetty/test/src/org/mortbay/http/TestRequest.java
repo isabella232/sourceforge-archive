@@ -7,14 +7,11 @@ package org.mortbay.http;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FilterInputStream;
 import java.io.IOException;
-import java.util.List;
-import java.util.Set;
 import org.mortbay.util.Code;
+import org.mortbay.util.LineInput;
 import org.mortbay.util.TestCase;
 import org.mortbay.util.URI;
-import org.mortbay.util.LineInput;
 
 /* ------------------------------------------------------------ */
 /** Test HTTP Request.

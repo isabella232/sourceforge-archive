@@ -6,7 +6,7 @@
 package org.mortbay.jetty;
 
 
-import junit.framework.*;
+import junit.framework.TestSuite;
 
 
 public class Tests extends junit.framework.TestCase

@@ -6,7 +6,6 @@
 package org.mortbay.http;
 
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.net.Socket;
 import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
@@ -31,7 +30,7 @@ public class Http10TestClient extends Thread
         "/javadoc/stylesheet.css",
         "/javadoc/stylesheet.css",
     };
-    
+
     int _id;
     int _requests;
     int _responses;
@@ -46,7 +45,7 @@ public class Http10TestClient extends Thread
         _addr=addr;
         _pipeline=pipeline;
     }
-    
+
     public void run()
     {
         Socket socket=null;
@@ -66,7 +65,7 @@ public class Http10TestClient extends Thread
             {
                 _requests--;
                 //System.err.println(_id+": --> "+_requests);
-                
+
                 out.write
                     (("GET "+
                      url[_requests%url.length]+
@@ -79,7 +78,7 @@ public class Http10TestClient extends Thread
             while(_requests-->0)
             {
                 //System.err.println(_id+": --> "+_requests);
-                
+
                 out.write
                     (("GET "+
                      url[_requests%url.length]+
@@ -109,8 +108,8 @@ public class Http10TestClient extends Thread
                     if (byteCount<4096)
                         b=in.read(buffer,0,byteCount);
                     else
-                        b=in.read(buffer,0,4096);                   
-                    
+                        b=in.read(buffer,0,4096);
+
                     if (b==-1)
                         break;
                     byteCount-=b;
@@ -132,7 +131,7 @@ public class Http10TestClient extends Thread
                 {
                     if (headers++==0 && !line.startsWith("HTTP"))
                         Code.fail("Bad response:"+line);
-                    
+
                     if (line.startsWith("Content-Length:"))
                         len=Integer.parseInt(line.substring(16));
                 }
@@ -150,8 +149,8 @@ public class Http10TestClient extends Thread
                     if (byteCount<4096)
                         b=in.read(buffer,0,byteCount);
                     else
-                        b=in.read(buffer,0,4096);                   
-                    
+                        b=in.read(buffer,0,4096);
+
                     if (b==-1)
                         break;
                     byteCount-=b;
@@ -160,7 +159,7 @@ public class Http10TestClient extends Thread
                     return;
                 _responses--;
                 //System.err.println(_id+": <-- "+(_responses));
-            }	    
+            }
         }
         catch(Exception e)
         {
@@ -174,7 +173,7 @@ public class Http10TestClient extends Thread
                 Code.warning("Missed "+_requests+" requests");
             if (_responses>0)
                 Code.warning("Missed "+_responses+" responses");
-                
+
             try{
                 if (socket!=null)
                     socket.close();
@@ -186,7 +185,7 @@ public class Http10TestClient extends Thread
         }
     }
 
-    
+
     public static void main(String[] args)
     {
         try
@@ -198,7 +197,7 @@ public class Http10TestClient extends Thread
             }
             int threads=Integer.parseInt(args[1]);
             int requests=Integer.parseInt(args[2]);
-            
+
             Http10TestClient[] client = new Http10TestClient[threads];
             for (int c=0;c<threads;c++)
                 client[c]=
@@ -214,7 +213,7 @@ public class Http10TestClient extends Thread
             long end=System.currentTimeMillis();
 
             System.err.println("Requests/Sec="+((requests*threads)/((end-start)/1000)));
-            
+
         }
         catch(Exception e)
         {

@@ -5,7 +5,7 @@
 
 package org.mortbay.xml;
 
-import junit.framework.*;
+import junit.framework.TestSuite;
 
 
 /* ------------------------------------------------------------ */
@@ -15,11 +15,11 @@ import junit.framework.*;
  */
 public class Tests extends junit.framework.TestCase
 {
-    public Tests(String name) 
+    public Tests(String name)
     {
       super(name);
     }
-    
+
     public static junit.framework.Test suite() {
       return new TestSuite(Tests.class);
     }
@@ -30,7 +30,7 @@ public class Tests extends junit.framework.TestCase
     public static void main(String[] args)
     {
       junit.textui.TestRunner.run(suite());
-    }    
+    }
 
     public void testPlaceHolder()
     {

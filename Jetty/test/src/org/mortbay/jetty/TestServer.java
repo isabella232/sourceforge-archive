@@ -5,11 +5,13 @@
 
 package org.mortbay.jetty;
 
-import org.mortbay.http.*;
-import junit.framework.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import junit.framework.TestSuite;
 
 public class TestServer extends junit.framework.TestCase
 {

@@ -5,11 +5,13 @@
 
 package org.mortbay.util;
 
-import junit.framework.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.security.Permission;
+import java.io.File;
+import java.io.FilePermission;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.Writer;
+import java.net.URL;
+import junit.framework.TestSuite;
 
 public class TestResource extends junit.framework.TestCase
 {

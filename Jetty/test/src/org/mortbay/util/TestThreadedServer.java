@@ -5,10 +5,14 @@
 
 package org.mortbay.util;
 
-import junit.framework.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.HashSet;
+import junit.framework.TestSuite;
 
 public class TestThreadedServer extends junit.framework.TestCase
 {

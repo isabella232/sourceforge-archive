@@ -10,17 +10,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilePermission;
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.security.Permission;
 import java.util.Enumeration;
 import java.util.HashMap;
 import org.mortbay.util.Code;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.TestCase;
-import javax.servlet.http.Cookie;
 
 /* ------------------------------------------------------------ */
 /** Top level test harness.
