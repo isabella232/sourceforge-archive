@@ -9,19 +9,32 @@ import junit.framework.TestSuite;
 
 
 /* ------------------------------------------------------------ */
+
 /** Util meta JUnitTestHarness.
  * @version $Id$
  * @author Juancarlo Añez <juancarlo@modelistica.com>
+ * @author Brett Sealey
  */
 public class Tests extends junit.framework.TestCase
 {
+    /* ------------------------------------------------------------ */
+    /** Create the named test case.
+     * @param name The name of the test case.
+     */
     public Tests(String name)
     {
-      super(name);
+        super(name);
     }
 
-    public static junit.framework.Test suite() {
-      return new TestSuite(Tests.class);
+    /* ------------------------------------------------------------ */
+    /** Get the Test suite for the org.mortbay.http.handler package.
+     * @return A TestSuite for this package.
+     */
+    public static junit.framework.Test suite()
+    {
+        TestSuite testSuite = new TestSuite(Tests.class);
+        testSuite.addTest(TestSetResponseHeadersHandler.suite());
+        return testSuite;
     }
 
     /* ------------------------------------------------------------ */
@@ -29,11 +42,11 @@ public class Tests extends junit.framework.TestCase
      */
     public static void main(String[] args)
     {
-      junit.textui.TestRunner.run(suite());
+        junit.textui.TestRunner.run(suite());
     }
 
     public void testPlaceHolder()
     {
-      assertTrue(true);
+        assertTrue(true);
     }
 }
