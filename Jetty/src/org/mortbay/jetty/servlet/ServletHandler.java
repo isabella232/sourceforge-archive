@@ -727,7 +727,7 @@ public class ServletHandler
                 httpRequest.setAttribute(HttpRequest.__AuthType,"FORM");
                 httpRequest.setAttribute(HttpRequest.__AuthUser,username);
                 httpRequest.setAttribute(UserPrincipal.__ATTR,user);
-                session.setAttribute(__J_AUTHENTICATED,username);
+                session.setAttribute(__J_AUTHENTICATED,user);
                 String nuri=(String)session.getAttribute(__J_URI);
                 if (nuri==null)
                     response.sendRedirect(URI.addPaths(request.getContextPath(),
@@ -747,17 +747,14 @@ public class ServletHandler
         }
 
         // Check if the session is already authenticated.
-        if (session.getAttribute(__J_AUTHENTICATED) != null)
+        UserPrincipal user = (UserPrincipal) session.getAttribute(__J_AUTHENTICATED);
+        if (user != null)
         {
-            String username=(String)session.getAttribute(__J_AUTHENTICATED);
-            UserPrincipal user =
-                shandler.getUserRealm().getUser(username);
-
             if (user.isAuthenticated())
             {
-                Code.debug("FORM Authenticated for ",username);
+                Code.debug("FORM Authenticated for ",user.getName());
                 httpRequest.setAttribute(HttpRequest.__AuthType,"FORM");
-                httpRequest.setAttribute(HttpRequest.__AuthUser,username);
+                httpRequest.setAttribute(HttpRequest.__AuthUser,user.getName());
                 httpRequest.setAttribute(UserPrincipal.__ATTR,user);
                 return true;
             }
